@@ -479,7 +479,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_design">Design</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Chronicle Wire uses Chronicle Bytes for bytes manipulation, and Chronicle Core for low level JVM access.</p>
+<p>Chronicle Wire uses Chronicle Bytes<?> for bytes manipulation, and Chronicle Core for low level JVM access.</p>
 </div>
 <div class="sect2">
 <h3 id="_why_are_these_concerns_conflated">Why are these concerns conflated?</h3>
@@ -921,7 +921,7 @@ should implement <code>ResetOverride</code>:</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_bytes_options">Bytes options</h2>
+<h2 id="_bytes_options">Bytes<?> options</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Chronicle Wire is built on top of the <code>Bytes</code> library, however <code>Bytes</code>, in turn, can wrap:</p>
@@ -1711,7 +1711,7 @@ See the Code Generating section below.</p>
 
 private static final int MASHALLABLE_VERSION = 1;
 
-@Override public void writeMarshallable(net.openhft.chronicle.bytes.BytesOut out) {
+@Override public void writeMarshallable(net.openhft.chronicle.bytes.BytesOut<?> out) {
 #if($class0.superName != &quot;BytesInBinaryMarshallable&quot;)
    super.writeMarshallable(out);
 #end
@@ -1727,7 +1727,7 @@ private static final int MASHALLABLE_VERSION = 1;
 #end
 }
 
-@Override public void readMarshallable(net.openhft.chronicle.bytes.BytesIn in) {
+@Override public void readMarshallable(net.openhft.chronicle.bytes.BytesIn<?> in) {
 #if($class0.superName != &quot;BytesInBinaryMarshallable&quot;)
    super.readMarshallable(in);
 #end
@@ -1756,7 +1756,7 @@ private static final int MASHALLABLE_VERSION = 1;
 
 private static final int MASHALLABLE_VERSION = 1;
 
-@Override public void writeMarshallable(net.openhft.chronicle.bytes.BytesOut out) {
+@Override public void writeMarshallable(net.openhft.chronicle.bytes.BytesOut<?> out) {
 #if($class0.hasSuper)
    super.writeMarshallable(out); // <b class="conum">(1)</b>
 #end
@@ -1772,7 +1772,7 @@ private static final int MASHALLABLE_VERSION = 1;
 #end
 }
 
-@Override public void readMarshallable(net.openhft.chronicle.bytes.BytesIn in) {
+@Override public void readMarshallable(net.openhft.chronicle.bytes.BytesIn<?> in) {
 #if($class0.hasSuper)
    super.readMarshallable(in);
 #end

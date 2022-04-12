@@ -47,7 +47,7 @@ public class Marshallable2Test extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testObject() {
-        Bytes bytes = Bytes.allocateElasticOnHeap(64);
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         Wire wire = wireType.apply(bytes);
 
         Outer source = new Outer("Armadillo");

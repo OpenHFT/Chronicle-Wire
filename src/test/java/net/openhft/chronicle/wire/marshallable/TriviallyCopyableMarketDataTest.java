@@ -37,7 +37,7 @@ public class TriviallyCopyableMarketDataTest {
                 "}\n";
         TriviallyCopyableMarketData data = Marshallable.fromString(str);
 
-        Bytes bytes = Bytes.allocateElasticDirect();
+        Bytes<?> bytes = Bytes.allocateElasticDirect();
         data.writeMarshallable(bytes);
 
         TriviallyCopyableMarketData data2 = new TriviallyCopyableMarketData();

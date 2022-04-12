@@ -16,8 +16,8 @@ import static org.junit.Assume.assumeFalse;
 
 public class TriviallyCopyableTest extends WireTestCommon {
 
-    static void doTest(BiConsumer<Bytes, AA> read, BiConsumer<Bytes, AA> write) {
-        Bytes bytes = Bytes.allocateDirect(40);
+    static void doTest(BiConsumer<Bytes<?>, AA> read, BiConsumer<Bytes<?>, AA> write) {
+        Bytes<?> bytes = Bytes.allocateDirect(40);
         AA aa = new AA((byte) 1, (byte) 2, true, false, 'Y', (short) 6, 7, 8, 9, 10);
         write.accept(bytes, aa);
         AA a2 = ObjectUtils.newInstance(AA.class);
@@ -59,7 +59,7 @@ public class TriviallyCopyableTest extends WireTestCommon {
         }
 
         @Override
-        public void readMarshallable(BytesIn bytes) throws IORuntimeException {
+        public void readMarshallable(BytesIn<?> bytes) throws IORuntimeException {
             int id = (int) bytes.readStopBit();
             switch (id) {
                 case FORMAT:
@@ -73,7 +73,7 @@ public class TriviallyCopyableTest extends WireTestCommon {
             }
         }
 
-        void readMarshallable1(BytesIn bytes) throws IORuntimeException {
+        void readMarshallable1(BytesIn<?> bytes) throws IORuntimeException {
             i = bytes.readInt();
             d = bytes.readDouble();
             l = bytes.readLong();
@@ -87,7 +87,7 @@ public class TriviallyCopyableTest extends WireTestCommon {
         }
 
         @Override
-        public void writeMarshallable(BytesOut bytes) {
+        public void writeMarshallable(BytesOut<?> bytes) {
             bytes.writeStopBit(FORMAT);
             if (OS.is64Bit())
                 bytes.unsafeWriteObject(this, 32);
@@ -95,7 +95,7 @@ public class TriviallyCopyableTest extends WireTestCommon {
                 writeMarshallable1(bytes);
         }
 
-        void writeMarshallable1(BytesOut bytes) {
+        void writeMarshallable1(BytesOut<?> bytes) {
             bytes.writeInt(i);
             bytes.writeDouble(d);
             bytes.writeLong(l);

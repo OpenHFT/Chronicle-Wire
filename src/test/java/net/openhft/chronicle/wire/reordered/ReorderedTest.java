@@ -55,10 +55,10 @@ public class ReorderedTest extends WireTestCommon {
     }
 
     @SuppressWarnings("rawtypes")
-    private final Function<Bytes, Wire> wireType;
+    private final Function<Bytes<?>, Wire> wireType;
 
     @SuppressWarnings("rawtypes")
-    public ReorderedTest(Function<Bytes, Wire> wireType) {
+    public ReorderedTest(Function<Bytes<?>, Wire> wireType) {
         this.wireType = wireType;
     }
 
@@ -74,7 +74,7 @@ public class ReorderedTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testWithReorderedFields() {
-        Bytes bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.elasticByteBuffer();
         Wire wire = wireType.apply(bytes);
         wire.writeEventName(() -> "test1").marshallable(outerClass1);
         if (wireType == WireType.JSON)
@@ -99,7 +99,7 @@ public class ReorderedTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testTopLevel() {
-        Bytes bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.elasticByteBuffer();
         Wire wire = wireType.apply(bytes);
         for (int i = 1; i < 5; i++) {
             wire.clear();

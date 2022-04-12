@@ -32,7 +32,7 @@ public class StreamMain {
                 continue;
 
             @SuppressWarnings("rawtypes")
-            @NotNull Bytes b = Bytes.allocateElasticDirect();
+            @NotNull Bytes<?> b = Bytes.allocateElasticDirect();
             Wire w = wt.apply(b);
             w.writeDocument(true, w2 -> w2.write(() -> "header")
                     .typedMarshallable(new FileFormat()));

@@ -55,7 +55,7 @@ public class ComparisonMain {
     // {"smallInt":123,"longInt":1234567890,"price":1234.0,"flag":true,"text":"Hello World","side":"Sell"}
     com.fasterxml.jackson.core.JsonFactory jsonFactory = new com.fasterxml.jackson.core.JsonFactory(); // or, for data binding, org.codehaus.jackson.mapper.MappingJsonFactory
     UnsafeBuffer directBuffer = new UnsafeBuffer(ByteBuffer.allocateDirect(128));
-    Bytes bytes = Bytes.allocateDirect(512).unchecked(true);
+    Bytes<?> bytes = Bytes.allocateDirect(512).unchecked(true);
     InputStream inputStream = bytes.inputStream();
     OutputStream outputStream = bytes.outputStream();
     Writer writer = bytes.writer();

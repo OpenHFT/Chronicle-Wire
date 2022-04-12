@@ -2,7 +2,9 @@ package net.openhft.chronicle.wire.bytesmarshallable;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesMarshallable;
-import net.openhft.chronicle.wire.*;
+import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireTestCommon;
+import net.openhft.chronicle.wire.WireType;
 import org.junit.Test;
 
 import java.util.Objects;
@@ -14,7 +16,7 @@ public class NestedGenericTest extends WireTestCommon {
     public void testGeneric() {
         ignoreException("BytesMarshallable found in field which is not matching exactly, the object may not unmarshall correctly if that type is not specified: " +
                 "net.openhft.chronicle.wire.bytesmarshallable.NestedGenericTest$A. The warning will not repeat so there may be more types affected.");
-        Bytes bytes = Bytes.allocateElasticOnHeap();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.BINARY.apply(bytes);
 
         ValueHolder<A> object = new ValueHolder<>(new A(2, "b"));
@@ -26,7 +28,7 @@ public class NestedGenericTest extends WireTestCommon {
 
     @Test
     public void testDefined() {
-        Bytes bytes = Bytes.allocateElasticOnHeap();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.BINARY.apply(bytes);
 
         ValueHolderDef object = new ValueHolderDef(new A(2, "b"));

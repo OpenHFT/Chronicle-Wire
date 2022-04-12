@@ -32,7 +32,7 @@ public class Data implements Marshallable, BytesMarshallable {
     long longInt = 0;
     double price = 0;
     boolean flag = false;
-    transient Bytes text = Bytes.allocateElasticOnHeap(16).unchecked(true);
+    transient Bytes<?> text = Bytes.allocateElasticOnHeap(16).unchecked(true);
     Side side;
 
     public Data(int smallInt, long longInt, double price, boolean flag, CharSequence text, Side side) {
@@ -109,7 +109,7 @@ public class Data implements Marshallable, BytesMarshallable {
         this.text.appendUtf8(text);
     }
 
-    public Bytes textAsBytes() {
+    public Bytes<?> textAsBytes() {
         return text;
     }
 
@@ -131,7 +131,7 @@ public class Data implements Marshallable, BytesMarshallable {
     }
 
     @Override
-    public void readMarshallable(BytesIn bytes) {
+    public void readMarshallable(BytesIn<?> bytes) {
         price = bytes.readStopBitDouble();
         longInt = bytes.readStopBit();
         smallInt = (int) bytes.readStopBit();
@@ -142,7 +142,7 @@ public class Data implements Marshallable, BytesMarshallable {
     }
 
     @Override
-    public void writeMarshallable(BytesOut bytes) {
+    public void writeMarshallable(BytesOut<?> bytes) {
         bytes.writeStopBit(price)
                 .writeStopBit(longInt)
                 .writeStopBit(smallInt)

@@ -21,7 +21,7 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
     protected abstract int $length();
 
     @Override
-    public void readMarshallable(BytesIn bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
+    public void readMarshallable(BytesIn<?> bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         int description0 = bytes.readInt();
         if (description0 != $description())
             carefulCopy(bytes, description0);
@@ -82,7 +82,7 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
     }
 
     @Override
-    public void writeMarshallable(BytesOut bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
+    public void writeMarshallable(BytesOut<?> bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
         bytes.writeInt($description());
         bytes.unsafeWriteObject(this, $start(), $length());
     }

@@ -27,7 +27,7 @@ public class BytesInBytesMarshallableMain {
         WithBytes n = new WithBytes("1", "12", "123", "1234", "123456", "1234567", "123456789", "12345678901");
 
         WithBytes n2 = new WithBytes();
-        Bytes bytes = Bytes.allocateElasticDirect(128);
+        Bytes<?> bytes = Bytes.allocateElasticDirect(128);
 
         for (int i = -20_000; i < 100_000_000; i++) {
             bytes.clear();
@@ -57,7 +57,7 @@ public class BytesInBytesMarshallableMain {
     }
 
     static class WithBytes extends BytesInBinaryMarshallable {
-        Bytes a, b, c, d, e, f, g, h;
+        Bytes<?> a, b, c, d, e, f, g, h;
 
         public WithBytes() {
             a = Bytes.elasticHeapByteBuffer(64);
@@ -82,7 +82,7 @@ public class BytesInBytesMarshallableMain {
         }
 
         @Override
-        public void readMarshallable(BytesIn bytes) throws IORuntimeException {
+        public void readMarshallable(BytesIn<?> bytes) throws IORuntimeException {
             bytes.read8bit(a);
             bytes.read8bit(b);
             bytes.read8bit(c);
@@ -94,7 +94,7 @@ public class BytesInBytesMarshallableMain {
         }
 
         @Override
-        public void writeMarshallable(BytesOut bytes) {
+        public void writeMarshallable(BytesOut<?> bytes) {
             bytes.write8bit(a);
             bytes.write8bit(b);
             bytes.write8bit(c);

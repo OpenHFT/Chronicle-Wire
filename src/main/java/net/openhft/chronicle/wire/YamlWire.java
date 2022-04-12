@@ -91,13 +91,13 @@ public class YamlWire extends AbstractWire implements Wire {
     private boolean addTimeStamps = false;
     private boolean trimFirstCurly = true;
 
-    public YamlWire(@NotNull Bytes bytes, boolean use8bit) {
+    public YamlWire(@NotNull Bytes<?> bytes, boolean use8bit) {
         super(bytes, use8bit);
         yt = new YamlTokeniser(bytes);
         defaultValueIn = new DefaultValueIn(this);
     }
 
-    public YamlWire(@NotNull Bytes bytes) {
+    public YamlWire(@NotNull Bytes<?> bytes) {
         this(bytes, false);
     }
 
@@ -504,7 +504,7 @@ public class YamlWire extends AbstractWire implements Wire {
     }
 
     public String dumpContext() {
-        Bytes b = Bytes.allocateElasticOnHeap(128);
+        Bytes<?> b = Bytes.allocateElasticOnHeap(128);
         YamlWire yw = new YamlWire(b);
         yw.valueOut.list(yt.contexts, YamlTokeniser.YTContext.class);
         return b.toString();
@@ -1507,7 +1507,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, Class type) {
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, Class type) {
             if (dropDefault) {
                 if (type == null)
                     return wireOut();
@@ -1976,7 +1976,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
         @Nullable
         @Override
-        public Bytes textTo(@NotNull Bytes bytes) {
+        public Bytes<?> textTo(@NotNull Bytes<?> bytes) {
             bytes.clear();
             if (yt.current() == YamlToken.TEXT) {
                 bytes.clear();
@@ -2008,7 +2008,7 @@ public class YamlWire extends AbstractWire implements Wire {
         }
 
         @Nullable
-        Bytes textTo0(@NotNull Bytes a) {
+        Bytes<?> textTo0(@NotNull Bytes<?> a) {
             consumePadding();
             if (yt.current() == YamlToken.TEXT) {
                 a.append(yt.text());
@@ -2047,7 +2047,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireIn bytes(@NotNull BytesOut toBytes) {
+        public WireIn bytes(@NotNull BytesOut<?> toBytes) {
             toBytes.clear();
             return bytes(b -> toBytes.write((BytesStore) b));
         }

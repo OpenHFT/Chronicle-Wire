@@ -19,7 +19,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 public class UnicodeStringTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @NotNull
-    static Bytes bytes = nativeBytes();
+    static Bytes<?> bytes = nativeBytes();
     static Wire wire = createWire();
     static char[] chars = new char[128];
     private final char ch;

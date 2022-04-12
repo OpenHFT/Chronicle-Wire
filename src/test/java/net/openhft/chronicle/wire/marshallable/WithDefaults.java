@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("rawtypes")
 public class WithDefaults extends SelfDescribingMarshallable {
-    Bytes bytes = Bytes.from("Hello");
+    Bytes<?> bytes = Bytes.from("Hello");
     String text = "Hello";
     boolean flag = true;
     int num = Integer.MIN_VALUE;

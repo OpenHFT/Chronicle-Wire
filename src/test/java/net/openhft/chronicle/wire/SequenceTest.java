@@ -87,7 +87,7 @@ public class SequenceTest extends WireTestCommon {
 
     @Test
     public void readSetAsObject() {
-        Bytes bytes = Bytes.allocateElasticOnHeap();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire w1 = wireType.apply(bytes);
         Set<String> value = new LinkedHashSet<>(Arrays.asList("a", "b", "c"));
         try (DocumentContext dc = w1.writingDocument()) {
@@ -104,7 +104,7 @@ public class SequenceTest extends WireTestCommon {
 
     @Test
     public void readListAsObject() {
-        Bytes bytes = Bytes.allocateElasticOnHeap();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire w1 = wireType.apply(bytes);
         List<String> value = Arrays.asList("a", "b", "c");
         try (DocumentContext dc = w1.writingDocument()) {
@@ -120,7 +120,7 @@ public class SequenceTest extends WireTestCommon {
     @Test
     public void readMapAsObject() {
         assumeFalse(wireType == WireType.RAW);
-        Bytes bytes = Bytes.allocateElasticOnHeap();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire w1 = wireType.apply(bytes);
         Map<String, String> value = new LinkedHashMap<>();
         value.put("a", "aya");

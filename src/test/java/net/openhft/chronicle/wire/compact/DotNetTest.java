@@ -29,7 +29,7 @@ public class DotNetTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testCode() {
-        final Bytes bytes = Bytes.fromHexString("000000: B9 06 75 73 65 72 49 64 E5 61 6E 64 72 65 B9 06\n" +
+        final Bytes<?> bytes = Bytes.fromHexString("000000: B9 06 75 73 65 72 49 64 E5 61 6E 64 72 65 B9 06\n" +
                 "000016: 64 6F 6D 61 69 6E EB 54 45 53 54 2D 44 4F 4D 41\n" +
                 "000032: 49 4E B9 0D 73 65 63 75 72 69 74 79 54 6F 6B 65\n" +
                 "000048: 6E EE 53 69 6D 70 6C 65 50 61 73 73 77 6F 72 64\n" +
@@ -38,7 +38,7 @@ public class DotNetTest extends WireTestCommon {
                 "000096: 66 65 38 2D 65 37 36 30 32 38 38 31 34 34 64 39\n");
        // System.out.println(bytes.toHexString());
         @NotNull Wire wire = new BinaryWire(bytes);
-        @NotNull Bytes text = Bytes.allocateElasticOnHeap();
+        @NotNull Bytes<?> text = Bytes.allocateElasticOnHeap();
         wire.copyTo(new TextWire(text));
        // System.out.println(text);
 

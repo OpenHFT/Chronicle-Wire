@@ -29,7 +29,7 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
     private final String[] testData = new String[DATA_SET_SIZE];
     private final String[] internedStrings = new String[DATA_SET_SIZE];
     @SuppressWarnings("rawtypes")
-    private final Bytes heapBytes = Bytes.allocateElasticOnHeap(4096);
+    private final Bytes<?> heapBytes = Bytes.allocateElasticOnHeap(4096);
     private final BinaryWire wire = BinaryWire.binaryOnly(heapBytes);
 
     private static String message(final int index, final String inputData) {

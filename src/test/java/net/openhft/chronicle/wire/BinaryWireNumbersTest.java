@@ -96,7 +96,7 @@ public class BinaryWireNumbersTest extends WireTestCommon {
 
     public void test(@NotNull WriteValue expected, @NotNull WriteValue perform) {
         @SuppressWarnings("rawtypes")
-        @NotNull Bytes bytes1 = allocateElasticOnHeap();
+        @NotNull Bytes<?> bytes1 = allocateElasticOnHeap();
         @NotNull Wire wire1 = new BinaryWire(bytes1, true, false, false, Integer.MAX_VALUE, "binary", false);
         assert wire1.startUse();
         expected.writeValue(wire1.write());
@@ -104,7 +104,7 @@ public class BinaryWireNumbersTest extends WireTestCommon {
         assertEquals("Length for fixed length doesn't match for " + TextWire.asText(wire1), len, bytes1.readRemaining());
 
         @SuppressWarnings("rawtypes")
-        @NotNull Bytes bytes2 = allocateElasticOnHeap();
+        @NotNull Bytes<?> bytes2 = allocateElasticOnHeap();
         @NotNull Wire wire2 = new BinaryWire(bytes2);
         perform.writeValue(wire2.write());
 

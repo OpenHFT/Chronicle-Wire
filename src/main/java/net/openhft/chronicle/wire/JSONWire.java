@@ -53,7 +53,7 @@ public class JSONWire extends TextWire {
         this(Bytes.allocateElasticOnHeap());
     }
 
-    public JSONWire(@NotNull Bytes bytes, boolean use8bit) {
+    public JSONWire(@NotNull Bytes<?> bytes, boolean use8bit) {
         super(bytes, use8bit);
         trimFirstCurly(false);
     }
@@ -64,7 +64,7 @@ public class JSONWire extends TextWire {
     }
 
     @SuppressWarnings("rawtypes")
-    public JSONWire(@NotNull Bytes bytes) {
+    public JSONWire(@NotNull Bytes<?> bytes) {
         this(bytes, false);
     }
 
@@ -576,7 +576,7 @@ public class JSONWire extends TextWire {
             for (@NotNull Map.Entry<K, V> entry : map.entrySet()) {
                 final K key = entry.getKey();
 
-                Bytes bytes = null;
+                Bytes<?> bytes = null;
                 bytes.app
 
 

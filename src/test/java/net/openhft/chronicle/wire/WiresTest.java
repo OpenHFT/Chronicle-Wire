@@ -73,7 +73,7 @@ public class WiresTest extends WireTestCommon {
         container1.bytesField.append("1");
         container1.bytesField.append("2");
         BytesContainerMarshallable container2 = new BytesContainerMarshallable();
-        Bytes container2Bytes = container2.bytesField;
+        Bytes<?> container2Bytes = container2.bytesField;
         Wires.copyTo(container1, container2);
         assertEquals(container2Bytes, container2.bytesField);
         assertEquals("12", container2.bytesField.toString());
@@ -146,11 +146,11 @@ public class WiresTest extends WireTestCommon {
     }
 
     private static final class BytesContainer {
-        Bytes bytesField = Bytes.allocateElasticOnHeap(64);
+        Bytes<?> bytesField = Bytes.allocateElasticOnHeap(64);
     }
 
     private static final class BytesContainerMarshallable extends SelfDescribingMarshallable {
-        Bytes bytesField = Bytes.allocateElasticOnHeap(64);
+        Bytes<?> bytesField = Bytes.allocateElasticOnHeap(64);
     }
 
     private static final class StringBuilderContainer {

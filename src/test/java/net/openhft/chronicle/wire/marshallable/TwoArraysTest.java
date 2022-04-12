@@ -13,7 +13,7 @@ public class TwoArraysTest extends WireTestCommon {
     @Test
     public void testTwoArrays() {
         ignoreException("BytesMarshallable found in field which is not matching exactly");
-        Bytes bytes = new HexDumpBytes();
+        Bytes<?> bytes = new HexDumpBytes();
         Wire wire = new BinaryWire(bytes);
         TwoArrays ta = new TwoArrays(4, 8);
         ta.writeMarshallable(wire);
@@ -45,7 +45,7 @@ public class TwoArraysTest extends WireTestCommon {
         ta2.la.setValueAt(0, 111);
         ta2.la.setValueAt(1, 222);
 
-        Bytes bytes2 = new HexDumpBytes();
+        Bytes<?> bytes2 = new HexDumpBytes();
         Wire wire2 = new BinaryWire(bytes2);
         ta2.writeMarshallable(wire2);
         assertEquals("" +

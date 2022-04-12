@@ -27,7 +27,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     public void testMethodReaderWriterMetadata() {
-        Bytes b = Bytes.allocateElasticOnHeap();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             Wire wire = WireType.BINARY.apply(b);
             wire.usePadding(true);
@@ -78,7 +78,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
                 .useTextDocuments();
         // expected
-        Bytes expected = BytesUtil.readFile("methods-in.yaml");
+        Bytes<?> expected = BytesUtil.readFile("methods-in.yaml");
         MockMethods writer = wire2.methodWriter(MockMethods.class);
         MethodReader reader = wire.methodReader(writer);
         checkReaderType(reader);
