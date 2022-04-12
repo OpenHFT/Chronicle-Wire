@@ -34,7 +34,7 @@ enum CcyPair {
 
 @SuppressWarnings("rawtypes")
 public class CSVBytesMarshallableTest extends WireTestCommon {
-    Bytes bytes = Bytes.from(
+    Bytes<?> bytes = Bytes.from(
             "1.09029,1.090305,EURUSD,2,1,EBS\n" +
                     "1.50935,1.50936,GBPUSD,5,1,RTRS\n" +
                     "1.0906,1.09065,EURCHF,3,1,EBS\n");
@@ -42,7 +42,7 @@ public class CSVBytesMarshallableTest extends WireTestCommon {
     // low level marshalling
     @Test
     public void bytesMarshallable() {
-        Bytes bytes2 = Bytes.elasticByteBuffer();
+        Bytes<?> bytes2 = Bytes.elasticByteBuffer();
         @NotNull FXPrice fxPrice = new FXPrice();
         while (bytes.readRemaining() > 0) {
             fxPrice.readMarshallable(bytes);
@@ -69,7 +69,7 @@ public class CSVBytesMarshallableTest extends WireTestCommon {
         bytes.readPosition(0);
         @NotNull CSVWire in = new CSVWire(bytes);
 
-        Bytes bytes2 = Bytes.elasticByteBuffer();
+        Bytes<?> bytes2 = Bytes.elasticByteBuffer();
         Wire out = wt.apply(bytes2);
 
         @NotNull FXPrice2 fxPrice = new FXPrice2();
@@ -98,7 +98,7 @@ class FXPrice implements BytesMarshallable {
     public transient double midPrice;
 
     @Override
-    public void readMarshallable(@NotNull BytesIn bytes) {
+    public void readMarshallable(@NotNull BytesIn<?> bytes) {
         bidprice = bytes.parseDouble();
         offerprice = bytes.parseDouble();
         pair = parseEnum(bytes, CcyPair.INTERNER);
@@ -109,7 +109,7 @@ class FXPrice implements BytesMarshallable {
     }
 
     @Override
-    public void writeMarshallable(@NotNull BytesOut bytes) {
+    public void writeMarshallable(@NotNull BytesOut<?> bytes) {
         bytes.append(bidprice).append(',');
         bytes.append(offerprice).append(',');
         bytes.append(pair.name()).append(',');
@@ -117,7 +117,7 @@ class FXPrice implements BytesMarshallable {
         bytes.append(exchangeName).append('\n');
     }
 
-    private <T extends Enum<T>> T parseEnum(@NotNull BytesIn bytes, @NotNull EnumInterner<T> interner) {
+    private <T extends Enum<T>> T parseEnum(@NotNull BytesIn<?> bytes, @NotNull EnumInterner<T> interner) {
         StringBuilder sb = Wires.acquireStringBuilder();
         bytes.parseUtf8(sb, StopCharTesters.COMMA_STOP);
         return interner.intern(sb);

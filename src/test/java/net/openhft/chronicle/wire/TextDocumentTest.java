@@ -34,7 +34,7 @@ public class TextDocumentTest extends WireTestCommon {
 
     @Test
     public void testDocument() {
-        @NotNull Bytes bytes1 = Bytes.allocateElasticOnHeap();
+        @NotNull Bytes<?> bytes1 = Bytes.allocateElasticOnHeap();
         @NotNull final Wire wire = new TextWire(bytes1);
         wire.usePadding(true);
         @NotNull final Header wheader = new Header();

@@ -30,7 +30,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class QueryWireTest extends WireTestCommon {
-    private Bytes bytes;
+    private Bytes<?> bytes;
 
     @NotNull
     private QueryWire createWire() {

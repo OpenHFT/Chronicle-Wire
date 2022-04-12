@@ -43,7 +43,7 @@ public class RawWireTest extends WireTestCommon {
 
     @SuppressWarnings("rawtypes")
     @NotNull
-    Bytes bytes = nativeBytes();
+    Bytes<?> bytes = nativeBytes();
 
     @Override
     public void assertReferencesReleased() {

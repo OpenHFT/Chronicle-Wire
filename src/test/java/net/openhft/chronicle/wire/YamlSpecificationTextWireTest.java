@@ -18,7 +18,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
@@ -28,12 +27,10 @@ import org.junit.runners.Parameterized;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
 import static net.openhft.chronicle.wire.WireType.TEXT;
-import static net.openhft.chronicle.wire.WireType.YAML;
 import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("rawtypes")
@@ -77,7 +74,7 @@ public class YamlSpecificationTextWireTest extends WireTestCommon {
     @NotNull
     private String parseWithText(String snippet) {
         Object o = TEXT.fromString(snippet);
-        Bytes bytes = Bytes.allocateElasticOnHeap();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
         TextWire tw = new TextWire(bytes);
         tw.writeObject(o);

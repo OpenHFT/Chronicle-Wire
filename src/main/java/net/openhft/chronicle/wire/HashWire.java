@@ -509,7 +509,7 @@ public class HashWire implements WireOut, BytesComment {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @Nullable Class type) {
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class type) {
             hash = hash * M1 + (type == null ? 0 : type.hashCode() * M2);
             return HashWire.this;
         }

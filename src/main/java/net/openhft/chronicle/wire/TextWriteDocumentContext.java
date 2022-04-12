@@ -59,7 +59,7 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         count--;
         if (count > 0)
             return;
-        @NotNull Bytes bytes = wire().bytes();
+        @NotNull Bytes<?> bytes = wire().bytes();
         if (rollback) {
             bytes.writePosition(bytes.readPosition());
             return;

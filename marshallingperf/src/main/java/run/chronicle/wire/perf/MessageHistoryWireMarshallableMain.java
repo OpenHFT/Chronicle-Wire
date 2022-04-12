@@ -23,7 +23,7 @@ public class MessageHistoryWireMarshallableMain {
 
         MessageHistoryBytesMarshallableMain.SetTimeMessageHistory n = createMessageHistory();
         MessageHistoryBytesMarshallableMain.SetTimeMessageHistory n2 = new MessageHistoryBytesMarshallableMain.SetTimeMessageHistory();
-        Bytes bytes = Bytes.allocateElasticDirect(128);
+        Bytes<?> bytes = Bytes.allocateElasticDirect(128);
         Wire bw = WireType.BINARY.apply(bytes);
 
         for (int i = -20_000; i < 100_000_000; i++) {

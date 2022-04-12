@@ -37,7 +37,7 @@ import java.util.function.Supplier;
 @SuppressWarnings("rawtypes")
 public class ReadAnyWire extends AbstractAnyWire implements Wire {
 
-    public ReadAnyWire(@NotNull Bytes bytes) {
+    public ReadAnyWire(@NotNull Bytes<?> bytes) {
         super(bytes, new ReadAnyWireAcquisition(bytes));
     }
 
@@ -81,13 +81,13 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
     }
 
     static class ReadAnyWireAcquisition implements WireAcquisition {
-        private final Bytes bytes;
+        private final Bytes<?> bytes;
         WireType wireType;
         @Nullable
         Wire wire = null;
         private ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
 
-        public ReadAnyWireAcquisition(Bytes bytes) {
+        public ReadAnyWireAcquisition(Bytes<?> bytes) {
             this.bytes = bytes;
         }
 
@@ -137,7 +137,7 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
             return null;
         }
 
-        public Bytes bytes() {
+        public Bytes<?> bytes() {
             return bytes;
         }
     }

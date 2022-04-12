@@ -61,7 +61,7 @@ import static org.junit.Assert.*;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TextWireTest extends WireTestCommon {
 
-    Bytes bytes;
+    Bytes<?> bytes;
 
     @Test
     public void testWhiteSpaceInType() {
@@ -88,7 +88,7 @@ public class TextWireTest extends WireTestCommon {
                 .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
                 .write().bytes(allBytes);
         // System.out.println(bytes.toString());
-        @NotNull Bytes allBytes2 = allocateElasticOnHeap();
+        @NotNull Bytes<?> allBytes2 = allocateElasticOnHeap();
         wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
                 .read().bytes(b -> assertEquals("Hello", b.toString()))
                 .read().bytes(b -> assertEquals("quotable, text", b.toString()))
@@ -247,7 +247,7 @@ public class TextWireTest extends WireTestCommon {
     @Test
     public void testWriteToBinaryAndTriesToConvertToText() {
 
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
         Wire wire = WireType.BINARY.apply(b);
         wire.usePadding(true);
 
@@ -940,7 +940,7 @@ public class TextWireTest extends WireTestCommon {
     @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteStrings() {
-        @NotNull final Bytes bytes = allocateElasticOnHeap();
+        @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new TextWire(bytes);
         wire.usePadding(true);
 
@@ -1062,7 +1062,7 @@ public class TextWireTest extends WireTestCommon {
     @Test
     @Ignore
     public void testMapReadAndWriteIntegers() {
-        @NotNull final Bytes bytes = allocateElasticOnHeap();
+        @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new TextWire(bytes);
 
         @NotNull final Map<Integer, Integer> expected = new HashMap<>();
@@ -1127,7 +1127,7 @@ public class TextWireTest extends WireTestCommon {
     @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteMarshable() {
-        @NotNull final Bytes bytes = allocateElasticOnHeap();
+        @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new TextWire(bytes);
         wire.usePadding(false);
 
@@ -1171,7 +1171,7 @@ public class TextWireTest extends WireTestCommon {
                 return stack;
             }
         };
-        @NotNull final Bytes bytes = allocateElasticOnHeap();
+        @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new TextWire(bytes);
         wire.usePadding(false);
         wire.writeDocument(false, w -> w.writeEventName(() -> "exception")
@@ -1268,7 +1268,7 @@ public class TextWireTest extends WireTestCommon {
         @NotNull byte[] compressedBytes = str.getBytes(ISO_8859_1);
         wire.write().compress("gzip", Bytes.wrapForRead(compressedBytes));
 
-        @NotNull Bytes bytes = allocateElasticOnHeap();
+        @NotNull Bytes<?> bytes = allocateElasticOnHeap();
         wire.read().bytes(bytes);
         assertEquals(str, bytes.toString());
     }
@@ -1282,7 +1282,7 @@ public class TextWireTest extends WireTestCommon {
         @NotNull byte[] compressedBytes = str.getBytes(ISO_8859_1);
         wire.write().compress("lzw", Bytes.wrapForRead(compressedBytes));
 
-        @NotNull Bytes bytes = allocateElasticOnHeap();
+        @NotNull Bytes<?> bytes = allocateElasticOnHeap();
         wire.read().bytes(bytes);
         assertEquals(str, bytes.toString());
     }
@@ -1962,10 +1962,10 @@ public class TextWireTest extends WireTestCommon {
     }
 
     static class ABCD extends SelfDescribingMarshallable {
-        Bytes A = Bytes.allocateElasticDirect();
-        Bytes B = Bytes.allocateDirect(64);
-        Bytes C = Bytes.elasticByteBuffer();
-        Bytes D = Bytes.allocateElasticOnHeap(1);
+        Bytes<?> A = Bytes.allocateElasticDirect();
+        Bytes<?> B = Bytes.allocateDirect(64);
+        Bytes<?> C = Bytes.elasticByteBuffer();
+        Bytes<?> D = Bytes.allocateElasticOnHeap(1);
 
         void releaseAll() {
             A.releaseLast();
@@ -1996,7 +1996,7 @@ public class TextWireTest extends WireTestCommon {
 
     static class BytesWrapper extends SelfDescribingMarshallable {
         @NotNull
-        Bytes bytes = allocateElasticDirect();
+        Bytes<?> bytes = allocateElasticDirect();
 
         public void bytes(@NotNull CharSequence cs) {
             bytes.clear();

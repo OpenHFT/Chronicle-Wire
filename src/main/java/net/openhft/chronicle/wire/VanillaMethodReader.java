@@ -200,7 +200,7 @@ public class VanillaMethodReader implements MethodReader {
 
             if (v.wireIn().isBinary()) {
                 final Bytes<?> bytes0 = v.wireIn().bytes();
-                Bytes bytes = Bytes.allocateElasticOnHeap((int) (bytes0.readRemaining() * 3 / 2 + 64));
+                Bytes<?> bytes = Bytes.allocateElasticOnHeap((int) (bytes0.readRemaining() * 3 / 2 + 64));
                 long pos = bytes0.readPosition();
                 try {
                     v.wireIn().copyTo(new TextWire(bytes));

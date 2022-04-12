@@ -39,7 +39,7 @@ public class Example3 {
         System.out.println(data2);
 
         //To write in binary instead
-        Bytes bytes2 = new HexDumpBytes();
+        Bytes<?> bytes2 = new HexDumpBytes();
         Wire wire2 = new BinaryWire(bytes2);
         wire2.write("mydata").marshallable(data);
 

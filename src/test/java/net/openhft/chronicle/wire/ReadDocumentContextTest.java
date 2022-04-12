@@ -34,7 +34,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
     @Test
     public void testWritingNotCompleteDocument() {
 
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
         assertFalse(b.sharedMemory());
         @NotNull Wire wire = new TextWire(b).useBinaryDocuments();
         assertFalse(wire.notCompleteIsNotPresent());
@@ -113,7 +113,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
     @Test
     public void testEmptyMessage() {
 
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
 
         @NotNull TextWire textWire = new TextWire(b).useBinaryDocuments();
         textWire.usePadding(true);
@@ -142,7 +142,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
     public void testReadingADocumentThatHasNotBeenFullyReadFromTheTcpSocketAt2Bytes() throws
             Exception {
 
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
 
         @NotNull TextWire textWire = new TextWire(b).useBinaryDocuments();
         textWire.usePadding(true);
@@ -188,7 +188,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
     @Test
     public void testReadingADocumentThatHasNotBeenFullyReadFromTheTcpSocketAt5Bytes() {
 
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
 
         @NotNull TextWire wire = new TextWire(b).useBinaryDocuments();
         wire.usePadding(true);

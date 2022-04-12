@@ -105,11 +105,11 @@ public class TextWire extends AbstractWire implements Wire {
     private boolean addTimeStamps = false;
     private boolean trimFirstCurly = true;
 
-    public TextWire(@NotNull Bytes bytes, boolean use8bit) {
+    public TextWire(@NotNull Bytes<?> bytes, boolean use8bit) {
         super(bytes, use8bit);
     }
 
-    public TextWire(@NotNull Bytes bytes) {
+    public TextWire(@NotNull Bytes<?> bytes) {
         this(bytes, false);
     }
 
@@ -1766,7 +1766,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, Class type) {
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, Class type) {
             if (dropDefault) {
                 if (type == null)
                     return wireOut();
@@ -2249,7 +2249,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         @Nullable
         @Override
-        public Bytes textTo(@NotNull Bytes bytes) {
+        public Bytes<?> textTo(@NotNull Bytes<?> bytes) {
             bytes.clear();
             @Nullable CharSequence cs = textTo0(bytes);
             consumePadding(1);
@@ -2416,7 +2416,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireIn bytes(@NotNull BytesOut toBytes) {
+        public WireIn bytes(@NotNull BytesOut<?> toBytes) {
             toBytes.clear();
             return bytes(b -> toBytes.write((BytesStore) b));
         }

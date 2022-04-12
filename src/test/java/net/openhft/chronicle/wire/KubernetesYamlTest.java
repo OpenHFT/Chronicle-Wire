@@ -1,17 +1,12 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Stream;
 
-import static net.openhft.chronicle.wire.WireType.TEXT;
 import static net.openhft.chronicle.wire.WireType.YAML;
 import static org.junit.Assert.assertEquals;
 
@@ -20,12 +15,12 @@ public class KubernetesYamlTest extends WireTestCommon {
     static String DIR = "/yaml/k8s/";
 
     public static void doTest(String file, String... expected) {
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
         try {
             InputStream is = KubernetesYamlTest.class.getResourceAsStream(DIR + file);
 
             Scanner s = new Scanner(is).useDelimiter("\\A");
-            Bytes bytes = Bytes.from(s.hasNext() ? s.next() : "");
+            Bytes<?> bytes = Bytes.from(s.hasNext() ? s.next() : "");
             Stream<Object> stream = YAML.streamFromBytes(Object.class, bytes);
             Object[] objects = stream.toArray();
             assertEquals(expected.length, objects.length);

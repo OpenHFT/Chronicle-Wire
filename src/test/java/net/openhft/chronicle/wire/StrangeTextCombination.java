@@ -32,7 +32,7 @@ import java.util.Collection;
 public class StrangeTextCombination {
     private WireType wireType;
     @SuppressWarnings("rawtypes")
-    private Bytes bytes;
+    private Bytes<?> bytes;
 
     public StrangeTextCombination(WireType wireType) {
         this.wireType = wireType;

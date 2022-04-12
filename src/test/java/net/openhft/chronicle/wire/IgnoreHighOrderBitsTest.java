@@ -16,7 +16,7 @@ public class IgnoreHighOrderBitsTest extends WireTestCommon {
     @Test
     public void testWriteByte() throws IOException {
         @SuppressWarnings("rawtypes")
-        final Bytes bytes = Bytes.elasticByteBuffer();
+        final Bytes<?> bytes = Bytes.elasticByteBuffer();
         try {
             final Wire wire = new BinaryWire(bytes);
             @SuppressWarnings("resource")

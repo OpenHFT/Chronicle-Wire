@@ -28,7 +28,7 @@ public class WireInternalTest extends WireTestCommon {
 
     @Test
     public void testThrowableAsObject() {
-        final Bytes bytes = Bytes.elasticByteBuffer();
+        final Bytes<?> bytes = Bytes.elasticByteBuffer();
         try {
             final Wire wire = new BinaryWire(bytes);
 
@@ -47,7 +47,7 @@ public class WireInternalTest extends WireTestCommon {
 
     @Test
     public void testThrowable() {
-        final Bytes bytes = Bytes.elasticByteBuffer();
+        final Bytes<?> bytes = Bytes.elasticByteBuffer();
         try {
             final Wire wire = new TextWire(bytes);
 
@@ -66,7 +66,7 @@ public class WireInternalTest extends WireTestCommon {
 
     @Test
     public void testFromSizePrefixedBinaryToText() {
-        Bytes bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.elasticByteBuffer();
         @NotNull Wire wire = new BinaryWire(bytes);
         wire.usePadding(true);
 

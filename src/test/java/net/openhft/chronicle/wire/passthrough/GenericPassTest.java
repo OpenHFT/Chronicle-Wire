@@ -35,7 +35,7 @@ public class GenericPassTest {
 
     @Test
     public void passingOpaqueMessage() {
-        Bytes bytes0 = Bytes.allocateElasticOnHeap(1);
+        Bytes<?> bytes0 = Bytes.allocateElasticOnHeap(1);
         // invalid in every wire
         bytes0.writeUnsignedByte(0x82);
         Wire wire0 = new TextWire(bytes0).useTextDocuments();
@@ -65,7 +65,7 @@ public class GenericPassTest {
 
     @Test
     public void passingOpaqueMessageBinary() {
-        Bytes bytes0 = Bytes.allocateElasticOnHeap(1);
+        Bytes<?> bytes0 = Bytes.allocateElasticOnHeap(1);
         // invalid in every wire
         bytes0.writeUnsignedByte(0x82);
         Wire wire0 = new BinaryWire(bytes0);

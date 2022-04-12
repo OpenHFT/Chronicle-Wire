@@ -68,7 +68,7 @@ public class MapWireTest extends WireTestCommon {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
     public void writeMap() {
-        Bytes bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.elasticByteBuffer();
         Wire wire = wireType.apply(bytes);
         wire.getValueOut()
                 .marshallable(m);

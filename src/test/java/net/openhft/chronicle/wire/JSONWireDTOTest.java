@@ -14,7 +14,7 @@ public class JSONWireDTOTest extends WireTestCommon {
     public void dto() {
         expectException("Found this$0, in class");
         // underlying bytes
-        Bytes bytes = Bytes.allocateElasticDirect();
+        Bytes<?> bytes = Bytes.allocateElasticDirect();
 
         // Use the JSON serialization
         JSONWire wire = new JSONWire(bytes);

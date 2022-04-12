@@ -127,30 +127,30 @@ public enum Wires {
      * @param bytes to decode
      * @return as String
      */
-    public static String fromSizePrefixedBlobs(@NotNull Bytes bytes) {
+    public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes) {
         return WireDumper.of(bytes).asString();
     }
 
-    public static String fromAlignedSizePrefixedBlobs(@NotNull Bytes bytes) {
+    public static String fromAlignedSizePrefixedBlobs(@NotNull Bytes<?> bytes) {
         return WireDumper.of(bytes, true).asString();
     }
 
-    public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, boolean abbrev) {
+    public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, boolean abbrev) {
         return WireDumper.of(bytes).asString(abbrev);
     }
 
-    public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, long position) {
+    public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, long position) {
         return fromSizePrefixedBlobs(bytes, position, false);
     }
 
-    public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, long position, boolean padding) {
+    public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, long position, boolean padding) {
         final long limit = bytes.readLimit();
         if (position > limit)
             return "";
         return WireDumper.of(bytes, padding).asString(position, limit - position);
     }
 
-    public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, boolean padding, boolean abbrev) {
+    public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, boolean padding, boolean abbrev) {
         return WireDumper.of(bytes, padding).asString(abbrev);
     }
 
@@ -169,7 +169,7 @@ public enum Wires {
             int metaDataBit = dc.isMetaData() ? Wires.META_DATA : 0;
             int header = metaDataBit | toIntU30(length, "Document length %,d out of 30-bit int range.");
 
-            Bytes tempBytes = Bytes.allocateElasticDirect();
+            Bytes<?> tempBytes = Bytes.allocateElasticDirect();
             try {
                 tempBytes.writeOrderedInt(header);
                 final AbstractWire wire2 = ((BinaryReadDocumentContext) dc).wire;
@@ -228,8 +228,8 @@ public enum Wires {
     private static Bytes asType(@NotNull WireIn wireIn, Function<Bytes, Wire> wireProvider) {
         long pos = wireIn.bytes().readPosition();
         try {
-            Bytes bytes = WireInternal.acquireInternalBytes();
-            wireIn.copyTo(wireProvider.apply(bytes));
+            Bytes<?> bytes = WireInternal.acquireInternalBytes();
+            wireIn.copyTo(new TextWire(bytes).addTimeStamps(true));
             return bytes;
         } finally {
             wireIn.bytes().readPosition(pos);
@@ -329,7 +329,7 @@ public enum Wires {
     public static Bytes<?> acquireBytes() {
         if (Jvm.isDebug())
             return Bytes.allocateElasticOnHeap();
-        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL,
+        Bytes<?> bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL,
                 Wires::unmonitoredDirectBytes);
         bytes.clear();
         return bytes;
@@ -341,7 +341,7 @@ public enum Wires {
         if (Jvm.isDebug())
             return Bytes.allocateElasticOnHeap();
 
-        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_F2S_TL,
+        Bytes<?> bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_F2S_TL,
                 Wires::unmonitoredDirectBytes);
         bytes.clear();
         return bytes;
@@ -357,10 +357,10 @@ public enum Wires {
     }
 
     @NotNull
-    public static Bytes acquireAnotherBytes() {
+    public static Bytes<?> acquireAnotherBytes() {
         if (Jvm.isDebug())
             return Bytes.allocateElasticOnHeap();
-        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL,
+        Bytes<?> bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL,
                 Wires::unmonitoredDirectBytes);
         bytes.clear();
         return bytes;
@@ -399,7 +399,7 @@ public enum Wires {
         wm.writeMarshallable(marshallable, wire, previous, copy);
     }
 
-    public static void writeKey(@NotNull Object marshallable, Bytes bytes) {
+    public static void writeKey(@NotNull Object marshallable, Bytes<?> bytes) {
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass());
         wm.writeKey(marshallable, bytes);
     }
@@ -661,7 +661,7 @@ public enum Wires {
     }
 
     @NotNull
-    public static BinaryWire binaryWireForRead(Bytes in, long position, long length) {
+    public static BinaryWire binaryWireForRead(Bytes<?> in, long position, long length) {
         BinaryWire wire = WIRE_TL.get();
         VanillaBytes bytes = (VanillaBytes) wire.bytes();
         wire.clear();
@@ -670,7 +670,7 @@ public enum Wires {
     }
 
     @NotNull
-    public static BinaryWire binaryWireForWrite(Bytes in, long position, long length) {
+    public static BinaryWire binaryWireForWrite(Bytes<?> in, long position, long length) {
         BinaryWire wire = WIRE_TL.get();
         VanillaBytes bytes = (VanillaBytes) wire.bytes();
         bytes.bytesStore(in.bytesStore(), 0, position);
@@ -960,7 +960,7 @@ public enum Wires {
     enum SerializeBytes implements Function<Class, SerializationStrategy> {
         INSTANCE;
 
-        static Bytes decodeBase64(Bytes o, ValueIn in) {
+        static Bytes<?> decodeBase64(Bytes<?> o, ValueIn in) {
             @NotNull StringBuilder sb0 = acquireStringBuilder();
             in.text(sb0);
             String s = WireInternal.INTERNER.intern(sb0);

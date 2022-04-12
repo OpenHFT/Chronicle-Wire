@@ -40,7 +40,7 @@ public class CSVWire extends TextWire {
     private final List<String> header = new ArrayList<>();
 
     @SuppressWarnings("rawtypes")
-    public CSVWire(@NotNull Bytes bytes, boolean use8bit) {
+    public CSVWire(@NotNull Bytes<?> bytes, boolean use8bit) {
         super(bytes, use8bit);
         while (lineStart == 0) {
             long start = bytes.readPosition();
@@ -51,7 +51,7 @@ public class CSVWire extends TextWire {
     }
 
     @SuppressWarnings("rawtypes")
-    public CSVWire(@NotNull Bytes bytes) {
+    public CSVWire(@NotNull Bytes<?> bytes) {
         this(bytes, false);
     }
 

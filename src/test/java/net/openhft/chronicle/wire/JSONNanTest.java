@@ -8,7 +8,7 @@ public class JSONNanTest extends WireTestCommon {
 
     @Test
     public void writeNaN() {
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
         try {
             Wire wire = WireType.JSON.apply(b);
             Dto value = new Dto();
@@ -25,7 +25,7 @@ public class JSONNanTest extends WireTestCommon {
      */
     @Test
     public void readNan() {
-        Bytes b = Bytes.from("\"\":{\"value\":null}");
+        Bytes<?> b = Bytes.from("\"\":{\"value\":null}");
         Wire wire = WireType.JSON.apply(b);
         Dto value = wire.read().object(Dto.class);
         Assert.assertTrue(Double.isNaN(value.value));
@@ -36,7 +36,7 @@ public class JSONNanTest extends WireTestCommon {
      */
     @Test
     public void readNanWithSpaceAteEnd() {
-        Bytes b = Bytes.from("\"\":{\"value\":null }");
+        Bytes<?> b = Bytes.from("\"\":{\"value\":null }");
         Wire wire = WireType.JSON.apply(b);
         Dto value = wire.read().object(Dto.class);
         Assert.assertTrue(Double.isNaN(value.value));
@@ -47,7 +47,7 @@ public class JSONNanTest extends WireTestCommon {
      */
     @Test
     public void readNanWithSpaceAtStart() {
-        Bytes b = Bytes.from("\"\":{\"value\": null}");
+        Bytes<?> b = Bytes.from("\"\":{\"value\": null}");
         Wire wire = WireType.JSON.apply(b);
         Dto value = wire.read().object(Dto.class);
         Assert.assertTrue(Double.isNaN(value.value));

@@ -145,10 +145,10 @@ Wire wire = new TextWire(bytes);
 WireType wireType = WireType.TEXT;
 Wire wireB = wireType.apply(bytes);
 // or
-Bytes bytes2 = Bytes.allocateElasticOnHeap();
+Bytes<?> bytes2 = Bytes.allocateElasticOnHeap();
 Wire wire2 = new BinaryWire(bytes2);
 // or
-Bytes bytes3 = Bytes.allocateElasticOnHeap();
+Bytes<?> bytes3 = Bytes.allocateElasticOnHeap();
 Wire wire3 = new RawWire(bytes3);
 ----
 
@@ -288,7 +288,7 @@ In this example the data is marshalled as a nested data structure.
 ----
 
 // Bytes which wraps a byte[] which is resized as needed
-Bytes bytes = Bytes.allocateElasticOnHeap();
+Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
 Wire wire = new TextWire(bytes);
 
@@ -322,7 +322,7 @@ To write in binary instead
 
 [source,java]
 ----
-Bytes bytes2 = new HexDumpBytes();
+Bytes<?> bytes2 = new HexDumpBytes();
 Wire wire2 = new BinaryWire(bytes2);
 
 wire2.write("mydata").marshallable(data);
@@ -1068,7 +1068,7 @@ The provided id should be unique across all classes using the same MethodReader/
  }
 
  public void shouldDetermineMethodNamesFromMethodIds() {
-     Bytes bytes = Bytes.allocateElasticOnHeap();
+     Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
      final BinaryWire wire = new BinaryWire(bytes);
      final Speaker speaker =
@@ -1754,7 +1754,7 @@ This will add more efficient code for Marshallable format.
 
 private static final int MASHALLABLE_VERSION = 1;
 
-@Override public void writeMarshallable(net.openhft.chronicle.bytes.BytesOut out) {
+@Override public void writeMarshallable(net.openhft.chronicle.bytes.BytesOut<?> out) {
 #if($class0.superName != "BytesInBinaryMarshallable")
    super.writeMarshallable(out);
 #end
@@ -1770,7 +1770,7 @@ private static final int MASHALLABLE_VERSION = 1;
 #end
 }
 
-@Override public void readMarshallable(net.openhft.chronicle.bytes.BytesIn in) {
+@Override public void readMarshallable(net.openhft.chronicle.bytes.BytesIn<?> in) {
 #if($class0.superName != "BytesInBinaryMarshallable")
    super.readMarshallable(in);
 #end
@@ -1799,7 +1799,7 @@ private static final int MASHALLABLE_VERSION = 1;
 
 private static final int MASHALLABLE_VERSION = 1;
 
-@Override public void writeMarshallable(net.openhft.chronicle.bytes.BytesOut out) {
+@Override public void writeMarshallable(net.openhft.chronicle.bytes.BytesOut<?> out) {
 #if($class0.hasSuper)
    super.writeMarshallable(out); // <1>
 #end
@@ -1815,7 +1815,7 @@ private static final int MASHALLABLE_VERSION = 1;
 #end
 }
 
-@Override public void readMarshallable(net.openhft.chronicle.bytes.BytesIn in) {
+@Override public void readMarshallable(net.openhft.chronicle.bytes.BytesIn<?> in) {
 #if($class0.hasSuper)
    super.readMarshallable(in);
 #end

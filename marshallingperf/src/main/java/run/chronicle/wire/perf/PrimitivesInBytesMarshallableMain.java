@@ -19,7 +19,7 @@ public class PrimitivesInBytesMarshallableMain {
         WithPrimitives n = new WithPrimitives();
 
         WithPrimitives n2 = new WithPrimitives();
-        Bytes bytes = Bytes.elasticByteBuffer(256);
+        Bytes<?> bytes = Bytes.elasticByteBuffer(256);
 
         for (int i = -20_000; i < 100_000_000; i++) {
             bytes.clear();
@@ -57,7 +57,7 @@ public class PrimitivesInBytesMarshallableMain {
         }
 
         @Override
-        public void readMarshallable(BytesIn bytes) throws IORuntimeException {
+        public void readMarshallable(BytesIn<?> bytes) throws IORuntimeException {
             a = bytes.readBoolean();
             b = bytes.readByte();
             c = bytes.readChar();
@@ -69,7 +69,7 @@ public class PrimitivesInBytesMarshallableMain {
         }
 
         @Override
-        public void writeMarshallable(BytesOut bytes) {
+        public void writeMarshallable(BytesOut<?> bytes) {
             bytes.writeBoolean(a);
             bytes.writeByte(b);
             bytes.writeChar(c);

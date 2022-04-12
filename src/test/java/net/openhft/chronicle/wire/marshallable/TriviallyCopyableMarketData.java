@@ -27,12 +27,12 @@ public class TriviallyCopyableMarketData extends BytesInBinaryMarshallable {
     double askQty0, askQty1, askQty2, askQty3;
 
     @Override
-    public void readMarshallable(BytesIn bytes) {
+    public void readMarshallable(BytesIn<?> bytes) {
         bytes.unsafeReadObject(this, START, LENGTH);
     }
 
     @Override
-    public void writeMarshallable(BytesOut bytes) {
+    public void writeMarshallable(BytesOut<?> bytes) {
         bytes.unsafeWriteObject(this, START, LENGTH);
     }
 

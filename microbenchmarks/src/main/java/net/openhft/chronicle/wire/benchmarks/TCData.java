@@ -47,12 +47,12 @@ public class TCData implements Marshallable, BytesMarshallable {
     }
 
     @Override
-    public void readMarshallable(BytesIn bytes) throws IllegalStateException {
+    public void readMarshallable(BytesIn<?> bytes) throws IllegalStateException {
         bytes.unsafeReadObject(this, DTO_START, DTO_LENGTH);
     }
 
     @Override
-    public final void writeMarshallable(BytesOut bytes) {
+    public final void writeMarshallable(BytesOut<?> bytes) {
         bytes.unsafeWriteObject(this, DTO_START, DTO_LENGTH);
     }
 

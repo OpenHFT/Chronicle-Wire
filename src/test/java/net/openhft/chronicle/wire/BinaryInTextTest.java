@@ -11,16 +11,16 @@ public class BinaryInTextTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testBytesFromText() {
-        Bytes a = Marshallable.fromString(Bytes.class, "A==");
+        Bytes<?> a = Marshallable.fromString(Bytes.class, "A==");
         assertEquals("A==", a.toString());
 
         BytesStore a2 = Marshallable.fromString(BytesStore.class, "A==");
         assertEquals("A==", a2.toString());
 
-        Bytes b = Marshallable.fromString(Bytes.class, "!!binary BA==");
+        Bytes<?> b = Marshallable.fromString(Bytes.class, "!!binary BA==");
         assertEquals("[pos: 0, rlim: 1, wlim: 2147483632, cap: 2147483632 ] ǁ⒋‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", b.toDebugString());
 
-        Bytes b2 = Marshallable.fromString(Bytes.class, "!!binary A1==");
+        Bytes<?> b2 = Marshallable.fromString(Bytes.class, "!!binary A1==");
         assertEquals("[pos: 0, rlim: 1, wlim: 2147483632, cap: 2147483632 ] ǁ⒊‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", b2.toDebugString());
     }
 
@@ -49,7 +49,7 @@ public class BinaryInTextTest extends WireTestCommon {
 
     @SuppressWarnings("rawtypes")
     static class BIT extends SelfDescribingMarshallable {
-        Bytes b;
+        Bytes<?> b;
         BytesStore c;
     }
 }

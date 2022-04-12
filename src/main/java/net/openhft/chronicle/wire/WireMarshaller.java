@@ -268,7 +268,7 @@ public class WireMarshaller<T> {
         bytes.indent(-1);
     }
 
-    public void writeMarshallable(T t, Bytes bytes) {
+    public void writeMarshallable(T t, Bytes<?> bytes) {
         for (@NotNull FieldAccess field : fields) {
             try {
                 field.getAsBytes(t, bytes);
@@ -343,7 +343,7 @@ public class WireMarshaller<T> {
         return sb.length() == 0 || StringUtils.isEqual(field.field.getName(), sb);
     }
 
-    public void writeKey(T t, Bytes bytes) {
+    public void writeKey(T t, Bytes<?> bytes) {
         // assume one key for now.
         try {
             fields[0].getAsBytes(t, bytes);
@@ -643,7 +643,7 @@ public class WireMarshaller<T> {
 
         protected abstract void setValue(Object o, ValueIn read, boolean overwrite) throws IllegalAccessException;
 
-        public abstract void getAsBytes(Object o, Bytes bytes) throws IllegalAccessException;
+        public abstract void getAsBytes(Object o, Bytes<?> bytes) throws IllegalAccessException;
 
         public boolean isEqual(Object o1, Object o2) {
             try {
@@ -677,7 +677,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, Bytes bytes) {
+        public void getAsBytes(Object o, Bytes<?> bytes) {
             throw new UnsupportedOperationException();
         }
     }
@@ -705,7 +705,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, Bytes bytes) {
+        public void getAsBytes(Object o, Bytes<?> bytes) {
             throw new UnsupportedOperationException();
         }
     }
@@ -778,7 +778,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) throws IllegalAccessException {
             bytes.writeUtf8(String.valueOf(field.get(o)));
         }
     }
@@ -799,7 +799,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             bytes.writeUtf8((String) unsafeGetObject(o, offset));
         }
 
@@ -829,7 +829,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             bytes.writeUtf8((CharSequence) unsafeGetObject(o, offset));
         }
 
@@ -864,13 +864,13 @@ public class WireMarshaller<T> {
         @Override
         protected void getValue(@NotNull Object o, @NotNull ValueOut write, Object previous)
                 throws IllegalAccessException {
-            Bytes bytesField = (Bytes) field.get(o);
+            Bytes<?> bytesField = (Bytes) field.get(o);
             write.bytes(bytesField);
         }
 
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            @NotNull Bytes bytes = (Bytes) unsafeGetObject(o, offset);
+            @NotNull Bytes<?> bytes = (Bytes) unsafeGetObject(o, offset);
             if (bytes == null)
                 unsafePutObject(o, offset, bytes = Bytes.allocateElasticOnHeap(128));
             WireIn wireIn = read.wireIn();
@@ -885,7 +885,7 @@ public class WireMarshaller<T> {
                 unsafePutObject(o, offset, null);
         }
 
-        private void decodeBytes(@NotNull ValueIn read, Bytes bytes) {
+        private void decodeBytes(@NotNull ValueIn read, Bytes<?> bytes) {
             @NotNull StringBuilder sb0 = RSBP.acquireStringBuilder();
             read.text(sb0);
             String s = WireInternal.INTERNER.intern(sb0);
@@ -895,15 +895,15 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
-            Bytes bytesField = (Bytes) field.get(o);
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) throws IllegalAccessException {
+            Bytes<?> bytesField = (Bytes) field.get(o);
             bytes.write(bytesField);
         }
 
         @Override
         protected void copy(Object from, Object to) {
-            Bytes fromBytes = (Bytes) unsafeGetObject(from, offset);
-            Bytes toBytes = (Bytes) unsafeGetObject(to, offset);
+            Bytes<?> fromBytes = (Bytes) unsafeGetObject(from, offset);
+            Bytes<?> toBytes = (Bytes) unsafeGetObject(to, offset);
             if (fromBytes == null) {
                 unsafePutObject(to, offset, null);
                 return;
@@ -962,7 +962,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, Bytes bytes) {
+        public void getAsBytes(Object o, Bytes<?> bytes) {
             throw new UnsupportedOperationException();
         }
 
@@ -1023,7 +1023,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, Bytes bytes) {
+        public void getAsBytes(Object o, Bytes<?> bytes) {
             throw new UnsupportedOperationException();
         }
 
@@ -1138,7 +1138,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(final Object o, final Bytes bytes) {
+        public void getAsBytes(final Object o, final Bytes<?> bytes) {
             throw new UnsupportedOperationException();
         }
 
@@ -1277,7 +1277,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, Bytes bytes) {
+        public void getAsBytes(Object o, Bytes<?> bytes) {
             throw new UnsupportedOperationException();
         }
 
@@ -1357,7 +1357,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, Bytes bytes) {
+        public void getAsBytes(Object o, Bytes<?> bytes) {
             throw new UnsupportedOperationException();
         }
     }
@@ -1435,7 +1435,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, Bytes bytes) {
+        public void getAsBytes(Object o, Bytes<?> bytes) {
             throw new UnsupportedOperationException();
         }
     }
@@ -1456,7 +1456,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             bytes.writeBoolean(unsafeGetBoolean(o, offset));
         }
 
@@ -1487,7 +1487,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             bytes.writeByte(unsafeGetByte(o, offset));
         }
 
@@ -1518,7 +1518,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             bytes.writeShort(unsafeGetShort(o, offset));
         }
 
@@ -1563,7 +1563,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             bytes.writeUnsignedShort(unsafeGetChar(o, offset));
         }
 
@@ -1598,7 +1598,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             bytes.writeInt(unsafeGetInt(o, offset));
         }
 
@@ -1679,7 +1679,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             StringBuilder sb = WSBP.acquireStringBuilder();
             bytes.readUtf8(sb);
             int i = intConverter.parse(sb);
@@ -1741,7 +1741,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             StringBuilder sb = WSBP.acquireStringBuilder();
             bytes.readUtf8(sb);
             int i = intConverter.parse(sb);
@@ -1779,7 +1779,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             bytes.writeFloat(unsafeGetFloat(o, offset));
         }
 
@@ -1814,7 +1814,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             bytes.writeLong(unsafeGetLong(o, offset));
         }
 
@@ -1864,7 +1864,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             StringBuilder sb = WSBP.acquireStringBuilder();
             bytes.readUtf8(sb);
             long i = longConverter.parse(sb);
@@ -1902,7 +1902,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             bytes.writeDouble(unsafeGetDouble(o, offset));
         }
 
