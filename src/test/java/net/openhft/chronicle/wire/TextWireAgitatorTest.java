@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.junit.Test;
 
@@ -12,6 +13,7 @@ public class TextWireAgitatorTest extends WireTestCommon {
 
     @Test
     public void lowerCaseClass() {
+        assertFalse(OS.isWindows());
         expectException("Unable to load net.openhft.chronicle.wire.textwiretest$mydto, is a class alias missing");
         assertTrue(Marshallable.fromString("!" + TextWireTest.MyDto.class.getName().toLowerCase() + " { }") instanceof Map);
     }
