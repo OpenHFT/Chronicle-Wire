@@ -35,11 +35,13 @@ public class WireDumperTest extends WireTestCommon {
     }
 
     private static Object[][] toParams(final WireType[] values) {
-        return Arrays.stream(values).filter(WireType::isAvailable).
-                filter(wt -> wt != WireType.CSV).
-                filter(wt -> wt != WireType.READ_ANY).
-                filter(wt -> wt != WireType.YAML). // todo
-                        map(wt -> new Object[]{wt.toString(), wt}).toArray(Object[][]::new);
+        return Arrays.stream(values).filter(WireType::isAvailable)
+                .filter(wt -> wt != WireType.CSV)
+                .filter(wt -> wt != WireType.READ_ANY)
+                .filter(wt -> wt != WireType.JSON_ONLY)
+                .filter(wt -> wt != WireType.YAML_ONLY)
+                .map(wt -> new Object[]{wt.toString(), wt})
+                .toArray(Object[][]::new);
     }
 
     @Test
@@ -69,6 +71,17 @@ public class WireDumperTest extends WireTestCommon {
 
     private void initTestData() {
         expectedContentByType.put(WireType.TEXT, "" +
+                "--- !!data #binary\n" +
+                "00000000             31 37 0a                                 17·          \n" +
+                "# position: 8, header: 1\n" +
+                "--- !!data\n" +
+                "bark\n" +
+                "# position: 20, header: 2\n" +
+                "--- !!data\n" +
+                "3.14\n" +
+                "");
+
+        expectedContentByType.put(WireType.YAML, "" +
                 "--- !!data #binary\n" +
                 "00000000             31 37 0a                                 17·          \n" +
                 "# position: 8, header: 1\n" +
@@ -119,6 +132,14 @@ public class WireDumperTest extends WireTestCommon {
                         "00000020 b8 1e 09 40                                      ···@             \n");
 
         expectedPartialContent.put(WireType.TEXT,
+                "--- !!data #binary\n" +
+                        "00000000             31 37 0a                                 17·          \n" +
+                        "# position: 8, header: 0 or 1\n" +
+                        "--- !!not-ready-data\n" +
+                        "...\n" +
+                        "# 5 bytes remaining\n" +
+                        "");
+        expectedPartialContent.put(WireType.YAML,
                 "--- !!data #binary\n" +
                         "00000000             31 37 0a                                 17·          \n" +
                         "# position: 8, header: 0 or 1\n" +
