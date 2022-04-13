@@ -20,9 +20,10 @@ public class HTTPMarshallableOut implements MarshallableOut {
     private final DocumentContextHolder dcHolder = new DocumentContextHolder() {
         @Override
         public void close() {
-            if (chainedElement())
-                return;
+            final boolean chainedElement = chainedElement();
             super.close();
+            if (chainedElement)
+                return;
             if (wire.bytes().isEmpty())
                 return;
             try {
@@ -78,6 +79,7 @@ public class HTTPMarshallableOut implements MarshallableOut {
 
     @Override
     public DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException {
-        return writingDocument(metaData);
+        dcHolder.documentContext(wire.acquireWritingDocument(metaData));
+        return dcHolder;
     }
 }
