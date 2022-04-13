@@ -184,7 +184,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     @Override
     public void readMarshallable(@NotNull BytesIn<?> bytes) throws IORuntimeException {
         readMarshallable0(bytes);
-        assert !addSourceDetails : "Bytes<?> marshalling does not yet support addSourceDetails";
+        assert !addSourceDetails : "Bytes marshalling does not yet support addSourceDetails";
     }
 
     private void readMarshallable0(@NotNull BytesIn<?> bytes) {
