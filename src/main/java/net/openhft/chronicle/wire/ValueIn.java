@@ -513,8 +513,12 @@ public interface ValueIn {
         return wireIn();
     }
 
+    /**
+     * @param clazz Expected object type. <code>null</code> can be passed to request proxy marshallable tuple
+     *              if {@link Wires#GENERATE_TUPLES} is enabled.
+     */
     @Nullable
-    default <E> E object(@NotNull Class<E> clazz) {
+    default <E> E object(@Nullable Class<E> clazz) {
         return Wires.object0(this, null, clazz);
     }
 
