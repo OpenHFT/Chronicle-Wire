@@ -399,7 +399,7 @@ public class JSONWire extends TextWire {
         }
 
         @Override
-        public <E> @Nullable E object(@NotNull Class<E> clazz) {
+        public <E> @Nullable E object(@Nullable Class<E> clazz) {
             return useTypes ? parseType(null, clazz) : super.object(clazz);
         }
 
