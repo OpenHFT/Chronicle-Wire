@@ -94,6 +94,8 @@ public interface WireIn extends WireCommon, MarshallableIn {
 
     /**
      * Read a field which might be an object of any type.
+     * <p>
+     * Use getValueIn() to read the value for this event
      *
      * @param expectedClass to use as a hint, or Object.class if no hint available.
      * @return an instance of expectedClass
@@ -101,7 +103,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
     @Nullable <K> K readEvent(Class<K> expectedClass);
 
     /**
-     * Obtain the value in (for internal use)
+     * Obtain the value in for advanced use (typically after a call to readEvent above)
      */
     @NotNull
     ValueIn getValueIn();
