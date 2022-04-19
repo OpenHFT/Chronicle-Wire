@@ -72,7 +72,7 @@ public interface ValueIn {
     }
 
     @NotNull
-    default WireIn text(@NotNull Bytes sdo) {
+    default WireIn text(@NotNull Bytes<?> sdo) {
         sdo.clear();
         textTo(sdo);
         return wireIn();
@@ -85,19 +85,19 @@ public interface ValueIn {
     StringBuilder textTo(@NotNull StringBuilder sb);
 
     @Nullable
-    Bytes textTo(@NotNull Bytes bytes);
+    Bytes<?> textTo(@NotNull Bytes<?> bytes);
 
     @NotNull
-    WireIn bytes(@NotNull BytesOut toBytes);
+    WireIn bytes(@NotNull BytesOut<?> toBytes);
 
-    default WireIn bytes(@NotNull BytesOut toBytes, boolean clearBytes) {
+    default WireIn bytes(@NotNull BytesOut<?> toBytes, boolean clearBytes) {
         if (clearBytes)
             toBytes.clear();
         return bytes(toBytes);
     }
 
     @NotNull
-    default WireIn bytesLiteral(@NotNull BytesOut toBytes) {
+    default WireIn bytesLiteral(@NotNull BytesOut<?> toBytes) {
         return bytes(toBytes);
     }
 

@@ -41,7 +41,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.ObjIntConsumer;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -57,7 +56,7 @@ import static org.junit.Assert.*;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class YamlWireTest extends WireTestCommon {
 
-    Bytes bytes;
+    Bytes<?> bytes;
 
     @Test
     public void comment() {
@@ -156,7 +155,7 @@ public class YamlWireTest extends WireTestCommon {
     @Test
     public void testWriteToBinaryAndTriesToConvertToText() {
 
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
         Wire wire = WireType.BINARY.apply(b);
         wire.usePadding(true);
 
@@ -871,7 +870,7 @@ public class YamlWireTest extends WireTestCommon {
                 .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
                 .write().bytes(allBytes);
        // System.out.println(bytes.toString());
-        @NotNull Bytes allBytes2 = allocateElasticOnHeap();
+        @NotNull Bytes<?> allBytes2 = allocateElasticOnHeap();
         wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
                 .read().bytes(b -> assertEquals("Hello", b.toString()))
                 .read().bytes(b -> assertEquals("quotable, text", b.toString()))
@@ -1028,7 +1027,7 @@ public class YamlWireTest extends WireTestCommon {
     @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteStrings() {
-        @NotNull final Bytes bytes = allocateElasticOnHeap();
+        @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new YamlWire(bytes);
         wire.usePadding(true);
 
@@ -1087,7 +1086,7 @@ public class YamlWireTest extends WireTestCommon {
     @Test
     @Ignore
     public void testMapReadAndWriteIntegers() {
-        @NotNull final Bytes bytes = allocateElasticOnHeap();
+        @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         @NotNull final YamlWire wire = new YamlWire(bytes);
 
         @NotNull final Map<Integer, Integer> expected = new HashMap<>();
@@ -1127,7 +1126,7 @@ public class YamlWireTest extends WireTestCommon {
     @Test
     @Ignore("TODO FIX")
     public void testMapReadAndWriteMarshable() {
-        @NotNull final Bytes bytes = allocateElasticOnHeap();
+        @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new YamlWire(bytes);
 
         @NotNull final Map<MyMarshallable, MyMarshallable> expected = new LinkedHashMap<>();
@@ -1170,7 +1169,7 @@ public class YamlWireTest extends WireTestCommon {
                 return stack;
             }
         };
-        @NotNull final Bytes bytes = allocateElasticOnHeap();
+        @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new YamlWire(bytes);
         wire.usePadding(false);
 
@@ -1270,7 +1269,7 @@ public class YamlWireTest extends WireTestCommon {
         @NotNull byte[] compressedBytes = str.getBytes(ISO_8859_1);
         wire.write().compress("gzip", Bytes.wrapForRead(compressedBytes));
 
-        @NotNull Bytes bytes = allocateElasticDirect();
+        @NotNull Bytes<?> bytes = allocateElasticDirect();
         wire.read().bytes(bytes);
         assertEquals(str, bytes.toString());
     }
@@ -1285,7 +1284,7 @@ public class YamlWireTest extends WireTestCommon {
         @NotNull byte[] compressedBytes = str.getBytes(ISO_8859_1);
         wire.write().compress("lzw", Bytes.wrapForRead(compressedBytes));
 
-        @NotNull Bytes bytes = allocateElasticDirect();
+        @NotNull Bytes<?> bytes = allocateElasticDirect();
         wire.read().bytes(bytes);
         assertEquals(str, bytes.toString());
     }
@@ -1810,7 +1809,7 @@ public class YamlWireTest extends WireTestCommon {
 
     static class BytesWrapper extends SelfDescribingMarshallable {
         @NotNull
-        Bytes bytes = allocateElasticDirect();
+        Bytes<?> bytes = allocateElasticDirect();
 
         public void bytes(@NotNull CharSequence cs) {
             bytes.clear();

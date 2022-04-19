@@ -172,7 +172,7 @@ public class JSONWireTest extends WireTestCommon {
     public void testBytes() {
         @NotNull Wire w = createWire();
 
-        Bytes bs = Bytes.from("blablabla");
+        Bytes<?> bs = Bytes.from("blablabla");
         w.write("a").int64(123);
         w.write("somebytes").text(bs);
 

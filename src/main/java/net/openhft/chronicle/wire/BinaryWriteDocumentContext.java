@@ -71,7 +71,7 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
             return;
         if (checkResetOpened())
             return;
-        @NotNull Bytes bytes = wire().bytes();
+        @NotNull Bytes<?> bytes = wire().bytes();
         long position1 = bytes.writePosition();
 //        if (position1 < position)
 //            System.out.println("Message truncated from " + position + " to " + position1);

@@ -293,7 +293,7 @@ public class TextMethodTester<T> {
                 .replace("/target/test-classes/", "/src/test/resources/");
     }
 
-    protected Wire createWire(Bytes bytes) {
+    protected Wire createWire(Bytes<?> bytes) {
         return new TextWire(bytes).useTextDocuments().addTimeStamps(true);
     }
 

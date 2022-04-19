@@ -57,11 +57,11 @@ public class RawWire extends AbstractWire implements Wire {
     @Nullable
     private StringBuilder lastSB;
 
-    public RawWire(@NotNull Bytes bytes) {
+    public RawWire(@NotNull Bytes<?> bytes) {
         this(bytes, true);
     }
 
-    public RawWire(@NotNull Bytes bytes, boolean use8bit) {
+    public RawWire(@NotNull Bytes<?> bytes, boolean use8bit) {
         super(bytes, use8bit);
     }
 
@@ -195,7 +195,7 @@ public class RawWire extends AbstractWire implements Wire {
 
     @NotNull
     @Override
-    public Bytes bytes() {
+    public Bytes<?> bytes() {
         return bytes;
     }
 
@@ -541,7 +541,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @Nullable Class type) {
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class type) {
             long position = bytes.writePosition();
             bytes.writeSkip(1);
             typeTranslator.accept(type, bytes);
@@ -747,7 +747,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @Nullable
         @Override
-        public Bytes textTo(@NotNull Bytes s) {
+        public Bytes<?> textTo(@NotNull Bytes<?> s) {
             if (use8bit)
                 return bytes.read8bit(s) ? s : null;
             else
@@ -756,13 +756,13 @@ public class RawWire extends AbstractWire implements Wire {
 
         @Override
         @NotNull
-        public WireIn bytes(@NotNull BytesOut toBytes) {
+        public WireIn bytes(@NotNull BytesOut<?> toBytes) {
             return bytes(toBytes, true);
         }
 
         @NotNull
         @Override
-        public WireIn bytes(@NotNull BytesOut toBytes, boolean clearBytes) {
+        public WireIn bytes(@NotNull BytesOut<?> toBytes, boolean clearBytes) {
             if (clearBytes)
                 toBytes.clear();
 

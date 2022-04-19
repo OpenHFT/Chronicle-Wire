@@ -71,7 +71,7 @@ public class WireTests {
 
     @Test
     public void testHexLongNegativeTest() {
-        final Bytes b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.elasticByteBuffer();
         final long expectedLong1 = -1;
         final long expectedLong2 = Long.MIN_VALUE;
         try {
@@ -100,7 +100,7 @@ public class WireTests {
 
     @Test
     public void testLenientTypeLiteral() {
-        final Bytes b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.elasticByteBuffer();
         try {
             final Wire wire = createWire(b);
 
@@ -119,7 +119,7 @@ public class WireTests {
 
     @Test
     public void testDate() {
-        final Bytes b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.elasticByteBuffer();
         final Wire wire = createWire(b);
 
         wire.getValueOut()
@@ -145,7 +145,7 @@ public class WireTests {
 
     @Test
     public void testLocalDateTime() {
-        final Bytes b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.elasticByteBuffer();
         try {
             final Wire wire = createWire(b);
             LocalDateTime expected = LocalDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
@@ -160,7 +160,7 @@ public class WireTests {
 
     @Test
     public void testZonedDateTime() {
-        final Bytes b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.elasticByteBuffer();
         final Wire wire = createWire(b);
         ZonedDateTime expected = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
         wire.getValueOut().object(expected);
@@ -174,7 +174,7 @@ public class WireTests {
     @Test
     public void testSkipValueWithNumbersAndStrings() {
 
-        final Bytes b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.elasticByteBuffer();
         final Wire wire = createWire(b);
 
         wire.write("value1").text("text");
@@ -195,7 +195,7 @@ public class WireTests {
 
     @Test
     public void testWriteNull() {
-        final Bytes b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.elasticByteBuffer();
         final Wire wire = createWire(b);
         wire.write().object(null);
         wire.write().object(null);
@@ -220,7 +220,7 @@ public class WireTests {
 
         @NotNull TestClass testClass = new TestClass(Boolean.class);
 
-        final Bytes b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.elasticByteBuffer();
         final Wire wire = createWire(b);
         wire.write().typedMarshallable(testClass);
 
@@ -232,7 +232,7 @@ public class WireTests {
 
     @Test
     public void unknownFieldsAreClearedBetweenReadContexts() {
-        final Bytes b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.elasticByteBuffer();
         final Wire wire = createWire(b);
 
         try (final DocumentContext documentContext = wire.writingDocument()) {
@@ -254,7 +254,7 @@ public class WireTests {
     public void testReadingPeekYaml() {
         assumeTrue(usePadding);
         assumeTrue(wireType == WireType.BINARY);
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
         final Wire wire = createWire(b);
         assertEquals("", wire.readingPeekYaml());
         try (@NotNull DocumentContext dc = wire.writingDocument(false)) {
@@ -318,7 +318,7 @@ public class WireTests {
 
     @Test
     public void isPresentReturnsTrueWhenValueIsPresent() {
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
         final Wire wire = createWire(b);
         wire.write("value").int32(12345);
         assertTrue(wire.read("value").isPresent());
@@ -326,13 +326,13 @@ public class WireTests {
 
     @Test
     public void isPresentReturnsFalseWhenValueIsNotPresent() {
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
         final Wire wire = createWire(b);
         wire.write("value").int32(12345);
         assertFalse(wire.read("anotherValue").isPresent());
     }
 
-    private Wire createWire(Bytes b) {
+    private Wire createWire(Bytes<?> b) {
         final Wire wire = wireType.apply(b);
         wire.usePadding(usePadding);
         return wire;

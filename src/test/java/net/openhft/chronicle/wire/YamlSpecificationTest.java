@@ -21,7 +21,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -29,12 +28,9 @@ import org.junit.runners.Parameterized;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
-import static net.openhft.chronicle.wire.WireType.TEXT;
 import static net.openhft.chronicle.wire.WireType.YAML;
 import static org.junit.Assert.assertEquals;
 
@@ -110,7 +106,7 @@ public class YamlSpecificationTest extends WireTestCommon {
     @NotNull
     private String parseWithYaml(String snippet) {
         Object o = YAML.fromString(snippet);
-        Bytes bytes = Bytes.allocateElasticOnHeap();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
         YamlWire tw = new YamlWire(bytes);
         tw.writeObject(o);

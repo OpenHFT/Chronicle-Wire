@@ -46,10 +46,10 @@ public enum WireInternal {
     static final StringInterner INTERNER = new StringInterner(Integer.getInteger("wire.interner.size", 4096));
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final StringBuilderPool ASBP = new StringBuilderPool();
-    static final ThreadLocal<WeakReference<Bytes>> BYTES_TL = new ThreadLocal<>();
-    static final ThreadLocal<WeakReference<Bytes>> BYTES_F2S_TL = new ThreadLocal<>();
+    static final ThreadLocal<WeakReference<Bytes<?>>> BYTES_TL = new ThreadLocal<>();
+    static final ThreadLocal<WeakReference<Bytes<?>>> BYTES_F2S_TL = new ThreadLocal<>();
     static final ThreadLocal<WeakReference<Wire>> BINARY_WIRE_TL = new ThreadLocal<>();
-    static final ThreadLocal<WeakReference<Bytes>> INTERNAL_BYTES_TL = new ThreadLocal<>();
+    static final ThreadLocal<WeakReference<Bytes<?>>> INTERNAL_BYTES_TL = new ThreadLocal<>();
 
     static final StackTraceElement[] NO_STE = {};
     static final Set<Class> INTERNABLE = new HashSet<>(Arrays.asList(
@@ -118,7 +118,7 @@ public enum WireInternal {
         assert wireOut.startUse();
         long position;
         try {
-            @NotNull Bytes bytes = wireOut.bytes();
+            @NotNull Bytes<?> bytes = wireOut.bytes();
             position = bytes.writePositionForHeader(wireOut.usePadding());
 
             int metaDataBit = metaData ? Wires.META_DATA : 0;
@@ -156,7 +156,7 @@ public enum WireInternal {
                                    @NotNull WireIn wireIn,
                                    @Nullable ReadMarshallable metaDataConsumer,
                                    @Nullable ReadMarshallable dataConsumer) {
-        @NotNull final Bytes bytes = wireIn.bytes();
+        @NotNull final Bytes<?> bytes = wireIn.bytes();
         long position = bytes.readPosition();
         long limit = bytes.readLimit();
         try {
@@ -316,7 +316,7 @@ public enum WireInternal {
     static Bytes<?> acquireInternalBytes() {
         if (Jvm.isDebug())
             return Bytes.allocateElasticOnHeap();
-        Bytes bytes = ThreadLocalHelper.getTL(INTERNAL_BYTES_TL,
+        Bytes<?> bytes = ThreadLocalHelper.getTL(INTERNAL_BYTES_TL,
                 Wires::unmonitoredDirectBytes);
         bytes.clear();
         return bytes;

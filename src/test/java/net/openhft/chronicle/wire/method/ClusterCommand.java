@@ -6,7 +6,7 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 public class ClusterCommand extends SelfDescribingMarshallable {
     private long cycle;
     private Service service;
-    private final Bytes serviceId = Bytes.elasticByteBuffer();
+    private final Bytes<?> serviceId = Bytes.elasticByteBuffer();
 
     public ClusterCommand(long cycle, Service service) {
         this.cycle = cycle;

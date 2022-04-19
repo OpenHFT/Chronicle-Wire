@@ -28,10 +28,10 @@ public class WireDumper {
     @NotNull
     private final WireIn wireIn;
     @NotNull
-    private final Bytes bytes;
+    private final Bytes<?> bytes;
     private long headerNumber = -1;
 
-    private WireDumper(@Nullable WireIn wireIn, @NotNull Bytes bytes) {
+    private WireDumper(@Nullable WireIn wireIn, @NotNull Bytes<?> bytes) {
         if (wireIn == null)
             wireIn = new BinaryWire(bytes);
         this.wireIn = wireIn;
@@ -44,12 +44,12 @@ public class WireDumper {
     }
 
     @NotNull
-    public static WireDumper of(@NotNull Bytes bytes) {
+    public static WireDumper of(@NotNull Bytes<?> bytes) {
         return of(bytes, AbstractWire.DEFAULT_USE_PADDING);
     }
 
     @NotNull
-    public static WireDumper of(@NotNull Bytes bytes, boolean align) {
+    public static WireDumper of(@NotNull Bytes<?> bytes, boolean align) {
         final BinaryWire wireIn = new BinaryWire(bytes);
         wireIn.usePadding(align);
         return new WireDumper(wireIn, bytes);
@@ -165,7 +165,7 @@ public class WireDumper {
             return true;
         }
 
-        Bytes textBytes = this.bytes;
+        Bytes<?> textBytes = this.bytes;
 
         if (binary) {
             long readPosition = this.bytes.readPosition();
@@ -179,7 +179,7 @@ public class WireDumper {
                     return false;
                 }
 
-                Bytes bytes2 = buffer == null ? Bytes.elasticByteBuffer() : buffer.clear();
+                Bytes<?> bytes2 = buffer == null ? Bytes.elasticByteBuffer() : buffer.clear();
                 @NotNull TextWire textWire = new TextWire(bytes2);
 
                 this.bytes.readLimit(readPosition + len);

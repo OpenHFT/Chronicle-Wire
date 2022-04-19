@@ -58,7 +58,7 @@ class WireObjectInput implements ObjectInput {
             throw new EOFException();
         if (len > remaining)
             len = (int) remaining;
-        Bytes bytes = Bytes.wrapForWrite(b);
+        Bytes<?> bytes = Bytes.wrapForWrite(b);
         bytes.writePosition(off);
         bytes.writeLimit(off + len);
         wire.getValueIn().bytes(bytes);

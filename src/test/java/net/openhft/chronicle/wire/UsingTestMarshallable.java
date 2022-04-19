@@ -62,7 +62,7 @@ public class UsingTestMarshallable {
     public void testMarshall() {
 
         @SuppressWarnings("rawtypes")
-        Bytes bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.elasticByteBuffer();
         @NotNull Wire wire = new BinaryWire(bytes);
 
         @NotNull MyMarshallable x = new MyMarshallable();

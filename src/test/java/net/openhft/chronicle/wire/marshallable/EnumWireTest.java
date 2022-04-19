@@ -20,18 +20,18 @@ import static org.junit.Assert.assertSame;
 @SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
 public class EnumWireTest extends WireTestCommon {
-    private final Function<Bytes, Wire> createWire;
+    private final Function<Bytes<?>, Wire> createWire;
 
-    public EnumWireTest(Function<Bytes, Wire> createWire) {
+    public EnumWireTest(Function<Bytes<?>, Wire> createWire) {
         this.createWire = createWire;
     }
 
     @Parameterized.Parameters
-    public static Iterable<Function<Bytes, Wire>> wires() {
+    public static Iterable<Function<Bytes<?>, Wire>> wires() {
         return Arrays.asList(TextWire::new, BinaryWire::new, RawWire::new);
     }
 
-    private static Wire serialise(@NotNull Function<Bytes, Wire> createWire, @NotNull Marshallable person) {
+    private static Wire serialise(@NotNull Function<Bytes<?>, Wire> createWire, @NotNull Marshallable person) {
         Wire wire = createWire.apply(Bytes.elasticByteBuffer());
         person.writeMarshallable(wire);
         return wire;

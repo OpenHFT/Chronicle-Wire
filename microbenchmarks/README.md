@@ -79,7 +79,7 @@ public void readMarshallable(Bytes<?> bytes) {
 }
 
 @Override
-public void writeMarshallable(Bytes bytes) {
+public void writeMarshallable(Bytes<?> bytes) {
     bytes.writeDouble(price)
             .writeLong(longInt)
             .writeInt(smallInt)

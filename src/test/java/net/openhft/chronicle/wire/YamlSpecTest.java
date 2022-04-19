@@ -2,7 +2,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -13,7 +12,7 @@ public class YamlSpecTest extends WireTestCommon {
     static String DIR = "/yaml/spec/";
 
     public static void doTest(String file, String expected) {
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
         try {
             InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + file);
@@ -30,7 +29,7 @@ public class YamlSpecTest extends WireTestCommon {
 
     @Test
     public void test2_18Multi_lineFlowScalarsFixed() {
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
         try {
             InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_18Multi_lineFlowScalarsFixed.yaml");

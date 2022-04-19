@@ -86,11 +86,11 @@ public class BinaryWire extends AbstractWire implements Wire {
     private String compression;
     private Boolean overrideSelfDescribing = null;
 
-    public BinaryWire(@NotNull Bytes bytes) {
+    public BinaryWire(@NotNull Bytes<?> bytes) {
         this(bytes, false, false, false, Integer.MAX_VALUE, "binary", SUPPORT_DELTA);
     }
 
-    public BinaryWire(@NotNull Bytes bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression, boolean supportDelta) {
+    public BinaryWire(@NotNull Bytes<?> bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression, boolean supportDelta) {
         super(bytes, false);
         this.numericFields = numericFields;
         this.fieldLess = fieldLess;
@@ -124,7 +124,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     @NotNull
-    public static BinaryWire binaryOnly(@NotNull Bytes bytes) {
+    public static BinaryWire binaryOnly(@NotNull Bytes<?> bytes) {
         return new BinaryWire(bytes, false, false, false, Integer.MAX_VALUE, "binary", false);
     }
 
@@ -1217,7 +1217,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         bytes.writeStopBit(code);
     }
 
-    protected Bytes writeCode(int code) {
+    protected Bytes<?> writeCode(int code) {
         return bytes.writeByte((byte) code);
     }
 
@@ -1800,7 +1800,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @Nullable Class type) {
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class type) {
             if (bytes.retainsComments())
                 bytes.comment(type == null ? null : type.getName());
             writeCode(TYPE_LITERAL);
@@ -2450,7 +2450,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @Nullable
         @Override
-        public Bytes textTo(@NotNull Bytes bytes) {
+        public Bytes<?> textTo(@NotNull Bytes<?> bytes) {
             int code = readCode();
             boolean wasNull = code == NULL;
             if (wasNull) {
@@ -2458,7 +2458,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 return null;
 
             } else {
-                @Nullable Bytes text = readText(code, bytes);
+                @Nullable Bytes<?> text = readText(code, bytes);
                 if (text == null)
                     cantRead(code);
                 return bytes;
@@ -2514,13 +2514,13 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @Override
         @NotNull
-        public WireIn bytes(@NotNull BytesOut toBytes) {
+        public WireIn bytes(@NotNull BytesOut<?> toBytes) {
             return bytes(toBytes, true);
         }
 
         @NotNull
         @Override
-        public WireIn bytes(@NotNull BytesOut toBytes, boolean clearBytes) {
+        public WireIn bytes(@NotNull BytesOut<?> toBytes, boolean clearBytes) {
             long length = readLength();
             int code = readCode();
             if (code == NULL) {
@@ -2544,7 +2544,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (clearBytes)
                 toBytes.clear();
             if (code == U8_ARRAY) {
-                bytes.readWithLength(length - 1, toBytes);
+                ((Bytes) bytes).readWithLength(length - 1, toBytes);
             } else {
                 bytes.uncheckedReadSkipBackOne();
                 textTo((Bytes) toBytes);
@@ -2554,7 +2554,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireIn bytesLiteral(@NotNull BytesOut toBytes) {
+        public WireIn bytesLiteral(@NotNull BytesOut<?> toBytes) {
             long length = readLength();
             toBytes.clear();
             toBytes.write(bytes, bytes.readPosition(), length);
@@ -2663,7 +2663,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
         }
 
-        public void bytesStore(@NotNull Bytes toBytes) {
+        public void bytesStore(@NotNull Bytes<?> toBytes) {
             toBytes.clear();
             long length = readLength() - 1;
             int code = readCode();

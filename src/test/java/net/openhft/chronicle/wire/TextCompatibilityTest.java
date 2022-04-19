@@ -77,7 +77,7 @@ public class TextCompatibilityTest extends WireTestCommon {
     private static void runTest(String filename, String expectedFilename, boolean print) {
         String expected = null;
         try {
-            Bytes bytes = BytesUtil.readFile(filename);
+            Bytes<?> bytes = BytesUtil.readFile(filename);
             if (bytes.readRemaining() > 50)
                 return;
             expected = filename.equals(expectedFilename) ? bytes.toString() : BytesUtil.readFile(filename).toString();
@@ -85,7 +85,7 @@ public class TextCompatibilityTest extends WireTestCommon {
                 Object o = new YamlWire(bytes)
                         .getValueIn()
                         .object();
-                Bytes out = Bytes.allocateElasticOnHeap(256);
+                Bytes<?> out = Bytes.allocateElasticOnHeap(256);
                 String s = new TextWire(out).getValueOut().object(o).toString();
                 if (s.trim().equals(expected.trim()))
                     return;

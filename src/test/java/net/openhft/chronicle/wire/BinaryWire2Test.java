@@ -44,7 +44,7 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(value = Parameterized.class)
 public class BinaryWire2Test extends WireTestCommon {
     @NotNull
-    Bytes bytes = new HexDumpBytes();
+    Bytes<?> bytes = new HexDumpBytes();
 
     final boolean usePadding;
 
@@ -185,7 +185,7 @@ public class BinaryWire2Test extends WireTestCommon {
         @NotNull Wire wire = createWire();
         wire.write().object(Bytes.from("Hello"));
 
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
         wire.read().bytes(b);
         assertEquals("Hello", b.toString());
         b.releaseLast();
@@ -522,7 +522,7 @@ public class BinaryWire2Test extends WireTestCommon {
                 "xxxxxxxxxxxxxxxx" +
                 "xxxxxxxxxxxxxxxx" +
                 "xxxxxxxxxxxxxxxx";
-        Bytes str = Bytes.from(s);
+        Bytes<?> str = Bytes.from(s);
 
         wire.write("message").compress("gzip", str);
 
@@ -531,7 +531,7 @@ public class BinaryWire2Test extends WireTestCommon {
         assertEquals(s, str2);
 
         wire.bytes().readPosition(0);
-        Bytes asText = Bytes.elasticByteBuffer();
+        Bytes<?> asText = Bytes.elasticByteBuffer();
         wire.copyTo(new TextWire(asText));
         assertEquals("message: # gzip\n" + s +
                 "\n", asText.toString());
@@ -882,7 +882,7 @@ public class BinaryWire2Test extends WireTestCommon {
     }
 
     static class BytesHolder extends SelfDescribingMarshallable {
-        final Bytes bytes = Bytes.allocateElasticOnHeap(64);
+        final Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
 
         @Override
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {

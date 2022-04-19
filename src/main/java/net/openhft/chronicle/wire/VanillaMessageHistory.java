@@ -182,12 +182,12 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     }
 
     @Override
-    public void readMarshallable(@NotNull BytesIn bytes) throws IORuntimeException {
+    public void readMarshallable(@NotNull BytesIn<?> bytes) throws IORuntimeException {
         readMarshallable0(bytes);
         assert !addSourceDetails : "Bytes marshalling does not yet support addSourceDetails";
     }
 
-    private void readMarshallable0(@NotNull BytesIn bytes) {
+    private void readMarshallable0(@NotNull BytesIn<?> bytes) {
         sources = bytes.readUnsignedByte();
         for (int i = 0; i < sources; i++)
             sourceIdArray[i] = bytes.readInt();
@@ -199,7 +199,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     }
 
     @Override
-    public void writeMarshallable(@NotNull BytesOut b) {
+    public void writeMarshallable(@NotNull BytesOut<?> b) {
         BytesOut<?> bytes = b;
         bytes.comment("sources")
                 .writeUnsignedByte(sources);

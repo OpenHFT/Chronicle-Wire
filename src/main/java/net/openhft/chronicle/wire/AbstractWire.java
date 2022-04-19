@@ -68,7 +68,7 @@ public abstract class AbstractWire implements Wire {
     private boolean usePadding = false;
 
     @SuppressWarnings("rawtypes")
-    protected AbstractWire(@NotNull Bytes bytes, boolean use8bit) {
+    protected AbstractWire(@NotNull Bytes<?> bytes, boolean use8bit) {
         this.bytes = bytes;
         this.use8bit = use8bit;
         notCompleteIsNotPresent = bytes.sharedMemory();

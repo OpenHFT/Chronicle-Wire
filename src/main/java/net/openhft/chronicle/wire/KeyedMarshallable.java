@@ -22,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 
 public interface KeyedMarshallable {
     @SuppressWarnings("rawtypes")
-    default void writeKey(@NotNull Bytes bytes) {
+    default void writeKey(@NotNull Bytes<?> bytes) {
         Wires.writeKey(this, bytes);
     }
 }
