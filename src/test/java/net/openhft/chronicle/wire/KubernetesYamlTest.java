@@ -29,7 +29,7 @@ public class KubernetesYamlTest extends WireTestCommon {
                 Object o = objects[i];
                 String actual = o.toString();
 
-                assertEquals(expected[i], actual);
+                assertEquals(expected[i], actual.replace("\r", ""));
             }
         } finally {
             b.releaseLast();
