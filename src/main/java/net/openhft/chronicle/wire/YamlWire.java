@@ -1994,6 +1994,9 @@ public class YamlWire extends AbstractWire implements Wire {
             switch (yt.current()) {
                 default:
                     throw new UnsupportedOperationException(yt.toString());
+                case DIRECTIVES_END:
+                    yt.next();
+                    return getBracketType();
                 case MAPPING_START:
                     return BracketType.MAP;
                 case SEQUENCE_START:
