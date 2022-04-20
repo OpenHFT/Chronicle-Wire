@@ -54,40 +54,41 @@ public class YamlSpecificationTest extends WireTestCommon {
     @Parameterized.Parameters(name = "case={0}")
     public static Collection<Object[]> tests() {
         return Arrays.asList(new String[][]{
-                    {"2_1_SequenceOfScalars"},
-                    {"2_2_MappingScalarsToScalars"},
-                    {"2_3_MappingScalarsToSequences"},
-                    {"2_4_SequenceOfMappings"},
-                    {"2_5_SequenceOfSequences"},
-                    {"2_6_MappingOfMappings"},
-                    {"2_7_TwoDocumentsInAStream"},
-                    // {"example2_8"},
-                    {"2_9_SingleDocumentWithTwoComments"},
-                    {"2_10_NodeAppearsTwiceInThisDocument"},
-                    // {"2_11MappingBetweenSequences"}, // Not supported
-                    {"2_12CompactNestedMapping"},
-                    {"2_13InLiteralsNewlinesArePreserved"},
-                    {"2_14InThefoldedScalars"},
-                    // {"example2_15"}, // Not supported
-                    // {"example2_16"}, // Not supported
-                    {"2_17QuotedScalars"},
-                    // {"example2_18"}, // Not supported
-                    {"2_19Integers"},
-                    // {"2_20FloatingPoint"}, // TODO fix handling of .nan/.inf
-                    {"2_21MiscellaneousBis"},
-                    // {"example2_22"}, // TODO fix handling of times.
-                    {"2_23VariousExplicitTags"},
-                    // {"example2_24"}, // TODO FIx handling of anchors
-                    // {"example2_25"}, // TODO support set
-                    // {"2_26OrderedMappings"}, // TODO support omap
-                    // {"example2_27"}, // Not supported
-                    // {"example2_28"} // Not supported
-            });
+                {"2_1_SequenceOfScalars"},
+                {"2_2_MappingScalarsToScalars"},
+                {"2_3_MappingScalarsToSequences"},
+                {"2_4_SequenceOfMappings"},
+                {"2_5_SequenceOfSequences"},
+                {"2_6_MappingOfMappings"},
+                {"2_7_TwoDocumentsInAStream"},
+                // {"example2_8"},
+                {"2_9_SingleDocumentWithTwoComments"},
+                {"2_10_NodeAppearsTwiceInThisDocument"},
+                // {"2_11MappingBetweenSequences"}, // Not supported
+                {"2_12CompactNestedMapping"},
+                {"2_13InLiteralsNewlinesArePreserved"},
+                {"2_14InThefoldedScalars"},
+                // {"example2_15"}, // Not supported
+                // {"example2_16"}, // Not supported
+                {"2_17QuotedScalars"},
+                // {"example2_18"}, // Not supported
+                {"2_19Integers"},
+                // {"2_20FloatingPoint"}, // TODO fix handling of .nan/.inf
+                {"2_21MiscellaneousBis"},
+                // {"example2_22"}, // TODO fix handling of times.
+                {"2_23VariousExplicitTags"},
+                // {"example2_24"}, // TODO FIx handling of anchors
+                // {"example2_25"}, // TODO support set
+                // {"2_26OrderedMappings"}, // TODO support omap
+                // {"example2_27"}, // Not supported
+                // {"example2_28"} // Not supported
+        });
     }
 
     @Test
     public void decodeAs() throws IOException {
-        String snippet = new String(getBytes(input + ".yaml"), StandardCharsets.UTF_8);
+        String snippet = new String(getBytes(input + ".yaml"), StandardCharsets.UTF_8)
+                .replace("\r\n", "\n");
         String actual = parseWithYaml(snippet);
 
         byte[] expectedBytes = getBytes(input + ".out.yaml");
@@ -100,7 +101,11 @@ public class YamlSpecificationTest extends WireTestCommon {
             expected = snippet;
         }
 
-        assertEquals(input, Bytes.wrapForRead(expected.getBytes(StandardCharsets.UTF_8)).toString().replace("\r\n", "\n"), actual);
+        final String expectedStr = Bytes.wrapForRead(expected.getBytes(StandardCharsets.UTF_8)).toString();
+        assertEquals(input,
+                expectedStr
+                        .replace("\r\n", "\n"),
+                actual);
     }
 
     @NotNull
