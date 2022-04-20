@@ -26,8 +26,8 @@ public class Issue341Test extends WireTestCommon {
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 new Object[]{WireType.TEXT},
-                new Object[]{WireType.JSON},
-                new Object[]{WireType.BINARY},
+                new Object[]{WireType.YAML},
+                new Object[]{WireType.BINARY_LIGHT},
         });
     }
 
@@ -49,7 +49,7 @@ public class Issue341Test extends WireTestCommon {
     }
 
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testComparableSerializable() {
         final MyComparableSerializable source = new MyComparableSerializable("hello");
 
@@ -61,7 +61,7 @@ public class Issue341Test extends WireTestCommon {
                 + (wire.getValueOut().isBinary() ? bytes.toHexString() : bytes.toString()));
 
         final MyComparableSerializable target = wire.getValueIn().object(source.getClass());
-        Assert.assertEquals(source, target);
+        Assert.assertEquals(source.value, target.value);
     }
 
     static final class MyClass extends SelfDescribingMarshallable {
