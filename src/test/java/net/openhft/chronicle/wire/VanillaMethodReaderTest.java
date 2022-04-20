@@ -1,15 +1,19 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.marshallable.TriviallyCopyableMarketData;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class VanillaMethodReaderTest {
 
     @Test
     public void logMessage0() {
+        // layout is different
+        assumeFalse(Jvm.isAzulZing());
         TriviallyCopyableMarketData data = new TriviallyCopyableMarketData();
         data.securityId(0x828282828282L);
 
