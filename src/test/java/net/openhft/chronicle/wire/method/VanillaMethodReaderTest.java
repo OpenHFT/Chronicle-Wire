@@ -415,7 +415,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     }
 
     static class MRT1 extends SelfDescribingMarshallable implements MRTInterface {
-        final String field1;
+        String field1;
         String value = "a";
 
         MRT1(String field1) {
@@ -424,7 +424,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     }
 
     static class MRT2 extends MRT1 {
-        final String field2;
+        String field2;
 
         MRT2(String field1, String field2) {
             super(field1);

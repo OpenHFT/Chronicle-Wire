@@ -158,7 +158,7 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
 
     public static class MDTO2 extends SelfDescribingMarshallable implements Demarshallable {
 
-        final StringBuilder three = new StringBuilder();
+        StringBuilder three = new StringBuilder();
         int one;
         int two;
 

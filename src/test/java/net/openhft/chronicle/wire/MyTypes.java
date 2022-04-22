@@ -20,7 +20,7 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 
 class MyTypes extends SelfDescribingMarshallable {
-    final StringBuilder text = new StringBuilder();
+    StringBuilder text = new StringBuilder();
     boolean flag;
     byte b;
     short s;

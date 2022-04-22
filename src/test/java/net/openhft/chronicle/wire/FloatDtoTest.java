@@ -29,7 +29,7 @@ public class FloatDtoTest extends WireTestCommon {
     static class Value extends Key implements Marshallable {
 
         @SuppressWarnings("unused")
-        final float myFloat;
+        float myFloat;
 
         Value(int uiid,
               float myFloat) {

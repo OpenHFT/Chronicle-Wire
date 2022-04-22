@@ -8,8 +8,8 @@ import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
 public class TwoArrays extends SelfDescribingMarshallable implements Closeable {
-    final IntArrayValues ia;
-    final LongArrayValues la;
+    IntArrayValues ia;
+    LongArrayValues la;
     transient boolean closed;
 
     public TwoArrays(int isize, long lsize) {

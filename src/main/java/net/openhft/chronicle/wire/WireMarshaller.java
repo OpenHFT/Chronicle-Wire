@@ -450,6 +450,7 @@ public class WireMarshaller<T> {
 
         Comment commentAnnotation;
         Boolean isLeaf;
+        boolean isFinalNoWarning;
 
         FieldAccess(@NotNull Field field) {
             this(field, null);
@@ -461,6 +462,10 @@ public class WireMarshaller<T> {
             offset = unsafeObjectFieldOffset(field);
             key = field::getName;
             this.isLeaf = isLeaf;
+
+            if ((field.getModifiers() & Modifier.FINAL) != 0)
+                isFinalNoWarning = true;
+
             try {
                 commentAnnotation = field.getAnnotation(Comment.class);
             } catch (NullPointerException ignore) {
@@ -613,6 +618,8 @@ public class WireMarshaller<T> {
         }
 
         protected void copy(Object from, Object to) throws IllegalAccessException {
+            triggerFinalWarning();
+
             ObjectUtils.requireNonNull(from);
             ObjectUtils.requireNonNull(to);
 
@@ -622,6 +629,8 @@ public class WireMarshaller<T> {
         protected abstract void getValue(Object o, ValueOut write, Object previous) throws IllegalAccessException;
 
         protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
+            triggerFinalWarning();
+
             if (!read.isPresent()) {
                 if (overwrite && defaults != null)
                     copy(Objects.requireNonNull(defaults), o);
@@ -638,6 +647,14 @@ public class WireMarshaller<T> {
                     Jvm.warn().on(getClass(), "Failed to read '" + this.field.getName() + "' with '" + sb + "' taking default", e);
                     copy(defaults, o);
                 }
+            }
+        }
+
+        protected void triggerFinalWarning() {
+            if (isFinalNoWarning) {
+                Jvm.warn().on(WireMarshaller.class, "Overwriting final field " + field.getName() + " in " +
+                        field.getDeclaringClass() + ", final fields cannot be updated safely and will be ignored in future releases");
+                isFinalNoWarning = false;
             }
         }
 
@@ -1094,6 +1111,8 @@ public class WireMarshaller<T> {
 
         @Override
         protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
+            triggerFinalWarning();
+
             EnumSet coll = (EnumSet) field.get(o);
             if (coll == null) {
                 coll = enumSetSupplier.get();
@@ -1249,6 +1268,8 @@ public class WireMarshaller<T> {
 
         @Override
         protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
+            triggerFinalWarning();
+
             Collection coll = (Collection) field.get(o);
             if (coll == null) {
                 coll = collectionSupplier.get();
@@ -1338,6 +1359,8 @@ public class WireMarshaller<T> {
 
         @Override
         protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
+            triggerFinalWarning();
+
             Collection coll = (Collection) field.get(o);
             if (coll == null) {
                 coll = collectionSupplier.get();
@@ -1418,6 +1441,8 @@ public class WireMarshaller<T> {
 
         @Override
         protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
+            triggerFinalWarning();
+
             Map map = (Map) field.get(o);
             if (map == null) {
                 map = collectionSupplier.get();

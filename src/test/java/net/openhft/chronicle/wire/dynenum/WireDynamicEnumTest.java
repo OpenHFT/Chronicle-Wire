@@ -144,6 +144,8 @@ public class WireDynamicEnumTest extends WireTestCommon {
 
     @Test
     public void deserialize2() {
+        expectException("Overwriting final field name in class java.lang.Enum");
+
         String text = "push: ONE\n" +
                 "...\n" +
                 "unwraps: {\n" +
@@ -234,8 +236,8 @@ public class WireDynamicEnumTest extends WireTestCommon {
         ONE("One", 1),
         TWO("Two", 2);
 
-        private final String nice;
-        private final int value;
+        private String nice;
+        private int value;
 
         WDENums(String nice, int value) {
             this.nice = nice;
@@ -278,9 +280,9 @@ public class WireDynamicEnumTest extends WireTestCommon {
         static final WDENum2 ONE = new WDENum2("One", 1);
         static final WDENum2 TWO = new WDENum2("Two", 2);
 
-        private final String name;
-        private final String nice;
-        private final int value;
+        private String name;
+        private String nice;
+        private int value;
 
         WDENum2(String nice, int value) {
             this.name = nice.toUpperCase();

@@ -255,9 +255,9 @@ public class NestedMapsTest extends WireTestCommon {
     }
 
     static class Mapped extends SelfDescribingMarshallable {
-        final Set<String> words = new LinkedHashSet<>();
-        final List<Integer> numbers = new ArrayList<>();
-        final Map<String, String> map1 = new LinkedHashMap<>();
-        final Map<String, Double> map2 = new LinkedHashMap<>();
+        Set<String> words = new LinkedHashSet<>();
+        List<Integer> numbers = new ArrayList<>();
+        Map<String, String> map1 = new LinkedHashMap<>();
+        Map<String, Double> map2 = new LinkedHashMap<>();
     }
 }

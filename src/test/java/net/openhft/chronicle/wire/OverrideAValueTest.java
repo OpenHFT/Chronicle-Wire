@@ -76,6 +76,6 @@ public class OverrideAValueTest extends WireTestCommon {
     }
 
     static class ParentHolder extends SelfDescribingMarshallable {
-        final ParentClass object = new ParentClass();
+        ParentClass object = new ParentClass();
     }
 }
