@@ -49,10 +49,17 @@ public class FinalFieldsTest extends WireTestCommon {
         assertEquals(a, b);
     }
 
+    @Test
+    public void testCopyEnum() {
+        //expectException("Overwriting final field name");
+
+        assertEquals(EnumValue.A, EnumValue.A.deepCopy());
+    }
+
     private FinalFieldsClass create() {
         Map<CcyPair, String> map = new HashMap<>();
         map.put(CcyPair.EURUSD, "eurusd");
-        return new FinalFieldsClass(map, new String[]{"hello", "there"}, 11, 123.4);
+        return new FinalFieldsClass(map, new String[]{"hello", "there"}, 11, 123.4, EnumValue.A);
     }
 
     @SuppressWarnings("unused")
@@ -61,12 +68,19 @@ public class FinalFieldsTest extends WireTestCommon {
         final String[] array;
         final int intValue;
         final double value;
+        EnumValue enumValue;
 
-        public FinalFieldsClass(Map<CcyPair, String> map, String[] array, int intValue, double value) {
+        public FinalFieldsClass(Map<CcyPair, String> map, String[] array, int intValue, double value,
+                                EnumValue enumValue) {
             this.map = map;
             this.array = array;
             this.intValue = intValue;
             this.value = value;
+            this.enumValue = enumValue;
         }
+    }
+
+    private enum EnumValue implements Marshallable {
+        A;
     }
 }
