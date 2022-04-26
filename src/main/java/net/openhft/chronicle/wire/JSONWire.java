@@ -399,7 +399,7 @@ public class JSONWire extends TextWire {
         }
 
         @Override
-        public <E> @Nullable E object(@NotNull Class<E> clazz) {
+        public <E> @Nullable E object(@Nullable Class<E> clazz) {
             return useTypes ? parseType(null, clazz) : super.object(clazz);
         }
 
@@ -497,8 +497,7 @@ public class JSONWire extends TextWire {
             } */
         }
 
-        private <E> E parseType(@Nullable E using, @NotNull Class clazz) {
-
+        private <E> E parseType(@Nullable E using, @Nullable Class clazz) {
             if (!hasTypeDefinition()) {
                 return super.object(using, clazz);
             } else {
@@ -506,7 +505,7 @@ public class JSONWire extends TextWire {
                 sb.setLength(0);
                 readTypeDefinition(sb);
                 final Class<?> overrideClass = classLookup().forName(sb.subSequence(1, sb.length()));
-                if (!clazz.isAssignableFrom(overrideClass))
+                if (clazz != null && !clazz.isAssignableFrom(overrideClass))
                     throw new ClassCastException("Unable to cast " + overrideClass.getName() + " to " + clazz.getName());
                 if (using != null && !overrideClass.isInstance(using))
                     throw new ClassCastException("Unable to reuse a " + using.getClass().getName() + " as a " + overrideClass.getName());
