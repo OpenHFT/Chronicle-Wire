@@ -51,31 +51,31 @@ public class FieldInfoTest extends WireTestCommon {
                 new ScalarValues(1),
         };
         @NotNull String[] fields = {
-                "[!FieldInfo {\n" +
+                "[!net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: values,\n" +
                         "  type: !type net.openhft.chronicle.wire.marshallable.ScalarValues,\n" +
                         "  bracketType: MAP,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.Nested\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: strings,\n" +
                         "  type: !type !seq,\n" +
                         "  bracketType: SEQ,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.Nested\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: ints,\n" +
                         "  type: !type !set,\n" +
                         "  bracketType: SEQ,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.Nested\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: map,\n" +
                         "  type: !type !map,\n" +
                         "  bracketType: MAP,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.Nested\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: array,\n" +
                         "  type: !type String[],\n" +
                         "  bracketType: SEQ,\n" +
@@ -100,13 +100,13 @@ public class FieldInfoTest extends WireTestCommon {
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.CharFieldInfo {\n" +
                         "  name: ch,\n" +
                         "  type: !type char,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.IntFieldInfo {\n" +
                         "  name: i,\n" +
                         "  type: !type int,\n" +
                         "  bracketType: NONE,\n" +
@@ -118,130 +118,136 @@ public class FieldInfoTest extends WireTestCommon {
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.LongFieldInfo {\n" +
                         "  name: l,\n" +
                         "  type: !type long,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.DoubleFieldInfo {\n" +
                         "  name: d,\n" +
                         "  type: !type double,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: flag2,\n" +
                         "  type: !type java.lang.Boolean,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: b2,\n" +
                         "  type: !type byte,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: s2,\n" +
                         "  type: !type short,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: ch2,\n" +
                         "  type: !type Char,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: i2,\n" +
                         "  type: !type int,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: f2,\n" +
                         "  type: !type Float32,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: l2,\n" +
                         "  type: !type long,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: d2,\n" +
                         "  type: !type Float64,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: aClass,\n" +
                         "  type: !type type,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: policy,\n" +
                         "  type: !type java.lang.annotation.RetentionPolicy,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: text,\n" +
                         "  type: !type String,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: date,\n" +
                         "  type: !type Date,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: time,\n" +
                         "  type: !type Time,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: dateTime,\n" +
                         "  type: !type DateTime,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: zonedDateTime,\n" +
                         "  type: !type ZonedDateTime,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: uuid,\n" +
                         "  type: !type UUID,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: bi,\n" +
                         "  type: !type java.math.BigInteger,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: bd,\n" +
                         "  type: !type java.math.BigDecimal,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
-                        ", !FieldInfo {\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: file,\n" +
                         "  type: !type java.io.File,\n" +
                         "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
+                        "}\n" +
+                        ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
+                        "  name: dynamicEnum,\n" +
+                        "  type: !type net.openhft.chronicle.wire.marshallable.TestDynamicEnum,\n" +
+                        "  bracketType: UNKNOWN,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         "]",
