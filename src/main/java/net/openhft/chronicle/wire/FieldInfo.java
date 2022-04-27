@@ -17,12 +17,66 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.wire.internal.fieldinfo.*;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
 
 /**
  * Provides information about a single field of a class or an interface.
  */
 public interface FieldInfo {
+
+    @SuppressWarnings("deprecation" /* VanillaFieldInfo will become internal in the future, remove this suppression in x.25 */)
+    static FieldInfo createForField(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
+        if (!type.isPrimitive()) {
+            return new ObjectFieldInfo(name, type, bracketType, field);
+        } else if (type == int.class) {
+            return new IntFieldInfo(name, type, bracketType, field);
+        } else if (type == double.class) {
+            return new DoubleFieldInfo(name, type, bracketType, field);
+        } else if (type == long.class) {
+            return new LongFieldInfo(name, type, bracketType, field);
+        } else if (type == char.class) {
+            return new CharFieldInfo(name, type, bracketType, field);
+        }
+        return new VanillaFieldInfo(name, type, bracketType, field);
+    }
+
+    @NotNull
+    static Wires.FieldInfoPair lookupClass(@NotNull Class<?> aClass) {
+        final SerializationStrategy<?> ss = Wires.CLASS_STRATEGY.get(aClass);
+        switch (ss.bracketType()) {
+            case NONE:
+            case SEQ:
+                return Wires.FieldInfoPair.EMPTY;
+            case MAP:
+                break;
+            default:
+                // assume it could be a map
+                break;
+        }
+
+        @NotNull List<FieldInfo> fields = new ArrayList<>();
+        final WireMarshaller<?> marshaller = WIRE_MARSHALLER_CL.get(aClass);
+        for (@NotNull WireMarshaller.FieldAccess fa : marshaller.fields) {
+            final String name = fa.field.getName();
+            final Class<?> type = fa.field.getType();
+            final SerializationStrategy<?> ss2 = Wires.CLASS_STRATEGY.get(type);
+            final BracketType bracketType = ss2.bracketType();
+            fields.add(createForField(name, type, bracketType, fa.field));
+        }
+        return new Wires.FieldInfoPair(
+                Collections.unmodifiableList(fields),
+                fields.stream().collect(Collectors.toMap(FieldInfo::name, f -> f)));
+    }
 
     /**
      * Returns the name of the field represented by this {@code FieldInfo} object.
@@ -144,6 +198,18 @@ public interface FieldInfo {
      * field represented by this {@code FieldInfo} object.
      */
     Class<?> genericType(int index);
+
+    /**
+     * Copy the field from the source object to the destination
+     * <p>
+     * Note: this is not a deep copy, objects will be copied by reference
+     *
+     * @param source      The object to copy the field value from
+     * @param destination The object to copy the field value to
+     */
+    default void copy(Object source, Object destination) {
+        set(destination, get(source));
+    }
 
     boolean isEqual(Object a, Object b);
 }

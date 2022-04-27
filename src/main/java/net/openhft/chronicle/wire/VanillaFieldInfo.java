@@ -25,14 +25,12 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
-import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
-
+/**
+ * @deprecated This class will become internal in the future, use {@link FieldInfo#createForField(String, Class, BracketType, Field)} instead.
+ */
+@Deprecated
 @SuppressWarnings("rawtypes")
 public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
 
@@ -45,85 +43,61 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         this.field = field;
     }
 
+    /**
+     * @deprecated Use {@link FieldInfo#lookupClass(Class)} instead (to be removed in x.25)
+     */
     @NotNull
+    @Deprecated
     public static Wires.FieldInfoPair lookupClass(@NotNull Class aClass) {
-        final SerializationStrategy ss = Wires.CLASS_STRATEGY.get(aClass);
-        switch (ss.bracketType()) {
-            case NONE:
-            case SEQ:
-                return Wires.FieldInfoPair.EMPTY;
-            case MAP:
-                break;
-            default:
-                // assume it could be a map
-                break;
-        }
-
-        @NotNull List<FieldInfo> fields = new ArrayList<>();
-        final WireMarshaller marshaller = WIRE_MARSHALLER_CL.get(aClass);
-        for (@NotNull WireMarshaller.FieldAccess fa : marshaller.fields) {
-            final String name = fa.field.getName();
-            final Class<?> type = fa.field.getType();
-            final SerializationStrategy ss2 = Wires.CLASS_STRATEGY.get(type);
-            final BracketType bracketType = ss2.bracketType();
-            fields.add(new VanillaFieldInfo(name, type, bracketType, fa.field));
-        }
-        return new Wires.FieldInfoPair(
-                Collections.unmodifiableList(fields),
-                fields.stream().collect(Collectors.toMap(FieldInfo::name, f -> f)));
+        return FieldInfo.lookupClass(aClass);
     }
 
     @Nullable
     @Override
-    public Object get(Object value) {
+    public Object get(Object object) {
         try {
-            return getField().get(value);
+            return getField().get(object);
         } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
             Jvm.debug().on(VanillaFieldInfo.class, e);
             return null;
         }
     }
 
     @Override
-    public long getLong(Object value) {
+    public long getLong(Object object) {
         try {
-            return getField().getLong(value);
+            return getField().getLong(object);
         } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
             Jvm.debug().on(VanillaFieldInfo.class, e);
             return Long.MIN_VALUE;
         }
     }
 
     @Override
-    public int getInt(Object value) {
+    public int getInt(Object object) {
         try {
-            return getField().getInt(value);
+            return getField().getInt(object);
         } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
             Jvm.debug().on(VanillaFieldInfo.class, e);
             return Integer.MIN_VALUE;
         }
     }
 
     @Override
-    public char getChar(Object value) {
+    public char getChar(Object object) {
         try {
-            return getField().getChar(value);
+            return getField().getChar(object);
         } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
             Jvm.debug().on(VanillaFieldInfo.class, e);
             return Character.MAX_VALUE;
         }
     }
 
     @Override
-    public double getDouble(Object value) {
+    public double getDouble(Object object) {
         try {
-            return getField().getDouble(value);
+            return getField().getDouble(object);
         } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
             Jvm.debug().on(VanillaFieldInfo.class, e);
             return Double.NaN;
         }
@@ -200,6 +174,8 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
                 return getLong(a) == getLong(b);
             if (type == double.class)
                 return getDouble(a) == getDouble(b);
+            if (type == char.class)
+                return getChar(a) == getChar(b);
         }
         return Objects.deepEquals(get(a), get(b));
     }
