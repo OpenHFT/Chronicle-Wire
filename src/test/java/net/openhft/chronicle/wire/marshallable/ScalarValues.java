@@ -17,6 +17,7 @@
 
 package net.openhft.chronicle.wire.marshallable;
 
+import net.openhft.chronicle.wire.DynamicEnum;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
 import java.io.File;
@@ -57,6 +58,7 @@ public class ScalarValues extends SelfDescribingMarshallable {
     BigInteger bi;
     BigDecimal bd;
     File file;
+    TestDynamicEnum dynamicEnum;
 
    // Path path;
 
@@ -93,5 +95,13 @@ public class ScalarValues extends SelfDescribingMarshallable {
         bi = BigInteger.valueOf(i);
         bd = BigDecimal.valueOf(i);
         file = new File("/tmp/" + i);
+        dynamicEnum = TestDynamicEnum.THREE;
     }
+}
+
+
+enum TestDynamicEnum implements DynamicEnum {
+    ONE,
+    TWO,
+    THREE
 }
