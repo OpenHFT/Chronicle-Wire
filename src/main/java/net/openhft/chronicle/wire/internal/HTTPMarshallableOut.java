@@ -4,11 +4,18 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.io.ObjectInput;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Map;
+
+import static net.openhft.chronicle.bytes.Bytes.*;
+import static net.openhft.chronicle.wire.Wires.*;
 
 /**
  * Equivalent to wget --post-data='{data}' http://{host}:{port}/url...
@@ -29,6 +36,7 @@ public class HTTPMarshallableOut implements MarshallableOut {
             try {
                 final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                 conn.setRequestMethod("POST");
 
                 try {
@@ -54,9 +62,17 @@ public class HTTPMarshallableOut implements MarshallableOut {
         }
     };
 
-    public HTTPMarshallableOut(MarshallableOutBuilder builder, WireType wIreType) {
+
+    public HTTPMarshallableOut(MarshallableOutBuilder builder, WireType wireType) {
         this.url = builder.url();
-        this.wire = wIreType.apply(Bytes.allocateElasticOnHeap());
+
+        if (wireType == WireType.JSON)
+            this.wire = new JSONWire(allocateElasticOnHeap()).useTypes(true).trimFirstCurly(false).useTextDocuments();
+        else if (wireType == WireType.JSON_ONLY) {
+            this.wire = new JSONWire(allocateElasticOnHeap()).useTypes(true).useTextDocuments();
+        } else
+            this.wire = wireType.apply(allocateElasticDirect());
+
         startWire();
     }
 

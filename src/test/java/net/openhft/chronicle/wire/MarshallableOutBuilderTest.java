@@ -10,6 +10,7 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.jlbh.JLBH;
 import net.openhft.chronicle.jlbh.JLBHOptions;
 import net.openhft.chronicle.jlbh.JLBHTask;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -82,6 +83,26 @@ public class MarshallableOutBuilderTest {
         server.createContext("/echo", new Handler(queue));
         server.start();
         final URL url = new URL("http://localhost:" + port + "/echo");
+        writeMessages(url);
+        assertEquals(
+                "{\"mid\":\"mid\",\"next\":1,\"echo\":\"echo-1\"}\n",
+                queue.poll(1, TimeUnit.SECONDS));
+        assertEquals(
+                "{\"mid2\":\"mid2\",\"next2\":\"word\",\"echo\":\"echo-2\"}\n",
+                queue.poll(1, TimeUnit.SECONDS));
+        assertNull(queue.poll(1, TimeUnit.MILLISECONDS));
+        server.stop(1);
+    }
+
+    @Ignore("test was added to work with queue-web-gateway, so work in progress")
+    @Test
+    public void http2() throws IOException, InterruptedException {
+        int port = 51972;
+        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
+        BlockingQueue<String> queue = new LinkedBlockingQueue<>();
+        server.createContext("/echo", new Handler(queue));
+        server.start();
+        final URL url = new URL("http://localhost:" + port + "/echo/append");
         writeMessages(url);
         assertEquals(
                 "{\"mid\":\"mid\",\"next\":1,\"echo\":\"echo-1\"}\n",

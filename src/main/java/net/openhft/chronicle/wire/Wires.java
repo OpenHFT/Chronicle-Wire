@@ -54,6 +54,7 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.SerializationStrategies.*;
@@ -208,17 +209,42 @@ public enum Wires {
         return WireDumper.of(wireIn).asString(abbrev);
     }
 
+
     @NotNull
     public static CharSequence asText(@NotNull WireIn wireIn) {
+        return asType(wireIn, Wires::newTextWire);
+    }
+
+
+    private static Wire newJsonWire(Bytes bytes) {
+        return new JSONWire(bytes).useTypes(true).trimFirstCurly(false).useTextDocuments();
+    }
+
+    @NotNull
+    public static Bytes asBinary(@NotNull WireIn wireIn) {
+        return asType(wireIn, BinaryWire::new);
+    }
+
+    private static Bytes asType(@NotNull WireIn wireIn, Function<Bytes, Wire> wireProvider) {
         long pos = wireIn.bytes().readPosition();
         try {
             Bytes bytes = WireInternal.acquireInternalBytes();
-            wireIn.copyTo(new TextWire(bytes).addTimeStamps(true));
+            wireIn.copyTo(wireProvider.apply(bytes));
             return bytes;
         } finally {
             wireIn.bytes().readPosition(pos);
         }
     }
+
+    @NotNull
+    public static Bytes asJson(@NotNull WireIn wireIn) {
+        return asType(wireIn, Wires::newJsonWire);
+    }
+
+    private static Wire newTextWire(Bytes bytes) {
+        return new TextWire(bytes).addTimeStamps(true);
+    }
+
 
     public static StringBuilder acquireStringBuilder() {
         return Jvm.isDebug() ? new StringBuilder() : SBP.acquireStringBuilder();

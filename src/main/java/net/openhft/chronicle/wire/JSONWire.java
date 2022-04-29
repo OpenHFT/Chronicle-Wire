@@ -155,7 +155,15 @@ public class JSONWire extends TextWire {
 
     @Override
     public void copyTo(@NotNull WireOut wire) {
-        throw new UnsupportedOperationException();
+        if (wire instanceof JSONWire) {
+            final Bytes<?> bytes0 = bytes();
+            final long length = bytes0.readRemaining();
+            wire.bytes().write(this.bytes, bytes0.readPosition(), length);
+            this.bytes.readSkip(length);
+        } else {
+            // TODO: implement copying
+            throw new UnsupportedOperationException("Not implemented yet. Can only copy JSONWire format to the same format not " + wire.getClass());
+        }
     }
 
     @NotNull
