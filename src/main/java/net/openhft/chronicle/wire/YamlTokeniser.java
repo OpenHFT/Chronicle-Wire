@@ -218,7 +218,12 @@ public class YamlTokeniser {
                 return seq(YamlToken.RESERVED);
             case '!':
                 readWord();
-                return seq(YamlToken.TAG);
+                push(seq(YamlToken.TAG));
+                if (context() == YamlToken.STREAM_START) {
+                    pushContext0(YamlToken.DIRECTIVES_END, NO_INDENT);
+                    push(YamlToken.DIRECTIVES_END);
+                }
+                return popPushed();
             case '{':
                 return flow(YamlToken.MAPPING_START);
             case '}':

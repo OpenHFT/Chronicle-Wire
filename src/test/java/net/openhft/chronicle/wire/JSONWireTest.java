@@ -59,9 +59,9 @@ public class JSONWireTest extends WireTestCommon {
 
         @NotNull WireOut out = wire.writeEventName(() -> "myEvent").list(items, Item.class);
 
-        assertEquals("\"myEvent\":[{\"name\":\"item1\",\"number1\":1235666,\"number2\":1.1231231},\n" +
-                "{\"name\":\"item2\",\"number1\":2235666,\"number2\":1.0987987},\n" +
-                "{\"name\":\"item3\",\"number1\":3235666,\"number2\":1.12312},\n" +
+        assertEquals("\"myEvent\":[{\"name\":\"item1\",\"number1\":1235666,\"number2\":1.1231231}," +
+                "{\"name\":\"item2\",\"number1\":2235666,\"number2\":1.0987987}," +
+                "{\"name\":\"item3\",\"number1\":3235666,\"number2\":1.12312}," +
                 "{\"name\":\"item4\",\"number1\":4235666,\"number2\":1.51231}]", out.toString());
 
         wire.bytes().releaseLast();
@@ -215,7 +215,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     private void doTestMapOfNamedKeys(MapHolder mh) {
-        assertEquals("{\"map\":{\"CLASS\":0.1}\n}",
+        assertEquals("{\"map\":{\"CLASS\":0.1}}",
                 JSON.asString(mh));
     }
 
@@ -302,10 +302,8 @@ public class JSONWireTest extends WireTestCommon {
         mh.doubleMap.put(2.56, "number");
         final String text = JSON.asString(mh);
         assertEquals("" +
-                "{\"intMap\":{\"1111\":\"ones\",\"2222\":\"twos\"},\n" +
-                "\"longMap\":{\"888888888888\":\"eights\",\"999999999999\":\"nines\"},\n" +
-                "\"doubleMap\":{\"1.28\":\"number\",\"2.56\":\"number\"}\n" +
-                "}", text);
+                        "{\"intMap\":{\"1111\":\"ones\",\"2222\":\"twos\"},\"longMap\":{\"888888888888\":\"eights\",\"999999999999\":\"nines\"},\"doubleMap\":{\"1.28\":\"number\",\"2.56\":\"number\"}}",
+                text);
         MapWithIntegerKeysHolder mh2 = JSON.fromString(MapWithIntegerKeysHolder.class, text);
         assertEquals(mh, mh2);
     }
