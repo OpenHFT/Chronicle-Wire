@@ -114,7 +114,9 @@ public class MarshallableOutBuilderTest {
         server.stop(1);
     }
 
-    @Test
+
+    //"Only JSON Wire is currently supported"
+    @Test(expected = IllegalStateException.class)
     public void httpBinary() throws IOException, InterruptedException {
         int port = 65432;
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
@@ -123,20 +125,7 @@ public class MarshallableOutBuilderTest {
         server.start();
         final URL url = new URL("http://localhost:" + port + "/echo");
         writeMessages(url, WireType.BINARY_LIGHT);
-        assertEquals(
-                "" +
-                        "00000000 1e 00 00 00 b9 03 6d 69  64 e3 6d 69 64 b9 04 6e ······mi d·mid··n\n" +
-                        "00000010 65 78 74 a1 01 b9 04 65  63 68 6f e6 65 63 68 6f ext····e cho·echo\n" +
-                        "00000020 2d 31                                            -1               \n",
-                queue.poll(1, TimeUnit.SECONDS));
-        assertEquals(
-                "" +
-                        "00000000 24 00 00 00 b9 04 6d 69  64 32 e4 6d 69 64 32 b9 $·····mi d2·mid2·\n" +
-                        "00000010 05 6e 65 78 74 32 e4 77  6f 72 64 b9 04 65 63 68 ·next2·w ord··ech\n" +
-                        "00000020 6f e6 65 63 68 6f 2d 32                          o·echo-2         \n",
-                queue.poll(1, TimeUnit.SECONDS));
-        assertNull(queue.poll(1, TimeUnit.MILLISECONDS));
-        server.stop(1);
+
     }
 
     interface Timed {
