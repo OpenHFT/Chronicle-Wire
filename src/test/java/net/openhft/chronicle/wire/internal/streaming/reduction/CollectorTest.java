@@ -6,7 +6,6 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.internal.streaming.CreateUtil;
 import net.openhft.chronicle.wire.internal.streaming.DocumentExtractor;
 import net.openhft.chronicle.wire.internal.streaming.Reduction;
-import net.openhft.chronicle.wire.internal.streaming.Reductions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,7 +51,7 @@ public class CollectorTest extends WireTestCommon {
                 Collector.Characteristics.CONCURRENT
         );
 
-        Reduction<MarketData> listener = Reductions.of(
+        Reduction<MarketData> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class).withMethod(ServiceOut.class, ServiceOut::marketData).build())
                 .collecting(lastSeen);
 
@@ -66,7 +65,7 @@ public class CollectorTest extends WireTestCommon {
     @Test
     public void lastSeen() {
 
-        Reduction<Optional<MarketData>> listener = Reductions.of(
+        Reduction<Optional<MarketData>> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class).withMethod(ServiceOut.class, ServiceOut::marketData).build())
                 .collecting(reducingConcurrent(replacingMerger()));
 
@@ -80,7 +79,7 @@ public class CollectorTest extends WireTestCommon {
     @Test
     public void map() {
 
-        Reduction<Map<String, MarketData>> listener = Reductions.of(
+        Reduction<Map<String, MarketData>> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class).withMethod(ServiceOut.class, ServiceOut::marketData).build()
                 )
                 .collecting(collectingAndThen(toConcurrentMap(MarketData::symbol, Function.identity(), replacingMerger()), Collections::unmodifiableMap));
@@ -99,7 +98,7 @@ public class CollectorTest extends WireTestCommon {
     @Test
     public void composite() {
 
-        final Reduction<Map<String, List<Double>>> listener = Reductions.of(
+        final Reduction<Map<String, List<Double>>> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class).withMethod(ServiceOut.class, ServiceOut::marketData).build())
                 .collecting(groupingByConcurrent(MarketData::symbol, mapping(MarketData::last, toList())));
 

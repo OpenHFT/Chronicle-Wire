@@ -35,11 +35,11 @@ public class DemoTest {
 
         // Maintains a List of all MarketData elements encountered in a List
         Reduction<List<MarketData>> listing =
-                Reductions.of(builder(MarketData.class).build())
+                Reduction.of(builder(MarketData.class).build())
                         .collecting(ConcurrentCollectors.toConcurrentList());
 
         // Maintains a Set of all MarketData symbols starting with "S"
-        Reduction<Set<String>> symbolsStartingWithS = Reductions.of(
+        Reduction<Set<String>> symbolsStartingWithS = Reduction.of(
                         builder(MarketData.class).withReusing(MarketData::new).build()
                                 .map(MarketData::symbol)
                                 .filter(s -> s.startsWith("S")))
@@ -47,7 +47,7 @@ public class DemoTest {
 
         // Maintains a Map of the latest MarketData message per symbol where the
         // messages were previously written by a MethodWriter of type MarketDataProvider
-        Reduction<Map<String, MarketData>> latest = Reductions.of(
+        Reduction<Map<String, MarketData>> latest = Reduction.of(
                         DocumentExtractor.builder(MarketData.class)
                                 .withMethod(MarketDataProvider.class, MarketDataProvider::marketData)
                                 .build())
@@ -65,7 +65,7 @@ public class DemoTest {
 
         // Maintains a protected Map of the latest MarketData message per symbol where the
         // messages were previously written by a MethodWriter of type MarketDataProvider
-        Reduction<Map<String, MarketData>> latestProtected = Reductions.of(
+        Reduction<Map<String, MarketData>> latestProtected = Reduction.of(
                         DocumentExtractor.builder(MarketData.class)
                                 .withMethod(MarketDataProvider.class, MarketDataProvider::marketData)
                                 .build())
@@ -81,7 +81,7 @@ public class DemoTest {
 
         // Maintains statistics per symbol on MarketData::last using vanilla Java
         // classes (creates objects).
-        Reduction<ConcurrentMap<String, DoubleSummaryStatistics>> stats = Reductions.of(
+        Reduction<ConcurrentMap<String, DoubleSummaryStatistics>> stats = Reduction.of(
                         DocumentExtractor.builder(MarketData.class)
                                 .withMethod(MarketDataProvider.class, MarketDataProvider::marketData)
                                 .build())
@@ -97,7 +97,7 @@ public class DemoTest {
         // This is a demo of a queue-backed map that is continuously listening to a queue
         // and any change is reflected in the Reduction.
 
-        Reduction<Map<String, MarketData>> queueBackedMapping = Reductions.of(
+        Reduction<Map<String, MarketData>> queueBackedMapping = Reduction.of(
                         DocumentExtractor.builder(MarketData.class)
                                 .withMethod(MarketDataProvider.class, MarketDataProvider::marketData)
                                 .build())

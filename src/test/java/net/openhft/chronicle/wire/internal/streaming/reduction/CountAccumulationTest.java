@@ -19,7 +19,7 @@ public class CountAccumulationTest extends WireTestCommon {
 
     @Test
     public void countCustom() {
-        Reduction<AtomicLong> listener = Reductions.of((wire, index) -> 1L)
+        Reduction<AtomicLong> listener = Reduction.of((wire, index) -> 1L)
                 .collecting(Collector.of(AtomicLong::new, AtomicLong::addAndGet, throwingMerger(), Collector.Characteristics.CONCURRENT));
 
         count(listener);

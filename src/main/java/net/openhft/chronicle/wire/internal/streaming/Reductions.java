@@ -2,15 +2,16 @@ package net.openhft.chronicle.wire.internal.streaming;
 
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
-import net.openhft.chronicle.wire.internal.streaming.internal.ReductionUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.DoubleAccumulator;
 import java.util.concurrent.atomic.LongAccumulator;
 import java.util.concurrent.atomic.LongAdder;
-import java.util.function.*;
-import java.util.stream.Collector;
+import java.util.function.DoubleBinaryOperator;
+import java.util.function.DoubleSupplier;
+import java.util.function.LongBinaryOperator;
+import java.util.function.LongSupplier;
 
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
@@ -18,50 +19,6 @@ public final class Reductions {
 
     // Suppresses default constructor, ensuring non-instantiability.
     private Reductions() {
-    }
-
-    public static <E>
-    ReductionBuilder<E> of(@NotNull final DocumentExtractor<E> extractor) {
-        requireNonNull(extractor);
-        return new ReductionBuilder<E>() {
-            @Override
-            public <A, R> Reduction<R> collecting(@NotNull final Collector<E, A, ? extends R> collector) {
-                return new ReductionUtil.CollectorReduction<>(extractor, collector);
-            }
-        };
-    }
-
-    @Deprecated
-    public static <E, A, R>
-    Reduction<R> of(@NotNull final DocumentExtractor<E> extractor,
-                    @NotNull final Collector<E, A, ? extends R> collector) {
-        requireNonNull(extractor);
-        requireNonNull(collector);
-        return new ReductionUtil.CollectorReduction<>(extractor, collector);
-    }
-
-    public static <A>
-    Reduction<LongSupplier> ofLong(@NotNull final ToLongDocumentExtractor extractor,
-                                   @NotNull final Supplier<A> supplier,
-                                   @NotNull final ObjLongConsumer<A> accumulator,
-                                   @NotNull final ToLongFunction<A> finisher) {
-        requireNonNull(extractor);
-        requireNonNull(supplier);
-        requireNonNull(accumulator);
-        requireNonNull(finisher);
-        return new ReductionUtil.LongSupplierReduction<>(extractor, supplier, accumulator, finisher);
-    }
-
-    public static <A>
-    Reduction<DoubleSupplier> ofDouble(@NotNull final ToDoubleDocumentExtractor extractor,
-                                       @NotNull final Supplier<A> supplier,
-                                       @NotNull final ObjDoubleConsumer<A> accumulator,
-                                       @NotNull final ToDoubleFunction<A> finisher) {
-        requireNonNull(extractor);
-        requireNonNull(supplier);
-        requireNonNull(accumulator);
-        requireNonNull(finisher);
-        return new ReductionUtil.DoubleSupplierReduction<>(extractor, supplier, accumulator, finisher);
     }
 
     // Specialized Reductions
@@ -72,11 +29,12 @@ public final class Reductions {
         requireNonNull(extractor);
         requireNonNull(accumulator);
 
-        return Reductions.ofLong(
-                extractor,
-                () -> new LongAccumulator(accumulator, identity),
-                LongAccumulator::accumulate,
-                LongAccumulator::get);
+        return Reduction.ofLong(extractor)
+                .reducing(
+                        () -> new LongAccumulator(accumulator, identity),
+                        LongAccumulator::accumulate,
+                        LongAccumulator::get
+                );
     }
 
     public static Reduction<DoubleSupplier> reducingDouble(@NotNull final ToDoubleDocumentExtractor extractor,
@@ -85,20 +43,22 @@ public final class Reductions {
         requireNonNull(extractor);
         requireNonNull(accumulator);
 
-        return Reductions.ofDouble(
-                extractor,
-                () -> new DoubleAccumulator(accumulator, identity),
-                DoubleAccumulator::accumulate,
-                DoubleAccumulator::get);
+        return Reduction.ofDouble(extractor)
+                .reducing(
+                        () -> new DoubleAccumulator(accumulator, identity),
+                        DoubleAccumulator::accumulate,
+                        DoubleAccumulator::get
+                );
     }
 
     public static Reduction<LongSupplier> counting() {
-        return Reductions.ofLong(
-                (wire, index) -> 1L,
-                LongAdder::new,
-                LongAdder::add,
-                LongAdder::sum
-        );
+        return Reduction.ofLong(
+                        (wire, index) -> 1L)
+                .reducing(
+                        LongAdder::new,
+                        LongAdder::add,
+                        LongAdder::sum
+                );
     }
 
     /**
@@ -137,8 +97,5 @@ public final class Reductions {
         }
     }
 
-    public interface ReductionBuilder<E> {
-        <A, R> Reduction<R> collecting(@NotNull final Collector<E, A, ? extends R> collector);
-    }
 
 }

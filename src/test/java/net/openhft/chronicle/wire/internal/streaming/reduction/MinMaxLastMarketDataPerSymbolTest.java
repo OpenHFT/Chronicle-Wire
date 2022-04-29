@@ -6,7 +6,6 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.internal.streaming.CreateUtil;
 import net.openhft.chronicle.wire.internal.streaming.DocumentExtractor;
 import net.openhft.chronicle.wire.internal.streaming.Reduction;
-import net.openhft.chronicle.wire.internal.streaming.Reductions;
 import org.junit.Test;
 
 import java.util.*;
@@ -30,13 +29,13 @@ public class MinMaxLastMarketDataPerSymbolTest extends WireTestCommon {
 
         // This first Accumulation will keep track of the min and max value for all symbols
 
-        final Reduction<MinMax> globalListener = Reductions.of(
+        final Reduction<MinMax> globalListener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class).build())
                 .collecting(
                         Collector.of(MinMax::new, MinMax::merge, throwingMerger(), Collector.Characteristics.CONCURRENT));
 
         // This second Accumulation will track min and max value for each symbol individually
-        final Reduction<Map<String, MinMax>> listener = Reductions.of(
+        final Reduction<Map<String, MinMax>> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class).build())
                 .collecting(
                         collectingAndThen(toConcurrentMap(MarketData::symbol, MinMax::new, MinMax::merge), Collections::unmodifiableMap)
@@ -58,7 +57,7 @@ public class MinMaxLastMarketDataPerSymbolTest extends WireTestCommon {
     @Test
     public void lastMarketDataPerSymbol() {
 
-        final Reduction<Map<String, MarketData>> listener = Reductions.of(
+        final Reduction<Map<String, MarketData>> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class).build())
                 .collecting(
                         collectingAndThen(toConcurrentMap(MarketData::symbol, Function.identity(), replacingMerger()), Collections::unmodifiableMap)
@@ -76,7 +75,7 @@ public class MinMaxLastMarketDataPerSymbolTest extends WireTestCommon {
     @Test
     public void symbolSet() {
 
-        Reduction<Set<String>> listener = Reductions.of(
+        Reduction<Set<String>> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class)
                                 .withReusing(MarketData::new) // Reuse is safe as we only extract immutable data (String symbol).
                                 .build()

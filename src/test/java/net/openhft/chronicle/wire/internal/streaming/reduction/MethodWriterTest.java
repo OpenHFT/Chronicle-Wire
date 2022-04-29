@@ -5,7 +5,6 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.internal.streaming.CreateUtil;
 import net.openhft.chronicle.wire.internal.streaming.DocumentExtractor;
 import net.openhft.chronicle.wire.internal.streaming.Reduction;
-import net.openhft.chronicle.wire.internal.streaming.Reductions;
 import org.junit.Test;
 
 import java.util.*;
@@ -31,7 +30,7 @@ public class MethodWriterTest extends WireTestCommon {
     @Test
     public void lastSeen() {
 
-        final Reduction<AtomicReference<MarketData>> listener = Reductions.of(
+        final Reduction<AtomicReference<MarketData>> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class)
                                 .withMethod(ServiceOut.class, ServiceOut::marketData).
                                 build())
@@ -49,7 +48,7 @@ public class MethodWriterTest extends WireTestCommon {
     @Test
     public void map() {
 
-        final Reduction<Map<String, MarketData>> listener = Reductions.of(
+        final Reduction<Map<String, MarketData>> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class).withMethod(ServiceOut.class, ServiceOut::marketData).build())
                 .collecting(collectingAndThen(toConcurrentMap(MarketData::symbol, Function.identity(), replacingMerger()), Collections::unmodifiableMap));
 

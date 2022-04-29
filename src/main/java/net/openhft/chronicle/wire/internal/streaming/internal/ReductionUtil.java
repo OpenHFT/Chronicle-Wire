@@ -1,14 +1,12 @@
 package net.openhft.chronicle.wire.internal.streaming.internal;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.ExcerptListener;
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.Wire;
-import net.openhft.chronicle.wire.internal.streaming.DocumentExtractor;
-import net.openhft.chronicle.wire.internal.streaming.Reduction;
-import net.openhft.chronicle.wire.internal.streaming.ToDoubleDocumentExtractor;
-import net.openhft.chronicle.wire.internal.streaming.ToLongDocumentExtractor;
+import net.openhft.chronicle.wire.internal.streaming.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.*;
@@ -159,4 +157,60 @@ public final class ReductionUtil {
             return ReductionUtil.accept(tailer, this);
         }
     }
+
+    // Reduction Builders
+
+    public static final class VanillaReductionBuilder<E> implements Reduction.ReductionBuilder<E> {
+
+        private final DocumentExtractor<E> extractor;
+
+        public VanillaReductionBuilder(@NotNull final DocumentExtractor<E> extractor) {
+            this.extractor = extractor;
+        }
+
+        @Override
+        public <A, R> Reduction<R> collecting(@NotNull Collector<E, A, ? extends R> collector) {
+            ObjectUtils.requireNonNull(collector);
+            return new ReductionUtil.CollectorReduction<>(extractor, collector);
+        }
+    }
+
+    public static final class VanillaLongReductionBuilder implements Reduction.LongReductionBuilder {
+
+        private final ToLongDocumentExtractor extractor;
+
+        public VanillaLongReductionBuilder(@NotNull final ToLongDocumentExtractor extractor) {
+            this.extractor = extractor;
+        }
+
+        @Override
+        public <A> Reduction<LongSupplier> reducing(@NotNull final Supplier<A> supplier,
+                                                    @NotNull final ObjLongConsumer<A> accumulator,
+                                                    @NotNull final ToLongFunction<A> finisher) {
+            ObjectUtils.requireNonNull(supplier);
+            ObjectUtils.requireNonNull(accumulator);
+            ObjectUtils.requireNonNull(finisher);
+            return new ReductionUtil.LongSupplierReduction<>(extractor, supplier, accumulator, finisher);
+        }
+    }
+
+    public static final class VanillaDoubleReductionBuilder implements Reduction.DoubleReductionBuilder {
+
+        private final ToDoubleDocumentExtractor extractor;
+
+        public VanillaDoubleReductionBuilder(@NotNull final ToDoubleDocumentExtractor extractor) {
+            this.extractor = extractor;
+        }
+
+        @Override
+        public <A> Reduction<DoubleSupplier> reducing(@NotNull final Supplier<A> supplier,
+                                                      @NotNull final ObjDoubleConsumer<A> accumulator,
+                                                      @NotNull final ToDoubleFunction<A> finisher) {
+            ObjectUtils.requireNonNull(supplier);
+            ObjectUtils.requireNonNull(accumulator);
+            ObjectUtils.requireNonNull(finisher);
+            return new ReductionUtil.DoubleSupplierReduction<>(extractor, supplier, accumulator, finisher);
+        }
+    }
+
 }

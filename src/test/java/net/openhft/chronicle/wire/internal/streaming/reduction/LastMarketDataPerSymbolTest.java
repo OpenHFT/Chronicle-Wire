@@ -5,7 +5,6 @@ import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.internal.streaming.CreateUtil;
 import net.openhft.chronicle.wire.internal.streaming.Reduction;
-import net.openhft.chronicle.wire.internal.streaming.Reductions;
 import org.junit.Test;
 
 import java.util.*;
@@ -29,7 +28,7 @@ public class LastMarketDataPerSymbolTest extends WireTestCommon {
     @Test
     public void lastMarketDataPerSymbol() {
 
-        final Reduction<Map<String, MarketData>> listener = Reductions.of(
+        final Reduction<Map<String, MarketData>> listener = Reduction.of(
                         builder(MarketData.class).build())
                 .collecting(collectingAndThen(toConcurrentMap(MarketData::symbol, Function.identity(), replacingMerger()), Collections::unmodifiableMap));
 
@@ -44,7 +43,7 @@ public class LastMarketDataPerSymbolTest extends WireTestCommon {
     @Test
     public void symbolSet() {
 
-        Reduction<Set<String>> listener = Reductions.of(
+        Reduction<Set<String>> listener = Reduction.of(
                         builder(MarketData.class).build().map(MarketData::symbol))
                 .collecting(toConcurrentSet());
 

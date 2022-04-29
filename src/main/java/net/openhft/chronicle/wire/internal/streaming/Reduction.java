@@ -7,6 +7,9 @@ import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.internal.streaming.internal.ReductionUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.*;
+import java.util.stream.Collector;
+
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 public interface Reduction<T> extends ExcerptListener {
@@ -46,5 +49,42 @@ public interface Reduction<T> extends ExcerptListener {
     default long accept(@NotNull final MarshallableIn tailer) {
         requireNonNull(tailer);
         return ReductionUtil.accept(tailer, this);
+    }
+
+    // Basic static constructors
+
+    static <E> ReductionBuilder<E> of(@NotNull final DocumentExtractor<E> extractor) {
+        requireNonNull(extractor);
+        return new ReductionUtil.VanillaReductionBuilder<>(extractor);
+    }
+
+    static LongReductionBuilder ofLong(@NotNull final ToLongDocumentExtractor extractor) {
+        requireNonNull(extractor);
+        return new ReductionUtil.VanillaLongReductionBuilder(extractor);
+    }
+
+    static DoubleReductionBuilder ofDouble(@NotNull final ToDoubleDocumentExtractor extractor) {
+        requireNonNull(extractor);
+        return new ReductionUtil.VanillaDoubleReductionBuilder(extractor);
+    }
+
+    interface ReductionBuilder<E> {
+        <A, R> Reduction<R> collecting(@NotNull final Collector<E, A, ? extends R> collector);
+    }
+
+    interface LongReductionBuilder {
+
+        <A> Reduction<LongSupplier> reducing(@NotNull final Supplier<A> supplier,
+                                             @NotNull final ObjLongConsumer<A> accumulator,
+                                             @NotNull final ToLongFunction<A> finisher);
+
+    }
+
+    interface DoubleReductionBuilder {
+
+        <A> Reduction<DoubleSupplier> reducing(@NotNull final Supplier<A> supplier,
+                                               @NotNull final ObjDoubleConsumer<A> accumulator,
+                                               @NotNull final ToDoubleFunction<A> finisher);
+
     }
 }
