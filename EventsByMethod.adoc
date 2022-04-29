@@ -180,7 +180,7 @@ say: Hello World
 .Say one text message As JSON
 [source,json]
 ----
-"say":"Hello World"
+{"say":"Hello World"}
 ----
 
 .Say one text message As Binary YAML
@@ -210,7 +210,7 @@ noArgs: ""
 .No Arguments As JSON
 [source,json]
 ----
-"noArgs":""
+{"noArgs":""}
 ----
 
 .No Arguments As Binary YAML
@@ -240,7 +240,7 @@ primArg: 1.5
 .Primitive argument As JSON
 [source,json]
 ----
-"primArg":1.5
+{"primArg":1.5}
 ----
 
 .Primitive argument As Binary YAML
@@ -270,7 +270,7 @@ withMethodId: 150
 .Using an @MethodId Primitive argument As JSON
 [source,json]
 ----
-"withMethodId":150
+{"withMethodId":150}
 ----
 
 .Using an @MethodId Primitive argument As Binary YAML
@@ -303,7 +303,7 @@ twoPrimArg: [
 .Two primitive argument As JSON
 [source,json]
 ----
-"twoPrimArg":[ "A",128 ]
+{"twoPrimArg":[ "A",128 ]}
 ----
 
 .Two primitive argument As Binary YAML
@@ -335,7 +335,7 @@ scalarArg: DAYS
 .One scalar primitive argument As JSON
 [source,json]
 ----
-"scalarArg":"DAYS"
+{"scalarArg":"DAYS"}
 ----
 
 .One scalar primitive argument As Binary YAML
@@ -352,20 +352,20 @@ An event type with a local date time as a long arguments
 
 [source,java]
 ----
-eg.timeNanos(NanoTimestampLongConverter.INSTANCE.parse("2022-02-24T11:36:49.810004679"));
+eg.timeNanos(NanoTimestampLongConverter.INSTANCE.parse("2022-04-29T08:24:17.44500531"));
 ----
 
 .A timestamp as a long As YAML
 [source,yaml]
 ----
-timeNanos: 2022-02-24T11:36:49.810004679
+timeNanos: 2022-04-29T08:24:17.44500531
 ...
 ----
 
 .A timestamp as a long As JSON
 [source,json]
 ----
-"timeNanos":"2022-02-24T11:36:49.810004679"
+{"timeNanos":"2022-04-29T08:24:17.44500531"}
 ----
 
 .A timestamp as a long As Binary YAML
@@ -373,8 +373,8 @@ timeNanos: 2022-02-24T11:36:49.810004679
 ----
 14 00 00 00                                     # msg-length
 b9 09 74 69 6d 65 4e 61 6e 6f 73                # timeNanos: (event)
-                                                # 2022-02-24T11:36:49.810004679
-a7 c7 9a a8 e7 cd b5 d6 16                      # 1645702609810004679
+                                                # 2022-04-29T08:24:17.44500531
+a7 fe e7 cb 7c 70 50 ea 16                      # 1651220657445005310
 ----
 
 === Event with a Data Transfer Object
@@ -406,7 +406,7 @@ withDto: {
 .Event with a Data Transfer Object As JSON
 [source,json]
 ----
-"withDto":{"text":"hello world","flag":true,"b":-1,"s":1111,"ch":"$","i":66666,"f":1.28,"d":1.1234,"l":0}
+{"withDto":{"text":"hello world","flag":true,"b":-1,"s":1111,"ch":"$","i":66666,"f":1.28,"d":1.1234,"l":0}}
 ----
 
 .Event with a Data Transfer Object As Binary YAML
@@ -447,7 +447,7 @@ eg.via("target").at(now).say("Hello World");
 [source,yaml]
 ----
 via: target
-at: 2022-02-24T11:36:49.82577794
+at: 2022-04-29T08:24:17.46275735
 say: Hello World
 ...
 ----
@@ -455,7 +455,7 @@ say: Hello World
 .Chained Event As JSON
 [source,json]
 ----
-"via":"target","at":"2022-02-24T11:36:49.82577794","say":"Hello World"
+{"via":"target","at":"2022-04-29T08:24:17.46275735","say":"Hello World"}
 ----
 
 .Chained Event As Binary YAML
@@ -465,8 +465,8 @@ say: Hello World
 b9 03 76 69 61                                  # via: (event)
 e6 74 61 72 67 65 74                            # target
 b9 02 61 74                                     # at: (event)
-                                                # 2022-02-24T11:36:49.82577794
-a7 14 49 99 e8 cd b5 d6 16                      # 1645702609825777940
+                                                # 2022-04-29T08:24:17.46275735
+a7 e6 c7 da 7d 70 50 ea 16                      # 1651220657462757350
 b9 03 73 61 79                                  # say: (event)
 eb 48 65 6c 6c 6f 20 57 6f 72 6c 64             # Hello World
 ----
