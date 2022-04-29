@@ -192,7 +192,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
 
     @Override
     public long index() {
-        return 0;
+        return readPosition;
     }
 
     @Override

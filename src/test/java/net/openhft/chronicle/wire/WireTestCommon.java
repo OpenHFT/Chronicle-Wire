@@ -24,6 +24,10 @@ public class WireTestCommon {
 
     private boolean gt;
 
+    public WireTestCommon() {
+        ignoreException("The incubating features are subject to change");
+    }
+
     @Before
     public void enableReferenceTracing() {
         AbstractReferenceCounted.enableReferenceTracing();

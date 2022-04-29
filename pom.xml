@@ -186,6 +186,12 @@
                             <referenceVersion>2.23ea0</referenceVersion>
                             <artifactsURI>https://teamcity.chronicle.software/repository/download</artifactsURI>
                             <binaryCompatibilityPercentageRequired>98.1</binaryCompatibilityPercentageRequired>
+<!--                            <extraOptions>
+                                <extraOption>
+                                    <name>skip-internal-packages</name>
+                                    <value>net.openhft.chronicle.wire.incubator</value>
+                                </extraOption>
+                            </extraOptions>-->
                         </configuration>
                     </execution>
                 </executions>

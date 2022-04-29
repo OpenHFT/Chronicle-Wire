@@ -34,7 +34,7 @@ public interface SourceContext {
      * Index last read, only available for read contexts.
      *
      * @return the current Excerpt's index
-     * @throws IORuntimeException is the an error occurred while getting the index
+     * @throws IORuntimeException if an error occurred while getting the index
      */
     long index() throws IORuntimeException;
 }
