@@ -13,10 +13,12 @@ import java.util.function.Consumer;
 
 public class EventByMethodExamples {
     static {
-        Jvm.pause(10);
+        // let it flush the System.err first
+        Jvm.pause(20);
     }
 
     public static void main(String[] args) {
+        helloWorld();
         noArgs();
         primArg();
         withMethodId();
@@ -65,6 +67,14 @@ public class EventByMethodExamples {
                 "An event type with a scalar arguments",
                 "eg.scalarArg(TimeUnit.DAYS)",
                 eg -> eg.scalarArg(TimeUnit.DAYS));
+    }
+
+    private static void helloWorld() {
+        dump(Examples.class,
+                "Say one text message",
+                "An event type with String arguments",
+                "eg.say(\"Hello World\")",
+                eg -> eg.say("Hello World"));
     }
 
     private static void timeAsLong() {
@@ -140,7 +150,7 @@ public class EventByMethodExamples {
         System.out.println();
     }
 
-    interface Examples {
+    interface Examples extends Saying {
         void noArgs();
 
         void primArg(double value);
