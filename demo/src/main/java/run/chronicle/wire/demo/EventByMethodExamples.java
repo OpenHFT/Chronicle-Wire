@@ -131,11 +131,13 @@ public class EventByMethodExamples {
 
         Wire jsonWire = new JSONWire(Bytes.allocateElasticOnHeap()).useTextDocuments().trimFirstCurly(false);
         code.accept(jsonWire.methodWriter(tClass));
-
+        String json = jsonWire.toString().trim();
+        if (!json.startsWith("{"))
+            json = '{' + json + '}';
         System.out.println("." + methodName + " As JSON ");
         System.out.println("[source,json]");
         System.out.println("----");
-        System.out.print(jsonWire);
+        System.out.println(json);
         System.out.println("----");
         System.out.println();
 
