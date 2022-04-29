@@ -155,14 +155,195 @@ public class JSONWire extends TextWire {
 
     @Override
     public void copyTo(@NotNull WireOut wire) {
-        if (wire instanceof TextWire || wire instanceof YamlWire || wire instanceof JSONWire) {
+        if (wire.getClass() == getClass()) {
             final Bytes<?> bytes0 = bytes();
             final long length = bytes0.readRemaining();
             wire.bytes().write(this.bytes, bytes0.readPosition(), length);
             this.bytes.readSkip(length);
+            return;
+        }
+
+        consumePadding();
+        trimCurlyBrackets();
+        while (bytes.readRemaining() > 1) {
+            copyOne(wire, true, true);
+            consumePadding();
+        }
+    }
+
+    private void trimCurlyBrackets() {
+        if (peekNextByte() == '}') {
+            bytes.readSkip(1);
+            consumePadding();
+            while (peekPreviousByte() <= ' ')
+                bytes.writeSkip(-1);
+            if (peekPreviousByte() == '}')
+                bytes.writeSkip(-1);
+            // TODO else error?
+        }
+    }
+
+    private int peekPreviousByte() {
+        return bytes.peekUnsignedByte(bytes.readLimit() - 1);
+    }
+
+    public void copyOne(@NotNull WireOut wire, boolean inMap, boolean topLevel) {
+        int ch = bytes.readUnsignedByte();
+        switch (ch) {
+            case '\'':
+            case '"':
+                copyQuote(wire, ch, inMap, topLevel);
+                if (inMap) {
+                    consumePadding();
+                    int ch2 = bytes.readUnsignedByte();
+                    if (ch2 != ':')
+                        throw new IORuntimeException("Expected a ':' but got a '" + (char) ch);
+                    // copy the value
+                    copyOne(wire, false, false);
+                }
+                break;
+            case '{':
+                copyMap(wire);
+                break;
+            case '[':
+                copySequence(wire);
+                break;
+            case '+':
+            case '-':
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+            case '.':
+                copyNumber(wire);
+                break;
+            default:
+                throw new IORuntimeException("Unexpected char '" + (char) ch + "'");
+        }
+    }
+
+    private void copyQuote(WireOut wire, int ch, boolean inMap, boolean topLevel) {
+        final StringBuilder sb = Wires.acquireStringBuilder();
+        while (bytes.readRemaining() > 0) {
+            int ch2 = bytes.readUnsignedByte();
+            if (ch2 == ch)
+                break;
+            sb.append((char) ch2);
+            if (ch2 == '\\')
+                sb.append((char) bytes.readUnsignedByte());
+        }
+        unescape(sb);
+        if (topLevel) {
+            wire.writeEvent(String.class, sb);
+        } else if (inMap) {
+            wire.write(sb);
         } else {
-            // TODO: implement copying
-            throw new UnsupportedOperationException("Not implemented yet. Can only copy TextWire format to the same format  not " + wire.getClass());
+            wire.getValueOut().text(sb);
+        }
+    }
+
+    private void copyMap(WireOut wire) {
+        wire.getValueOut().marshallable(out -> {
+            consumePadding();
+
+            while (bytes.readRemaining() > 0) {
+                final int ch = peekNextByte();
+                if (ch == '}') {
+                    bytes.readSkip(1);
+                    return;
+                }
+                copyOne(wire, true, false);
+                expectComma('}');
+            }
+        });
+    }
+
+    private void expectComma(char end) {
+        consumePadding();
+        final int ch = peekNextByte();
+        if (ch == end)
+            return;
+        if (ch == ',') {
+            bytes.readSkip(1);
+            consumePadding();
+        } else {
+            throw new IORuntimeException("Expected a comma or '" + end + "' not a '" + (char) ch + "'");
+        }
+    }
+
+    private void copySequence(WireOut wire) {
+        wire.getValueOut().sequence(out -> {
+            consumePadding();
+
+            while (bytes.readRemaining() > 1) {
+                final int ch = peekNextByte();
+                if (ch == ']') {
+                    bytes.readSkip(1);
+                    return;
+                }
+                copyOne(wire, false, false);
+                expectComma(']');
+            }
+        });
+    }
+
+    private int peekNextByte() {
+        return bytes.peekUnsignedByte(bytes.readPosition());
+    }
+
+    private void copyNumber(WireOut wire) {
+        bytes.readSkip(-1);
+        long rp = bytes.readPosition();
+        boolean decimal = false;
+        while (true) {
+            int ch2 = peekNextByte();
+            switch (ch2) {
+                case '+':
+                case '-':
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                case '.':
+                    bytes.readSkip(1);
+                    if (wire.isBinary()) {
+                        decimal |= ch2 == '.';
+                    } else {
+                        wire.bytes().append((char) ch2);
+                    }
+                    break;
+                case '}':
+                case ']':
+                case ',':
+                default:
+                    if (wire.isBinary()) {
+                        long rl = bytes.readLimit();
+                        try {
+                            bytes.readPositionRemaining(rp, bytes.readPosition() - rp);
+                            if (decimal)
+                                wire.getValueOut().float64(bytes.parseDouble());
+                            else
+                                wire.getValueOut().int64(bytes.parseLong());
+                        } finally {
+                            bytes.readLimit(rl);
+                        }
+                    } else {
+                        wire.bytes().append(",");
+                    }
+                    return;
+            }
         }
     }
 

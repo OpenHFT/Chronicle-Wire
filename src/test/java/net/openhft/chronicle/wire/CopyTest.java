@@ -55,7 +55,10 @@ public class CopyTest extends WireTestCommon {
                 new Object[]{WireType.TEXT, WireType.TEXT, false},
                 new Object[]{WireType.TEXT, WireType.TEXT, true},
                 new Object[]{WireType.YAML, WireType.YAML, false},
-                new Object[]{WireType.YAML, WireType.YAML, true}
+                new Object[]{WireType.YAML, WireType.YAML, true},
+                new Object[]{WireType.JSON, WireType.TEXT, false},
+                new Object[]{WireType.JSON, WireType.YAML, false},
+                new Object[]{WireType.JSON, WireType.BINARY, false}
         );
     }
 
