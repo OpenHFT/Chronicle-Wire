@@ -161,6 +161,36 @@ class MyTimedSaying implements TimedSaying {
 }
 ----
 
+=== Say one text message
+
+An event type with String arguments
+
+[source,java]
+----
+eg.say("Hello World");
+----
+
+.Say one text message As YAML
+[source,yaml]
+----
+say: Hello World
+...
+----
+
+.Say one text message As JSON
+[source,json]
+----
+"say":"Hello World"
+----
+
+.Say one text message As Binary YAML
+[source,text]
+----
+11 00 00 00                                     # msg-length
+b9 03 73 61 79                                  # say: (event)
+eb 48 65 6c 6c 6f 20 57 6f 72 6c 64             # Hello World
+----
+
 === No Arguments
 
 Any event type, single method calls only, with no arguments
