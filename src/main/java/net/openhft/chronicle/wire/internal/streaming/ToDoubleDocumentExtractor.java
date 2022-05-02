@@ -12,6 +12,7 @@ import java.util.function.DoubleUnaryOperator;
 import static java.lang.Double.isNaN;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
+@FunctionalInterface
 public interface ToDoubleDocumentExtractor {
 
     /**

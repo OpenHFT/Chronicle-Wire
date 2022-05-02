@@ -11,6 +11,7 @@ import java.util.function.LongUnaryOperator;
 
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
+@FunctionalInterface
 public interface ToLongDocumentExtractor {
 
     /**
