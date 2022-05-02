@@ -130,7 +130,7 @@ public final class Streams {
     }
 
     /**
-     * Creates and returns a new ordered {@link Spliterator.OfLong } whose elements are obtained
+     * Creates and returns a new ordered {@link java.util.Spliterator.OfLong } whose elements are obtained
      * by successively applying the provided {@code extractor} on excerpts from the
      * provided {@code documentProvider}, with no initial size estimate.
      * <p>
@@ -156,7 +156,7 @@ public final class Streams {
     }
 
     /**
-     * Creates and returns a new ordered {@link Spliterator.OfDouble } whose elements are obtained
+     * Creates and returns a new ordered {@link java.util.Spliterator.OfDouble } whose elements are obtained
      * by successively applying the provided {@code extractor} on excerpts from the
      * provided {@code documentProvider}, with no initial size estimate.
      * <p>
@@ -205,7 +205,7 @@ public final class Streams {
     }
 
     /**
-     * Creates and returns a new {@link PrimitiveIterator.OfLong } whose elements are obtained
+     * Creates and returns a new {@link java.util.PrimitiveIterator.OfLong } whose elements are obtained
      * by successively applying the provided {@code extractor} on excerpts from the
      * provided {@code documentProvider}.
      * <p>
@@ -227,7 +227,7 @@ public final class Streams {
     }
 
     /**
-     * Creates and returns a new {@link PrimitiveIterator.OfDouble } whose elements are obtained
+     * Creates and returns a new {@link java.util.PrimitiveIterator.OfDouble } whose elements are obtained
      * by successively applying the provided {@code extractor} on excerpts from the
      * provided {@code documentProvider}.
      * <p>

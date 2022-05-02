@@ -47,7 +47,7 @@ public final class ConcurrentCollectors {
      * Returns a concurrent {@code Collector} that reduces the input elements into a
      * new {@code Set}.
      *
-     * <p>This is an {@link Collector.Characteristics#UNORDERED unordered}
+     * <p>This is an {@link java.util.stream.Collector.Characteristics#UNORDERED unordered}
      * Collector.
      *
      * @param <T> the type of the input elements
@@ -65,7 +65,7 @@ public final class ConcurrentCollectors {
     }
 
     /**
-     * Returns a {@code Collector} which performs a concurrent reduction of its
+     * Returns a {@link java.util.stream.Collector} which performs a concurrent reduction of its
      * input elements under a specified {@code BinaryOperator} using the
      * provided identity.
      *
