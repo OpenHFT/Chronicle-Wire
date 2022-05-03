@@ -62,24 +62,9 @@ public class JSONWireTest extends WireTestCommon {
         return new JSONWire(Bytes.from(json));
     }
 
-    @Test
-    public void testListFormatting() {
-        @NotNull Wire wire = createWire();
-
-        @NotNull List<Item> items = new ArrayList<>();
-        items.add(new Item("item1", 1235666L, 1.1231231));
-        items.add(new Item("item2", 2235666L, 1.0987987));
-        items.add(new Item("item3", 3235666L, 1.12312));
-        items.add(new Item("item4", 4235666L, 1.51231));
-
-        @NotNull WireOut out = wire.writeEventName(() -> "myEvent").list(items, Item.class);
-
-        assertEquals("\"myEvent\":[{\"name\":\"item1\",\"number1\":1235666,\"number2\":1.1231231}," +
-                "{\"name\":\"item2\",\"number1\":2235666,\"number2\":1.0987987}," +
-                "{\"name\":\"item3\",\"number1\":3235666,\"number2\":1.12312}," +
-                "{\"name\":\"item4\",\"number1\":4235666,\"number2\":1.51231}]", out.toString());
-
-        wire.bytes().releaseLast();
+    @NotNull
+    private JSONWire createWire() {
+        return new JSONWire(Bytes.allocateElasticDirect()).useTypes(true);
     }
 
     @NotNull
