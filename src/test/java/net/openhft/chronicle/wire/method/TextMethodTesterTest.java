@@ -47,7 +47,7 @@ public class TextMethodTesterTest extends WireTestCommon {
                 "methods-out.yaml")
                 .setup("methods-out.yaml") // calls made here are not validated in the output.
                 .run();
-        assertEquals(test.expected(), test.actual());
+        assertEquals(test.expected(), test.actual().replaceAll("\n\n", "\n"));
     }
 
     @Test
