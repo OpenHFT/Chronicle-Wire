@@ -441,6 +441,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         if (peekCode >= FIELD_NAME0 && peekCode <= FIELD_NAME31)
             return BracketType.MAP;
         switch (peekCode) {
+            case FIELD_NUMBER:
             case FIELD_NAME_ANY:
             case EVENT_NAME:
             case EVENT_OBJECT:

@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.StopCharTesters;
 import net.openhft.chronicle.bytes.StopCharsTester;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -46,6 +47,7 @@ public class JSONWire extends TextWire {
     @SuppressWarnings("rawtypes")
     static final BytesStore COMMA = BytesStore.from(",");
     static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_JSON_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT_JSON::escaping;
+    public static final @NotNull Bytes<byte[]> ULL = Bytes.from("ull");
     boolean useTypes;
 
     @SuppressWarnings("rawtypes")
@@ -201,13 +203,16 @@ public class JSONWire extends TextWire {
                     // copy the value
                     copyOne(wire, false, false);
                 }
-                break;
+                return;
+
             case '{':
                 copyMap(wire);
-                break;
+                return;
+
             case '[':
                 copySequence(wire);
-                break;
+                return;
+
             case '+':
             case '-':
             case '0':
@@ -222,10 +227,22 @@ public class JSONWire extends TextWire {
             case '9':
             case '.':
                 copyNumber(wire);
+                return;
+
+            case 'n':
+                if (bytes.startsWith(ULL) && !Character.isLetterOrDigit(bytes.peekUnsignedByte(bytes.readPosition() + 3))) {
+                    bytes.readSkip(3);
+                    consumePadding();
+                    wire.getValueOut().nu11();
+                    return;
+                }
                 break;
+
             default:
-                throw new IORuntimeException("Unexpected char '" + (char) ch + "'");
+                break;
         }
+        bytes.readSkip(-1);
+        throw new IORuntimeException("Unexpected chars '" + bytes.parse8bit(StopCharTesters.CONTROL_STOP) + "'");
     }
 
     private void copyQuote(WireOut wire, int ch, boolean inMap, boolean topLevel) {

@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,9 +38,23 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class JSONWireTest extends WireTestCommon {
-    @NotNull
-    private JSONWire createWire() {
-        return new JSONWire(Bytes.allocateElasticDirect());
+    static void testCopyToBinaryAndBack(CharSequence str) {
+        JSONWire json = new JSONWire(Bytes.from(str));
+        BinaryWire binary = new BinaryWire(new HexDumpBytes());
+        JSONWire json2 = new JSONWire(Bytes.allocateElasticOnHeap());
+        json.copyTo(binary);
+//        System.out.println(binary.bytes().toHexString());
+        binary.copyTo(json2);
+        assertEquals(
+                str.toString()
+                        .replaceAll("\\.0(\\D)", "$1")
+                        .replaceAll(" ?\\[ ?", "[")
+                        .replaceAll(" ?\\] ?", "]")
+                ,
+                json2.toString()
+                        .replaceAll(" ?\\[ ?", "[")
+                        .replaceAll(" ?\\] ?", "]")
+        );
     }
 
     @NotNull
@@ -47,24 +62,9 @@ public class JSONWireTest extends WireTestCommon {
         return new JSONWire(Bytes.from(json));
     }
 
-    @Test
-    public void testListFormatting() {
-        @NotNull Wire wire = createWire();
-
-        @NotNull List<Item> items = new ArrayList<>();
-        items.add(new Item("item1", 1235666L, 1.1231231));
-        items.add(new Item("item2", 2235666L, 1.0987987));
-        items.add(new Item("item3", 3235666L, 1.12312));
-        items.add(new Item("item4", 4235666L, 1.51231));
-
-        @NotNull WireOut out = wire.writeEventName(() -> "myEvent").list(items, Item.class);
-
-        assertEquals("\"myEvent\":[{\"name\":\"item1\",\"number1\":1235666,\"number2\":1.1231231}," +
-                "{\"name\":\"item2\",\"number1\":2235666,\"number2\":1.0987987}," +
-                "{\"name\":\"item3\",\"number1\":3235666,\"number2\":1.12312}," +
-                "{\"name\":\"item4\",\"number1\":4235666,\"number2\":1.51231}]", out.toString());
-
-        wire.bytes().releaseLast();
+    @NotNull
+    private JSONWire createWire() {
+        return new JSONWire(Bytes.allocateElasticDirect()).useTypes(true);
     }
 
     @Test
@@ -112,43 +112,24 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
-    public void testMarshallableWithTwoLists() {
+    public void testListFormatting() {
         @NotNull Wire wire = createWire();
 
-        @NotNull TwoLists lists1 = new TwoLists(null, 5, 5);
-        wire.writeEventName("two_lists").marshallable(lists1);
+        @NotNull List<Item> items = new ArrayList<>();
+        items.add(new Item("item1", 1235666L, 1.1231231));
+        items.add(new Item("item2", 2235666L, 1.0987987));
+        items.add(new Item("item3", 3235666L, 1.12312));
+        items.add(new Item("item4", 4235666L, 1.51231));
 
-        @NotNull TwoLists lists2 = new TwoLists();
+        @NotNull WireOut out = wire.writeEventName(() -> "myEvent").list(items, Item.class);
 
-        @NotNull final StringBuilder sb = new StringBuilder();
-        @NotNull ValueIn valueIn = wire.readEventName(sb);
+        assertEquals("\"myEvent\":[{\"name\":\"item1\",\"number1\":1235666,\"number2\":1.1231231}," +
+                "{\"name\":\"item2\",\"number1\":2235666,\"number2\":1.0987987}," +
+                "{\"name\":\"item3\",\"number1\":3235666,\"number2\":1.12312}," +
+                "{\"name\":\"item4\",\"number1\":4235666,\"number2\":1.51231}]", out.toString());
 
-        valueIn.marshallable(lists2);
-
-        // fails due to a trailing space if we don't call toString.
-        // assertEquals(lists1, lists2);
-        // assertEquals(lists1.toString(), lists2.toString());
-        try {
-            assertEquals("!net.openhft.chronicle.wire.JSONWireTest$TwoLists {\n" +
-                    "  name: !!null \"\",\n" +
-                    "  list1: [\n" +
-                    "    { name: !!null \"\", number1: 0, number2: 0.0 },\n" +
-                    "    { name: !!null \"\", number1: 1, number2: 10.0 },\n" +
-                    "    { name: !!null \"\", number1: 2, number2: 20.0 },\n" +
-                    "    { name: !!null \"\", number1: 3, number2: 30.0 },\n" +
-                    "    { name: !!null \"\", number1: 4, number2: 40.0 }\n" +
-                    "  ],\n" +
-                    "  list2: [\n" +
-                    "    { name: !!null \"\", number1: 0, number2: 0.0 },\n" +
-                    "    { name: !!null \"\", number1: 1, number2: 10.0 },\n" +
-                    "    { name: !!null \"\", number1: 2, number2: 20.0 },\n" +
-                    "    { name: !!null \"\", number1: 3, number2: 30.0 },\n" +
-                    "    { name: !!null \"\", number1: 4, number2: 40.0 }\n" +
-                    "  ]\n" +
-                    "}\n", lists1.toString());
-        } finally {
-            wire.bytes().releaseLast();
-        }
+        testCopyToBinaryAndBack(out.toString());
+        wire.bytes().releaseLast();
     }
 
     @Test
@@ -201,6 +182,53 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    public void testMarshallableWithTwoLists() {
+        @NotNull Wire wire = createWire();
+
+        @NotNull TwoLists lists1 = new TwoLists(null, 5, 5);
+        wire.writeEventName("two_lists").marshallable(lists1);
+
+        @NotNull TwoLists lists2 = new TwoLists();
+
+        @NotNull final StringBuilder sb = new StringBuilder();
+        @NotNull ValueIn valueIn = wire.readEventName(sb);
+
+        valueIn.marshallable(lists2);
+
+        // fails due to a trailing space if we don't call toString.
+        // assertEquals(lists1, lists2);
+        // assertEquals(lists1.toString(), lists2.toString());
+        try {
+            assertEquals("!net.openhft.chronicle.wire.JSONWireTest$TwoLists {\n" +
+                    "  name: !!null \"\",\n" +
+                    "  list1: [\n" +
+                    "    { name: !!null \"\", number1: 0, number2: 0.0 },\n" +
+                    "    { name: !!null \"\", number1: 1, number2: 10.0 },\n" +
+                    "    { name: !!null \"\", number1: 2, number2: 20.0 },\n" +
+                    "    { name: !!null \"\", number1: 3, number2: 30.0 },\n" +
+                    "    { name: !!null \"\", number1: 4, number2: 40.0 }\n" +
+                    "  ],\n" +
+                    "  list2: [\n" +
+                    "    { name: !!null \"\", number1: 0, number2: 0.0 },\n" +
+                    "    { name: !!null \"\", number1: 1, number2: 10.0 },\n" +
+                    "    { name: !!null \"\", number1: 2, number2: 20.0 },\n" +
+                    "    { name: !!null \"\", number1: 3, number2: 30.0 },\n" +
+                    "    { name: !!null \"\", number1: 4, number2: 40.0 }\n" +
+                    "  ]\n" +
+                    "}\n", lists1.toString());
+            final String str = JSON.asString(lists1);
+            testCopyToBinaryAndBack(str);
+        } finally {
+            wire.bytes().releaseLast();
+        }
+    }
+
+    private void doTestMapOfNamedKeys(MapHolder mh) {
+        assertEquals("{\"map\":{\"CLASS\":0.1}}",
+                JSON.asString(mh));
+    }
+
+    @Test
     public void testMapOfNamedKeys() {
         MapHolder mh = new MapHolder();
         Map<RetentionPolicy, Double> map = Collections.singletonMap(RetentionPolicy.CLASS, 0.1);
@@ -212,11 +240,8 @@ public class JSONWireTest extends WireTestCommon {
         doTestMapOfNamedKeys(mh);
         mh.map = new LinkedHashMap<>(map);
         doTestMapOfNamedKeys(mh);
-    }
 
-    private void doTestMapOfNamedKeys(MapHolder mh) {
-        assertEquals("{\"map\":{\"CLASS\":0.1}}",
-                JSON.asString(mh));
+        testCopyToBinaryAndBack("{\"map\":{\"CLASS\":0.1}}");
     }
 
     @Test
@@ -232,13 +257,8 @@ public class JSONWireTest extends WireTestCommon {
         jw.trimFirstCurly(false);
         jw.getValueOut().typedMarshallable(dates);
         assertEquals(expected, jw.toString());
-    }
 
-    @Test
-    public void testDateNull() {
-        Dates dates = new Dates();
-        @NotNull CharSequence str = WireType.JSON.asString(dates);
-        assertEquals("{\"date\":null,\"dateTime\":null,\"zdateTime\":null}", str);
+        testCopyToBinaryAndBack(str);
     }
 
     @Test
@@ -264,11 +284,20 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    public void testDateNull() {
+        Dates dates = new Dates();
+        @NotNull CharSequence str = WireType.JSON.asString(dates);
+        assertEquals("{\"date\":null,\"dateTime\":null,\"zdateTime\":null}", str);
+        testCopyToBinaryAndBack(str);
+    }
+
+    @Test
     public void testArrayInDictionary2() {
         String text = "[320,{\"as\":[[\"32905.50000\",\"1.60291699\",\"1625822573.857656\"],[\"32905.60000\",\"0.10415889\",\"1625822573.194909\"]],\"bs\":[[\"32893.60000\",\"0.15042948\",\"1625822574.220475\"]]},\"book-10\"]";
         final JSONWire jsonWire = new JSONWire(Bytes.from(text));
         final Object list = jsonWire.getValueIn().object();
         assertEquals("[320, {as=[[32905.50000, 1.60291699, 1625822573.857656], [32905.60000, 0.10415889, 1625822573.194909]], bs=[[32893.60000, 0.15042948, 1625822574.220475]]}, book-10]", "" + list);
+        testCopyToBinaryAndBack(text);
     }
 
     @Test
@@ -289,6 +318,13 @@ public class JSONWireTest extends WireTestCommon {
 
         final List<Object> list = jsonWire.getValueIn().list(Object.class);
         assertNotNull(list);
+        testCopyToBinaryAndBack(text);
+    }
+
+    static class MapWithIntegerKeysHolder extends SelfDescribingMarshallable {
+        Map<Integer, String> intMap = new LinkedHashMap<>();
+        Map<Long, String> longMap = new LinkedHashMap<>();
+        Map<Double, String> doubleMap = new LinkedHashMap<>();
     }
 
     @Test
@@ -306,16 +342,7 @@ public class JSONWireTest extends WireTestCommon {
                 text);
         MapWithIntegerKeysHolder mh2 = JSON.fromString(MapWithIntegerKeysHolder.class, text);
         assertEquals(mh, mh2);
-    }
-
-    static class MapWithIntegerKeysHolder extends SelfDescribingMarshallable {
-        Map<Integer, String> intMap = new LinkedHashMap<>();
-        Map<Long, String> longMap = new LinkedHashMap<>();
-        Map<Double, String> doubleMap = new LinkedHashMap<>();
-    }
-
-    static class MapHolder extends SelfDescribingMarshallable {
-        Map<RetentionPolicy, Double> map;
+        testCopyToBinaryAndBack(text);
     }
 
     private static class FooEvent extends AbstractEventCfg<FooEvent> {
@@ -376,6 +403,11 @@ public class JSONWireTest extends WireTestCommon {
             wire.write(() -> "list1").list(list1, Item.class);
             wire.write(() -> "list2").list(list2, Item.class);
         }
+    }
+
+    static class MapHolder extends SelfDescribingMarshallable {
+
+        Map<RetentionPolicy, Double> map;
     }
 
     private static class Dates extends SelfDescribingMarshallable {
