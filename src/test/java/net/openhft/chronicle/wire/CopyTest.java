@@ -49,16 +49,21 @@ public class CopyTest extends WireTestCommon {
                 new Object[]{WireType.BINARY, WireType.JSON, false},
                 new Object[]{WireType.BINARY, WireType.TEXT, true},
                 new Object[]{WireType.BINARY, WireType.TEXT, false},
-//                new Object[]{WireType.RAW, WireType.RAW, false},
+                //  new Object[]{WireType.RAW, WireType.RAW, false},
                 new Object[]{WireType.JSON, WireType.JSON, false},
-                new Object[]{WireType.JSON, WireType.JSON, true},
+                // new Object[]{WireType.JSON, WireType.JSON, true}, // not supported as types are dropped for backward compatability
+                new Object[]{WireType.JSON, WireType.JSON_ONLY, false},
+                new Object[]{WireType.JSON_ONLY, WireType.JSON_ONLY, false},
+                new Object[]{WireType.JSON_ONLY, WireType.JSON_ONLY, true},
                 new Object[]{WireType.TEXT, WireType.TEXT, false},
                 new Object[]{WireType.TEXT, WireType.TEXT, true},
                 new Object[]{WireType.YAML, WireType.YAML, false},
                 new Object[]{WireType.YAML, WireType.YAML, true},
-                new Object[]{WireType.JSON, WireType.TEXT, false},
-                new Object[]{WireType.JSON, WireType.YAML, false},
-                new Object[]{WireType.JSON, WireType.BINARY, false}
+                new Object[]{WireType.YAML_ONLY, WireType.YAML_ONLY, true},
+                new Object[]{WireType.JSON_ONLY, WireType.TEXT, true},
+                new Object[]{WireType.JSON_ONLY, WireType.YAML, true},
+                new Object[]{WireType.JSON_ONLY, WireType.BINARY, true},
+                new Object[]{WireType.JSON_ONLY, WireType.BINARY_LIGHT, true}
         );
     }
 
@@ -77,13 +82,11 @@ public class CopyTest extends WireTestCommon {
             wireFrom.getValueOut().marshallable(a);
 
         wireFrom.copyTo(wireTo);
-        if (to == WireType.JSON) {
+        if (to == WireType.JSON || to == WireType.JSON_ONLY) {
             final String text = wireTo.toString();
             assertFalse(text, text.contains("? "));
             assertFalse(text, text.contains("\n\""));
         }
-        System.out.println(wireTo);
-        System.out.println(bytesFrom.toHexString());
         AClass b = wireTo.getValueIn().object(AClass.class);
 
         assertEquals(a, b);
@@ -94,6 +97,10 @@ public class CopyTest extends WireTestCommon {
 
             wireFrom.write("msg").typedMarshallable(a);
             wireFrom.copyTo(wireTo);
+            if (from == WireType.JSON_ONLY) {
+                System.out.println(wireFrom);
+                System.out.println(wireTo);
+            }
             Object b2 = wireTo.read("msg").object();
 
             assertEquals(a, b2);

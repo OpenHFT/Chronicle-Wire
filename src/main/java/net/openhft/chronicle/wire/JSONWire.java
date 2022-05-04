@@ -206,7 +206,10 @@ public class JSONWire extends TextWire {
                 return;
 
             case '{':
-                copyMap(wire);
+                if (isTypePrefix())
+                    copyTypePrefix(wire);
+                else
+                    copyMap(wire);
                 return;
 
             case '[':
@@ -243,6 +246,31 @@ public class JSONWire extends TextWire {
         }
         bytes.readSkip(-1);
         throw new IORuntimeException("Unexpected chars '" + bytes.parse8bit(StopCharTesters.CONTROL_STOP) + "'");
+    }
+
+    private void copyTypePrefix(WireOut wire) {
+        final StringBuilder sb = Wires.acquireStringBuilder();
+        // the type literal
+        getValueIn().text(sb);
+        // drop the '@
+        sb.deleteCharAt(0);
+        wire.getValueOut().typePrefix(sb);
+        consumePadding();
+        int ch = bytes.readUnsignedByte();
+        if (ch != ':')
+            throw new IORuntimeException("Expected a ':' after the type " + sb + " but got a " + (char) ch);
+        copyOne(wire, true, false);
+
+        consumePadding();
+        int ch2 = bytes.readUnsignedByte();
+        if (ch2 != '}')
+            throw new IORuntimeException("Expected a '}' after the type " + sb + " but got a " + (char) ch);
+    }
+
+    private boolean isTypePrefix() {
+        final long rp = bytes.readPosition();
+        return bytes.peekUnsignedByte(rp) == '"'
+                && bytes.peekUnsignedByte(rp + 1) == '@';
     }
 
     private void copyQuote(WireOut wire, int ch, boolean inMap, boolean topLevel) {
