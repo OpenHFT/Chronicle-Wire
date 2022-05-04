@@ -210,7 +210,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
                     "Enterprise licence is required to run this code because you are using " +
                     "DELTA_BINARY which is a licence product. " +
                     "Please contact sales@chronicle.software");
-            Jvm.error().on(WireType.class,  licence);
+            Jvm.error().on(WireType.class, licence);
             throw licence;
         }
 
@@ -269,6 +269,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
             return fromHexString(cs);
         }
     },
+    // for backward compatibility, this doesn't support types
     JSON {
         @NotNull
         @Override
