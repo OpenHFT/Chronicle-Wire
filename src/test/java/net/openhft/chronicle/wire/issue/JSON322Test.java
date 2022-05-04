@@ -68,7 +68,7 @@ public class JSON322Test extends WireTestCommon {
         wire.getValueOut()
                 .object(three);
 
-        final String expected = "{\"@net.openhft.chronicle.wire.issue.JSON322Test$Three\":{\"one\":{\"@net.openhft.chronicle.wire.issue.JSON322Test$One\":{\"text\":\"hello\"}}, \"two\":{\"@net.openhft.chronicle.wire.issue.JSON322Test$Four\":{\"text\":\"world\"}}  }}";
+        final String expected = "{\"@net.openhft.chronicle.wire.issue.JSON322Test$Three\":{\"one\":{\"@net.openhft.chronicle.wire.issue.JSON322Test$One\":{\"text\":\"hello\"}},\"two\":{\"@net.openhft.chronicle.wire.issue.JSON322Test$Four\":{\"text\":\"world\"}}}}";
         final String actual = wire.bytes().toString();
         assertEquals(expected, actual);
 
@@ -109,9 +109,9 @@ public class JSON322Test extends WireTestCommon {
 
         assertEquals("" +
                         "{\"@Combined322\":{" +
-                        "\"t1\":{\"@TypeOne322\":{\"text\":\"one-one\"}}, " +
-                        "\"t2\":{\"@TypeTwo322\":{\"id\":222,\"value\":2020}}, " +
-                        "\"list\":[ {\"@TypeOne322\":{\"text\":\"one\"}}, {\"@TypeTwo322\":{\"id\":2,\"value\":22}} ]  }}",
+                        "\"t1\":{\"@TypeOne322\":{\"text\":\"one-one\"}}," +
+                        "\"t2\":{\"@TypeTwo322\":{\"id\":222,\"value\":2020}}," +
+                        "\"list\":[ {\"@TypeOne322\":{\"text\":\"one\"}},{\"@TypeTwo322\":{\"id\":2,\"value\":22}} ]}}",
                 wire.bytes().toString());
 
         // Now try reading it back again
