@@ -67,11 +67,6 @@ public class JSONWireTest extends WireTestCommon {
         return new JSONWire(Bytes.allocateElasticDirect()).useTypes(true);
     }
 
-    @NotNull
-    private JSONWire createWire() {
-        return new JSONWire(Bytes.allocateElasticDirect()).useTypes(true);
-    }
-
     @Test
     public void testOpenBracket() {
         @NotNull StringBuilder sb = new StringBuilder();
@@ -245,7 +240,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     private void doTestMapOfNamedKeys(MapHolder mh) {
-        assertEquals("{\"map\":{\"CLASS\":0.1}\n}",
+        assertEquals("{\"map\":{\"CLASS\":0.1}}",
                 JSON.asString(mh));
     }
 
