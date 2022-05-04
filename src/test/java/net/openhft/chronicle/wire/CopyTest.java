@@ -87,6 +87,17 @@ public class CopyTest extends WireTestCommon {
         AClass b = wireTo.getValueIn().object(AClass.class);
 
         assertEquals(a, b);
+
+        if (withType) {
+            wireFrom.clear();
+            wireTo.clear();
+
+            wireFrom.write("msg").typedMarshallable(a);
+            wireFrom.copyTo(wireTo);
+            Object b2 = wireTo.read("msg").object();
+
+            assertEquals(a, b2);
+        }
     }
 
     private AClass create() {
