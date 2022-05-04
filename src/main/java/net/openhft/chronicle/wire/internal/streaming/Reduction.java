@@ -20,7 +20,7 @@ public interface Reduction<T> extends ExcerptListener {
      * If this method throws an Exception, it is relayed to the call site.
      * Therefore, care should be taken to minimise the probability of throwing Exceptions.
      * <p>
-     * If this method is referenced as an {@link ExcerptListener} then the Accumulation must be
+     * If this method is referenced as an {@link ExcerptListener} then the Reduction must be
      * thread-safe.
      **/
     void onExcerpt(@NotNull Wire wire, @NonNegative long index);
@@ -28,7 +28,7 @@ public interface Reduction<T> extends ExcerptListener {
     /**
      * Returns a view of the underlying reduction.
      *
-     * @return accumulation view.
+     * @return Reduction view.
      */
     @NotNull
     T reduction();

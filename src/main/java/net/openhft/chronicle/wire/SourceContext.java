@@ -31,7 +31,7 @@ public interface SourceContext {
     int sourceId();
 
     /**
-     * Index last read, only available for read contexts. 
+     * Index last read, only available for read contexts.
      *
      * @return the current Excerpt's index
      * @throws IORuntimeException if an error occurred while getting the index
