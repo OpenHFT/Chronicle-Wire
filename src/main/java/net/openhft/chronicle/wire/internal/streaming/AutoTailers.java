@@ -5,6 +5,7 @@ import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.wire.ExcerptListener;
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.internal.streaming.internal.InternalAutoTailers;
+import net.openhft.chronicle.wire.internal.streaming.internal.ReductionUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
@@ -25,6 +26,14 @@ public final class AutoTailers {
     public interface CloseableEventHandler extends EventHandler, AutoCloseable {
         @Override
         void close();
+    }
+
+    public static long replayOnto(@NotNull final MarshallableIn tailer,
+                                  @NotNull final ExcerptListener excerptListener) {
+        requireNonNull(tailer);
+        requireNonNull(excerptListener);
+
+        return ReductionUtil.accept(tailer, excerptListener);
     }
 
     @NotNull
