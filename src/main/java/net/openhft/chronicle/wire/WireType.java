@@ -210,7 +210,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
                     "Enterprise licence is required to run this code because you are using " +
                     "DELTA_BINARY which is a licence product. " +
                     "Please contact sales@chronicle.software");
-            Jvm.error().on(WireType.class,  licence);
+            Jvm.error().on(WireType.class, licence);
             throw licence;
         }
 
@@ -269,11 +269,24 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
             return fromHexString(cs);
         }
     },
+    // for backward compatibility, this doesn't support types
     JSON {
         @NotNull
         @Override
         public Wire apply(@NotNull Bytes<?> bytes) {
             return new JSONWire(bytes).useBinaryDocuments();
+        }
+
+        @Override
+        public boolean isText() {
+            return true;
+        }
+    },
+    JSON_ONLY {
+        @NotNull
+        @Override
+        public Wire apply(@NotNull Bytes<?> bytes) {
+            return new JSONWire(bytes).useTypes(true).trimFirstCurly(false).useTextDocuments();
         }
 
         @Override
@@ -288,19 +301,16 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
             return new YamlWire(bytes).useBinaryDocuments();
         }
 
-        @Nullable
         @Override
-        public <T> T fromString(Class<T> tClass, @NotNull CharSequence cs) {
-            Bytes<?> bytes = Bytes.allocateElasticDirect(cs.length());
-            try {
-                bytes.appendUtf8(cs);
-                @NotNull YamlWire wire = (YamlWire) apply(bytes);
-                wire.consumePadding();
-                wire.consumeDocumentStart();
-                return wire.getValueIn().object(tClass);
-            } finally {
-                bytes.releaseLast();
-            }
+        public boolean isText() {
+            return true;
+        }
+    },
+    YAML_ONLY {
+        @NotNull
+        @Override
+        public Wire apply(@NotNull Bytes<?> bytes) {
+            return new YamlWire(bytes).useTextDocuments();
         }
 
         @Override

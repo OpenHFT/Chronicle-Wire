@@ -23,7 +23,6 @@ public class MonetaTest {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap());
         wire.write("currencies")
                 .object(set);
-//        System.out.println(wire);
         SortedSet<NonScalarComparable> set2 = wire
                 .read("currencies")
                 .object(SortedSet.class);
