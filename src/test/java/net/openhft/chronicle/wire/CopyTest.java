@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 @RunWith(value = Parameterized.class)
 public class CopyTest extends WireTestCommon {
@@ -40,14 +41,24 @@ public class CopyTest extends WireTestCommon {
         this.withType = withType;
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "from: {0}, to: {1}, withType: {2}")
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
                 // new Object[] {WireType.TEXT, WireType.BINARY, true}, // not supported yet
                 // new Object[] {WireType.TEXT, WireType.BINARY, false}, // not supported yet
                 new Object[]{WireType.BINARY, WireType.JSON, false},
                 new Object[]{WireType.BINARY, WireType.TEXT, true},
-                new Object[]{WireType.BINARY, WireType.TEXT, false}
+                new Object[]{WireType.BINARY, WireType.TEXT, false},
+//                new Object[]{WireType.RAW, WireType.RAW, false},
+                new Object[]{WireType.JSON, WireType.JSON, false},
+                new Object[]{WireType.JSON, WireType.JSON, true},
+                new Object[]{WireType.TEXT, WireType.TEXT, false},
+                new Object[]{WireType.TEXT, WireType.TEXT, true},
+                new Object[]{WireType.YAML, WireType.YAML, false},
+                new Object[]{WireType.YAML, WireType.YAML, true},
+                new Object[]{WireType.JSON, WireType.TEXT, false},
+                new Object[]{WireType.JSON, WireType.YAML, false},
+                new Object[]{WireType.JSON, WireType.BINARY, false}
         );
     }
 
@@ -66,11 +77,14 @@ public class CopyTest extends WireTestCommon {
             wireFrom.getValueOut().marshallable(a);
 
         wireFrom.copyTo(wireTo);
-        AClass b;
-        if (withType)
-            b = (AClass) wireTo.getValueIn().object();
-        else
-            b = wireTo.getValueIn().object(AClass.class);
+        if (to == WireType.JSON) {
+            final String text = wireTo.toString();
+            assertFalse(text, text.contains("? "));
+            assertFalse(text, text.contains("\n\""));
+        }
+        System.out.println(wireTo);
+        System.out.println(bytesFrom.toHexString());
+        AClass b = wireTo.getValueIn().object(AClass.class);
 
         assertEquals(a, b);
     }

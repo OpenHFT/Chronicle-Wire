@@ -118,7 +118,6 @@ public class TextWireTest extends WireTestCommon {
         f.field = "hello world";
         Assert.assertEquals("!net.openhft.chronicle.wire.TextWireTest$FieldWithComment {\n" +
                 "  field: hello world, \t\t# a comment where the value=hello world\n" +
-                "\n" +
                 "}\n", Marshallable.$toString(f));
     }
 
