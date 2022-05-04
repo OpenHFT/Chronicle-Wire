@@ -44,6 +44,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
  * At the moment, this is a cut down version of the YAML wire format.
  */
 public class JSONWire extends TextWire {
+
     @SuppressWarnings("rawtypes")
     static final BytesStore COMMA = BytesStore.from(",");
     static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_JSON_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT_JSON::escaping;
@@ -249,7 +250,7 @@ public class JSONWire extends TextWire {
     }
 
     private void copyTypePrefix(WireOut wire) {
-        final StringBuilder sb = Wires.acquireStringBuilder();
+        final StringBuilder sb = acquireStringBuilder();
         // the type literal
         getValueIn().text(sb);
         // drop the '@
@@ -274,7 +275,7 @@ public class JSONWire extends TextWire {
     }
 
     private void copyQuote(WireOut wire, int ch, boolean inMap, boolean topLevel) {
-        final StringBuilder sb = Wires.acquireStringBuilder();
+        final StringBuilder sb = acquireStringBuilder();
         while (bytes.readRemaining() > 0) {
             int ch2 = bytes.readUnsignedByte();
             if (ch2 == ch)
@@ -695,7 +696,7 @@ public class JSONWire extends TextWire {
             if (!hasTypeDefinition()) {
                 return super.object();
             } else {
-                final StringBuilder sb = Wires.acquireStringBuilder();
+                final StringBuilder sb = acquireStringBuilder();
                 sb.setLength(0);
                 this.wireIn().read(sb);
                 final Class<?> clazz = classLookup().forName(sb.subSequence(1, sb.length()));
@@ -716,7 +717,7 @@ public class JSONWire extends TextWire {
 
 
             /*
-            final StringBuilder sb = Wires.acquireStringBuilder();
+            final StringBuilder sb = acquireStringBuilder();
             sb.setLength(0);
             this.wireIn().read(sb);
             try {
@@ -750,7 +751,7 @@ public class JSONWire extends TextWire {
             if (!hasTypeDefinition()) {
                 return super.object(using, clazz);
             } else {
-                final StringBuilder sb = Wires.acquireStringBuilder();
+                final StringBuilder sb = acquireStringBuilder();
                 sb.setLength(0);
                 readTypeDefinition(sb);
                 final Class<?> overrideClass = classLookup().forName(sb.subSequence(1, sb.length()));
