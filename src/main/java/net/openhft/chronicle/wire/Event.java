@@ -68,15 +68,9 @@ public interface Event<E extends Event<E>> extends Marshallable {
     }
 
     /**
-     * Updates event with new event name, updating event time to now if required.
-     *
-     * @param eventName name of the event
+     * Updates event with event time to now if required.
      */
-    // TODO: x.23 remove eventName parameter
-    default E updateEvent(final String eventName) {
-        if (this.eventId().length() == 0)
-            this.eventId(eventName);
-
+    default E updateEvent() {
         if (this.eventTime() <= 0)
             this.eventTimeNow();
         return (E) this;
