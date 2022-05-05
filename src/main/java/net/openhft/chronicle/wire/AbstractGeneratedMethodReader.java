@@ -113,8 +113,13 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         if (wireIn == null)
             return false;
 
-        if (historyConsumer != NO_OP_MH_CONSUMER)
+        if (historyConsumer != NO_OP_MH_CONSUMER) {
             writeUnwrittenMessageHistory(context);
+
+            // Another reader may have swapped MessageHistory.get() and TEMP_MESSAGE_HISTORY
+            // Clearing local reference to recover link to the proper thread-local, which is MessageHistory.get()
+            messageHistory = null;
+        }
 
         messageHistory().reset(context.sourceId(), context.index());
 
@@ -185,17 +190,21 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
 
     /**
      * uses a double buffer technique to swap the current message history with a temp message history ( this is, if it has not already been stored ) .
-     *
-     * @return the MessageHistory
      */
-    @NotNull
-    private MessageHistory swapMessageHistoryIfDirty() {
+    private void swapMessageHistoryIfDirty() {
         if (messageHistory.isDirty()) {
+            // This input event didn't generate an output event.
+            // Saving message history - in case next input event will be processed by another method reader,
+            // that method reader will cooperatively write saved history.
             messageHistory = TEMP_MESSAGE_HISTORY.getAndSet(messageHistory);
             MessageHistory.set(messageHistory);
             assert (messageHistory != TEMP_MESSAGE_HISTORY.get());
+        } else {
+            // This input event generated an output event.
+            // In case previous input event was processed by this method reader, TEMP_MESSAGE_HISTORY may contain
+            // stale info on event's message history, which is superseded by the message history written now.
+            TEMP_MESSAGE_HISTORY.get().reset();
         }
-        return messageHistory;
     }
 
     /**
@@ -206,9 +215,8 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      */
     private void writeUnwrittenMessageHistory(DocumentContext context) {
         final MessageHistory mh = TEMP_MESSAGE_HISTORY.get();
-        if (mh.sources() == 0 || context.sourceId() == mh.lastSourceId() || !mh.isDirty())
-            return;
-        historyConsumer.accept(mh);
+        if (mh.sources() != 0 && context.sourceId() != mh.lastSourceId() && mh.isDirty())
+            historyConsumer.accept(mh);
     }
 
     @Override
