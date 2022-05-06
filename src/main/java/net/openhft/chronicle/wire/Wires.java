@@ -380,6 +380,9 @@ public enum Wires {
 
     @NotNull
     public static <T extends Marshallable> T deepCopy(@NotNull T marshallable) {
+        if (Enum.class.isAssignableFrom(marshallable.getClass()))
+            return marshallable;
+
         Wire wire = acquireBinaryWire();
         @NotNull T t = (T) ObjectUtils.newInstance(marshallable.getClass());
         boolean useSelfDescribing = t.usesSelfDescribingMessage() || !(t instanceof BytesMarshallable);
