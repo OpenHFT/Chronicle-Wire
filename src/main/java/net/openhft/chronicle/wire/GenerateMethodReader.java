@@ -159,7 +159,6 @@ public class GenerateMethodReader {
                 "import net.openhft.chronicle.wire.*;\n" +
                 "import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;\n" +
                 "\n" +
-                "import java.util.function.Supplier;\n" +
                 "import java.util.Map;\n" +
                 "import java.lang.reflect.Method;\n" +
                 "\n");
@@ -202,10 +201,10 @@ public class GenerateMethodReader {
         }
 
         sourceCode.append(format("public %s(MarshallableIn in, WireParselet debugLoggingParselet," +
-                "Supplier<MethodReader> delegateSupplier, MethodReaderInterceptorReturns interceptor, " +
+                "MethodReaderInterceptorReturns interceptor, " +
                 "Object[] metaInstances, " +
                 "Object[] instances) {\n" +
-                "super(in, debugLoggingParselet, delegateSupplier);\n", generatedClassName()));
+                "super(in, debugLoggingParselet);\n", generatedClassName()));
 
         if (hasRealInterceptorReturns())
             sourceCode.append("this.interceptor = interceptor;\n");
