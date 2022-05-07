@@ -3,38 +3,13 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Mocker;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
-import java.util.Collection;
 
-import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN;
 import static org.junit.Assert.*;
 
-@RunWith(Parameterized.class)
 public class ChainedMethodsTest extends WireTestCommon {
-    @Parameterized.Parameter
-    public boolean disableProxyCodegen;
-
-    @Parameterized.Parameters(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[]{false}, new Object[]{false});
-    }
-
-    @Before
-    public void setUp() {
-        System.setProperty(DISABLE_WRITER_PROXY_CODEGEN, String.valueOf(disableProxyCodegen));
-    }
-
-    @After
-    public void cleanUp() {
-        System.clearProperty(DISABLE_WRITER_PROXY_CODEGEN);
-    }
 
     @Test
     public void chainedText() {
@@ -187,7 +162,7 @@ public class ChainedMethodsTest extends WireTestCommon {
         wire.usePadding(true);
         final NestedStart writer = wire.methodWriter(NestedStart.class);
 
-        assertEquals(disableProxyCodegen, Proxy.isProxyClass(writer.getClass()));
+        assertEquals(false, Proxy.isProxyClass(writer.getClass()));
 
         writer.start().end();
 

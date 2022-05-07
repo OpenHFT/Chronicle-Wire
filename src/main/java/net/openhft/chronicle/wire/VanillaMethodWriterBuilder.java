@@ -35,8 +35,6 @@ import java.util.function.Supplier;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBuilder<T> {
-    public static final String DISABLE_WRITER_PROXY_CODEGEN = "disableProxyCodegen";
-
     private static final Class<?> COMPILE_FAILED = ClassNotFoundException.class;
     private static final Map<String, Class> classCache = new ConcurrentHashMap<>();
     private static final List<Class> invalidSuperInterfaces = Arrays.asList(
@@ -56,7 +54,6 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
             Observer.class
     );
 
-    private final boolean disableProxyGen = Jvm.getBoolean(DISABLE_WRITER_PROXY_CODEGEN, false);
     private final Set<Class> interfaces = Collections.synchronizedSet(new LinkedHashSet<>());
 
     private final String packageName;
@@ -186,7 +183,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                     Jvm.debug().on(getClass(), e);
             }
         }
-        if (!disableProxyGen && handlerSupplier.methodWriterInterceptorReturns() == null) {
+        if (handlerSupplier.methodWriterInterceptorReturns() == null) {
             T t = createInstance();
             if (t != null)
                 return t;

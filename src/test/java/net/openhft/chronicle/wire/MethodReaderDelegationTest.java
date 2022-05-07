@@ -27,7 +27,6 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static net.openhft.chronicle.wire.VanillaMethodReaderBuilder.DISABLE_READER_PROXY_CODEGEN;
 import static org.junit.Assert.*;
 
 public class MethodReaderDelegationTest extends WireTestCommon {
@@ -107,83 +106,32 @@ public class MethodReaderDelegationTest extends WireTestCommon {
         reader.readOne();
     }
 
-    // TODO: test below with interceptor
-
-    @Test
-    public void testCodeGenerationCanBeDisabled() {
-        System.setProperty(DISABLE_READER_PROXY_CODEGEN, "true");
-
-        try {
-            final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
-
-            final MethodReader reader = wire.methodReader((MyInterface) () -> {
-            });
-
-            assertTrue(reader instanceof VanillaMethodReader);
-        }
-        finally {
-            System.clearProperty(DISABLE_READER_PROXY_CODEGEN);
-        }
-    }
-
     @Test(expected = InvocationTargetRuntimeException.class)
     public void testExceptionThrownFromUserCode() {
-        testExceptionThrownFromUserCode(false);
-    }
+        final TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
+        final MyInterface writer = wire.methodWriter(MyInterface.class);
+        writer.myCall();
 
-    @Test(expected = InvocationTargetRuntimeException.class)
-    public void testExceptionThrownFromUserCodeProxy() {
-        testExceptionThrownFromUserCode(true);
-    }
+        final MethodReader reader = wire.methodReader((MyInterface) () -> {
+            throw new IllegalStateException("This is an exception by design");
+        });
+        assertEquals(false, reader instanceof VanillaMethodReader);
 
-    private void testExceptionThrownFromUserCode(boolean proxy) throws InvocationTargetRuntimeException {
-        if (proxy)
-            System.setProperty(DISABLE_READER_PROXY_CODEGEN, "true");
-
-        try {
-            final TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
-            final MyInterface writer = wire.methodWriter(MyInterface.class);
-            writer.myCall();
-
-            final MethodReader reader = wire.methodReader((MyInterface) () -> {
-                throw new IllegalStateException("This is an exception by design");
-            });
-            assertEquals(proxy, reader instanceof VanillaMethodReader);
-
-            reader.readOne();
-        } finally {
-            System.clearProperty(DISABLE_READER_PROXY_CODEGEN);
-        }
+        reader.readOne();
     }
 
     @Test(expected = InvocationTargetRuntimeException.class)
     public void testExceptionThrownFromUserCodeLong() {
-        testExceptionThrownFromUserCodeLong(false);
-    }
+        final TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
+        final MyInterfaceLong writer = wire.methodWriter(MyInterfaceLong.class);
+        writer.myCall(1L);
 
-    @Test(expected = InvocationTargetRuntimeException.class)
-    public void testExceptionThrownFromUserCodeLongProxy() {
-        testExceptionThrownFromUserCodeLong(true);
-    }
+        final MethodReader reader = wire.methodReader((MyInterfaceLong) (l) -> {
+            throw new IllegalStateException("This is an exception by design");
+        });
+        assertEquals(false, reader instanceof VanillaMethodReader);
 
-    private void testExceptionThrownFromUserCodeLong(boolean proxy) {
-        if (proxy)
-            System.setProperty(DISABLE_READER_PROXY_CODEGEN, "true");
-
-        try {
-            final TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
-            final MyInterfaceLong writer = wire.methodWriter(MyInterfaceLong.class);
-            writer.myCall(1L);
-
-            final MethodReader reader = wire.methodReader((MyInterfaceLong) (l) -> {
-                throw new IllegalStateException("This is an exception by design");
-            });
-            assertEquals(proxy, reader instanceof VanillaMethodReader);
-
-            reader.readOne();
-        } finally {
-            System.clearProperty(DISABLE_READER_PROXY_CODEGEN);
-        }
+        reader.readOne();
     }
 
     interface MyInterface {
