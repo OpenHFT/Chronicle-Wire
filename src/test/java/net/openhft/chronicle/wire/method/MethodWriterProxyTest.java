@@ -15,6 +15,7 @@ public class MethodWriterProxyTest extends MethodWriterTest {
     @Before
     public void before() {
         System.setProperty("disableProxyCodegen", "true");
+        expectException("Falling back to proxy method writer");
     }
 
     @After
