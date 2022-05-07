@@ -18,46 +18,76 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static junit.framework.TestCase.assertFalse;
 import static net.openhft.chronicle.wire.VanillaMethodReaderBuilder.DISABLE_READER_PROXY_CODEGEN;
 import static org.junit.Assert.*;
 
+@RunWith(Parameterized.class)
 public class MethodReaderDelegationTest extends WireTestCommon {
+    private boolean useMethodId;
+
+    public MethodReaderDelegationTest(boolean useMethodId) {
+        this.useMethodId = useMethodId;
+    }
+
+    @Parameterized.Parameters(name = "useMethodId={0}")
+    public static Collection<Object[]> data() {
+        return Arrays.asList(
+                new Object[]{false},
+                new Object[]{true}
+        );
+    }
+
     @Test
     public void testUnsuccessfulCallIsDelegatedBinaryWire() {
         final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
 
-        doTestUnsuccessfullCallIsDelegated(wire);
+        doTestUnsuccessfulCallIsDelegated(wire);
     }
 
     @Test
     public void testUnsuccessfulCallIsDelegatedTextWire() {
         final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
-        doTestUnsuccessfullCallIsDelegated(wire);
+        doTestUnsuccessfulCallIsDelegated(wire);
     }
 
     @Test
     public void testUnsuccessfulCallIsDelegatedYamlWire() {
         final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
-        doTestUnsuccessfullCallIsDelegated(wire);
+        doTestUnsuccessfulCallIsDelegated(wire);
     }
 
-    private void doTestUnsuccessfullCallIsDelegated(Wire wire) {
-        final MyInterface writer = wire.methodWriter(MyInterface.class);
+    private void doTestUnsuccessfulCallIsDelegated(Wire wire) {
+        final Class<? extends MyInterface> ifaceClass = useMethodId ? MyInterfaceMethodId.class : MyInterface.class;
+        final MyInterface writer = wire.methodWriter(ifaceClass);
+        assertFalse(Proxy.isProxyClass(writer.getClass()));
         writer.myCall();
 
+        final int myFallId = 2;
+        final String myFall = useMethodId ? Integer.toString(myFallId) : "myFall";
+
         try (DocumentContext dc = wire.acquireWritingDocument(false)) {
-            Objects.requireNonNull(dc.wire()).writeEventName("myFall").text("");
+            if (useMethodId) {
+                Objects.requireNonNull(dc.wire()).writeEventId(myFallId).text("");
+            } else
+                Objects.requireNonNull(dc.wire()).writeEventName("myFall").text("");
         }
 
         writer.myCall();
@@ -66,17 +96,18 @@ public class MethodReaderDelegationTest extends WireTestCommon {
         StringBuilder sb = new StringBuilder();
 
         final MethodReader reader = wire.methodReaderBuilder()
-                .defaultParselet((s, in) -> { // Default parselet handling is delegated to Vanilla reader.
+                .defaultParselet((s, in) -> {
                     delegatedMethodCall.set(s.toString());
                     in.skipValue();
                 })
-                .build(Mocker.intercepting(MyInterface.class, "*", sb::append));
+                .build(Mocker.intercepting(ifaceClass, "*", sb::append));
+        assertFalse(Proxy.isProxyClass(reader.getClass()));
 
         assertTrue(reader.readOne());
         assertNull(delegatedMethodCall.get());
 
         assertTrue(reader.readOne());
-        assertEquals("myFall", delegatedMethodCall.get());
+        assertEquals(myFall, delegatedMethodCall.get());
 
         assertTrue(reader.readOne());
 
@@ -84,21 +115,63 @@ public class MethodReaderDelegationTest extends WireTestCommon {
     }
 
     @Test
+    public void testUnsuccessfulCallNoDelegate() {
+        testUnsuccessfulCallNoDelegate(false);
+    }
+
+    @Test
+    public void testUnsuccessfulCallNoDelegateProxy() {
+        testUnsuccessfulCallNoDelegate(true);
+    }
+
+    private void testUnsuccessfulCallNoDelegate(boolean proxy) {
+        if (proxy)
+            System.setProperty(DISABLE_READER_PROXY_CODEGEN, "true");
+
+        try {
+            final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
+            final MyInterface writer = wire.methodWriter(MyInterface.class);
+            writer.myCall();
+
+            try (DocumentContext dc = wire.acquireWritingDocument(false)) {
+                Objects.requireNonNull(dc.wire()).writeEventName("myFall").text("");
+            }
+
+            writer.myCall();
+
+            StringBuilder sb = new StringBuilder();
+            final MethodReader reader = wire.methodReaderBuilder()
+                    .build(Mocker.intercepting(MyInterface.class, "*", sb::append));
+
+            assertTrue(reader.readOne());
+            assertTrue(reader.readOne());
+            assertTrue(reader.readOne());
+            assertFalse(reader.readOne());
+
+            assertEquals("*myCall[]*myCall[]", sb.toString());
+        } finally {
+            System.clearProperty(DISABLE_READER_PROXY_CODEGEN);
+        }
+    }
+
+    @Test
     public void testUserExceptionsAreNotDelegated() {
         final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
 
-        final MyInterface writer = wire.methodWriter(MyInterface.class);
+        final Class<? extends MyInterface> ifaceClass = useMethodId ? MyInterfaceMethodId.class : MyInterface.class;
+        final MyInterface writer = wire.methodWriter(ifaceClass);
 
         writer.myCall();
 
         AtomicInteger exceptionsThrown = new AtomicInteger();
 
-        final MethodReader reader = wire.methodReader((MyInterface) () -> {
+        final MyInterface myInterface = () -> {
             exceptionsThrown.incrementAndGet();
 
             throw new IllegalStateException("This is an exception by design");
-        });
+        };
+        final MethodReader reader = wire.methodReader(useMethodId ? (MyInterfaceMethodId) () -> myInterface.myCall() : myInterface);
 
         assertThrows(InvocationTargetRuntimeException.class, () -> reader.readOne());
     }
@@ -138,12 +211,14 @@ public class MethodReaderDelegationTest extends WireTestCommon {
 
         try {
             final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
-            final MyInterface writer = wire.methodWriter(MyInterface.class);
+            final Class<? extends MyInterface> ifaceClass = useMethodId ? MyInterfaceMethodId.class : MyInterface.class;
+            final MyInterface writer = wire.methodWriter(ifaceClass);
             writer.myCall();
 
-            final MethodReader reader = wire.methodReader((MyInterface) () -> {
+            final MyInterface myInterface = () -> {
                 throw new IllegalStateException("This is an exception by design");
-            });
+            };
+            final MethodReader reader = wire.methodReader(useMethodId ? (MyInterfaceMethodId) () -> myInterface.myCall() : myInterface);
             assertEquals(proxy, reader instanceof VanillaMethodReader);
 
             assertThrows(InvocationTargetRuntimeException.class, () -> reader.readOne());
@@ -168,12 +243,14 @@ public class MethodReaderDelegationTest extends WireTestCommon {
 
         try {
             final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
-            final MyInterfaceLong writer = wire.methodWriter(MyInterfaceLong.class);
+            final Class<? extends MyInterfaceLong> ifaceClass = useMethodId ? MyInterfaceLongMethodId.class : MyInterfaceLong.class;
+            final MyInterfaceLong writer = wire.methodWriter(ifaceClass);
             writer.myCall(1L);
 
-            final MethodReader reader = wire.methodReader((MyInterfaceLong) (l) -> {
+            final MyInterfaceLong myInterface = (l) -> {
                 throw new IllegalStateException("This is an exception by design");
-            });
+            };
+            final MethodReader reader = wire.methodReader(useMethodId ? (MyInterfaceLongMethodId) (l) -> myInterface.myCall(l) : myInterface);
             assertEquals(proxy, reader instanceof VanillaMethodReader);
 
             assertThrows(InvocationTargetRuntimeException.class, () -> reader.readOne());
@@ -186,7 +263,17 @@ public class MethodReaderDelegationTest extends WireTestCommon {
         void myCall();
     }
 
+    interface MyInterfaceMethodId extends MyInterface {
+        @MethodId(1)
+        void myCall();
+    }
+
     interface MyInterfaceLong {
+        void myCall(long l);
+    }
+
+    interface MyInterfaceLongMethodId extends MyInterfaceLong {
+        @MethodId(2)
         void myCall(long l);
     }
 }
