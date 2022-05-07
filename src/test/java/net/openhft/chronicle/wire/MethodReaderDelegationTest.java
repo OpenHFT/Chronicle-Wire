@@ -72,8 +72,6 @@ public class MethodReaderDelegationTest extends WireTestCommon {
                 })
                 .build(Mocker.intercepting(MyInterface.class, "*", sb::append));
 
-       // System.out.println(WireDumper.of(wire).asString());
-
         assertTrue(reader.readOne());
         assertNull(delegatedMethodCall.get());
 
@@ -85,7 +83,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
         assertEquals("*myCall[]*myCall[]", sb.toString());
     }
 
-    @Test(expected = InvocationTargetRuntimeException.class)
+    @Test
     public void testUserExceptionsAreNotDelegated() {
         final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
@@ -102,7 +100,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
             throw new IllegalStateException("This is an exception by design");
         });
 
-        reader.readOne();
+        assertThrows(InvocationTargetRuntimeException.class, () -> reader.readOne());
     }
 
     // TODO: test below with interceptor
@@ -124,12 +122,12 @@ public class MethodReaderDelegationTest extends WireTestCommon {
         }
     }
 
-    @Test(expected = InvocationTargetRuntimeException.class)
+    @Test
     public void testExceptionThrownFromUserCode() {
         testExceptionThrownFromUserCode(false);
     }
 
-    @Test(expected = InvocationTargetRuntimeException.class)
+    @Test
     public void testExceptionThrownFromUserCodeProxy() {
         testExceptionThrownFromUserCode(true);
     }
@@ -148,18 +146,18 @@ public class MethodReaderDelegationTest extends WireTestCommon {
             });
             assertEquals(proxy, reader instanceof VanillaMethodReader);
 
-            reader.readOne();
+            assertThrows(InvocationTargetRuntimeException.class, () -> reader.readOne());
         } finally {
             System.clearProperty(DISABLE_READER_PROXY_CODEGEN);
         }
     }
 
-    @Test(expected = InvocationTargetRuntimeException.class)
+    @Test
     public void testExceptionThrownFromUserCodeLong() {
         testExceptionThrownFromUserCodeLong(false);
     }
 
-    @Test(expected = InvocationTargetRuntimeException.class)
+    @Test
     public void testExceptionThrownFromUserCodeLongProxy() {
         testExceptionThrownFromUserCodeLong(true);
     }
@@ -178,7 +176,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
             });
             assertEquals(proxy, reader instanceof VanillaMethodReader);
 
-            reader.readOne();
+            assertThrows(InvocationTargetRuntimeException.class, () -> reader.readOne());
         } finally {
             System.clearProperty(DISABLE_READER_PROXY_CODEGEN);
         }
