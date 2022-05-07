@@ -379,7 +379,6 @@ public class GenerateMethodReader {
      * @param anInterface        Interface which method is processed.
      * @param instanceFieldName  In generated code, method is executed on field with this name.
      * @param methodFilter       <code>true</code> if passed interface is marked with {@link MethodFilterOnFirstArg}.
-     * @param switchBlock
      * @param eventIdSwitchBlock
      */
     private void handleMethod(Method m, Class<?> anInterface, String instanceFieldName, boolean methodFilter, SourceCodeFormatter eventNameSwitchBlock, SourceCodeFormatter eventIdSwitchBlock) {
