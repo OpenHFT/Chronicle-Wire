@@ -29,6 +29,8 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
     @Before
     public void setUp() {
         System.setProperty(DISABLE_WRITER_PROXY_CODEGEN, String.valueOf(disableProxyCodegen));
+        if (disableProxyCodegen)
+            expectException("Falling back to proxy method writer");
     }
 
     @After

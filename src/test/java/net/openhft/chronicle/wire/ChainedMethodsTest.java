@@ -39,6 +39,8 @@ public class ChainedMethodsTest extends WireTestCommon {
 
     @Test
     public void chainedText() {
+        if (disableProxyCodegen)
+            expectException("Falling back to proxy method writer");
         TextWire wire = new TextWire(Bytes.allocateElasticOnHeap(128))
                 .useTextDocuments();
         ITop top = wire.methodWriter(ITop.class);
@@ -67,6 +69,8 @@ public class ChainedMethodsTest extends WireTestCommon {
 
     @Test
     public void chainedYaml() {
+        if (disableProxyCodegen)
+            expectException("Falling back to proxy method writer");
         YamlWire wire = new YamlWire(Bytes.allocateElasticOnHeap(128))
                 .useTextDocuments();
         ITop top = wire.methodWriter(ITop.class);
@@ -189,6 +193,8 @@ public class ChainedMethodsTest extends WireTestCommon {
 
     @Test
     public void testNestedReturnType() {
+        if (disableProxyCodegen)
+            expectException("Falling back to proxy method writer");
         Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
         final NestedStart writer = wire.methodWriter(NestedStart.class);
