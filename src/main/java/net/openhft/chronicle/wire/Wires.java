@@ -54,7 +54,6 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.SerializationStrategies.*;
@@ -1124,7 +1123,11 @@ public enum Wires {
 
     static class TupleFieldInfo extends AbstractFieldInfo {
         public TupleFieldInfo(String name, Class type) {
-            super(type, SerializeMarshallables.INSTANCE.apply(type).bracketType(), name);
+            super(type, bracketType(SerializeMarshallables.INSTANCE.apply(type)), name);
+        }
+
+        static BracketType bracketType(SerializationStrategy ss) {
+            return ss == null ? BracketType.UNKNOWN : ss.bracketType();
         }
 
         private Map<String, Object> getMap(Object o) {
