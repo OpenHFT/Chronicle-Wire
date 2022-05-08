@@ -694,9 +694,42 @@ public class YamlTokeniser {
         if (blockStart == blockEnd || NO_TEXT.contains(last))
             return;
         long pos = in.readPosition();
-        in.readPosition(blockStart);
-        in.parseUtf8(sb, Math.toIntExact(blockEnd - blockStart));
-        in.readPosition(pos);
+        try {
+            in.readPosition(blockStart);
+            in.parseUtf8(sb, Math.toIntExact(blockEnd - blockStart));
+        } finally {
+            in.readPosition(pos);
+        }
+    }
+
+    public double parseDouble() {
+        if (blockEnd < 0 && temp != null) {
+            return temp.parseDouble();
+        }
+        if (blockStart == blockEnd || NO_TEXT.contains(last))
+            return -0.0; // no data
+        long pos = in.readPosition();
+        try {
+            in.readPosition(blockStart);
+            return in.parseDouble();
+        } finally {
+            in.readPosition(pos);
+        }
+    }
+
+    public long parseLong() {
+        if (blockEnd < 0 && temp != null) {
+            return temp.parseLong();
+        }
+        if (blockStart == blockEnd || NO_TEXT.contains(last))
+            return 0; // no data
+        long pos = in.readPosition();
+        try {
+            in.readPosition(blockStart);
+            return in.parseLong();
+        } finally {
+            in.readPosition(pos);
+        }
     }
 
     public void push(YamlToken token) {
