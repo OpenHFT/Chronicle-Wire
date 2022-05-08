@@ -20,10 +20,14 @@ public class MarshallableOutBuilder implements Supplier<MarshallableOut> {
             case "tcp":
                 throw new UnsupportedOperationException("Direct TCP connection not implemented");
             case "file":
+                if (wireType != null && wireType != WireType.YAML_ONLY)
+                    throw new IllegalArgumentException("Unsupported wireType; " + wireType);
                 // URL file protocol doesn't support writing...
                 return new FileMarshallableOut(this, wireTypeOr(WireType.YAML_ONLY));
             case "http":
             case "https":
+                if (wireType != null && wireType != WireType.JSON_ONLY)
+                    throw new IllegalArgumentException("Unsupported wireType; " + wireType);
                 return new HTTPMarshallableOut(this, wireTypeOr(WireType.JSON_ONLY));
             default:
                 throw new UnsupportedOperationException("Writing to " + url.getProtocol() + " is  not implemented");

@@ -160,7 +160,14 @@ public class WireDumperTest extends WireTestCommon {
                 "...\n" +
                 "# 5 bytes remaining\n" +
                 "");
-
+        expectedPartialContent.put(WireType.YAML,
+                "--- !!data #binary\n" +
+                        "00000000             31 37 0a                                 17·          \n" +
+                        "# position: 8, header: 0 or 1\n" +
+                        "--- !!not-ready-data\n" +
+                        "...\n" +
+                        "# 5 bytes remaining\n" +
+                        "");
         final String expectedPartialBinary = "" +
                 "--- !!data #binary\n" +
                 "17\n" +

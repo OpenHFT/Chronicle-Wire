@@ -82,16 +82,19 @@ public class MarshallableOutBuilderTest {
         BlockingQueue<String> queue = new LinkedBlockingQueue<>();
         server.createContext("/echo", new Handler(queue));
         server.start();
-        final URL url = new URL("http://localhost:" + port + "/echo");
-        writeMessages(url);
-        assertEquals(
-                "{\"mid\":\"mid\",\"next\":1,\"echo\":\"echo-1\"}\n",
-                queue.poll(1, TimeUnit.SECONDS));
-        assertEquals(
-                "{\"mid2\":\"mid2\",\"next2\":\"word\",\"echo\":\"echo-2\"}\n",
-                queue.poll(1, TimeUnit.SECONDS));
-        assertNull(queue.poll(1, TimeUnit.MILLISECONDS));
-        server.stop(1);
+        try {
+            final URL url = new URL("http://localhost:" + port + "/echo");
+            writeMessages(url);
+            assertEquals(
+                    "{\"mid\":\"mid\",\"next\":1,\"echo\":\"echo-1\"}\n",
+                    queue.poll(1, TimeUnit.SECONDS));
+            assertEquals(
+                    "{\"mid2\":\"mid2\",\"next2\":\"word\",\"echo\":\"echo-2\"}\n",
+                    queue.poll(1, TimeUnit.SECONDS));
+            assertNull(queue.poll(1, TimeUnit.MILLISECONDS));
+        } finally {
+            server.stop(1);
+        }
     }
 
     @Ignore("test was added to work with queue-web-gateway, so work in progress")
@@ -102,49 +105,35 @@ public class MarshallableOutBuilderTest {
         BlockingQueue<String> queue = new LinkedBlockingQueue<>();
         server.createContext("/echo", new Handler(queue));
         server.start();
-        final URL url = new URL("http://localhost:" + port + "/echo/append");
-        writeMessages(url);
-        assertEquals(
-                "{\"mid\":\"mid\",\"next\":1,\"echo\":\"echo-1\"}\n",
-                queue.poll(1, TimeUnit.SECONDS));
-        assertEquals(
-                "{\"mid2\":\"mid2\",\"next2\":\"word\",\"echo\":\"echo-2\"}\n",
-                queue.poll(1, TimeUnit.SECONDS));
-        assertNull(queue.poll(1, TimeUnit.MILLISECONDS));
-        server.stop(1);
+        try {
+            final URL url = new URL("http://localhost:" + port + "/echo/append");
+            writeMessages(url);
+            assertEquals(
+                    "{\"mid\":\"mid\",\"next\":1,\"echo\":\"echo-1\"}\n",
+                    queue.poll(1, TimeUnit.SECONDS));
+            assertEquals(
+                    "{\"mid2\":\"mid2\",\"next2\":\"word\",\"echo\":\"echo-2\"}\n",
+                    queue.poll(1, TimeUnit.SECONDS));
+            assertNull(queue.poll(1, TimeUnit.MILLISECONDS));
+        } finally {
+            server.stop(1);
+        }
     }
-
-    @Ignore("test was added to work with queue-web-gateway, so work in progress")
-    @Test
-    public void http2() throws IOException, InterruptedException {
-        int port = 51972;
-        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
-        BlockingQueue<String> queue = new LinkedBlockingQueue<>();
-        server.createContext("/echo", new Handler(queue));
-        server.start();
-        final URL url = new URL("http://localhost:" + port + "/echo/append");
-        writeMessages(url);
-        assertEquals(
-                "{\"mid\":\"mid\",\"next\":1,\"echo\":\"echo-1\"}\n",
-                queue.poll(1, TimeUnit.SECONDS));
-        assertEquals(
-                "{\"mid2\":\"mid2\",\"next2\":\"word\",\"echo\":\"echo-2\"}\n",
-                queue.poll(1, TimeUnit.SECONDS));
-        assertNull(queue.poll(1, TimeUnit.MILLISECONDS));
-        server.stop(1);
-    }
-
 
     //"Only JSON Wire is currently supported"
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void httpBinary() throws IOException, InterruptedException {
         int port = 65432;
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         BlockingQueue<String> queue = new LinkedBlockingQueue<>();
         server.createContext("/echo", new Handler(queue));
         server.start();
-        final URL url = new URL("http://localhost:" + port + "/echo");
-        writeMessages(url, WireType.BINARY_LIGHT);
+        try {
+            final URL url = new URL("http://localhost:" + port + "/echo");
+            writeMessages(url, WireType.BINARY_LIGHT);
+        } finally {
+            server.stop(1);
+        }
 
     }
 
