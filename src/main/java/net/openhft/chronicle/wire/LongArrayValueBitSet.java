@@ -316,7 +316,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
         int endWordIndex = wordIndex(toIndex - 1);
         if (endWordIndex >= getWordsInUse()) {
             toIndex = length();
-            endWordIndex = Math.toIntExact(getWordsInUse() - 1);
+            endWordIndex = getWordsInUse() - 1;
         }
 
         long firstWordMask = WORD_MASK << fromIndex;
