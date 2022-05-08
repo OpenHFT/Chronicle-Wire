@@ -223,11 +223,6 @@ public class JSONWireTest extends WireTestCommon {
         }
     }
 
-    private void doTestMapOfNamedKeys(MapHolder mh) {
-        assertEquals("{\"map\":{\"CLASS\":0.1}}",
-                JSON.asString(mh));
-    }
-
     @Test
     public void testMapOfNamedKeys() {
         MapHolder mh = new MapHolder();
@@ -242,6 +237,11 @@ public class JSONWireTest extends WireTestCommon {
         doTestMapOfNamedKeys(mh);
 
         testCopyToBinaryAndBack("{\"map\":{\"CLASS\":0.1}}");
+    }
+
+    private void doTestMapOfNamedKeys(MapHolder mh) {
+        assertEquals("{\"map\":{\"CLASS\":0.1}}",
+                JSON.asString(mh));
     }
 
     @Test
