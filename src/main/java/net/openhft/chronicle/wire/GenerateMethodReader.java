@@ -30,6 +30,7 @@ import net.openhft.chronicle.wire.internal.GenericReflection;
 import net.openhft.chronicle.wire.utils.JavaSourceCodeFormatter;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -379,7 +380,6 @@ public class GenerateMethodReader {
      * @param anInterface        Interface which method is processed.
      * @param instanceFieldName  In generated code, method is executed on field with this name.
      * @param methodFilter       <code>true</code> if passed interface is marked with {@link MethodFilterOnFirstArg}.
-     * @param switchBlock
      * @param eventIdSwitchBlock
      */
     private void handleMethod(Method m, Class<?> anInterface, String instanceFieldName, boolean methodFilter, SourceCodeFormatter eventNameSwitchBlock, SourceCodeFormatter eventIdSwitchBlock) {
@@ -507,7 +507,7 @@ public class GenerateMethodReader {
      * @param chainedCallPrefix Prefix for method call statement, passed in order to save method result for chaining.
      * @return Code that performs a method call.
      */
-    private String methodCall(Method m, String instanceFieldName, String chainedCallPrefix, Class<?> returnType) {
+    private String methodCall(Method m, String instanceFieldName, String chainedCallPrefix, @Nullable Class<?> returnType) {
         StringBuilder res = new StringBuilder();
 
         Class<?>[] parameterTypes = m.getParameterTypes();
@@ -546,7 +546,7 @@ public class GenerateMethodReader {
                 res.append(format("interceptor%sArgs[%d] = %sarg%d;\n", m.getName(), i, m.getName(), i));
             }
 
-            String castPrefix = chainedCallPrefix.isEmpty() ?
+            String castPrefix = chainedCallPrefix.isEmpty() || returnType == null ?
                     "" : "(" + returnType.getCanonicalName() + ")";
 
             res.append(format("%s%sinterceptor.intercept(%smethod, %s, " +
