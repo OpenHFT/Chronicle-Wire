@@ -11,7 +11,6 @@ import java.lang.reflect.Proxy;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
-@Ignore(/* legacy behaviour */)
 public class MethodWriterProxyTest extends MethodWriterTest {
     @Before
     public void before() {
@@ -29,6 +28,7 @@ public class MethodWriterProxyTest extends MethodWriterTest {
         super.multiOut();
     }
 
+    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
     @Test
     public void testPrimitives() {
         assumeFalse(Jvm.isMacArm());
