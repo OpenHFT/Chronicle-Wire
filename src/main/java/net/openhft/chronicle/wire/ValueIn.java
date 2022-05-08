@@ -115,16 +115,15 @@ public interface ValueIn {
     @NotNull
     WireIn bytes(@NotNull ReadBytesMarshallable bytesMarshallable);
 
-    @Nullable
-    default byte[] bytes() {
+    default byte @Nullable [] bytes() {
         return bytes((byte[]) null);
     }
 
-    byte[] bytes(byte[] using);
+    byte @Nullable [] bytes(byte[] using);
 
     @Nullable
     default BytesStore bytesStore() {
-        @Nullable byte[] bytes = bytes();
+        byte @Nullable [] bytes = bytes();
         return bytes == null ? null : BytesStore.wrap(bytes);
     }
 
