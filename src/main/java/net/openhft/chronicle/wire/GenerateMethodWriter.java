@@ -6,6 +6,7 @@ import net.openhft.chronicle.bytes.UpdateInterceptor;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.util.GenericReflection;
+import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.wire.utils.JavaSourceCodeFormatter;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
 import org.jetbrains.annotations.NotNull;
@@ -498,7 +499,7 @@ public class GenerateMethodWriter {
             return "";
 
         if (returnType.isPrimitive() || returnType == Void.class)
-            throw new UnsupportedOperationException("having a method of this return type=" + returnType + " is not supported by method writers");
+            return " " + ObjectUtils.defaultValue(returnType);
 
         return " this";
     }
