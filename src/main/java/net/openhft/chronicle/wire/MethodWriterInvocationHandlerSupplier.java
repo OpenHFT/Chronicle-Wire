@@ -42,11 +42,13 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
         this.recordHistory = recordHistory;
     }
 
+    @Deprecated(/* to be removed in x.24 */)
     public MethodWriterInvocationHandlerSupplier methodWriterInterceptorReturns(MethodWriterInterceptorReturns methodWriterInterceptorReturns) {
         this.methodWriterInterceptorReturns = methodWriterInterceptorReturns;
         return this;
     }
 
+    @Deprecated(/* to be removed in x.24 */)
     public MethodWriterInterceptorReturns methodWriterInterceptorReturns() {
         return methodWriterInterceptorReturns;
     }

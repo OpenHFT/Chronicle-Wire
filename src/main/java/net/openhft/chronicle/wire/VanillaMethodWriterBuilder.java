@@ -118,6 +118,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         return this;
     }
 
+    @Deprecated(/* Replaced by UpdateInterceptor. To be removed in x.24 */)
     @NotNull
     public MethodWriterBuilder<T> methodWriterInterceptorReturns(MethodWriterInterceptorReturns methodWriterInterceptor) {
         handlerSupplier.methodWriterInterceptorReturns(methodWriterInterceptor);
