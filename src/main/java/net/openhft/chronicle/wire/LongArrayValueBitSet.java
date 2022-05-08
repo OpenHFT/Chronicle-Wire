@@ -531,6 +531,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
         // Perform logical AND on words in common
         for (int i = 0; i < value; i++)
             and(i, set.getWord(i));
+        OS.memory().storeFence();
     }
 
     /**
