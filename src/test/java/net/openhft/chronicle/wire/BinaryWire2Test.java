@@ -150,7 +150,7 @@ public class BinaryWire2Test extends WireTestCommon {
                 v -> v.uuid(UUID.randomUUID())
         );
         Wire wire = createWire();
-        Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap(32));
+        Wire wire2 = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(32));
 
         for (Consumer<ValueOut> value : writeValue) {
             wire.clear();
@@ -321,7 +321,7 @@ public class BinaryWire2Test extends WireTestCommon {
 
         // System.out.println(wire.bytes().toHexString());
 
-        @NotNull Wire twire = new TextWire(Bytes.elasticByteBuffer());
+        @NotNull Wire twire = WireType.TEXT.apply(Bytes.elasticByteBuffer());
         twire.usePadding(true);
         writeMessage(twire);
 
@@ -354,7 +354,7 @@ public class BinaryWire2Test extends WireTestCommon {
 
         // System.out.println(wire.bytes().toHexString());
 
-        @NotNull Wire twire = new TextWire(Bytes.elasticByteBuffer());
+        @NotNull Wire twire = WireType.TEXT.apply(Bytes.elasticByteBuffer());
         writeMessageContext(twire);
 
         // System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
@@ -532,7 +532,7 @@ public class BinaryWire2Test extends WireTestCommon {
 
         wire.bytes().readPosition(0);
         Bytes<?> asText = Bytes.elasticByteBuffer();
-        wire.copyTo(new TextWire(asText));
+        wire.copyTo(WireType.TEXT.apply(asText));
         assertEquals("message: # gzip\n" + s +
                 "\n", asText.toString());
         asText.releaseLast();

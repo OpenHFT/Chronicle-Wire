@@ -133,7 +133,7 @@ public class TextWire extends AbstractWire implements Wire {
         NativeBytes<Void> bytes = nativeBytes();
         try {
             long pos = wire.bytes().readPosition();
-            @NotNull TextWire tw = new TextWire(bytes);
+            @NotNull Wire tw = WireType.TEXT.apply(bytes);
             wire.copyTo(tw);
             wire.bytes().readPosition(pos);
             return tw.toString();

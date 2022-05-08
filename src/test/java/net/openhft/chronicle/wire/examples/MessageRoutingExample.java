@@ -1,10 +1,11 @@
 package net.openhft.chronicle.wire.examples;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.util.BinaryLengthLength;
-import net.openhft.chronicle.wire.*;
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -59,7 +60,7 @@ public class MessageRoutingExample {
 
     // the serialized data gets written to 'wire'
     //  private final Wire wire = new BinaryWire(new HexDumpBytes());
-    private final Wire wire = new TextWire(Bytes.allocateElasticOnHeap());
+    private final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
 
     private void demo() {

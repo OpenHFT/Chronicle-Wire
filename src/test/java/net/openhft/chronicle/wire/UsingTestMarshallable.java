@@ -38,7 +38,7 @@ public class UsingTestMarshallable {
 
         Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer();
 
-        @NotNull Wire wire = new TextWire(byteBufferBytes);
+        @NotNull Wire wire = WireType.TEXT.apply(byteBufferBytes);
         wire.usePadding(true);
         wire.bytes().readPosition();
 

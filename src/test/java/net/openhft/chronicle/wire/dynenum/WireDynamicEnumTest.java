@@ -27,7 +27,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
 
     @Test
     public void addedEnum() throws NoSuchFieldException {
-        TextWire tw = new TextWire(Bytes.allocateElasticOnHeap());
+        Wire tw = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
         UsesWDENums nums = tw.methodWriter(UsesWDENums.class);
         nums.push(WDENums.ONE);
 

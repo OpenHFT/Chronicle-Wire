@@ -55,7 +55,7 @@ public class WireSerializedLambdaTest extends WireTestCommon {
 
     @Test
     public void testTextWire() {
-        @NotNull Wire wire = new TextWire(Bytes.elasticByteBuffer());
+        @NotNull Wire wire = WireType.TEXT.apply(Bytes.elasticByteBuffer());
         SerializableFunction<String, String> fun = String::toUpperCase;
 
         wire.write(() -> "one").object(fun)

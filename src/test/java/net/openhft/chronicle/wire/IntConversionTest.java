@@ -65,7 +65,7 @@ public class IntConversionTest extends WireTestCommon {
 
     @Test
     public void twoArgumentsConversion() {
-        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(128));
+        Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(128));
 
         final TwoArgumentsConversion writer = wire.methodWriter(TwoArgumentsConversion.class);
 

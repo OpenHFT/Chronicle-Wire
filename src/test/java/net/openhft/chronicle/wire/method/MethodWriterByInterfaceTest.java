@@ -37,7 +37,7 @@ public class MethodWriterByInterfaceTest extends WireTestCommon {
     }
 
     private void checkWriteReadViaImplementation() {
-        TextWire tw = new TextWire(Bytes.allocateElasticOnHeap());
+        Wire tw = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
         MWBI0 mwbi0 = tw.methodWriter(MWBI0.class);
         mwbi0.method(new MWBImpl("name", 1234567890123456L));
         assertFalse(Proxy.isProxyClass(mwbi0.getClass()));

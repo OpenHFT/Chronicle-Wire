@@ -74,8 +74,8 @@ public class EscapeCharsTest extends WireTestCommon {
     }
 
     @NotNull
-    static TextWire createWire() {
-        return new TextWire(nativeBytes());
+    static Wire createWire() {
+        return WireType.TEXT.apply(nativeBytes());
     }
 
     @Test

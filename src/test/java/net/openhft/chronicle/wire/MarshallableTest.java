@@ -63,7 +63,7 @@ public class MarshallableTest extends WireTestCommon {
 
         @NotNull Bytes<?> bytes = allocateElasticOnHeap();
         assertTrue(bytes.isElastic());
-        @NotNull TextWire wire = new TextWire(bytes);
+        @NotNull Wire wire = WireType.TEXT.apply(bytes);
         m.writeMarshallable(wire);
 
         m.readMarshallable(wire);
@@ -85,7 +85,7 @@ public class MarshallableTest extends WireTestCommon {
         source.text("a");
         @NotNull final Marshallable destination = new MyTypes();
         assertNotEquals(source, destination);
-        @NotNull final TextWire wire = new TextWire(bytes);
+        @NotNull final Wire wire = WireType.TEXT.apply(bytes);
         source.writeMarshallable(wire);
         destination.readMarshallable(wire);
         assertEquals(source, destination);
