@@ -115,6 +115,7 @@ public interface ValueIn {
     @NotNull
     WireIn bytes(@NotNull ReadBytesMarshallable bytesMarshallable);
 
+    @Nullable
     default byte[] bytes() {
         return bytes((byte[]) null);
     }
