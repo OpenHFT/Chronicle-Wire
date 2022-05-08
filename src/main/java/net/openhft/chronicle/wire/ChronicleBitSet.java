@@ -3,7 +3,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.io.Closeable;
 
 public interface ChronicleBitSet extends Marshallable, Closeable {
-    int BITS_PER_WORD = Long.BYTES * 8;
+    long BITS_PER_WORD = Long.BYTES * 8;
 
     /**
      * Returns the number of bits of space actually in use by this {@code ChronicleBitSet} to represent bit values.
@@ -120,7 +120,7 @@ public interface ChronicleBitSet extends Marshallable, Closeable {
         for (int i = getWordsInUse() - 1; i >= 0; i--) {
             long word = getWord(i);
             if (word != 0) {
-                return BITS_PER_WORD * (i + 1) - Long.numberOfLeadingZeros(word);
+                return Math.toIntExact(BITS_PER_WORD * (i + 1) - Long.numberOfLeadingZeros(word));
             }
         }
         return 0;

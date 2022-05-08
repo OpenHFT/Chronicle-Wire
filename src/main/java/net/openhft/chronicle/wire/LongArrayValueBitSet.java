@@ -67,7 +67,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
         if (bitIndex < 0)
             throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
 
-        return bitIndex / BITS_PER_WORD;
+        return (int) (bitIndex / BITS_PER_WORD);
     }
 
     /**
@@ -378,7 +378,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
 
         while (true) {
             if (word != 0)
-                return (u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word);
+                return Math.toIntExact((u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word));
             if (++u == getWordsInUse())
                 return -1;
             word = words.getValueAt(u);
@@ -400,7 +400,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
 
         while (true) {
             if (word != 0)
-                return (u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word);
+                return Math.toIntExact((u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word));
             if (++u == getWordsInUse())
                 return -1;
             if (u * BITS_PER_WORD > toIndex)
@@ -423,7 +423,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
 
         while (true) {
             if (word != 0)
-                return (u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word);
+                return Math.toIntExact((u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word));
             if (++u == getWordsInUse())
                 return Math.toIntExact(getWordsInUse() * BITS_PER_WORD);
             word = ~words.getValueAt(u);
@@ -452,7 +452,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
 
         while (true) {
             if (word != 0)
-                return (u + 1) * BITS_PER_WORD - 1 - Long.numberOfLeadingZeros(word);
+                return Math.toIntExact((u + 1) * BITS_PER_WORD - 1 - Long.numberOfLeadingZeros(word));
             if (u-- == 0)
                 return -1;
             word = words.getValueAt(u);
@@ -481,7 +481,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
 
         while (true) {
             if (word != 0)
-                return (u + 1) * BITS_PER_WORD - 1 - Long.numberOfLeadingZeros(word);
+                return Math.toIntExact((u + 1) * BITS_PER_WORD - 1 - Long.numberOfLeadingZeros(word));
             if (u-- == 0)
                 return -1;
             word = ~words.getValueAt(u);
