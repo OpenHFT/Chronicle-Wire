@@ -4,18 +4,14 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.*;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.io.ObjectInput;
 import java.io.OutputStream;
-import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Map;
 
-import static net.openhft.chronicle.bytes.Bytes.*;
-import static net.openhft.chronicle.wire.Wires.*;
+import static net.openhft.chronicle.bytes.Bytes.allocateElasticDirect;
+import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 
 /**
  * Equivalent to wget --post-data='{data}' http://{host}:{port}/url...
@@ -23,7 +19,7 @@ import static net.openhft.chronicle.wire.Wires.*;
 
 public class HTTPMarshallableOut implements MarshallableOut {
     private final URL url;
-    private Wire wire;
+    private final Wire wire;
     private final DocumentContextHolder dcHolder = new DocumentContextHolder() {
         @Override
         public void close() {
