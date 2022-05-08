@@ -1460,6 +1460,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut bytesLiteral(@Nullable BytesStore fromBytes) {
+            if (fromBytes == null)
+                return nu11();
             long remaining = fromBytes.readRemaining();
             writeLength(Maths.toInt32(remaining));
             bytes.write(fromBytes);
