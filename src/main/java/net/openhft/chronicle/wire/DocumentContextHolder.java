@@ -3,7 +3,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.Nullable;
 
-public class DocumentContextHolder implements DocumentContext {
+public class DocumentContextHolder implements DocumentContext, WriteDocumentContext {
 
     DocumentContext dc;
 
@@ -56,5 +56,20 @@ public class DocumentContextHolder implements DocumentContext {
 
     public boolean isClosed() {
         return dc == null;
+    }
+
+    @Override
+    public void start(boolean metaData) {
+        ((WriteDocumentContext) dc).start(metaData);
+    }
+
+    @Override
+    public boolean chainedElement() {
+        return ((WriteDocumentContext) dc).chainedElement();
+    }
+
+    @Override
+    public void chainedElement(boolean chainedElement) {
+        ((WriteDocumentContext) dc).chainedElement(chainedElement);
     }
 }

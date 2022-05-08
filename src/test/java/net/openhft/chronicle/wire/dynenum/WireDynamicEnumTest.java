@@ -230,6 +230,13 @@ public class WireDynamicEnumTest extends WireTestCommon {
                 "KING = King = 112\n", sw.toString());
     }
 
+    @Test
+    public void testDeepCopy() {
+        assertEquals(WDENums.ONE, WDENums.ONE.deepCopy());
+
+        assertSame(WDENums.TWO, WDENums.TWO.deepCopy());
+    }
+
     enum WDENums implements WDEI, DynamicEnum {
         ONE("One", 1),
         TWO("Two", 2);

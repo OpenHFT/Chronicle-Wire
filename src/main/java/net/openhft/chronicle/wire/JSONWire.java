@@ -44,6 +44,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
  * At the moment, this is a cut down version of the YAML wire format.
  */
 public class JSONWire extends TextWire {
+
     @SuppressWarnings("rawtypes")
     static final BytesStore COMMA = BytesStore.from(",");
     static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_JSON_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT_JSON::escaping;
@@ -206,7 +207,10 @@ public class JSONWire extends TextWire {
                 return;
 
             case '{':
-                copyMap(wire);
+                if (isTypePrefix())
+                    copyTypePrefix(wire);
+                else
+                    copyMap(wire);
                 return;
 
             case '[':
@@ -245,8 +249,33 @@ public class JSONWire extends TextWire {
         throw new IORuntimeException("Unexpected chars '" + bytes.parse8bit(StopCharTesters.CONTROL_STOP) + "'");
     }
 
+    private void copyTypePrefix(WireOut wire) {
+        final StringBuilder sb = acquireStringBuilder();
+        // the type literal
+        getValueIn().text(sb);
+        // drop the '@
+        sb.deleteCharAt(0);
+        wire.getValueOut().typePrefix(sb);
+        consumePadding();
+        int ch = bytes.readUnsignedByte();
+        if (ch != ':')
+            throw new IORuntimeException("Expected a ':' after the type " + sb + " but got a " + (char) ch);
+        copyOne(wire, true, false);
+
+        consumePadding();
+        int ch2 = bytes.readUnsignedByte();
+        if (ch2 != '}')
+            throw new IORuntimeException("Expected a '}' after the type " + sb + " but got a " + (char) ch);
+    }
+
+    private boolean isTypePrefix() {
+        final long rp = bytes.readPosition();
+        return bytes.peekUnsignedByte(rp) == '"'
+                && bytes.peekUnsignedByte(rp + 1) == '@';
+    }
+
     private void copyQuote(WireOut wire, int ch, boolean inMap, boolean topLevel) {
-        final StringBuilder sb = Wires.acquireStringBuilder();
+        final StringBuilder sb = acquireStringBuilder();
         while (bytes.readRemaining() > 0) {
             int ch2 = bytes.readUnsignedByte();
             if (ch2 == ch)
@@ -667,62 +696,19 @@ public class JSONWire extends TextWire {
             if (!hasTypeDefinition()) {
                 return super.object();
             } else {
-                final StringBuilder sb = Wires.acquireStringBuilder();
+                final StringBuilder sb = acquireStringBuilder();
                 sb.setLength(0);
                 this.wireIn().read(sb);
                 final Class<?> clazz = classLookup().forName(sb.subSequence(1, sb.length()));
                 return parseType(null, clazz);
             }
-
-/*
-            consumePadding();
-            final char openingBracket = bytes.readChar();
-            assert openingBracket == '{';
-            consumePadding();
-            final char openingQuote = bytes.readChar();
-            assert openingQuote == '"';
-            final Class<?> typePrefix = typePrefix();
-            consumePadding();
-            final char closingQuote = bytes.readChar();
-            assert closingQuote == '"'; */
-
-
-            /*
-            final StringBuilder sb = Wires.acquireStringBuilder();
-            sb.setLength(0);
-            this.wireIn().read(sb);
-            try {
-                final Bytes<?> bytes2 = wireIn().bytes();
-                assert sb.charAt(0) == '@' : "Did not start with an @ character: " + bytes;
-                final Class<?> clazz = Class.forName(sb.substring(1));
-                this.wireIn().consumePadding();
-
-                final long writePos = bytes.writePosition();
-                bytes.writePosition(bytes.readPosition());
-                bytes.writeChar('!');
-                bytes.writePosition(writePos);
-
-                // Skip opening bracket
-                // this.wireIn().bytes().readChar();
-
-                final Object object = objectWithInferredType(null, SerializationStrategies.ANY_NESTED, clazz);
-                //final Object object = object(clazz);
-
-                // this.wireIn().consumePadding();
-                // Skip closing bracket (todo: assert })
-                // this.wireIn().bytes().readChar();
-
-                return object;
-            } catch (ReflectiveOperationException e) {
-                throw new RuntimeException(e);
-            } */
         }
 
         private <E> E parseType(@Nullable E using, @Nullable Class clazz) {
             if (!hasTypeDefinition()) {
                 return super.object(using, clazz);
             } else {
-                final StringBuilder sb = Wires.acquireStringBuilder();
+                final StringBuilder sb = acquireStringBuilder();
                 sb.setLength(0);
                 readTypeDefinition(sb);
                 final Class<?> overrideClass = classLookup().forName(sb.subSequence(1, sb.length()));
@@ -774,44 +760,5 @@ public class JSONWire extends TextWire {
         public boolean useTypes() {
             return useTypes;
         }
-
     }
-
-/*
-    final class MapMarshaller<K, V> implements WriteMarshallable {
-        private Map<K, V> map;
-        private Class<K> kClass;
-        private Class<V> vClass;
-        private boolean leaf;
-
-        void params(@Nullable Map<K, V> map, @NotNull Class<K> kClass, @NotNull Class<V> vClass, boolean leaf) {
-            this.map = map;
-            this.kClass = kClass;
-            this.vClass = vClass;
-            this.leaf = leaf;
-        }
-
-        @Override
-        public void writeMarshallable(@NotNull WireOut wire) {
-            for (@NotNull Map.Entry<K, V> entry : map.entrySet()) {
-                final K key = entry.getKey();
-
-                Bytes<?> bytes = null;
-                bytes.app
-
-
-
-//                 StringUtils
-
-                ValueOut valueOut = wire.write()writeEvent(kClass, entry.getKey());
-
-                boolean wasLeaf = valueOut.swapLeaf(leaf);
-                valueOut.object(vClass, entry.getValue());
-                valueOut.swapLeaf(wasLeaf);
-            }
-        }
-    }
-    */
-
-
 }
