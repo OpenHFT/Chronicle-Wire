@@ -18,24 +18,21 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
-import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 /**
  * YAML Based wire format
  */
 public class CSVWire extends TextWire {
 
-    private static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_END_OF_TEXT = new ThreadLocal<>();
-    static final Supplier<StopCharTester> COMMA_STOP_ESCAPING = StopCharTesters.COMMA_STOP::escaping;
+    private static final ThreadLocal<StopCharTester> ESCAPED_END_OF_TEXT = ThreadLocal.withInitial(
+            StopCharTesters.COMMA_STOP::escaping);
 
     private final List<String> header = new ArrayList<>();
 
@@ -67,7 +64,7 @@ public class CSVWire extends TextWire {
 
     @NotNull
     static StopCharTester getEscapingCSVEndOfText() {
-        StopCharTester escaping = ThreadLocalHelper.getTL(ESCAPED_END_OF_TEXT, COMMA_STOP_ESCAPING);
+        StopCharTester escaping = ESCAPED_END_OF_TEXT.get();
         // reset it.
         escaping.isStopChar(' ');
         return escaping;
