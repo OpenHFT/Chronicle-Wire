@@ -1441,9 +1441,9 @@ public class YamlWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut zonedDateTime(@Nullable ZonedDateTime zonedDateTime) {
+            if (zonedDateTime == null)
+                return nu11();
             if (dropDefault) {
-                if (zonedDateTime == null)
-                    return wireOut();
                 writeSavedEventName();
             }
             final String s = zonedDateTime.toString();
