@@ -425,7 +425,8 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
             if (word != 0)
                 return Math.toIntExact((u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word));
             if (++u == getWordsInUse())
-                return Math.toIntExact(getWordsInUse() * BITS_PER_WORD);
+                // TODO Overflows to MIN_VALUE
+                return (int) (getWordsInUse() * BITS_PER_WORD);
             word = ~words.getValueAt(u);
         }
     }
