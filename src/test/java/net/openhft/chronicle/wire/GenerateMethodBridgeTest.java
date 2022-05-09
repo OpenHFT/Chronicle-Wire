@@ -39,7 +39,7 @@ public class GenerateMethodBridgeTest extends WireTestCommon {
         md.baseClassName("GMB");
         Class<GMBZ> aClass = gmb.acquireClass(getClass().getClassLoader());
         StringWriter sw = new StringWriter();
-        List args = Arrays.asList(
+        List<?> args = Arrays.asList(
                 Mocker.logging(GMBA.class, "gmba.", sw),
                 Mocker.logging(GMBB.class, "gmbb.", sw),
                 Mocker.logging(GMBZ.class, "gmbz.", sw)

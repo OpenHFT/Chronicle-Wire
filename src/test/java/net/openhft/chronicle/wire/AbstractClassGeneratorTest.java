@@ -67,7 +67,7 @@ public class AbstractClassGeneratorTest extends WireTestCommon {
                 .packageName(getClass().getPackage().getName())
                 .baseClassName("ACGT")
                 .message = message;
-        Class<Callable> aClass = scg.acquireClass(getClass().getClassLoader());
+        Class<Callable<String>> aClass = scg.acquireClass(getClass().getClassLoader());
         Callable<String> callable = aClass.getDeclaredConstructor().newInstance();
         // break point on the next line to be able to debug the generated class.
         String call = callable.call();

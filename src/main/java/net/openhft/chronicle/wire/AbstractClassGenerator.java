@@ -16,26 +16,26 @@ import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.MetaData<MD>> {
+public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.MetaData<M>> {
     public static final CachedCompiler CACHED_COMPILER = new CachedCompiler(Jvm.isDebug() ? new File(OS.getTarget(), "generated-test-sources") : null, null);
     private static final boolean DUMP_CODE = Jvm.getBoolean("dumpCode");
     protected final SourceCodeFormatter sourceCode = new JavaSourceCodeFormatter();
     protected SortedSet<String> importSet = new TreeSet<>();
-    private final MD metaData;
+    private final M metaData;
     private int maxCode = 6;
 
-    protected AbstractClassGenerator(MD metaData) {
+    protected AbstractClassGenerator(M metaData) {
         this.metaData = metaData;
     }
 
-    public MD metaData() {
+    public M metaData() {
         return metaData;
     }
 
-    public synchronized Class acquireClass(ClassLoader classLoader) {
+    public synchronized <T> Class<T> acquireClass(ClassLoader classLoader) {
         String fullName = metaData.packageName() + "." + className();
         try {
-            return classLoader.loadClass(fullName);
+            return (Class<T>) classLoader.loadClass(fullName);
 
         } catch (ClassNotFoundException cnfe) {
             // ignored
@@ -77,7 +77,7 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
                         .append(mainCode)
                         .append("}\n");
                 if (DUMP_CODE)
-                    System.out.println(sourceCode);
+                    Jvm.startup().on(AbstractClassGenerator.class, sourceCode.toString());
             }
             return CACHED_COMPILER.loadFromJava(classLoader, fullName, sourceCode.toString());
         } catch (Throwable e) {
@@ -89,11 +89,11 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
         return null;
     }
 
-    protected Class extendsClass() {
+    protected Class<?> extendsClass() {
         return Object.class;
     }
 
-    public String nameForClass(Class clazz) {
+    public String nameForClass(Class<?> clazz) {
         if (clazz.isArray())
             return nameForClass(clazz.getComponentType()) + "[]";
         String s = clazz.getName().replace('$', '.');
@@ -118,7 +118,7 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
         return maxCode;
     }
 
-    public AbstractClassGenerator maxCode(int maxCode) {
+    public AbstractClassGenerator<M> maxCode(int maxCode) {
         this.maxCode = maxCode;
         return this;
     }
@@ -151,7 +151,7 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
         generateEnd(mainCode);
     }
 
-    protected String fieldCase(Class clazz) {
+    protected String fieldCase(Class<?> clazz) {
         if (clazz.isPrimitive()) {
             if (clazz == boolean.class)
                 return "flag";
@@ -234,7 +234,7 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
     protected Set<Method> methodsToOverride() {
         Map<String, Method> sig2methodMap = new TreeMap<>();
         Set<String> overridenSet = new LinkedHashSet<>();
-        for (Class clazz : metaData().interfaces()) {
+        for (Class<?> clazz : metaData().interfaces()) {
             addMethodsFor(sig2methodMap, overridenSet, clazz);
         }
         addMethodsFor(sig2methodMap, overridenSet, extendsClass());
@@ -244,7 +244,7 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
         return new LinkedHashSet<>(sig2methodMap.values());
     }
 
-    private void addMethodsFor(Map<String, Method> sig2methodMap, Set<String> overridenSet, Class clazz) {
+    private void addMethodsFor(Map<String, Method> sig2methodMap, Set<String> overridenSet, Class<?> clazz) {
         for (Method method : clazz.getMethods()) {
             String sig = method.getName() + Arrays.toString(method.getParameterTypes());
             if (Modifier.isAbstract(method.getModifiers())) {
@@ -255,48 +255,48 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
         }
     }
 
-    public abstract static class MetaData<MD extends MetaData<MD>> extends SelfDescribingMarshallable {
+    public abstract static class MetaData<M extends MetaData<M>> extends SelfDescribingMarshallable {
         private String packageName = "";
         private String baseClassName = "";
-        private Set<Class> interfaces = new LinkedHashSet<>();
+        private Set<Class<?>> interfaces = new LinkedHashSet<>();
         private boolean useUpdateInterceptor;
 
         public String packageName() {
             return packageName;
         }
 
-        public MD packageName(String packageName) {
+        public M packageName(String packageName) {
             this.packageName = packageName;
-            return (MD) this;
+            return (M) this;
         }
 
         public String baseClassName() {
             return baseClassName;
         }
 
-        public MD baseClassName(String baseClassName) {
+        public M baseClassName(String baseClassName) {
             if (!SourceVersion.isIdentifier(baseClassName))
                 throw new IllegalArgumentException(baseClassName + " is not a valid class name");
             this.baseClassName = baseClassName;
-            return (MD) this;
+            return (M) this;
         }
 
-        public Set<Class> interfaces() {
+        public Set<Class<?>> interfaces() {
             return interfaces;
         }
 
-        public MD interfaces(Set<Class> interfaces) {
+        public M interfaces(Set<Class<?>> interfaces) {
             this.interfaces = interfaces;
-            return (MD) this;
+            return (M) this;
         }
 
         public boolean useUpdateInterceptor() {
             return useUpdateInterceptor;
         }
 
-        public MD useUpdateInterceptor(boolean useUpdateInterceptor) {
+        public M useUpdateInterceptor(boolean useUpdateInterceptor) {
             this.useUpdateInterceptor = useUpdateInterceptor;
-            return (MD) this;
+            return (M) this;
         }
     }
 }

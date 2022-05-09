@@ -111,8 +111,8 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         if (rollbackIfNeeded())
             return;
 
-        long readLimit = this.readLimit;
-        long readPosition = this.readPosition;
+        long readLimit0 = this.readLimit;
+        long readPosition0 = this.readPosition;
 
         AbstractWire wire0 = this.wire;
         if (present && ensureFullRead && start >= 0 && wire0 != null && wire0.hasMore()) {
@@ -120,12 +120,12 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         }
 
         start = -1;
-        if (readLimit > 0 && wire0 != null) {
+        if (readLimit0 > 0 && wire0 != null) {
             @NotNull final Bytes<?> bytes = wire0.bytes();
-            bytes.readLimit(readLimit);
+            bytes.readLimit(readLimit0);
             if (wire.usePadding())
-                readPosition += BytesUtil.padOffset(readPosition);
-            bytes.readPosition(Math.min(readLimit, readPosition));
+                readPosition0 += BytesUtil.padOffset(readPosition0);
+            bytes.readPosition(Math.min(readLimit0, readPosition0));
         }
 
         present = false;
