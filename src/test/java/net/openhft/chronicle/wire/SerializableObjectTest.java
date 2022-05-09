@@ -32,7 +32,6 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 final class SerializableObjectTest extends WireTestCommon {
 
@@ -220,7 +219,8 @@ final class SerializableObjectTest extends WireTestCommon {
         try {
             Object source = o == null ? aClass.newInstance() : o;
             // sanity check
-            assertNotNull(source.toString());
+            if (source.toString() == null)
+                return false;
             // can it be serialized
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -230,15 +230,11 @@ final class SerializableObjectTest extends WireTestCommon {
             ObjectInputStream ois = new ObjectInputStream(bis);
             Object source2 = ois.readObject();
             if (source instanceof Throwable) {
-                assertEquals(source.getClass(), source2.getClass());
-                assertEquals(((Throwable) source).getMessage(), ((Throwable) source2).getMessage());
+                return source.getClass() == source2.getClass()
+                        && Objects.equals(((Throwable) source).getMessage(), ((Throwable) source2).getMessage());
             } else {
-                assertEquals(source, source2);
+                return Objects.equals(source, source2);
             }
-            return true;
-        } catch (AssertionError ae) {
-            // Java Serialization does serialize/deserialize a class which is equal
-            return false;
         } catch (InstantiationException | NotSerializableException | IllegalAccessException t) {
             return false;
         } catch (Throwable t) {

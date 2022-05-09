@@ -21,8 +21,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.ByteBuffer;
-
 @SuppressWarnings("rawtypes")
 public class WireDumper {
     @NotNull
@@ -76,7 +74,7 @@ public class WireDumper {
         final long limit0 = bytes.readLimit();
         final long position0 = bytes.readPosition();
 
-        Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
+        Bytes<?> bytes2 = Bytes.allocateElasticOnHeap();
         try {
             bytes.readPosition(position);
             long limit2 = Math.min(limit0, position + length);
@@ -100,11 +98,11 @@ public class WireDumper {
         return sb.toString();
     }
 
-    public boolean dumpOne(@NotNull StringBuilder sb, @Nullable Bytes<ByteBuffer> buffer) {
+    public boolean dumpOne(@NotNull StringBuilder sb, @Nullable Bytes<?> buffer) {
         return dumpOne(sb, buffer, false);
     }
 
-    public boolean dumpOne(@NotNull StringBuilder sb, @Nullable Bytes<ByteBuffer> buffer, boolean abbrev) {
+    public boolean dumpOne(@NotNull StringBuilder sb, @Nullable Bytes<?> buffer, boolean abbrev) {
         bytes.readPositionForHeader(wireIn.usePadding());
         long start = this.bytes.readPosition();
         int header = this.bytes.readInt();

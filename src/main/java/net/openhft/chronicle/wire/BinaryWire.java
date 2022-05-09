@@ -1460,6 +1460,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut bytesLiteral(@Nullable BytesStore fromBytes) {
+            if (fromBytes == null)
+                return nu11();
             long remaining = fromBytes.readRemaining();
             writeLength(Maths.toInt32(remaining));
             bytes.write(fromBytes);
@@ -1471,7 +1473,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return compressedSize;
         }
 
-        public void bytes0(@Nullable BytesStore fromBytes, long remaining) {
+        public void bytes0(@NotNull BytesStore fromBytes, long remaining) {
             writeLength(Maths.toInt32(remaining + 1));
             writeCode(U8_ARRAY);
             if (remaining > 0)
@@ -2703,9 +2705,9 @@ public class BinaryWire extends AbstractWire implements Wire {
             return wireIn();
         }
 
-        @NotNull
+        @Nullable
         @Override
-        public byte @NotNull [] bytes(byte[] using) {
+        public byte[] bytes(byte[] using) {
             long length = readLength();
             int code = readCode();
             if (code == NULL) {

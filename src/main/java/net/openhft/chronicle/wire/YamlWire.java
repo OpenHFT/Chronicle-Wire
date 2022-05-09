@@ -1155,6 +1155,8 @@ public class YamlWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut bytes(@NotNull String type, @Nullable BytesStore bytesStore) {
+            if (bytesStore == null)
+                return nu11();
             if (dropDefault) {
                 writeSavedEventName();
             }
@@ -1439,9 +1441,9 @@ public class YamlWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut zonedDateTime(@Nullable ZonedDateTime zonedDateTime) {
+            if (zonedDateTime == null)
+                return nu11();
             if (dropDefault) {
-                if (zonedDateTime == null)
-                    return wireOut();
                 writeSavedEventName();
             }
             final String s = zonedDateTime.toString();
@@ -2000,6 +2002,9 @@ public class YamlWire extends AbstractWire implements Wire {
             switch (yt.current()) {
                 default:
                     throw new UnsupportedOperationException(yt.toString());
+                case DIRECTIVES_END:
+                    yt.next();
+                    return getBracketType();
                 case MAPPING_START:
                     return BracketType.MAP;
                 case SEQUENCE_START:
@@ -2270,15 +2275,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
         long getALong() {
             if (yt.current() == YamlToken.TEXT) {
-                String text = yt.text();
-                long l;
-                if ((text.startsWith("0x") || text.startsWith("0X")) && text.length() > 2) {
-                    l = Long.parseLong(text.substring(2), 16);
-                } else if (text.startsWith("0") && text.length() > 1) {
-                    l = Long.parseLong(text.substring(text.length() > 2 && text.charAt(1) == 'o' ? 2 : 1), 8);
-                } else {
-                    l = Long.parseLong(text);
-                }
+                long l = yt.parseLong();
                 yt.next();
                 return l;
             }
@@ -2311,7 +2308,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
         public double getADouble() {
             if (yt.current() == YamlToken.TEXT) {
-                double v = Double.parseDouble(yt.text());
+                double v = yt.parseDouble();
                 yt.next();
                 return v;
             } else {
