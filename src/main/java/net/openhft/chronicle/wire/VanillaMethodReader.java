@@ -195,7 +195,6 @@ public class VanillaMethodReader implements MethodReader {
     // package local for testing
     static @NotNull String logMessage0(@NotNull CharSequence s, @NotNull ValueIn v) {
         try {
-            @NotNull String name = s.toString();
             String rest;
 
             if (v.wireIn().isBinary()) {
