@@ -76,7 +76,8 @@ class AbstractUntypedFieldTest extends WireTestCommon {
     static Stream<Function<Bytes<byte[]>, Wire>> provideWire() {
         return Stream.of(
                 JSONWire::new,
-                TextWire::new
+                TextWire::new,
+                YamlWire::new
         );
     }
 

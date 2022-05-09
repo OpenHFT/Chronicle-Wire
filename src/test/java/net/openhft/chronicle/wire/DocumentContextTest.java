@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 public class DocumentContextTest extends WireTestCommon {
     @Test
     public void multiMessageText() {
-        TextWire wire = new TextWire(Bytes.allocateElasticOnHeap()).useBinaryDocuments();
+        Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
         Bytes<?> bytes = doTest(wire);
         bytes.readSkip(4);

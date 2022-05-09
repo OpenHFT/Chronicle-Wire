@@ -28,7 +28,7 @@ public class EnumWireTest extends WireTestCommon {
 
     @Parameterized.Parameters
     public static Iterable<Function<Bytes<?>, Wire>> wires() {
-        return Arrays.asList(TextWire::new, BinaryWire::new, RawWire::new);
+        return Arrays.asList(YamlWire::new, TextWire::new, BinaryWire::new, RawWire::new);
     }
 
     private static Wire serialise(@NotNull Function<Bytes<?>, Wire> createWire, @NotNull Marshallable person) {

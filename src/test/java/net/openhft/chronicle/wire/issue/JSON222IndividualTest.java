@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
+import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
@@ -69,7 +70,7 @@ public class JSON222IndividualTest extends WireTestCommon {
     }
 
     void checkSerialized(@NotNull String expected, Object o) {
-        @NotNull Wire wire = new TextWire(Bytes.elasticByteBuffer());
+        @NotNull Wire wire = WireType.TEXT.apply(Bytes.elasticByteBuffer());
         try {
             wire.getValueOut()
                     .object(o);

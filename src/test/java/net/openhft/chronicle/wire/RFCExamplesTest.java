@@ -46,7 +46,7 @@ tid: 1426502826520
 --- !!data
 lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
  */
-        @NotNull Wire text = new TextWire(bytes);
+        @NotNull Wire text = WireType.TEXT.apply(bytes);
         text.usePadding(true);
         writeMessageOne(text);
 

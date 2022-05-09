@@ -19,9 +19,9 @@ package net.openhft.chronicle.wire.compact;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.BinaryWire;
-import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
+import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
@@ -39,7 +39,7 @@ public class DotNetTest extends WireTestCommon {
        // System.out.println(bytes.toHexString());
         @NotNull Wire wire = new BinaryWire(bytes);
         @NotNull Bytes<?> text = Bytes.allocateElasticOnHeap();
-        wire.copyTo(new TextWire(text));
+        wire.copyTo(WireType.TEXT.apply(text));
        // System.out.println(text);
 
         bytes.releaseLast();

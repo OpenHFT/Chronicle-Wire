@@ -23,7 +23,7 @@ import static org.junit.Assert.assertTrue;
 public class MethodWriterTest extends WireTestCommon {
     @Test
     public void testSubclasses() {
-        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256));
+        Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(256));
         wire.usePadding(true);
 
         Event writer = wire.methodWriterBuilder(Event.class).genericEvent("event").build();
@@ -104,7 +104,7 @@ public class MethodWriterTest extends WireTestCommon {
 
     @Test
     public void multiOut() {
-        TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
+        Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
 
         Event event = wire.methodWriter(Event.class);
@@ -132,7 +132,7 @@ public class MethodWriterTest extends WireTestCommon {
 
     @Test
     public void ignoreStatic() {
-        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256));
+        Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(256));
         wire.usePadding(true);
 
         Closeable writer = wire.methodWriter(Closeable.class);
@@ -190,7 +190,6 @@ public class MethodWriterTest extends WireTestCommon {
     @Test
     public void testUpdateListenerCheckUpdateInterceptorReturnValue() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
-        wire.usePadding(true);
 
         StringMethod instance = wire.methodWriterBuilder(StringMethod.class).updateInterceptor((methodName, t) -> false).build();
         checkWriterType(instance);
@@ -203,7 +202,6 @@ public class MethodWriterTest extends WireTestCommon {
     public void testMicroTS() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
-        wire.usePadding(true);
 
         HasMicroTS writer = wire.methodWriter(HasMicroTS.class);
         checkWriterType(writer);
@@ -231,7 +229,6 @@ public class MethodWriterTest extends WireTestCommon {
 
     protected void doTestPrimitives(boolean byteShort) {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
-        wire.usePadding(true);
 
         Args writer = wire.methodWriter(Args.class);
         checkWriterType(writer);
@@ -262,7 +259,6 @@ public class MethodWriterTest extends WireTestCommon {
     @Test
     public void testExceptionInMarshallingRollsBack() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
-        wire.usePadding(true);
 
         HasMarshallable instance = wire.methodWriterBuilder(HasMarshallable.class).build();
         checkWriterType(instance);
@@ -277,7 +273,6 @@ public class MethodWriterTest extends WireTestCommon {
     @Test
     public void testMultipleImplsInheritBoth() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
-        wire.usePadding(true);
 
         InheritBoth instance = wire.methodWriterBuilder(InheritBoth.class).build();
         checkWriterType(instance);
@@ -287,7 +282,6 @@ public class MethodWriterTest extends WireTestCommon {
     @Test
     public void testMultipleImplsReturnValues() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
-        wire.usePadding(true);
 
         ReturnValues instance = wire.methodWriterBuilder(ReturnValues.class).build();
         checkWriterType(instance);
@@ -296,7 +290,6 @@ public class MethodWriterTest extends WireTestCommon {
     @Test
     public void testMultipleImplsReturnValuesWorkAround() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
-        wire.usePadding(true);
 
         ReturnValuesWorkAround instance = wire.methodWriterBuilder(ReturnValuesWorkAround.class).build();
         checkWriterType(instance);

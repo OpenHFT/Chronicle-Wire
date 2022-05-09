@@ -52,9 +52,12 @@ import static net.openhft.chronicle.core.io.IOTools.*;
 public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
 
     TEXT {
+        private final boolean TEXT_AS_YAML = Jvm.getBoolean("wire.testAsYaml");
         @NotNull
         @Override
         public Wire apply(@NotNull Bytes<?> bytes) {
+            if (TEXT_AS_YAML)
+                return YAML.apply(bytes);
             return new TextWire(bytes).useBinaryDocuments();
         }
 

@@ -291,7 +291,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     public void testOverloaded() {
         Jvm.recordExceptions();
         try {
-            Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap(32));
+            Wire wire2 = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(32));
             Overloaded writer2 = wire2.methodWriter(Overloaded.class);
             Wire wire = TextWire.from("method: [ ]\n");
             wire.methodReader(writer2);

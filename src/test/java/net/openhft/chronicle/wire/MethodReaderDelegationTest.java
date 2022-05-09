@@ -40,14 +40,14 @@ public class MethodReaderDelegationTest extends WireTestCommon {
 
     @Test
     public void testUnsuccessfulCallIsDelegatedTextWire() {
-        final TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
+        final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
         doTestUnsuccessfullCallIsDelegated(wire);
     }
 
     @Test
     public void testUnsuccessfulCallIsDelegatedYamlWire() {
-        final TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
+        final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
         doTestUnsuccessfullCallIsDelegated(wire);
     }
@@ -141,7 +141,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
             System.setProperty(DISABLE_READER_PROXY_CODEGEN, "true");
 
         try {
-            final TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
+            final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
             final MyInterface writer = wire.methodWriter(MyInterface.class);
             writer.myCall();
 
@@ -171,7 +171,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
             System.setProperty(DISABLE_READER_PROXY_CODEGEN, "true");
 
         try {
-            final TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
+            final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
             final MyInterfaceLong writer = wire.methodWriter(MyInterfaceLong.class);
             writer.myCall(1L);
 
