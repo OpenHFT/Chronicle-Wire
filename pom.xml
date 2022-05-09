@@ -15,7 +15,8 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -23,7 +24,7 @@
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
         <version>1.1.31</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
 
@@ -33,7 +34,7 @@
     <description>Chronicle-Wire</description>
     <packaging>bundle</packaging>
     <properties>
-        <argLine />
+        <argLine/>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <compiler.argument>-Xlint:deprecation</compiler.argument>
@@ -181,7 +182,7 @@
             <plugin>
                 <groupId>net.openhft</groupId>
                 <artifactId>binary-compatibility-enforcer-plugin</artifactId>
-                <version>1.0.9</version>
+                <version>1.0.13</version>
                 <executions>
                     <execution>
                         <phase>verify</phase>
@@ -191,13 +192,13 @@
                         <configuration>
                             <referenceVersion>2.23ea0</referenceVersion>
                             <artifactsURI>https://teamcity.chronicle.software/repository/download</artifactsURI>
-                            <binaryCompatibilityPercentageRequired>98.1</binaryCompatibilityPercentageRequired>
-<!--                            <extraOptions>
+                            <binaryCompatibilityPercentageRequired>96.2</binaryCompatibilityPercentageRequired>
+                            <extraOptions>
                                 <extraOption>
                                     <name>skip-internal-packages</name>
-                                    <value>net.openhft.chronicle.wire.incubator</value>
+                                    <value>net.openhft.chronicle.wire.domestic.*</value>
                                 </extraOption>
-                            </extraOptions>-->
+                            </extraOptions>
                         </configuration>
                     </execution>
                 </executions>
@@ -214,7 +215,7 @@
                     <runOrder>hourly</runOrder>
                 </configuration>
             </plugin>
-           
+
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
