@@ -72,7 +72,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * Given a bit index, return word index containing it.
      */
     private static int wordIndex(int bitIndex) {
-        return bitIndex / BITS_PER_WORD;
+        return (int) (bitIndex / BITS_PER_WORD);
     }
 
     /**
@@ -419,7 +419,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
 
         while (true) {
             if (word != 0)
-                return (u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word);
+                return Math.toIntExact((u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word));
             if (++u == getWordsInUse())
                 return -1;
             word = words[u].getVolatileValue();
@@ -444,7 +444,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
 
         while (true) {
             if (word != 0)
-                return (u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word);
+                return Math.toIntExact((u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word));
             if (++u == getWordsInUse())
                 return -1;
             if (u * BITS_PER_WORD > toIndex)
@@ -472,9 +472,9 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
 
         while (true) {
             if (word != 0)
-                return (u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word);
+                return Math.toIntExact((u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word));
             if (++u == getWordsInUse())
-                return getWordsInUse() * BITS_PER_WORD;
+                return Math.toIntExact(getWordsInUse() * BITS_PER_WORD);
             word = ~words[u].getValue();
         }
     }
@@ -501,7 +501,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
 
         while (true) {
             if (word != 0)
-                return (u + 1) * BITS_PER_WORD - 1 - Long.numberOfLeadingZeros(word);
+                return Math.toIntExact((u + 1) * BITS_PER_WORD - 1 - Long.numberOfLeadingZeros(word));
             if (u-- == 0)
                 return -1;
             word = words[u].getValue();
@@ -530,7 +530,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
 
         while (true) {
             if (word != 0)
-                return (u + 1) * BITS_PER_WORD - 1 - Long.numberOfLeadingZeros(word);
+                return Math.toIntExact((u + 1) * BITS_PER_WORD - 1 - Long.numberOfLeadingZeros(word));
             if (u-- == 0)
                 return -1;
             word = ~words[u].getValue();
@@ -682,7 +682,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * - 1st element.
      */
     public int size() {
-        return words.length * BITS_PER_WORD;
+        return Math.toIntExact(words.length * BITS_PER_WORD);
     }
 
     /**
@@ -718,7 +718,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     public String toString() {
 
         int numBits = (getWordsInUse() > 128) ?
-                cardinality() : getWordsInUse() * BITS_PER_WORD;
+                cardinality() : Math.toIntExact(getWordsInUse() * BITS_PER_WORD);
         StringBuilder b = new StringBuilder(6 * numBits + 2);
         b.append('{');
 

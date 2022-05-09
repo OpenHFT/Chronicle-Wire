@@ -37,14 +37,11 @@ public class YamlTokeniser {
             YamlToken.MAPPING_KEY,
             YamlToken.MAPPING_END,
             YamlToken.DIRECTIVES_END);
-
-    private final BytesIn<?> in;
     protected final List<YTContext> contexts = new ArrayList<>();
+    private final BytesIn<?> in;
     private final List<YTContext> freeContexts = new ArrayList<>();
-    private YamlToken last = YamlToken.STREAM_START;
-    Bytes<?> temp = null;
-
     private final List<YamlToken> pushed = new ArrayList<>();
+    Bytes<?> temp = null;
     long lineStart;
     long blockStart;
     long blockEnd;
@@ -52,6 +49,7 @@ public class YamlTokeniser {
     char blockQuote = 0;
     boolean hasSequenceEntry;
     long lastKeyPosition = -1;
+    private YamlToken last = YamlToken.STREAM_START;
 
     public YamlTokeniser(BytesIn<?> in) {
         this.in = in;
@@ -218,7 +216,12 @@ public class YamlTokeniser {
                 return seq(YamlToken.RESERVED);
             case '!':
                 readWord();
-                return seq(YamlToken.TAG);
+                push(seq(YamlToken.TAG));
+                if (context() == YamlToken.STREAM_START) {
+                    pushContext0(YamlToken.DIRECTIVES_END, NO_INDENT);
+                    push(YamlToken.DIRECTIVES_END);
+                }
+                return popPushed();
             case '{':
                 return flow(YamlToken.MAPPING_START);
             case '}':
@@ -689,9 +692,55 @@ public class YamlTokeniser {
         if (blockStart == blockEnd || NO_TEXT.contains(last))
             return;
         long pos = in.readPosition();
-        in.readPosition(blockStart);
-        in.parseUtf8(sb, Math.toIntExact(blockEnd - blockStart));
-        in.readPosition(pos);
+        try {
+            in.readPosition(blockStart);
+            in.parseUtf8(sb, Math.toIntExact(blockEnd - blockStart));
+        } finally {
+            in.readPosition(pos);
+        }
+    }
+
+    public double parseDouble() {
+        if (blockEnd < 0 && temp != null) {
+            return temp.parseDouble();
+        }
+        if (blockStart == blockEnd || NO_TEXT.contains(last))
+            return -0.0; // no data
+        long pos = in.readPosition();
+        try {
+            in.readPosition(blockStart);
+            return in.parseDouble();
+        } finally {
+            in.readPosition(pos);
+        }
+    }
+
+    public long parseLong() {
+        if (blockEnd < 0 && temp != null) {
+            return temp.parseLong();
+        }
+        if (blockStart == blockEnd || NO_TEXT.contains(last))
+            return 0; // no data
+        long pos = in.readPosition();
+        try {
+            in.readPosition(blockStart);
+            if (in.peekUnsignedByte() == '0') {
+                final int i = in.peekUnsignedByte(in.readPosition() + 1);
+                StringBuilder sb = Wires.acquireStringBuilder();
+                if (Character.isDigit(i)) {
+                    in.readSkip(1);
+                    in.parseUtf8(sb, Math.toIntExact(blockEnd - blockStart) - 1);
+                    return Long.parseLong(sb.toString(), 8);
+                } else if (i == 'o') {
+                    in.readSkip(2);
+                    in.parseUtf8(sb, Math.toIntExact(blockEnd - blockStart) - 2);
+                    return Long.parseLong(sb.toString(), 8);
+                }
+            }
+            return in.parseLong();
+        } finally {
+            in.readPosition(pos);
+        }
     }
 
     public void push(YamlToken token) {

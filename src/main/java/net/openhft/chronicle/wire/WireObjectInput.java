@@ -60,7 +60,7 @@ class WireObjectInput implements ObjectInput {
             len = (int) remaining;
         Bytes<?> bytes = Bytes.wrapForWrite(b);
         bytes.writePosition(off);
-        bytes.writeLimit(off + len);
+        bytes.writeLimit((long) off + len);
         wire.getValueIn().bytes(bytes);
         return (int) (bytes.lengthWritten(off));
     }

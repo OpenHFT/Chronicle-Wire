@@ -217,12 +217,10 @@ public class VanillaMethodReader implements MethodReader {
             // TextWire.toString has an \n at the end
             if (rest.endsWith("\n"))
                 rest = rest.substring(0, rest.length() - 1);
-            return "read " + name + " - " + rest;
-        } catch (Exception ignore) {
-            // todo commented out til the following is fixed  - https://github.com/ChronicleEnterprise/Chronicle-Services/issues/240
-            // Jvm.warn().on(VanillaMethodReader.class, "s=" + s, e);
+            return "read " + s + " - " + rest;
+        } catch (Exception e) {
+            return "read " + s + " - " + e;
         }
-        return null;
     }
 
     private Object[] addObjectsToMetaDataHandlers(Object[] metaDataHandler, @NotNull Object @NotNull [] objects) {

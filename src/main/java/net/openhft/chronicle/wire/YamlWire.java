@@ -130,7 +130,7 @@ public class YamlWire extends AbstractWire implements Wire {
     }
 
     private static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb,
-                                                                        char blockQuote) {
+                                                                         char blockQuote) {
         int end = 0;
         int length = sb.length();
         boolean skip = false;
@@ -406,6 +406,9 @@ public class YamlWire extends AbstractWire implements Wire {
         startEventIfTop();
         if (yt.current() == YamlToken.MAPPING_KEY) {
             YamlToken next = yt.next();
+            if (next == YamlToken.MAPPING_KEY) {
+                return readEvent(expectedClass);
+            }
             if (next == YamlToken.TEXT) {
                 sb.setLength(0);
                 sb.append(yt.text());
@@ -1152,6 +1155,8 @@ public class YamlWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut bytes(@NotNull String type, @Nullable BytesStore bytesStore) {
+            if (bytesStore == null)
+                return nu11();
             if (dropDefault) {
                 writeSavedEventName();
             }
@@ -1436,9 +1441,9 @@ public class YamlWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut zonedDateTime(@Nullable ZonedDateTime zonedDateTime) {
+            if (zonedDateTime == null)
+                return nu11();
             if (dropDefault) {
-                if (zonedDateTime == null)
-                    return wireOut();
                 writeSavedEventName();
             }
             final String s = zonedDateTime.toString();
@@ -1646,7 +1651,11 @@ public class YamlWire extends AbstractWire implements Wire {
             if (dropDefault) {
                 writeSavedEventName();
             }
-            if (!sep.isEmpty()) {
+            if (sep.isEmpty()) {
+                if (!seps.isEmpty())
+                    sep = leaf ? COMMA_SPACE : COMMA_NEW_LINE;
+
+            } else {
                 append(sep);
                 indent();
                 sep = EMPTY;
@@ -1747,14 +1756,7 @@ public class YamlWire extends AbstractWire implements Wire {
                 popState();
                 newLine();
             }
-            if (sep.startsWith(',')) {
-                append(sep, 1, sep.length() - 1);
-                if (!wasLeaf)
-                    indent();
-
-            } else {
-                prependSeparator();
-            }
+            writeEndOfBlock(wasLeaf);
             endBlock('}');
 
             leaf = wasLeaf0;
@@ -1795,14 +1797,7 @@ public class YamlWire extends AbstractWire implements Wire {
                 popState();
                 newLine();
             }
-            if (sep.startsWith(',')) {
-                append(sep, 1, sep.length() - 1);
-                if (!wasLeaf)
-                    indent();
-
-            } else {
-                prependSeparator();
-            }
+            writeEndOfBlock(wasLeaf);
             bytes.writeUnsignedByte(object instanceof Externalizable ? ']' : '}');
             if (popSep != null)
                 sep = popSep;
@@ -1813,6 +1808,19 @@ public class YamlWire extends AbstractWire implements Wire {
                 elementSeparator();
             }
             return YamlWire.this;
+        }
+
+        private void writeEndOfBlock(boolean wasLeaf) {
+            if (sep.startsWith(',')) {
+                char ch = sep.charAt(1);
+                if (bytes.peekUnsignedByte(bytes.readPosition() - 1) != ch)
+                    append(sep, 1, sep.length() - 1);
+                if (!wasLeaf)
+                    indent();
+
+            } else {
+                prependSeparator();
+            }
         }
 
         private void writeSerializable(@NotNull Serializable object) {
@@ -1994,6 +2002,9 @@ public class YamlWire extends AbstractWire implements Wire {
             switch (yt.current()) {
                 default:
                     throw new UnsupportedOperationException(yt.toString());
+                case DIRECTIVES_END:
+                    yt.next();
+                    return getBracketType();
                 case MAPPING_START:
                     return BracketType.MAP;
                 case SEQUENCE_START:
@@ -2264,15 +2275,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
         long getALong() {
             if (yt.current() == YamlToken.TEXT) {
-                String text = yt.text();
-                long l;
-                if ((text.startsWith("0x") || text.startsWith("0X")) && text.length() > 2) {
-                    l = Long.parseLong(text.substring(2), 16);
-                } else if (text.startsWith("0") && text.length() > 1) {
-                    l = Long.parseLong(text.substring(text.length() > 2 && text.charAt(1) == 'o' ? 2 : 1), 8);
-                } else {
-                    l = Long.parseLong(text);
-                }
+                long l = yt.parseLong();
                 yt.next();
                 return l;
             }
@@ -2305,7 +2308,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
         public double getADouble() {
             if (yt.current() == YamlToken.TEXT) {
-                double v = Double.parseDouble(yt.text());
+                double v = yt.parseDouble();
                 yt.next();
                 return v;
             } else {
@@ -2563,6 +2566,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
         @Override
         public Type typeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
+            consumePadding();
             if (yt.current() == YamlToken.TAG) {
                 if (yt.text().equals("type")) {
                     if (yt.next() == YamlToken.TEXT) {

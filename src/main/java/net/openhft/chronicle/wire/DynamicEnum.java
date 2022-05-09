@@ -20,7 +20,7 @@ public interface DynamicEnum extends CoreDynamicEnum, Marshallable {
         E nums = cache.valueOf(e.name());
         List<FieldInfo> fieldInfos = e.$fieldInfos();
         for (FieldInfo fieldInfo : fieldInfos) {
-            fieldInfo.set(nums, fieldInfo.get(e));
+            fieldInfo.copy(e, nums);
         }
     }
 }

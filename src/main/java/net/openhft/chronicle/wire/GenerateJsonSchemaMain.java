@@ -121,7 +121,7 @@ public class GenerateJsonSchemaMain {
     void generateObjectSchemaFor(Class<?> type) {
         if (type.isArray())
             return;
-        if (aliases.containsKey(type) || events.containsKey(type))
+        if (aliases.containsKey(type))
             return;
         aliases.put(type, "#/definitions/" + type.getSimpleName());
         Set<String> required = new LinkedHashSet<>();

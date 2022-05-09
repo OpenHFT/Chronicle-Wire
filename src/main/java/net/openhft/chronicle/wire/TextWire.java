@@ -1205,7 +1205,7 @@ public class TextWire extends AbstractWire implements Wire {
 
     /**
      * @deprecated Will be replaced with a different implementation in the future,
-     *   which will generate correct Yaml but may introduce some behavior changes.
+     * which will generate correct Yaml but may introduce some behavior changes.
      */
     @Deprecated(/* To be removed and replaced by YamlWire.TextValueOut in 2.24 #411 */)
     class TextValueOut implements ValueOut, CommentAnnotationNotifier {
@@ -1237,10 +1237,22 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         void prependSeparator() {
-            append(sep);
-            if (sep.endsWith('\n') || sep == EMPTY_AFTER_COMMENT)
-                indent();
+            appendSep();
             sep = BytesStore.empty();
+        }
+
+        protected void appendSep() {
+            append(sep);
+            trimWhiteSpace();
+            if (bytes.endsWith('\n') || sep == EMPTY_AFTER_COMMENT)
+                indent();
+        }
+
+        protected void trimWhiteSpace() {
+            // remove multiple new lines
+            long wp = bytes.writePosition();
+            if (bytes.peekUnsignedByte(wp - 1) == '\n' && bytes.peekUnsignedByte(wp - 2) == '\n')
+                bytes.writeSkip(-1);
         }
 
         @Override
@@ -1259,7 +1271,7 @@ public class TextWire extends AbstractWire implements Wire {
             return TextWire.this;
         }
 
-        private void indent() {
+        protected void indent() {
             for (int i = 0; i < indentation; i++) {
                 bytes.writeUnsignedShort(' ' * 257);
             }
@@ -1409,6 +1421,8 @@ public class TextWire extends AbstractWire implements Wire {
             if (dropDefault) {
                 writeSavedEventName();
             }
+            if (bytesStore == null)
+                return nu11();
             prependSeparator();
             typePrefix(type);
             append(Base64.getEncoder().encodeToString(bytesStore.toByteArray()));
@@ -1690,9 +1704,9 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut zonedDateTime(@Nullable ZonedDateTime zonedDateTime) {
+            if (zonedDateTime == null)
+                return nu11();
             if (dropDefault) {
-                if (zonedDateTime == null)
-                    return wireOut();
                 writeSavedEventName();
             }
             final String s = zonedDateTime.toString();
@@ -1907,6 +1921,7 @@ public class TextWire extends AbstractWire implements Wire {
             }
             if (!sep.isEmpty()) {
                 append(sep);
+                trimWhiteSpace();
                 indent();
                 sep = EMPTY;
             }
@@ -1999,6 +2014,7 @@ public class TextWire extends AbstractWire implements Wire {
             if (wasLeaf) {
                 if (sep.endsWith(' '))
                     append(" ");
+                trimWhiteSpace();
                 leaf = false;
                 popState();
             } else if (!seps.isEmpty()) {
@@ -2008,6 +2024,7 @@ public class TextWire extends AbstractWire implements Wire {
             }
             if (sep.startsWith(',')) {
                 append(sep, 1, sep.length() - 1);
+                trimWhiteSpace();
                 if (!wasLeaf)
                     indent();
 
@@ -2061,6 +2078,7 @@ public class TextWire extends AbstractWire implements Wire {
             }
             if (sep.startsWith(',')) {
                 append(sep, 1, sep.length() - 1);
+                trimWhiteSpace();
                 if (!wasLeaf)
                     indent();
 
@@ -2092,8 +2110,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         protected void afterClose() {
             newLine();
-            append(sep);
-            sep = EMPTY;
+            appendSep();
         }
 
         protected void afterOpen() {
@@ -2123,7 +2140,7 @@ public class TextWire extends AbstractWire implements Wire {
             if (dropDefault) {
                 eventName = "";
             } else {
-                append(sep);
+                appendSep();
                 writeTwo('"', '"');
                 endEvent();
             }
@@ -2189,10 +2206,8 @@ public class TextWire extends AbstractWire implements Wire {
                 if (!sep.endsWith('\n'))
                     return;
                 sep = COMMA_SPACE;
-            } else
-                prependSeparator();
-
-            append(sep);
+            }
+            prependSeparator();
 
             if (hasCommentAnnotation)
                 writeTwo('\t', '\t');
@@ -2468,7 +2483,7 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public byte @NotNull [] bytes(byte[] using) {
+        public byte[] bytes(byte[] using) {
             consumePadding();
             try {
                 // TODO needs to be made much more efficient.
@@ -2482,7 +2497,7 @@ public class TextWire extends AbstractWire implements Wire {
                         parseWord(stringBuilder);
                     }
 
-                    @Nullable byte[] bytes = Compression.uncompress(stringBuilder, this, t -> {
+                    byte @Nullable [] bytes = Compression.uncompress(stringBuilder, this, t -> {
                         @NotNull StringBuilder sb0 = acquireStringBuilder();
                         parseUntil(sb0, StopCharTesters.COMMA_SPACE_STOP);
                         return Base64.getDecoder().decode(WireInternal.INTERNER.intern(sb0));
@@ -3061,6 +3076,7 @@ public class TextWire extends AbstractWire implements Wire {
 
             final long limit = bytes.readLimit();
             final long position = bytes.readPosition();
+            boolean endsNormally = false;
 
             try {
                 // ensure that you can read past the end of this marshable object
@@ -3068,15 +3084,16 @@ public class TextWire extends AbstractWire implements Wire {
                 bytes.readLimit(newLimit);
                 bytes.readSkip(1); // skip the {
                 consumePadding();
-                return marshallableReader.apply(TextWire.this);
+                final T apply = marshallableReader.apply(TextWire.this);
+                endsNormally = true;
+                return apply;
             } finally {
                 bytes.readLimit(limit);
 
                 consumePadding(1);
                 code = readCode();
                 popState();
-                if (code != '}')
-                    //noinspection ThrowFromFinallyBlock
+                if (code != '}' && endsNormally)
                     throw new IORuntimeException("Unterminated { while reading marshallable "
                             + "bytes=" + Bytes.toString(bytes)
                     );
