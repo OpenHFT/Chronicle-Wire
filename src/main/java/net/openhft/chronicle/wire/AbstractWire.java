@@ -331,7 +331,7 @@ public abstract class AbstractWire implements Wire {
         // if there aren't at least 4 bytes remaining, then region not yet mapped and will be cleared when mapped
         // also clears any dirty bits left by a failed writer/appender
         // does not get added to the length
-        final BytesStore bytesStore = bytes.bytesStore();
+        final BytesStore<?, ?> bytesStore = bytes.bytesStore();
         if (bytesStore.capacity() - pos >= 4 && bytesStore.readInt(pos) != 0) {
             bytesStore.writeInt(pos, 0);
         }

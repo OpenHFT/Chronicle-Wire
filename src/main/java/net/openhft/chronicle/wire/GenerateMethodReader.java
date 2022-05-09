@@ -326,7 +326,7 @@ public class GenerateMethodReader {
         isSourceCodeGenerated = true;
 
         if (DUMP_CODE)
-            System.out.println(sourceCode);
+            Jvm.startup().on(GenerateMethodReader.class, sourceCode.toString());
     }
 
     /**
