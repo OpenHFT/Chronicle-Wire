@@ -459,7 +459,7 @@ public class JSONWire extends TextWire {
 
         @Override
         protected void trimWhiteSpace() {
-            if (sep.endsWith('\n') || sep.endsWith(' '))
+            if (bytes.endsWith('\n') || bytes.endsWith(' '))
                 bytes.writeSkip(-1);
         }
 
