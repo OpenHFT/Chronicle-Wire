@@ -44,6 +44,8 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     private final Supplier<MethodReader> delegateSupplier;
 
     protected MessageHistory messageHistory;
+    protected boolean dataEventProcessed;
+
     private MethodReader delegate;
     private boolean closeIn = false;
     private boolean closed;
@@ -126,6 +128,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         try {
             wireIn.startEvent();
             Bytes<?> bytes = wireIn.bytes();
+            dataEventProcessed = false;
             while (bytes.readRemaining() > 0) {
                 if (wireIn.isEndEvent())
                     break;
@@ -146,7 +149,9 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
             // only called if the end of the message is reached normally.
             wireIn.endEvent();
         } finally {
-            if (historyConsumer != NO_OP_MH_CONSUMER)
+            // Don't save message history if we are reading non-data event (e.g. another "message history only" message)
+            // Infinite loop between services is possible otherwise
+            if (historyConsumer != NO_OP_MH_CONSUMER && dataEventProcessed)
                 swapMessageHistoryIfDirty();
             messageHistory.reset();
         }
