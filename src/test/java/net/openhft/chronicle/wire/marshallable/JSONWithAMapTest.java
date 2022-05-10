@@ -95,8 +95,8 @@ public class JSONWithAMapTest {
     }
 
     static class ResponseItem extends SelfDescribingMarshallable {
-        private final Bytes<?> key = Bytes.elasticByteBuffer();
         @NotNull String index;
+        Bytes<?> key = Bytes.elasticByteBuffer();
         private Object payload;
     }
 }
