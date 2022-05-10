@@ -42,7 +42,7 @@ public class FileMarshallableOut implements MarshallableOut {
         }
     };
 
-    public FileMarshallableOut(MarshallableOutBuilder builder, WireType wIreType) {
+    public FileMarshallableOut(MarshallableOutBuilder builder, WireType wireType) {
         this.url = builder.url();
         assert url.getProtocol().equals("file");
         final String query = url.getQuery();
@@ -50,7 +50,7 @@ public class FileMarshallableOut implements MarshallableOut {
             QueryWire queryWire = new QueryWire(Bytes.from(query));
             options.readMarshallable(queryWire);
         }
-        this.wire = wIreType.apply(Bytes.allocateElasticOnHeap());
+        this.wire = wireType.apply(Bytes.allocateElasticOnHeap());
     }
 
     @Override
