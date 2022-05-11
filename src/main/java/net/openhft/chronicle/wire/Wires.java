@@ -32,6 +32,7 @@ import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.ReadResolvable;
+import net.openhft.chronicle.wire.internal.StringConsumerMarshallableOut;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,6 +40,7 @@ import javax.naming.CompositeName;
 import javax.naming.InvalidNameException;
 import java.io.Externalizable;
 import java.io.File;
+import java.io.PrintStream;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
@@ -58,6 +60,7 @@ import java.util.function.Function;
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.SerializationStrategies.*;
 import static net.openhft.chronicle.wire.WireType.TEXT;
+import static net.openhft.chronicle.wire.WireType.YAML_ONLY;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum Wires {
@@ -117,6 +120,38 @@ public enum Wires {
     public static void init() {
         // Do nothing here
     }
+
+//    public static <T> T recordAsYaml(Class<T> tClass, PrintStream prn){
+//        Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap();
+//        Wire wire = new TextWire(bytes);
+//
+//        String tMethod= tClass.getDeclaredMethods()[0].toString();
+//        int index1 = tMethod.indexOf('(');
+//        int index2 = tMethod.lastIndexOf('.', index1);
+//
+//        String methodName = tMethod.substring(index2+1,index1);
+//        wire.write(methodName).text("this should be the input text");
+//
+//        T newInstance = ObjectUtils.newInstance(tClass);  //= a->a+"2";
+//
+//    //    newInstance.get
+//
+//
+//       return newInstance;
+//    }
+
+    public static <T> T recordAsYaml(Class<T> tClass, PrintStream ps) {
+        MarshallableOut out = new StringConsumerMarshallableOut(s -> {
+            ps.print(s);
+            if (!s.endsWith("\n"))
+                ps.println();
+        }, YAML_ONLY);
+        return out.methodWriter(tClass);
+    }
+
+
+
+
 
     /**
      * This decodes some Bytes where the first 4-bytes is the length.  e.g. Wire.writeDocument wrote
