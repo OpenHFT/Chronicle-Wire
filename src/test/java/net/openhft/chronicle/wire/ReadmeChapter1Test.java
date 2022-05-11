@@ -319,7 +319,6 @@ The benefits of using this approach ares that
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
         @NotNull Wire wire = WireType.TEXT.apply(bytes);
-        wire.usePadding(true);
 
         ClassAliasPool.CLASS_ALIASES.addAlias(Data.class);
 
@@ -386,7 +385,6 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
         @NotNull Wire wire = WireType.TEXT.apply(bytes);
-        wire.usePadding(true);
 
         ClassAliasPool.CLASS_ALIASES.addAlias(Data.class);
 

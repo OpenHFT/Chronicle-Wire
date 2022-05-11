@@ -196,6 +196,10 @@ public class WireDumper {
             len = (int) textBytes.readRemaining();
         }
         try {
+            // trim spaces
+            for (; len > 0; len--)
+                if (textBytes.readUnsignedByte(textBytes.readPosition() + len - 1) != ' ')
+                    break;
             for (int i = 0; i < len; i++) {
                 int ch = textBytes.readUnsignedByte();
                 sb.append((char) ch);

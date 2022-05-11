@@ -283,7 +283,6 @@ public class TextWireTest extends WireTestCommon {
     private Wire createWire() {
         bytes = allocateElasticOnHeap();
         final Wire wire = WireType.TEXT.apply(bytes);
-        wire.usePadding(true);
         return wire;
     }
 
@@ -1496,13 +1495,12 @@ public class TextWireTest extends WireTestCommon {
         @NotNull byte[] four = {1, 2, 3, 4};
         wire.writeDocument(false, w -> w.write("four").object(four));
 
-        assertEquals("--- !!data\n" +
+        assertEquals("" +
+                        "--- !!data\n" +
                         "nothing: !byte[] !!binary \n" +
-                        " \n" +
                         "# position: 32, header: 1\n" +
                         "--- !!data\n" +
                         "one: !byte[] !!binary AQ==\n" +
-                        " \n" +
                         "# position: 64, header: 2\n" +
                         "--- !!data\n" +
                         "four: !byte[] !!binary AQIDBA==\n"

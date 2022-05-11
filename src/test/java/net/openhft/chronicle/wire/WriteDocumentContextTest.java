@@ -54,7 +54,6 @@ public class WriteDocumentContextTest extends WireTestCommon {
     @Test
     public void nestedText() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
-        wire.usePadding(true);
 
         writeThreeKeys(wire);
         assertEquals(21, wire.bytes().readInt());
@@ -68,7 +67,6 @@ public class WriteDocumentContextTest extends WireTestCommon {
     @Test
     public void chainedText() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
-        wire.usePadding(true);
 
         writeThreeChainedKeys(wire);
         assertEquals(21, wire.bytes().readInt());

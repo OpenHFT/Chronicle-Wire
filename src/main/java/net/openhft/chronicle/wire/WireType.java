@@ -53,12 +53,15 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
 
     TEXT {
         private final boolean TEXT_AS_YAML = Jvm.getBoolean("wire.testAsYaml");
+
         @NotNull
         @Override
         public Wire apply(@NotNull Bytes<?> bytes) {
             if (TEXT_AS_YAML)
                 return YAML.apply(bytes);
-            return new TextWire(bytes).useBinaryDocuments();
+            final TextWire wire = new TextWire(bytes).useBinaryDocuments();
+            wire.usePadding(true);
+            return wire;
         }
 
         @Override
@@ -277,7 +280,9 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         @NotNull
         @Override
         public Wire apply(@NotNull Bytes<?> bytes) {
-            return new JSONWire(bytes).useBinaryDocuments();
+            final TextWire wire = new JSONWire(bytes).useBinaryDocuments();
+            wire.usePadding(true);
+            return wire;
         }
 
         @Override
@@ -301,7 +306,9 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         @NotNull
         @Override
         public Wire apply(@NotNull Bytes<?> bytes) {
-            return new YamlWire(bytes).useBinaryDocuments();
+            final YamlWire wire = new YamlWire(bytes).useBinaryDocuments();
+            wire.usePadding(true);
+            return wire;
         }
 
         @Override
@@ -463,7 +470,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     private Bytes<?> asBytes(Object marshallable) {
         Bytes<?> bytes = getBytesForToString();
         Wire wire = apply(bytes);
-        wire.usePadding(AbstractWire.DEFAULT_USE_PADDING);
+        wire.usePadding(wire.isBinary() && AbstractWire.DEFAULT_USE_PADDING);
         @NotNull final ValueOut valueOut = wire.getValueOut();
 
         if (marshallable instanceof WriteMarshallable)

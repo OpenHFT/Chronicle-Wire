@@ -319,13 +319,8 @@ public class BinaryWire2Test extends WireTestCommon {
         @NotNull Wire wire = createWire();
         writeMessage(wire);
 
-        // System.out.println(wire.bytes().toHexString());
-
         @NotNull Wire twire = WireType.TEXT.apply(Bytes.elasticByteBuffer());
-        twire.usePadding(true);
         writeMessage(twire);
-
-        // System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
 
         wire.bytes().releaseLast();
         twire.bytes().releaseLast();

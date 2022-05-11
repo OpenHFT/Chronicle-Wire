@@ -1029,7 +1029,6 @@ public class YamlWireTest extends WireTestCommon {
     public void testMapReadAndWriteStrings() {
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new YamlWire(bytes);
-        wire.usePadding(true);
 
         @NotNull final Map<String, String> expected = new LinkedHashMap<>();
 

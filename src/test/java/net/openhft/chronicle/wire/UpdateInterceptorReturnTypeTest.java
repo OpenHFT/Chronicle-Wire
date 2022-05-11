@@ -19,7 +19,6 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
 
     static Wire createWire() {
         final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
-        wire.usePadding(true);
         return wire;
     }
 

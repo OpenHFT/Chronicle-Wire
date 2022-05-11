@@ -53,8 +53,6 @@ public class MethodReaderDelegationTest extends WireTestCommon {
     }
 
     private void doTestUnsuccessfullCallIsDelegated(Wire wire) {
-        wire.usePadding(true);
-
         final MyInterface writer = wire.methodWriter(MyInterface.class);
         writer.myCall();
 

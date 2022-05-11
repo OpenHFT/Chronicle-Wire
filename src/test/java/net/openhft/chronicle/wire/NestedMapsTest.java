@@ -238,7 +238,7 @@ public class NestedMapsTest extends WireTestCommon {
     public void testMapReadAndWrite() {
         Bytes<?> bytes = Bytes.elasticByteBuffer();
         Wire wire = wireType.apply(bytes);
-        wire.usePadding(true);
+        wire.usePadding(wire.isBinary());
 
         @NotNull final Map<Integer, Integer> expected = new HashMap<>();
         expected.put(1, 2);
