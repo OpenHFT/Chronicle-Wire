@@ -22,8 +22,7 @@ public class WireDumperTest extends WireTestCommon {
     public WireDumperTest(final String name, final WireType wireType) {
         bytes = Bytes.allocateElasticOnHeap();
         wire = wireType.apply(bytes);
-        wire.usePadding(wire.isBinary());
-
+        wire.usePadding(true);
         this.wireType = wireType;
         initTestData();
     }
