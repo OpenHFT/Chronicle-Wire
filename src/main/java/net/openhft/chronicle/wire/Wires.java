@@ -121,25 +121,6 @@ public enum Wires {
         // Do nothing here
     }
 
-//    public static <T> T recordAsYaml(Class<T> tClass, PrintStream prn){
-//        Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap();
-//        Wire wire = new TextWire(bytes);
-//
-//        String tMethod= tClass.getDeclaredMethods()[0].toString();
-//        int index1 = tMethod.indexOf('(');
-//        int index2 = tMethod.lastIndexOf('.', index1);
-//
-//        String methodName = tMethod.substring(index2+1,index1);
-//        wire.write(methodName).text("this should be the input text");
-//
-//        T newInstance = ObjectUtils.newInstance(tClass);  //= a->a+"2";
-//
-//    //    newInstance.get
-//
-//
-//       return newInstance;
-//    }
-
     public static <T> T recordAsYaml(Class<T> tClass, PrintStream ps) {
         MarshallableOut out = new StringConsumerMarshallableOut(s -> {
             ps.print(s);
@@ -148,10 +129,6 @@ public enum Wires {
         }, YAML_ONLY);
         return out.methodWriter(tClass);
     }
-
-
-
-
 
     /**
      * This decodes some Bytes where the first 4-bytes is the length.  e.g. Wire.writeDocument wrote
