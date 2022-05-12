@@ -517,6 +517,7 @@ public class GenerateMethodReader {
             args[i] = m.getName() + "arg" + i;
 
         res.append("try {\n");
+        res.append("dataEventProcessed = true;\n");
 
         // called for no interceptor and a generating interceptor
         if (!hasRealInterceptorReturns()) {
