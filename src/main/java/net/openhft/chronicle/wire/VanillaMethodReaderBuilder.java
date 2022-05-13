@@ -78,6 +78,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     @Deprecated(/* Not used. To be removed in x.25 */)
     @NotNull
     public MethodReaderBuilder ignoreDefaults(boolean ignoreDefaults) {
+        Jvm.warn().on(getClass(), "Support for ignoreDefaults will soon be dropped");
         this.ignoreDefaults = ignoreDefaults;
         return this;
     }
@@ -138,7 +139,6 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
             }
         } catch (Throwable e) {
             classCache.put(fullClassName, COMPILE_FAILED);
-            // do nothing and drop through
             Jvm.warn().on(getClass(), "Failed to compile generated method reader - falling back to proxy method reader. Please report this failure.", e);
         }
 

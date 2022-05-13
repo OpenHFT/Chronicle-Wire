@@ -121,6 +121,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     @Deprecated(/* Replaced by UpdateInterceptor. To be removed in x.24 */)
     @NotNull
     public MethodWriterBuilder<T> methodWriterInterceptorReturns(MethodWriterInterceptorReturns methodWriterInterceptor) {
+        Jvm.warn().on(getClass(), "Support for methodWriterInterceptorReturns will soon be dropped. Use UpdateInterceptor instead");
         handlerSupplier.methodWriterInterceptorReturns(methodWriterInterceptor);
         return this;
     }
@@ -215,9 +216,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
             throw e;
         } catch (Throwable e) {
             classCache.put(fullClassName, COMPILE_FAILED);
-            // do nothing and drop through
-            if (Jvm.isDebugEnabled(getClass()))
-                Jvm.debug().on(getClass(), e);
+            Jvm.warn().on(getClass(), "Failed to compile generated method writer - falling back to proxy method writer. Please report this failure.", e);
         }
         return null;
     }
