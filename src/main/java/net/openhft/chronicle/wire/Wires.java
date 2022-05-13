@@ -38,10 +38,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.naming.CompositeName;
 import javax.naming.InvalidNameException;
-import java.io.Externalizable;
-import java.io.File;
-import java.io.PrintStream;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -128,6 +125,15 @@ public enum Wires {
                 ps.println();
         }, YAML_ONLY);
         return out.methodWriter(tClass);
+    }
+
+    public static void replay(String file, Object obj) throws IOException {
+        Bytes bytes = BytesUtil.readFile(file);
+        Wire wire = new YamlWire(bytes).useTextDocuments();
+        MethodReader readerObj = wire.methodReader(obj);
+        while (readerObj.readOne()) {
+        }
+        bytes.releaseLast();
     }
 
     /**
