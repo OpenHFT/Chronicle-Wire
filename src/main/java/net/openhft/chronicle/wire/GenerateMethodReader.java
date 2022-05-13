@@ -315,10 +315,7 @@ public class GenerateMethodReader {
                 "throw e;\n" +
                 "}\n" +
                 "catch (Exception e) {\n" +
-                "Jvm.warn().on(this.getClass(), \"Failure to dispatch message, " +
-                "will retry to process without generated code: \" + lastEventName + \"(), " +
-                "bytes: \" + wireIn.bytes().toDebugString(), e);\n" +
-                "return false;\n" +
+                "throw new InvocationTargetRuntimeException(e);\n" +
                 "}\n" +
                 "}\n}\n");
 
