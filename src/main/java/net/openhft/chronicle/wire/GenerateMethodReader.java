@@ -173,6 +173,7 @@ public class GenerateMethodReader {
         for (int i = 0; i < instances.length; i++) {
             sourceCode.append(format("private final Object instance%d;\n", i));
         }
+        sourceCode.append("private final WireParselet defaultParselet;\n");
         sourceCode.append("\n");
 
         if (hasRealInterceptorReturns()) {
@@ -200,11 +201,14 @@ public class GenerateMethodReader {
             sourceCode.append("\n");
         }
 
-        sourceCode.append(format("public %s(MarshallableIn in, WireParselet debugLoggingParselet," +
+        sourceCode.append(format("public %s(MarshallableIn in, " +
+                "WireParselet defaultParselet, " +
+                "WireParselet debugLoggingParselet, " +
                 "MethodReaderInterceptorReturns interceptor, " +
                 "Object[] metaInstances, " +
                 "Object[] instances) {\n" +
-                "super(in, debugLoggingParselet);\n", generatedClassName()));
+                "super(in, debugLoggingParselet);\n" +
+                "this.defaultParselet = defaultParselet;\n", generatedClassName()));
 
         if (hasRealInterceptorReturns())
             sourceCode.append("this.interceptor = interceptor;\n");
@@ -259,8 +263,8 @@ public class GenerateMethodReader {
         sourceCode.append(eventNameSwitchBlock);
 
         sourceCode.append("default:\n" +
-                "valueIn.skipValue();\n" +
-                "return false;\n" +
+                "defaultParselet.accept(lastEventName, valueIn);\n" +
+                "return true;\n" +
                 "}\n" +
                 "return true;\n" +
                 "} \n" +

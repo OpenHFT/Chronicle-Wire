@@ -28,7 +28,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
 
 public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     public static final String DISABLE_READER_PROXY_CODEGEN = "disableReaderProxyCodegen";
@@ -46,8 +45,6 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     public VanillaMethodReaderBuilder(MarshallableIn in) {
         this.in = in;
     }
-
-    // TODO add support for filtering.
 
     @NotNull
     public static WireParselet createDefaultParselet(boolean warnMissing) {
@@ -116,10 +113,8 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     }
 
     @Nullable
-    private MethodReader createGeneratedInstance(Supplier<MethodReader> vanillaSupplier, Object... impls) {
-        // todo support this options in the generated code
-        if (ignoreDefaults ||
-                Jvm.getBoolean(DISABLE_READER_PROXY_CODEGEN))
+    private MethodReader createGeneratedInstance(Object... impls) {
+        if (ignoreDefaults || Jvm.getBoolean(DISABLE_READER_PROXY_CODEGEN))
             return null;
 
         GenerateMethodReader generateMethodReader = new GenerateMethodReader(wireType, methodReaderInterceptorReturns, metaDataHandler, impls);
@@ -153,7 +148,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         WireParselet debugLoggingParselet = VanillaMethodReader::logMessage;
 
         return (MethodReader) constructor.newInstance(
-                in, debugLoggingParselet, methodReaderInterceptorReturns, metaDataHandler, impls);
+                in, defaultParselet, debugLoggingParselet, methodReaderInterceptorReturns, metaDataHandler, impls);
     }
 
     @Override
@@ -164,14 +159,13 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
     @NotNull
     public MethodReader build(Object... impls) {
-        final WireParselet defaultParselet = this.defaultParselet == null ?
-                createDefaultParselet(warnMissing) : this.defaultParselet;
+        if (this.defaultParselet == null)
+            this.defaultParselet = createDefaultParselet(warnMissing);
 
-        Supplier<MethodReader> vanillaSupplier = () -> new VanillaMethodReader(
-                in, ignoreDefaults, defaultParselet, methodReaderInterceptorReturns, metaDataHandler, impls);
+        final MethodReader generatedInstance = createGeneratedInstance(impls);
 
-        final MethodReader generatedInstance = createGeneratedInstance(vanillaSupplier, impls);
-
-        return generatedInstance == null ? vanillaSupplier.get() : generatedInstance;
+        return generatedInstance == null ? new VanillaMethodReader(
+                in, ignoreDefaults, defaultParselet, methodReaderInterceptorReturns, metaDataHandler, impls) :
+                generatedInstance;
     }
 }
