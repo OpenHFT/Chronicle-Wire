@@ -118,6 +118,14 @@ public enum Wires {
         // Do nothing here
     }
 
+    /**
+     * Creates and returns a proxy of the specified interface. The proxy writes inputs into the specified PrintStream in Yaml format.
+     *
+     * @param tClass the specified interface
+     * @param ps     the PrintStream used to write output data into as Yaml format
+     * @param <T>    type of the specified interface
+     * @return a proxy of the specified interface
+     */
     public static <T> T recordAsYaml(Class<T> tClass, PrintStream ps) {
         MarshallableOut out = new StringConsumerMarshallableOut(s -> {
             if (!s.startsWith("---\n"))
@@ -129,6 +137,13 @@ public enum Wires {
         return out.methodWriter(tClass);
     }
 
+    /**
+     * Reads the content of a specified Yaml file and feeds it to the specified object.
+     *
+     * @param file name of the input Yaml file
+     * @param obj  the object that replays the data in the specified file
+     * @throws IOException is thrown if an IO operation fails
+     */
     public static void replay(String file, Object obj) throws IOException {
         Bytes bytes = BytesUtil.readFile(file);
         Wire wire = new YamlWire(bytes).useTextDocuments();
