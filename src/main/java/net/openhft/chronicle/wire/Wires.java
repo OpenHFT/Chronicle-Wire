@@ -120,9 +120,11 @@ public enum Wires {
 
     public static <T> T recordAsYaml(Class<T> tClass, PrintStream ps) {
         MarshallableOut out = new StringConsumerMarshallableOut(s -> {
+            if (!s.startsWith("---\n"))
+                ps.print("---\n");
             ps.print(s);
             if (!s.endsWith("\n"))
-                ps.println();
+                ps.print("\n");
         }, YAML_ONLY);
         return out.methodWriter(tClass);
     }

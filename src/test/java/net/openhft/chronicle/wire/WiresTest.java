@@ -146,12 +146,16 @@ public class WiresTest extends WireTestCommon {
         says.say("Three");
 
         assertEquals("" +
+                "---\n" +
                 "say: One\n" +
                 "...\n" +
+                "---\n" +
                 "say: Two\n" +
                 "...\n" +
+                "---\n" +
                 "say: Three\n" +
-                "...\n", new String(baos.toByteArray(), StandardCharsets.ISO_8859_1));
+                "...\n",
+                new String(baos.toByteArray(), StandardCharsets.ISO_8859_1));
     }
     @Test
     public void replay() throws IOException {
@@ -160,20 +164,27 @@ public class WiresTest extends WireTestCommon {
         Says says = Wires.recordAsYaml(Says.class, ps);
         says.say("zero");
         Wires.replay("=" +
+                "---\n" +
                 "say: One\n" +
                 "...\n" +
+                "---\n" +
                 "say: Two\n" +
                 "...\n" +
+                "---\n" +
                 "say: Three\n" +
                 "...\n",says);
 
         assertEquals("" +
+                "---\n" +
                 "say: zero\n" +
                 "...\n" +
+                "---\n" +
                 "say: One\n" +
                 "...\n" +
+                "---\n" +
                 "say: Two\n" +
                 "...\n" +
+                "---\n" +
                 "say: Three\n" +
                 "...\n", new String(baos.toByteArray(), StandardCharsets.ISO_8859_1));
     }
