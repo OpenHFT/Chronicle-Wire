@@ -70,10 +70,12 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
                 Long.toHexString(sourceIndex) + " ~ " + (int) sourceIndex;
     }
 
+    @Deprecated(/* Not used. To be removed in x.25 */)
     public boolean ignoreDefaults() {
         return ignoreDefaults;
     }
 
+    @Deprecated(/* Not used. To be removed in x.25 */)
     @NotNull
     public MethodReaderBuilder ignoreDefaults(boolean ignoreDefaults) {
         this.ignoreDefaults = ignoreDefaults;
