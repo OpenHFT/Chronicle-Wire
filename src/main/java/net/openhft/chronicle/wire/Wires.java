@@ -32,14 +32,13 @@ import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.ReadResolvable;
+import net.openhft.chronicle.wire.internal.StringConsumerMarshallableOut;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.naming.CompositeName;
 import javax.naming.InvalidNameException;
-import java.io.Externalizable;
-import java.io.File;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -58,6 +57,7 @@ import java.util.function.Function;
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.SerializationStrategies.*;
 import static net.openhft.chronicle.wire.WireType.TEXT;
+import static net.openhft.chronicle.wire.WireType.YAML_ONLY;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum Wires {
@@ -116,6 +116,41 @@ public enum Wires {
     // force static initialise
     public static void init() {
         // Do nothing here
+    }
+
+    /**
+     * Creates and returns a proxy of the specified interface. The proxy writes inputs into the specified PrintStream in Yaml format.
+     *
+     * @param tClass the specified interface
+     * @param ps     the PrintStream used to write output data into as Yaml format
+     * @param <T>    type of the specified interface
+     * @return a proxy of the specified interface
+     */
+    public static <T> T recordAsYaml(Class<T> tClass, PrintStream ps) {
+        MarshallableOut out = new StringConsumerMarshallableOut(s -> {
+            if (!s.startsWith("---\n"))
+                ps.print("---\n");
+            ps.print(s);
+            if (!s.endsWith("\n"))
+                ps.print("\n");
+        }, YAML_ONLY);
+        return out.methodWriter(tClass);
+    }
+
+    /**
+     * Reads the content of a specified Yaml file and feeds it to the specified object.
+     *
+     * @param file name of the input Yaml file
+     * @param obj  the object that replays the data in the specified file
+     * @throws IOException is thrown if an IO operation fails
+     */
+    public static void replay(String file, Object obj) throws IOException {
+        Bytes bytes = BytesUtil.readFile(file);
+        Wire wire = new YamlWire(bytes).useTextDocuments();
+        MethodReader readerObj = wire.methodReader(obj);
+        while (readerObj.readOne()) {
+        }
+        bytes.releaseLast();
     }
 
     /**
