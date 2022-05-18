@@ -8,7 +8,7 @@ import java.util.function.Function;
 
 public interface YamlTester {
     /**
-     * Test a microservice implemented in a class using in.yaml comparing with out.yaml,
+     * Test a component implemented in a class using in.yaml comparing with out.yaml,
      * with optionally setup.yaml to initialise it.
      *
      * @param implClass of the implementation
@@ -35,7 +35,7 @@ public interface YamlTester {
     }
 
     /**
-     * Test a microservice implemented in a class using in.yaml comparing with out.yaml,
+     * Test a component implemented in a class using in.yaml comparing with out.yaml,
      * with optionally setup.yaml to initialise it.
      *
      * @param builder  to construct a component to be tested
