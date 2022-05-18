@@ -79,6 +79,14 @@ public class TextMethodTester<T> implements YamlTester {
         this.onInvocationException = e -> Jvm.warn().on(TextMethodTester.class, "Exception calling target method. Continuing", e);
     }
 
+    public static boolean resourceExists(String resourceName) {
+        try {
+            return new File(resourceName).exists() || IOTools.urlFor(TextMethodTester.class, resourceName) != null;
+        } catch (FileNotFoundException ignored) {
+            return false;
+        }
+    }
+
     public String[] retainLast() {
         return retainLast;
     }
@@ -163,6 +171,7 @@ public class TextMethodTester<T> implements YamlTester {
                 ? (Object[]) component
                 : new Object[]{component};
 
+        String setupNotFound = "";
         for (String setup : setups) {
             try {
                 final Bytes<?> bytes = Bytes.wrapForRead(IOTools.readFile(outputClass, setup));
@@ -177,7 +186,7 @@ public class TextMethodTester<T> implements YamlTester {
                 }
                 wireOut.bytes().clear();
             } catch (FileNotFoundException ignored) {
-                // continue
+                setupNotFound = setup + " not found";
             }
         }
 
@@ -283,6 +292,9 @@ public class TextMethodTester<T> implements YamlTester {
                 fw.write(actual2);
             }
         }
+        // add a warning if they don't match and there was a setup missing.
+        if (!expected.trim().equals(actual.trim()) && !setupNotFound.isEmpty())
+            Jvm.warn().on(getClass(), setupNotFound);
         return this;
     }
 
@@ -366,12 +378,8 @@ public class TextMethodTester<T> implements YamlTester {
         return this;
     }
 
-    public static boolean resourceExists(String resourceName) {
-        try {
-            return new File(resourceName).exists() || IOTools.urlFor(TextMethodTester.class, resourceName) != null;
-        } catch (FileNotFoundException ignored) {
-            return false;
-        }
+    public interface PostSetup {
+        void postSetup();
     }
 
     @Deprecated(/* used by one client*/)
@@ -425,9 +433,5 @@ public class TextMethodTester<T> implements YamlTester {
                 invocation.method.invoke(writer0, invocation.args);
             }
         }
-    }
-
-    public interface PostSetup {
-        void postSetup();
     }
 }
