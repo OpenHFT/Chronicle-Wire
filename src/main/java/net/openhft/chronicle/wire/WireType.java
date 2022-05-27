@@ -80,9 +80,10 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
             Bytes<?> bytes = Bytes.allocateElasticDirect(cs.length());
             try {
                 bytes.appendUtf8(cs);
-                @NotNull TextWire wire = (TextWire) apply(bytes);
+                @NotNull Wire wire = apply(bytes);
                 wire.consumePadding();
-                wire.consumeDocumentStart();
+                if (!TEXT_AS_YAML)
+                    ((TextWire) wire).consumeDocumentStart();
                 return wire.getValueIn().object(tClass);
             } finally {
                 bytes.releaseLast();

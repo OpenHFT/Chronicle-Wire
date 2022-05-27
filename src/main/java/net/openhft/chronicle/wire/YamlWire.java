@@ -2414,6 +2414,9 @@ public class YamlWire extends AbstractWire implements Wire {
         @Override
         public <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
             consumePadding();
+            if (isNull()) {
+                return false;
+            }
             if (yt.current() == YamlToken.SEQUENCE_START) {
                 int minIndent = yt.secondTopContext().indent;
                 yt.next(Integer.MAX_VALUE);
