@@ -56,7 +56,8 @@ final class SerializableObjectTest extends WireTestCommon {
                     "javafx.",
                     "javax.swing",
                     "javax.print",
-                    "apple.security"
+                    "apple.security",
+                    "org.apache.maven.surefire.shared.lang3.text"
             )
             .collect(Collectors.collectingAndThen(toSet(), Collections::unmodifiableSet));
 
