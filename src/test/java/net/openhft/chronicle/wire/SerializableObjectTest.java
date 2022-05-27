@@ -56,7 +56,11 @@ final class SerializableObjectTest extends WireTestCommon {
                     "javafx.",
                     "javax.swing",
                     "javax.print",
-                    "apple.security"
+                    "apple.security",
+                    // Requires non-headless so skip these classes
+                    "java.awt",
+                    // Do not test classes from the maven plugins
+                    "org.apache.maven"
             )
             .collect(Collectors.collectingAndThen(toSet(), Collections::unmodifiableSet));
 
