@@ -327,13 +327,17 @@ public abstract class AbstractWire implements Wire {
         }
 
 
-        // clear up to the next 4 bytes to explicitly indicate "no more data"
-        // if there aren't at least 4 bytes remaining, then region not yet mapped and will be cleared when mapped
+        // clear up to the next 8 bytes to explicitly indicate "no more data" (8 covers int + max padding)
+        // if there aren't at least 8 bytes remaining, then clear what we can (any new mapping will be 0 anyway)
         // also clears any dirty bits left by a failed writer/appender
         // does not get added to the length
         final BytesStore<?, ?> bytesStore = bytes.bytesStore();
-        if (bytesStore.capacity() - pos >= 4 && bytesStore.readInt(pos) != 0) {
-            bytesStore.writeInt(pos, 0);
+        if (bytesStore.capacity() - pos >= 8 ) {
+            bytesStore.writeLong(pos, 0);
+        } else {
+            long remain = bytesStore.capacity() - pos;
+            for(int i=0; i<remain; ++i)
+                bytesStore.writeByte(pos + i, 0);
         }
 
         final long value = pos - position - 4;
