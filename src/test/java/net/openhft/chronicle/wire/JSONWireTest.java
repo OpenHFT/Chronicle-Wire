@@ -40,7 +40,8 @@ import static org.junit.Assert.assertNotNull;
 public class JSONWireTest extends WireTestCommon {
     static void testCopyToBinaryAndBack(CharSequence str) {
         JSONWire json = new JSONWire(Bytes.from(str));
-        BinaryWire binary = new BinaryWire(new HexDumpBytes());
+        HexDumpBytes hexDump = new HexDumpBytes();
+        BinaryWire binary = new BinaryWire(hexDump);
         JSONWire json2 = new JSONWire(Bytes.allocateElasticOnHeap());
         json.copyTo(binary);
 //        System.out.println(binary.bytes().toHexString());
@@ -55,6 +56,7 @@ public class JSONWireTest extends WireTestCommon {
                         .replaceAll(" ?\\[ ?", "[")
                         .replaceAll(" ?\\] ?", "]")
         );
+        hexDump.releaseLast();
     }
 
     @NotNull
