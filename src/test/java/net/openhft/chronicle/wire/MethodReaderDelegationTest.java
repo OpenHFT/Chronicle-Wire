@@ -75,6 +75,8 @@ public class MethodReaderDelegationTest extends WireTestCommon {
     }
 
     private void doTestUnsuccessfulCallIsDelegated(Wire wire) {
+        wire.usePadding(true);
+
         final Class<? extends MyInterface> ifaceClass = useMethodId ? MyInterfaceMethodId.class : MyInterface.class;
         final MyInterface writer = wire.methodWriter(ifaceClass);
         assertFalse(Proxy.isProxyClass(writer.getClass()));
