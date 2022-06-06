@@ -105,6 +105,8 @@ public class WireDumper {
     public boolean dumpOne(@NotNull StringBuilder sb, @Nullable Bytes<?> buffer, boolean abbrev) {
         bytes.readPositionForHeader(wireIn.usePadding());
         long start = this.bytes.readPosition();
+        if (start == 2988)
+            Thread.yield();
         int header = this.bytes.readInt();
         if (header == 0) {
             if (!abbrev) {
@@ -209,6 +211,7 @@ public class WireDumper {
         }
         if (sb.charAt(sb.length() - 1) != '\n')
             sb.append('\n');
+        this.bytes.readPosition(start + 4 + Wires.lengthOf(header));
         return false;
     }
 
