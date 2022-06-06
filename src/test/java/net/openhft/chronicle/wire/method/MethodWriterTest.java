@@ -24,7 +24,6 @@ public class MethodWriterTest extends WireTestCommon {
     @Test
     public void testSubclasses() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(256));
-        wire.usePadding(true);
 
         Event writer = wire.methodWriterBuilder(Event.class).genericEvent("event").build();
         writer.event("top", new VanillaMethodReaderTest.MRT1("one"));
@@ -93,7 +92,6 @@ public class MethodWriterTest extends WireTestCommon {
     public void testDefault() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
-        wire.usePadding(true);
 
         HasDefault writer = wire.methodWriter(HasDefault.class);
         checkWriterType(writer);
@@ -105,7 +103,6 @@ public class MethodWriterTest extends WireTestCommon {
     @Test
     public void multiOut() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
-        wire.usePadding(true);
 
         Event event = wire.methodWriter(Event.class);
         checkWriterType(event);
@@ -133,7 +130,6 @@ public class MethodWriterTest extends WireTestCommon {
     @Test
     public void ignoreStatic() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(256));
-        wire.usePadding(true);
 
         Closeable writer = wire.methodWriter(Closeable.class);
         checkWriterType(writer);
@@ -145,7 +141,6 @@ public class MethodWriterTest extends WireTestCommon {
     public void testNoArgs() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
-        wire.usePadding(true);
 
         NoArgs writer = wire.methodWriter(NoArgs.class);
         checkWriterType(writer);
@@ -169,7 +164,6 @@ public class MethodWriterTest extends WireTestCommon {
     public void testUpdateListener() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
-        wire.usePadding(true);
 
         final StringBuilder value = new StringBuilder();
 

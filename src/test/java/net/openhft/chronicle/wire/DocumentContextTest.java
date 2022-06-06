@@ -11,7 +11,6 @@ public class DocumentContextTest extends WireTestCommon {
     @Test
     public void multiMessageText() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
-        wire.usePadding(true);
         Bytes<?> bytes = doTest(wire);
         bytes.readSkip(4);
         assertEquals("one: 1\n" +
