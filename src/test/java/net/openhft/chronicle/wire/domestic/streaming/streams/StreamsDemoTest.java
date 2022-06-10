@@ -51,19 +51,19 @@ class StreamsDemoTest {
                 .map(Object::toString)
                 .collect(Collectors.joining(","));
 
-        assertEquals("!net.openhft.chronicle.queue.incubator.streaming.demo.accumulation.MarketData {\n" +
+        assertEquals("!MarketData {\n" +
                 "  symbol: MSFT,\n" +
                 "  last: 100.0,\n" +
                 "  high: 110.0,\n" +
                 "  low: 90.0\n" +
                 "}\n" +
-                ",!net.openhft.chronicle.queue.incubator.streaming.demo.accumulation.MarketData {\n" +
+                ",!MarketData {\n" +
                 "  symbol: AAPL,\n" +
                 "  last: 200.0,\n" +
                 "  high: 220.0,\n" +
                 "  low: 180.0\n" +
                 "}\n" +
-                ",!net.openhft.chronicle.queue.incubator.streaming.demo.accumulation.MarketData {\n" +
+                ",!MarketData {\n" +
                 "  symbol: MSFT,\n" +
                 "  last: 101.0,\n" +
                 "  high: 110.0,\n" +
@@ -79,10 +79,11 @@ class StreamsDemoTest {
                 vo -> vo.writeLong(3)
         );
         long last = Streams.ofLong(in, ToLongDocumentExtractor.extractingIndex())
+                .peek(System.out::println)
                 .max()
                 .orElse(-1);
 
-        assertEquals("16d00000002", Long.toHexString(last));
+        assertEquals(14, last);
     }
 
 
@@ -123,12 +124,24 @@ class StreamsDemoTest {
 
         assertEquals(expected, groups);
 
+    }
+
+    @Test
+    void testIterator() {
+
+        MarshallableIn in = createThenValueOuts(
+                vo -> vo.object(new MarketData("MSFT", 100, 110, 90)),
+                vo -> vo.object(new MarketData("APPL", 200, 220, 180)),
+                vo -> vo.object(new MarketData("MSFT", 101, 110, 90))
+        );
+
         DoubleAdder adder = new DoubleAdder();
         Iterator<MarketData> iterator = Streams.iterator(in, builder(MarketData.class).build());
         iterator.forEachRemaining(md -> adder.add(md.last()));
 
         assertEquals(401.0, adder.doubleValue(), 1e-10);
     }
+
 
     @Test
     void streamType2() {
@@ -196,6 +209,7 @@ class StreamsDemoTest {
 
 
     @Test
+    @Disabled("Parallel is not supported yet")
     void longStreamParallel() {
         final int no = 100_000;
 
