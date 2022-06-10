@@ -17,49 +17,39 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.util.StringUtils;
-
-import static net.openhft.chronicle.wire.Base32IntConverter.*;
+import net.openhft.chronicle.wire.internal.PowerOfTwoLongConverter;
 
 /**
  * Unsigned 64-bit number with encoding to be as disambiguated as possible.
  */
 public class Base32LongConverter implements LongConverter {
 
-    public static final int MAX_LENGTH = LongConverter.maxParseLength(32);
+    public static final Base32LongConverter INSTANCE = new Base32LongConverter();
+    private static final String CHARS = "234567ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    static final PowerOfTwoLongConverter DELEGATE = new PowerOfTwoLongConverter(CHARS);
+    public static final int MAX_LENGTH = DELEGATE.maxParseLength();
+
+    static {
+        DELEGATE.addEncode('0', 'O');
+        DELEGATE.addEncode('1', 'l');
+        DELEGATE.addEncode('8', 'B');
+        DELEGATE.addEncode('9', 'q');
+        for (char ch = 'a'; ch <= 'z'; ch++)
+            DELEGATE.addEncode(ch, Character.toUpperCase(ch));
+    }
 
     @Override
     public int maxParseLength() {
         return MAX_LENGTH;
     }
 
-    public static final Base32LongConverter INSTANCE = new Base32LongConverter();
-
     @Override
     public long parse(CharSequence text) {
-        lengthCheck(text);
-        long v = 0;
-        for (int i = 0; i < text.length(); i++) {
-            byte b = ENCODE[text.charAt(i)];
-            if (b >= 0)
-                v = (v << 5) + (b & 0xff);
-        }
-        return v;
+        return DELEGATE.parse(text);
     }
 
     @Override
     public void append(StringBuilder text, long value) {
-        int start = text.length();
-        while (value != 0) {
-            int v = (int) (value & (BASE - 1));
-            value >>>= 5;
-            text.append(DECODE[v]);
-        }
-        StringUtils.reverse(text, start);
-        if (text.length() > start + maxParseLength()) {
-            Jvm.warn().on(getClass(), "truncated because the value was too large");
-            text.setLength(start + maxParseLength());
-        }
+        DELEGATE.append(text, value);
     }
 }

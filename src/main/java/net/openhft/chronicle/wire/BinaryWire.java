@@ -29,6 +29,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassLookup;
+import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
@@ -70,6 +71,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return ((Marshallable) m).usesSelfDescribingMessage();
         return true;
     });
+    static final StringBuilderPool SBP = new StringBuilderPool();
     private final FixedBinaryValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
     private final FixedBinaryValueOut valueOut;
@@ -1283,7 +1285,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             case BinaryWireHighCode.FIELD0:
             case BinaryWireHighCode.FIELD1:
-                readField(Wires.acquireStringBuilder(), "", code);
+                readField(SBP.acquireStringBuilder(), "", code);
                 AppendableUtil.setLength(sb, 0);
                 return readText(peekCode(), sb);
             default:

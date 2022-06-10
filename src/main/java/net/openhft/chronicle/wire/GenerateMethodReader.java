@@ -591,13 +591,30 @@ public class GenerateMethodReader {
         if (boolean.class.equals(argumentType)) {
             return format("%s = %s.bool();\n", argumentName, valueInName);
         } else if (byte.class.equals(argumentType)) {
-            return format("%s = %s.readByte();\n", argumentName, valueInName);
+            if (numericConversionClass != null && LongConverter.class.isAssignableFrom(numericConversionClass)) {
+                numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);\n",
+                        numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
+
+                return format("%s = (byte) %sConverter.parse(%s.text());\n", argumentName, argumentName, valueInName);
+            } else
+                return format("%s = %s.readByte();\n", argumentName, valueInName);
         } else if (char.class.equals(argumentType)) {
             return format("%s = %s.character();\n", argumentName, valueInName);
         } else if (short.class.equals(argumentType)) {
-            return format("%s = %s.int16();\n", argumentName, valueInName);
+            if (numericConversionClass != null && LongConverter.class.isAssignableFrom(numericConversionClass)) {
+                numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);\n",
+                        numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
+
+                return format("%s = (short) %sConverter.parse(%s.text());\n", argumentName, argumentName, valueInName);
+            } else
+                return format("%s = %s.int16();\n", argumentName, valueInName);
         } else if (int.class.equals(argumentType)) {
-            if (numericConversionClass != null && IntConverter.class.isAssignableFrom(numericConversionClass)) {
+            if (numericConversionClass != null && LongConverter.class.isAssignableFrom(numericConversionClass)) {
+                numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);\n",
+                        numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
+
+                return format("%s = (int) %sConverter.parse(%s.text());\n", argumentName, argumentName, valueInName);
+            } else if (numericConversionClass != null && IntConverter.class.isAssignableFrom(numericConversionClass)) {
                 numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);\n",
                         numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
 

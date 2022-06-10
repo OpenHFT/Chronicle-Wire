@@ -18,64 +18,30 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.util.StringUtils;
-
-import java.util.Arrays;
 
 /**
  * Unsigned 32-bit number with encoding to be as disambiguated as possible.
  */
+@Deprecated(/* to remove in x.25 */)
 public class Base32IntConverter implements IntConverter {
 
     public static final int MAX_LENGTH = IntConverter.maxParseLength(32);
     public static final Base32IntConverter INSTANCE = new Base32IntConverter();
-    static final byte[] ENCODE = new byte[128];
-    static final int BASE = 32;
-    // similar but no the same as c.f. https://tools.ietf.org/html/rfc4648 to allow letters to be preserved.
-    private static final String CHARS = "234567ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    static final char[] DECODE = CHARS.toCharArray();
 
     @Override
     public int maxParseLength() {
         return MAX_LENGTH;
     }
 
-    static {
-        assert DECODE.length == BASE;
-        Arrays.fill(ENCODE, (byte) -1);
-        for (int i = 0; i < DECODE.length; i++) {
-            char c = DECODE[i];
-            ENCODE[c] = (byte) i;
-            ENCODE[Character.toLowerCase(c)] = (byte) i;
-        }
-        ENCODE['0'] = ENCODE['O'];
-        ENCODE['1'] = ENCODE['l'];
-        ENCODE['8'] = ENCODE['B'];
-        ENCODE['9'] = ENCODE['q'];
-        ENCODE['='] = 0;
-    }
-
     @Override
     public int parse(CharSequence text) {
-        lengthCheck(text);
-        int v = 0;
-        for (int i = 0; i < text.length(); i++) {
-            byte b = ENCODE[text.charAt(i)];
-            if (b >= 0)
-                v = (v << 5) + (b & 0xff);
-        }
-        return v;
+        return (int) Base32LongConverter.DELEGATE.parse(text);
     }
 
     @Override
     public void append(StringBuilder text, int value) {
         final int start = text.length();
-        while (value != 0) {
-            final int v = (value & (BASE - 1));
-            value >>>= 5;
-            text.append(DECODE[v]);
-        }
-        StringUtils.reverse(text, start);
+        Base32LongConverter.DELEGATE.append(text, value);
         if (text.length() > start + maxParseLength()) {
             Jvm.warn().on(getClass(), "truncated because the value was too large");
             text.setLength(start + maxParseLength());

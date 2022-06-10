@@ -499,6 +499,9 @@ public class WireMarshaller<T> {
                 case "boolean":
                     return new BooleanFieldAccess(field);
                 case "byte": {
+                    LongConversion longConversion = field.getAnnotation(LongConversion.class);
+                    if (longConversion != null)
+                        return new ByteLongConversionFieldAccess(field, longConversion);
                     IntConversion intConversion = field.getAnnotation(IntConversion.class);
                     return intConversion == null
                             ? new ByteFieldAccess(field)
@@ -511,12 +514,18 @@ public class WireMarshaller<T> {
                             : new CharConversionFieldAccess(field, charConversion);
 
                 case "short": {
+                    LongConversion longConversion = field.getAnnotation(LongConversion.class);
+                    if (longConversion != null)
+                        return new ShortLongConversionFieldAccess(field, longConversion);
                     IntConversion intConversion = field.getAnnotation(IntConversion.class);
                     return intConversion == null
                             ? new ShortFieldAccess(field)
                             : new ShortIntConversionFieldAccess(field, intConversion);
                 }
                 case "int": {
+                    LongConversion longConversion = field.getAnnotation(LongConversion.class);
+                    if (longConversion != null)
+                        return new IntLongConversionFieldAccess(field, longConversion);
                     IntConversion intConversion = field.getAnnotation(IntConversion.class);
                     return intConversion == null
                             ? new IntegerFieldAccess(field)
@@ -1645,6 +1654,54 @@ public class WireMarshaller<T> {
         }
     }
 
+    static class ByteLongConversionFieldAccess extends LongConversionFieldAccess {
+        public ByteLongConversionFieldAccess(@NotNull Field field, @NotNull LongConversion longConversion) {
+            super(field, longConversion);
+        }
+
+        @Override
+        protected long getLong(Object o) {
+            return unsafeGetByte(o, offset) & 0xFFL;
+        }
+
+        @Override
+        protected void setLong(Object o, long i) {
+            unsafePutByte(o, offset, (byte) i);
+        }
+    }
+
+    static class ShortLongConversionFieldAccess extends LongConversionFieldAccess {
+        public ShortLongConversionFieldAccess(@NotNull Field field, @NotNull LongConversion longConversion) {
+            super(field, longConversion);
+        }
+
+        @Override
+        protected long getLong(Object o) {
+            return unsafeGetShort(o, offset) & 0xFFFFL;
+        }
+
+        @Override
+        protected void setLong(Object o, long i) {
+            unsafePutShort(o, offset, (short) i);
+        }
+    }
+
+    static class IntLongConversionFieldAccess extends LongConversionFieldAccess {
+        public IntLongConversionFieldAccess(@NotNull Field field, @NotNull LongConversion longConversion) {
+            super(field, longConversion);
+        }
+
+        @Override
+        protected long getLong(Object o) {
+            return unsafeGetInt(o, offset) & 0xFFFF_FFFFL;
+        }
+
+        @Override
+        protected void setLong(Object o, long i) {
+            unsafePutInt(o, offset, (int) i);
+        }
+    }
+
     static class CharConversionFieldAccess extends CharFieldAccess {
 
         @NotNull
@@ -1659,7 +1716,10 @@ public class WireMarshaller<T> {
         protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
             StringBuilder sb = WSBP.acquireStringBuilder();
             intConverter.append(sb, getChar(o));
-            write.rawText(sb);
+            if (!write.isBinary() && sb.length() == 0)
+                write.text("");
+            else
+                write.rawText(sb);
         }
 
         protected char getChar(Object o) {
@@ -1714,7 +1774,10 @@ public class WireMarshaller<T> {
             } else {
                 StringBuilder sb = WSBP.acquireStringBuilder();
                 intConverter.append(sb, anInt);
-                write.rawText(sb);
+                if (!write.isBinary() && sb.length() == 0)
+                    write.text("");
+                else
+                    write.rawText(sb);
             }
         }
 
@@ -1840,14 +1903,21 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
-            long aLong = unsafeGetLong(o, offset);
+            long aLong = getLong(o);
             if (write.isBinary()) {
                 write.int64(aLong);
             } else {
                 StringBuilder sb = WSBP.acquireStringBuilder();
                 longConverter.append(sb, aLong);
-                write.rawText(sb);
+                if (!write.isBinary() && sb.length() == 0)
+                    write.text("");
+                else
+                    write.rawText(sb);
             }
+        }
+
+        protected long getLong(Object o) {
+            return unsafeGetLong(o, offset);
         }
 
         @Override
@@ -1860,6 +1930,10 @@ public class WireMarshaller<T> {
                 read.text(sb);
                 i = longConverter.parse(sb);
             }
+            setLong(o, i);
+        }
+
+        protected void setLong(Object o, long i) {
             unsafePutLong(o, offset, i);
         }
 
@@ -1873,12 +1947,12 @@ public class WireMarshaller<T> {
 
         @Override
         protected boolean sameValue(Object o, Object o2) {
-            return unsafeGetLong(o, offset) == unsafeGetLong(o2, offset);
+            return getLong(o) == getLong(o2);
         }
 
         @Override
         protected void copy(Object from, Object to) {
-            unsafePutLong(to, offset, unsafeGetLong(from, offset));
+            setLong(to, getLong(from));
         }
     }
 

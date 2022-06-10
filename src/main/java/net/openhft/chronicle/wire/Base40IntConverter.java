@@ -25,10 +25,11 @@ import java.util.Arrays;
 /**
  * Unsigned 32-bit number.
  */
+@Deprecated(/* to remove in x.25 */)
 public class Base40IntConverter implements IntConverter {
     public static final int MAX_LENGTH = IntConverter.maxParseLength(40);
     public static final Base40IntConverter INSTANCE = new Base40IntConverter();
-    private static final String CHARS = ".ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:-+";
+    private static final String CHARS = ".ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+";
     private static final char[] DECODE = CHARS.toCharArray();
     private static final byte[] ENCODE = new byte[128];
 

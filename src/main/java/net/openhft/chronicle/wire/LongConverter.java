@@ -23,6 +23,10 @@ import static java.text.MessageFormat.format;
 // TODO add a pattern for validation
 public interface LongConverter {
 
+    static int maxParseLength(int based) {
+        return (int) Math.ceil(64 / log(based) * log(2));
+    }
+
     /**
      * Parses the provided {@link CharSequence} and returns the parsed results as a
      * {@code long} primitive.
@@ -38,6 +42,10 @@ public interface LongConverter {
 
     default String asString(long value) {
         return asText(value).toString();
+    }
+
+    default CharSequence asText(int value) {
+        return asText(value & 0xFFFF_FFFFL);
     }
 
     default CharSequence asText(long value) {
@@ -63,8 +71,7 @@ public interface LongConverter {
             throw new IllegalArgumentException(format("text={0} exceeds the maximum allowable length of {1}", text, maxParseLength()));
     }
 
-    static int maxParseLength(int based) {
-        return (int) (64 / log(based) * log(2));
+    default boolean allSafeChars() {
+        return true;
     }
-
 }

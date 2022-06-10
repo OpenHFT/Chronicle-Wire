@@ -84,7 +84,7 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
                 LongConverter ic = ObjectUtils.newInstance(longConversion.value());
                 return a -> {
                     if (a[0] instanceof Number) {
-                        StringBuilder sb = Wires.acquireStringBuilder();
+                        StringBuilder sb = WireInternal.acquireStringBuilder();
                         ic.append(sb, ((Number) a[0]).longValue());
                         a[0] = new RawText(sb);
                     }
@@ -95,7 +95,7 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
                 IntConverter ic = ObjectUtils.newInstance(intConversion.value());
                 return a -> {
                     if (a[0] instanceof Number) {
-                        StringBuilder sb = Wires.acquireStringBuilder();
+                        StringBuilder sb = WireInternal.acquireStringBuilder();
                         ic.append(sb, ((Number) a[0]).intValue());
                         a[0] = new RawText(sb);
                     }

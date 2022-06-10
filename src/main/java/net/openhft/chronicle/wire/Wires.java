@@ -839,7 +839,7 @@ public enum Wires {
                 case "java.lang.StringBuilder":
                     return ScalarStrategy.of(StringBuilder.class, (o, in) -> {
                         StringBuilder builder = (o == null)
-                                ? acquireStringBuilder()
+                                ? WireInternal.acquireStringBuilder()
                                 : o;
                         in.textTo(builder);
                         return o;
@@ -998,7 +998,7 @@ public enum Wires {
         INSTANCE;
 
         static Bytes<?> decodeBase64(Bytes<?> o, ValueIn in) {
-            @NotNull StringBuilder sb0 = acquireStringBuilder();
+            @NotNull StringBuilder sb0 = WireInternal.acquireStringBuilder();
             in.text(sb0);
             String s = WireInternal.INTERNER.intern(sb0);
             byte[] decode = Base64.getDecoder().decode(s);

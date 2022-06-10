@@ -21,6 +21,7 @@ import static java.lang.Math.log;
 import static java.text.MessageFormat.format;
 
 // TODO add a pattern for validation
+@Deprecated(/* use LongConversion, to be removed in x.25 */)
 public interface IntConverter {
 
     /**
@@ -56,7 +57,7 @@ public interface IntConverter {
     }
 
     static int maxParseLength(int based) {
-        return (int) (32 / log(based) * log(2));
+        return (int) Math.ceil(32 / log(based) * log(2));
     }
 
     /**

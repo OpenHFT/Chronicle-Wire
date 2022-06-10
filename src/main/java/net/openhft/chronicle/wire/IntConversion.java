@@ -24,6 +24,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
+@Deprecated(/* use LongConversion, to be removed in x.25 */)
 public @interface IntConversion {
     Class<? extends IntConverter> value();
 }

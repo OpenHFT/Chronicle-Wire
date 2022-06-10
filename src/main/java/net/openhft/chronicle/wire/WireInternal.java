@@ -46,6 +46,8 @@ public enum WireInternal {
     static final StringInterner INTERNER = new StringInterner(Integer.getInteger("wire.interner.size", 4096));
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final StringBuilderPool ASBP = new StringBuilderPool();
+    static final StringBuilderPool SBPVI = new StringBuilderPool();
+    static final StringBuilderPool SBPVO = new StringBuilderPool();
     static final ThreadLocal<WeakReference<Bytes<?>>> BYTES_TL = new ThreadLocal<>();
     static final ThreadLocal<WeakReference<Bytes<?>>> BYTES_F2S_TL = new ThreadLocal<>();
     static final ThreadLocal<WeakReference<Wire>> BINARY_WIRE_TL = new ThreadLocal<>();
@@ -320,6 +322,14 @@ public enum WireInternal {
                 Wires::unmonitoredDirectBytes);
         bytes.clear();
         return bytes;
+    }
+
+    static StringBuilder acquireStringBuilderForValueIn() {
+        return SBPVI.acquireStringBuilder();
+    }
+
+    static StringBuilder acquireStringBuilderForValueOut() {
+        return SBPVO.acquireStringBuilder();
     }
 
     static class ObjectInterner<T> extends FromStringInterner<T> {
