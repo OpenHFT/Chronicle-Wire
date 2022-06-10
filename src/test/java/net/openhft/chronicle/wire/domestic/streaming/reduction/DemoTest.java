@@ -2,6 +2,11 @@ package net.openhft.chronicle.wire.domestic.streaming.reduction;
 
 import net.openhft.chronicle.threads.PauserMode;
 import net.openhft.chronicle.wire.domestic.streaming.*;
+import net.openhft.chronicle.wire.extractor.DocumentExtractor;
+import net.openhft.chronicle.wire.AutoTailers;
+import net.openhft.chronicle.wire.reduction.ConcurrentCollectors;
+import net.openhft.chronicle.wire.reduction.Reduction;
+import net.openhft.chronicle.wire.reduction.Reductions;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentMap;
@@ -14,9 +19,9 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingByConcurrent;
 import static java.util.stream.Collectors.summarizingDouble;
-import static net.openhft.chronicle.wire.domestic.streaming.ConcurrentCollectors.replacingMerger;
-import static net.openhft.chronicle.wire.domestic.streaming.DocumentExtractor.builder;
-import static net.openhft.chronicle.wire.domestic.streaming.ToLongDocumentExtractor.extractingIndex;
+import static net.openhft.chronicle.wire.reduction.ConcurrentCollectors.replacingMerger;
+import static net.openhft.chronicle.wire.extractor.DocumentExtractor.builder;
+import static net.openhft.chronicle.wire.extractor.ToLongDocumentExtractor.extractingIndex;
 
 public class DemoTest {
 

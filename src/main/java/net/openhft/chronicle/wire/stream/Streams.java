@@ -1,7 +1,10 @@
-package net.openhft.chronicle.wire.domestic.streaming;
+package net.openhft.chronicle.wire.stream;
 
 import net.openhft.chronicle.wire.MarshallableIn;
-import net.openhft.chronicle.wire.internal.domestic.streaming.StreamsUtil;
+import net.openhft.chronicle.wire.extractor.DocumentExtractor;
+import net.openhft.chronicle.wire.extractor.ToDoubleDocumentExtractor;
+import net.openhft.chronicle.wire.extractor.ToLongDocumentExtractor;
+import net.openhft.chronicle.wire.internal.stream.StreamsUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
@@ -15,7 +18,7 @@ import java.util.stream.StreamSupport;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * Factories to create standard {@link Stream} and related objects from Chronicle Queues.
+ * Factories to create standard {@link Stream} and related objects from Chronicle Queues and other MarshallableIn types.
  * <p>
  * If the provided {@code extractor } is reusing objects, then care must be taken in the
  * returned objects (e.g. Streams, Spliterators and Iterators) to account for this.

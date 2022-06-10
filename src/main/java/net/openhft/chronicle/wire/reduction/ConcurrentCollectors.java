@@ -1,4 +1,4 @@
-package net.openhft.chronicle.wire.domestic.streaming;
+package net.openhft.chronicle.wire.reduction;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

@@ -1,4 +1,4 @@
-package net.openhft.chronicle.wire.domestic.streaming;
+package net.openhft.chronicle.wire.extractor;
 
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.wire.Wire;

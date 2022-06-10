@@ -1,7 +1,7 @@
-package net.openhft.chronicle.wire.internal.domestic.streaming;
+package net.openhft.chronicle.wire.internal.extractor;
 
 import net.openhft.chronicle.core.util.ThreadConfinementAsserter;
-import net.openhft.chronicle.wire.domestic.streaming.DocumentExtractor;
+import net.openhft.chronicle.wire.extractor.DocumentExtractor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiConsumer;
@@ -10,10 +10,6 @@ import java.util.function.Supplier;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 public final class DocumentExtractorBuilder<E> implements DocumentExtractor.Builder<E> {
-
-    static {
-        IncubatorWarning.warnOnce();
-    }
 
     private final Class<E> elementType;
 

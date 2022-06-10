@@ -4,8 +4,8 @@ import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.domestic.streaming.CreateUtil;
-import net.openhft.chronicle.wire.domestic.streaming.DocumentExtractor;
-import net.openhft.chronicle.wire.domestic.streaming.Reduction;
+import net.openhft.chronicle.wire.extractor.DocumentExtractor;
+import net.openhft.chronicle.wire.reduction.Reduction;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,8 +16,8 @@ import java.util.function.Function;
 import java.util.stream.Collector;
 
 import static java.util.stream.Collectors.*;
-import static net.openhft.chronicle.wire.domestic.streaming.ConcurrentCollectors.reducingConcurrent;
-import static net.openhft.chronicle.wire.domestic.streaming.ConcurrentCollectors.replacingMerger;
+import static net.openhft.chronicle.wire.reduction.ConcurrentCollectors.reducingConcurrent;
+import static net.openhft.chronicle.wire.reduction.ConcurrentCollectors.replacingMerger;
 import static org.junit.Assert.assertEquals;
 
 public class CollectorTest extends WireTestCommon {

@@ -1,0 +1,280 @@
+= Chronicle Stream Bridge
+Per Minborg
+:css-signature: demo
+:toc: macro
+:toclevels: 3
+:icons: font
+
+toc::[]
+
+== About Chronicle Stream Bridge
+
+Chronicle Queue Stream Bridge acts as a bridge between `MarshallableIn` capable objects such as Chronicle Queue, Chronicle Network and Chronicle Wire and standard `java.util.stream.Stream` objects.
+
+== Stream Bridge Overview
+
+The Stream Bridge allows standard `Stream`, `LongStream` and `DoubleStream` objects to be created directly from `MarshallableIn` objects such as a Chronicle Queues.
+Here is an example how a Chronicle Queue that contains `MarketData` objects can be converted and used as a Stream:
+
+[source,java]
+----
+String s = Streams.of(
+               queue.createTailer(),                                <1>
+               ExcerptExtractor.builder(MarketData.class).build()   <2>
+         )
+        .skip(100)
+        .limit(50)
+        .map(Object::toString)
+        .collect(Collectors.joining(","));
+----
+
+<1> The `ExceprtTailer` to use when reading excerpts from the Queue.
+The tailer can be set to a certain configuration and/or position before being submitted to the method above.
+
+<2> The `ExcerptExtractor` used to convert an excerpt to a Java object.
+In the example above, an extractor of type `MarketData` is used which is obtained via a builder function `ExcerptExtractor.builder()`.
+
+The `Stream` above shows an example of a pagination service where the third page of events from the Queue is shown (each page has 50 rows).
+Once the `Stream` is created, it behaves like any `Stream` and can take advantage of the whole `Stream` ecosystem.
+
+The snippet above might produce the following output (shortened):
+[source,text]
+
+----
+!MarketData {
+  symbol: MSFT,
+  last: 100.0,
+  high: 110.0,
+  low: 90.0
+}
+,!.MarketData {
+  symbol: APPL,
+  last: 200.0,
+  high: 220.0,
+  low: 180.0
+}
+,!MarketData {
+  symbol: MSFT,
+  last: 101.0,
+  high: 110.0,
+  low: 90.0
+}
+...
+----
+
+== Stream Bridge Details
+
+This chapter contains a more detailed description of the Stream Bridge functionality.
+First, a number of examples are shown so that the overall use cases can be more easily understood.
+After that, a more formal description is presented.
+
+=== Examples
+
+This chapter contains a number of Stream Bridge examples.
+
+==== LongStream: Finding the Highest Index
+
+This example is using a `LongStream` eliminating object creation:
+
+[source,java]
+----
+long last = Streams.ofLong(
+                q.createTailer(),
+                ToLongExcerptExtractor.extractingIndex() <1>
+         )
+        .max()
+        .orElse(-1);                                     <2>
+
+----
+
+<1> Convenience method equivalent to `(wire, index) -> index`.
+<2> If no index is present, return `-1`.
+
+==== LongStream: Computing Statistics
+
+This other example is also using a `LongStream` but with a custom extractor that will read a `long` directly from the queue.
+
+[source,java]
+----
+LongSummaryStatistics stat = Streams.ofLong(
+               q.createTailer(),
+               (wire, index) -> wire.getValueIn().readLong() <1>
+        )
+        .summaryStatistics();
+----
+
+<1> Custom `ToLongExcerptExtractor` lambda.
+
+==== Stream: Objects of a Certain Type
+
+This example shows an example of creating a `Stream<MarketData>`.
+[source,java]
+
+----
+Stream<MarketData> stream = Streams.of(queue.createTailer(), builder(MarketData.class).build());
+----
+
+The `ExcerptExtractor.builder(Class<E> type).build` construct is equivalent to:
+
+[source,java]
+----
+(wire, index) -> wire
+    .getValueIn()
+    .object(type);
+----
+
+==== Stream: Objects from a Queue written via MethodWriters
+
+If a queue was written using a method writer, the queue will likely contain messages of different types.
+Assuming we have used a method writer implementing:
+
+[source,java]
+----
+public interface Messages {
+
+    void shares(Shares shares);
+
+    void news(News news);
+
+    void greeting(String greeting);
+
+}
+----
+
+we can extract messages of a certain type like so:
+
+[source,java]
+----
+List<News> newsList = Streams.of(
+                    q.createTailer(),
+                    builder(News.class)
+                        .withMethod(Messages.class, Messages::news)
+                        .build()                                           <1>
+            )
+            .sorted(Comparator.comparing(News::symbol))                    <2>
+            .collect(toList());
+----
+
+<1> Creates an `ExcerptExtractor` that will extract `News` messages that was previously written to the queue using a method writer's `Messages::news` method.
+
+<2> Standard `Stream` operation that will return a `Stream` sorted in `symbol` order.
+
+The extractor will only extract messages of the specified type and method and not other messages.
+
+==== Iterators and Spliterators
+
+Streams, Spliterators and Iterators are related.
+The Stream Bridge feature also supports creating various Spliterators and Iterators.
+Here is an example:
+
+[source,java]
+----
+Iterator<MarketData> iterator = Streams.iterator(
+                queue.createTailer(),
+                builder(MarketData.class).build()      <1>
+);
+----
+
+<1> Extract messages of this type while iterating.
+
+As can be seen, the procedure here is similar to creating a `Stream`.
+
+==== Parallel Streams
+Streams handle thread-safety issues with `MarshallableIn` objects but the provided `MarshallableIn` must be able to run on different threads (e.g. cannot have `ThreadLocal` variables) or else the result is undefined.
+
+=== Constrains and Best Practices
+
+This chapter contains tips for using the Stream Bridge feature.
+
+==== Object Reuse
+
+It is possible to create an `ExcerprExtractor` that is reusing objects.
+Care must be taken if such an extractor is used so that, for example, reused objects are not exposed and/or not stored internally in the Streams pipeline.
+If in doubt, make a copy or extract an immutable value from the object at hand.
+
+[source,java]
+----
+OptionalDouble max = Streams.of(queue.createTailer(),
+               builder(MarketData.class)
+                        .withReusing(MarketData::new)    <1>
+                        .build())
+        .mapToDouble(MarketData::last)                   <2>
+        .max();
+----
+
+<1> This supplier is used to provide objects that are reused when successively extracting a plurality of elements.
+<2> A primitive `double` value is extracted directly making reuse safe.
+
+Here is an example of object reuse that is *not allowed*:
+
+[source,java]
+----
+List<MarketData> list = Streams.of(queue.createTailer(),
+                builder(MarketData.class)
+                        .withReusing(MarketData::new)  <1>
+                        .build())
+        .collect(toList());                            <2>
+
+System.out.println("list = " + list);
+----
+
+<1> This supplier is used to provide objects that are reused when successively extracting a plurality of elements.
+<2> As objects are reused, the list will be populated with identical objects that will reflect the latest value of the reused object.
+
+This might print something like this:
+
+[source,text]
+----
+list = [!MarketData {
+  symbol: MSFT,
+  last: 101.0,
+  high: 110.0,
+  low: 90.0
+}
+, !MarketData {
+  symbol: MSFT,
+  last: 101.0,
+  high: 110.0,
+  low: 90.0
+}
+, !MarketData {
+  symbol: MSFT,
+  last: 101.0,
+  high: 110.0,
+  low: 90.0
+}
+]
+----
+
+==== Closing an ExcerptTailer
+
+In the examples above, an `ExcerptTailer` was created on demand but was not properly closed.
+In memory sensitive applications, it is recommended that this is taken care of as tailers may have allocated internal resources.
+Here is an example:
+
+[source,java]
+----
+Map<String, List<MarketData>> groups;
+try (ExcerptTailer tailer = queue.createTailer()) {
+    groups = Streams.of(tailer, builder(MarketData.class).build())
+            .collect(groupingBy(MarketData::symbol));
+}    <1>
+
+groups...
+----
+
+<1> The tailer is auto-closed here
+
+==== GC and Object creation
+
+Streams are likely to create objects during construction and use.
+Therefore, the Stream Bridge features are not recommended in the same JVM as deterministic low-latency applications.
+Once these objects are reclaimed by the Garbage Collector, jitter may be incurred on executing Threads.
+
+
+== To be Documented or todo
+
+* Parallel streams (Thread-safe ExcerptTailer)
+* ExcerptExtractor.ofType() error handling (what if there is another message on the queue?)
+* Extractors' use of `null` and `Long.MIN_VALUE`
+* Maybe provide a Supplier<ExcerptTailer> so that streams can close the tailer after use?

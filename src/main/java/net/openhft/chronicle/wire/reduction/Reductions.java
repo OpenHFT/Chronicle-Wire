@@ -1,7 +1,9 @@
-package net.openhft.chronicle.wire.domestic.streaming;
+package net.openhft.chronicle.wire.reduction;
 
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.extractor.ToDoubleDocumentExtractor;
+import net.openhft.chronicle.wire.extractor.ToLongDocumentExtractor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
@@ -23,6 +25,19 @@ public final class Reductions {
 
     // Specialized Reductions
 
+    /**
+     * Creates and returns a new Reduction that will extract elements of type {@code long} using
+     * the provided {@code extractor} and will accumulate values using the provided {@code accumulator}.
+     * The initial state of the reduction will be the provided {@code identity}.
+     * <p>
+     * The returned Reduction is guaranteed to not create any internal objects.
+     *
+     * @param extractor to apply on each document (non-null)
+     * @param identity initial start value
+     * @param accumulator to apply for each element (non-null)
+     * @return a new Reduction reducing long values
+     * @throws NullPointerException if any objects provided are {@code null}.
+     */
     public static Reduction<LongSupplier> reducingLong(@NotNull final ToLongDocumentExtractor extractor,
                                                        final long identity,
                                                        @NotNull final LongBinaryOperator accumulator) {
@@ -37,6 +52,19 @@ public final class Reductions {
                 );
     }
 
+    /**
+     * Creates and returns a new Reduction that will extract elements of type {@code double} using
+     * the provided {@code extractor} and will accumulate values using the provided {@code accumulator}.
+     * The initial state of the reduction will be the provided {@code identity}.
+     * <p>
+     * The returned Reduction is guaranteed to not create any internal objects.
+     *
+     * @param extractor to apply on each document (non-null)
+     * @param identity initial start value
+     * @param accumulator to apply for each element (non-null)
+     * @return a new Reduction reducing double values
+     * @throws NullPointerException if any objects provided are {@code null}.
+     */
     public static Reduction<DoubleSupplier> reducingDouble(@NotNull final ToDoubleDocumentExtractor extractor,
                                                            final double identity,
                                                            @NotNull final DoubleBinaryOperator accumulator) {
@@ -51,6 +79,13 @@ public final class Reductions {
                 );
     }
 
+    /**
+     * Creates and returns a new Reduction that will count the number of excerpts.
+     * <p>
+     * The returned Reduction is guaranteed to not create any internal objects.
+     *
+     * @return a new Reduction counting excerpts
+     */
     public static Reduction<LongSupplier> counting() {
         return Reduction.ofLong(
                         (wire, index) -> 1L)
@@ -63,6 +98,9 @@ public final class Reductions {
 
     /**
      * A Reduction class that counts the number of excerpts that have been processed.
+     * <p>
+     * This is an example of a public class with configurable properties that can be
+     * referenced in a YAML configuration file.
      */
     public static final class Counting extends SelfDescribingMarshallable implements Reduction<LongSupplier> {
 

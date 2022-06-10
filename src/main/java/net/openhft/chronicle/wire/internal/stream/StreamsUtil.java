@@ -1,11 +1,11 @@
-package net.openhft.chronicle.wire.internal.domestic.streaming;
+package net.openhft.chronicle.wire.internal.stream;
 
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.Wire;
-import net.openhft.chronicle.wire.domestic.streaming.DocumentExtractor;
-import net.openhft.chronicle.wire.domestic.streaming.ToDoubleDocumentExtractor;
-import net.openhft.chronicle.wire.domestic.streaming.ToLongDocumentExtractor;
+import net.openhft.chronicle.wire.extractor.DocumentExtractor;
+import net.openhft.chronicle.wire.extractor.ToDoubleDocumentExtractor;
+import net.openhft.chronicle.wire.extractor.ToLongDocumentExtractor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -17,10 +17,6 @@ import java.util.function.LongConsumer;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 public final class StreamsUtil {
-
-    static {
-        IncubatorWarning.warnOnce();
-    }
 
     private static final int BATCH_UNIT_INCREASE = 1 << 10;
     private static final int MAX_BATCH_SIZE = 1 << 24;

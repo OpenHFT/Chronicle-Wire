@@ -1,8 +1,8 @@
-package net.openhft.chronicle.wire.internal.domestic.streaming;
+package net.openhft.chronicle.wire.internal.extractor;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.util.StringUtils;
-import net.openhft.chronicle.wire.domestic.streaming.DocumentExtractor;
+import net.openhft.chronicle.wire.extractor.DocumentExtractor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

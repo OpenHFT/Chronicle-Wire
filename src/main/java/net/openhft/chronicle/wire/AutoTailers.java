@@ -1,11 +1,11 @@
-package net.openhft.chronicle.wire.domestic.streaming;
+package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.threads.EventHandler;
 import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.wire.ExcerptListener;
 import net.openhft.chronicle.wire.MarshallableIn;
-import net.openhft.chronicle.wire.internal.domestic.streaming.InternalAutoTailers;
-import net.openhft.chronicle.wire.internal.domestic.streaming.ReductionUtil;
+import net.openhft.chronicle.wire.internal.InternalAutoTailers;
+import net.openhft.chronicle.wire.internal.reduction.ReductionUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;

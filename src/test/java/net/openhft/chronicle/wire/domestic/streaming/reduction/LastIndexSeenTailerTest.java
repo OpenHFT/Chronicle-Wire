@@ -2,9 +2,9 @@ package net.openhft.chronicle.wire.domestic.streaming.reduction;
 
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.WireTestCommon;
-import net.openhft.chronicle.wire.domestic.streaming.Reduction;
-import net.openhft.chronicle.wire.domestic.streaming.Reductions;
-import net.openhft.chronicle.wire.domestic.streaming.ToLongDocumentExtractor;
+import net.openhft.chronicle.wire.reduction.Reduction;
+import net.openhft.chronicle.wire.reduction.Reductions;
+import net.openhft.chronicle.wire.extractor.ToLongDocumentExtractor;
 import org.junit.Test;
 
 import java.util.function.LongSupplier;
