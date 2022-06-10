@@ -28,9 +28,7 @@ import static net.openhft.chronicle.wire.domestic.streaming.DocumentExtractor.bu
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class StreamsDemoTest {
-
-    static final String Q_NAME = StreamsDemoTest.class.getSimpleName();
+final class StreamsDemoTest {
 
     @Test
     void streamTypeMarketDataSimple() {
