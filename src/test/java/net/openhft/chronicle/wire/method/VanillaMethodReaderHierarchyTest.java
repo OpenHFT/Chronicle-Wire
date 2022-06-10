@@ -2,9 +2,9 @@ package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
+import net.openhft.chronicle.wire.WireType;
 import org.junit.Test;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -54,7 +54,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
     }
 
     private void checkWriteRead(Simple simple) {
-        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(32));
+        Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(32));
         Simple writer = wire.methodWriter(Simple.class);
         MethodReader reader = wire.methodReader(simple);
         final String superMario = "Mario";

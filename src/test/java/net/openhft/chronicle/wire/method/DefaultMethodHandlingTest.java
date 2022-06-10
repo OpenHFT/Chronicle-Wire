@@ -3,8 +3,9 @@ package net.openhft.chronicle.wire.method;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Mocker;
-import net.openhft.chronicle.wire.TextWire;
+import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
+import net.openhft.chronicle.wire.WireType;
 import org.junit.Test;
 
 import java.io.StringWriter;
@@ -22,7 +23,7 @@ interface WithDefault {
 public class DefaultMethodHandlingTest extends WireTestCommon {
     @Test
     public void withDefault() {
-        TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
+        Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
         WithDefault withDefault = wire.methodWriter(WithDefault.class);
         withDefault.method1("one");
         withDefault.method2("two");

@@ -5,6 +5,12 @@ import net.openhft.chronicle.bytes.BytesMarshallable;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.Assert.assertEquals;
 
@@ -130,6 +136,58 @@ public class WiresTest extends WireTestCommon {
                 "}\n", tv.toString());
 
     }
+    @Test
+    public void recordAsYaml() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(baos);
+        Says says = Wires.recordAsYaml(Says.class, ps);
+        says.say("One");
+        says.say("Two");
+        says.say("Three");
+
+        assertEquals("" +
+                "---\n" +
+                "say: One\n" +
+                "...\n" +
+                "---\n" +
+                "say: Two\n" +
+                "...\n" +
+                "---\n" +
+                "say: Three\n" +
+                "...\n",
+                new String(baos.toByteArray(), StandardCharsets.ISO_8859_1));
+    }
+    @Test
+    public void replay() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(baos);
+        Says says = Wires.recordAsYaml(Says.class, ps);
+        says.say("zero");
+        Wires.replay("=" +
+                "---\n" +
+                "say: One\n" +
+                "...\n" +
+                "---\n" +
+                "say: Two\n" +
+                "...\n" +
+                "---\n" +
+                "say: Three\n" +
+                "...\n",says);
+
+        assertEquals("" +
+                "---\n" +
+                "say: zero\n" +
+                "...\n" +
+                "---\n" +
+                "say: One\n" +
+                "...\n" +
+                "---\n" +
+                "say: Two\n" +
+                "...\n" +
+                "---\n" +
+                "say: Three\n" +
+                "...\n", new String(baos.toByteArray(), StandardCharsets.ISO_8859_1));
+    }
 
     interface ThreeValues {
         ThreeValues string(String s);
@@ -211,5 +269,9 @@ public class WiresTest extends WireTestCommon {
         ContainsBM(BasicBytesMarshallable inner) {
             this.inner = inner;
         }
+    }
+
+    interface Says {
+        void say(String word);
     }
 }

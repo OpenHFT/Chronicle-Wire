@@ -57,7 +57,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     );
 
     private final boolean disableProxyGen = Jvm.getBoolean(DISABLE_WRITER_PROXY_CODEGEN, false);
-    private final Set<Class> interfaces = Collections.synchronizedSet(new LinkedHashSet<>());
+    private final Set<Class<?>> interfaces = Collections.synchronizedSet(new LinkedHashSet<>());
 
     private final String packageName;
     private ClassLoader classLoader;
@@ -118,8 +118,10 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         return this;
     }
 
+    @Deprecated(/* Replaced by UpdateInterceptor. To be removed in x.24 */)
     @NotNull
     public MethodWriterBuilder<T> methodWriterInterceptorReturns(MethodWriterInterceptorReturns methodWriterInterceptor) {
+        Jvm.warn().on(getClass(), "Support for methodWriterInterceptorReturns will be dropped in x.24. Use UpdateInterceptor instead");
         handlerSupplier.methodWriterInterceptorReturns(methodWriterInterceptor);
         return this;
     }
@@ -190,6 +192,9 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
             T t = createInstance();
             if (t != null)
                 return t;
+        } else {
+            Jvm.warn().on(getClass(), "Falling back to proxy method writer. Support for " +
+                    "proxy method writers will be dropped in x.25.");
         }
 
         @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
@@ -214,9 +219,9 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
             throw e;
         } catch (Throwable e) {
             classCache.put(fullClassName, COMPILE_FAILED);
-            // do nothing and drop through
-            if (Jvm.isDebugEnabled(getClass()))
-                Jvm.debug().on(getClass(), e);
+            Jvm.warn().on(getClass(), "Failed to compile generated method writer - " +
+                    "falling back to proxy method writer. Please report this failure as support for " +
+                    "proxy method writers will be dropped in x.25.", e);
         }
         return null;
     }

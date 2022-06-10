@@ -195,7 +195,6 @@ public class VanillaMethodReader implements MethodReader {
     // package local for testing
     static @NotNull String logMessage0(@NotNull CharSequence s, @NotNull ValueIn v) {
         try {
-            @NotNull String name = s.toString();
             String rest;
 
             if (v.wireIn().isBinary()) {
@@ -203,7 +202,7 @@ public class VanillaMethodReader implements MethodReader {
                 Bytes<?> bytes = Bytes.allocateElasticOnHeap((int) (bytes0.readRemaining() * 3 / 2 + 64));
                 long pos = bytes0.readPosition();
                 try {
-                    v.wireIn().copyTo(new TextWire(bytes));
+                    v.wireIn().copyTo(WireType.TEXT.apply(bytes));
                     rest = bytes.toString();
                 } catch (Exception t) {
                     rest = bytes0.toHexString(pos, bytes0.readLimit() - pos);

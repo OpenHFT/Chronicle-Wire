@@ -49,7 +49,7 @@ public class WireInternalTest extends WireTestCommon {
     public void testThrowable() {
         final Bytes<?> bytes = Bytes.elasticByteBuffer();
         try {
-            final Wire wire = new TextWire(bytes);
+            final Wire wire = WireType.TEXT.apply(bytes);
 
             final Exception exc = new Exception();
 

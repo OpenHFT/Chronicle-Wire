@@ -53,7 +53,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO1 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO2");
 
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
-        wire.usePadding(true);
+        wire.usePadding(wire.isBinary());
         CLASS_ALIASES.addAlias(DTO1.class, "DTO");
 
         wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new DTO1(1)));
@@ -80,7 +80,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO2 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO1");
 
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
-        wire.usePadding(true);
+        wire.usePadding(wire.isBinary());
         CLASS_ALIASES.addAlias(DTO2.class, "DTO");
 
         wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new DTO2(1, 2, 3)));

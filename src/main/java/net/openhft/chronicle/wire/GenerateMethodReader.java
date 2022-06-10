@@ -159,7 +159,6 @@ public class GenerateMethodReader {
                 "import net.openhft.chronicle.wire.*;\n" +
                 "import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;\n" +
                 "\n" +
-                "import java.util.function.Supplier;\n" +
                 "import java.util.Map;\n" +
                 "import java.lang.reflect.Method;\n" +
                 "\n");
@@ -174,6 +173,7 @@ public class GenerateMethodReader {
         for (int i = 0; i < instances.length; i++) {
             sourceCode.append(format("private final Object instance%d;\n", i));
         }
+        sourceCode.append("private final WireParselet defaultParselet;\n");
         sourceCode.append("\n");
 
         if (hasRealInterceptorReturns()) {
@@ -201,11 +201,14 @@ public class GenerateMethodReader {
             sourceCode.append("\n");
         }
 
-        sourceCode.append(format("public %s(MarshallableIn in, WireParselet debugLoggingParselet," +
-                "Supplier<MethodReader> delegateSupplier, MethodReaderInterceptorReturns interceptor, " +
+        sourceCode.append(format("public %s(MarshallableIn in, " +
+                "WireParselet defaultParselet, " +
+                "WireParselet debugLoggingParselet, " +
+                "MethodReaderInterceptorReturns interceptor, " +
                 "Object[] metaInstances, " +
                 "Object[] instances) {\n" +
-                "super(in, debugLoggingParselet, delegateSupplier);\n", generatedClassName()));
+                "super(in, debugLoggingParselet);\n" +
+                "this.defaultParselet = defaultParselet;\n", generatedClassName()));
 
         if (hasRealInterceptorReturns())
             sourceCode.append("this.interceptor = interceptor;\n");
@@ -240,8 +243,9 @@ public class GenerateMethodReader {
         sourceCode.append(eventIdSwitchBlock);
 
         sourceCode.append("default:\n" +
-                "valueIn.skipValue();\n" +
-                "return false;\n" +
+                // below should be garbage-free if methodId is low. This will now drop through for defaultParselet
+                "lastEventName = Integer.toString(methodId);\n" +
+                "break;\n" +
                 "}\n" +
                 "}\n" +
                 "else {\n" +
@@ -260,19 +264,12 @@ public class GenerateMethodReader {
         sourceCode.append(eventNameSwitchBlock);
 
         sourceCode.append("default:\n" +
-                "valueIn.skipValue();\n" +
-                "return false;\n" +
+                "defaultParselet.accept(lastEventName, valueIn);\n" +
                 "}\n" +
                 "return true;\n" +
                 "} \n" +
                 "catch (InvocationTargetRuntimeException e) {\n" +
                 "throw e;\n" +
-                "}\n" +
-                "catch (Exception e) {\n" +
-                "Jvm.warn().on(this.getClass(), \"Failure to dispatch message, " +
-                "will retry to process without generated code: \" + lastEventName + \"(), " +
-                "bytes: \" + wireIn.bytes().toDebugString(), e);\n" +
-                "return false;\n" +
                 "}\n" +
                 "}\n");
 
@@ -315,18 +312,12 @@ public class GenerateMethodReader {
                 "catch (InvocationTargetRuntimeException e) {\n" +
                 "throw e;\n" +
                 "}\n" +
-                "catch (Exception e) {\n" +
-                "Jvm.warn().on(this.getClass(), \"Failure to dispatch message, " +
-                "will retry to process without generated code: \" + lastEventName + \"(), " +
-                "bytes: \" + wireIn.bytes().toDebugString(), e);\n" +
-                "return false;\n" +
-                "}\n" +
                 "}\n}\n");
 
         isSourceCodeGenerated = true;
 
         if (DUMP_CODE)
-            System.out.println(sourceCode);
+            System.out.println(sourceCode.toString());
     }
 
     /**
@@ -517,6 +508,7 @@ public class GenerateMethodReader {
             args[i] = m.getName() + "arg" + i;
 
         res.append("try {\n");
+        res.append("dataEventProcessed = true;\n");
 
         // called for no interceptor and a generating interceptor
         if (!hasRealInterceptorReturns()) {

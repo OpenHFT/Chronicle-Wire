@@ -280,10 +280,9 @@ public class TextWireTest extends WireTestCommon {
     }
 
     @NotNull
-    private TextWire createWire() {
+    private Wire createWire() {
         bytes = allocateElasticOnHeap();
-        final TextWire wire = new TextWire(bytes);
-        wire.usePadding(true);
+        final Wire wire = WireType.TEXT.apply(bytes);
         return wire;
     }
 
@@ -940,8 +939,7 @@ public class TextWireTest extends WireTestCommon {
     @Test
     public void testMapReadAndWriteStrings() {
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
-        @NotNull final Wire wire = new TextWire(bytes);
-        wire.usePadding(true);
+        @NotNull final Wire wire = WireType.TEXT.apply(bytes);
 
         @NotNull final Map<String, String> expected = new LinkedHashMap<>();
 
@@ -1062,7 +1060,7 @@ public class TextWireTest extends WireTestCommon {
     @Ignore
     public void testMapReadAndWriteIntegers() {
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
-        @NotNull final Wire wire = new TextWire(bytes);
+        @NotNull final Wire wire = WireType.TEXT.apply(bytes);
 
         @NotNull final Map<Integer, Integer> expected = new HashMap<>();
 
@@ -1127,8 +1125,7 @@ public class TextWireTest extends WireTestCommon {
     @Test
     public void testMapReadAndWriteMarshable() {
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
-        @NotNull final Wire wire = new TextWire(bytes);
-        wire.usePadding(false);
+        @NotNull final Wire wire = WireType.TEXT.apply(bytes);
 
         @NotNull final Map<MyMarshallable, MyMarshallable> expected = new LinkedHashMap<>();
 
@@ -1171,8 +1168,7 @@ public class TextWireTest extends WireTestCommon {
             }
         };
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
-        @NotNull final Wire wire = new TextWire(bytes);
-        wire.usePadding(false);
+        @NotNull final Wire wire = WireType.TEXT.apply(bytes);
         wire.writeDocument(false, w -> w.writeEventName(() -> "exception")
                 .object(e));
 
@@ -1449,7 +1445,7 @@ public class TextWireTest extends WireTestCommon {
 
     @Test
     public void readDemarshallable() {
-        @NotNull Wire wire = createWire().useBinaryDocuments();
+        @NotNull Wire wire = createWire();
         try (DocumentContext $ = wire.writingDocument(true)) {
             wire.getValueOut().typedMarshallable(new DemarshallableObject("test", 12345));
         }
@@ -1499,13 +1495,12 @@ public class TextWireTest extends WireTestCommon {
         @NotNull byte[] four = {1, 2, 3, 4};
         wire.writeDocument(false, w -> w.write("four").object(four));
 
-        assertEquals("--- !!data\n" +
+        assertEquals("" +
+                        "--- !!data\n" +
                         "nothing: !byte[] !!binary \n" +
-                        " \n" +
                         "# position: 32, header: 1\n" +
                         "--- !!data\n" +
                         "one: !byte[] !!binary AQ==\n" +
-                        " \n" +
                         "# position: 64, header: 2\n" +
                         "--- !!data\n" +
                         "four: !byte[] !!binary AQIDBA==\n"

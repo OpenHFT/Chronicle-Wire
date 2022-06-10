@@ -1,0 +1,71 @@
+package net.openhft.chronicle.wire;
+
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.OnHeapBytes;
+import org.jetbrains.annotations.NotNull;
+import org.junit.Assert;
+import org.junit.Ignore;
+
+import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
+
+// relates to https://github.com/OpenHFT/Chronicle-Wire/issues/467
+public class TestJsonIssue467 {
+
+    public static class ResponseItem extends SelfDescribingMarshallable {
+        @NotNull String index;
+        private final Bytes<?> key = Bytes.elasticByteBuffer();
+        private Object payload;
+    }
+
+
+    @Ignore
+    @org.junit.Test
+    public void test() {
+        CLASS_ALIASES.addAlias(ResponseItem.class);
+
+        ResponseItem responseItem = Marshallable.fromString(ResponseItem.class, "!ResponseItem {\n" +
+                "  index: \"4ab100000005\",\n" +
+                "  key: seqNumber,\n" +
+                "  payload: {\n" +
+                "    eventId: periodicUpdate,\n" +
+                "    eventTime: 1652109920838805734,\n" +
+                "    seqNumbers: [\n" +
+                "      {\n" +
+                "        sessionID: {\n" +
+                "          localCompID: SERVER,\n" +
+                "          remoteCompID: CLIENT,\n" +
+                "          localSubID: !!null \"\",\n" +
+                "          remoteSubID: !!null \"\"\n" +
+                "        },\n" +
+                "        rSeq: !short 1517,\n" +
+                "        wSeq: !short 1519,\n" +
+                "        isActive: true,\n" +
+                "        isConnected: false\n" +
+                "      }\n" +
+                "    ]\n" +
+                "  }\n" +
+                "}");
+
+        OnHeapBytes buffer = Bytes.allocateElasticOnHeap();
+        final Wire jsonWire = WireType.JSON_ONLY.apply(buffer);
+        jsonWire.getValueOut().object(responseItem);
+
+        String actual = buffer.toString();
+
+        int openBracket = 0;
+        int closeBracket = 0;
+        for (int i = 0; i < actual.length(); i++) {
+            if (actual.charAt(i) == '{')
+                openBracket++;
+            if (actual.charAt(i) == '}')
+                closeBracket++;
+        }
+
+        // check the number of '{' match the number of '}'
+        Assert.assertTrue("openBracket=" + openBracket + ",closeBracket=" + closeBracket, openBracket == closeBracket);
+
+        // DON'T CHANGE THE EXPECTED JSON IT IS CORRECT ! - please use this website to validate the json - https://jsonformatter.org
+        Assert.assertEquals("{\"@ResponseItem\":{\"index\":\"4ab100000005\",\"key\":\"seqNumber\",\"payload\":{\"eventId\":\"periodicUpdate\",\"eventTime\":1652109920838805734,\"seqNumbers\":[ {\"sessionID\":{\"localCompID\":\"SERVER\",\"remoteCompID\":\"CLIENT\",\"localSubID\":null,\"remoteSubID\":null},\"rSeq\":1517,\"wSeq\":1519,\"isActive\":true,\"isConnected\":false} ]}}}", actual);
+    }
+}
+

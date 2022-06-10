@@ -12,10 +12,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class GenerateJsonSchemaMain {
-    final Map<Class, String> aliases = new LinkedHashMap<>();
-    final Map<Class, String> definitions = new LinkedHashMap<>();
+    final Map<Class<?>, String> aliases = new LinkedHashMap<>();
+    final Map<Class<?>, String> definitions = new LinkedHashMap<>();
     final Map<String, String> events = new LinkedHashMap<>();
-    final Set<Class> eventClasses = new LinkedHashSet<>();
+    final Set<Class<?>> eventClasses = new LinkedHashSet<>();
 
     public GenerateJsonSchemaMain() {
         aliases.put(void.class, "null");
@@ -51,7 +51,7 @@ public class GenerateJsonSchemaMain {
                 "\"definitions\": {\n";
         sb.append(str);
         String sep = "";
-        for (Map.Entry<Class, String> entry : definitions.entrySet()) {
+        for (Map.Entry<Class<?>, String> entry : definitions.entrySet()) {
             sb.append(sep);
             sb.append("\"" + entry.getKey().getSimpleName() + "\": {\n");
             sb.append(entry.getValue());

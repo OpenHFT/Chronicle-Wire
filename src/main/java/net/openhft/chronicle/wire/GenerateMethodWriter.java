@@ -6,15 +6,14 @@ import net.openhft.chronicle.bytes.UpdateInterceptor;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.util.GenericReflection;
+import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.wire.utils.JavaSourceCodeFormatter;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -80,7 +79,7 @@ public class GenerateMethodWriter {
     private final boolean useMethodId;
 
     private final String packageName;
-    private final Set<Class> interfaces;
+    private final Set<Class<?>> interfaces;
     private final String className;
     private final ClassLoader classLoader;
     private final WireType wireType;
@@ -90,7 +89,7 @@ public class GenerateMethodWriter {
     final private AtomicInteger indent = new AtomicInteger();
 
     private GenerateMethodWriter(final String packageName,
-                                 final Set<Class> interfaces,
+                                 final Set<Class<?>> interfaces,
                                  final String className,
                                  final ClassLoader classLoader,
                                  final WireType wireType,
@@ -116,7 +115,7 @@ public class GenerateMethodWriter {
      */
     @Nullable
     public static Class<?> newClass(String fullClassName,
-                                    Set<Class> interfaces,
+                                    Set<Class<?>> interfaces,
                                     ClassLoader classLoader,
                                     final WireType wireType,
                                     final String genericEvent,
@@ -308,7 +307,7 @@ public class GenerateMethodWriter {
                     if (Modifier.isStatic(dm.getModifiers()))
                         continue;
 
-                    final Class<?> returnType = (Class<?>) GenericReflection.getReturnType(dm, interfaceClazz);
+                    final Class<?> returnType = returnType(dm, interfaceClazz);
                     if (dm.isDefault() && (!returnType.equals(void.class) && !returnType.isInterface()))
                         continue;
 
@@ -353,12 +352,19 @@ public class GenerateMethodWriter {
 
     }
 
+    private Class<?> returnType(Method dm, Class interfaceClazz) {
+        Type returnType = GenericReflection.getReturnType(dm, interfaceClazz);
+        if (!(returnType instanceof Class))
+            returnType = (Type) ((TypeVariable<?>)returnType).getGenericDeclaration();
+        return (Class<?>) returnType;
+    }
+
     private String templateFor(Method dm, Class interfaceType) {
         Map<List<Class<?>>, String> map = TEMPLATE_METHODS.get(dm.getName());
         if (map == null)
             return null;
         List<Class> sig = new ArrayList<>();
-        sig.add((Class) GenericReflection.getReturnType(dm, interfaceType));
+        sig.add(returnType(dm, interfaceType));
         addAll(sig, dm.getParameterTypes());
         return map.get(sig);
     }
@@ -416,7 +422,7 @@ public class GenerateMethodWriter {
         int parameterCount = dm.getParameterCount();
         Parameter[] parameters = dm.getParameters();
         final int len = parameters.length;
-        Class<?> returnType = (Class<?>) GenericReflection.getReturnType(dm, interfaceClazz);
+        final Class<?> returnType = returnType(dm, interfaceClazz);
         final String typeName = nameForClass(importSet, returnType);
 
         final StringBuilder body = new StringBuilder();
@@ -489,7 +495,7 @@ public class GenerateMethodWriter {
                 dm.getName(),
                 methodSignature(importSet, dm),
                 body,
-                methodReturn(importSet, dm, interfaceClazz));
+                methodReturn(dm, interfaceClazz));
     }
 
     private String returnDefault(final Class<?> returnType) {
@@ -498,7 +504,7 @@ public class GenerateMethodWriter {
             return "";
 
         if (returnType.isPrimitive() || returnType == Void.class)
-            throw new UnsupportedOperationException("having a method of this return type=" + returnType + " is not supported by method writers");
+            return " " + ObjectUtils.defaultValue(returnType);
 
         return " this";
     }
@@ -565,9 +571,9 @@ public class GenerateMethodWriter {
                 .append(");\n");
     }
 
-    private StringBuilder methodReturn(Set<String> importSet, final Method dm, final Class<?> interfaceClazz) {
+    private StringBuilder methodReturn(final Method dm, final Class<?> interfaceClazz) {
         final StringBuilder result = new StringBuilder();
-        final Class<?> returnType = (Class<?>) GenericReflection.getReturnType(dm, interfaceClazz);
+        final Class<?> returnType = returnType(dm, interfaceClazz);
 
         if (returnType == Void.class || returnType == void.class)
             return result;

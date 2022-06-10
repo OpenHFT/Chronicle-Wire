@@ -24,6 +24,7 @@ public class MethodWriter2Test extends WireTestCommon {
 
     @Test
     public void allowThrough() {
+        ignoreException("Generated code to call updateInterceptor for public abstract void net.openhft.chronicle.wire.method.FundingListener.fundingPrimitive(int) will box and generate garbage");
         check(true, ARGUMENT.DTO);
     }
 

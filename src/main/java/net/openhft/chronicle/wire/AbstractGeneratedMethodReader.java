@@ -28,22 +28,21 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import static java.lang.ThreadLocal.withInitial;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
 /**
  * Base class for generated method readers.
- * In case generated instance fails to perform a read, it's delegated to lazy-initialized {@link VanillaMethodReader}.
  */
 public abstract class AbstractGeneratedMethodReader implements MethodReader {
     private static final Consumer<MessageHistory> NO_OP_MH_CONSUMER = Mocker.ignored(Consumer.class);
     private final MarshallableIn in;
     protected final WireParselet debugLoggingParselet;
-    private final Supplier<MethodReader> delegateSupplier;
 
     protected MessageHistory messageHistory;
+    protected boolean dataEventProcessed;
+
     private MethodReader delegate;
     private boolean closeIn = false;
     private boolean closed;
@@ -72,11 +71,9 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     private static final MessageHistoryThreadLocal TEMP_MESSAGE_HISTORY = new MessageHistoryThreadLocal();
 
     protected AbstractGeneratedMethodReader(MarshallableIn in,
-                                            WireParselet debugLoggingParselet,
-                                            Supplier<MethodReader> delegateSupplier) {
+                                            WireParselet debugLoggingParselet) {
         this.in = in;
         this.debugLoggingParselet = debugLoggingParselet;
-        this.delegateSupplier = delegateSupplier;
     }
 
     /**
@@ -126,6 +123,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         try {
             wireIn.startEvent();
             Bytes<?> bytes = wireIn.bytes();
+            dataEventProcessed = false;
             while (bytes.readRemaining() > 0) {
                 if (wireIn.isEndEvent())
                     break;
@@ -146,7 +144,9 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
             // only called if the end of the message is reached normally.
             wireIn.endEvent();
         } finally {
-            if (historyConsumer != NO_OP_MH_CONSUMER)
+            // Don't save message history if we are reading non-data event (e.g. another "message history only" message)
+            // Infinite loop between services is possible otherwise
+            if (historyConsumer != NO_OP_MH_CONSUMER && dataEventProcessed)
                 swapMessageHistoryIfDirty();
             messageHistory.reset();
         }
@@ -233,12 +233,9 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
             ok = context.isMetaData()
                     ? readOneMeta(context)
                     : readOne0(context);
-
-            if (!ok)
-                context.rollbackOnClose();
         }
 
-        return ok || delegate().readOne();
+        return ok;
     }
 
     public void throwExceptionIfClosed() {
@@ -299,13 +296,6 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
             messageHistory = MessageHistory.get();
 
         return messageHistory;
-    }
-
-    private MethodReader delegate() {
-        if (delegate == null)
-            delegate = delegateSupplier.get();
-
-        return delegate;
     }
 
     /**

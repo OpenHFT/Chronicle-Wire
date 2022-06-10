@@ -78,7 +78,8 @@ public class Base40LongConverter implements LongConverter {
             long h2 = hi / BASE;
             long mod = hi % BASE;
             long val2 = (mod << 32) + (value & 0xFFFFFFFFL);
-            int l2 = (int) (val2 / BASE), v = (int) (val2 % BASE);
+            int l2 = (int) (val2 / BASE);
+            int v = (int) (val2 % BASE);
             text.append(decode[v]);
             value = (h2 << 32) + (l2 & 0xFFFFFFFFL);
         }

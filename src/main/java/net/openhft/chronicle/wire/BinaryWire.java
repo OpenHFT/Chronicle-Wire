@@ -400,25 +400,25 @@ public class BinaryWire extends AbstractWire implements Wire {
         long lim = bytes.readLimit();
         try {
             bytes.readLimit(bytes.readPosition() + len);
-            @NotNull final ValueOut valueOut = wire.getValueOut();
+            @NotNull final ValueOut wireValueOut = wire.getValueOut();
             switch (getBracketTypeNext()) {
                 case MAP:
-                    valueOut.marshallable(this::copyTo);
+                    wireValueOut.marshallable(this::copyTo);
                     break;
                 case SEQ:
-                    valueOut.sequence(v -> copyTo(v.wireOut()));
+                    wireValueOut.sequence(v -> copyTo(v.wireOut()));
                     break;
                 case NONE:
                     @Nullable Object object = this.getValueIn().object();
                     if (object instanceof BytesStore) {
                         @Nullable BytesStore bytes = (BytesStore) object;
                         if (textable(bytes)) {
-                            valueOut.text(bytes);
+                            wireValueOut.text(bytes);
                             bytes.releaseLast();
                             break;
                         }
                     }
-                    valueOut.object(object);
+                    wireValueOut.object(object);
                     break;
             }
         } finally {
@@ -789,7 +789,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         return sb;
     }
 
-    @NotNull <ACS extends Appendable & CharSequence> ACS getStringBuilder(int code, @NotNull ACS sb) {
+    @NotNull <T extends Appendable & CharSequence> T getStringBuilder(int code, @NotNull T sb) {
         bytes.parseUtf8(sb, true, code & 0x1f);
         return sb;
     }
@@ -1222,7 +1222,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         return bytes.writeByte((byte) code);
     }
 
-    @Nullable <ACS extends Appendable & CharSequence> ACS readText(int code, @NotNull ACS sb) {
+    @Nullable <T extends Appendable & CharSequence> T readText(int code, @NotNull T sb) {
         if (code <= 127) {
             AppendableUtil.append(sb, code);
             return sb;
@@ -3176,7 +3176,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             // if the value is null, then we will create a LongDirectReference to write the data
             // into and then call setter.accept(), this will then update the value
             if (!(value instanceof BinaryLongReference)) {
-                setter.accept(t, value = new BinaryLongReference());
+                value = new BinaryLongReference();
+                setter.accept(t, value);
             }
             return int64(value);
         }
@@ -3189,7 +3190,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (code != INT32)
                 cantRead(code);
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 4) {
-                setter.accept(t, value = new BinaryIntReference());
+                value = new BinaryIntReference();
+                setter.accept(t, value);
             }
             @NotNull Byteable b = (Byteable) value;
             long length = b.maxSize();

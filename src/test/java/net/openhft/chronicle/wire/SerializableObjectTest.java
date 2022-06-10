@@ -2,6 +2,7 @@ package net.openhft.chronicle.wire;
 
 import io.github.classgraph.*;
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
@@ -56,7 +57,11 @@ final class SerializableObjectTest extends WireTestCommon {
                     "javafx.",
                     "javax.swing",
                     "javax.print",
-                    "apple.security"
+                    "apple.security",
+                    // Requires non-headless so skip these classes
+                    "java.awt",
+                    // Do not test classes from the maven plugins
+                    "org.apache.maven"
             )
             .collect(Collectors.collectingAndThen(toSet(), Collections::unmodifiableSet));
 
@@ -318,6 +323,7 @@ final class SerializableObjectTest extends WireTestCommon {
         }
     }
 
+    @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/482")
     @TestFactory
     Stream<DynamicTest> test() {
         return DynamicTest.stream(cases(), Objects::toString, wireTypeObject -> {
