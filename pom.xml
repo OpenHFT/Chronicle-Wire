@@ -119,8 +119,6 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-            <!-- Todo: remove explicit version when 3rd party BOM 3.22.2 is released-->
-            <version>5.8.1</version>
             <scope>test</scope>
         </dependency>
 

@@ -31,6 +31,13 @@ public final class MarketData extends SelfDescribingMarshallable {
         low(low);
     }
 
+    public MarketData(MarketData other) {
+        symbol(other.symbol);
+        last(other.last);
+        high(other.high);
+        low(other.low);
+    }
+
     public String symbol() {
         return Base85LongConverter.INSTANCE.asString(symbol);
     }
