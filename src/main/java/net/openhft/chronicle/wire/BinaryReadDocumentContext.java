@@ -131,6 +131,13 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         present = false;
     }
 
+    @Override
+    public void reset() {
+        close();
+        readLimit = readPosition = 0;
+        lastStart = start = -1;
+    }
+
     /**
      * Rolls back document context state to a one before opening if rollback marker is set.
      *

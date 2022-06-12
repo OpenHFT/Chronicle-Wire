@@ -108,6 +108,17 @@ public class TextReadDocumentContext implements ReadDocumentContext {
     }
 
     @Override
+    public void reset() {
+        close();
+        readLimit = 0;
+        readPosition = 0;
+        start = -1;
+        present = false;
+        notComplete = false;
+        rollback = false;
+    }
+
+    @Override
     public void start() {
         wire.getValueIn().resetState();
         Bytes<?> bytes = wire.bytes();

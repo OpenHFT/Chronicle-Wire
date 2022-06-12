@@ -113,11 +113,6 @@ public class TextWire extends AbstractWire implements Wire {
         this(bytes, false);
     }
 
-    @Override
-    public boolean isBinary() {
-        return false;
-    }
-
     @NotNull
     public static TextWire fromFile(String name) throws IOException {
         return new TextWire(BytesUtil.readFile(name), true);
@@ -237,6 +232,11 @@ public class TextWire extends AbstractWire implements Wire {
      */
     public static <T> T load(String filename) throws IOException {
         return (T) TextWire.fromFile(filename).readObject();
+    }
+
+    @Override
+    public boolean isBinary() {
+        return false;
     }
 
     public boolean strict() {
@@ -1199,6 +1199,17 @@ public class TextWire extends AbstractWire implements Wire {
     public TextWire trimFirstCurly(boolean trimFirstCurly) {
         this.trimFirstCurly = trimFirstCurly;
         return this;
+    }
+
+    @Override
+    public void reset() {
+        sb.setLength(0);
+        lineStart = 0;
+        valueIn.resetState();
+        valueOut.resetState();
+        writeContext.reset();
+        readContext.reset();
+        bytes.clear();
     }
 
     enum NoObject {NO_OBJECT}

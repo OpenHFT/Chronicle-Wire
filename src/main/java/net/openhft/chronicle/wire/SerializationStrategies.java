@@ -181,7 +181,7 @@ public enum SerializationStrategies implements SerializationStrategy {
                 return null;
             }
             if (o == null)
-                throw new IllegalArgumentException("Unable to deserialize " + clazz);
+                o = ObjectUtils.newInstance(clazz);
             Wires.readMarshallable(clazz, o, in.wireIn(), true);
             return o;
         }
