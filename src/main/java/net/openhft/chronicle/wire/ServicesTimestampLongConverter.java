@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.time.LongTime;
 import net.openhft.chronicle.core.time.TimeProvider;
@@ -67,6 +68,11 @@ public class ServicesTimestampLongConverter implements LongConverter {
     @Override
     public void append(StringBuilder text, long value) {
         underlying.append(text, value);
+    }
+
+    @Override
+    public void append(Bytes<?> bytes, long value) {
+        underlying.append(bytes, value);
     }
 
     interface longFunction {

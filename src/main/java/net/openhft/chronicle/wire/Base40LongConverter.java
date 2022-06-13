@@ -17,50 +17,31 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.wire.internal.VanillaLongConverter;
-
 /**
  * Unsigned 64-bit number.
  */
 @Deprecated(/* to remove in x.25 */)
-public class Base40LongConverter implements LongConverter {
+public class Base40LongConverter extends AbstractLongConverter {
 
     public static final int MAX_LENGTH = LongConverter.maxParseLength(40);
-    private static final String CHARS = ".ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_^~";
-    public static final Base40LongConverter UPPER = new Base40LongConverter(CHARS);
+    public static final Base40LongConverter UPPER = new Base40LongConverter();
     public static final Base40LongConverter INSTANCE = UPPER;
+    private static final String CHARS = ".ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_^~";
     public static final Base40LongConverter LOWER = new Base40LongConverter(CHARS.toLowerCase());
-    private static final int BASE = 40;
-    private final VanillaLongConverter delegate;
 
-    public Base40LongConverter() {
+    private Base40LongConverter() {
         this(CHARS);
     }
 
-    public Base40LongConverter(String chars) {
-        delegate = new VanillaLongConverter(chars);
+    private Base40LongConverter(String chars) {
+        super(chars);
         // support both cases
         for (int i = 0; i < chars.length(); i++) {
             char c = chars.charAt(i);
             if (Character.isLowerCase(c))
-                delegate.addEncode(Character.toUpperCase(c), c);
+                converter.addEncode(Character.toUpperCase(c), c);
             else
-                delegate.addEncode(Character.toLowerCase(c), c);
+                converter.addEncode(Character.toLowerCase(c), c);
         }
-    }
-
-    @Override
-    public int maxParseLength() {
-        return MAX_LENGTH;
-    }
-
-    @Override
-    public long parse(CharSequence text) {
-        return delegate.parse(text);
-    }
-
-    @Override
-    public void append(StringBuilder text, long value) {
-        delegate.append(text, value);
     }
 }

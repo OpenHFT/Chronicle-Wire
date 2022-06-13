@@ -39,7 +39,7 @@ public class Base85LongConverterTest extends WireTestCommon {
     public void testAppend() {
         final Bytes<?> b = Bytes.elasticByteBuffer();
         try {
-            final Base85LongConverter idLongConverter = new Base85LongConverter();
+            final Base85LongConverter idLongConverter = Base85LongConverter.INSTANCE;
             final long helloWorld = idLongConverter.parse(TEST_STRING);
             idLongConverter.append(b, helloWorld);
             assertEquals(TEST_STRING, b.toString());
@@ -52,7 +52,7 @@ public class Base85LongConverterTest extends WireTestCommon {
     public void testAppendWithExistingData() {
         final Bytes<?> b = Bytes.elasticByteBuffer().append("hello");
         try {
-            final Base85LongConverter idLongConverter = new Base85LongConverter();
+            final Base85LongConverter idLongConverter = Base85LongConverter.INSTANCE;
             final long helloWorld = idLongConverter.parse(TEST_STRING);
             idLongConverter.append(b, helloWorld);
             assertEquals("hello" + TEST_STRING, b.toString());

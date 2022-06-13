@@ -2091,27 +2091,15 @@ public class TextWireTest extends WireTestCommon {
 
     static class TwoLongs extends SelfDescribingMarshallable {
 
-        @LongConversion(HexaDecimalConverter.class)
+        @LongConversion(HexadecimalLongConverter.class)
         long hexadecimal;
 
-        @LongConversion(HexaDecimalConverter.class)
+        @LongConversion(HexadecimalLongConverter.class)
         long hexa2;
 
         public TwoLongs(long hexadecimal, long hexa2) {
             this.hexadecimal = hexadecimal;
             this.hexa2 = hexa2;
-        }
-    }
-
-    static class HexaDecimalConverter implements LongConverter {
-        @Override
-        public long parse(CharSequence text) {
-            return Long.parseUnsignedLong(text.toString(), 16);
-        }
-
-        @Override
-        public void append(StringBuilder text, long value) {
-            text.append(Long.toHexString(value));
         }
     }
 

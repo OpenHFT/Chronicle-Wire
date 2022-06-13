@@ -21,6 +21,8 @@ import net.openhft.chronicle.core.Jvm;
 
 /**
  * Unsigned 32-bit number with encoding to be as disambiguated as possible.
+ *
+ * @deprecated Use Base32LongConverter
  */
 @Deprecated(/* to remove in x.25 */)
 public class Base32IntConverter implements IntConverter {
@@ -35,13 +37,13 @@ public class Base32IntConverter implements IntConverter {
 
     @Override
     public int parse(CharSequence text) {
-        return (int) Base32LongConverter.DELEGATE.parse(text);
+        return (int) Base32LongConverter.INSTANCE.parse(text);
     }
 
     @Override
     public void append(StringBuilder text, int value) {
         final int start = text.length();
-        Base32LongConverter.DELEGATE.append(text, value);
+        Base32LongConverter.INSTANCE.append(text, value);
         if (text.length() > start + maxParseLength()) {
             Jvm.warn().on(getClass(), "truncated because the value was too large");
             text.setLength(start + maxParseLength());

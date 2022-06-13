@@ -51,12 +51,15 @@ public class VanillaLongConverter implements LongConverter {
             value = Long.divideUnsigned(value, factor);
             text.append(decode[v]);
         }
+
         while (value != 0) {
             int v = (int) (value % factor);
             value /= factor;
             text.append(decode[v]);
         }
+
         StringUtils.reverse(text, start);
+
         if (text.length() > start + maxParseLength()) {
             Jvm.warn().on(getClass(), "truncated because the value was too large");
             text.setLength(start + maxParseLength());
@@ -70,12 +73,15 @@ public class VanillaLongConverter implements LongConverter {
             value = Long.divideUnsigned(value, factor);
             text.append(decode[v]);
         }
+
         while (value != 0) {
             int v = (int) (value % factor);
             value /= factor;
             text.append(decode[v]);
         }
+
         BytesUtil.reverse(text, start);
+
         if (text.length() > start + maxParseLength()) {
             Jvm.warn().on(getClass(), "truncated because the value was too large");
             text.readLimit(start + maxParseLength());

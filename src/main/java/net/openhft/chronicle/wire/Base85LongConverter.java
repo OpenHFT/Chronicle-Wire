@@ -17,10 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.wire.internal.VanillaLongConverter;
-
-public class Base85LongConverter implements LongConverter {
+public class Base85LongConverter extends AbstractLongConverter {
 
     public static final int MAX_LENGTH = 10;
     public static final Base85LongConverter INSTANCE = new Base85LongConverter();
@@ -30,25 +27,14 @@ public class Base85LongConverter implements LongConverter {
                     "ABCDEFGHIJKLMNOPQRSTUVWXYZ_" +
                     "abcdefghijklmnopqrstuvwxyz" +
                     "\"#$%&'()*+,-./ ";
-    private final VanillaLongConverter delegate = new VanillaLongConverter(CHARS);
+
+    private Base85LongConverter() {
+        super(CHARS);
+    }
 
     @Override
     public int maxParseLength() {
         return MAX_LENGTH;
-    }
-
-    @Override
-    public long parse(CharSequence text) {
-        return delegate.parse(text);
-    }
-
-    @Override
-    public void append(StringBuilder text, long value) {
-        delegate.append(text, value);
-    }
-
-    public void append(Bytes<?> text, long value) {
-        delegate.append(text, value);
     }
 
     @Override

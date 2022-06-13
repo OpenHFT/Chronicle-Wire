@@ -17,11 +17,28 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.wire.internal.PowerOfTwoLongConverter;
+import net.openhft.chronicle.wire.internal.VanillaLongConverter;
+
 import static java.lang.Math.log;
 import static java.text.MessageFormat.format;
 
 // TODO add a pattern for validation
 public interface LongConverter {
+
+    /**
+     * Creates an implementation for delegation
+     *
+     * @param chars symbols to use
+     * @return an implementation of a LongConverter
+     */
+    static LongConverter forSymbols(String chars) {
+        return Maths.isPowerOf2(chars.length())
+                ? new PowerOfTwoLongConverter(chars)
+                : new VanillaLongConverter(chars);
+    }
 
     static int maxParseLength(int based) {
         return (int) Math.ceil(64 / log(based) * log(2));
@@ -39,6 +56,14 @@ public interface LongConverter {
      * Appends the provided {@code value} to the provided {@code text}.
      */
     void append(StringBuilder text, long value);
+
+    /**
+     * * Appends to provided {@code value} to the provided {@code text}.
+     *
+     * @param value to append as text
+     * @return bytes to append to
+     */
+    void append(Bytes<?> bytes, long value);
 
     default String asString(long value) {
         return asText(value).toString();
@@ -73,5 +98,15 @@ public interface LongConverter {
 
     default boolean allSafeChars() {
         return true;
+    }
+
+    /**
+     * Add an alias for encoding text as a number
+     *
+     * @param alias to make the same as another character
+     * @param as    to make ti the same as
+     */
+    default void addEncode(char alias, char as) {
+        throw new UnsupportedOperationException();
     }
 }

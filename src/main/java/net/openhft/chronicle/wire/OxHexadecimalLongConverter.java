@@ -17,7 +17,16 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
+
+/**
+ * @deprecated Use the HexadecimalLongConverter
+ */
+@Deprecated(/* to be removed in x.25 */)
 public class OxHexadecimalLongConverter implements LongConverter {
+
+    public static final LongConverter INSTANCE = new OxHexadecimalLongConverter();
+
     @Override
     public long parse(CharSequence text) {
         String s = text.toString();
@@ -29,5 +38,10 @@ public class OxHexadecimalLongConverter implements LongConverter {
     @Override
     public void append(StringBuilder text, long value) {
         text.append("0x").append(Long.toHexString(value));
+    }
+
+    @Override
+    public void append(Bytes<?> bytes, long value) {
+        bytes.append("0x").append(Long.toHexString(value));
     }
 }

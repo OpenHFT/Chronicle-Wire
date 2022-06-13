@@ -17,30 +17,14 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.wire.internal.PowerOfTwoLongConverter;
-
 /**
  * Unsigned 64-bit number with encoding with all 0-9, A-Z and a-z, plus period and plus
  */
-public class Base64LongConverter implements LongConverter {
-
+public class Base64LongConverter extends AbstractLongConverter {
     public static final Base64LongConverter INSTANCE = new Base64LongConverter();
     private static final String CHARS = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
-    private static final PowerOfTwoLongConverter DELEGATE = new PowerOfTwoLongConverter(CHARS);
-    public static final int MAX_LENGTH = DELEGATE.maxParseLength();
 
-    @Override
-    public int maxParseLength() {
-        return MAX_LENGTH;
-    }
-
-    @Override
-    public long parse(CharSequence text) {
-        return DELEGATE.parse(text);
-    }
-
-    @Override
-    public void append(StringBuilder text, long value) {
-        DELEGATE.append(text, value);
+    private Base64LongConverter() {
+        super(CHARS);
     }
 }

@@ -29,7 +29,8 @@ import java.util.Arrays;
 public class Base40IntConverter implements IntConverter {
     public static final int MAX_LENGTH = IntConverter.maxParseLength(40);
     public static final Base40IntConverter INSTANCE = new Base40IntConverter();
-    private static final String CHARS = ".ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+";
+    // using : followed by a separator doesn't work
+    private static final String CHARS = ".ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:-+";
     private static final char[] DECODE = CHARS.toCharArray();
     private static final byte[] ENCODE = new byte[128];
 

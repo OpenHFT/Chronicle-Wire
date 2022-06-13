@@ -17,39 +17,22 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.wire.internal.PowerOfTwoLongConverter;
-
 /**
  * Unsigned 64-bit number with encoding to be as disambiguated as possible.
  */
-public class Base32LongConverter implements LongConverter {
+public class Base32LongConverter extends AbstractLongConverter {
 
     public static final Base32LongConverter INSTANCE = new Base32LongConverter();
     private static final String CHARS = "234567ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    static final PowerOfTwoLongConverter DELEGATE = new PowerOfTwoLongConverter(CHARS);
-    public static final int MAX_LENGTH = DELEGATE.maxParseLength();
 
-    static {
-        DELEGATE.addEncode('0', 'O');
-        DELEGATE.addEncode('1', 'l');
-        DELEGATE.addEncode('8', 'B');
-        DELEGATE.addEncode('9', 'q');
+    public Base32LongConverter() {
+        super(CHARS);
+
+        converter.addEncode('0', 'O');
+        converter.addEncode('1', 'l');
+        converter.addEncode('8', 'B');
+        converter.addEncode('9', 'q');
         for (char ch = 'a'; ch <= 'z'; ch++)
-            DELEGATE.addEncode(ch, Character.toUpperCase(ch));
-    }
-
-    @Override
-    public int maxParseLength() {
-        return MAX_LENGTH;
-    }
-
-    @Override
-    public long parse(CharSequence text) {
-        return DELEGATE.parse(text);
-    }
-
-    @Override
-    public void append(StringBuilder text, long value) {
-        DELEGATE.append(text, value);
+            converter.addEncode(ch, Character.toUpperCase(ch));
     }
 }

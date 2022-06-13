@@ -1,5 +1,7 @@
 package net.openhft.chronicle.wire.internal;
 
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -52,11 +54,29 @@ public class PowerOfTwoLongConverter implements LongConverter {
             text.append(decode[val]);
             value >>>= shift;
         }
+
         StringUtils.reverse(text, start);
 
         if (text.length() > start + maxParseLength()) {
             Jvm.warn().on(getClass(), "truncated because the value was too large");
             text.setLength(start + maxParseLength());
+        }
+    }
+
+    @Override
+    public void append(Bytes<?> text, long value) {
+        int start = text.length();
+        while (value != 0) {
+            int val = (int) (value & mask);
+            text.append(decode[val]);
+            value >>>= shift;
+        }
+
+        BytesUtil.reverse(text, start);
+
+        if (text.length() > start + maxParseLength()) {
+            Jvm.warn().on(getClass(), "truncated because the value was too large");
+            text.readLimit(start + maxParseLength());
         }
     }
 

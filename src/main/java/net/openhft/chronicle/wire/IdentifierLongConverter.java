@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.internal.VanillaLongConverter;
 
 /**
@@ -39,6 +40,16 @@ public class IdentifierLongConverter implements LongConverter {
             SMALL_POSITIVE.append(text, value);
         else
             NanoTimestampLongConverter.INSTANCE.append(text, value);
+    }
+
+    @Override
+    public void append(Bytes<?> bytes, long value) {
+        if (value < 0)
+            throw new IllegalArgumentException("value: " + value); // reserved
+        if (value <= MAX_SMALL_ID)
+            SMALL_POSITIVE.append(bytes, value);
+        else
+            NanoTimestampLongConverter.INSTANCE.append(bytes, value);
     }
 
     @Override
