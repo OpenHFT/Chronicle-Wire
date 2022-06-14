@@ -1,22 +1,18 @@
 package net.openhft.chronicle.wire;
-
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.FieldGroup;
 import java.nio.ByteBuffer;
-
 import static net.openhft.chronicle.bytes.Bytes.*;
 import static net.openhft.chronicle.wire.WireType.*;
-
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 
 public class LongConversionExampleC {
-
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(House.class);
     }
-
     public static class House extends SelfDescribingMarshallable {
         @FieldGroup("address")
+        // 5 longs, each at 8 bytes = 40 bytes, so we can store a String with up to 40 ISO-8859 characters
         private long text4a, text4b, text4c, text4d, text4e;
         private transient Bytes address = Bytes.forFieldGroup(this, "address");
 
@@ -24,7 +20,6 @@ public class LongConversionExampleC {
             address.append(owner);
         }
     }
-
     public static void main(String[] args) {
         House house = new House();
         house.address("82 St John Street, Clerkenwell, London");
@@ -39,12 +34,11 @@ public class LongConversionExampleC {
         wire.getValueOut().object(house);
 
         // dumps out the contents of the bytes
-       System.out.println(t.toHexString());
-
+        System.out.println(t.toHexString());
         System.out.println(t);
 
         // reads the house object from the bytes
-       final House object = wire.getValueIn().object(House.class);
+        final House object = wire.getValueIn().object(House.class);
 
         // prints the value of text4
         System.out.println(object.address);
