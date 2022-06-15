@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 
 import static net.openhft.chronicle.core.io.IOTools.deleteDirWithFiles;
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
-import static net.openhft.chronicle.wire.Marshallable.fromString;
 
 public class TriviallyCopyableJLBH implements JLBHTask {
 
@@ -27,6 +26,7 @@ public class TriviallyCopyableJLBH implements JLBHTask {
 
 
     static {
+        System.setProperty("jvm.resource.tracing", "false");
         CLASS_ALIASES.addAlias(TriviallyCopyableHouse.class, "House1");
         CLASS_ALIASES.addAlias(House.class, "House2");
         Jvm.isDebug();

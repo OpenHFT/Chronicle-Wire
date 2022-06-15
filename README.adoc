@@ -1116,7 +1116,7 @@ NOTE: This is not garbage collection free, but if the volume is low, this may be
 
 NOTE: This only works when the expected type is not a class.
 
-=== Example
+=== LongConversionExample
 
 [source,Java]
 ----
@@ -1212,7 +1212,7 @@ It's also possible to use fail-fast approach and throw an exception:
 ----
 Exceptions that are thrown from this method are never swallowed, they are wrapped into runtime `UnexpectedFieldHandlingException` and thrown back to a high-level API call.
 
-== Example with `MethodReaders`
+== LongConversionExample with `MethodReaders`
 
 [source,Java]
 ----
@@ -1593,7 +1593,7 @@ Marshallable objects have been designed to allow you to
 - the string format for text and binary can be logged and reconstructed from the text or hexadecimal dump
 - copying and conversion of data from one type to another
 
-== Pojo Example
+== Pojo LongConversionExample
 The following is a simple example of a POJO with a nested data type in a List.
 
 .A Simple Pojo without needing to define toString/hashCode/equals
