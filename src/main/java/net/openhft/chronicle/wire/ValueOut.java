@@ -1004,7 +1004,7 @@ public interface ValueOut {
     default WireOut writeLong(LongConverter longConverter, long l) {
         StringBuilder sb = WireInternal.acquireStringBuilderForValueOut();
         longConverter.append(sb, l);
-        if (longConverter.allSafeChars() && sb.length() > 0)
+        if (longConverter.allSafeChars(wireOut()) && sb.length() > 0)
             return rawText(sb);
         else
             return text(sb);

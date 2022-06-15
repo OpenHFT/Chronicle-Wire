@@ -96,7 +96,7 @@ public interface LongConverter {
             throw new IllegalArgumentException(format("text={0} exceeds the maximum allowable length of {1}", text, maxParseLength()));
     }
 
-    default boolean allSafeChars() {
+    default boolean allSafeChars(@NotNull WireOut wireOut) {
         return true;
     }
 
