@@ -96,7 +96,13 @@ public interface LongConverter {
             throw new IllegalArgumentException(format("text={0} exceeds the maximum allowable length of {1}", text, maxParseLength()));
     }
 
-    default boolean allSafeChars(@NotNull WireOut wireOut) {
+    /**
+     * All safe character for a give WireOut type without quotes or escaping.
+     *
+     * @param wireOut to write to
+     * @return true if no characters need escaping or put in additional quotes for YAML
+     */
+    default boolean allSafeChars(WireOut wireOut) {
         return true;
     }
 
