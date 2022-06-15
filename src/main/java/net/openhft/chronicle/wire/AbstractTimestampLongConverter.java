@@ -1,5 +1,8 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.AppendableUtil;
+import net.openhft.chronicle.bytes.Bytes;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -93,10 +96,9 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
      */
     protected abstract void appendFraction(DateTimeFormatterBuilder builder);
 
-    @Override
-    public void append(StringBuilder text, long value) {
+    public void append(Appendable text, long value) {
         if (value <= 0) {
-            text.append(value);
+            AppendableUtil.append(text, value);
             return;
         }
         LocalDateTime ldt = LocalDateTime.ofEpochSecond(
@@ -109,5 +111,15 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
             dtf.formatTo(ZonedDateTime.of(ldt, UTC)
                     .withZoneSameInstant(zoneId), text);
         }
+    }
+
+    @Override
+    public void append(StringBuilder text, long value) {
+        append((Appendable) text, value);
+    }
+
+    @Override
+    public void append(Bytes<?> bytes, long value) {
+        append((Appendable) bytes, value);
     }
 }

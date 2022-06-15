@@ -72,7 +72,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
     static {
         IOTools.unmonitor(TYPE);
-        for (char ch : "?%&@`0123456789+- ',#:{}[]|>!\\".toCharArray())
+        for (char ch : "?%&*@`0123456789+- ',#:{}[]|>!\\".toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
         for (char ch : "?,#:{}[]|>\\".toCharArray())
             QUOTE_CHARS.set(ch);
@@ -99,11 +99,6 @@ public class YamlWire extends AbstractWire implements Wire {
 
     public YamlWire(@NotNull Bytes<?> bytes) {
         this(bytes, false);
-    }
-
-    @Override
-    public boolean isBinary() {
-        return false;
     }
 
     @NotNull
@@ -206,6 +201,11 @@ public class YamlWire extends AbstractWire implements Wire {
         if (length != sb.length())
             throw new IllegalStateException("Length changed from " + length + " to " + sb.length() + " for " + sb);
         AppendableUtil.setLength(sb, end);
+    }
+
+    @Override
+    public boolean isBinary() {
+        return false;
     }
 
     @Override
@@ -730,13 +730,21 @@ public class YamlWire extends AbstractWire implements Wire {
         if (STARTS_QUOTE_CHARS.get(s.charAt(0)) ||
                 Character.isWhitespace(s.charAt(s.length() - 1)))
             return Quotes.DOUBLE;
+        boolean hasSingleQuote = false;
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
             if (QUOTE_CHARS.get(ch) || ch < ' ' || ch > 127)
                 return Quotes.DOUBLE;
-            if (ch == '"')
+            if (ch == '\'')
+                hasSingleQuote = true;
+            if (ch == '"') {
+                if (i < s.length() - 1 && s.charAt(i + 1) == '\'')
+                    return Quotes.DOUBLE;
                 quotes = Quotes.SINGLE;
+            }
         }
+        if (hasSingleQuote)
+            return Quotes.NONE;
         return quotes;
     }
 

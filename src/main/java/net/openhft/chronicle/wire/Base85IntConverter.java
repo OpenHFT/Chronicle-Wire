@@ -22,6 +22,10 @@ import net.openhft.chronicle.core.util.StringUtils;
 
 import java.util.Arrays;
 
+/**
+ * @deprecated Use Base85LongConverter
+ */
+@Deprecated(/* to remove in x.25 */)
 public class Base85IntConverter implements IntConverter {
     public static final int MAX_LENGTH = 5;
     public static final Base85IntConverter INSTANCE = new Base85IntConverter();

@@ -31,6 +31,110 @@ public class YamlTokeniserTest extends WireTestCommon {
     }
 
     @Test
+    public void morseCode() {
+        assertEquals("" +
+                "DIRECTIVES_END \n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT A\n" +
+                "TEXT .-\n" +
+                "MAPPING_KEY \n" +
+                "TEXT B\n" +
+                "TEXT -...\n" +
+                "MAPPING_KEY \n" +
+                "TEXT C\n" +
+                "TEXT -.-.\n" +
+                "MAPPING_KEY \n" +
+                "TEXT D\n" +
+                "TEXT -..\n" +
+                "MAPPING_KEY \n" +
+                "TEXT E\n" +
+                "TEXT .\n" +
+                "MAPPING_KEY \n" +
+                "TEXT F\n" +
+                "TEXT ..-.\n" +
+                "MAPPING_KEY \n" +
+                "TEXT G\n" +
+                "TEXT --.\n" +
+                "MAPPING_KEY \n" +
+                "TEXT H\n" +
+                "TEXT ....\n" +
+                "MAPPING_KEY \n" +
+                "TEXT I\n" +
+                "TEXT ..\n" +
+                "MAPPING_KEY \n" +
+                "TEXT J\n" +
+                "TEXT .---\n" +
+                "MAPPING_KEY \n" +
+                "TEXT K\n" +
+                "TEXT -.-\n" +
+                "MAPPING_KEY \n" +
+                "TEXT L\n" +
+                "TEXT .-..\n" +
+                "MAPPING_KEY \n" +
+                "TEXT M\n" +
+                "TEXT --\n" +
+                "MAPPING_KEY \n" +
+                "TEXT N\n" +
+                "TEXT -.\n" +
+                "MAPPING_KEY \n" +
+                "TEXT O\n" +
+                "TEXT ---\n" +
+                "MAPPING_KEY \n" +
+                "TEXT P\n" +
+                "TEXT .--.\n" +
+                "MAPPING_KEY \n" +
+                "TEXT Q\n" +
+                "TEXT --.-\n" +
+                "MAPPING_KEY \n" +
+                "TEXT R\n" +
+                "TEXT .-.\n" +
+                "MAPPING_KEY \n" +
+                "TEXT S\n" +
+                "TEXT ...\n" +
+                "MAPPING_KEY \n" +
+                "TEXT T\n" +
+                "TEXT \" -\n" +
+                "MAPPING_KEY \n" +
+                "TEXT U\n" +
+                "TEXT ..-\n" +
+                "MAPPING_KEY \n" +
+                "TEXT V\n" +
+                "TEXT ...-\n" +
+                "MAPPING_KEY \n" +
+                "TEXT W\n" +
+                "TEXT .--\n" +
+                "MAPPING_KEY \n" +
+                "TEXT X\n" +
+                "TEXT -..-\n" +
+                "MAPPING_KEY \n" +
+                "TEXT Y\n" +
+                "TEXT -.--\n" +
+                "MAPPING_KEY \n" +
+                "TEXT Z\n" +
+                "TEXT --..\n" +
+                "MAPPING_END \n" +
+                "DOCUMENT_END \n", doTest("morse-code.yaml"));
+    }
+
+    @Test
+    public void mixedQuotes() {
+        assertEquals("" +
+                "DIRECTIVES_END \n" +
+                "SEQUENCE_START \n" +
+                "TEXT \" \\\"\n" +
+                "TEXT ' \"\n" +
+                "TEXT ' \\\n" +
+                "TEXT ' \"\n" +
+                "TEXT \" \\\"'\n" +
+                "TEXT \" \\\"\n" +
+                "TEXT \" \\\"\\\"\n" +
+                "TEXT \" \\'\\'\n" +
+                "SEQUENCE_END \n" +
+                "DOCUMENT_END \n", doTest("mixed-quotes.yaml"));
+    }
+
+    @Test
     public void exception() {
         assertEquals("DIRECTIVES_END \n" +
                 "TAG !data\n" +

@@ -189,7 +189,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         transient long b0, b1, b2;
         @FieldGroup("c")
         transient int c0, c1, c3;
-        @IntConversion(Base85IntConverter.class)
+        @LongConversion(Base85LongConverter.class)
         int number;
         Bytes<?> a = Bytes.forFieldGroup(this, "a");
         Bytes<?> b = Bytes.forFieldGroup(this, "b");

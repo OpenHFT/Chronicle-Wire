@@ -17,56 +17,14 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.util.StringUtils;
-
-import java.util.Arrays;
-
-public class Base64LongConverter implements LongConverter {
-
-    public static final int MAX_LENGTH = LongConverter.maxParseLength(64);
-
-    @Override
-    public int maxParseLength() {
-        return MAX_LENGTH;
-    }
-
+/**
+ * Unsigned 64-bit number with encoding with all 0-9, A-Z and a-z, plus period and plus
+ */
+public class Base64LongConverter extends AbstractLongConverter {
     public static final Base64LongConverter INSTANCE = new Base64LongConverter();
-    static final char[] CODES = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+".toCharArray();
-    static final byte[] LOOKUP = new byte[128];
+    private static final String CHARS = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
 
-    static {
-        Arrays.fill(LOOKUP, (byte) -1);
-        for (int i = 0; i < CODES.length; i++) {
-            char code = CODES[i];
-            LOOKUP[code] = (byte) i;
-        }
-    }
-
-    @Override
-    public long parse(CharSequence text) {
-        lengthCheck(text);
-        long v = 0;
-        for (int i = 0; i < text.length(); i++) {
-            byte b = LOOKUP[text.charAt(i)];
-            if (b >= 0)
-                v = (v << 6) + (b & 0xff);
-        }
-        return v;
-    }
-
-    @Override
-    public void append(StringBuilder text, long value) {
-        final int start = text.length();
-        while (value != 0) {
-            text.append(CODES[(int) (value & 0x3F)]);
-            value >>>= 6;
-        }
-        StringUtils.reverse(text, start);
-
-        if (text.length() > start + maxParseLength()) {
-            Jvm.warn().on(getClass(), "truncated because the value was too large");
-            text.setLength(start + maxParseLength());
-        }
+    private Base64LongConverter() {
+        super(CHARS);
     }
 }

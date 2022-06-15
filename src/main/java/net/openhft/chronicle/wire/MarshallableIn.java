@@ -91,7 +91,7 @@ public interface MarshallableIn {
             if (!dc.isPresent()) {
                 return null;
             }
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             dc.wire().getValueIn().text(sb);
             return sb.length() < MARSHALLABLE_IN_INTERN_SIZE
                     ? WireInternal.INTERNER.intern(sb)

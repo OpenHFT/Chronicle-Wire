@@ -87,7 +87,7 @@ public interface ValueOut {
 
     @NotNull
     default WireOut text(char c) {
-        return text(Wires.acquireStringBuilder().append(c));
+        return text(WireInternal.acquireStringBuilderForValueOut().append(c));
     }
 
     @NotNull
@@ -462,7 +462,7 @@ public interface ValueOut {
             } else if (isScalar(object)) {
                 if (object instanceof LocalDate) {
                     LocalDate d = (LocalDate) object;
-                    return text(WireInternal.acquireStringBuilder()
+                    return text(WireInternal.acquireStringBuilderForValueOut()
                             .append(d.getYear())
                             .append('-')
                             .append(d.getMonthValue() < 10 ? "0" : "")
@@ -996,15 +996,18 @@ public interface ValueOut {
     }
 
     default WireOut writeInt(IntConverter intConverter, int i) {
-        StringBuilder sb = Wires.acquireStringBuilder();
+        StringBuilder sb = WireInternal.acquireStringBuilderForValueOut();
         intConverter.append(sb, i);
         return rawText(sb);
     }
 
     default WireOut writeLong(LongConverter longConverter, long l) {
-        StringBuilder sb = Wires.acquireStringBuilder();
+        StringBuilder sb = WireInternal.acquireStringBuilderForValueOut();
         longConverter.append(sb, l);
-        return rawText(sb);
+        if (longConverter.allSafeChars(wireOut()) && sb.length() > 0)
+            return rawText(sb);
+        else
+            return text(sb);
     }
 
     /**

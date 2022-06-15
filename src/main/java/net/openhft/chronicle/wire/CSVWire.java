@@ -219,7 +219,7 @@ public class CSVWire extends TextWire {
             }
 
             int prev = peekBack();
-            if (prev == ':' || prev == '#' || prev == '}')
+            if (END_CHARS.get(prev))
                 bytes.readSkip(-1);
             return a;
         }
