@@ -66,7 +66,7 @@ public class Base128LongConverter implements LongConverter {
     }
 
     @Override
-    public boolean allSafeChars(@NotNull WireOut wireOut) {
+    public boolean allSafeChars(WireOut wireOut) {
         return false;
     }
 }

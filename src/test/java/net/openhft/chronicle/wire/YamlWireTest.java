@@ -135,7 +135,6 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals(488, w.read("perms").int64());
     }
 
-    @Ignore("TODO")
     @Test
     public void testFromString() {
         @Nullable Object w = WireType.YAML.fromString("" +
@@ -1020,7 +1019,6 @@ public class YamlWireTest extends WireTestCommon {
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteStrings() {
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
@@ -1036,9 +1034,7 @@ public class YamlWireTest extends WireTestCommon {
             o.writeEventName(() -> "example")
                     .map(expected);
         });
-        // bytes.readPosition(4);
-        // expectWithSnakeYaml("{example={hello=world, hello1=world1, hello2=world2}}", wire);
-        // bytes.readPosition(0);
+
         assertEquals("--- !!data\n" +
                         "example: {\n" +
                         "  hello: world,\n" +
@@ -1358,10 +1354,9 @@ public class YamlWireTest extends WireTestCommon {
         @Nullable Map<String, String> map = wire.read().object(Map.class);
         assertEquals(0, map.size());
 
-        // TODO we shouldn't need to create a new wire. should wire.reset()
-        wire = createWire();
+        wire.clear();
 
-        Set<String> threeObjects = new HashSet(Arrays.asList(new String[]{"abc", "def", "ghi"}));
+        Set<String> threeObjects = new HashSet(Arrays.asList("abc", "def", "ghi"));
         wire.write().object(threeObjects);
 
         Set<String> list2 = wire.read()

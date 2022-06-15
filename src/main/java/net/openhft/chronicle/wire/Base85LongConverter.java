@@ -38,7 +38,7 @@ public class Base85LongConverter extends AbstractLongConverter {
     }
 
     @Override
-    public boolean allSafeChars(@NotNull WireOut wireOut) {
+    public boolean allSafeChars(WireOut wireOut) {
         return false;
     }
 }

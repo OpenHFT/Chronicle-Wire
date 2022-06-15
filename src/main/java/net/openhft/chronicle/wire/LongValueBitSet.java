@@ -59,7 +59,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     public LongValueBitSet(final long maxNumberOfBits) {
         int size = (int) ((maxNumberOfBits + BITS_PER_WORD - 1) / BITS_PER_WORD);
         words = new LongValue[size];
-        disableThreadSafetyCheck(true);
+        singleThreadedCheckDisabled(true);
     }
 
     public LongValueBitSet(final long maxNumberOfBits, Wire w) {
@@ -793,7 +793,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
 
     @Override
     public void readMarshallable(@NotNull final WireIn wire) throws IORuntimeException {
-        disableThreadSafetyCheck(true);
+        singleThreadedCheckDisabled(true);
         throwExceptionIfClosed();
 
         closeQuietly(words);

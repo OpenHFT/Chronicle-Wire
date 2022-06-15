@@ -63,7 +63,11 @@ public interface LongConverter {
      * @param value to append as text
      * @return bytes to append to
      */
-    void append(Bytes<?> bytes, long value);
+    default void append(Bytes<?> bytes, long value) {
+        final StringBuilder sb = WireInternal.acquireStringBuilder();
+        append(sb, value);
+        bytes.append(sb);
+    }
 
     default String asString(long value) {
         return asText(value).toString();
