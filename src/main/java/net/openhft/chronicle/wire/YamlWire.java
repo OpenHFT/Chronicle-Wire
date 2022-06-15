@@ -114,7 +114,7 @@ public class YamlWire extends AbstractWire implements Wire {
         assert wire.startUse();
         try {
             long pos = wire.bytes().readPosition();
-            @NotNull Wire tw = YamlWire.onHeapBuffer();
+            @NotNull Wire tw = Wire.newYamlWireOnHeap();
             wire.copyTo(tw);
             wire.bytes().readPosition(pos);
             return tw.toString();
@@ -200,17 +200,6 @@ public class YamlWire extends AbstractWire implements Wire {
         if (length != sb.length())
             throw new IllegalStateException("Length changed from " + length + " to " + sb.length() + " for " + sb);
         AppendableUtil.setLength(sb, end);
-    }
-
-    /**
-     * Create a temporary on heap copy useful for testing.
-     *
-     * @return a YamlWire wrapping an elastic on heap buffer
-     */
-    public static Wire onHeapBuffer() {
-        return new YamlWire(Bytes.allocateElasticOnHeap())
-                .trimFirstCurly(true)
-                .useTextDocuments();
     }
 
     @Override
@@ -517,7 +506,7 @@ public class YamlWire extends AbstractWire implements Wire {
     }
 
     public String dumpContext() {
-        Wire yw = YamlWire.onHeapBuffer();
+        Wire yw = Wire.newYamlWireOnHeap();
         yw.getValueOut().list(yt.contexts, YamlTokeniser.YTContext.class);
         return yw.toString();
     }

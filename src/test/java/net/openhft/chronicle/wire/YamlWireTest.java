@@ -78,7 +78,7 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals(0, sb.length());
     }
 
-    static Wire wire = YamlWire.onHeapBuffer();
+    static Wire wire = Wire.newYamlWireOnHeap();
 
     @Ignore("TODO FIX")
     @Test
