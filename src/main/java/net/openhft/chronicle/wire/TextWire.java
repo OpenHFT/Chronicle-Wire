@@ -1202,6 +1202,17 @@ public class TextWire extends AbstractWire implements Wire {
         return this;
     }
 
+    @Override
+    public void reset() {
+        sb.setLength(0);
+        lineStart = 0;
+        valueIn.resetState();
+        valueOut.resetState();
+        writeContext.reset();
+        readContext.reset();
+        bytes.clear();
+    }
+
     enum NoObject {NO_OBJECT}
 
     /**

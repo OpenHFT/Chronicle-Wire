@@ -104,6 +104,15 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     @Override
+    public void reset() {
+        writeContext.reset();
+        readContext.reset();
+        valueIn.resetState();
+        valueOut.resetState();
+        bytes.clear();
+    }
+
+    @Override
     public boolean isBinary() {
         return true;
     }

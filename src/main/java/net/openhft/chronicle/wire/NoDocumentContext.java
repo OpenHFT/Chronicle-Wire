@@ -59,4 +59,10 @@ public enum NoDocumentContext implements DocumentContext {
     public void close() {
         // Do nothing
     }
+
+    @Override
+    public void reset() {
+        close();
+    }
+
 }

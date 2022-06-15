@@ -48,7 +48,6 @@ import java.util.function.*;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.BytesStore.empty;
-import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
 /**
  * YAML Based wire format
@@ -115,7 +114,7 @@ public class YamlWire extends AbstractWire implements Wire {
         assert wire.startUse();
         try {
             long pos = wire.bytes().readPosition();
-            @NotNull YamlWire tw = new YamlWire(nativeBytes());
+            @NotNull Wire tw = Wire.newYamlWireOnHeap();
             wire.copyTo(tw);
             wire.bytes().readPosition(pos);
             return tw.toString();
@@ -507,10 +506,9 @@ public class YamlWire extends AbstractWire implements Wire {
     }
 
     public String dumpContext() {
-        Bytes<?> b = Bytes.allocateElasticOnHeap(128);
-        YamlWire yw = new YamlWire(b);
-        yw.valueOut.list(yt.contexts, YamlTokeniser.YTContext.class);
-        return b.toString();
+        Wire yw = Wire.newYamlWireOnHeap();
+        yw.getValueOut().list(yt.contexts, YamlTokeniser.YTContext.class);
+        return yw.toString();
     }
 
     private boolean checkForMatch(@NotNull String keyName) {
@@ -556,10 +554,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
     @Override
     public void clear() {
-        yt.reset();
-        bytes.clear();
-        valueIn.resetState();
-        valueOut.resetState();
+        reset();
     }
 
     @NotNull
@@ -954,8 +949,13 @@ public class YamlWire extends AbstractWire implements Wire {
     }
 
     public void reset() {
-        bytes.readPosition(0);
+        bytes.clear();
+        sb.setLength(0);
+        writeContext.reset();
+        readContext.reset();
         yt.reset();
+        valueIn.resetState();
+        valueOut.resetState();
         anchorValues.clear();
     }
 
@@ -2004,7 +2004,6 @@ public class YamlWire extends AbstractWire implements Wire {
             return bytes;
         }
 
-        @NotNull
         @Override
         public BracketType getBracketType() {
             switch (yt.current()) {
@@ -2017,6 +2016,7 @@ public class YamlWire extends AbstractWire implements Wire {
                     return BracketType.MAP;
                 case SEQUENCE_START:
                     return BracketType.SEQ;
+                case NONE:
                 case MAPPING_KEY:
                 case SEQUENCE_ENTRY:
                 case STREAM_START:

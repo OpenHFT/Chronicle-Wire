@@ -75,6 +75,16 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
     }
 
     @Override
+    public void reset() {
+        chainedElement = false;
+        if (count > 0)
+            close();
+        count = 0;
+        rollback = false;
+        notComplete = false;
+    }
+
+    @Override
     public void rollbackOnClose() {
         rollback = true;
     }

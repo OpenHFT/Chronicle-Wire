@@ -78,4 +78,9 @@ public interface DocumentContext extends Closeable, SourceContext {
 
     @Override
     void close();
+
+    /**
+     * call close once, then discard any remaining state
+     */
+    void reset();
 }

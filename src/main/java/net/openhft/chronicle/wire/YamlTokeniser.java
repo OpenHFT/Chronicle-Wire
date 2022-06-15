@@ -54,8 +54,8 @@ public class YamlTokeniser {
     private YamlToken last = YamlToken.STREAM_START;
 
     public YamlTokeniser(BytesIn<?> in) {
-        this.in = in;
         reset();
+        this.in = in;
     }
 
     public int contextSize() {
@@ -63,10 +63,12 @@ public class YamlTokeniser {
     }
 
     void reset() {
-        freeContexts.addAll(contexts);
         contexts.clear();
-        if (temp != null) temp.clear();
-        lineStart = in.readPosition();
+        freeContexts.clear();
+        if (temp != null)
+            temp.clear();
+        long pos = in == null ? 0 : in.readPosition();
+        lineStart = blockStart = blockEnd = pos;
         flowDepth = Integer.MAX_VALUE;
         blockQuote = 0;
         hasSequenceEntry = false;

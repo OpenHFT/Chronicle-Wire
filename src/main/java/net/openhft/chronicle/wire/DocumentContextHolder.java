@@ -39,8 +39,18 @@ public class DocumentContextHolder implements DocumentContext, WriteDocumentCont
     @Override
     public void close() {
         DocumentContext documentContext = this.dc;
+        if (documentContext == null)
+            return;
+        documentContext.close();
+        if (!documentContext.isNotComplete())
+            dc = null;
+    }
+
+    @Override
+    public void reset() {
+        DocumentContext documentContext = this.dc;
         if (documentContext != null)
-            documentContext.close();
+            documentContext.reset();
         this.dc = null;
     }
 
