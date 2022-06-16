@@ -1,4 +1,4 @@
-package net.openhft.chronicle.wire.internal;
+package net.openhft.chronicle.wire.converter;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
@@ -8,13 +8,13 @@ import net.openhft.chronicle.wire.LongConverter;
 
 import java.util.Arrays;
 
-public class VanillaLongConverter implements LongConverter {
+public class SymbolsLongConverter implements LongConverter {
     private final int factor;
     private final short[] encode;
     private final char[] decode;
     private final int maxParseLength;
 
-    public VanillaLongConverter(String symbols) {
+    public SymbolsLongConverter(String symbols) {
         final int length = symbols.length();
         factor = length;
         decode = symbols.toCharArray();

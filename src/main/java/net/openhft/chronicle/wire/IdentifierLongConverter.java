@@ -1,7 +1,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.wire.internal.VanillaLongConverter;
+import net.openhft.chronicle.wire.converter.SymbolsLongConverter;
 
 /**
  * An identifier that acts as a base 66 string of up to 10 characters, or a nanosecond timestamp for dates from 2019-09-14.
@@ -15,7 +15,7 @@ import net.openhft.chronicle.wire.internal.VanillaLongConverter;
 public class IdentifierLongConverter implements LongConverter {
     public static final IdentifierLongConverter INSTANCE = new IdentifierLongConverter();
 
-    protected static final VanillaLongConverter SMALL_POSITIVE = new VanillaLongConverter(
+    protected static final SymbolsLongConverter SMALL_POSITIVE = new SymbolsLongConverter(
             "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz._~^");
     protected static final long MAX_SMALL_ID = 1568336880910795775L; // 66^10-1
     static final String MIN_DATE = "2019-09-13T01:08:00.910795776";
