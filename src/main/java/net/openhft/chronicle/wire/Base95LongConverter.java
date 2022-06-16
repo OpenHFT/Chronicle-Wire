@@ -17,24 +17,25 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.StringUtils;
 
-import java.math.BigInteger;
-
+/**
+ * @deprecated This doesn't really work as it uses characters that have to be escaped out in text wires
+ */
+@Deprecated(/* to remove in x.25 */)
 public class Base95LongConverter implements LongConverter {
 
     public static final int MAX_LENGTH = LongConverter.maxParseLength(95);
+    public static final Base95LongConverter INSTANCE = new Base95LongConverter();
+
+    private static final int BASE = 95;
 
     @Override
     public int maxParseLength() {
         return MAX_LENGTH;
     }
-
-    public static final Base95LongConverter INSTANCE = new Base95LongConverter();
-    private static final int BASE = 95;
-    private static final BigInteger BASE_BI = BigInteger.valueOf(BASE);
-    private static final BigInteger TWO_TO_64 = BigInteger.ONE.shiftLeft(64);
 
     @Override
     public long parse(CharSequence text) {
@@ -49,9 +50,8 @@ public class Base95LongConverter implements LongConverter {
     public void append(StringBuilder text, long value) {
         int start = text.length();
         if (value < 0) {
-            BigInteger bi = BigInteger.valueOf(value).add(TWO_TO_64);
-            int v = bi.mod(BASE_BI).intValueExact();
-            value = bi.divide(BASE_BI).longValueExact();
+            int v = (int) Long.remainderUnsigned(value, BASE);
+            value = Long.divideUnsigned(value, BASE);
             text.append((char) (' ' + v - 1));
         }
         while (value != 0) {
@@ -64,5 +64,17 @@ public class Base95LongConverter implements LongConverter {
             Jvm.warn().on(getClass(), "truncated because the value was too large");
             text.setLength(start + maxParseLength());
         }
+    }
+
+    @Override
+    public void append(Bytes<?> bytes, long value) {
+        StringBuilder sb = WireInternal.acquireStringBuilder();
+        append(sb, value);
+        bytes.append(sb);
+    }
+
+    @Override
+    public boolean allSafeChars(WireOut wireOut) {
+        return false;
     }
 }

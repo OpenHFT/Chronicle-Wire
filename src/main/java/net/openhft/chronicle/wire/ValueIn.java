@@ -64,7 +64,7 @@ public interface ValueIn {
     }
 
     default char character() {
-        @Nullable CharSequence cs = textTo(Wires.acquireStringBuilder());
+        @Nullable CharSequence cs = textTo(WireInternal.acquireStringBuilderForValueIn());
         if (cs == null || cs.length() == 0)
             return '\u0000';
 
@@ -496,7 +496,7 @@ public interface ValueIn {
 
     @Nullable
     default <E extends Enum<E>> E asEnum(Class<E> eClass) {
-        StringBuilder sb = WireInternal.acquireStringBuilder();
+        StringBuilder sb = WireInternal.acquireStringBuilderForValueIn();
         text(sb);
         return sb.length() == 0 ? null : WireInternal.internEnum(eClass, sb);
     }
@@ -578,7 +578,7 @@ public interface ValueIn {
     }
 
     default long readLong(LongConverter longConverter) {
-        StringBuilder sb = Wires.acquireStringBuilder();
+        StringBuilder sb = WireInternal.acquireStringBuilderForValueIn();
         text(sb);
         return longConverter.parse(sb);
     }

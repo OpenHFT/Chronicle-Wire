@@ -98,6 +98,11 @@ public class HashWire implements WireOut, BytesComment {
         hash = 0;
     }
 
+    @Override
+    public void reset() {
+        clear();
+    }
+
     @Nullable
     @Override
     public Object parent() {

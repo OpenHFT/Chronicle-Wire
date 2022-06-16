@@ -48,7 +48,6 @@ import java.util.function.*;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.BytesStore.empty;
-import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
 /**
  * YAML Based wire format
@@ -72,7 +71,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
     static {
         IOTools.unmonitor(TYPE);
-        for (char ch : "?%&@`0123456789+- ',#:{}[]|>!\\".toCharArray())
+        for (char ch : "?%&*@`0123456789+- ',#:{}[]|>!\\".toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
         for (char ch : "?,#:{}[]|>\\".toCharArray())
             QUOTE_CHARS.set(ch);
@@ -101,11 +100,6 @@ public class YamlWire extends AbstractWire implements Wire {
         this(bytes, false);
     }
 
-    @Override
-    public boolean isBinary() {
-        return false;
-    }
-
     @NotNull
     public static YamlWire fromFile(String name) throws IOException {
         return new YamlWire(BytesUtil.readFile(name), true);
@@ -120,7 +114,7 @@ public class YamlWire extends AbstractWire implements Wire {
         assert wire.startUse();
         try {
             long pos = wire.bytes().readPosition();
-            @NotNull YamlWire tw = new YamlWire(nativeBytes());
+            @NotNull Wire tw = Wire.newYamlWireOnHeap();
             wire.copyTo(tw);
             wire.bytes().readPosition(pos);
             return tw.toString();
@@ -206,6 +200,11 @@ public class YamlWire extends AbstractWire implements Wire {
         if (length != sb.length())
             throw new IllegalStateException("Length changed from " + length + " to " + sb.length() + " for " + sb);
         AppendableUtil.setLength(sb, end);
+    }
+
+    @Override
+    public boolean isBinary() {
+        return false;
     }
 
     @Override
@@ -507,10 +506,9 @@ public class YamlWire extends AbstractWire implements Wire {
     }
 
     public String dumpContext() {
-        Bytes<?> b = Bytes.allocateElasticOnHeap(128);
-        YamlWire yw = new YamlWire(b);
-        yw.valueOut.list(yt.contexts, YamlTokeniser.YTContext.class);
-        return b.toString();
+        Wire yw = Wire.newYamlWireOnHeap();
+        yw.getValueOut().list(yt.contexts, YamlTokeniser.YTContext.class);
+        return yw.toString();
     }
 
     private boolean checkForMatch(@NotNull String keyName) {
@@ -556,10 +554,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
     @Override
     public void clear() {
-        yt.reset();
-        bytes.clear();
-        valueIn.resetState();
-        valueOut.resetState();
+        reset();
     }
 
     @NotNull
@@ -730,13 +725,21 @@ public class YamlWire extends AbstractWire implements Wire {
         if (STARTS_QUOTE_CHARS.get(s.charAt(0)) ||
                 Character.isWhitespace(s.charAt(s.length() - 1)))
             return Quotes.DOUBLE;
+        boolean hasSingleQuote = false;
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
             if (QUOTE_CHARS.get(ch) || ch < ' ' || ch > 127)
                 return Quotes.DOUBLE;
-            if (ch == '"')
+            if (ch == '\'')
+                hasSingleQuote = true;
+            if (ch == '"') {
+                if (i < s.length() - 1 && s.charAt(i + 1) == '\'')
+                    return Quotes.DOUBLE;
                 quotes = Quotes.SINGLE;
+            }
         }
+        if (hasSingleQuote)
+            return Quotes.NONE;
         return quotes;
     }
 
@@ -946,8 +949,13 @@ public class YamlWire extends AbstractWire implements Wire {
     }
 
     public void reset() {
-        bytes.readPosition(0);
+        bytes.clear();
+        sb.setLength(0);
+        writeContext.reset();
+        readContext.reset();
         yt.reset();
+        valueIn.resetState();
+        valueOut.resetState();
         anchorValues.clear();
     }
 
@@ -1996,7 +2004,6 @@ public class YamlWire extends AbstractWire implements Wire {
             return bytes;
         }
 
-        @NotNull
         @Override
         public BracketType getBracketType() {
             switch (yt.current()) {
@@ -2009,6 +2016,7 @@ public class YamlWire extends AbstractWire implements Wire {
                     return BracketType.MAP;
                 case SEQUENCE_START:
                     return BracketType.SEQ;
+                case NONE:
                 case MAPPING_KEY:
                 case SEQUENCE_ENTRY:
                 case STREAM_START:
@@ -3016,4 +3024,5 @@ public class YamlWire extends AbstractWire implements Wire {
             return YamlWire.this.toString();
         }
     }
+
 }

@@ -78,7 +78,7 @@ public class PassThroughTest extends WireTestCommon {
                 "}\n" +
                 "...\n";
         Wire wire = new YamlWire(Bytes.from(input)).useTextDocuments();
-        Wire wire2 = new YamlWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
+        Wire wire2 = Wire.newYamlWireOnHeap();
         final DestinationSpecific destinationSpecific = wire2.methodWriter(DestinationSpecific.class);
         final MethodReader reader = wire.methodReader(destinationSpecific);
         for (int i = 2; i >= 0; i--)
@@ -104,7 +104,7 @@ public class PassThroughTest extends WireTestCommon {
 
     @Test
     public void methodWriterYaml() {
-        Wire wire2 = new YamlWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
+        Wire wire2 = Wire.newYamlWireOnHeap();
         final Destination destination = wire2.methodWriter(Destination.class);
         try (DocumentContext dc = destination.to("dest")) {
             dc.wire().write("send").text("message");

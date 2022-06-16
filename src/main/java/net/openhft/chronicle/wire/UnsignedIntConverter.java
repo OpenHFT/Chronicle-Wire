@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.AppendableUtil;
 
+@Deprecated(/* to be removed in x.25 */)
 public class UnsignedIntConverter implements IntConverter {
     private static final long MASK_32 = 0xFFFF_FFFFL;
 

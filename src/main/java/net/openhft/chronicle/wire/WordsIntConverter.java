@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+@Deprecated(/* to be removed in x.25 */)
 public class WordsIntConverter implements IntConverter {
     private final LongConverter longConverter;
 

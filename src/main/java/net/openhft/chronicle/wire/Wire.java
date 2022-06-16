@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.annotation.DontChain;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,6 +39,15 @@ public interface Wire extends WireIn, WireOut {
             default:
                 throw new IllegalArgumentException("Unknown file type " + name);
         }
+    }
+
+    /**
+     * Create a YamlWire that write to an on heap Bytes
+     *
+     * @return the Wire
+     */
+    static Wire newYamlWireOnHeap() {
+        return new YamlWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
     }
 
     @Override

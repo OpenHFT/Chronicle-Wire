@@ -23,7 +23,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Target({ElementType.ANNOTATION_TYPE, ElementType.FIELD, ElementType.PARAMETER})
 public @interface LongConversion {
-    Class<? extends LongConverter> value();
+    /**
+     * @return the implementing class which either has a static final INSTANCE, or takes a string for initialisation
+     */
+    Class<?> value();
 }

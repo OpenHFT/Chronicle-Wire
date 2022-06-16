@@ -66,6 +66,16 @@ public class RawWire extends AbstractWire implements Wire {
     }
 
     @Override
+    public void reset() {
+        valueIn.resetState();
+        valueOut.resetState();
+        writeContext.reset();
+        readContext.reset();
+        bytes.clear();
+        lastSB = null;
+    }
+
+    @Override
     public boolean isBinary() {
         return true;
     }

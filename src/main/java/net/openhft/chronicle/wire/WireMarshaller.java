@@ -48,12 +48,6 @@ public class WireMarshaller<T> {
     private static final StringBuilderPool WSBP = new StringBuilderPool();
     @NotNull
     final FieldAccess[] fields;
-    public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial
-            (tClass ->
-                    Throwable.class.isAssignableFrom(tClass)
-                            ? WireMarshaller.ofThrowable(tClass)
-                            : WireMarshaller.of(tClass)
-            );
     final TreeMap<CharSequence, FieldAccess> fieldMap = new TreeMap<>(WireMarshaller::compare);
     private final boolean isLeaf;
     @Nullable
@@ -62,6 +56,13 @@ public class WireMarshaller<T> {
     protected WireMarshaller(@NotNull Class<T> tClass, @NotNull FieldAccess[] fields, boolean isLeaf) {
         this(fields, isLeaf, defaultValueForType(tClass));
     }
+
+    public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial
+            (tClass ->
+                    Throwable.class.isAssignableFrom(tClass)
+                            ? WireMarshaller.ofThrowable(tClass)
+                            : WireMarshaller.of(tClass)
+            );
 
     private WireMarshaller(@NotNull FieldAccess[] fields, boolean isLeaf, @Nullable T defaultValue) {
         this.fields = fields;
@@ -441,6 +442,81 @@ public class WireMarshaller<T> {
         return isLeaf;
     }
 
+    static class LongConverterFieldAccess extends FieldAccess {
+        @NotNull
+        private final LongConverter longConverter;
+
+        LongConverterFieldAccess(@NotNull Field field, @NotNull LongConverter longConverter) {
+            super(field);
+            this.longConverter = longConverter;
+        }
+
+        static LongConverter getInstance(Class clazz) {
+            try {
+                Field converterField = clazz.getDeclaredField("INSTANCE");
+                return (LongConverter) converterField.get(null);
+            } catch (NoSuchFieldException nsfe) {
+                return (LongConverter) ObjectUtils.newInstance(clazz);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
+            long aLong = getLong(o);
+            if (write.isBinary()) {
+                write.int64(aLong);
+            } else {
+                StringBuilder sb = WSBP.acquireStringBuilder();
+                longConverter.append(sb, aLong);
+                if (!write.isBinary() && sb.length() == 0)
+                    write.text("");
+                else
+                    write.rawText(sb);
+            }
+        }
+
+        protected long getLong(Object o) {
+            return unsafeGetLong(o, offset);
+        }
+
+        @Override
+        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
+            long i;
+            if (read.isBinary()) {
+                i = read.int64();
+            } else {
+                StringBuilder sb = RSBP.acquireStringBuilder();
+                read.text(sb);
+                i = longConverter.parse(sb);
+            }
+            setLong(o, i);
+        }
+
+        protected void setLong(Object o, long i) {
+            unsafePutLong(o, offset, i);
+        }
+
+        @Override
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
+            StringBuilder sb = WSBP.acquireStringBuilder();
+            bytes.readUtf8(sb);
+            long i = longConverter.parse(sb);
+            bytes.writeLong(i);
+        }
+
+        @Override
+        protected boolean sameValue(Object o, Object o2) {
+            return getLong(o) == getLong(o2);
+        }
+
+        @Override
+        protected void copy(Object from, Object to) {
+            setLong(to, getLong(from));
+        }
+    }
+
     abstract static class FieldAccess {
         @NotNull
         final Field field;
@@ -499,6 +575,9 @@ public class WireMarshaller<T> {
                 case "boolean":
                     return new BooleanFieldAccess(field);
                 case "byte": {
+                    LongConverter longConverter = acquireLongConverter(field);
+                    if (longConverter != null)
+                        return new ByteLongConverterFieldAccess(field, longConverter);
                     IntConversion intConversion = field.getAnnotation(IntConversion.class);
                     return intConversion == null
                             ? new ByteFieldAccess(field)
@@ -511,12 +590,18 @@ public class WireMarshaller<T> {
                             : new CharConversionFieldAccess(field, charConversion);
 
                 case "short": {
+                    LongConverter longConverter = acquireLongConverter(field);
+                    if (longConverter != null)
+                        return new ShortLongConverterFieldAccess(field, longConverter);
                     IntConversion intConversion = field.getAnnotation(IntConversion.class);
                     return intConversion == null
                             ? new ShortFieldAccess(field)
                             : new ShortIntConversionFieldAccess(field, intConversion);
                 }
                 case "int": {
+                    LongConverter longConverter = acquireLongConverter(field);
+                    if (longConverter != null)
+                        return new IntLongConverterFieldAccess(field, longConverter);
                     IntConversion intConversion = field.getAnnotation(IntConversion.class);
                     return intConversion == null
                             ? new IntegerFieldAccess(field)
@@ -525,10 +610,11 @@ public class WireMarshaller<T> {
                 case "float":
                     return new FloatFieldAccess(field);
                 case "long": {
-                    LongConversion longConversion = field.getAnnotation(LongConversion.class);
-                    return longConversion == null
+                    LongConverter longConverter = acquireLongConverter(field);
+
+                    return longConverter == null
                             ? new LongFieldAccess(field)
-                            : new LongConversionFieldAccess(field, longConversion);
+                            : new LongConverterFieldAccess(field, longConverter);
                 }
                 case "double":
                     return new DoubleFieldAccess(field);
@@ -550,6 +636,15 @@ public class WireMarshaller<T> {
                         isLeaf = false;
                     return new ObjectFieldAccess(field, isLeaf);
             }
+        }
+
+        @Nullable
+        private static LongConverter acquireLongConverter(@NotNull Field field) {
+            LongConversion longConversion = Jvm.findAnnotation(field, LongConversion.class);
+            LongConverter longConverter = null;
+            if (longConversion != null)
+                longConverter = LongConverterFieldAccess.getInstance(longConversion.value());
+            return longConverter;
         }
 
         @NotNull
@@ -1645,6 +1740,54 @@ public class WireMarshaller<T> {
         }
     }
 
+    static class ByteLongConverterFieldAccess extends LongConverterFieldAccess {
+        public ByteLongConverterFieldAccess(@NotNull Field field, LongConverter longConverter) {
+            super(field, longConverter);
+        }
+
+        @Override
+        protected long getLong(Object o) {
+            return unsafeGetByte(o, offset) & 0xFFL;
+        }
+
+        @Override
+        protected void setLong(Object o, long i) {
+            unsafePutByte(o, offset, (byte) i);
+        }
+    }
+
+    static class ShortLongConverterFieldAccess extends LongConverterFieldAccess {
+        public ShortLongConverterFieldAccess(@NotNull Field field, LongConverter longConverter) {
+            super(field, longConverter);
+        }
+
+        @Override
+        protected long getLong(Object o) {
+            return unsafeGetShort(o, offset) & 0xFFFFL;
+        }
+
+        @Override
+        protected void setLong(Object o, long i) {
+            unsafePutShort(o, offset, (short) i);
+        }
+    }
+
+    static class IntLongConverterFieldAccess extends LongConverterFieldAccess {
+        public IntLongConverterFieldAccess(@NotNull Field field, @NotNull LongConverter longConverter) {
+            super(field, longConverter);
+        }
+
+        @Override
+        protected long getLong(Object o) {
+            return unsafeGetInt(o, offset) & 0xFFFF_FFFFL;
+        }
+
+        @Override
+        protected void setLong(Object o, long i) {
+            unsafePutInt(o, offset, (int) i);
+        }
+    }
+
     static class CharConversionFieldAccess extends CharFieldAccess {
 
         @NotNull
@@ -1659,7 +1802,10 @@ public class WireMarshaller<T> {
         protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
             StringBuilder sb = WSBP.acquireStringBuilder();
             intConverter.append(sb, getChar(o));
-            write.rawText(sb);
+            if (!write.isBinary() && sb.length() == 0)
+                write.text("");
+            else
+                write.rawText(sb);
         }
 
         protected char getChar(Object o) {
@@ -1714,7 +1860,10 @@ public class WireMarshaller<T> {
             } else {
                 StringBuilder sb = WSBP.acquireStringBuilder();
                 intConverter.append(sb, anInt);
-                write.rawText(sb);
+                if (!write.isBinary() && sb.length() == 0)
+                    write.text("");
+                else
+                    write.rawText(sb);
             }
         }
 
@@ -1829,59 +1978,6 @@ public class WireMarshaller<T> {
         }
     }
 
-    static class LongConversionFieldAccess extends FieldAccess {
-        @NotNull
-        private final LongConverter longConverter;
-
-        LongConversionFieldAccess(@NotNull Field field, @NotNull LongConversion longConversion) {
-            super(field);
-            this.longConverter = ObjectUtils.newInstance(longConversion.value());
-        }
-
-        @Override
-        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
-            long aLong = unsafeGetLong(o, offset);
-            if (write.isBinary()) {
-                write.int64(aLong);
-            } else {
-                StringBuilder sb = WSBP.acquireStringBuilder();
-                longConverter.append(sb, aLong);
-                write.rawText(sb);
-            }
-        }
-
-        @Override
-        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            long i;
-            if (read.isBinary()) {
-                i = read.int64();
-            } else {
-                StringBuilder sb = RSBP.acquireStringBuilder();
-                read.text(sb);
-                i = longConverter.parse(sb);
-            }
-            unsafePutLong(o, offset, i);
-        }
-
-        @Override
-        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
-            StringBuilder sb = WSBP.acquireStringBuilder();
-            bytes.readUtf8(sb);
-            long i = longConverter.parse(sb);
-            bytes.writeLong(i);
-        }
-
-        @Override
-        protected boolean sameValue(Object o, Object o2) {
-            return unsafeGetLong(o, offset) == unsafeGetLong(o2, offset);
-        }
-
-        @Override
-        protected void copy(Object from, Object to) {
-            unsafePutLong(to, offset, unsafeGetLong(from, offset));
-        }
-    }
-
     static class DoubleFieldAccess extends FieldAccess {
         DoubleFieldAccess(@NotNull Field field) {
             super(field);
@@ -1916,8 +2012,6 @@ public class WireMarshaller<T> {
             unsafePutDouble(to, offset, unsafeGetDouble(from, offset));
         }
     }
-
-
 
 
 }

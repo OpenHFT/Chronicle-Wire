@@ -18,7 +18,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.AppendableUtil;
+import net.openhft.chronicle.bytes.Bytes;
 
+@Deprecated(/* to be removed in x.25*/)
 public class UnsignedLongConverter implements LongConverter {
 
     @Override
@@ -32,5 +34,13 @@ public class UnsignedLongConverter implements LongConverter {
             AppendableUtil.append(text, value);
         else
             text.append(Long.toUnsignedString(value));
+    }
+
+    @Override
+    public void append(Bytes<?> bytes, long value) {
+        if (value >= 0)
+            AppendableUtil.append(bytes, value);
+        else
+            bytes.append(Long.toUnsignedString(value));
     }
 }
