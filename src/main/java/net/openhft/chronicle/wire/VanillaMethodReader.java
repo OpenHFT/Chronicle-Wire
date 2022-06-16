@@ -136,7 +136,7 @@ public class VanillaMethodReader implements MethodReader {
                 } else {
                     String text = v.text();
                     if (text != null && !text.isEmpty()) {
-                        LongConverter longConverter = ObjectUtils.newInstance(lc.value());
+                        LongConverter longConverter = (LongConverter) ObjectUtils.newInstance(lc.value());
                         arg = longConverter.parse(text);
                     }
                 }
