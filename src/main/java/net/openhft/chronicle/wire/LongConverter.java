@@ -19,8 +19,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.wire.converter.SymbolsLongConverter;
 import net.openhft.chronicle.wire.internal.PowerOfTwoLongConverter;
-import net.openhft.chronicle.wire.internal.VanillaLongConverter;
 
 import static java.lang.Math.log;
 import static java.text.MessageFormat.format;
@@ -37,7 +37,7 @@ public interface LongConverter {
     static LongConverter forSymbols(String chars) {
         return Maths.isPowerOf2(chars.length())
                 ? new PowerOfTwoLongConverter(chars)
-                : new VanillaLongConverter(chars);
+                : new SymbolsLongConverter(chars);
     }
 
     static int maxParseLength(int based) {

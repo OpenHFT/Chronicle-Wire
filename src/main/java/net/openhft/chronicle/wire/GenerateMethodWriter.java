@@ -355,7 +355,7 @@ public class GenerateMethodWriter {
     private Class<?> returnType(Method dm, Class interfaceClazz) {
         Type returnType = GenericReflection.getReturnType(dm, interfaceClazz);
         if (!(returnType instanceof Class))
-            returnType = (Type) ((TypeVariable<?>)returnType).getGenericDeclaration();
+            returnType = (Type) ((TypeVariable<?>) returnType).getGenericDeclaration();
         return (Class<?>) returnType;
     }
 
@@ -530,25 +530,19 @@ public class GenerateMethodWriter {
 
             final Parameter p = dm.getParameters()[j];
 
-            final Optional<String> intConversion = stream(p.getAnnotations())
-                    .filter(a -> a.annotationType() == IntConversion.class)
-                    .map(x -> (((IntConversion) x).value().getName()))
-                    .findFirst();
+            final IntConversion intConversion = Jvm.findAnnotation(p, IntConversion.class);
+            final LongConversion longConversion = Jvm.findAnnotation(p, LongConversion.class);
 
-            final Optional<String> longConversion = stream(p.getAnnotations())
-                    .filter(a -> a.annotationType() == LongConversion.class)
-                    .map(x -> (((LongConversion) x).value().getName()))
-                    .findFirst();
-
-            final String name = intConversion.orElseGet(() -> (longConversion.orElse("")));
+            final String name = intConversion != null ? intConversion.value().getName() :
+                    longConversion != null ? longConversion.value().getName() : "";
 
             if (!name.isEmpty() && (WireType.TEXT == wireType || WireType.YAML == wireType))
                 body.append(format("valueOut.rawText(%s.INSTANCE.asText(%s));\n", name, p.getName()));
             else if (p.getType().isPrimitive() || CharSequence.class.isAssignableFrom(p.getType())) {
-                if (longConversion.isPresent() && (p.getType() == long.class || CharSequence.class.isAssignableFrom(p.getType())))
-                    body.append(format("%s.writeLong(%s.INSTANCE, %s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", longConversion.get(), p.getName()));
-                else if (intConversion.isPresent())
-                    body.append(format("%s.writeInt(%s.INSTANCE, %s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", intConversion.get(), p.getName()));
+                if (longConversion != null && (p.getType() == long.class || CharSequence.class.isAssignableFrom(p.getType())))
+                    body.append(format("%s.writeLong(%s.INSTANCE, %s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", longConversion.value().getName(), p.getName()));
+                else if (intConversion != null)
+                    body.append(format("%s.writeInt(%s.INSTANCE, %s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", intConversion.value().getName(), p.getName()));
                 else
                     body.append(format("%s.%s(%s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", toString(p.getType()), p.getName()));
             } else
