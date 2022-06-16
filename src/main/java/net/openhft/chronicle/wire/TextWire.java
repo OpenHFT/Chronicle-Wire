@@ -89,7 +89,7 @@ public class TextWire extends AbstractWire implements Wire {
         IOTools.unmonitor(BINARY);
         for (char ch : "?%*&@`0123456789+- ',#:{}[]|>!\\".toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
-        for (char ch : "?,#:{}[]|>\\$^@".toCharArray())
+        for (char ch : "?,#:{}[]|>\\^".toCharArray())
             QUOTE_CHARS.set(ch);
         for (char ch : "#:}]".toCharArray())
             END_CHARS.set(ch);
