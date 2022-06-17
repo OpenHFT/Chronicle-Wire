@@ -61,5 +61,4 @@ public class Base64LongConverterTest extends WireTestCommon {
             });
         }
     }
-
 }
