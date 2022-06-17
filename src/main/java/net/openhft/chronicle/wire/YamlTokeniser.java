@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesIn;
+import net.openhft.chronicle.core.pool.StringBuilderPool;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ public class YamlTokeniser {
             YamlToken.MAPPING_KEY,
             YamlToken.MAPPING_END,
             YamlToken.DIRECTIVES_END);
+    static final StringBuilderPool SBP = new StringBuilderPool();
     protected final List<YTContext> contexts = new ArrayList<>();
     private final BytesIn<?> in;
     private final List<YTContext> freeContexts = new ArrayList<>();
@@ -52,8 +54,8 @@ public class YamlTokeniser {
     private YamlToken last = YamlToken.STREAM_START;
 
     public YamlTokeniser(BytesIn<?> in) {
-        this.in = in;
         reset();
+        this.in = in;
     }
 
     public int contextSize() {
@@ -61,10 +63,12 @@ public class YamlTokeniser {
     }
 
     void reset() {
-        freeContexts.addAll(contexts);
         contexts.clear();
-        if (temp != null) temp.clear();
-        lineStart = in.readPosition();
+        freeContexts.clear();
+        if (temp != null)
+            temp.clear();
+        long pos = in == null ? 0 : in.readPosition();
+        lineStart = blockStart = blockEnd = pos;
         flowDepth = Integer.MAX_VALUE;
         blockQuote = 0;
         hasSequenceEntry = false;
@@ -157,7 +161,7 @@ public class YamlTokeniser {
                     hasSequenceEntry = true;
                     return indent(YamlToken.SEQUENCE_START, YamlToken.SEQUENCE_ENTRY, YamlToken.STREAM_START, indent2 + 1);
                 }
-                if (next == '-' && in.peekUnsignedByte(in.readPosition() + 1) == '-' && in.peekUnsignedByte(in.readPosition() + 2) <= ' ') {
+                if (indent2 == 0 && next == '-' && in.peekUnsignedByte(in.readPosition() + 1) == '-' && in.peekUnsignedByte(in.readPosition() + 2) <= ' ') {
                     if (contextIndent() <= minIndent && minIndent >= 0)
                         return dontRead();
                     in.readSkip(2);
@@ -171,7 +175,7 @@ public class YamlTokeniser {
             }
             case '.': {
                 int next = in.peekUnsignedByte();
-                if (next == '.') {
+                if (indent2 == 0 && next == '.') {
                     if (in.peekUnsignedByte(in.readPosition() + 1) == '.' &&
                             in.peekUnsignedByte(in.readPosition() + 2) <= ' ') {
                         if (contextIndent() <= minIndent)
@@ -678,7 +682,7 @@ public class YamlTokeniser {
 
     // for testing.
     public String text() {
-        StringBuilder sb = Wires.acquireStringBuilder();
+        StringBuilder sb = SBP.acquireStringBuilder();
         text(sb);
         return sb.length() == 0 ? "" : sb.toString();
     }
@@ -726,7 +730,7 @@ public class YamlTokeniser {
             in.readPosition(blockStart);
             if (in.peekUnsignedByte() == '0') {
                 final int i = in.peekUnsignedByte(in.readPosition() + 1);
-                StringBuilder sb = Wires.acquireStringBuilder();
+                StringBuilder sb = SBP.acquireStringBuilder();
                 if (Character.isDigit(i)) {
                     in.readSkip(1);
                     in.parseUtf8(sb, Math.toIntExact(blockEnd - blockStart) - 1);

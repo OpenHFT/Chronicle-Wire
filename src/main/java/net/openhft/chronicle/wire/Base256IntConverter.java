@@ -2,6 +2,10 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
 
+/**
+ * @deprecated This doesn't really work as it uses characters that have to be escaped out in text wires
+ */
+@Deprecated(/* to remove in x.25 */)
 public class Base256IntConverter implements IntConverter {
     public static final int MAX_LENGTH = IntConverter.maxParseLength(256);
     public static final Base256IntConverter INSTANCE = new Base256IntConverter();

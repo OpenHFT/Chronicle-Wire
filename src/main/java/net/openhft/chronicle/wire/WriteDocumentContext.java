@@ -34,5 +34,4 @@ public interface WriteDocumentContext extends DocumentContext {
      * Marks this {@code WriteDocumentContext} as a chained element.
      */
     void chainedElement(boolean chainedElement);
-
 }

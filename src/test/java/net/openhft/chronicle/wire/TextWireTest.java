@@ -275,14 +275,13 @@ public class TextWireTest extends WireTestCommon {
         wire.write();
         wire.write();
         assertEquals("\"\": \"\": \"\": ", wire.toString());
-
-        wire.bytes().releaseLast();
     }
 
+    static Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
     @NotNull
     private Wire createWire() {
-        bytes = allocateElasticOnHeap();
-        final Wire wire = WireType.TEXT.apply(bytes);
+        wire.reset();
+        bytes = wire.bytes();
         return wire;
     }
 
@@ -1486,6 +1485,13 @@ public class TextWireTest extends WireTestCommon {
     }
 
     @Test
+    public void two() {
+        testByteArrayValueWithRealBytesNegative();
+        wire.reset();
+        uint16();
+    }
+
+    @Test
     public void testByteArray() {
         @NotNull Wire wire = createWire();
         wire.usePadding(true);
@@ -1537,8 +1543,6 @@ public class TextWireTest extends WireTestCommon {
                     .object(Map.class);
             assertEquals(map, map2);
         });
-
-        wire.bytes().releaseLast();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -2091,27 +2095,15 @@ public class TextWireTest extends WireTestCommon {
 
     static class TwoLongs extends SelfDescribingMarshallable {
 
-        @LongConversion(HexaDecimalConverter.class)
+        @LongConversion(HexadecimalLongConverter.class)
         long hexadecimal;
 
-        @LongConversion(HexaDecimalConverter.class)
+        @LongConversion(HexadecimalLongConverter.class)
         long hexa2;
 
         public TwoLongs(long hexadecimal, long hexa2) {
             this.hexadecimal = hexadecimal;
             this.hexa2 = hexa2;
-        }
-    }
-
-    static class HexaDecimalConverter implements LongConverter {
-        @Override
-        public long parse(CharSequence text) {
-            return Long.parseUnsignedLong(text.toString(), 16);
-        }
-
-        @Override
-        public void append(StringBuilder text, long value) {
-            text.append(Long.toHexString(value));
         }
     }
 

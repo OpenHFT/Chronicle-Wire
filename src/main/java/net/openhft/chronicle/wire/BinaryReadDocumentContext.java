@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.pool.StringBuilderPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -77,6 +78,8 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         return rollback;
     }
 
+    static final StringBuilderPool SBP = new StringBuilderPool();
+
     private static void fullReadForDeltaWire(AbstractWire wire0, long start) {
         long readPosition1 = wire0.bytes().readPosition();
         try {
@@ -90,7 +93,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
                 if (read.isTyped()) {
                     read.skipValue();
                 } else {
-                    read.text(Wires.acquireStringBuilder());  // todo remove this and use skipValue
+                    read.text(SBP.acquireStringBuilder());  // todo remove this and use skipValue
                 }
 
                 if (wire0.bytes().readRemaining() == remaining) {
@@ -129,6 +132,13 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         }
 
         present = false;
+    }
+
+    @Override
+    public void reset() {
+        close();
+        readLimit = readPosition = 0;
+        lastStart = start = -1;
     }
 
     /**

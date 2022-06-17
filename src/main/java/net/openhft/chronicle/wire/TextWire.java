@@ -64,6 +64,7 @@ public class TextWire extends AbstractWire implements Wire {
     static final String NULL = "!null \"\"";
     static final BitSet STARTS_QUOTE_CHARS = new BitSet();
     static final BitSet QUOTE_CHARS = new BitSet();
+    static final BitSet END_CHARS = new BitSet();
     static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_QUOTES = new ThreadLocal<>();//ThreadLocal.withInitial(StopCharTesters.QUOTES::escaping);
     static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_SINGLE_QUOTES = new ThreadLocal<>();//ThreadLocal.withInitial(() -> StopCharTesters.SINGLE_QUOTES.escaping());
     static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_END_OF_TEXT = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
@@ -86,10 +87,12 @@ public class TextWire extends AbstractWire implements Wire {
     static {
         IOTools.unmonitor(TYPE);
         IOTools.unmonitor(BINARY);
-        for (char ch : "?%&@`0123456789+- ',#:{}[]|>!\\".toCharArray())
+        for (char ch : "?%*&@`0123456789+- ',#:{}[]|>!\\".toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
-        for (char ch : "?,#:{}[]|>\\".toCharArray())
+        for (char ch : "?,#:{}[]|>\\^".toCharArray())
             QUOTE_CHARS.set(ch);
+        for (char ch : "#:}]".toCharArray())
+            END_CHARS.set(ch);
         // make sure it has loaded.
         WireInternal.INTERNER.valueCount();
     }
@@ -111,11 +114,6 @@ public class TextWire extends AbstractWire implements Wire {
 
     public TextWire(@NotNull Bytes<?> bytes) {
         this(bytes, false);
-    }
-
-    @Override
-    public boolean isBinary() {
-        return false;
     }
 
     @NotNull
@@ -237,6 +235,11 @@ public class TextWire extends AbstractWire implements Wire {
      */
     public static <T> T load(String filename) throws IOException {
         return (T) TextWire.fromFile(filename).readObject();
+    }
+
+    @Override
+    public boolean isBinary() {
+        return false;
     }
 
     public boolean strict() {
@@ -609,8 +612,6 @@ public class TextWire extends AbstractWire implements Wire {
                     if (valueIn.isASeparator(peekCodeNext()) && commas-- <= 0)
                         return;
                     bytes.readSkip(1);
-                    if (commas == 0)
-                        return;
                     break;
                 case ' ':
                 case '\t':
@@ -1199,6 +1200,17 @@ public class TextWire extends AbstractWire implements Wire {
     public TextWire trimFirstCurly(boolean trimFirstCurly) {
         this.trimFirstCurly = trimFirstCurly;
         return this;
+    }
+
+    @Override
+    public void reset() {
+        sb.setLength(0);
+        lineStart = 0;
+        valueIn.resetState();
+        valueOut.resetState();
+        writeContext.reset();
+        readContext.reset();
+        bytes.clear();
     }
 
     enum NoObject {NO_OBJECT}
@@ -2377,7 +2389,7 @@ public class TextWire extends AbstractWire implements Wire {
             }
 
             int prev = peekBack();
-            if (prev == ':' || prev == '#' || prev == '}' || prev == ']')
+            if (END_CHARS.get(prev))
                 bytes.readSkip(-1);
             return ret;
         }
@@ -2595,6 +2607,8 @@ public class TextWire extends AbstractWire implements Wire {
                 case '\'':
                 default:
                     consumeValue();
+                    while (peekBack() <= ' ' && bytes.readPosition() >= 0)
+                        bytes.readSkip(-1);
                     if (peekBack() == ',') {
                         bytes.readSkip(-1);
                         break;
@@ -3463,18 +3477,12 @@ public class TextWire extends AbstractWire implements Wire {
 
         public void checkRewind() {
             int ch = peekBack();
-            if (ch == ':' || ch == '}' || ch == ']')
+            if (END_CHARS.get(ch))
                 bytes.readSkip(-1);
-
-            else if ((ch > 'F' && (ch < 'a' || ch > 'f'))) {
-                throw new IllegalArgumentException("Unexpected character in number '" + (char) ch + '\'');
-            }
         }
 
         public void checkRewindDouble() {
-            int ch = peekBack();
-            if (ch == ':' || ch == '}' || ch == ']')
-                bytes.readSkip(-1);
+            checkRewind();
         }
 
         /**

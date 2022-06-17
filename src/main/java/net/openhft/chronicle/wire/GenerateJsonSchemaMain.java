@@ -179,7 +179,7 @@ public class GenerateJsonSchemaMain {
         } else {
             LongConversion lc = find(annotations, LongConversion.class);
             if (lc != null) {
-                Class<? extends LongConverter> value = lc.value();
+                Class value = lc.value();
                 if (value.getName().contains("Timestamp"))
                     desc.append("" +
                             "\"type\": \"string\",\n" +

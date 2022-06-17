@@ -62,6 +62,11 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
         bytes.clear();
     }
 
+    @Override
+    public void reset() {
+        clear();
+    }
+
     @NotNull
     @Override
     public BooleanValue newBooleanReference() {
