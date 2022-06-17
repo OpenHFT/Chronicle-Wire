@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.wire.converter.Words;
 import org.junit.Test;
 
 import java.util.Random;
@@ -7,6 +8,25 @@ import java.util.Random;
 import static org.junit.Assert.assertEquals;
 
 public class WordsLongConverterTest extends WireTestCommon {
+
+    @Test
+    public void inYaml() {
+        Wire wire = Wire.newYamlWireOnHeap();
+        final AsWords words = wire.methodWriter(AsWords.class);
+        words.words(Words.INSTANCE.parse("eat.red.apple"));
+        words.words(Words.INSTANCE.parse("blue.clay,sets"));
+        words.words(Words.INSTANCE.parse("many.looks.now"));
+        words.words(Words.INSTANCE.parse("square.army.plan.player.wash.disk"));
+        assertEquals("" +
+                "words: eat.red.apple\n" +
+                "...\n" +
+                "words: blue.clay.sets\n" +
+                "...\n" +
+                "words: many.looks.now\n" +
+                "...\n" +
+                "words: square.army.plan.player.wash.disk\n" +
+                "...\n", wire.toString());
+    }
 
     @Test
     public void asString() {
@@ -39,7 +59,7 @@ public class WordsLongConverterTest extends WireTestCommon {
                 -1, 0, 1,
                 Integer.MAX_VALUE, Long.MAX_VALUE}) {
             String text = bic.asString(l);
-           // System.out.println(text);
+            // System.out.println(text);
             assertEquals(l, bic.parse(text));
         }
         Random random = new Random(1);
@@ -52,5 +72,9 @@ public class WordsLongConverterTest extends WireTestCommon {
             assertEquals(l, parse);
 
         }
+    }
+
+    interface AsWords {
+        void words(@Words long words);
     }
 }

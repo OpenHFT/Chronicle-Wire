@@ -19,8 +19,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.wire.converter.PowerOfTwoLongConverter;
 import net.openhft.chronicle.wire.converter.SymbolsLongConverter;
-import net.openhft.chronicle.wire.internal.PowerOfTwoLongConverter;
 
 import static java.lang.Math.log;
 import static java.text.MessageFormat.format;

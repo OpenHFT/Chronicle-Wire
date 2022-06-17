@@ -1,4 +1,4 @@
-package net.openhft.chronicle.wire.internal;
+package net.openhft.chronicle.wire.converter;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
