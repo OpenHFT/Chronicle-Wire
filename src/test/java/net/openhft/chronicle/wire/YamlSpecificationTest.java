@@ -113,7 +113,7 @@ public class YamlSpecificationTest extends WireTestCommon {
         Object o = YAML.fromString(snippet);
 
         YamlWire tw = (YamlWire) Wire.newYamlWireOnHeap();
-        tw.writeObject(o);
+        tw.getValueOut().object(o);
 
         return tw.toString();
     }
