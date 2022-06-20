@@ -22,7 +22,7 @@ public class TextMethodTesterTest extends WireTestCommon {
                 "tmtt/methods-out.yaml")
                 .setup("tmtt/methods-out.yaml") // calls made here are not validated in the output.
                 .run();
-        assertEquals(test.expected(), test.actual());
+        compareResults(test);
     }
 
     @Test
@@ -34,7 +34,7 @@ public class TextMethodTesterTest extends WireTestCommon {
                 "tmtt/methods-out-empty.yaml")
                 .setup("tmtt/methods-out.yaml") // calls made here are not validated in the output.
                 .run();
-        assertEquals(test.expected(), test.actual());
+        compareResults(test);
     }
 
     @SuppressWarnings("rawtypes")
@@ -47,7 +47,7 @@ public class TextMethodTesterTest extends WireTestCommon {
                 "tmtt/methods-out.yaml")
                 .setup("tmtt/methods-out.yaml") // calls made here are not validated in the output.
                 .run();
-        assertEquals(test.expected(), test.actual().replaceAll("\n\n", "\n"));
+        compareResults(test);
     }
 
     @Test
@@ -60,8 +60,13 @@ public class TextMethodTesterTest extends WireTestCommon {
                 "tmtt/methods-out-empty.yaml")
                 .onInvocationException(exceptions::add)
                 .run();
-        assertEquals(test.expected(), test.actual());
+        compareResults(test);
         assertEquals(4, exceptions.size());
+    }
+
+    private void compareResults(TextMethodTester test) {
+        assertEquals(test.expected().replaceAll("\\s+#", " #"),
+                test.actual().replaceAll("\\s+#", " #"));
     }
 }
 
