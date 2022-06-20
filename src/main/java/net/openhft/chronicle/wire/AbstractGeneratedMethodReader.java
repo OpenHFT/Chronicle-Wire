@@ -122,6 +122,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
 
         try {
             wireIn.startEvent();
+            wireIn.consumePadding();
             Bytes<?> bytes = wireIn.bytes();
             dataEventProcessed = false;
             while (bytes.readRemaining() > 0) {

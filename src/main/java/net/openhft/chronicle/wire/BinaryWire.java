@@ -62,6 +62,7 @@ import static net.openhft.chronicle.wire.Wires.GENERATE_TUPLES;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class BinaryWire extends AbstractWire implements Wire {
 
+    static final StringBuilderPool SBP = new StringBuilderPool();
     private static final boolean SUPPORT_DELTA = supportDelta();
     private static final UTF8StringInterner UTF8 = new UTF8StringInterner(4096);
     private static final Bit8StringInterner BIT8 = new Bit8StringInterner(1024);
@@ -71,7 +72,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             return ((Marshallable) m).usesSelfDescribingMessage();
         return true;
     });
-    static final StringBuilderPool SBP = new StringBuilderPool();
     private final FixedBinaryValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
     private final FixedBinaryValueOut valueOut;
@@ -101,20 +101,6 @@ public class BinaryWire extends AbstractWire implements Wire {
         this.compression = compression;
         valueIn = supportDelta ? new DeltaValueIn() : new BinaryValueIn();
         readContext = new BinaryReadDocumentContext(this, supportDelta);
-    }
-
-    @Override
-    public void reset() {
-        writeContext.reset();
-        readContext.reset();
-        valueIn.resetState();
-        valueOut.resetState();
-        bytes.clear();
-    }
-
-    @Override
-    public boolean isBinary() {
-        return true;
     }
 
     private static boolean supportDelta() {
@@ -151,6 +137,20 @@ public class BinaryWire extends AbstractWire implements Wire {
         // use underflow to make digits below '0' large.
         c -= '0';
         return c <= 9;
+    }
+
+    @Override
+    public void reset() {
+        writeContext.reset();
+        readContext.reset();
+        valueIn.resetState();
+        valueOut.resetState();
+        bytes.clear();
+    }
+
+    @Override
+    public boolean isBinary() {
+        return true;
     }
 
     /**
@@ -681,7 +681,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                 case COMMENT: {
                     bytes.uncheckedReadSkipOne();
-                    readUtf8();
+                    commentListener.accept(readUtf8());
                     break;
                 }
 
@@ -1128,8 +1128,11 @@ public class BinaryWire extends AbstractWire implements Wire {
     @Override
     public ValueOut writeEventId(String name, int methodId) {
         if (bytes.retainsComments())
-            bytes.comment(name);
-        writeCode(FIELD_NUMBER).writeStopBit(methodId);
+            bytes.comment(name + " (" + methodId + ")");
+        if (numericFields)
+            writeCode(FIELD_NUMBER).writeStopBit(methodId);
+        else
+            writeCode(EVENT_NAME).write8bit(name);
         return valueOut;
     }
 

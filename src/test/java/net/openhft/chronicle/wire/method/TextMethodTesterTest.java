@@ -16,11 +16,11 @@ public class TextMethodTesterTest extends WireTestCommon {
     @Test
     public void run() throws IOException {
         TextMethodTester test = new TextMethodTester<>(
-                "methods-out.yaml",
+                "tmtt/methods-in.yaml",
                 MockMethodsImpl::new,
                 MockMethods.class,
-                "methods-out.yaml")
-                .setup("methods-out.yaml") // calls made here are not validated in the output.
+                "tmtt/methods-out.yaml")
+                .setup("tmtt/methods-out.yaml") // calls made here are not validated in the output.
                 .run();
         assertEquals(test.expected(), test.actual());
     }
@@ -28,11 +28,11 @@ public class TextMethodTesterTest extends WireTestCommon {
     @Test
     public void runTestEmptyOut() throws IOException {
         TextMethodTester test = new TextMethodTester<>(
-                "methods-out.yaml",
+                "tmtt/methods-in.yaml",
                 NoopMockMethods::new,
                 MockMethods.class,
-                "methods-out-empty.yaml")
-                .setup("methods-out.yaml") // calls made here are not validated in the output.
+                "tmtt/methods-out-empty.yaml")
+                .setup("tmtt/methods-out.yaml") // calls made here are not validated in the output.
                 .run();
         assertEquals(test.expected(), test.actual());
     }
@@ -41,11 +41,11 @@ public class TextMethodTesterTest extends WireTestCommon {
     @Test
     public void runYaml() throws IOException {
         TextMethodTester test = new YamlMethodTester<>(
-                "methods-out.yaml",
+                "tmtt/methods-in.yaml",
                 MockMethodsImpl::new,
                 MockMethods.class,
-                "methods-out.yaml")
-                .setup("methods-out.yaml") // calls made here are not validated in the output.
+                "tmtt/methods-out.yaml")
+                .setup("tmtt/methods-out.yaml") // calls made here are not validated in the output.
                 .run();
         assertEquals(test.expected(), test.actual().replaceAll("\n\n", "\n"));
     }
@@ -54,10 +54,10 @@ public class TextMethodTesterTest extends WireTestCommon {
     public void checkExceptionsProvidedToHandler() throws IOException {
         List<Exception> exceptions = new ArrayList<>();
         TextMethodTester test = new TextMethodTester<>(
-                "methods-in-exception.yaml",
+                "tmtt/methods-in-exception.yaml",
                 MockMethodsImpl::new,
                 MockMethods.class,
-                "methods-out-empty.yaml")
+                "tmtt/methods-out-empty.yaml")
                 .onInvocationException(exceptions::add)
                 .run();
         assertEquals(test.expected(), test.actual());

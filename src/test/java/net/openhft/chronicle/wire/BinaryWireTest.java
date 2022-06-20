@@ -17,10 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.HexDumpBytes;
-import net.openhft.chronicle.bytes.NativeBytes;
-import net.openhft.chronicle.bytes.NoBytesStore;
+import net.openhft.chronicle.bytes.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
@@ -1426,6 +1423,31 @@ public class BinaryWireTest extends WireTestCommon {
         }
     }
 
+    @Test
+    public void readsComment() {
+        StringBuilder sb = new StringBuilder();
+        Wire wire = createWire();
+        try (DocumentContext dc = wire.writingDocument()) {
+            wire.writeComment("one\n");
+            wire.writeEventId("dto", 1);
+            wire.writeComment("two\n");
+            wire.getValueOut().object(new DTO("text"));
+            wire.writeComment("three\n");
+            wire.commentListener(sb::append);
+        }
+        final MethodReader reader = wire.methodReader((IDTO) dto -> sb.append("dto: " + dto + "\n"));
+        assertTrue(reader.readOne());
+        assertFalse(reader.readOne());
+        assertEquals("" +
+                "one\n" +
+                "two\n" +
+                "dto: !net.openhft.chronicle.wire.BinaryWireTest$DTO {\n" +
+                "  text: text\n" +
+                "}\n" +
+                "\n" +
+                "three\n", sb.toString());
+    }
+
     enum BWKey implements WireKey {
         field1(1), field2(2), field3(3);
 
@@ -1441,7 +1463,12 @@ public class BinaryWireTest extends WireTestCommon {
         }
     }
 
-    private static class DTO extends SelfDescribingMarshallable {
+    interface IDTO {
+        @MethodId(1)
+        void dto(DTO dto);
+    }
+
+    static class DTO extends SelfDescribingMarshallable {
 
         String text;
 

@@ -443,6 +443,8 @@ public class YamlWire extends AbstractWire implements Wire {
         while (true) {
             switch (yt.current()) {
                 case COMMENT:
+                    commentListener.accept(yt.text());
+                    // fall through
                 case DIRECTIVE:
                 case DIRECTIVES_END:
                     yt.next();
@@ -949,10 +951,10 @@ public class YamlWire extends AbstractWire implements Wire {
     }
 
     public void reset() {
+        readContext.reset();
+        writeContext.reset();
         bytes.clear();
         sb.setLength(0);
-        writeContext.reset();
-        readContext.reset();
         yt.reset();
         valueIn.resetState();
         valueOut.resetState();
@@ -1017,6 +1019,7 @@ public class YamlWire extends AbstractWire implements Wire {
         }
 
         private void indent() {
+            BytesUtil.combineDoubleNewline(bytes);
             for (int i = 0; i < indentation; i++) {
                 bytes.writeUnsignedShort(' ' * 257);
             }
@@ -1033,6 +1036,7 @@ public class YamlWire extends AbstractWire implements Wire {
             } else {
                 sep = leaf ? COMMA_SPACE : COMMA_NEW_LINE;
             }
+            BytesUtil.combineDoubleNewline(bytes);
         }
 
         @NotNull
@@ -1696,6 +1700,7 @@ public class YamlWire extends AbstractWire implements Wire {
         }
 
         protected void endBlock(char c) {
+            BytesUtil.combineDoubleNewline(bytes);
             bytes.writeUnsignedByte(c);
             elementSeparator();
         }
@@ -1772,6 +1777,7 @@ public class YamlWire extends AbstractWire implements Wire {
             if (popSep != null)
                 sep = popSep;
 
+            elementSeparator();
             return YamlWire.this;
         }
 
@@ -1806,6 +1812,7 @@ public class YamlWire extends AbstractWire implements Wire {
                 newLine();
             }
             writeEndOfBlock(wasLeaf);
+            BytesUtil.combineDoubleNewline(bytes);
             bytes.writeUnsignedByte(object instanceof Externalizable ? ']' : '}');
             if (popSep != null)
                 sep = popSep;
@@ -3025,4 +3032,13 @@ public class YamlWire extends AbstractWire implements Wire {
         }
     }
 
+    @Override
+    public boolean hasMetaDataPrefix() {
+        if (yt.current() == YamlToken.TAG
+                && yt.isText("!meta-data")) {
+            yt.next();
+            return true;
+        }
+        return false;
+    }
 }

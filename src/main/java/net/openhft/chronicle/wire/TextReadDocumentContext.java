@@ -136,10 +136,10 @@ public class TextReadDocumentContext implements ReadDocumentContext {
             return;
         }
 
+        metaData = wire.hasMetaDataPrefix();
         start = bytes.readPosition();
         consumeToEndOfMessage(bytes);
 
-        metaData = false;
         readLimit = bytes.readLimit();
         readPosition = bytes.readPosition();
 

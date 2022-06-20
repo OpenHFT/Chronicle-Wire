@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -187,6 +188,7 @@ public class WireDumper {
                 wireIn.copyTo(textWire);
 
                 textBytes = bytes2;
+                BytesUtil.combineDoubleNewline(bytes2);
             } catch (Exception e) {
                 dumpAsHexadecimal(sb, len, readPosition, sblen);
                 return false;

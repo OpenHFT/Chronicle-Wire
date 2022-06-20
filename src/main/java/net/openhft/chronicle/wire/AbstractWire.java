@@ -26,6 +26,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
+import net.openhft.chronicle.core.util.IgnoresEverything;
 import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.threads.TimingPauser;
 import org.jetbrains.annotations.NotNull;
@@ -35,6 +36,7 @@ import java.io.ObjectOutput;
 import java.io.StreamCorruptedException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.wire.Wires.*;
@@ -53,10 +55,10 @@ public abstract class AbstractWire implements Wire {
     @NotNull
     protected final Bytes<?> bytes;
     protected final boolean use8bit;
-
     protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
     protected Object parent;
-    int usedCount = 0;
+    protected Consumer<CharSequence> commentListener = IgnoringConsumer.IGNORING_CONSUMER;
+
     private Pauser pauser;
     private TimingPauser timedParser;
     private long headerNumber = Long.MIN_VALUE;
@@ -161,6 +163,11 @@ public abstract class AbstractWire implements Wire {
     @Override
     public BytesComment<?> bytesComment() {
         return bytes;
+    }
+
+    @Override
+    public void commentListener(Consumer<CharSequence> commentListener) {
+        this.commentListener = commentListener;
     }
 
     @NotNull
@@ -332,11 +339,11 @@ public abstract class AbstractWire implements Wire {
         // also clears any dirty bits left by a failed writer/appender
         // does not get added to the length
         final BytesStore<?, ?> bytesStore = bytes.bytesStore();
-        if (bytesStore.capacity() - pos >= 8 ) {
+        if (bytesStore.capacity() - pos >= 8) {
             bytesStore.writeLong(pos, 0);
         } else {
             long remain = bytesStore.capacity() - pos;
-            for(int i=0; i<remain; ++i)
+            for (int i = 0; i < remain; ++i)
                 bytesStore.writeByte(pos + i, 0);
         }
 
@@ -496,13 +503,11 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public boolean startUse() {
-        usedCount++;
         return true;
     }
 
     @Override
     public boolean endUse() {
-        --usedCount;
         return true;
     }
 
@@ -549,5 +554,13 @@ public abstract class AbstractWire implements Wire {
 
     public boolean usePadding() {
         return usePadding;
+    }
+
+    private enum IgnoringConsumer implements Consumer<CharSequence>, IgnoresEverything {
+        IGNORING_CONSUMER {
+            @Override
+            public void accept(CharSequence charSequence) {
+            }
+        }
     }
 }

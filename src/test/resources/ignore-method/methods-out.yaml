@@ -4,6 +4,7 @@ method1: {
   field2: 1.23, 		# field2 comment
 }
 ...
+# included
 ignoreMethodBasedOnFirstArg: [
   method2,
   false
@@ -18,11 +19,13 @@ method2: [
   }
 ]
 ...
+# IGNORED
 ignoreMethodBasedOnFirstArg: [
   method2,
   true
 ]
 ...
+# included
 ignoreMethodBasedOnFirstArg: [
   method3,
   !net.openhft.chronicle.wire.method.MockDto {
@@ -43,6 +46,7 @@ method3: [
   }
 ]
 ...
+# IGNORED
 ignoreMethodBasedOnFirstArg: [
   method3,
   !net.openhft.chronicle.wire.method.MockDto {
