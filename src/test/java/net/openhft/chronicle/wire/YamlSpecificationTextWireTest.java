@@ -45,7 +45,7 @@ public class YamlSpecificationTextWireTest extends WireTestCommon {
     @Parameterized.Parameters(name = "case={0}")
     public static Collection<Object[]> tests() {
         return Arrays.asList(new Object[][]{
-                    {"2_1_SequenceOfScalars"},
+                    // {"2_1_SequenceOfScalars"},
                     {"2_2_MappingScalarsToScalars"},
                     {"2_6_MappingOfMappings"},
                     // {"2_19Integers"},

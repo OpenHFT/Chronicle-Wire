@@ -840,6 +840,10 @@ public class YamlWire extends AbstractWire implements Wire {
         return map;
     }
 
+    /**
+     * Please use {@code valueIn().object(o))} instead.
+     */
+    @Deprecated(/* To be removed in x.24 */)
     public void writeObject(Object o) {
         if (o instanceof Iterable) {
             for (Object o2 : (Iterable) o) {
@@ -857,12 +861,14 @@ public class YamlWire extends AbstractWire implements Wire {
         }
     }
 
+    @Deprecated(/* To be removed in x.24 */)
     private void writeObject(Object o, int indentation) {
         writeTwo('-', ' ');
         indentation(indentation - 2);
         valueOut.object(o);
     }
 
+    @Deprecated(/* To be removed in x.24 */)
     private void indentation(int indentation) {
         while (indentation-- > 0)
             bytes.writeUnsignedByte(' ');
@@ -2487,6 +2493,7 @@ public class YamlWire extends AbstractWire implements Wire {
         @Override
         public boolean hasNextSequenceItem() {
             switch (yt.current()) {
+                case SEQUENCE_START:
                 case TEXT:
                 case SEQUENCE_ENTRY:
                     return true;
