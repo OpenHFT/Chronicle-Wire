@@ -29,7 +29,7 @@
 
 
     <artifactId>chronicle-wire</artifactId>
-    <version>2.23ea14-SNAPSHOT</version>
+    <version>2.23ea20-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Wire</name>
     <description>Chronicle-Wire</description>
     <packaging>bundle</packaging>
@@ -220,7 +220,6 @@
                     <runOrder>hourly</runOrder>
                 </configuration>
             </plugin>
-
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -36,7 +36,7 @@ public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
     public void readMarshallable(T t, @NotNull WireIn in, T defaults, boolean overwrite) {
         try {
             ReadMarshallable rm = t instanceof ReadMarshallable ? (ReadMarshallable) t : null;
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             int next = 0;
             if (overwrite) {
                 for (FieldAccess field : fields) {

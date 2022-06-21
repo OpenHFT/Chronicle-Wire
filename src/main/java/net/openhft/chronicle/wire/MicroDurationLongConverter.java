@@ -17,6 +17,8 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
+
 import java.time.Duration;
 
 public class MicroDurationLongConverter implements LongConverter {
@@ -27,10 +29,19 @@ public class MicroDurationLongConverter implements LongConverter {
         return parse.getSeconds() * 1000_000 + parse.getNano() / 1000;
     }
 
+
+    private Duration duration(long value) {
+        return Duration.ofSeconds(value / 1_000_000,
+                value % 1_000_000 * 1_000);
+    }
+
     @Override
     public void append(StringBuilder text, long value) {
-        final Duration d = Duration.ofSeconds(value / 1_000_000,
-                value % 1_000_000 * 1_000);
-        text.append(d);
+        text.append(duration(value));
+    }
+
+    @Override
+    public void append(Bytes<?> bytes, long value) {
+        bytes.append(duration(value).toString());
     }
 }

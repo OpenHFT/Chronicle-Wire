@@ -71,8 +71,7 @@ public class ChainedMethodsTest extends WireTestCommon {
     public void chainedYaml() {
         if (disableProxyCodegen)
             expectException("Falling back to proxy method writer");
-        YamlWire wire = new YamlWire(Bytes.allocateElasticOnHeap(128))
-                .useTextDocuments();
+        Wire wire = Wire.newYamlWireOnHeap();
         ITop top = wire.methodWriter(ITop.class);
         top.mid("mid")
                 .next(1)

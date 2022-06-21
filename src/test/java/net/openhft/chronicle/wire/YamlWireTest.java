@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.NoBytesStore;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.wire.TextWireTest.ABCD;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -48,6 +49,8 @@ import java.util.stream.Stream;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticDirect;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
+import static net.openhft.chronicle.wire.TextWireTest.ABC;
+import static net.openhft.chronicle.wire.TextWireTest.WithEnumSet;
 import static net.openhft.chronicle.wire.YamlTokeniserTest.doTest;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
@@ -55,8 +58,6 @@ import static org.junit.Assert.*;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class YamlWireTest extends WireTestCommon {
-
-    Bytes<?> bytes;
 
     @Test
     public void comment() {
@@ -77,15 +78,17 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals(0, sb.length());
     }
 
+    static Wire wire = Wire.newYamlWireOnHeap();
+
     @Ignore("TODO FIX")
     @Test
     public void writeObjectWithTreeMap() {
-        @NotNull YamlWire wire = createWire();
+        Wire wire = createWire();
         ObjectWithTreeMap value = new ObjectWithTreeMap();
         value.map.put("hello", "world");
         wire.write().object(value);
 
-       // System.out.println(wire);
+        // System.out.println(wire);
 
         ObjectWithTreeMap value2 = new ObjectWithTreeMap();
         wire.read().object(value2, ObjectWithTreeMap.class);
@@ -99,25 +102,6 @@ public class YamlWireTest extends WireTestCommon {
         wire.reset();
         ObjectWithTreeMap value4 = wire.read().object(ObjectWithTreeMap.class);
         assertEquals("{hello=world}", value4.map.toString());
-    }
-
-    @Ignore("TODO")
-    @Test
-    public void testFromString() {
-        @Nullable Object w = WireType.YAML.fromString("changedRow: {\n" +
-                "  row: [\n" +
-                "  ],\n" +
-                "  oldRow: {\n" +
-                "    volume: 26880400.0,\n" +
-                "    high: 108.3,\n" +
-                "    adjClose: 107.7,\n" +
-                "    low: 107.51,\n" +
-                "    close: 107.7,\n" +
-                "    key: !java.util.Date 1473116400000,\n" +
-                "    open: 107.9\n" +
-                "  }\n" +
-                "}");
-        Assert.assertTrue(w instanceof Map);
     }
 
     @Test
@@ -151,6 +135,34 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals(488, w.read("perms").int64());
     }
 
+    @Test
+    public void testFromString() {
+        @Nullable Object w = WireType.YAML.fromString("" +
+                "changedRow: {\n" +
+                "  row: [\n" +
+                "  ],\n" +
+                "  oldRow: {\n" +
+                "    volume: 26880400.0,\n" +
+                "    high: 108.3,\n" +
+                "    adjClose: 107.7,\n" +
+                "    low: 107.51,\n" +
+                "    close: 107.7,\n" +
+                "    key: !java.util.Date 1473116400000,\n" +
+                "    open: 107.9\n" +
+                "  }\n" +
+                "}");
+        Assert.assertTrue(w instanceof Map);
+    }
+
+    @Test
+    public void testWrite() {
+        @NotNull Wire wire = createWire();
+        wire.write();
+        wire.write();
+        wire.write();
+        assertEquals("\"\": \"\": \"\": ", wire.toString());
+    }
+
     @Ignore("TODO")
     @Test
     public void testWriteToBinaryAndTriesToConvertToText() {
@@ -170,28 +182,17 @@ public class YamlWireTest extends WireTestCommon {
         }
 
         final String textYaml = Wires.fromSizePrefixedBlobs(b);
-       // System.out.println(textYaml);
+        // System.out.println(textYaml);
         @Nullable Object o = WireType.YAML.fromString(textYaml);
         Assert.assertEquals("{map={some={key=value}, some-other={key=value}}}", o.toString());
 
         b.releaseLast();
     }
 
-    @Test
-    public void testWrite() {
-        @NotNull Wire wire = createWire();
-        wire.write();
-        wire.write();
-        wire.write();
-        assertEquals("\"\": \"\": \"\": ", wire.toString());
-
-        wire.bytes().releaseLast();
-    }
-
     @NotNull
-    private YamlWire createWire() {
-        bytes = allocateElasticOnHeap();
-        return new YamlWire(bytes);
+    private Wire createWire() {
+        wire.reset();
+        return wire;
     }
 
     @Test
@@ -236,7 +237,7 @@ public class YamlWireTest extends WireTestCommon {
         expectWithSnakeYaml(expected, wire);
 
         // TODO fix.
-       // assertEquals(null, wire.read(() -> "A").object(Boolean.class));
+        // assertEquals(null, wire.read(() -> "A").object(Boolean.class));
         assertEquals(false, wire.read(() -> "B").object(Boolean.class));
     }
 
@@ -332,7 +333,7 @@ public class YamlWireTest extends WireTestCommon {
         wire.read();
         wire.read();
         wire.read();
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, wire.bytes().readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -349,7 +350,7 @@ public class YamlWireTest extends WireTestCommon {
         wire.read(BWKey.field1).text();
         // not a match
         wire.read(BWKey.field1).text();
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, wire.bytes().readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -373,7 +374,7 @@ public class YamlWireTest extends WireTestCommon {
         wire.read(name).text();
         assertEquals(name1, name.toString());
 
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, wire.bytes().readRemaining());
         // check it's safe to read too much.
         assertNull(wire.read().text());
     }
@@ -396,7 +397,7 @@ public class YamlWireTest extends WireTestCommon {
             assertEquals(e, i.get());
         });
 
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, wire.bytes().readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -419,7 +420,7 @@ public class YamlWireTest extends WireTestCommon {
             assertEquals(e, i.get());
         });
 
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, wire.bytes().readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -442,7 +443,7 @@ public class YamlWireTest extends WireTestCommon {
             assertEquals(e, i.get());
         });
 
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, wire.bytes().readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -465,7 +466,7 @@ public class YamlWireTest extends WireTestCommon {
             assertEquals(e, i.get());
         });
 
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, wire.bytes().readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -488,7 +489,7 @@ public class YamlWireTest extends WireTestCommon {
             assertEquals(e, i.get());
         });
 
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, wire.bytes().readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -511,7 +512,7 @@ public class YamlWireTest extends WireTestCommon {
             assertEquals(e, i.get());
         });
 
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, wire.bytes().readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -534,7 +535,7 @@ public class YamlWireTest extends WireTestCommon {
             assertEquals(e, i.get());
         });
 
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, wire.bytes().readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -564,7 +565,7 @@ public class YamlWireTest extends WireTestCommon {
             assertEquals(e, n.f, 0.0);
         });
 
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, wire.bytes().readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -591,7 +592,7 @@ public class YamlWireTest extends WireTestCommon {
             assertEquals(e, sb.toString());
         });
 
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, wire.bytes().readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -605,7 +606,7 @@ public class YamlWireTest extends WireTestCommon {
         wire.write(() -> "Test").typePrefix(name1).text("");
         wire.writeComment("");
         // TODO fix how types are serialized.
-       // expectWithSnakeYaml(wire, "{=1, field1=2, Test=3}");
+        // expectWithSnakeYaml(wire, "{=1, field1=2, Test=3}");
         assertEquals("\"\": !MyType \"\"\n" +
                 "field1: !AlsoMyType \"\"\n" +
                 "Test: !" + name1 + " \"\"\n" +
@@ -618,7 +619,7 @@ public class YamlWireTest extends WireTestCommon {
                     .text();
         });
 
-        assertEquals(0, bytes.readRemaining(), 1);
+        assertEquals(0, wire.bytes().readRemaining(), 1);
         // check it's safe to read too much.
         wire.read();
     }
@@ -659,13 +660,12 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals("\"\": " + now + "\n" +
                         "\"\": 23:59:59.999999999\n" +
                         "\"\": 00:00\n",
-                bytes.toString());
+                wire.toString());
         wire.read().time(now, Assert::assertEquals)
                 .read().time(LocalTime.MAX, Assert::assertEquals)
                 .read().time(LocalTime.MIN, Assert::assertEquals);
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void testZonedDateTime() {
         @NotNull Wire wire = createWire();
@@ -774,14 +774,14 @@ public class YamlWireTest extends WireTestCommon {
         @NotNull Wire wire = createWire();
         wire.bytes().append(
                 "nonesingle: \\\n" +
-                "nonedouble: \\\\\n" +
-                "singleself: ''''\n" +
-                "singleselfself: ''''''\n" +
-                "singlesingle: '\\'\n" +
-                "singledouble: '\\\\'\n" +
-                "doubleself: \"\\\"\"\n" +
-                "doublesingle: \"\\\\\"\n" +
-                "doubledouble: \"\\\\\\\\\"\n");
+                        "nonedouble: \\\\\n" +
+                        "singleself: ''''\n" +
+                        "singleselfself: ''''''\n" +
+                        "singlesingle: '\\'\n" +
+                        "singledouble: '\\\\'\n" +
+                        "doubleself: \"\\\"\"\n" +
+                        "doublesingle: \"\\\\\"\n" +
+                        "doubledouble: \"\\\\\\\\\"\n");
         assertEquals("\\", wire.read("nonesingle").readString());
         assertEquals("\\\\", wire.read("nonedouble").readString());
         assertEquals("'", wire.read("singleself").readString());
@@ -799,27 +799,27 @@ public class YamlWireTest extends WireTestCommon {
         wire.bytes().append("b: !byte[] !!binary AAAAAAA=\n" +
                 "c: !!binary CCCCCCCC\n");
         byte[] b = (byte[]) wire.read("b").object();
-        assertTrue(Arrays.toString(b), Arrays.equals(new byte[] {0, 0, 0, 0, 0}, b));
-        assertEquals(BytesStore.wrap(new byte[] {8, ' ', -126, 8, ' ', -126}), wire.read("c").object());
+        assertTrue(Arrays.toString(b), Arrays.equals(new byte[]{0, 0, 0, 0, 0}, b));
+        assertEquals(BytesStore.wrap(new byte[]{8, ' ', -126, 8, ' ', -126}), wire.read("c").object());
     }
 
     @Ignore("TODO FIX")
     @Test
     public void testABCDBytes() {
-/*        @NotNull YamlWire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.bytes().append(
                 "A: \"hi\",\n" +
                         "B: 'hi',\n" +
                         "C: hi,\n" +
                         "D: bye,\n");
-        TextWireTest.ABCD abcd = new TextWireTest.ABCD();
+        ABCD abcd = new ABCD();
 
         try {
             for (int i = 0; i < 5; i++) {
                 wire.reset();
-                TextWireTest.ABCD object = wire.getValueIn()
-                        .object(abcd, TextWireTest.ABCD.class);
-                assertEquals("!net.openhft.chronicle.wire.YamlWireTest$ABCD {\n" +
+                ABCD object = wire.getValueIn()
+                        .object(abcd, ABCD.class);
+                assertEquals("!net.openhft.chronicle.wire.TextWireTest$ABCD {\n" +
                         "  A: hi,\n" +
                         "  B: hi,\n" +
                         "  C: hi,\n" +
@@ -829,18 +829,13 @@ public class YamlWireTest extends WireTestCommon {
             }
         } finally {
             abcd.releaseAll();
-
-            WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(ABCD.class);
-            ABCD abcd0 = (ABCD) wm.defaultValue();
-            abcd0.releaseAll();
-        }*/
+        }
     }
 
     @Ignore("TODO FIX")
     @Test
     public void testABCStringBuilder() {
-/*
-        @NotNull YamlWire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.bytes().append(
                 "A: \"hi\",\n" +
                         "B: 'hi',\n" +
@@ -849,14 +844,14 @@ public class YamlWireTest extends WireTestCommon {
 
         for (int i = 0; i < 5; i++) {
             wire.reset();
-            assertEquals("!net.openhft.chronicle.wire.YamlWireTest$ABC {\n" +
+            assertEquals("!net.openhft.chronicle.wire.TextWireTest$ABC {\n" +
                     "  A: hi,\n" +
                     "  B: hi,\n" +
                     "  C: hi\n" +
                     "}\n", wire.getValueIn()
                     .object(abc, ABC.class)
                     .toString());
-        }*/
+        }
     }
 
     @Test
@@ -869,7 +864,7 @@ public class YamlWireTest extends WireTestCommon {
                 .write().bytes(Bytes.wrapForRead("Hello".getBytes(ISO_8859_1)))
                 .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
                 .write().bytes(allBytes);
-       // System.out.println(bytes.toString());
+        // System.out.println(bytes.toString());
         @NotNull Bytes<?> allBytes2 = allocateElasticOnHeap();
         wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
                 .read().bytes(b -> assertEquals("Hello", b.toString()))
@@ -1024,7 +1019,6 @@ public class YamlWireTest extends WireTestCommon {
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteStrings() {
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
@@ -1040,9 +1034,7 @@ public class YamlWireTest extends WireTestCommon {
             o.writeEventName(() -> "example")
                     .map(expected);
         });
-       // bytes.readPosition(4);
-       // expectWithSnakeYaml("{example={hello=world, hello1=world1, hello2=world2}}", wire);
-       // bytes.readPosition(0);
+
         assertEquals("--- !!data\n" +
                         "example: {\n" +
                         "  hello: world,\n" +
@@ -1081,9 +1073,8 @@ public class YamlWireTest extends WireTestCommon {
                 fromString.toString());
     }
 
-    @SuppressWarnings("deprecation")
     @Test
-    @Ignore
+    @Ignore("TODO FIX")
     public void testMapReadAndWriteIntegers() {
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         @NotNull final YamlWire wire = new YamlWire(bytes);
@@ -1135,10 +1126,11 @@ public class YamlWireTest extends WireTestCommon {
 
         wire.writeDocument(false, o -> o.write(() -> "example").marshallable(expected, MyMarshallable.class, MyMarshallable.class, true));
 
-        assertEquals("--- !!data\n" +
+        assertEquals("" +
+                        "--- !!data\n" +
                         "example: {\n" +
-                        "  ? { MyField: aKey }: { MyField: aValue },\n" +
-                        "  ? { MyField: aKey2 }: { MyField: aValue2 }\n" +
+                        "  ? { MyField: aKey  }: { MyField: aValue  },\n" +
+                        "  ? { MyField: aKey2  }: { MyField: aValue2  }\n" +
                         "}\n",
                 Wires.fromSizePrefixedBlobs(bytes));
         @NotNull final Map<MyMarshallable, MyMarshallable> actual = new LinkedHashMap<>();
@@ -1202,14 +1194,13 @@ public class YamlWireTest extends WireTestCommon {
 
         assertEquals("\"\": !WireType BINARY\n" +
                 "\"\": !WireType TEXT\n" +
-                "\"\": !WireType RAW\n", bytes.toString());
+                "\"\": !WireType RAW\n", wire.toString());
 
         assertEquals(WireType.BINARY, wire.read().object(Object.class));
         assertEquals(WireType.TEXT, wire.read().object(Object.class));
         assertEquals(WireType.RAW, wire.read().object(Object.class));
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void testArrays() {
         @NotNull Wire wire = createWire();
@@ -1217,7 +1208,7 @@ public class YamlWireTest extends WireTestCommon {
         @NotNull Object[] noObjects = {};
         wire.write("a").object(noObjects);
 
-        assertEquals("a: []", wire.toString());
+        assertEquals("a: []\n", wire.toString());
 
         @Nullable Object[] object = wire.read().object(Object[].class);
         assertEquals(0, object.length);
@@ -1231,7 +1222,7 @@ public class YamlWireTest extends WireTestCommon {
                 "  abc,\n" +
                 "  def,\n" +
                 "  ghi\n" +
-                "]", wire.toString());
+                "]\n", wire.toString());
 
         @Nullable Object[] object2 = wire.read()
                 .object(Object[].class);
@@ -1288,7 +1279,6 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals(str, bytes.toString());
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void testStringArrays() {
         @NotNull Wire wire = createWire();
@@ -1355,7 +1345,6 @@ public class YamlWireTest extends WireTestCommon {
     }
 
     @Test
-    @Ignore
     public void testStringMap() {
         @NotNull Wire wire = createWire();
 
@@ -1365,16 +1354,15 @@ public class YamlWireTest extends WireTestCommon {
         @Nullable Map<String, String> map = wire.read().object(Map.class);
         assertEquals(0, map.size());
 
-        // TODO we shouldn't need to create a new wire.
-        // wire = createWire();
-//
-        // Set<String> threeObjects = new HashSet(Arrays.asList(new String[]{"abc", "def", "ghi"}));
-        // wire.write().object(threeObjects);
-//
-        // Set<String> list2 = wire.read()
-        // .object(Set.class);
-        // assertEquals(3, list2.size());
-        // assertEquals("[abc, def, ghi]", list2.toString());
+        wire.clear();
+
+        Set<String> threeObjects = new HashSet(Arrays.asList("abc", "def", "ghi"));
+        wire.write().object(threeObjects);
+
+        Set<String> list2 = wire.read()
+                .object(Set.class);
+        assertEquals(3, list2.size());
+        assertEquals("[abc, def, ghi]", list2.toString());
     }
 
     @Test
@@ -1382,7 +1370,7 @@ public class YamlWireTest extends WireTestCommon {
         @NotNull String s = "cluster: {\n" +
                 "  host1: {\n" +
                 "     hostId: 1,\n" +
-               // "     name: one,\n" +
+                // "     name: one,\n" +
                 "  },\n" +
                 "  host2: {\n" +
                 "     hostId: 2,\n" +
@@ -1499,10 +1487,10 @@ public class YamlWireTest extends WireTestCommon {
         }
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void readDemarshallable() {
-        @NotNull Wire wire = createWire().useBinaryDocuments();
+        @NotNull Wire wire = new YamlWire(allocateElasticOnHeap())
+                .useBinaryDocuments();
         try (DocumentContext $ = wire.writingDocument(true)) {
             wire.getValueOut().typedMarshallable(new DemarshallableObject("test", 12345));
         }
@@ -1544,7 +1532,7 @@ public class YamlWireTest extends WireTestCommon {
                         .read(() -> "value").object(byte[].class, expected, Assert::assertArrayEquals)));
     }
 
-    @Ignore
+    @Ignore("TODO FIX")
     @Test
     public void testByteArray() {
         @NotNull Wire wire = createWire();
@@ -1579,10 +1567,11 @@ public class YamlWireTest extends WireTestCommon {
         @NotNull final MyMarshallable parent = new MyMarshallable("parent");
         wire.writeDocument(false, w -> w.writeEvent(MyMarshallable.class, parent).object(map));
 
-        assertEquals("--- !!data\n" +
+        assertEquals("" +
+                        "--- !!data\n" +
                         "? { MyField: parent }: {\n" +
-                        "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key1 }: value1,\n" +
-                        "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key2 }: value2\n" +
+                        "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key1  }: value1,\n" +
+                        "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key2  }: value2\n" +
                         "}\n"
                 , Wires.fromSizePrefixedBlobs(wire.bytes()));
 
@@ -1599,17 +1588,23 @@ public class YamlWireTest extends WireTestCommon {
         wire.bytes().releaseLast();
     }
 
-    @Test
-    @Ignore("TODO FIX")
+    @Test(expected = IllegalArgumentException.class)
     public void writeUnserializable() throws IOException {
-       // System.out.println(TEXT.asString(Thread.currentThread()));
-        @NotNull Socket s = new Socket();
-       // System.out.println(TEXT.asString(s));
-        SocketChannel sc = SocketChannel.open();
-       // System.out.println(TEXT.asString(sc));
+        System.out.println(WireType.YAML_ONLY.asString(Thread.currentThread()));
     }
 
-    @Ignore("TODO FIX")
+    @Test(expected = IllegalArgumentException.class)
+    public void writeUnserializable2() throws IOException {
+        @NotNull Socket s = new Socket();
+        System.out.println(WireType.YAML_ONLY.asString(s));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void writeUnserializable3() throws IOException {
+        SocketChannel sc = SocketChannel.open();
+        System.out.println(WireType.YAML_ONLY.asString(sc));
+    }
+
     @Test
     public void writeCharacter() {
         @NotNull Wire wire = createWire();
@@ -1709,7 +1704,6 @@ public class YamlWireTest extends WireTestCommon {
     }
 
     @Test
-    @Ignore("see #102")
     public void testArrayTypes2() {
         Wire wire = createWire();
         wire.bytes().append("a: [ !type byte[] ], b: !type String[], c: hi");
@@ -1736,9 +1730,9 @@ public class YamlWireTest extends WireTestCommon {
     public void nestedWithEnumSet() {
         Wire wire = createWire();
         YNestedWithEnumSet n = new YNestedWithEnumSet();
-        n.list.add(new TextWireTest.WithEnumSet("none"));
-        n.list.add(new TextWireTest.WithEnumSet("one", EnumSet.of(TimeUnit.DAYS)));
-        n.list.add(new TextWireTest.WithEnumSet("two", EnumSet.of(TimeUnit.DAYS, TimeUnit.HOURS)));
+        n.list.add(new WithEnumSet("none"));
+        n.list.add(new WithEnumSet("one", EnumSet.of(TimeUnit.DAYS)));
+        n.list.add(new WithEnumSet("two", EnumSet.of(TimeUnit.DAYS, TimeUnit.HOURS)));
         wire.write("hello")
                 .object(YNestedWithEnumSet.class, n);
         assertEquals("hello: {\n" +
@@ -1773,6 +1767,10 @@ public class YamlWireTest extends WireTestCommon {
         field1, field2, field3
     }
 
+    enum YWTSingleton {
+        INSTANCE
+    }
+
     static class FieldWithComment extends SelfDescribingMarshallable {
         @Comment("a comment where the value=%s")
         String field;
@@ -1798,10 +1796,6 @@ public class YamlWireTest extends WireTestCommon {
         }
     }
 
-    enum YWTSingleton {
-        INSTANCE
-    }
-
     static class StringArray implements Marshallable {
         String[] strings;
     }
@@ -1817,7 +1811,7 @@ public class YamlWireTest extends WireTestCommon {
     }
 
     static class YNestedWithEnumSet extends SelfDescribingMarshallable {
-        List<TextWireTest.WithEnumSet> list = new ArrayList<>();
+        List<WithEnumSet> list = new ArrayList<>();
     }
 
     class Circle implements Marshallable {

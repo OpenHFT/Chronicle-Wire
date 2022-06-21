@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IOTools;
 
 import java.io.IOException;
@@ -76,6 +77,17 @@ public class WordsLongConverter implements LongConverter {
         do {
             text.append(asep);
             text.append(WORDS[(int) (value & 2047)]);
+            value >>>= 11;
+            asep = this.sep;
+        } while (value > 0);
+    }
+
+    @Override
+    public void append(Bytes<?> bytes, long value) {
+        String asep = "";
+        do {
+            bytes.append(asep);
+            bytes.append(WORDS[(int) (value & 2047)]);
             value >>>= 11;
             asep = this.sep;
         } while (value > 0);

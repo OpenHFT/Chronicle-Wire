@@ -144,7 +144,7 @@ public class JSONWire extends TextWire {
 
             @Override
             public void checkRewind() {
-                int ch = bytes.readUnsignedByte(bytes.readPosition() - 1);
+                int ch = peekBack();
                 if (ch == ':' || ch == '}' || ch == ']')
                     bytes.readSkip(-1);
 

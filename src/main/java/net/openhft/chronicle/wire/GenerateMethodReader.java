@@ -578,6 +578,12 @@ public class GenerateMethodReader {
                 } else if (a instanceof LongConversion) {
                     numericConversionClass = ((LongConversion) a).value();
                     break;
+                } else {
+                    LongConversion lc = Jvm.findAnnotation(a.annotationType(), LongConversion.class);
+                    if (lc != null) {
+                        numericConversionClass = lc.value();
+                        break;
+                    }
                 }
             }
         }
@@ -591,13 +597,39 @@ public class GenerateMethodReader {
         if (boolean.class.equals(argumentType)) {
             return format("%s = %s.bool();\n", argumentName, valueInName);
         } else if (byte.class.equals(argumentType)) {
-            return format("%s = %s.readByte();\n", argumentName, valueInName);
+            if (numericConversionClass != null && hasInstance(numericConversionClass)) {
+                return format("%s = (byte) %s.INSTANCE.parse(%s.text());\n", argumentName, numericConversionClass.getName(), valueInName);
+
+            } else if (numericConversionClass != null && LongConverter.class.isAssignableFrom(numericConversionClass)) {
+                numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);\n",
+                        numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
+
+                return format("%s = (byte) %sConverter.parse(%s.text());\n", argumentName, argumentName, valueInName);
+            } else
+                return format("%s = %s.readByte();\n", argumentName, valueInName);
         } else if (char.class.equals(argumentType)) {
             return format("%s = %s.character();\n", argumentName, valueInName);
         } else if (short.class.equals(argumentType)) {
-            return format("%s = %s.int16();\n", argumentName, valueInName);
+            if (numericConversionClass != null && hasInstance(numericConversionClass)) {
+                return format("%s = (short) %s.INSTANCE.parse(%s.text());\n", argumentName, numericConversionClass.getName(), valueInName);
+
+            } else if (numericConversionClass != null && LongConverter.class.isAssignableFrom(numericConversionClass)) {
+                numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);\n",
+                        numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
+
+                return format("%s = (short) %sConverter.parse(%s.text());\n", argumentName, argumentName, valueInName);
+            } else
+                return format("%s = %s.int16();\n", argumentName, valueInName);
         } else if (int.class.equals(argumentType)) {
-            if (numericConversionClass != null && IntConverter.class.isAssignableFrom(numericConversionClass)) {
+            if (numericConversionClass != null && hasInstance(numericConversionClass)) {
+                return format("%s = (int) %s.INSTANCE.parse(%s.text());\n", argumentName, numericConversionClass.getName(), valueInName);
+
+            } else if (numericConversionClass != null && LongConverter.class.isAssignableFrom(numericConversionClass)) {
+                numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);\n",
+                        numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
+
+                return format("%s = (int) %sConverter.parse(%s.text());\n", argumentName, argumentName, valueInName);
+            } else if (numericConversionClass != null && IntConverter.class.isAssignableFrom(numericConversionClass)) {
                 numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);\n",
                         numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
 
@@ -605,13 +637,17 @@ public class GenerateMethodReader {
             } else
                 return format("%s = %s.int32();\n", argumentName, valueInName);
         } else if (long.class.equals(argumentType)) {
-            if (numericConversionClass != null && LongConverter.class.isAssignableFrom(numericConversionClass)) {
+            if (numericConversionClass != null && hasInstance(numericConversionClass)) {
+                return format("%s = %s.INSTANCE.parse(%s.text());\n", argumentName, numericConversionClass.getName(), valueInName);
+
+            } else if (numericConversionClass != null && LongConverter.class.isAssignableFrom(numericConversionClass)) {
                 numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);\n",
                         numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
 
                 return format("%s = %sConverter.parse(%s.text());\n", argumentName, argumentName, valueInName);
-            } else
+            } else {
                 return format("%s = %s.int64();\n", argumentName, valueInName);
+            }
         } else if (float.class.equals(argumentType)) {
             return format("%s = %s.float32();\n", argumentName, valueInName);
         } else if (double.class.equals(argumentType)) {
@@ -621,6 +657,15 @@ public class GenerateMethodReader {
         } else {
             final String typeName = argumentType.getCanonicalName();
             return format("%s = %s.object(checkRecycle(%s), %s.class);\n", argumentName, valueInName, argumentName, typeName);
+        }
+    }
+
+    static boolean hasInstance(Class<?> aClass) {
+        try {
+            aClass.getField("INSTANCE");
+            return true;
+        } catch (NoSuchFieldException e) {
+            return false;
         }
     }
 

@@ -197,4 +197,9 @@ public interface WireCommon {
      * @return Is this a binary protocol
      */
     boolean isBinary();
+
+    /**
+     * Reset the state of the wire
+     */
+    void reset();
 }
