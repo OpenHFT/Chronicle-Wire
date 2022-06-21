@@ -130,6 +130,19 @@ public class TextWireTest extends WireTestCommon {
     }
 
     @Test
+    public void testCommentAfterString() {
+        Map<String, Object> o = Marshallable.fromString("{\n" +
+                "  pattern: '@Symbol =~ \"[A-L].*\"', # quoted\n" +
+                "  policy: ROUND_ROBIN, # unquoted\n" +
+                "  routes: [ \"INT1\" ] # terminating list\n" +
+                "}");
+
+        assertEquals("ROUND_ROBIN", o.get("policy"));
+        assertEquals(Collections.singletonList("INT1"), o.get("routes"));
+        assertEquals("@Symbol =~ \"[A-L].*\"", o.get("pattern"));
+    }
+
+    @Test
     public void handleUnexpectedFields() {
         TwoFields tf = Marshallable.fromString("!" + TwoFields.class.getName() + " {" +
                 "a: 1,\n" +
