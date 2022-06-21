@@ -147,7 +147,9 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
 
     @Override
     public void consumePadding() {
-        wireAcquisition.acquireWire().consumePadding();
+        final Wire wire = wireAcquisition.acquireWire();
+        wire.commentListener(commentListener);
+        wire.consumePadding();
     }
 
     @NotNull

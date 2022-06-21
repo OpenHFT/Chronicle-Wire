@@ -83,6 +83,7 @@ public class TextWire extends AbstractWire implements Wire {
     static final Supplier<StopCharTester> END_OF_TEXT_ESCAPING = TextStopCharTesters.END_OF_TEXT::escaping;
     static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT::escaping;
     static final Supplier<StopCharsTester> END_EVENT_NAME_ESCAPING = TextStopCharsTesters.END_EVENT_NAME::escaping;
+    static final Bytes<?> META_DATA = Bytes.from("!!meta-data");
 
     static {
         IOTools.unmonitor(TYPE);
@@ -599,13 +600,20 @@ public class TextWire extends AbstractWire implements Wire {
         return "todo";
     }
 
+    // TODO Move to valueIn
     public void consumePadding(int commas) {
         for (; ; ) {
             int codePoint = peekCode();
             switch (codePoint) {
                 case '#':
-                    //noinspection StatementWithEmptyBody
-                    while (notNewLine(readCode())) ;
+                    readCode();
+                    while (peekCode() == ' ')
+                        readCode();
+                    final StringBuilder sb = WireInternal.acquireAnotherStringBuilder(this.sb);
+                    for (int ch; notNewLine(ch = readCode()); )
+                        sb.append((char) ch);
+                    if (!valueIn.consumeAny)
+                        commentListener.accept(sb);
                     this.lineStart = bytes.readPosition();
                     break;
                 case ',':
@@ -1204,13 +1212,23 @@ public class TextWire extends AbstractWire implements Wire {
 
     @Override
     public void reset() {
+        writeContext.reset();
+        readContext.reset();
         sb.setLength(0);
         lineStart = 0;
         valueIn.resetState();
         valueOut.resetState();
-        writeContext.reset();
-        readContext.reset();
         bytes.clear();
+    }
+
+    @Override
+    public boolean hasMetaDataPrefix() {
+        if (bytes.startsWith(META_DATA)
+                && bytes.peekUnsignedByte(bytes.readPosition() + 11) <= ' ') {
+            bytes.readSkip(12);
+            return true;
+        }
+        return false;
     }
 
     enum NoObject {NO_OBJECT}
@@ -1261,10 +1279,7 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         protected void trimWhiteSpace() {
-            // remove multiple new lines
-            long wp = bytes.writePosition();
-            if (bytes.peekUnsignedByte(wp - 1) == '\n' && bytes.peekUnsignedByte(wp - 2) == '\n')
-                bytes.writeSkip(-1);
+            BytesUtil.combineDoubleNewline(bytes);
         }
 
         @Override
@@ -1284,6 +1299,7 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         protected void indent() {
+            BytesUtil.combineDoubleNewline(bytes);
             for (int i = 0; i < indentation; i++) {
                 bytes.writeUnsignedShort(' ' * 257);
             }
@@ -1300,6 +1316,7 @@ public class TextWire extends AbstractWire implements Wire {
             } else {
                 sep = leaf ? COMMA_SPACE : COMMA_NEW_LINE;
             }
+            BytesUtil.combineDoubleNewline(bytes);
         }
 
         @NotNull
@@ -1965,6 +1982,7 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         public void endBlock(boolean leaf, char c) {
+            BytesUtil.combineDoubleNewline(bytes);
             bytes.writeUnsignedByte(c);
             sep = leaf ? COMMA_SPACE : COMMA_NEW_LINE;
         }
@@ -2097,6 +2115,7 @@ public class TextWire extends AbstractWire implements Wire {
             } else {
                 prependSeparator();
             }
+            BytesUtil.combineDoubleNewline(bytes);
             bytes.writeUnsignedByte(object instanceof Externalizable ? ']' : '}');
             if (popSep != null)
                 sep = popSep;
@@ -2235,6 +2254,7 @@ public class TextWire extends AbstractWire implements Wire {
     class TextValueIn implements ValueIn {
         final ValueInStack stack = new ValueInStack();
         int sequenceLimit = 0;
+        private boolean consumeAny;
 
         @Override
         public void resetState() {
@@ -2561,10 +2581,12 @@ public class TextWire extends AbstractWire implements Wire {
 
         protected long readLengthMarshallable() {
             long start = bytes.readPosition();
+            this.consumeAny = true;
             try {
                 consumeAny();
                 return bytes.readPosition() - start;
             } finally {
+                this.consumeAny = false;
                 bytes.readPosition(start);
             }
         }

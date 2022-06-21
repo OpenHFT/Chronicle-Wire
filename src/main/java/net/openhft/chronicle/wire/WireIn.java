@@ -28,6 +28,7 @@ import java.io.StreamCorruptedException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 
 /**
  * The defines the stand interface for writing and reading sequentially to/from a Bytes stream.
@@ -182,6 +183,8 @@ public interface WireIn extends WireCommon, MarshallableIn {
 
     void consumePadding();
 
+    void commentListener(Consumer<CharSequence> commentListener);
+
     /**
      * Consume a header if one is available.
      *
@@ -224,6 +227,10 @@ public interface WireIn extends WireCommon, MarshallableIn {
     }
 
     default boolean hintReadInputOrder() {
+        return false;
+    }
+
+    default boolean hasMetaDataPrefix() {
         return false;
     }
 

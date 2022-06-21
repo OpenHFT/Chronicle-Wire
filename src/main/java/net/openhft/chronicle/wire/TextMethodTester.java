@@ -47,17 +47,18 @@ import java.util.function.Function;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TextMethodTester<T> implements YamlTester {
+    private static final boolean TESTS_INCLUDE_COMMENTS = Jvm.getBoolean("tests.include.comments", true);
+
     private static final boolean REGRESS_TESTS = Jvm.getBoolean("regress.tests");
     private final String input;
     private final Class<T> outputClass;
     private final String output;
     private final BiFunction<T, UpdateInterceptor, Object> componentFunction;
+    private final boolean TEXT_AS_YAML = Jvm.getBoolean("wire.testAsYaml");
     private BiConsumer<MethodReader, T> exceptionHandlerSetup;
     private String genericEvent;
-
     private List<String> setups;
     private Function<String, String> afterRun;
-
     private String expected;
     private String actual;
     private String[] retainLast;
@@ -176,7 +177,6 @@ public class TextMethodTester<T> implements YamlTester {
             try {
                 final Bytes<?> bytes = Bytes.wrapForRead(IOTools.readFile(outputClass, setup));
                 Wire wire0 = createWire(bytes);
-
                 MethodReader reader0 = wire0.methodReaderBuilder()
                         .methodReaderInterceptorReturns(methodReaderInterceptorReturns)
                         .warnMissing(true)
@@ -194,6 +194,8 @@ public class TextMethodTester<T> implements YamlTester {
             ((PostSetup) component).postSetup();
 
         Wire wire = createWire(Bytes.wrapForRead(IOTools.readFile(outputClass, input)));
+        if (TESTS_INCLUDE_COMMENTS)
+            wire.commentListener(wireOut::writeComment);
 
         // expected
         if (retainLast == null) {
@@ -313,7 +315,9 @@ public class TextMethodTester<T> implements YamlTester {
     }
 
     protected Wire createWire(Bytes<?> bytes) {
-        return new TextWire(bytes).useTextDocuments().addTimeStamps(true);
+        return TEXT_AS_YAML
+                ? new YamlWire(bytes).useTextDocuments().addTimeStamps(true)
+                : new TextWire(bytes).useTextDocuments().addTimeStamps(true);
     }
 
     @NotNull

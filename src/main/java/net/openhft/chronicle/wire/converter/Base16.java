@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
-@LongConversion(Base64.class)
-public @interface Base64 {
-    LongConverter INSTANCE = new PowerOfTwoLongConverter(".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_");
+@LongConversion(Base16.class)
+public @interface Base16 {
+    LongConverter INSTANCE = new PowerOfTwoLongConverter("0123456789abcdef");
 }

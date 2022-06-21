@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+@Deprecated(/* to be remove din x.25 */)
 public class WatermarkedMicroTimestampLongConverter extends MicroTimestampLongConverter {
     @Override
     public long parse(CharSequence text) {

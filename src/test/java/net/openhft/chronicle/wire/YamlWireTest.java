@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.NoBytesStore;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.TextWireTest.ABCD;
@@ -59,6 +60,8 @@ import static org.junit.Assert.*;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class YamlWireTest extends WireTestCommon {
 
+    static Wire wire = Wire.newYamlWireOnHeap();
+
     @Test
     public void comment() {
         @NotNull Wire wire = createWire();
@@ -77,8 +80,6 @@ public class YamlWireTest extends WireTestCommon {
                 .object(Object.class);
         assertEquals(0, sb.length());
     }
-
-    static Wire wire = Wire.newYamlWireOnHeap();
 
     @Ignore("TODO FIX")
     @Test
@@ -965,7 +966,7 @@ public class YamlWireTest extends WireTestCommon {
             assertEquals("[\n" +
                     "  { token: STREAM_START, indent: -1, keys: !!null \"\" },\n" +
                     "  { token: DIRECTIVES_END, indent: -1, keys: !!null \"\" },\n" +
-                    "  { token: MAPPING_START, indent: 0, keys: !net.openhft.chronicle.wire.YamlKeys { count: 2, offsets: [ 10, 41, 0, 0, 0, 0, 0 ]  }}\n" +
+                    "  { token: MAPPING_START, indent: 0, keys: !net.openhft.chronicle.wire.YamlKeys { count: 2, offsets: [ 10, 41, 0, 0, 0, 0, 0 ]  } }\n" +
                     "]\n", yw.dumpContext());
             assertEquals("{c=lo, d=xyz}", "" + yw.read("B").object());
             assertEquals("{b=1234, c=hi, d=abc}", "" + yw.read("A").object());
@@ -984,7 +985,7 @@ public class YamlWireTest extends WireTestCommon {
             assertEquals("[\n" +
                     "  { token: STREAM_START, indent: -1, keys: !!null \"\" },\n" +
                     "  { token: DIRECTIVES_END, indent: -1, keys: !!null \"\" },\n" +
-                    "  { token: MAPPING_START, indent: 0, keys: !net.openhft.chronicle.wire.YamlKeys { count: 4, offsets: [ 2, 8, 14, 32, 0, 0, 0 ]  }}\n" +
+                    "  { token: MAPPING_START, indent: 0, keys: !net.openhft.chronicle.wire.YamlKeys { count: 4, offsets: [ 2, 8, 14, 32, 0, 0, 0 ]  } }\n" +
                     "]\n", yw.dumpContext());
             assertEquals("AA", "" + yw.read("b").object());
             assertEquals("{}", "" + yw.read("c").object());
@@ -1761,6 +1762,64 @@ public class YamlWireTest extends WireTestCommon {
         final double d2 = wire2.getValueIn().float64();
 
         Assert.assertEquals(d2, d, 0);
+    }
+
+    @Test
+    public void readsComment() {
+        StringBuilder sb = new StringBuilder();
+        Wire wire = createWire();
+        try (DocumentContext dc = wire.writingDocument()) {
+            wire.writeComment("one");
+            wire.writeEventId("dto", 1);
+            wire.writeComment("two");
+            wire.getValueOut().object(new BinaryWireTest.DTO("text"));
+            wire.writeComment("three");
+            wire.commentListener(cs ->
+                    sb.append(cs).append("\n"));
+        }
+        final MethodReader reader = wire.methodReader((BinaryWireTest.IDTO) dto -> sb.append("dto: " + dto + "\n"));
+        assertTrue(reader.readOne());
+        assertFalse(reader.readOne());
+        assertEquals("" +
+                "one\n" +
+                "two\n" +
+                "dto: !net.openhft.chronicle.wire.BinaryWireTest$DTO {\n" +
+                "  text: text\n" +
+                "}\n" +
+                "\n" +
+                "three\n", sb.toString());
+    }
+
+    @Test
+    public void readMetaData() {
+        wire.bytes().append("" +
+                "---\n" +
+                "!!meta-data\n" +
+                "hello-world\n" +
+                "...\n" +
+                "---\n" +
+                "!!data\n" +
+                "hello-world\n" +
+                "...\n" +
+                "---\n" +
+                "!!meta-data\n" +
+                "dto: {\n" +
+                "  text: hello-world\n" +
+                "}\n" +
+                "...\n" +
+                "---\n" +
+                "!!data\n" +
+                "dto: {\n" +
+                "  text: hello-world\n" +
+                "}\n" +
+                "...\n" +
+                "");
+        for (int i = 0; i < 4; i++) {
+            try (DocumentContext dc = wire.readingDocument()) {
+                final boolean metaData = i % 2 == 0;
+                assertEquals("i: " + i, metaData, dc.isMetaData());
+            }
+        }
     }
 
     enum BWKey implements WireKey {

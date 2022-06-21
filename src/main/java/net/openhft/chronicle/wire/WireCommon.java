@@ -140,17 +140,19 @@ public interface WireCommon {
     void parent(Object parent);
 
     /**
-     * Used to check that the wire is being used by only one thread
+     * Doesn't do anything
      *
-     * @return true always, so it can be used in an assert line
+     * @return true
      */
+    @Deprecated(/* to be removed in x.24 */)
     boolean startUse();
 
     /**
-     * Check the Wire was not used by another thread.
+     * Doesn't do anything
      *
      * @return true always, so it can be used in an assert line
      */
+    @Deprecated(/* to be removed in x.24 */)
     boolean endUse();
 
     /**

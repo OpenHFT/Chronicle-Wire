@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 
 public class TextWriteDocumentContext implements WriteDocumentContext {
@@ -68,6 +69,7 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         if (!(wire() instanceof JSONWire)) {
             if (l < 1 || bytes.peekUnsignedByte(l - 1) >= ' ')
                 bytes.append('\n');
+            BytesUtil.combineDoubleNewline(bytes);
             bytes.append("...\n");
         }
         wire().getValueOut().resetBetweenDocuments();

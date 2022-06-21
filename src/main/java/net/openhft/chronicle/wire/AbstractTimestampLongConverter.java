@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
  * <p>
  * Parsing of ISO dates with or without timestamps is supported. When an ISO date
  * is read with no timezone, it is assumed to be in the converter's zone.
+ *
  */
 public abstract class AbstractTimestampLongConverter implements LongConverter {
     public static final ZoneId UTC = ZoneId.of("UTC");

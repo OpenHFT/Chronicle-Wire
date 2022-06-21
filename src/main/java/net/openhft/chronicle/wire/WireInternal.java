@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -127,6 +128,8 @@ public enum WireInternal {
             int len0 = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
             bytes.writeOrderedInt(len0);
             writer.writeMarshallable(wireOut);
+            if (!wireOut.isBinary())
+                BytesUtil.combineDoubleNewline(bytes);
             long position1 = bytes.writePosition();
             if (wireOut.usePadding()) {
                 int bytesToSkip = (int) ((position - position1) & 0x3);
