@@ -1,4 +1,4 @@
-package net.openhft.chronicle.wire.extractor;
+package net.openhft.chronicle.wire.domestic.extractor;
 
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.wire.Wire;
@@ -28,14 +28,14 @@ public interface DocumentExtractor<T> {
     T extract(@NotNull Wire wire, @NonNegative long index);
 
     /**
-     * Creates and returns a new ExcerptExtractor consisting of the results (of type R) of applying the provided
-     * {@code mapper } to the elements of this ExcerptExtractor.
+     * Creates and returns a new DocumentExtractor consisting of the results (of type R) of applying the provided
+     * {@code mapper } to the elements of this DocumentExtractor.
      * <p>
      * Values mapped to {@code null} are removed.
      *
      * @param mapper to apply
      * @param <R>    type to map to
-     * @return a new mapped ExcerptExtractor
+     * @return a new mapped DocumentExtractor
      * @throws NullPointerException if the provided {@code mapper} is {@code null}
      */
     default <R> DocumentExtractor<R> map(@NotNull final Function<? super T, ? extends R> mapper) {
@@ -50,13 +50,13 @@ public interface DocumentExtractor<T> {
     }
 
     /**
-     * Creates and returns a new ToLongExcerptExtractor consisting of applying the provided
-     * {@code mapper } to the elements of this ExcerptExtractor.
+     * Creates and returns a new ToLongDocumentExtractor consisting of applying the provided
+     * {@code mapper } to the elements of this DocumentExtractor.
      * <p>
      * Values mapped to {@link Long#MIN_VALUE } are removed.
      *
      * @param mapper to apply
-     * @return a new mapped ExcerptExtractor
+     * @return a new mapped DocumentExtractor
      * @throws NullPointerException if the provided {@code mapper} is {@code null}
      */
     default ToLongDocumentExtractor mapToLong(@NotNull final ToLongFunction<? super T> mapper) {
@@ -71,12 +71,12 @@ public interface DocumentExtractor<T> {
     }
 
     /**
-     * Creates and returns a new ExcerptExtractor consisting of the elements of this ExcerptExtractor that match
+     * Creates and returns a new DocumentExtractor consisting of the elements of this DocumentExtractor that match
      * the provided {@code predicate}.
      *
      * @param predicate to apply to each element to determine if it
      *                  should be included
-     * @return a ExcerptExtractor consisting of the elements of this ExcerptExtractor that match
+     * @return a DocumentExtractor consisting of the elements of this DocumentExtractor that match
      * @throws NullPointerException if the provided {@code predicate} is {@code null}
      */
     default DocumentExtractor<T> filter(@NotNull final Predicate<? super T> predicate) {
@@ -99,7 +99,7 @@ public interface DocumentExtractor<T> {
     // peek
 
     /**
-     * Generic builder that can be used to build ExcerptExtractor objects of common types.
+     * Generic builder that can be used to build DocumentExtractor objects of common types.
      *
      * @param <E> element type to extract
      */
@@ -123,7 +123,7 @@ public interface DocumentExtractor<T> {
         /**
          * Specifies that only one reuse object, confined to the first using thread, shall be reused.
          * <p>
-         * The ExcerptExtractor is guaranteed to prevent accidental concurrent thread access by throwing
+         * The DocumentExtractor is guaranteed to prevent accidental concurrent thread access by throwing
          * an {@link IllegalStateException} if accessed by a foreign thread.
          *
          * @return this Builder
@@ -153,7 +153,7 @@ public interface DocumentExtractor<T> {
     }
 
     /**
-     * Creates and returns a new Builder that can be used to create ExcerptExtractor objects
+     * Creates and returns a new Builder that can be used to create DocumentExtractor objects
      * of the provided {@code elementType}.
      *
      * @param elementType type of element to extract

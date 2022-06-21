@@ -2,14 +2,14 @@ package net.openhft.chronicle.wire.domestic.streaming.reduction;
 
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.WireTestCommon;
-import net.openhft.chronicle.wire.reduction.Reduction;
+import net.openhft.chronicle.wire.domestic.reduction.Reduction;
 import org.junit.Test;
 
 import java.util.function.LongSupplier;
 
 import static net.openhft.chronicle.wire.domestic.streaming.CreateUtil.createThenValueOuts;
-import static net.openhft.chronicle.wire.reduction.Reductions.reducingLong;
-import static net.openhft.chronicle.wire.extractor.ToLongDocumentExtractor.extractingIndex;
+import static net.openhft.chronicle.wire.domestic.reduction.Reductions.reducingLong;
+import static net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor.extractingIndex;
 import static org.junit.Assert.assertEquals;
 
 public class LastIndexSeenTest extends WireTestCommon {

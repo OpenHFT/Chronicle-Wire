@@ -5,8 +5,8 @@ import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
-import net.openhft.chronicle.wire.stream.Streams;
-import net.openhft.chronicle.wire.extractor.ToLongDocumentExtractor;
+import net.openhft.chronicle.wire.domestic.stream.Streams;
+import net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor;
 import net.openhft.chronicle.wire.domestic.streaming.reduction.MarketData;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Disabled;
@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static net.openhft.chronicle.wire.domestic.streaming.CreateUtil.*;
-import static net.openhft.chronicle.wire.extractor.DocumentExtractor.builder;
+import static net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor.builder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -236,6 +236,7 @@ final class StreamsDemoTest {
 
     }
 
+    @Disabled("Does not work properly since net.openhft.chronicle.bytes.NativeBytes is not thread-safe")
     @Test
     void streamParallel() {
         final int no = 100_000;

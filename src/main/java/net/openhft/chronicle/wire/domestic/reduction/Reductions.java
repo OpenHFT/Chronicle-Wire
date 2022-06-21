@@ -1,9 +1,9 @@
-package net.openhft.chronicle.wire.reduction;
+package net.openhft.chronicle.wire.domestic.reduction;
 
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
-import net.openhft.chronicle.wire.extractor.ToDoubleDocumentExtractor;
-import net.openhft.chronicle.wire.extractor.ToLongDocumentExtractor;
+import net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor;
+import net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;

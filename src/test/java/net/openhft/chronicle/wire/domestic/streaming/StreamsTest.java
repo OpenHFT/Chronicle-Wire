@@ -2,7 +2,7 @@ package net.openhft.chronicle.wire.domestic.streaming;
 
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.Wire;
-import net.openhft.chronicle.wire.stream.Streams;
+import net.openhft.chronicle.wire.domestic.stream.Streams;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;

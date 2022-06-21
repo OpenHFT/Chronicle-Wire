@@ -6,7 +6,7 @@ import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.wire.ExcerptListener;
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.internal.reduction.ReductionUtil;
-import net.openhft.chronicle.wire.AutoTailers;
+import net.openhft.chronicle.wire.domestic.AutoTailers;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;

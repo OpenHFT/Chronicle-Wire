@@ -3,15 +3,15 @@ package net.openhft.chronicle.wire.domestic.streaming.reduction;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.domestic.streaming.CreateUtil;
-import net.openhft.chronicle.wire.reduction.Reduction;
-import net.openhft.chronicle.wire.reduction.Reductions;
+import net.openhft.chronicle.wire.domestic.reduction.Reduction;
+import net.openhft.chronicle.wire.domestic.reduction.Reductions;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongSupplier;
 import java.util.stream.Collector;
 
-import static net.openhft.chronicle.wire.reduction.ConcurrentCollectors.throwingMerger;
+import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.throwingMerger;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CountAccumulationTest extends WireTestCommon {

@@ -1,12 +1,12 @@
-package net.openhft.chronicle.wire.reduction;
+package net.openhft.chronicle.wire.domestic.reduction;
 
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.wire.ExcerptListener;
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.Wire;
-import net.openhft.chronicle.wire.extractor.DocumentExtractor;
-import net.openhft.chronicle.wire.extractor.ToDoubleDocumentExtractor;
-import net.openhft.chronicle.wire.extractor.ToLongDocumentExtractor;
+import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
+import net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor;
+import net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor;
 import net.openhft.chronicle.wire.internal.reduction.ReductionUtil;
 import org.jetbrains.annotations.NotNull;
 

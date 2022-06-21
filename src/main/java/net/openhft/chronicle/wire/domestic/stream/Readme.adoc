@@ -20,7 +20,7 @@ Here is an example how a Chronicle Queue that contains `MarketData` objects can 
 ----
 String s = Streams.of(
                queue.createTailer(),                                <1>
-               ExcerptExtractor.builder(MarketData.class).build()   <2>
+               DocumentExtractor.builder(MarketData.class).build()  <2>
          )
         .skip(100)
         .limit(50)
@@ -28,11 +28,11 @@ String s = Streams.of(
         .collect(Collectors.joining(","));
 ----
 
-<1> The `ExceprtTailer` to use when reading excerpts from the Queue.
+<1> The `DocumentExtractor` to use when reading excerpts from the Queue.
 The tailer can be set to a certain configuration and/or position before being submitted to the method above.
 
-<2> The `ExcerptExtractor` used to convert an excerpt to a Java object.
-In the example above, an extractor of type `MarketData` is used which is obtained via a builder function `ExcerptExtractor.builder()`.
+<2> The `DocumentExtractor` used to convert an excerpt to a Java object.
+In the example above, an extractor of type `MarketData` is used which is obtained via a builder function `DocumentExtractor.builder()`.
 
 The `Stream` above shows an example of a pagination service where the third page of events from the Queue is shown (each page has 50 rows).
 Once the `Stream` is created, it behaves like any `Stream` and can take advantage of the whole `Stream` ecosystem.
@@ -80,7 +80,7 @@ This example is using a `LongStream` eliminating object creation:
 ----
 long last = Streams.ofLong(
                 q.createTailer(),
-                ToLongExcerptExtractor.extractingIndex() <1>
+                ToLongDocumentExtractor.extractingIndex() <1>
          )
         .max()
         .orElse(-1);                                     <2>
@@ -103,7 +103,7 @@ LongSummaryStatistics stat = Streams.ofLong(
         .summaryStatistics();
 ----
 
-<1> Custom `ToLongExcerptExtractor` lambda.
+<1> Custom `ToLongDocumentExtractor` lambda.
 
 ==== Stream: Objects of a Certain Type
 
@@ -114,7 +114,7 @@ This example shows an example of creating a `Stream<MarketData>`.
 Stream<MarketData> stream = Streams.of(queue.createTailer(), builder(MarketData.class).build());
 ----
 
-The `ExcerptExtractor.builder(Class<E> type).build` construct is equivalent to:
+The `DocumentExtractor.builder(Class<T> type).build()` construct is equivalent to:
 
 [source,java]
 ----
@@ -155,7 +155,7 @@ List<News> newsList = Streams.of(
             .collect(toList());
 ----
 
-<1> Creates an `ExcerptExtractor` that will extract `News` messages that was previously written to the queue using a method writer's `Messages::news` method.
+<1> Creates a `DocumentExtractor` that will extract `News` messages that was previously written to the queue using a method writer's `Messages::news` method.
 
 <2> Standard `Stream` operation that will return a `Stream` sorted in `symbol` order.
 
@@ -188,7 +188,7 @@ This chapter contains tips for using the Stream Bridge feature.
 
 ==== Object Reuse
 
-It is possible to create an `ExcerprExtractor` that is reusing objects.
+It is possible to create a `DocumentExtractor` that is reusing objects.
 Care must be taken if such an extractor is used so that, for example, reused objects are not exposed and/or not stored internally in the Streams pipeline.
 If in doubt, make a copy or extract an immutable value from the object at hand.
 
@@ -275,6 +275,6 @@ Once these objects are reclaimed by the Garbage Collector, jitter may be incurre
 == To be Documented or todo
 
 * Parallel streams (Thread-safe ExcerptTailer)
-* ExcerptExtractor.ofType() error handling (what if there is another message on the queue?)
+* DocumentExtractor.ofType() error handling (what if there is another message on the queue?)
 * Extractors' use of `null` and `Long.MIN_VALUE`
 * Maybe provide a Supplier<ExcerptTailer> so that streams can close the tailer after use?

@@ -20,16 +20,16 @@ Here is an example how a `Reduction` that can be attached to a Chronicle Queue c
 
 [source,java]
 ----
-Reduction<Map<String, MarketData>> latest = Reductions.of(
-        ExcerptExtractor.builder(MarketData.class)
-                .withMethod(MarketDataProvider.class, MarketDataProvider::marketData)
-                .build(),             <1>
-        Collectors.toConcurrentMap(   <2>
-                MarketData::symbol,   <3>
-                Function.identity(),  <4>
-                replacingMerger()     <5>
-        )
-    );
+Reduction<Map<String, MarketData>> latest = Reduction.of(
+                DocumentExtractor.builder(MarketData.class)
+                        .withMethod(MarketDataProvider.class, MarketDataProvider::marketData)
+                        .build())                 <1>
+        .collecting(Collectors.toConcurrentMap(   <2>
+                MarketData::symbol,               <3>
+                Function.identity(),              <4>
+                replacingMerger())                <5>
+        );
+
 
 ChronicleQueue q = SingleChronicleQueueBuilder.builder()
                 .path("market-data-queue")
@@ -40,7 +40,7 @@ MarketData latestAppleMarketData = latest.reduction().get("AAPL");  <7>
 
 ----
 
-<1> `ExcertpExtractor` that will extract objects of type `MarketData` previously written via a method writer.
+<1> `DocumentExtractor` that will extract objects of type `MarketData` previously written via a method writer.
 <2> A standard Java Collector which needs to be concurrent.
 <3> Key extractor that will extract keys from `MarketData` objects.
 <4> Value extractor (in this case, it will only pass through objects).
@@ -50,7 +50,7 @@ MarketData latestAppleMarketData = latest.reduction().get("AAPL");  <7>
 
 The `Reduction` above shows an example of a latest-seen service where the latest `MarketData` per symbol (key) is maintained.
 
-The `Reductions.of()` takes an `ExcerptExtractor` that is used to extract objects from the queue and a standard Java Collector (which needs to be concurrent). The Collector shown above operates on Maps and, as described above, will map objects of type `MarketData` using `MarketData::symbol` to extract keys and `Function.identity()` to extract values.
+The `Reductions.of()` takes an `DocumentExtractor` that is used to extract objects from the queue and a standard Java Collector (which needs to be concurrent). The Collector shown above operates on Maps and, as described above, will map objects of type `MarketData` using `MarketData::symbol` to extract keys and `Function.identity()` to extract values.
 In case there is already an old value associated with a particular key, the provided merger `Reductions.replacingMerger()` is applied (which will replace the old existing value for a key with the new value).
 
 Once a `Reduction` is created, it can accept an `ExcerptTailer` to boostrap from an existing queue.
@@ -135,8 +135,9 @@ Maintains a List of all MarketData elements encountered in a List. This should b
 
 [source,java]
 ----
-Reduction<List<MarketData>> listing =
-        Reductions.of(builder(MarketData.class).build(), ConcurrentCollectors.toConcurrentList()); <1>
+        Reduction<List<MarketData>> listing =
+                Reduction.of(builder(MarketData.class).build())
+                        .collecting(ConcurrentCollectors.toConcurrentList()); <1>
 ----
 <1> Maintains a List of all MarketData elements encountered in a List.
 
@@ -146,21 +147,21 @@ Maintains a Set of all symbols that starts with an "S" in MarketData objects.
 
 [source,java]
 ----
-Reduction<Set<String>> symbolsStartingWithS = Reductions.of(
-       builder(MarketData.class).withReusing(MarketData::new).build() <1>
-                .map(MarketData::symbol)                              <2>
-                .filter(s -> s.startsWith("S")),                      <3>
-        ConcurrentCollectors.toConcurrentSet());                      <4>
+Reduction<Set<String>> symbolsStartingWithS = Reduction.of(
+                builder(MarketData.class).withReusing(MarketData::new).build()  <1>
+                        .map(MarketData::symbol)                                <2>
+                        .filter(s -> s.startsWith("S")))                        <3>
+        .collecting(ConcurrentCollectors.toConcurrentSet());                    <4>
 ----
 
-<1> Extract MarketData objects.
-<2> Map ExcerptExtractor<MarketData> to ExcerptExtractor<String> extracting symbols.
+<1> Extract `MarketData` objects.
+<2> Map DocumentExtractor<MarketData> to DocumentExtractor<String> extracting symbols.
 <3> Retain only symbols starting with "S".
 <4> Collect to a concurrent Set.
 
 ==== Set of Elements with Object Reuse
 
-Maintains a Set of all symbols in MarketData objects reusing intermediate MarketData objects.
+Maintains a Set of all symbols in MarketData objects reusing intermediate `MarketData` objects.
 
 [source,java]
 ----
@@ -169,13 +170,13 @@ Reduction<Set<String>> symbolsStartingWithS =
                 builder(MarketData.class)                       <1>
                     .withReusing(MarketData::new)               <2>
                     .build()
-                .map(MarketData::symbol),                       <3>
-               ConcurrentCollectors.toConcurrentSet());         <4>
+                .map(MarketData::symbol))                       <3>
+        .collecting(ConcurrentCollectors.toConcurrentSet());    <4>
 ----
 
-<1> Extract MarketData objects.
+<1> Extract `MarketData` objects.
 <2> Provide a constructor used to create object(s) to reuse.
-<3> Map ExcerptExtractor<MarketData> to ExcerptExtractor<String> extracting symbols.
+<3> Map DocumentExtractor<MarketData> to DocumentExtractor<String> extracting symbols.
 <4> Collect to a concurrent Set.
 
 NOTE: The reuse of object is safe in this case as immutable values are derived directly from the reused object.
@@ -186,16 +187,15 @@ Maintains a Map of the latest MarketData message per symbol where the messages w
 
 [source,java]
 ----
-Reduction<Map<String, MarketData>> latest = Reductions.of(
-        ExcerptExtractor.builder(MarketData.class)
-                .withMethod(MarketDataProvider.class, MarketDataProvider::marketData)
-                .build(),
-        Collectors.toConcurrentMap(
+Reduction<Map<String, MarketData>> latest = Reduction.of(
+                DocumentExtractor.builder(MarketData.class)
+                        .withMethod(MarketDataProvider.class, MarketDataProvider::marketData)
+                        .build())
+        .collecting(Collectors.toConcurrentMap(
                 MarketData::symbol,
                 Function.identity(),
-                replacingMerger()
-        )
-);
+                replacingMerger())
+        );
 ...
 MarketData latestAppleMarketData = latest.reduction().get("AAPL");
 
@@ -210,18 +210,18 @@ Many collectors can be used in combination with a "protective coat" around the a
 
 [source,java]
 ----
-Reduction<Map<String, MarketData>> latestProtected = Reductions.of(
-        ExcerptExtractor.builder(MarketData.class)
-                .withMethod(MarketDataProvider.class, MarketDataProvider::marketData)
-                .build(),
-        Collectors.collectingAndThen(
-                Collectors.toConcurrentMap(
-                        MarketData::symbol,
-                        Function.identity(),
-                        replacingMerger()),
-                Collections::unmodifiableMap
-        )
-);
+Reduction<Map<String, MarketData>> latestProtected = Reduction.of(
+                DocumentExtractor.builder(MarketData.class)
+                        .withMethod(MarketDataProvider.class, MarketDataProvider::marketData)
+                        .build())
+        .collecting(Collectors.collectingAndThen(
+                        Collectors.toConcurrentMap(
+                                MarketData::symbol,
+                                Function.identity(),
+                                replacingMerger()),
+                        Collections::unmodifiableMap
+                )
+        );
 ----
 
 
@@ -229,15 +229,15 @@ Reduction<Map<String, MarketData>> latestProtected = Reductions.of(
 As Collectors can be composed to an arbitrary depth, more complex reductions can easily be constructed. As long as the first-level collector is concurrent, the lower level ones need not be concurrent. Here is an example:
 [source,java]
 ----
-Reduction<ConcurrentMap<String, DoubleSummaryStatistics>> stats = Reductions.of(
-        ExcerptExtractor.builder(MarketData.class)
-                .withMethod(MarketDataProvider.class, MarketDataProvider::marketData)
-                .build(),
-        groupingByConcurrent(
-                MarketData::symbol,
-                summarizingDouble(MarketData::last)
-        )
-);
+Reduction<ConcurrentMap<String, DoubleSummaryStatistics>> stats = Reduction.of(
+                DocumentExtractor.builder(MarketData.class)
+                        .withMethod(MarketDataProvider.class, MarketDataProvider::marketData)
+                        .build())
+        .collecting(groupingByConcurrent(
+                        MarketData::symbol,
+                        summarizingDouble(MarketData::last)
+                )
+        );
 ----
 This will maintain statistics per symbol on `MarketData::last` using vanilla Java classes (creates objects).
 
@@ -274,10 +274,10 @@ SingleChronicleQueue queue = SingleChronicleQueueBuilder.single("my-queue")
                 .build();
 
 Reduction<Map<String, MarketData>> queueBackedMapping = Reductions.of(
-        ExcerptExtractor.builder(MarketData.class)
+        DocumentExtractor.builder(MarketData.class)
                 .withMethod(MarketDataProvider.class, MarketDataProvider::marketData)
-                .build(),
-        Collectors.collectingAndThen(
+                .build())
+        .collecting(Collectors.collectingAndThen(
                 Collectors.toConcurrentMap(
                         MarketData::symbol,
                         Function.identity(),
@@ -319,8 +319,8 @@ net.openhft.chronicle.threads.Threads.shutdown(executorService);                
 == To be Documented or todo
 
 * Configuration Reductions (concrete classes)
-* ExcerptExtractor.ofType() error handling (what if there is another message on the queue?)
+* DocumentExtractor.ofType() error handling (what if there is another message on the queue?)
 * Extractors' use of `null` and `Long.MIN_VALUE`
 * ConcurrentCollectors.* need not be transitively concurrent as this is handled by the first level
-* Reduction.of(ExcerptExtractor).collecting(Collector)
-* Reduction.of(ExcerptExtractor).reducing()
+* Reduction.of(DocumentExtractor).collecting(Collector)
+* Reduction.of(DocumentExtractor).reducing()

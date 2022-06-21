@@ -4,16 +4,16 @@ import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.domestic.streaming.CreateUtil;
-import net.openhft.chronicle.wire.reduction.Reduction;
+import net.openhft.chronicle.wire.domestic.reduction.Reduction;
 import org.junit.Test;
 
 import java.util.*;
 import java.util.function.Function;
 
 import static java.util.stream.Collectors.*;
-import static net.openhft.chronicle.wire.reduction.ConcurrentCollectors.replacingMerger;
-import static net.openhft.chronicle.wire.reduction.ConcurrentCollectors.toConcurrentSet;
-import static net.openhft.chronicle.wire.extractor.DocumentExtractor.builder;
+import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.replacingMerger;
+import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.toConcurrentSet;
+import static net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor.builder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LastMarketDataPerSymbolTest extends WireTestCommon {

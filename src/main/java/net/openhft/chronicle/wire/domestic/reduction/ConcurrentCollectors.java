@@ -1,4 +1,4 @@
-package net.openhft.chronicle.wire.reduction;
+package net.openhft.chronicle.wire.domestic.reduction;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

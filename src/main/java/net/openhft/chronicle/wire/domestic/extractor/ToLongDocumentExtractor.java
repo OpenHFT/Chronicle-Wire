@@ -1,4 +1,4 @@
-package net.openhft.chronicle.wire.extractor;
+package net.openhft.chronicle.wire.domestic.extractor;
 
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.wire.Wire;
@@ -22,7 +22,7 @@ public interface ToLongDocumentExtractor {
      * queue but of another type.
      * <p>
      * Extractors that must include {@link Long#MIN_VALUE} as a valid value must use other means of
-     * aggregating values (e.g. use an {@link DocumentExtractor ExcerptExtractor<Long> }.
+     * aggregating values (e.g. use an {@link DocumentExtractor DocumentExtractor<Long> }.
      *
      * @param wire  to use
      * @param index to use
@@ -31,13 +31,13 @@ public interface ToLongDocumentExtractor {
     long extractAsLong(@NotNull Wire wire, @NonNegative long index);
 
     /**
-     * Creates and returns a new ToLongExcerptExtractor consisting of the results (of type R) of applying the provided
-     * {@code mapper } to the elements of this ToLongExcerptExtractor.
+     * Creates and returns a new ToLongDocumentExtractor consisting of the results (of type R) of applying the provided
+     * {@code mapper } to the elements of this ToLongDocumentExtractor.
      * <p>
      * Values mapped to {@link Long#MIN_VALUE} are removed.
      *
      * @param mapper to apply
-     * @return a new mapped ToLongExcerptExtractor
+     * @return a new mapped ToLongDocumentExtractor
      * @throws NullPointerException if the provided {@code mapper} is {@code null}
      */
     default ToLongDocumentExtractor map(@NotNull final LongUnaryOperator mapper) {
@@ -52,13 +52,13 @@ public interface ToLongDocumentExtractor {
     }
 
     /**
-     * Creates and returns a new ExcerptExtractor consisting of applying the provided
-     * {@code mapper } to the elements of this ToLongExcerptExtractor.
+     * Creates and returns a new DocumentExtractor consisting of applying the provided
+     * {@code mapper } to the elements of this ToLongDocumentExtractor.
      * <p>
      * Values mapped to {@link Long#MIN_VALUE } are removed.
      *
      * @param mapper to apply
-     * @return a new mapped ExcerptExtractor
+     * @return a new mapped DocumentExtractor
      * @throws NullPointerException if the provided {@code mapper} is {@code null}
      */
     default <T> DocumentExtractor<T> mapToObj(@NotNull final LongFunction<? extends T> mapper) {
@@ -73,13 +73,13 @@ public interface ToLongDocumentExtractor {
     }
 
     /**
-     * Creates and returns a new ToDoubleExcerptExtractor consisting of applying the provided
-     * {@code mapper } to the elements of this ToLongExcerptExtractor.
+     * Creates and returns a new ToDoubleDocumentExtractor consisting of applying the provided
+     * {@code mapper } to the elements of this ToLongDocumentExtractor.
      * <p>
      * Values mapped to {@link Long#MIN_VALUE } are removed.
      *
      * @param mapper to apply
-     * @return a new mapped ToDoubleExcerptExtractor
+     * @return a new mapped ToDoubleDocumentExtractor
      * @throws NullPointerException if the provided {@code mapper} is {@code null}
      */
     default ToDoubleDocumentExtractor mapToDouble(@NotNull final LongToDoubleFunction mapper) {
@@ -94,12 +94,12 @@ public interface ToLongDocumentExtractor {
     }
 
     /**
-     * Creates and returns a new ToLongExcerptExtractor consisting of the elements of this ToLongExcerptExtractor
+     * Creates and returns a new ToLongDocumentExtractor consisting of the elements of this ToLongDocumentExtractor
      * that match the provided {@code predicate}.
      *
      * @param predicate to apply to each element to determine if it
      *                  should be included
-     * @return a ToLongExcerptExtractor consisting of the elements of this ToLongExcerptExtractor that match
+     * @return a ToLongDocumentExtractor consisting of the elements of this ToLongDocumentExtractor that match
      * @throws NullPointerException if the provided {@code predicate} is {@code null}
      */
     default ToLongDocumentExtractor filter(@NotNull final LongPredicate predicate) {

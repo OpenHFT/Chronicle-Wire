@@ -1,7 +1,7 @@
 package net.openhft.chronicle.wire.internal.extractor;
 
 import net.openhft.chronicle.core.util.ThreadConfinementAsserter;
-import net.openhft.chronicle.wire.extractor.DocumentExtractor;
+import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiConsumer;

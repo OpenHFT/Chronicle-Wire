@@ -1,4 +1,4 @@
-package net.openhft.chronicle.wire;
+package net.openhft.chronicle.wire.domestic;
 
 import net.openhft.chronicle.core.threads.EventHandler;
 import net.openhft.chronicle.threads.Pauser;

@@ -1,4 +1,4 @@
-package net.openhft.chronicle.wire.extractor;
+package net.openhft.chronicle.wire.domestic.extractor;
 
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.wire.Wire;
@@ -23,7 +23,7 @@ public interface ToDoubleDocumentExtractor {
      * queue but of another type.
      * <p>
      * Extractors that must include {@link Double#NaN} as a valid value must use other means of
-     * aggregating values (e.g. use an {@link DocumentExtractor ExcerptExtractor<Double> }.
+     * aggregating values (e.g. use an {@link DocumentExtractor DocumentExtractor<Double> }.
      *
      * @param wire  to use
      * @param index to use
@@ -32,13 +32,13 @@ public interface ToDoubleDocumentExtractor {
     double extractAsDouble(@NotNull Wire wire, @NonNegative long index);
 
     /**
-     * Creates and returns a new ToDoubleExcerptExtractor consisting of the results (of type R) of applying the provided
-     * {@code mapper } to the elements of this ToDoubleExcerptExtractor.
+     * Creates and returns a new ToDoubleDocumentExtractor consisting of the results (of type R) of applying the provided
+     * {@code mapper } to the elements of this ToDoubleDocumentExtractor.
      * <p>
      * Values mapped to {@link Double#NaN} are removed.
      *
      * @param mapper to apply
-     * @return a new mapped ToDoubleExcerptExtractor
+     * @return a new mapped ToDoubleDocumentExtractor
      * @throws NullPointerException if the provided {@code mapper} is {@code null}
      */
     default ToDoubleDocumentExtractor map(@NotNull final DoubleUnaryOperator mapper) {
@@ -53,13 +53,13 @@ public interface ToDoubleDocumentExtractor {
     }
 
     /**
-     * Creates and returns a new ExcerptExtractor consisting of applying the provided
-     * {@code mapper } to the elements of this ExcerptExtractor.
+     * Creates and returns a new DocumentExtractor consisting of applying the provided
+     * {@code mapper } to the elements of this DocumentExtractor.
      * <p>
      * Values mapped to {@link Double#NaN } are removed.
      *
      * @param mapper to apply
-     * @return a new mapped ExcerptExtractor
+     * @return a new mapped DocumentExtractor
      * @throws NullPointerException if the provided {@code mapper} is {@code null}
      */
     default <T> DocumentExtractor<T> mapToObj(@NotNull final DoubleFunction<? extends T> mapper) {
@@ -74,13 +74,13 @@ public interface ToDoubleDocumentExtractor {
     }
 
     /**
-     * Creates and returns a new ToLongExcerptExtractor consisting of applying the provided
-     * {@code mapper } to the elements of this ToDoubleExcerptExtractor.
+     * Creates and returns a new ToLongDocumentExtractor consisting of applying the provided
+     * {@code mapper } to the elements of this ToDoubleDocumentExtractor.
      * <p>
      * Values mapped to {@link Double#NaN } are removed.
      *
      * @param mapper to apply
-     * @return a new mapped ToLongExcerptExtractor
+     * @return a new mapped ToLongDocumentExtractor
      * @throws NullPointerException if the provided {@code mapper} is {@code null}
      */
     default ToLongDocumentExtractor mapToLong(@NotNull final DoubleToLongFunction mapper) {
@@ -95,12 +95,12 @@ public interface ToDoubleDocumentExtractor {
     }
 
     /**
-     * Creates and returns a new ToDoubleExcerptExtractor consisting of the elements of this ToDoubleExcerptExtractor
+     * Creates and returns a new ToDoubleDocumentExtractor consisting of the elements of this ToDoubleDocumentExtractor
      * that match the provided {@code predicate}.
      *
      * @param predicate to apply to each element to determine if it
      *                  should be included
-     * @return a ToDoubleExcerptExtractor consisting of the elements of this ToDoubleExcerptExtractor that match
+     * @return a ToDoubleDocumentExtractor consisting of the elements of this ToDoubleDocumentExtractor that match
      * @throws NullPointerException if the provided {@code predicate} is {@code null}
      */
     default ToDoubleDocumentExtractor filter(@NotNull final DoublePredicate predicate) {
