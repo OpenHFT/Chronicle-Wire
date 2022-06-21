@@ -609,7 +609,7 @@ public class TextWire extends AbstractWire implements Wire {
                     readCode();
                     while (peekCode() == ' ')
                         readCode();
-                    final StringBuilder sb = acquireStringBuilder();
+                    final StringBuilder sb = WireInternal.acquireAnotherStringBuilder(this.sb);
                     for (int ch; notNewLine(ch = readCode()); )
                         sb.append((char) ch);
                     if (!valueIn.consumeAny)
