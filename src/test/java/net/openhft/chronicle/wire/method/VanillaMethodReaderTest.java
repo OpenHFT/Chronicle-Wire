@@ -33,7 +33,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
             wire.usePadding(true);
 
             {
-                AListener aListener = wire.methodWriter(true, AListener.class);
+                AListener aListener = wire.methodWriterBuilder(true, AListener.class).build();
                 A a = new A();
                 a.x = 5;
                 aListener.a(a);
@@ -304,7 +304,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     public void parseMetaData() {
         Wire wire = WireType.BINARY_LIGHT.apply(new HexDumpBytes());
         final RoutedSaying routedSaying = wire.methodWriter(RoutedSaying.class);
-        final RoutedSaying metaRoutedSaying = wire.methodWriter(true, RoutedSaying.class);
+        final RoutedSaying metaRoutedSaying = wire.methodWriterBuilder(true, RoutedSaying.class).build();
         metaRoutedSaying.to("aye").say("hi AAA");
         routedSaying.to("one").say("hi 111");
         metaRoutedSaying.to("bee").say("hi BBB");
