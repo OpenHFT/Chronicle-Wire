@@ -148,10 +148,10 @@ Maintains a Set of all symbols that starts with an "S" in MarketData objects.
 [source,java]
 ----
 Reduction<Set<String>> symbolsStartingWithS = Reduction.of(
-                builder(MarketData.class).withReusing(MarketData::new).build()  <1>
-                        .map(MarketData::symbol)                                <2>
-                        .filter(s -> s.startsWith("S")))                        <3>
-        .collecting(ConcurrentCollectors.toConcurrentSet());                    <4>
+                builder(MarketData.class).build()               <1>
+                        .map(MarketData::symbol)                <2>
+                        .filter(s -> s.startsWith("S")))        <3>
+        .collecting(ConcurrentCollectors.toConcurrentSet());    <4>
 ----
 
 <1> Extract `MarketData` objects.
