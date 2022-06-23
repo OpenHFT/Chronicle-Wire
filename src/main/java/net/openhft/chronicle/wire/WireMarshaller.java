@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.BytesComment;
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.io.SingleThreadedChecked;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -854,6 +855,8 @@ public class WireMarshaller<T> {
                     }
                 }
 
+                if (object instanceof SingleThreadedChecked)
+                    ((SingleThreadedChecked) object).singleThreadedCheckReset();
                 field.set(o, object);
 
             } catch (UnexpectedFieldHandlingException e) {
@@ -978,6 +981,8 @@ public class WireMarshaller<T> {
             }
             if (read.textTo(bytes) == null)
                 unsafePutObject(o, offset, null);
+            else
+                bytes.singleThreadedCheckReset();
         }
 
         private void decodeBytes(@NotNull ValueIn read, Bytes<?> bytes) {
