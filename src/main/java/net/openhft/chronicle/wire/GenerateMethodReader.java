@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
@@ -88,6 +89,15 @@ public class GenerateMethodReader {
         return m.getReturnType() + " " + m.getName() + " " + Arrays.toString(m.getParameterTypes());
     }
 
+    static boolean hasInstance(Class<?> aClass) {
+        try {
+            aClass.getField("INSTANCE");
+            return true;
+        } catch (NoSuchFieldException e) {
+            return false;
+        }
+    }
+
     /**
      * Generates and compiles in runtime code of a custom {@link MethodReader}.
      *
@@ -152,12 +162,12 @@ public class GenerateMethodReader {
         if (!packageName().isEmpty())
             sourceCode.append(format("package %s;\n", packageName()));
 
-        sourceCode.append("import net.openhft.chronicle.bytes.MethodReader;\n" +
-                "import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;\n" +
+        sourceCode.append("" +
                 "import net.openhft.chronicle.core.Jvm;\n" +
+                "import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;\n" +
                 "import net.openhft.chronicle.core.util.ObjectUtils;\n" +
+                "import net.openhft.chronicle.bytes.*;\n" +
                 "import net.openhft.chronicle.wire.*;\n" +
-                "import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;\n" +
                 "\n" +
                 "import java.util.Map;\n" +
                 "import java.lang.reflect.Method;\n" +
@@ -390,8 +400,12 @@ public class GenerateMethodReader {
 
             final String typeName = parameterType.getCanonicalName();
             String fieldName = m.getName() + "arg" + i;
-            if (fieldNames.add(fieldName))
-                fields.append(format("private %s %s;\n", typeName, fieldName));
+            if (fieldNames.add(fieldName)) {
+                if (parameterType == Bytes.class)
+                    fields.append(format("private Bytes %s = Bytes.allocateElasticOnHeap();\n", fieldName));
+                else
+                    fields.append(format("private %s %s;\n", typeName, fieldName));
+            }
         }
 
         if (chainReturnType != null)
@@ -652,20 +666,13 @@ public class GenerateMethodReader {
             return format("%s = %s.float32();\n", argumentName, valueInName);
         } else if (double.class.equals(argumentType)) {
             return format("%s = %s.float64();\n", argumentName, valueInName);
+        } else if (Bytes.class.isAssignableFrom(argumentType)) {
+            return format("%s.bytes(%s);\n", valueInName, argumentName);
         } else if (CharSequence.class.isAssignableFrom(argumentType)) {
             return format("%s = %s.text();\n", argumentName, valueInName);
         } else {
             final String typeName = argumentType.getCanonicalName();
             return format("%s = %s.object(checkRecycle(%s), %s.class);\n", argumentName, valueInName, argumentName, typeName);
-        }
-    }
-
-    static boolean hasInstance(Class<?> aClass) {
-        try {
-            aClass.getField("INSTANCE");
-            return true;
-        } catch (NoSuchFieldException e) {
-            return false;
         }
     }
 

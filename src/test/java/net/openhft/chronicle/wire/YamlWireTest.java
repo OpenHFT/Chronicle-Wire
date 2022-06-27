@@ -23,6 +23,7 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.NoBytesStore;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.TextWireTest.ABCD;
+import net.openhft.chronicle.wire.converter.NanoTime;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -1822,12 +1823,41 @@ public class YamlWireTest extends WireTestCommon {
         }
     }
 
+    @Test
+    public void putData() {
+        Data data = new Data();
+        data.timeNS = (long) 1.6e18;
+        data.bytes = Bytes.from("zzz");
+        data.data = new byte[2];
+
+        wire.methodWriter(PutData.class)
+                .put(Bytes.from("hi"), data);
+
+        Wire wire2 = Wire.newYamlWireOnHeap();
+        wire.methodReader(wire2.methodWriter(PutData.class))
+                .readOne();
+        assertEquals("" +
+                "put: [\n" +
+                "  hi,\n" +
+                "  {\n" +
+                "    timeNS: 2020-09-13T12:26:40,\n" +
+                "    bytes: zzz,\n" +
+                "    data: !!binary AAA=\n" +
+                "  }\n" +
+                "]\n" +
+                "...\n", wire2.toString());
+    }
+
     enum BWKey implements WireKey {
         field1, field2, field3
     }
 
     enum YWTSingleton {
         INSTANCE
+    }
+
+    interface PutData {
+        void put(Bytes key, Data data);
     }
 
     static class FieldWithComment extends SelfDescribingMarshallable {
@@ -1871,6 +1901,13 @@ public class YamlWireTest extends WireTestCommon {
 
     static class YNestedWithEnumSet extends SelfDescribingMarshallable {
         List<WithEnumSet> list = new ArrayList<>();
+    }
+
+    static class Data extends SelfDescribingMarshallable {
+        @NanoTime
+        long timeNS;
+        Bytes bytes;
+        byte[] data;
     }
 
     class Circle implements Marshallable {

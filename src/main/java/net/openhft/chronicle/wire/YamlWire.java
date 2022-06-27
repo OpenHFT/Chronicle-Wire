@@ -2066,6 +2066,16 @@ public class YamlWire extends AbstractWire implements Wire {
                     yt.next();
                     return null;
                 }
+
+                if (yt.isText(BINARY_TAG)) {
+                    yt.next();
+                    final byte[] arr = (byte[]) decodeBinary(byte[].class);
+                    for (byte b : arr) {
+                        a.append((char) b);
+                    }
+                    return a;
+                }
+
                 throw new UnsupportedOperationException(yt.toString());
             }
             return a;
@@ -2136,6 +2146,10 @@ public class YamlWire extends AbstractWire implements Wire {
         @Override
         public byte @NotNull [] bytes(byte[] using) {
             consumePadding();
+            if (yt.isText(BINARY_TAG)) {
+                yt.next();
+                return (byte[]) decodeBinary(byte[].class);
+            }
             throw new UnsupportedOperationException(yt.toString());
         }
 
