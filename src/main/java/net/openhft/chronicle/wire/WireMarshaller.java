@@ -1437,6 +1437,22 @@ public class WireMarshaller<T> {
         }
 
         @Override
+        protected void copy(Object from, Object to) throws IllegalAccessException {
+            Collection fromColl = (Collection) field.get(from);
+            if (fromColl == null) {
+                field.set(to, null);
+                return;
+            }
+            Collection coll = (Collection) field.get(to);
+            if (coll == null) {
+                coll = collectionSupplier.get();
+                field.set(to, coll);
+            }
+            coll.clear();
+            coll.addAll(fromColl);
+        }
+
+        @Override
         protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
             Collection coll = (Collection) field.get(o);
             if (coll == null) {
