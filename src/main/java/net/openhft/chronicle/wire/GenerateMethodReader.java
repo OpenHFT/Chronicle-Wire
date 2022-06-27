@@ -168,6 +168,7 @@ public class GenerateMethodReader {
                 "import net.openhft.chronicle.core.util.ObjectUtils;\n" +
                 "import net.openhft.chronicle.bytes.*;\n" +
                 "import net.openhft.chronicle.wire.*;\n" +
+                "import net.openhft.chronicle.wire.BinaryWireCode;\n" +
                 "\n" +
                 "import java.util.Map;\n" +
                 "import java.lang.reflect.Method;\n" +
