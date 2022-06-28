@@ -344,9 +344,103 @@ public class YamlWire extends AbstractWire implements Wire {
             wire.bytes().write(this.bytes, yt.blockStart(), bytes0.readLimit() - yt.blockStart);
             this.bytes.readPosition(this.bytes.readLimit());
         } else {
-            // TODO: implement copying
-            throw new UnsupportedOperationException("Not implemented yet. Can only copy YamlWire format to the same format not " + wire.getClass());
+            while (!isEmpty()) {
+                copyOne(wire, true);
+                yt.next();
+            }
         }
+    }
+
+    private void copyOne(WireOut wire, boolean nested) {
+        switch (yt.current()) {
+            case NONE:
+                break;
+            case COMMENT:
+                wire.writeComment(yt.text());
+                break;
+            case TAG:
+                wire.getValueOut().typePrefix(yt.text());
+                yt.next();
+                copyOne(wire, true);
+                yt.next();
+                break;
+            case DIRECTIVE:
+                break;
+            case DOCUMENT_END:
+                break;
+            case DIRECTIVES_END:
+                yt.next();
+                while (!isEmpty()) {
+                    copyOne(wire, false);
+                    yt.next();
+                }
+                break;
+            case MAPPING_KEY:
+                copyMappingKey(wire, nested);
+                break;
+            case MAPPING_END:
+                return;
+            case MAPPING_START: {
+                if (nested) {
+                    yt.next();
+                    wire.getValueOut().marshallable(w -> {
+                        while (yt.current() == YamlToken.MAPPING_KEY) {
+                            copyMappingKey(wire, true);
+                            yt.next();
+                        }
+                    });
+                }
+                break;
+            }
+            case SEQUENCE_END:
+                break;
+            case SEQUENCE_ENTRY:
+                break;
+            case SEQUENCE_START: {
+                yt.next();
+                YamlWire yw = this;
+                wire.getValueOut().sequence(w -> {
+                    while (yt.current() != YamlToken.SEQUENCE_END) {
+                        yw.copyOne(w.wireOut(), true);
+                        yw.yt.next();
+                    }
+                });
+                break;
+            }
+            case TEXT:
+                wire.getValueOut().text(yt.text());
+                break;
+            case LITERAL:
+                wire.getValueOut().text(yt.text());
+                break;
+            case ANCHOR:
+                break;
+            case ALIAS:
+                break;
+            case RESERVED:
+                break;
+            case STREAM_END:
+                break;
+            case STREAM_START:
+                break;
+        }
+    }
+
+    private void copyMappingKey(WireOut wire, boolean nested) {
+        yt.next();
+        if (yt.current() == YamlToken.MAPPING_KEY)
+            yt.next();
+        if (yt.current() == YamlToken.TEXT) {
+            if (nested) {
+                wire.write(yt.text());
+            } else {
+                wire.writeEvent(String.class, yt.text());
+            }
+            yt.next();
+        } else {
+            throw new UnsupportedOperationException("Unable to copy key " + yt);
+        }
+        copyOne(wire, true);
     }
 
     @Override
@@ -965,6 +1059,16 @@ public class YamlWire extends AbstractWire implements Wire {
         valueIn.resetState();
         valueOut.resetState();
         anchorValues.clear();
+    }
+
+    @Override
+    public boolean hasMetaDataPrefix() {
+        if (yt.current() == YamlToken.TAG
+                && yt.isText("!meta-data")) {
+            yt.next();
+            return true;
+        }
+        return false;
     }
 
     class TextValueOut implements ValueOut, CommentAnnotationNotifier {
@@ -3051,15 +3155,5 @@ public class YamlWire extends AbstractWire implements Wire {
         public String toString() {
             return YamlWire.this.toString();
         }
-    }
-
-    @Override
-    public boolean hasMetaDataPrefix() {
-        if (yt.current() == YamlToken.TAG
-                && yt.isText("!meta-data")) {
-            yt.next();
-            return true;
-        }
-        return false;
     }
 }
