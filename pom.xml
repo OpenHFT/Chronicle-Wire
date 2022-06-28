@@ -15,7 +15,8 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -33,7 +34,7 @@
     <description>Chronicle-Wire</description>
     <packaging>bundle</packaging>
     <properties>
-        <argLine />
+        <argLine/>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <compiler.argument>-Xlint:deprecation</compiler.argument>
@@ -128,6 +129,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
@@ -188,7 +195,14 @@
                         <configuration>
                             <referenceVersion>2.23ea0</referenceVersion>
                             <artifactsURI>https://teamcity.chronicle.software/repository/download</artifactsURI>
-                            <binaryCompatibilityPercentageRequired>95</binaryCompatibilityPercentageRequired>
+                            <!-- Exactly the same reported problems as the main line, not sure why we need 96.2 -> 96.1 -->
+                            <binaryCompatibilityPercentageRequired>95.7</binaryCompatibilityPercentageRequired>
+                            <extraOptions>
+                                <extraOption>
+                                    <name>skip-internal-packages</name>
+                                    <value>net.openhft.chronicle.wire.domestic.*</value>
+                                </extraOption>
+                            </extraOptions>
                         </configuration>
                     </execution>
                 </executions>
@@ -196,6 +210,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M7</version>
                 <configuration>
                     <systemPropertyVariables>
                         <user.timezone>UTC</user.timezone>
