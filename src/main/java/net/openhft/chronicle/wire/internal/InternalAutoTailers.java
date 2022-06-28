@@ -33,13 +33,13 @@ public final class InternalAutoTailers {
         @Override
         public void run() {
             try {
-                while (running) {
-                    if (ReductionUtil.accept(tailer, excerptListener) != -1) {
+                while (running()) {
+                    if (ReductionUtil.accept(tailer(), excerptListener()) != -1) {
                         pauser.pause();
                     }
                 }
             } finally {
-                closer.run();
+                closer().run();
             }
         }
     }
@@ -53,20 +53,20 @@ public final class InternalAutoTailers {
 
         @Override
         public boolean action() throws InvalidEventHandlerException {
-            if (!running) {
-                closer.run();
+            if (!running()) {
+                closer().run();
                 throw InvalidEventHandlerException.reusable();
             }
-            return ReductionUtil.accept(tailer, excerptListener) != -1;
+            return ReductionUtil.accept(tailer(), excerptListener()) != -1;
         }
     }
 
     private abstract static class AbstractPoller implements AutoCloseable {
 
-        protected final ExcerptListener excerptListener;
-        protected final MarshallableIn tailer;
-        protected final Runnable closer;
-        protected volatile boolean running = true;
+        private final ExcerptListener excerptListener;
+        private final MarshallableIn tailer;
+        private final Runnable closer;
+        private volatile boolean running = true;
 
         protected AbstractPoller(@NotNull final Supplier<? extends MarshallableIn> tailerSupplier,
                                  @NotNull final ExcerptListener excerptListener) {
@@ -74,6 +74,22 @@ public final class InternalAutoTailers {
             this.excerptListener = requireNonNull(excerptListener);
             this.tailer = requireNonNull(tailerSupplier.get());
             this.closer = closer(tailer);
+        }
+
+        protected ExcerptListener excerptListener() {
+            return excerptListener;
+        }
+
+        protected MarshallableIn tailer() {
+            return tailer;
+        }
+
+        protected Runnable closer() {
+            return closer;
+        }
+
+        protected boolean running() {
+            return running;
         }
 
         @Override
