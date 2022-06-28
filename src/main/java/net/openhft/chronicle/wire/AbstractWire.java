@@ -67,7 +67,7 @@ public abstract class AbstractWire implements Wire {
     private ObjectInput objectInput;
     private boolean insideHeader;
     private HeadNumberChecker headNumberChecker;
-    private boolean usePadding = false;
+    private boolean usePadding = DEFAULT_USE_PADDING;
 
     @SuppressWarnings("rawtypes")
     protected AbstractWire(@NotNull Bytes<?> bytes, boolean use8bit) {
