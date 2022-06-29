@@ -76,7 +76,7 @@ public class PowerOfTwoLongConverter implements LongConverter {
 
         if (text.length() > start + maxParseLength()) {
             Jvm.warn().on(getClass(), "truncated because the value was too large");
-            text.readLimit(start + maxParseLength());
+            text.readLimit((long) start + maxParseLength());
         }
     }
 
