@@ -443,8 +443,7 @@ public class BinaryWire2Test extends WireTestCommon {
 
     @Test
     public void fieldAfterNullContext() {
-        assumeTrue(usePadding);
-
+        assumeFalse(usePadding);
         expectException("Unable to copy !UpdateEvent safely will try anyway");
         @NotNull Wire wire = createWire();
         try (DocumentContext ignored = wire.writingDocument(true)) {
@@ -461,7 +460,7 @@ public class BinaryWire2Test extends WireTestCommon {
 
         assertEquals("--- !!meta-data #binary\n" +
                         "tid: 1234567890\n" +
-                        "# position: 16, header: 0\n" +
+                        "# position: 13, header: 0\n" +
                         "--- !!data #binary\n" +
                         "data: !!UpdateEvent {\n" +
                         "  assetName: /name,\n" +
