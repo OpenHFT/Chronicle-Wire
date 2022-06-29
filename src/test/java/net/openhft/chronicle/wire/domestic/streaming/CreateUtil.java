@@ -1,8 +1,6 @@
 package net.openhft.chronicle.wire.domestic.streaming;
 
-import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.DocumentContext;
-import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.ValueOut;
 import net.openhft.chronicle.wire.Wire;
 import org.jetbrains.annotations.NotNull;
@@ -61,7 +59,6 @@ public final class CreateUtil {
 
     @NotNull
     public static Wire create() {
-        return new TextWire(Bytes.elasticByteBuffer());
+        return Wire.newYamlWireOnHeap();
     }
-
 }
