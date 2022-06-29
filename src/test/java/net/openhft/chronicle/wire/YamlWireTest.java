@@ -30,6 +30,8 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
@@ -59,9 +61,22 @@ import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
+@RunWith(value = Parameterized.class)
 public class YamlWireTest extends WireTestCommon {
-
     static Wire wire = Wire.newYamlWireOnHeap();
+    final boolean usePadding;
+
+    public YamlWireTest(boolean usePadding) {
+        this.usePadding = usePadding;
+    }
+
+    @Parameterized.Parameters(name = "usePadding={0}")
+    public static Collection<Object[]> wireTypes() {
+        return Arrays.asList(
+                new Object[]{true},
+                new Object[]{false}
+        );
+    }
 
     @Test
     public void comment() {
@@ -168,10 +183,8 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testWriteToBinaryAndTriesToConvertToText() {
-
-        Bytes<?> b = Bytes.elasticByteBuffer();
-        Wire wire = WireType.BINARY.apply(b);
-        wire.usePadding(true);
+        Wire wire = WireType.BINARY.apply(Bytes.allocateElasticOnHeap());
+        wire.usePadding(usePadding);
 
         @NotNull Map<String, String> data = Collections.singletonMap("key", "value");
 
@@ -183,18 +196,16 @@ public class YamlWireTest extends WireTestCommon {
             wire.write("map").object(map);
         }
 
-        final String textYaml = Wires.fromSizePrefixedBlobs(b);
+        final String textYaml = Wires.fromSizePrefixedBlobs(wire);
         // System.out.println(textYaml);
         @Nullable Object o = WireType.YAML.fromString(textYaml);
         Assert.assertEquals("{map={some={key=value}, some-other={key=value}}}", o.toString());
-
-        b.releaseLast();
     }
 
     @NotNull
     private Wire createWire() {
         wire.reset();
-
+        wire.usePadding(usePadding);
         return wire;
     }
 
@@ -1163,9 +1174,8 @@ public class YamlWireTest extends WireTestCommon {
                 return stack;
             }
         };
-        @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
-        @NotNull final Wire wire = new YamlWire(bytes);
-        wire.usePadding(false);
+        @NotNull final Wire wire = new YamlWire(Bytes.allocateElasticOnHeap());
+        wire.usePadding(usePadding);
 
         wire.writeDocument(false, w -> w.writeEventName(() -> "exception")
                 .object(e));
@@ -1178,7 +1188,7 @@ public class YamlWireTest extends WireTestCommon {
                 "    { class: net.openhft.chronicle.wire.YamlWireTest, method: runTestException, file: YamlWireTest.java, line: 73 },\n" +
                 "    { class: sun.reflect.NativeMethodAccessorImpl, method: invoke0, file: NativeMethodAccessorImpl.java, line: -2 }\n" +
                 "  ]\n" +
-                "}\n", Wires.fromSizePrefixedBlobs(bytes));
+                "}\n", Wires.fromSizePrefixedBlobs(wire));
 
         wire.readDocument(null, r -> {
             Throwable t = r.read(() -> "exception").throwable(true);
@@ -1540,15 +1550,24 @@ public class YamlWireTest extends WireTestCommon {
         @NotNull byte[] four = {1, 2, 3, 4};
         wire.writeDocument(false, w -> w.write("four").object(four));
 
-        assertEquals("--- !!data\n" +
-                        "nothing: !byte[] !!binary \n" +
-                        "# position: 31, header: 1\n" +
-                        "--- !!data\n" +
-                        "one: !byte[] !!binary AQ==\n" +
-                        "# position: 62, header: 2\n" +
-                        "--- !!data\n" +
-                        "four: !byte[] !!binary AQIDBA==\n"
-                , Wires.fromSizePrefixedBlobs(wire.bytes(), 0));
+        final String expected1 = "--- !!data\n" +
+                "nothing: !byte[] !!binary \n" +
+                "# position: 32, header: 1\n" +
+                "--- !!data\n" +
+                "one: !byte[] !!binary AQ==\n" +
+                "# position: 64, header: 2\n" +
+                "--- !!data\n" +
+                "four: !byte[] !!binary AQIDBA==\n";
+        final String expected2 = "--- !!data\n" +
+                "nothing: !byte[] !!binary \n" +
+                "# position: 31, header: 1\n" +
+                "--- !!data\n" +
+                "one: !byte[] !!binary AQ==\n" +
+                "# position: 62, header: 2\n" +
+                "--- !!data\n" +
+                "four: !byte[] !!binary AQIDBA==\n";
+        assertEquals(usePadding ? expected1 : expected2,
+                Wires.fromSizePrefixedBlobs(wire.bytes(), 0));
         wire.readDocument(null, w -> assertArrayEquals(new byte[0], (byte[]) w.read(() -> "nothing").object()));
         wire.readDocument(null, w -> assertArrayEquals(one, (byte[]) w.read(() -> "one").object()));
         wire.readDocument(null, w -> assertArrayEquals(four, (byte[]) w.read(() -> "four").object()));
