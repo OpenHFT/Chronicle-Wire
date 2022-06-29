@@ -47,7 +47,7 @@ import static net.openhft.compiler.CompilerUtils.CACHED_COMPILER;
  */
 public class GenerateMethodReader {
     private static final boolean DUMP_CODE = Jvm.getBoolean("dumpCode");
-    private static final Set<Class> IGNORED_INTERFACES = new LinkedHashSet<>();
+    private static final Set<Class<?>> IGNORED_INTERFACES = new LinkedHashSet<>();
 
     static {
         // make sure Wires static block called and classpath set up
