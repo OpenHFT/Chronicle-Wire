@@ -57,6 +57,7 @@ public class YamlWire extends AbstractWire implements Wire {
     public static final BytesStore TYPE = BytesStore.from("!type ");
     static final String SEQ_MAP = "!seqmap";
     static final String BINARY_TAG = "!binary";
+    static final String DATA_TAG = "!data";
     static final String NULL = "!null \"\"";
     static final BitSet STARTS_QUOTE_CHARS = new BitSet();
     static final BitSet QUOTE_CHARS = new BitSet();
@@ -1069,6 +1070,16 @@ public class YamlWire extends AbstractWire implements Wire {
             return true;
         }
         return false;
+    }
+    public boolean readDocument(@Nullable ReadMarshallable metaDataConsumer, @Nullable ReadMarshallable dataConsumer) {
+        valueIn.resetState();
+        return super.readDocument(metaDataConsumer, dataConsumer);
+    }
+
+    @Override
+    public boolean readDocument(long position, @Nullable ReadMarshallable metaDataConsumer, @Nullable ReadMarshallable dataConsumer) {
+        valueIn.resetState();
+        return super.readDocument(position, metaDataConsumer, dataConsumer);
     }
 
     class TextValueOut implements ValueOut, CommentAnnotationNotifier {
@@ -2127,6 +2138,8 @@ public class YamlWire extends AbstractWire implements Wire {
                 default:
                     throw new UnsupportedOperationException(yt.toString());
                 case DIRECTIVES_END:
+                case TAG:
+                case COMMENT:
                     yt.next();
                     return getBracketType();
                 case MAPPING_START:
@@ -2248,13 +2261,9 @@ public class YamlWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public byte @NotNull [] bytes(byte[] using) {
-            consumePadding();
-            if (yt.isText(BINARY_TAG)) {
-                yt.next();
-                return (byte[]) decodeBinary(byte[].class);
-            }
-            throw new UnsupportedOperationException(yt.toString());
+        public byte @Nullable [] bytes(byte[] using) {
+            return (byte[])objectWithInferredType(using, SerializationStrategies.ANY_OBJECT, byte[].class);
+
         }
 
         @NotNull
@@ -2646,7 +2655,7 @@ public class YamlWire extends AbstractWire implements Wire {
             yt.text(stringBuilder);
 
             // Do not handle !!binary, do not resolve to BytesStore, do not consume tag
-            if (BINARY_TAG.contentEquals(stringBuilder))
+            if (BINARY_TAG.contentEquals(stringBuilder) || DATA_TAG.contains(stringBuilder))
                 return null;
 
             try {

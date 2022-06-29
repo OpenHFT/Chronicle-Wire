@@ -82,7 +82,6 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals(0, sb.length());
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void writeObjectWithTreeMap() {
         Wire wire = createWire();
@@ -96,12 +95,14 @@ public class YamlWireTest extends WireTestCommon {
         wire.read().object(value2, ObjectWithTreeMap.class);
         assertEquals("{hello=world}", value2.map.toString());
 
-        wire.reset();
+        wire.bytes().readPosition(0);
+        wire.getValueIn().resetState();
         ObjectWithTreeMap value3 = new ObjectWithTreeMap();
         wire.read().object(value3, Object.class);
         assertEquals("{hello=world}", value3.map.toString());
 
-        wire.reset();
+        wire.bytes().readPosition(0);
+        wire.getValueIn().resetState();
         ObjectWithTreeMap value4 = wire.read().object(ObjectWithTreeMap.class);
         assertEquals("{hello=world}", value4.map.toString());
     }
@@ -165,7 +166,6 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals("\"\": \"\": \"\": ", wire.toString());
     }
 
-    @Ignore("TODO")
     @Test
     public void testWriteToBinaryAndTriesToConvertToText() {
 
@@ -805,7 +805,6 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals(BytesStore.wrap(new byte[]{8, ' ', -126, 8, ' ', -126}), wire.read("c").object());
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void testABCDBytes() {
         @NotNull Wire wire = createWire();
@@ -818,7 +817,8 @@ public class YamlWireTest extends WireTestCommon {
 
         try {
             for (int i = 0; i < 5; i++) {
-                wire.reset();
+                wire.bytes().readPosition(0);
+                wire.getValueIn().resetState();
                 ABCD object = wire.getValueIn()
                         .object(abcd, ABCD.class);
                 assertEquals("!net.openhft.chronicle.wire.TextWireTest$ABCD {\n" +
@@ -834,7 +834,6 @@ public class YamlWireTest extends WireTestCommon {
         }
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void testABCStringBuilder() {
         @NotNull Wire wire = createWire();
@@ -845,7 +844,8 @@ public class YamlWireTest extends WireTestCommon {
         ABC abc = new ABC();
 
         for (int i = 0; i < 5; i++) {
-            wire.reset();
+            wire.bytes().readPosition(0);
+            wire.getValueIn().resetState();
             assertEquals("!net.openhft.chronicle.wire.TextWireTest$ABC {\n" +
                     "  A: hi,\n" +
                     "  B: hi,\n" +
@@ -1251,7 +1251,6 @@ public class YamlWireTest extends WireTestCommon {
         assertArrayEquals(a3, (Object[]) o3);
     }
 
-    @Ignore
     @Test
     public void testGZIPCompressionAsText() {
         @NotNull Wire wire = createWire();
@@ -1266,7 +1265,6 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals(str, bytes.toString());
     }
 
-    @Ignore
     @Test
     public void testLZWCompressionAsText() {
         @NotNull Wire wire = createWire();
@@ -1474,7 +1472,6 @@ public class YamlWireTest extends WireTestCommon {
         assertNull(c);
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void testAllChars() {
         @NotNull Wire wire = createWire();
@@ -1511,7 +1508,6 @@ public class YamlWireTest extends WireTestCommon {
         }
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void testByteArrayValueWithRealBytesNegative() {
         @NotNull Wire wire = createWire();
@@ -1534,7 +1530,6 @@ public class YamlWireTest extends WireTestCommon {
                         .read(() -> "value").object(byte[].class, expected, Assert::assertArrayEquals)));
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void testByteArray() {
         @NotNull Wire wire = createWire();
@@ -1552,7 +1547,7 @@ public class YamlWireTest extends WireTestCommon {
                         "# position: 62, header: 2\n" +
                         "--- !!data\n" +
                         "four: !byte[] !!binary AQIDBA==\n"
-                , Wires.fromSizePrefixedBlobs(wire.bytes()));
+                , Wires.fromSizePrefixedBlobs(wire.bytes(), 0));
         wire.readDocument(null, w -> assertArrayEquals(new byte[0], (byte[]) w.read(() -> "nothing").object()));
         wire.readDocument(null, w -> assertArrayEquals(one, (byte[]) w.read(() -> "one").object()));
         wire.readDocument(null, w -> assertArrayEquals(four, (byte[]) w.read(() -> "four").object()));
