@@ -367,8 +367,6 @@ public class GenerateMethodReader {
             final int modifiers = m.getModifiers();
             if (Modifier.isStatic(modifiers) || isSynthetic(modifiers))
                 continue;
-            if ("ignoreMethodBasedOnFirstArg".equals(m.getName()))
-                continue;
             if (!handledMethodSignatures.add(signature(m)))
                 continue;
 
