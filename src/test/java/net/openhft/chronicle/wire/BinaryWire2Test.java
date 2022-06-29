@@ -43,10 +43,9 @@ import static org.junit.Assume.assumeTrue;
 @SuppressWarnings("rawtypes")
 @RunWith(value = Parameterized.class)
 public class BinaryWire2Test extends WireTestCommon {
+    final boolean usePadding;
     @NotNull
     Bytes<?> bytes = new HexDumpBytes();
-
-    final boolean usePadding;
 
     public BinaryWire2Test(boolean usePadding) {
         this.usePadding = usePadding;
@@ -457,7 +456,8 @@ public class BinaryWire2Test extends WireTestCommon {
                             .write("value").object("world2"));
         }
 
-        assertEquals("--- !!meta-data #binary\n" +
+        assertEquals("" +
+                        "--- !!meta-data #binary\n" +
                         "tid: 1234567890\n" +
                         "# position: 1X, header: 0\n" +
                         "--- !!data #binary\n" +
