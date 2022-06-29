@@ -24,7 +24,6 @@ import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.util.Annotations;
 import net.openhft.chronicle.core.util.IgnoresEverything;
-import net.openhft.chronicle.wire.internal.GenericReflection;
 import net.openhft.chronicle.wire.utils.JavaSourceCodeFormatter;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
 import org.jetbrains.annotations.NotNull;
@@ -39,6 +38,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static net.openhft.chronicle.core.util.GenericReflection.*;
 import static net.openhft.chronicle.wire.GenerateMethodWriter.isSynthetic;
 import static net.openhft.compiler.CompilerUtils.CACHED_COMPILER;
 
@@ -401,9 +401,9 @@ public class GenerateMethodReader {
     private void handleMethod(Method m, Class<?> anInterface, String instanceFieldName, boolean methodFilter, SourceCodeFormatter eventNameSwitchBlock, SourceCodeFormatter eventIdSwitchBlock) {
         Jvm.setAccessible(m);
 
-        Type[] parameterTypes = net.openhft.chronicle.core.util.GenericReflection.getParameterTypes(m, anInterface);
+        Type[] parameterTypes = getParameterTypes(m, anInterface);
 
-        Class<?> chainReturnType = (Class<?>) GenericReflection.getReturnType(m, anInterface);
+        Class<?> chainReturnType = erase(getReturnType(m, anInterface));
         if (chainReturnType != DocumentContext.class && (!chainReturnType.isInterface() || Jvm.dontChain(chainReturnType)))
             chainReturnType = null;
 
@@ -411,7 +411,7 @@ public class GenerateMethodReader {
             fields.append(format("// %s\n", m.getName()));
 
         for (int i = 0; i < parameterTypes.length; i++) {
-            Class<?> parameterType = (Class<?>) parameterTypes[i];
+            Class<?> parameterType = erase(parameterTypes[i]);
 
             final String typeName = parameterType.getCanonicalName();
             String fieldName = m.getName() + "arg" + i;
@@ -432,7 +432,7 @@ public class GenerateMethodReader {
 
             String parameterTypesArg = parameterTypes.length == 0 ? "" :
                     ", " + Arrays.stream(parameterTypes)
-                            .map(t -> ((Class) t).getCanonicalName())
+                            .map(t -> erase(t).getCanonicalName())
                             .map(s -> s + ".class")
                             .collect(Collectors.joining(", "));
 
@@ -619,7 +619,7 @@ public class GenerateMethodReader {
             }
         }
 
-        final Class<?> argumentType = (Class<?>) parameterTypes[argIndex];
+        final Class<?> argumentType = erase(parameterTypes[argIndex]);
         String trueArgumentName = m.getName() + "arg" + argIndex;
         String argumentName = (inLambda ? "f." : "") + trueArgumentName;
 

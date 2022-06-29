@@ -25,6 +25,8 @@ import java.util.stream.Stream;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.*;
+import static net.openhft.chronicle.core.util.GenericReflection.erase;
+import static net.openhft.chronicle.core.util.GenericReflection.getParameterTypes;
 import static net.openhft.compiler.CompilerUtils.CACHED_COMPILER;
 
 @SuppressWarnings("StringBufferReplaceableByString")
@@ -201,7 +203,7 @@ public class GenerateMethodWriter {
 
     private static String signature(Method m, Type type) {
         final Type returnType = GenericReflection.getReturnType(m, type);
-        final Type[] parameterTypes = GenericReflection.getParameterTypes(m, type);
+        final Type[] parameterTypes = getParameterTypes(m, type);
         return returnType + " " + m.getName() + " " + Arrays.toString(parameterTypes);
     }
 
@@ -231,7 +233,7 @@ public class GenerateMethodWriter {
                         .append(nameForClass(importSet, longConversion.value()))
                         .append(".class) ");
             result.append("final ")
-                    .append(nameForClass(importSet, (Class) parameterTypes[i]))
+                    .append(nameForClass(importSet, erase(parameterTypes[i])))
                     .append(' ')
                     .append(p.getName());
         }
@@ -280,7 +282,8 @@ public class GenerateMethodWriter {
                     String template = templateFor(dm, interfaceClazz);
                     if (template != null)
                         continue;
-                    for (Class pType : dm.getParameterTypes()) {
+                    for (Type type : getParameterTypes(dm, interfaceClazz)) {
+                        Class pType = erase(type);
                         if (pType.isPrimitive() || pType.isArray() || pType.getPackage().getName().equals("java.lang"))
                             continue;
                         importSet.add(nameForClass(pType));
@@ -367,7 +370,7 @@ public class GenerateMethodWriter {
         Type returnType = GenericReflection.getReturnType(dm, interfaceClazz);
         if (!(returnType instanceof Class))
             returnType = (Type) ((TypeVariable<?>) returnType).getGenericDeclaration();
-        return (Class<?>) returnType;
+        return erase(returnType);
     }
 
     private String templateFor(Method dm, Class interfaceType) {
@@ -376,7 +379,9 @@ public class GenerateMethodWriter {
             return null;
         List<Class> sig = new ArrayList<>();
         sig.add(returnType(dm, interfaceType));
-        addAll(sig, dm.getParameterTypes());
+        for (Type type : getParameterTypes(dm, interfaceType)) {
+            addAll(sig, erase(type));
+        }
         return map.get(sig);
     }
 
@@ -427,10 +432,10 @@ public class GenerateMethodWriter {
         if (Modifier.isStatic(dm.getModifiers()))
             return "";
 
-        if (dm.getParameterTypes().length == 0 && dm.isDefault())
+        int parameterCount = dm.getParameterCount();
+        if (parameterCount == 0 && dm.isDefault())
             return "";
 
-        int parameterCount = dm.getParameterCount();
         Parameter[] parameters = dm.getParameters();
         final int len = parameters.length;
         final Class<?> returnType = returnType(dm, interfaceClazz);
@@ -438,7 +443,7 @@ public class GenerateMethodWriter {
 
         final StringBuilder body = new StringBuilder();
         String methodIDAnotation = "";
-        final Type[] parameterTypes = GenericReflection.getParameterTypes(dm, interfaceClazz);
+        final Type[] parameterTypes = getParameterTypes(dm, interfaceClazz);
         if (useUpdateInterceptor) {
             if (parameterCount > 1)
                 Jvm.debug().on(getClass(), "Generated code to call updateInterceptor for " + dm + " only using last argument");
@@ -491,7 +496,7 @@ public class GenerateMethodWriter {
         if (parameters.length > 0)
             writeArrayOfParameters(dm, parameterTypes, len, body, startJ);
 
-        if (dm.getParameterTypes().length == 0)
+        if (parameterCount == 0)
             body.append("valueOut.text(\"\");\n");
 
         body.append("} catch (Throwable t) {\n");
@@ -536,7 +541,8 @@ public class GenerateMethodWriter {
     }
 
     private void writeArrayOfParameters(final Method dm, Type[] parameterTypes, final int len, final StringBuilder body, final int startJ) {
-        if (dm.getParameterTypes().length > startJ + 1)
+        final int parameterCount = dm.getParameterCount();
+        if (parameterCount > startJ + 1)
             body.append("valueOut.array(v -> {\n");
         for (int j = startJ; j < len; j++) {
 
@@ -552,16 +558,16 @@ public class GenerateMethodWriter {
                 body.append(format("valueOut.rawText(%s.INSTANCE.asText(%s));\n", name, p.getName()));
             else if (p.getType().isPrimitive() || CharSequence.class.isAssignableFrom(p.getType())) {
                 if (longConversion != null && (p.getType() == long.class || CharSequence.class.isAssignableFrom(p.getType())))
-                    body.append(format("%s.writeLong(%s.INSTANCE, %s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", longConversion.value().getName(), p.getName()));
+                    body.append(format("%s.writeLong(%s.INSTANCE, %s);\n", parameterCount > startJ + 1 ? "v" : "valueOut", longConversion.value().getName(), p.getName()));
                 else if (intConversion != null)
-                    body.append(format("%s.writeInt(%s.INSTANCE, %s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", intConversion.value().getName(), p.getName()));
+                    body.append(format("%s.writeInt(%s.INSTANCE, %s);\n", parameterCount > startJ + 1 ? "v" : "valueOut", intConversion.value().getName(), p.getName()));
                 else
-                    body.append(format("%s.%s(%s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", toString((Class) parameterTypes[j]), p.getName()));
+                    body.append(format("%s.%s(%s);\n", parameterCount > startJ + 1 ? "v" : "valueOut", toString(erase(parameterTypes[j])), p.getName()));
             } else
-                writeValue(dm, (Class) parameterTypes[j], body, startJ, p);
+                writeValue(dm, erase(parameterTypes[j]), body, startJ, p);
         }
 
-        if (dm.getParameterTypes().length > startJ + 1)
+        if (parameterCount > startJ + 1)
             body.append("}, Object[].class);\n");
     }
 
@@ -569,7 +575,7 @@ public class GenerateMethodWriter {
         String className = type.getTypeName().replace('$', '.');
 
         body
-                .append(dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut")
+                .append(dm.getParameterCount() > startJ + 1 ? "v" : "valueOut")
                 .append(".object(")
                 .append(className)
                 .append(".class, ")

@@ -194,6 +194,7 @@ public class YamlWireTest extends WireTestCommon {
     @NotNull
     private Wire createWire() {
         wire.reset();
+
         return wire;
     }
 
