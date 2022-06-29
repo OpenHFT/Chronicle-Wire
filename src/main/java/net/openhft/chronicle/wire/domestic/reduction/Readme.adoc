@@ -1,0 +1,326 @@
+= Chronicle Reductions
+Per Minborg
+:css-signature: demo
+:toc: macro
+:toclevels: 3
+:icons: font
+
+toc::[]
+
+== About Chronicle Reductions
+
+Chronicle Reduction can maintain concurrent `Reduction` views which are materialized views of underlying Chronicle Queues and other MarshallableIn capable objects like Wire.
+
+== Reduction Overview
+
+A `Reduction` allows access to a continuously updated and concurrent view of an underlying `MarshallableIn` (such as a Queue) object's content.
+The `Reduction` can be maintained automatically.
+
+Here is an example how a `Reduction` that can be attached to a Chronicle Queue containing `MarketData` objects:
+
+[source,java]
+----
+Reduction<Map<String, MarketData>> latest = Reduction.of(
+                DocumentExtractor.builder(MarketData.class)
+                        .withMethod(MarketDataProvider.class, MarketDataProvider::marketData)
+                        .build())                 <1>
+        .collecting(Collectors.toConcurrentMap(   <2>
+                MarketData::symbol,               <3>
+                Function.identity(),              <4>
+                replacingMerger())                <5>
+        );
+
+
+ChronicleQueue q = SingleChronicleQueueBuilder.builder()
+                .path("market-data-queue")
+                .appenderListener(latest)     <6>
+                .build()
+
+MarketData latestAppleMarketData = latest.reduction().get("AAPL");  <7>
+
+----
+
+<1> `DocumentExtractor` that will extract objects of type `MarketData` previously written via a method writer.
+<2> A standard Java Collector which needs to be concurrent.
+<3> Key extractor that will extract keys from `MarketData` objects.
+<4> Value extractor (in this case, it will only pass through objects).
+<5> Merger that will be applied on the old and new value if a key is already associated with an old value.
+<6> Register the accumulation with the queue so that it is automatically maintained when excerpts are added.
+<7> Example of how to access the concurrent reduction.
+
+The `Reduction` above shows an example of a latest-seen service where the latest `MarketData` per symbol (key) is maintained.
+
+The `Reductions.of()` takes an `DocumentExtractor` that is used to extract objects from the queue and a standard Java Collector (which needs to be concurrent). The Collector shown above operates on Maps and, as described above, will map objects of type `MarketData` using `MarketData::symbol` to extract keys and `Function.identity()` to extract values.
+In case there is already an old value associated with a particular key, the provided merger `Reductions.replacingMerger()` is applied (which will replace the old existing value for a key with the new value).
+
+Once a `Reduction` is created, it can accept an `ExcerptTailer` to boostrap from an existing queue.
+As shown above, it can also be registered with a Queue as an `ExcerptListener` so that any updates made to the Queue also automatically will update the `Reduction`, effectively creating a "fire-and-forget" data reduction structure.
+
+The snippet above might produce the following output (shortened):
+
+[source,text]
+----
+accumulation.accumulation() = {MSFT=!MarketData {
+  symbol: MSFT,
+  last: 101.0,
+  high: 110.0,
+  low: 90.0
+}
+, APPL=!MarketData {
+  symbol: AAPL,
+  last: 200.0,
+  high: 220.0,
+  low: 180.0
+}
+}
+----
+
+== Reduction Details
+
+=== Examples
+
+This chapter contains a number of examples of how to use `Reduction` objects.
+
+==== Counting Excerpts
+
+[source,java]
+----
+Reduction<LongSupplier> counting = Reductions.counting() <1>
+...
+long count = counting.reduction().getAsLong();           <2>
+----
+<1> Maintains a count of the number of excerpts encountered.
+<2> Shows how one can access the current reduction value.
+
+==== Last Index Seen
+
+This Accumulation will hold the latest index seen or 0 if no index was seen.
+
+[source,java]
+----
+Reduction<LongSupplier> lastSeeing =
+        Reductions.reducingLong(extractingIndex(), 0, (a, b) -> b); <1>
+...
+long lastSeen = lastSeeing.reduction().getAsLong();
+
+----
+<1> Maintains a view of the last index encountered or 0 if no index was encountered
+
+==== Highest Index Seen
+
+This Accumulation will hold the highest index seen or 0 if no index was seen.
+
+[source,java]
+----
+Reduction<LongSupplier> maxIndexing =
+        Reductions.reducingLong(extractingIndex(), 0L, Math::max); <1>
+...
+long maxIndex = maxIndexing.reduction().getAsLong();
+----
+<1> Maintains a view of the highest index encountered or 0 if no index was encountered.
+
+==== Lowest Index Seen
+
+This Accumulation will hold the lowest index seen or `Long.MAX_VALUE` if no index was seen.
+
+[source,java]
+----
+Reduction<LongSupplier> minListener =
+        Reductions.reducingLong(extractingIndex(), Long.MAX_VALUE, Math::min);
+----
+
+==== List of Elements
+
+Maintains a List of all MarketData elements encountered in a List. This should be used with caution as a queue can contain many elements requiring a lot of heap memory.
+
+[source,java]
+----
+        Reduction<List<MarketData>> listing =
+                Reduction.of(builder(MarketData.class).build())
+                        .collecting(ConcurrentCollectors.toConcurrentList()); <1>
+----
+<1> Maintains a List of all MarketData elements encountered in a List.
+
+==== Set of Elements with Mapping and Filtering
+
+Maintains a Set of all symbols that starts with an "S" in MarketData objects.
+
+[source,java]
+----
+Reduction<Set<String>> symbolsStartingWithS = Reduction.of(
+                builder(MarketData.class).build()               <1>
+                        .map(MarketData::symbol)                <2>
+                        .filter(s -> s.startsWith("S")))        <3>
+        .collecting(ConcurrentCollectors.toConcurrentSet());    <4>
+----
+
+<1> Extract `MarketData` objects.
+<2> Map DocumentExtractor<MarketData> to DocumentExtractor<String> extracting symbols.
+<3> Retain only symbols starting with "S".
+<4> Collect to a concurrent Set.
+
+==== Set of Elements with Object Reuse
+
+Maintains a Set of all symbols in MarketData objects reusing intermediate `MarketData` objects.
+
+[source,java]
+----
+Reduction<Set<String>> symbolsStartingWithS =
+        Reduction.of(
+                builder(MarketData.class)                       <1>
+                    .withReusing(MarketData::new)               <2>
+                    .build()
+                .map(MarketData::symbol))                       <3>
+        .collecting(ConcurrentCollectors.toConcurrentSet());    <4>
+----
+
+<1> Extract `MarketData` objects.
+<2> Provide a constructor used to create object(s) to reuse.
+<3> Map DocumentExtractor<MarketData> to DocumentExtractor<String> extracting symbols.
+<4> Collect to a concurrent Set.
+
+NOTE: The reuse of object is safe in this case as immutable values are derived directly from the reused object.
+
+==== Merging entries in a Map
+
+Maintains a Map of the latest MarketData message per symbol where the messages were previously written by a MethodWriter of type MarketDataProvider. This is effectively a queue backed Map that will always reflect a state of the underlying queue.
+
+[source,java]
+----
+Reduction<Map<String, MarketData>> latest = Reduction.of(
+                DocumentExtractor.builder(MarketData.class)
+                        .withMethod(MarketDataProvider.class, MarketDataProvider::marketData)
+                        .build())
+        .collecting(Collectors.toConcurrentMap(
+                MarketData::symbol,
+                Function.identity(),
+                replacingMerger())
+        );
+...
+MarketData latestAppleMarketData = latest.reduction().get("AAPL");
+
+Map<String, MarketData> liveQueueBackedMap = latest.reduction(); <1>
+
+----
+<1> This creates a live concurrent view of the reduction that can be invoked at any time.
+
+==== Using a protected Reduction
+
+Many collectors can be used in combination with a "protective coat" around the actual reduction. Here is an example of providing an unmodifiable view of a map using standard Java Collector constructs:
+
+[source,java]
+----
+Reduction<Map<String, MarketData>> latestProtected = Reduction.of(
+                DocumentExtractor.builder(MarketData.class)
+                        .withMethod(MarketDataProvider.class, MarketDataProvider::marketData)
+                        .build())
+        .collecting(Collectors.collectingAndThen(
+                        Collectors.toConcurrentMap(
+                                MarketData::symbol,
+                                Function.identity(),
+                                replacingMerger()),
+                        Collections::unmodifiableMap
+                )
+        );
+----
+
+
+==== More Complex Reductions
+As Collectors can be composed to an arbitrary depth, more complex reductions can easily be constructed. As long as the first-level collector is concurrent, the lower level ones need not be concurrent. Here is an example:
+[source,java]
+----
+Reduction<ConcurrentMap<String, DoubleSummaryStatistics>> stats = Reduction.of(
+                DocumentExtractor.builder(MarketData.class)
+                        .withMethod(MarketDataProvider.class, MarketDataProvider::marketData)
+                        .build())
+        .collecting(groupingByConcurrent(
+                        MarketData::symbol,
+                        summarizingDouble(MarketData::last)
+                )
+        );
+----
+This will maintain statistics per symbol on `MarketData::last` using vanilla Java classes (creates objects).
+
+==== Register with a Queue
+
+A Reduction can be added to a Chronicle Queue using the `SingleChronicleQueueBuilder::appenderListener` method.
+This means the Reduction will be automatically updated upon excerpts being persisted to the queue.
+
+[source,java]
+----
+ChronicleQueue q = SingleChronicleQueueBuilder.builder()
+        .path("my-queue")
+        .appenderListener(reduction)
+        .build();
+----
+
+==== Bootstrapping from a Tailer
+
+Existing exerpts in a queue can be replayed onto an Reduction by means of the `Reduction::accept` method.
+This provides an easy way to bootstrap the Reduction upon restart.
+
+[source,java]
+----
+reduction.accept(queue.createTailer());
+----
+
+==== Automatically Tail a Queue Maintaining a Reduction
+
+This example shows how a Thread can be setup to automatically tail a queue while maintaining a Reduction. Any data added to the queue will be consumed by the Thread and might contribute to the Reduction.
+
+[source,java]
+----
+SingleChronicleQueue queue = SingleChronicleQueueBuilder.single("my-queue")
+                .build();
+
+Reduction<Map<String, MarketData>> queueBackedMapping = Reductions.of(
+        DocumentExtractor.builder(MarketData.class)
+                .withMethod(MarketDataProvider.class, MarketDataProvider::marketData)
+                .build())
+        .collecting(Collectors.collectingAndThen(
+                Collectors.toConcurrentMap(
+                        MarketData::symbol,
+                        Function.identity(),
+                        replacingMerger()
+                ),
+                Collections::unmodifiableMap
+        )
+); <1>
+
+// This provides a concurrent automatically updated view of the queue-backed map.
+Map<String, MarketData> queueBackedMap = queueBackedMapping.reduction();        <2>
+
+ExecutorService executorService = Executors.newSingleThreadExecutor();          <3>
+
+try (AutoTailers.CloseableRunnable runnable = AutoTailers.createRunnable(       <4>
+        queue::createTailer,                                                    <5>
+        queueBackedMapping,                                                     <6>
+        PauserMode.balanced                                                     <7>
+)) {
+    executorService.submit(runnable);                                           <8>
+    Thread.sleep(TimeUnit.SECONDS.toMillis(10));                                <9>
+} catch (InterruptedException ie) {                                             <10>
+    // do nothing
+}
+net.openhft.chronicle.threads.Threads.shutdown(executorService);                <11>
+----
+<1> This is the same Reduction previously described in <<_using_a_protected_reduction>> and will maintain a queue-backed map Reduction.
+<2> This variable can be used to inspect the Reduction at any time.
+<3> Creates a new ExecutorService with a single thread.
+<4> Creates a Runnable that can be submitted to the ExecutorService in <3>
+<5> Signifies how an ExcerptTailer is obtained.
+<6> Provides an ExcerptListener (in this case the Reduction) to be invoked on every encountered excerpt.
+<7> Tells the Thread how to pause if there are no more Excerpts to consume.
+<8> Submits the runnable to the executor service.
+<9> Waits for 10 seconds. In a real case, the Thread might run forever.
+<10> When exiting the TWR block, the runnable is automatically closed and will consequently exit shortly after.
+<11> Waits for the thread to shut down
+
+== To be Documented or todo
+
+* Configuration Reductions (concrete classes)
+* DocumentExtractor.ofType() error handling (what if there is another message on the queue?)
+* Extractors' use of `null` and `Long.MIN_VALUE`
+* ConcurrentCollectors.* need not be transitively concurrent as this is handled by the first level
+* Reduction.of(DocumentExtractor).collecting(Collector)
+* Reduction.of(DocumentExtractor).reducing()

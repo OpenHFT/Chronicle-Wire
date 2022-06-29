@@ -29,6 +29,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassLookup;
+import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
@@ -61,6 +62,7 @@ import static net.openhft.chronicle.wire.Wires.GENERATE_TUPLES;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class BinaryWire extends AbstractWire implements Wire {
 
+    static final StringBuilderPool SBP = new StringBuilderPool();
     private static final boolean SUPPORT_DELTA = supportDelta();
     private static final UTF8StringInterner UTF8 = new UTF8StringInterner(4096);
     private static final Bit8StringInterner BIT8 = new Bit8StringInterner(1024);
@@ -101,11 +103,6 @@ public class BinaryWire extends AbstractWire implements Wire {
         readContext = new BinaryReadDocumentContext(this, supportDelta);
     }
 
-    @Override
-    public boolean isBinary() {
-        return true;
-    }
-
     private static boolean supportDelta() {
         String supportDeltaStr = System.getProperty("deltaWire.enable");
         if (supportDeltaStr != null) {
@@ -140,6 +137,20 @@ public class BinaryWire extends AbstractWire implements Wire {
         // use underflow to make digits below '0' large.
         c -= '0';
         return c <= 9;
+    }
+
+    @Override
+    public void reset() {
+        writeContext.reset();
+        readContext.reset();
+        valueIn.resetState();
+        valueOut.resetState();
+        bytes.clear();
+    }
+
+    @Override
+    public boolean isBinary() {
+        return true;
     }
 
     /**
@@ -670,7 +681,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                 case COMMENT: {
                     bytes.uncheckedReadSkipOne();
-                    readUtf8();
+                    commentListener.accept(readUtf8());
                     break;
                 }
 
@@ -1117,8 +1128,11 @@ public class BinaryWire extends AbstractWire implements Wire {
     @Override
     public ValueOut writeEventId(String name, int methodId) {
         if (bytes.retainsComments())
-            bytes.comment(name);
-        writeCode(FIELD_NUMBER).writeStopBit(methodId);
+            bytes.comment(name + " (" + methodId + ")");
+        if (numericFields)
+            writeCode(FIELD_NUMBER).writeStopBit(methodId);
+        else
+            writeCode(EVENT_NAME).write8bit(name);
         return valueOut;
     }
 
@@ -1283,7 +1297,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             case BinaryWireHighCode.FIELD0:
             case BinaryWireHighCode.FIELD1:
-                readField(Wires.acquireStringBuilder(), "", code);
+                readField(SBP.acquireStringBuilder(), "", code);
                 AppendableUtil.setLength(sb, 0);
                 return readText(peekCode(), sb);
             default:
@@ -2526,6 +2540,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         public WireIn bytes(@NotNull BytesOut<?> toBytes, boolean clearBytes) {
             long length = readLength();
             int code = readCode();
+            if (clearBytes)
+                toBytes.clear();
             if (code == NULL) {
                 return BinaryWire.this;
             }
@@ -2537,15 +2553,11 @@ public class BinaryWire extends AbstractWire implements Wire {
                 int code2 = readCode();
                 if (code2 != U8_ARRAY)
                     cantRead(code);
-                if (clearBytes)
-                    toBytes.clear();
 
                 bytes.readWithLength0(length2 - 1, (b, sb1, toBytes1) -> Compression.uncompress(sb1, b, toBytes1), sb, toBytes);
                 return wireIn();
 
             }
-            if (clearBytes)
-                toBytes.clear();
             if (code == U8_ARRAY) {
                 ((Bytes) bytes).readWithLength(length - 1, toBytes);
             } else {

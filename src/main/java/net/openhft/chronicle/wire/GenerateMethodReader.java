@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
@@ -88,6 +89,15 @@ public class GenerateMethodReader {
         return m.getReturnType() + " " + m.getName() + " " + Arrays.toString(m.getParameterTypes());
     }
 
+    static boolean hasInstance(Class<?> aClass) {
+        try {
+            aClass.getField("INSTANCE");
+            return true;
+        } catch (NoSuchFieldException e) {
+            return false;
+        }
+    }
+
     /**
      * Generates and compiles in runtime code of a custom {@link MethodReader}.
      *
@@ -152,12 +162,13 @@ public class GenerateMethodReader {
         if (!packageName().isEmpty())
             sourceCode.append(format("package %s;\n", packageName()));
 
-        sourceCode.append("import net.openhft.chronicle.bytes.MethodReader;\n" +
-                "import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;\n" +
+        sourceCode.append("" +
                 "import net.openhft.chronicle.core.Jvm;\n" +
+                "import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;\n" +
                 "import net.openhft.chronicle.core.util.ObjectUtils;\n" +
+                "import net.openhft.chronicle.bytes.*;\n" +
                 "import net.openhft.chronicle.wire.*;\n" +
-                "import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;\n" +
+                "import net.openhft.chronicle.wire.BinaryWireCode;\n" +
                 "\n" +
                 "import java.util.Map;\n" +
                 "import java.lang.reflect.Method;\n" +
@@ -390,8 +401,12 @@ public class GenerateMethodReader {
 
             final String typeName = parameterType.getCanonicalName();
             String fieldName = m.getName() + "arg" + i;
-            if (fieldNames.add(fieldName))
-                fields.append(format("private %s %s;\n", typeName, fieldName));
+            if (fieldNames.add(fieldName)) {
+                if (parameterType == Bytes.class)
+                    fields.append(format("private Bytes %s = Bytes.allocateElasticOnHeap();\n", fieldName));
+                else
+                    fields.append(format("private %s %s;\n", typeName, fieldName));
+            }
         }
 
         if (chainReturnType != null)
@@ -578,6 +593,12 @@ public class GenerateMethodReader {
                 } else if (a instanceof LongConversion) {
                     numericConversionClass = ((LongConversion) a).value();
                     break;
+                } else {
+                    LongConversion lc = Jvm.findAnnotation(a.annotationType(), LongConversion.class);
+                    if (lc != null) {
+                        numericConversionClass = lc.value();
+                        break;
+                    }
                 }
             }
         }
@@ -591,13 +612,39 @@ public class GenerateMethodReader {
         if (boolean.class.equals(argumentType)) {
             return format("%s = %s.bool();\n", argumentName, valueInName);
         } else if (byte.class.equals(argumentType)) {
-            return format("%s = %s.readByte();\n", argumentName, valueInName);
+            if (numericConversionClass != null && hasInstance(numericConversionClass)) {
+                return format("%s = (byte) %s.INSTANCE.parse(%s.text());\n", argumentName, numericConversionClass.getName(), valueInName);
+
+            } else if (numericConversionClass != null && LongConverter.class.isAssignableFrom(numericConversionClass)) {
+                numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);\n",
+                        numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
+
+                return format("%s = (byte) %sConverter.parse(%s.text());\n", argumentName, argumentName, valueInName);
+            } else
+                return format("%s = %s.readByte();\n", argumentName, valueInName);
         } else if (char.class.equals(argumentType)) {
             return format("%s = %s.character();\n", argumentName, valueInName);
         } else if (short.class.equals(argumentType)) {
-            return format("%s = %s.int16();\n", argumentName, valueInName);
+            if (numericConversionClass != null && hasInstance(numericConversionClass)) {
+                return format("%s = (short) %s.INSTANCE.parse(%s.text());\n", argumentName, numericConversionClass.getName(), valueInName);
+
+            } else if (numericConversionClass != null && LongConverter.class.isAssignableFrom(numericConversionClass)) {
+                numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);\n",
+                        numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
+
+                return format("%s = (short) %sConverter.parse(%s.text());\n", argumentName, argumentName, valueInName);
+            } else
+                return format("%s = %s.int16();\n", argumentName, valueInName);
         } else if (int.class.equals(argumentType)) {
-            if (numericConversionClass != null && IntConverter.class.isAssignableFrom(numericConversionClass)) {
+            if (numericConversionClass != null && hasInstance(numericConversionClass)) {
+                return format("%s = (int) %s.INSTANCE.parse(%s.text());\n", argumentName, numericConversionClass.getName(), valueInName);
+
+            } else if (numericConversionClass != null && LongConverter.class.isAssignableFrom(numericConversionClass)) {
+                numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);\n",
+                        numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
+
+                return format("%s = (int) %sConverter.parse(%s.text());\n", argumentName, argumentName, valueInName);
+            } else if (numericConversionClass != null && IntConverter.class.isAssignableFrom(numericConversionClass)) {
                 numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);\n",
                         numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
 
@@ -605,17 +652,23 @@ public class GenerateMethodReader {
             } else
                 return format("%s = %s.int32();\n", argumentName, valueInName);
         } else if (long.class.equals(argumentType)) {
-            if (numericConversionClass != null && LongConverter.class.isAssignableFrom(numericConversionClass)) {
+            if (numericConversionClass != null && hasInstance(numericConversionClass)) {
+                return format("%s = %s.INSTANCE.parse(%s.text());\n", argumentName, numericConversionClass.getName(), valueInName);
+
+            } else if (numericConversionClass != null && LongConverter.class.isAssignableFrom(numericConversionClass)) {
                 numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);\n",
                         numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
 
                 return format("%s = %sConverter.parse(%s.text());\n", argumentName, argumentName, valueInName);
-            } else
+            } else {
                 return format("%s = %s.int64();\n", argumentName, valueInName);
+            }
         } else if (float.class.equals(argumentType)) {
             return format("%s = %s.float32();\n", argumentName, valueInName);
         } else if (double.class.equals(argumentType)) {
             return format("%s = %s.float64();\n", argumentName, valueInName);
+        } else if (Bytes.class.isAssignableFrom(argumentType)) {
+            return format("%s.bytes(%s);\n", valueInName, argumentName);
         } else if (CharSequence.class.isAssignableFrom(argumentType)) {
             return format("%s = %s.text();\n", argumentName, valueInName);
         } else {

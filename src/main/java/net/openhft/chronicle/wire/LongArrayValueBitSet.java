@@ -51,7 +51,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
 
     public LongArrayValueBitSet(final long maxNumberOfBits) {
         words = new BinaryLongArrayReference((maxNumberOfBits + BITS_PER_WORD - 1) / BITS_PER_WORD);
-        disableThreadSafetyCheck(true);
+        singleThreadedCheckDisabled(true);
     }
 
     public LongArrayValueBitSet(final long maxNumberOfBits, Wire w) {
@@ -727,7 +727,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
 
     @Override
     public void readMarshallable(@NotNull final WireIn wire) throws IORuntimeException {
-        disableThreadSafetyCheck(true);
+        singleThreadedCheckDisabled(true);
 
         throwExceptionIfClosed();
 

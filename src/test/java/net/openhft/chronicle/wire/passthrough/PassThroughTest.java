@@ -155,6 +155,7 @@ public class PassThroughTest extends WireTestCommon {
 
         Bytes<?> bytes3 = new HexDumpBytes();
         Wire wire3 = WireType.BINARY_LIGHT.apply(bytes3);
+        wire3.usePadding(false);
 
         final MethodReader reader2 = wire2.methodReader(new Destination() {
             @Override

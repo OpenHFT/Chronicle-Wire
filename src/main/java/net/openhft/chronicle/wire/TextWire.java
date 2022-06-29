@@ -64,6 +64,7 @@ public class TextWire extends AbstractWire implements Wire {
     static final String NULL = "!null \"\"";
     static final BitSet STARTS_QUOTE_CHARS = new BitSet();
     static final BitSet QUOTE_CHARS = new BitSet();
+    static final BitSet END_CHARS = new BitSet();
     static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_QUOTES = new ThreadLocal<>();//ThreadLocal.withInitial(StopCharTesters.QUOTES::escaping);
     static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_SINGLE_QUOTES = new ThreadLocal<>();//ThreadLocal.withInitial(() -> StopCharTesters.SINGLE_QUOTES.escaping());
     static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_END_OF_TEXT = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
@@ -82,14 +83,17 @@ public class TextWire extends AbstractWire implements Wire {
     static final Supplier<StopCharTester> END_OF_TEXT_ESCAPING = TextStopCharTesters.END_OF_TEXT::escaping;
     static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT::escaping;
     static final Supplier<StopCharsTester> END_EVENT_NAME_ESCAPING = TextStopCharsTesters.END_EVENT_NAME::escaping;
+    static final Bytes<?> META_DATA = Bytes.from("!!meta-data");
 
     static {
         IOTools.unmonitor(TYPE);
         IOTools.unmonitor(BINARY);
-        for (char ch : "?%&@`0123456789+- ',#:{}[]|>!\\".toCharArray())
+        for (char ch : "?%*&@`0123456789+- ',#:{}[]|>!\\".toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
-        for (char ch : "?,#:{}[]|>\\".toCharArray())
+        for (char ch : "?,#:{}[]|>\\^".toCharArray())
             QUOTE_CHARS.set(ch);
+        for (char ch : "#:}]".toCharArray())
+            END_CHARS.set(ch);
         // make sure it has loaded.
         WireInternal.INTERNER.valueCount();
     }
@@ -111,11 +115,6 @@ public class TextWire extends AbstractWire implements Wire {
 
     public TextWire(@NotNull Bytes<?> bytes) {
         this(bytes, false);
-    }
-
-    @Override
-    public boolean isBinary() {
-        return false;
     }
 
     @NotNull
@@ -237,6 +236,11 @@ public class TextWire extends AbstractWire implements Wire {
      */
     public static <T> T load(String filename) throws IOException {
         return (T) TextWire.fromFile(filename).readObject();
+    }
+
+    @Override
+    public boolean isBinary() {
+        return false;
     }
 
     public boolean strict() {
@@ -596,21 +600,26 @@ public class TextWire extends AbstractWire implements Wire {
         return "todo";
     }
 
+    // TODO Move to valueIn
     public void consumePadding(int commas) {
         for (; ; ) {
             int codePoint = peekCode();
             switch (codePoint) {
                 case '#':
-                    //noinspection StatementWithEmptyBody
-                    while (notNewLine(readCode())) ;
+                    readCode();
+                    while (peekCode() == ' ')
+                        readCode();
+                    final StringBuilder sb = WireInternal.acquireAnotherStringBuilder(this.sb);
+                    for (int ch; notNewLine(ch = readCode()); )
+                        sb.append((char) ch);
+                    if (!valueIn.consumeAny)
+                        commentListener.accept(sb);
                     this.lineStart = bytes.readPosition();
                     break;
                 case ',':
                     if (valueIn.isASeparator(peekCodeNext()) && commas-- <= 0)
                         return;
                     bytes.readSkip(1);
-                    if (commas == 0)
-                        return;
                     break;
                 case ' ':
                 case '\t':
@@ -1201,6 +1210,27 @@ public class TextWire extends AbstractWire implements Wire {
         return this;
     }
 
+    @Override
+    public void reset() {
+        writeContext.reset();
+        readContext.reset();
+        sb.setLength(0);
+        lineStart = 0;
+        valueIn.resetState();
+        valueOut.resetState();
+        bytes.clear();
+    }
+
+    @Override
+    public boolean hasMetaDataPrefix() {
+        if (bytes.startsWith(META_DATA)
+                && bytes.peekUnsignedByte(bytes.readPosition() + 11) <= ' ') {
+            bytes.readSkip(12);
+            return true;
+        }
+        return false;
+    }
+
     enum NoObject {NO_OBJECT}
 
     /**
@@ -1249,10 +1279,7 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         protected void trimWhiteSpace() {
-            // remove multiple new lines
-            long wp = bytes.writePosition();
-            if (bytes.peekUnsignedByte(wp - 1) == '\n' && bytes.peekUnsignedByte(wp - 2) == '\n')
-                bytes.writeSkip(-1);
+            BytesUtil.combineDoubleNewline(bytes);
         }
 
         @Override
@@ -1272,6 +1299,7 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         protected void indent() {
+            BytesUtil.combineDoubleNewline(bytes);
             for (int i = 0; i < indentation; i++) {
                 bytes.writeUnsignedShort(' ' * 257);
             }
@@ -1288,6 +1316,7 @@ public class TextWire extends AbstractWire implements Wire {
             } else {
                 sep = leaf ? COMMA_SPACE : COMMA_NEW_LINE;
             }
+            BytesUtil.combineDoubleNewline(bytes);
         }
 
         @NotNull
@@ -1953,6 +1982,7 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         public void endBlock(boolean leaf, char c) {
+            BytesUtil.combineDoubleNewline(bytes);
             bytes.writeUnsignedByte(c);
             sep = leaf ? COMMA_SPACE : COMMA_NEW_LINE;
         }
@@ -2085,6 +2115,7 @@ public class TextWire extends AbstractWire implements Wire {
             } else {
                 prependSeparator();
             }
+            BytesUtil.combineDoubleNewline(bytes);
             bytes.writeUnsignedByte(object instanceof Externalizable ? ']' : '}');
             if (popSep != null)
                 sep = popSep;
@@ -2223,6 +2254,7 @@ public class TextWire extends AbstractWire implements Wire {
     class TextValueIn implements ValueIn {
         final ValueInStack stack = new ValueInStack();
         int sequenceLimit = 0;
+        private boolean consumeAny;
 
         @Override
         public void resetState() {
@@ -2377,7 +2409,7 @@ public class TextWire extends AbstractWire implements Wire {
             }
 
             int prev = peekBack();
-            if (prev == ':' || prev == '#' || prev == '}' || prev == ']')
+            if (END_CHARS.get(prev))
                 bytes.readSkip(-1);
             return ret;
         }
@@ -2549,10 +2581,12 @@ public class TextWire extends AbstractWire implements Wire {
 
         protected long readLengthMarshallable() {
             long start = bytes.readPosition();
+            this.consumeAny = true;
             try {
                 consumeAny();
                 return bytes.readPosition() - start;
             } finally {
+                this.consumeAny = false;
                 bytes.readPosition(start);
             }
         }
@@ -2595,6 +2629,8 @@ public class TextWire extends AbstractWire implements Wire {
                 case '\'':
                 default:
                     consumeValue();
+                    while (peekBack() <= ' ' && bytes.readPosition() >= 0)
+                        bytes.readSkip(-1);
                     if (peekBack() == ',') {
                         bytes.readSkip(-1);
                         break;
@@ -3463,18 +3499,12 @@ public class TextWire extends AbstractWire implements Wire {
 
         public void checkRewind() {
             int ch = peekBack();
-            if (ch == ':' || ch == '}' || ch == ']')
+            if (END_CHARS.get(ch))
                 bytes.readSkip(-1);
-
-            else if ((ch > 'F' && (ch < 'a' || ch > 'f'))) {
-                throw new IllegalArgumentException("Unexpected character in number '" + (char) ch + '\'');
-            }
         }
 
         public void checkRewindDouble() {
-            int ch = peekBack();
-            if (ch == ':' || ch == '}' || ch == ']')
-                bytes.readSkip(-1);
+            checkRewind();
         }
 
         /**

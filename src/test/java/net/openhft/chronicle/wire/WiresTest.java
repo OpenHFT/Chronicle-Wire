@@ -2,17 +2,19 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesMarshallable;
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("rawtypes")
 public class WiresTest extends WireTestCommon {
@@ -187,6 +189,15 @@ public class WiresTest extends WireTestCommon {
                 "---\n" +
                 "say: Three\n" +
                 "...\n", new String(baos.toByteArray(), StandardCharsets.ISO_8859_1));
+    }
+
+    @Test
+    public void deepCopyNotBoundToThread() {
+        BytesContainerMarshallable bcm = new BytesContainerMarshallable();
+        bcm.bytesField.append("Hello");
+        assumeFalse(Jvm.getValue(bcm.bytesField, "usedByThread") == null);
+        BytesContainerMarshallable bcm2 = bcm.deepCopy();
+        assertNull(Jvm.getValue(bcm2.bytesField, "usedByThread"));
     }
 
     interface ThreeValues {

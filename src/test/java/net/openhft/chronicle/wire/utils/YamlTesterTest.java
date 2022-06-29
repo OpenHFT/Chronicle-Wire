@@ -42,4 +42,11 @@ public class YamlTesterTest extends WireTestCommon {
         final YamlTester yt = YamlTester.runTest(TestImpl.class, "yaml-tester/t3");
         assertNotEquals(yt.expected(), yt.actual());
     }
+
+    @Test
+    public void comments() {
+        // Note using YamlWire instead of TextWire moves comment 8
+        final YamlTester yt = YamlTester.runTest(TestImpl::new, TestOut.class, "yaml-tester/comments");
+        assertEquals(yt.expected(), yt.actual());
+    }
 }

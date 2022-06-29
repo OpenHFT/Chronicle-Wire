@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -46,6 +47,8 @@ public enum WireInternal {
     static final StringInterner INTERNER = new StringInterner(Integer.getInteger("wire.interner.size", 4096));
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final StringBuilderPool ASBP = new StringBuilderPool();
+    static final StringBuilderPool SBPVI = new StringBuilderPool();
+    static final StringBuilderPool SBPVO = new StringBuilderPool();
     static final ThreadLocal<WeakReference<Bytes<?>>> BYTES_TL = new ThreadLocal<>();
     static final ThreadLocal<WeakReference<Bytes<?>>> BYTES_F2S_TL = new ThreadLocal<>();
     static final ThreadLocal<WeakReference<Wire>> BINARY_WIRE_TL = new ThreadLocal<>();
@@ -125,6 +128,8 @@ public enum WireInternal {
             int len0 = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
             bytes.writeOrderedInt(len0);
             writer.writeMarshallable(wireOut);
+            if (!wireOut.isBinary())
+                BytesUtil.combineDoubleNewline(bytes);
             long position1 = bytes.writePosition();
             if (wireOut.usePadding()) {
                 int bytesToSkip = (int) ((position - position1) & 0x3);
@@ -320,6 +325,14 @@ public enum WireInternal {
                 Wires::unmonitoredDirectBytes);
         bytes.clear();
         return bytes;
+    }
+
+    static StringBuilder acquireStringBuilderForValueIn() {
+        return SBPVI.acquireStringBuilder();
+    }
+
+    static StringBuilder acquireStringBuilderForValueOut() {
+        return SBPVO.acquireStringBuilder();
     }
 
     static class ObjectInterner<T> extends FromStringInterner<T> {

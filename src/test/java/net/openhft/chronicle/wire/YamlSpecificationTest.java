@@ -111,12 +111,11 @@ public class YamlSpecificationTest extends WireTestCommon {
     @NotNull
     private String parseWithYaml(String snippet) {
         Object o = YAML.fromString(snippet);
-        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
-        YamlWire tw = new YamlWire(bytes);
-        tw.writeObject(o);
+        YamlWire tw = (YamlWire) Wire.newYamlWireOnHeap();
+        tw.getValueOut().object(o);
 
-        return bytes.toString();
+        return tw.toString();
     }
 
     @Nullable

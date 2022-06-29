@@ -1,5 +1,8 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.AppendableUtil;
+import net.openhft.chronicle.bytes.Bytes;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -20,6 +23,7 @@ import java.util.concurrent.TimeUnit;
  * <p>
  * Parsing of ISO dates with or without timestamps is supported. When an ISO date
  * is read with no timezone, it is assumed to be in the converter's zone.
+ *
  */
 public abstract class AbstractTimestampLongConverter implements LongConverter {
     public static final ZoneId UTC = ZoneId.of("UTC");
@@ -93,10 +97,9 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
      */
     protected abstract void appendFraction(DateTimeFormatterBuilder builder);
 
-    @Override
-    public void append(StringBuilder text, long value) {
+    public void append(Appendable text, long value) {
         if (value <= 0) {
-            text.append(value);
+            AppendableUtil.append(text, value);
             return;
         }
         LocalDateTime ldt = LocalDateTime.ofEpochSecond(
@@ -109,5 +112,15 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
             dtf.formatTo(ZonedDateTime.of(ldt, UTC)
                     .withZoneSameInstant(zoneId), text);
         }
+    }
+
+    @Override
+    public void append(StringBuilder text, long value) {
+        append((Appendable) text, value);
+    }
+
+    @Override
+    public void append(Bytes<?> bytes, long value) {
+        append((Appendable) bytes, value);
     }
 }

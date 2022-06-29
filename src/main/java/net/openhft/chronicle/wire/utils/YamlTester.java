@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire.utils;
 
 import net.openhft.chronicle.wire.TextMethodTester;
+import net.openhft.chronicle.wire.WireOut;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -50,6 +51,30 @@ public interface YamlTester {
                     path + "/in.yaml",
                     builder,
                     outClass,
+                    path + "/out.yaml")
+                    .setup(path + "/setup.yaml")
+                    .run();
+        } catch (IOException ioe) {
+            throw new AssertionError(ioe);
+        }
+    }
+
+    /**
+     * Test a component implemented in a class using in.yaml comparing with out.yaml,
+     * with optionally setup.yaml to initialise it.
+     *
+     * @param builder     to construct a component to be tested
+     * @param outFunction the interface of output
+     * @param path        where the yaml files can be found
+     * @return the results for comparison
+     * @throws AssertionError if anything went wrong
+     */
+    static <T> YamlTester runTest(Function<T, Object> builder, Function<WireOut, T> outFunction, String path) throws AssertionError {
+        try {
+            return new TextMethodTester<T>(
+                    path + "/in.yaml",
+                    builder,
+                    outFunction,
                     path + "/out.yaml")
                     .setup(path + "/setup.yaml")
                     .run();

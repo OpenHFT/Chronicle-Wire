@@ -17,10 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.NoBytesStore;
-import net.openhft.chronicle.bytes.PointerBytesStore;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -61,6 +58,7 @@ import static org.junit.Assert.*;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TextWireTest extends WireTestCommon {
 
+    static Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
     Bytes<?> bytes;
 
     @Test
@@ -129,6 +127,19 @@ public class TextWireTest extends WireTestCommon {
                 "  field: hello world, \t\t# a comment where the value=hello world\n" +
                 "  field2: !!null \"\"\n" +
                 "}\n", Marshallable.$toString(f));
+    }
+
+    @Test
+    public void testCommentAfterString() {
+        Map<String, Object> o = Marshallable.fromString("{\n" +
+                "  pattern: '@Symbol =~ \"[A-L].*\"', # quoted\n" +
+                "  policy: ROUND_ROBIN, # unquoted\n" +
+                "  routes: [ \"INT1\" ] # terminating list\n" +
+                "}");
+
+        assertEquals("ROUND_ROBIN", o.get("policy"));
+        assertEquals(Collections.singletonList("INT1"), o.get("routes"));
+        assertEquals("@Symbol =~ \"[A-L].*\"", o.get("pattern"));
     }
 
     @Test
@@ -275,14 +286,12 @@ public class TextWireTest extends WireTestCommon {
         wire.write();
         wire.write();
         assertEquals("\"\": \"\": \"\": ", wire.toString());
-
-        wire.bytes().releaseLast();
     }
 
     @NotNull
     private Wire createWire() {
-        bytes = allocateElasticOnHeap();
-        final Wire wire = WireType.TEXT.apply(bytes);
+        wire.reset();
+        bytes = wire.bytes();
         return wire;
     }
 
@@ -1450,6 +1459,12 @@ public class TextWireTest extends WireTestCommon {
             wire.getValueOut().typedMarshallable(new DemarshallableObject("test", 12345));
         }
 
+        assertEquals("40000052", Integer.toUnsignedString(wire.bytes().readInt(0), 16));
+        assertEquals("!net.openhft.chronicle.wire.DemarshallableObject {\n" +
+                "  name: test,\n" +
+                "  value: 12345\n" +
+                "}\n", wire.toString().substring(4));
+
         assertEquals("--- !!meta-data\n" +
                 "!net.openhft.chronicle.wire.DemarshallableObject {\n" +
                 "  name: test,\n" +
@@ -1483,6 +1498,13 @@ public class TextWireTest extends WireTestCommon {
         wire.readDocument(null, wir -> wire.read(() -> "put")
                 .marshallable(w -> w.read(() -> "key").object(Object.class, "1", Assert::assertEquals)
                         .read(() -> "value").object(byte[].class, expected, Assert::assertArrayEquals)));
+    }
+
+    @Test
+    public void two() {
+        testByteArrayValueWithRealBytesNegative();
+        wire.reset();
+        uint16();
     }
 
     @Test
@@ -1537,8 +1559,6 @@ public class TextWireTest extends WireTestCommon {
                     .object(Map.class);
             assertEquals(map, map2);
         });
-
-        wire.bytes().releaseLast();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -1909,6 +1929,74 @@ public class TextWireTest extends WireTestCommon {
         assertEquals("[1,2,3, c]", "" + list);
     }
 
+    @Test
+    public void testDuration() {
+        DurationHolder dh = new DurationHolder(1, Duration.ofSeconds(63));
+        String h = dh.toString();
+        System.out.println(h);
+        DurationHolder dh2 = Marshallable.fromString(h);
+        assertEquals(dh, dh2);
+    }
+
+    @Test
+    public void readsComment() {
+        StringBuilder sb = new StringBuilder();
+        Wire wire = createWire();
+        try (DocumentContext dc = wire.writingDocument()) {
+            wire.writeComment("one");
+            wire.writeEventId("dto", 1);
+            wire.writeComment("two");
+            wire.getValueOut().object(new BinaryWireTest.DTO("text"));
+            wire.writeComment("three");
+            wire.commentListener(cs ->
+                    sb.append(cs).append("\n"));
+        }
+        final MethodReader reader = wire.methodReader((BinaryWireTest.IDTO) dto -> sb.append("dto: " + dto + "\n"));
+        assertTrue(reader.readOne());
+        assertFalse(reader.readOne());
+        assertEquals("" +
+                "one\n" +
+                "two\n" +
+                "three\n" +
+                "dto: !net.openhft.chronicle.wire.BinaryWireTest$DTO {\n" +
+                "  text: text\n" +
+                "}\n" +
+                "\n", sb.toString());
+    }
+
+    @Test
+    public void readMetaData() {
+        Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
+        wire.bytes().append("" +
+                "---\n" +
+                "!!meta-data\n" +
+                "hello-world\n" +
+                "...\n" +
+                "---\n" +
+                "!!data\n" +
+                "hello-world\n" +
+                "...\n" +
+                "---\n" +
+                "!!meta-data\n" +
+                "dto: {\n" +
+                "  text: hello-world\n" +
+                "}\n" +
+                "...\n" +
+                "---\n" +
+                "!!data\n" +
+                "dto: {\n" +
+                "  text: hello-world\n" +
+                "}\n" +
+                "...\n" +
+                "");
+        for (int i = 0; i < 4; i++) {
+            try (DocumentContext dc = wire.readingDocument()) {
+                final boolean metaData = i % 2 == 0;
+                assertEquals("i: " + i, metaData, dc.isMetaData());
+            }
+        }
+    }
+
     public enum OrderLevel implements Marshallable {
         PARENT, CHILD;
     }
@@ -2091,10 +2179,10 @@ public class TextWireTest extends WireTestCommon {
 
     static class TwoLongs extends SelfDescribingMarshallable {
 
-        @LongConversion(HexaDecimalConverter.class)
+        @LongConversion(HexadecimalLongConverter.class)
         long hexadecimal;
 
-        @LongConversion(HexaDecimalConverter.class)
+        @LongConversion(HexadecimalLongConverter.class)
         long hexa2;
 
         public TwoLongs(long hexadecimal, long hexa2) {
@@ -2102,19 +2190,6 @@ public class TextWireTest extends WireTestCommon {
             this.hexa2 = hexa2;
         }
     }
-
-    static class HexaDecimalConverter implements LongConverter {
-        @Override
-        public long parse(CharSequence text) {
-            return Long.parseUnsignedLong(text.toString(), 16);
-        }
-
-        @Override
-        public void append(StringBuilder text, long value) {
-            text.append(Long.toHexString(value));
-        }
-    }
-
 
     static class DurationHolder extends SelfDescribingMarshallable {
         int foo;
@@ -2124,15 +2199,6 @@ public class TextWireTest extends WireTestCommon {
             this.foo = foo;
             this.duration = duration;
         }
-    }
-
-    @Test
-    public void testDuration() {
-        DurationHolder dh = new DurationHolder(1, Duration.ofSeconds(63));
-        String h = dh.toString();
-        System.out.println(h);
-        DurationHolder dh2 = Marshallable.fromString(h);
-        assertEquals(dh, dh2);
     }
 
     class Circle implements Marshallable {

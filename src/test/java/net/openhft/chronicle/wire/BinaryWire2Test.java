@@ -43,10 +43,9 @@ import static org.junit.Assume.assumeTrue;
 @SuppressWarnings("rawtypes")
 @RunWith(value = Parameterized.class)
 public class BinaryWire2Test extends WireTestCommon {
+    final boolean usePadding;
     @NotNull
     Bytes<?> bytes = new HexDumpBytes();
-
-    final boolean usePadding;
 
     public BinaryWire2Test(boolean usePadding) {
         this.usePadding = usePadding;
@@ -443,8 +442,6 @@ public class BinaryWire2Test extends WireTestCommon {
 
     @Test
     public void fieldAfterNullContext() {
-        assumeTrue(usePadding);
-
         expectException("Unable to copy !UpdateEvent safely will try anyway");
         @NotNull Wire wire = createWire();
         try (DocumentContext ignored = wire.writingDocument(true)) {
@@ -459,9 +456,10 @@ public class BinaryWire2Test extends WireTestCommon {
                             .write("value").object("world2"));
         }
 
-        assertEquals("--- !!meta-data #binary\n" +
+        assertEquals("" +
+                        "--- !!meta-data #binary\n" +
                         "tid: 1234567890\n" +
-                        "# position: 16, header: 0\n" +
+                        "# position: 1X, header: 0\n" +
                         "--- !!data #binary\n" +
                         "data: !!UpdateEvent {\n" +
                         "  assetName: /name,\n" +
@@ -469,7 +467,7 @@ public class BinaryWire2Test extends WireTestCommon {
                         "  oldValue: !!null \"\",\n" +
                         "  value: world2\n" +
                         "}\n",
-                Wires.fromSizePrefixedBlobs(wire.bytes()));
+                Wires.fromSizePrefixedBlobs(wire).replaceAll("position: 1\\d", "position: 1X"));
         try (DocumentContext context = wire.readingDocument()) {
             assertTrue(context.isPresent());
             assertTrue(context.isMetaData());

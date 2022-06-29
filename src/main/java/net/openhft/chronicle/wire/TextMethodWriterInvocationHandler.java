@@ -81,21 +81,20 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
         for (Annotation anno : parameterAnnotations[0]) {
             if (anno instanceof LongConversion) {
                 LongConversion longConversion = (LongConversion) anno;
-                LongConverter ic = ObjectUtils.newInstance(longConversion.value());
-                return a -> {
-                    if (a[0] instanceof Number) {
-                        StringBuilder sb = Wires.acquireStringBuilder();
-                        ic.append(sb, ((Number) a[0]).longValue());
-                        a[0] = new RawText(sb);
-                    }
-                };
+                final Class<?> value = longConversion.value();
+
+                return buildLongConverter(value);
+            }
+            LongConversion lc2 = anno.annotationType().getAnnotation(LongConversion.class);
+            if (lc2 != null) {
+                return buildLongConverter(anno.annotationType());
             }
             if (anno instanceof IntConversion) {
                 IntConversion intConversion = (IntConversion) anno;
                 IntConverter ic = ObjectUtils.newInstance(intConversion.value());
                 return a -> {
                     if (a[0] instanceof Number) {
-                        StringBuilder sb = Wires.acquireStringBuilder();
+                        StringBuilder sb = WireInternal.acquireStringBuilder();
                         ic.append(sb, ((Number) a[0]).intValue());
                         a[0] = new RawText(sb);
                     }
@@ -103,6 +102,26 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
             }
         }
         return NOOP_CONSUMER;
+    }
+
+    @NotNull
+    private Consumer<Object[]> buildLongConverter(Class<?> value) {
+        LongConverter lc;
+        try {
+            lc = (LongConverter) value.getField("INSTANCE").get(null);
+        } catch (NoSuchFieldException e) {
+            lc = (LongConverter) ObjectUtils.newInstance(value);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        LongConverter finalLc = lc;
+        return a -> {
+            if (a[0] instanceof Number) {
+                StringBuilder sb = WireInternal.acquireStringBuilder();
+                finalLc.append(sb, ((Number) a[0]).longValue());
+                a[0] = new RawText(sb);
+            }
+        };
     }
 
     @Deprecated(/* To be removed in x.24 */)
