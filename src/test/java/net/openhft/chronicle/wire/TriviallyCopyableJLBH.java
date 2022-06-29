@@ -6,6 +6,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.jlbh.JLBH;
 import net.openhft.chronicle.jlbh.JLBHOptions;
 import net.openhft.chronicle.jlbh.JLBHTask;
+import net.openhft.affinity.AffinityLock;
 import org.jetbrains.annotations.NotNull;
 
 import static net.openhft.chronicle.core.io.IOTools.deleteDirWithFiles;
@@ -15,23 +16,25 @@ public class TriviallyCopyableJLBH implements JLBHTask {
 
 
     enum HouseType {
-        TRIVIALLY_COPYABLE, BINARY_WIRE;
+        TRIVIALLY_COPYABLE, 
+        BINARY_WIRE,
+        UNKNOWN;
     }
 
 
-    // change these, to select which one to run
-    HouseType type = HouseType.BINARY_WIRE;
+    // use -Dio.type=binary or trivial to set. Defaults to binary
+    HouseType type = HouseType.UNKNOWN;
 
-    // HouseType type = HouseType.TRIVIALLY_COPYABLE;
-
+    // use -Dcpu=N to set. Defaults to 2
+    final int CPU;
 
     static {
         System.setProperty("jvm.resource.tracing", "false");
         CLASS_ALIASES.addAlias(TriviallyCopyableHouse.class, "House1");
         CLASS_ALIASES.addAlias(House.class, "House2");
-        Jvm.isDebug();
-        System.out.println("jvm.resource.tracing=" + System.getProperty("jvm.resource.tracing"));
-        System.setProperty("dumpCode", "true");
+        System.setProperty("disable.thread.safety", "true");
+        System.setProperty("jvm.resource.tracing", "false");
+        System.setProperty("check.thread.safety", "false");
     }
 
     public interface BaseHouse {
@@ -84,7 +87,8 @@ public class TriviallyCopyableJLBH implements JLBHTask {
 
     public static class House extends SelfDescribingMarshallable implements BaseHouse {
 
-        final Bytes address = Bytes.elasticByteBuffer();
+
+        final Bytes address = Bytes.allocateDirect(128);
 
         public BaseHouse address(CharSequence owner) {
             address.clear().append(owner);
@@ -94,25 +98,51 @@ public class TriviallyCopyableJLBH implements JLBHTask {
 
 
     private JLBH lth;
-    final BaseHouse originalHouse = newHouse(type).address("82 St John Street, Clerkenwell");
+    final BaseHouse originalHouse;
 
     private BaseHouse newHouse(HouseType type) {
         return type == HouseType.TRIVIALLY_COPYABLE ? new TriviallyCopyableHouse() : new House();
     }
 
-    final BaseHouse targetHouse = new TriviallyCopyableHouse();
+    final BaseHouse targetHouse;
 
-    final Wire wire = WireType.BINARY.apply(Bytes.elasticHeapByteBuffer());
+    final Wire wire = WireType.BINARY.apply(Bytes.allocateDirect(1024));
 
     public static void main(String[] args) {
+        new TriviallyCopyableJLBH().test();   
+        System.exit(0);
+    }
+
+    TriviallyCopyableJLBH() 
+    {
+        String ioType = System.getProperty("io.type", "binary");
+        if(ioType.equals("binary")) {
+            type = HouseType.BINARY_WIRE;
+        } else if(ioType.equals("trivial")) {
+            type = HouseType.TRIVIALLY_COPYABLE;
+        } else {
+            System.out.println("-Dio.type must be \"binary\" or \"trivial\"");
+            System.exit(-1);
+        }
+
+        CPU = Integer.parseInt(System.getProperty("cpu", "2"));
+
+        originalHouse = newHouse(type).address("82 St John Street, Clerkenwell");
+        targetHouse = newHouse(type);
+    }
+
+
+    public void test() {
         deleteDirWithFiles("tmp");
         @NotNull JLBHOptions jlbhOptions = new JLBHOptions()
-                .warmUpIterations(500_000)
-                .iterations(500_000)
-                .throughput(500_000)
+                .warmUpIterations(1_000_000)
+                .iterations(1_000_000)
+                .throughput(100_000)
                 .accountForCoordinatedOmission(false)
-                .runs(10)
-                .jlbhTask(new TriviallyCopyableJLBH());
+                .acquireLock(()->AffinityLock.acquireLock(CPU))
+                .recordOSJitter(false)
+                .runs(5)
+                .jlbhTask(this);
         new JLBH(jlbhOptions).start();
     }
 
