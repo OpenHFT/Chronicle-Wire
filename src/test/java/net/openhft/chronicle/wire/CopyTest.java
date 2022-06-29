@@ -46,6 +46,8 @@ public class CopyTest extends WireTestCommon {
         return Arrays.asList(
                 // new Object[] {WireType.TEXT, WireType.BINARY, true}, // not supported yet
                 // new Object[] {WireType.TEXT, WireType.BINARY, false}, // not supported yet
+                new Object[]{WireType.YAML, WireType.BINARY_LIGHT, true},
+                // new Object[]{WireType.TEXT, WireType.BINARY_LIGHT, true},
                 new Object[]{WireType.BINARY, WireType.JSON, false},
                 new Object[]{WireType.BINARY, WireType.TEXT, true},
                 new Object[]{WireType.BINARY, WireType.TEXT, false},
@@ -77,9 +79,9 @@ public class CopyTest extends WireTestCommon {
 
         AClass a = create();
         if (withType)
-            wireFrom.getValueOut().object(a);
+            wireFrom.write("test").object(a);
         else
-            wireFrom.getValueOut().marshallable(a);
+            wireFrom.write("test").marshallable(a);
 
         wireFrom.copyTo(wireTo);
         if (to == WireType.JSON || to == WireType.JSON_ONLY) {
@@ -87,6 +89,8 @@ public class CopyTest extends WireTestCommon {
             assertFalse(text, text.contains("? "));
             assertFalse(text, text.contains("\n\""));
         }
+        final String event = wireTo.readEvent(String.class);
+        assertEquals("test", event);
         AClass b = wireTo.getValueIn().object(AClass.class);
 
         assertEquals(a, b);
