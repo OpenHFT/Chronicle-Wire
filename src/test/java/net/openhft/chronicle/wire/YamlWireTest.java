@@ -1551,7 +1551,7 @@ public class YamlWireTest extends WireTestCommon {
         wire.writeDocument(false, w -> w.write("four").object(four));
 
         final String expected1 = "--- !!data\n" +
-                "nothing: !byte[] !!binary \n" +
+                "nothing: !byte[] !!binary\n" +
                 "# position: 32, header: 1\n" +
                 "--- !!data\n" +
                 "one: !byte[] !!binary AQ==\n" +
@@ -1559,7 +1559,7 @@ public class YamlWireTest extends WireTestCommon {
                 "--- !!data\n" +
                 "four: !byte[] !!binary AQIDBA==\n";
         final String expected2 = "--- !!data\n" +
-                "nothing: !byte[] !!binary \n" +
+                "nothing: !byte[] !!binary\n" +
                 "# position: 31, header: 1\n" +
                 "--- !!data\n" +
                 "one: !byte[] !!binary AQ==\n" +
