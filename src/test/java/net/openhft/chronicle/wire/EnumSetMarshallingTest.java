@@ -49,7 +49,7 @@ public class EnumSetMarshallingTest extends WireTestCommon {
     private static final String EMPTY_SET_SERIALISED_FORM =
             "--- !!data #binary\n" +
                     "key: {\n" +
-                    "  f: [  ]\n" +
+                    "  f: [ ]\n" +
                     "}\n";
 
     @Test
