@@ -74,7 +74,7 @@ public class WireSerializedLambdaTest extends WireTestCommon {
                 "  imn: toUpperCase,\n" +
                 "  ims: ()Ljava/lang/String;,\n" +
                 "  imt: (Ljava/lang/String;)Ljava/lang/String;,\n" +
-                "  ca: [  ]\n" +
+                "  ca: [ ]\n" +
                 "}\n" +
                 "two: !Fun ADD_A\n" +
                 "three: !Update INCR\n", wire.bytes().toString());

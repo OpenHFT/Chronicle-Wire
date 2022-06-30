@@ -979,7 +979,7 @@ public class YamlWireTest extends WireTestCommon {
             assertEquals("[\n" +
                     "  { token: STREAM_START, indent: -1, keys: !!null \"\" },\n" +
                     "  { token: DIRECTIVES_END, indent: -1, keys: !!null \"\" },\n" +
-                    "  { token: MAPPING_START, indent: 0, keys: !net.openhft.chronicle.wire.YamlKeys { count: 2, offsets: [ 10, 41, 0, 0, 0, 0, 0 ]  } }\n" +
+                    "  { token: MAPPING_START, indent: 0, keys: !net.openhft.chronicle.wire.YamlKeys { count: 2, offsets: [ 10, 41, 0, 0, 0, 0, 0 ] } }\n" +
                     "]\n", yw.dumpContext());
             assertEquals("{c=lo, d=xyz}", "" + yw.read("B").object());
             assertEquals("{b=1234, c=hi, d=abc}", "" + yw.read("A").object());
@@ -998,7 +998,7 @@ public class YamlWireTest extends WireTestCommon {
             assertEquals("[\n" +
                     "  { token: STREAM_START, indent: -1, keys: !!null \"\" },\n" +
                     "  { token: DIRECTIVES_END, indent: -1, keys: !!null \"\" },\n" +
-                    "  { token: MAPPING_START, indent: 0, keys: !net.openhft.chronicle.wire.YamlKeys { count: 4, offsets: [ 2, 8, 14, 32, 0, 0, 0 ]  } }\n" +
+                    "  { token: MAPPING_START, indent: 0, keys: !net.openhft.chronicle.wire.YamlKeys { count: 4, offsets: [ 2, 8, 14, 32, 0, 0, 0 ] } }\n" +
                     "]\n", yw.dumpContext());
             assertEquals("AA", "" + yw.read("b").object());
             assertEquals("{}", "" + yw.read("c").object());
@@ -1551,7 +1551,7 @@ public class YamlWireTest extends WireTestCommon {
         wire.writeDocument(false, w -> w.write("four").object(four));
 
         final String expected1 = "--- !!data\n" +
-                "nothing: !byte[] !!binary \n" +
+                "nothing: !byte[] !!binary\n" +
                 "# position: 32, header: 1\n" +
                 "--- !!data\n" +
                 "one: !byte[] !!binary AQ==\n" +
@@ -1559,11 +1559,11 @@ public class YamlWireTest extends WireTestCommon {
                 "--- !!data\n" +
                 "four: !byte[] !!binary AQIDBA==\n";
         final String expected2 = "--- !!data\n" +
-                "nothing: !byte[] !!binary \n" +
-                "# position: 31, header: 1\n" +
+                "nothing: !byte[] !!binary\n" +
+                "# position: 30, header: 1\n" +
                 "--- !!data\n" +
                 "one: !byte[] !!binary AQ==\n" +
-                "# position: 62, header: 2\n" +
+                "# position: 61, header: 2\n" +
                 "--- !!data\n" +
                 "four: !byte[] !!binary AQIDBA==\n";
         assertEquals(usePadding ? expected1 : expected2,
