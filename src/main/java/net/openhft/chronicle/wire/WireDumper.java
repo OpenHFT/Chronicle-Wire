@@ -127,7 +127,8 @@ public class WireDumper {
             sb.append("\n");
         }
 
-        int len = Wires.lengthOf(header);
+        int len0 = Wires.lengthOf(header);
+        int len = len0;
         if (len > this.bytes.readRemaining()) {
             sb.append("#  has a 4 byte size prefix, ").append(len).append(" > ").append(this.bytes.readRemaining()).append(" len is ").append(len);
             return true;
@@ -211,7 +212,9 @@ public class WireDumper {
         }
         if (sb.charAt(sb.length() - 1) != '\n')
             sb.append('\n');
-        this.bytes.readPosition(start + 4 + Wires.lengthOf(header));
+        if (wireIn.usePadding())
+            len0 = (len0 + 3) & ~3;
+        this.bytes.readPosition(Math.min(this.bytes.readLimit(), start + 4 + len0));
         return false;
     }
 

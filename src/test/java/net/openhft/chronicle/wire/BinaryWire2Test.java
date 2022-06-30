@@ -498,7 +498,7 @@ public class BinaryWire2Test extends WireTestCommon {
                 "!net.openhft.chronicle.wire.DemarshallableObject {\n" +
                 "  name: test,\n" +
                 "  value: 123456\n" +
-                "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
+                "}\n", Wires.fromSizePrefixedBlobs(wire));
 
         try (DocumentContext $ = wire.readingDocument()) {
             @Nullable DemarshallableObject dobj = wire.getValueIn().typedMarshallable();
