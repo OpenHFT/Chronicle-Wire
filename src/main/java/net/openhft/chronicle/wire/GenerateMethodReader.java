@@ -17,17 +17,13 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.MethodId;
-import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.util.Annotations;
 import net.openhft.chronicle.core.util.IgnoresEverything;
-import net.openhft.chronicle.wire.internal.GenericReflection;
 import net.openhft.chronicle.wire.utils.JavaSourceCodeFormatter;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
 import org.jetbrains.annotations.NotNull;
@@ -36,14 +32,14 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.lang.reflect.Type;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static net.openhft.chronicle.core.util.GenericReflection.*;
+import static net.openhft.chronicle.wire.GenerateMethodWriter.isSynthetic;
 import static net.openhft.compiler.CompilerUtils.CACHED_COMPILER;
 
 /**
@@ -51,10 +47,25 @@ import static net.openhft.compiler.CompilerUtils.CACHED_COMPILER;
  */
 public class GenerateMethodReader {
     private static final boolean DUMP_CODE = Jvm.getBoolean("dumpCode");
+    private static final Set<Class<?>> IGNORED_INTERFACES = new LinkedHashSet<>();
 
     static {
         // make sure Wires static block called and classpath set up
         Wires.init();
+        Collections.addAll(IGNORED_INTERFACES,
+                BytesMarshallable.class,
+                DocumentContext.class,
+                ReadDocumentContext.class,
+                WriteDocumentContext.class,
+                ExcerptListener.class,
+                FieldInfo.class,
+                FieldNumberParselet.class,
+                Marshallable.class,
+                MarshallableIn.class,
+                MarshallableOut.class,
+                MethodWriter.class,
+                SourceContext.class
+        );
     }
 
     private final WireType wireType;
@@ -155,6 +166,8 @@ public class GenerateMethodReader {
             methodFilterPresent |= methodFilter;
 
             for (Class<?> anInterface : ReflectionUtil.interfaces(aClass)) {
+                if (IGNORED_INTERFACES.contains(anInterface))
+                    continue;
                 handleInterface(anInterface, "instance" + i, methodFilter, eventNameSwitchBlock, eventIdSwitchBlock);
             }
         }
@@ -351,9 +364,8 @@ public class GenerateMethodReader {
             Class<?> declaringClass = m.getDeclaringClass();
             if (declaringClass == Object.class)
                 continue;
-            if (Modifier.isStatic(m.getModifiers()))
-                continue;
-            if ("ignoreMethodBasedOnFirstArg".equals(m.getName()))
+            final int modifiers = m.getModifiers();
+            if (Modifier.isStatic(modifiers) || isSynthetic(modifiers))
                 continue;
             if (!handledMethodSignatures.add(signature(m)))
                 continue;
@@ -387,9 +399,9 @@ public class GenerateMethodReader {
     private void handleMethod(Method m, Class<?> anInterface, String instanceFieldName, boolean methodFilter, SourceCodeFormatter eventNameSwitchBlock, SourceCodeFormatter eventIdSwitchBlock) {
         Jvm.setAccessible(m);
 
-        Class<?>[] parameterTypes = m.getParameterTypes();
+        Type[] parameterTypes = getParameterTypes(m, anInterface);
 
-        Class<?> chainReturnType = (Class<?>) GenericReflection.getReturnType(m, anInterface);
+        Class<?> chainReturnType = erase(getReturnType(m, anInterface));
         if (chainReturnType != DocumentContext.class && (!chainReturnType.isInterface() || Jvm.dontChain(chainReturnType)))
             chainReturnType = null;
 
@@ -397,7 +409,7 @@ public class GenerateMethodReader {
             fields.append(format("// %s\n", m.getName()));
 
         for (int i = 0; i < parameterTypes.length; i++) {
-            Class<?> parameterType = parameterTypes[i];
+            Class<?> parameterType = erase(parameterTypes[i]);
 
             final String typeName = parameterType.getCanonicalName();
             String fieldName = m.getName() + "arg" + i;
@@ -418,7 +430,8 @@ public class GenerateMethodReader {
 
             String parameterTypesArg = parameterTypes.length == 0 ? "" :
                     ", " + Arrays.stream(parameterTypes)
-                            .map(Class::getCanonicalName).map(s -> s + ".class")
+                            .map(t -> erase(t).getCanonicalName())
+                            .map(s -> s + ".class")
                             .collect(Collectors.joining(", "));
 
             fields.append(format("private static final Method %smethod = lookupMethod(%s.class, \"%s\"%s);\n",
@@ -442,13 +455,13 @@ public class GenerateMethodReader {
             eventNameSwitchBlock.append("valueIn.skipValue();\n");
             eventNameSwitchBlock.append(methodCall(m, instanceFieldName, chainedCallPrefix, chainReturnType));
         } else if (parameterTypes.length == 1) {
-            eventNameSwitchBlock.append(argumentRead(m, 0, false));
+            eventNameSwitchBlock.append(argumentRead(m, 0, false, parameterTypes));
             eventNameSwitchBlock.append(methodCall(m, instanceFieldName, chainedCallPrefix, chainReturnType));
         } else {
             if (methodFilter) {
                 eventNameSwitchBlock.append("ignored = false;\n");
                 eventNameSwitchBlock.append("valueIn.sequence(this, (f, v) -> {\n");
-                eventNameSwitchBlock.append(argumentRead(m, 0, true));
+                eventNameSwitchBlock.append(argumentRead(m, 0, true, parameterTypes));
                 eventNameSwitchBlock.append(format("if (((MethodFilterOnFirstArg) f.%s)." +
                                 "ignoreMethodBasedOnFirstArg(\"%s\", f.%sarg%d)) {\n",
                         instanceFieldName, m.getName(), m.getName(), 0));
@@ -461,7 +474,7 @@ public class GenerateMethodReader {
                 eventNameSwitchBlock.append("else {\n");
 
                 for (int i = 1; i < parameterTypes.length; i++)
-                    eventNameSwitchBlock.append(argumentRead(m, i, true));
+                    eventNameSwitchBlock.append(argumentRead(m, i, true, parameterTypes));
 
                 eventNameSwitchBlock.append("}\n");
                 eventNameSwitchBlock.append("});\n");
@@ -471,7 +484,7 @@ public class GenerateMethodReader {
                         "// todo optimize megamorphic lambda call\n");
 
                 for (int i = 0; i < parameterTypes.length; i++)
-                    eventNameSwitchBlock.append(argumentRead(m, i, true));
+                    eventNameSwitchBlock.append(argumentRead(m, i, true, parameterTypes));
 
                 eventNameSwitchBlock.append("});\n");
             }
@@ -573,13 +586,14 @@ public class GenerateMethodReader {
      * Generates code for reading an argument.
      * Side-effect: registers a converter as a field if {@link IntConversion} or {@link LongConversion} is used.
      *
-     * @param m        Method for which an argument is read.
-     * @param argIndex Index of an argument.
-     * @param inLambda <code>true</code> if argument is read in lambda passed to a
-     *                 {@link ValueIn#sequence(Object, BiConsumer)} call.
+     * @param m              Method for which an argument is read.
+     * @param argIndex       Index of an argument.
+     * @param inLambda       <code>true</code> if argument is read in lambda passed to a
+     *                       {@link ValueIn#sequence(Object, BiConsumer)} call.
+     * @param parameterTypes
      * @return Code that retrieves specified argument from {@link ValueIn} input.
      */
-    private String argumentRead(Method m, int argIndex, boolean inLambda) {
+    private String argumentRead(Method m, int argIndex, boolean inLambda, Type[] parameterTypes) {
         Class<?> numericConversionClass = null;
 
         // Numeric conversion is not supported for binary wire
@@ -603,7 +617,7 @@ public class GenerateMethodReader {
             }
         }
 
-        final Class<?> argumentType = m.getParameterTypes()[argIndex];
+        final Class<?> argumentType = erase(parameterTypes[argIndex]);
         String trueArgumentName = m.getName() + "arg" + argIndex;
         String argumentName = (inLambda ? "f." : "") + trueArgumentName;
 

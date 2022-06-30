@@ -1071,6 +1071,8 @@ public class YamlWire extends AbstractWire implements Wire {
         }
         return false;
     }
+
+    @Override
     public boolean readDocument(@Nullable ReadMarshallable metaDataConsumer, @Nullable ReadMarshallable dataConsumer) {
         valueIn.resetState();
         return super.readDocument(metaDataConsumer, dataConsumer);
