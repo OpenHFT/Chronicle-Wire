@@ -1560,10 +1560,10 @@ public class YamlWireTest extends WireTestCommon {
                 "four: !byte[] !!binary AQIDBA==\n";
         final String expected2 = "--- !!data\n" +
                 "nothing: !byte[] !!binary\n" +
-                "# position: 31, header: 1\n" +
+                "# position: 30, header: 1\n" +
                 "--- !!data\n" +
                 "one: !byte[] !!binary AQ==\n" +
-                "# position: 62, header: 2\n" +
+                "# position: 61, header: 2\n" +
                 "--- !!data\n" +
                 "four: !byte[] !!binary AQIDBA==\n";
         assertEquals(usePadding ? expected1 : expected2,
