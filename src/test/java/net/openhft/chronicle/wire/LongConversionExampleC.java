@@ -12,7 +12,7 @@ public class LongConversionExampleC {
     }
     public static class House extends SelfDescribingMarshallable {
         @FieldGroup("address")
-        // 5 longs, each at 8 bytes = 40 bytes, so we can store a String with up to 40 ISO-8859 characters
+        // 5 longs, each at 8 bytes = 40 bytes, so we can store a String with up to 39 ISO-8859 characters (as the first byte contains the length)
         private long text4a, text4b, text4c, text4d, text4e;
         private transient Bytes address = Bytes.forFieldGroup(this, "address");
 
