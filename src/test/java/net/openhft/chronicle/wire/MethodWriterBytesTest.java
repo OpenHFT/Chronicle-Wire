@@ -5,6 +5,7 @@ import net.openhft.chronicle.bytes.MethodReader;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -26,7 +27,7 @@ public class MethodWriterBytesTest {
         reader.readOne();
 
         Bytes result = q.poll(10, TimeUnit.SECONDS);
-        Assert.assertEquals("hello", result);
+        Assert.assertEquals("hello", result.toString());
     }
 
     private void println(Bytes bytes) {
