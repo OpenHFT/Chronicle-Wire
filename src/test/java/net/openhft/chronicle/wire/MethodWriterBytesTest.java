@@ -9,7 +9,6 @@ import org.junit.Test;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-@Ignore("failing test")
 public class MethodWriterBytesTest {
     private ArrayBlockingQueue<Bytes> q = new ArrayBlockingQueue(1);
 
