@@ -287,6 +287,10 @@ public class TextMethodTester<T> implements YamlTester {
             expected = afterRun.apply(expected);
             actual = afterRun.apply(actual);
         }
+        if (OS.isWindows()) {
+            expected = expected.replace("\r\n", "\n");
+            actual = actual.replace("\r\n", "\n");
+        }
         if (REGRESS_TESTS && !originalExpected.equals(expected)) {
             String output = replaceTargetWithSource(this.output);
             String output2;
