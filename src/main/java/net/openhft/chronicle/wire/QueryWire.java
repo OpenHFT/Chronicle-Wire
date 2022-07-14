@@ -42,7 +42,7 @@ import java.util.function.BiFunction;
 @SuppressWarnings("rawtypes")
 public class QueryWire extends TextWire {
     final QueryValueOut valueOut = new QueryValueOut();
-    final ValueIn valueIn = new QueryValueIn();
+    final QueryValueIn valueIn = new QueryValueIn();
 
     public QueryWire(@NotNull Bytes<?> bytes) {
         super(bytes);
@@ -102,6 +102,11 @@ public class QueryWire extends TextWire {
     @Override
     public ValueOut getValueOut() {
         return valueOut;
+    }
+
+    @Override
+    public @NotNull ValueIn getValueIn() {
+        return valueIn;
     }
 
     @NotNull

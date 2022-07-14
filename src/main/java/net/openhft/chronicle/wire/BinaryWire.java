@@ -1258,6 +1258,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                         }
                         return sb;
                 }
+                throw unknownCode(code);
+
             case BinaryWireHighCode.SPECIAL:
                 switch (code) {
                     case NULL:
@@ -1281,9 +1283,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     case EVENT_OBJECT:
                         valueIn.text((StringBuilder) sb);
                         return sb;
-                    default:
-                        return null;
                 }
+                throw unknownCode(code);
 
             case BinaryWireHighCode.FLOAT:
                 AppendableUtil.append(sb, readFloat(code));
@@ -1301,8 +1302,13 @@ public class BinaryWire extends AbstractWire implements Wire {
                 AppendableUtil.setLength(sb, 0);
                 return readText(peekCode(), sb);
             default:
-                throw new UnsupportedOperationException("code=0x" + String.format("%02X ", code).trim());
+                throw unknownCode(code);
         }
+    }
+
+    @NotNull
+    private UnsupportedOperationException unknownCode(int code) {
+        return new UnsupportedOperationException("code=0x" + String.format("%02X ", code).trim());
     }
 
     int readCode() {
