@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.util.Annotations;
+import net.openhft.chronicle.core.util.GenericReflection;
 import net.openhft.chronicle.core.util.IgnoresEverything;
 import net.openhft.chronicle.wire.utils.JavaSourceCodeFormatter;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
@@ -40,7 +41,6 @@ import java.util.stream.Collectors;
 import static java.lang.String.format;
 import static net.openhft.chronicle.core.util.GenericReflection.*;
 import static net.openhft.chronicle.wire.GenerateMethodWriter.isSynthetic;
-import static net.openhft.compiler.CompilerUtils.CACHED_COMPILER;
 
 /**
  * Responsible for code generation and its runtime compilation of custom {@link MethodReader}s.
@@ -72,7 +72,7 @@ public class GenerateMethodReader {
     private final Object[] metaDataHandler;
     private final Object[] instances;
     private final MethodReaderInterceptorReturns interceptor;
-    private final Set<String> handledMethodNames = new HashSet<>();
+    private final Map<String, String> handledMethodNames = new HashMap<>();
     private final Set<String> handledMethodSignatures = new HashSet<>();
     private final Set<Class<?>> handledInterfaces = new HashSet<>();
     private final SourceCodeFormatter sourceCode = new JavaSourceCodeFormatter();
@@ -96,8 +96,8 @@ public class GenerateMethodReader {
         this.generatedClassName = generatedClassName0();
     }
 
-    private static String signature(Method m) {
-        return m.getReturnType() + " " + m.getName() + " " + Arrays.toString(m.getParameterTypes());
+    private static String signature(Method m, Class type) {
+        return GenericReflection.getReturnType(m, type) + " " + m.getName() + " " + Arrays.toString(GenericReflection.getParameterTypes(m, type));
     }
 
     static boolean hasInstance(Class<?> aClass) {
@@ -122,7 +122,7 @@ public class GenerateMethodReader {
         final String fullClassName = packageName() + "." + generatedClassName();
 
         try {
-            return CACHED_COMPILER.loadFromJava(classLoader, fullClassName, sourceCode.toString());
+            return Wires.CACHED_COMPILER.loadFromJava(classLoader, fullClassName, sourceCode.toString());
         } catch (AssertionError e) {
             if (e.getCause() instanceof LinkageError) {
                 try {
@@ -367,21 +367,25 @@ public class GenerateMethodReader {
             final int modifiers = m.getModifiers();
             if (Modifier.isStatic(modifiers) || isSynthetic(modifiers))
                 continue;
-            if (!handledMethodSignatures.add(signature(m)))
+            final String signature = signature(m, anInterface);
+            if (!handledMethodSignatures.add(signature))
                 continue;
 
+            final String methodName = m.getName();
             try {
                 // skip Object defined methods.
-                Object.class.getMethod(m.getName(), m.getParameterTypes());
+                Object.class.getMethod(methodName, m.getParameterTypes());
                 continue;
             } catch (NoSuchMethodException e) {
                 // not an Object method.
             }
 
-            if (!handledMethodNames.add(m.getName())) {
+            if (handledMethodNames.containsKey(methodName)) {
                 throw new IllegalStateException("MethodReader does not support overloaded methods. " +
-                        "Method: " + m);
+                        "Method: " + handledMethodNames.get(methodName) +
+                        ", and: " + signature);
             }
+            handledMethodNames.put(methodName, signature);
 
             handleMethod(m, anInterface, instanceFieldName, methodFilter, eventNameSwitchBlock, eventIdSwitchBlock);
         }

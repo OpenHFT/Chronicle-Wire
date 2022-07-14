@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
@@ -33,6 +34,8 @@ import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.ReadResolvable;
 import net.openhft.chronicle.wire.internal.StringConsumerMarshallableOut;
+import net.openhft.compiler.CachedCompiler;
+import net.openhft.compiler.CompilerUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -98,11 +101,14 @@ public enum Wires {
     });
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(Bytes.allocateElasticOnHeap()));
+    final static CachedCompiler CACHED_COMPILER;
     private static final int TID_MASK = 0b00111111_11111111_11111111_11111111;
     private static final int INVERSE_TID_MASK = ~TID_MASK;
     public static boolean GENERATE_TUPLES = Jvm.getBoolean("wire.generate.tuples");
     static volatile boolean warnedUntypedBytesOnce = false;
     static ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
+
+    static final boolean DUMP_CODE_TO_TARGET = Jvm.getBoolean("dumpCodeToTarget");
 
     static {
         Jvm.addToClassPath(Wires.class);
@@ -111,6 +117,11 @@ public enum Wires {
         CLASS_STRATEGY_FUNCTIONS.add(SerializeBytes.INSTANCE);
         CLASS_STRATEGY_FUNCTIONS.add(SerializeMarshallables.INSTANCE); // must be after SerializeBytes.
         WireInternal.addAliases();
+        final String target = OS.getTarget();
+        CACHED_COMPILER =
+                new File(target).exists() && Jvm.isDebug() && DUMP_CODE_TO_TARGET
+                        ? new CachedCompiler(new File(target, "generated-test-sources"), new File(target, "test-classes"))
+                        : CompilerUtils.CACHED_COMPILER;
     }
 
     // force static initialise

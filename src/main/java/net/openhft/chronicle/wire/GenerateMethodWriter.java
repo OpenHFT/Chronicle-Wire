@@ -27,7 +27,6 @@ import static java.util.Arrays.stream;
 import static java.util.Collections.*;
 import static net.openhft.chronicle.core.util.GenericReflection.erase;
 import static net.openhft.chronicle.core.util.GenericReflection.getParameterTypes;
-import static net.openhft.compiler.CompilerUtils.CACHED_COMPILER;
 
 @SuppressWarnings("StringBufferReplaceableByString")
 public class GenerateMethodWriter {
@@ -347,7 +346,7 @@ public class GenerateMethodWriter {
             if (DUMP_CODE)
                 System.out.println(imports);
 
-            return CACHED_COMPILER.loadFromJava(classLoader, packageName + '.' + className, imports.toString());
+            return Wires.CACHED_COMPILER.loadFromJava(classLoader, packageName + '.' + className, imports.toString());
 
         } catch (AssertionError e) {
             if (e.getCause() instanceof LinkageError) {
