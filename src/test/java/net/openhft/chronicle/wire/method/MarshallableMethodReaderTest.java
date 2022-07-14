@@ -1,16 +1,38 @@
 package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.Wire;
 import org.junit.Test;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 public class MarshallableMethodReaderTest {
     @Test
     public void test() {
         Wire wire = new TextWire(Bytes.from("say: hi")).useTextDocuments();
-        wire.methodReader(new SayingMicroservice()).readOne();
+        final SayingMicroservice sm = new SayingMicroservice();
+        final MethodReader reader = wire.methodReader(sm);
+        assertTrue(reader.readOne());
+    }
+
+    @Test
+    public void ignoredMethods() {
+        Wire wire = Wire.newYamlWireOnHeap();
+        final SayingMicroservice sm = new SayingMicroservice();
+        final MethodReader reader = wire.methodReader(sm);
+        for (Method method : sm.getClass().getMethods()) {
+            final String name = method.getName();
+            wire.write(name).text("");
+            assertEquals(method.toString(), name.equals("say"), reader.readOne());
+        }
     }
 
     interface Saying {
@@ -18,9 +40,11 @@ public class MarshallableMethodReaderTest {
     }
 
     static class SayingMicroservice extends SelfDescribingMarshallable implements Saying {
+        transient List<String> said = new ArrayList<>();
+
         @Override
         public void say(String hi) {
-            System.out.println("say: " + hi);
+            said.add(hi);
         }
     }
 }

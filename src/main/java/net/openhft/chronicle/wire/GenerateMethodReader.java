@@ -60,6 +60,8 @@ public class GenerateMethodReader {
                 ExcerptListener.class,
                 FieldInfo.class,
                 FieldNumberParselet.class,
+                SelfDescribingMarshallable.class,
+                BytesMarshallable.class,
                 Marshallable.class,
                 MarshallableIn.class,
                 MarshallableOut.class,
@@ -289,6 +291,7 @@ public class GenerateMethodReader {
 
         sourceCode.append("default:\n" +
                 "defaultParselet.accept(lastEventName, valueIn);\n" +
+                "return false;\n" +
                 "}\n" +
                 "return true;\n" +
                 "} \n" +
@@ -309,7 +312,7 @@ public class GenerateMethodReader {
 
         sourceCode.append("default:\n" +
                 "valueIn.skipValue();\n" +
-                "return true;\n" +
+                "return false;\n" +
                 "}\n" +
                 "}\n" +
                 "else {\n" +
@@ -329,7 +332,7 @@ public class GenerateMethodReader {
 
         sourceCode.append("default:\n" +
                 "valueIn.skipValue();\n" +
-                "return true;\n" +
+                "return false;\n" +
                 "}\n" +
                 "return true;\n" +
                 "} \n" +
