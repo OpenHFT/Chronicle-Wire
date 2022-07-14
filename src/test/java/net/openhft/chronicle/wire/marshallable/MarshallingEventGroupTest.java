@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire.marshallable;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.threads.EventGroup;
 import net.openhft.chronicle.threads.EventGroupBuilder;
 import net.openhft.chronicle.threads.Pauser;
@@ -8,11 +9,14 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.junit.Test;
 
+import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MarshallingEventGroupTest extends WireTestCommon {
     @Test
     public void test() {
+        // produced longer timeout in debug
+        assumeFalse(Jvm.isDebug());
         try (final EventGroup eg =
                      EventGroupBuilder.builder()
                              .withName("test")
