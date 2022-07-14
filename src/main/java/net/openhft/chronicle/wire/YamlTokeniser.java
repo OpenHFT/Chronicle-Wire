@@ -211,6 +211,7 @@ public class YamlTokeniser {
                     readFolded();
                     return seq(YamlToken.LITERAL);
                 }
+                break;
             case '%':
                 readDirective();
                 return YamlToken.DIRECTIVE;
@@ -257,6 +258,7 @@ public class YamlTokeniser {
                     reversePushed(pos);
                     return pushed.isEmpty() ? next0(minIndent) : popPushed();
                 }
+                break;
                 // other symbols
             case '+':
             case '$':

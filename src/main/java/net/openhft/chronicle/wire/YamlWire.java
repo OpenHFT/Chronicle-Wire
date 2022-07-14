@@ -2783,6 +2783,7 @@ public class YamlWire extends AbstractWire implements Wire {
             switch (yt.current()) {
                 case TAG:
                     yt.next();
+                    break;
                 case MAPPING_START:
                     break;
                 default:

@@ -32,6 +32,7 @@ import java.util.concurrent.Future;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 @RunWith(value = Parameterized.class)
 public class EscapeCharsTest extends WireTestCommon {
@@ -80,6 +81,6 @@ public class EscapeCharsTest extends WireTestCommon {
 
     @Test
     public void testEscaped() throws ExecutionException, InterruptedException {
-        future.get();
+        assertNull(future.get());
     }
 }

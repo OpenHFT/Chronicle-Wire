@@ -21,17 +21,20 @@ import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 public class BinaryToTextTest extends WireTestCommon {
 
     @Test
     public void test() {
         @SuppressWarnings("rawtypes")
-        Bytes<?> tbytes = Bytes.elasticByteBuffer();
+        Bytes<?> tbytes = Bytes.allocateElasticOnHeap();
         @NotNull Wire tw = new BinaryWire(tbytes);
         tw.usePadding(true);
         tw.writeDocument(false, w -> w.write(() -> "key").text("hello"));
-       // System.out.println(Wires.fromSizePrefixedBlobs(tbytes));
-
-        tbytes.releaseLast();
+        assertEquals("" +
+                        "--- !!data #binary\n" +
+                        "key: hello\n",
+                Wires.fromSizePrefixedBlobs(tw));
     }
 }

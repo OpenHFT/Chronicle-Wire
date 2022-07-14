@@ -317,9 +317,43 @@ public class BinaryWire2Test extends WireTestCommon {
     public void testSequence() {
         @NotNull Wire wire = createWire();
         writeMessage(wire);
+        assertEquals("" +
+                        "--- !!meta-data #binary\n" +
+                        "csp: //path/service\n" +
+                        "tid: 123456789\n" +
+                        "# position: 32, header: 0\n" +
+                        "--- !!data #binary\n" +
+                        "entrySet: [\n" +
+                        "  {\n" +
+                        "    key: key-1,\n" +
+                        "    value: value-1\n" +
+                        "  },\n" +
+                        "  {\n" +
+                        "    key: key-2,\n" +
+                        "    value: value-2\n" +
+                        "  }\n" +
+                        "]\n",
+                Wires.fromSizePrefixedBlobs(wire));
 
         @NotNull Wire twire = WireType.TEXT.apply(Bytes.elasticByteBuffer());
         writeMessage(twire);
+        assertEquals("" +
+                        "--- !!meta-data\n" +
+                        "csp: //path/service\n" +
+                        "tid: 123456789\n" +
+                        "# position: 40, header: 0\n" +
+                        "--- !!data\n" +
+                        "entrySet: [\n" +
+                        "  {\n" +
+                        "    key: key-1,\n" +
+                        "    value: value-1\n" +
+                        "  },\n" +
+                        "  {\n" +
+                        "    key: key-2,\n" +
+                        "    value: value-2\n" +
+                        "  }\n" +
+                        "]\n",
+                Wires.fromSizePrefixedBlobs(twire));
 
         wire.bytes().releaseLast();
         twire.bytes().releaseLast();

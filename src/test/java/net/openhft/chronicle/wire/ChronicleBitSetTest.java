@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IOTools;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -169,6 +170,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     }
 
     @Test
+    @Ignore("Performance test")
     public void testFlipTime() {
         // Make a fairly random ChronicleBitSet
         ChronicleBitSet b1 = createBitSet();
