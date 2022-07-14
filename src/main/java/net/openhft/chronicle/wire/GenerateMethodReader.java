@@ -291,7 +291,7 @@ public class GenerateMethodReader {
 
         sourceCode.append("default:\n" +
                 "defaultParselet.accept(lastEventName, valueIn);\n" +
-                "return false;\n" +
+                "return true;\n" +
                 "}\n" +
                 "return true;\n" +
                 "} \n" +
@@ -312,7 +312,7 @@ public class GenerateMethodReader {
 
         sourceCode.append("default:\n" +
                 "valueIn.skipValue();\n" +
-                "return false;\n" +
+                "return true;\n" +
                 "}\n" +
                 "}\n" +
                 "else {\n" +
@@ -332,7 +332,7 @@ public class GenerateMethodReader {
 
         sourceCode.append("default:\n" +
                 "valueIn.skipValue();\n" +
-                "return false;\n" +
+                "return true;\n" +
                 "}\n" +
                 "return true;\n" +
                 "} \n" +
