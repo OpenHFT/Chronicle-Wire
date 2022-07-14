@@ -1837,6 +1837,18 @@ private static final int MASHALLABLE_VERSION = 1;
 ----
 <1> You will have to remove this line if the class extends `AbstractBytesMarshallable`
 
+
+=== JLBH Benchmark Performance
+
+To explore the efficiency of the examples above, this link:https://github.com/OpenHFT/Chronicle-Wire/blob/develop/src/test/java/net/openhft/chronicle/wire/TriviallyCopyableJLBH.java[TrivallyCopyableJLBH.java] test was created.
+As can be seen on lines 18-26, we have the ability to switch between running the TriviallyCopyable House (“House1”), the BinaryWire House (“House2”) or 'UNKNOWN'. Important to note is that trivially copyable objects were used in order to improve java serialisation speeds. For further understanding on trivially copyable objects, refer to link:https://dzone.com/articles/how-to-get-c-speed-in-java-serialisation[this article].
+This shows that we can serialise and then de-serialise 100,000 messages a second. The Trivially Copyable version is even faster, especially at the higher percentiles.
+
+.Benchmark Performance Between TriviallyCopyable and BinaryWire
+image::jlbhBenchmark.png[buffer,600,400]
+* Microseconds to both serialise and deserialise a message
+
+
 ===  Platform support
 
 Chronicle Wire supports `Java 8`, `Java 11` and `C++`.
