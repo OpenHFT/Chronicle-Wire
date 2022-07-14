@@ -1257,6 +1257,11 @@ public class BinaryWire extends AbstractWire implements Wire {
                             throw new IllegalArgumentException("Expected a StringBuilder or Bytes");
                         }
                         return sb;
+                    case PADDING:
+                        return readText(bytes.readUnsignedByte(), sb);
+                    case PADDING32:
+                        bytes.readSkip(bytes.readUnsignedInt());
+                        return readText(bytes.readUnsignedByte(), sb);
                 }
                 throw unknownCode(code);
 
