@@ -108,7 +108,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
         assertTrue(reader.readOne());
         assertNull(delegatedMethodCall.get());
 
-        assertTrue(reader.readOne());
+        reader.readOne();
         assertEquals(myFall, delegatedMethodCall.get());
 
         assertTrue(reader.readOne());
@@ -146,7 +146,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
                     .build(Mocker.intercepting(MyInterface.class, "*", sb::append));
 
             assertTrue(reader.readOne());
-            assertTrue(reader.readOne());
+            reader.readOne();
             assertTrue(reader.readOne());
             assertFalse(reader.readOne());
 
