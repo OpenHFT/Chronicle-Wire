@@ -7,6 +7,10 @@ import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.Wire;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 public class SkipsIgnoresEveryThingTest {
@@ -27,6 +31,7 @@ public class SkipsIgnoresEveryThingTest {
                 "...\n";
 
         Wire wire = new TextWire(Bytes.from(text)).useTextDocuments();
+        List<String> words = new ArrayList<>();
         final MethodReader reader = wire.methodReader(new Selective() {
             DontSayBad dsb = new DontSayBad();
 
@@ -34,10 +39,12 @@ public class SkipsIgnoresEveryThingTest {
             public Saying to(long id) {
                 if (id % 2 == 0)
                     return dsb;
-                return System.out::println;
+                return words::add;
             }
         });
-        while (reader.readOne()) ;
+        for (int i = 4; i >= 0; i--)
+            assertEquals(i > 0, reader.readOne());
+        assertEquals("[hi, fine]", words.toString());
     }
 
     interface Selective {
