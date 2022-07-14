@@ -13,6 +13,7 @@ import java.util.Collection;
 
 import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN;
 import static net.openhft.chronicle.wire.WireType.BINARY;
+import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -24,6 +25,11 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
     @Parameterized.Parameters(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[]{false}, new Object[]{true});
+    }
+
+    static Wire createWire() {
+        final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
+        return wire;
     }
 
     @Before
@@ -41,46 +47,70 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
     @Test
     public void testUpdateInterceptorNoReturnType() {
 
-        createWire()
+        final Wire wire = createWire();
+        wire
                 .methodWriterBuilder(NoReturnType.class)
                 .updateInterceptor((methodName, t) -> true)
                 .build()
                 .x("hello world");
-    }
-
-    static Wire createWire() {
-        final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
-        return wire;
+        assertEquals("" +
+                        "--- !!data #binary\n" +
+                        "x: hello world\n",
+                Wires.fromSizePrefixedBlobs(wire));
     }
 
     @Test
     public void testUpdateInterceptorWithIntReturnType() {
-        int value = createWire()
+        final Wire wire = createWire();
+        int value = wire
                 .methodWriterBuilder(WithIntReturnType.class)
                 .updateInterceptor((methodName, t) -> true)
                 .build()
                 .x("hello world");
         assertEquals(0, value);
+        assertEquals("" +
+                        "--- !!data #binary\n" +
+                        "x: hello world\n",
+                Wires.fromSizePrefixedBlobs(wire));
     }
 
     @Test
     public void testUpdateInterceptorWithObjectReturnType() {
-        final WithObjectReturnType mw = createWire()
+        final Wire wire = createWire();
+        final WithObjectReturnType mw = wire
                 .methodWriterBuilder(WithObjectReturnType.class)
                 .updateInterceptor((methodName, t) -> true)
                 .build();
         Object value = mw.x("hello world");
         assertSame(mw, value);
         assertEquals(disableProxyCodegen, Proxy.isProxyClass(mw.getClass()));
+        assumeFalse(disableProxyCodegen);
+        assertEquals("" +
+                        "--- !!not-ready-data #binary\n" +
+                        "...\n" +
+                        "# 15 bytes remaining\n",
+                Wires.fromSizePrefixedBlobs(wire));
+
+        mw.y("good byte");
+        assertEquals("" +
+                        "--- !!data #binary\n" +
+                        "x: hello world\n" +
+                        "y: good byte\n",
+                Wires.fromSizePrefixedBlobs(wire));
     }
 
     @Test
     public void testUpdateInterceptorWithLadderByQtyListener() {
-        createWire()
+        final Wire wire = createWire();
+        wire
                 .methodWriterBuilder(LadderByQtyListener.class)
                 .updateInterceptor((methodName, t) -> true)
                 .build()
                 .ladderByQty("a ladder");
+        assertEquals("" +
+                        "--- !!data #binary\n" +
+                        "ladderByQty: a ladder\n",
+                Wires.fromSizePrefixedBlobs(wire));
     }
 
     public interface LadderByQtyListener {
@@ -105,6 +135,8 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
 
     interface WithObjectReturnType {
         Object x(String x);
+
+        void y(String y);
     }
 
     interface WithObjectVoidReturnType {

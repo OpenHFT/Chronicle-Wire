@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 public class HashWireTest extends WireTestCommon {
@@ -44,7 +45,7 @@ public class HashWireTest extends WireTestCommon {
 
     @Test
     public void testHashWithMap() {
-        new Field("hi").hashCode();
+        assertEquals(428977857, new Field("hi").hashCode());
     }
 
     enum Required {

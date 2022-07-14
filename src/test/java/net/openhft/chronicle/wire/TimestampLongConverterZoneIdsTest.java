@@ -9,10 +9,14 @@ import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assume.assumeFalse;
 
 @RunWith(value = Parameterized.class)
@@ -46,7 +50,7 @@ public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
 
     @Test
     public void testManyZones() throws ExecutionException, InterruptedException {
-        future.get();
+        assertNull(future.get());
     }
 
     enum ConverterType implements ConverterFactory {

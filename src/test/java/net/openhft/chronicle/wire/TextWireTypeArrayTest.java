@@ -20,21 +20,28 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 public class TextWireTypeArrayTest extends WireTestCommon {
     @Test
     public void shouldUnmarshalArrayOfType() {
         final Bytes<?> bytes = Wires.acquireBytes();
 
         final Wire wire = WireType.TEXT.apply(bytes);
-        final Person person = new Person();
-        wire.getValueOut().typedMarshallable(person);
-        System.err.println(bytes.toString());
+        final HasClasses hasClasses = new HasClasses();
+        wire.getValueOut().typedMarshallable(hasClasses);
+        final String expected = "" +
+                "!net.openhft.chronicle.wire.TextWireTypeArrayTest$HasClasses {\n" +
+                "  classes: [ !type String, !type int, !type java.lang.Number ]\n" +
+                "}\n";
+        assertEquals(expected, bytes.toString());
 
         final TextWire textWire = TextWire.from(bytes.toString());
-        textWire.getValueIn().typedMarshallable();
+        final Object a = textWire.getValueIn().typedMarshallable();
+        assertEquals(expected, a.toString());
     }
 
-    static class Person extends SelfDescribingMarshallable {
-        Class<?>[] classes = {Object.class, Object.class};
+    static class HasClasses extends SelfDescribingMarshallable {
+        Class<?>[] classes = {String.class, Integer.class, Number.class};
     }
 }

@@ -4,6 +4,8 @@ import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 @SuppressWarnings("rawtypes")
 public class FloatDtoTest extends WireTestCommon {
 
@@ -15,6 +17,7 @@ public class FloatDtoTest extends WireTestCommon {
         w.write().marshallable(value);
         @NotNull Value object1 = new Value(0, 0.0f);
         w.read().marshallable(object1);
+        assertEquals(value, object1);
     }
 
     static class Key extends SelfDescribingMarshallable implements KeyedMarshallable {

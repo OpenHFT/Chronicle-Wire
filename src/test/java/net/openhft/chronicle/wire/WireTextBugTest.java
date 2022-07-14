@@ -38,6 +38,8 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * @author Rob Austin
  */
@@ -49,7 +51,9 @@ public class WireTextBugTest extends WireTestCommon {
         @NotNull Wire encodeWire = new BinaryWire(Bytes.elasticByteBuffer(), false, true, false, Integer.MAX_VALUE, "lzw", true);
         @NotNull Bug b = new Bug();
         b.setClOrdID("FIX.4.4:12345678_client1->FOO/MINI1-1234567891234-12");
-       // System.out.println("b = " + b);
+        assertEquals("!Bug {\n" +
+                "  clOrdID: \"FIX.4.4:12345678_client1->FOO/MINI1-1234567891234-12\"\n" +
+                "}\n", b.toString());
         encodeWire.getValueOut().object(b);
         byte[] bytes = encodeWire.bytes().toByteArray();
 
@@ -57,7 +61,9 @@ public class WireTextBugTest extends WireTestCommon {
         @Nullable Object o = decodeWire.getValueIn()
                 .object(Object.class);
         @Nullable Bug b2 = (Bug) o;
-       // System.out.println("b2 = " + b2);
+        assertEquals("!Bug {\n" +
+                "  clOrdID: \"FIX.4.4:12345678_client1->FOO/MINI1-1234567891234-12\"\n" +
+                "}\n", b2.toString());
 
         encodeWire.bytes().releaseLast();
         decodeWire.bytes().releaseLast();

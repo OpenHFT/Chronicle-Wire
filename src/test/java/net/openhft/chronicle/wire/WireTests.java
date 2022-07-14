@@ -184,11 +184,11 @@ public class WireTests {
 
         field = new StringBuilder();
         wire.read(field).skipValue();
-        // System.out.println("read field=" + field.toString());
+        assertEquals("value1", field.toString());
 
         field = new StringBuilder();
         wire.read(field).skipValue();
-        // System.out.println("read field=" + field.toString());
+        assertEquals("number", field.toString());
 
         b.releaseLast();
     }
