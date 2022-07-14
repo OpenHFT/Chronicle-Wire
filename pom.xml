@@ -69,6 +69,10 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>net.openhft</groupId>
+            <artifactId>compiler</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>net.openhft</groupId>
