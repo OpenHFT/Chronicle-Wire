@@ -642,14 +642,18 @@ public class BinaryWire extends AbstractWire implements Wire {
                 return ObjectUtils.convertTo(expectedClass, fieldId);
 
             case FIELD_NAME_ANY:
-            case EVENT_NAME:
+            case EVENT_NAME: {
                 bytes.uncheckedReadSkipOne();
                 @Nullable StringBuilder sb = read8bit();
                 return ObjectUtils.convertTo(expectedClass, WireInternal.INTERNER.intern(sb));
+            }
 
-            case FIELD_ANCHOR:
+            case FIELD_ANCHOR: {
                 bytes.uncheckedReadSkipOne();
-                throw new UnsupportedOperationException();
+                final StringBuilder sb = SBP.acquireStringBuilder();
+                readFieldAnchor(sb);
+                return ObjectUtils.convertTo(expectedClass, sb);
+            }
 
             case EVENT_OBJECT:
                 bytes.uncheckedReadSkipOne();
