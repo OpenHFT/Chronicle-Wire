@@ -14,6 +14,7 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(Parameterized.class)
@@ -96,9 +97,10 @@ public class HandleSkippedValueReadsTest {
                 .metaDataHandler(Mocker.logging(MetaMethod.class, "M ", sw))
                 .build(Mocker.logging(DataMethod.class, "D ", sw));
 
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 2; i++) {
             reader.readOne();
         }
+        assertFalse(reader.readOne());
         assertEquals("M meta[one]\n"
                 , sw.toString().replace("\r", ""));
 

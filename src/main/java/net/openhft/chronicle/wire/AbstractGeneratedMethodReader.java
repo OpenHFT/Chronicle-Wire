@@ -37,43 +37,35 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  */
 public abstract class AbstractGeneratedMethodReader implements MethodReader {
     private static final Consumer<MessageHistory> NO_OP_MH_CONSUMER = Mocker.ignored(Consumer.class);
-    private final MarshallableIn in;
+    private static final MessageHistoryThreadLocal TEMP_MESSAGE_HISTORY = new MessageHistoryThreadLocal();
     protected final WireParselet debugLoggingParselet;
-
+    private final MarshallableIn in;
     protected MessageHistory messageHistory;
     protected boolean dataEventProcessed;
-
     private MethodReader delegate;
     private boolean closeIn = false;
     private boolean closed;
-
     private Consumer<MessageHistory> historyConsumer = NO_OP_MH_CONSUMER;
-
-    private static final class MessageHistoryThreadLocal {
-
-        private final ThreadLocal<MessageHistory> messageHistoryTL = withInitial(() -> {
-            @NotNull VanillaMessageHistory veh = new VanillaMessageHistory();
-            veh.addSourceDetails(true);
-            return veh;
-        });
-
-        private MessageHistory getAndSet(MessageHistory mh) {
-            final MessageHistory result = messageHistoryTL.get();
-            messageHistoryTL.set(mh);
-            return result;
-        }
-
-        public MessageHistory get() {
-            return messageHistoryTL.get();
-        }
-    }
-
-    private static final MessageHistoryThreadLocal TEMP_MESSAGE_HISTORY = new MessageHistoryThreadLocal();
 
     protected AbstractGeneratedMethodReader(MarshallableIn in,
                                             WireParselet debugLoggingParselet) {
         this.in = in;
         this.debugLoggingParselet = debugLoggingParselet;
+    }
+
+    /**
+     * Helper method used by implementations to get a Method
+     */
+    protected static Method lookupMethod(Class<?> clazz, String name, Class<?>... parameterTypes) {
+        try {
+            final Method method = clazz.getMethod(name, parameterTypes);
+
+            Jvm.setAccessible(method);
+
+            return method;
+        } catch (NoSuchMethodException e) {
+            throw new AssertionError(e);
+        }
     }
 
     /**
@@ -125,16 +117,17 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
             wireIn.consumePadding();
             Bytes<?> bytes = wireIn.bytes();
             dataEventProcessed = false;
+            boolean decoded = false;
             while (bytes.readRemaining() > 0) {
                 if (wireIn.isEndEvent())
                     break;
                 long start = bytes.readPosition();
 
-                if (!readOneCall(wireIn))
-                    return false;
+                if (readOneCall(wireIn))
+                    decoded = true;
 
                 if (restIgnored())
-                    return true;
+                    break;
 
                 wireIn.consumePadding();
                 if (bytes.readPosition() == start) {
@@ -143,7 +136,11 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
                 }
             }
             // only called if the end of the message is reached normally.
-            wireIn.endEvent();
+            if (decoded)
+                wireIn.endEvent();
+
+            return decoded;
+
         } finally {
             // Don't save message history if we are reading non-data event (e.g. another "message history only" message)
             // Infinite loop between services is possible otherwise
@@ -151,8 +148,6 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
                 swapMessageHistoryIfDirty();
             messageHistory.reset();
         }
-
-        return true;
     }
 
     public boolean readOneMeta(DocumentContext context) {
@@ -162,16 +157,17 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
 
         wireIn.startEvent();
         Bytes<?> bytes = wireIn.bytes();
+        boolean decoded = false;
         while (bytes.readRemaining() > 0) {
             if (wireIn.isEndEvent())
                 break;
             long start = bytes.readPosition();
 
-            if (!readOneCallMeta(wireIn))
-                return false;
+            if (readOneCallMeta(wireIn))
+                decoded = true;
 
             if (restIgnored())
-                return true;
+                break;
 
             wireIn.consumePadding();
             if (bytes.readPosition() == start) {
@@ -180,9 +176,10 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
             }
         }
         // only called if the end of the message is reached normally.
-        wireIn.endEvent();
+        if (decoded)
+            wireIn.endEvent();
 
-        return true;
+        return decoded;
     }
 
     protected boolean restIgnored() {
@@ -299,18 +296,22 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         return messageHistory;
     }
 
-    /**
-     * Helper method used by implementations to get a Method
-     */
-    protected static Method lookupMethod(Class<?> clazz, String name, Class<?>... parameterTypes) {
-        try {
-            final Method method = clazz.getMethod(name, parameterTypes);
+    private static final class MessageHistoryThreadLocal {
 
-            Jvm.setAccessible(method);
+        private final ThreadLocal<MessageHistory> messageHistoryTL = withInitial(() -> {
+            @NotNull VanillaMessageHistory veh = new VanillaMessageHistory();
+            veh.addSourceDetails(true);
+            return veh;
+        });
 
-            return method;
-        } catch (NoSuchMethodException e) {
-            throw new AssertionError(e);
+        private MessageHistory getAndSet(MessageHistory mh) {
+            final MessageHistory result = messageHistoryTL.get();
+            messageHistoryTL.set(mh);
+            return result;
+        }
+
+        public MessageHistory get() {
+            return messageHistoryTL.get();
         }
     }
 }
