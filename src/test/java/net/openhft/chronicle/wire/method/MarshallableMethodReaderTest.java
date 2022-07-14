@@ -31,7 +31,7 @@ public class MarshallableMethodReaderTest {
         for (Method method : sm.getClass().getMethods()) {
             final String name = method.getName();
             wire.write(name).text("");
-            assertEquals(method.toString(), name.equals("say"), reader.readOne());
+            assertTrue(method.toString(), reader.readOne());
         }
     }
 
