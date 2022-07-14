@@ -53,7 +53,6 @@ public class RawWire extends AbstractWire implements Wire {
     private final RawValueIn valueIn = new RawValueIn();
     private final WriteDocumentContext writeContext = new BinaryWriteDocumentContext(this);
     private final BinaryReadDocumentContext readContext = new BinaryReadDocumentContext(this, false);
-    boolean use8bit;
     @Nullable
     private StringBuilder lastSB;
 
