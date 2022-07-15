@@ -49,7 +49,7 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "    name: testcore-event-loop,\n" +
                     "    mediumHandlers: [    ],\n" +
                     "    newHandler: !!null \"\",\n" +
-                    "    pauser: !net.openhft.chronicle.threads.LongPauser { minPauseTimeNS: 1000000, maxPauseTimeNS: 20000000, pausing: false, minBusyNS: 0, minYieldNS: 1000000, busyNS: 9223372036854775807, yieldNS: 9223372036854775807, pauseTimeNS: 1000000, timePaused: 0, countPaused: 0, thread: !!null \"\", yieldStart: 0, timeOutStart: 9223372036854775807, pauseUntilNS: 0, pauseStartNS: 0 },\n" +
+                    "    pauser: !net.openhft.chronicle.threads.LongPauser { minPauseTimeNS: 500000, maxPauseTimeNS: 20000000, pausing: false, minBusyNS: 0, minYieldNS: 50000, busyNS: 9223372036854775807, yieldNS: 9223372036854775807, pauseTimeNS: 500000, timePaused: 0, countPaused: 0, thread: !!null \"\", yieldStart: 0, timeOutStart: 9223372036854775807, pauseUntilNS: 0, pauseStartNS: 0 },\n" +
                     "    daemon: true,\n" +
                     "    binding: none,\n" +
                     "    mediumHandlersArray: [ ],\n" +
@@ -78,17 +78,17 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "    name: testblocking-event-loop,\n" +
                     "    handlers: [    ],\n" +
                     "    threadFactory: testblocking-event-loop,\n" +
-                    "    pauser: !net.openhft.chronicle.threads.LongPauser { minPauseTimeNS: 1000000, maxPauseTimeNS: 20000000, pausing: false, minBusyNS: 0, minYieldNS: 1000000, busyNS: 9223372036854775807, yieldNS: 9223372036854775807, pauseTimeNS: 1000000, timePaused: 0, countPaused: 0, thread: !!null \"\", yieldStart: 0, timeOutStart: 9223372036854775807, pauseUntilNS: 0, pauseStartNS: 0 }\n" +
+                    "    pauser: !net.openhft.chronicle.threads.LongPauser { minPauseTimeNS: 500000, maxPauseTimeNS: 20000000, pausing: false, minBusyNS: 0, minYieldNS: 50000, busyNS: 9223372036854775807, yieldNS: 9223372036854775807, pauseTimeNS: 500000, timePaused: 0, countPaused: 0, thread: !!null \"\", yieldStart: 0, timeOutStart: 9223372036854775807, pauseUntilNS: 0, pauseStartNS: 0 }\n" +
                     "  },\n" +
                     "  pauser: !net.openhft.chronicle.threads.LongPauser {\n" +
-                    "    minPauseTimeNS: 1000000,\n" +
+                    "    minPauseTimeNS: 500000,\n" +
                     "    maxPauseTimeNS: 20000000,\n" +
                     "    pausing: false,\n" +
                     "    minBusyNS: 0,\n" +
-                    "    minYieldNS: 1000000,\n" +
+                    "    minYieldNS: 50000,\n" +
                     "    busyNS: 9223372036854775807,\n" +
                     "    yieldNS: 9223372036854775807,\n" +
-                    "    pauseTimeNS: 1000000,\n" +
+                    "    pauseTimeNS: 500000,\n" +
                     "    timePaused: 0,\n" +
                     "    countPaused: 0,\n" +
                     "    thread: !!null \"\",\n" +
