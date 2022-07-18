@@ -1084,6 +1084,11 @@ public class YamlWire extends AbstractWire implements Wire {
         return super.readDocument(position, metaDataConsumer, dataConsumer);
     }
 
+    @Override
+    public boolean writingIsComplete() {
+        return !writeContext.isNotComplete();
+    }
+
     class TextValueOut implements ValueOut, CommentAnnotationNotifier {
         protected boolean hasCommentAnnotation = false;
 
@@ -2264,7 +2269,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
         @Override
         public byte @Nullable [] bytes(byte[] using) {
-            return (byte[])objectWithInferredType(using, SerializationStrategies.ANY_OBJECT, byte[].class);
+            return (byte[]) objectWithInferredType(using, SerializationStrategies.ANY_OBJECT, byte[].class);
 
         }
 

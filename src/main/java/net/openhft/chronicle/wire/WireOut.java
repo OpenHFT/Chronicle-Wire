@@ -212,4 +212,11 @@ public interface WireOut extends WireCommon, MarshallableOut {
     default WireOut dropDefault(boolean dropDefault) {
         return this;
     }
+
+    /**
+     * @return true unless there is an incomplete/chained message
+     */
+    default boolean writingIsComplete() {
+        return true;
+    }
 }
