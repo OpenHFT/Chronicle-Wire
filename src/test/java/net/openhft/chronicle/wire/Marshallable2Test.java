@@ -26,6 +26,9 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @RunWith(value = Parameterized.class)
 public class Marshallable2Test extends WireTestCommon {
     private final WireType wireType;
@@ -38,9 +41,12 @@ public class Marshallable2Test extends WireTestCommon {
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
                 new Object[]{WireType.BINARY},
-                new Object[]{WireType.TEXT}
-                // TODO FIX
-//                new Object[]{WireType.JSON}
+                new Object[]{WireType.BINARY_LIGHT},
+                new Object[]{WireType.TEXT},
+                new Object[]{WireType.YAML},
+                new Object[]{WireType.YAML_ONLY},
+                new Object[]{WireType.JSON},
+                new Object[]{WireType.JSON_ONLY}
         );
     }
 
@@ -56,6 +62,32 @@ public class Marshallable2Test extends WireTestCommon {
         wire.getValueOut().object(source);
         Outer target = wire.getValueIn().object(source.getClass());
         Assert.assertEquals(source, target);
+    }
+
+    @Test
+    public void writingIsComplete() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
+        Wire wire = wireType.apply(bytes);
+        assertTrue(wire.writingIsComplete());
+        try (DocumentContext dc = wire.writingDocument()) {
+            assertFalse(dc.wire().writingIsComplete());
+            dc.wire().write("say").text("hi");
+        }
+        assertTrue(wire.writingIsComplete());
+
+        try (WriteDocumentContext dc = (WriteDocumentContext) wire.acquireWritingDocument(false)) {
+            assertFalse(dc.wire().writingIsComplete());
+            dc.wire().write("say").text("hi");
+            dc.chainedElement(true);
+        }
+        assertFalse(wire.writingIsComplete());
+
+        try (WriteDocumentContext dc = (WriteDocumentContext) wire.acquireWritingDocument(false)) {
+            assertFalse(dc.wire().writingIsComplete());
+            dc.wire().write("say").text("hi");
+            dc.chainedElement(false);
+        }
+        assertTrue(wire.writingIsComplete());
     }
 
     @SuppressWarnings("unused")

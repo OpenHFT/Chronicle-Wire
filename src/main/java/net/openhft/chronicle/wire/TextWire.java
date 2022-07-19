@@ -3730,4 +3730,9 @@ public class TextWire extends AbstractWire implements Wire {
             return TextWire.this.toString();
         }
     }
+
+    @Override
+    public boolean writingIsComplete() {
+        return !writeContext.isNotComplete();
+    }
 }

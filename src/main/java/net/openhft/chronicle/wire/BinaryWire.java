@@ -4198,5 +4198,10 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
         }
     }
+
+    @Override
+    public boolean writingIsComplete() {
+        return !writeContext.isNotComplete();
+    }
 }
 
