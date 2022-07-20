@@ -28,10 +28,12 @@ import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.values.*;
+import net.openhft.chronicle.threads.NamedThreadFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
+import java.lang.ref.Reference;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
@@ -40,8 +42,15 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
+
+import static net.openhft.chronicle.wire.SerializationStrategies.ANY_NESTED;
+import static net.openhft.chronicle.wire.SerializationStrategies.ANY_OBJECT;
 
 /**
  * Write out data after writing a field.
@@ -78,7 +87,7 @@ public interface ValueOut {
 
     @NotNull
     default WireOut text(char c) {
-        return text(Wires.acquireStringBuilder().append(c));
+        return text(WireInternal.acquireStringBuilderForValueOut().append(c));
     }
 
     @NotNull
@@ -250,7 +259,7 @@ public interface ValueOut {
     WireOut typeLiteral(@Nullable CharSequence type);
 
     @NotNull
-    WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @Nullable Class type);
+    WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class type);
 
     @NotNull
     WireOut uuid(UUID uuid);
@@ -453,7 +462,7 @@ public interface ValueOut {
             } else if (isScalar(object)) {
                 if (object instanceof LocalDate) {
                     LocalDate d = (LocalDate) object;
-                    return text(WireInternal.acquireStringBuilder()
+                    return text(WireInternal.acquireStringBuilderForValueOut()
                             .append(d.getYear())
                             .append('-')
                             .append(d.getMonthValue() < 10 ? "0" : "")
@@ -475,7 +484,11 @@ public interface ValueOut {
     }
 
     default boolean isScalar(Serializable object) {
-        return object instanceof Comparable;
+        if (object instanceof Comparable) {
+            final SerializationStrategy strategy = Wires.CLASS_STRATEGY.get(object.getClass());
+            return strategy != ANY_OBJECT && strategy != ANY_NESTED;
+        }
+        return false;
     }
 
     @NotNull
@@ -567,7 +580,8 @@ public interface ValueOut {
         if (value == null)
             return nu11();
         // look for exact matches
-        switch (value.getClass().getName()) {
+        final Class<?> valueClass = value.getClass();
+        switch (valueClass.getName()) {
             case "[B": {
                 typePrefix(byte[].class).bytes((byte[]) value);
                 endTypePrefix();
@@ -580,7 +594,7 @@ public interface ValueOut {
             case "[F":
             case "[D":
             case "[Z":
-                ValueOut valueOut = typePrefix(value.getClass());
+                ValueOut valueOut = typePrefix(valueClass);
                 boolean wasLeaf = valueOut.swapLeaf(true);
                 valueOut.sequence(value, (v, out) -> {
                     int len = Array.getLength(v);
@@ -592,8 +606,18 @@ public interface ValueOut {
                 endTypePrefix();
                 return wireOut();
 
+            case "net.openhft.chronicle.threads.NamedThreadFactory":
+                return text(((NamedThreadFactory) value).getName());
             case "net.openhft.chronicle.wire.RawText":
                 return rawText(((RawText) value).text);
+            case "java.util.concurrent.atomic.AtomicReference":
+                return object(((AtomicReference) value).get());
+            case "java.util.concurrent.atomic.AtomicLong.class":
+                return int64(((AtomicLong) value).get());
+            case "java.util.concurrent.atomic.AtomicInteger":
+                return int32(((AtomicInteger) value).get());
+            case "java.util.concurrent.atomic.AtomicBoolean":
+                return bool(((AtomicBoolean) value).get());
             case "java.lang.String":
                 return text((String) value);
             case "java.lang.Byte":
@@ -638,6 +662,25 @@ public interface ValueOut {
                 endTypePrefix();
                 return result;
             }
+            case "java.util.BitSet": {
+                typePrefix(BitSet.class);
+
+                BitSet bs = (BitSet) value;
+                boolean isTextWire = TextWire.TextValueOut.class.isAssignableFrom(this.getClass());
+
+                // note : this like the others below this is capturing lambda
+                return sequence(v -> {
+                    for (int i = 0; i < bs.size() >> 6; i++) {
+                        long l = BitSetUtil.getWord(bs, i);
+                        WireOut wireOut = v.int64(l);
+                        if (isTextWire) {
+                            String bits = Long.toBinaryString(l);
+                            wireOut.writeComment(ZEROS_64.substring(bits.length()) + bits);
+                        }
+                    }
+                });
+            }
+
             case "java.util.UUID": {
                 final WireOut result = optionalTyped(UUID.class).uuid((UUID) value);
                 endTypePrefix();
@@ -648,7 +691,7 @@ public interface ValueOut {
             case "java.sql.Time":
             case "java.util.Date":
             case "java.sql.Date": {
-                final WireOut result = Wires.SerializeJavaLang.writeDate((Date) value, typePrefix(value.getClass()));
+                final WireOut result = Wires.SerializeJavaLang.writeDate((Date) value, typePrefix(valueClass));
                 endTypePrefix();
                 return result;
             }
@@ -664,17 +707,17 @@ public interface ValueOut {
             case "java.math.BigDecimal":
             case "java.time.Duration":
             case "java.io.File": {
-                final WireOut result = optionalTyped(value.getClass()).text(value.toString());
+                final WireOut result = optionalTyped(valueClass).text(value.toString());
                 endTypePrefix();
                 return result;
             }
         }
         if (value instanceof WriteMarshallable) {
             if (isAnEnum(value)) {
-                Jvm.debug().on(getClass(), "Treating " + value.getClass() + " as enum not WriteMarshallable");
+                Jvm.debug().on(getClass(), "Treating " + valueClass + " as enum not WriteMarshallable");
                 return typedScalar(value);
             }
-            if (value.getClass().getName().contains("$$Lambda"))
+            if (valueClass.getName().contains("$$Lambda"))
                 return marshallable((WriteMarshallable) value);
             else
                 return typedMarshallable((WriteMarshallable) value);
@@ -682,7 +725,7 @@ public interface ValueOut {
         if (value instanceof WriteBytesMarshallable) {
             if (!Wires.warnedUntypedBytesOnce) {
                 Jvm.warn().on(ValueOut.class, "BytesMarshallable found in field which is not matching exactly, " +
-                        "the object may not unmarshall correctly if that type is not specified: " + value.getClass().getName() +
+                        "the object may not unmarshall correctly if that type is not specified: " + valueClass.getName() +
                         ". The warning will not repeat so there may be more types affected.");
 
                 Wires.warnedUntypedBytesOnce = true;
@@ -704,37 +747,20 @@ public interface ValueOut {
             return throwable((Throwable) value);
         if (isAnEnum(value))
             return typedScalar(value);
-        if (value instanceof BitSet) {
-            typePrefix(BitSet.class);
-
-            BitSet bs = (BitSet) value;
-            boolean isTextWire = TextWire.TextValueOut.class.isAssignableFrom(this.getClass());
-
-            // note : this like the others below this is capturing lambda
-            return sequence(v -> {
-                for (int i = 0; i < bs.size() >> 6; i++) {
-                    long l = BitSetUtil.getWord(bs, i);
-                    WireOut wireOut = v.int64(l);
-                    if (isTextWire) {
-                        String bits = Long.toBinaryString(l);
-                        wireOut.writeComment(ZEROS_64.substring(bits.length()) + bits);
-                    }
-                }
-            });
-
-        }
         if (value instanceof Collection) {
             if (value instanceof SortedSet)
                 typePrefix(SortedSet.class);
             else if (value instanceof Set)
                 typePrefix(Set.class);
             return sequence(v -> ((Collection) value).forEach(v::object));
-        } else if (WireSerializedLambda.isSerializableLambda(value.getClass())) {
+        } else if (WireSerializedLambda.isSerializableLambda(valueClass)) {
             WireSerializedLambda.write(value, this);
             return wireOut();
-        } else if (Object[].class.isAssignableFrom(value.getClass())) {
-            @NotNull Class type = value.getClass().getComponentType();
-            return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), value.getClass());
+        } else if (Object[].class.isAssignableFrom(valueClass)) {
+            @NotNull Class type = valueClass.getComponentType();
+            return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), valueClass);
+        } else if (value instanceof Thread) {
+            return text(((Thread) value).getName());
         } else if (value instanceof Serializable) {
             return typedMarshallable((Serializable) value);
         } else if (value instanceof ByteBuffer) {
@@ -745,9 +771,11 @@ public interface ValueOut {
         } else if (value instanceof IntValue) {
             IntValue value2 = (IntValue) value;
             return int32forBinding(value2.getValue(), value2);
+        } else if (value instanceof Reference) {
+            return object(((Reference) value).get());
         } else {
             if ((Wires.isInternal(value)))
-                throw new IllegalArgumentException("type=" + value.getClass() +
+                throw new IllegalArgumentException("type=" + valueClass +
                         " is unsupported, it must either be of type Marshallable, String or " +
                         "AutoBoxed primitive Object");
 
@@ -757,7 +785,7 @@ public interface ValueOut {
             } catch (IllegalArgumentException e) {
                 if (isBinary())
                     throw e;
-                typeName = value.getClass().getName();
+                typeName = valueClass.getName();
             }
             if (typeName != null)
                 typePrefix(typeName);
@@ -906,12 +934,12 @@ public interface ValueOut {
     WireOut wireOut();
 
     @NotNull
-    default WireOut compress(@NotNull String compression, @Nullable Bytes uncompressedBytes) {
+    default WireOut compress(@NotNull String compression, @Nullable Bytes<?> uncompressedBytes) {
         if (uncompressedBytes == null)
             return nu11();
         if (uncompressedBytes.readRemaining() < SMALL_MESSAGE)
             return bytes(uncompressedBytes);
-        Bytes tmpBytes = Wires.acquireBytes();
+        Bytes<?> tmpBytes = WireInternal.acquireInternalBytes();
         Compression.compress(compression, uncompressedBytes, tmpBytes);
         bytes(compression, tmpBytes);
         return wireOut();
@@ -967,10 +995,19 @@ public interface ValueOut {
         return text(x);
     }
 
-    default WireOut writeLong(LongConverter longConverter, long l) {
-        StringBuilder sb = Wires.acquireStringBuilder();
-        longConverter.append(sb, l);
+    default WireOut writeInt(IntConverter intConverter, int i) {
+        StringBuilder sb = WireInternal.acquireStringBuilderForValueOut();
+        intConverter.append(sb, i);
         return rawText(sb);
+    }
+
+    default WireOut writeLong(LongConverter longConverter, long l) {
+        StringBuilder sb = WireInternal.acquireStringBuilderForValueOut();
+        longConverter.append(sb, l);
+        if (longConverter.allSafeChars(wireOut()) && sb.length() > 0)
+            return rawText(sb);
+        else
+            return text(sb);
     }
 
     /**

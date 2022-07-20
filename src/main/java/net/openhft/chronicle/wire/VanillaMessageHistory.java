@@ -16,15 +16,16 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesComment;
 import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
+import net.openhft.chronicle.bytes.util.BinaryLengthLength;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("rawtypes")
 public class VanillaMessageHistory extends SelfDescribingMarshallable implements MessageHistory {
-    static  boolean USE_BYTES_MARSHALLABLE = Boolean.getBoolean("history.as.bytes");
     public static final int MESSAGE_HISTORY_LENGTH = 128;
     private static final ThreadLocal<MessageHistory> THREAD_LOCAL =
             ThreadLocal.withInitial(() -> {
@@ -32,18 +33,17 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
                 veh.addSourceDetails(true);
                 return veh;
             });
-
-    // true if these change have been written
-    private transient boolean dirty;
-
-    private int sources;
-    private int timings;
+    static boolean USE_BYTES_MARSHALLABLE = Boolean.getBoolean("history.as.bytes");
     @NotNull
     private final int[] sourceIdArray = new int[MESSAGE_HISTORY_LENGTH];
     @NotNull
     private final long[] sourceIndexArray = new long[MESSAGE_HISTORY_LENGTH];
     @NotNull
     private final long[] timingsArray = new long[MESSAGE_HISTORY_LENGTH * 2];
+    // true if these change have been written
+    private transient boolean dirty;
+    private int sources;
+    private int timings;
     private boolean addSourceDetails = false;
 
     static MessageHistory getThreadLocal() {
@@ -55,6 +55,18 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             THREAD_LOCAL.remove();
         else
             THREAD_LOCAL.set(md);
+    }
+
+    private static void acceptSourcesRead(VanillaMessageHistory t, ValueIn in) {
+        while (in.hasNextSequenceItem()) {
+            t.addSource(in.int32(), in.int64());
+        }
+    }
+
+    private static void acceptTimingsRead(VanillaMessageHistory t, ValueIn in) {
+        while (in.hasNextSequenceItem()) {
+            t.addTiming(in.int64());
+        }
     }
 
     /**
@@ -170,12 +182,12 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     }
 
     @Override
-    public void readMarshallable(@NotNull BytesIn bytes) throws IORuntimeException {
+    public void readMarshallable(@NotNull BytesIn<?> bytes) throws IORuntimeException {
         readMarshallable0(bytes);
         assert !addSourceDetails : "Bytes marshalling does not yet support addSourceDetails";
     }
 
-    private void readMarshallable0(@NotNull BytesIn bytes) {
+    private void readMarshallable0(@NotNull BytesIn<?> bytes) {
         sources = bytes.readUnsignedByte();
         for (int i = 0; i < sources; i++)
             sourceIdArray[i] = bytes.readInt();
@@ -187,7 +199,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     }
 
     @Override
-    public void writeMarshallable(@NotNull BytesOut b) {
+    public void writeMarshallable(@NotNull BytesOut<?> b) {
         BytesOut<?> bytes = b;
         bytes.comment("sources")
                 .writeUnsignedByte(sources);
@@ -209,34 +221,38 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         return System.nanoTime();
     }
 
-    private static void acceptSourcesRead(VanillaMessageHistory t, ValueIn in) {
-        while (in.hasNextSequenceItem()) {
-            t.addSource(in.int32(), in.int64());
-        }
-    }
-
-    private static void acceptTimingsRead(VanillaMessageHistory t, ValueIn in) {
-        while (in.hasNextSequenceItem()) {
-            t.addTiming(in.int64());
-        }
-    }
-
     private void acceptSources(VanillaMessageHistory t, ValueOut out) {
-        Bytes<?> b = out.wireOut().bytes();
+        BytesComment<?> b = bytesComment(out);
+
         for (int i = 0; i < t.sources; i++) {
-            b.comment("source id & index");
+            if (b != null)
+                b.comment("source id & index");
             out.uint32(t.sourceIdArray[i]);
             out.int64_0x(t.sourceIndexArray[i]);
         }
     }
 
     private void acceptTimings(VanillaMessageHistory t, ValueOut out) {
-        Bytes<?> b = out.wireOut().bytes();
+        BytesComment<?> b = bytesComment(out);
         for (int i = 0; i < t.timings; i++) {
-            b.comment("timing in nanos");
+            if (b != null)
+                b.comment("timing in nanos");
             out.int64(t.timingsArray[i]);
         }
-        out.int64(nanoTime());
+        if (!(out.wireOut() instanceof HashWire))
+            out.int64(nanoTime());
+    }
+
+    @Nullable
+    private BytesComment<?> bytesComment(ValueOut out) {
+        final WireOut wireOut = out.wireOut();
+        BytesComment<?> b = null;
+        if (!(wireOut instanceof HashWire)) {
+            b = wireOut.bytes();
+            if (!b.retainsComments())
+                b = null;
+        }
+        return b;
     }
 
     public void addSource(int id, long index) {
@@ -302,5 +318,10 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             sb.append(timingsArray[i]);
         }
         return sb.toString();
+    }
+
+    @Override
+    public BinaryLengthLength binaryLengthLength() {
+        return BinaryLengthLength.LENGTH_16BIT;
     }
 }

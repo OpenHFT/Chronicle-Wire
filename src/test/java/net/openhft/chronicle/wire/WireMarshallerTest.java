@@ -29,10 +29,11 @@ public class WireMarshallerTest extends WireTestCommon {
         WMTwoFields tf2 = w.read().object(WMTwoFields.class);
         assertEquals(text, tf2.toString());
         assertEquals("" +
-                "c0 82 14 00 00 00                               # WMTwoFields\n" +
-                "   c2 69 64                                        # id\n" +
+                "c0                                              # :\n" +
+                "82 14 00 00 00                                  # WMTwoFields\n" +
+                "   c2 69 64                                        # id:\n" +
                 "   a6 d2 02 96 49                                  # 1234567890\n" +
-                "   c2 74 73                                        # ts\n" +
+                "   c2 74 73                                        # ts:\n" +
                 "   a7 2b 20 d2 5c 8a 97 05 00                      # 1573995402108971\n", bytes.toHexString());
         bytes.releaseLast();
     }

@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.pool.StringBuilderPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -77,6 +78,8 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         return rollback;
     }
 
+    static final StringBuilderPool SBP = new StringBuilderPool();
+
     private static void fullReadForDeltaWire(AbstractWire wire0, long start) {
         long readPosition1 = wire0.bytes().readPosition();
         try {
@@ -90,7 +93,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
                 if (read.isTyped()) {
                     read.skipValue();
                 } else {
-                    read.text(Wires.acquireStringBuilder());  // todo remove this and use skipValue
+                    read.text(SBP.acquireStringBuilder());  // todo remove this and use skipValue
                 }
 
                 if (wire0.bytes().readRemaining() == remaining) {
@@ -111,8 +114,8 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         if (rollbackIfNeeded())
             return;
 
-        long readLimit = this.readLimit;
-        long readPosition = this.readPosition;
+        long readLimit0 = this.readLimit;
+        long readPosition0 = this.readPosition;
 
         AbstractWire wire0 = this.wire;
         if (present && ensureFullRead && start >= 0 && wire0 != null && wire0.hasMore()) {
@@ -120,15 +123,22 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         }
 
         start = -1;
-        if (readLimit > 0 && wire0 != null) {
+        if (readLimit0 > 0 && wire0 != null) {
             @NotNull final Bytes<?> bytes = wire0.bytes();
-            bytes.readLimit(readLimit);
+            bytes.readLimit(readLimit0);
             if (wire.usePadding())
-                readPosition += BytesUtil.padOffset(readPosition);
-            bytes.readPosition(Math.min(readLimit, readPosition));
+                readPosition0 += BytesUtil.padOffset(readPosition0);
+            bytes.readPosition(Math.min(readLimit0, readPosition0));
         }
 
         present = false;
+    }
+
+    @Override
+    public void reset() {
+        close();
+        readLimit = readPosition = 0;
+        lastStart = start = -1;
     }
 
     /**
@@ -192,7 +202,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
 
     @Override
     public long index() {
-        return 0;
+        return readPosition;
     }
 
     @Override

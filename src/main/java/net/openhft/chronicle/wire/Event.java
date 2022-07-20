@@ -10,11 +10,11 @@ public interface Event<E extends Event<E>> extends Marshallable {
 
     /**
      * Returns a unique identifier attached to this event.
-     * This will be deprecated to be removed in x.23. Suggest to make #eventTime unique - Chronicle Services uses MappedUniqueTimeProvider
      *
      * @return a unique identifier attached to this event.
      */
     @NotNull
+    @Deprecated(/* to be removed in x.25 */)
     default CharSequence eventId() {
         return "";
     }
@@ -72,7 +72,7 @@ public interface Event<E extends Event<E>> extends Marshallable {
      *
      * @param eventName name of the event
      */
-    // TODO: x.23 remove eventName parameter
+    // TODO: x.25 remove eventName parameter
     default E updateEvent(final String eventName) {
         if (this.eventId().length() == 0)
             this.eventId(eventName);
@@ -84,7 +84,7 @@ public interface Event<E extends Event<E>> extends Marshallable {
 
     /**
      * Rather than getting/setting from one event to the other directly, please use this method as
-     * this will make removing eventId easier in x.23
+     * this will make removing eventId easier
      * @param from from
      * @param to to
      */

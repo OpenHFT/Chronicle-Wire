@@ -32,15 +32,16 @@ import java.util.concurrent.Future;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 @RunWith(value = Parameterized.class)
 public class EscapeCharsTest extends WireTestCommon {
     @NotNull
-    final Character ch;
+    final String chs;
     private final Future future;
 
-    public EscapeCharsTest(@NotNull Character ch, Future future) {
-        this.ch = ch;
+    public EscapeCharsTest(@NotNull String chs, Future future) {
+        this.chs = chs;
         this.future = future;
     }
 
@@ -48,36 +49,38 @@ public class EscapeCharsTest extends WireTestCommon {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() {
         @NotNull List<Object[]> list = new ArrayList<>();
-        for (char i = 0; i < 300; i++) {
+        for (char i = 0; i < 300; i += 2) {
             char finalI = i;
-            list.add(new Object[]{i, ForkJoinPool.commonPool().submit(() -> testEscaped(finalI))});
+            char ch1 = (char) (i + 1);
+            list.add(new Object[]{"" + i + ch1, ForkJoinPool.commonPool().submit(() -> testEscaped(finalI))});
         }
         return list;
     }
 
     static void testEscaped(char ch) {
+        char ch1 = (char) (ch + 1);
         @NotNull Wire wire = createWire();
-        wire.write("" + ch).text("" + ch);
-        wire.write("" + ch + ch).text("" + ch + ch);
+        wire.write("" + ch + ch1).text("" + ch + ch1);
+        wire.write("" + ch1 + ch).text("" + ch1 + ch);
 
         @NotNull StringBuilder sb = new StringBuilder();
         @Nullable String s = wire.read(sb).text();
-        assertEquals("key " + ch, "" + ch, sb.toString());
-        assertEquals("value " + ch, "" + ch, s);
+        assertEquals("key " + ch + ch1, "" + ch + ch1, sb.toString());
+        assertEquals("value " + ch1 + ch, "" + ch + ch1, s);
         @Nullable String ss = wire.read(sb).text();
-        assertEquals("key " + ch + ch, "" + ch + ch, sb.toString());
-        assertEquals("value " + ch + ch, "" + ch + ch, ss);
+        assertEquals("key " + ch1 + ch, "" + ch1 + ch, sb.toString());
+        assertEquals("value " + ch1 + ch, "" + ch1 + ch, ss);
 
         wire.bytes().releaseLast();
     }
 
     @NotNull
-    static TextWire createWire() {
-        return new TextWire(nativeBytes());
+    static Wire createWire() {
+        return WireType.TEXT.apply(nativeBytes());
     }
 
     @Test
     public void testEscaped() throws ExecutionException, InterruptedException {
-        future.get();
+        assertNull(future.get());
     }
 }

@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
+import net.openhft.chronicle.wire.utils.YamlTester;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,6 +35,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -44,18 +46,20 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class TextMethodTester<T> {
+public class TextMethodTester<T> implements YamlTester {
+    private static final boolean TESTS_INCLUDE_COMMENTS = Jvm.getBoolean("tests.include.comments", true);
+
     private static final boolean REGRESS_TESTS = Jvm.getBoolean("regress.tests");
     private final String input;
     private final Class<T> outputClass;
+    private final Function<WireOut, T> outputFunction;
     private final String output;
     private final BiFunction<T, UpdateInterceptor, Object> componentFunction;
+    private final boolean TEXT_AS_YAML = Jvm.getBoolean("wire.testAsYaml");
     private BiConsumer<MethodReader, T> exceptionHandlerSetup;
     private String genericEvent;
-
     private List<String> setups;
     private Function<String, String> afterRun;
-
     private String expected;
     private String actual;
     private String[] retainLast;
@@ -69,12 +73,30 @@ public class TextMethodTester<T> {
     }
 
     public TextMethodTester(String input, BiFunction<T, UpdateInterceptor, Object> componentFunction, Class<T> outputClass, String output) {
+        this(input, componentFunction, null, outputClass, output);
+    }
+
+    public TextMethodTester(String input, Function<T, Object> componentFunction, Function<WireOut, T> outputFunction, String output) {
+        this(input, (out, ui) -> componentFunction.apply(out), outputFunction, null, output);
+    }
+
+    private TextMethodTester(String input, BiFunction<T, UpdateInterceptor, Object> componentFunction, Function<WireOut, T> outputFunction, Class<T> outputClass, String output) {
         this.input = input;
+        this.componentFunction = componentFunction;
+        this.outputFunction = outputFunction;
         this.outputClass = outputClass;
         this.output = output;
-        this.componentFunction = componentFunction;
+
         this.setups = Collections.emptyList();
         this.onInvocationException = e -> Jvm.warn().on(TextMethodTester.class, "Exception calling target method. Continuing", e);
+    }
+
+    public static boolean resourceExists(String resourceName) {
+        try {
+            return new File(resourceName).exists() || IOTools.urlFor(TextMethodTester.class, resourceName) != null;
+        } catch (FileNotFoundException ignored) {
+            return false;
+        }
     }
 
     public String[] retainLast() {
@@ -146,13 +168,18 @@ public class TextMethodTester<T> {
     public TextMethodTester run() throws IOException {
         Wire wireOut = createWire(Bytes.allocateElasticOnHeap());
 
-        MethodWriterBuilder<T> methodWriterBuilder = wireOut.methodWriterBuilder(outputClass);
-        if (updateInterceptor != null)
-            methodWriterBuilder.updateInterceptor(updateInterceptor);
+        T writer0;
+        if (outputClass != null) {
+            MethodWriterBuilder<T> methodWriterBuilder = wireOut.methodWriterBuilder(outputClass);
+            if (updateInterceptor != null)
+                methodWriterBuilder.updateInterceptor(updateInterceptor);
 
-        if (genericEvent != null) methodWriterBuilder.genericEvent(genericEvent);
+            if (genericEvent != null) methodWriterBuilder.genericEvent(genericEvent);
 
-        T writer0 = methodWriterBuilder.get();
+            writer0 = methodWriterBuilder.get();
+        } else {
+            writer0 = outputFunction.apply(wireOut);
+        }
         T writer = retainLast == null
                 ? writer0
                 : cachedMethodWriter(writer0);
@@ -161,27 +188,35 @@ public class TextMethodTester<T> {
                 ? (Object[]) component
                 : new Object[]{component};
 
+        String setupNotFound = "";
+        final Class<?> clazz = outputClass == null ? getClass() : outputClass;
         for (String setup : setups) {
-            Wire wire0 = createWire(BytesUtil.readFile(setup));
-
-            MethodReader reader0 = wire0.methodReaderBuilder()
-                    .methodReaderInterceptorReturns(methodReaderInterceptorReturns)
-                    .warnMissing(true)
-                    .build(components);
-            while (readOne(reader0)) {
+            try {
+                final Bytes<?> bytes = Bytes.wrapForRead(IOTools.readFile(clazz, setup));
+                Wire wire0 = createWire(bytes);
+                MethodReader reader0 = wire0.methodReaderBuilder()
+                        .methodReaderInterceptorReturns(methodReaderInterceptorReturns)
+                        .warnMissing(true)
+                        .build(components);
+                while (readOne(reader0)) {
+                    wireOut.bytes().clear();
+                }
                 wireOut.bytes().clear();
+            } catch (FileNotFoundException ignored) {
+                setupNotFound = setup + " not found";
             }
-            wireOut.bytes().clear();
         }
 
         if (component instanceof PostSetup)
             ((PostSetup) component).postSetup();
 
-        Wire wire = createWire(BytesUtil.readFile(input));
+        Wire wire = createWire(Bytes.wrapForRead(IOTools.readFile(clazz, input)));
+        if (TESTS_INCLUDE_COMMENTS)
+            wire.commentListener(wireOut::writeComment);
 
         // expected
         if (retainLast == null) {
-            expected = BytesUtil.readFile(output).toString().trim().replace("\r", "");
+            expected = new String(IOTools.readFile(clazz, output), StandardCharsets.ISO_8859_1).trim().replace("\r", "");
         } else {
             expected = loadLastValues().toString().trim();
         }
@@ -252,6 +287,10 @@ public class TextMethodTester<T> {
             expected = afterRun.apply(expected);
             actual = afterRun.apply(actual);
         }
+        if (OS.isWindows()) {
+            expected = expected.replace("\r\n", "\n");
+            actual = actual.replace("\r\n", "\n");
+        }
         if (REGRESS_TESTS && !originalExpected.equals(expected)) {
             String output = replaceTargetWithSource(this.output);
             String output2;
@@ -276,6 +315,9 @@ public class TextMethodTester<T> {
                 fw.write(actual2);
             }
         }
+        // add a warning if they don't match and there was a setup missing.
+        if (!expected.trim().equals(actual.trim()) && !setupNotFound.isEmpty())
+            Jvm.warn().on(getClass(), setupNotFound);
         return this;
     }
 
@@ -293,8 +335,10 @@ public class TextMethodTester<T> {
                 .replace("/target/test-classes/", "/src/test/resources/");
     }
 
-    protected Wire createWire(Bytes bytes) {
-        return new TextWire(bytes).useTextDocuments().addTimeStamps(true);
+    protected Wire createWire(Bytes<?> bytes) {
+        return TEXT_AS_YAML
+                ? new YamlWire(bytes).useTextDocuments().addTimeStamps(true)
+                : new TextWire(bytes).useTextDocuments().addTimeStamps(true);
     }
 
     @NotNull
@@ -359,12 +403,8 @@ public class TextMethodTester<T> {
         return this;
     }
 
-    public static boolean resourceExists(String resourceName) {
-        try {
-            return new File(resourceName).exists() || IOTools.urlFor(TextMethodTester.class, resourceName) != null;
-        } catch (FileNotFoundException ignored) {
-            return false;
-        }
+    public interface PostSetup {
+        void postSetup();
     }
 
     @Deprecated(/* used by one client*/)
@@ -418,9 +458,5 @@ public class TextMethodTester<T> {
                 invocation.method.invoke(writer0, invocation.args);
             }
         }
-    }
-
-    public interface PostSetup {
-        void postSetup();
     }
 }

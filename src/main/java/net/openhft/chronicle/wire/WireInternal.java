@@ -18,12 +18,14 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
+import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.wire.internal.FromStringInterner;
 import org.jetbrains.annotations.NotNull;
@@ -45,10 +47,12 @@ public enum WireInternal {
     static final StringInterner INTERNER = new StringInterner(Integer.getInteger("wire.interner.size", 4096));
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final StringBuilderPool ASBP = new StringBuilderPool();
-    static final ThreadLocal<WeakReference<Bytes>> BYTES_TL = new ThreadLocal<>();
-    static final ThreadLocal<WeakReference<Bytes>> BYTES_F2S_TL = new ThreadLocal<>();
+    static final StringBuilderPool SBPVI = new StringBuilderPool();
+    static final StringBuilderPool SBPVO = new StringBuilderPool();
+    static final ThreadLocal<WeakReference<Bytes<?>>> BYTES_TL = new ThreadLocal<>();
+    static final ThreadLocal<WeakReference<Bytes<?>>> BYTES_F2S_TL = new ThreadLocal<>();
     static final ThreadLocal<WeakReference<Wire>> BINARY_WIRE_TL = new ThreadLocal<>();
-    static final ThreadLocal<WeakReference<Bytes>> ABYTES_TL = new ThreadLocal();
+    static final ThreadLocal<WeakReference<Bytes<?>>> INTERNAL_BYTES_TL = new ThreadLocal<>();
 
     static final StackTraceElement[] NO_STE = {};
     static final Set<Class> INTERNABLE = new HashSet<>(Arrays.asList(
@@ -117,13 +121,15 @@ public enum WireInternal {
         assert wireOut.startUse();
         long position;
         try {
-            @NotNull Bytes bytes = wireOut.bytes();
+            @NotNull Bytes<?> bytes = wireOut.bytes();
             position = bytes.writePositionForHeader(wireOut.usePadding());
 
             int metaDataBit = metaData ? Wires.META_DATA : 0;
             int len0 = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
             bytes.writeOrderedInt(len0);
             writer.writeMarshallable(wireOut);
+            if (!wireOut.isBinary())
+                BytesUtil.combineDoubleNewline(bytes);
             long position1 = bytes.writePosition();
             if (wireOut.usePadding()) {
                 int bytesToSkip = (int) ((position - position1) & 0x3);
@@ -155,7 +161,7 @@ public enum WireInternal {
                                    @NotNull WireIn wireIn,
                                    @Nullable ReadMarshallable metaDataConsumer,
                                    @Nullable ReadMarshallable dataConsumer) {
-        @NotNull final Bytes bytes = wireIn.bytes();
+        @NotNull final Bytes<?> bytes = wireIn.bytes();
         long position = bytes.readPosition();
         long limit = bytes.readLimit();
         try {
@@ -309,6 +315,24 @@ public enum WireInternal {
             return (T) interner.intern(s);
         }
         return ObjectUtils.convertTo(tClass, o);
+    }
+
+    @NotNull
+    static Bytes<?> acquireInternalBytes() {
+        if (Jvm.isDebug())
+            return Bytes.allocateElasticOnHeap();
+        Bytes<?> bytes = ThreadLocalHelper.getTL(INTERNAL_BYTES_TL,
+                Wires::unmonitoredDirectBytes);
+        bytes.clear();
+        return bytes;
+    }
+
+    static StringBuilder acquireStringBuilderForValueIn() {
+        return SBPVI.acquireStringBuilder();
+    }
+
+    static StringBuilder acquireStringBuilderForValueOut() {
+        return SBPVO.acquireStringBuilder();
     }
 
     static class ObjectInterner<T> extends FromStringInterner<T> {

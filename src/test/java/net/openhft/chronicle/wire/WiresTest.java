@@ -2,11 +2,19 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesMarshallable;
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("rawtypes")
 public class WiresTest extends WireTestCommon {
@@ -73,7 +81,7 @@ public class WiresTest extends WireTestCommon {
         container1.bytesField.append("1");
         container1.bytesField.append("2");
         BytesContainerMarshallable container2 = new BytesContainerMarshallable();
-        Bytes container2Bytes = container2.bytesField;
+        Bytes<?> container2Bytes = container2.bytesField;
         Wires.copyTo(container1, container2);
         assertEquals(container2Bytes, container2.bytesField);
         assertEquals("12", container2.bytesField.toString());
@@ -130,6 +138,67 @@ public class WiresTest extends WireTestCommon {
                 "}\n", tv.toString());
 
     }
+    @Test
+    public void recordAsYaml() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(baos);
+        Says says = Wires.recordAsYaml(Says.class, ps);
+        says.say("One");
+        says.say("Two");
+        says.say("Three");
+
+        assertEquals("" +
+                "---\n" +
+                "say: One\n" +
+                "...\n" +
+                "---\n" +
+                "say: Two\n" +
+                "...\n" +
+                "---\n" +
+                "say: Three\n" +
+                "...\n",
+                new String(baos.toByteArray(), StandardCharsets.ISO_8859_1));
+    }
+    @Test
+    public void replay() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(baos);
+        Says says = Wires.recordAsYaml(Says.class, ps);
+        says.say("zero");
+        Wires.replay("=" +
+                "---\n" +
+                "say: One\n" +
+                "...\n" +
+                "---\n" +
+                "say: Two\n" +
+                "...\n" +
+                "---\n" +
+                "say: Three\n" +
+                "...\n",says);
+
+        assertEquals("" +
+                "---\n" +
+                "say: zero\n" +
+                "...\n" +
+                "---\n" +
+                "say: One\n" +
+                "...\n" +
+                "---\n" +
+                "say: Two\n" +
+                "...\n" +
+                "---\n" +
+                "say: Three\n" +
+                "...\n", new String(baos.toByteArray(), StandardCharsets.ISO_8859_1));
+    }
+
+    @Test
+    public void deepCopyNotBoundToThread() {
+        BytesContainerMarshallable bcm = new BytesContainerMarshallable();
+        bcm.bytesField.append("Hello");
+        assumeFalse(Jvm.getValue(bcm.bytesField, "usedByThread") == null);
+        BytesContainerMarshallable bcm2 = bcm.deepCopy();
+        assertNull(Jvm.getValue(bcm2.bytesField, "usedByThread"));
+    }
 
     interface ThreeValues {
         ThreeValues string(String s);
@@ -146,11 +215,11 @@ public class WiresTest extends WireTestCommon {
     }
 
     private static final class BytesContainer {
-        Bytes bytesField = Bytes.allocateElasticOnHeap(64);
+        Bytes<?> bytesField = Bytes.allocateElasticOnHeap(64);
     }
 
     private static final class BytesContainerMarshallable extends SelfDescribingMarshallable {
-        Bytes bytesField = Bytes.allocateElasticOnHeap(64);
+        Bytes<?> bytesField = Bytes.allocateElasticOnHeap(64);
     }
 
     private static final class StringBuilderContainer {
@@ -211,5 +280,9 @@ public class WiresTest extends WireTestCommon {
         ContainsBM(BasicBytesMarshallable inner) {
             this.inner = inner;
         }
+    }
+
+    interface Says {
+        void say(String word);
     }
 }

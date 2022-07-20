@@ -28,9 +28,9 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
     protected Wire wire;
     protected long position = -1;
     protected int tmpHeader;
+    protected int count = 0;
     private int metaDataBit;
     private volatile boolean notComplete;
-    protected int count = 0;
     private boolean chainedElement;
 
     public BinaryWriteDocumentContext(Wire wire) {
@@ -49,8 +49,20 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         this.position = bytes.writePosition();
         metaDataBit = metaData ? Wires.META_DATA : 0;
         tmpHeader = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
-        bytes.writeOrderedInt(tmpHeader);
+        bytes.writeInt(tmpHeader);
         notComplete = true;
+        chainedElement = false;
+    }
+
+    @Override
+    public void reset() {
+        if (count > 0)
+            close();
+        count = 0;
+        position = 0;
+        metaDataBit = 0;
+        tmpHeader = 0;
+        notComplete = false;
         chainedElement = false;
     }
 
@@ -71,7 +83,7 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
             return;
         if (checkResetOpened())
             return;
-        @NotNull Bytes bytes = wire().bytes();
+        @NotNull Bytes<?> bytes = wire().bytes();
         long position1 = bytes.writePosition();
 //        if (position1 < position)
 //            System.out.println("Message truncated from " + position + " to " + position1);

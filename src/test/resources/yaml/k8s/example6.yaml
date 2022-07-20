@@ -1,0 +1,259 @@
+apiVersion: v1
+items:
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        "external-dns.alpha.kubernetes.io/cloudflare-proxied": "false"
+        "external-dns.alpha.kubernetes.io/hostname": h.christine.website
+        "external-dns.alpha.kubernetes.io/ttl": "120"
+      labels:
+        app: hlang
+      name: hlang
+      namespace: apps
+    spec:
+      ports:
+        - port: 5000
+          targetPort: 5000
+      selector:
+        app: hlang
+      type: ClusterIP
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: hlang
+      namespace: apps
+    spec:
+      replicas: 2
+      selector:
+        matchLabels:
+          app: hlang
+      template:
+        metadata:
+          labels:
+            app: hlang
+          name: hlang
+        spec:
+          containers:
+            - image: "xena/hlang:latest"
+              imagePullPolicy: Always
+              name: web
+              ports:
+                - containerPort: 5000
+          imagePullSecrets:
+            - name: regcred
+  - apiVersion: networking.k8s.io/v1beta1
+    kind: Ingress
+    metadata:
+      annotations:
+        "certmanager.k8s.io/cluster-issuer": "letsencrypt-prod"
+        kubernetes.io/ingress.class: nginx
+      labels:
+        app: hlang
+      name: hlang
+      namespace: apps
+    spec:
+      rules:
+        - host: h.christine.website
+          http:
+            paths:
+              - backend:
+                  serviceName: hlang
+                  servicePort: 5000
+      tls:
+        - hosts:
+            - h.christine.website
+          secretName: "prod-certs-hlang"
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        "external-dns.alpha.kubernetes.io/cloudflare-proxied": "false"
+        "external-dns.alpha.kubernetes.io/hostname": olin.within.website
+        "external-dns.alpha.kubernetes.io/ttl": "120"
+      labels:
+        app: olin
+      name: olin
+      namespace: apps
+    spec:
+      ports:
+        - port: 5000
+          targetPort: 5000
+      selector:
+        app: olin
+      type: ClusterIP
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: olin
+      namespace: apps
+    spec:
+      replicas: 2
+      selector:
+        matchLabels:
+          app: olin
+      template:
+        metadata:
+          labels:
+            app: olin
+          name: olin
+        spec:
+          containers:
+            - image: "xena/olin:latest"
+              imagePullPolicy: Always
+              name: web
+              ports:
+                - containerPort: 5000
+          imagePullSecrets:
+            - name: regcred
+  - apiVersion: networking.k8s.io/v1beta1
+    kind: Ingress
+    metadata:
+      annotations:
+        "certmanager.k8s.io/cluster-issuer": "letsencrypt-prod"
+        kubernetes.io/ingress.class: nginx
+      labels:
+        app: olin
+      name: olin
+      namespace: apps
+    spec:
+      rules:
+        - host: olin.within.website
+          http:
+            paths:
+              - backend:
+                  serviceName: olin
+                  servicePort: 5000
+      tls:
+        - hosts:
+            - olin.within.website
+          secretName: "prod-certs-olin"
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        "external-dns.alpha.kubernetes.io/cloudflare-proxied": "false"
+        "external-dns.alpha.kubernetes.io/hostname": tulpaforce.xyz
+        "external-dns.alpha.kubernetes.io/ttl": "120"
+      labels:
+        app: tulpaforcexyz
+      name: tulpaforcexyz
+      namespace: apps
+    spec:
+      ports:
+        - port: 80
+          targetPort: 80
+      selector:
+        app: tulpaforcexyz
+      type: ClusterIP
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: tulpaforcexyz
+      namespace: apps
+    spec:
+      replicas: 2
+      selector:
+        matchLabels:
+          app: tulpaforcexyz
+      template:
+        metadata:
+          labels:
+            app: tulpaforcexyz
+          name: tulpaforcexyz
+        spec:
+          containers:
+            - image: "xena/tulpaforce:20190906"
+              imagePullPolicy: Always
+              name: web
+              ports:
+                - containerPort: 80
+          imagePullSecrets:
+            - name: regcred
+  - apiVersion: networking.k8s.io/v1beta1
+    kind: Ingress
+    metadata:
+      annotations:
+        "certmanager.k8s.io/cluster-issuer": "letsencrypt-prod"
+        kubernetes.io/ingress.class: nginx
+      labels:
+        app: tulpaforcexyz
+      name: tulpaforcexyz
+      namespace: apps
+    spec:
+      rules:
+        - host: tulpaforce.xyz
+          http:
+            paths:
+              - backend:
+                  serviceName: tulpaforcexyz
+                  servicePort: 80
+      tls:
+        - hosts:
+            - tulpaforce.xyz
+          secretName: "prod-certs-tulpaforcexyz"
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        "external-dns.alpha.kubernetes.io/cloudflare-proxied": "false"
+        "external-dns.alpha.kubernetes.io/hostname": within.website
+        "external-dns.alpha.kubernetes.io/ttl": "120"
+      labels:
+        app: withinwebsite
+      name: withinwebsite
+      namespace: apps
+    spec:
+      ports:
+        - port: 5000
+          targetPort: 5000
+      selector:
+        app: withinwebsite
+      type: ClusterIP
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: withinwebsite
+      namespace: apps
+    spec:
+      replicas: 2
+      selector:
+        matchLabels:
+          app: withinwebsite
+      template:
+        metadata:
+          labels:
+            app: withinwebsite
+          name: withinwebsite
+        spec:
+          containers:
+            - image: "xena/within.website:013120201402"
+              imagePullPolicy: Always
+              name: web
+              ports:
+                - containerPort: 5000
+          imagePullSecrets:
+            - name: regcred
+  - apiVersion: networking.k8s.io/v1beta1
+    kind: Ingress
+    metadata:
+      annotations:
+        "certmanager.k8s.io/cluster-issuer": "letsencrypt-prod"
+        kubernetes.io/ingress.class: nginx
+      labels:
+        app: withinwebsite
+      name: withinwebsite
+      namespace: apps
+    spec:
+      rules:
+        - host: within.website
+          http:
+            paths:
+              - backend:
+                  serviceName: withinwebsite
+                  servicePort: 5000
+      tls:
+        - hosts:
+            - within.website
+          secretName: "prod-certs-withinwebsite"
+kind: List

@@ -25,7 +25,6 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.*;
-import net.openhft.chronicle.threads.BusyPauser;
 import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -97,6 +96,11 @@ public class HashWire implements WireOut, BytesComment {
     @Override
     public void clear() {
         hash = 0;
+    }
+
+    @Override
+    public void reset() {
+        clear();
     }
 
     @Nullable
@@ -223,11 +227,6 @@ public class HashWire implements WireOut, BytesComment {
     }
 
     @Override
-    public long enterHeader(final int safeLength) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public long enterHeader(final long safeLength) {
         throw new UnsupportedOperationException();
     }
@@ -286,6 +285,11 @@ public class HashWire implements WireOut, BytesComment {
         return object.usesSelfDescribingMessage();
     }
 
+    @Override
+    public boolean isBinary() {
+        return false; // as byte() doesn't make sense to access
+    }
+
     @NotNull
     @Override
     public LongArrayValues newLongArrayReference() {
@@ -300,7 +304,7 @@ public class HashWire implements WireOut, BytesComment {
     @NotNull
     @Override
     public Pauser pauser() {
-        return BusyPauser.INSTANCE;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -510,7 +514,7 @@ public class HashWire implements WireOut, BytesComment {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @Nullable Class type) {
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class type) {
             hash = hash * M1 + (type == null ? 0 : type.hashCode() * M2);
             return HashWire.this;
         }

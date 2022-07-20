@@ -1,4 +1,5 @@
 canonical: 12345
-decimal: +12345
+decimal: +12_345
+sexagesimal: 3:25:45
 octal: 0o14
 hexadecimal: 0xC

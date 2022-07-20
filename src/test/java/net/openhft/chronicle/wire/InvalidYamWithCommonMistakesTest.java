@@ -1,8 +1,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.pool.ClassAliasPool;
-import org.junit.Assert;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by Rob Austin
@@ -20,7 +21,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
                 "{\n" +
                 "  y:hello8\n" +
                 "}\n");
-        Assert.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -32,7 +33,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
                 "{\n" +
                 "  y:hello8\n" +
                 "}\n");
-        Assert.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -45,17 +46,22 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
                 "  y:hello8\n" +
                 "}\n");
 
-        Assert.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
     public void testAssumeTheTypeMissingType() {
-
-        Marshallable.fromString(Dto.class, "Dto " +
+        expectException("Cannot find a class for Xyz are you missing an alias?");
+        final String cs = "!Xyz " +
                 "{\n" +
-                "  y:hello8\n" +
-                "}\n");
-
+                "  y: hello8\n" +
+                "}\n";
+        String s = Marshallable.fromString(Dto.class, cs).toString();
+        assertEquals("" +
+                "!net.openhft.chronicle.wire.InvalidYamWithCommonMistakesTest$Dto {\n" +
+                "  y: hello8,\n" +
+                "  x: !!null \"\"\n" +
+                "}\n", s);
     }
 
     @Test
@@ -70,8 +76,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
                 "  y: hello,\n" +
                 "}");
 
-        Assert.assertEquals(expected, actual);
-
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -87,7 +92,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
                 "  y: hello,\n" +
                 "}");
 
-        Assert.assertEquals(expected, actual);
+        assertEquals(expected, actual);
 
     }
 
@@ -101,7 +106,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
                 "  y:hello8\n" +
                 "}\n");
 
-        Assert.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -113,7 +118,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
                 "  y:hello8\n" +
                 "}\n");
 
-        Assert.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -125,7 +130,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
                 "  y:hello8\n" +
                 "}\n");
 
-        Assert.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -136,7 +141,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
                 "  y:hello8\n" +
                 "}\n");
 
-        Assert.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -148,7 +153,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
                 "  y:hello8\n" +
                 "}\n");
 
-        Assert.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     public static class Dto extends SelfDescribingMarshallable {

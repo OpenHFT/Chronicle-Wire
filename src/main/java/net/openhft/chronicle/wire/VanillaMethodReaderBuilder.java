@@ -28,7 +28,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
 
 public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     public static final String DISABLE_READER_PROXY_CODEGEN = "disableReaderProxyCodegen";
@@ -41,12 +40,11 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     private WireParselet defaultParselet;
     private MethodReaderInterceptorReturns methodReaderInterceptorReturns;
     private WireType wireType;
+    private Object[] metaDataHandler = null;
 
     public VanillaMethodReaderBuilder(MarshallableIn in) {
         this.in = in;
     }
-
-    // TODO add support for filtering.
 
     @NotNull
     public static WireParselet createDefaultParselet(boolean warnMissing) {
@@ -69,12 +67,15 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
                 Long.toHexString(sourceIndex) + " ~ " + (int) sourceIndex;
     }
 
+    @Deprecated(/* Not used. To be removed in x.25 */)
     public boolean ignoreDefaults() {
         return ignoreDefaults;
     }
 
+    @Deprecated(/* Not used. To be removed in x.25 */)
     @NotNull
     public MethodReaderBuilder ignoreDefaults(boolean ignoreDefaults) {
+        Jvm.warn().on(getClass(), "Support for ignoreDefaults will be dropped in x.25");
         this.ignoreDefaults = ignoreDefaults;
         return this;
     }
@@ -112,13 +113,11 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     }
 
     @Nullable
-    private MethodReader createGeneratedInstance(Supplier<MethodReader> vanillaSupplier, Object... impls) {
-        // todo support this options in the generated code
-        if (ignoreDefaults ||
-                Jvm.getBoolean(DISABLE_READER_PROXY_CODEGEN))
+    private MethodReader createGeneratedInstance(Object... impls) {
+        if (ignoreDefaults || Jvm.getBoolean(DISABLE_READER_PROXY_CODEGEN))
             return null;
 
-        GenerateMethodReader generateMethodReader = new GenerateMethodReader(wireType, methodReaderInterceptorReturns, impls);
+        GenerateMethodReader generateMethodReader = new GenerateMethodReader(wireType, methodReaderInterceptorReturns, metaDataHandler, impls);
 
         String fullClassName = generateMethodReader.packageName() + "." + generateMethodReader.generatedClassName();
 
@@ -126,44 +125,49 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
             try {
                 final Class<?> generatedClass = Class.forName(fullClassName);
 
-                return instanceForGeneratedClass(vanillaSupplier, generatedClass, impls);
+                return instanceForGeneratedClass(generatedClass, impls);
             } catch (ClassNotFoundException e) {
                 Class<?> clazz = classCache.computeIfAbsent(fullClassName, name -> generateMethodReader.createClass());
                 if (clazz != null && clazz != COMPILE_FAILED) {
-                    return instanceForGeneratedClass(vanillaSupplier, clazz, impls);
+                    return instanceForGeneratedClass(clazz, impls);
                 }
             }
         } catch (Throwable e) {
             classCache.put(fullClassName, COMPILE_FAILED);
-            // do nothing and drop through
-            Jvm.warn().on(getClass(), "Failed to compile generated method reader - falling back to proxy method reader. Please report this failure.", e);
+            Jvm.warn().on(getClass(), "Failed to compile generated method reader - " +
+                    "falling back to proxy method reader. Please report this failure as support for " +
+                    "proxy method readers will be dropped in x.25.", e);
         }
 
         return null;
     }
 
     @NotNull
-    private MethodReader instanceForGeneratedClass(Supplier<MethodReader> vanillaSupplier,
-                                                   Class<?> generatedClass, Object[] impls
-    ) throws InstantiationException, IllegalAccessException, InvocationTargetException {
+    private MethodReader instanceForGeneratedClass(Class<?> generatedClass, Object[] impls)
+            throws InstantiationException, IllegalAccessException, InvocationTargetException {
         final Constructor<?> constructor = generatedClass.getConstructors()[0];
 
         WireParselet debugLoggingParselet = VanillaMethodReader::logMessage;
 
         return (MethodReader) constructor.newInstance(
-                in, debugLoggingParselet, vanillaSupplier, methodReaderInterceptorReturns, impls);
+                in, defaultParselet, debugLoggingParselet, methodReaderInterceptorReturns, metaDataHandler, impls);
+    }
+
+    @Override
+    public MethodReaderBuilder metaDataHandler(Object... components) {
+        this.metaDataHandler = components;
+        return this;
     }
 
     @NotNull
     public MethodReader build(Object... impls) {
-        final WireParselet defaultParselet = this.defaultParselet == null ?
-                createDefaultParselet(warnMissing) : this.defaultParselet;
+        if (this.defaultParselet == null)
+            this.defaultParselet = createDefaultParselet(warnMissing);
 
-        Supplier<MethodReader> vanillaSupplier = () -> new VanillaMethodReader(
-                in, ignoreDefaults, defaultParselet, methodReaderInterceptorReturns, impls);
+        final MethodReader generatedInstance = createGeneratedInstance(impls);
 
-        final MethodReader generatedInstance = createGeneratedInstance(vanillaSupplier, impls);
-
-        return generatedInstance == null ? vanillaSupplier.get() : generatedInstance;
+        return generatedInstance == null ? new VanillaMethodReader(
+                in, ignoreDefaults, defaultParselet, methodReaderInterceptorReturns, metaDataHandler, impls) :
+                generatedInstance;
     }
 }

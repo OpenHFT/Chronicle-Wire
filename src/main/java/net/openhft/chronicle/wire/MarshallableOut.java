@@ -20,8 +20,11 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.MethodWriterBuilder;
 import net.openhft.chronicle.bytes.WriteBytesMarshallable;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.annotation.DontChain;
+import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.URL;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
@@ -29,7 +32,13 @@ import java.util.stream.Stream;
 /**
  * Anything you can write Marshallable objects to.
  */
+@DontChain
 public interface MarshallableOut extends DocumentWritten {
+
+    static MarshallableOutBuilder builder(URL url) {
+        return new MarshallableOutBuilder(url);
+    }
+
     /**
      * Start a document which is completed when DocumentContext.close() is called. You can use a
      * <pre>
@@ -186,7 +195,7 @@ public interface MarshallableOut extends DocumentWritten {
     }
 
     /**
-     * Proxy an interface so each message called is written to a file for replay.
+     * Proxy an interface so each message called is written for replay.
      *
      * @param tClass     primary interface
      * @param additional any additional interfaces
@@ -200,33 +209,52 @@ public interface MarshallableOut extends DocumentWritten {
     }
 
     /**
-     * Proxy an interface so each message called is written to a file for method.
+     * Proxy an interface so each message called is written for method.
      *
      * @param metaData   true if you wish to write every method as meta data
      * @param tClass     primary interface
      * @param additional any additional interfaces
      * @return a proxy which implements the primary interface (additional interfaces have to be
      * cast)
+     * @deprecated use methodWriterBuilder with Stream.of(additional).forEach(builder::addInterface);
      */
+    @Deprecated(/* to be removed in x.25 */)
     @SuppressWarnings({"rawtypes", "unchecked"})
     @NotNull
     default <T> T methodWriter(boolean metaData, @NotNull Class<T> tClass, Class... additional) {
-        VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
-                WireType.BINARY_LIGHT,
-                () -> new BinaryMethodWriterInvocationHandler(metaData, this));
+        VanillaMethodWriterBuilder<T> builder =
+                (VanillaMethodWriterBuilder<T>) methodWriterBuilder(metaData, tClass);
         Stream.of(additional).forEach(builder::addInterface);
-
-        builder.marshallableOut(this);
-        builder.metaData(metaData);
         return builder.build();
     }
 
+    /**
+     * Return a builder for a proxy an interface so each message called is written for method.
+     *
+     * @param tClass primary interface
+     * @return a builder for a proxy which implements the interface
+     */
     @NotNull
     default <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
+        return methodWriterBuilder(false, tClass);
+    }
+
+    /**
+     * Proxy an interface so each message called is written to a file for method.
+     *
+     * @param metaData true if you wish to write every method as meta data
+     * @param tClass   primary interface
+     * @return a proxy which implements the interface
+     */
+    @NotNull
+    default <T> MethodWriterBuilder<T> methodWriterBuilder(boolean metaData, @NotNull Class<T> tClass) {
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.BINARY_LIGHT,
-                () -> new BinaryMethodWriterInvocationHandler(false, this));
+                () -> new BinaryMethodWriterInvocationHandler(tClass, metaData, this));
         builder.marshallableOut(this);
+        builder.metaData(metaData);
+        if (this instanceof Closeable)
+            builder.onClose((Closeable) this);
         return builder;
     }
 }

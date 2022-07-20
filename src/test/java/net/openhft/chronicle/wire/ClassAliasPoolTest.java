@@ -55,11 +55,12 @@ public class ClassAliasPoolTest extends WireTestCommon {
                                 w.toString())},
                 {WireType.BINARY,
                         (Consumer<WireIn>) w -> assertEquals("" +
-                                        "1e 00 00 00                                     # msg-length\n" +
-                                        "b9 06 68 61 6e 64 6c 65                         # handle\n" +
+                                        "1f 00 00 00                                     # msg-length\n" +
+                                        "b9 06 68 61 6e 64 6c 65                         # handle: (event)\n" +
                                         "b6 08 43 41 50 54 44 61 74 61                   # CAPTData\n" +
-                                        "82 07 00 00 00                                  # CAPTData\n" +
-                                        "   c5 76 61 6c 75 65 00                            # value\n",
+                                        "82 08 00 00 00                                  # CAPTData\n" +
+                                        "   c5 76 61 6c 75 65                               # value:\n" +
+                                        "   a1 00                                           # 0\n",
                                 w.bytes().toHexString())},
         });
     }
@@ -83,19 +84,19 @@ public class ClassAliasPoolTest extends WireTestCommon {
         assertTrue(reader.readOne());
         assertFalse(reader.readOne());
         assertEquals("" +
-                "handle[!net.openhft.chronicle.wire.ClassAliasPoolTest$CAPTData {\n" +
-                "  value: 0\n" +
-                "}\n" +
-                "]\n", out.toString());
+                        "handle[!net.openhft.chronicle.wire.ClassAliasPoolTest$CAPTData {\n" +
+                        "  value: 0\n" +
+                        "}\n" +
+                        "]\n",
+                out.toString().replace("\r", ""));
         verify(mock);
     }
 
-    interface TestedMethods {
+    public interface TestedMethods {
         void handle(Marshallable m);
     }
 
-    static class CAPTData extends SelfDescribingMarshallable {
+    public static class CAPTData extends SelfDescribingMarshallable {
         long value;
     }
-
 }

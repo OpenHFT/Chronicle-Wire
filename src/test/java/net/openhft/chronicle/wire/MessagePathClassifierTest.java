@@ -34,10 +34,13 @@ public class MessagePathClassifierTest extends WireTestCommon {
 
     @Test
     public void addPathForSourcesEnding() {
-        new MessagePathClassifier()
+        final MessagePathClassifier mpc = new MessagePathClassifier()
                 .addPathForSourcesEnding(4, 4)
                 .addPathForSourcesEnding(123, 1, 2, 3)
-                .addPathForSourcesEnding(4, 4); // warning.
+                .addPathForSourcesEnding(4, 4);
+        assertEquals("" +
+                        "MessagePathClassifier{sourcePattern=[[4], [1, 2, 3]], pathIds=[4, 123]}",
+                mpc.toString());
     }
 
     @Test(expected = IllegalArgumentException.class)

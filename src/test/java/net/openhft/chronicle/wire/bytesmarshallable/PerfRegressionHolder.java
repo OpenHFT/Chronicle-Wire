@@ -41,8 +41,8 @@ public class PerfRegressionHolder {
 
     DefaultStringFields dsf0 = new DefaultStringFields(new String[6]);
 
-    final Bytes direct = Bytes.allocateElasticDirect();
-    final Bytes onHeap = Bytes.allocateElasticOnHeap();
+    final Bytes<?> direct = Bytes.allocateElasticDirect();
+    final Bytes<?> onHeap = Bytes.allocateElasticOnHeap();
 
     MappedBytes mapped;
 
@@ -80,12 +80,12 @@ public class PerfRegressionHolder {
     }
 
     static class BytesFields extends BytesInBinaryMarshallable {
-        Bytes a = Bytes.allocateElasticOnHeap();
-        Bytes b = Bytes.allocateElasticOnHeap();
-        Bytes c = Bytes.allocateElasticOnHeap();
-        Bytes d = Bytes.allocateElasticOnHeap();
-        Bytes e = Bytes.allocateElasticOnHeap();
-        Bytes f = Bytes.allocateElasticOnHeap();
+        Bytes<?> a = Bytes.allocateElasticOnHeap();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
+        Bytes<?> c = Bytes.allocateElasticOnHeap();
+        Bytes<?> d = Bytes.allocateElasticOnHeap();
+        Bytes<?> e = Bytes.allocateElasticOnHeap();
+        Bytes<?> f = Bytes.allocateElasticOnHeap();
 
         public BytesFields() {
         }
@@ -110,7 +110,7 @@ public class PerfRegressionHolder {
         }
 
         @Override
-        public void readMarshallable(BytesIn bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
+        public void readMarshallable(BytesIn<?> bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
             read8Bit(bytes, a);
             read8Bit(bytes, b);
             read8Bit(bytes, c);
@@ -119,12 +119,12 @@ public class PerfRegressionHolder {
             read8Bit(bytes, f);
         }
 
-        protected void read8Bit(BytesIn bytes, Bytes a) {
+        protected void read8Bit(BytesIn<?> bytes, Bytes<?> a) {
             bytes.read8bit(a);
         }
 
         @Override
-        public void writeMarshallable(BytesOut bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
+        public void writeMarshallable(BytesOut<?> bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
             write8Bit(bytes, a);
             write8Bit(bytes, b);
             write8Bit(bytes, c);
@@ -133,7 +133,7 @@ public class PerfRegressionHolder {
             write8Bit(bytes, f);
         }
 
-        protected void write8Bit(BytesOut bytes, BytesStore a) {
+        protected void write8Bit(BytesOut<?> bytes, BytesStore a) {
             if (a == null) {
                 bytes.writeStopBit(-1);
             } else {
@@ -158,7 +158,7 @@ public class PerfRegressionHolder {
         }
 
         @Override
-        public void readMarshallable(BytesIn bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
+        public void readMarshallable(BytesIn<?> bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
             read8Bit(bytes, a);
             read8Bit(bytes, b);
             read8Bit(bytes, c);
@@ -168,7 +168,7 @@ public class PerfRegressionHolder {
         }
 
         @Override
-        public void writeMarshallable(BytesOut bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
+        public void writeMarshallable(BytesOut<?> bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
             write8Bit(bytes, a);
             write8Bit(bytes, b);
             write8Bit(bytes, c);
@@ -178,7 +178,7 @@ public class PerfRegressionHolder {
         }
 
         @Override
-        protected void read8Bit(BytesIn bytes, Bytes a) {
+        protected void read8Bit(BytesIn<?> bytes, Bytes<?> a) {
             int length = (int) bytes.readStopBit();
             a.clear();
             for (int i = 0; i < length; i++)
@@ -186,7 +186,7 @@ public class PerfRegressionHolder {
         }
 
         @Override
-        protected void write8Bit(BytesOut bytes, BytesStore a) {
+        protected void write8Bit(BytesOut<?> bytes, BytesStore a) {
             final int length = a.length();
             bytes.writeStopBit(length);
             for (int i = 0; i < length; i++)
@@ -235,13 +235,13 @@ public class PerfRegressionHolder {
  // U8 3060
  // 88 3510
         @Override
-        public void readMarshallable(BytesIn bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
+        public void readMarshallable(BytesIn<?> bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
             for (long offset : offsets)
                 MEMORY.putObject(this, offset, bytes.read8bit());
         }
 
         @Override
-        public void writeMarshallable(BytesOut bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
+        public void writeMarshallable(BytesOut<?> bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
             for (long offset : offsets) {
                 final String s = MEMORY.getObject(this, offset);
                 bytes.write8bit(s);
@@ -259,7 +259,7 @@ public class PerfRegressionHolder {
         }
 
         @Override
-        public void readMarshallable(BytesIn bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
+        public void readMarshallable(BytesIn<?> bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
             a = bytes.read8bit();
             b = bytes.read8bit();
             c = bytes.read8bit();
@@ -269,7 +269,7 @@ public class PerfRegressionHolder {
         }
 
         @Override
-        public void writeMarshallable(BytesOut bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
+        public void writeMarshallable(BytesOut<?> bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
             bytes.write8bit(a);
             bytes.write8bit(b);
             bytes.write8bit(c);
@@ -288,7 +288,7 @@ public class PerfRegressionHolder {
         }
 
         @Override
-        public void readMarshallable(BytesIn bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
+        public void readMarshallable(BytesIn<?> bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
             a = bytes.readUtf8();
             b = bytes.readUtf8();
             c = bytes.readUtf8();
@@ -298,7 +298,7 @@ public class PerfRegressionHolder {
         }
 
         @Override
-        public void writeMarshallable(BytesOut bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
+        public void writeMarshallable(BytesOut<?> bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
             bytes.writeUtf8(a);
             bytes.writeUtf8(b);
             bytes.writeUtf8(c);

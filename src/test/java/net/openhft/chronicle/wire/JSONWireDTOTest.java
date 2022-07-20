@@ -14,7 +14,7 @@ public class JSONWireDTOTest extends WireTestCommon {
     public void dto() {
         expectException("Found this$0, in class");
         // underlying bytes
-        Bytes bytes = Bytes.allocateElasticDirect();
+        Bytes<?> bytes = Bytes.allocateElasticDirect();
 
         // Use the JSON serialization
         JSONWire wire = new JSONWire(bytes);
@@ -29,7 +29,7 @@ public class JSONWireDTOTest extends WireTestCommon {
         wire.getValueOut().marshallable(dto);
 
         // check the bytes
-        assertEquals("{\"text\":\"hi\",\"nested\":[ {\"str\":\"there\",\"num\":1} ], \"b\":false,\"bb\":0,\"s\":0,\"f\":0.0,\"d\":3.1415,\"l\":0,\"i\":0}",
+        assertEquals("{\"text\":\"hi\",\"nested\":[ {\"str\":\"there\",\"num\":1} ],\"b\":false,\"bb\":0,\"s\":0,\"f\":0.0,\"d\":3.1415,\"l\":0,\"i\":0}",
                 bytes.toString());
 
         // create another instance to deserialize into

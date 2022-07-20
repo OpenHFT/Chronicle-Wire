@@ -38,14 +38,6 @@ public interface MarshallableIn {
     DocumentContext readingDocument();
 
     /**
-     * @deprecated as it no longer fulfils its original purpose (performance optimisation)
-     */
-    @Deprecated(/* remove in x.23 */)
-    default boolean peekDocument() {
-        return true;
-    }
-
-    /**
      * @param reader user to read the document
      * @return {@code true} if successful
      */
@@ -76,7 +68,7 @@ public interface MarshallableIn {
      * @return {@code true} if successful
      */
     @SuppressWarnings("rawtypes")
-    default boolean readBytes(@NotNull Bytes using) {
+    default boolean readBytes(@NotNull Bytes<?> using) {
         try (@NotNull DocumentContext dc = readingDocument()) {
             if (!dc.isPresent())
                 return false;
@@ -99,7 +91,7 @@ public interface MarshallableIn {
             if (!dc.isPresent()) {
                 return null;
             }
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             dc.wire().getValueIn().text(sb);
             return sb.length() < MARSHALLABLE_IN_INTERN_SIZE
                     ? WireInternal.INTERNER.intern(sb)

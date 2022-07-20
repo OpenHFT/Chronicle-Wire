@@ -23,7 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
-import java.lang.reflect.Modifier;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +43,7 @@ public class ReadmeChapter1Test extends WireTestCommon {
 Now you can choice which format you are using.  As the wire formats are themselves unbuffered, you can use them with the same buffer, but in general using one wire format is easier.
 ```java
  */
-        @NotNull Wire wire = new TextWire(bytes);
+        @NotNull Wire wire = WireType.TEXT.apply(bytes);
         // or
         @NotNull WireType wireType = WireType.TEXT;
         Wire wireB = wireType.apply(bytes);
@@ -133,7 +132,7 @@ prints in RawWire
         // Bytes which wraps a ByteBuffer which is resized as needed.
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
-        @NotNull Wire wire = new TextWire(bytes);
+        @NotNull Wire wire = WireType.TEXT.apply(bytes);
 
         @NotNull Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
         data.writeMarshallable(wire);
@@ -190,7 +189,7 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
         // Bytes which wraps a ByteBuffer which is resized as needed.
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
-        @NotNull Wire wire = new TextWire(bytes);
+        @NotNull Wire wire = WireType.TEXT.apply(bytes);
 
         @NotNull Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
         wire.write(() -> "mydata").marshallable(data);
@@ -251,7 +250,7 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
         // Bytes which wraps a ByteBuffer which is resized as needed.
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
-        @NotNull Wire wire = new TextWire(bytes);
+        @NotNull Wire wire = WireType.TEXT.apply(bytes);
 
         ClassAliasPool.CLASS_ALIASES.addAlias(Data.class);
 
@@ -319,8 +318,7 @@ The benefits of using this approach ares that
         // Bytes which wraps a ByteBuffer which is resized as needed.
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
-        @NotNull Wire wire = new TextWire(bytes);
-        wire.usePadding(true);
+        @NotNull Wire wire = WireType.TEXT.apply(bytes);
 
         ClassAliasPool.CLASS_ALIASES.addAlias(Data.class);
 
@@ -386,8 +384,7 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
         // Bytes which wraps a ByteBuffer which is resized as needed.
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
-        @NotNull Wire wire = new TextWire(bytes);
-        wire.usePadding(true);
+        @NotNull Wire wire = WireType.TEXT.apply(bytes);
 
         ClassAliasPool.CLASS_ALIASES.addAlias(Data.class);
 
@@ -502,7 +499,7 @@ Data{message='Howyall', number=1234567890, timeUnit=SECONDS, price=1000.0}
         // Bytes which wraps a ByteBuffer which is resized as needed.
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
-        @NotNull Wire wire = new TextWire(bytes);
+        @NotNull Wire wire = WireType.TEXT.apply(bytes);
         ClassAliasPool.CLASS_ALIASES.addAlias(Data.class);
 
         @NotNull Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);

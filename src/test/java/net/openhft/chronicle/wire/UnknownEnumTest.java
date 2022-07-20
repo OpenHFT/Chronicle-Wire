@@ -9,8 +9,7 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class UnknownEnumTest extends WireTestCommon {
 
@@ -22,11 +21,11 @@ public class UnknownEnumTest extends WireTestCommon {
             109, 84, 101, 115, 116, 36, 84, 101, 109, 112, -27, 70, 73, 82, 83, 84};
 
     public Wire createWire() {
-        return new TextWire(Bytes.allocateElasticOnHeap(128));
+        return WireType.TEXT.apply(Bytes.allocateElasticOnHeap(128));
     }
 
     @Test
-    public void testUnknownEnum() {
+    public void testUnknownDynamicEnum() {
         Wire wire = createWire();
         wire.write("value").text("Maybe");
 
@@ -39,6 +38,13 @@ public class UnknownEnumTest extends WireTestCommon {
         assertEquals("Maybe", maybe);
     }
 
+    @Test
+    public void testUnknownStaticEnum() {
+        Wire wire = createWire();
+        wire.write("value").text("Maybe");
+
+        assertThrows(IllegalArgumentException.class, () -> wire.read("value").asEnum(StrictYesNo.class));
+    }
    // private enum Temp {
        // FIRST
    // }
@@ -63,6 +69,7 @@ public class UnknownEnumTest extends WireTestCommon {
        // }
        // System.out.println();
 
+        expectException("Unknown class (net.openhft.chronicle.wire.UnknownEnumTest$Temp), perhaps you need to define an alias");
         final Bytes<ByteBuffer> bytes = Bytes.wrapForRead(ByteBuffer.wrap(SERIALISED_MAP_DATA));
 
         final Wire wire = WireType.BINARY.apply(bytes);
@@ -81,13 +88,18 @@ public class UnknownEnumTest extends WireTestCommon {
         } catch (Exception e) {
             String message = e.getMessage().replaceAll(" [a-z0-9.]+.Proxy\\d+", " ProxyXX");
             assertThat(message,
-                    is(equalTo("Trying to read marshallable class ProxyXX at [pos: 27, rlim: 27, wlim: 27, cap: 27 ] enumField: !UnknownEnum QUXǁ‡ expected to find a {")));
+                    is(equalTo("Trying to read marshallable class ProxyXX at [pos: 23, rlim: 27, wlim: 27, cap: 27 ]  QUX expected to find a {")));
         } finally {
             Wires.GENERATE_TUPLES = false;
         }
     }
 
     enum YesNo implements DynamicEnum {
+        Yes,
+        No
+    }
+
+    enum StrictYesNo {
         Yes,
         No
     }

@@ -2,9 +2,9 @@
 method1: {
   field1: hello, 		# field1 comment
   field2: 1.23, 		# field2 comment
-
 }
 ...
+# included
 ignoreMethodBasedOnFirstArg: [
   method2,
   false
@@ -16,21 +16,21 @@ method2: [
   {
     field1: world, 		# field1 comment
     field2: 1E6, 		# field2 comment
-
   }
 ]
 ...
+# IGNORED
 ignoreMethodBasedOnFirstArg: [
   method2,
   true
 ]
 ...
+# included
 ignoreMethodBasedOnFirstArg: [
   method3,
   !net.openhft.chronicle.wire.method.MockDto {
     field1: world, 		# field1 comment
     field2: 1E6, 		# field2 comment
-
   }
 ]
 ...
@@ -39,21 +39,19 @@ method3: [
   {
     field1: world, 		# field1 comment
     field2: 1E6, 		# field2 comment
-
   },
   {
     field1: world, 		# field1 comment
     field2: 1E6, 		# field2 comment
-
   }
 ]
 ...
+# IGNORED
 ignoreMethodBasedOnFirstArg: [
   method3,
   !net.openhft.chronicle.wire.method.MockDto {
     field1: world, 		# field1 comment
     field2: 0.0, 		# field2 comment
-
   }
 ]
 ...

@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.annotation.DontChain;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ObjectOutput;
@@ -28,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * The defines the standard interface for writing and reading sequentially to/from a Bytes stream
  */
+@DontChain
 public interface WireOut extends WireCommon, MarshallableOut {
     /**
      * Write an empty filed marker
@@ -168,11 +170,6 @@ public interface WireOut extends WireCommon, MarshallableOut {
 
     void updateHeader(long position, boolean metaData, int expectedHeader) throws StreamCorruptedException;
 
-    @Deprecated(/* to be removed in x.23*/)
-    default long enterHeader(int safeLength) {
-        return enterHeader((long) safeLength);
-    }
-
     long enterHeader(long safeLength);
 
     /**
@@ -214,5 +211,12 @@ public interface WireOut extends WireCommon, MarshallableOut {
     @NotNull
     default WireOut dropDefault(boolean dropDefault) {
         return this;
+    }
+
+    /**
+     * @return true unless there is an incomplete/chained message
+     */
+    default boolean writingIsComplete() {
+        return true;
     }
 }

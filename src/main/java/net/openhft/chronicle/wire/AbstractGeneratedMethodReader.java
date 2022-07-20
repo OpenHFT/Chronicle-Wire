@@ -21,62 +21,51 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.Mocker;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import static java.lang.ThreadLocal.withInitial;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
 /**
  * Base class for generated method readers.
- * In case generated instance fails to perform a read, it's delegated to lazy-initialized {@link VanillaMethodReader}.
  */
 public abstract class AbstractGeneratedMethodReader implements MethodReader {
-    private static final Consumer<MessageHistory> NO_OP_MH_CONSUMER = noOp -> {
-    };
-    private final MarshallableIn in;
+    private static final Consumer<MessageHistory> NO_OP_MH_CONSUMER = Mocker.ignored(Consumer.class);
+    private static final MessageHistoryThreadLocal TEMP_MESSAGE_HISTORY = new MessageHistoryThreadLocal();
     protected final WireParselet debugLoggingParselet;
-    private final Supplier<MethodReader> delegateSupplier;
-
+    private final MarshallableIn in;
     protected MessageHistory messageHistory;
+    protected boolean dataEventProcessed;
     private MethodReader delegate;
     private boolean closeIn = false;
     private boolean closed;
-
     private Consumer<MessageHistory> historyConsumer = NO_OP_MH_CONSUMER;
 
-    private static final class MessageHistoryThreadLocal {
-
-        private final ThreadLocal<MessageHistory> messageHistoryTL = withInitial(() -> {
-            @NotNull VanillaMessageHistory veh = new VanillaMessageHistory();
-            veh.addSourceDetails(true);
-            return veh;
-        });
-
-        private MessageHistory getAndSet(MessageHistory mh) {
-            final MessageHistory result = messageHistoryTL.get();
-            messageHistoryTL.set(mh);
-            return result;
-        }
-
-        public MessageHistory get() {
-            return messageHistoryTL.get();
-        }
-    }
-
-    private static final MessageHistoryThreadLocal TEMP_MESSAGE_HISTORY = new MessageHistoryThreadLocal();
-
     protected AbstractGeneratedMethodReader(MarshallableIn in,
-                                            WireParselet debugLoggingParselet,
-                                            Supplier<MethodReader> delegateSupplier) {
+                                            WireParselet debugLoggingParselet) {
         this.in = in;
         this.debugLoggingParselet = debugLoggingParselet;
-        this.delegateSupplier = delegateSupplier;
+    }
+
+    /**
+     * Helper method used by implementations to get a Method
+     */
+    protected static Method lookupMethod(Class<?> clazz, String name, Class<?>... parameterTypes) {
+        try {
+            final Method method = clazz.getMethod(name, parameterTypes);
+
+            Jvm.setAccessible(method);
+
+            return method;
+        } catch (NoSuchMethodException e) {
+            throw new AssertionError(e);
+        }
     }
 
     /**
@@ -97,6 +86,10 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      */
     protected abstract boolean readOneCall(WireIn wireIn);
 
+    protected boolean readOneCallMeta(WireIn wireIn) {
+        return false;
+    }
+
     /**
      * @param context Reading document context.
      * @return <code>true</code> if reading is successful, <code>false</code> if reading should be delegated.
@@ -109,21 +102,32 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         if (wireIn == null)
             return false;
 
-        if (historyConsumer != NO_OP_MH_CONSUMER)
+        if (historyConsumer != NO_OP_MH_CONSUMER) {
             writeUnwrittenMessageHistory(context);
+
+            // Another reader may have swapped MessageHistory.get() and TEMP_MESSAGE_HISTORY
+            // Clearing local reference to recover link to the proper thread-local, which is MessageHistory.get()
+            messageHistory = null;
+        }
 
         messageHistory().reset(context.sourceId(), context.index());
 
         try {
             wireIn.startEvent();
+            wireIn.consumePadding();
             Bytes<?> bytes = wireIn.bytes();
+            dataEventProcessed = false;
+            boolean decoded = false;
             while (bytes.readRemaining() > 0) {
                 if (wireIn.isEndEvent())
                     break;
                 long start = bytes.readPosition();
 
-                if (!readOneCall(wireIn))
-                    return false;
+                if (readOneCall(wireIn))
+                    decoded = true;
+
+                if (restIgnored())
+                    break;
 
                 wireIn.consumePadding();
                 if (bytes.readPosition() == start) {
@@ -131,28 +135,74 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
                     break;
                 }
             }
-            wireIn.endEvent();
+            // only called if the end of the message is reached normally.
+            if (decoded)
+                wireIn.endEvent();
+
+            return decoded;
+
         } finally {
-            if (historyConsumer != NO_OP_MH_CONSUMER)
+            // Don't save message history if we are reading non-data event (e.g. another "message history only" message)
+            // Infinite loop between services is possible otherwise
+            if (historyConsumer != NO_OP_MH_CONSUMER && dataEventProcessed)
                 swapMessageHistoryIfDirty();
             messageHistory.reset();
         }
+    }
 
-        return true;
+    public boolean readOneMeta(DocumentContext context) {
+        WireIn wireIn = context.wire();
+        if (wireIn == null)
+            return false;
+
+        wireIn.startEvent();
+        Bytes<?> bytes = wireIn.bytes();
+        boolean decoded = false;
+        while (bytes.readRemaining() > 0) {
+            if (wireIn.isEndEvent())
+                break;
+            long start = bytes.readPosition();
+
+            if (readOneCallMeta(wireIn))
+                decoded = true;
+
+            if (restIgnored())
+                break;
+
+            wireIn.consumePadding();
+            if (bytes.readPosition() == start) {
+                Jvm.warn().on(getClass(), "Failed to progress reading " + bytes.readRemaining() + " bytes left.");
+                break;
+            }
+        }
+        // only called if the end of the message is reached normally.
+        if (decoded)
+            wireIn.endEvent();
+
+        return decoded;
+    }
+
+    protected boolean restIgnored() {
+        return false;
     }
 
     /**
      * uses a double buffer technique to swap the current message history with a temp message history ( this is, if it has not already been stored ) .
-     * @return the MessageHistory
      */
-    @NotNull
-    private MessageHistory swapMessageHistoryIfDirty() {
+    private void swapMessageHistoryIfDirty() {
         if (messageHistory.isDirty()) {
+            // This input event didn't generate an output event.
+            // Saving message history - in case next input event will be processed by another method reader,
+            // that method reader will cooperatively write saved history.
             messageHistory = TEMP_MESSAGE_HISTORY.getAndSet(messageHistory);
             MessageHistory.set(messageHistory);
             assert (messageHistory != TEMP_MESSAGE_HISTORY.get());
+        } else {
+            // This input event generated an output event.
+            // In case previous input event was processed by this method reader, TEMP_MESSAGE_HISTORY may contain
+            // stale info on event's message history, which is superseded by the message history written now.
+            TEMP_MESSAGE_HISTORY.get().reset();
         }
-        return messageHistory;
     }
 
     /**
@@ -163,32 +213,27 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      */
     private void writeUnwrittenMessageHistory(DocumentContext context) {
         final MessageHistory mh = TEMP_MESSAGE_HISTORY.get();
-        if (mh.sources() == 0 || context.sourceId() == mh.lastSourceId() || !mh.isDirty())
-            return;
-        historyConsumer.accept(mh);
+        if (mh.sources() != 0 && context.sourceId() != mh.lastSourceId() && mh.isDirty())
+            historyConsumer.accept(mh);
     }
 
     @Override
     public boolean readOne() {
         throwExceptionIfClosed();
 
-        boolean shouldDelegate;
+        boolean ok;
 
         try (DocumentContext context = in.readingDocument()) {
             if (!context.isPresent()) {
                 return false;
             }
 
-            shouldDelegate = !readOne0(context);
-
-            if (shouldDelegate)
-                context.rollbackOnClose();
+            ok = context.isMetaData()
+                    ? readOneMeta(context)
+                    : readOne0(context);
         }
 
-        if (shouldDelegate)
-            return delegate().readOne();
-        else
-            return true;
+        return ok;
     }
 
     public void throwExceptionIfClosed() {
@@ -251,25 +296,22 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         return messageHistory;
     }
 
-    private MethodReader delegate() {
-        if (delegate == null)
-            delegate = delegateSupplier.get();
+    private static final class MessageHistoryThreadLocal {
 
-        return delegate;
-    }
+        private final ThreadLocal<MessageHistory> messageHistoryTL = withInitial(() -> {
+            @NotNull VanillaMessageHistory veh = new VanillaMessageHistory();
+            veh.addSourceDetails(true);
+            return veh;
+        });
 
-    /**
-     * Helper method used by implementations to get a Method
-     */
-    protected static Method lookupMethod(Class<?> clazz, String name, Class<?>... parameterTypes) {
-        try {
-            final Method method = clazz.getMethod(name, parameterTypes);
+        private MessageHistory getAndSet(MessageHistory mh) {
+            final MessageHistory result = messageHistoryTL.get();
+            messageHistoryTL.set(mh);
+            return result;
+        }
 
-            Jvm.setAccessible(method);
-
-            return method;
-        } catch (NoSuchMethodException e) {
-            throw new AssertionError(e);
+        public MessageHistory get() {
+            return messageHistoryTL.get();
         }
     }
 }

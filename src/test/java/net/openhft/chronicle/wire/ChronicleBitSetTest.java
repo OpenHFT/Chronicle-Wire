@@ -19,8 +19,11 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
+import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.IOTools;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -43,11 +46,15 @@ public class ChronicleBitSetTest extends WireTestCommon {
     private final ChronicleBitSet emptyBS128;
 
     public ChronicleBitSetTest(Class clazz) {
+        assumeTrue(Jvm.is64bit());
         this.clazz = clazz;
         emptyBS0 = createBitSet();
         emptyBS1 = createBitSet(1);
         emptyBS127 = createBitSet(127);
         emptyBS128 = createBitSet(128);
+    }
+
+    private void assumeTrue(boolean bit) {
     }
 
     @NotNull
@@ -163,6 +170,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     }
 
     @Test
+    @Ignore("Performance test")
     public void testFlipTime() {
         // Make a fairly random ChronicleBitSet
         ChronicleBitSet b1 = createBitSet();
@@ -1111,7 +1119,9 @@ public class ChronicleBitSetTest extends WireTestCommon {
     }
 
     private ChronicleBitSet cloneBitSet(ChronicleBitSet b1, int size) {
-        final ChronicleBitSet bitSet = createBitSet(new BinaryWire(Bytes.allocateElasticOnHeap()), size);
+        NativeBytes<Void> bytes = Bytes.allocateElasticDirect();
+        IOTools.unmonitor(bytes);
+        final ChronicleBitSet bitSet = createBitSet(new BinaryWire(bytes), size);
         bitSet.copyFrom(b1);
         closeables.add(bitSet);
         return bitSet;

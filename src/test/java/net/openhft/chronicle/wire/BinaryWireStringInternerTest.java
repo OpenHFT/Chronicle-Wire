@@ -29,7 +29,7 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
     private final String[] testData = new String[DATA_SET_SIZE];
     private final String[] internedStrings = new String[DATA_SET_SIZE];
     @SuppressWarnings("rawtypes")
-    private final Bytes heapBytes = Bytes.allocateElasticOnHeap(4096);
+    private final Bytes<?> heapBytes = Bytes.allocateElasticOnHeap(4096);
     private final BinaryWire wire = BinaryWire.binaryOnly(heapBytes);
 
     private static String message(final int index, final String inputData) {
@@ -80,7 +80,7 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
         }
 
         executorService.shutdown();
-        assertTrue("jobs did not complete in time", executorService.awaitTermination(15L, TimeUnit.SECONDS));
+        assertTrue("jobs did not complete in time", executorService.awaitTermination(60, TimeUnit.SECONDS));
         assertTrue(capturedExceptions.isEmpty());
     }
 
@@ -96,7 +96,7 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
 
         executorService.shutdown();
         assertTrue("jobs did not complete in time",
-                executorService.awaitTermination(Jvm.isCodeCoverage() ? 40 : 10, TimeUnit.SECONDS));
+                executorService.awaitTermination(60, TimeUnit.SECONDS));
         assertTrue(capturedExceptions.isEmpty());
     }
 

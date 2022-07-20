@@ -57,7 +57,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     );
 
     private final boolean disableProxyGen = Jvm.getBoolean(DISABLE_WRITER_PROXY_CODEGEN, false);
-    private final Set<Class> interfaces = Collections.synchronizedSet(new LinkedHashSet<>());
+    private final Set<Class<?>> interfaces = Collections.synchronizedSet(new LinkedHashSet<>());
 
     private final String packageName;
     private ClassLoader classLoader;
@@ -67,8 +67,6 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     private Closeable closeable;
     private String genericEvent;
     private boolean metaData;
-    @Deprecated(/* To be removed in x.23 */)
-    private boolean useMethodIds = true;
     private WireType wireType;
     private Class<?> proxyClass;
     private UpdateInterceptor updateInterceptor;
@@ -120,8 +118,10 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         return this;
     }
 
+    @Deprecated(/* Replaced by UpdateInterceptor. To be removed in x.24 */)
     @NotNull
     public MethodWriterBuilder<T> methodWriterInterceptorReturns(MethodWriterInterceptorReturns methodWriterInterceptor) {
+        Jvm.warn().on(getClass(), "Support for methodWriterInterceptorReturns will be dropped in x.24. Use UpdateInterceptor instead");
         handlerSupplier.methodWriterInterceptorReturns(methodWriterInterceptor);
         return this;
     }
@@ -169,7 +169,6 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         });
         sb.append(this.genericEvent == null ? "" : this.genericEvent);
         sb.append(this.metaData ? "MetadataAware" : "");
-        sb.append(useMethodIds ? "MethodIds" : "");
         sb.append(updateInterceptor != null ? "Intercepting" : "");
         sb.append(toFirstCapCase(wireType().toString().replace("_", "")));
         sb.append("MethodWriter");
@@ -193,12 +192,15 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
             T t = createInstance();
             if (t != null)
                 return t;
+        } else {
+            Jvm.warn().on(getClass(), "Falling back to proxy method writer. Support for " +
+                    "proxy method writers will be dropped in x.25.");
         }
 
         @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
 
         //noinspection unchecked
-        return (T) Proxy.newProxyInstance(classLoader, interfacesArr, new CallSupplierInvocationHandler());
+        return (T) Proxy.newProxyInstance(classLoader, interfacesArr, new CallSupplierInvocationHandler(this));
     }
 
     @Nullable
@@ -217,9 +219,9 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
             throw e;
         } catch (Throwable e) {
             classCache.put(fullClassName, COMPILE_FAILED);
-            // do nothing and drop through
-            if (Jvm.isDebugEnabled(getClass()))
-                Jvm.debug().on(getClass(), e);
+            Jvm.warn().on(getClass(), "Failed to compile generated method writer - " +
+                    "falling back to proxy method writer. Please report this failure as support for " +
+                    "proxy method writers will be dropped in x.25.", e);
         }
         return null;
     }
@@ -232,7 +234,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                     wireType,
                     genericEvent,
                     metaData,
-                    useMethodIds,
+                    true,
                     updateInterceptor != null);
         GenerateMethodWriter2 gmw = new GenerateMethodWriter2();
         gmw.metaData()
@@ -241,7 +243,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                 .interfaces(interfaces)
                 .genericEvent(genericEvent)
                 .metaData(metaData)
-                .useMethodIds(useMethodIds)
+                .useMethodIds(true)
                 .useUpdateInterceptor(updateInterceptor != null);
         gmw.maxCode(0);
         return gmw.acquireClass(classLoader);
@@ -269,12 +271,6 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     public MethodWriterBuilder<T> genericEvent(String genericEvent) {
         handlerSupplier.genericEvent(genericEvent);
         this.genericEvent = genericEvent;
-        return this;
-    }
-
-    public MethodWriterBuilder<T> useMethodIds(boolean useMethodIds) {
-        handlerSupplier.useMethodIds(useMethodIds);
-        this.useMethodIds = useMethodIds;
         return this;
     }
 
@@ -313,7 +309,17 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     /**
      * throws AbortCallingProxyException if the updateInterceptor returns {@code false}
      */
-    class CallSupplierInvocationHandler implements InvocationHandler {
+    static final class CallSupplierInvocationHandler implements InvocationHandler {
+
+        private final UpdateInterceptor updateInterceptor;
+        private final MethodWriterInvocationHandlerSupplier handlerSupplier;
+
+        CallSupplierInvocationHandler(@NotNull final VanillaMethodWriterBuilder builder) {
+            // Take a snapshot of these values so the builder can be reclaimed by the GC later
+            this.updateInterceptor = builder.updateInterceptor;
+            this.handlerSupplier = builder.handlerSupplier;
+        }
+
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             Object args0 = args == null ? null : args[args.length - 1];

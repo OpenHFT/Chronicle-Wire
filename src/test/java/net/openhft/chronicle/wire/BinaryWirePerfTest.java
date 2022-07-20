@@ -39,7 +39,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
     final boolean fieldLess;
     @SuppressWarnings("rawtypes")
     @NotNull
-    Bytes bytes = allocateElasticOnHeap();
+    Bytes<?> bytes = allocateElasticOnHeap();
 
     public BinaryWirePerfTest(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
         this.testId = testId;

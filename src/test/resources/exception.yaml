@@ -1,0 +1,9 @@
+--- !!data
+exception: !java.security.InvalidAlgorithmParameterException {
+  message: Reference cannot be null,
+  stackTrace: [
+    { class: net.openhft.chronicle.wire.YamlWireTest, method: testException, file: YamlWireTest.java, line: 783 },
+    { class: net.openhft.chronicle.wire.YamlWireTest, method: runTestException, file: YamlWireTest.java, line: 73 },
+    { class: sun.reflect.NativeMethodAccessorImpl, method: invoke0, file: NativeMethodAccessorImpl.java, line: -2 }
+  ]
+}

@@ -61,9 +61,9 @@ public class MarshallableTest extends WireTestCommon {
     public void testBytesMarshallable() {
         @NotNull Marshallable m = new MyTypes();
 
-        @NotNull Bytes bytes = allocateElasticOnHeap();
+        @NotNull Bytes<?> bytes = allocateElasticOnHeap();
         assertTrue(bytes.isElastic());
-        @NotNull TextWire wire = new TextWire(bytes);
+        @NotNull Wire wire = WireType.TEXT.apply(bytes);
         m.writeMarshallable(wire);
 
         m.readMarshallable(wire);
@@ -72,7 +72,7 @@ public class MarshallableTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testEquals() {
-        @NotNull final Bytes bytes = allocateElasticOnHeap();
+        @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         assertTrue(bytes.isElastic());
         @NotNull final MyTypes source = new MyTypes();
         //change default value fields in order to let destination to be changed from its default values too
@@ -85,7 +85,7 @@ public class MarshallableTest extends WireTestCommon {
         source.text("a");
         @NotNull final Marshallable destination = new MyTypes();
         assertNotEquals(source, destination);
-        @NotNull final TextWire wire = new TextWire(bytes);
+        @NotNull final Wire wire = WireType.TEXT.apply(bytes);
         source.writeMarshallable(wire);
         destination.readMarshallable(wire);
         assertEquals(source, destination);

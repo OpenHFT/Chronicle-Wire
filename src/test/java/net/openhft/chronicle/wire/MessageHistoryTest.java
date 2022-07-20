@@ -102,15 +102,22 @@ public class MessageHistoryTest extends WireTestCommon {
         BinaryWire bw = new BinaryWire(new HexDumpBytes());
         bw.writeEventName(MethodReader.HISTORY).marshallable(history);
         assertEquals("" +
-                "b9 07 68 69 73 74 6f 72 79                      # history\n" +
-                "82 3d 00 00 00                                  # SetTimeMessageHistory\n" +
-                "c7 73 6f 75 72 63 65 73 82 14 00 00 00          # sources\n" +
-                "01 af ff 00 00 00 00 00 00 00                   # source id & index\n" +
-                "02 af ff 0f 00 00 00 00 00 00                   # source id & index\n" +
-                "c7 74 69 6d 69 6e 67 73 82 0f 00 00 00          # timings\n" +
-                "a5 10 27                                        # timing in nanos\n" +
-                "a5 20 4e                                        # timing in nanos\n" +
-                "a7 64 0c 2c b5 03 6e 00 00                      # 120962203520100\n", bw.bytes().toHexString());
+                        "b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
+                        "81 3f 00                                        # SetTimeMessageHistory\n" +
+                        "c7 73 6f 75 72 63 65 73                         # sources:\n" +
+                        "82 16 00 00 00                                  # sequence\n" +
+                        "                                                # source id & index\n" +
+                        "a1 01 af ff 00 00 00 00 00 00 00                # 1\n" +
+                        "                                                # source id & index\n" +
+                        "a1 02 af ff 0f 00 00 00 00 00 00                # 2\n" +
+                        "c7 74 69 6d 69 6e 67 73                         # timings:\n" +
+                        "82 0f 00 00 00                                  # sequence\n" +
+                        "                                                # timing in nanos\n" +
+                        "a5 10 27                                        # 10000\n" +
+                        "                                                # timing in nanos\n" +
+                        "a5 20 4e                                        # 20000\n" +
+                        "a7 64 0c 2c b5 03 6e 00 00                      # 120962203520100\n",
+                bw.bytes().toHexString());
         bw.bytes().releaseLast();
 
         assertEquals("VanillaMessageHistory{sources: [1=0xff,2=0xfff] timings: [10000,20000] addSourceDetails=true}",
@@ -134,22 +141,27 @@ public class MessageHistoryTest extends WireTestCommon {
         HexDumpBytes bytes = new HexDumpBytes();
         Wire wire = new BinaryWire(bytes);
         VanillaMessageHistory.USE_BYTES_MARSHALLABLE = false;
-        wire.write(MethodReader.HISTORY).object(SetTimeMessageHistory.class, vmh);
+        wire.writeEventName(MethodReader.HISTORY).object(SetTimeMessageHistory.class, vmh);
 
         vmh.nanoTime = 120962203520000L;
         VanillaMessageHistory.USE_BYTES_MARSHALLABLE = true;
         wire.writeEventId(MESSAGE_HISTORY_METHOD_ID).object(SetTimeMessageHistory.class, vmh);
 
         assertEquals("" +
-                        "c7 68 69 73 74 6f 72 79                         # history\n" +
-                        "82 33 00 00 00                                  # SetTimeMessageHistory\n" +
-                        "c7 73 6f 75 72 63 65 73 82 0a 00 00 00          # sources\n" +
-                        "01 af 02 00 00 00 00 00 00 00                   # source id & index\n" +
-                        "c7 74 69 6d 69 6e 67 73 82 0f 00 00 00          # timings\n" +
-                        "a5 57 04                                        # timing in nanos\n" +
-                        "a5 ae 08                                        # timing in nanos\n" +
+                        "b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
+                        "81 34 00                                        # SetTimeMessageHistory\n" +
+                        "c7 73 6f 75 72 63 65 73                         # sources:\n" +
+                        "82 0b 00 00 00                                  # sequence\n" +
+                        "                                                # source id & index\n" +
+                        "a1 01 af 02 00 00 00 00 00 00 00                # 1\n" +
+                        "c7 74 69 6d 69 6e 67 73                         # timings:\n" +
+                        "82 0f 00 00 00                                  # sequence\n" +
+                        "                                                # timing in nanos\n" +
+                        "a5 57 04                                        # 1111\n" +
+                        "                                                # timing in nanos\n" +
+                        "a5 ae 08                                        # 2222\n" +
                         "a7 64 0c 2c b5 03 6e 00 00 ba 80 00             # 120962203520100\n" +
-                        "82 27 00 00 00 86                               # SetTimeMessageHistory\n" +
+                        "81 27 00 86                                     # SetTimeMessageHistory\n" +
                         "01 01 00 00 00 02 00 00 00 00 00 00 00          # sources\n" +
                         "03 57 04 00 00 00 00 00 00 ae 08 00 00 00 00 00 # timings\n" +
                         "00 64 0c 2c b5 03 6e 00 00\n",

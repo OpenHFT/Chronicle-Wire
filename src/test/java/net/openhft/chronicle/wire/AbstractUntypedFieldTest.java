@@ -14,6 +14,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 class AbstractUntypedFieldTest extends WireTestCommon {
 
+    static Stream<Function<Bytes<byte[]>, Wire>> provideWire() {
+        return Stream.of(
+                JSONWire::new,
+                TextWire::new,
+                YamlWire::new
+        );
+    }
+
     @BeforeEach
     void beforeEach() {
         ClassAliasPool.CLASS_ALIASES.addAlias(AImpl.class, "AImpl");
@@ -22,7 +30,8 @@ class AbstractUntypedFieldTest extends WireTestCommon {
     @ParameterizedTest
     @MethodSource("provideWire")
     void typedFieldsShouldBeNonNull(Function<Bytes<byte[]>, Wire> wireConstruction) {
-        final Bytes<byte[]> bytes = Bytes.from("!net.openhft.chronicle.wire.AbstractUntypedFieldShouldBeNull$Holder {\n" +
+        final Bytes<byte[]> bytes = Bytes.from("" +
+                "!net.openhft.chronicle.wire.AbstractUntypedFieldShouldBeNull$Holder {\n" +
                 "  a: !AImpl {\n" +
                 "  }\n" +
                 "}");
@@ -49,6 +58,21 @@ class AbstractUntypedFieldTest extends WireTestCommon {
         assertNull(holder.a);
     }
 
+    @ParameterizedTest
+    @MethodSource("provideWire")
+    void missingAliasesShouldLogWarnings(Function<Bytes<byte[]>, Wire> wireConstruction) {
+        final Bytes<byte[]> bytes = Bytes.from("!net.openhft.chronicle.wire.AbstractUntypedFieldShouldBeNull$Holder {\n" +
+                "  a: !MissingAlias {\n" +
+                "  }\n" +
+                "}");
+        final Wire textWire = wireConstruction.apply(bytes);
+
+        expectException("Ignoring exception and setting field 'a' to null");
+        expectException("Cannot find a class for MissingAlias are you missing an alias?");
+        final ValueIn valueIn = textWire.getValueIn();
+        assertNull(valueIn.object(Holder.class).a);
+    }
+
     static abstract class A {
     }
 
@@ -57,13 +81,6 @@ class AbstractUntypedFieldTest extends WireTestCommon {
 
     private static final class Holder {
         A a;
-    }
-
-    static Stream<Function<Bytes<byte[]>, Wire>> provideWire() {
-        return Stream.of(
-                JSONWire::new,
-                TextWire::new
-        );
     }
 
 

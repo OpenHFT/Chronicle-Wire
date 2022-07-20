@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 @RunWith(value = Parameterized.class)
 public class CopyTest extends WireTestCommon {
@@ -40,39 +41,74 @@ public class CopyTest extends WireTestCommon {
         this.withType = withType;
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "from: {0}, to: {1}, withType: {2}")
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
                 // new Object[] {WireType.TEXT, WireType.BINARY, true}, // not supported yet
                 // new Object[] {WireType.TEXT, WireType.BINARY, false}, // not supported yet
+                new Object[]{WireType.YAML, WireType.BINARY_LIGHT, true},
+                // new Object[]{WireType.TEXT, WireType.BINARY_LIGHT, true},
                 new Object[]{WireType.BINARY, WireType.JSON, false},
                 new Object[]{WireType.BINARY, WireType.TEXT, true},
-                new Object[]{WireType.BINARY, WireType.TEXT, false}
+                new Object[]{WireType.BINARY, WireType.TEXT, false},
+                //  new Object[]{WireType.RAW, WireType.RAW, false},
+                new Object[]{WireType.JSON, WireType.JSON, false},
+                // new Object[]{WireType.JSON, WireType.JSON, true}, // not supported as types are dropped for backward compatability
+                new Object[]{WireType.JSON, WireType.JSON_ONLY, false},
+                new Object[]{WireType.JSON_ONLY, WireType.JSON_ONLY, false},
+                new Object[]{WireType.JSON_ONLY, WireType.JSON_ONLY, true},
+                new Object[]{WireType.TEXT, WireType.TEXT, false},
+                new Object[]{WireType.TEXT, WireType.TEXT, true},
+                new Object[]{WireType.YAML, WireType.YAML, false},
+                new Object[]{WireType.YAML, WireType.YAML, true},
+                new Object[]{WireType.YAML_ONLY, WireType.YAML_ONLY, true},
+                new Object[]{WireType.JSON_ONLY, WireType.TEXT, true},
+                new Object[]{WireType.JSON_ONLY, WireType.YAML, true},
+                new Object[]{WireType.JSON_ONLY, WireType.BINARY, true},
+                new Object[]{WireType.JSON_ONLY, WireType.BINARY_LIGHT, true}
         );
     }
 
     @SuppressWarnings("rawtypes")
     @Test
     public void testCopy() {
-        Bytes bytesFrom = Bytes.allocateElasticOnHeap(64);
+        Bytes<?> bytesFrom = Bytes.allocateElasticOnHeap(64);
         Wire wireFrom = from.apply(bytesFrom);
-        Bytes bytesTo = Bytes.allocateElasticOnHeap(64);
+        Bytes<?> bytesTo = Bytes.allocateElasticOnHeap(64);
         Wire wireTo = to.apply(bytesTo);
 
         AClass a = create();
         if (withType)
-            wireFrom.getValueOut().object(a);
+            wireFrom.write("test").object(a);
         else
-            wireFrom.getValueOut().marshallable(a);
+            wireFrom.write("test").marshallable(a);
 
         wireFrom.copyTo(wireTo);
-        AClass b;
-        if (withType)
-            b = (AClass) wireTo.getValueIn().object();
-        else
-            b = wireTo.getValueIn().object(AClass.class);
+        if (to == WireType.JSON || to == WireType.JSON_ONLY) {
+            final String text = wireTo.toString();
+            assertFalse(text, text.contains("? "));
+            assertFalse(text, text.contains("\n\""));
+        }
+        final String event = wireTo.readEvent(String.class);
+        assertEquals("test", event);
+        AClass b = wireTo.getValueIn().object(AClass.class);
 
         assertEquals(a, b);
+
+        if (withType) {
+            wireFrom.clear();
+            wireTo.clear();
+
+            wireFrom.write("msg").typedMarshallable(a);
+            wireFrom.copyTo(wireTo);
+            if (from == WireType.JSON_ONLY) {
+                System.out.println(wireFrom);
+                System.out.println(wireTo);
+            }
+            Object b2 = wireTo.read("msg").object();
+
+            assertEquals(a, b2);
+        }
     }
 
     private AClass create() {

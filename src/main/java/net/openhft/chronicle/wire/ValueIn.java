@@ -64,7 +64,7 @@ public interface ValueIn {
     }
 
     default char character() {
-        @Nullable CharSequence cs = textTo(Wires.acquireStringBuilder());
+        @Nullable CharSequence cs = textTo(WireInternal.acquireStringBuilderForValueIn());
         if (cs == null || cs.length() == 0)
             return '\u0000';
 
@@ -72,7 +72,7 @@ public interface ValueIn {
     }
 
     @NotNull
-    default WireIn text(@NotNull Bytes sdo) {
+    default WireIn text(@NotNull Bytes<?> sdo) {
         sdo.clear();
         textTo(sdo);
         return wireIn();
@@ -85,19 +85,19 @@ public interface ValueIn {
     StringBuilder textTo(@NotNull StringBuilder sb);
 
     @Nullable
-    Bytes textTo(@NotNull Bytes bytes);
+    Bytes<?> textTo(@NotNull Bytes<?> bytes);
 
     @NotNull
-    WireIn bytes(@NotNull BytesOut toBytes);
+    WireIn bytes(@NotNull BytesOut<?> toBytes);
 
-    default WireIn bytes(@NotNull BytesOut toBytes, boolean clearBytes) {
+    default WireIn bytes(@NotNull BytesOut<?> toBytes, boolean clearBytes) {
         if (clearBytes)
             toBytes.clear();
         return bytes(toBytes);
     }
 
     @NotNull
-    default WireIn bytesLiteral(@NotNull BytesOut toBytes) {
+    default WireIn bytesLiteral(@NotNull BytesOut<?> toBytes) {
         return bytes(toBytes);
     }
 
@@ -115,11 +115,15 @@ public interface ValueIn {
     @NotNull
     WireIn bytes(@NotNull ReadBytesMarshallable bytesMarshallable);
 
-    byte @NotNull [] bytes();
+    default byte @Nullable [] bytes() {
+        return bytes((byte[]) null);
+    }
+
+    byte @Nullable [] bytes(byte[] using);
 
     @Nullable
     default BytesStore bytesStore() {
-        @Nullable byte[] bytes = bytes();
+        byte @Nullable [] bytes = bytes();
         return bytes == null ? null : BytesStore.wrap(bytes);
     }
 
@@ -425,7 +429,7 @@ public interface ValueIn {
     }
 
     @Nullable
-    Object marshallable(Object object, SerializationStrategy strategy)
+    Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy)
             throws BufferUnderflowException, IORuntimeException;
 
     default boolean marshallable(@NotNull Serializable object) throws BufferUnderflowException, IORuntimeException {
@@ -492,7 +496,7 @@ public interface ValueIn {
 
     @Nullable
     default <E extends Enum<E>> E asEnum(Class<E> eClass) {
-        StringBuilder sb = WireInternal.acquireStringBuilder();
+        StringBuilder sb = WireInternal.acquireStringBuilderForValueIn();
         text(sb);
         return sb.length() == 0 ? null : WireInternal.internEnum(eClass, sb);
     }
@@ -509,8 +513,12 @@ public interface ValueIn {
         return wireIn();
     }
 
+    /**
+     * @param clazz Expected object type. <code>null</code> can be passed to request proxy marshallable tuple
+     *              if {@link Wires#GENERATE_TUPLES} is enabled.
+     */
     @Nullable
-    default <E> E object(@NotNull Class<E> clazz) {
+    default <E> E object(@Nullable Class<E> clazz) {
         return Wires.object0(this, null, clazz);
     }
 
@@ -541,6 +549,7 @@ public interface ValueIn {
     @Nullable
     Class typePrefix();
 
+    @Nullable
     default Object typePrefixOrObject(Class tClass) {
         return typePrefix();
     }
@@ -569,7 +578,7 @@ public interface ValueIn {
     }
 
     default long readLong(LongConverter longConverter) {
-        StringBuilder sb = Wires.acquireStringBuilder();
+        StringBuilder sb = WireInternal.acquireStringBuilderForValueIn();
         text(sb);
         return longConverter.parse(sb);
     }

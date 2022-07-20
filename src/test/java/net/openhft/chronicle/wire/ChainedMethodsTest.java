@@ -15,6 +15,7 @@ import java.util.Collection;
 
 import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN;
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 @RunWith(Parameterized.class)
 public class ChainedMethodsTest extends WireTestCommon {
@@ -23,7 +24,7 @@ public class ChainedMethodsTest extends WireTestCommon {
 
     @Parameterized.Parameters(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[]{false}, new Object[]{false});
+        return Arrays.asList(new Object[]{false}, new Object[]{true});
     }
 
     @Before
@@ -38,6 +39,8 @@ public class ChainedMethodsTest extends WireTestCommon {
 
     @Test
     public void chainedText() {
+        if (disableProxyCodegen)
+            expectException("Falling back to proxy method writer");
         TextWire wire = new TextWire(Bytes.allocateElasticOnHeap(128))
                 .useTextDocuments();
         ITop top = wire.methodWriter(ITop.class);
@@ -66,8 +69,9 @@ public class ChainedMethodsTest extends WireTestCommon {
 
     @Test
     public void chainedYaml() {
-        YamlWire wire = new YamlWire(Bytes.allocateElasticOnHeap(128))
-                .useTextDocuments();
+        if (disableProxyCodegen)
+            expectException("Falling back to proxy method writer");
+        Wire wire = Wire.newYamlWireOnHeap();
         ITop top = wire.methodWriter(ITop.class);
         top.mid("mid")
                 .next(1)
@@ -94,21 +98,25 @@ public class ChainedMethodsTest extends WireTestCommon {
 
     @Test
     public void chainedBinary() {
+        assumeFalse("https://github.com/OpenHFT/Chronicle-Wire/issues/460", disableProxyCodegen);
+
         Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
         ITop top = wire.methodWriter(ITop.class);
         top.mid("mid")
                 .next(1)
                 .echo("echo-1");
+        assertEquals(34, wire.bytes().writePosition());
         top.mid2("mid2")
                 .next2("word")
                 .echo("echo-2");
 
-        assertEquals("--- !!data #binary\n" +
+        assertEquals("" +
+                "--- !!data #binary\n" +
                 "mid: mid\n" +
                 "next: 1\n" +
                 "echo: echo-1\n" +
-                "# position: 44, header: 1\n" +
+                "# position: 36, header: 1\n" +
                 "--- !!data #binary\n" +
                 "mid2: mid2\n" +
                 "next2: word\n" +
@@ -123,6 +131,8 @@ public class ChainedMethodsTest extends WireTestCommon {
 
     @Test
     public void chainedBinaryVariousArgsNumber() {
+        assumeFalse("https://github.com/OpenHFT/Chronicle-Wire/issues/460", disableProxyCodegen);
+
         Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
         ITop top = wire.methodWriter(ITop.class);
@@ -134,18 +144,20 @@ public class ChainedMethodsTest extends WireTestCommon {
                 .next(2)
                 .echo("echo-2");
 
-        assertEquals("--- !!data #binary\n" +
-                "midNoArg: \"\"\n" +
-                "next: 1\n" +
-                "echo: echo-1\n" +
-                "# position: 44, header: 1\n" +
-                "--- !!data #binary\n" +
-                "midTwoArgs: [\n" +
-                "  !int 5,\n" +
-                "  -7\n" +
-                "],\n" +
-                "next: 2\n" +
-                "echo: echo-2\n", WireDumper.of(wire).asString());
+        assertEquals("" +
+                        "--- !!data #binary\n" +
+                        "midNoArg: \"\"\n" +
+                        "next: 1\n" +
+                        "echo: echo-1\n" +
+                        "# position: 36, header: 1\n" +
+                        "--- !!data #binary\n" +
+                        "midTwoArgs: [\n" +
+                        "  5,\n" +
+                        "  !byte -7\n" +
+                        "],\n" +
+                        "next: 2\n" +
+                        "echo: echo-2\n",
+                WireDumper.of(wire).asString());
 
         StringBuilder sb = new StringBuilder();
 
@@ -180,6 +192,8 @@ public class ChainedMethodsTest extends WireTestCommon {
 
     @Test
     public void testNestedReturnType() {
+        if (disableProxyCodegen)
+            expectException("Falling back to proxy method writer");
         Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
         final NestedStart writer = wire.methodWriter(NestedStart.class);

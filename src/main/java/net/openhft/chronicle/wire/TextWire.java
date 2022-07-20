@@ -64,6 +64,7 @@ public class TextWire extends AbstractWire implements Wire {
     static final String NULL = "!null \"\"";
     static final BitSet STARTS_QUOTE_CHARS = new BitSet();
     static final BitSet QUOTE_CHARS = new BitSet();
+    static final BitSet END_CHARS = new BitSet();
     static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_QUOTES = new ThreadLocal<>();//ThreadLocal.withInitial(StopCharTesters.QUOTES::escaping);
     static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_SINGLE_QUOTES = new ThreadLocal<>();//ThreadLocal.withInitial(() -> StopCharTesters.SINGLE_QUOTES.escaping());
     static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_END_OF_TEXT = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
@@ -77,14 +78,22 @@ public class TextWire extends AbstractWire implements Wire {
     static final BytesStore END_FIELD = NEW_LINE;
     static final char[] HEXADECIMAL = "0123456789ABCDEF".toCharArray();
     static final Pattern REGX_PATTERN = Pattern.compile("\\.|\\$");
+    static final Supplier<StopCharTester> QUOTES_ESCAPING = StopCharTesters.QUOTES::escaping;
+    static final Supplier<StopCharTester> SINGLE_QUOTES_ESCAPING = StopCharTesters.SINGLE_QUOTES::escaping;
+    static final Supplier<StopCharTester> END_OF_TEXT_ESCAPING = TextStopCharTesters.END_OF_TEXT::escaping;
+    static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT::escaping;
+    static final Supplier<StopCharsTester> END_EVENT_NAME_ESCAPING = TextStopCharsTesters.END_EVENT_NAME::escaping;
+    static final Bytes<?> META_DATA = Bytes.from("!!meta-data");
 
     static {
         IOTools.unmonitor(TYPE);
         IOTools.unmonitor(BINARY);
-        for (char ch : "?%&@`0123456789+- ',#:{}[]|>!\\".toCharArray())
+        for (char ch : "?%*&@`0123456789+- ',#:{}[]|>!\\".toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
-        for (char ch : "?,#:{}[]|>\\".toCharArray())
+        for (char ch : "?,#:{}[]|>\\^".toCharArray())
             QUOTE_CHARS.set(ch);
+        for (char ch : "#:}]".toCharArray())
+            END_CHARS.set(ch);
         // make sure it has loaded.
         WireInternal.INTERNER.valueCount();
     }
@@ -100,11 +109,11 @@ public class TextWire extends AbstractWire implements Wire {
     private boolean addTimeStamps = false;
     private boolean trimFirstCurly = true;
 
-    public TextWire(@NotNull Bytes bytes, boolean use8bit) {
+    public TextWire(@NotNull Bytes<?> bytes, boolean use8bit) {
         super(bytes, use8bit);
     }
 
-    public TextWire(@NotNull Bytes bytes) {
+    public TextWire(@NotNull Bytes<?> bytes) {
         this(bytes, false);
     }
 
@@ -123,7 +132,7 @@ public class TextWire extends AbstractWire implements Wire {
         NativeBytes<Void> bytes = nativeBytes();
         try {
             long pos = wire.bytes().readPosition();
-            @NotNull TextWire tw = new TextWire(bytes);
+            @NotNull Wire tw = WireType.TEXT.apply(bytes);
             wire.copyTo(tw);
             wire.bytes().readPosition(pos);
             return tw.toString();
@@ -199,8 +208,7 @@ public class TextWire extends AbstractWire implements Wire {
 
     @Nullable
     static StopCharTester getEscapingSingleQuotes() {
-        StopCharTester sct = ThreadLocalHelper.getTL(ESCAPED_SINGLE_QUOTES,
-                StopCharTesters.SINGLE_QUOTES::escaping);
+        StopCharTester sct = ThreadLocalHelper.getTL(ESCAPED_SINGLE_QUOTES, SINGLE_QUOTES_ESCAPING);
         // reset it.
         sct.isStopChar(' ');
         return sct;
@@ -228,6 +236,11 @@ public class TextWire extends AbstractWire implements Wire {
      */
     public static <T> T load(String filename) throws IOException {
         return (T) TextWire.fromFile(filename).readObject();
+    }
+
+    @Override
+    public boolean isBinary() {
+        return false;
     }
 
     public boolean strict() {
@@ -268,7 +281,7 @@ public class TextWire extends AbstractWire implements Wire {
             if (c != null)
                 writeComment(c.value());
         }
-        return new TextMethodWriterInvocationHandler(this);
+        return new TextMethodWriterInvocationHandler(interfaces[0], this);
     }
 
     @Override
@@ -484,7 +497,7 @@ public class TextWire extends AbstractWire implements Wire {
                 // then we force it to be String as otherwise valueIn.object gets confused and gives us back a Map
                 int ch3 = peekCode();
                 if (ch3 != '!' && expectedClass == Object.class) {
-                    object = (K) valueIn.object(String.class);
+                    object = (K) valueIn.objectWithInferredType0(null, SerializationStrategies.ANY_SCALAR, defaultKeyClass());
                 } else {
                     object = valueIn.object(expectedClass);
                 }
@@ -523,6 +536,10 @@ public class TextWire extends AbstractWire implements Wire {
         return toExpected(expectedClass, sb);
     }
 
+    protected Class defaultKeyClass() {
+        return Object.class;
+    }
+
     @Nullable
     private <K> K toExpected(Class<K> expectedClass, StringBuilder sb) {
         return ObjectUtils.convertTo(expectedClass, WireInternal.INTERNER.intern(sb));
@@ -530,8 +547,7 @@ public class TextWire extends AbstractWire implements Wire {
 
     @NotNull
     protected StopCharTester getEscapingEndOfText() {
-        StopCharTester escaping = ThreadLocalHelper.getTL(ESCAPED_END_OF_TEXT,
-                TextStopCharTesters.END_OF_TEXT::escaping);
+        StopCharTester escaping = ThreadLocalHelper.getTL(ESCAPED_END_OF_TEXT, END_OF_TEXT_ESCAPING);
         // reset it.
         escaping.isStopChar(' ');
         return escaping;
@@ -539,23 +555,27 @@ public class TextWire extends AbstractWire implements Wire {
 
     @NotNull
     protected StopCharsTester getStrictEscapingEndOfText() {
-        TextStopCharsTesters strictEndOfText = strictEndOfText();
-        StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT,
-                strictEndOfText::escaping);
+        StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT, strictEndOfTextEscaping());
         // reset it.
         escaping.isStopChar(' ', ' ');
         return escaping;
     }
 
     @NotNull
+    @Deprecated(/* To be removed in 2.24 - use strictEndOfTextEscaping */)
     protected TextStopCharsTesters strictEndOfText() {
         return TextStopCharsTesters.STRICT_END_OF_TEXT;
     }
 
     @NotNull
+    protected Supplier<StopCharsTester> strictEndOfTextEscaping() {
+        return strictEndOfText() == TextStopCharsTesters.STRICT_END_OF_TEXT ?
+                STRICT_END_OF_TEXT_ESCAPING : strictEndOfText()::escaping;
+    }
+
+    @NotNull
     protected StopCharsTester getEscapingEndEventName() {
-        StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT,
-                TextStopCharsTesters.END_EVENT_NAME::escaping);
+        StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT, END_EVENT_NAME_ESCAPING);
         // reset it.
         escaping.isStopChar(' ', ' ');
         return escaping;
@@ -563,8 +583,7 @@ public class TextWire extends AbstractWire implements Wire {
 
     @Nullable
     protected StopCharTester getEscapingQuotes() {
-        StopCharTester sct = ThreadLocalHelper.getTL(ESCAPED_QUOTES,
-                StopCharTesters.QUOTES::escaping);
+        StopCharTester sct = ThreadLocalHelper.getTL(ESCAPED_QUOTES, QUOTES_ESCAPING);
         // reset it.
         sct.isStopChar(' ');
         return sct;
@@ -581,21 +600,26 @@ public class TextWire extends AbstractWire implements Wire {
         return "todo";
     }
 
+    // TODO Move to valueIn
     public void consumePadding(int commas) {
         for (; ; ) {
             int codePoint = peekCode();
             switch (codePoint) {
                 case '#':
-                    //noinspection StatementWithEmptyBody
-                    while (notNewLine(readCode())) ;
+                    readCode();
+                    while (peekCode() == ' ')
+                        readCode();
+                    final StringBuilder sb = WireInternal.acquireAnotherStringBuilder(this.sb);
+                    for (int ch; notNewLine(ch = readCode()); )
+                        sb.append((char) ch);
+                    if (!valueIn.consumeAny)
+                        commentListener.accept(sb);
                     this.lineStart = bytes.readPosition();
                     break;
                 case ',':
                     if (valueIn.isASeparator(peekCodeNext()) && commas-- <= 0)
                         return;
                     bytes.readSkip(1);
-                    if (commas == 0)
-                        return;
                     break;
                 case ' ':
                 case '\t':
@@ -619,8 +643,23 @@ public class TextWire extends AbstractWire implements Wire {
     protected void consumeDocumentStart() {
         if (bytes.readRemaining() > 4) {
             long pos = bytes.readPosition();
-            if (bytes.readByte(pos) == '-' && bytes.readByte(pos + 1) == '-' && bytes.readByte(pos + 2) == '-')
+            if (bytes.readByte(pos) == '-' && bytes.readByte(pos + 1) == '-' && bytes.readByte(pos + 2) == '-') {
                 bytes.readSkip(3);
+
+                consumeWhiteSpace();
+
+                pos = bytes.readPosition();
+                @NotNull String word = bytes.parseUtf8(StopCharTesters.SPACE_STOP);
+                switch (word) {
+                    case "!!data":
+                    case "!!data-not-ready":
+                    case "!!meta-data":
+                    case "!!meta-data-not-ready":
+                        break;
+                    default:
+                        bytes.readPosition(pos);
+                }
+            }
         }
     }
 
@@ -1023,7 +1062,7 @@ public class TextWire extends AbstractWire implements Wire {
     public Object readObject() {
         consumePadding();
         consumeDocumentStart();
-        return readObject(0);
+        return getValueIn().object(Object.class);
     }
 
     @Nullable
@@ -1171,8 +1210,34 @@ public class TextWire extends AbstractWire implements Wire {
         return this;
     }
 
+    @Override
+    public void reset() {
+        writeContext.reset();
+        readContext.reset();
+        sb.setLength(0);
+        lineStart = 0;
+        valueIn.resetState();
+        valueOut.resetState();
+        bytes.clear();
+    }
+
+    @Override
+    public boolean hasMetaDataPrefix() {
+        if (bytes.startsWith(META_DATA)
+                && bytes.peekUnsignedByte(bytes.readPosition() + 11) <= ' ') {
+            bytes.readSkip(12);
+            return true;
+        }
+        return false;
+    }
+
     enum NoObject {NO_OBJECT}
 
+    /**
+     * @deprecated Will be replaced with a different implementation in the future,
+     * which will generate correct Yaml but may introduce some behavior changes.
+     */
+    @Deprecated(/* To be removed and replaced by YamlWire.TextValueOut in 2.24 #411 */)
     class TextValueOut implements ValueOut, CommentAnnotationNotifier {
         protected boolean hasCommentAnnotation = false;
 
@@ -1202,10 +1267,19 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         void prependSeparator() {
-            append(sep);
-            if (sep.endsWith('\n') || sep == EMPTY_AFTER_COMMENT)
-                indent();
+            appendSep();
             sep = BytesStore.empty();
+        }
+
+        protected void appendSep() {
+            append(sep);
+            trimWhiteSpace();
+            if (bytes.endsWith('\n') || sep == EMPTY_AFTER_COMMENT)
+                indent();
+        }
+
+        protected void trimWhiteSpace() {
+            BytesUtil.combineDoubleNewline(bytes);
         }
 
         @Override
@@ -1224,7 +1298,8 @@ public class TextWire extends AbstractWire implements Wire {
             return TextWire.this;
         }
 
-        private void indent() {
+        protected void indent() {
+            BytesUtil.combineDoubleNewline(bytes);
             for (int i = 0; i < indentation; i++) {
                 bytes.writeUnsignedShort(' ' * 257);
             }
@@ -1241,6 +1316,7 @@ public class TextWire extends AbstractWire implements Wire {
             } else {
                 sep = leaf ? COMMA_SPACE : COMMA_NEW_LINE;
             }
+            BytesUtil.combineDoubleNewline(bytes);
         }
 
         @NotNull
@@ -1374,6 +1450,8 @@ public class TextWire extends AbstractWire implements Wire {
             if (dropDefault) {
                 writeSavedEventName();
             }
+            if (bytesStore == null)
+                return nu11();
             prependSeparator();
             typePrefix(type);
             append(Base64.getEncoder().encodeToString(bytesStore.toByteArray()));
@@ -1576,7 +1654,7 @@ public class TextWire extends AbstractWire implements Wire {
             }
             long pos = bytes.writePosition();
             TextLongArrayReference.write(bytes, capacity);
-            ((Byteable) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
+            ((Byteable) values).bytesStore(bytes, pos, bytes.lengthWritten(pos));
             return TextWire.this;
         }
 
@@ -1655,9 +1733,9 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut zonedDateTime(@Nullable ZonedDateTime zonedDateTime) {
+            if (zonedDateTime == null)
+                return nu11();
             if (dropDefault) {
-                if (zonedDateTime == null)
-                    return wireOut();
                 writeSavedEventName();
             }
             final String s = zonedDateTime.toString();
@@ -1731,7 +1809,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, Class type) {
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, Class type) {
             if (dropDefault) {
                 if (type == null)
                     return wireOut();
@@ -1790,7 +1868,7 @@ public class TextWire extends AbstractWire implements Wire {
             prependSeparator();
             long offset = bytes.writePosition();
             TextIntReference.write(bytes, value);
-            long length = bytes.writePosition() - offset;
+            long length = bytes.lengthWritten(offset);
             ((Byteable) intValue).bytesStore(bytes, offset, length);
             elementSeparator();
             return wireOut();
@@ -1819,7 +1897,7 @@ public class TextWire extends AbstractWire implements Wire {
             prependSeparator();
             long offset = bytes.writePosition();
             TextLongReference.write(bytes, value);
-            long length = bytes.writePosition() - offset;
+            long length = bytes.lengthWritten(offset);
             ((Byteable) longValue).bytesStore(bytes, offset, length);
             elementSeparator();
             return wireOut();
@@ -1836,7 +1914,7 @@ public class TextWire extends AbstractWire implements Wire {
             prependSeparator();
             long offset = bytes.writePosition();
             TextBooleanReference.write(value, bytes, offset);
-            long length = bytes.writePosition() - offset;
+            long length = bytes.lengthWritten(offset);
             ((Byteable) longValue).bytesStore(bytes, offset, length);
             elementSeparator();
             return wireOut();
@@ -1872,6 +1950,7 @@ public class TextWire extends AbstractWire implements Wire {
             }
             if (!sep.isEmpty()) {
                 append(sep);
+                trimWhiteSpace();
                 indent();
                 sep = EMPTY;
             }
@@ -1903,6 +1982,7 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         public void endBlock(boolean leaf, char c) {
+            BytesUtil.combineDoubleNewline(bytes);
             bytes.writeUnsignedByte(c);
             sep = leaf ? COMMA_SPACE : COMMA_NEW_LINE;
         }
@@ -1964,15 +2044,17 @@ public class TextWire extends AbstractWire implements Wire {
             if (wasLeaf) {
                 if (sep.endsWith(' '))
                     append(" ");
+                trimWhiteSpace();
                 leaf = false;
                 popState();
             } else if (!seps.isEmpty()) {
                 popSep = seps.get(seps.size() - 1);
                 popState();
-                sep = NEW_LINE;
+                newLine();
             }
             if (sep.startsWith(',')) {
                 append(sep, 1, sep.length() - 1);
+                trimWhiteSpace();
                 if (!wasLeaf)
                     indent();
 
@@ -2022,16 +2104,18 @@ public class TextWire extends AbstractWire implements Wire {
             } else if (seps.size() > 0) {
                 popSep = seps.get(seps.size() - 1);
                 popState();
-                sep = NEW_LINE;
+                newLine();
             }
             if (sep.startsWith(',')) {
                 append(sep, 1, sep.length() - 1);
+                trimWhiteSpace();
                 if (!wasLeaf)
                     indent();
 
             } else {
                 prependSeparator();
             }
+            BytesUtil.combineDoubleNewline(bytes);
             bytes.writeUnsignedByte(object instanceof Externalizable ? ']' : '}');
             if (popSep != null)
                 sep = popSep;
@@ -2057,8 +2141,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         protected void afterClose() {
             newLine();
-            append(sep);
-            sep = EMPTY;
+            appendSep();
         }
 
         protected void afterOpen() {
@@ -2088,7 +2171,7 @@ public class TextWire extends AbstractWire implements Wire {
             if (dropDefault) {
                 eventName = "";
             } else {
-                append(sep);
+                appendSep();
                 writeTwo('"', '"');
                 endEvent();
             }
@@ -2154,10 +2237,8 @@ public class TextWire extends AbstractWire implements Wire {
                 if (!sep.endsWith('\n'))
                     return;
                 sep = COMMA_SPACE;
-            } else
-                prependSeparator();
-
-            append(sep);
+            }
+            prependSeparator();
 
             if (hasCommentAnnotation)
                 writeTwo('\t', '\t');
@@ -2173,6 +2254,7 @@ public class TextWire extends AbstractWire implements Wire {
     class TextValueIn implements ValueIn {
         final ValueInStack stack = new ValueInStack();
         int sequenceLimit = 0;
+        private boolean consumeAny;
 
         @Override
         public void resetState() {
@@ -2214,7 +2296,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         @Nullable
         @Override
-        public Bytes textTo(@NotNull Bytes bytes) {
+        public Bytes<?> textTo(@NotNull Bytes<?> bytes) {
             bytes.clear();
             @Nullable CharSequence cs = textTo0(bytes);
             consumePadding(1);
@@ -2327,7 +2409,7 @@ public class TextWire extends AbstractWire implements Wire {
             }
 
             int prev = peekBack();
-            if (prev == ':' || prev == '#' || prev == '}' || prev == ']')
+            if (END_CHARS.get(prev))
                 bytes.readSkip(-1);
             return ret;
         }
@@ -2381,7 +2463,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireIn bytes(@NotNull BytesOut toBytes) {
+        public WireIn bytes(@NotNull BytesOut<?> toBytes) {
             toBytes.clear();
             return bytes(b -> toBytes.write((BytesStore) b));
         }
@@ -2433,7 +2515,7 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public byte @NotNull [] bytes() {
+        public byte[] bytes(byte[] using) {
             consumePadding();
             try {
                 // TODO needs to be made much more efficient.
@@ -2447,7 +2529,7 @@ public class TextWire extends AbstractWire implements Wire {
                         parseWord(stringBuilder);
                     }
 
-                    @Nullable byte[] bytes = Compression.uncompress(stringBuilder, this, t -> {
+                    byte @Nullable [] bytes = Compression.uncompress(stringBuilder, this, t -> {
                         @NotNull StringBuilder sb0 = acquireStringBuilder();
                         parseUntil(sb0, StopCharTesters.COMMA_SPACE_STOP);
                         return Base64.getDecoder().decode(WireInternal.INTERNER.intern(sb0));
@@ -2464,6 +2546,11 @@ public class TextWire extends AbstractWire implements Wire {
 
                 } else {
                     textTo(stringBuilder);
+                    if (using != null && stringBuilder.length() == using.length) {
+                        for (int i = 0; i < using.length; i++)
+                            using[i] = (byte) stringBuilder.charAt(i);
+                        return using;
+                    }
                     // todo fix this.
                     return stringBuilder.toString().getBytes(ISO_8859_1);
                 }
@@ -2494,10 +2581,12 @@ public class TextWire extends AbstractWire implements Wire {
 
         protected long readLengthMarshallable() {
             long start = bytes.readPosition();
+            this.consumeAny = true;
             try {
                 consumeAny();
                 return bytes.readPosition() - start;
             } finally {
+                this.consumeAny = false;
                 bytes.readPosition(start);
             }
         }
@@ -2540,6 +2629,8 @@ public class TextWire extends AbstractWire implements Wire {
                 case '\'':
                 default:
                     consumeValue();
+                    while (peekBack() <= ' ' && bytes.readPosition() >= 0)
+                        bytes.readSkip(-1);
                     if (peekBack() == ',') {
                         bytes.readSkip(-1);
                         break;
@@ -3021,6 +3112,7 @@ public class TextWire extends AbstractWire implements Wire {
 
             final long limit = bytes.readLimit();
             final long position = bytes.readPosition();
+            boolean endsNormally = false;
 
             try {
                 // ensure that you can read past the end of this marshable object
@@ -3028,15 +3120,16 @@ public class TextWire extends AbstractWire implements Wire {
                 bytes.readLimit(newLimit);
                 bytes.readSkip(1); // skip the {
                 consumePadding();
-                return marshallableReader.apply(TextWire.this);
+                final T apply = marshallableReader.apply(TextWire.this);
+                endsNormally = true;
+                return apply;
             } finally {
                 bytes.readLimit(limit);
 
                 consumePadding(1);
                 code = readCode();
                 popState();
-                if (code != '}')
-                    //noinspection ThrowFromFinallyBlock
+                if (code != '}' && endsNormally)
                     throw new IORuntimeException("Unterminated { while reading marshallable "
                             + "bytes=" + Bytes.toString(bytes)
                     );
@@ -3096,14 +3189,13 @@ public class TextWire extends AbstractWire implements Wire {
                 bytes.readSkip(-1);
                 try {
                     return classLookup().forName(stringBuilder);
-                } catch (NoClassDefFoundError e) {
-                    throw new IORuntimeException("Unable to load class " + e, e);
                 } catch (ClassNotFoundRuntimeException e) {
                     if (tClass == null) {
                         if (Wires.GENERATE_TUPLES) {
                             return Wires.tupleFor(null, stringBuilder.toString());
                         }
-                        throw new NoClassDefFoundError("Unable to load " + stringBuilder + ", is a class alias missing.");
+                        Jvm.warn().on(TextWire.class, "Unable to load " + stringBuilder + ", is a class alias missing.");
+                        return null;
                     }
 
                     final String className = tClass.getName();
@@ -3183,6 +3275,7 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy)
                 throws BufferUnderflowException, IORuntimeException {
+            long position0 = bytes.readPosition();
             if (isNull()) {
                 consumePadding(1);
                 return null;
@@ -3204,7 +3297,10 @@ public class TextWire extends AbstractWire implements Wire {
 
             } else if (code != '{') {
                 consumeValue();
-                throw new IORuntimeException("Trying to read marshallable " + object.getClass() + " at " + bytes.toDebugString(128) + " expected to find a {");
+                long position00 = bytes.readPosition();
+                final String s = bytes.readPosition(position0).toDebugString(128);
+                bytes.readPosition(position00);
+                throw new IORuntimeException("Trying to read marshallable " + object.getClass() + " at " + s + " expected to find a {");
             }
 
             final long len = readLengthMarshallable();
@@ -3403,18 +3499,12 @@ public class TextWire extends AbstractWire implements Wire {
 
         public void checkRewind() {
             int ch = peekBack();
-            if (ch == ':' || ch == '}' || ch == ']')
+            if (END_CHARS.get(ch))
                 bytes.readSkip(-1);
-
-            else if ((ch > 'F' && (ch < 'a' || ch > 'f'))) {
-                throw new IllegalArgumentException("Unexpected character in number '" + (char) ch + '\'');
-            }
         }
 
         public void checkRewindDouble() {
-            int ch = peekBack();
-            if (ch == ':' || ch == '}' || ch == ']')
-                bytes.readSkip(-1);
+            checkRewind();
         }
 
         /**
@@ -3482,7 +3572,7 @@ public class TextWire extends AbstractWire implements Wire {
             @Nullable Object o = objectWithInferredType0(using, strategy, type);
             consumePadding();
             int code = peekCode();
-            if (code == ':') {
+            if (code == ':' && strategy.bracketType() != BracketType.NONE) {
                 return readRestOfMap(using, o);
             }
             return o;
@@ -3639,5 +3729,10 @@ public class TextWire extends AbstractWire implements Wire {
         public String toString() {
             return TextWire.this.toString();
         }
+    }
+
+    @Override
+    public boolean writingIsComplete() {
+        return !writeContext.isNotComplete();
     }
 }

@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+@Deprecated(/* to be removed in x.25 */)
 public class HexadecimalIntConverter implements IntConverter {
     @Override
     public int parse(CharSequence text) {

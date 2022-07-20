@@ -140,17 +140,19 @@ public interface WireCommon {
     void parent(Object parent);
 
     /**
-     * Used to check that the wire is being used by only one thread
+     * Doesn't do anything
      *
-     * @return true always, so it can be used in an assert line
+     * @return true
      */
+    @Deprecated(/* to be removed in x.24 */)
     boolean startUse();
 
     /**
-     * Check the Wire was not used by another thread.
+     * Doesn't do anything
      *
      * @return true always, so it can be used in an assert line
      */
+    @Deprecated(/* to be removed in x.24 */)
     boolean endUse();
 
     /**
@@ -190,4 +192,16 @@ public interface WireCommon {
      * @return use Marshallable
      */
     boolean useSelfDescribingMessage(@NotNull CommonMarshallable object);
+
+    /**
+     * Determine whether direct access to the underlying byte() makes sense or should it be treated as text
+     *
+     * @return Is this a binary protocol
+     */
+    boolean isBinary();
+
+    /**
+     * Reset the state of the wire
+     */
+    void reset();
 }

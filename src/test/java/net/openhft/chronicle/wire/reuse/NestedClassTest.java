@@ -56,10 +56,10 @@ public class NestedClassTest extends WireTestCommon {
     }
 
     @SuppressWarnings("rawtypes")
-    private final Function<Bytes, Wire> wireType;
+    private final Function<Bytes<?>, Wire> wireType;
 
     @SuppressWarnings("rawtypes")
-    public NestedClassTest(Function<Bytes, Wire> wireType) {
+    public NestedClassTest(Function<Bytes<?>, Wire> wireType) {
         this.wireType = wireType;
     }
 
@@ -67,7 +67,7 @@ public class NestedClassTest extends WireTestCommon {
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
         return Arrays.asList(
-                new Object[]{(Function<Bytes, Wire>) bytes -> new BinaryWire(bytes, false, true, false, 128, "binary", false)},
+                new Object[]{(Function<Bytes<?>, Wire>) bytes -> new BinaryWire(bytes, false, true, false, 128, "binary", false)},
                 new Object[]{WireType.TEXT},
                 new Object[]{WireType.BINARY},
                 new Object[]{WireType.BINARY_LIGHT},
@@ -79,7 +79,7 @@ public class NestedClassTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testMultipleReads() {
-        Bytes bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.elasticByteBuffer();
         Wire wire = wireType.apply(bytes);
         wire.writeEventName(() -> "test1").marshallable(outerClass1);
         if (wireType == WireType.JSON)

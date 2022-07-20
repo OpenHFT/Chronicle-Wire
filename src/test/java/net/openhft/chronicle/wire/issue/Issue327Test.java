@@ -74,7 +74,7 @@ public class Issue327Test extends WireTestCommon {
 
     @Test
     public void intArray() {
-        test(() -> IntStream.range(0, 4).toArray(), "{\"@int[]\":[ 0,1,2,3 ]}", "[ 0,1,2,3 ]");
+        test(() -> IntStream.range(0, 4).toArray(), "{\"@int[]\":[0,1,2,3 ]}", "[0,1,2,3 ]");
     }
 
     @Test

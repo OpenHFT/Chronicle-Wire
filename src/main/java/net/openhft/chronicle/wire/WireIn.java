@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,10 +28,12 @@ import java.io.StreamCorruptedException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 
 /**
  * The defines the stand interface for writing and reading sequentially to/from a Bytes stream.
  */
+@DontChain
 public interface WireIn extends WireCommon, MarshallableIn {
 
     @NotNull
@@ -92,6 +95,8 @@ public interface WireIn extends WireCommon, MarshallableIn {
 
     /**
      * Read a field which might be an object of any type.
+     * <p>
+     * Use getValueIn() to read the value for this event
      *
      * @param expectedClass to use as a hint, or Object.class if no hint available.
      * @return an instance of expectedClass
@@ -99,7 +104,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
     @Nullable <K> K readEvent(Class<K> expectedClass);
 
     /**
-     * Obtain the value in (for internal use)
+     * Obtain the value in for advanced use (typically after a call to readEvent above)
      */
     @NotNull
     ValueIn getValueIn();
@@ -178,6 +183,8 @@ public interface WireIn extends WireCommon, MarshallableIn {
 
     void consumePadding();
 
+    void commentListener(Consumer<CharSequence> commentListener);
+
     /**
      * Consume a header if one is available.
      *
@@ -200,6 +207,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
 
     void readMetaDataHeader();
 
+    @Deprecated(/* to be removed in x.25 */)
     @Nullable
     default CharSequence asText() {
         return Wires.asText(this);
@@ -219,6 +227,10 @@ public interface WireIn extends WireCommon, MarshallableIn {
     }
 
     default boolean hintReadInputOrder() {
+        return false;
+    }
+
+    default boolean hasMetaDataPrefix() {
         return false;
     }
 

@@ -53,16 +53,30 @@ public class RawWire extends AbstractWire implements Wire {
     private final RawValueIn valueIn = new RawValueIn();
     private final WriteDocumentContext writeContext = new BinaryWriteDocumentContext(this);
     private final BinaryReadDocumentContext readContext = new BinaryReadDocumentContext(this, false);
-    boolean use8bit;
     @Nullable
     private StringBuilder lastSB;
 
-    public RawWire(@NotNull Bytes bytes) {
+    public RawWire(@NotNull Bytes<?> bytes) {
         this(bytes, true);
     }
 
-    public RawWire(@NotNull Bytes bytes, boolean use8bit) {
+    public RawWire(@NotNull Bytes<?> bytes, boolean use8bit) {
         super(bytes, use8bit);
+    }
+
+    @Override
+    public void reset() {
+        valueIn.resetState();
+        valueOut.resetState();
+        writeContext.reset();
+        readContext.reset();
+        bytes.clear();
+        lastSB = null;
+    }
+
+    @Override
+    public boolean isBinary() {
+        return true;
     }
 
     @NotNull
@@ -190,7 +204,7 @@ public class RawWire extends AbstractWire implements Wire {
 
     @NotNull
     @Override
-    public Bytes bytes() {
+    public Bytes<?> bytes() {
         return bytes;
     }
 
@@ -464,7 +478,7 @@ public class RawWire extends AbstractWire implements Wire {
         public WireOut int64array(long capacity, @NotNull LongArrayValues values) {
             long pos = bytes.writePosition();
             BinaryLongArrayReference.lazyWrite(bytes, capacity);
-            ((Byteable) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
+            ((Byteable) values).bytesStore(bytes, pos, bytes.lengthWritten(pos));
             return RawWire.this;
         }
 
@@ -536,11 +550,11 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @Nullable Class type) {
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class type) {
             long position = bytes.writePosition();
             bytes.writeSkip(1);
             typeTranslator.accept(type, bytes);
-            bytes.writeUnsignedByte(position, Maths.toInt8(bytes.writePosition() - position - 1));
+            bytes.writeUnsignedByte(position, Maths.toInt8(bytes.lengthWritten(position) - 1));
             return RawWire.this;
         }
 
@@ -598,7 +612,7 @@ public class RawWire extends AbstractWire implements Wire {
 
             writer.accept(t, this);
 
-            bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
+            bytes.writeOrderedInt(position, Maths.toInt32(bytes.lengthWritten(position) - 4, "Document length %,d out of 32-bit int range."));
             return RawWire.this;
         }
 
@@ -610,7 +624,7 @@ public class RawWire extends AbstractWire implements Wire {
 
             writer.accept(t, kls, this);
 
-            bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
+            bytes.writeOrderedInt(position, Maths.toInt32(bytes.lengthWritten(position) - 4, "Document length %,d out of 32-bit int range."));
             return RawWire.this;
         }
 
@@ -622,7 +636,7 @@ public class RawWire extends AbstractWire implements Wire {
 
             object.writeMarshallable(RawWire.this);
 
-            int length = Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range.");
+            int length = Maths.toInt32(bytes.lengthWritten(position) - 4, "Document length %,d out of 32-bit int range.");
             bytes.writeOrderedInt(position, length);
             return RawWire.this;
         }
@@ -635,7 +649,7 @@ public class RawWire extends AbstractWire implements Wire {
 
             writeSerializable(object);
 
-            int length = Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range.");
+            int length = Maths.toInt32(bytes.lengthWritten(position) - 4, "Document length %,d out of 32-bit int range.");
             bytes.writeOrderedInt(position, length);
             return RawWire.this;
         }
@@ -742,7 +756,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @Nullable
         @Override
-        public Bytes textTo(@NotNull Bytes s) {
+        public Bytes<?> textTo(@NotNull Bytes<?> s) {
             if (use8bit)
                 return bytes.read8bit(s) ? s : null;
             else
@@ -751,13 +765,13 @@ public class RawWire extends AbstractWire implements Wire {
 
         @Override
         @NotNull
-        public WireIn bytes(@NotNull BytesOut toBytes) {
+        public WireIn bytes(@NotNull BytesOut<?> toBytes) {
             return bytes(toBytes, true);
         }
 
         @NotNull
         @Override
-        public WireIn bytes(@NotNull BytesOut toBytes, boolean clearBytes) {
+        public WireIn bytes(@NotNull BytesOut<?> toBytes, boolean clearBytes) {
             if (clearBytes)
                 toBytes.clear();
 
@@ -812,7 +826,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public byte @NotNull [] bytes() {
+        public byte @NotNull [] bytes(byte[] using) {
             throw new UnsupportedOperationException("todo");
         }
 

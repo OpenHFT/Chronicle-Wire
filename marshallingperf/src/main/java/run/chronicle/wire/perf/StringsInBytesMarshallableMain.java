@@ -29,7 +29,7 @@ public class StringsInBytesMarshallableMain {
         WithStrings n = new WithStrings("1", "12", "123", "1234", "123456", "1234567", "123456789", "12345678901");
 
         WithStrings n2 = new WithStrings();
-        Bytes bytes = Bytes.allocateElasticDirect(128);
+        Bytes<?> bytes = Bytes.allocateElasticDirect(128);
 
         for (int i = -20_000; i < 100_000_000; i++) {
             bytes.clear();
@@ -71,7 +71,7 @@ public class StringsInBytesMarshallableMain {
         }
 
         @Override
-        public void readMarshallable(BytesIn bytes) throws IORuntimeException {
+        public void readMarshallable(BytesIn<?> bytes) throws IORuntimeException {
             a = bytes.read8bit();
             b = bytes.read8bit();
             c = bytes.read8bit();
@@ -83,7 +83,7 @@ public class StringsInBytesMarshallableMain {
         }
 
         @Override
-        public void writeMarshallable(BytesOut bytes) {
+        public void writeMarshallable(BytesOut<?> bytes) {
             bytes.write8bit(a);
             bytes.write8bit(b);
             bytes.write8bit(c);

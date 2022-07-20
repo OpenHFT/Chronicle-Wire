@@ -31,6 +31,7 @@ public enum YamlToken {
     SEQUENCE_ENTRY,
     SEQUENCE_START(SEQUENCE_END),
     TEXT,
+    LITERAL,
     ANCHOR,
     ALIAS,
     RESERVED,

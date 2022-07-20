@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static org.junit.Assert.assertEquals;
+
 public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
 
     @Test
@@ -26,7 +28,7 @@ public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
        // System.out.println(cs);
         MyDto2 o = (MyDto2) Marshallable.fromString(cs);
 
-        assert o.myDto.get("").strings.size() == 2;
+        assertEquals(2, o.myDto.get("").strings.size());
     }
 
     static class MyDto extends SelfDescribingMarshallable {

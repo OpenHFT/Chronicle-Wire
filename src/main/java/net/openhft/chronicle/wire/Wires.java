@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
@@ -32,14 +33,15 @@ import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.ReadResolvable;
+import net.openhft.chronicle.wire.internal.StringConsumerMarshallableOut;
+import net.openhft.compiler.CachedCompiler;
+import net.openhft.compiler.CompilerUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.naming.CompositeName;
 import javax.naming.InvalidNameException;
-import java.io.Externalizable;
-import java.io.File;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -58,6 +60,7 @@ import java.util.function.Function;
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.SerializationStrategies.*;
 import static net.openhft.chronicle.wire.WireType.TEXT;
+import static net.openhft.chronicle.wire.WireType.YAML_ONLY;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum Wires {
@@ -82,7 +85,7 @@ public enum Wires {
         }
         return ANY_OBJECT;
     });
-    static final ClassLocal<FieldInfoPair> FIELD_INFOS = ClassLocal.withInitial(VanillaFieldInfo::lookupClass);
+    static final ClassLocal<FieldInfoPair> FIELD_INFOS = ClassLocal.withInitial(FieldInfo::lookupClass);
     static final ClassLocal<Function<String, Marshallable>> MARSHALLABLE_FUNCTION = ClassLocal.withInitial(tClass -> {
         Class[] interfaces = {Marshallable.class, tClass};
         if (tClass == Marshallable.class)
@@ -98,11 +101,14 @@ public enum Wires {
     });
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(Bytes.allocateElasticOnHeap()));
+    final static CachedCompiler CACHED_COMPILER;
     private static final int TID_MASK = 0b00111111_11111111_11111111_11111111;
     private static final int INVERSE_TID_MASK = ~TID_MASK;
     public static boolean GENERATE_TUPLES = Jvm.getBoolean("wire.generate.tuples");
     static volatile boolean warnedUntypedBytesOnce = false;
     static ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
+
+    static final boolean DUMP_CODE_TO_TARGET = Jvm.getBoolean("dumpCodeToTarget");
 
     static {
         Jvm.addToClassPath(Wires.class);
@@ -111,11 +117,51 @@ public enum Wires {
         CLASS_STRATEGY_FUNCTIONS.add(SerializeBytes.INSTANCE);
         CLASS_STRATEGY_FUNCTIONS.add(SerializeMarshallables.INSTANCE); // must be after SerializeBytes.
         WireInternal.addAliases();
+        final String target = OS.getTarget();
+        CACHED_COMPILER =
+                new File(target).exists() && Jvm.isDebug() && DUMP_CODE_TO_TARGET
+                        ? new CachedCompiler(new File(target, "generated-test-sources"), new File(target, "test-classes"))
+                        : CompilerUtils.CACHED_COMPILER;
     }
 
     // force static initialise
     public static void init() {
         // Do nothing here
+    }
+
+    /**
+     * Creates and returns a proxy of the specified interface. The proxy writes inputs into the specified PrintStream in Yaml format.
+     *
+     * @param tClass the specified interface
+     * @param ps     the PrintStream used to write output data into as Yaml format
+     * @param <T>    type of the specified interface
+     * @return a proxy of the specified interface
+     */
+    public static <T> T recordAsYaml(Class<T> tClass, PrintStream ps) {
+        MarshallableOut out = new StringConsumerMarshallableOut(s -> {
+            if (!s.startsWith("---\n"))
+                ps.print("---\n");
+            ps.print(s);
+            if (!s.endsWith("\n"))
+                ps.print("\n");
+        }, YAML_ONLY);
+        return out.methodWriter(tClass);
+    }
+
+    /**
+     * Reads the content of a specified Yaml file and feeds it to the specified object.
+     *
+     * @param file name of the input Yaml file
+     * @param obj  the object that replays the data in the specified file
+     * @throws IOException is thrown if an IO operation fails
+     */
+    public static void replay(String file, Object obj) throws IOException {
+        Bytes bytes = BytesUtil.readFile(file);
+        Wire wire = new YamlWire(bytes).useTextDocuments();
+        MethodReader readerObj = wire.methodReader(obj);
+        while (readerObj.readOne()) {
+        }
+        bytes.releaseLast();
     }
 
     /**
@@ -126,30 +172,30 @@ public enum Wires {
      * @param bytes to decode
      * @return as String
      */
-    public static String fromSizePrefixedBlobs(@NotNull Bytes bytes) {
+    public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes) {
         return WireDumper.of(bytes).asString();
     }
 
-    public static String fromAlignedSizePrefixedBlobs(@NotNull Bytes bytes) {
+    public static String fromAlignedSizePrefixedBlobs(@NotNull Bytes<?> bytes) {
         return WireDumper.of(bytes, true).asString();
     }
 
-    public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, boolean abbrev) {
+    public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, boolean abbrev) {
         return WireDumper.of(bytes).asString(abbrev);
     }
 
-    public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, long position) {
+    public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, long position) {
         return fromSizePrefixedBlobs(bytes, position, false);
     }
 
-    public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, long position, boolean padding) {
+    public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, long position, boolean padding) {
         final long limit = bytes.readLimit();
         if (position > limit)
             return "";
         return WireDumper.of(bytes, padding).asString(position, limit - position);
     }
 
-    public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, boolean padding, boolean abbrev) {
+    public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, boolean padding, boolean abbrev) {
         return WireDumper.of(bytes, padding).asString(abbrev);
     }
 
@@ -168,7 +214,7 @@ public enum Wires {
             int metaDataBit = dc.isMetaData() ? Wires.META_DATA : 0;
             int header = metaDataBit | toIntU30(length, "Document length %,d out of 30-bit int range.");
 
-            Bytes tempBytes = Bytes.allocateElasticDirect();
+            Bytes<?> tempBytes = Bytes.allocateElasticDirect();
             try {
                 tempBytes.writeOrderedInt(header);
                 final AbstractWire wire2 = ((BinaryReadDocumentContext) dc).wire;
@@ -208,17 +254,42 @@ public enum Wires {
         return WireDumper.of(wireIn).asString(abbrev);
     }
 
+
     @NotNull
     public static CharSequence asText(@NotNull WireIn wireIn) {
+        return asType(wireIn, Wires::newTextWire);
+    }
+
+
+    private static Wire newJsonWire(Bytes bytes) {
+        return new JSONWire(bytes).useTypes(true).trimFirstCurly(false).useTextDocuments();
+    }
+
+    @NotNull
+    public static Bytes asBinary(@NotNull WireIn wireIn) {
+        return asType(wireIn, BinaryWire::new);
+    }
+
+    private static Bytes asType(@NotNull WireIn wireIn, Function<Bytes, Wire> wireProvider) {
         long pos = wireIn.bytes().readPosition();
         try {
-            Bytes bytes = acquireBytes();
+            Bytes<?> bytes = WireInternal.acquireInternalBytes();
             wireIn.copyTo(new TextWire(bytes).addTimeStamps(true));
             return bytes;
         } finally {
             wireIn.bytes().readPosition(pos);
         }
     }
+
+    @NotNull
+    public static Bytes asJson(@NotNull WireIn wireIn) {
+        return asType(wireIn, Wires::newJsonWire);
+    }
+
+    private static Wire newTextWire(Bytes bytes) {
+        return new TextWire(bytes).addTimeStamps(true);
+    }
+
 
     public static StringBuilder acquireStringBuilder() {
         return Jvm.isDebug() ? new StringBuilder() : SBP.acquireStringBuilder();
@@ -303,7 +374,7 @@ public enum Wires {
     public static Bytes<?> acquireBytes() {
         if (Jvm.isDebug())
             return Bytes.allocateElasticOnHeap();
-        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL,
+        Bytes<?> bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL,
                 Wires::unmonitoredDirectBytes);
         bytes.clear();
         return bytes;
@@ -315,7 +386,7 @@ public enum Wires {
         if (Jvm.isDebug())
             return Bytes.allocateElasticOnHeap();
 
-        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_F2S_TL,
+        Bytes<?> bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_F2S_TL,
                 Wires::unmonitoredDirectBytes);
         bytes.clear();
         return bytes;
@@ -331,10 +402,10 @@ public enum Wires {
     }
 
     @NotNull
-    public static Bytes acquireAnotherBytes() {
+    public static Bytes<?> acquireAnotherBytes() {
         if (Jvm.isDebug())
             return Bytes.allocateElasticOnHeap();
-        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL,
+        Bytes<?> bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL,
                 Wires::unmonitoredDirectBytes);
         bytes.clear();
         return bytes;
@@ -373,13 +444,16 @@ public enum Wires {
         wm.writeMarshallable(marshallable, wire, previous, copy);
     }
 
-    public static void writeKey(@NotNull Object marshallable, Bytes bytes) {
+    public static void writeKey(@NotNull Object marshallable, Bytes<?> bytes) {
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass());
         wm.writeKey(marshallable, bytes);
     }
 
     @NotNull
     public static <T extends Marshallable> T deepCopy(@NotNull T marshallable) {
+        if (Enum.class.isAssignableFrom(marshallable.getClass()))
+            return marshallable;
+
         Wire wire = acquireBinaryWire();
         @NotNull T t = (T) ObjectUtils.newInstance(marshallable.getClass());
         boolean useSelfDescribing = t.usesSelfDescribingMessage() || !(t instanceof BytesMarshallable);
@@ -473,25 +547,23 @@ public enum Wires {
     }
 
     @Nullable
-    public static <E> E objectMap(ValueIn in, @Nullable E using, @Nullable Class clazz, SerializationStrategy<E> strategy) {
+    public static <E> E objectMap(ValueIn in, @Nullable E using, @Nullable Class clazz, @NotNull SerializationStrategy<E> strategy) {
         if (in.isNull())
             return null;
-        boolean nullObject = false;
         if (clazz == Object.class)
             strategy = MAP;
         if (using == null) {
             using = (E) strategy.newInstanceOrNull(clazz);
-            nullObject = using == null;
         }
         if (Throwable.class.isAssignableFrom(clazz))
             return (E) WireInternal.throwable(in, false, (Throwable) using);
 
-        if (using == null && !nullObject)
+        if (using == null)
             throw new IllegalStateException("failed to create instance of clazz=" + clazz + " is it aliased?");
+
         final long position = in.wireIn().bytes().readPosition();
         Object marshallable = in.marshallable(using, strategy);
-        // only do a readResolve if an object was provided.
-        E e = using != null ? readResolve(marshallable) : (E) marshallable;
+        E e = readResolve(marshallable);
         String name = nameOf(e);
         if (name != null) {
             E e2 = (E) EnumCache.of(e.getClass()).valueOf(name);
@@ -613,14 +685,19 @@ public enum Wires {
         }
     }
 
+    @Nullable
     public static <T> T tupleFor(Class<T> tClass, String typeName) {
-        if (!GENERATE_TUPLES)
-            throw new IllegalArgumentException("Cannot find a class for " + typeName + " are you missing an alias?");
+        if (!GENERATE_TUPLES) {
+            Jvm.warn().on(Wires.class, "Cannot find a class for " + typeName + " are you missing an alias?");
+            return null;
+        }
 
         if (tClass == null || tClass == Object.class)
             tClass = (Class<T>) Marshallable.class;
-        if (!tClass.isInterface())
-            throw new IllegalArgumentException("Cannot generate a class for " + typeName + " are you missing an alias?");
+        if (!tClass.isInterface()) {
+            Jvm.warn().on(Wires.class, "Cannot generate a class for " + typeName + " are you missing an alias?");
+            return null;
+        }
         return (T) MARSHALLABLE_FUNCTION.get(tClass).apply(typeName);
     }
 
@@ -632,7 +709,7 @@ public enum Wires {
     }
 
     @NotNull
-    public static BinaryWire binaryWireForRead(Bytes in, long position, long length) {
+    public static BinaryWire binaryWireForRead(Bytes<?> in, long position, long length) {
         BinaryWire wire = WIRE_TL.get();
         VanillaBytes bytes = (VanillaBytes) wire.bytes();
         wire.clear();
@@ -641,7 +718,7 @@ public enum Wires {
     }
 
     @NotNull
-    public static BinaryWire binaryWireForWrite(Bytes in, long position, long length) {
+    public static BinaryWire binaryWireForWrite(Bytes<?> in, long position, long length) {
         BinaryWire wire = WIRE_TL.get();
         VanillaBytes bytes = (VanillaBytes) wire.bytes();
         bytes.bytesStore(in.bytesStore(), 0, position);
@@ -773,7 +850,7 @@ public enum Wires {
                 case "java.lang.StringBuilder":
                     return ScalarStrategy.of(StringBuilder.class, (o, in) -> {
                         StringBuilder builder = (o == null)
-                                ? acquireStringBuilder()
+                                ? WireInternal.acquireStringBuilder()
                                 : o;
                         in.textTo(builder);
                         return o;
@@ -931,8 +1008,8 @@ public enum Wires {
     enum SerializeBytes implements Function<Class, SerializationStrategy> {
         INSTANCE;
 
-        static Bytes decodeBase64(Bytes o, ValueIn in) {
-            @NotNull StringBuilder sb0 = acquireStringBuilder();
+        static Bytes<?> decodeBase64(Bytes<?> o, ValueIn in) {
+            @NotNull StringBuilder sb0 = WireInternal.acquireStringBuilder();
             in.text(sb0);
             String s = WireInternal.INTERNER.intern(sb0);
             byte[] decode = Base64.getDecoder().decode(s);
@@ -1092,7 +1169,11 @@ public enum Wires {
 
     static class TupleFieldInfo extends AbstractFieldInfo {
         public TupleFieldInfo(String name, Class type) {
-            super(type, SerializeMarshallables.INSTANCE.apply(type).bracketType(), name);
+            super(type, bracketType(SerializeMarshallables.INSTANCE.apply(type)), name);
+        }
+
+        static BracketType bracketType(SerializationStrategy ss) {
+            return ss == null ? BracketType.UNKNOWN : ss.bracketType();
         }
 
         private Map<String, Object> getMap(Object o) {

@@ -18,6 +18,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.Mocker;
+import net.openhft.chronicle.core.util.IgnoresEverything;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,11 +35,12 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
     private final Supplier<MarshallableOut> marshallableOutSupplier;
     private final Map<Method, Consumer<Object[]>> visitorConverter = new LinkedHashMap<>();
 
-    TextMethodWriterInvocationHandler(@NotNull MarshallableOut marshallableOut) {
-        this(() -> marshallableOut);
+    TextMethodWriterInvocationHandler(Class tClass, @NotNull MarshallableOut marshallableOut) {
+        this(tClass, () -> marshallableOut);
     }
 
-    public TextMethodWriterInvocationHandler(@NotNull Supplier<MarshallableOut> marshallableOutSupplier) {
+    public TextMethodWriterInvocationHandler(Class tClass, @NotNull Supplier<MarshallableOut> marshallableOutSupplier) {
+        super(tClass);
         this.marshallableOutSupplier = marshallableOutSupplier;
     }
 
@@ -69,38 +72,60 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
         }
     }
 
+    static final Consumer<Object[]> NOOP_CONSUMER = Mocker.ignored(Consumer.class);
+
     private Consumer<Object[]> buildConverter(Method method) {
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         if (parameterAnnotations.length <= 0)
-            return NoOp.INSTANCE;
+            return NOOP_CONSUMER;
         for (Annotation anno : parameterAnnotations[0]) {
             if (anno instanceof LongConversion) {
                 LongConversion longConversion = (LongConversion) anno;
-                LongConverter ic = ObjectUtils.newInstance(longConversion.value());
-                return a -> {
-                    if (a[0] instanceof Number) {
-                        StringBuilder sb = Wires.acquireStringBuilder();
-                        ic.append(sb, ((Number) a[0]).longValue());
-                        a[0] = new RawText(sb);
-                    }
-                };
+                final Class<?> value = longConversion.value();
+
+                return buildLongConverter(value);
+            }
+            LongConversion lc2 = anno.annotationType().getAnnotation(LongConversion.class);
+            if (lc2 != null) {
+                return buildLongConverter(anno.annotationType());
             }
             if (anno instanceof IntConversion) {
                 IntConversion intConversion = (IntConversion) anno;
                 IntConverter ic = ObjectUtils.newInstance(intConversion.value());
                 return a -> {
                     if (a[0] instanceof Number) {
-                        StringBuilder sb = Wires.acquireStringBuilder();
+                        StringBuilder sb = WireInternal.acquireStringBuilder();
                         ic.append(sb, ((Number) a[0]).intValue());
                         a[0] = new RawText(sb);
                     }
                 };
             }
         }
-        return NoOp.INSTANCE;
+        return NOOP_CONSUMER;
     }
 
-    enum NoOp implements Consumer<Object[]> {
+    @NotNull
+    private Consumer<Object[]> buildLongConverter(Class<?> value) {
+        LongConverter lc;
+        try {
+            lc = (LongConverter) value.getField("INSTANCE").get(null);
+        } catch (NoSuchFieldException e) {
+            lc = (LongConverter) ObjectUtils.newInstance(value);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        LongConverter finalLc = lc;
+        return a -> {
+            if (a[0] instanceof Number) {
+                StringBuilder sb = WireInternal.acquireStringBuilder();
+                finalLc.append(sb, ((Number) a[0]).longValue());
+                a[0] = new RawText(sb);
+            }
+        };
+    }
+
+    @Deprecated(/* To be removed in x.24 */)
+    enum NoOp implements Consumer<Object[]>, IgnoresEverything {
         INSTANCE;
 
         @Override

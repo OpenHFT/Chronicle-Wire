@@ -50,7 +50,7 @@ class BClass extends BytesInBinaryMarshallable {
     private static final int MASHALLABLE_VERSION = 1;
 
     @Override
-    public void writeMarshallable(BytesOut out) {
+    public void writeMarshallable(BytesOut<?> out) {
         out.writeStopBit(MASHALLABLE_VERSION);
         out.writeInt(id);
         out.writeBoolean(flag);
@@ -65,7 +65,7 @@ class BClass extends BytesInBinaryMarshallable {
     }
 
     @Override
-    public void readMarshallable(BytesIn in) {
+    public void readMarshallable(BytesIn<?> in) {
         int version = (int) in.readStopBit();
         if (version == MASHALLABLE_VERSION) {
             id = in.readInt();

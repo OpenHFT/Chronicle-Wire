@@ -65,7 +65,7 @@ public class IntConversionTest extends WireTestCommon {
 
     @Test
     public void twoArgumentsConversion() {
-        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(128));
+        Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(128));
 
         final TwoArgumentsConversion writer = wire.methodWriter(TwoArgumentsConversion.class);
 
@@ -74,7 +74,7 @@ public class IntConversionTest extends WireTestCommon {
         StringBuilder sb = new StringBuilder();
 
         assertEquals("to: [\n" +
-                "  7-DBEN,\n" +
+                "  7^DBEN,\n" +
                 "  3fffffffffffffff\n" +
                 "]\n" +
                 "...\n", wire.toString());
@@ -87,15 +87,15 @@ public class IntConversionTest extends WireTestCommon {
     }
 
     public interface TwoArgumentsConversion {
-        void to(@IntConversion(Base40IntConverter.class) int i, @LongConversion(HexadecimalLongConverter.class) long l);
+        void to(@LongConversion(Base40LongConverter.class) int i, @LongConversion(HexadecimalLongConverter.class) long l);
     }
 
     public interface WriteWithInt {
-        WriteWithInt to(@IntConversion(HexadecimalIntConverter.class) int x);
+        WriteWithInt to(@LongConversion(HexadecimalLongConverter.class) int x);
     }
 
     static class IntHolder extends SelfDescribingMarshallable {
-        @IntConversion(HexadecimalIntConverter.class)
+        @LongConversion(HexadecimalLongConverter.class)
         int number;
 
         public IntHolder(int number) {
@@ -113,11 +113,11 @@ public class IntConversionTest extends WireTestCommon {
     }
 
     static class UnsignedHolder extends SelfDescribingMarshallable {
-        @IntConversion(UnsignedIntConverter.class)
+        @LongConversion(UnsignedLongConverter.class)
         public byte u8;
-        @IntConversion(UnsignedIntConverter.class)
+        @LongConversion(UnsignedLongConverter.class)
         public short u16;
-        @IntConversion(UnsignedIntConverter.class)
+        @LongConversion(UnsignedLongConverter.class)
         public int u32;
 
     }

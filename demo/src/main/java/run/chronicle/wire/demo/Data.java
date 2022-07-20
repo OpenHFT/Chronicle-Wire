@@ -1,5 +1,6 @@
 package run.chronicle.wire.demo;
 
+import net.openhft.chronicle.bytes.util.BinaryLengthLength;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
@@ -81,5 +82,10 @@ class Data extends SelfDescribingMarshallable {
                 ", timeUnit=" + timeUnit +
                 ", price=" + price +
                 '}';
+    }
+
+    @Override
+    public BinaryLengthLength binaryLengthLength() {
+        return BinaryLengthLength.LENGTH_8BIT;
     }
 }

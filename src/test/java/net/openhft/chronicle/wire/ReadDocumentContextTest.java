@@ -34,9 +34,9 @@ public class ReadDocumentContextTest extends WireTestCommon {
     @Test
     public void testWritingNotCompleteDocument() {
 
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
         assertFalse(b.sharedMemory());
-        @NotNull Wire wire = new TextWire(b).useBinaryDocuments();
+        @NotNull Wire wire = WireType.TEXT.apply(b);
         assertFalse(wire.notCompleteIsNotPresent());
 
         try (DocumentContext dc = wire.readingDocument()) {
@@ -69,8 +69,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
     public void testWritingNotCompleteDocumentShared() throws IOException {
         @NotNull MappedBytes b = MappedBytes.mappedBytes(File.createTempFile("delete", "me"), 64 << 10);
         assertTrue(b.sharedMemory());
-        @NotNull Wire wire = new TextWire(b).useBinaryDocuments();
-        wire.usePadding(true);
+        @NotNull Wire wire = WireType.TEXT.apply(b);
         assertTrue(wire.notCompleteIsNotPresent());
 
         try (DocumentContext dc = wire.readingDocument()) {
@@ -113,10 +112,9 @@ public class ReadDocumentContextTest extends WireTestCommon {
     @Test
     public void testEmptyMessage() {
 
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
 
-        @NotNull TextWire textWire = new TextWire(b).useBinaryDocuments();
-        textWire.usePadding(true);
+        Wire textWire = WireType.TEXT.apply(b);
 
         textWire.writeDocument(true, w -> {
         });
@@ -142,10 +140,9 @@ public class ReadDocumentContextTest extends WireTestCommon {
     public void testReadingADocumentThatHasNotBeenFullyReadFromTheTcpSocketAt2Bytes() throws
             Exception {
 
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
 
-        @NotNull TextWire textWire = new TextWire(b).useBinaryDocuments();
-        textWire.usePadding(true);
+        Wire textWire = WireType.TEXT.apply(b);
 
         textWire.writeDocument(true, w -> w.write("key").text("someText"));
         textWire.writeDocument(true, w -> w.write("key").text("someText"));
@@ -188,10 +185,9 @@ public class ReadDocumentContextTest extends WireTestCommon {
     @Test
     public void testReadingADocumentThatHasNotBeenFullyReadFromTheTcpSocketAt5Bytes() {
 
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
 
-        @NotNull TextWire wire = new TextWire(b).useBinaryDocuments();
-        wire.usePadding(true);
+        Wire wire = WireType.TEXT.apply(b);
 
         wire.writeDocument(true, w -> w.write("key").text("someText"));
         wire.writeDocument(true, w -> w.write("key").text("someText"));

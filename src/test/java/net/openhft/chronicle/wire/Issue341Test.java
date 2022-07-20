@@ -13,6 +13,8 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static org.junit.Assume.assumeFalse;
+
 @RunWith(value = Parameterized.class)
 public class Issue341Test extends WireTestCommon {
 
@@ -25,9 +27,13 @@ public class Issue341Test extends WireTestCommon {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                new Object[]{WireType.TEXT},
-                new Object[]{WireType.JSON},
                 new Object[]{WireType.BINARY},
+                new Object[]{WireType.BINARY_LIGHT},
+                new Object[]{WireType.JSON},
+                new Object[]{WireType.JSON_ONLY},
+                new Object[]{WireType.TEXT},
+                new Object[]{WireType.YAML},
+                new Object[]{WireType.YAML_ONLY},
         });
     }
 
@@ -49,8 +55,10 @@ public class Issue341Test extends WireTestCommon {
     }
 
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testComparableSerializable() {
+        // for backward compatibility, this doesn't support types
+        assumeFalse(wireType == WireType.JSON);
         final MyComparableSerializable source = new MyComparableSerializable("hello");
 
         final Bytes<?> bytes = new HexDumpBytes();
@@ -61,7 +69,7 @@ public class Issue341Test extends WireTestCommon {
                 + (wire.getValueOut().isBinary() ? bytes.toHexString() : bytes.toString()));
 
         final MyComparableSerializable target = wire.getValueIn().object(source.getClass());
-        Assert.assertEquals(source, target);
+        Assert.assertEquals(source.value, target.value);
     }
 
     static final class MyClass extends SelfDescribingMarshallable {

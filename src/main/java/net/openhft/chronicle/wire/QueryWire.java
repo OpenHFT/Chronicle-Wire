@@ -42,9 +42,9 @@ import java.util.function.BiFunction;
 @SuppressWarnings("rawtypes")
 public class QueryWire extends TextWire {
     final QueryValueOut valueOut = new QueryValueOut();
-    final ValueIn valueIn = new QueryValueIn();
+    final QueryValueIn valueIn = new QueryValueIn();
 
-    public QueryWire(@NotNull Bytes bytes) {
+    public QueryWire(@NotNull Bytes<?> bytes) {
         super(bytes);
     }
 
@@ -102,6 +102,11 @@ public class QueryWire extends TextWire {
     @Override
     public ValueOut getValueOut() {
         return valueOut;
+    }
+
+    @Override
+    public @NotNull ValueIn getValueIn() {
+        return valueIn;
     }
 
     @NotNull
@@ -266,7 +271,7 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @NotNull Class type) {
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @NotNull Class type) {
             throw new UnsupportedOperationException();
         }
 
@@ -399,7 +404,7 @@ public class QueryWire extends TextWire {
 
         @Nullable
         @Override
-        public Bytes textTo(@NotNull Bytes a) {
+        public Bytes<?> textTo(@NotNull Bytes<?> a) {
             consumePadding();
             bytes.parseUtf8(a, QueryStopCharTesters.QUERY_VALUE);
             return a;

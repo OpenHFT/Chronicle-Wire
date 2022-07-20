@@ -65,7 +65,7 @@ public class DefaultValueIn implements ValueIn {
 
     @Nullable
     @Override
-    public Bytes textTo(@NotNull Bytes bytes) {
+    public Bytes<?> textTo(@NotNull Bytes<?> bytes) {
         @Nullable Object o = defaultValue;
         if (o == null)
             return null;
@@ -75,7 +75,7 @@ public class DefaultValueIn implements ValueIn {
 
     @NotNull
     @Override
-    public WireIn bytes(@NotNull BytesOut toBytes) {
+    public WireIn bytes(@NotNull BytesOut<?> toBytes) {
         @Nullable Object o = defaultValue;
         if (o == null)
             return wireIn();
@@ -120,7 +120,7 @@ public class DefaultValueIn implements ValueIn {
     }
 
     @Override
-    public byte @NotNull [] bytes() {
+    public byte @NotNull [] bytes(byte[] using) {
         return (byte[]) defaultValue;
     }
 
@@ -374,7 +374,7 @@ public class DefaultValueIn implements ValueIn {
 
     @Nullable
     @Override
-    public Object marshallable(@NotNull Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
+    public Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
         return defaultValue;
     }
 

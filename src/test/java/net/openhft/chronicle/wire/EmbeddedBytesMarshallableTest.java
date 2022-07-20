@@ -35,7 +35,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
                 "  c: a1234567890\n" +
                 "}\n";
         assertEquals(expected, e1.toString());
-        Bytes bytes = new HexDumpBytes();
+        Bytes<?> bytes = new HexDumpBytes();
         e1.writeMarshallable(bytes);
         assertEquals("00 80 04 07 1e 61 31 32 33 34 35 36 37 38 39 30\n" +
                 "31 32 33 34 35 36 37 38 39 30 31 32 33 34 35 36\n" +
@@ -66,7 +66,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
                 "  b1: 11,\n" +
                 "  b2: 12\n" +
                 "}");
-        Bytes bytes = new HexDumpBytes();
+        Bytes<?> bytes = new HexDumpBytes();
         e3.writeMarshallable(bytes);
         assertEquals("" +
                 "03 83 03 03 50 00 00 00 00 00 00 00 51 00 00 00\n" +
@@ -98,7 +98,8 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         bytes.clear();
         e1.writeMarshallable(bytes);
         assertEquals("" +
-                "01 81 01 01 50 00 00 00 00 00 00 00 28 00 00 00 14 00 0a", bytes.toHexString());
+                "01 81 01 01 50 00 00 00 00 00 00 00 28 00 00 00\n" +
+                "14 00 0a\n", bytes.toHexString());
         e2.readMarshallable(bytes);
         assertEquals("!EBM2 {\n" +
                 "  l0: 80,\n" +
@@ -132,14 +133,14 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
 
     @Test(expected = DecoratedBufferUnderflowException.class)
     public void noData() {
-        Bytes bytes = Bytes.allocateElasticOnHeap(64);
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         EBM ebm = new EBM();
         ebm.readMarshallable(bytes);
     }
 
     @Test(expected = IllegalStateException.class)
     public void invalidDescription() {
-        Bytes bytes = Bytes.allocateElasticOnHeap(64);
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         bytes.readLimit(64); // even bit count i.e. 0
         EBM ebm = new EBM();
         ebm.readMarshallable(bytes);
@@ -147,7 +148,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
 
     @Test(expected = IllegalStateException.class)
     public void invalidDescription2() {
-        Bytes bytes = Bytes.allocateElasticOnHeap(64);
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         bytes.append("abcd"); // tries to read too much data.
         bytes.readLimit(64);
         EBM ebm = new EBM();
@@ -156,7 +157,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
 
     @Test(expected = IllegalStateException.class)
     public void invalidDescription3() {
-        Bytes bytes = Bytes.allocateElasticOnHeap(64);
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         bytes.append("abce"); // even bit count &&  tries to read too much data.
         bytes.readLimit(64);
         EBM ebm = new EBM();
@@ -165,7 +166,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
 
     @Test(expected = IllegalStateException.class)
     public void invalidDescription4() {
-        Bytes bytes = Bytes.allocateElasticOnHeap(64);
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         bytes.append("3\0\0\0"); // even bit count
         bytes.readLimit(64);
         EBM ebm = new EBM();
@@ -188,7 +189,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         transient long b0, b1, b2;
         @FieldGroup("c")
         transient int c0, c1, c3;
-        @IntConversion(Base85IntConverter.class)
+        @LongConversion(Base85LongConverter.class)
         int number;
         Bytes<?> a = Bytes.forFieldGroup(this, "a");
         Bytes<?> b = Bytes.forFieldGroup(this, "b");

@@ -1,0 +1,16 @@
+# Method with DTO 1
+---
+throwException: 1
+...
+# Method with DTO 1
+---
+throwException: 2
+...
+# Method with array
+---
+throwException: 3
+...
+# Chained methods
+---
+throwException: 4
+...

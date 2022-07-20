@@ -17,7 +17,6 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 
 class MyTypes extends SelfDescribingMarshallable {
@@ -112,14 +111,5 @@ class MyTypes extends SelfDescribingMarshallable {
         text.setLength(0);
         text.append(value);
         return this;
-    }
-
-    enum Fields implements WireKey {
-        B_FLAG, S_NUM, D_NUM, L_NUM, I_NUM, TEXT;
-
-        @Override
-        public int code() {
-            return ordinal();
-        }
     }
 }

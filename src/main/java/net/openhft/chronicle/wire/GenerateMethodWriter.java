@@ -5,15 +5,15 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.UpdateInterceptor;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
+import net.openhft.chronicle.core.util.GenericReflection;
+import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.wire.utils.JavaSourceCodeFormatter;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -25,7 +25,8 @@ import java.util.stream.Stream;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.*;
-import static net.openhft.compiler.CompilerUtils.CACHED_COMPILER;
+import static net.openhft.chronicle.core.util.GenericReflection.erase;
+import static net.openhft.chronicle.core.util.GenericReflection.getParameterTypes;
 
 @SuppressWarnings("StringBufferReplaceableByString")
 public class GenerateMethodWriter {
@@ -40,6 +41,7 @@ public class GenerateMethodWriter {
     private static final String CLOSEABLE = Closeable.class.getSimpleName();
     private static final String UPDATE_INTERCEPTOR_FIELD = "updateInterceptor";
     private static final Map<String, Map<List<Class<?>>, String>> TEMPLATE_METHODS = new LinkedHashMap<>();
+    private static final int SYNTHETIC = 0x00001000;
 
     static {
         // make sure Wires static block called and classpath set up
@@ -79,7 +81,7 @@ public class GenerateMethodWriter {
     private final boolean useMethodId;
 
     private final String packageName;
-    private final Set<Class> interfaces;
+    private final Set<Class<?>> interfaces;
     private final String className;
     private final ClassLoader classLoader;
     private final WireType wireType;
@@ -89,7 +91,7 @@ public class GenerateMethodWriter {
     final private AtomicInteger indent = new AtomicInteger();
 
     private GenerateMethodWriter(final String packageName,
-                                 final Set<Class> interfaces,
+                                 final Set<Class<?>> interfaces,
                                  final String className,
                                  final ClassLoader classLoader,
                                  final WireType wireType,
@@ -115,7 +117,7 @@ public class GenerateMethodWriter {
      */
     @Nullable
     public static Class<?> newClass(String fullClassName,
-                                    Set<Class> interfaces,
+                                    Set<Class<?>> interfaces,
                                     ClassLoader classLoader,
                                     final WireType wireType,
                                     final String genericEvent,
@@ -163,13 +165,13 @@ public class GenerateMethodWriter {
         } else if (short.class.equals(type)) {
             return "int16";
         } else if (int.class.equals(type)) {
-            return "fixedInt32";
+            return "int32";
         } else if (long.class.equals(type)) {
-            return "fixedInt64";
+            return "int64";
         } else if (float.class.equals(type)) {
-            return "fixedFloat32";
+            return "float32";
         } else if (double.class.equals(type)) {
-            return "fixedFloat64";
+            return "float64";
         } else if (CharSequence.class.isAssignableFrom(type)) {
             return "text";
         } else if (Marshallable.class.isAssignableFrom(type)) {
@@ -198,16 +200,24 @@ public class GenerateMethodWriter {
         return s;
     }
 
-    private static String signature(Method m) {
-        return m.getReturnType() + " " + m.getName() + " " + Arrays.toString(m.getParameterTypes());
+    private static String signature(Method m, Type type) {
+        final Type returnType = GenericReflection.getReturnType(m, type);
+        final Type[] parameterTypes = getParameterTypes(m, type);
+        return returnType + " " + m.getName() + " " + Arrays.toString(parameterTypes);
+    }
+
+    static boolean isSynthetic(int modifiers) {
+        return (modifiers & SYNTHETIC) != 0;
     }
 
     @NotNull
-    private Appendable methodSignature(SortedSet<String> importSet, final Method dm) {
+    private Appendable methodSignature(SortedSet<String> importSet, final Method dm, Type[] parameterTypes) {
 
         SourceCodeFormatter result = new JavaSourceCodeFormatter(this.indent);
         String sep = "";
-        for (Parameter p : dm.getParameters()) {
+        Parameter[] parameters = dm.getParameters();
+        for (int i = 0; i < parameters.length; i++) {
+            Parameter p = parameters[i];
             result.append(sep);
             sep = ", ";
             IntConversion intConversion = p.getAnnotation(IntConversion.class);
@@ -222,7 +232,7 @@ public class GenerateMethodWriter {
                         .append(nameForClass(importSet, longConversion.value()))
                         .append(".class) ");
             result.append("final ")
-                    .append(nameForClass(importSet, p.getType()))
+                    .append(nameForClass(importSet, erase(parameterTypes[i])))
                     .append(' ')
                     .append(p.getName());
         }
@@ -268,10 +278,11 @@ public class GenerateMethodWriter {
                 for (Method dm : interfaceClazz.getMethods()) {
                     if (dm.isDefault() || Modifier.isStatic(dm.getModifiers()))
                         continue;
-                    String template = templateFor(dm);
+                    String template = templateFor(dm, interfaceClazz);
                     if (template != null)
                         continue;
-                    for (Class pType : dm.getParameterTypes()) {
+                    for (Type type : getParameterTypes(dm, interfaceClazz)) {
+                        Class pType = erase(type);
                         if (pType.isPrimitive() || pType.isArray() || pType.getPackage().getName().equals("java.lang"))
                             continue;
                         importSet.add(nameForClass(pType));
@@ -304,16 +315,19 @@ public class GenerateMethodWriter {
                     throw new MethodWriterValidationException("expecting an interface instead of class=" + interfaceClazz.getName());
 
                 for (Method dm : interfaceClazz.getMethods()) {
-                    if (Modifier.isStatic(dm.getModifiers()))
+                    final int modifiers = dm.getModifiers();
+                    if (Modifier.isStatic(modifiers) || isSynthetic(modifiers))
                         continue;
 
-                    if (dm.isDefault() && (!dm.getReturnType().equals(void.class) && !dm.getReturnType().isInterface()))
+                    final Class<?> returnType = returnType(dm, interfaceClazz);
+                    if (dm.isDefault() && (!returnType.equals(void.class) && !returnType.isInterface()))
                         continue;
 
-                    if (!handledMethodSignatures.add(signature(dm)))
+                    final String signature = signature(dm, interfaceClazz);
+                    if (!handledMethodSignatures.add(signature))
                         continue;
 
-                    String template = templateFor(dm);
+                    String template = templateFor(dm, interfaceClazz);
                     if (template == null) {
                         interfaceMethods.append(createMethod(importSet, dm, interfaceClazz, methodIds));
                     } else {
@@ -332,7 +346,7 @@ public class GenerateMethodWriter {
             if (DUMP_CODE)
                 System.out.println(imports);
 
-            return CACHED_COMPILER.loadFromJava(classLoader, packageName + '.' + className, imports.toString());
+            return Wires.CACHED_COMPILER.loadFromJava(classLoader, packageName + '.' + className, imports.toString());
 
         } catch (AssertionError e) {
             if (e.getCause() instanceof LinkageError) {
@@ -351,13 +365,22 @@ public class GenerateMethodWriter {
 
     }
 
-    private String templateFor(Method dm) {
+    private Class<?> returnType(Method dm, Class interfaceClazz) {
+        Type returnType = GenericReflection.getReturnType(dm, interfaceClazz);
+        if (!(returnType instanceof Class))
+            returnType = (Type) ((TypeVariable<?>) returnType).getGenericDeclaration();
+        return erase(returnType);
+    }
+
+    private String templateFor(Method dm, Class interfaceType) {
         Map<List<Class<?>>, String> map = TEMPLATE_METHODS.get(dm.getName());
         if (map == null)
             return null;
         List<Class> sig = new ArrayList<>();
-        sig.add(dm.getReturnType());
-        addAll(sig, dm.getParameterTypes());
+        sig.add(returnType(dm, interfaceType));
+        for (Type type : getParameterTypes(dm, interfaceType)) {
+            addAll(sig, erase(type));
+        }
         return map.get(sig);
     }
 
@@ -408,24 +431,25 @@ public class GenerateMethodWriter {
         if (Modifier.isStatic(dm.getModifiers()))
             return "";
 
-        if (dm.getParameterTypes().length == 0 && dm.isDefault())
+        int parameterCount = dm.getParameterCount();
+        if (parameterCount == 0 && dm.isDefault())
             return "";
 
-        int parameterCount = dm.getParameterCount();
         Parameter[] parameters = dm.getParameters();
         final int len = parameters.length;
-        Class<?> returnType = dm.getReturnType();
+        final Class<?> returnType = returnType(dm, interfaceClazz);
         final String typeName = nameForClass(importSet, returnType);
 
         final StringBuilder body = new StringBuilder();
         String methodIDAnotation = "";
+        final Type[] parameterTypes = getParameterTypes(dm, interfaceClazz);
         if (useUpdateInterceptor) {
             if (parameterCount > 1)
                 Jvm.debug().on(getClass(), "Generated code to call updateInterceptor for " + dm + " only using last argument");
             final String name;
             if (parameterCount > 0) {
-                Class<?> type = parameters[parameterCount - 1].getType();
-                if (type.isPrimitive())
+                Type type = parameterTypes[parameterCount - 1];
+                if (type instanceof Class && ((Class) type).isPrimitive())
                     Jvm.warn().on(getClass(), "Generated code to call updateInterceptor for " + dm + " will box and generate garbage");
                 name = parameters[parameterCount - 1].getName();
             } else
@@ -450,7 +474,7 @@ public class GenerateMethodWriter {
         else
             body.append(") {\n");
         body.append("try {\n");
-        body.append("dc.chainedElement(" + !terminating + ");\n");
+        body.append("dc.chainedElement(" + (!terminating && !passthrough) + ");\n");
         body.append("if (out.get().recordHistory()) MessageHistory.writeHistory(dc);\n");
 
         int startJ = 0;
@@ -469,9 +493,9 @@ public class GenerateMethodWriter {
             throw new MethodWriterValidationException("Duplicate methodIds. Cannot add " + methodIDAnotation + " to " + methodIds);
 
         if (parameters.length > 0)
-            writeArrayOfParameters(dm, len, body, startJ);
+            writeArrayOfParameters(dm, parameterTypes, len, body, startJ);
 
-        if (dm.getParameterTypes().length == 0)
+        if (parameterCount == 0)
             body.append("valueOut.text(\"\");\n");
 
         body.append("} catch (Throwable t) {\n");
@@ -485,9 +509,9 @@ public class GenerateMethodWriter {
                 methodIDAnotation,
                 typeName,
                 dm.getName(),
-                methodSignature(importSet, dm),
+                methodSignature(importSet, dm, parameterTypes),
                 body,
-                methodReturn(importSet, dm, interfaceClazz));
+                methodReturn(dm, interfaceClazz));
     }
 
     private String returnDefault(final Class<?> returnType) {
@@ -496,7 +520,7 @@ public class GenerateMethodWriter {
             return "";
 
         if (returnType.isPrimitive() || returnType == Void.class)
-            throw new UnsupportedOperationException("having a method of this return type=" + returnType + " is not supported by method writers");
+            return " " + ObjectUtils.defaultValue(returnType);
 
         return " this";
     }
@@ -515,42 +539,42 @@ public class GenerateMethodWriter {
         return methodID;
     }
 
-    private void writeArrayOfParameters(final Method dm, final int len, final StringBuilder body, final int startJ) {
-        if (dm.getParameterTypes().length > startJ + 1)
+    private void writeArrayOfParameters(final Method dm, Type[] parameterTypes, final int len, final StringBuilder body, final int startJ) {
+        final int parameterCount = dm.getParameterCount();
+        if (parameterCount > startJ + 1)
             body.append("valueOut.array(v -> {\n");
         for (int j = startJ; j < len; j++) {
 
             final Parameter p = dm.getParameters()[j];
 
-            final Optional<String> intConversion = stream(p.getAnnotations())
-                    .filter(a -> a.annotationType() == IntConversion.class)
-                    .map(x -> (((IntConversion) x).value().getName()))
-                    .findFirst();
+            final IntConversion intConversion = Jvm.findAnnotation(p, IntConversion.class);
+            final LongConversion longConversion = Jvm.findAnnotation(p, LongConversion.class);
 
-            final Optional<String> longConversion = stream(p.getAnnotations())
-                    .filter(a -> a.annotationType() == LongConversion.class)
-                    .map(x -> (((LongConversion) x).value().getName()))
-                    .findFirst();
-
-            final String name = intConversion.orElseGet(() -> (longConversion.orElse("")));
+            final String name = intConversion != null ? intConversion.value().getName() :
+                    longConversion != null ? longConversion.value().getName() : "";
 
             if (!name.isEmpty() && (WireType.TEXT == wireType || WireType.YAML == wireType))
-                body.append(format("//todo improve this\nvalueOut.rawText(new %s().asText(%s));\n", name, p.getName()));
+                body.append(format("valueOut.rawText(%s.INSTANCE.asText(%s));\n", name, p.getName()));
             else if (p.getType().isPrimitive() || CharSequence.class.isAssignableFrom(p.getType())) {
-                body.append(format("%s.%s(%s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", toString(p.getType()), p.getName()));
+                if (longConversion != null && (p.getType() == long.class || CharSequence.class.isAssignableFrom(p.getType())))
+                    body.append(format("%s.writeLong(%s.INSTANCE, %s);\n", parameterCount > startJ + 1 ? "v" : "valueOut", longConversion.value().getName(), p.getName()));
+                else if (intConversion != null)
+                    body.append(format("%s.writeInt(%s.INSTANCE, %s);\n", parameterCount > startJ + 1 ? "v" : "valueOut", intConversion.value().getName(), p.getName()));
+                else
+                    body.append(format("%s.%s(%s);\n", parameterCount > startJ + 1 ? "v" : "valueOut", toString(erase(parameterTypes[j])), p.getName()));
             } else
-                writeValue(dm, body, startJ, p);
+                writeValue(dm, erase(parameterTypes[j]), body, startJ, p);
         }
 
-        if (dm.getParameterTypes().length > startJ + 1)
+        if (parameterCount > startJ + 1)
             body.append("}, Object[].class);\n");
     }
 
-    private void writeValue(final Method dm, final StringBuilder body, final int startJ, final Parameter p) {
-        String className = p.getType().getTypeName().replace('$', '.');
+    private void writeValue(final Method dm, Class type, final StringBuilder body, final int startJ, final Parameter p) {
+        String className = type.getTypeName().replace('$', '.');
 
         body
-                .append(dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut")
+                .append(dm.getParameterCount() > startJ + 1 ? "v" : "valueOut")
                 .append(".object(")
                 .append(className)
                 .append(".class, ")
@@ -558,9 +582,9 @@ public class GenerateMethodWriter {
                 .append(");\n");
     }
 
-    private StringBuilder methodReturn(Set<String> importSet, final Method dm, final Class<?> interfaceClazz) {
+    private StringBuilder methodReturn(final Method dm, final Class<?> interfaceClazz) {
         final StringBuilder result = new StringBuilder();
-        final Class<?> returnType = dm.getReturnType();
+        final Class<?> returnType = returnType(dm, interfaceClazz);
 
         if (returnType == Void.class || returnType == void.class)
             return result;

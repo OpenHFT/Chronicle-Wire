@@ -18,13 +18,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
-import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,12 +31,13 @@ import java.util.List;
  */
 public class CSVWire extends TextWire {
 
-    private static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_END_OF_TEXT = new ThreadLocal<>();
+    private static final ThreadLocal<StopCharTester> ESCAPED_END_OF_TEXT = ThreadLocal.withInitial(
+            StopCharTesters.COMMA_STOP::escaping);
 
     private final List<String> header = new ArrayList<>();
 
     @SuppressWarnings("rawtypes")
-    public CSVWire(@NotNull Bytes bytes, boolean use8bit) {
+    public CSVWire(@NotNull Bytes<?> bytes, boolean use8bit) {
         super(bytes, use8bit);
         while (lineStart == 0) {
             long start = bytes.readPosition();
@@ -49,7 +48,7 @@ public class CSVWire extends TextWire {
     }
 
     @SuppressWarnings("rawtypes")
-    public CSVWire(@NotNull Bytes bytes) {
+    public CSVWire(@NotNull Bytes<?> bytes) {
         this(bytes, false);
     }
 
@@ -65,8 +64,7 @@ public class CSVWire extends TextWire {
 
     @NotNull
     static StopCharTester getEscapingCSVEndOfText() {
-        StopCharTester escaping = ThreadLocalHelper.getTL(ESCAPED_END_OF_TEXT,
-                StopCharTesters.COMMA_STOP::escaping);
+        StopCharTester escaping = ESCAPED_END_OF_TEXT.get();
         // reset it.
         escaping.isStopChar(' ');
         return escaping;
@@ -166,7 +164,7 @@ public class CSVWire extends TextWire {
         }
 
         @Override
-        @Nullable <ACS extends Appendable & CharSequence> ACS textTo0(@NotNull ACS a) {
+        @Nullable <T extends Appendable & CharSequence> T textTo0(@NotNull T a) {
             consumePadding();
             int ch = peekCode();
 
@@ -221,7 +219,7 @@ public class CSVWire extends TextWire {
             }
 
             int prev = peekBack();
-            if (prev == ':' || prev == '#' || prev == '}')
+            if (END_CHARS.get(prev))
                 bytes.readSkip(-1);
             return a;
         }

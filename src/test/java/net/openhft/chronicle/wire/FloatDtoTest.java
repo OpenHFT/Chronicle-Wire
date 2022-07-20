@@ -4,17 +4,20 @@ import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 @SuppressWarnings("rawtypes")
 public class FloatDtoTest extends WireTestCommon {
 
     @Test
     public void test() {
         @NotNull final Value value = new Value(99, 2000f);
-        final Bytes bytes = Wires.acquireBytes();
+        final Bytes<?> bytes = Wires.acquireBytes();
         final Wire w = WireType.BINARY.apply(bytes);
         w.write().marshallable(value);
         @NotNull Value object1 = new Value(0, 0.0f);
         w.read().marshallable(object1);
+        assertEquals(value, object1);
     }
 
     static class Key extends SelfDescribingMarshallable implements KeyedMarshallable {

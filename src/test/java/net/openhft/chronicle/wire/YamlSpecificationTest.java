@@ -27,9 +27,11 @@ import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static net.openhft.chronicle.wire.WireType.YAML;
 import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("rawtypes")
@@ -37,10 +39,10 @@ import static org.junit.Assert.assertEquals;
 public class YamlSpecificationTest extends WireTestCommon {
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(String.class, "something");
-        ClassAliasPool.CLASS_ALIASES.addAlias(Circle.class, "circle");
+        /*ClassAliasPool.CLASS_ALIASES.addAlias(Circle.class, "circle");
         ClassAliasPool.CLASS_ALIASES.addAlias(Shape.class, "shape");
         ClassAliasPool.CLASS_ALIASES.addAlias(Line.class, "line");
-        ClassAliasPool.CLASS_ALIASES.addAlias(Label.class, "label");
+        ClassAliasPool.CLASS_ALIASES.addAlias(Label.class, "label");*/
     }
 
     private final String input;
@@ -49,61 +51,76 @@ public class YamlSpecificationTest extends WireTestCommon {
         this.input = input;
     }
 
-    @Parameterized.Parameters
-    public static Collection tests() {
+    @Parameterized.Parameters(name = "case={0}")
+    public static Collection<Object[]> tests() {
         return Arrays.asList(new String[][]{
-                {"example2_1"},
-                {"example2_2"},
-                {"example2_3"},
-               // {"example2_4"}, // TODO Fix map format
-               // {"example2_5"}, // Not supported
-               // {"example2_6"}, // TODO Fix map format
-                {"example2_7"},// TODO Fix for multiple ---
-               // {"example2_8"},// TODO Fix for multiple ---
-                {"example2_9"},
-               // {"example2_10"}, // TODO FIx handling of anchors
-               // {"example2_11"}, // Not supported
-               // {"example2_12"}, // Not supported
-               // {"example2_13"}, // Not supported
-               // {"example2_14"}, // Not supported
-               // {"example2_15"}, // Not supported
-               // {"example2_16"}, // Not supported
-               // {"example2_17"}, // TODO Fix handling of double single quote.
-               // {"example2_18"}, // Not supported
-               // {"example2_19"}, // TODO fix handling of times.
-               // {"example2_20"}, // TODO fix handling of times.
-                {"example2_21"},
-               // {"example2_22"}, // TODO fix handling of times.
-               // {"example2_23"}, // Not supported
-               // {"example2_24"}, // TODO FIx handling of anchors
-               // {"example2_25"}, // TODO support set
-               // {"example2_26"}, // TODO support omap
-               // {"example2_27"}, // Not supported
-               // {"example2_28"} // Not supported
+                {"2_1_SequenceOfScalars"},
+                {"2_2_MappingScalarsToScalars"},
+                {"2_3_MappingScalarsToSequences"},
+                {"2_4_SequenceOfMappings"},
+                {"2_5_SequenceOfSequences"},
+                {"2_6_MappingOfMappings"},
+                {"2_7_TwoDocumentsInAStream"},
+                // {"example2_8"},
+                {"2_9_SingleDocumentWithTwoComments"},
+                {"2_10_NodeAppearsTwiceInThisDocument"},
+                // {"2_11MappingBetweenSequences"}, // Not supported
+                {"2_12CompactNestedMapping"},
+                {"2_13InLiteralsNewlinesArePreserved"},
+                {"2_14InThefoldedScalars"},
+                // {"example2_15"}, // Not supported
+                // {"example2_16"}, // Not supported
+                {"2_17QuotedScalars"},
+                // {"example2_18"}, // Not supported
+                {"2_19Integers"},
+                // {"2_20FloatingPoint"}, // TODO fix handling of .nan/.inf
+                {"2_21MiscellaneousBis"},
+                // {"example2_22"}, // TODO fix handling of times.
+                {"2_23VariousExplicitTags"},
+                // {"example2_24"}, // TODO FIx handling of anchors
+                // {"example2_25"}, // TODO support set
+                // {"2_26OrderedMappings"}, // TODO support omap
+                // {"example2_27"}, // Not supported
+                // {"example2_28"} // Not supported
         });
     }
 
     @Test
     public void decodeAs() throws IOException {
-        @Nullable byte[] byteArr = getBytes(input + ".yaml");
-        Bytes bytes = Bytes.wrapForRead(byteArr);
-        @NotNull TextWire tw = new TextWire(bytes);
-        @NotNull Bytes bytes2 = Bytes.allocateElasticOnHeap();
-        @NotNull TextWire tw2 = new TextWire(bytes2);
+        String snippet = new String(getBytes(input + ".yaml"), StandardCharsets.UTF_8)
+                .replace("\r\n", "\n");
+        String actual = parseWithYaml(snippet);
 
-        @Nullable Object o = tw.readObject();
-        tw2.writeObject(o);
-        @Nullable byte[] byteArr2 = getBytes(input + ".out.yaml");
-        if (byteArr2 == null)
-            byteArr2 = byteArr;
-        String expected = Bytes.wrapForRead(byteArr2).toString().replace("\r\n", "\n");
-        String actual = bytes2.toString();
-        assertEquals(input, expected, actual);
+        byte[] expectedBytes = getBytes(input + ".out.yaml");
+        String expected;
+        if (expectedBytes != null) {
+            assertEquals(actual, parseWithYaml(actual));
+
+            expected = new String(expectedBytes, StandardCharsets.UTF_8);
+        } else {
+            expected = snippet;
+        }
+
+        final String expectedStr = Bytes.wrapForRead(expected.getBytes(StandardCharsets.UTF_8)).toString();
+        assertEquals(input,
+                expectedStr
+                        .replace("\r\n", "\n"),
+                actual);
+    }
+
+    @NotNull
+    private String parseWithYaml(String snippet) {
+        Object o = YAML.fromString(snippet);
+
+        YamlWire tw = (YamlWire) Wire.newYamlWireOnHeap();
+        tw.getValueOut().object(o);
+
+        return tw.toString();
     }
 
     @Nullable
     public byte[] getBytes(String file) throws IOException {
-        InputStream is = getClass().getResourceAsStream("/specification/" + file);
+        InputStream is = getClass().getResourceAsStream("/yaml/spec/" + file);
         if (is == null) return null;
         int len = is.available();
         @NotNull byte[] byteArr = new byte[len];
@@ -126,7 +143,7 @@ public class YamlSpecificationTest extends WireTestCommon {
   color: 0xFFEEBB
   text: Pretty vector drawing.
  */
-
+/*
 class Shape implements Marshallable {
 }
 
@@ -138,3 +155,4 @@ class Line implements Marshallable {
 
 class Label implements Marshallable {
 }
+*/

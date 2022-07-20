@@ -1,0 +1,20 @@
+== System Properties
+Below, a number of relevant System Properties are listed.
+
+
+
+NOTE: All boolean properties below are read using link:https://javadoc.io/static/net.openhft/chronicle-core/2.23ea13/net/openhft/chronicle/core/Jvm.html#getBoolean-java.lang.String-[net.openhft.chronicle.core.Jvm.getBoolean(java.lang.String)], and so are enabled if either `-Dflag` or `-Dflag=true` or `-Dflag=yes`
+
+
+.System properties
+[cols=4*, options="header"]
+|===
+| Property Key | Default | Description | Java Variable Name (Type)
+| dumpCode | `false` | If enabled, prints out specified code | _DUMP_CODE_ (boolean)
+| mappedFile.retain | `false` | To enable system property, see NOTE | _RETAIN_ (boolean)
+| regress.tests | `false` | To enable system property, see NOTE | _REGRESS_TESTS_ (boolean)
+| wire.generate.tuples | `false` | If enabled, @param clazz Expected object type <code>null</code> can be passed to request proxy marshallable tuple | _GENERATE_TUPLES_(boolean)
+| wire.testAsYaml | `false` | To enable system property, see NOTE | _TEXT_AS_YAML_ (boolean)
+| wire.usePadding | `true` | Set system property to "false" to disable | _DEFAULT_USE_PADDING_ (boolean)
+| yaml.logging | `false` | If enabled, controls whether to log Yaml messages for debugging or documentation | _clientReads_ (boolean)
+|===

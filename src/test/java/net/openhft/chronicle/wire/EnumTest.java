@@ -36,7 +36,7 @@ public class EnumTest extends WireTestCommon {
         expectException("Treating class net.openhft.chronicle.wire.EnumTest$TestEnum as enum not WriteMarshallable");
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         try {
-            @NotNull TextWire wire = new TextWire(bytes);
+            @NotNull Wire wire = WireType.TEXT.apply(bytes);
             wire.write("test")
                     .object(TestEnum.INSTANCE);
             assertEquals("test: !net.openhft.chronicle.wire.EnumTest$TestEnum INSTANCE\n", wire.toString());

@@ -30,13 +30,13 @@ public class BytesUsageTest extends WireTestCommon {
 
     @SuppressWarnings("rawtypes")
     static class BytesWrapper extends SelfDescribingMarshallable {
-        Bytes clOrdId = Bytes.allocateElasticOnHeap();
+        Bytes<?> clOrdId = Bytes.allocateElasticOnHeap();
 
-        public Bytes clOrdId() {
+        public Bytes<?> clOrdId() {
             return clOrdId;
         }
 
-        public BytesWrapper clOrdId(Bytes clOrdId) {
+        public BytesWrapper clOrdId(Bytes<?> clOrdId) {
             this.clOrdId = clOrdId;
             return this;
         }

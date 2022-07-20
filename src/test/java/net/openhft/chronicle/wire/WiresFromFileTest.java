@@ -15,7 +15,16 @@ public class WiresFromFileTest extends WireTestCommon {
     public void testFromFile() throws IOException {
         ClassAliasPool.CLASS_ALIASES.addAlias(MDU.class);
         MDU[] o = Marshallable.fromFile(MDU[].class, "md.yaml");
-       // System.out.println(Arrays.asList(o));
+        assertEquals("[!MDU {\n" +
+                "  symbol: EU\n" +
+                "}\n" +
+                ", !MDU {\n" +
+                "  symbol: UY\n" +
+                "}\n" +
+                ", !MDU {\n" +
+                "  symbol: AU\n" +
+                "}\n" +
+                "]", Arrays.asList(o).toString());
     }
 
     @Test

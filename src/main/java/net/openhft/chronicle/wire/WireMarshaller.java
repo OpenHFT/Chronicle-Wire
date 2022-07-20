@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.BytesComment;
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.io.SingleThreadedChecked;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -41,21 +42,14 @@ import static net.openhft.chronicle.core.UnsafeMemory.*;
 
 @SuppressWarnings({"restriction", "rawtypes", "unchecked"})
 public class WireMarshaller<T> {
-    private static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
     static final StringBuilderPool SBP = new StringBuilderPool();
+    private static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
     private static final FieldAccess[] NO_FIELDS = {};
-    public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial
-            (tClass ->
-                    Throwable.class.isAssignableFrom(tClass)
-                            ? WireMarshaller.ofThrowable(tClass)
-                            : WireMarshaller.of(tClass)
-            );
     private static final StringBuilderPool RSBP = new StringBuilderPool();
     private static final StringBuilderPool WSBP = new StringBuilderPool();
     @NotNull
     final FieldAccess[] fields;
     final TreeMap<CharSequence, FieldAccess> fieldMap = new TreeMap<>(WireMarshaller::compare);
-
     private final boolean isLeaf;
     @Nullable
     private final T defaultValue;
@@ -63,6 +57,13 @@ public class WireMarshaller<T> {
     protected WireMarshaller(@NotNull Class<T> tClass, @NotNull FieldAccess[] fields, boolean isLeaf) {
         this(fields, isLeaf, defaultValueForType(tClass));
     }
+
+    public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial
+            (tClass ->
+                    Throwable.class.isAssignableFrom(tClass)
+                            ? WireMarshaller.ofThrowable(tClass)
+                            : WireMarshaller.of(tClass)
+            );
 
     private WireMarshaller(@NotNull FieldAccess[] fields, boolean isLeaf, @Nullable T defaultValue) {
         this.fields = fields;
@@ -183,6 +184,72 @@ public class WireMarshaller<T> {
         return Integer.compare(cs0.length(), cs1.length());
     }
 
+    private static Type[] computeActualTypeArguments(Class iface, Field field) {
+        Type[] actual = consumeActualTypeArguments(new HashMap<>(), iface, field.getGenericType());
+
+        if (actual == null)
+            return iface.getTypeParameters();
+
+        return actual;
+    }
+
+    private static Type[] consumeActualTypeArguments(Map<String, Type> prevTypeParameters, Class iface, Type type) {
+        Class cls = null;
+        Map<String, Type> typeParameters = new HashMap<>();
+        if (type instanceof ParameterizedType) {
+            ParameterizedType pType = (ParameterizedType) type;
+            Type[] typeArguments = pType.getActualTypeArguments();
+
+            cls = ((Class) ((ParameterizedType) type).getRawType());
+            TypeVariable<?>[] typeParamDecls = cls.getTypeParameters();
+
+            for (int i = 0; i < Math.min(typeParamDecls.length, typeArguments.length); i++) {
+                Type value;
+                if (typeArguments[i] instanceof TypeVariable) {
+                    value = prevTypeParameters.get(((TypeVariable<?>) typeArguments[i]).getName());
+
+                    if (value == null) {
+                        // Fail-safe.
+                        Type[] bounds = ((TypeVariable<?>) typeArguments[i]).getBounds();
+                        value = bounds.length == 0 ? Object.class : bounds[0];
+                    }
+                } else {
+                    value = typeArguments[i];
+                }
+
+                typeParameters.put(typeParamDecls[i].getName(), value);
+            }
+        } else if (type instanceof Class) {
+            cls = (Class) type;
+        }
+
+        if (iface.equals(cls)) {
+            TypeVariable[] parameters = iface.getTypeParameters();
+            Type[] result = new Type[parameters.length];
+
+            for (int i = 0; i < result.length; i++) {
+                Type parameter = typeParameters.get(parameters[i].getName());
+
+                result[i] = parameter != null ? parameter : parameters[i];
+            }
+
+            return result;
+        }
+
+        if (cls != null) {
+            for (Type ifaceType : cls.getGenericInterfaces()) {
+                Type[] result = consumeActualTypeArguments(typeParameters, iface, ifaceType);
+
+                if (result != null)
+                    return result;
+            }
+
+            return consumeActualTypeArguments(typeParameters, iface, cls.getGenericSuperclass());
+        }
+
+        return null;
+    }
+
     public WireMarshaller<T> excludeFields(String... fieldNames) {
         Set<String> fieldSet = new HashSet<>(Arrays.asList(fieldNames));
         return new WireMarshaller(Stream.of(fields)
@@ -203,7 +270,7 @@ public class WireMarshaller<T> {
         bytes.indent(-1);
     }
 
-    public void writeMarshallable(T t, Bytes bytes) {
+    public void writeMarshallable(T t, Bytes<?> bytes) {
         for (@NotNull FieldAccess field : fields) {
             try {
                 field.getAsBytes(t, bytes);
@@ -278,7 +345,7 @@ public class WireMarshaller<T> {
         return sb.length() == 0 || StringUtils.isEqual(field.field.getName(), sb);
     }
 
-    public void writeKey(T t, Bytes bytes) {
+    public void writeKey(T t, Bytes<?> bytes) {
         // assume one key for now.
         try {
             fields[0].getAsBytes(t, bytes);
@@ -376,6 +443,81 @@ public class WireMarshaller<T> {
         return isLeaf;
     }
 
+    static class LongConverterFieldAccess extends FieldAccess {
+        @NotNull
+        private final LongConverter longConverter;
+
+        LongConverterFieldAccess(@NotNull Field field, @NotNull LongConverter longConverter) {
+            super(field);
+            this.longConverter = longConverter;
+        }
+
+        static LongConverter getInstance(Class clazz) {
+            try {
+                Field converterField = clazz.getDeclaredField("INSTANCE");
+                return (LongConverter) converterField.get(null);
+            } catch (NoSuchFieldException nsfe) {
+                return (LongConverter) ObjectUtils.newInstance(clazz);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
+            long aLong = getLong(o);
+            if (write.isBinary()) {
+                write.int64(aLong);
+            } else {
+                StringBuilder sb = WSBP.acquireStringBuilder();
+                longConverter.append(sb, aLong);
+                if (!write.isBinary() && sb.length() == 0)
+                    write.text("");
+                else
+                    write.rawText(sb);
+            }
+        }
+
+        protected long getLong(Object o) {
+            return unsafeGetLong(o, offset);
+        }
+
+        @Override
+        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
+            long i;
+            if (read.isBinary()) {
+                i = read.int64();
+            } else {
+                StringBuilder sb = RSBP.acquireStringBuilder();
+                read.text(sb);
+                i = longConverter.parse(sb);
+            }
+            setLong(o, i);
+        }
+
+        protected void setLong(Object o, long i) {
+            unsafePutLong(o, offset, i);
+        }
+
+        @Override
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
+            StringBuilder sb = WSBP.acquireStringBuilder();
+            bytes.readUtf8(sb);
+            long i = longConverter.parse(sb);
+            bytes.writeLong(i);
+        }
+
+        @Override
+        protected boolean sameValue(Object o, Object o2) {
+            return getLong(o) == getLong(o2);
+        }
+
+        @Override
+        protected void copy(Object from, Object to) {
+            setLong(to, getLong(from));
+        }
+    }
+
     abstract static class FieldAccess {
         @NotNull
         final Field field;
@@ -406,8 +548,11 @@ public class WireMarshaller<T> {
         @Nullable
         public static Object create(@NotNull Field field) {
             Class<?> type = field.getType();
-            if (type.isArray())
+            if (type.isArray()) {
+                if (type.getComponentType() == byte.class)
+                    return new ByteArrayFieldAccess(field);
                 return new ArrayFieldAccess(field);
+            }
             if (EnumSet.class.isAssignableFrom(type)) {
                 final Class componentType = extractClass(computeActualTypeArguments(EnumSet.class, field)[0]);
                 if (componentType == Object.class || Modifier.isAbstract(componentType.getModifiers()))
@@ -431,6 +576,9 @@ public class WireMarshaller<T> {
                 case "boolean":
                     return new BooleanFieldAccess(field);
                 case "byte": {
+                    LongConverter longConverter = acquireLongConverter(field);
+                    if (longConverter != null)
+                        return new ByteLongConverterFieldAccess(field, longConverter);
                     IntConversion intConversion = field.getAnnotation(IntConversion.class);
                     return intConversion == null
                             ? new ByteFieldAccess(field)
@@ -443,12 +591,18 @@ public class WireMarshaller<T> {
                             : new CharConversionFieldAccess(field, charConversion);
 
                 case "short": {
+                    LongConverter longConverter = acquireLongConverter(field);
+                    if (longConverter != null)
+                        return new ShortLongConverterFieldAccess(field, longConverter);
                     IntConversion intConversion = field.getAnnotation(IntConversion.class);
                     return intConversion == null
                             ? new ShortFieldAccess(field)
                             : new ShortIntConversionFieldAccess(field, intConversion);
                 }
                 case "int": {
+                    LongConverter longConverter = acquireLongConverter(field);
+                    if (longConverter != null)
+                        return new IntLongConverterFieldAccess(field, longConverter);
                     IntConversion intConversion = field.getAnnotation(IntConversion.class);
                     return intConversion == null
                             ? new IntegerFieldAccess(field)
@@ -457,10 +611,11 @@ public class WireMarshaller<T> {
                 case "float":
                     return new FloatFieldAccess(field);
                 case "long": {
-                    LongConversion longConversion = field.getAnnotation(LongConversion.class);
-                    return longConversion == null
+                    LongConverter longConverter = acquireLongConverter(field);
+
+                    return longConverter == null
                             ? new LongFieldAccess(field)
-                            : new LongConversionFieldAccess(field, longConversion);
+                            : new LongConverterFieldAccess(field, longConverter);
                 }
                 case "double":
                     return new DoubleFieldAccess(field);
@@ -482,6 +637,15 @@ public class WireMarshaller<T> {
                         isLeaf = false;
                     return new ObjectFieldAccess(field, isLeaf);
             }
+        }
+
+        @Nullable
+        private static LongConverter acquireLongConverter(@NotNull Field field) {
+            LongConversion longConversion = Jvm.findAnnotation(field, LongConversion.class);
+            LongConverter longConverter = null;
+            if (longConversion != null)
+                longConverter = LongConverterFieldAccess.getInstance(longConversion.value());
+            return longConverter;
         }
 
         @NotNull
@@ -575,7 +739,7 @@ public class WireMarshaller<T> {
 
         protected abstract void setValue(Object o, ValueIn read, boolean overwrite) throws IllegalAccessException;
 
-        public abstract void getAsBytes(Object o, Bytes bytes) throws IllegalAccessException;
+        public abstract void getAsBytes(Object o, Bytes<?> bytes) throws IllegalAccessException;
 
         public boolean isEqual(Object o1, Object o2) {
             try {
@@ -609,7 +773,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, Bytes bytes) {
+        public void getAsBytes(Object o, Bytes<?> bytes) {
             throw new UnsupportedOperationException();
         }
     }
@@ -637,7 +801,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, Bytes bytes) {
+        public void getAsBytes(Object o, Bytes<?> bytes) {
             throw new UnsupportedOperationException();
         }
     }
@@ -685,11 +849,14 @@ public class WireMarshaller<T> {
                             !type.isEnum() &&
                             !read.isTyped()) {
                         // retain the null value of object
+                        Jvm.warn().on(getClass(), "Ignoring exception and setting field '" + field.getName() + "' to null", e);
                     } else {
                         Jvm.rethrow(e);
                     }
                 }
 
+                if (object instanceof SingleThreadedChecked)
+                    ((SingleThreadedChecked) object).singleThreadedCheckReset();
                 field.set(o, object);
 
             } catch (UnexpectedFieldHandlingException e) {
@@ -709,7 +876,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) throws IllegalAccessException {
             bytes.writeUtf8(String.valueOf(field.get(o)));
         }
     }
@@ -730,7 +897,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             bytes.writeUtf8((String) unsafeGetObject(o, offset));
         }
 
@@ -760,7 +927,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             bytes.writeUtf8((CharSequence) unsafeGetObject(o, offset));
         }
 
@@ -795,13 +962,13 @@ public class WireMarshaller<T> {
         @Override
         protected void getValue(@NotNull Object o, @NotNull ValueOut write, Object previous)
                 throws IllegalAccessException {
-            Bytes bytesField = (Bytes) field.get(o);
+            Bytes<?> bytesField = (Bytes) field.get(o);
             write.bytes(bytesField);
         }
 
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            @NotNull Bytes bytes = (Bytes) unsafeGetObject(o, offset);
+            @NotNull Bytes<?> bytes = (Bytes) unsafeGetObject(o, offset);
             if (bytes == null)
                 unsafePutObject(o, offset, bytes = Bytes.allocateElasticOnHeap(128));
             WireIn wireIn = read.wireIn();
@@ -814,9 +981,11 @@ public class WireMarshaller<T> {
             }
             if (read.textTo(bytes) == null)
                 unsafePutObject(o, offset, null);
+            else
+                bytes.singleThreadedCheckReset();
         }
 
-        private void decodeBytes(@NotNull ValueIn read, Bytes bytes) {
+        private void decodeBytes(@NotNull ValueIn read, Bytes<?> bytes) {
             @NotNull StringBuilder sb0 = RSBP.acquireStringBuilder();
             read.text(sb0);
             String s = WireInternal.INTERNER.intern(sb0);
@@ -826,15 +995,15 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
-            Bytes bytesField = (Bytes) field.get(o);
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) throws IllegalAccessException {
+            Bytes<?> bytesField = (Bytes) field.get(o);
             bytes.write(bytesField);
         }
 
         @Override
         protected void copy(Object from, Object to) {
-            Bytes fromBytes = (Bytes) unsafeGetObject(from, offset);
-            Bytes toBytes = (Bytes) unsafeGetObject(to, offset);
+            Bytes<?> fromBytes = (Bytes) unsafeGetObject(from, offset);
+            Bytes<?> toBytes = (Bytes) unsafeGetObject(to, offset);
             if (fromBytes == null) {
                 unsafePutObject(to, offset, null);
                 return;
@@ -893,7 +1062,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, Bytes bytes) {
+        public void getAsBytes(Object o, Bytes<?> bytes) {
             throw new UnsupportedOperationException();
         }
 
@@ -917,6 +1086,60 @@ public class WireMarshaller<T> {
                     if (!Objects.equals(Array.get(a1, i), Array.get(a2, i)))
                         return false;
                 return true;
+            } catch (IllegalAccessException e) {
+                throw new AssertionError(e);
+            }
+        }
+    }
+
+    static class ByteArrayFieldAccess extends FieldAccess {
+
+        ByteArrayFieldAccess(@NotNull Field field) {
+            super(field);
+        }
+
+        @Override
+        protected void getValue(Object o, @NotNull ValueOut write, Object previous) throws IllegalAccessException {
+            Object arr = field.get(o);
+            boolean leaf = write.swapLeaf(true);
+            if (arr == null)
+                write.nu11();
+            else
+                write.bytes((byte[]) arr);
+            write.swapLeaf(leaf);
+        }
+
+        @Override
+        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
+            final Object arr = field.get(o);
+            if (read.isNull()) {
+                if (arr != null)
+                    field.set(o, null);
+                return;
+            }
+            byte[] arr2 = read.bytes((byte[]) arr);
+            if (arr2 != arr)
+                field.set(o, arr2);
+        }
+
+        @Override
+        public void getAsBytes(Object o, Bytes<?> bytes) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean isEqual(Object o1, Object o2) {
+            try {
+                Object a1 = field.get(o1);
+                Object a2 = field.get(o2);
+                if (a1 == null) return a2 == null;
+                if (a2 == null) return false;
+                Class<?> aClass1 = a1.getClass();
+                Class<?> aClass2 = a2.getClass();
+                if (aClass1 != aClass2)
+                    if (!aClass1.isAssignableFrom(aClass2) && !aClass2.isAssignableFrom(aClass1))
+                        return false;
+                return Arrays.equals((byte[]) a1, (byte[]) a2);
             } catch (IllegalAccessException e) {
                 throw new AssertionError(e);
             }
@@ -1015,7 +1238,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(final Object o, final Bytes bytes) {
+        public void getAsBytes(final Object o, final Bytes<?> bytes) {
             throw new UnsupportedOperationException();
         }
 
@@ -1154,7 +1377,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, Bytes bytes) {
+        public void getAsBytes(Object o, Bytes<?> bytes) {
             throw new UnsupportedOperationException();
         }
 
@@ -1214,6 +1437,22 @@ public class WireMarshaller<T> {
         }
 
         @Override
+        protected void copy(Object from, Object to) throws IllegalAccessException {
+            Collection fromColl = (Collection) field.get(from);
+            if (fromColl == null) {
+                field.set(to, null);
+                return;
+            }
+            Collection coll = (Collection) field.get(to);
+            if (coll == null) {
+                coll = collectionSupplier.get();
+                field.set(to, coll);
+            }
+            coll.clear();
+            coll.addAll(fromColl);
+        }
+
+        @Override
         protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
             Collection coll = (Collection) field.get(o);
             if (coll == null) {
@@ -1234,7 +1473,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, Bytes bytes) {
+        public void getAsBytes(Object o, Bytes<?> bytes) {
             throw new UnsupportedOperationException();
         }
     }
@@ -1312,7 +1551,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, Bytes bytes) {
+        public void getAsBytes(Object o, Bytes<?> bytes) {
             throw new UnsupportedOperationException();
         }
     }
@@ -1333,7 +1572,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             bytes.writeBoolean(unsafeGetBoolean(o, offset));
         }
 
@@ -1364,7 +1603,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             bytes.writeByte(unsafeGetByte(o, offset));
         }
 
@@ -1395,7 +1634,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             bytes.writeShort(unsafeGetShort(o, offset));
         }
 
@@ -1440,7 +1679,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             bytes.writeUnsignedShort(unsafeGetChar(o, offset));
         }
 
@@ -1475,7 +1714,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             bytes.writeInt(unsafeGetInt(o, offset));
         }
 
@@ -1522,6 +1761,54 @@ public class WireMarshaller<T> {
         }
     }
 
+    static class ByteLongConverterFieldAccess extends LongConverterFieldAccess {
+        public ByteLongConverterFieldAccess(@NotNull Field field, LongConverter longConverter) {
+            super(field, longConverter);
+        }
+
+        @Override
+        protected long getLong(Object o) {
+            return unsafeGetByte(o, offset) & 0xFFL;
+        }
+
+        @Override
+        protected void setLong(Object o, long i) {
+            unsafePutByte(o, offset, (byte) i);
+        }
+    }
+
+    static class ShortLongConverterFieldAccess extends LongConverterFieldAccess {
+        public ShortLongConverterFieldAccess(@NotNull Field field, LongConverter longConverter) {
+            super(field, longConverter);
+        }
+
+        @Override
+        protected long getLong(Object o) {
+            return unsafeGetShort(o, offset) & 0xFFFFL;
+        }
+
+        @Override
+        protected void setLong(Object o, long i) {
+            unsafePutShort(o, offset, (short) i);
+        }
+    }
+
+    static class IntLongConverterFieldAccess extends LongConverterFieldAccess {
+        public IntLongConverterFieldAccess(@NotNull Field field, @NotNull LongConverter longConverter) {
+            super(field, longConverter);
+        }
+
+        @Override
+        protected long getLong(Object o) {
+            return unsafeGetInt(o, offset) & 0xFFFF_FFFFL;
+        }
+
+        @Override
+        protected void setLong(Object o, long i) {
+            unsafePutInt(o, offset, (int) i);
+        }
+    }
+
     static class CharConversionFieldAccess extends CharFieldAccess {
 
         @NotNull
@@ -1536,7 +1823,10 @@ public class WireMarshaller<T> {
         protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
             StringBuilder sb = WSBP.acquireStringBuilder();
             intConverter.append(sb, getChar(o));
-            write.rawText(sb);
+            if (!write.isBinary() && sb.length() == 0)
+                write.text("");
+            else
+                write.rawText(sb);
         }
 
         protected char getChar(Object o) {
@@ -1556,7 +1846,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             StringBuilder sb = WSBP.acquireStringBuilder();
             bytes.readUtf8(sb);
             int i = intConverter.parse(sb);
@@ -1591,7 +1881,10 @@ public class WireMarshaller<T> {
             } else {
                 StringBuilder sb = WSBP.acquireStringBuilder();
                 intConverter.append(sb, anInt);
-                write.rawText(sb);
+                if (!write.isBinary() && sb.length() == 0)
+                    write.text("");
+                else
+                    write.rawText(sb);
             }
         }
 
@@ -1618,7 +1911,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             StringBuilder sb = WSBP.acquireStringBuilder();
             bytes.readUtf8(sb);
             int i = intConverter.parse(sb);
@@ -1656,7 +1949,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             bytes.writeFloat(unsafeGetFloat(o, offset));
         }
 
@@ -1691,61 +1984,8 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             bytes.writeLong(unsafeGetLong(o, offset));
-        }
-
-        @Override
-        protected boolean sameValue(Object o, Object o2) {
-            return unsafeGetLong(o, offset) == unsafeGetLong(o2, offset);
-        }
-
-        @Override
-        protected void copy(Object from, Object to) {
-            unsafePutLong(to, offset, unsafeGetLong(from, offset));
-        }
-    }
-
-    static class LongConversionFieldAccess extends FieldAccess {
-        @NotNull
-        private final LongConverter longConverter;
-
-        LongConversionFieldAccess(@NotNull Field field, @NotNull LongConversion longConversion) {
-            super(field);
-            this.longConverter = ObjectUtils.newInstance(longConversion.value());
-        }
-
-        @Override
-        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
-            long aLong = unsafeGetLong(o, offset);
-            if (write.isBinary()) {
-                write.int64(aLong);
-            } else {
-                StringBuilder sb = WSBP.acquireStringBuilder();
-                longConverter.append(sb, aLong);
-                write.rawText(sb);
-            }
-        }
-
-        @Override
-        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            long i;
-            if (read.isBinary()) {
-                i = read.int64();
-            } else {
-                StringBuilder sb = RSBP.acquireStringBuilder();
-                read.text(sb);
-                i = longConverter.parse(sb);
-            }
-            unsafePutLong(o, offset, i);
-        }
-
-        @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
-            StringBuilder sb = WSBP.acquireStringBuilder();
-            bytes.readUtf8(sb);
-            long i = longConverter.parse(sb);
-            bytes.writeLong(i);
         }
 
         @Override
@@ -1779,7 +2019,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             bytes.writeDouble(unsafeGetDouble(o, offset));
         }
 
@@ -1794,69 +2034,5 @@ public class WireMarshaller<T> {
         }
     }
 
-    private static Type[] computeActualTypeArguments(Class iface, Field field) {
-        Type[] actual = consumeActualTypeArguments(new HashMap<>(), iface, field.getGenericType());
 
-        if (actual == null)
-            return iface.getTypeParameters();
-
-        return actual;
-    }
-
-    private static Type[] consumeActualTypeArguments(Map<String, Type> prevTypeParameters, Class iface, Type type) {
-        Class cls = null;
-        Map<String, Type> typeParameters = new HashMap<>();
-        if (type instanceof ParameterizedType) {
-            ParameterizedType pType = (ParameterizedType) type;
-            Type[] typeArguments = pType.getActualTypeArguments();
-
-            cls = ((Class) ((ParameterizedType) type).getRawType());
-            TypeVariable<?>[] typeParamDecls = cls.getTypeParameters();
-
-            for (int i = 0; i < Math.min(typeParamDecls.length, typeArguments.length); i++) {
-                Type value;
-                if (typeArguments[i] instanceof TypeVariable) {
-                    value = prevTypeParameters.get(((TypeVariable<?>) typeArguments[i]).getName());
-
-                    if (value == null) {
-                        // Fail-safe.
-                        Type[] bounds = ((TypeVariable<?>) typeArguments[i]).getBounds();
-                        value = bounds.length == 0 ? Object.class : bounds[0];
-                    }
-                } else {
-                    value = typeArguments[i];
-                }
-
-                typeParameters.put(typeParamDecls[i].getName(), value);
-            }
-        } else if (type instanceof Class) {
-            cls = (Class) type;
-        }
-
-        if (iface.equals(cls)) {
-            TypeVariable[] parameters = iface.getTypeParameters();
-            Type[] result = new Type[parameters.length];
-
-            for (int i = 0; i < result.length; i++) {
-                Type parameter = typeParameters.get(parameters[i].getName());
-
-                result[i] = parameter != null ? parameter : parameters[i];
-            }
-
-            return result;
-        }
-
-        if (cls != null) {
-            for (Type ifaceType : cls.getGenericInterfaces()) {
-                Type[] result = consumeActualTypeArguments(typeParameters, iface, ifaceType);
-
-                if (result != null)
-                    return result;
-            }
-
-            return consumeActualTypeArguments(typeParameters, iface, cls.getGenericSuperclass());
-        }
-
-        return null;
-    }
 }

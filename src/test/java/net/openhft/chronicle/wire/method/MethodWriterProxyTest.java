@@ -15,6 +15,7 @@ public class MethodWriterProxyTest extends MethodWriterTest {
     @Before
     public void before() {
         System.setProperty("disableProxyCodegen", "true");
+        expectException("Falling back to proxy method writer");
     }
 
     @After
@@ -28,6 +29,7 @@ public class MethodWriterProxyTest extends MethodWriterTest {
         super.multiOut();
     }
 
+    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
     @Test
     public void testPrimitives() {
         assumeFalse(Jvm.isMacArm());

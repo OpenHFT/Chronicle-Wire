@@ -49,7 +49,7 @@ public class EnumSetMarshallingTest extends WireTestCommon {
     private static final String EMPTY_SET_SERIALISED_FORM =
             "--- !!data #binary\n" +
                     "key: {\n" +
-                    "  f: [  ]\n" +
+                    "  f: [ ]\n" +
                     "}\n";
 
     @Test
@@ -79,7 +79,7 @@ public class EnumSetMarshallingTest extends WireTestCommon {
 
         @NotNull Wire tw = new BinaryWire(bytes);
         tw.usePadding(false);
-        
+
         tw.writeDocument(false, w -> {
             w.write(() -> "key").marshallable(written);
         });

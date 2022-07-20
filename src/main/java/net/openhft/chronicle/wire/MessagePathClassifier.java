@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.function.IntSupplier;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class MessagePathClassifier implements IntSupplier {
@@ -72,5 +73,13 @@ public class MessagePathClassifier implements IntSupplier {
         if (pathId == null)
             throw new IllegalStateException("Unable to classify the pathId for " + messageHistory);
         return pathId;
+    }
+
+    @Override
+    public String toString() {
+        return "MessagePathClassifier{" +
+                "sourcePattern=" + sourcePattern.stream().map(Arrays::toString).collect(Collectors.toList()) +
+                ", pathIds=" + pathIds +
+                '}';
     }
 }

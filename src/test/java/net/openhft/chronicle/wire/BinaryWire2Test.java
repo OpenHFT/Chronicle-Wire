@@ -43,10 +43,9 @@ import static org.junit.Assume.assumeTrue;
 @SuppressWarnings("rawtypes")
 @RunWith(value = Parameterized.class)
 public class BinaryWire2Test extends WireTestCommon {
-    @NotNull
-    Bytes bytes = new HexDumpBytes();
-
     final boolean usePadding;
+    @NotNull
+    Bytes<?> bytes = new HexDumpBytes();
 
     public BinaryWire2Test(boolean usePadding) {
         this.usePadding = usePadding;
@@ -150,7 +149,7 @@ public class BinaryWire2Test extends WireTestCommon {
                 v -> v.uuid(UUID.randomUUID())
         );
         Wire wire = createWire();
-        Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap(32));
+        Wire wire2 = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(32));
 
         for (Consumer<ValueOut> value : writeValue) {
             wire.clear();
@@ -185,7 +184,7 @@ public class BinaryWire2Test extends WireTestCommon {
         @NotNull Wire wire = createWire();
         wire.write().object(Bytes.from("Hello"));
 
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
         wire.read().bytes(b);
         assertEquals("Hello", b.toString());
         b.releaseLast();
@@ -318,14 +317,43 @@ public class BinaryWire2Test extends WireTestCommon {
     public void testSequence() {
         @NotNull Wire wire = createWire();
         writeMessage(wire);
+        assertEquals("" +
+                        "--- !!meta-data #binary\n" +
+                        "csp: //path/service\n" +
+                        "tid: 123456789\n" +
+                        "# position: 32, header: 0\n" +
+                        "--- !!data #binary\n" +
+                        "entrySet: [\n" +
+                        "  {\n" +
+                        "    key: key-1,\n" +
+                        "    value: value-1\n" +
+                        "  },\n" +
+                        "  {\n" +
+                        "    key: key-2,\n" +
+                        "    value: value-2\n" +
+                        "  }\n" +
+                        "]\n",
+                Wires.fromSizePrefixedBlobs(wire));
 
-        // System.out.println(wire.bytes().toHexString());
-
-        @NotNull Wire twire = new TextWire(Bytes.elasticByteBuffer());
-        twire.usePadding(true);
+        @NotNull Wire twire = WireType.TEXT.apply(Bytes.elasticByteBuffer());
         writeMessage(twire);
-
-        // System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
+        assertEquals("" +
+                        "--- !!meta-data\n" +
+                        "csp: //path/service\n" +
+                        "tid: 123456789\n" +
+                        "# position: 40, header: 0\n" +
+                        "--- !!data\n" +
+                        "entrySet: [\n" +
+                        "  {\n" +
+                        "    key: key-1,\n" +
+                        "    value: value-1\n" +
+                        "  },\n" +
+                        "  {\n" +
+                        "    key: key-2,\n" +
+                        "    value: value-2\n" +
+                        "  }\n" +
+                        "]\n",
+                Wires.fromSizePrefixedBlobs(twire));
 
         wire.bytes().releaseLast();
         twire.bytes().releaseLast();
@@ -354,7 +382,7 @@ public class BinaryWire2Test extends WireTestCommon {
 
         // System.out.println(wire.bytes().toHexString());
 
-        @NotNull Wire twire = new TextWire(Bytes.elasticByteBuffer());
+        @NotNull Wire twire = WireType.TEXT.apply(Bytes.elasticByteBuffer());
         writeMessageContext(twire);
 
         // System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
@@ -448,8 +476,6 @@ public class BinaryWire2Test extends WireTestCommon {
 
     @Test
     public void fieldAfterNullContext() {
-        assumeTrue(usePadding);
-
         expectException("Unable to copy !UpdateEvent safely will try anyway");
         @NotNull Wire wire = createWire();
         try (DocumentContext ignored = wire.writingDocument(true)) {
@@ -464,9 +490,10 @@ public class BinaryWire2Test extends WireTestCommon {
                             .write("value").object("world2"));
         }
 
-        assertEquals("--- !!meta-data #binary\n" +
-                        "tid: !int 1234567890\n" +
-                        "# position: 16, header: 0\n" +
+        assertEquals("" +
+                        "--- !!meta-data #binary\n" +
+                        "tid: 1234567890\n" +
+                        "# position: 1X, header: 0\n" +
                         "--- !!data #binary\n" +
                         "data: !!UpdateEvent {\n" +
                         "  assetName: /name,\n" +
@@ -474,7 +501,7 @@ public class BinaryWire2Test extends WireTestCommon {
                         "  oldValue: !!null \"\",\n" +
                         "  value: world2\n" +
                         "}\n",
-                Wires.fromSizePrefixedBlobs(wire.bytes()));
+                Wires.fromSizePrefixedBlobs(wire).replaceAll("position: 1\\d", "position: 1X"));
         try (DocumentContext context = wire.readingDocument()) {
             assertTrue(context.isPresent());
             assertTrue(context.isMetaData());
@@ -504,8 +531,8 @@ public class BinaryWire2Test extends WireTestCommon {
         assertEquals("--- !!meta-data #binary\n" +
                 "!net.openhft.chronicle.wire.DemarshallableObject {\n" +
                 "  name: test,\n" +
-                "  value: !int 123456\n" +
-                "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
+                "  value: 123456\n" +
+                "}\n", Wires.fromSizePrefixedBlobs(wire));
 
         try (DocumentContext $ = wire.readingDocument()) {
             @Nullable DemarshallableObject dobj = wire.getValueIn().typedMarshallable();
@@ -522,7 +549,7 @@ public class BinaryWire2Test extends WireTestCommon {
                 "xxxxxxxxxxxxxxxx" +
                 "xxxxxxxxxxxxxxxx" +
                 "xxxxxxxxxxxxxxxx";
-        Bytes str = Bytes.from(s);
+        Bytes<?> str = Bytes.from(s);
 
         wire.write("message").compress("gzip", str);
 
@@ -531,8 +558,8 @@ public class BinaryWire2Test extends WireTestCommon {
         assertEquals(s, str2);
 
         wire.bytes().readPosition(0);
-        Bytes asText = Bytes.elasticByteBuffer();
-        wire.copyTo(new TextWire(asText));
+        Bytes<?> asText = Bytes.elasticByteBuffer();
+        wire.copyTo(WireType.TEXT.apply(asText));
         assertEquals("message: # gzip\n" + s +
                 "\n", asText.toString());
         asText.releaseLast();
@@ -763,11 +790,13 @@ public class BinaryWire2Test extends WireTestCommon {
             // "74 65 45 76 65 6e 74 82 11 00 00 00 c2 6d 6d e6\n" +
             // "e4 bd a0 e5 a5 bd c5 76 61 6c 75 65 0f\n", bytes.toHexString());
 
-            assertEquals("--- !!data #binary\n" +
-                    "data: !!UpdateEvent {\n" +
-                    "  mm: \"\\u4F60\\u597D\",\n" +
-                    "  value: 15\n" +
-                    "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
+            assertEquals("" +
+                            "--- !!data #binary\n" +
+                            "data: !!UpdateEvent {\n" +
+                            "  mm: \"\\u4F60\\u597D\",\n" +
+                            "  value: 15\n" +
+                            "}\n",
+                    Wires.fromSizePrefixedBlobs(wire.bytes()));
         } finally {
             wire.bytes().releaseLast();
         }
@@ -880,7 +909,7 @@ public class BinaryWire2Test extends WireTestCommon {
     }
 
     static class BytesHolder extends SelfDescribingMarshallable {
-        final Bytes bytes = Bytes.allocateElasticOnHeap(64);
+        final Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
 
         @Override
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {

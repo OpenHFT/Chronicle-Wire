@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 
 public class TextWriteDocumentContext implements WriteDocumentContext {
@@ -59,16 +60,29 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         count--;
         if (count > 0)
             return;
-        @NotNull Bytes bytes = wire().bytes();
+        @NotNull Bytes<?> bytes = wire().bytes();
         if (rollback) {
             bytes.writePosition(bytes.readPosition());
             return;
         }
         long l = bytes.writePosition();
-        if (l < 1 || bytes.peekUnsignedByte(l - 1) >= ' ')
-            bytes.append('\n');
-        bytes.append("...\n");
+        if (!(wire() instanceof JSONWire)) {
+            if (l < 1 || bytes.peekUnsignedByte(l - 1) >= ' ')
+                bytes.append('\n');
+            BytesUtil.combineDoubleNewline(bytes);
+            bytes.append("...\n");
+        }
         wire().getValueOut().resetBetweenDocuments();
+        notComplete = false;
+    }
+
+    @Override
+    public void reset() {
+        chainedElement = false;
+        if (count > 0)
+            close();
+        count = 0;
+        rollback = false;
         notComplete = false;
     }
 

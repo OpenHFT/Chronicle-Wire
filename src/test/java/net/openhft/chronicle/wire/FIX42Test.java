@@ -84,7 +84,7 @@ public class FIX42Test extends WireTestCommon {
     final boolean fieldLess;
     @SuppressWarnings("rawtypes")
     @NotNull
-    Bytes bytes = allocateElasticOnHeap();
+    Bytes<?> bytes = allocateElasticOnHeap();
 
     public FIX42Test(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
         this.testId = testId;
@@ -110,7 +110,7 @@ public class FIX42Test extends WireTestCommon {
     private Wire createWire() {
         bytes.clear();
         @NotNull Wire wire = testId < 0
-                ? new TextWire(bytes)
+                ? WireType.TEXT.apply(bytes)
                 : new BinaryWire(bytes, fixed, numericField, fieldLess, Integer.MAX_VALUE, "binary", true);
         assert wire.startUse();
         return wire;

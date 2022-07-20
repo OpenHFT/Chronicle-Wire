@@ -46,7 +46,7 @@ public class SerializableWireTest extends WireTestCommon {
     }
 
     @NotNull
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "wt: {0}, object: {1}")
     public static Collection<Object[]> combinations() {
         @NotNull List<Object[]> list = new ArrayList<>();
         @NotNull WireType[] wireTypes = {WireType.TEXT/*, WireType.BINARY*/};
@@ -69,7 +69,7 @@ public class SerializableWireTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void writeMarshallable() {
-        Bytes bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.elasticByteBuffer();
         Wire wire = wireType.apply(bytes);
 
         wire.getValueOut().object(m);

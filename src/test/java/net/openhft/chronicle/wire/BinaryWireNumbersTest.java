@@ -55,8 +55,8 @@ public class BinaryWireNumbersTest extends WireTestCommon {
                 {2 + 2, (WriteValue) w -> w.int16(Short.MIN_VALUE), (WriteValue) w -> w.int64(Short.MIN_VALUE)},//5
                 {2 + 1, (WriteValue) w -> w.int8(Byte.MIN_VALUE), (WriteValue) w -> w.int64(Byte.MIN_VALUE)},//6
                 {2 + 1, (WriteValue) w -> w.int8(-1), (WriteValue) w -> w.int64(-1)},//7
-                {2, (WriteValue) w -> w.wireOut().bytes().writeUnsignedByte(0), (WriteValue) w -> w.int64(0)}, //8
-                {2, (WriteValue) w -> w.wireOut().bytes().writeUnsignedByte(Byte.MAX_VALUE), (WriteValue) w -> w.int64(Byte.MAX_VALUE)}, //9
+                {2 + 1, (WriteValue) w -> w.uint8(0), (WriteValue) w -> w.int64(0)}, //8
+                {2 + 1, (WriteValue) w -> w.uint8(Byte.MAX_VALUE), (WriteValue) w -> w.int64(Byte.MAX_VALUE)}, //9
                 {2 + 1, (WriteValue) w -> w.uint8(0xFF), (WriteValue) w -> w.int64(0xFF)}, //10
                 {2 + 2, (WriteValue) w -> w.int16(Short.MAX_VALUE), (WriteValue) w -> w.int64(Short.MAX_VALUE)},// 11
                 {2 + 2, (WriteValue) w -> w.uint16(0xFFFF), (WriteValue) w -> w.int64(0xFFFF)}, //12
@@ -74,8 +74,8 @@ public class BinaryWireNumbersTest extends WireTestCommon {
                 {2 + 2, (WriteValue) w -> w.int16(Short.MIN_VALUE), (WriteValue) w -> w.float64(Short.MIN_VALUE)},//23
                 {2 + 1, (WriteValue) w -> w.int8(Byte.MIN_VALUE), (WriteValue) w -> w.float64(Byte.MIN_VALUE)},//24
                 {2 + 1, (WriteValue) w -> w.int8(-1), (WriteValue) w -> w.float64(-1)},//25
-                {2, (WriteValue) w -> w.wireOut().bytes().writeUnsignedByte(0), (WriteValue) w -> w.float64(0)},//26
-                {2, (WriteValue) w -> w.wireOut().bytes().writeUnsignedByte(Byte.MAX_VALUE), (WriteValue) w -> w.float64(Byte.MAX_VALUE)},//27
+                {2 + 1, (WriteValue) w -> w.uint8(0), (WriteValue) w -> w.float64(0)},//26
+                {2 + 1, (WriteValue) w -> w.uint8(Byte.MAX_VALUE), (WriteValue) w -> w.float64(Byte.MAX_VALUE)},//27
                 {2 + 1, (WriteValue) w -> w.uint8(0xFF), (WriteValue) w -> w.float64(0xFF)},//28
                 {2 + 2, (WriteValue) w -> w.int16(Short.MAX_VALUE), (WriteValue) w -> w.float64(Short.MAX_VALUE)},//29
                 {2 + 2, (WriteValue) w -> w.uint16(0xFFFF), (WriteValue) w -> w.float64(0xFFFF)},//30
@@ -96,7 +96,7 @@ public class BinaryWireNumbersTest extends WireTestCommon {
 
     public void test(@NotNull WriteValue expected, @NotNull WriteValue perform) {
         @SuppressWarnings("rawtypes")
-        @NotNull Bytes bytes1 = allocateElasticOnHeap();
+        @NotNull Bytes<?> bytes1 = allocateElasticOnHeap();
         @NotNull Wire wire1 = new BinaryWire(bytes1, true, false, false, Integer.MAX_VALUE, "binary", false);
         assert wire1.startUse();
         expected.writeValue(wire1.write());
@@ -104,7 +104,7 @@ public class BinaryWireNumbersTest extends WireTestCommon {
         assertEquals("Length for fixed length doesn't match for " + TextWire.asText(wire1), len, bytes1.readRemaining());
 
         @SuppressWarnings("rawtypes")
-        @NotNull Bytes bytes2 = allocateElasticOnHeap();
+        @NotNull Bytes<?> bytes2 = allocateElasticOnHeap();
         @NotNull Wire wire2 = new BinaryWire(bytes2);
         perform.writeValue(wire2.write());
 

@@ -108,6 +108,17 @@ public class TextReadDocumentContext implements ReadDocumentContext {
     }
 
     @Override
+    public void reset() {
+        close();
+        readLimit = 0;
+        readPosition = 0;
+        start = -1;
+        present = false;
+        notComplete = false;
+        rollback = false;
+    }
+
+    @Override
     public void start() {
         wire.getValueIn().resetState();
         Bytes<?> bytes = wire.bytes();
@@ -125,10 +136,10 @@ public class TextReadDocumentContext implements ReadDocumentContext {
             return;
         }
 
+        metaData = wire.hasMetaDataPrefix();
         start = bytes.readPosition();
         consumeToEndOfMessage(bytes);
 
-        metaData = false;
         readLimit = bytes.readLimit();
         readPosition = bytes.readPosition();
 
@@ -150,7 +161,7 @@ public class TextReadDocumentContext implements ReadDocumentContext {
 
     @Override
     public long index() {
-        return 0;
+        return readPosition;
     }
 
     @Override

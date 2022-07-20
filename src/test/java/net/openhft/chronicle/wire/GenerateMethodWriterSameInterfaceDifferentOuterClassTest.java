@@ -26,6 +26,14 @@ public class GenerateMethodWriterSameInterfaceDifferentOuterClassTest extends Te
                 .build()
                 .y("hello world");
 
+        assertEquals("" +
+                        "--- !!data #binary\n" +
+                        "x: hello world\n" +
+                        "# position: 20, header: 1\n" +
+                        "--- !!data #binary\n" +
+                        "y: hello world\n",
+                Wires.fromSizePrefixedBlobs(wire));
+
     }
 }
 

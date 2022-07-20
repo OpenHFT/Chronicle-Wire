@@ -21,7 +21,7 @@ public class MessageHistoryBytesMarshallableMain {
 
         SetTimeMessageHistory n = createMessageHistory();
         SetTimeMessageHistory n2 = new SetTimeMessageHistory();
-        Bytes bytes = Bytes.allocateElasticDirect(128);
+        Bytes<?> bytes = Bytes.allocateElasticDirect(128);
 
         for (int i = -20_000; i < 100_000_000; i++) {
             bytes.clear();

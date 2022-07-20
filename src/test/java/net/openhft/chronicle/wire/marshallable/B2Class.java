@@ -11,13 +11,13 @@ public class B2Class extends BClass {
     }
 
     @Override
-    public void writeMarshallable(BytesOut out) {
+    public void writeMarshallable(BytesOut<?> out) {
         super.writeMarshallable(out);
         out.writeStopBit(MASHALLABLE_VERSION);
     }
 
     @Override
-    public void readMarshallable(BytesIn in) {
+    public void readMarshallable(BytesIn<?> in) {
         super.readMarshallable(in);
         int version = (int) in.readStopBit();
         if (version == MASHALLABLE_VERSION) {

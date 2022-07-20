@@ -18,7 +18,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.compiler.CompilerUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
@@ -108,7 +107,7 @@ public enum GeneratedProxyClass {
             System.out.println(sb);
 
         try {
-            return CompilerUtils.CACHED_COMPILER.loadFromJava(classLoader, packageName + '.' + className, sb.toString());
+            return Wires.CACHED_COMPILER.loadFromJava(classLoader, packageName + '.' + className, sb.toString());
         } catch (Throwable e) {
             throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + sb, e));
         }
