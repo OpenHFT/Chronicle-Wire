@@ -17,15 +17,17 @@ public class AbstractFieldTest extends WireTestCommon {
 
     public AbstractFieldTest(WireType wireType) {
         this.wireType = wireType;
-
     }
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
                 new Object[]{WireType.BINARY},
+                new Object[]{WireType.BINARY_LIGHT},
                 new Object[]{WireType.TEXT},
-                new Object[]{WireType.JSON}
+                new Object[]{WireType.YAML},
+                new Object[]{WireType.YAML_ONLY},
+                new Object[]{WireType.JSON_ONLY}
         );
     }
 
