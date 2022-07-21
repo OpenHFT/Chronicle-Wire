@@ -423,7 +423,8 @@ public class YamlTokeniser {
         readWords();
         if (isFieldEnd()) {
             lastKeyPosition = pos;
-            return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent2);
+            if (contexts.get(contexts.size() - 1).token != YamlToken.MAPPING_KEY)
+                return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent2);
         }
 
         YamlToken token = YamlToken.TEXT;
@@ -465,14 +466,14 @@ public class YamlTokeniser {
     }
 
     private YamlToken popPushed() {
-        return pushed.isEmpty() ? YamlToken.STREAM_START : pushed.remove(pushed.size() - 1);
+        return pushed.isEmpty() ? next(Integer.MIN_VALUE) : pushed.remove(pushed.size() - 1);
     }
 
     private void readWord() {
         blockStart = in.readPosition();
         boolean isQuote = in.peekUnsignedByte() == '<';
-        while (true) {
-            int ch = in.readUnsignedByte();
+        int ch = in.readUnsignedByte();
+        do {
             // ! is valid in a type TAG
             // [] isn't standard but needed for array types in Java.
             if (ch <= ' ' || (!isQuote && ",{}:?'\"#".indexOf(ch) >= 0)) {
@@ -485,7 +486,8 @@ public class YamlTokeniser {
                 blockEnd--;
                 break;
             }
-        }
+            ch = in.readUnsignedByte();
+        } while (ch != -1);
     }
 
     private void readWords() {

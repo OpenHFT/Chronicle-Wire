@@ -201,6 +201,91 @@ public class YamlTokeniserTest extends WireTestCommon {
     }
 
     @Test
+    public void intMappingIncomplete() {
+        assertEquals("DIRECTIVES_END \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT example\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TAG int\n" +
+                        "MAPPING_END \n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("yaml/int-mapping-incomplete.yaml"));
+    }
+
+    @Test
+    public void intMapping() {
+        assertEquals("DIRECTIVES_END \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT example\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TAG int\n" +
+                        "TEXT 1\n" +
+                        "TAG int\n" +
+                        "TEXT 11\n" +
+                        "MAPPING_KEY \n" +
+                        "TAG int\n" +
+                        "TEXT 2\n" +
+                        "TAG int\n" +
+                        "TEXT 2\n" +
+                        "MAPPING_KEY \n" +
+                        "TAG int\n" +
+                        "TEXT 3\n" +
+                        "TAG int\n" +
+                        "TEXT 3\n" +
+                        "MAPPING_END \n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("yaml/int-mapping.yaml"));
+    }
+
+    @Test
+    public void complexMapping() {
+        assertEquals("DIRECTIVES_END \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT MyField\n" +
+                        "TEXT parent\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT Id\n" +
+                        "TEXT 1\n" +
+                        "MAPPING_END \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TAG net.openhft.chronicle.wire.MyMarshallable\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT MyField\n" +
+                        "TEXT key1\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT Id\n" +
+                        "TEXT 1\n" +
+                        "MAPPING_END \n" +
+                        "TEXT value1\n" +
+                        "MAPPING_KEY \n" +
+                        "TAG net.openhft.chronicle.wire.MyMarshallable\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT MyField\n" +
+                        "TEXT key2\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT Id\n" +
+                        "TEXT 2\n" +
+                        "MAPPING_END \n" +
+                        "TEXT value2\n" +
+                        "MAPPING_END \n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("yaml/complex-mapping.yaml"));
+    }
+
+    @Test
     public void eg2_1() {
         assertEquals("DIRECTIVES_END \n" +
                         "SEQUENCE_START \n" +

@@ -1066,7 +1066,6 @@ public class TextWireTest extends WireTestCommon {
 
     @SuppressWarnings("deprecation")
     @Test
-    @Ignore
     public void testMapReadAndWriteIntegers() {
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = WireType.TEXT.apply(bytes);
@@ -1092,16 +1091,6 @@ public class TextWireTest extends WireTestCommon {
             @Nullable Map m = c.read(() -> "example").marshallableAsMap(Integer.class, Integer.class, actual);
             assertEquals(m, expected);
         });
-
-        wire.bytes().readPosition(0);
-        // skip the length
-        wire.bytes().readSkip(4);
-        // TODO: snakeyaml doesn't like !int
-        // Can't construct a java object for !int; exception=Invalid tag: !int
-        // in 'reader', line 2, column 5:
-        // ? !int 1: !int 11,
-        // ^
-        expectWithSnakeYaml("{1=11, 2=2, 3=3}", wire);
     }
 
     @Test

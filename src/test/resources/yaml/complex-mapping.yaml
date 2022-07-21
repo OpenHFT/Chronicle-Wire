@@ -1,0 +1,4 @@
+? { MyField: parent, Id: 1 }: {
+  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key1, Id: 1 }: value1,
+  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key2, Id: 2 }: value2
+}
