@@ -503,13 +503,8 @@ public class YamlWire extends AbstractWire implements Wire {
             if (next == YamlToken.MAPPING_KEY) {
                 return readEvent(expectedClass);
             }
-            if (next == YamlToken.TEXT) {
-                sb.setLength(0);
-                sb.append(yt.text());
-                unescape(sb, yt.blockQuote);
-                yt.next();
-                return toExpected(expectedClass, sb);
-            }
+
+            return valueIn.object(expectedClass);
         }
         throw new UnsupportedOperationException(yt.toString());
     }
@@ -1052,8 +1047,10 @@ public class YamlWire extends AbstractWire implements Wire {
     }
 
     public void reset() {
-        readContext.reset();
-        writeContext.reset();
+        if (readContext != null)
+            readContext.reset();
+        if (writeContext != null)
+            writeContext.reset();
         bytes.clear();
         sb.setLength(0);
         yt.reset();

@@ -28,7 +28,6 @@ import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -1088,7 +1087,6 @@ public class YamlWireTest extends WireTestCommon {
     }
 
     @Test
-    @Ignore("TODO FIX")
     public void testMapReadAndWriteIntegers() {
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         @NotNull final YamlWire wire = new YamlWire(bytes);
@@ -1109,26 +1107,17 @@ public class YamlWireTest extends WireTestCommon {
                 "  ? !int 2: !int 2,\n" +
                 "  ? !int 3: !int 3\n" +
                 "}\n", Wires.fromSizePrefixedBlobs(bytes));
-        @NotNull final Map<Integer, Integer> actual = new HashMap<>();
+        @NotNull final Map<Object, Object> actual = new HashMap<>();
         wire.readDocument(null, c -> {
-            @Nullable Map m = c.read(() -> "example").marshallableAsMap(Integer.class, Integer.class, actual);
+            @Nullable Map m = c.read(() -> "example").marshallableAsMap(Object.class, Object.class, actual);
             assertEquals(m, expected);
         });
 
         wire.reset();
-        // skip the length
-        wire.bytes().readSkip(4);
-        // TODO: snakeyaml doesn't like !int
-        // Can't construct a java object for !int; exception=Invalid tag: !int
-        // in 'reader', line 2, column 5:
-        // ? !int 1: !int 11,
-        // ^
-        expectWithSnakeYaml("{1=11, 2=2, 3=3}", wire);
     }
 
     @SuppressWarnings("deprecation")
     @Test
-    @Ignore("TODO FIX")
     public void testMapReadAndWriteMarshable() {
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new YamlWire(bytes);
@@ -1143,8 +1132,8 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals("" +
                         "--- !!data\n" +
                         "example: {\n" +
-                        "  ? { MyField: aKey  }: { MyField: aValue  },\n" +
-                        "  ? { MyField: aKey2  }: { MyField: aValue2  }\n" +
+                        "  ? { MyField: aKey }: { MyField: aValue },\n" +
+                        "  ? { MyField: aKey2 }: { MyField: aValue2 }\n" +
                         "}\n",
                 Wires.fromSizePrefixedBlobs(bytes));
         @NotNull final Map<MyMarshallable, MyMarshallable> actual = new LinkedHashMap<>();
@@ -1573,7 +1562,6 @@ public class YamlWireTest extends WireTestCommon {
         wire.readDocument(null, w -> assertArrayEquals(four, (byte[]) w.read(() -> "four").object()));
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void testObjectKeys() {
         @NotNull Map<MyMarshallable, String> map = new LinkedHashMap<>();
@@ -1587,22 +1575,20 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals("" +
                         "--- !!data\n" +
                         "? { MyField: parent }: {\n" +
-                        "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key1  }: value1,\n" +
-                        "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key2  }: value2\n" +
+                        "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key1 }: value1,\n" +
+                        "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key2 }: value2\n" +
                         "}\n"
                 , Wires.fromSizePrefixedBlobs(wire.bytes()));
 
         wire.readDocument(null, w -> {
-            MyMarshallable mm = w.readEvent(MyMarshallable.class);
+            Map<MyMarshallable, Map> map1 = w.getValueIn().marshallableAsMap(MyMarshallable.class, Map.class);
+            MyMarshallable mm = map1.keySet().iterator().next();
             assertEquals(parent.toString(), mm.toString());
             parent.equals(mm);
             assertEquals(parent, mm);
-            @Nullable final Map map2 = w.getValueIn()
-                    .object(Map.class);
+            @Nullable final Map map2 = map1.values().iterator().next();
             assertEquals(map, map2);
         });
-
-        wire.bytes().releaseLast();
     }
 
     @Test(expected = IllegalArgumentException.class)

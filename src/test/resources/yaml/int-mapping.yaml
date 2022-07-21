@@ -1,0 +1,5 @@
+example: {
+  ? !int 1: !int 11,
+  ? !int 2: !int 2,
+  ? !int 3: !int 3
+}
