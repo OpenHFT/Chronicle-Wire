@@ -5,6 +5,7 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.UpdateInterceptor;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
+import net.openhft.chronicle.core.io.Syncable;
 import net.openhft.chronicle.core.util.GenericReflection;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.wire.utils.JavaSourceCodeFormatter;
@@ -274,7 +275,7 @@ public class GenerateMethodWriter {
                 if (!interfaceClazz.isInterface())
                     throw new MethodWriterValidationException("expecting an interface instead of class=" + interfaceClazz.getName());
 
-                // TODO: everything in this loop can be commented out and all tests pass
+                // TODO: Need a test to show when an extra import is required.
                 for (Method dm : interfaceClazz.getMethods()) {
                     if (dm.isDefault() || Modifier.isStatic(dm.getModifiers()))
                         continue;
@@ -459,6 +460,10 @@ public class GenerateMethodWriter {
                     ".update(\"" + dm.getName() + "\", " + name + ")) return" + returnDefault(returnType) + ";\n");
         }
 
+        body.append("MarshallableOut out = this.out.get();\n");
+        if (dm.getDeclaringClass() == Syncable.class) {
+            body.append(Syncable.class.getName()).append(".syncIfAvailable(out);\n");
+        }
         boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
         boolean passthrough = returnType == DocumentContext.class;
         if (!passthrough)
@@ -466,7 +471,7 @@ public class GenerateMethodWriter {
         body.append("final ")
                 .append(WRITE_DOCUMENT_CONTEXT)
                 .append(" dc = (")
-                .append(WRITE_DOCUMENT_CONTEXT).append(") this.out.get().acquireWritingDocument(")
+                .append(WRITE_DOCUMENT_CONTEXT).append(") out.acquireWritingDocument(")
                 .append(metaData)
                 .append(")");
         if (passthrough)
@@ -475,7 +480,7 @@ public class GenerateMethodWriter {
             body.append(") {\n");
         body.append("try {\n");
         body.append("dc.chainedElement(" + (!terminating && !passthrough) + ");\n");
-        body.append("if (out.get().recordHistory()) MessageHistory.writeHistory(dc);\n");
+        body.append("if (out.recordHistory()) MessageHistory.writeHistory(dc);\n");
 
         int startJ = 0;
 
