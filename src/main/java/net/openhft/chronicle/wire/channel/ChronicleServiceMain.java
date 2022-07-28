@@ -65,6 +65,8 @@ public class ChronicleServiceMain extends SelfDescribingMarshallable implements 
             Jvm.pause(50);
             // don't shut down while compiling a class
             synchronized (Wires.class) {
+                // avoid shutdown while locking.
+                AffinityLock.dumpLocks();
                 service.shutdownNow();
             }
             try {

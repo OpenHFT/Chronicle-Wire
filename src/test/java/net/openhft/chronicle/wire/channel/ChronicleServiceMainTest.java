@@ -34,7 +34,6 @@ class ClosingMicroservice extends SelfDescribingMarshallable implements Closeabl
 
     @Override
     public void close() {
-        throw new UnsupportedOperationException();
     }
 
     @Override
