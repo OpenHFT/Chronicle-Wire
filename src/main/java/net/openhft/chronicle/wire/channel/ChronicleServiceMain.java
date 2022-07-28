@@ -8,6 +8,7 @@ import net.openhft.chronicle.threads.NamedThreadFactory;
 import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+import net.openhft.chronicle.wire.Wires;
 import net.openhft.chronicle.wire.channel.impl.BufferedChronicleChannel;
 import net.openhft.chronicle.wire.channel.impl.TCPChronicleChannel;
 
@@ -17,6 +18,8 @@ import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Collections;
+import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +31,7 @@ public class ChronicleServiceMain extends SelfDescribingMarshallable implements 
     boolean buffered;
     transient ServerSocketChannel ssc;
     transient volatile boolean closed;
+    transient Set<ChronicleChannel> channels;
 
     public static void main(String... args) throws IOException {
         ChronicleServiceMain main = Marshallable.fromFile(ChronicleServiceMain.class, args[0]);
@@ -36,6 +40,8 @@ public class ChronicleServiceMain extends SelfDescribingMarshallable implements 
     }
 
     void run() {
+        channels = Collections.newSetFromMap(new WeakHashMap<>());
+
         Jvm.startup().on(getClass(), "Starting " + this);
         Thread.currentThread().setName("acceptor");
         ExecutorService service = Executors.newCachedThreadPool(new NamedThreadFactory("connections"));
@@ -49,13 +55,18 @@ public class ChronicleServiceMain extends SelfDescribingMarshallable implements 
                 sc.socket().setTcpNoDelay(true);
                 final TCPChronicleChannel connection0 = new TCPChronicleChannel(SystemContext.INSTANCE, channelCfg, sc, redirectFunction);
                 ChronicleChannel channel = buffered ? new BufferedChronicleChannel(connection0, Pauser.balanced(), redirectFunction) : connection0;
+                channels.add(channel);
                 service.submit(() -> new ConnectionHandler(channel).run());
             }
         } catch (Throwable e) {
             if (!isClosed()) Jvm.error().on(getClass(), e);
         } finally {
             close();
-            service.shutdownNow();
+            Jvm.pause(50);
+            // don't shut down while compiling a class
+            synchronized (Wires.class) {
+                service.shutdownNow();
+            }
             try {
                 service.awaitTermination(1, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
@@ -76,6 +87,7 @@ public class ChronicleServiceMain extends SelfDescribingMarshallable implements 
     public void close() {
         closed = true;
         Closeable.closeQuietly(ssc);
+        Closeable.closeQuietly(channels);
     }
 
     @Override
