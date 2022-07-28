@@ -124,7 +124,7 @@ public class GenerateMethodReader {
         final String fullClassName = packageName() + "." + generatedClassName();
 
         try {
-            return Wires.CACHED_COMPILER.loadFromJava(classLoader, fullClassName, sourceCode.toString());
+            return Wires.loadFromJava(classLoader, fullClassName, sourceCode.toString());
         } catch (AssertionError e) {
             if (e.getCause() instanceof LinkageError) {
                 try {

@@ -347,7 +347,7 @@ public class GenerateMethodWriter {
             if (DUMP_CODE)
                 System.out.println(imports);
 
-            return Wires.CACHED_COMPILER.loadFromJava(classLoader, packageName + '.' + className, imports.toString());
+            return Wires.loadFromJava(classLoader, packageName + '.' + className, imports.toString());
 
         } catch (AssertionError e) {
             if (e.getCause() instanceof LinkageError) {

@@ -1,7 +1,6 @@
 package net.openhft.chronicle.wire.channel;
 
 import net.openhft.affinity.AffinityLock;
-import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.ClosedIORuntimeException;
@@ -96,7 +95,6 @@ public class ChronicleServiceMain extends SelfDescribingMarshallable implements 
                 System.out.println("Server got " + channel.headerIn(ChronicleServiceMain.this::redirect));
 
                 final Marshallable microservice = ChronicleServiceMain.this.microservice.deepCopy();
-                final MethodReader reader = channel.methodReaderBuilder().build(microservice);
                 final Field field = Jvm.getFieldOrNull(microservice.getClass(), "out");
                 if (field == null)
                     throw new IllegalStateException("Microservice " + microservice + " must have a field called out");
