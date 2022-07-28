@@ -21,7 +21,7 @@ public class SystemContextTest {
     @Test
     public void hostName() {
         assertNotEquals("localhost", INSTANCE.hostName());
-        assertTrue(INSTANCE.hostName().matches("[a-zA-Z].*"));
+        assertTrue(INSTANCE.hostName(), INSTANCE.hostName().matches("[a-zA-Z].*"));
     }
 
     @Test
