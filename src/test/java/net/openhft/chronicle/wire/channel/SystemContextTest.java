@@ -20,8 +20,14 @@ public class SystemContextTest {
 
     @Test
     public void hostName() {
-        assertNotEquals("localhost", INSTANCE.hostName());
-        assertTrue(INSTANCE.hostName(), INSTANCE.hostName().matches("[a-zA-Z].*"));
+        final String hostName = INSTANCE.hostName();
+        assertNotEquals("localhost", hostName);
+        try {
+            // test if its a docker hostname
+            Long.parseUnsignedLong(hostName, 16);
+        } catch (NumberFormatException nfe) {
+            assertTrue(hostName, hostName.matches("[a-zA-Z].*"));
+        }
     }
 
     @Test
