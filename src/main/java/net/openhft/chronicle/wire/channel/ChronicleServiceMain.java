@@ -62,7 +62,7 @@ public class ChronicleServiceMain extends SelfDescribingMarshallable implements 
             if (!isClosed()) Jvm.error().on(getClass(), e);
         } finally {
             close();
-            Jvm.pause(50);
+            Jvm.pause(100);
             // don't shut down while compiling a class
             synchronized (Wires.class) {
                 // avoid shutdown while locking.
