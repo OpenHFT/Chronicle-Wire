@@ -64,8 +64,8 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
     }
 
     public double connectionTimeoutSecs() {
-        if (connectionTimeoutSecs <= 0 || Jvm.isDebug())
-            return 60;
+        if (connectionTimeoutSecs <= 0)
+            return Jvm.isDebug() ? 120 : 10;
         return connectionTimeoutSecs;
     }
 

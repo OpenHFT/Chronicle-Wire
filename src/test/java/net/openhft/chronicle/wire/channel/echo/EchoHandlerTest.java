@@ -1,6 +1,5 @@
 package net.openhft.chronicle.wire.channel.echo;
 
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.wire.DocumentContext;
@@ -12,7 +11,6 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
 
 public class EchoHandlerTest extends WireTestCommon {
 
@@ -50,7 +48,7 @@ public class EchoHandlerTest extends WireTestCommon {
 
     @Test
     public void redirectedServer() throws IOException {
-        assumeFalse(Jvm.isDebug()); // TODO FIX
+        ignoreException("ClosedIORuntimeException");
         String urlZzz = "tcp://localhost:65329";
         String url0 = "tcp://localhost:65330";
         String url1 = "tcp://localhost:65331";
@@ -76,7 +74,8 @@ public class EchoHandlerTest extends WireTestCommon {
     }
 
     private void doTest(ChronicleContext context, Boolean buffered) {
-        ChronicleChannel channel = context.newChannelSupplier(new EchoHandler().buffered(buffered)).get();
+        final EchoHandler echoHandler = new EchoHandler().buffered(buffered);
+        ChronicleChannel channel = context.newChannelSupplier(echoHandler).connectionTimeoutSecs(1).get();
         Says says = channel.methodWriter(Says.class);
         says.say("Hello World");
 
