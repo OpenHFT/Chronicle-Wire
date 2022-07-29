@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire.channel.echo;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.wire.DocumentContext;
@@ -36,6 +37,10 @@ public class EchoHandlerTest extends WireTestCommon {
 
     @Test
     public void serverBuffered() {
+        if (Jvm.isArm()) {
+            ignoreException("Using Pauser.balanced() as not enough processors");
+            ignoreException("bgWriter died");
+        }
         String url = "tcp://:0";
         IOTools.deleteDirWithFiles("target/server");
         try (ChronicleContext context = ChronicleContext.newContext(url)
