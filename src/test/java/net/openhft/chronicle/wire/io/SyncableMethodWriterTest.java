@@ -47,15 +47,16 @@ public class SyncableMethodWriterTest {
         sas.sync();
         sas.say("world");
         sas.sync();
-        assertEquals("say: hello\n" +
+        assertEquals("" +
+                "say: hello\n" +
                 "...\n" +
-                "# sync\n" +
                 "sync: \"\"\n" +
+                "# sync\n" +
                 "...\n" +
                 "say: world\n" +
                 "...\n" +
-                "# sync\n" +
                 "sync: \"\"\n" +
+                "# sync\n" +
                 "...\n", wire.toString());
     }
 
