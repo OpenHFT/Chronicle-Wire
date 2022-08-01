@@ -21,7 +21,7 @@ import java.util.function.Function;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 import static net.openhft.chronicle.core.io.ClosedIORuntimeException.newIORuntimeException;
 
-public class TCPChronicleChannel extends SimpleCloseable implements ChronicleChannel {
+public class TCPChronicleChannel extends SimpleCloseable implements InternalChronicleChannel {
     static final int CAPACITY = 128 << 10; // 128 KB
     private static final String HEADER = "header";
     private static final ChannelHeader NO_HEADER = Mocker.ignored(ChannelHeader.class);
@@ -374,5 +374,20 @@ public class TCPChronicleChannel extends SimpleCloseable implements ChronicleCha
             if (dc instanceof WriteDocumentContext)
                 ((WriteDocumentContext) dc).chainedElement(chainedElement);
         }
+    }
+
+    @Override
+    public boolean supportsEventPoller() {
+        return false;
+    }
+
+    @Override
+    public EventPoller eventPoller() {
+        return null;
+    }
+
+    @Override
+    public ChronicleChannel eventPoller(EventPoller eventPoller) {
+        throw new UnsupportedOperationException();
     }
 }

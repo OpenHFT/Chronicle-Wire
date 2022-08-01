@@ -45,10 +45,12 @@ public class BufferedChronicleChannel extends DelegateChronicleChannel {
         bgWriter.submit(this::bgWrite);
     }
 
+    @Override
     public EventPoller eventPoller() {
         return eventPoller;
     }
 
+    @Override
     public BufferedChronicleChannel eventPoller(EventPoller eventPoller) {
         this.eventPoller = eventPoller;
         return this;

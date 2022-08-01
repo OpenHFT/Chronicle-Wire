@@ -118,7 +118,15 @@ public interface ChronicleChannel extends Closeable, MarshallableOut, Marshallab
         };
     }
 
+    /**
+     * Send a test message so the caller can wait for the response via lastTestMessage()
+     *
+     * @param now a monotonically increasing timestamp
+     */
     void testMessage(@NanoTime long now);
 
+    /**
+     * @return the highest timestamp received
+     */
     long lastTestMessage();
 }

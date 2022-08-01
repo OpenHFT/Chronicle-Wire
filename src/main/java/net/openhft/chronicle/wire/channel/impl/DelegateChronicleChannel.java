@@ -3,16 +3,14 @@ package net.openhft.chronicle.wire.channel.impl;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.UnrecoverableTimeoutException;
-import net.openhft.chronicle.wire.channel.ChannelHeader;
-import net.openhft.chronicle.wire.channel.ChronicleChannel;
-import net.openhft.chronicle.wire.channel.ChronicleChannelCfg;
+import net.openhft.chronicle.wire.channel.*;
 
 import java.util.function.Function;
 
-public class DelegateChronicleChannel implements ChronicleChannel, Closeable {
-    protected final ChronicleChannel channel;
+public class DelegateChronicleChannel implements InternalChronicleChannel, Closeable {
+    protected final InternalChronicleChannel channel;
 
-    public DelegateChronicleChannel(ChronicleChannel channel) {
+    public DelegateChronicleChannel(InternalChronicleChannel channel) {
         this.channel = channel;
     }
 
@@ -69,5 +67,21 @@ public class DelegateChronicleChannel implements ChronicleChannel, Closeable {
     @Override
     public DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException {
         return channel.acquireWritingDocument(metaData);
+    }
+
+    @Override
+    public boolean supportsEventPoller() {
+        return channel.supportsEventPoller();
+    }
+
+    @Override
+    public EventPoller eventPoller() {
+        return channel.eventPoller();
+    }
+
+    @Override
+    public ChronicleChannel eventPoller(EventPoller eventPoller) {
+        channel.eventPoller(eventPoller);
+        return this;
     }
 }
