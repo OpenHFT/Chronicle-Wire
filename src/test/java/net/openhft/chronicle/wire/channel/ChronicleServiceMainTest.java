@@ -4,7 +4,9 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assume.assumeFalse;
@@ -14,6 +16,15 @@ interface NoOut {
 }
 
 public class ChronicleServiceMainTest extends WireTestCommon {
+
+    @Before
+    public void precompile() {
+        // as shutdown happens quickly, recompile the NoOut
+        Wire.newYamlWireOnHeap()
+                .methodWriter(NoOut.class)
+                .out()
+                .close();
+    }
 
     @Test
     public void handshake() {
