@@ -1,0 +1,3 @@
+port: 65432
+microservice: !net.openhft.chronicle.queue.channel.EchoingMicroservice { }
+buffered: ${buffered}

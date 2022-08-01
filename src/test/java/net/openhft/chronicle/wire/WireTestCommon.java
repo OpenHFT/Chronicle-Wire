@@ -83,7 +83,10 @@ public class WireTestCommon {
         }
         ignoredExceptions.clear();
         if (Jvm.hasException(exceptions)) {
-            final String msg = exceptions.size() + " exceptions were detected: " + exceptions.keySet().stream().map(ek -> ek.message).collect(Collectors.joining(", "));
+            final String msg = exceptions.size() + " exceptions were detected: " +
+                    exceptions.keySet().stream()
+                            .map(ek -> "" + ek.throwable)
+                            .collect(Collectors.joining(", "));
             Jvm.dumpException(exceptions);
             Jvm.resetExceptionHandlers();
             Assert.fail(msg);

@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.ForceInline;
+import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -35,7 +36,6 @@ import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.ReadResolvable;
 import net.openhft.chronicle.wire.internal.StringConsumerMarshallableOut;
 import net.openhft.compiler.CachedCompiler;
-import net.openhft.compiler.CompilerUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -101,14 +101,13 @@ public enum Wires {
     });
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(Bytes.allocateElasticOnHeap()));
-    final static CachedCompiler CACHED_COMPILER;
+    static final boolean DUMP_CODE_TO_TARGET = Jvm.getBoolean("dumpCodeToTarget");
     private static final int TID_MASK = 0b00111111_11111111_11111111_11111111;
     private static final int INVERSE_TID_MASK = ~TID_MASK;
     public static boolean GENERATE_TUPLES = Jvm.getBoolean("wire.generate.tuples");
     static volatile boolean warnedUntypedBytesOnce = false;
     static ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
-
-    static final boolean DUMP_CODE_TO_TARGET = Jvm.getBoolean("dumpCodeToTarget");
+    private static CachedCompiler CACHED_COMPILER = null;
 
     static {
         Jvm.addToClassPath(Wires.class);
@@ -117,11 +116,6 @@ public enum Wires {
         CLASS_STRATEGY_FUNCTIONS.add(SerializeBytes.INSTANCE);
         CLASS_STRATEGY_FUNCTIONS.add(SerializeMarshallables.INSTANCE); // must be after SerializeBytes.
         WireInternal.addAliases();
-        final String target = OS.getTarget();
-        CACHED_COMPILER =
-                new File(target).exists() && Jvm.isDebug() && DUMP_CODE_TO_TARGET
-                        ? new CachedCompiler(new File(target, "generated-test-sources"), new File(target, "test-classes"))
-                        : CompilerUtils.CACHED_COMPILER;
     }
 
     // force static initialise
@@ -724,6 +718,23 @@ public enum Wires {
         bytes.bytesStore(in.bytesStore(), 0, position);
         bytes.writeLimit(position + length);
         return wire;
+    }
+
+    static synchronized Class loadFromJava(ClassLoader classLoader, String className, String code) throws ClassNotFoundException {
+        if (CACHED_COMPILER == null) {
+            final String target = OS.getTarget();
+            CACHED_COMPILER =
+                    new File(target).exists() && Jvm.isDebug() && DUMP_CODE_TO_TARGET
+                            ? new CachedCompiler(new File(target, "generated-test-sources"), new File(target, "test-classes"))
+                            : new CachedCompiler((File) null, (File) null);
+        }
+        try {
+            return CACHED_COMPILER.loadFromJava(classLoader, className, code);
+        } catch (Throwable t) {
+            Closeable.closeQuietly(CACHED_COMPILER);
+            CACHED_COMPILER = null;
+            throw t;
+        }
     }
 
     enum SerializeEnum implements Function<Class, SerializationStrategy> {
