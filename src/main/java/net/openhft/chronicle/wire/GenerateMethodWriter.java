@@ -461,9 +461,6 @@ public class GenerateMethodWriter {
         }
 
         body.append("MarshallableOut out = this.out.get();\n");
-        if (dm.getDeclaringClass() == Syncable.class) {
-            body.append(Syncable.class.getName()).append(".syncIfAvailable(out);\n");
-        }
         boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
         boolean passthrough = returnType == DocumentContext.class;
         if (!passthrough)
@@ -507,6 +504,11 @@ public class GenerateMethodWriter {
         body.append("dc.rollbackOnClose();\n");
         body.append("throw Jvm.rethrow(t);\n");
         body.append("}\n");
+
+        if (dm.getDeclaringClass() == Syncable.class) {
+            body.append(Syncable.class.getName()).append(".syncIfAvailable(out);\n");
+        }
+
         if (!passthrough)
             body.append("}\n");
 
