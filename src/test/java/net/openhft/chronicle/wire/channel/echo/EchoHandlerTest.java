@@ -37,6 +37,7 @@ public class EchoHandlerTest extends WireTestCommon {
 
     @Test
     public void serverBuffered() {
+        ignoreException("net.openhft.chronicle.core.io.ClosedIORuntimeException: Closed");
         if (Jvm.isArm()) {
             ignoreException("Using Pauser.balanced() as not enough processors");
             ignoreException("bgWriter died");
