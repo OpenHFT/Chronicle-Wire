@@ -11,7 +11,6 @@ import net.openhft.chronicle.wire.converter.NanoTime;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.SocketChannel;
 import java.util.Collections;
 import java.util.Objects;
@@ -172,11 +171,8 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
         try {
             read = sc.read(bb);
 
-        } catch (AsynchronousCloseException e) {
-            close();
-            throw new ClosedIORuntimeException("Closed", e);
-
         } catch (IOException e) {
+            close();
             throw newIORuntimeException(e);
         }
         if (read < 0) {
