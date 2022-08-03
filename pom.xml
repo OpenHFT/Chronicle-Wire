@@ -305,6 +305,12 @@
                         <configuration>
                             <skip>false</skip>
                             <mainClass>net.openhft.chronicle.wire.channel.ChronicleGatewayMain</mainClass>
+                            <systemProperties>
+                                <property>
+                                    <key>system.properties</key>
+                                    <value>/dev/null</value>
+                                </property>
+                            </systemProperties>
                             <classpathScope>test</classpathScope>
                         </configuration>
                     </execution>
@@ -319,6 +325,12 @@
                         <configuration>
                             <skip>false</skip>
                             <mainClass>net.openhft.chronicle.wire.channel.PerfChronicleServiceMain</mainClass>
+                            <systemProperties>
+                                <property>
+                                    <key>system.properties</key>
+                                    <value>/dev/null</value>
+                                </property>
+                            </systemProperties>
                             <classpathScope>test</classpathScope>
                         </configuration>
                     </execution>
@@ -334,6 +346,10 @@
                             <skip>false</skip>
                             <mainClass>net.openhft.chronicle.wire.channel.PerfChronicleServiceMain</mainClass>
                             <systemProperties>
+                                <property>
+                                    <key>system.properties</key>
+                                    <value>/dev/null</value>
+                                </property>
                                 <property>
                                     <key>throughput</key>
                                     <value>1000000</value>
