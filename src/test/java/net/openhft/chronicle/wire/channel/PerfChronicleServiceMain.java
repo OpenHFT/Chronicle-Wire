@@ -12,7 +12,7 @@ import net.openhft.chronicle.wire.channel.echo.EchoHandler;
 import java.util.concurrent.locks.LockSupport;
 
 /*
-Ryzen 9 5950X with Ubuntu 21.10 run with
+** Ryzen 9 5950X with Ubuntu 21.10 run with **
 
 -Durl=tcp://localhost:1248 -Dsize=256 -Dthroughput=100000 -Diterations=3000000 -Dbuffered=false
 -------------------------------- SUMMARY (end to end) us -------------------------------------------
@@ -29,7 +29,7 @@ worst:         217.34        86.14        53.06        22.62        22.62       
 
 ----------------------------------------------------------------------------------------------------
 
--Durl=tcp://localhost:65432 -Dsize=256 -Dthroughput=1000000 -Diterations=30000000 -Dbuffered=true
+-Durl=tcp://localhost:1248 -Dsize=256 -Dthroughput=1000000 -Diterations=30000000 -Dbuffered=true
 -------------------------------- SUMMARY (end to end) us -------------------------------------------
 Percentile   run1         run2         run3         run4         run5      % Variation
 50.0:           16.54        16.54        16.54        16.61        16.61         0.26
@@ -44,6 +44,9 @@ Percentile   run1         run2         run3         run4         run5      % Var
 99.9997:      1185.79       391.68      1107.97        30.18        31.01        95.97
 worst:        1239.04       430.59      1165.31        34.37        69.25        95.64
 
+** Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz **
+-Durl=tcp://server-via-onload:1248  -Dsize=256 -Dthroughput=100000 -Diterations=3000000 -Dbuffered=false
+-------------------------------- SUMMARY (end to end) us -------------------------------------------
 Percentile   run1         run2         run3         run4         run5      % Variation
 50.0:           16.74        16.74        16.74        16.74        16.74         0.00
 90.0:           17.18        17.18        17.18        17.18        17.18         0.00
@@ -54,10 +57,25 @@ Percentile   run1         run2         run3         run4         run5      % Var
 99.99:          25.44        24.35        24.67        25.31        25.25         2.56
 99.997:         37.57        46.27        29.02        47.17        59.33        41.04
 worst:         159.49       196.86       161.02       162.05       229.12        21.99
+
+-Durl=tcp://server-via-onload:1248  -Dsize=256 -Dthroughput=1000000 -Diterations=30000000 -Dbuffered=true
+-------------------------------- SUMMARY (end to end) us -------------------------------------------
+Percentile   run1         run2         run3         run4         run5      % Variation
+50.0:           35.01        34.75        34.62        34.50        34.50         0.49
+90.0:           41.28        41.02        40.90        40.77        40.77         0.42
+99.0:           47.42        46.91        46.78        46.53        46.66         0.55
+99.7:           54.59        49.73        49.22        48.96        48.96         1.03
+99.9:         3330.05        53.70        51.78        51.26        51.26         3.07
+99.97:        4448.26        95.62        70.27        55.36        54.72        33.26
+99.99:        5382.14       185.09       158.46       140.03       104.58        33.92
+99.997:       6086.66       609.28       326.14       228.61       162.56        64.69
+99.999:       6250.50       715.78       601.09       456.19       178.43        66.75
+99.9997:      6381.57       746.50       699.39       553.98       186.11        66.75
+worst:        6463.49       783.36       736.26       592.90       199.94        66.05
 ----------------------------------------------------------------------------------------------------
+*/
 
-
-
+/* for profiling
 -XX:+UnlockCommercialFeatures
 -XX:+FlightRecorder
 -XX:+UnlockDiagnosticVMOptions
