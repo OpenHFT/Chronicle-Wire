@@ -15,7 +15,8 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -23,7 +24,7 @@
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
         <version>1.1.33</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
 
@@ -33,7 +34,7 @@
     <description>Chronicle-Wire</description>
     <packaging>bundle</packaging>
     <properties>
-        <argLine />
+        <argLine/>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <compiler.argument>-Xlint:deprecation</compiler.argument>
@@ -288,6 +289,66 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- benchmark network latency with Wire -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <!-- run this first -->
+                    <execution>
+                        <id>Gateway</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <skip>false</skip>
+                            <mainClass>net.openhft.chronicle.wire.channel.ChronicleGatewayMain</mainClass>
+                            <classpathScope>test</classpathScope>
+                        </configuration>
+                    </execution>
+
+                    <!-- ECHOING MICROSERVICE LOW LATENCY TEST -->
+                    <!-- run this second with -Durl=tcp://localhost:1248 or the host of your choice -->
+                    <execution>
+                        <id>EchoClient</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <skip>false</skip>
+                            <mainClass>net.openhft.chronicle.wire.channel.PerfChronicleServiceMain</mainClass>
+                            <classpathScope>test</classpathScope>
+                        </configuration>
+                    </execution>
+
+                    <!-- ECHOING MICROSERVICE THROUGHPUT TEST -->
+                    <!-- run this second with -Durl=tcp://localhost:1248 or the host of your choice -->
+                    <execution>
+                        <id>EchoClient-Throughput</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <skip>false</skip>
+                            <mainClass>net.openhft.chronicle.wire.channel.PerfChronicleServiceMain</mainClass>
+                            <systemProperties>
+                                <property>
+                                    <key>throughput</key>
+                                    <value>1000000</value>
+                                </property>
+                                <property>
+                                    <key>buffered</key>
+                                    <value>true</value>
+                                </property>
+                            </systemProperties>
+                            <classpathScope>test</classpathScope>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 
