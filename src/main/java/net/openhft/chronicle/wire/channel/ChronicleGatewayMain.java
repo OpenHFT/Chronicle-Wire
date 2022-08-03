@@ -45,6 +45,7 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
     public static void main(String... args) throws IOException {
         ChronicleGatewayMain chronicleGatewayMain = new ChronicleGatewayMain("tcp://localhost:" + Integer.getInteger("port", 1248))
                 .buffered(Jvm.getBoolean("buffered"));
+        chronicleGatewayMain.useAffinity(Jvm.getBoolean("useAffinity"));
         chronicleGatewayMain.pauserMode = PauserMode.valueOf(System.getProperty("pauserMode", PauserMode.balanced.name()));
         ChronicleGatewayMain main = args.length == 0
                 ? chronicleGatewayMain

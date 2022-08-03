@@ -310,6 +310,10 @@
                                     <key>system.properties</key>
                                     <value>/dev/null</value>
                                 </property>
+                                <property>
+                                    <key>useAffinity</key>
+                                    <value>true</value>
+                                </property>
                             </systemProperties>
                             <classpathScope>test</classpathScope>
                         </configuration>
