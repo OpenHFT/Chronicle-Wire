@@ -44,6 +44,7 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
 
     public static void main(String... args) throws IOException {
         ChronicleGatewayMain chronicleGatewayMain = new ChronicleGatewayMain("tcp://localhost:" + Integer.getInteger("port", 1248))
+                .pauserMode(PauserMode.valueOf(System.getProperty("pauserMode", PauserMode.balanced.name())))
                 .buffered(Jvm.getBoolean("buffered"));
         chronicleGatewayMain.useAffinity(Jvm.getBoolean("useAffinity"));
         chronicleGatewayMain.pauserMode = PauserMode.valueOf(System.getProperty("pauserMode", PauserMode.balanced.name()));
@@ -52,6 +53,11 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
                 : Marshallable.fromFile(ChronicleGatewayMain.class, args[0]);
         System.out.println("Starting  " + main);
         main.run();
+    }
+
+    public ChronicleGatewayMain pauserMode(PauserMode pauserMode) {
+        this.pauserMode = pauserMode;
+        return this;
     }
 
     public boolean buffered() {

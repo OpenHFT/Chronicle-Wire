@@ -314,6 +314,10 @@
                                     <key>useAffinity</key>
                                     <value>true</value>
                                 </property>
+                                <property>
+                                    <key>pauserMode</key>
+                                    <value>busy</value>
+                                </property>
                             </systemProperties>
                             <classpathScope>test</classpathScope>
                         </configuration>
