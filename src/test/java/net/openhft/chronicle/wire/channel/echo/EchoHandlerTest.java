@@ -104,4 +104,45 @@ public class EchoHandlerTest extends WireTestCommon {
         }
         assertEquals(now, channel.lastTestMessage());
     }
+
+    @Test
+    public void readme() {
+        // start a server on an unused port
+        String url = "tcp://:0";
+        // create a context for new channels, all channels are closed when the context is closed
+        try (ChronicleContext context = ChronicleContext.newContext(url)) {
+            // open a new channel that acts as an EchoHandler
+            ChronicleChannel channel = context.newChannelSupplier(new EchoHandler()).get();
+            // create a proxy that turns each call to Says into an event on the channel
+            Says say = channel.methodWriter(Says.class);
+            // add an event
+            say.say("Hello World");
+            // ad a second event
+            say.say("Bye now");
+
+            // A buffer so the event name can be returned as well
+            StringBuilder event = new StringBuilder();
+            // read one message excepting the object after the event name to be a String
+            String text = channel.readOne(event, String.class);
+            // check it matches
+            assertEquals("say: Hello World", event + ": " + text);
+
+            // read the second message
+            String text2 = channel.readOne(event, String.class);
+            // check it matches
+            assertEquals("say: Bye now", event + ": " + text2);
+/*
+            final long now = System.currentTimeMillis();
+            channel.testMessage(now);
+
+            Says reply = Mocker.logging(Says.class, "reply - ", System.out);
+            final MethodReader methodReader = channel.methodReader(reply);
+            int count = 0;
+            while (channel.lastTestMessage() < now) {
+                if (methodReader.readOne())
+                    count++;
+            }
+            assertEquals(2, count);*/
+        }
+    }
 }

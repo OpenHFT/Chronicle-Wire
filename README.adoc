@@ -1841,13 +1841,12 @@ private static final int MASHALLABLE_VERSION = 1;
 === JLBH Benchmark Performance
 
 To explore the efficiency of the examples above, this link:https://github.com/OpenHFT/Chronicle-Wire/blob/develop/src/test/java/net/openhft/chronicle/wire/TriviallyCopyableJLBH.java[TrivallyCopyableJLBH.java] test was created.
-As can be seen on lines 18-26, we have the ability to switch between running the TriviallyCopyable House (“House1”), the BinaryWire House (“House2”) or 'UNKNOWN'. Important to note is that trivially copyable objects were used in order to improve java serialisation speeds. For further understanding on trivially copyable objects, refer to link:https://dzone.com/articles/how-to-get-c-speed-in-java-serialisation[this article].
-This shows that we can serialise and then de-serialise 100,000 messages a second. The Trivially Copyable version is even faster, especially at the higher percentiles.
+As can be seen on lines 18-26, we have the ability to switch between running the TriviallyCopyable House (“House1”), the BinaryWire House (“House2”) or 'UNKNOWN'.Important to note is that trivially copyable objects were used in order to improve java serialisation speeds.For further understanding on trivially copyable objects, refer to link:https://dzone.com/articles/how-to-get-c-speed-in-java-serialisation[this article].
+This shows that we can serialise and then de-serialise 100,000 messages a second.The Trivially Copyable version is even faster, especially at the higher percentiles.
 
 .Benchmark Performance Between TriviallyCopyable and BinaryWire
 image::jlbhBenchmark.png[buffer,600,400]
 * Microseconds to both serialise and deserialise a message
-
 
 ===  Platform support
 
@@ -1855,4 +1854,45 @@ Chronicle Wire supports `Java 8`, `Java 11` and `C++`.
 Future versions may support `Java 14`, `python`.
 
 '''
+
 https://github.com/OpenHFT/Chronicle-Wire[Back to Chronicle Wire project]
+
+== Network Channels in Wire
+
+Chronicle Wire supports creating channels over TCP.
+These `ChronicleChannel`s act as `MarshallableIn` and `MarshallableOut` as `Wire` does except that write to a TCP connection and read from the same connection.
+
+=== Simple ChronicleChannel - EchoHandler
+
+When you create a channel, you specific what type of connection you want.
+The simplest is an EchoHandler that echos everything you send it.
+
+[source,java]
+----
+// start a server on an unused port
+String url = "tcp://:0";
+// create a context for new channels, all channels are closed when the context is closed
+try (ChronicleContext context = ChronicleContext.newContext(url)) {
+    // open a new channel that acts as an EchoHandler
+    ChronicleChannel channel = context.newChannelSupplier(new EchoHandler()).get();
+    // create a proxy that turns each call to Says into an event on the channel
+    Says say = channel.methodWriter(Says.class);
+    // add an event
+    say.say("Hello World");
+    // ad a second event
+    say.say("Bye now");
+
+    // A buffer so the event name can be returned as well
+    StringBuilder event = new StringBuilder();
+    // read one message excepting the object after the event name to be a String
+    String text = channel.readOne(event, String.class);
+    // check it matches
+    assertEquals("say: Hello World", event + ": " + text);
+
+    // read the second message
+    String text2 = channel.readOne(event, String.class);
+    // check it matches
+    assertEquals("say: Bye now", event + ": " + text2);
+}
+----
+
