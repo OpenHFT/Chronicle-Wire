@@ -121,8 +121,13 @@ public interface MarshallableOut extends DocumentWritten {
      */
     default void writeDocument(@NotNull WriteMarshallable writer) throws UnrecoverableTimeoutException {
         try (@NotNull DocumentContext dc = writingDocument(false)) {
-            Wire wire = dc.wire();
-            writer.writeMarshallable(wire);
+            try {
+                Wire wire = dc.wire();
+                writer.writeMarshallable(wire);
+            } catch (Throwable t) {
+                dc.rollbackOnClose();
+                throw Jvm.rethrow(t);
+            }
         }
     }
 
