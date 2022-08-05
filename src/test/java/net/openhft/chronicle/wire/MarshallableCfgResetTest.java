@@ -3,7 +3,7 @@ package net.openhft.chronicle.wire;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class MarshallableCfgRestTest {
+public class MarshallableCfgResetTest {
 
     public static class Engine extends AbstractMarshallableCfg {
         public boolean isItElectric;
