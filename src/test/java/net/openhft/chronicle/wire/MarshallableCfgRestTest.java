@@ -17,8 +17,8 @@ public class MarshallableCfgRestTest {
 
         Engine engine;
 
-        public Boat(Engine dog) {
-            this.engine = dog;
+        public Boat(Engine engine) {
+            this.engine = engine;
         }
     }
 
