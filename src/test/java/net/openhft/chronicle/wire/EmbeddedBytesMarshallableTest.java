@@ -26,6 +26,7 @@ import net.openhft.chronicle.bytes.internal.BytesFieldInfo;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,6 +37,24 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     @Before
     public void checkArch() {
         assumeFalse(Jvm.isArm() || Jvm.isAzulZing());
+    }
+
+    @Test
+    public void testClear() {
+        ClassAliasPool.CLASS_ALIASES.addAlias(EBM.class);
+        EBM e1 = new EBM();
+        e1.a.append("a12345678");
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+        e1.writeMarshallable(bytes);
+
+        EBM e2 = new EBM();
+        e2.readMarshallable(bytes);
+        e2.a.clear();
+        e2.a.append("b0000000");
+
+        Assert.assertEquals("b0000000", e2.a.toString());
+
+        bytes.releaseLast();
     }
 
     @Test
