@@ -588,6 +588,9 @@ public enum Wires {
 
     @Nullable
     public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class clazz) {
+        if (using instanceof AbstractMarshallableCfg)
+            ((AbstractMarshallableCfg) using).reset();
+
         Object o = in.typePrefixOrObject(clazz);
         if (o != null && !(o instanceof Class)) {
             return (E) in.marshallable(o, MARSHALLABLE);
