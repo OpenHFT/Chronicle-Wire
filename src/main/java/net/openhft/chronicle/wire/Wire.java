@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.annotation.DontChain;
+import net.openhft.chronicle.core.annotation.SingleThreaded;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -26,6 +27,7 @@ import java.io.IOException;
 /**
  * The defines the stand interface for writing and reading sequentially to/from a Bytes stream. <p>
  */
+@SingleThreaded
 @DontChain
 public interface Wire extends WireIn, WireOut {
     @Deprecated(/*to be removed?*/)
