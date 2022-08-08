@@ -36,4 +36,5 @@ public interface ChannelHandler extends ChannelHeader {
     ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg channelCfg);
 
     Boolean buffered();
+
 }

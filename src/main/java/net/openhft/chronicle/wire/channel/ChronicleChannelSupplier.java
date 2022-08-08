@@ -24,6 +24,7 @@ public class ChronicleChannelSupplier extends ChronicleChannelCfg<ChronicleChann
     private final ChronicleContext context;
     private final ChannelHandler handler;
     private String protocol;
+    private String connectionId;
 
     public ChronicleChannelSupplier(ChronicleContext context, ChannelHandler handler) {
         this.context = context;
@@ -33,6 +34,8 @@ public class ChronicleChannelSupplier extends ChronicleChannelCfg<ChronicleChann
     @Override
     public ChronicleChannel get() {
         handler.systemContext(context.systemContext());
+        if (connectionId != null && handler.connectionId() == null)
+            handler.connectionId(connectionId);
         final ChronicleChannel channel;
         switch (protocol) {
             case "tcp":
@@ -54,6 +57,15 @@ public class ChronicleChannelSupplier extends ChronicleChannelCfg<ChronicleChann
 
     public ChronicleChannelSupplier protocol(String protocol) {
         this.protocol = protocol;
+        return this;
+    }
+
+    public String connectionId() {
+        return connectionId;
+    }
+
+    public ChronicleChannelSupplier connectionId(String connectionId) {
+        this.connectionId = connectionId;
         return this;
     }
 }

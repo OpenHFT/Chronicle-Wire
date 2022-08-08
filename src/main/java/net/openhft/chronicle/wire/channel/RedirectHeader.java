@@ -27,9 +27,15 @@ import java.util.List;
 public class RedirectHeader extends SelfDescribingMarshallable implements ChannelHeader {
     private final List<String> locations = new ArrayList<>();
     private SystemContext systemContext;
+    private String connectionId;
 
     public RedirectHeader(List<String> locations) {
         this.locations.addAll(locations);
+    }
+
+    @Override
+    public SystemContext systemContext() {
+        return systemContext;
     }
 
     @Override
@@ -39,8 +45,14 @@ public class RedirectHeader extends SelfDescribingMarshallable implements Channe
     }
 
     @Override
-    public SystemContext systemContext() {
-        return systemContext;
+    public String connectionId() {
+        return connectionId;
+    }
+
+    @Override
+    public ChannelHeader connectionId(String connectionId) {
+        this.connectionId = connectionId;
+        return this;
     }
 
     public List<String> locations() {

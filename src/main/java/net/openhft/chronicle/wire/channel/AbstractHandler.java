@@ -27,7 +27,19 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
  */
 public abstract class AbstractHandler<A extends AbstractHandler<A>> extends SelfDescribingMarshallable implements ChannelHandler {
     private SystemContext systemContext;
+    private String connectionId;
     private Boolean buffered;
+
+    @Override
+    public String connectionId() {
+        return connectionId;
+    }
+
+    @Override
+    public ChannelHeader connectionId(String connectionId) {
+        this.connectionId = connectionId;
+        return this;
+    }
 
     @Override
     public SystemContext systemContext() {

@@ -22,6 +22,7 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
 public class OkHeader extends SelfDescribingMarshallable implements ChannelHeader {
     private SystemContext systemContext;
+    private String connectionId;
 
     @Override
     public OkHeader systemContext(SystemContext systemContext) {
@@ -34,4 +35,14 @@ public class OkHeader extends SelfDescribingMarshallable implements ChannelHeade
         return systemContext;
     }
 
+    @Override
+    public String connectionId() {
+        return connectionId;
+    }
+
+    @Override
+    public ChannelHeader connectionId(String connectionId) {
+        this.connectionId = connectionId;
+        return this;
+    }
 }
