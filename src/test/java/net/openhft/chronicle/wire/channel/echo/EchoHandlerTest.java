@@ -37,6 +37,29 @@ import static org.junit.Assert.*;
 
 public class EchoHandlerTest extends WireTestCommon {
 
+    private static void doTest(ChronicleContext context, ChannelHandler handler) {
+        ChronicleChannel channel = context.newChannelSupplier(handler).connectionTimeoutSecs(1).get();
+        Says says = channel.methodWriter(Says.class);
+        says.say("Hello World");
+
+        StringBuilder eventType = new StringBuilder();
+        String text = channel.readOne(eventType, String.class);
+        assertEquals("say: Hello World",
+                eventType + ": " + text);
+        try (DocumentContext dc = channel.readingDocument()) {
+            assertFalse(dc.isPresent());
+            assertFalse(dc.isMetaData());
+        }
+
+        final long now = SystemTimeProvider.CLOCK.currentTimeNanos();
+        channel.testMessage(now);
+        try (DocumentContext dc = channel.readingDocument()) {
+            assertTrue(dc.isPresent());
+            assertTrue(dc.isMetaData());
+        }
+        assertEquals(now, channel.lastTestMessage());
+    }
+
     @Test
     public void internal() {
         String url = "internal://";
@@ -82,11 +105,12 @@ public class EchoHandlerTest extends WireTestCommon {
         try (ChronicleGatewayMain gateway0 = new ChronicleGatewayMain(url0) {
             @Override
             protected @Nullable ChannelHandler validateHandler(TCPChronicleChannel channel, Marshallable marshallable) {
+                // for this test, the default behaviour is to act as an EchoHandler
                 if (marshallable instanceof GatewayHandler) {
                     GatewayHandler gh = (GatewayHandler) marshallable;
                     return new EchoHandler().systemContext(gh.systemContext()).sessionName(gh.sessionName());
                 }
-                throw new UnsupportedOperationException();
+                return new ErrorReplyHandler().errorMsg("Custom ChannelHandlers not supported");
             }
         }) {
             gateway0.name("target/zero");
@@ -124,29 +148,6 @@ public class EchoHandlerTest extends WireTestCommon {
                 }
             }
         }
-    }
-
-    private static void doTest(ChronicleContext context, ChannelHandler handler) {
-        ChronicleChannel channel = context.newChannelSupplier(handler).connectionTimeoutSecs(1).get();
-        Says says = channel.methodWriter(Says.class);
-        says.say("Hello World");
-
-        StringBuilder eventType = new StringBuilder();
-        String text = channel.readOne(eventType, String.class);
-        assertEquals("say: Hello World",
-                eventType + ": " + text);
-        try (DocumentContext dc = channel.readingDocument()) {
-            assertFalse(dc.isPresent());
-            assertFalse(dc.isMetaData());
-        }
-
-        final long now = SystemTimeProvider.CLOCK.currentTimeNanos();
-        channel.testMessage(now);
-        try (DocumentContext dc = channel.readingDocument()) {
-            assertTrue(dc.isPresent());
-            assertTrue(dc.isMetaData());
-        }
-        assertEquals(now, channel.lastTestMessage());
     }
 
     @Test
