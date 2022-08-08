@@ -22,8 +22,11 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.wire.DocumentContext;
+import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.channel.*;
+import net.openhft.chronicle.wire.channel.impl.TCPChronicleChannel;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -38,7 +41,7 @@ public class EchoHandlerTest extends WireTestCommon {
     public void internal() {
         String url = "internal://";
         try (ChronicleContext context = ChronicleContext.newContext(url)) {
-            doTest(context, false);
+            doTest(context, new EchoHandler().buffered(false));
         }
     }
 
@@ -50,7 +53,7 @@ public class EchoHandlerTest extends WireTestCommon {
                 .name("target/server")
                 .buffered(true)
                 .useAffinity(true)) {
-            doTest(context, false);
+            doTest(context, new EchoHandler().buffered(false));
         }
     }
 
@@ -68,7 +71,31 @@ public class EchoHandlerTest extends WireTestCommon {
                 .name("target/server")
                 .buffered(true)
                 .useAffinity(true)) {
-            doTest(context, true);
+            doTest(context, new EchoHandler().buffered(true));
+        }
+    }
+
+    @Test
+    public void gateway() throws IOException {
+        ignoreException("ClosedIORuntimeException");
+        String url0 = "tcp://localhost:65340";
+        try (ChronicleGatewayMain gateway0 = new ChronicleGatewayMain(url0) {
+            @Override
+            protected @Nullable ChannelHandler validateHandler(TCPChronicleChannel channel, Marshallable marshallable) {
+                if (marshallable instanceof GatewayHandler) {
+                    GatewayHandler gh = (GatewayHandler) marshallable;
+                    return new EchoHandler().systemContext(gh.systemContext()).sessionName(gh.sessionName());
+                }
+                throw new UnsupportedOperationException();
+            }
+        }) {
+            gateway0.name("target/zero");
+            // gateway that will handle the request
+            gateway0.start();
+
+            try (ChronicleContext context = ChronicleContext.newContext(url0).name("target/client")) {
+                doTest(context, new GatewayHandler());
+            }
         }
     }
 
@@ -93,15 +120,14 @@ public class EchoHandlerTest extends WireTestCommon {
                 gateway1.start();
 
                 try (ChronicleContext context = ChronicleContext.newContext(url1).name("target/client")) {
-                    doTest(context, false);
+                    doTest(context, new EchoHandler().buffered(false));
                 }
             }
         }
     }
 
-    private void doTest(ChronicleContext context, Boolean buffered) {
-        final EchoHandler echoHandler = new EchoHandler().buffered(buffered);
-        ChronicleChannel channel = context.newChannelSupplier(echoHandler).connectionTimeoutSecs(1).get();
+    private static void doTest(ChronicleContext context, ChannelHandler handler) {
+        ChronicleChannel channel = context.newChannelSupplier(handler).connectionTimeoutSecs(1).get();
         Says says = channel.methodWriter(Says.class);
         says.say("Hello World");
 

@@ -29,6 +29,7 @@ import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.channel.impl.BufferedChronicleChannel;
 import net.openhft.chronicle.wire.channel.impl.SocketRegistry;
 import net.openhft.chronicle.wire.channel.impl.TCPChronicleChannel;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.channels.ServerSocketChannel;
@@ -159,13 +160,8 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
         try {
             // get the header
             final Marshallable marshallable = channel.headerIn(redirectFunction);
-            if (!(marshallable instanceof ChannelHandler)) {
-                try (DocumentContext dc = channel.acquireWritingDocument(true)) {
-                    dc.wire().write("error").text("The header must be a BrokerHandler");
-                }
-                return;
-            }
-            ChannelHandler bh = (ChannelHandler) marshallable;
+            ChannelHandler bh = validateHandler(channel, marshallable);
+            if (bh == null) return;
             boolean buffered = this.buffered;
             if (bh.buffered() != null)
                 buffered = bh.buffered();
@@ -192,6 +188,17 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
             if (close)
                 Closeable.closeQuietly(channel2, channel);
         }
+    }
+
+    @Nullable
+    protected ChannelHandler validateHandler(TCPChronicleChannel channel, Marshallable marshallable) {
+        if (!(marshallable instanceof ChannelHandler)) {
+            try (DocumentContext dc = channel.acquireWritingDocument(true)) {
+                dc.wire().write("error").text("The header must be a ChannelHandler");
+            }
+            return null;
+        }
+        return (ChannelHandler) marshallable;
     }
 
     public int port() {

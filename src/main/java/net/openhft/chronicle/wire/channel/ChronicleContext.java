@@ -112,7 +112,7 @@ public class ChronicleContext extends SimpleCloseable {
         String connectionId = null;
         if (query != null) {
             QueryWire wire = new QueryWire(Bytes.from(query));
-            connectionId = wire.read("connectionId").text();
+            connectionId = wire.read("sessionName").text();
         }
         connectionSupplier
                 .protocol(url().getProtocol())

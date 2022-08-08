@@ -24,35 +24,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class RedirectHeader extends SelfDescribingMarshallable implements ChannelHeader {
+public class RedirectHeader extends AbstractHeader<RedirectHeader> {
     private final List<String> locations = new ArrayList<>();
-    private SystemContext systemContext;
-    private String connectionId;
 
     public RedirectHeader(List<String> locations) {
         this.locations.addAll(locations);
-    }
-
-    @Override
-    public SystemContext systemContext() {
-        return systemContext;
-    }
-
-    @Override
-    public RedirectHeader systemContext(SystemContext systemContext) {
-        this.systemContext = systemContext;
-        return this;
-    }
-
-    @Override
-    public String connectionId() {
-        return connectionId;
-    }
-
-    @Override
-    public ChannelHeader connectionId(String connectionId) {
-        this.connectionId = connectionId;
-        return this;
     }
 
     public List<String> locations() {

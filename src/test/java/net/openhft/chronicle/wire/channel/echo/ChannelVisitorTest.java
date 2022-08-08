@@ -23,21 +23,21 @@ public class ChannelVisitorTest {
 
     @Test
     public void testChannel() {
-        try (ChronicleContext context = ChronicleContext.newContext("tcp://:0?connectionId=testId");
+        try (ChronicleContext context = ChronicleContext.newContext("tcp://:0?sessionName=testId");
              final ChronicleChannel channel = context.newChannelSupplier(new ChannelVisitorHandler()).get()) {
             final ChannelVisiting visiting = channel.methodWriter(ChannelVisiting.class);
             int hostId = visitOne(channel, visiting, new ChannelHostId());
             assertEquals(0, hostId);
 
-            String connectionId = visitOne(channel, visiting, new ChannelConnectionId());
+            String connectionId = visitOne(channel, visiting, new ChannelSessionName());
             assertEquals("testId", connectionId);
         }
     }
 
-    static class ChannelConnectionId extends ChannelVisitor<String> {
+    static class ChannelSessionName extends ChannelVisitor<String> {
         @Override
         public String visit(ChronicleChannel channel) {
-            return channel.headerIn().connectionId();
+            return channel.headerIn().sessionName();
         }
     }
 

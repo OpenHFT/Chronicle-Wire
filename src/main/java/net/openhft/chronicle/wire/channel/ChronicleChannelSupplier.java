@@ -34,8 +34,8 @@ public class ChronicleChannelSupplier extends ChronicleChannelCfg<ChronicleChann
     @Override
     public ChronicleChannel get() {
         handler.systemContext(context.systemContext());
-        if (connectionId != null && handler.connectionId() == null)
-            handler.connectionId(connectionId);
+        if (connectionId != null && handler.sessionName() == null)
+            handler.sessionName(connectionId);
         final ChronicleChannel channel;
         switch (protocol) {
             case "tcp":

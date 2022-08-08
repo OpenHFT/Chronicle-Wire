@@ -20,29 +20,5 @@ package net.openhft.chronicle.wire.channel;
 
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
-public class OkHeader extends SelfDescribingMarshallable implements ChannelHeader {
-    private SystemContext systemContext;
-    private String connectionId;
-
-    @Override
-    public OkHeader systemContext(SystemContext systemContext) {
-        this.systemContext = systemContext;
-        return this;
-    }
-
-    @Override
-    public SystemContext systemContext() {
-        return systemContext;
-    }
-
-    @Override
-    public String connectionId() {
-        return connectionId;
-    }
-
-    @Override
-    public ChannelHeader connectionId(String connectionId) {
-        this.connectionId = connectionId;
-        return this;
-    }
+public class OkHeader extends AbstractHeader<OkHeader> {
 }

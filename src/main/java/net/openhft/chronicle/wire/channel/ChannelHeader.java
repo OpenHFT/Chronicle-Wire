@@ -24,6 +24,6 @@ public interface ChannelHeader extends Marshallable {
     SystemContext systemContext();
     ChannelHeader systemContext(SystemContext systemContext);
 
-    String connectionId();
-    ChannelHeader connectionId(String connectionId);
+    String sessionName();
+    ChannelHeader sessionName(String connectionId);
 }
