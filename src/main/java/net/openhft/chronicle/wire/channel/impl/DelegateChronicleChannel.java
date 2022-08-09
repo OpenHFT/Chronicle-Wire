@@ -48,6 +48,11 @@ public class DelegateChronicleChannel implements InternalChronicleChannel, Close
     }
 
     @Override
+    public ChannelHeader headerInToUse() {
+        return channel.headerInToUse();
+    }
+
+    @Override
     public void testMessage(long now) {
         channel.testMessage(now);
     }

@@ -104,10 +104,10 @@ public class EchoHandlerTest extends WireTestCommon {
         String url0 = "tcp://localhost:65340";
         try (ChronicleGatewayMain gateway0 = new ChronicleGatewayMain(url0) {
             @Override
-            protected @Nullable ChannelHandler validateHandler(TCPChronicleChannel channel, Marshallable marshallable) {
+            protected ChannelHeader replaceInHeader(ChannelHeader channelHeader) {
                 // for this test, the default behaviour is to act as an EchoHandler
-                if (marshallable instanceof GatewayHandler) {
-                    GatewayHandler gh = (GatewayHandler) marshallable;
+                if (channelHeader instanceof GatewayHandler) {
+                    GatewayHandler gh = (GatewayHandler) channelHeader;
                     return new EchoHandler().systemContext(gh.systemContext()).sessionName(gh.sessionName());
                 }
                 return new ErrorReplyHandler().errorMsg("Custom ChannelHandlers not supported");

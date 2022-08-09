@@ -129,11 +129,11 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
     }
 
     protected ChannelHeader replaceInHeader(ChannelHeader channelHeader) {
-        return null;
+        return channelHeader;
     }
 
     protected ChannelHeader replaceOutHeader(ChannelHeader channelHeader) {
-        return null;
+        return channelHeader;
     }
 
     private void waitForService() {
@@ -161,8 +161,8 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
         ChronicleChannel channel2 = null;
         try {
             // get the header
-            final Marshallable marshallable = channel.headerIn();
-            ChannelHandler bh = validateHandler(channel, marshallable);
+            final ChannelHeader channelHeader = channel.headerInToUse();
+            ChannelHandler bh = validateHandler(channelHeader);
             if (bh == null) return;
             boolean buffered = this.buffered;
             if (bh.buffered() != null)
@@ -193,12 +193,9 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
     }
 
     @Nullable
-    protected ChannelHandler validateHandler(TCPChronicleChannel channel, Marshallable marshallable) {
+    protected ChannelHandler validateHandler(Marshallable marshallable) {
         if (!(marshallable instanceof ChannelHandler)) {
-            try (DocumentContext dc = channel.acquireWritingDocument(true)) {
-                dc.wire().write("error").text("The header must be a ChannelHandler");
-            }
-            return null;
+            return new ErrorReplyHandler().errorMsg("The header must be a ChannelHandler");
         }
         return (ChannelHandler) marshallable;
     }

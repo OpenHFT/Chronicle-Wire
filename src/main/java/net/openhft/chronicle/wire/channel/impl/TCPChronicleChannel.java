@@ -298,6 +298,14 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
         return headerIn;
     }
 
+    @Override
+    public ChannelHeader headerInToUse() {
+        if (headerInToUse == null) {
+            acceptorRespondToHeader();
+        }
+        return headerInToUse;
+    }
+
     private void readHeader() {
         while (!Thread.currentThread().isInterrupted()) {
             try (DocumentContext dc = readingDocument()) {
