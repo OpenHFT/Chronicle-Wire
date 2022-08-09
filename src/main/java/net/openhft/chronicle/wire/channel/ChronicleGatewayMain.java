@@ -41,7 +41,6 @@ import java.util.function.Function;
 
 
 public class ChronicleGatewayMain extends ChronicleContext implements Closeable {
-    private final transient Function<ChannelHeader, ChannelHeader> redirectFunction;
     transient ServerSocketChannel ssc;
     transient Thread thread;
     @Comment("PauserMode to use in buffered channels")
@@ -58,7 +57,6 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
     public ChronicleGatewayMain(String url, SocketRegistry socketRegistry, SystemContext systemContext) {
         super(url, socketRegistry);
         this.systemContext(systemContext);
-        redirectFunction = this::redirect;
     }
 
     public static void main(String... args) throws IOException {
@@ -115,7 +113,7 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
             while (!isClosed()) {
                 final SocketChannel sc = ssc.accept();
                 sc.socket().setTcpNoDelay(true);
-                final TCPChronicleChannel channel = new TCPChronicleChannel(this, channelCfg, sc, redirectFunction);
+                final TCPChronicleChannel channel = new TCPChronicleChannel(systemContext(), channelCfg, sc, this::replaceInHeader, this::replaceOutHeader);
                 service.submit(() -> handle(channel));
             }
         } catch (Throwable e) {
@@ -130,6 +128,14 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
         }
     }
 
+    protected ChannelHeader replaceInHeader(ChannelHeader channelHeader) {
+        return null;
+    }
+
+    protected ChannelHeader replaceOutHeader(ChannelHeader channelHeader) {
+        return null;
+    }
+
     private void waitForService() {
         try {
             service.shutdownNow();
@@ -139,10 +145,6 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
             Jvm.warn().on(getClass(), e);
             Thread.currentThread().interrupt();
         }
-    }
-
-    protected ChannelHeader redirect(ChannelHeader channelHandler) {
-        return null;
     }
 
     @Override
@@ -159,7 +161,7 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
         ChronicleChannel channel2 = null;
         try {
             // get the header
-            final Marshallable marshallable = channel.headerIn(redirectFunction);
+            final Marshallable marshallable = channel.headerIn();
             ChannelHandler bh = validateHandler(channel, marshallable);
             if (bh == null) return;
             boolean buffered = this.buffered;
@@ -172,7 +174,7 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
                 return;
             }
             channel2 = buffered
-                    ? new BufferedChronicleChannel(channel, pauserMode.get(), redirectFunction)
+                    ? new BufferedChronicleChannel(channel, pauserMode.get())
                     : channel;
             System.out.println("Running " + channel2);
             bh.run(this, channel2);

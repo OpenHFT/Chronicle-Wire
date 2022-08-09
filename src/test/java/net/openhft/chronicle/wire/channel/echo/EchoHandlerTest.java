@@ -135,7 +135,7 @@ public class EchoHandlerTest extends WireTestCommon {
             gateway0.start();
             try (ChronicleGatewayMain gateway1 = new ChronicleGatewayMain(url1) {
                 @Override
-                protected ChannelHeader redirect(ChannelHeader channelHandler) {
+                protected ChannelHeader replaceOutHeader(ChannelHeader channelHeader) {
                     return new RedirectHeader(Arrays.asList(urlZzz, url0));
                 }
             }) {

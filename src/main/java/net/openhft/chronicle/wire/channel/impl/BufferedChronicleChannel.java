@@ -41,17 +41,15 @@ public class BufferedChronicleChannel extends DelegateChronicleChannel {
     private final WireExchanger exchanger = new WireExchanger();
     private final ExecutorService bgWriter;
     private final int lingerNs;
-    private final Function<ChannelHeader, ChannelHeader> redirectFunction;
     private volatile EventPoller eventPoller;
 
-    public BufferedChronicleChannel(TCPChronicleChannel channel, Pauser pauser, Function<ChannelHeader, ChannelHeader> redirectFunction) {
-        this(channel, pauser, redirectFunction, 8);
+    public BufferedChronicleChannel(TCPChronicleChannel channel, Pauser pauser) {
+        this(channel, pauser, 8);
     }
 
-    public BufferedChronicleChannel(TCPChronicleChannel channel, Pauser pauser, Function<ChannelHeader, ChannelHeader> redirectFunction, int lingerUs) {
+    public BufferedChronicleChannel(TCPChronicleChannel channel, Pauser pauser, int lingerUs) {
         super(channel);
         this.pauser = pauser;
-        this.redirectFunction = redirectFunction;
 
         lingerNs = lingerUs * 1000;
         String desc = channel.connectionCfg().initiator() ? "init" : "accp";
@@ -79,7 +77,7 @@ public class BufferedChronicleChannel extends DelegateChronicleChannel {
             final TCPChronicleChannel channel = (TCPChronicleChannel) this.channel;
             while (!isClosing()) {
                 long start = System.nanoTime();
-                channel.checkConnected(redirectFunction);
+                channel.checkConnected();
                 final Wire wire = exchanger.acquireConsumer();
                 if (wire.bytes().isEmpty()) {
                     final EventPoller eventPoller = this.eventPoller();

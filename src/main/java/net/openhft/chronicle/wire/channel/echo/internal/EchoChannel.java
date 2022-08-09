@@ -59,11 +59,6 @@ public class EchoChannel extends SimpleCloseable implements ChronicleChannel {
     }
 
     @Override
-    public ChannelHeader headerIn(Function<ChannelHeader, ChannelHeader> redirectFunction) {
-        return redirectFunction.apply(headerIn());
-    }
-
-    @Override
     public void testMessage(long now) {
         this.lastTestMessage = now;
         try (DocumentContext dc = writingDocument(true)) {
