@@ -23,6 +23,11 @@ package net.openhft.chronicle.wire.channel;
  */
 public interface InternalChronicleChannel extends ChronicleChannel {
     /**
+     * The header in to use based on the acceptors replacement rules.
+     */
+    ChannelHeader headerInToUse();
+
+    /**
      * @return true if eventPollers are supported by this Channel.
      */
     boolean supportsEventPoller();

@@ -22,8 +22,11 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.wire.DocumentContext;
+import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.channel.*;
+import net.openhft.chronicle.wire.channel.impl.TCPChronicleChannel;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -34,74 +37,8 @@ import static org.junit.Assert.*;
 
 public class EchoHandlerTest extends WireTestCommon {
 
-    @Test
-    public void internal() {
-        String url = "internal://";
-        try (ChronicleContext context = ChronicleContext.newContext(url)) {
-            doTest(context, false);
-        }
-    }
-
-    @Test
-    public void server() {
-        String url = "tcp://:0";
-        IOTools.deleteDirWithFiles("target/server");
-        try (ChronicleContext context = ChronicleContext.newContext(url)
-                .name("target/server")
-                .buffered(true)
-                .useAffinity(true)) {
-            doTest(context, false);
-        }
-    }
-
-    @Test
-    @Ignore(/* TODO FIX */)
-    public void serverBuffered() {
-        ignoreException("Closed");
-        if (Jvm.isArm()) {
-            ignoreException("Using Pauser.balanced() as not enough processors");
-            ignoreException("bgWriter died");
-        }
-        String url = "tcp://:0";
-        IOTools.deleteDirWithFiles("target/server");
-        try (ChronicleContext context = ChronicleContext.newContext(url)
-                .name("target/server")
-                .buffered(true)
-                .useAffinity(true)) {
-            doTest(context, true);
-        }
-    }
-
-    @Test
-    public void redirectedServer() throws IOException {
-        ignoreException("ClosedIORuntimeException");
-        String urlZzz = "tcp://localhost:65329";
-        String url0 = "tcp://localhost:65330";
-        String url1 = "tcp://localhost:65331";
-        try (ChronicleGatewayMain gateway0 = new ChronicleGatewayMain(url0)) {
-            gateway0.name("target/zero");
-            // gateway that will handle the request
-            gateway0.start();
-            try (ChronicleGatewayMain gateway1 = new ChronicleGatewayMain(url1) {
-                @Override
-                protected ChannelHeader redirect(ChannelHeader channelHandler) {
-                    return new RedirectHeader(Arrays.asList(urlZzz, url0));
-                }
-            }) {
-                gateway1.name("target/one");
-                // gateway that will handle the redirect request
-                gateway1.start();
-
-                try (ChronicleContext context = ChronicleContext.newContext(url1).name("target/client")) {
-                    doTest(context, false);
-                }
-            }
-        }
-    }
-
-    private void doTest(ChronicleContext context, Boolean buffered) {
-        final EchoHandler echoHandler = new EchoHandler().buffered(buffered);
-        ChronicleChannel channel = context.newChannelSupplier(echoHandler).connectionTimeoutSecs(1).get();
+    private static void doTest(ChronicleContext context, ChannelHandler handler) {
+        ChronicleChannel channel = context.newChannelSupplier(handler).connectionTimeoutSecs(1).get();
         Says says = channel.methodWriter(Says.class);
         says.say("Hello World");
 
@@ -121,6 +58,96 @@ public class EchoHandlerTest extends WireTestCommon {
             assertTrue(dc.isMetaData());
         }
         assertEquals(now, channel.lastTestMessage());
+    }
+
+    @Test
+    public void internal() {
+        String url = "internal://";
+        try (ChronicleContext context = ChronicleContext.newContext(url)) {
+            doTest(context, new EchoHandler().buffered(false));
+        }
+    }
+
+    @Test
+    public void server() {
+        String url = "tcp://:0";
+        IOTools.deleteDirWithFiles("target/server");
+        try (ChronicleContext context = ChronicleContext.newContext(url)
+                .name("target/server")
+                .buffered(true)
+                .useAffinity(true)) {
+            doTest(context, new EchoHandler().buffered(false));
+        }
+    }
+
+    @Test
+    @Ignore(/* TODO FIX */)
+    public void serverBuffered() {
+        ignoreException("Closed");
+        if (Jvm.isArm()) {
+            ignoreException("Using Pauser.balanced() as not enough processors");
+            ignoreException("bgWriter died");
+        }
+        String url = "tcp://:0";
+        IOTools.deleteDirWithFiles("target/server");
+        try (ChronicleContext context = ChronicleContext.newContext(url)
+                .name("target/server")
+                .buffered(true)
+                .useAffinity(true)) {
+            doTest(context, new EchoHandler().buffered(true));
+        }
+    }
+
+    @Test
+    public void gateway() throws IOException {
+        ignoreException("ClosedIORuntimeException");
+        String url0 = "tcp://localhost:65340";
+        try (ChronicleGatewayMain gateway0 = new ChronicleGatewayMain(url0) {
+            @Override
+            protected ChannelHeader replaceInHeader(ChannelHeader channelHeader) {
+                // for this test, the default behaviour is to act as an EchoHandler
+                if (channelHeader instanceof GatewayHandler) {
+                    GatewayHandler gh = (GatewayHandler) channelHeader;
+                    return new EchoHandler().systemContext(gh.systemContext()).sessionName(gh.sessionName());
+                }
+                return new ErrorReplyHandler().errorMsg("Custom ChannelHandlers not supported");
+            }
+        }) {
+            gateway0.name("target/zero");
+            // gateway that will handle the request
+            gateway0.start();
+
+            try (ChronicleContext context = ChronicleContext.newContext(url0).name("target/client")) {
+                doTest(context, new GatewayHandler());
+            }
+        }
+    }
+
+    @Test
+    public void redirectedServer() throws IOException {
+        ignoreException("ClosedIORuntimeException");
+        String urlZzz = "tcp://localhost:65329";
+        String url0 = "tcp://localhost:65330";
+        String url1 = "tcp://localhost:65331";
+        try (ChronicleGatewayMain gateway0 = new ChronicleGatewayMain(url0)) {
+            gateway0.name("target/zero");
+            // gateway that will handle the request
+            gateway0.start();
+            try (ChronicleGatewayMain gateway1 = new ChronicleGatewayMain(url1) {
+                @Override
+                protected ChannelHeader replaceOutHeader(ChannelHeader channelHeader) {
+                    return new RedirectHeader(Arrays.asList(urlZzz, url0));
+                }
+            }) {
+                gateway1.name("target/one");
+                // gateway that will handle the redirect request
+                gateway1.start();
+
+                try (ChronicleContext context = ChronicleContext.newContext(url1).name("target/client")) {
+                    doTest(context, new EchoHandler().buffered(false));
+                }
+            }
+        }
     }
 
     @Test

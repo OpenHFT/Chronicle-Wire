@@ -35,6 +35,7 @@ import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
+import static java.util.Objects.*;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 import static net.openhft.chronicle.core.io.ClosedIORuntimeException.newIORuntimeException;
 
@@ -48,11 +49,14 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
     private final Wire in = createBuffer();
     private final Wire out = createBuffer();
     private final DocumentContextHolder dch = new ConnectionDocumentContextHolder();
-    private final Function<ChannelHeader, ChannelHeader> redirectFunction;
+
+    private final Function<ChannelHeader, ChannelHeader> replaceInHeader;
+    private final Function<ChannelHeader, ChannelHeader> replaceOutHeader;
     private ChronicleContext chronicleContext;
     private SystemContext systemContext;
     private SocketChannel sc;
     private ChannelHeader headerIn;
+    private ChannelHeader headerInToUse;
     private ChannelHeader headerOut;
     private long lastTestMessage;
     private SocketRegistry socketRegistry;
@@ -60,35 +64,38 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
     private boolean endOfData = false;
     private boolean unsentTestMessage = false;
 
-    public TCPChronicleChannel(ChronicleChannelCfg channelCfg, ChannelHeader headerOut, Function<ChannelHeader, ChannelHeader> redirectFunction, SocketRegistry socketRegistry) {
-        this.channelCfg = Objects.requireNonNull(channelCfg);
-        this.headerOut = Objects.requireNonNull(headerOut);
-        this.redirectFunction = redirectFunction;
+    /**
+     * Initiator constructor
+     */
+    public TCPChronicleChannel(ChronicleChannelCfg channelCfg,
+                               ChannelHeader headerOut,
+                               SocketRegistry socketRegistry) {
+        this.channelCfg = requireNonNull(channelCfg);
+        this.headerOut = requireNonNull(headerOut);
         this.socketRegistry = socketRegistry;
+        this.replaceInHeader = null;
+        this.replaceOutHeader = null;
         if (channelCfg.port() < -1)
             throw new IllegalArgumentException("Invalid port " + channelCfg.port());
 
         this.sc = null;
         assert channelCfg.initiator();
-        checkConnected(this.redirectFunction);
+        checkConnected();
     }
 
-    public TCPChronicleChannel(ChronicleContext chronicleContext, ChronicleChannelCfg channelCfg, SocketChannel sc, Function<ChannelHeader, ChannelHeader> redirectFunction) {
-        this.chronicleContext = chronicleContext;
-        this.systemContext = chronicleContext.systemContext();
-        this.channelCfg = Objects.requireNonNull(channelCfg);
-        this.sc = Objects.requireNonNull(sc);
-        this.redirectFunction = redirectFunction;
-
-        this.headerOut = null;
-        assert !channelCfg.initiator();
-    }
-
-    public TCPChronicleChannel(SystemContext systemContext, ChronicleChannelCfg channelCfg, SocketChannel sc, Function<ChannelHeader, ChannelHeader> redirectFunction) {
+    /**
+     * Acceptor constructor
+     */
+    public TCPChronicleChannel(SystemContext systemContext,
+                               ChronicleChannelCfg channelCfg,
+                               SocketChannel sc,
+                               Function<ChannelHeader, ChannelHeader> replaceInHeader,
+                               Function<ChannelHeader, ChannelHeader> replaceOutHeader) {
         this.systemContext = systemContext;
-        this.channelCfg = Objects.requireNonNull(channelCfg);
-        this.sc = Objects.requireNonNull(sc);
-        this.redirectFunction = redirectFunction;
+        this.channelCfg = requireNonNull(channelCfg);
+        this.sc = requireNonNull(sc);
+        this.replaceInHeader = requireNonNull(replaceInHeader);
+        this.replaceOutHeader = requireNonNull(replaceOutHeader);
 
         this.headerOut = null;
         assert !channelCfg.initiator();
@@ -168,7 +175,7 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
     }
 
     private DocumentContext readingDocument0() {
-        checkConnected(redirectFunction);
+        checkConnected();
         @SuppressWarnings("unchecked") final Bytes<ByteBuffer> bytes = (Bytes) in.bytes();
         if (bytes.readRemaining() == 0)
             bytes.clear();
@@ -206,10 +213,10 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
         return in.readingDocument();
     }
 
-    synchronized void checkConnected(Function<ChannelHeader, ChannelHeader> redirectFunction) {
+    synchronized void checkConnected() {
         if (sc != null && sc.isOpen()) {
             if (headerOut == null) {
-                acceptorRespondToHeader(redirectFunction);
+                acceptorRespondToHeader();
             }
             return;
         }
@@ -251,18 +258,19 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
             Closeable.closeQuietly(socketRegistry);
     }
 
-    synchronized void acceptorRespondToHeader(Function<ChannelHeader, ChannelHeader> redirectFunction) {
+    synchronized void acceptorRespondToHeader() {
         headerOut = NO_HEADER;
         readHeader();
-        final ChannelHeader redirectHeader = redirectFunction.apply(headerIn);
-        if (redirectHeader == null) {
+        headerInToUse = replaceInHeader.apply(headerIn);
+        final ChannelHeader replyHeader = replaceOutHeader.apply(headerInToUse);
+        if (replyHeader == null) {
             if (headerIn instanceof ChannelHandler) // it's a ChannelHeader
                 headerOut = ((ChannelHandler) headerIn).responseHeader(chronicleContext);
             else // reject the connection
                 //noinspection unchecked
                 headerOut = new RedirectHeader(Collections.EMPTY_LIST);
         } else { // return the header
-            headerOut = redirectHeader;
+            headerOut = replyHeader;
         }
         if (systemContext != null)
             headerOut.systemContext(systemContext);
@@ -285,17 +293,17 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
     @Override
     public ChannelHeader headerIn() {
         if (headerIn == null) {
-            acceptorRespondToHeader(redirectFunction);
+            acceptorRespondToHeader();
         }
         return headerIn;
     }
 
     @Override
-    public ChannelHeader headerIn(Function<ChannelHeader, ChannelHeader> redirectFunction) {
-        if (headerIn == null) {
-            acceptorRespondToHeader(redirectFunction);
+    public ChannelHeader headerInToUse() {
+        if (headerInToUse == null) {
+            acceptorRespondToHeader();
         }
-        return headerIn;
+        return headerInToUse;
     }
 
     private void readHeader() {
@@ -318,7 +326,7 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
 
     @Override
     public DocumentContext writingDocument(boolean metaData) throws UnrecoverableTimeoutException {
-        checkConnected(redirectFunction);
+        checkConnected();
         lock.lock();
 
         final DocumentContext dc = out.writingDocument(metaData);
@@ -352,12 +360,27 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
 
     @Override
     public DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException {
-        checkConnected(redirectFunction);
+        checkConnected();
         lock.lock();
 
         final DocumentContext dc = out.acquireWritingDocument(metaData);
         dch.documentContext(dc);
         return dch;
+    }
+
+    @Override
+    public boolean supportsEventPoller() {
+        return false;
+    }
+
+    @Override
+    public EventPoller eventPoller() {
+        return null;
+    }
+
+    @Override
+    public ChronicleChannel eventPoller(EventPoller eventPoller) {
+        throw new UnsupportedOperationException();
     }
 
     private class ConnectionDocumentContextHolder extends DocumentContextHolder implements WriteDocumentContext {
@@ -388,20 +411,5 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
             if (dc instanceof WriteDocumentContext)
                 ((WriteDocumentContext) dc).chainedElement(chainedElement);
         }
-    }
-
-    @Override
-    public boolean supportsEventPoller() {
-        return false;
-    }
-
-    @Override
-    public EventPoller eventPoller() {
-        return null;
-    }
-
-    @Override
-    public ChronicleChannel eventPoller(EventPoller eventPoller) {
-        throw new UnsupportedOperationException();
     }
 }

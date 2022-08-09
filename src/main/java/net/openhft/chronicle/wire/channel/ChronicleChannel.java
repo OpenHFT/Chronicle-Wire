@@ -39,7 +39,7 @@ import java.util.function.Function;
 
 public interface ChronicleChannel extends Closeable, MarshallableOut, MarshallableIn {
     static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg channelCfg, ChannelHeader headerOut) {
-        TCPChronicleChannel simpleConnection = new TCPChronicleChannel(channelCfg, headerOut, null, socketRegistry);
+        TCPChronicleChannel simpleConnection = new TCPChronicleChannel(channelCfg, headerOut, socketRegistry);
         final ChannelHeader marshallable = simpleConnection.headerIn();
         System.out.println("Client got " + marshallable);
         if (marshallable instanceof RedirectHeader) {
@@ -59,7 +59,7 @@ public interface ChronicleChannel extends Closeable, MarshallableOut, Marshallab
             throw new IORuntimeException("No urls available " + rh);
         }
         return channelCfg.buffered()
-                ? new BufferedChronicleChannel(simpleConnection, channelCfg.pauserMode().get(), null)
+                ? new BufferedChronicleChannel(simpleConnection, channelCfg.pauserMode().get())
                 : simpleConnection;
     }
 
@@ -68,8 +68,6 @@ public interface ChronicleChannel extends Closeable, MarshallableOut, Marshallab
     ChannelHeader headerOut();
 
     ChannelHeader headerIn();
-
-    ChannelHeader headerIn(Function<ChannelHeader, ChannelHeader> redirectFunction);
 
     /**
      * Read one event and return a value

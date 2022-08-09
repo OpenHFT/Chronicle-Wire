@@ -48,8 +48,8 @@ public class DelegateChronicleChannel implements InternalChronicleChannel, Close
     }
 
     @Override
-    public ChannelHeader headerIn(Function<ChannelHeader, ChannelHeader> redirectFunction) {
-        return channel.headerIn(redirectFunction);
+    public ChannelHeader headerInToUse() {
+        return channel.headerInToUse();
     }
 
     @Override

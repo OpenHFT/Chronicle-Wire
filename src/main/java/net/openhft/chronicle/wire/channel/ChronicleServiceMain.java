@@ -67,12 +67,12 @@ public class ChronicleServiceMain extends SelfDescribingMarshallable implements 
             ssc = ServerSocketChannel.open();
             ssc.bind(new InetSocketAddress(port));
             ChronicleChannelCfg channelCfg = new ChronicleChannelCfg().port(port);
-            Function<ChannelHeader, ChannelHeader> redirectFunction = this::redirect;
+            Function<ChannelHeader, ChannelHeader> redirectFunction = this::replaceOutHeader;
             while (!isClosed()) {
                 final SocketChannel sc = ssc.accept();
                 sc.socket().setTcpNoDelay(true);
-                final TCPChronicleChannel connection0 = new TCPChronicleChannel(SystemContext.INSTANCE, channelCfg, sc, redirectFunction);
-                ChronicleChannel channel = buffered ? new BufferedChronicleChannel(connection0, Pauser.balanced(), redirectFunction) : connection0;
+                final TCPChronicleChannel connection0 = new TCPChronicleChannel(SystemContext.INSTANCE, channelCfg, sc, h -> h, redirectFunction);
+                ChronicleChannel channel = buffered ? new BufferedChronicleChannel(connection0, Pauser.balanced()) : connection0;
                 channels.add(channel);
                 service.submit(() -> new ConnectionHandler(channel).run());
             }
@@ -96,7 +96,7 @@ public class ChronicleServiceMain extends SelfDescribingMarshallable implements 
         }
     }
 
-    protected ChannelHeader redirect(ChannelHeader channelHandler) {
+    protected ChannelHeader replaceOutHeader(ChannelHeader channelHandler) {
         if (channelHandler instanceof OkHeader)
             return new OkHeader();
         //noinspection unchecked
@@ -124,7 +124,7 @@ public class ChronicleServiceMain extends SelfDescribingMarshallable implements 
 
         void run() {
             try {
-                System.out.println("Server got " + channel.headerIn(ChronicleServiceMain.this::redirect));
+                System.out.println("Server got " + channel.headerIn());
 
                 final Marshallable microservice = ChronicleServiceMain.this.microservice.deepCopy();
                 final Field field = Jvm.getFieldOrNull(microservice.getClass(), "out");

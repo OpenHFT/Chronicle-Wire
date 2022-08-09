@@ -29,6 +29,7 @@ import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.channel.impl.BufferedChronicleChannel;
 import net.openhft.chronicle.wire.channel.impl.SocketRegistry;
 import net.openhft.chronicle.wire.channel.impl.TCPChronicleChannel;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.channels.ServerSocketChannel;
@@ -40,7 +41,6 @@ import java.util.function.Function;
 
 
 public class ChronicleGatewayMain extends ChronicleContext implements Closeable {
-    private final transient Function<ChannelHeader, ChannelHeader> redirectFunction;
     transient ServerSocketChannel ssc;
     transient Thread thread;
     @Comment("PauserMode to use in buffered channels")
@@ -57,7 +57,6 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
     public ChronicleGatewayMain(String url, SocketRegistry socketRegistry, SystemContext systemContext) {
         super(url, socketRegistry);
         this.systemContext(systemContext);
-        redirectFunction = this::redirect;
     }
 
     public static void main(String... args) throws IOException {
@@ -114,7 +113,7 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
             while (!isClosed()) {
                 final SocketChannel sc = ssc.accept();
                 sc.socket().setTcpNoDelay(true);
-                final TCPChronicleChannel channel = new TCPChronicleChannel(this, channelCfg, sc, redirectFunction);
+                final TCPChronicleChannel channel = new TCPChronicleChannel(systemContext(), channelCfg, sc, this::replaceInHeader, this::replaceOutHeader);
                 service.submit(() -> handle(channel));
             }
         } catch (Throwable e) {
@@ -129,6 +128,14 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
         }
     }
 
+    protected ChannelHeader replaceInHeader(ChannelHeader channelHeader) {
+        return channelHeader;
+    }
+
+    protected ChannelHeader replaceOutHeader(ChannelHeader channelHeader) {
+        return channelHeader;
+    }
+
     private void waitForService() {
         try {
             service.shutdownNow();
@@ -138,10 +145,6 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
             Jvm.warn().on(getClass(), e);
             Thread.currentThread().interrupt();
         }
-    }
-
-    protected ChannelHeader redirect(ChannelHeader channelHandler) {
-        return null;
     }
 
     @Override
@@ -158,14 +161,9 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
         ChronicleChannel channel2 = null;
         try {
             // get the header
-            final Marshallable marshallable = channel.headerIn(redirectFunction);
-            if (!(marshallable instanceof ChannelHandler)) {
-                try (DocumentContext dc = channel.acquireWritingDocument(true)) {
-                    dc.wire().write("error").text("The header must be a BrokerHandler");
-                }
-                return;
-            }
-            ChannelHandler bh = (ChannelHandler) marshallable;
+            final ChannelHeader channelHeader = channel.headerInToUse();
+            ChannelHandler bh = validateHandler(channelHeader);
+            if (bh == null) return;
             boolean buffered = this.buffered;
             if (bh.buffered() != null)
                 buffered = bh.buffered();
@@ -176,7 +174,7 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
                 return;
             }
             channel2 = buffered
-                    ? new BufferedChronicleChannel(channel, pauserMode.get(), redirectFunction)
+                    ? new BufferedChronicleChannel(channel, pauserMode.get())
                     : channel;
             System.out.println("Running " + channel2);
             bh.run(this, channel2);
@@ -192,6 +190,14 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
             if (close)
                 Closeable.closeQuietly(channel2, channel);
         }
+    }
+
+    @Nullable
+    protected ChannelHandler validateHandler(Marshallable marshallable) {
+        if (!(marshallable instanceof ChannelHandler)) {
+            return new ErrorReplyHandler().errorMsg("The header must be a ChannelHandler");
+        }
+        return (ChannelHandler) marshallable;
     }
 
     public int port() {

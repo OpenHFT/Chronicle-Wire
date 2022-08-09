@@ -19,10 +19,12 @@
 package net.openhft.chronicle.wire.channel;
 
 import net.openhft.affinity.AffinityLock;
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.SimpleCloseable;
 import net.openhft.chronicle.core.util.WeakIdentityHashMap;
+import net.openhft.chronicle.wire.QueryWire;
 import net.openhft.chronicle.wire.channel.impl.SocketRegistry;
 import net.openhft.chronicle.wire.channel.impl.internal.Handler;
 
@@ -106,10 +108,17 @@ public class ChronicleContext extends SimpleCloseable {
         final ChronicleChannelSupplier connectionSupplier = new ChronicleChannelSupplier(this, handler);
         final String hostname = url().getHost();
         final int port = gateway == null ? url().getPort() : gateway.port();
+        String query = url().getQuery();
+        String connectionId = null;
+        if (query != null) {
+            QueryWire wire = new QueryWire(Bytes.from(query));
+            connectionId = wire.read("sessionName").text();
+        }
         connectionSupplier
                 .protocol(url().getProtocol())
                 .hostname(hostname == null || hostname.isEmpty() ? "localhost" : hostname)
                 .port(port)
+                .connectionId(connectionId)
                 .buffered(buffered())
                 .initiator(true);
         return connectionSupplier;

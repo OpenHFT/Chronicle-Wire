@@ -21,7 +21,9 @@ package net.openhft.chronicle.wire.channel;
 import net.openhft.chronicle.wire.Marshallable;
 
 public interface ChannelHeader extends Marshallable {
+    SystemContext systemContext();
     ChannelHeader systemContext(SystemContext systemContext);
 
-    SystemContext systemContext();
+    String sessionName();
+    ChannelHeader sessionName(String connectionId);
 }
