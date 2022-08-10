@@ -101,7 +101,7 @@ public enum Wires {
     });
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(Bytes.allocateElasticOnHeap()));
-    static final boolean DUMP_CODE_TO_TARGET = Jvm.getBoolean("dumpCodeToTarget");
+    static final boolean DUMP_CODE_TO_TARGET = Jvm.getBoolean("dumpCodeToTarget", Jvm.isDebug());
     private static final int TID_MASK = 0b00111111_11111111_11111111_11111111;
     private static final int INVERSE_TID_MASK = ~TID_MASK;
     public static boolean GENERATE_TUPLES = Jvm.getBoolean("wire.generate.tuples");
@@ -727,7 +727,7 @@ public enum Wires {
         if (CACHED_COMPILER == null) {
             final String target = OS.getTarget();
             CACHED_COMPILER =
-                    new File(target).exists() && Jvm.isDebug() && DUMP_CODE_TO_TARGET
+                    new File(target).exists() && DUMP_CODE_TO_TARGET
                             ? new CachedCompiler(new File(target, "generated-test-sources"), new File(target, "test-classes"))
                             : new CachedCompiler((File) null, (File) null);
         }
