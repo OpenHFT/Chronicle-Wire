@@ -18,6 +18,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.internal.SingleMappedFile;
+import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.annotation.ScopeConfined;
+import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.io.VanillaReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
@@ -25,11 +30,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.annotation.RetentionPolicy;
 import java.time.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -1446,6 +1455,34 @@ public class BinaryWireTest extends WireTestCommon {
                 "}\n" +
                 "\n" +
                 "three\n", sb.toString());
+    }
+
+    @Test
+    public void writeEndOfWireDoesNotUpdateModifiedTimeOnNoOpWhenUnderlyingBytesIsFile() throws IOException {
+        final File tempFile = IOTools.createTempFile("test-lastModified-endOfWire");
+        final AtomicLong endOfWirePosition = new AtomicLong();
+        createWireFromFileAnd(tempFile, wire -> {
+            wire.write("testing-testing").int8(123);
+            endOfWirePosition.set(wire.bytes().writePosition());
+            assertTrue(wire.writeEndOfWire(100, TimeUnit.MILLISECONDS, endOfWirePosition.get()));
+        });
+        long lastModified = tempFile.lastModified();
+        Jvm.pause(10);
+        createWireFromFileAnd(tempFile, wire -> {
+            // This should be a no-op and not result in an update to lastModifiedTime
+            assertFalse(wire.writeEndOfWire(100, TimeUnit.MILLISECONDS, endOfWirePosition.get()));
+        });
+        assertEquals(lastModified, tempFile.lastModified());
+    }
+
+    private void createWireFromFileAnd(File file, Consumer<@ScopeConfined Wire> wireConsumer) throws IOException {
+        VanillaReferenceOwner owner = new VanillaReferenceOwner("test");
+        try (MappedFile mappedFile = SingleMappedFile.mappedFile(file, 10_240)) {
+            final Bytes<?> bytes = mappedFile.acquireBytesForWrite(owner, 0);
+            Wire wire = WireType.BINARY.apply(bytes);
+            wireConsumer.accept(wire);
+            bytes.releaseLast(owner);
+        }
     }
 
     enum BWKey implements WireKey {
