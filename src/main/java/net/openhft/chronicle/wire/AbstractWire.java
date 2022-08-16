@@ -436,7 +436,7 @@ public abstract class AbstractWire implements Wire {
                     pos += BytesUtil.padOffset(pos);
 
                 if (MEMORY.safeAlignedInt(pos)) {
-                    if (bytes.compareAndSwapInt(pos, 0, END_OF_DATA)) {
+                    if (bytes.readVolatileInt(pos) == 0 && bytes.compareAndSwapInt(pos, 0, END_OF_DATA)) {
                         bytes.writePosition(pos + SPB_HEADER_SIZE);
                         write("EOF");
                         return true;

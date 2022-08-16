@@ -18,8 +18,13 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.MappedFile;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
+import net.openhft.chronicle.bytes.internal.SingleMappedFile;
+import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.io.VanillaReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
@@ -27,11 +32,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.annotation.RetentionPolicy;
 import java.time.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -588,7 +597,7 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write().bool(false)
                 .write().bool(true)
                 .write().bool(null);
-       // System.out.println(wire);
+        // System.out.println(wire);
         wire.read().bool(false, Assert::assertEquals)
                 .read().bool(true, Assert::assertEquals)
                 .read().bool(null, Assert::assertEquals);
@@ -688,7 +697,7 @@ public class BinaryWireTest extends WireTestCommon {
                 .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
                 .write()
                 .bytes(allBytes);
-       // System.out.println(bytes.toDebugString());
+        // System.out.println(bytes.toDebugString());
         @SuppressWarnings("rawtypes")
         @NotNull NativeBytes allBytes2 = nativeBytes();
         wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
@@ -702,7 +711,7 @@ public class BinaryWireTest extends WireTestCommon {
 
     @Test
     public void testWriteMarshallable() {
-       // BinaryWire.SPEC = 18;
+        // BinaryWire.SPEC = 18;
 
         @NotNull Wire wire = createWire();
         @NotNull MyTypesCustom mtA = new MyTypesCustom();
@@ -722,7 +731,7 @@ public class BinaryWireTest extends WireTestCommon {
         mtB.text.append("Bye now");
         wire.write(() -> "B").marshallable(mtB);
 
-               // System.out.println(wire.bytes().toDebugString(400));
+        // System.out.println(wire.bytes().toDebugString(400));
         checkWire(wire,
                 "[pos: 0, rlim: 134, wlim: 2147483632, cap: 2147483632 ] ǁÁA\\u0082>٠٠٠ÆB_FLAG±ÅS_NUM¥90ÅD_NUM\\u0094\\u0080\u00ADKÅL_NUM٠ÅI_NUM¦C\\u009ECÿÄTEXTëHello WorldÁB\\u0082:٠٠٠ÆB_FLAG°ÅS_NUM¥Ò⒋ÅD_NUM\\u0094\\u0087\u00ADKÅL_NUM٠ÅI_NUM¦\\u009E.¤øÄTEXTçBye now‡٠٠٠٠٠٠٠٠",
                 "[pos: 0, rlim: 134, wlim: 2147483632, cap: 2147483632 ] ǁÁA\\u0082>٠٠٠ÆB_FLAG±ÅS_NUM¥90ÅD_NUM\\u0094\\u0080\u00ADKÅL_NUM٠ÅI_NUM¦C\\u009ECÿÄTEXTëHello WorldÁB\\u0082:٠٠٠ÆB_FLAG°ÅS_NUM¥Ò⒋ÅD_NUM\\u0094\\u0087\u00ADKÅL_NUM٠ÅI_NUM¦\\u009E.¤øÄTEXTçBye now‡٠٠٠٠٠٠٠٠",
@@ -771,7 +780,7 @@ public class BinaryWireTest extends WireTestCommon {
             @NotNull String s = new String(chars);
             wire.writeDocument(false, w -> w.write(() -> "message").text(s));
 
-           // System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
+            // System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
             wire.readDocument(null, w -> w.read(() -> "message").text(s, Assert::assertEquals));
         }
     }
@@ -783,14 +792,14 @@ public class BinaryWireTest extends WireTestCommon {
         @NotNull Object[] noObjects = {};
         wire.write("a").object(noObjects);
 
-       // System.out.println(wire.asText());
+        // System.out.println(wire.asText());
         @Nullable Object[] object = wire.read()
                 .object(Object[].class);
         assertEquals(0, object.length);
 
         @NotNull Object[] threeObjects = {"abc", "def", "ghi"};
         wire.write("b").object(threeObjects);
-       // System.out.println(wire.asText());
+        // System.out.println(wire.asText());
 
         @Nullable Object[] object2 = wire.read()
                 .object(Object[].class);
@@ -830,7 +839,7 @@ public class BinaryWireTest extends WireTestCommon {
 
         try (DocumentContext dc = w.readingDocument()) {
 
-           // System.out.println(Wires.fromSizePrefixedBlobs(dc));
+            // System.out.println(Wires.fromSizePrefixedBlobs(dc));
 
             StringBuilder sb = Wires.acquireStringBuilder();
 
@@ -896,6 +905,34 @@ public class BinaryWireTest extends WireTestCommon {
             wire.getValueIn().skipValue();
             assertEquals(0, wire.bytes().readRemaining());
             wire.clear();
+        }
+    }
+
+    @Test
+    public void writeEndOfWireDoesNotUpdateModifiedTimeOnNoOpWhenUnderlyingBytesIsFile() throws IOException {
+        final File tempFile = IOTools.createTempFile("test-lastModified-endOfWire");
+        final AtomicLong endOfWirePosition = new AtomicLong();
+        createWireFromFileAnd(tempFile, wire -> {
+            wire.write("testing-testing").int8(123);
+            endOfWirePosition.set(wire.bytes().writePosition());
+            assertTrue(wire.writeEndOfWire(100, TimeUnit.MILLISECONDS, endOfWirePosition.get()));
+        });
+        long lastModified = tempFile.lastModified();
+        Jvm.pause(10);
+        createWireFromFileAnd(tempFile, wire -> {
+            // This should be a no-op and not result in an update to lastModifiedTime
+            assertFalse(wire.writeEndOfWire(100, TimeUnit.MILLISECONDS, endOfWirePosition.get()));
+        });
+        assertEquals(lastModified, tempFile.lastModified());
+    }
+
+    private void createWireFromFileAnd(File file, Consumer<Wire> wireConsumer) throws IOException {
+        VanillaReferenceOwner owner = new VanillaReferenceOwner("test");
+        try (MappedFile mappedFile = SingleMappedFile.mappedFile(file, 10_240)) {
+            final Bytes<?> bytes = mappedFile.acquireBytesForWrite(owner, 0);
+            Wire wire = WireType.BINARY.apply(bytes);
+            wireConsumer.accept(wire);
+            bytes.releaseLast(owner);
         }
     }
 
