@@ -18,9 +18,10 @@
 
 package net.openhft.chronicle.wire.channel;
 
+import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.wire.channel.echo.DummyData;
 
 interface Echoing {
-    //    @MethodId(1)
+    @MethodId('e')
     void echo(DummyData data);
 }
