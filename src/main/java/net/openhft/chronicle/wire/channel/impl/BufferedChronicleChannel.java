@@ -35,7 +35,7 @@ import java.util.concurrent.ThreadFactory;
 import static net.openhft.chronicle.wire.channel.impl.TCPChronicleChannel.validateHeader;
 
 public class BufferedChronicleChannel extends DelegateChronicleChannel {
-    static final long LINGER_US = (long) (Double.parseDouble(System.getProperty("wire.lingerUS", "10")) * 1e3);
+    static final long LINGER_US = (long) (Double.parseDouble(System.getProperty("wire.lingerUS", "20")) * 1e3);
 
     static {
         Jvm.perf().on(BufferedChronicleChannel.class, "wire.lingerUS: " + LINGER_US);
