@@ -104,7 +104,7 @@ worst:        6463.49       783.36       736.26       592.90       199.94       
 public class PerfChronicleServiceMain implements JLBHTask {
     static final int THROUGHPUT = Integer.getInteger("throughput", 100_000);
 
-    static final int BATCH = Integer.getInteger("batch", 1);
+    static final int BATCH = Integer.getInteger("batch", Math.max(1, THROUGHPUT / 500_000));
     static final int ITERATIONS = Integer.getInteger("iterations", THROUGHPUT * 30);
     static final int SIZE = Integer.getInteger("size", 256);
     static final boolean BUFFERED = Jvm.getBoolean("buffered");
@@ -131,8 +131,8 @@ public class PerfChronicleServiceMain implements JLBHTask {
 
         JLBHOptions lth = new JLBHOptions()
                 .warmUpIterations(50_000)
-                .iterations(ITERATIONS/BATCH)
-                .throughput(THROUGHPUT/BATCH)
+                .iterations(ITERATIONS / BATCH)
+                .throughput(THROUGHPUT / BATCH)
                 .acquireLock(AffinityLock::acquireLock)
                 // disable as otherwise single GC event skews results heavily
                 .recordOSJitter(false)
