@@ -26,32 +26,25 @@ import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.UnrecoverableTimeoutException;
 import net.openhft.chronicle.wire.Wire;
-import net.openhft.chronicle.wire.channel.ChannelHeader;
 import net.openhft.chronicle.wire.channel.EventPoller;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.function.Function;
 
 import static net.openhft.chronicle.wire.channel.impl.TCPChronicleChannel.validateHeader;
 
 public class BufferedChronicleChannel extends DelegateChronicleChannel {
+    static final long LINGER_US = (long) (Double.parseDouble(System.getProperty("wire.lingerUS", "10")) * 1e3);
     private final Pauser pauser;
     private final WireExchanger exchanger = new WireExchanger();
     private final ExecutorService bgWriter;
-    private final int lingerNs;
     private volatile EventPoller eventPoller;
 
     public BufferedChronicleChannel(TCPChronicleChannel channel, Pauser pauser) {
-        this(channel, pauser, 8);
-    }
-
-    public BufferedChronicleChannel(TCPChronicleChannel channel, Pauser pauser, int lingerUs) {
         super(channel);
         this.pauser = pauser;
 
-        lingerNs = lingerUs * 1000;
         String desc = channel.connectionCfg().initiator() ? "init" : "accp";
         final String writer = desc + "~writer";
         final ThreadFactory factory = pauser.isBusy()
@@ -93,7 +86,7 @@ public class BufferedChronicleChannel extends DelegateChronicleChannel {
 //                long size = wire.bytes().readRemaining();
                 channel.flushOut(wire);
                 exchanger.releaseConsumer();
-                while (System.nanoTime() < start + lingerNs) {
+                while (System.nanoTime() < start + LINGER_US) {
                     pauser.pause();
                 }
             }
