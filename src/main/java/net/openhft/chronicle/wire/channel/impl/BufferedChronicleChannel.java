@@ -36,6 +36,11 @@ import static net.openhft.chronicle.wire.channel.impl.TCPChronicleChannel.valida
 
 public class BufferedChronicleChannel extends DelegateChronicleChannel {
     static final long LINGER_US = (long) (Double.parseDouble(System.getProperty("wire.lingerUS", "10")) * 1e3);
+
+    static {
+        Jvm.perf().on(BufferedChronicleChannel.class, "wire.lingerUS: " + LINGER_US);
+    }
+
     private final Pauser pauser;
     private final WireExchanger exchanger = new WireExchanger();
     private final ExecutorService bgWriter;
