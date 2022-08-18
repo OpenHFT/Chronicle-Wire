@@ -31,7 +31,7 @@ public class WireExchanger extends SimpleCloseable implements MarshallableOut {
     static final int FREE = 0x000, LOCKED = 0x010, DIRTY = 0x100;
     static final int FREE0 = 0x000, LOCKED0 = 0x010, DIRTY0 = 0x100;
     static final int FREE1 = 0x001, LOCKED1 = 0x011, DIRTY1 = 0x101;
-    private static final int INIT_CAPACITY = TCPChronicleChannel.CAPACITY;
+    private static final int INIT_CAPACITY = TCPChronicleChannel.CAPACITY * 2;
     private static final long valueOffset;
     private static final Wire EMPTY_WIRE = WireType.BINARY_LIGHT.apply(Bytes.from(""));
 
@@ -65,17 +65,23 @@ public class WireExchanger extends SimpleCloseable implements MarshallableOut {
     }
 
     public Wire acquireProducer() {
-        for (int delay = 1; ; delay++) {
+        {
             int val = lock();
             int writeTo = val & USED_MASK;
             final Wire wire = wireAt(writeTo);
             if (wire.bytes().readRemaining() <= INIT_CAPACITY / 2) {
-                if (delay > 1)
-                    System.out.println("delay " + (delay - 1));
                 return wire;
             }
             releaseProducer();
-            Jvm.pause(delay);
+        }
+        Jvm.pause(1);
+        {
+            int val2 = lock();
+            int writeTo2 = val2 & USED_MASK;
+            final Wire wire2 = wireAt(writeTo2);
+            if (wire2.bytes().readRemaining() > INIT_CAPACITY * 3 / 4)
+                Jvm.perf().on(getClass(), "Producer buffering");
+            return wire2;
         }
     }
 

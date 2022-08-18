@@ -103,6 +103,8 @@ worst:        6463.49       783.36       736.26       592.90       199.94       
 
 public class PerfChronicleServiceMain implements JLBHTask {
     static final int THROUGHPUT = Integer.getInteger("throughput", 100_000);
+
+    static final int BATCH = Integer.getInteger("batch", 1);
     static final int ITERATIONS = Integer.getInteger("iterations", THROUGHPUT * 30);
     static final int SIZE = Integer.getInteger("size", 256);
     static final boolean BUFFERED = Jvm.getBoolean("buffered");
@@ -122,14 +124,15 @@ public class PerfChronicleServiceMain implements JLBHTask {
         System.out.println("" +
                 "-Durl=" + URL + " " +
                 "-Dsize=" + SIZE + " " +
+                "-Dbatch=" + BATCH + " " +
                 "-Dthroughput=" + THROUGHPUT + " " +
                 "-Diterations=" + ITERATIONS + " " +
                 "-Dbuffered=" + BUFFERED);
 
         JLBHOptions lth = new JLBHOptions()
                 .warmUpIterations(50_000)
-                .iterations(ITERATIONS)
-                .throughput(THROUGHPUT)
+                .iterations(ITERATIONS/BATCH)
+                .throughput(THROUGHPUT/BATCH)
                 .acquireLock(AffinityLock::acquireLock)
                 // disable as otherwise single GC event skews results heavily
                 .recordOSJitter(false)
@@ -151,8 +154,10 @@ public class PerfChronicleServiceMain implements JLBHTask {
         client = context.newChannelSupplier(handler).buffered(BUFFERED).get();
         echoing = client.methodWriter(Echoing.class);
         reader = client.methodReader((Echoing) data -> {
-            jlbh.sample(System.nanoTime() - data.timeNS());
-            count++;
+            if (data.data()[0] == 0) {
+                jlbh.sample(System.nanoTime() - data.timeNS());
+                count++;
+            }
         });
         readerThread = new Thread(() -> {
             try (AffinityLock lock = AffinityLock.acquireLock()) {
@@ -177,7 +182,11 @@ public class PerfChronicleServiceMain implements JLBHTask {
     @Override
     public void run(long startTimeNS) {
         data.timeNS(startTimeNS);
-        echoing.echo(data);
+        data.data()[0] = 0;
+        for (int b = 0; b < BATCH; b++) {
+            echoing.echo(data);
+            data.data()[0] = 1;
+        }
 
         // throttling when warming up.
         if (!warmedUp) {
