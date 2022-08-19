@@ -164,7 +164,7 @@ public class PerfChronicleServiceMain implements JLBHTask {
         data.data()[0] = 0;
         final Client client = clients[nextClient];
         // multiple clients would use multiple threads, if not multiple machines.
-        if (BATCH > 1) {
+        if (BATCH > 1 && THROUGHPUT >= 100_000) {
             InternalChronicleChannel icc = (InternalChronicleChannel) client.channel;
             final WireOut wire = icc.acquireProducer();
             for (int b = 0; b < BATCH; b++) {
