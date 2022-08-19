@@ -27,8 +27,6 @@ import net.openhft.chronicle.jlbh.JLBHTask;
 import net.openhft.chronicle.wire.channel.echo.DummyData;
 import net.openhft.chronicle.wire.channel.echo.EchoHandler;
 
-import java.util.concurrent.locks.LockSupport;
-
 /*
 ** Ryzen 9 5950X with Ubuntu 21.10 run with **
 
@@ -103,22 +101,20 @@ worst:        6463.49       783.36       736.26       592.90       199.94       
 
 public class PerfChronicleServiceMain implements JLBHTask {
     static final int THROUGHPUT = Integer.getInteger("throughput", 100_000);
-
-    static final int BATCH = Integer.getInteger("batch", Math.max(1, THROUGHPUT / 500_000));
-    static final int ITERATIONS = Integer.getInteger("iterations", THROUGHPUT * 30);
+    static final int RUN_TIME = Integer.getInteger("runTime", 30);
+    static final int ITERATIONS = Integer.getInteger("iterations", THROUGHPUT * RUN_TIME);
     static final int SIZE = Integer.getInteger("size", 256);
     static final boolean BUFFERED = Jvm.getBoolean("buffered");
     static final String URL = System.getProperty("url", "tcp://:1248");
+    static final int BATCH = Integer.getInteger("batch", Math.max(1, THROUGHPUT / 500_000));
+    static final int CLIENTS = Integer.getInteger("clients", 1);
     private DummyData data;
-    private Echoing echoing;
-    private MethodReader reader;
-    private Thread readerThread;
-    private ChronicleChannel client;
+    private Client[] clients = new Client[CLIENTS];
+    private int nextClient = 0;
     private volatile boolean complete;
-    private int sent;
-    private volatile int count;
-    private boolean warmedUp;
     private ChronicleContext context;
+    private JLBH jlbh;
+    private EchoHandler echoHandler;
 
     public static void main(String[] args) {
         System.out.println("" +
@@ -126,7 +122,8 @@ public class PerfChronicleServiceMain implements JLBHTask {
                 "-Dsize=" + SIZE + " " +
                 "-Dbatch=" + BATCH + " " +
                 "-Dthroughput=" + THROUGHPUT + " " +
-                "-Diterations=" + ITERATIONS + " " +
+                "-Dclients=" + CLIENTS + " " +
+                "-DrunTime=" + THROUGHPUT / ITERATIONS + " " +
                 "-Dbuffered=" + BUFFERED);
 
         JLBHOptions lth = new JLBHOptions()
@@ -144,62 +141,70 @@ public class PerfChronicleServiceMain implements JLBHTask {
 
     @Override
     public void init(JLBH jlbh) {
+        this.jlbh = jlbh;
         this.data = new DummyData();
         this.data.data(new byte[SIZE - Long.BYTES]);
 
         context = ChronicleContext.newContext(URL);
 
-        final EchoHandler handler = new EchoHandler()
+        echoHandler = new EchoHandler()
                 .buffered(BUFFERED);
-        client = context.newChannelSupplier(handler).buffered(BUFFERED).get();
-        echoing = client.methodWriter(Echoing.class);
-        reader = client.methodReader((Echoing) data -> {
-            if (data.data()[0] == 0) {
-                jlbh.sample(System.nanoTime() - data.timeNS());
-                count++;
-            }
-        });
-        readerThread = new Thread(() -> {
-            try (AffinityLock lock = AffinityLock.acquireLock()) {
-                while (!Thread.currentThread().isInterrupted()) {
-                    reader.readOne();
-                }
-            } catch (Throwable t) {
-                if (!complete)
-                    t.printStackTrace();
-            }
-        }, "last-reader");
-        readerThread.setDaemon(true);
-        readerThread.start();
-    }
-
-    @Override
-    public void warmedUp() {
-        JLBHTask.super.warmedUp();
-        warmedUp = true;
+        for (int i = 0; i < CLIENTS; i++)
+            clients[i] = new Client();
     }
 
     @Override
     public void run(long startTimeNS) {
         data.timeNS(startTimeNS);
         data.data()[0] = 0;
+        final Echoing echoing = clients[nextClient].echoing;
         for (int b = 0; b < BATCH; b++) {
             echoing.echo(data);
             data.data()[0] = 1;
         }
-
-        // throttling when warming up.
-        if (!warmedUp) {
-            long lag = sent++ - count;
-            if (lag >= 50)
-                LockSupport.parkNanos(lag * 500L);
-        }
+        if (++nextClient >= CLIENTS)
+            nextClient = 0;
     }
 
     @Override
     public void complete() {
         this.complete = true;
-        readerThread.interrupt();
-        client.close();
+        for (Client client : clients)
+            client.readerThread.interrupt();
+        for (Client client : clients)
+            client.channel.close();
+        context.close();
+    }
+
+    class Client {
+        private Echoing echoing;
+        private Thread readerThread;
+        private MethodReader reader;
+        private ChronicleChannel channel;
+
+        public Client() {
+            channel = context.newChannelSupplier(echoHandler).buffered(BUFFERED).get();
+            echoing = channel.methodWriter(Echoing.class);
+            reader = channel.methodReader((Echoing) data -> {
+                if (data.data()[0] == 0) {
+                    final long durationNs = System.nanoTime() - data.timeNS();
+                    synchronized (jlbh) {
+                        jlbh.sample(durationNs);
+                    }
+                }
+            });
+            readerThread = new Thread(() -> {
+                try (AffinityLock lock = AffinityLock.acquireLock()) {
+                    while (!Thread.currentThread().isInterrupted()) {
+                        reader.readOne();
+                    }
+                } catch (Throwable t) {
+                    if (!complete)
+                        t.printStackTrace();
+                }
+            }, "last-reader");
+            readerThread.setDaemon(true);
+            readerThread.start();
+        }
     }
 }

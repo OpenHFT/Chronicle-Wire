@@ -38,7 +38,8 @@ public class BufferedChronicleChannel extends DelegateChronicleChannel {
     static final long LINGER_NS = (long) (Double.parseDouble(System.getProperty("wire.lingerUS", "20")) * 1e3);
 
     static {
-        Jvm.perf().on(BufferedChronicleChannel.class, "wire.lingerUS: " + LINGER_NS / 1e3);
+        if (LINGER_NS != 20_000)
+            Jvm.perf().on(BufferedChronicleChannel.class, "wire.lingerUS: " + LINGER_NS / 1e3);
     }
 
     private final Pauser pauser;
