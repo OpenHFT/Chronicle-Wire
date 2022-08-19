@@ -25,6 +25,8 @@ import net.openhft.chronicle.core.util.NanoSampler;
 import net.openhft.chronicle.jlbh.JLBH;
 import net.openhft.chronicle.jlbh.JLBHOptions;
 import net.openhft.chronicle.jlbh.JLBHTask;
+import net.openhft.chronicle.wire.DocumentContext;
+import net.openhft.chronicle.wire.WireOut;
 import net.openhft.chronicle.wire.channel.echo.DummyData;
 import net.openhft.chronicle.wire.channel.echo.EchoHandler;
 
@@ -161,10 +163,24 @@ public class PerfChronicleServiceMain implements JLBHTask {
         data.timeNS(startTimeNS);
         data.data()[0] = 0;
         final Client client = clients[nextClient];
-        final Echoing echoing = client.echoing;
-        for (int b = 0; b < BATCH; b++) {
-            echoing.echo(data);
-            data.data()[0] = 1;
+        // multiple clients would use multiple threads, if not multiple machines.
+        if (THROUGHPUT > 200_000) {
+            InternalChronicleChannel icc = (InternalChronicleChannel) client.channel;
+            final WireOut wire = icc.acquireProducer();
+            for (int b = 0; b < BATCH; b++) {
+                try (DocumentContext dc = wire.writingDocument()) {
+                    dc.wire().writeEventId('e').object(DummyData.class, data);
+                }
+                data.data()[0] = 1;
+            }
+            icc.releaseProducer();
+
+        } else {
+            final Echoing echoing = client.echoing;
+            for (int b = 0; b < BATCH; b++) {
+                echoing.echo(data);
+                data.data()[0] = 1;
+            }
         }
         if (++nextClient >= CLIENTS)
             nextClient = 0;

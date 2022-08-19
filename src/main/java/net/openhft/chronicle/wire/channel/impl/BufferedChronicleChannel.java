@@ -26,6 +26,7 @@ import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.UnrecoverableTimeoutException;
 import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireOut;
 import net.openhft.chronicle.wire.channel.EventPoller;
 
 import java.util.concurrent.ExecutorService;
@@ -113,6 +114,16 @@ public class BufferedChronicleChannel extends DelegateChronicleChannel {
     @Override
     public DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException {
         return exchanger.acquireWritingDocument(metaData);
+    }
+
+    @Override
+    public WireOut acquireProducer() {
+        return exchanger.acquireProducer();
+    }
+
+    @Override
+    public void releaseProducer() {
+        exchanger.releaseProducer();
     }
 
     @Override

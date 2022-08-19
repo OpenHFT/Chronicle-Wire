@@ -18,6 +18,9 @@
 
 package net.openhft.chronicle.wire.channel;
 
+import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireOut;
+
 /**
  * Advanced options that may change in the future
  */
@@ -44,4 +47,8 @@ public interface InternalChronicleChannel extends ChronicleChannel {
      * @return this
      */
     ChronicleChannel eventPoller(EventPoller eventPoller);
+
+    WireOut acquireProducer();
+
+    void releaseProducer();
 }

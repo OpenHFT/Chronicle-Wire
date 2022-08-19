@@ -383,6 +383,18 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public Wire acquireProducer() {
+        lock.lock();
+        return out;
+    }
+
+    @Override
+    public void releaseProducer() {
+        flush();
+        lock.unlock();
+    }
+
     private class ConnectionDocumentContextHolder extends DocumentContextHolder implements WriteDocumentContext {
         private boolean chainedElement;
 

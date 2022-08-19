@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.SimpleCloseable;
 import net.openhft.chronicle.wire.*;
+import org.jetbrains.annotations.NotNull;
 
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
@@ -74,13 +75,19 @@ public class WireExchanger extends SimpleCloseable implements MarshallableOut {
             }
             releaseProducer();
         }
+        return acquireProducer2();
+    }
+
+    @NotNull
+    private Wire acquireProducer2() {
         Jvm.pause(1);
         {
             int val2 = lock();
             int writeTo2 = val2 & USED_MASK;
             final Wire wire2 = wireAt(writeTo2);
-            if (wire2.bytes().readRemaining() > INIT_CAPACITY * 3 / 4)
-                Jvm.perf().on(getClass(), "Producer buffering");
+            final long used = wire2.bytes().readRemaining();
+            if (used > INIT_CAPACITY * 3 / 4)
+                Jvm.perf().on(getClass(), "Producer buffering " + 100 * used / INIT_CAPACITY + "%");
             return wire2;
         }
     }

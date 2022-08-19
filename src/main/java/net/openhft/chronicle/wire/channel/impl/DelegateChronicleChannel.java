@@ -21,9 +21,8 @@ package net.openhft.chronicle.wire.channel.impl;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.UnrecoverableTimeoutException;
+import net.openhft.chronicle.wire.WireOut;
 import net.openhft.chronicle.wire.channel.*;
-
-import java.util.function.Function;
 
 public class DelegateChronicleChannel implements InternalChronicleChannel, Closeable {
     protected final InternalChronicleChannel channel;
@@ -101,5 +100,15 @@ public class DelegateChronicleChannel implements InternalChronicleChannel, Close
     public ChronicleChannel eventPoller(EventPoller eventPoller) {
         channel.eventPoller(eventPoller);
         return this;
+    }
+
+    @Override
+    public WireOut acquireProducer() {
+        return channel.acquireProducer();
+    }
+
+    @Override
+    public void releaseProducer() {
+        channel.releaseProducer();
     }
 }
