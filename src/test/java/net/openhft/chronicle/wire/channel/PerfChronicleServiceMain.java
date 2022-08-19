@@ -188,7 +188,7 @@ public class PerfChronicleServiceMain implements JLBHTask {
         private ChronicleChannel channel;
 
         public Client() {
-            channel = context.newChannelSupplier(echoHandler).buffered(BUFFERED).get();
+            channel = context.newChannelSupplier(echoHandler).buffered(BUFFERED && BATCH > 1).get();
             echoing = channel.methodWriter(Echoing.class);
             reader = channel.methodReader(new Echoing() {
                 long last = 0;
