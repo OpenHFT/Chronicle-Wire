@@ -35,10 +35,10 @@ import java.util.concurrent.ThreadFactory;
 import static net.openhft.chronicle.wire.channel.impl.TCPChronicleChannel.validateHeader;
 
 public class BufferedChronicleChannel extends DelegateChronicleChannel {
-    static final long LINGER_US = (long) (Double.parseDouble(System.getProperty("wire.lingerUS", "20")) * 1e3);
+    static final long LINGER_NS = (long) (Double.parseDouble(System.getProperty("wire.lingerUS", "20")) * 1e3);
 
     static {
-        Jvm.perf().on(BufferedChronicleChannel.class, "wire.lingerUS: " + LINGER_US);
+        Jvm.perf().on(BufferedChronicleChannel.class, "wire.lingerUS: " + LINGER_NS / 1e3);
     }
 
     private final Pauser pauser;
@@ -91,7 +91,7 @@ public class BufferedChronicleChannel extends DelegateChronicleChannel {
 //                long size = wire.bytes().readRemaining();
                 channel.flushOut(wire);
                 exchanger.releaseConsumer();
-                while (System.nanoTime() < start + LINGER_US) {
+                while (System.nanoTime() < start + LINGER_NS) {
                     pauser.pause();
                 }
             }
