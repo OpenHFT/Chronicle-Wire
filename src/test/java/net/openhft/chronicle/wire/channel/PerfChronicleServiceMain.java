@@ -21,6 +21,7 @@ package net.openhft.chronicle.wire.channel;
 import net.openhft.affinity.AffinityLock;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.util.NanoSampler;
 import net.openhft.chronicle.jlbh.JLBH;
 import net.openhft.chronicle.jlbh.JLBHOptions;
 import net.openhft.chronicle.jlbh.JLBHTask;
@@ -115,6 +116,7 @@ public class PerfChronicleServiceMain implements JLBHTask {
     private ChronicleContext context;
     private JLBH jlbh;
     private EchoHandler echoHandler;
+    private NanoSampler toPublish;
 
     public static void main(String[] args) {
         System.out.println("" +
@@ -123,7 +125,7 @@ public class PerfChronicleServiceMain implements JLBHTask {
                 "-Dbatch=" + BATCH + " " +
                 "-Dthroughput=" + THROUGHPUT + " " +
                 "-Dclients=" + CLIENTS + " " +
-                "-DrunTime=" +  ITERATIONS / THROUGHPUT + " " +
+                "-DrunTime=" + ITERATIONS / THROUGHPUT + " " +
                 "-Dbuffered=" + BUFFERED);
 
         JLBHOptions lth = new JLBHOptions()
@@ -142,6 +144,7 @@ public class PerfChronicleServiceMain implements JLBHTask {
     @Override
     public void init(JLBH jlbh) {
         this.jlbh = jlbh;
+        toPublish = jlbh.addProbe("To Publish");
         this.data = new DummyData();
         this.data.data(new byte[SIZE - Long.BYTES]);
 
@@ -157,13 +160,15 @@ public class PerfChronicleServiceMain implements JLBHTask {
     public void run(long startTimeNS) {
         data.timeNS(startTimeNS);
         data.data()[0] = 0;
-        final Echoing echoing = clients[nextClient].echoing;
+        final Client client = clients[nextClient];
+        final Echoing echoing = client.echoing;
         for (int b = 0; b < BATCH; b++) {
             echoing.echo(data);
             data.data()[0] = 1;
         }
         if (++nextClient >= CLIENTS)
             nextClient = 0;
+        toPublish.sampleNanos(System.nanoTime() - startTimeNS);
     }
 
     @Override
