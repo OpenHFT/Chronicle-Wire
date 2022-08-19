@@ -25,10 +25,8 @@ import net.openhft.chronicle.core.util.NanoSampler;
 import net.openhft.chronicle.jlbh.JLBH;
 import net.openhft.chronicle.jlbh.JLBHOptions;
 import net.openhft.chronicle.jlbh.JLBHTask;
-import net.openhft.chronicle.wire.DocumentContext;
-import net.openhft.chronicle.wire.WireOut;
 import net.openhft.chronicle.wire.channel.echo.DummyData;
-import net.openhft.chronicle.wire.channel.echo.EchoHandler;
+import net.openhft.chronicle.wire.channel.echo.EchoNHandler;
 
 /*
 ** Ryzen 9 5950X with Ubuntu 21.10 run with **
@@ -111,14 +109,14 @@ public class PerfChronicleServiceMain implements JLBHTask {
     static final String URL = System.getProperty("url", "tcp://:1248");
     static final int BATCH = Integer.getInteger("batch", Math.max(1, THROUGHPUT / 500_000));
     static final int CLIENTS = Integer.getInteger("clients", 1);
+    long lastStartTimeNS = 0;
     private DummyData data;
     private Client[] clients = new Client[CLIENTS];
     private int nextClient = 0;
     private volatile boolean complete;
     private ChronicleContext context;
     private JLBH jlbh;
-    private EchoHandler echoHandler;
-    private NanoSampler toPublish;
+    private EchoNHandler echoHandler;
 
     public static void main(String[] args) {
         System.out.println("" +
@@ -146,45 +144,31 @@ public class PerfChronicleServiceMain implements JLBHTask {
     @Override
     public void init(JLBH jlbh) {
         this.jlbh = jlbh;
-        toPublish = jlbh.addProbe("To Publish");
         this.data = new DummyData();
         this.data.data(new byte[SIZE - Long.BYTES]);
 
         context = ChronicleContext.newContext(URL);
 
-        echoHandler = new EchoHandler()
-                .buffered(BUFFERED);
+        echoHandler = new EchoNHandler()
+                .buffered(BUFFERED)
+                .times(BATCH);
         for (int i = 0; i < CLIENTS; i++)
             clients[i] = new Client();
     }
 
     @Override
     public void run(long startTimeNS) {
+        startTimeNS = Math.max(lastStartTimeNS + 1, startTimeNS);
+        lastStartTimeNS = startTimeNS;
         data.timeNS(startTimeNS);
-        data.data()[0] = 0;
-        final Client client = clients[nextClient];
-        // multiple clients would use multiple threads, if not multiple machines.
-        if (BATCH > 1 && THROUGHPUT >= 100_000) {
-            InternalChronicleChannel icc = (InternalChronicleChannel) client.channel;
-            final WireOut wire = icc.acquireProducer();
-            for (int b = 0; b < BATCH; b++) {
-                try (DocumentContext dc = wire.writingDocument()) {
-                    dc.wire().writeEventId('e').object(DummyData.class, data);
-                }
-                data.data()[0] = 1;
-            }
-            icc.releaseProducer();
 
-        } else {
-            final Echoing echoing = client.echoing;
-            for (int b = 0; b < BATCH; b++) {
-                echoing.echo(data);
-                data.data()[0] = 1;
-            }
-        }
+        final Client client = clients[nextClient];
+        final Echoing echoing = client.echoing;
+        // the message is multiplied on the other side. re times(BATCH)
+        echoing.echo(data);
+
         if (++nextClient >= CLIENTS)
             nextClient = 0;
-        toPublish.sampleNanos(System.nanoTime() - startTimeNS);
     }
 
     @Override
@@ -206,12 +190,19 @@ public class PerfChronicleServiceMain implements JLBHTask {
         public Client() {
             channel = context.newChannelSupplier(echoHandler).buffered(BUFFERED).get();
             echoing = channel.methodWriter(Echoing.class);
-            reader = channel.methodReader((Echoing) data -> {
-                if (data.data()[0] == 0) {
-                    final long durationNs = System.nanoTime() - data.timeNS();
-                    synchronized (jlbh) {
-                        jlbh.sample(durationNs);
+            reader = channel.methodReader(new Echoing() {
+                long last = 0;
+
+                @Override
+                public void echo(DummyData data) {
+                    final long timeNS = data.timeNS();
+                    if (timeNS > last) {
+                        final long durationNs = System.nanoTime() - timeNS;
+                        synchronized (jlbh) {
+                            jlbh.sample(durationNs);
+                        }
                     }
+                    last = timeNS;
                 }
             });
             readerThread = new Thread(() -> {
