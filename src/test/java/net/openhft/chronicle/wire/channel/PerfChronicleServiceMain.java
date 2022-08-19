@@ -123,7 +123,7 @@ public class PerfChronicleServiceMain implements JLBHTask {
                 "-Dbatch=" + BATCH + " " +
                 "-Dthroughput=" + THROUGHPUT + " " +
                 "-Dclients=" + CLIENTS + " " +
-                "-DrunTime=" + THROUGHPUT / ITERATIONS + " " +
+                "-DrunTime=" +  ITERATIONS / THROUGHPUT + " " +
                 "-Dbuffered=" + BUFFERED);
 
         JLBHOptions lth = new JLBHOptions()
