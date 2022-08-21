@@ -369,6 +369,27 @@
                             <classpathScope>test</classpathScope>
                         </configuration>
                     </execution>
+
+                    <!-- ECHOING MICROSERVICE LOW LATENCY TEST -->
+                    <!-- run this second with -Durl=tcp://localhost:1248 or the host of your choice -->
+                    <execution>
+                        <id>EchoThroughput</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <skip>false</skip>
+                            <mainClass>net.openhft.chronicle.wire.channel.PerfThroughputMain</mainClass>
+                            <systemProperties>
+                                <property>
+                                    <key>system.properties</key>
+                                    <value>/dev/null</value>
+                                </property>
+                            </systemProperties>
+                            <classpathScope>test</classpathScope>
+                        </configuration>
+                    </execution>
+
                 </executions>
             </plugin>
 
