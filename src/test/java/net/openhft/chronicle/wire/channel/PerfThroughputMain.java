@@ -45,7 +45,7 @@ public class PerfThroughputMain {
             MethodReader reader = channel.methodReader((Echoing) d -> {
                 unread.getAndDecrement();
             });
-            int window = (1 << 20) / size;
+            int window = (128 << 20) / size;
             do {
                 echoing.echo(data);
                 unread.getAndIncrement();
