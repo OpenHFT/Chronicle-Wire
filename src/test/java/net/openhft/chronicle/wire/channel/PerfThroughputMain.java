@@ -19,18 +19,20 @@ import java.util.stream.Stream;
 public class PerfThroughputMain {
     static final String URL = System.getProperty("url", "tcp://:1248");
     static final int RUN_TIME = Integer.getInteger("runTime", 5);
+    static final int BATCH = Integer.getInteger("batch", 1);
     static final int CLIENTS = Integer.getInteger("clients", 1);
 
     public static void main(String[] args) {
         System.out.println("-Durl=" + URL + " " +
                 "-DrunTime=" + RUN_TIME + " " +
-                "-Dclients=" + CLIENTS);
+                "-Dclients=" + CLIENTS + " " +
+                "-Dbatch=" + BATCH
+        );
         try (ChronicleContext context = ChronicleContext.newContext(URL)) {
             EchoNHandler echoHandler = new EchoNHandler();
-            echoHandler.times(CLIENTS);
+            echoHandler.times(BATCH);
             final ChronicleChannelSupplier supplier = context.newChannelSupplier(echoHandler);
             echoHandler.buffered(true);
-            supplier.buffered(true);
             doTest("buffered", supplier.buffered(true));
 
             echoHandler.buffered(false);
@@ -62,7 +64,7 @@ public class PerfThroughputMain {
                             icc.releaseProducer();
 
                             // due to the multiplier in the EchoNHandler
-                            written += CLIENTS;
+                            written += BATCH;
 
                             read = readUpto(window, icc, written, read);
                         } while (System.currentTimeMillis() < end);
