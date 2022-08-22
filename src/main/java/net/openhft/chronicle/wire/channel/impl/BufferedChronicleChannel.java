@@ -36,10 +36,10 @@ import java.util.concurrent.ThreadFactory;
 import static net.openhft.chronicle.wire.channel.impl.TCPChronicleChannel.validateHeader;
 
 public class BufferedChronicleChannel extends DelegateChronicleChannel {
-    static final long LINGER_NS = (long) (Double.parseDouble(System.getProperty("wire.lingerUS", "20")) * 1e3);
+    static final long LINGER_NS = (long) (Double.parseDouble(System.getProperty("wire.lingerUS", "10")) * 1e3);
 
     static {
-        if (LINGER_NS != 20_000)
+        if (LINGER_NS != 10_000)
             Jvm.perf().on(BufferedChronicleChannel.class, "wire.lingerUS: " + LINGER_NS / 1e3);
     }
 

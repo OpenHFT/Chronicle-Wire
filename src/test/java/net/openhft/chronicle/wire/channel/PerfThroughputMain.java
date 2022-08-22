@@ -38,7 +38,6 @@ public class PerfThroughputMain {
             try (ChronicleChannel channel = supplier.get()) {
                 doTest("unbuffered", channel);
             }
-
         }
     }
 
