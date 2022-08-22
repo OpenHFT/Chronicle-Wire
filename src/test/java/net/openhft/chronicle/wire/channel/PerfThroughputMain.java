@@ -76,7 +76,8 @@ public class PerfThroughputMain {
             long totalBytes = size * count;
             long MBps = totalBytes / time / (1_000_000 / 1_000);
             long rate = count * 1000 / time;
-            System.out.println("desc: " + desc + ", size: " + size + ", MBps: " + MBps + ", mps: " + rate);
+            System.out.printf("desc: %s, , size: %,d, MBps: %,d, mps: %,d%n",
+                    desc, size, MBps, rate);
         }
     }
 
