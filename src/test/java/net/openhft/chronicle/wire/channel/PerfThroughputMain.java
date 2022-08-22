@@ -29,14 +29,16 @@ public class PerfThroughputMain {
         try (ChronicleContext context = ChronicleContext.newContext(URL)) {
             EchoHandler echoHandler = new EchoHandler();
             final ChronicleChannelSupplier supplier = context.newChannelSupplier(echoHandler);
-            ChronicleChannel channel = supplier.get();
-
-            doTest("unbuffered", channel);
-
             echoHandler.buffered(true);
-            ChronicleChannel channel2 = supplier.buffered(true).get();
+            try (ChronicleChannel channel2 = supplier.buffered(true).get()) {
+                doTest("buffered", channel2);
+            }
 
-            doTest("buffered", channel2);
+            echoHandler.buffered(false);
+            try (ChronicleChannel channel = supplier.get()) {
+                doTest("unbuffered", channel);
+            }
+
         }
     }
 
