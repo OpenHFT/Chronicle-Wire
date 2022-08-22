@@ -108,6 +108,7 @@ public class WireExchanger extends SimpleCloseable implements MarshallableOut {
         int val = lock();
         int writeTo = val & USED_MASK;
         final int val2 = FREE | writeTo ^ USED_MASK;
+        // assume one consumer
         MEMORY.writeOrderedInt(this, valueOffset, val2);
 
         return wireAt(writeTo);

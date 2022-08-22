@@ -81,10 +81,10 @@ public class BufferedChronicleChannel extends DelegateChronicleChannel {
                 final Wire wire = exchanger.acquireConsumer();
                 if (wire.bytes().isEmpty()) {
                     final EventPoller eventPoller = this.eventPoller();
-                    if (eventPoller == null || !eventPoller.onPoll(this)) {
-                        pauser.pause();
-                    }
+                    final boolean idle = eventPoller == null || !eventPoller.onPoll(this);
                     exchanger.releaseConsumer();
+                    if (idle)
+                        pauser.pause();
                     continue;
                 }
                 assert validateHeader(wire.bytes().peekVolatileInt());

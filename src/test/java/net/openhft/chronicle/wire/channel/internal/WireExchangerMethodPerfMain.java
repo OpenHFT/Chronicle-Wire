@@ -62,7 +62,7 @@ public class WireExchangerMethodPerfMain implements JLBHTask {
 
     private static final int warmup = 100_000;
     private static final int iterations = 10_000_000;
-    private static final int throughput = 500_000;
+    private static final int throughput = 1_000_000;
     private final WireExchanger be = new WireExchanger();
     private int count = 0;
     private JLBH jlbh;
