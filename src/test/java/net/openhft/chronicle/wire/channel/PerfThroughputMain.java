@@ -8,7 +8,11 @@
 
 package net.openhft.chronicle.wire.channel;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.wire.DocumentContext;
+import net.openhft.chronicle.wire.WireOut;
 import net.openhft.chronicle.wire.channel.echo.DummyData;
 import net.openhft.chronicle.wire.channel.echo.EchoHandler;
 
@@ -17,6 +21,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class PerfThroughputMain {
     static final int RUN_TIME = Integer.getInteger("runTime", 5);
     static final String URL = System.getProperty("url", "tcp://:1248");
+    static final boolean METHOD_RW = Jvm.getBoolean("method.rw");
 
     public static void main(String[] args) {
         try (ChronicleContext context = ChronicleContext.newContext(URL)) {
@@ -42,21 +47,50 @@ public class PerfThroughputMain {
             final Echoing echoing = channel.methodWriter(Echoing.class);
             long count = 0;
             AtomicLong unread = new AtomicLong(0);
-            MethodReader reader = channel.methodReader((Echoing) d -> {
-                unread.getAndDecrement();
-            });
             int window = (128 << 20) / size;
-            do {
-                echoing.echo(data);
-                unread.getAndIncrement();
-                count++;
+            if (METHOD_RW) {
+                MethodReader reader = channel.methodReader((Echoing) d -> {
+                    unread.getAndDecrement();
+                });
+                do {
+                    echoing.echo(data);
+                    unread.getAndIncrement();
+                    count++;
+                    do {
+                        reader.readOne();
+                    } while (unread.get() > window);
+                } while (System.currentTimeMillis() < end);
+
                 do {
                     reader.readOne();
-                } while (unread.get() > window);
-            } while (System.currentTimeMillis() < end);
-            do {
-                reader.readOne();
-            } while (unread.get() > 0);
+                } while (unread.get() > 0);
+
+            } else {
+                InternalChronicleChannel icc = (InternalChronicleChannel) channel;
+                do {
+                    final Bytes<?> bytes = icc.acquireProducer().bytes();
+                    bytes.writeInt(size);
+                    for(int i=0;i<size;i+=8)
+                        bytes.writeLong(0L);
+                    icc.releaseProducer();
+
+                    unread.getAndIncrement();
+                    count++;
+                    do {
+                        try (DocumentContext dc = channel.readingDocument()){
+                            if (dc.isPresent())
+                                unread.getAndDecrement();
+                        }
+                    } while (unread.get() > window);
+                } while (System.currentTimeMillis() < end);
+
+                do {
+                    try (DocumentContext dc = channel.readingDocument()){
+                        if (dc.isPresent())
+                            unread.getAndDecrement();
+                    }
+                } while (unread.get() > 0);
+            }
             long time = System.currentTimeMillis() - start;
             long totalBytes = size * count;
             long MBps = totalBytes / time / (1_000_000 / 1_000);
