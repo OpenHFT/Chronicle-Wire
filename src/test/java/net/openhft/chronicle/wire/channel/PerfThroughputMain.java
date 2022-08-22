@@ -12,18 +12,20 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.DocumentContext;
-import net.openhft.chronicle.wire.WireOut;
 import net.openhft.chronicle.wire.channel.echo.DummyData;
 import net.openhft.chronicle.wire.channel.echo.EchoHandler;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 public class PerfThroughputMain {
-    static final int RUN_TIME = Integer.getInteger("runTime", 5);
     static final String URL = System.getProperty("url", "tcp://:1248");
+    static final int RUN_TIME = Integer.getInteger("runTime", 5);
     static final boolean METHOD_RW = Jvm.getBoolean("method.rw");
 
     public static void main(String[] args) {
+        System.out.println("-Durl=" + URL + " " +
+                "-DrunTime=" + RUN_TIME + " " +
+                "-Dmethod.rw=" + METHOD_RW);
         try (ChronicleContext context = ChronicleContext.newContext(URL)) {
             EchoHandler echoHandler = new EchoHandler();
             final ChronicleChannelSupplier supplier = context.newChannelSupplier(echoHandler);
@@ -70,14 +72,14 @@ public class PerfThroughputMain {
                 do {
                     final Bytes<?> bytes = icc.acquireProducer().bytes();
                     bytes.writeInt(size);
-                    for(int i=0;i<size;i+=8)
+                    for (int i = 0; i < size; i += 8)
                         bytes.writeLong(0L);
                     icc.releaseProducer();
 
                     unread.getAndIncrement();
                     count++;
                     do {
-                        try (DocumentContext dc = channel.readingDocument()){
+                        try (DocumentContext dc = channel.readingDocument()) {
                             if (dc.isPresent())
                                 unread.getAndDecrement();
                         }
@@ -85,7 +87,7 @@ public class PerfThroughputMain {
                 } while (System.currentTimeMillis() < end);
 
                 do {
-                    try (DocumentContext dc = channel.readingDocument()){
+                    try (DocumentContext dc = channel.readingDocument()) {
                         if (dc.isPresent())
                             unread.getAndDecrement();
                     }
@@ -95,7 +97,7 @@ public class PerfThroughputMain {
             long totalBytes = size * count;
             long MBps = totalBytes / time / (1_000_000 / 1_000);
             long rate = count * 1000 / time;
-            System.out.println("desc: " + desc + ", size: " + size + ", MBps: " + MBps+", mps: "+rate);
+            System.out.println("desc: " + desc + ", size: " + size + ", MBps: " + MBps + ", mps: " + rate);
         }
     }
 }
