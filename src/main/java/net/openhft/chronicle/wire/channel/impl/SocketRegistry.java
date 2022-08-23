@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.wire.channel.impl;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.util.WeakIdentityHashMap;
 
@@ -39,6 +40,8 @@ public class SocketRegistry extends AbstractCloseable {
             Collections.synchronizedSet(
                     Collections.newSetFromMap(
                             new WeakIdentityHashMap<>()));
+    // not thread safe but it doesn't matter
+    int lastHost = 0;
 
     public ServerSocketChannel acquireServerSocketChannel(URL url) throws IOException {
         return acquireServerSocketChannel(url.getHost(), url.getPort());
@@ -61,7 +64,17 @@ public class SocketRegistry extends AbstractCloseable {
     }
 
     public synchronized SocketChannel createSocketChannel(String hostname, int port) throws IOException {
-        return SocketChannel.open(new InetSocketAddress(hostname, port));
+        if (hostname.contains(",")) {
+            String[] hostnames = hostname.split(",");
+            int lastHost = this.lastHost;
+            if (lastHost >= hostnames.length)
+                lastHost = 0;
+            hostname = hostnames[lastHost];
+            this.lastHost = lastHost + 1;
+        }
+        final SocketChannel open = SocketChannel.open(new InetSocketAddress(hostname, port));
+        Jvm.startup().on(getClass(), "Connected to " + hostname + ":" + port);
+        return open;
     }
 
     private void addCloseable(Closeable closeable) {

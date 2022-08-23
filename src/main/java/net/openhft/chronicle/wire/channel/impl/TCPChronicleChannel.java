@@ -52,7 +52,6 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
 
     private final Function<ChannelHeader, ChannelHeader> replaceInHeader;
     private final Function<ChannelHeader, ChannelHeader> replaceOutHeader;
-    int lastHost = 0;
     private ChronicleContext chronicleContext;
     private SystemContext systemContext;
     private SocketChannel sc;
@@ -231,15 +230,9 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
                 socketRegistry = new SocketRegistry();
                 privateSocketRegistry = true;
             }
-            final String[] hostnames = channelCfg.hostname().split(",");
-
             for (int delay = 1; ; delay++) {
                 try {
-                    if (lastHost >= hostnames.length)
-                        lastHost = 0;
-                    String hostname = hostnames[lastHost];
-                    lastHost++;
-                    sc = socketRegistry.createSocketChannel(hostname, channelCfg.port());
+                    sc = socketRegistry.createSocketChannel(channelCfg.hostname(), channelCfg.port());
                     configureSocket();
                     writeHeader();
                     readHeader();
