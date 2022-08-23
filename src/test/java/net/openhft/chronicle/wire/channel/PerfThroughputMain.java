@@ -50,7 +50,7 @@ public class PerfThroughputMain {
         for (int i = 0; i < CLIENTS; i++)
             clients[i] = (InternalChronicleChannel) channelSupplier.get();
 
-        for (int size = 256 << 10; size >= 8; size /= 2) {
+        for (int size = 128 << 10; size >= 8; size /= 2) {
             long start = System.currentTimeMillis();
             long end = start + RUN_TIME * 1000L;
             int window = (4 << 20) / size / CLIENTS;
