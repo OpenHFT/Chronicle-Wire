@@ -32,7 +32,7 @@ public class WireExchanger extends SimpleCloseable implements MarshallableOut {
     static final int FREE = 0x000, LOCKED = 0x010, DIRTY = 0x100;
     static final int FREE0 = 0x000, LOCKED0 = 0x010, DIRTY0 = 0x100;
     static final int FREE1 = 0x001, LOCKED1 = 0x011, DIRTY1 = 0x101;
-    private static final int INIT_CAPACITY = TCPChronicleChannel.CAPACITY * 2;
+    private static final int INIT_CAPACITY = TCPChronicleChannel.CAPACITY;
     private static final long valueOffset;
     private static final Wire EMPTY_WIRE = WireType.BINARY_LIGHT.apply(Bytes.from(""));
 
@@ -50,11 +50,16 @@ public class WireExchanger extends SimpleCloseable implements MarshallableOut {
     private volatile int value;
 
     public WireExchanger() {
+        this(INIT_CAPACITY);
+    }
+
+    @NotNull
+    public WireExchanger(int initCapacity) {
         wire0 = WireType.BINARY_LIGHT.apply(
-                Bytes.elasticByteBuffer(INIT_CAPACITY));
+                Bytes.elasticByteBuffer(initCapacity));
         wire0.bytes().singleThreadedCheckDisabled(true);
         wire1 = WireType.BINARY_LIGHT.apply(
-                Bytes.elasticByteBuffer(INIT_CAPACITY));
+                Bytes.elasticByteBuffer(initCapacity));
         wire1.bytes().singleThreadedCheckDisabled(true);
     }
 

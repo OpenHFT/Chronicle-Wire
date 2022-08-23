@@ -40,7 +40,8 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 import static net.openhft.chronicle.core.io.ClosedIORuntimeException.newIORuntimeException;
 
 public class TCPChronicleChannel extends SimpleCloseable implements InternalChronicleChannel {
-    static final int CAPACITY = 128 << 10; // 128 KB
+    // tune for message sizes up to this
+    static final int CAPACITY = Integer.getInteger("tcp.capacity", 1 << 20); // 1 MB
     private static final String HEADER = "header";
     private static final ChannelHeader NO_HEADER = Mocker.ignored(ChannelHeader.class);
     private static final boolean DUMP_YAML = Jvm.getBoolean("dumpYaml");
@@ -187,7 +188,7 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
             endOfData = false;
             return dc;
         }
-        if (bytes.readPosition() * 2 > Math.max(CAPACITY, bytes.readLimit()))
+        if (bytes.readPosition() * 2 > Math.max(CAPACITY/2, bytes.readLimit()))
             bytes.compact();
         final ByteBuffer bb = bytes.underlyingObject();
         bb.position(Math.toIntExact(bytes.writePosition()));
@@ -233,8 +234,7 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
             for (int delay = 1; ; delay++) {
                 try {
                     sc = socketRegistry.createSocketChannel(channelCfg.hostname(), channelCfg.port());
-                    if (channelCfg.pauserMode() == PauserMode.busy)
-                        sc.configureBlocking(false);
+                    configureSocket();
                     writeHeader();
                     readHeader();
                     break;
@@ -248,6 +248,13 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
         }
         in.clear();
         out.clear();
+    }
+
+    private void configureSocket() throws IOException {
+        if (channelCfg.pauserMode() == PauserMode.busy)
+            sc.configureBlocking(false);
+        sc.socket().setReceiveBufferSize(CAPACITY);
+        sc.socket().setSendBufferSize(CAPACITY);
     }
 
     @Override
