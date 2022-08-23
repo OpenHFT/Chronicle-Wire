@@ -31,11 +31,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Collections;
-import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
-import static java.util.Objects.*;
+import static java.util.Objects.requireNonNull;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 import static net.openhft.chronicle.core.io.ClosedIORuntimeException.newIORuntimeException;
 
@@ -53,6 +52,7 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
 
     private final Function<ChannelHeader, ChannelHeader> replaceInHeader;
     private final Function<ChannelHeader, ChannelHeader> replaceOutHeader;
+    int lastHost = 0;
     private ChronicleContext chronicleContext;
     private SystemContext systemContext;
     private SocketChannel sc;
@@ -188,7 +188,7 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
             endOfData = false;
             return dc;
         }
-        if (bytes.readPosition() * 2 > Math.max(CAPACITY/2, bytes.readLimit()))
+        if (bytes.readPosition() * 2 > Math.max(CAPACITY / 2, bytes.readLimit()))
             bytes.compact();
         final ByteBuffer bb = bytes.underlyingObject();
         bb.position(Math.toIntExact(bytes.writePosition()));
@@ -231,9 +231,15 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
                 socketRegistry = new SocketRegistry();
                 privateSocketRegistry = true;
             }
+            final String[] hostnames = channelCfg.hostname().split(",");
+
             for (int delay = 1; ; delay++) {
                 try {
-                    sc = socketRegistry.createSocketChannel(channelCfg.hostname(), channelCfg.port());
+                    if (lastHost >= hostnames.length)
+                        lastHost = 0;
+                    String hostname = hostnames[lastHost];
+                    lastHost++;
+                    sc = socketRegistry.createSocketChannel(hostname, channelCfg.port());
                     configureSocket();
                     writeHeader();
                     readHeader();
