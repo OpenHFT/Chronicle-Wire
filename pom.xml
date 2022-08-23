@@ -210,6 +210,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -222,6 +223,21 @@
                     <reuseForks>true</reuseForks>
                     <runOrder>hourly</runOrder>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
@@ -331,7 +347,7 @@
                         </goals>
                         <configuration>
                             <skip>false</skip>
-                            <mainClass>net.openhft.chronicle.wire.channel.PerfChronicleServiceMain</mainClass>
+                            <mainClass>net.openhft.chronicle.wire.channel.PerfLatencyMain</mainClass>
                             <systemProperties>
                                 <property>
                                     <key>system.properties</key>
@@ -342,7 +358,7 @@
                         </configuration>
                     </execution>
 
-                    <!-- ECHOING MICROSERVICE THROUGHPUT TEST -->
+                    <!-- ECHOING MICROSERVICE LATENCY WITH HIGH THROUGHPUT TEST -->
                     <!-- run this second with -Durl=tcp://localhost:1248 or the host of your choice -->
                     <execution>
                         <id>EchoClient-Throughput</id>
@@ -351,7 +367,7 @@
                         </goals>
                         <configuration>
                             <skip>false</skip>
-                            <mainClass>net.openhft.chronicle.wire.channel.PerfChronicleServiceMain</mainClass>
+                            <mainClass>net.openhft.chronicle.wire.channel.PerfLatencyMain</mainClass>
                             <systemProperties>
                                 <property>
                                     <key>system.properties</key>

@@ -21,7 +21,6 @@ package net.openhft.chronicle.wire.channel;
 import net.openhft.affinity.AffinityLock;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.util.NanoSampler;
 import net.openhft.chronicle.jlbh.JLBH;
 import net.openhft.chronicle.jlbh.JLBHOptions;
 import net.openhft.chronicle.jlbh.JLBHTask;
@@ -100,7 +99,7 @@ worst:        6463.49       783.36       736.26       592.90       199.94       
 -XX:StartFlightRecording=filename=recording_echo.jfr,settings=profile
  */
 
-public class PerfChronicleServiceMain implements JLBHTask {
+public class PerfLatencyMain implements JLBHTask {
     static final int THROUGHPUT = Integer.getInteger("throughput", 100_000);
     static final int RUN_TIME = Integer.getInteger("runTime", 30);
     static final int ITERATIONS = Integer.getInteger("iterations", THROUGHPUT * RUN_TIME);
@@ -137,7 +136,7 @@ public class PerfChronicleServiceMain implements JLBHTask {
                 .recordOSJitter(false)
                 .accountForCoordinatedOmission(false)
                 .runs(5)
-                .jlbhTask(new PerfChronicleServiceMain());
+                .jlbhTask(new PerfLatencyMain());
         new JLBH(lth).start();
     }
 
