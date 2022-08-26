@@ -24,11 +24,8 @@ import net.openhft.chronicle.core.io.ClosedIORuntimeException;
 import net.openhft.chronicle.threads.NamedThreadFactory;
 import net.openhft.chronicle.threads.PauserMode;
 import net.openhft.chronicle.wire.Comment;
-import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.Marshallable;
-import net.openhft.chronicle.wire.channel.impl.BufferedChronicleChannel;
-import net.openhft.chronicle.wire.channel.impl.SocketRegistry;
-import net.openhft.chronicle.wire.channel.impl.TCPChronicleChannel;
+import net.openhft.chronicle.wire.channel.impl.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -37,7 +34,6 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 
 public class ChronicleGatewayMain extends ChronicleContext implements Closeable {
@@ -133,6 +129,10 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
     }
 
     protected ChannelHeader replaceOutHeader(ChannelHeader channelHeader) {
+        if (channelHeader instanceof ChannelHandler) {
+            ChannelHandler handler = (ChannelHandler) channelHeader;
+            return handler.responseHeader(this);
+        }
         return channelHeader;
     }
 
@@ -179,6 +179,13 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
             System.out.println("Running " + channel2);
             bh.run(this, channel2);
             close = bh.closeWhenRunEnds();
+
+        } catch (HTTPDetectedException e) {
+            Jvm.warn().on(getClass(), "HTTP GET Detected", e);
+
+        } catch (InvalidProtocolException e) {
+            Jvm.warn().on(getClass(), "Invalid Protocol", e);
+
         } catch (Throwable t) {
             Jvm.pause(1);
             if (!isClosing() && !channel.isClosing())

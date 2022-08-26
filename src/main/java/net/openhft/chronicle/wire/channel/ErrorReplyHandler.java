@@ -10,8 +10,9 @@ package net.openhft.chronicle.wire.channel;
 
 import net.openhft.chronicle.core.io.ClosedIORuntimeException;
 import net.openhft.chronicle.wire.DocumentContext;
+import net.openhft.chronicle.wire.ReplyingHandler;
 
-public class ErrorReplyHandler extends AbstractHandler<ErrorReplyHandler> {
+public class ErrorReplyHandler extends ReplyingHandler<ErrorReplyHandler> {
     private String errorMsg = "unknown";
 
     public String errorMsg() {
@@ -24,14 +25,7 @@ public class ErrorReplyHandler extends AbstractHandler<ErrorReplyHandler> {
     }
 
     @Override
-    public void run(ChronicleContext context, ChronicleChannel channel) throws ClosedIORuntimeException {
-        try (DocumentContext dc = channel.writingDocument()){
-            dc.wire().write("error").text(errorMsg);
-        }
-    }
-
-    @Override
-    public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg channelCfg) {
-        throw new UnsupportedOperationException();
+    public ChannelHeader responseHeader(ChronicleContext context) {
+        return new ErrorHeader().errorMsg(errorMsg);
     }
 }

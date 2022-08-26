@@ -207,6 +207,15 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
         endOfData = true;
         bytes.writeSkip(read);
         final int header = bytes.readInt(bytes.readPosition());
+        if (headerOut == NO_HEADER) {
+            // HTTP GET
+            if (header == 0x20544547) {
+                throw new HTTPDetectedException("Start of request\n" + bytes);
+            }
+            if (header >> 16 != 0x4000) {
+                throw new InvalidProtocolException("Dump\n" + bytes.toHexString());
+            }
+        }
         assert bytes.readRemaining() < 4 || validateHeader(header);
         if (DUMP_YAML)
             System.out.println("in - " + Integer.toUnsignedString(header, 16) + "\n" + Wires.fromSizePrefixedBlobs(in));
