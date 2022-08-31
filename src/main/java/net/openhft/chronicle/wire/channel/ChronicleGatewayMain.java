@@ -167,7 +167,7 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
             boolean buffered = this.buffered;
             if (bh.buffered() != null)
                 buffered = bh.buffered();
-            System.out.println("Server got " + bh);
+            Jvm.debug().on(ChronicleGatewayMain.class, "Server got " + bh);
             final ChannelHeader headerOut = channel.headerOut();
             if (headerOut instanceof RedirectHeader) {
                 System.out.println("Server redirected  " + headerOut);
@@ -176,7 +176,7 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
             channel2 = buffered
                     ? new BufferedChronicleChannel(channel, pauserMode.get())
                     : channel;
-            System.out.println("Running " + channel2);
+            Jvm.debug().on(ChronicleGatewayMain.class, "Running " + channel2);
             bh.run(this, channel2);
             close = bh.closeWhenRunEnds();
 

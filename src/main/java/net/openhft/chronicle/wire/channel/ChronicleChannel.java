@@ -41,7 +41,7 @@ public interface ChronicleChannel extends Closeable, MarshallableOut, Marshallab
     static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg channelCfg, ChannelHeader headerOut) {
         TCPChronicleChannel simpleConnection = new TCPChronicleChannel(channelCfg, headerOut, socketRegistry);
         final ChannelHeader marshallable = simpleConnection.headerIn();
-        System.out.println("Client got " + marshallable);
+        Jvm.debug().on(ChronicleChannel.class, "Client got " + marshallable);
         if (marshallable instanceof RedirectHeader) {
             Closeable.closeQuietly(simpleConnection);
             RedirectHeader rh = (RedirectHeader) marshallable;

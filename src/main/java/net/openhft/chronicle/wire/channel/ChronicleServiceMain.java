@@ -124,7 +124,7 @@ public class ChronicleServiceMain extends SelfDescribingMarshallable implements 
 
         void run() {
             try {
-                System.out.println("Server got " + channel.headerIn());
+                Jvm.debug().on(ChronicleServiceMain.class, "Server got " + channel.headerIn());
 
                 final Marshallable microservice = ChronicleServiceMain.this.microservice.deepCopy();
                 final Field field = Jvm.getFieldOrNull(microservice.getClass(), "out");
