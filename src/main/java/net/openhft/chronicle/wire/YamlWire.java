@@ -2623,6 +2623,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
         @Override
         public boolean hasNextSequenceItem() {
+            consumePadding();
             switch (yt.current()) {
                 case SEQUENCE_START:
                 case TEXT:

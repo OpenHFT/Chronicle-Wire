@@ -620,6 +620,8 @@ public class TextWire extends AbstractWire implements Wire {
                     if (valueIn.isASeparator(peekCodeNext()) && commas-- <= 0)
                         return;
                     bytes.readSkip(1);
+                    if (commas == 0)
+                        return;
                     break;
                 case ' ':
                 case '\t':

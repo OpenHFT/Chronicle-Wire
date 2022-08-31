@@ -1825,6 +1825,42 @@ public class YamlWireTest extends WireTestCommon {
     }
 
     @Test
+    public void testNestedListInterleavedComments() {
+        YamlWireTest.StringArray obj = WireType.YAML.fromString(YamlWireTest.StringArray.class,
+                "     # first\n" +
+                        "{\n" +
+                        "     # more\n" +
+                        "  strings: [\n" +
+                        "     # foo\n" +
+                        "     'bar',\n" +
+                        "     # baz\n" +
+                        "     'quux'\n" +
+                        "     # thud\n" +
+                        "  ]\n" +
+                        "     # xyzzy\n" +
+                        "}\n" +
+                        "     # fin\n");
+
+        assertArrayEquals(new String[] { "bar", "quux" }, obj.strings);
+    }
+
+    @Test
+    public void testListInterleavedComments() {
+        List<String> obj = WireType.YAML.fromString(
+            "     # first\n" +
+                "[\n" +
+                "     # foo\n" +
+                "     'bar',\n" +
+                "     # baz\n" +
+                "     'quux'\n" +
+                "     # thud\n" +
+                "]\n" +
+                "     # fin\n");
+
+        assertEquals(Arrays.asList("bar", "quux"), obj);
+    }
+
+    @Test
     public void putData() {
         Data data = new Data();
         data.timeNS = (long) 1.6e18;
