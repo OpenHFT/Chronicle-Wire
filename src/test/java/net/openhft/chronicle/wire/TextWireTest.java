@@ -1986,6 +1986,42 @@ public class TextWireTest extends WireTestCommon {
         }
     }
 
+    @Test
+    public void testNestedListInterleavedComments() {
+        YamlWireTest.StringArray obj = WireType.TEXT.fromString(YamlWireTest.StringArray.class,
+                "     # first\n" +
+                        "{\n" +
+                        "     # more\n" +
+                        "  strings: [\n" +
+                        "     # foo\n" +
+                        "     'bar',\n" +
+                        "     # baz\n" +
+                        "     'quux'\n" +
+                        "     # thud\n" +
+                        "  ]\n" +
+                        "     # xyzzy\n" +
+                        "}\n" +
+                        "     # fin\n");
+
+        assertArrayEquals(obj.strings, new String[] { "bar", "quux" });
+    }
+
+    @Test
+    public void testListInterleavedComments() {
+        List<String> obj = Marshallable.fromString(
+                "     # first\n" +
+                    "[\n" +
+                    "     # foo\n" +
+                    "     'bar',\n" +
+                    "     # baz\n" +
+                    "     'quux'\n" +
+                    "     # thud\n" +
+                    "]\n" +
+                    "     # fin\n");
+
+        assertEquals(obj, Arrays.asList("bar", "quux"));
+    }
+
     public enum OrderLevel implements Marshallable {
         PARENT, CHILD;
     }
