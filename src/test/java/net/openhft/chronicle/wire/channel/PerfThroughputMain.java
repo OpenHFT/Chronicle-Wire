@@ -33,7 +33,7 @@ public class PerfThroughputMain {
                 "-Dbatch=" + BATCH + " " +
                 "-Dmethods=" + METHODS
         );
-        System.out.println("All messages are sent once to the service and once back again and count as 2");
+        System.out.println("This is the total of the messages sent and messages received");
         try (ChronicleContext context = ChronicleContext.newContext(URL)) {
             EchoNHandler echoHandler = new EchoNHandler();
             echoHandler.times(BATCH);
