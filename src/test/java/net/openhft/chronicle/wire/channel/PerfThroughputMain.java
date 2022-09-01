@@ -33,6 +33,7 @@ public class PerfThroughputMain {
                 "-Dbatch=" + BATCH + " " +
                 "-Dmethods=" + METHODS
         );
+        System.out.println("All messages are sent once to the service and once back again and count as 2");
         try (ChronicleContext context = ChronicleContext.newContext(URL)) {
             EchoNHandler echoHandler = new EchoNHandler();
             echoHandler.times(BATCH);
@@ -127,8 +128,8 @@ public class PerfThroughputMain {
             long count = totalRead.get();
             long time = System.currentTimeMillis() - start;
             long totalBytes = size * count;
-            long MBps = totalBytes / time / (1_000_000 / 1_000);
-            long rate = count * 1000 / time;
+            long MBps = (totalBytes + totalBytes / BATCH) / time / (1_000_000 / 1_000);
+            long rate = (count + count / BATCH) * 1000 / time;
             System.out.printf("desc: %s, size: %,d, MBps: %,d, mps: %,d%n",
                     desc, size, MBps, rate);
         }
