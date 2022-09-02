@@ -51,4 +51,6 @@ public interface InternalChronicleChannel extends ChronicleChannel {
     WireOut acquireProducer();
 
     void releaseProducer();
+
+    int bufferSize();
 }

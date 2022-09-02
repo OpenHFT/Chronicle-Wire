@@ -18,20 +18,17 @@
 
 package net.openhft.chronicle.wire.channel;
 
-public class ErrorReplyHandler extends ReplyingHandler<ErrorReplyHandler> {
-    private String errorMsg = "unknown";
+/**
+ * Header containing a reply object
+ */
+public class ReplyHeader<R> extends AbstractHeader<ReplyHeader<R>> {
+    private R reply;
 
-    public String errorMsg() {
-        return errorMsg;
+    public ReplyHeader(R reply) {
+        this.reply = reply;
     }
 
-    public ErrorReplyHandler errorMsg(String errorMsg) {
-        this.errorMsg = errorMsg;
-        return this;
-    }
-
-    @Override
-    public ChannelHeader responseHeader(ChronicleContext context) {
-        return new ErrorHeader().errorMsg(errorMsg);
+    public R replay() {
+        return reply;
     }
 }

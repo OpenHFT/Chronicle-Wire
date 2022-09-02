@@ -111,4 +111,9 @@ public class DelegateChronicleChannel implements InternalChronicleChannel, Close
     public void releaseProducer() {
         channel.releaseProducer();
     }
+
+    @Override
+    public int bufferSize() {
+        return channel.bufferSize();
+    }
 }

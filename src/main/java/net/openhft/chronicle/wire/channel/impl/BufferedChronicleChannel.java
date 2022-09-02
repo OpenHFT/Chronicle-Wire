@@ -36,13 +36,6 @@ import java.util.concurrent.ThreadFactory;
 import static net.openhft.chronicle.wire.channel.impl.TCPChronicleChannel.validateHeader;
 
 public class BufferedChronicleChannel extends DelegateChronicleChannel {
-    static final long LINGER_NS = (long) (Double.parseDouble(System.getProperty("wire.lingerUS", "10")) * 1e3);
-
-    static {
-        if (LINGER_NS != 10_000)
-            Jvm.perf().on(BufferedChronicleChannel.class, "wire.lingerUS: " + LINGER_NS / 1e3);
-    }
-
     private final Pauser pauser;
     private final WireExchanger exchanger = new WireExchanger();
     private final ExecutorService bgWriter;
@@ -76,7 +69,6 @@ public class BufferedChronicleChannel extends DelegateChronicleChannel {
         try {
             final TCPChronicleChannel channel = (TCPChronicleChannel) this.channel;
             while (!isClosing()) {
-                long start = System.nanoTime();
                 channel.checkConnected();
                 final Wire wire = exchanger.acquireConsumer();
                 if (wire.bytes().isEmpty()) {
@@ -90,12 +82,8 @@ public class BufferedChronicleChannel extends DelegateChronicleChannel {
                 assert validateHeader(wire.bytes().peekVolatileInt());
                 // System.out.println("Writing - " + Wires.fromSizePrefixedBlobs(wire));
                 pauser.reset();
-//                long size = wire.bytes().readRemaining();
                 channel.flushOut(wire);
                 exchanger.releaseConsumer();
-                while (System.nanoTime() < start + LINGER_NS) {
-                    pauser.pause();
-                }
             }
         } catch (Throwable t) {
             if (!isClosing())
