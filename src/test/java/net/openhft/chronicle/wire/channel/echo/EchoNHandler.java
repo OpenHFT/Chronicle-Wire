@@ -43,24 +43,22 @@ public class EchoNHandler extends AbstractHandler<EchoNHandler> {
 
     @Override
     public void run(ChronicleContext context, ChronicleChannel channel) throws ClosedIORuntimeException {
-        try (AffinityLock lock = context.affinityLock()) {
-            Pauser pauser = Pauser.balanced();
-            while (!channel.isClosed()) {
-                try (DocumentContext dc = channel.readingDocument()) {
-                    if (!dc.isPresent()) {
-                        pauser.pause();
-                        continue;
-                    }
-                    final Wire wire = dc.wire();
-                    final long position = wire.bytes().readPosition();
-                    for (int i = 0; i < times; i++) {
-                        wire.bytes().readPosition(position);
-                        try (DocumentContext dc2 = channel.writingDocument(dc.isMetaData())) {
-                            wire.copyTo(dc2.wire());
-                        }
-                    }
-                    pauser.reset();
+        Pauser pauser = Pauser.balanced();
+        while (!channel.isClosed()) {
+            try (DocumentContext dc = channel.readingDocument()) {
+                if (!dc.isPresent()) {
+                    pauser.pause();
+                    continue;
                 }
+                final Wire wire = dc.wire();
+                final long position = wire.bytes().readPosition();
+                for (int i = 0; i < times; i++) {
+                    wire.bytes().readPosition(position);
+                    try (DocumentContext dc2 = channel.writingDocument(dc.isMetaData())) {
+                        wire.copyTo(dc2.wire());
+                    }
+                }
+                pauser.reset();
             }
         }
     }

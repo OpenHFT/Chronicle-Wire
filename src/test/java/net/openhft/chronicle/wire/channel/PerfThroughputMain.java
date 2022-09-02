@@ -10,10 +10,12 @@ package net.openhft.chronicle.wire.channel;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.channel.echo.DummyData;
 import net.openhft.chronicle.wire.channel.echo.DummyDataSmall;
 import net.openhft.chronicle.wire.channel.echo.EchoNHandler;
+import net.openhft.chronicle.wire.channel.impl.BufferedChronicleChannel;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -23,7 +25,7 @@ public class PerfThroughputMain {
     static final String URL = System.getProperty("url", "tcp://:1248");
     static final int RUN_TIME = Integer.getInteger("runTime", 5);
     static final int BATCH = Integer.getInteger("batch", 1);
-    static final int CLIENTS = Integer.getInteger("clients", 8);
+    static final int CLIENTS = Integer.getInteger("clients", 4);
     static final boolean METHODS = Jvm.getBoolean("methods");
 
     public static void main(String[] args) {
@@ -33,27 +35,44 @@ public class PerfThroughputMain {
                 "-Dbatch=" + BATCH + " " +
                 "-Dmethods=" + METHODS
         );
-        try (ChronicleContext context = ChronicleContext.newContext(URL)) {
-            EchoNHandler echoHandler = new EchoNHandler();
-            echoHandler.times(BATCH);
-            final ChronicleChannelSupplier supplier = context.newChannelSupplier(echoHandler);
-            echoHandler.buffered(true);
-            doTest("buffered", supplier.buffered(true));
+        System.out.println("This is the total of the messages sent and messages received");
+        int[] nClients = {CLIENTS};
+        if (CLIENTS == 0)
+            nClients = new int[]{16, 8, 4, 2, 1};
+        for (int nClient : nClients) {
+            try (ChronicleContext context = ChronicleContext.newContext(URL)) {
+                EchoNHandler echoHandler = new EchoNHandler();
+                echoHandler.times(BATCH);
+                final ChronicleChannelSupplier supplier = context.newChannelSupplier(echoHandler);
 
-            echoHandler.buffered(false);
-            doTest("unbuffered", supplier.buffered(false));
+                echoHandler.buffered(false);
+                doTest("unbuffered", supplier.buffered(false), nClient);
+
+                echoHandler.buffered(true);
+                doTest("buffered", supplier.buffered(true), nClient);
+            }
         }
     }
 
-    private static void doTest(String desc, ChronicleChannelSupplier channelSupplier) {
-        InternalChronicleChannel[] clients = new InternalChronicleChannel[CLIENTS];
-        for (int i = 0; i < CLIENTS; i++)
+    private static void doTest(String desc, ChronicleChannelSupplier channelSupplier, int nClients) {
+        InternalChronicleChannel[] clients = new InternalChronicleChannel[nClients];
+        for (int i = 0; i < nClients; i++)
             clients[i] = (InternalChronicleChannel) channelSupplier.get();
-
-        for (int size = 128 << 10; size >= 8; size /= 2) {
+        int bufferSize = clients[0].bufferSize();
+        if (bufferSize < 4 << 20 && OS.isLinux()) {
+            System.err.println("Try increasing the maximum buffer sizes");
+            System.err.println("sudo sysctl --write net.core.rmem_max=2097152");
+            System.err.println("sudo sysctl --write net.core.wmem_max=2097152");
+        }
+        for (int size = 1 << 20; size >= 8; size /= 2) {
             long start = System.currentTimeMillis();
             long end = start + RUN_TIME * 1000L;
-            int window = (4 << 20) / size / CLIENTS;
+            int window =  bufferSize /  (4 + size);
+            if (size < 1024)
+                window *= 2;
+            if (nClients > 4)
+                window = window * 4 / nClients;
+            int finalWindow = window;
             AtomicLong totalRead = new AtomicLong(0);
             int finalSize = size;
             final Consumer<InternalChronicleChannel> sendAndReceive;
@@ -72,10 +91,10 @@ public class PerfThroughputMain {
                             // due to the multiplier in the EchoNHandler
                             written += BATCH;
 
-                            read = readUpto(window, icc, written, read);
+                            read = readUpto(finalWindow, icc, written, read);
                         } while (System.currentTimeMillis() < end);
 
-                        readUpto(0, icc, written, read);
+                        read = readUpto(0, icc, written, read);
                         totalRead.addAndGet(read);
                     };
                 } else {
@@ -91,10 +110,10 @@ public class PerfThroughputMain {
                             // due to the multiplier in the EchoNHandler
                             written += BATCH;
 
-                            read = readUpto(window, icc, written, read);
+                            read = readUpto(finalWindow, icc, written, read);
                         } while (System.currentTimeMillis() < end);
 
-                        readUpto(0, icc, written, read);
+                        read = readUpto(0, icc, written, read);
                         totalRead.addAndGet(read);
                     };
                 }
@@ -106,17 +125,16 @@ public class PerfThroughputMain {
                     do {
                         final Bytes<?> bytes = icc.acquireProducer().bytes();
                         bytes.writeInt(finalSize);
-                        for (int i = 0; i < finalSize; i += 8)
-                            bytes.writeLong(0L);
+                        bytes.writeSkip(finalSize);
                         icc.releaseProducer();
 
                         // due to the multiplier in the EchoNHandler
                         written += BATCH;
 
-                        read = readUpto(window, icc, written, read);
+                        read = readUpto(finalWindow, icc, written, read);
                     } while (System.currentTimeMillis() < end);
 
-                    readUpto(0, icc, written, read);
+                    read = readUpto(0, icc, written, read);
                     totalRead.addAndGet(read);
                 };
             }
@@ -127,10 +145,13 @@ public class PerfThroughputMain {
             long count = totalRead.get();
             long time = System.currentTimeMillis() - start;
             long totalBytes = size * count;
-            long MBps = totalBytes / time / (1_000_000 / 1_000);
-            long rate = count * 1000 / time;
-            System.out.printf("desc: %s, size: %,d, MBps: %,d, mps: %,d%n",
-                    desc, size, MBps, rate);
+            double GBps = (totalBytes + totalBytes / BATCH) / (time / 1e3) / 1e9;
+            long rate = (count + count / BATCH) * 1000 / time;
+//            if (s != size)
+//                System.out.println("Warmup...");
+//            else
+            System.out.printf("clients; %d; desc; %s; size; %,6d; GB/s; %6.3f; Mmsg/s; %6.3f%n",
+                    nClients, desc, size, GBps, rate/1e6);
         }
     }
 

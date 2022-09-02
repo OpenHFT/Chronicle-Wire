@@ -16,26 +16,28 @@
  * limitations under the License.
  */
 
-package net.openhft.chronicle.wire.channel.echo;
+package net.openhft.chronicle.wire.channel;
 
-import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.io.ClosedIORuntimeException;
-import net.openhft.chronicle.wire.channel.AbstractHandler;
-import net.openhft.chronicle.wire.channel.ChronicleChannel;
-import net.openhft.chronicle.wire.channel.ChronicleChannelCfg;
-import net.openhft.chronicle.wire.channel.ChronicleContext;
 
-public class ChannelVisitorHandler extends AbstractHandler<ChannelVisitorHandler> {
+/**
+ * This Handler performs a single action and returns a response in the reply header.
+ * <p>
+ * This would typically be either an OkHeader, ReplyHeader, ErrorHandler
+ *
+ * @param <H> the subclass
+ */
+public abstract class ReplyingHandler<H extends ReplyingHandler<H>> extends AbstractHandler<H> {
+    @Override
+    public abstract ChannelHeader responseHeader(ChronicleContext context);
+
     @Override
     public void run(ChronicleContext context, ChronicleChannel channel) throws ClosedIORuntimeException {
-        Replies replies = channel.methodWriter(Replies.class);
-        ChannelVisiting visiting = visitor -> replies.reply(visitor.visit(channel));
-        channel.eventHandlerAsRunnable(visiting).run();
+        // nothing to do
     }
 
     @Override
     public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg channelCfg) {
         throw new UnsupportedOperationException();
     }
-
 }

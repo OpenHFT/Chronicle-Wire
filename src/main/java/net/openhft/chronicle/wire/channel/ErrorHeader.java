@@ -16,8 +16,20 @@
  * limitations under the License.
  */
 
-package net.openhft.chronicle.wire.channel.echo;
+package net.openhft.chronicle.wire.channel;
 
-public interface Replies {
-    void reply(Object o);
+/**
+ * Header containing an error message
+ */
+public class ErrorHeader extends AbstractHeader<ErrorHeader> {
+    private String errorMsg;
+
+    public String errorMsg() {
+        return errorMsg;
+    }
+
+    public ErrorHeader errorMsg(String errorMsg) {
+        this.errorMsg = errorMsg;
+        return this;
+    }
 }

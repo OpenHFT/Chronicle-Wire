@@ -16,8 +16,19 @@
  * limitations under the License.
  */
 
-package net.openhft.chronicle.wire.channel.echo;
+package net.openhft.chronicle.wire.channel;
 
-public interface Replies {
-    void reply(Object o);
+/**
+ * Header containing a reply object
+ */
+public class ReplyHeader<R> extends AbstractHeader<ReplyHeader<R>> {
+    private R reply;
+
+    public ReplyHeader(R reply) {
+        this.reply = reply;
+    }
+
+    public R replay() {
+        return reply;
+    }
 }

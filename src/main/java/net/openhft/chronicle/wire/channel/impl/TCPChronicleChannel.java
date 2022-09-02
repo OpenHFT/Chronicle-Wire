@@ -28,6 +28,7 @@ import net.openhft.chronicle.wire.channel.*;
 import net.openhft.chronicle.wire.converter.NanoTime;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Collections;
@@ -40,7 +41,7 @@ import static net.openhft.chronicle.core.io.ClosedIORuntimeException.newIORuntim
 
 public class TCPChronicleChannel extends SimpleCloseable implements InternalChronicleChannel {
     // tune for message sizes up to this
-    static final int CAPACITY = Integer.getInteger("tcp.capacity", 1 << 20); // 1 MB
+    static final int CAPACITY = Integer.getInteger("tcp.capacity", 2 << 20); // 2 MB
     private static final String HEADER = "header";
     private static final ChannelHeader NO_HEADER = Mocker.ignored(ChannelHeader.class);
     private static final boolean DUMP_YAML = Jvm.getBoolean("dumpYaml");
@@ -63,6 +64,7 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
     private boolean privateSocketRegistry;
     private boolean endOfData = false;
     private boolean unsentTestMessage = false;
+    private int bufferSize = CAPACITY * 2;
 
     /**
      * Initiator constructor
@@ -207,6 +209,15 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
         endOfData = true;
         bytes.writeSkip(read);
         final int header = bytes.readInt(bytes.readPosition());
+        if (headerOut == NO_HEADER) {
+            // HTTP GET
+            if (header == 0x20544547) {
+                throw new HTTPDetectedException("Start of request\n" + bytes);
+            }
+            if (header >> 16 != 0x4000) {
+                throw new InvalidProtocolException("Dump\n" + bytes.toHexString());
+            }
+        }
         assert bytes.readRemaining() < 4 || validateHeader(header);
         if (DUMP_YAML)
             System.out.println("in - " + Integer.toUnsignedString(header, 16) + "\n" + Wires.fromSizePrefixedBlobs(in));
@@ -252,8 +263,11 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
     private void configureSocket() throws IOException {
         if (channelCfg.pauserMode() == PauserMode.busy)
             sc.configureBlocking(false);
-        sc.socket().setReceiveBufferSize(CAPACITY);
-        sc.socket().setSendBufferSize(CAPACITY);
+        final Socket socket = sc.socket();
+        socket.setReceiveBufferSize(CAPACITY);
+        socket.setSendBufferSize(CAPACITY);
+        bufferSize = socket.getReceiveBufferSize() +
+                socket.getSendBufferSize();
     }
 
     @Override
@@ -399,6 +413,10 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
     public void releaseProducer() {
         flush();
         lock.unlock();
+    }
+
+    public int bufferSize() {
+        return bufferSize;
     }
 
     private class ConnectionDocumentContextHolder extends DocumentContextHolder implements WriteDocumentContext {

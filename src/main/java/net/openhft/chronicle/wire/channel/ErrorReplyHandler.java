@@ -3,15 +3,22 @@
  *
  *       https://chronicle.software
  *
- * Licensed under Contract only
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package net.openhft.chronicle.wire.channel;
 
-import net.openhft.chronicle.core.io.ClosedIORuntimeException;
-import net.openhft.chronicle.wire.DocumentContext;
-
-public class ErrorReplyHandler extends AbstractHandler<ErrorReplyHandler> {
+public class ErrorReplyHandler extends ReplyingHandler<ErrorReplyHandler> {
     private String errorMsg = "unknown";
 
     public String errorMsg() {
@@ -24,14 +31,7 @@ public class ErrorReplyHandler extends AbstractHandler<ErrorReplyHandler> {
     }
 
     @Override
-    public void run(ChronicleContext context, ChronicleChannel channel) throws ClosedIORuntimeException {
-        try (DocumentContext dc = channel.writingDocument()){
-            dc.wire().write("error").text(errorMsg);
-        }
-    }
-
-    @Override
-    public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg channelCfg) {
-        throw new UnsupportedOperationException();
+    public ChannelHeader responseHeader(ChronicleContext context) {
+        return new ErrorHeader().errorMsg(errorMsg);
     }
 }

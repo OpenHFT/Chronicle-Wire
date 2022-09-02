@@ -16,8 +16,12 @@
  * limitations under the License.
  */
 
-package net.openhft.chronicle.wire.channel.echo;
+package net.openhft.chronicle.wire.channel.impl;
 
-public interface Replies {
-    void reply(Object o);
+import net.openhft.chronicle.core.io.IORuntimeException;
+
+public class InvalidProtocolException  extends IORuntimeException {
+    public InvalidProtocolException(String message) {
+        super(message);
+    }
 }

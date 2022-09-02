@@ -16,8 +16,10 @@
  * limitations under the License.
  */
 
-package net.openhft.chronicle.wire.channel.echo;
+package net.openhft.chronicle.wire.channel.impl;
 
-public interface Replies {
-    void reply(Object o);
+public class HTTPDetectedException extends InvalidProtocolException{
+    public HTTPDetectedException(String message) {
+        super(message);
+    }
 }
