@@ -47,6 +47,7 @@ public class WireExchanger extends SimpleCloseable implements MarshallableOut {
 
     private final Wire wire0, wire1;
     private final WEDocumentContext writeContext = new WEDocumentContext();
+    private int delay = 0;
     private volatile int value;
 
     public WireExchanger() {
@@ -76,6 +77,8 @@ public class WireExchanger extends SimpleCloseable implements MarshallableOut {
             int writeTo = val & USED_MASK;
             final Wire wire = wireAt(writeTo);
             if (wire.bytes().readRemaining() <= INIT_CAPACITY / 2) {
+                if (delay > 1)
+                    delay--;
                 return wire;
             }
             releaseProducer();
@@ -85,14 +88,17 @@ public class WireExchanger extends SimpleCloseable implements MarshallableOut {
 
     @NotNull
     private Wire acquireProducer2() {
-        Jvm.pause(1);
+        Jvm.pause(delay++);
         {
             int val2 = lock();
             int writeTo2 = val2 & USED_MASK;
             final Wire wire2 = wireAt(writeTo2);
             final long used = wire2.bytes().readRemaining();
-            if (used > INIT_CAPACITY * 3 / 4)
-                Jvm.perf().on(getClass(), "Producer buffering " + 100 * used / INIT_CAPACITY + "%");
+            if (used > INIT_CAPACITY * 4L / 5) {
+                double ratio = (double) used / INIT_CAPACITY;
+                Jvm.perf().on(getClass(), "Producer buffering " + (int) (100 * ratio) + "%");
+            }
+
             return wire2;
         }
     }
