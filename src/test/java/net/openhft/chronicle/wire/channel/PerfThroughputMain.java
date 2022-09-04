@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 
 public class PerfThroughputMain {
     static final String URL = System.getProperty("url", "tcp://:1248");
-    static final int RUN_TIME = Integer.getInteger("runTime", 5);
+    static final int RUN_TIME = Integer.getInteger("runTime", 10);
     static final int BATCH = Integer.getInteger("batch", 1);
     static final int CLIENTS = Integer.getInteger("clients", 4);
     static final boolean METHODS = Jvm.getBoolean("methods");
