@@ -74,7 +74,8 @@ public class PerfThroughputMain {
             System.err.println("sudo sysctl --write net.core.rmem_max=2097152");
             System.err.println("sudo sysctl --write net.core.wmem_max=2097152");
         }
-        for (int size = 1 << 20; size >= 8; size /= 2) {
+        for (int s = 1 << 20; s >= 8; s /= 2) {
+            int size = Math.min(64, s);
             long start = System.currentTimeMillis();
             long end = start + RUN_TIME * 1000L;
             int window =  bufferSize /  (4 + size);
