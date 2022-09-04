@@ -29,6 +29,21 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+/*
+On a Ryzen 5950X, bare metal Ubuntu 21.10
+clients; 32; desc; buffered; size;     44; GB/s;  1.446; Mmsg/s; 32.854
+clients; 32; desc; buffered; size;     44; GB/s;  1.654; Mmsg/s; 37.600
+clients; 32; desc; buffered; size;     44; GB/s;  1.666; Mmsg/s; 37.859
+clients; 16; desc; buffered; size;     44; GB/s;  1.777; Mmsg/s; 40.384
+clients; 16; desc; buffered; size;     44; GB/s;  1.780; Mmsg/s; 40.451
+clients; 16; desc; buffered; size;     44; GB/s;  1.772; Mmsg/s; 40.272
+clients; 8; desc; buffered; size;     44; GB/s;  1.356; Mmsg/s; 30.822
+clients; 8; desc; buffered; size;     44; GB/s;  1.362; Mmsg/s; 30.950
+clients; 8; desc; buffered; size;     44; GB/s;  1.355; Mmsg/s; 30.791
+clients; 4; desc; buffered; size;     44; GB/s;  0.880; Mmsg/s; 20.007
+clients; 4; desc; buffered; size;     44; GB/s;  0.731; Mmsg/s; 16.619
+clients; 4; desc; buffered; size;     44; GB/s;  0.737; Mmsg/s; 16.751
+ */
 public class PerfTopOfBookMain {
     static final String URL = System.getProperty("url", "tcp://:1248");
     static final int RUN_TIME = Integer.getInteger("runTime", 20);
@@ -42,7 +57,7 @@ public class PerfTopOfBookMain {
         System.out.println("This is the total of the messages sent and messages received");
         int[] nClients = {CLIENTS};
         if (CLIENTS == 0)
-            nClients = new int[]{16, 8, 4, 2, 1};
+            nClients = new int[]{32, 16, 8, 4, 2, 1};
         for (int nClient : nClients) {
             try (ChronicleContext context = ChronicleContext.newContext(URL)) {
                 EchoHandler echoHandler = new EchoHandler();
