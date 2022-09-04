@@ -25,7 +25,6 @@ import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.channel.echo.DummyData;
 import net.openhft.chronicle.wire.channel.echo.DummyDataSmall;
 import net.openhft.chronicle.wire.channel.echo.EchoNHandler;
-import net.openhft.chronicle.wire.channel.impl.BufferedChronicleChannel;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -35,7 +34,7 @@ public class PerfThroughputMain {
     static final String URL = System.getProperty("url", "tcp://:1248");
     static final int RUN_TIME = Integer.getInteger("runTime", 10);
     static final int BATCH = Integer.getInteger("batch", 1);
-    static final int CLIENTS = Integer.getInteger("clients", 4);
+    static final int CLIENTS = Integer.getInteger("clients", 8);
     static final boolean METHODS = Jvm.getBoolean("methods");
 
     public static void main(String[] args) {
@@ -74,8 +73,7 @@ public class PerfThroughputMain {
             System.err.println("sudo sysctl --write net.core.rmem_max=2097152");
             System.err.println("sudo sysctl --write net.core.wmem_max=2097152");
         }
-        for (int s = 1 << 20; s >= 8; s /= 2) {
-            int size = Math.min(64, s);
+        for (int size = 1 << 20; size >= 8; size /= 2) {
             long start = System.currentTimeMillis();
             long end = start + RUN_TIME * 1000L;
             int window =  bufferSize /  (4 + size);
@@ -94,7 +92,7 @@ public class PerfThroughputMain {
                     DummyDataSmall dd = new DummyDataSmall();
                     dd.data(new byte[size - Long.BYTES]);
                     sendAndReceive = icc -> {
-                        int written = 0, read = 0;
+                        long written = 0, read = 0;
                         final EchoingSmall echoing = icc.methodWriter(EchoingSmall.class);
                         do {
                             echoing.echo(dd);
@@ -113,7 +111,7 @@ public class PerfThroughputMain {
                     DummyData dd = new DummyData();
                     dd.data(new byte[size - Long.BYTES]);
                     sendAndReceive = icc -> {
-                        int written = 0, read = 0;
+                        long written = 0, read = 0;
                         final Echoing echoing = icc.methodWriter(Echoing.class);
                         do {
                             echoing.echo(dd);
@@ -131,7 +129,7 @@ public class PerfThroughputMain {
             } else {
                 // send messages as raw bytes
                 sendAndReceive = icc -> {
-                    int written = 0, read = 0;
+                    long written = 0, read = 0;
 
                     do {
                         final Bytes<?> bytes = icc.acquireProducer().bytes();
@@ -166,7 +164,7 @@ public class PerfThroughputMain {
         }
     }
 
-    private static int readUpto(int window, InternalChronicleChannel icc, int written, int read) {
+    private static long readUpto(int window, InternalChronicleChannel icc, long written, long read) {
         do {
             try (DocumentContext dc = icc.readingDocument()) {
                 if (dc.isPresent())
