@@ -46,7 +46,7 @@ public class BufferedChronicleChannel extends DelegateChronicleChannel {
         this.pauser = pauser;
 
         String desc = channel.connectionCfg().initiator() ? "init" : "accp";
-        final String writer = desc + "~writer";
+        final String writer = desc + "-writer";
         final ThreadFactory factory = pauser.isBusy()
                 ? new AffinityThreadFactory(writer, true)
                 : new NamedThreadFactory(writer, true);

@@ -328,7 +328,7 @@
                                 </property>
                                 <property>
                                     <key>useAffinity</key>
-                                    <value>true</value>
+                                    <value>false</value>
                                 </property>
                                 <property>
                                     <key>pauserMode</key>

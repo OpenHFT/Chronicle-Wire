@@ -38,7 +38,7 @@ public class TopOfBook extends BytesInBinaryMarshallable {
     @LongConversion(Base85LongConverter.class)
     private int ecn; // up to 5 chars
 
-    private double bidPrices, askPrice;
+    private double bidPrice, askPrice;
     private int bidQuantity, askQuantity;
 
     @Override
@@ -78,11 +78,11 @@ public class TopOfBook extends BytesInBinaryMarshallable {
     }
 
     public double bidPrices() {
-        return bidPrices;
+        return bidPrice;
     }
 
     public TopOfBook bidPrices(double bidPrices) {
-        this.bidPrices = bidPrices;
+        this.bidPrice = bidPrices;
         return this;
     }
 
