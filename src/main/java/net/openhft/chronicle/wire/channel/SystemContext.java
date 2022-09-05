@@ -37,6 +37,9 @@ public class SystemContext extends SelfDescribingMarshallable {
     private String userCountry;
     private String userName;
 
+    private String javaVendor;
+    private String javaVersion;
+
     private static SystemContext getInstance() {
         SystemContext sc = new SystemContext();
         final Runtime runtime = Runtime.getRuntime();
@@ -47,6 +50,8 @@ public class SystemContext extends SelfDescribingMarshallable {
         sc.upTime = tp.currentTimeNanos();
         sc.userCountry = System.getProperty("user.country");
         sc.userName = OS.getUserName();
+        sc.javaVendor = System.getProperty("java.vendor");
+        sc.javaVersion = System.getProperty("java.version");
         return sc;
     }
 
@@ -60,6 +65,14 @@ public class SystemContext extends SelfDescribingMarshallable {
 
     public String hostName() {
         return hostName;
+    }
+
+    public String javaVendor() {
+        return javaVendor;
+    }
+
+    public String javaVersion() {
+        return javaVersion;
     }
 
     public long upTime() {

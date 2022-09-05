@@ -20,10 +20,10 @@ package net.openhft.chronicle.wire.channel.book;
 
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.threads.ThreadDump;
 import net.openhft.chronicle.wire.channel.ChronicleChannelSupplier;
 import net.openhft.chronicle.wire.channel.ChronicleContext;
 import net.openhft.chronicle.wire.channel.InternalChronicleChannel;
-import net.openhft.chronicle.wire.channel.echo.EchoHandler;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -31,22 +31,36 @@ import java.util.stream.Stream;
 
 /*
 On a Ryzen 5950X, bare metal Ubuntu 21.10
-clients; 32; desc; buffered; size;     44; GB/s;  1.446; Mmsg/s; 32.854
-clients; 32; desc; buffered; size;     44; GB/s;  1.654; Mmsg/s; 37.600
-clients; 32; desc; buffered; size;     44; GB/s;  1.666; Mmsg/s; 37.859
-clients; 16; desc; buffered; size;     44; GB/s;  1.777; Mmsg/s; 40.384
-clients; 16; desc; buffered; size;     44; GB/s;  1.780; Mmsg/s; 40.451
-clients; 16; desc; buffered; size;     44; GB/s;  1.772; Mmsg/s; 40.272
-clients; 8; desc; buffered; size;     44; GB/s;  1.356; Mmsg/s; 30.822
-clients; 8; desc; buffered; size;     44; GB/s;  1.362; Mmsg/s; 30.950
-clients; 8; desc; buffered; size;     44; GB/s;  1.355; Mmsg/s; 30.791
-clients; 4; desc; buffered; size;     44; GB/s;  0.880; Mmsg/s; 20.007
-clients; 4; desc; buffered; size;     44; GB/s;  0.731; Mmsg/s; 16.619
-clients; 4; desc; buffered; size;     44; GB/s;  0.737; Mmsg/s; 16.751
+
+Corretto 17.0.4.1
+clients; 16; desc; buffered; size;     44; GB/s;  1.598; Mmsg/s; 36.327
+clients; 8; desc; buffered; size;     44; GB/s;  0.998; Mmsg/s; 22.682
+clients; 4; desc; buffered; size;     44; GB/s;  0.745; Mmsg/s; 16.928
+clients; 2; desc; buffered; size;     44; GB/s;  0.392; Mmsg/s;  8.908
+clients; 1; desc; buffered; size;     44; GB/s;  0.206; Mmsg/s;  4.682
+
+--add-exports=java.base/jdk.internal.ref=ALL-UNNAMED
+--add-exports=java.base/sun.nio.ch=ALL-UNNAMED
+--add-exports=jdk.unsupported/sun.misc=ALL-UNNAMED
+--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED
+--add-opens=jdk.compiler/com.sun.tools.javac=ALL-UNNAMED
+--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED
+--add-opens=java.base/java.lang=ALL-UNNAMED
+--add-opens=java.base/java.lang.reflect=ALL-UNNAMED
+--add-opens=java.base/java.io=ALL-UNNAMED
+--add-opens=java.base/java.util=ALL-UNNAMED
+--add-exports=java.base/jdk.internal.util=ALL-UNNAMED
+--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED
+
  */
 public class PerfTopOfBookMain {
+    static {
+        System.setProperty("system.properties", "/dev/null");
+        System.setProperty("useAffinity", "false");
+        System.setProperty("pauserMode", "yielding");
+    }
     static final String URL = System.getProperty("url", "tcp://:1248");
-    static final int RUN_TIME = Integer.getInteger("runTime", 20);
+    static final int RUN_TIME = Integer.getInteger("runTime", 60);
     static final int CLIENTS = Integer.getInteger("clients", 0);
 
     public static void main(String[] args) {
@@ -57,15 +71,18 @@ public class PerfTopOfBookMain {
         System.out.println("This is the total of the messages sent and messages received");
         int[] nClients = {CLIENTS};
         if (CLIENTS == 0)
-            nClients = new int[]{32, 16, 8, 4, 2, 1};
+            nClients = new int[]{2, 2, 1};
+        TopOfBookHandler echoHandler = new TopOfBookHandler(new EchoTopOfBookHandler());
         for (int nClient : nClients) {
+            ThreadDump td = new ThreadDump();
             try (ChronicleContext context = ChronicleContext.newContext(URL)) {
-                EchoHandler echoHandler = new EchoHandler();
                 final ChronicleChannelSupplier supplier = context.newChannelSupplier(echoHandler);
 
                 echoHandler.buffered(true);
                 doTest("buffered", supplier.buffered(true), nClient);
             }
+            // check everything has shutdown, this is just for testing purposes.
+            td.assertNoNewThreads();
         }
     }
 
@@ -81,7 +98,7 @@ public class PerfTopOfBookMain {
         }
 
         int size = TopOfBook.LENGTH_BYTES;
-        for (int t = 1; t <= 3; t++) {
+        for (int t = 1; t <= 1; t++) {
             long start = System.currentTimeMillis();
             long end = start + RUN_TIME * 1000L;
             int window = 8 * bufferSize / (4 + size) / nClients;

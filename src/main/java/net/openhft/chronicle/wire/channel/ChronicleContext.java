@@ -35,6 +35,8 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Set;
 
+import static net.openhft.chronicle.wire.WireType.YAML;
+
 public class ChronicleContext extends SimpleCloseable {
     static {
         Handler.init();
@@ -197,5 +199,10 @@ public class ChronicleContext extends SimpleCloseable {
         if (this.name() == null)
             return new File(name);
         return new File(name(), name);
+    }
+
+    @Override
+    public String toString() {
+        return YAML.asString(this);
     }
 }
