@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.wire.channel.book;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.TextMethodTester;
 import net.openhft.chronicle.wire.WireTestCommon;
@@ -25,10 +26,12 @@ import org.junit.Test;
 
 import java.io.IOException;
 
+import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TopOfBookHandlerTest extends WireTestCommon {
     public static void test(String basename) {
+        assumeFalse(Jvm.isAzulZing());
         TextMethodTester<TopOfBookListener> tester = new TextMethodTester<>(
                 basename + "/in.yaml",
                 out -> new EchoTopOfBookHandler().out(out),
