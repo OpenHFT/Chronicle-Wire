@@ -71,7 +71,7 @@ public class PerfTopOfBookMain {
         System.out.println("This is the total of the messages sent and messages received");
         int[] nClients = {CLIENTS};
         if (CLIENTS == 0)
-            nClients = new int[]{2, 2, 1};
+            nClients = new int[]{16, 8, 4, 2, 1};
         TopOfBookHandler echoHandler = new TopOfBookHandler(new EchoTopOfBookHandler());
         for (int nClient : nClients) {
             ThreadDump td = new ThreadDump();
