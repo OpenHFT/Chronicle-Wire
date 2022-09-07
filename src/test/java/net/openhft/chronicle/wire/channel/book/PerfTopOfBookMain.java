@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.wire.channel.book;
 
+import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
@@ -31,6 +32,7 @@ import net.openhft.chronicle.wire.channel.ChronicleContext;
 import net.openhft.chronicle.wire.channel.InternalChronicleChannel;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.BitSet;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -38,12 +40,16 @@ import java.util.stream.Stream;
 /*
 On a Ryzen 5950X, bare metal Ubuntu 21.10
 
-Azul Zulu 17.0.4.1
-clients; 16; desc; buffered; size;     44; GB/s;  1.618; Mmsg/s; 36.783
-clients; 8; desc; buffered; size;     44; GB/s;  1.170; Mmsg/s; 26.600
-clients; 4; desc; buffered; size;     44; GB/s;  0.745; Mmsg/s; 16.928
-clients; 2; desc; buffered; size;     44; GB/s;  0.392; Mmsg/s;  8.908
-clients; 1; desc; buffered; size;     44; GB/s;  0.206; Mmsg/s;  4.682
+Azul Zulu 18.0.2.1
+-Durl=tcp://:1248 -DrunTime=60 -Dclients=0 -DoneNewObject=false
+
+clients; 16; desc; buffered; size;     44; GB/s;  2.846; Mmsg/s; 64.690
+clients; 8; desc; buffered; size;     44; GB/s;  2.023; Mmsg/s; 45.976
+clients; 4; desc; buffered; size;     44; GB/s;  1.419; Mmsg/s; 32.261
+clients; 2; desc; buffered; size;     44; GB/s;  0.915; Mmsg/s; 20.793
+clients; 1; desc; buffered; size;     44; GB/s;  0.460; Mmsg/s; 10.447
+
+0 GCs/min
 
 --add-exports=java.base/jdk.internal.ref=ALL-UNNAMED
 --add-exports=java.base/sun.nio.ch=ALL-UNNAMED
@@ -58,25 +64,42 @@ clients; 1; desc; buffered; size;     44; GB/s;  0.206; Mmsg/s;  4.682
 --add-exports=java.base/jdk.internal.util=ALL-UNNAMED
 --add-exports=java.base/jdk.internal.misc=ALL-UNNAMED
 
--DoneNewObject=false -Xmn512m -Dclients=16
-clients; 16; desc; buffered; size;     44; GB/s;  1.485; Mmsg/s; 34.116
-0 GCs/min
+-Durl=tcp://:1248 -DrunTime=60 -Dclients=16 -DoneNewObject=false
+clients; 16; desc; buffered; size;     44; GB/s;  2.875; Mmsg/s; 65.344 - Azul Zulu 11.0.14.1
 
--DoneNewObject=true -Xmn24g -Dclients=16
-clients; 16; desc; buffered; size;     44; GB/s;  1.302; Mmsg/s; 29.595
-6 GCs/min
+-Durl=tcp://localhost:1248 -DrunTime=60 -Dclients=16 -DoneNewObject=false
+clients; 16; desc; buffered; size;     44; GB/s;  2.665; Mmsg/s; 60.578 - Azul Zulu 1.8.0_322
+clients; 16; desc; buffered; size;     44; GB/s;  2.961; Mmsg/s; 67.290 - Azul Zulu 11.0.14.1
+clients; 16; desc; buffered; size;     44; GB/s;  3.020; Mmsg/s; 68.628 - Azul Zulu 17.0.4.1
+clients; 16; desc; buffered; size;     44; GB/s;  2.972; Mmsg/s; 67.540 - Azul Zulu 18.0.2.1
+clients; 16; desc; buffered; size;     44; GB/s;  2.984; Mmsg/s; 67.811 - Oracle OpenJDK 18.0.2.1
+
+-Durl=tcp://localhost:1248 -DrunTime=60 -Dclients=16 -DoneNewObject=true
+clients; 16; desc; buffered; size;     44; GB/s;  1.601; Mmsg/s; 36.384 - Azul Zulu 1.8.0_322
+clients; 16; desc; buffered; size;     44; GB/s;  2.011; Mmsg/s; 45.710 - Azul Zulu 11.0.14.1
+clients; 16; desc; buffered; size;     44; GB/s;  2.215; Mmsg/s; 50.341 - Azul Zulu 17.0.4.1
+clients; 16; desc; buffered; size;     44; GB/s;  2.192; Mmsg/s; 49.818 - Azul Zulu 18.0.2.1
+clients; 16; desc; buffered; size;     44; GB/s;  2.205; Mmsg/s; 50.118 - Oracle OpenJDK 18.0.2.1
+
+-DoneNewObject=true -Xmn16g -Dclients=16
+clients; 16; desc; buffered; size;     44; GB/s;  1.728; Mmsg/s; 39.271 - Corretto 11.0.14.1
+clients; 16; desc; buffered; size;     44; GB/s;  1.760; Mmsg/s; 39.991 - Oracle 18.0.2.1
+clients; 16; desc; buffered; size;     44; GB/s;  1.799; Mmsg/s; 40.891 - Azul Zulu 11.0.14.1
+clients; 16; desc; buffered; size;     44; GB/s;  1.761; Mmsg/s; 40.012 - Oracle 17.0.2
+clients; 16; desc; buffered; size;     44; GB/s;  1.823; Mmsg/s; 41.428 - Azul Zulu 17.0.4.1
+8 GCs/min < 30 ms/min
 
 -DoneNewObject=true -Xmn2g -Dclients=16
-clients; 16; desc; buffered; size;     44; GB/s;  1.290; Mmsg/s; 29.324
-49 GCs/min
+clients; 16; desc; buffered; size;     44; GB/s;  1.718; Mmsg/s; 39.042
+62 GCs/min < 40 ms/min
 
 -DoneNewObject=true -Xmn1g -Dclients=16
-clients; 16; desc; buffered; size;     44; GB/s;  1.264; Mmsg/s; 28.724
-102 GCs/min
+clients; 16; desc; buffered; size;     44; GB/s;  1.703; Mmsg/s; 38.698
+123 GCs/min
 
--DoneNewObject=true -Xmn512m -Dclients=16
-clients; 16; desc; buffered; size;     44; GB/s;  1.239; Mmsg/s; 28.162
-232 GCs/min
+-DoneNewObject=true -Dclients=16 (348M young size)
+clients; 16; desc; buffered; size;     44; GB/s;  1.635; Mmsg/s; 37.151
+345 GCs/min
  */
 public class PerfTopOfBookMain {
     static final String URL = System.getProperty("url", "tcp://:1248");
@@ -105,6 +128,9 @@ public class PerfTopOfBookMain {
         System.gc();
         TopOfBookHandler echoHandler = new TopOfBookHandler(new EchoTopOfBookHandler());
         for (int nClient : nClients) {
+            if (nClient <= 2)
+                Affinity.setAffinity(BitSet.valueOf(new byte[] { -1 }));
+
             ThreadDump td = new ThreadDump();
             try (ChronicleContext context = ChronicleContext.newContext(URL)) {
                 final ChronicleChannelSupplier supplier = context.newChannelSupplier(echoHandler);

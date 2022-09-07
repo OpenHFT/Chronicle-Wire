@@ -116,11 +116,15 @@ public class TopOfBook extends BytesInBinaryMarshallable implements Cloneable {
 
     @Override
     public <T> @NotNull T deepCopy() {
-        try {
-            return (T) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError(e);
-        }
+        TopOfBook tob = new TopOfBook();
+        tob.symbol = symbol;
+        tob.ecn = ecn;
+        tob.sendingTimeNS = sendingTimeNS;
+        tob.askPrice = askPrice;
+        tob.askQuantity = askQuantity;
+        tob.bidPrice = bidPrice;
+        tob.bidQuantity = bidQuantity;
+        return (T) tob;
     }
 
     @Override

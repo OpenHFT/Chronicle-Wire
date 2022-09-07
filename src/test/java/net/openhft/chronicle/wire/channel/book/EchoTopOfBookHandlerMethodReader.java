@@ -45,8 +45,9 @@ public class EchoTopOfBookHandlerMethodReader extends AbstractGeneratedMethodRea
     protected boolean readOneCall(WireIn wireIn) {
         ValueIn valueIn = wireIn.getValueIn();
         String lastEventName = "";
-        if (wireIn.bytes().peekUnsignedByte() == BinaryWireCode.FIELD_NUMBER) {
-            int methodId = (int) wireIn.readEventNumber();
+        final long methodId0 = wireIn.readEventNumber();
+        if (methodId0 != Long.MIN_VALUE) {
+            int methodId = (int) methodId0;
             switch (methodId) {
                 case 116:
                     readTopOfBook(valueIn);

@@ -20,9 +20,10 @@ package net.openhft.chronicle.wire.channel.book;
 
 import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.UpdateInterceptor;
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
-import net.openhft.chronicle.wire.*;
+import net.openhft.chronicle.wire.MarshallableOut;
+import net.openhft.chronicle.wire.MethodWriter;
+import net.openhft.chronicle.wire.WriteDocumentContext;
 
 import java.util.function.Supplier;
 
@@ -30,36 +31,26 @@ public final class TopOfBookListenerBinarylightMethodWriter implements net.openh
 
     // result
     private transient final Closeable closeable;
-    private transient Supplier<MarshallableOut> out;
+    private transient MarshallableOut out;
 
     // constructor
     public TopOfBookListenerBinarylightMethodWriter(Supplier<MarshallableOut> out, Closeable closeable, UpdateInterceptor updateInterceptor) {
-        this.out = out;
+        this.out = out.get();
         this.closeable = closeable;
     }
 
     @Override
     public void marshallableOut(MarshallableOut out) {
-        this.out = () -> out;
+        this.out = out;
     }
 
     @MethodId(116)
     public void topOfBook(final net.openhft.chronicle.wire.channel.book.TopOfBook topOfBook) {
-        MarshallableOut out = this.out.get();
+        MarshallableOut out = this.out;
         try (final WriteDocumentContext dc = (WriteDocumentContext) out.acquireWritingDocument(false)) {
-            try {
-                dc.chainedElement(false);
-                if (out.recordHistory()) MessageHistory.writeHistory(dc);
-                final ValueOut valueOut = dc.wire().writeEventId("topOfBook", 116);
-                if (TopOfBook.class == topOfBook.getClass()) {
-                    valueOut.marshallable(topOfBook);
-                } else {
-                    valueOut.object(topOfBook);
-                }
-            } catch (Throwable t) {
-                dc.rollbackOnClose();
-                throw Jvm.rethrow(t);
-            }
+            dc.wire()
+                    .writeEventId("topOfBook", 116)
+                    .marshallable(topOfBook);
         }
     }
 }
