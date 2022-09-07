@@ -18,7 +18,6 @@
 
 package net.openhft.chronicle.wire.channel.book;
 
-import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.io.ClosedIORuntimeException;
 import net.openhft.chronicle.wire.channel.AbstractHandler;
 import net.openhft.chronicle.wire.channel.ChronicleChannel;

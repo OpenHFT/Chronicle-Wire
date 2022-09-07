@@ -24,10 +24,13 @@ class ValueInStack {
     final List<ValueInState> freeList = new ArrayList<>();
     int level = 0;
 
+    public ValueInStack() {
+        addOne();
+    }
+
     public void reset() {
         level = 0;
-        curr();
-        freeList.get(level).reset();
+        freeList.get(0).reset();
     }
 
     public void push() {
@@ -45,7 +48,11 @@ class ValueInStack {
 
     public ValueInState curr() {
         while (freeList.size() <= level)
-            freeList.add(new ValueInState());
+            addOne();
         return freeList.get(level);
+    }
+
+    private void addOne() {
+        freeList.add(new ValueInState());
     }
 }

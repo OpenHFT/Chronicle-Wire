@@ -27,8 +27,9 @@ import net.openhft.chronicle.wire.Base85LongConverter;
 import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
 import net.openhft.chronicle.wire.LongConversion;
 import net.openhft.chronicle.wire.converter.NanoTime;
+import org.jetbrains.annotations.NotNull;
 
-public class TopOfBook extends BytesInBinaryMarshallable {
+public class TopOfBook extends BytesInBinaryMarshallable implements Cloneable {
     static final int START_BYTES = BytesUtil.triviallyCopyableStart(TopOfBook.class);
     static final int LENGTH_BYTES = BytesUtil.triviallyCopyableLength(TopOfBook.class);
     @NanoTime
@@ -111,6 +112,15 @@ public class TopOfBook extends BytesInBinaryMarshallable {
     public TopOfBook askQuantity(int askQuantity) {
         this.askQuantity = askQuantity;
         return this;
+    }
+
+    @Override
+    public <T> @NotNull T deepCopy() {
+        try {
+            return (T) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override

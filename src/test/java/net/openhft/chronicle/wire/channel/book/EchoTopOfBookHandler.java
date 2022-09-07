@@ -16,7 +16,11 @@
  * limitations under the License.
  */
 
+// Generated code added here as there is an issue with Java 18.
+
 package net.openhft.chronicle.wire.channel.book;
+
+import static net.openhft.chronicle.wire.channel.book.PerfTopOfBookMain.ONE__NEW_OBJECT;
 
 /**
  * Echo each POJO as it gets it, the real work is in the deserialization and serialization.
@@ -32,6 +36,8 @@ public class EchoTopOfBookHandler implements ITopOfBookHandler {
 
     @Override
     public void topOfBook(TopOfBook topOfBook) {
+        if (ONE__NEW_OBJECT)
+            topOfBook = topOfBook.deepCopy();
         topOfBookListener.topOfBook(topOfBook);
     }
 }
