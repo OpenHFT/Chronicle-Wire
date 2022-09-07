@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -24,6 +25,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public final class ReflectionUtil {
+    private static final boolean PREPEND_PACKAGE = Jvm.getBoolean("wire.method.prependPackage");
+    private static final String PACKAGE_PREFIX = "net.openhft.chronicle.wire.method";
 
     private ReflectionUtil() {
     }
@@ -48,5 +51,22 @@ public final class ReflectionUtil {
             return;
         list.addAll(Arrays.asList(oClass.getInterfaces()));
         interfaces(baseClass, list);
+    }
+
+    @NotNull
+    public static String generatedPackageName(String classFullName) {
+        int lastDot = classFullName.lastIndexOf('.');
+
+        if (lastDot != -1) {
+            String packageName = classFullName.substring(0, lastDot);
+
+            if (PREPEND_PACKAGE || classFullName.startsWith("java.") || classFullName.startsWith("javax.") ||
+                    classFullName.startsWith("com.sun.")) {
+                return PACKAGE_PREFIX + "." + packageName;
+            }
+            return packageName;
+        }
+
+        return PREPEND_PACKAGE ? PACKAGE_PREFIX : "";
     }
 }
