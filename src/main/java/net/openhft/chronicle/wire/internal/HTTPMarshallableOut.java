@@ -81,9 +81,9 @@ public class HTTPMarshallableOut implements MarshallableOut {
         this.url = builder.url();
 
         if (wireType == WireType.JSON)
-            this.wire = new JSONWire(allocateElasticOnHeap()).useTypes(true).trimFirstCurly(false).useTextDocuments();
+            this.wire = new JSONWire(allocateElasticOnHeap()).useTypes(true).trimFirstCurly(true).useTextDocuments();
         else if (wireType == WireType.JSON_ONLY) {
-            this.wire = new JSONWire(allocateElasticOnHeap()).useTypes(true).useTextDocuments();
+            this.wire = new JSONWire(allocateElasticOnHeap()).useTypes(true).trimFirstCurly(false).useTextDocuments();
         } else
             this.wire = wireType.apply(allocateElasticDirect());
 
@@ -92,12 +92,12 @@ public class HTTPMarshallableOut implements MarshallableOut {
 
     void startWire() {
         wire.clear();
-        if (wire instanceof JSONWire)
+        if (wire instanceof JSONWire && !((JSONWire) wire).trimFirstCurly())
             wire.bytes().append('{').readPosition(1);
     }
 
     void endWire() {
-        if (wire instanceof JSONWire)
+        if (wire instanceof JSONWire && !((JSONWire) wire).trimFirstCurly())
             wire.bytes().append('}').append('\n').readPosition(0);
     }
 
