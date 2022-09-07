@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.core.util.BooleanConsumer;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -42,6 +43,30 @@ public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
             @Override
             public void call() {
                 b.set(true);
+            }
+        });
+
+        assertFalse(reader instanceof VanillaMethodReader);
+
+        assertTrue(reader.readOne());
+        assertTrue(b.get());
+    }
+
+    @Test
+    public void testCoreClassCanBePassedToMethodReader() throws Exception {
+        BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        wire.usePadding(true);
+
+        BooleanConsumer writer = wire.methodWriter(BooleanConsumer.class);
+
+        writer.accept(true);
+
+        AtomicBoolean b = new AtomicBoolean();
+
+        MethodReader reader = wire.methodReader(new BooleanConsumer() {
+            @Override
+            public void accept(Boolean value) {
+                b.set(value);
             }
         });
 
