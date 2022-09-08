@@ -52,8 +52,9 @@ public class TopOfBook extends BytesInBinaryMarshallable implements Cloneable {
         bytes.unsafeWriteObject(this, START_BYTES, LENGTH_BYTES);
     }
 
-    public void sendingTimeNS(long sendingTimeNS) {
+    public TopOfBook sendingTimeNS(long sendingTimeNS) {
         this.sendingTimeNS = sendingTimeNS;
+        return this;
     }
 
     public long sendingTimeNS() {
@@ -115,7 +116,7 @@ public class TopOfBook extends BytesInBinaryMarshallable implements Cloneable {
     }
 
     @Override
-    public <T> @NotNull T deepCopy() {
+    public TopOfBook deepCopy() {
         TopOfBook tob = new TopOfBook();
         tob.symbol = symbol;
         tob.ecn = ecn;
@@ -124,7 +125,7 @@ public class TopOfBook extends BytesInBinaryMarshallable implements Cloneable {
         tob.askQuantity = askQuantity;
         tob.bidPrice = bidPrice;
         tob.bidQuantity = bidQuantity;
-        return (T) tob;
+        return tob;
     }
 
     @Override
