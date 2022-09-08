@@ -43,7 +43,9 @@ public class PerfTopOfBookAllocationMain {
         System.out.println("batch: " + max.getAsInt());
         System.out.println("time: " + time / 1e3 + " sec");
         System.out.println("rate: " + count / time / 1e3 + " M objs/sec");
-        long avgLatency = Runtime.getRuntime().availableProcessors() * time * 1_000_000 / count;
+        final int proc = Runtime.getRuntime().availableProcessors();
+        System.out.println("proc: " + proc);
+        long avgLatency = proc * time * 1_000_000 / count;
         System.out.println("avgLatency: " + avgLatency + " ns");
     }
 }
