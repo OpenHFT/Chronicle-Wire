@@ -14,6 +14,7 @@ NOTE: All boolean properties below are read using link:https://javadoc.io/static
 | mappedFile.retain | `false` | To enable system property, see NOTE | _RETAIN_ (boolean)
 | regress.tests | `false` | To enable system property, see NOTE | _REGRESS_TESTS_ (boolean)
 | wire.generate.tuples | `false` | If enabled, @param clazz Expected object type <code>null</code> can be passed to request proxy marshallable tuple | _GENERATE_TUPLES_(boolean)
+| wire.method.prependPackage | `false` | If enabled, generated method writers will be placed under `net.openhft.wire.method` package | _PREPEND_PACKAGE_(boolean)
 | wire.testAsYaml | `false` | To enable system property, see NOTE | _TEXT_AS_YAML_ (boolean)
 | wire.usePadding | `true` | Set system property to "false" to disable | _DEFAULT_USE_PADDING_ (boolean)
 | yaml.logging | `false` | If enabled, controls whether to log Yaml messages for debugging or documentation | _clientReads_ (boolean)
