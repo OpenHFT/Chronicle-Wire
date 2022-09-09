@@ -26,7 +26,7 @@ import net.openhft.chronicle.wire.channel.echo.Says;
 
 public class Channel1 {
 
-    private static final String URL = System.getProperty("url", "tcp://:4441");
+    private static final String URL = System.getProperty("url", "tcp://:0");
 
     public static void main(String[] args) {
 
