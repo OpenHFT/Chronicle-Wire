@@ -499,18 +499,23 @@ public class JSONWire extends TextWire {
 
         @Override
         public void start(boolean metaData) {
+            int count = this.count;
             super.start(metaData);
-            bytes.append('{');
-            start = bytes.writePosition();
+            if (count == 0) {
+                bytes.append('{');
+                start = bytes.writePosition();
+            }
         }
 
         @Override
         public void close() {
             super.close();
-            if (bytes.writePosition() == start) {
-                bytes.writeSkip(-1);
-            } else {
-                bytes.append('}');
+            if (count == 0) {
+                if (bytes.writePosition() == start) {
+                    bytes.writeSkip(-1);
+                } else {
+                    bytes.append('}');
+                }
             }
         }
     }
