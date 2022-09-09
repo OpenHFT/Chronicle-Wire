@@ -16,9 +16,8 @@
  * limitations under the License.
  */
 
-package net.openhft.chronicle.wire.channel.book;
+package run.chronicle.wire.channel.channelArith;
 
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.TextMethodTester;
 import net.openhft.chronicle.wire.WireTestCommon;
@@ -26,16 +25,15 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assume.assumeFalse;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertEquals;
 
-public class TopOfBookHandlerTest extends WireTestCommon {
+
+public class CalculatorTest extends WireTestCommon {
     public static void test(String basename) {
-        assumeFalse(Jvm.isAzulZing());
-        TextMethodTester<TopOfBookListener> tester = new TextMethodTester<>(
-                basename + "/demo-arith/in.yaml",
-                out -> new EchoTopOfBookHandler().out(out),
-                TopOfBookListener.class,
+        TextMethodTester<AnswerListener> tester = new TextMethodTester<>(
+                basename + "/in.yaml",
+                out -> new Calculator().calculator(out),
+                AnswerListener.class,
                 basename + "/out.yaml");
         tester.setup(basename + "/setup.yaml");
         try {
@@ -49,7 +47,7 @@ public class TopOfBookHandlerTest extends WireTestCommon {
 
     @Test
     public void testTwo() {
-        test("echo-tob");
+        test("demo-arith");
     }
 
 }

@@ -1,0 +1,12 @@
+# add 2 and 3
+---
+answer: 5.0
+...
+# subtract 22 from 55
+---
+answer: 33.0
+...
+# multiply 2 hundred and 5 thousand
+---
+answer: 1E6
+...

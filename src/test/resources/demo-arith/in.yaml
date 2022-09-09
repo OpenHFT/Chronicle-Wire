@@ -1,0 +1,12 @@
+# add 2 and 3
+---
+plus: [ 2, 3 ]
+...
+# subtract 22 from 55
+---
+minus: [ 55, 22 ]
+...
+# multiply 2 hundred and 5 thousand
+---
+times: [ 200, 5e3 ]
+...

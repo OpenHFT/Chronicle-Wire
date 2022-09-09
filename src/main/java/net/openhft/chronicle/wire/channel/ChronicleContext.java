@@ -42,19 +42,19 @@ public class ChronicleContext extends SimpleCloseable {
         Handler.init();
     }
 
-    private final Set<Closeable> closeableSet =
-            Collections.synchronizedSet(
-                    Collections.newSetFromMap(
-                            new WeakIdentityHashMap<>()));
     private final String url;
     private String name;
     private transient URL _url;
-    private transient SocketRegistry socketRegistry;
     private boolean buffered;
     private boolean useAffinity;
-    private ChronicleGatewayMain gateway;
     private SystemContext systemContext;
-    private boolean privateSocketRegistry;
+    private transient final Set<Closeable> closeableSet =
+            Collections.synchronizedSet(
+                    Collections.newSetFromMap(
+                            new WeakIdentityHashMap<>()));
+    private transient ChronicleGatewayMain gateway;
+    private transient SocketRegistry socketRegistry;
+    private transient boolean privateSocketRegistry;
 
     protected ChronicleContext(String url) {
         this(url, null);
