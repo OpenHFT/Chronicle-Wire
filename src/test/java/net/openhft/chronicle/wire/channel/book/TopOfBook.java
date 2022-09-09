@@ -23,9 +23,8 @@ import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.util.BinaryLengthLength;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.wire.Base85LongConverter;
 import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
-import net.openhft.chronicle.wire.LongConversion;
+import net.openhft.chronicle.wire.converter.Base85;
 import net.openhft.chronicle.wire.converter.NanoTime;
 
 public class TopOfBook extends BytesInBinaryMarshallable {
@@ -33,9 +32,9 @@ public class TopOfBook extends BytesInBinaryMarshallable {
     static final int LENGTH_BYTES = BytesUtil.triviallyCopyableLength(TopOfBook.class);
     @NanoTime
     private long sendingTimeNS;
-    @LongConversion(Base85LongConverter.class)
+    @Base85
     private long symbol; // up to 10 chars
-    @LongConversion(Base85LongConverter.class)
+    @Base85
     private int ecn; // up to 5 chars
 
     private double bidPrice, askPrice;
