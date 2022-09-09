@@ -31,6 +31,7 @@ import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
@@ -562,7 +563,8 @@ public class GenerateMethodWriter {
 
     private void writeArrayOfParameters(final Method dm, Type[] parameterTypes, final int len, final StringBuilder body, final int startJ) {
         final int parameterCount = dm.getParameterCount();
-        if (parameterCount > startJ + 1)
+        final boolean multipleArgs = parameterCount > startJ + 1;
+        if (multipleArgs)
             body.append("valueOut.array(v -> {\n");
         for (int j = startJ; j < len; j++) {
 
@@ -578,29 +580,39 @@ public class GenerateMethodWriter {
                 body.append(format("valueOut.rawText(%s.INSTANCE.asText(%s));\n", name, p.getName()));
             else if (p.getType().isPrimitive() || CharSequence.class.isAssignableFrom(p.getType())) {
                 if (longConversion != null && (p.getType() == long.class || CharSequence.class.isAssignableFrom(p.getType())))
-                    body.append(format("%s.writeLong(%s.INSTANCE, %s);\n", parameterCount > startJ + 1 ? "v" : "valueOut", longConversion.value().getName(), p.getName()));
+                    body.append(format("%s.writeLong(%s.INSTANCE, %s);\n", multipleArgs ? "v" : "valueOut", longConversion.value().getName(), p.getName()));
                 else if (intConversion != null)
-                    body.append(format("%s.writeInt(%s.INSTANCE, %s);\n", parameterCount > startJ + 1 ? "v" : "valueOut", intConversion.value().getName(), p.getName()));
+                    body.append(format("%s.writeInt(%s.INSTANCE, %s);\n", multipleArgs ? "v" : "valueOut", intConversion.value().getName(), p.getName()));
                 else
-                    body.append(format("%s.%s(%s);\n", parameterCount > startJ + 1 ? "v" : "valueOut", toString(erase(parameterTypes[j])), p.getName()));
+                    body.append(format("%s.%s(%s);\n", multipleArgs ? "v" : "valueOut", toString(erase(parameterTypes[j])), p.getName()));
             } else
                 writeValue(dm, erase(parameterTypes[j]), body, startJ, p);
         }
 
-        if (parameterCount > startJ + 1)
+        if (multipleArgs)
             body.append("}, Object[].class);\n");
     }
 
     private void writeValue(final Method dm, Class type, final StringBuilder body, final int startJ, final Parameter p) {
+        final String name = p.getName();
         String className = type.getTypeName().replace('$', '.');
 
+        final String vOut = dm.getParameterCount() > startJ + 1 ? "v" : "valueOut";
+        String after = "";
+        if (!type.isInterface() && Marshallable.class.isAssignableFrom(type) && !Serializable.class.isAssignableFrom(type) && !DynamicEnum.class.isAssignableFrom(type)) {
+            body.append("if (").append(name).append(" != null && ").append(className).append(".class == ").append(name).append(".getClass()) {\n")
+                    .append(vOut).append(".marshallable(").append(name).append(");\n")
+                    .append("} else  {\n");
+            after = "}\n";
+        }
         body
-                .append(dm.getParameterCount() > startJ + 1 ? "v" : "valueOut")
+                .append(vOut)
                 .append(".object(")
                 .append(className)
                 .append(".class, ")
-                .append(p.getName())
-                .append(");\n");
+                .append(name)
+                .append(");\n")
+                .append(after);
     }
 
     private StringBuilder methodReturn(final Method dm, final Class<?> interfaceClazz) {

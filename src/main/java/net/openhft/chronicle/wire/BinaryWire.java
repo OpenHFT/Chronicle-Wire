@@ -83,6 +83,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     private final WriteDocumentContext writeContext = new BinaryWriteDocumentContext(this);
     @NotNull
     private final BinaryReadDocumentContext readContext;
+    private final boolean supportDelta;
     private final StringBuilder stringBuilder = new StringBuilder();
     private DefaultValueIn defaultValueIn;
     private String compression;
@@ -101,6 +102,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         this.compression = compression;
         valueIn = supportDelta ? new DeltaValueIn() : new BinaryValueIn();
         readContext = new BinaryReadDocumentContext(this, supportDelta);
+        this.supportDelta = supportDelta;
     }
 
     private static boolean supportDelta() {
@@ -551,6 +553,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         int peekCode = peekCodeAfterPadding();
         if (peekCode == BinaryWireCode.FIELD_NUMBER) {
             bytes.uncheckedReadSkipOne();
+            int peekCode2 = bytes.peekUnsignedByte();
+            if (peekCode2 >= 0) {
+                bytes.uncheckedReadSkipOne();
+                return peekCode2;
+            }
             return bytes.readStopBit();
         }
         return Long.MIN_VALUE;
@@ -1133,10 +1140,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     public ValueOut writeEventId(String name, int methodId) {
         if (bytes.retainsComments())
             bytes.comment(name + " (" + methodId + ")");
-        if (numericFields)
-            writeCode(FIELD_NUMBER).writeStopBit(methodId);
-        else
-            writeCode(EVENT_NAME).write8bit(name);
+        writeCode(FIELD_NUMBER).writeStopBit(methodId);
         return valueOut;
     }
 
@@ -1372,6 +1376,11 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     public boolean useSelfDescribingMessage(@NotNull CommonMarshallable object) {
         return overrideSelfDescribing == null ? object.usesSelfDescribingMessage() : overrideSelfDescribing;
+    }
+
+    @Override
+    public boolean writingIsComplete() {
+        return !writeContext.isNotComplete();
     }
 
     enum AnyCodeMatch implements WireKey {
@@ -3597,18 +3606,9 @@ public class BinaryWire extends AbstractWire implements Wire {
                 return null;
             pushState();
             consumePadding();
-            int code = peekCode();
-            switch (code) {
-                case ANCHOR:
-                case UPDATED_ALIAS: {
-                    bytes.uncheckedReadSkipOne();
-                    @NotNull Object o = code == ANCHOR ? anchor() : updateAlias();
-                    if (object == null || o.getClass() != object.getClass()) {
-                        return o instanceof Marshallable ? Wires.deepCopy((Marshallable) o) : o;
-                    }
-                    Wires.copyTo(o, object);
-                    return object;
-                }
+            if (supportDelta) {
+                Object o = readMarshallableAnchor(object);
+                if (o != null) return o;
             }
             long length = readLength();
             if (length >= 0) {
@@ -3627,6 +3627,24 @@ public class BinaryWire extends AbstractWire implements Wire {
                 throw new IORuntimeException("Length unknown " + length);
             }
             return object;
+        }
+
+        @Nullable
+        private Object readMarshallableAnchor(@NotNull Object object) {
+            int code = peekCode();
+            switch (code) {
+                case ANCHOR:
+                case UPDATED_ALIAS: {
+                    bytes.uncheckedReadSkipOne();
+                    @NotNull Object o = code == ANCHOR ? anchor() : updateAlias();
+                    if (object == null || o.getClass() != object.getClass()) {
+                        return o instanceof Marshallable ? Wires.deepCopy((Marshallable) o) : o;
+                    }
+                    Wires.copyTo(o, object);
+                    return object;
+                }
+            }
+            return null;
         }
 
         @Nullable
@@ -4197,11 +4215,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                     return super.float64();
             }
         }
-    }
-
-    @Override
-    public boolean writingIsComplete() {
-        return !writeContext.isNotComplete();
     }
 }
 

@@ -27,8 +27,9 @@ import net.openhft.chronicle.wire.Base85LongConverter;
 import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
 import net.openhft.chronicle.wire.LongConversion;
 import net.openhft.chronicle.wire.converter.NanoTime;
+import org.jetbrains.annotations.NotNull;
 
-public class TopOfBook extends BytesInBinaryMarshallable {
+public class TopOfBook extends BytesInBinaryMarshallable implements Cloneable {
     static final int START_BYTES = BytesUtil.triviallyCopyableStart(TopOfBook.class);
     static final int LENGTH_BYTES = BytesUtil.triviallyCopyableLength(TopOfBook.class);
     @NanoTime
@@ -51,8 +52,9 @@ public class TopOfBook extends BytesInBinaryMarshallable {
         bytes.unsafeWriteObject(this, START_BYTES, LENGTH_BYTES);
     }
 
-    public void sendingTimeNS(long sendingTimeNS) {
+    public TopOfBook sendingTimeNS(long sendingTimeNS) {
         this.sendingTimeNS = sendingTimeNS;
+        return this;
     }
 
     public long sendingTimeNS() {
@@ -111,6 +113,19 @@ public class TopOfBook extends BytesInBinaryMarshallable {
     public TopOfBook askQuantity(int askQuantity) {
         this.askQuantity = askQuantity;
         return this;
+    }
+
+    @Override
+    public TopOfBook deepCopy() {
+        TopOfBook tob = new TopOfBook();
+        tob.symbol = symbol;
+        tob.ecn = ecn;
+        tob.sendingTimeNS = sendingTimeNS;
+        tob.askPrice = askPrice;
+        tob.askQuantity = askQuantity;
+        tob.bidPrice = bidPrice;
+        tob.bidQuantity = bidQuantity;
+        return tob;
     }
 
     @Override

@@ -36,6 +36,7 @@ import java.util.concurrent.ThreadFactory;
 import static net.openhft.chronicle.wire.channel.impl.TCPChronicleChannel.validateHeader;
 
 public class BufferedChronicleChannel extends DelegateChronicleChannel {
+    private static final boolean ALLOW_AFFINITY = Jvm.getBoolean("useAffinity", true);
     private final Pauser pauser;
     private final WireExchanger exchanger = new WireExchanger();
     private final ExecutorService bgWriter;
@@ -47,7 +48,7 @@ public class BufferedChronicleChannel extends DelegateChronicleChannel {
 
         String desc = channel.connectionCfg().initiator() ? "init" : "accp";
         final String writer = desc + "-writer";
-        final ThreadFactory factory = pauser.isBusy()
+        final ThreadFactory factory = ALLOW_AFFINITY && pauser.isBusy()
                 ? new AffinityThreadFactory(writer, true)
                 : new NamedThreadFactory(writer, true);
         bgWriter = Executors.newSingleThreadExecutor(factory);

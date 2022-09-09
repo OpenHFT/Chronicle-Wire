@@ -22,7 +22,7 @@
     <parent>
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
-        <version>1.1.33</version>
+        <version>1.1.35</version>
         <relativePath />
     </parent>
 
@@ -87,11 +87,6 @@
         <dependency>
             <groupId>net.openhft</groupId>
             <artifactId>chronicle-threads</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>net.openhft</groupId>
-            <artifactId>compiler</artifactId>
         </dependency>
 
         <dependency>
@@ -327,10 +322,6 @@
                                     <value>/dev/null</value>
                                 </property>
                                 <property>
-                                    <key>useAffinity</key>
-                                    <value>false</value>
-                                </property>
-                                <property>
                                     <key>pauserMode</key>
                                     <value>busy</value>
                                 </property>
@@ -407,6 +398,41 @@
                         </configuration>
                     </execution>
 
+                    <execution>
+                        <id>TopOfBook</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <skip>false</skip>
+                            <mainClass>net.openhft.chronicle.wire.channel.book.PerfTopOfBookMain</mainClass>
+                            <systemProperties>
+                                <property>
+                                    <key>system.properties</key>
+                                    <value>/dev/null</value>
+                                </property>
+                            </systemProperties>
+                            <classpathScope>test</classpathScope>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>TopOfBook-Allocation</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <skip>false</skip>
+                            <mainClass>net.openhft.chronicle.wire.channel.book.PerfTopOfBookAllocationMain</mainClass>
+                            <systemProperties>
+                                <property>
+                                    <key>system.properties</key>
+                                    <value>/dev/null</value>
+                                </property>
+                            </systemProperties>
+                            <classpathScope>test</classpathScope>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
 
