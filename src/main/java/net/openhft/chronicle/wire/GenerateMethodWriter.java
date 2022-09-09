@@ -144,14 +144,10 @@ public class GenerateMethodWriter {
                                     boolean metaData,
                                     boolean useMethodId,
                                     final boolean useUpdateInterceptor) {
-        int lastDot = fullClassName.lastIndexOf('.');
-        String packageName = "";
-        String className = fullClassName;
+        String packageName = ReflectionUtil.generatedPackageName(fullClassName);
 
-        if (lastDot != -1) {
-            packageName = fullClassName.substring(0, lastDot);
-            className = fullClassName.substring(lastDot + 1);
-        }
+        int lastDot = fullClassName.lastIndexOf('.');
+        String className = lastDot == -1 ? fullClassName : fullClassName.substring(lastDot + 1);
 
         return new GenerateMethodWriter(packageName,
                 interfaces,

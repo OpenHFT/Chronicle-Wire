@@ -709,12 +709,7 @@ public class GenerateMethodReader {
         Class<?> firstClass = instances[0].getClass();
         String firstClassFullName = firstClass.getName();
 
-        int lastDot = firstClassFullName.lastIndexOf('.');
-
-        if (lastDot != -1)
-            return firstClassFullName.substring(0, lastDot);
-        else
-            return "";
+        return ReflectionUtil.generatedPackageName(firstClassFullName);
     }
 
     /**

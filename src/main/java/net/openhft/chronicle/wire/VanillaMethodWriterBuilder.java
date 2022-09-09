@@ -77,7 +77,10 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         this.packageName = tClass.getPackage().getName();
         this.wireType = wireType;
         addInterface(tClass);
-        this.classLoader = tClass.getClassLoader();
+        ClassLoader clsLdr = tClass.getClassLoader();
+        // TODO Using loader of parent class may not be safe if it's not accepting new classes.
+        //  Maybe have an option to always use current thread class loader?
+        this.classLoader = clsLdr != null ? clsLdr : getClass().getClassLoader();
         this.handlerSupplier = new MethodWriterInvocationHandlerSupplier(handlerSupplier);
     }
 

@@ -102,6 +102,11 @@ clients; 16; desc; buffered; size;     44; GB/s;  1.635; Mmsg/s; 37.151
 345 GCs/min
  */
 public class PerfTopOfBookMain {
+    static {
+        System.setProperty("system.properties", "/dev/null");
+        System.setProperty("useAffinity", "false");
+        System.setProperty("pauserMode", "yielding");
+    }
     static final String URL = System.getProperty("url", "tcp://:1248");
     static final int RUN_TIME = Integer.getInteger("runTime", 60);
     static final int CLIENTS = Integer.getInteger("clients", 0);
