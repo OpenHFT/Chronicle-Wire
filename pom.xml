@@ -90,11 +90,6 @@
         </dependency>
 
         <dependency>
-            <groupId>net.openhft</groupId>
-            <artifactId>compiler</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
         </dependency>
