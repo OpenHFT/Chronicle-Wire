@@ -554,7 +554,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         if (peekCode == BinaryWireCode.FIELD_NUMBER) {
             bytes.uncheckedReadSkipOne();
             int peekCode2 = bytes.peekUnsignedByte();
-            if (peekCode2 >= 0) {
+            if (0 <= peekCode2 && peekCode2 < 128) {
                 bytes.uncheckedReadSkipOne();
                 return peekCode2;
             }
