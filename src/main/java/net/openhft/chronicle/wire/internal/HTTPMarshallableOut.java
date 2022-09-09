@@ -28,7 +28,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import static net.openhft.chronicle.bytes.Bytes.allocateElasticDirect;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 
 /**
@@ -57,7 +56,9 @@ public class HTTPMarshallableOut implements MarshallableOut {
                     endWire();
                     try (final OutputStream out = conn.getOutputStream()) {
                         final Bytes<byte[]> bytes = (Bytes<byte[]>) wire.bytes();
-                        out.write(bytes.underlyingObject(), 0, (int) bytes.readLimit());
+                        final byte[] b = bytes.underlyingObject();
+                        assert b != null;
+                        out.write(b, 0, (int) bytes.readLimit());
                     }
 
                     final int responseCode = conn.getResponseCode();
@@ -81,24 +82,23 @@ public class HTTPMarshallableOut implements MarshallableOut {
         this.url = builder.url();
 
         if (wireType == WireType.JSON)
-            this.wire = new JSONWire(allocateElasticOnHeap()).useTypes(true).trimFirstCurly(false).useTextDocuments();
-        else if (wireType == WireType.JSON_ONLY) {
-            this.wire = new JSONWire(allocateElasticOnHeap()).useTypes(true).useTextDocuments();
-        } else
-            this.wire = wireType.apply(allocateElasticDirect());
+            this.wire = new JSONWire(allocateElasticOnHeap()).useTypes(true).trimFirstCurly(true).useTextDocuments();
+        else
+            this.wire = wireType.apply(allocateElasticOnHeap());
 
         startWire();
     }
 
     void startWire() {
         wire.clear();
-        if (wire instanceof JSONWire)
-            wire.bytes().append('{').readPosition(1);
     }
 
     void endWire() {
-        if (wire instanceof JSONWire)
-            wire.bytes().append('}').append('\n').readPosition(0);
+        if (!wire.isBinary()) {
+            final Bytes<?> bytes = wire.bytes();
+            if (bytes.peekUnsignedByte(bytes.writePosition() - 1) >= ' ')
+                bytes.append('\n');
+        }
     }
 
     @Override

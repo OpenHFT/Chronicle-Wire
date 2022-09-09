@@ -25,7 +25,7 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
     protected Wire wire;
     private boolean metaData;
     private volatile boolean notComplete;
-    private int count = 0;
+    protected int count = 0;
     private boolean chainedElement;
     private boolean rollback;
 

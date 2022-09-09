@@ -44,9 +44,9 @@ public class StringConsumerMarshallableOutTest {
     public void saysJson() {
         final WireType wireType = WireType.JSON_ONLY;
         final String expected = "" +
-                "\"say\":\"One\"\n" +
-                "\"say\":\"Two\"\n" +
-                "\"say\":\"Three\"\n";
+                "{\"say\":\"One\"}\n" +
+                "{\"say\":\"Two\"}\n" +
+                "{\"say\":\"Three\"}\n";
         doTest(wireType, expected);
     }
 
