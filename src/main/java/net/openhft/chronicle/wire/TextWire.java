@@ -103,8 +103,8 @@ public class TextWire extends AbstractWire implements Wire {
     private final StringBuilder sb = new StringBuilder();
     protected long lineStart = 0;
     private DefaultValueIn defaultValueIn;
-    private WriteDocumentContext writeContext;
-    private ReadDocumentContext readContext;
+    protected WriteDocumentContext writeContext;
+    protected ReadDocumentContext readContext;
     private boolean strict = false;
     private boolean addTimeStamps = false;
     private boolean trimFirstCurly = true;

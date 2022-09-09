@@ -1,10 +1,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
+
+import static org.junit.Assert.assertEquals;
 
 public class BracketsOnJSONWireTest {
 
@@ -19,12 +20,13 @@ public class BracketsOnJSONWireTest {
 
         final Bytes<ByteBuffer> t = Bytes.elasticByteBuffer();
         Wire wire = WireType.JSON_ONLY.apply(t);
-        wire.methodWriter(Printer.class).print("hello");
+        wire.methodWriter(Printer.class)
+                .print("hello");
 
-        Assert.assertEquals("{", "" + (char) wire.bytes().peekUnsignedByte());
+        assertEquals("{\"print\":\"hello\"}", wire.toString());
 
         wire.methodReader((Printer) msg -> actual = msg).readOne();
-        Assert.assertEquals("hello", actual);
+        assertEquals("hello", actual);
     }
 
 

@@ -45,10 +45,10 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
  */
 public class JSONWire extends TextWire {
 
+    public static final @NotNull Bytes<byte[]> ULL = Bytes.from("ull");
     @SuppressWarnings("rawtypes")
     static final BytesStore COMMA = BytesStore.from(",");
     static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_JSON_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT_JSON::escaping;
-    public static final @NotNull Bytes<byte[]> ULL = Bytes.from("ull");
     boolean useTypes;
 
     @SuppressWarnings("rawtypes")
@@ -59,11 +59,6 @@ public class JSONWire extends TextWire {
     public JSONWire(@NotNull Bytes<?> bytes, boolean use8bit) {
         super(bytes, use8bit);
         trimFirstCurly(false);
-    }
-
-    @Override
-    protected Class defaultKeyClass() {
-        return String.class;
     }
 
     @SuppressWarnings("rawtypes")
@@ -91,6 +86,11 @@ public class JSONWire extends TextWire {
                 type == Byte.class || type == Boolean.class || type == Void.class;
     }
 
+    @Override
+    protected Class defaultKeyClass() {
+        return String.class;
+    }
+
     public JSONWire useTypes(boolean outputTypes) {
         this.useTypes = outputTypes;
         return this;
@@ -98,6 +98,15 @@ public class JSONWire extends TextWire {
 
     public boolean useTypes() {
         return useTypes;
+    }
+
+    @Override
+    public @NotNull TextWire useTextDocuments() {
+        readContext = new JSONReadDocumentContext(this);
+        writeContext = trimFirstCurly()
+                ? new TextWriteDocumentContext(this)
+                : new JSONWriteDocumentContext(this);
+        return this;
     }
 
     @NotNull
@@ -453,6 +462,57 @@ public class JSONWire extends TextWire {
     @NotNull
     protected Supplier<StopCharsTester> strictEndOfTextEscaping() {
         return STRICT_END_OF_TEXT_JSON_ESCAPING;
+    }
+
+    class JSONReadDocumentContext extends TextReadDocumentContext {
+        private int first;
+
+        public JSONReadDocumentContext(@Nullable AbstractWire wire) {
+            super(wire);
+        }
+
+        @Override
+        public void start() {
+            first = bytes.peekUnsignedByte();
+            if (first == '{')
+                bytes.readSkip(1);
+            super.start();
+        }
+
+        @Override
+        public void close() {
+            if (first == '{') {
+                consumePadding();
+                if (bytes.peekUnsignedByte() == '}')
+                    bytes.readSkip(1);
+            }
+            super.close();
+        }
+    }
+
+    class JSONWriteDocumentContext extends TextWriteDocumentContext {
+        private long start;
+
+        public JSONWriteDocumentContext(Wire wire) {
+            super(wire);
+        }
+
+        @Override
+        public void start(boolean metaData) {
+            super.start(metaData);
+            bytes.append('{');
+            start = bytes.writePosition();
+        }
+
+        @Override
+        public void close() {
+            super.close();
+            if (bytes.writePosition() == start) {
+                bytes.writeSkip(-1);
+            } else {
+                bytes.append('}');
+            }
+        }
     }
 
     class JSONValueOut extends TextValueOut {
