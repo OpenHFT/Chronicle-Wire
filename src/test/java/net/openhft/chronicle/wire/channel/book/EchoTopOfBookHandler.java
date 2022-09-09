@@ -29,15 +29,15 @@ public class EchoTopOfBookHandler implements ITopOfBookHandler {
     private TopOfBookListener topOfBookListener;
 
     @Override
-    public EchoTopOfBookHandler out(TopOfBookListener topOfBookListener) {
-        this.topOfBookListener = topOfBookListener;
-        return this;
-    }
-
-    @Override
     public void topOfBook(TopOfBook topOfBook) {
         if (ONE__NEW_OBJECT)
             topOfBook = topOfBook.deepCopy();
         topOfBookListener.topOfBook(topOfBook);
+    }
+
+    @Override
+    public EchoTopOfBookHandler out(TopOfBookListener topOfBookListener) {
+        this.topOfBookListener = topOfBookListener;
+        return this;
     }
 }

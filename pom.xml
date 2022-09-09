@@ -327,10 +327,6 @@
                                     <value>/dev/null</value>
                                 </property>
                                 <property>
-                                    <key>useAffinity</key>
-                                    <value>false</value>
-                                </property>
-                                <property>
                                     <key>pauserMode</key>
                                     <value>busy</value>
                                 </property>
