@@ -16,8 +16,13 @@
  * limitations under the License.
  */
 
-package run.chronicle.wire.channel.customhandler;
+package run.chronicle.wire.channel.channelArith;
 
-public interface MessageListener {
-    void message(String msg);
+public interface ArithService {
+
+    void plus(double a, double b);
+
+    void minus (double a, double b);
+
+    void times(double a, double b);
 }

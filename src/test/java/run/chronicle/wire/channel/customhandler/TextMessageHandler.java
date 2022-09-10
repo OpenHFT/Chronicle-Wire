@@ -24,23 +24,23 @@ import net.openhft.chronicle.wire.channel.ChronicleChannelCfg;
 import net.openhft.chronicle.wire.channel.ChronicleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import run.chronicle.wire.channel.channelArith.AnswerListener;
 
-public class BaseMessageHandler extends AbstractHandler<BaseMessageHandler> {
+public class TextMessageHandler extends AbstractHandler<TextMessageHandler> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BaseMessageHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TextMessageHandler.class);
 
-    private final MessageHandler theHandler;
+    private final StringTransformerHandler stringTransformer;
 
-    public BaseMessageHandler(MessageHandler nestedHandler) {
-        this.theHandler = nestedHandler;
+    public TextMessageHandler(StringTransformerHandler nestedHandler) {
+        this.stringTransformer = nestedHandler;
     }
 
     @Override
     public void run(ChronicleContext context, ChronicleChannel channel) {
-        LOGGER.info("BaseMessageHandler::run");
-
-        theHandler.msg(channel.methodWriter(MessageListener.class));
-        channel.eventHandlerAsRunnable(theHandler).run();
+        LOGGER.info("TextMessageHandler::run");
+        channel.eventHandlerAsRunnable(
+                stringTransformer.msgOutput(channel.methodWriter(TextMessageOutput.class))).run();
     }
 
     @Override

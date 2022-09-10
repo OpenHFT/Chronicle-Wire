@@ -16,13 +16,25 @@
  * limitations under the License.
  */
 
-package run.chronicle.wire.channel.channelArith;
+package run.chronicle.wire.channel.customhandler;
 
-public interface ArithListener {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    void plus(double a, double b);
+public class UpperCase implements StringTransformerHandler {
 
-    void minus (double a, double b);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpperCase.class);
 
-    void times(double a, double b);
+    private TextMessageOutput msgOutput;
+
+    public UpperCase msgOutput(TextMessageOutput msgListener) {
+        this.msgOutput = msgListener;
+        return this;
+    }
+
+    @Override
+    public void toUpperCase(String msg) {
+        LOGGER.info("Processing message {}", msg);
+        msgOutput.outputTxtMessage(msg.toUpperCase());
+    }
 }

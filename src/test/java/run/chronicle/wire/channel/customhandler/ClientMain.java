@@ -18,32 +18,37 @@
 
 package run.chronicle.wire.channel.customhandler;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.channel.ChronicleChannel;
 import net.openhft.chronicle.wire.channel.ChronicleChannelSupplier;
 import net.openhft.chronicle.wire.channel.ChronicleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import run.chronicle.wire.channel.channelArith.ArithClient;
+import run.chronicle.wire.channel.channelArith.ArithService;
 
 public class ClientMain {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientMain.class);
-    private static final String url = "tcp://localhost:5556";
+    private static final String URL = System.getProperty("URL", "tcp://localhost:" + TextMessageSvcMain.PORT);
 
     public static void main(String[] args) {
 
-        try (ChronicleContext context = ChronicleContext.newContext(url)) {
-            BaseMessageHandler messageHandler = new BaseMessageHandler(new UCHandler());
+        try (ChronicleContext context = ChronicleContext.newContext(URL)) {
 
+            TextMessageHandler messageHandler = new TextMessageHandler(new UpperCase());
             final ChronicleChannelSupplier supplier = context.newChannelSupplier(messageHandler);
             ChronicleChannel channel = supplier.get();
-            LOGGER.info("Channel set up to: {}:{}", channel.channelCfg().hostname(), channel.channelCfg().port());
 
-            final MessageListener echoing = channel.methodWriter(MessageListener.class);
-            echoing.message("Hello, world");
-            StringBuilder eventType = new StringBuilder();
-            String text = channel.readOne(eventType, String.class);
+            LOGGER.info("Channel connected to: {}:{}", channel.channelCfg().hostname(), channel.channelCfg().port());
 
-            LOGGER.info(">>>> " + text);
+            final StringTransformer stringTransformer = channel.methodWriter(StringTransformer.class);
+            stringTransformer.toUpperCase("Hello again:");
+
+            StringBuilder evtType = new StringBuilder();
+            String response = channel.readOne(evtType, String.class);
+            Jvm.startup().on(ClientMain.class, " >>> " + evtType + ": " + response);
+
         }
     }
 

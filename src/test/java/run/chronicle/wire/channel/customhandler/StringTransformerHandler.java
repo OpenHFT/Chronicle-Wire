@@ -18,22 +18,6 @@
 
 package run.chronicle.wire.channel.customhandler;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public class UCHandler implements MessageHandler {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(UCHandler.class);
-
-    private MessageListener msgListener;
-
-    public UCHandler msg(MessageListener msgListener) {
-        this.msgListener = msgListener;
-        return this;
-    }
-
-    public void message(String msg) {
-        LOGGER.info("Processing message {}", msg);
-        msgListener.message(msg.toUpperCase());
-    }
+public interface StringTransformerHandler extends StringTransformer {
+    StringTransformerHandler msgOutput(TextMessageOutput msgOutput);
 }

@@ -28,21 +28,21 @@ public class ArithClient {
     public static void main(String[] args) {
 
         try (ChronicleContext context = ChronicleContext.newContext(URL)) {
-            ArithHandler arithHandler = new ArithHandler(new Calculator());
 
-            ChronicleChannel channel = context.newChannelSupplier(arithHandler).get();
-            Jvm.startup().on(ArithClient.class, "Channel set up to: " + channel.channelCfg());
+            ChronicleChannel channel = context.newChannelSupplier(new ArithHandler(new Calculator())).get();
 
-            final ArithListener outgoing = channel.methodWriter(ArithListener.class);
+            Jvm.startup().on(ArithClient.class, "Channel connected to: " + channel.channelCfg().hostname() + "[" + channel.channelCfg().port() + "]");
 
-            outgoing.plus(3, 4);
-            outgoing.minus(3, 4);
-            outgoing.times(3, 4);
+            final ArithService remoteCalculator = channel.methodWriter(ArithService.class);
+
+            remoteCalculator.plus(3, 4);
+            remoteCalculator.minus(3, 4);
+            remoteCalculator.times(3, 4);
 
             StringBuilder evtType = new StringBuilder();
             for (int i = 0; i < 3; i++) {
                 double response = channel.readOne(evtType, double.class);
-                Jvm.startup().on(ArithClient.class, " >>> " + response);
+                Jvm.startup().on(ArithClient.class, " >>> " + evtType + ": " + response);
             }
         }
     }

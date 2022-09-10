@@ -18,8 +18,6 @@
 
 package run.chronicle.wire.channel.customhandler;
 
-import net.openhft.chronicle.wire.Marshallable;
-
-public interface MessageHandler extends MessageListener, Marshallable {
-    UCHandler msg(MessageListener messageListener);
+public interface TextMessageOutput {
+    void outputTxtMessage(String msg);
 }

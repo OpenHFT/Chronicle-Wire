@@ -16,10 +16,18 @@
  * limitations under the License.
  */
 
-package run.chronicle.wire.channel.channelArith;
+package run.chronicle.wire.channel.customhandler;
 
-public interface CalcHandler extends ArithService {
+import net.openhft.chronicle.wire.channel.ChronicleGatewayMain;
 
-    CalcHandler calculator(AnswerListener expr);
+import java.io.IOException;
 
+public class TextMessageSvcMain {
+
+    static final int PORT = Integer.getInteger("port", 5557);
+
+    public static void main(String[] args) throws IOException {
+        System.setProperty("port", "" + PORT); // set if not set.
+        ChronicleGatewayMain.main(args);
+    }
 }

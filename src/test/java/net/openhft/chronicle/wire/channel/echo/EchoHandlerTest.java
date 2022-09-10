@@ -169,11 +169,13 @@ public class EchoHandlerTest extends WireTestCommon {
             StringBuilder event = new StringBuilder();
             // read one message excepting the object after the event name to be a String
             String text = channel.readOne(event, String.class);
+            System.out.println(">>>>>>> " + event + ": " + text);
             // check it matches
             assertEquals("say: Hello World", event + ": " + text);
 
             // read the second message
             String text2 = channel.readOne(event, String.class);
+            System.out.println(">>>>>>> " + event + ": " + text2);
             // check it matches
             assertEquals("say: Bye now", event + ": " + text2);
 /*
