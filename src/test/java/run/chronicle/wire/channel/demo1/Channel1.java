@@ -26,7 +26,7 @@ import net.openhft.chronicle.wire.channel.echo.Says;
 
 public class Channel1 {
 
-    private static final String URL = System.getProperty("url", "tcp://:0");
+    private static final String URL = System.getProperty("url", "tcp://:3334");
 
     public static void main(String[] args) {
 
@@ -34,13 +34,14 @@ public class Channel1 {
              ChronicleChannel channel = context.newChannelSupplier(new EchoHandler()).get()) {
 
             Jvm.startup().on(Channel1.class, "Channel set up on port: " + channel.channelCfg().port());
+
             Says says = channel.methodWriter(Says.class);
             says.say("Well hello there");
 
             StringBuilder eventType = new StringBuilder();
             String text = channel.readOne(eventType, String.class);
-
             Jvm.startup().on(Channel1.class, ">>>> " + eventType + ": " + text);
+
         }
     }
 }

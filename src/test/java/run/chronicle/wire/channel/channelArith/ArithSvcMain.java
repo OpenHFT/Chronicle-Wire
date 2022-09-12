@@ -20,17 +20,24 @@ package run.chronicle.wire.channel.channelArith;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.channel.ChronicleContext;
+import net.openhft.chronicle.wire.channel.ChronicleGatewayMain;
+
+import java.io.IOException;
 
 public class ArithSvcMain {
     static final int PORT = Integer.getInteger("port", 6661);
 
-    private static final String URL = System.getProperty("url", "tcp://:" + PORT);
+    //private static final String URL = System.getProperty("url", "tcp://:" + PORT);
 
-    public static void main(String[] args) {
+    public static void main (String[] args) throws IOException {
+        System.setProperty("port", "" + PORT); // set if not set.
+        ChronicleGatewayMain.main(args);
+/*
         try (ChronicleContext context = ChronicleContext.newContext(URL)) {
             context.startNewGateway();
             Jvm.startup().on(ArithSvcMain.class, "Ready for messages");
             Jvm.park();
         }
+*/
     }
 }

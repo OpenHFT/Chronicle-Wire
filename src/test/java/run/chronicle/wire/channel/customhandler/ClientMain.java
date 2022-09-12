@@ -28,8 +28,6 @@ import run.chronicle.wire.channel.channelArith.ArithClient;
 import run.chronicle.wire.channel.channelArith.ArithService;
 
 public class ClientMain {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClientMain.class);
     private static final String URL = System.getProperty("URL", "tcp://localhost:" + TextMessageSvcMain.PORT);
 
     public static void main(String[] args) {
@@ -40,7 +38,8 @@ public class ClientMain {
             final ChronicleChannelSupplier supplier = context.newChannelSupplier(messageHandler);
             ChronicleChannel channel = supplier.get();
 
-            LOGGER.info("Channel connected to: {}:{}", channel.channelCfg().hostname(), channel.channelCfg().port());
+            Jvm.startup().on(ClientMain.class, "Channel connected to " + channel.channelCfg().hostname()
+                                                         + ":" + channel.channelCfg().port() );
 
             final StringTransformer stringTransformer = channel.methodWriter(StringTransformer.class);
             stringTransformer.toUpperCase("Hello again:");

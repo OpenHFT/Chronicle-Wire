@@ -4,8 +4,6 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.TextMethodTester;
 import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.Test;
-import run.chronicle.wire.channel.channelArith.AnswerListener;
-import run.chronicle.wire.channel.channelArith.Calculator;
 
 import java.io.IOException;
 
@@ -30,7 +28,7 @@ public class UpperCaseTest extends WireTestCommon {
 
 
     @Test
-    public void testTwo() {
+    public void testUC() {
         test("demo-text");
     }
 

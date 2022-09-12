@@ -22,13 +22,8 @@ import net.openhft.chronicle.wire.channel.AbstractHandler;
 import net.openhft.chronicle.wire.channel.ChronicleChannel;
 import net.openhft.chronicle.wire.channel.ChronicleChannelCfg;
 import net.openhft.chronicle.wire.channel.ChronicleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import run.chronicle.wire.channel.channelArith.AnswerListener;
 
 public class TextMessageHandler extends AbstractHandler<TextMessageHandler> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TextMessageHandler.class);
 
     private final StringTransformerHandler stringTransformer;
 
@@ -38,7 +33,6 @@ public class TextMessageHandler extends AbstractHandler<TextMessageHandler> {
 
     @Override
     public void run(ChronicleContext context, ChronicleChannel channel) {
-        LOGGER.info("TextMessageHandler::run");
         channel.eventHandlerAsRunnable(
                 stringTransformer.msgOutput(channel.methodWriter(TextMessageOutput.class))).run();
     }

@@ -18,12 +18,7 @@
 
 package run.chronicle.wire.channel.customhandler;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class UpperCase implements StringTransformerHandler {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(UpperCase.class);
 
     private TextMessageOutput msgOutput;
 
@@ -34,7 +29,6 @@ public class UpperCase implements StringTransformerHandler {
 
     @Override
     public void toUpperCase(String msg) {
-        LOGGER.info("Processing message {}", msg);
         msgOutput.outputTxtMessage(msg.toUpperCase());
     }
 }
