@@ -123,12 +123,20 @@ In the past, there wasn't a clear advantage in using a newer version of Java, ho
 | Java Version | Throughput
 
 | Oracle JDK 1.8.0_321
-| 1.8 billion/min
+| 3.6 billion/min
 
 | Azul Zulu 11.0.11
-| 2.0 billion/min
+| 4.0 billion/min
 
 | Azul Zulu 17.0.4.1
-| 2.2 billion/min
+| 4.1 billion/min
+
+| Azul Zulu 18.0.2.1
+| 4.0 billion/min
 |===
+
+== References
+
+See this article on this package https://blog.vanillajava.blog/2022/09/java-is-very-fast-if-you-dont-create.html
+
 
