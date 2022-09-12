@@ -1,0 +1,12 @@
+# simple case
+---
+outputTxtMessage: ABCDEF
+...
+# numbers
+---
+outputTxtMessage: ABC123DEF
+...
+# mixed case input
+---
+outputTxtMessage: MIXEDCASEINPUT
+...

@@ -1,0 +1,12 @@
+# simple case
+---
+toUpperCase: abcdef
+...
+# numbers
+---
+toUpperCase: abc123def
+...
+# mixed case input
+---
+toUpperCase: MixedCaseInput
+...
