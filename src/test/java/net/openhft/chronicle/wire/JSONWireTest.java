@@ -347,6 +347,26 @@ public class JSONWireTest extends WireTestCommon {
         testCopyToBinaryAndBack(text);
     }
 
+    @Test
+    public void testWritingLayout() {
+        final Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(1024);
+        final JSONWire wire = new JSONWire(bytes, true);
+
+        final Value foo = new Value();
+
+        wire.getValueOut().marshallable(foo);
+
+        assertEquals("{\"a\":{\"b\":\"c\"}}", bytes.toString());
+    }
+
+    private static class Value extends SelfDescribingMarshallable {
+        final Inner a = new Inner();
+
+        private static class Inner extends SelfDescribingMarshallable {
+            String b = "c";
+        }
+    }
+
     private static class FooEvent extends AbstractEventCfg<FooEvent> {
         float foo;
     }
