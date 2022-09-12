@@ -323,6 +323,26 @@ public class JSONWireTest extends WireTestCommon {
         testCopyToBinaryAndBack(text);
     }
 
+    @Test
+    public void testQuotedFieldsEmptySequence() {
+        final Bytes data = Bytes.elasticByteBuffer();
+        data.append("{\n" +
+                "  \"field1\": 1234,\n" +
+                "  \"field2\": 456,\n" +
+                "  \"field3\": [ ],\n" +
+                "  \"field4\": [\n" +
+                "    \"abc\",\n" +
+                "    \"xyz\"\n" +
+                "  ]\n" +
+                "}");
+
+        final JSONWire wire = new JSONWire(data);
+        final SimpleTwoLists f = new SimpleTwoLists();
+        wire.getValueIn().object(f, SimpleTwoLists.class);
+
+        assertEquals("{\"field1\":1234,\"field2\":456,\"field3\":[ ],\"field4\":[\"abc\",\"xyz\" ]}", JSON.asString(f));
+    }
+
     static class MapWithIntegerKeysHolder extends SelfDescribingMarshallable {
         Map<Integer, String> intMap = new LinkedHashMap<>();
         Map<Long, String> longMap = new LinkedHashMap<>();
@@ -418,6 +438,27 @@ public class JSONWireTest extends WireTestCommon {
         ZonedDateTime zdateTime;
 
         Dates() {
+        }
+    }
+
+    private static final class SimpleTwoLists implements Marshallable {
+        int field1;
+        int field2;
+        final List<String> field3 = new ArrayList<>();
+        final List<String> field4 = new ArrayList<>();
+
+        @Override
+        public void readMarshallable(@NotNull final WireIn wire) throws IORuntimeException {
+            wire.read(() -> "field1").int32(this, (self, n) -> self.field1 = n);
+            wire.read(() -> "field2").int32(this, (self, n) -> self.field2 = n);
+            wire.read(() -> "field3").sequence(this, field3, SimpleTwoLists::readList);
+            wire.read(() -> "field4").sequence(this, field4, SimpleTwoLists::readList);
+        }
+
+        private static void readList(SimpleTwoLists record, List<String> data, ValueIn reader) {
+            while (reader.hasNextSequenceItem()) {
+                data.add(reader.text());
+            }
         }
     }
 }

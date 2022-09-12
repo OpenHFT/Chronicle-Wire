@@ -3067,17 +3067,17 @@ public class TextWire extends AbstractWire implements Wire {
             char code2 = (char) peekCode();
             if (code2 == ']') {
                 readCode();
-                return TextWire.this;
+            } else {
+                tReader.accept(t, kls, TextWire.this.valueIn);
+
+                if (code == '[') {
+                    consumePadding();
+                    char code3 = (char) readCode();
+                    if (code3 != ']')
+                        throw new IORuntimeException("Expected a ] but got " + code3 + " (" + code3 + ")");
+                }
             }
 
-            tReader.accept(t, kls, TextWire.this.valueIn);
-
-            if (code == '[') {
-                consumePadding();
-                char code3 = (char) readCode();
-                if (code3 != ']')
-                    throw new IORuntimeException("Expected a ] but got " + code3 + " (" + code3 + ")");
-            }
             consumePadding(1);
             return TextWire.this;
         }
