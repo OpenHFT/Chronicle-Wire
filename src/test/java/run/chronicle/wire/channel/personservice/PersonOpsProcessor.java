@@ -4,7 +4,7 @@ public class PersonOpsProcessor implements PersonOpsHandler {
 
     private transient ResponseSender responder;
 
-    public PersonOpsProcessor theService (ResponseSender responseSender) {
+    public PersonOpsProcessor responder(ResponseSender responseSender) {
         this.responder = responseSender;
         return this;
     }

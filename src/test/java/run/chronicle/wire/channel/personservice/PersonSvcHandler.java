@@ -15,7 +15,7 @@ public class PersonSvcHandler extends AbstractHandler<PersonSvcHandler> {
 
     public void run(ChronicleContext context, ChronicleChannel channel) {
         channel.eventHandlerAsRunnable(
-            personOpsHandler.theService(channel.methodWriter(ResponseSender.class))
+            personOpsHandler.responder(channel.methodWriter(ResponseSender.class))
         ).run();
     }
 
