@@ -6,7 +6,7 @@ import net.openhft.chronicle.wire.converter.NanoTime;
 public class Person extends SelfDescribingMarshallable {
     @NanoTime
     private long timestampNS;
-    String name;
+    private String name;
 
     public long timestampNS() {
         return this.timestampNS;
@@ -29,8 +29,8 @@ public class Person extends SelfDescribingMarshallable {
     @Override
     public String toString() {
         return "Person " + "{" +
-            " createdNS:" + timestampNS +
-            ", name:'" + name + "'" +
+            " timestampNS: " + timestampNS +
+            ", name: '" + name + "'" +
             " }";
     }
 }
