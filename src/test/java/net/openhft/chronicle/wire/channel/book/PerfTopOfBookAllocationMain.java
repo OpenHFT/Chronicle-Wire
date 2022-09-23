@@ -24,13 +24,22 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
+/* Windows 10 laptop, Intel(R) Core(TM) i9-10980HK CPU @ 2.40GHz
+
+-Dthreads=4 -Dcount=5 -Dbatch=10 -Xmn24m
+batch: 10
+time: 23.124 sec
+rate: 216.225 M objs/sec
+avgLatency: 18 ns
+
+ */
 /**
  * Benchmark for just allocations
  */
 public class PerfTopOfBookAllocationMain {
     static final int PROCS = Runtime.getRuntime().availableProcessors();
     static final int THREADS = Integer.getInteger("threads", PROCS);
-    static final int COUNT = Integer.getInteger("count", 2);
+    static final int COUNT = Integer.getInteger("count", 5);
     // adjusted to approximate what is seen in more realistic benchmarks
     static final int BATCH = Integer.getInteger("batch", 10);
 
