@@ -1383,6 +1383,18 @@ bootJar {
 
 NOTE: For more information see link:https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto.build.extract-specific-libraries-when-an-executable-jar-runs[Extract Specific Libraries When an Executable JAR Runs] and link:https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/html/#packaging-executable-configuring-unpacking[Spring Boot Gradle Plugin Reference Guide].
 
+== Using MethodWriter and MethodReader
+
+Chronicle Wire's `MethodWriter` is used for writing data, and `MethodReader` is used for then reading this data. However,
+there are many use cases for them. One of many benefits to these are their ease of use.
+
+In particular, link:https://vanilla-java.github.io/2016/03/23/Microservices-in-the-Chronicle-world-Part-1.html[this article] captures the simplicity of using `MethodWriter` and `MethodReader`.
+
+In another example, link:https://dzone.com/articles/java-how-to-leverage-method-chaining-to-add-smart[here], we can see how written data could be sent as a streaming event over an Event-Driven architecture, and then a `MethodReader` could be used to read these streaming events.
+
+These are also not limited to being used only within Chronicle Wire. With Chronicle Queue for instance, another example would be to have a `MethodWriter` that serialises and writes a method call to the out queue,
+and a `MethodReader` that reads in the in queue for any methods implemented. For more detail about this example, see link:https://github.com/OpenHFT/Chronicle-Queue-Demo/blob/c1e128545e8f219daa186836ca58a07047436084/md-pipeline/src/main/java/org/trading/Runner.java[here].
+
 == Uses of Chronicle Wire
 
 Chronicle Wire can be used for:

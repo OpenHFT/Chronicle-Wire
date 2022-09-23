@@ -55,7 +55,7 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "  monitor: !net.openhft.chronicle.threads.MonitorEventLoop {\n" +
                     "    referenceId: 0,\n" +
                     "    lifecycle: !net.openhft.chronicle.threads.EventLoopLifecycle NEW,\n" +
-                    "    name: test~monitortest/event~loop~monitor,\n" +
+                    "    name: test/~monitortest/event~loop~monitor,\n" +
                     "    handlers: [\n" +
                     "      !net.openhft.chronicle.threads.MonitorEventLoop$IdempotentLoopStartedEventHandler { referenceId: 0, loopStarted: false }\n" +
                     "    ],\n" +
@@ -64,7 +64,7 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "  core: !net.openhft.chronicle.threads.VanillaEventLoop {\n" +
                     "    referenceId: 0,\n" +
                     "    lifecycle: !net.openhft.chronicle.threads.EventLoopLifecycle NEW,\n" +
-                    "    name: testcore-event-loop,\n" +
+                    "    name: test/core-event-loop,\n" +
                     "    mediumHandlers: [    ],\n" +
                     "    newHandler: !!null \"\",\n" +
                     "    pauser: !net.openhft.chronicle.threads.LongPauser { minPauseTimeNS: 500000, maxPauseTimeNS: 20000000, pausing: false, minBusyNS: 0, minYieldNS: 50000, busyNS: 9223372036854775807, yieldNS: 9223372036854775807, pauseTimeNS: 500000, timePaused: 0, countPaused: 0, thread: !!null \"\", yieldStart: 0, timeOutStart: 9223372036854775807, pauseUntilNS: 0, pauseStartNS: 0 },\n" +
@@ -93,9 +93,9 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "  blocking: !net.openhft.chronicle.threads.BlockingEventLoop {\n" +
                     "    referenceId: 0,\n" +
                     "    lifecycle: !net.openhft.chronicle.threads.EventLoopLifecycle NEW,\n" +
-                    "    name: testblocking-event-loop,\n" +
+                    "    name: test/blocking-event-loop,\n" +
                     "    handlers: [    ],\n" +
-                    "    threadFactory: testblocking-event-loop,\n" +
+                    "    threadFactory: test/blocking-event-loop,\n" +
                     "    pauser: !net.openhft.chronicle.threads.LongPauser { minPauseTimeNS: 500000, maxPauseTimeNS: 20000000, pausing: false, minBusyNS: 0, minYieldNS: 50000, busyNS: 9223372036854775807, yieldNS: 9223372036854775807, pauseTimeNS: 500000, timePaused: 0, countPaused: 0, thread: !!null \"\", yieldStart: 0, timeOutStart: 9223372036854775807, pauseUntilNS: 0, pauseStartNS: 0 }\n" +
                     "  },\n" +
                     "  pauser: !net.openhft.chronicle.threads.LongPauser {\n" +
