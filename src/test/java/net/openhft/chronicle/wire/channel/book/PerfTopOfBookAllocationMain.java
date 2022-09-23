@@ -28,24 +28,34 @@ import java.util.stream.LongStream;
  * Benchmark for just allocations
  */
 public class PerfTopOfBookAllocationMain {
+    static final int PROCS = Runtime.getRuntime().availableProcessors();
+    static final int THREADS = Integer.getInteger("threads", PROCS);
+    static final int COUNT = Integer.getInteger("count", 2);
+    // adjusted to approximate what is seen in more realistic benchmarks
+    static final int BATCH = Integer.getInteger("batch", 10);
+
     public static void main(String[] args) {
+        System.out.println(""
+                + "-Dthreads=" + THREADS + " "
+                + "-Dcount=" + COUNT + " "
+                + "-Dbatch=" + BATCH);
         long start = System.currentTimeMillis();
-        final long count = 3_000_000_000L;
-        final int batch = 10;
-        final OptionalInt max = LongStream.range(0, count / batch)
-                .parallel()
-                .mapToObj(l -> IntStream.range(0, batch)
-                        .mapToObj(i -> new TopOfBook().sendingTimeNS(i))
-                        .collect(Collectors.toList()))
-                .mapToInt(List::size)
-                .max();
+        final long count = COUNT * 1_000_000_000L;
+        final int batch = BATCH;
+        final OptionalInt max =
+                LongStream.range(0, THREADS)
+                        .parallel()
+                        .flatMap(i -> LongStream.range(0, count / batch / THREADS))
+                        .mapToObj(l -> IntStream.range(0, batch)
+                                .mapToObj(i -> new TopOfBook().sendingTimeNS(i))
+                                .collect(Collectors.toList()))
+                        .mapToInt(List::size)
+                        .max();
         long time = System.currentTimeMillis() - start;
         System.out.println("batch: " + max.getAsInt());
         System.out.println("time: " + time / 1e3 + " sec");
         System.out.println("rate: " + count / time / 1e3 + " M objs/sec");
-        final int proc = Runtime.getRuntime().availableProcessors();
-        System.out.println("proc: " + proc);
-        long avgLatency = proc * time * 1_000_000 / count;
+        long avgLatency = Math.min(THREADS, PROCS) * time * 1_000_000 / count;
         System.out.println("avgLatency: " + avgLatency + " ns");
     }
 }
