@@ -27,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import static net.openhft.chronicle.wire.Wires.lengthOf;
 
 public class BinaryReadDocumentContext implements ReadDocumentContext {
+    static final StringBuilderPool SBP = new StringBuilderPool();
     private final boolean ensureFullRead;
     public long start = -1;
     public long lastStart = -1;
@@ -46,6 +47,35 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     public BinaryReadDocumentContext(@Nullable Wire wire, boolean ensureFullRead) {
         this.wire = (AbstractWire) wire;
         this.ensureFullRead = ensureFullRead;
+    }
+
+    private static void fullReadForDeltaWire(AbstractWire wire0, long start) {
+        long readPosition1 = wire0.bytes().readPosition();
+        try {
+            // we have to read back from the start, as close may have been called in
+            // the middle of reading a value
+            wire0.bytes().readPosition(start);
+            wire0.bytes().readSkip(4);
+            while (wire0.hasMore()) {
+                final long remaining = wire0.bytes().readRemaining();
+                final ValueIn read = wire0.read();
+                if (read.isTyped()) {
+                    read.skipValue();
+                } else {
+                    read.text(SBP.acquireStringBuilder());  // todo remove this and use skipValue
+                }
+
+                if (wire0.bytes().readRemaining() == remaining) {
+                    // stopped making progress, exit loop
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            // TODO: don't believe this is need any more. Have changed from debug to warn
+            Jvm.warn().on(BinaryReadDocumentContext.class, e);
+        } finally {
+            wire0.bytes().readPosition(readPosition1);
+        }
     }
 
     @Override
@@ -78,37 +108,6 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         return rollback;
     }
 
-    static final StringBuilderPool SBP = new StringBuilderPool();
-
-    private static void fullReadForDeltaWire(AbstractWire wire0, long start) {
-        long readPosition1 = wire0.bytes().readPosition();
-        try {
-            // we have to read back from the start, as close may have been called in
-            // the middle of reading a value
-            wire0.bytes().readPosition(start);
-            wire0.bytes().readSkip(4);
-            while (wire0.hasMore()) {
-                final long remaining = wire0.bytes().readRemaining();
-                final ValueIn read = wire0.read();
-                if (read.isTyped()) {
-                    read.skipValue();
-                } else {
-                    read.text(SBP.acquireStringBuilder());  // todo remove this and use skipValue
-                }
-
-                if (wire0.bytes().readRemaining() == remaining) {
-                    // stopped making progress, exit loop
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            // TODO: don't believe this is need any more. Have changed from debug to warn
-            Jvm.warn().on(BinaryReadDocumentContext.class, e);
-        } finally {
-            wire0.bytes().readPosition(readPosition1);
-        }
-    }
-
     @Override
     public void close() {
         if (rollbackIfNeeded())
@@ -125,6 +124,10 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         start = -1;
         if (readLimit0 > 0 && wire0 != null) {
             @NotNull final Bytes<?> bytes = wire0.bytes();
+            if (bytes.readPosition() < readPosition0)
+                Jvm.warn().on(getClass(), "The readPosition was invalid " + bytes.readPosition() + " < " + readPosition0);
+            if (bytes.readLimit() > readLimit0)
+                Jvm.warn().on(getClass(), "The readLimit was invalid " + bytes.readLimit() + " < " + readLimit0);
             bytes.readLimit(readLimit0);
             if (wire.usePadding())
                 readPosition0 += BytesUtil.padOffset(readPosition0);

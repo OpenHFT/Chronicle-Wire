@@ -85,8 +85,8 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
             return;
         @NotNull Bytes<?> bytes = wire().bytes();
         long position1 = bytes.writePosition();
-//        if (position1 < position)
-//            System.out.println("Message truncated from " + position + " to " + position1);
+        if (position1 < position)
+            Jvm.warn().on(getClass(), "WritePosition invalid " + position1 + " < " + position);
         long length0 = position1 - position - 4;
         if (length0 > Integer.MAX_VALUE && bytes instanceof HexDumpBytes)
             length0 = (int) length0;
