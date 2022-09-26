@@ -172,7 +172,7 @@ public class ChainedMethodsTest extends WireTestCommon {
                         "midTwoArgs: [\n" +
                         "  5,\n" +
                         "  !byte -7\n" +
-                        "],\n" +
+                        "]\n" +
                         "next: 2\n" +
                         "echo: echo-2\n",
                 WireDumper.of(wire).asString());

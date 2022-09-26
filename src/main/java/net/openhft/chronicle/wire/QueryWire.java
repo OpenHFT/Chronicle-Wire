@@ -111,13 +111,13 @@ public class QueryWire extends TextWire {
 
     @NotNull
     @Override
-    public Wire writeComment(@NotNull CharSequence s) {
+    public QueryWire writeComment(@NotNull CharSequence s) {
         return this;
     }
 
     @NotNull
     @Override
-    public WireOut addPadding(int paddingToAdd) {
+    public QueryWire addPadding(int paddingToAdd) {
         return this;
     }
 
@@ -163,7 +163,7 @@ public class QueryWire extends TextWire {
         }
     }
 
-    class QueryValueOut extends TextValueOut {
+    class QueryValueOut extends YamlValueOut {
         @NotNull
         String sep = "";
         @Nullable
@@ -186,7 +186,7 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public WireOut bool(@Nullable Boolean flag) {
+        public QueryWire bool(@Nullable Boolean flag) {
             if (flag != null) {
                 prependSeparator();
                 bytes.appendUtf8(flag ? "true" : "false");
@@ -197,7 +197,7 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public WireOut text(@Nullable CharSequence s) {
+        public QueryWire text(@Nullable CharSequence s) {
             if (s != null) {
                 prependSeparator();
                 bytes.appendUtf8(s);
@@ -208,7 +208,7 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public WireOut int8(byte i8) {
+        public QueryWire int8(byte i8) {
             prependSeparator();
             bytes.appendUtf8(i8);
             elementSeparator();
@@ -217,13 +217,13 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public WireOut bytes(@Nullable BytesStore fromBytes) {
+        public QueryWire bytes(@Nullable BytesStore fromBytes) {
             throw new UnsupportedOperationException("todo");
         }
 
         @NotNull
         @Override
-        public WireOut rawBytes(@Nullable byte[] value) {
+        public QueryWire rawBytes(@Nullable byte[] value) {
             if (value != null) {
                 prependSeparator();
                 bytes.write(value);
@@ -234,7 +234,7 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public WireOut bytes(byte[] byteArray) {
+        public QueryWire bytes(byte[] byteArray) {
             prependSeparator();
             bytes.appendUtf8(Base64.getEncoder().encodeToString(byteArray));
             elementSeparator();
@@ -244,19 +244,19 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public WireOut int64array(long capacity) {
+        public QueryWire int64array(long capacity) {
             throw new UnsupportedOperationException();
         }
 
         @NotNull
         @Override
-        public WireOut int64array(long capacity, @NotNull LongArrayValues values) {
+        public QueryWire int64array(long capacity, @NotNull LongArrayValues values) {
             throw new UnsupportedOperationException();
         }
 
         @NotNull
         @Override
-        public ValueOut typePrefix(@NotNull CharSequence typeName) {
+        public QueryValueOut typePrefix(@NotNull CharSequence typeName) {
             prependSeparator();
             bytes.appendUtf8(typeName);
             sep = " ";
@@ -265,43 +265,43 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@Nullable CharSequence type) {
+        public QueryWire typeLiteral(@Nullable CharSequence type) {
             throw new UnsupportedOperationException();
         }
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @NotNull Class type) {
+        public QueryWire typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @NotNull Class type) {
             throw new UnsupportedOperationException();
         }
 
         @NotNull
         @Override
-        public WireOut int32forBinding(int value) {
+        public QueryWire int32forBinding(int value) {
             throw new UnsupportedOperationException();
         }
 
         @NotNull
         @Override
-        public WireOut int32forBinding(int value, @NotNull IntValue intValue) {
+        public QueryWire int32forBinding(int value, @NotNull IntValue intValue) {
             throw new UnsupportedOperationException();
         }
 
         @NotNull
         @Override
-        public WireOut int64forBinding(long value) {
+        public QueryWire int64forBinding(long value) {
             throw new UnsupportedOperationException();
         }
 
         @NotNull
         @Override
-        public WireOut int64forBinding(long value, @NotNull LongValue longValue) {
+        public QueryWire int64forBinding(long value, @NotNull LongValue longValue) {
             throw new UnsupportedOperationException();
         }
 
         @NotNull
         @Override
-        public <T> WireOut sequence(T t, @NotNull BiConsumer<T, ValueOut> writer) {
+        public <T> QueryWire sequence(T t, @NotNull BiConsumer<T, ValueOut> writer) {
             prependSeparator();
             pushState();
             bytes.appendUtf8("[");
@@ -319,7 +319,7 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public <T, K> WireOut sequence(T t, K kls, @NotNull TriConsumer<T, K, ValueOut> writer) {
+        public <T, K> QueryWire sequence(T t, K kls, @NotNull TriConsumer<T, K, ValueOut> writer) {
             prependSeparator();
             pushState();
             bytes.appendUtf8("[");
@@ -345,7 +345,7 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public WireOut marshallable(@NotNull WriteMarshallable object) {
+        public QueryWire marshallable(@NotNull WriteMarshallable object) {
             pushState();
 
             prependSeparator();
@@ -363,26 +363,26 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public WireOut map(@NotNull final Map map) {
+        public QueryWire map(@NotNull final Map map) {
             throw new UnsupportedOperationException();
         }
 
         @Override
         @NotNull
-        public ValueOut write() {
+        public QueryValueOut write() {
             throw new UnsupportedOperationException();
         }
 
         @Override
         @NotNull
-        public ValueOut write(@NotNull WireKey key) {
+        public QueryValueOut write(@NotNull WireKey key) {
             fieldName = key.name();
             return this;
         }
 
         @Override
         @NotNull
-        public ValueOut write(@NotNull CharSequence name) {
+        public QueryValueOut write(@NotNull CharSequence name) {
             fieldName = name;
             return this;
         }

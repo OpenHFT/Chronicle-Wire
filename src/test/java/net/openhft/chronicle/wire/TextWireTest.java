@@ -1211,7 +1211,7 @@ public class TextWireTest extends WireTestCommon {
         @NotNull Object[] noObjects = {};
         wire.write("a").object(noObjects);
 
-        assertEquals("a: []", wire.toString());
+        assertEquals("a: []\n", wire.toString());
 
         @Nullable Object[] object = wire.read().object(Object[].class);
         assertEquals(0, object.length);
@@ -1225,7 +1225,7 @@ public class TextWireTest extends WireTestCommon {
                 "  abc,\n" +
                 "  def,\n" +
                 "  ghi\n" +
-                "]", wire.toString());
+                "]\n", wire.toString());
 
         @Nullable Object[] object2 = wire.read()
                 .object(Object[].class);
@@ -1589,7 +1589,7 @@ public class TextWireTest extends WireTestCommon {
                 "  one,\n" +
                 "  three,\n" +
                 "  two\n" +
-                "]", wire.toString());
+                "]\n", wire.toString());
         @Nullable Object o = wire.read().object();
         assertTrue(o instanceof SortedSet);
         assertEquals(set, o);

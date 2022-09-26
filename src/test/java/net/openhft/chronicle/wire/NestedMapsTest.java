@@ -201,7 +201,7 @@ public class NestedMapsTest extends WireTestCommon {
                         "  the,\n" +
                         "  lazy,\n" +
                         "  dog\n" +
-                        "],\n" +
+                        "]\n" +
                         "numbers: [\n" +
                         "  1,\n" +
                         "  2,\n" +
@@ -210,7 +210,7 @@ public class NestedMapsTest extends WireTestCommon {
                         "  5,\n" +
                         "  8,\n" +
                         "  13\n" +
-                        "],\n" +
+                        "]\n" +
                         "map1: {\n" +
                         "  aye: AAA,\n" +
                         "  bee: BBB\n" +

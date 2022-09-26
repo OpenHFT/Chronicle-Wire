@@ -193,8 +193,8 @@
                         <configuration>
                             <referenceVersion>2.23ea0</referenceVersion>
                             <artifactsURI>https://teamcity.chronicle.software/repository/download</artifactsURI>
-                            <!-- Exactly the same reported problems as the main line, not sure why we need 96.2 -> 96.1 -->
-                            <binaryCompatibilityPercentageRequired>95.7</binaryCompatibilityPercentageRequired>
+                            <!-- to be restored after 2.24 is out -->
+                            <binaryCompatibilityPercentageRequired>90.0</binaryCompatibilityPercentageRequired>
                             <extraOptions>
                                 <extraOption>
                                     <name>skip-internal-packages</name>

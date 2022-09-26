@@ -666,14 +666,14 @@ public interface ValueOut {
                 typePrefix(BitSet.class);
 
                 BitSet bs = (BitSet) value;
-                boolean isTextWire = TextWire.TextValueOut.class.isAssignableFrom(this.getClass());
+                boolean isYamlWire = YamlWireOut.YamlValueOut.class.isAssignableFrom(this.getClass());
 
                 // note : this like the others below this is capturing lambda
                 return sequence(v -> {
                     for (int i = 0; i < bs.size() >> 6; i++) {
                         long l = BitSetUtil.getWord(bs, i);
                         WireOut wireOut = v.int64(l);
-                        if (isTextWire) {
+                        if (isYamlWire) {
                             String bits = Long.toBinaryString(l);
                             wireOut.writeComment(ZEROS_64.substring(bits.length()) + bits);
                         }

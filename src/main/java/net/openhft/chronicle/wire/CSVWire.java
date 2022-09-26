@@ -72,7 +72,7 @@ public class CSVWire extends TextWire {
 
     @NotNull
     @Override
-    protected TextValueOut createValueOut() {
+    protected CSVValueOut createValueOut() {
         return new CSVValueOut();
     }
 
@@ -139,18 +139,18 @@ public class CSVWire extends TextWire {
         return this;
     }
 
-    class CSVValueOut extends TextValueOut {
+    class CSVValueOut extends YamlValueOut {
         @NotNull
         @Override
-        public WireOut typeLiteral(@Nullable CharSequence type) {
+        public CSVWire typeLiteral(@Nullable CharSequence type) {
             if (type == null)
-                return nu11();
+                return (CSVWire) nu11();
             throw new UnsupportedOperationException("Type literals not supported in CSV, cannot write " + type);
         }
 
         @NotNull
         @Override
-        public WireOut marshallable(@NotNull Serializable object) {
+        public CSVWire marshallable(@NotNull Serializable object) {
             throw new UnsupportedOperationException("Serializable objects not supported in CSV, cannot write " + object);
         }
     }

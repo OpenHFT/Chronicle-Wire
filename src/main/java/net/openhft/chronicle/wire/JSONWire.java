@@ -111,7 +111,7 @@ public class JSONWire extends TextWire {
 
     @NotNull
     @Override
-    protected TextValueOut createValueOut() {
+    protected JSONValueOut createValueOut() {
         return new JSONValueOut();
     }
 
@@ -404,7 +404,7 @@ public class JSONWire extends TextWire {
 
     @NotNull
     @Override
-    protected Quotes needsQuotesEscaped(@NotNull CharSequence s) {
+    protected Quotes needsQuotes(@NotNull CharSequence s) {
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
             if (ch == '"' || ch < ' ')
@@ -416,7 +416,7 @@ public class JSONWire extends TextWire {
     @Override
     void escape(@NotNull CharSequence s) {
         bytes.writeUnsignedByte('"');
-        if (needsQuotesEscaped(s) == Quotes.NONE) {
+        if (needsQuotes(s) == Quotes.NONE) {
             bytes.appendUtf8(s);
         } else {
             escape0(s, Quotes.DOUBLE);
@@ -458,7 +458,6 @@ public class JSONWire extends TextWire {
         return TextStopCharsTesters.STRICT_END_OF_TEXT_JSON;
     }
 
-    @Override
     @NotNull
     protected Supplier<StopCharsTester> strictEndOfTextEscaping() {
         return STRICT_END_OF_TEXT_JSON_ESCAPING;
@@ -520,7 +519,7 @@ public class JSONWire extends TextWire {
         }
     }
 
-    class JSONValueOut extends TextValueOut {
+    class JSONValueOut extends YamlValueOut {
 
         @Override
         protected void trimWhiteSpace() {
@@ -530,6 +529,7 @@ public class JSONWire extends TextWire {
 
         @Override
         protected void indent() {
+            // No-op.
         }
 
         @NotNull
@@ -540,13 +540,13 @@ public class JSONWire extends TextWire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@Nullable CharSequence type) {
-            return text(type);
+        public JSONWire typeLiteral(@Nullable CharSequence type) {
+            return (JSONWire) text(type);
         }
 
         @NotNull
         @Override
-        public ValueOut typePrefix(@NotNull CharSequence typeName) {
+        public JSONValueOut typePrefix(@NotNull CharSequence typeName) {
             if (useTypes) {
                 startBlock('{');
                 bytes.append("\"@");
@@ -560,7 +560,8 @@ public class JSONWire extends TextWire {
         public void endTypePrefix() {
             super.endTypePrefix();
             if (useTypes) {
-                endBlock(true, '}');
+                endBlock('}');
+                elementSeparator();
             }
         }
 
@@ -629,48 +630,48 @@ public class JSONWire extends TextWire {
 
         @NotNull
         @Override
-        public WireOut rawText(CharSequence value) {
+        public JSONWire rawText(CharSequence value) {
             bytes.writeByte((byte) '\"');
-            WireOut wireOut = super.rawText(value);
+            super.rawText(value);
             bytes.writeByte((byte) '\"');
-            return wireOut;
+            return JSONWire.this;
         }
 
         @Override
-        public @NotNull WireOut date(LocalDate localDate) {
-            return text(localDate.toString());
+        public @NotNull JSONWire date(LocalDate localDate) {
+            return (JSONWire) text(localDate.toString());
         }
 
         @Override
-        public @NotNull WireOut dateTime(LocalDateTime localDateTime) {
-            return text(localDateTime.toString());
+        public @NotNull JSONWire dateTime(LocalDateTime localDateTime) {
+            return (JSONWire) text(localDateTime.toString());
         }
 
         @Override
-        public @NotNull <V> WireOut object(@NotNull Class<V> expectedType, V v) {
-            return useTypes ? super.object(v) : super.object(expectedType, v);
+        public @NotNull <V> JSONWire object(@NotNull Class<V> expectedType, V v) {
+            return (JSONWire) (useTypes ? super.object(v) : super.object(expectedType, v));
         }
 
         @Override
-        public @NotNull ValueOut typePrefix(Class type) {
+        public @NotNull JSONValueOut typePrefix(Class type) {
             if (type.isPrimitive() || isWrapper(type) || type.isEnum()) {
                 // Do nothing because there are no other alternatives
                 // and thus, the type is implicitly given in the declaration.
                 return this;
             } else {
-                return super.typePrefix(type);
+                return (JSONValueOut) super.typePrefix(type);
             }
         }
 
         @Override
-        public @NotNull <K, V> WireOut marshallable(@Nullable Map<K, V> map, @NotNull Class<K> kClass, @NotNull Class<V> vClass, boolean leaf) {
-            return super.marshallable(map, (Class) String.class, vClass, leaf);
+        public @NotNull <K, V> JSONWire marshallable(@Nullable Map<K, V> map, @NotNull Class<K> kClass, @NotNull Class<V> vClass, boolean leaf) {
+            return (JSONWire) super.marshallable(map, (Class) String.class, vClass, leaf);
         }
 
 
-        public @NotNull WireOut time(final LocalTime localTime) {
+        public @NotNull JSONWire time(final LocalTime localTime) {
             // Todo: fix quoted text
-            return super.time(localTime);
+            return (JSONWire) super.time(localTime);
             /*return text(localTime.toString());*/
         }
     }
