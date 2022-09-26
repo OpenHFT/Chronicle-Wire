@@ -75,7 +75,7 @@ public class BitSetTest extends WireTestCommon {
             Assert.assertEquals("!!bitset [\n" +
                     "  1024,\n" +
                     "  # 0000000000000000000000000000000000000000000000000000010000000000\n" +
-                    "]", wire.toString());
+                    "]\n", wire.toString());
         } finally {
             b.releaseLast();
         }
@@ -96,7 +96,7 @@ public class BitSetTest extends WireTestCommon {
                     "  # 0000000000000000000000000000000000000000000000000000010000000000\n" +
                     "  33554432,\n" +
                     "  # 0000000000000000000000000000000000000010000000000000000000000000\n" +
-                    "]", wire.toString());
+                    "]\n", wire.toString());
         } finally {
             b.releaseLast();
         }

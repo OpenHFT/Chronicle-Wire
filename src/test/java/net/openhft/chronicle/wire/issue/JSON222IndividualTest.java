@@ -61,7 +61,7 @@ public class JSON222IndividualTest extends WireTestCommon {
                 "  [\n" +
                 "    4\n" +
                 "  ]\n" +
-                "]", list);
+                "]\n", list);
     }
 
     @Test
