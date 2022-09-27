@@ -452,12 +452,6 @@ public class JSONWire extends TextWire {
     }
 
     @Override
-    @Deprecated(/* To be removed in 2.24 */)
-    @NotNull
-    protected TextStopCharsTesters strictEndOfText() {
-        return TextStopCharsTesters.STRICT_END_OF_TEXT_JSON;
-    }
-
     @NotNull
     protected Supplier<StopCharsTester> strictEndOfTextEscaping() {
         return STRICT_END_OF_TEXT_JSON_ESCAPING;

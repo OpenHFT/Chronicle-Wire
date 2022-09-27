@@ -18,7 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesComment;
+import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.bytes.CommonMarshallable;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.*;
@@ -69,7 +69,7 @@ public interface WireCommon {
      *
      * @return the bytes() but only for comment
      */
-    BytesComment<?> bytesComment();
+    HexDumpBytesDescription<?> bytesComment();
 
     /**
      * Creates and returns a new {@link IntValue}. The {@link IntValue} implementation that is
@@ -138,22 +138,6 @@ public interface WireCommon {
      * @param parent to set, or null if there isn't one.
      */
     void parent(Object parent);
-
-    /**
-     * Doesn't do anything
-     *
-     * @return true
-     */
-    @Deprecated(/* to be removed in x.24 */)
-    boolean startUse();
-
-    /**
-     * Doesn't do anything
-     *
-     * @return true always, so it can be used in an assert line
-     */
-    @Deprecated(/* to be removed in x.24 */)
-    boolean endUse();
 
     /**
      * If a message is marked as NOT_COMPLETE is it still present.

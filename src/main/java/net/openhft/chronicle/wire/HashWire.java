@@ -18,7 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesComment;
+import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.CommonMarshallable;
 import net.openhft.chronicle.core.Maths;
@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 @SuppressWarnings("rawtypes")
-public class HashWire implements WireOut, BytesComment {
+public class HashWire implements WireOut, HexDumpBytesDescription {
     private static final ThreadLocal<HashWire> hwTL = new ThreadLocal<HashWire>() {
         @Override
         protected HashWire initialValue() {
@@ -111,16 +111,6 @@ public class HashWire implements WireOut, BytesComment {
 
     @Override
     public void parent(Object parent) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean startUse() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean endUse() {
         throw new UnsupportedOperationException();
     }
 
@@ -258,7 +248,7 @@ public class HashWire implements WireOut, BytesComment {
     }
 
     @Override
-    public BytesComment<?> bytesComment() {
+    public HexDumpBytesDescription<?> bytesComment() {
         return this;
     }
 
@@ -287,7 +277,7 @@ public class HashWire implements WireOut, BytesComment {
 
     @Override
     public boolean isBinary() {
-        return false; // as byte() doesn't make sense to access
+        return true; // text wire is orders of magnitude slower
     }
 
     @NotNull

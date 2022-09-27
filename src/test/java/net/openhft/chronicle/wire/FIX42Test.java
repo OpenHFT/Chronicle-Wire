@@ -112,7 +112,7 @@ public class FIX42Test extends WireTestCommon {
         @NotNull Wire wire = testId < 0
                 ? WireType.TEXT.apply(bytes)
                 : new BinaryWire(bytes, fixed, numericField, fieldLess, Integer.MAX_VALUE, "binary", true);
-        assert wire.startUse();
+
         return wire;
     }
 

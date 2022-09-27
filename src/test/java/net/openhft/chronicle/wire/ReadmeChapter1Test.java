@@ -349,8 +349,6 @@ To write in binary instead
         @NotNull Wire wire2 = new BinaryWire(bytes2);
         wire2.usePadding(true);
 
-        assert wire2.startUse();
-
         wire2.writeDocument(false, data);
        // System.out.println(Wires.fromSizePrefixedBlobs(bytes2));
 
@@ -442,7 +440,6 @@ To write in binary instead
         @NotNull Wire wire2 = new BinaryWire(bytes2);
         wire2.usePadding(true);
 
-        assert wire2.startUse();
         wire2.writeDocument(false, w -> w.write(() -> "mydata")
                 .sequence(v -> Stream.of(data).forEach(v::object)));
        // System.out.println(Wires.fromSizePrefixedBlobs(bytes2));

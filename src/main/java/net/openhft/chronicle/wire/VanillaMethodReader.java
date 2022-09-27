@@ -57,15 +57,6 @@ public class VanillaMethodReader implements MethodReader {
     private boolean closeIn = false;
     private boolean closed;
 
-    @Deprecated(/* To be removed in x.24 */)
-    public VanillaMethodReader(MarshallableIn in,
-                               boolean ignoreDefault,
-                               WireParselet defaultParselet,
-                               MethodReaderInterceptorReturns methodReaderInterceptorReturns,
-                               @NotNull Object... objects) {
-        this(in, ignoreDefault, defaultParselet, SKIP_READABLE_BYTES, methodReaderInterceptorReturns, objects);
-    }
-
     public VanillaMethodReader(MarshallableIn in,
                                boolean ignoreDefault,
                                WireParselet defaultParselet,

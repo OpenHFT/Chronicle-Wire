@@ -87,16 +87,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     public static String asText(@NotNull Wire wire) {
-        assert wire.startUse();
-        try {
-            long pos = wire.bytes().readPosition();
-            @NotNull Wire tw = Wire.newYamlWireOnHeap();
-            wire.copyTo(tw);
-            wire.bytes().readPosition(pos);
-            return tw.toString();
-        } finally {
-            assert wire.endUse();
-        }
+        long pos = wire.bytes().readPosition();
+        @NotNull Wire tw = Wire.newYamlWireOnHeap();
+        wire.copyTo(tw);
+        wire.bytes().readPosition(pos);
+        return tw.toString();
     }
 
     private static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb,

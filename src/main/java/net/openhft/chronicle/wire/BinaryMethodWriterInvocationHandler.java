@@ -32,14 +32,6 @@ public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInv
         this(tClass, metaData, () -> marshallableOut);
     }
 
-    /**
-     * @deprecated to be removed in x.24
-     */
-    @Deprecated(/* to be removed in x.24 */)
-    public BinaryMethodWriterInvocationHandler(final boolean metaData, Supplier<MarshallableOut> marshallableOutSupplier) {
-        this(Object.class, metaData, marshallableOutSupplier);
-    }
-
     public BinaryMethodWriterInvocationHandler(Class<?> tClass, final boolean metaData, Supplier<MarshallableOut> marshallableOutSupplier) {
         super(tClass);
         this.marshallableOutSupplier = marshallableOutSupplier;

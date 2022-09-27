@@ -96,7 +96,7 @@ public class WireSerializedLambdaTest extends WireTestCommon {
     @Test
     public void testBinaryWire() {
         @NotNull Wire wire = new BinaryWire(new HexDumpBytes());
-        assert wire.startUse();
+
         SerializableFunction<String, String> fun = String::toUpperCase;
         wire.write(() -> "one").object(fun)
                 .write(() -> "two").object(Fun.ADD_A)

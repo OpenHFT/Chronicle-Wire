@@ -118,41 +118,36 @@ public enum WireInternal {
     public static long writeData(@NotNull WireOut wireOut, boolean metaData, boolean notComplete,
                                  @NotNull WriteMarshallable writer) {
         wireOut.getValueOut().resetBetweenDocuments();
-        assert wireOut.startUse();
         long position;
-        try {
-            @NotNull Bytes<?> bytes = wireOut.bytes();
-            position = bytes.writePositionForHeader(wireOut.usePadding());
 
-            int metaDataBit = metaData ? Wires.META_DATA : 0;
-            int len0 = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
-            bytes.writeOrderedInt(len0);
-            writer.writeMarshallable(wireOut);
-            if (!wireOut.isBinary())
-                BytesUtil.combineDoubleNewline(bytes);
-            long position1 = bytes.writePosition();
-            if (wireOut.usePadding()) {
-                int bytesToSkip = (int) ((position - position1) & 0x3);
-                wireOut.addPadding(bytesToSkip);
-                position1 = bytes.writePosition();
-            }
+        @NotNull Bytes<?> bytes = wireOut.bytes();
+        position = bytes.writePositionForHeader(wireOut.usePadding());
+
+        int metaDataBit = metaData ? Wires.META_DATA : 0;
+        int len0 = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
+        bytes.writeOrderedInt(len0);
+        writer.writeMarshallable(wireOut);
+        if (!wireOut.isBinary())
+            BytesUtil.combineDoubleNewline(bytes);
+        long position1 = bytes.writePosition();
+        if (wireOut.usePadding()) {
+            int bytesToSkip = (int) ((position - position1) & 0x3);
+            wireOut.addPadding(bytesToSkip);
+            position1 = bytes.writePosition();
+        }
 //            if (position1 < position)
 //                System.out.println("Message truncated from " + position + " to " + position1);
-            int length;
-            if (bytes instanceof HexDumpBytes) {
-                // Todo: this looks suspicious. Why cast to int individually rather than use long arithmetics?
-                length = metaDataBit | toIntU30((int) position1 - (int) position - 4, "Document length %,d out of 30-bit int range.");
-            } else {
-                length = metaDataBit | toIntU30(position1 - position - 4L, "Document length %,d out of 30-bit int range.");
-            }
-            if (wireOut.usePadding())
-                bytes.testAndSetInt(position, len0, length | (notComplete ? Wires.NOT_COMPLETE : 0));
-            else
-                bytes.writeInt(position, length | (notComplete ? Wires.NOT_COMPLETE : 0));
-
-        } finally {
-            assert wireOut.endUse();
+        int length;
+        if (bytes instanceof HexDumpBytes) {
+            // Todo: this looks suspicious. Why cast to int individually rather than use long arithmetics?
+            length = metaDataBit | toIntU30((int) position1 - (int) position - 4, "Document length %,d out of 30-bit int range.");
+        } else {
+            length = metaDataBit | toIntU30(position1 - position - 4L, "Document length %,d out of 30-bit int range.");
         }
+        if (wireOut.usePadding())
+            bytes.testAndSetInt(position, len0, length | (notComplete ? Wires.NOT_COMPLETE : 0));
+        else
+            bytes.writeInt(position, length | (notComplete ? Wires.NOT_COMPLETE : 0));
 
         return position;
     }

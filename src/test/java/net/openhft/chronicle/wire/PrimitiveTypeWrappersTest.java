@@ -124,7 +124,7 @@ public class PrimitiveTypeWrappersTest extends WireTestCommon {
     private Wire wireFactory() {
         @NotNull final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         @NotNull Wire wire = (isTextWire) ? WireType.TEXT.apply(bytes) : new BinaryWire(bytes);
-        assert wire.startUse();
+
         return wire;
     }
 }
