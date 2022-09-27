@@ -124,8 +124,8 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         start = -1;
         if (readLimit0 > 0 && wire0 != null) {
             @NotNull final Bytes<?> bytes = wire0.bytes();
-            if (bytes.readPosition() < readPosition0)
-                Jvm.warn().on(getClass(), "The readPosition was invalid " + bytes.readPosition() + " < " + readPosition0);
+            if (bytes.readPosition() < lastStart)
+                Jvm.warn().on(getClass(), "The readPosition was invalid " + bytes.readPosition() + " < " + lastStart);
             if (bytes.readLimit() > readLimit0)
                 Jvm.warn().on(getClass(), "The readLimit was invalid " + bytes.readLimit() + " < " + readLimit0);
             bytes.readLimit(readLimit0);
