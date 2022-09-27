@@ -18,7 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesComment;
+import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
@@ -259,15 +259,15 @@ public class WireMarshaller<T> {
     }
 
     public void writeMarshallable(T t, @NotNull WireOut out) {
-        BytesComment bytes = out.bytesComment();
-        bytes.indent(+1);
+        HexDumpBytesDescription bytes = out.bytesComment();
+        bytes.adjustHexDumpIndentation(+1);
         try {
             for (@NotNull FieldAccess field : fields)
                 field.write(t, out);
         } catch (IllegalAccessException e) {
             throw new AssertionError(e);
         }
-        bytes.indent(-1);
+        bytes.adjustHexDumpIndentation(-1);
     }
 
     public void writeMarshallable(T t, Bytes<?> bytes) {

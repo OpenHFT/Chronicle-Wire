@@ -123,14 +123,4 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
             }
         };
     }
-
-    @Deprecated(/* To be removed in x.24 */)
-    enum NoOp implements Consumer<Object[]>, IgnoresEverything {
-        INSTANCE;
-
-        @Override
-        public void accept(Object[] objects) {
-            // Do nothing
-        }
-    }
 }

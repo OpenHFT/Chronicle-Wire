@@ -134,7 +134,6 @@ public class BinaryWireTest extends WireTestCommon {
         bytes.clear();
         @NotNull BinaryWire wire = new BinaryWire(bytes, fixed, numericField, fieldLess, compressedSize, "lzw", false);
         wire.usePadding(true);
-        assert wire.startUse();
         return wire;
     }
 

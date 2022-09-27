@@ -121,14 +121,6 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         return this;
     }
 
-    @Deprecated(/* Replaced by UpdateInterceptor. To be removed in x.24 */)
-    @NotNull
-    public MethodWriterBuilder<T> methodWriterInterceptorReturns(MethodWriterInterceptorReturns methodWriterInterceptor) {
-        Jvm.warn().on(getClass(), "Support for methodWriterInterceptorReturns will be dropped in x.24. Use UpdateInterceptor instead");
-        handlerSupplier.methodWriterInterceptorReturns(methodWriterInterceptor);
-        return this;
-    }
-
     @NotNull
     public MethodWriterBuilder<T> disableThreadSafe(boolean theadSafe) {
         handlerSupplier.disableThreadSafe(theadSafe);
@@ -191,7 +183,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                     Jvm.debug().on(getClass(), e);
             }
         }
-        if (!disableProxyGen && handlerSupplier.methodWriterInterceptorReturns() == null) {
+        if (!disableProxyGen) {
             T t = createInstance();
             if (t != null)
                 return t;

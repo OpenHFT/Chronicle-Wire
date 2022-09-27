@@ -98,7 +98,7 @@ public class GenericPassTest {
         final DocumentContextBroker dcb = wire1.methodWriter(DocumentContextBroker.class);
         try (DocumentContext dc = dcb.via("pass")) {
             dc.wire().bytes()
-                    .comment("opaque message")
+                    .writeHexDumpDescription("opaque message")
                     .writeUnsignedByte(0x82);
         }
         assertEquals("" +

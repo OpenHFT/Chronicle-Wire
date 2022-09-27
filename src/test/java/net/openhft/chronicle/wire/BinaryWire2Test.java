@@ -64,7 +64,6 @@ public class BinaryWire2Test extends WireTestCommon {
         bytes.clear();
         @NotNull BinaryWire wire = new BinaryWire(bytes, false, false, false, 32, "lzw", false);
         wire.usePadding(usePadding);
-        assert wire.startUse();
         return wire;
     }
 
@@ -584,7 +583,7 @@ public class BinaryWire2Test extends WireTestCommon {
     public void testCompression(String comp) {
         bytes.clear();
         @NotNull Wire wire = new BinaryWire(bytes, false, false, false, 32, comp, false);
-        assert wire.startUse();
+
         @NotNull String str = "xxxxxxxxxxxxxxxx2xxxxxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyyyyyyyy2yyyyyyyyyyyyyyyyy";
         BytesStore bytes = Bytes.from(str);
 

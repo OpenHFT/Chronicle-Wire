@@ -46,7 +46,6 @@ public class WireResourcesTest extends WireTestCommon {
 
         Wire wire = WireType.TEXT.apply(mb);
 
-        assert wire.startUse();
         wire.headerNumber(0);
 
         assertEquals(1, mb.mappedFile().refCount());
@@ -54,7 +53,6 @@ public class WireResourcesTest extends WireTestCommon {
         assertEquals(1, mb.mappedFile().refCount());
 
         wire.updateFirstHeader();
-        assert wire.endUse();
 
         assertEquals(1, mb.mappedFile().refCount());
         assertEquals(1, mb.refCount());
@@ -87,11 +85,9 @@ public class WireResourcesTest extends WireTestCommon {
 
         assertEquals(1, wire.bytes().refCount());
 
-        assert wire.startUse();
         wire.headerNumber(1);
         wire.writeFirstHeader();
         wire.updateFirstHeader();
-        assert wire.endUse();
 
         wire.bytes().releaseLast(test);
         BackgroundResourceReleaser.releasePendingResources();
@@ -111,7 +107,6 @@ public class WireResourcesTest extends WireTestCommon {
         assertEquals(1, t.refCount()); // not really using it yet
         assertEquals(1, t.mappedFile().refCount());
 
-        assert wire.startUse();
         wire.headerNumber(1);
         assertEquals(1, t.refCount());
         assertEquals(1, t.mappedFile().refCount()); // not really using it yet
@@ -126,7 +121,6 @@ public class WireResourcesTest extends WireTestCommon {
 
         wire.bytes().writeSkip(128000);
         wire.updateFirstHeader();
-        assert wire.endUse();
 
         writeMessage(wire);
 

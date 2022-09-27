@@ -16,7 +16,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesComment;
+import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.bytes.util.BinaryLengthLength;
@@ -201,14 +201,14 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     @Override
     public void writeMarshallable(@NotNull BytesOut<?> b) {
         BytesOut<?> bytes = b;
-        bytes.comment("sources")
+        bytes.writeHexDumpDescription("sources")
                 .writeUnsignedByte(sources);
         for (int i = 0; i < sources; i++)
             bytes.writeInt(sourceIdArray[i]);
         for (int i = 0; i < sources; i++)
             bytes.writeLong(sourceIndexArray[i]);
 
-        bytes.comment("timings")
+        bytes.writeHexDumpDescription("timings")
                 .writeUnsignedByte(timings + 1);// one more time for this output
         for (int i = 0; i < timings; i++) {
             bytes.writeLong(timingsArray[i]);
@@ -222,21 +222,21 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     }
 
     private void acceptSources(VanillaMessageHistory t, ValueOut out) {
-        BytesComment<?> b = bytesComment(out);
+        HexDumpBytesDescription<?> b = bytesComment(out);
 
         for (int i = 0; i < t.sources; i++) {
             if (b != null)
-                b.comment("source id & index");
+                b.writeHexDumpDescription("source id & index");
             out.uint32(t.sourceIdArray[i]);
             out.int64_0x(t.sourceIndexArray[i]);
         }
     }
 
     private void acceptTimings(VanillaMessageHistory t, ValueOut out) {
-        BytesComment<?> b = bytesComment(out);
+        HexDumpBytesDescription<?> b = bytesComment(out);
         for (int i = 0; i < t.timings; i++) {
             if (b != null)
-                b.comment("timing in nanos");
+                b.writeHexDumpDescription("timing in nanos");
             out.int64(t.timingsArray[i]);
         }
         if (!(out.wireOut() instanceof HashWire))
@@ -244,12 +244,12 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     }
 
     @Nullable
-    private BytesComment<?> bytesComment(ValueOut out) {
+    private HexDumpBytesDescription<?> bytesComment(ValueOut out) {
         final WireOut wireOut = out.wireOut();
-        BytesComment<?> b = null;
+        HexDumpBytesDescription<?> b = null;
         if (!(wireOut instanceof HashWire)) {
             b = wireOut.bytes();
-            if (!b.retainsComments())
+            if (!b.retainedHexDumpDescription())
                 b = null;
         }
         return b;

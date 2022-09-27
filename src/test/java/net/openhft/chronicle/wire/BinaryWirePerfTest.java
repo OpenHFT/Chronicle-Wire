@@ -66,7 +66,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
         @NotNull Wire wire = testId == -1
                 ? new RawWire(bytes)
                 : new BinaryWire(bytes, fixed, numericField, fieldLess, Integer.MAX_VALUE, "lzw", false);
-        assert wire.startUse();
+
         return wire;
     }
 
@@ -103,8 +103,8 @@ public class BinaryWirePerfTest extends WireTestCommon {
 
             b.readMarshallable(wire);
         }
-        long rate = (System.nanoTime() - start) / runs;
-        assert wire.startUse();
+        //long rate = (System.nanoTime() - start) / runs;
+
        // System.out.printf("(vars) %,d : %,d ns avg, len= %,d%n", t, rate, wire.bytes().readPosition());
     }
 

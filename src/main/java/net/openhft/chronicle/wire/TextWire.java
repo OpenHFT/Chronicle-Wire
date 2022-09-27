@@ -109,7 +109,6 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     public static String asText(@NotNull Wire wire) {
-        assert wire.startUse();
         NativeBytes<Void> bytes = nativeBytes();
         try {
             long pos = wire.bytes().readPosition();
@@ -119,7 +118,6 @@ public class TextWire extends YamlWireOut<TextWire> {
             return tw.toString();
         } finally {
             bytes.releaseLast();
-            assert wire.endUse();
         }
     }
 
@@ -529,15 +527,8 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     @NotNull
-    @Deprecated(/* To be removed in 2.24 - use strictEndOfTextEscaping */)
-    protected TextStopCharsTesters strictEndOfText() {
-        return TextStopCharsTesters.STRICT_END_OF_TEXT;
-    }
-
-    @NotNull
     protected Supplier<StopCharsTester> strictEndOfTextEscaping() {
-        return strictEndOfText() == TextStopCharsTesters.STRICT_END_OF_TEXT ?
-                STRICT_END_OF_TEXT_ESCAPING : strictEndOfText()::escaping;
+        return STRICT_END_OF_TEXT_ESCAPING;
     }
 
     @NotNull

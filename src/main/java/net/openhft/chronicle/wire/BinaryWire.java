@@ -252,8 +252,8 @@ public class BinaryWire extends AbstractWire implements Wire {
     public void copyTo(@NotNull WireOut wire) {
         if (wire.getClass() == getClass()) {
             final Bytes<?> bytes2 = wire.bytes();
-            if (bytes2.retainsComments())
-                bytes2.comment("passed-through");
+            if (bytes2.retainedHexDumpDescription())
+                bytes2.writeHexDumpDescription("passed-through");
             bytes2.write(this.bytes);
             this.bytes.readPosition(this.bytes.readLimit());
             return;
@@ -1124,8 +1124,8 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public ValueOut writeEventName(@NotNull CharSequence name) {
-        if (bytes.retainsComments())
-            bytes.comment(name + ": (event)");
+        if (bytes.retainedHexDumpDescription())
+            bytes.writeHexDumpDescription(name + ": (event)");
         writeCode(EVENT_NAME).write8bit(name);
         return valueOut;
     }
@@ -1138,8 +1138,8 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     @Override
     public ValueOut writeEventId(String name, int methodId) {
-        if (bytes.retainsComments())
-            bytes.comment(name + " (" + methodId + ")");
+        if (bytes.retainedHexDumpDescription())
+            bytes.writeHexDumpDescription(name + " (" + methodId + ")");
         writeCode(FIELD_NUMBER).writeStopBit(methodId);
         return valueOut;
     }
@@ -1210,8 +1210,8 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     private void writeField(@NotNull CharSequence name) {
-        if (bytes.retainsComments())
-            bytes.comment(name + ":");
+        if (bytes.retainedHexDumpDescription())
+            bytes.writeHexDumpDescription(name + ":");
         int len = name.length();
         if (len < 0x20) {
             writeField0(name, len);
@@ -1234,8 +1234,8 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     private void writeField(int code) {
-        if (bytes.retainsComments())
-            bytes.comment(Integer.toString(code));
+        if (bytes.retainedHexDumpDescription())
+            bytes.writeHexDumpDescription(Integer.toString(code));
         writeCode(FIELD_NUMBER);
         bytes.writeStopBit(code);
     }
@@ -1406,8 +1406,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut nu11() {
-            if (bytes.retainsComments())
-                bytes.comment("null");
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription("null");
             writeCode(NULL);
             return BinaryWire.this;
         }
@@ -1419,8 +1419,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                 nu11();
 
             } else {
-                if (bytes.retainsComments())
-                    bytes.comment(s);
+                if (bytes.retainedHexDumpDescription())
+                    bytes.writeHexDumpDescription(s);
                 long utflen = AppendableUtil.findUtf8Length(s);
                 if (utflen < 0x20) {
                     bytes.writeUnsignedByte((int) (STRING_0 + utflen)).appendUtf8(s);
@@ -1440,8 +1440,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                 writeCode(NULL);
 
             } else {
-                if (bytes.retainsComments())
-                    bytes.comment(s);
+                if (bytes.retainedHexDumpDescription())
+                    bytes.writeHexDumpDescription(s);
                 int len = s.length();
                 if (len < 0x20)
                     len = (int) AppendableUtil.findUtf8Length(s);
@@ -1584,8 +1584,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         @NotNull
         public WireOut fixedInt8(byte i8) {
-            if (bytes.retainsComments())
-                bytes.comment(Integer.toString(i8));
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(Integer.toString(i8));
             writeCode(INT8).writeByte(i8);
             return BinaryWire.this;
         }
@@ -1593,8 +1593,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut uint8checked(int u8) {
-            if (bytes.retainsComments())
-                bytes.comment(Integer.toString(u8));
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(Integer.toString(u8));
             writeCode(UINT8).writeUnsignedByte(u8);
             return BinaryWire.this;
         }
@@ -1608,8 +1608,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         @NotNull
         public WireOut fixedInt16(short i16) {
-            if (bytes.retainsComments())
-                bytes.comment(Integer.toString(i16));
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(Integer.toString(i16));
             writeCode(INT16).writeShort(i16);
             return BinaryWire.this;
         }
@@ -1617,8 +1617,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut uint16checked(int u16) {
-            if (bytes.retainsComments())
-                bytes.comment(Integer.toString(u16));
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(Integer.toString(u16));
             writeCode(UINT16).writeUnsignedShort(u16);
             return BinaryWire.this;
         }
@@ -1626,8 +1626,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut utf8(int codepoint) {
-            if (bytes.retainsComments())
-                bytes.comment(new String(Character.toChars(codepoint)));
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(new String(Character.toChars(codepoint)));
             writeCode(UINT16);
             bytes.appendUtf8(codepoint);
             return BinaryWire.this;
@@ -1642,16 +1642,16 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         @NotNull
         public WireOut fixedInt32(int i32) {
-            if (bytes.retainsComments())
-                bytes.comment(Integer.toString(i32));
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(Integer.toString(i32));
             writeCode(INT32).writeInt(i32);
             return BinaryWire.this;
         }
 
         @NotNull
         public WireOut fixedOrderedInt32(int i32) {
-            if (bytes.retainsComments())
-                bytes.comment(Integer.toString(i32));
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(Integer.toString(i32));
             writeCode(INT32).writeOrderedInt(i32);
             return BinaryWire.this;
         }
@@ -1659,8 +1659,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut uint32checked(long u32) {
-            if (bytes.retainsComments())
-                bytes.comment(Long.toUnsignedString(u32));
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(Long.toUnsignedString(u32));
             writeCode(UINT32).writeUnsignedInt(u32);
             return BinaryWire.this;
         }
@@ -1674,8 +1674,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         @NotNull
         public WireOut fixedInt64(long i64) {
-            if (bytes.retainsComments())
-                bytes.comment(Long.toString(i64));
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(Long.toString(i64));
             writeCode(INT64).writeLong(i64);
             return BinaryWire.this;
         }
@@ -1689,8 +1689,8 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         private WireOut fixedOrderedInt64(long i64) {
-            if (bytes.retainsComments())
-                bytes.comment(Long.toString(i64));
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(Long.toString(i64));
             writeAlignTo(8, 1);
             writeCode(INT64).writeOrderedLong(i64);
             return BinaryWire.this;
@@ -1699,8 +1699,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut int64array(long capacity) {
-            if (bytes.retainsComments())
-                bytes.comment(Long.toString(capacity));
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(Long.toString(capacity));
             writeAlignTo(8, 1);
             writeCode(I64_ARRAY);
             BinaryLongArrayReference.lazyWrite(bytes, capacity);
@@ -1739,8 +1739,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         @NotNull
         public WireOut fixedFloat32(float f) {
-            if (bytes.retainsComments())
-                bytes.comment(Float.toString(f));
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(Float.toString(f));
             writeCode(FLOAT32).writeFloat(f);
             return BinaryWire.this;
         }
@@ -1754,8 +1754,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         @NotNull
         public WireOut fixedFloat64(double d) {
-            if (bytes.retainsComments())
-                bytes.comment(Double.toString(d));
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(Double.toString(d));
             writeCode(FLOAT64).writeDouble(d);
             return BinaryWire.this;
         }
@@ -1764,8 +1764,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public WireOut time(@NotNull LocalTime localTime) {
             final String text = localTime.toString();
-            if (bytes.retainsComments())
-                bytes.comment(text);
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(text);
             writeCode(TIME).writeUtf8(text);
             return BinaryWire.this;
         }
@@ -1774,8 +1774,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public WireOut zonedDateTime(@NotNull ZonedDateTime zonedDateTime) {
             final String text = zonedDateTime.toString();
-            if (bytes.retainsComments())
-                bytes.comment(text);
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(text);
             writeCode(ZONED_DATE_TIME).writeUtf8(text);
             return BinaryWire.this;
         }
@@ -1784,8 +1784,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public WireOut date(@NotNull LocalDate localDate) {
             final String text = localDate.toString();
-            if (bytes.retainsComments())
-                bytes.comment(text);
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(text);
             writeCode(DATE).writeUtf8(text);
             return BinaryWire.this;
         }
@@ -1794,8 +1794,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public WireOut dateTime(@NotNull LocalDateTime localDateTime) {
             final String text = localDateTime.toString();
-            if (bytes.retainsComments())
-                bytes.comment(text);
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(text);
             writeCode(DATE_TIME).writeUtf8(text);
             return BinaryWire.this;
         }
@@ -1803,8 +1803,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public ValueOut typePrefix(CharSequence typeName) {
-            if (bytes.retainsComments())
-                bytes.comment(typeName);
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(typeName);
             if (typeName != null)
                 writeCode(TYPE_PREFIX).writeUtf8(typeName);
             return this;
@@ -1818,8 +1818,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut typeLiteral(CharSequence typeName) {
-            if (bytes.retainsComments())
-                bytes.comment(typeName);
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(typeName);
             if (typeName == null)
                 nu11();
             else
@@ -1830,8 +1830,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut typeLiteral(@Nullable Class type) {
-            if (bytes.retainsComments() && type != null)
-                bytes.comment(type.getName());
+            if (bytes.retainedHexDumpDescription() && type != null)
+                bytes.writeHexDumpDescription(type.getName());
             if (type == null)
                 nu11();
             else
@@ -1842,8 +1842,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class type) {
-            if (bytes.retainsComments())
-                bytes.comment(type == null ? null : type.getName());
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(type == null ? null : type.getName());
             writeCode(TYPE_LITERAL);
             typeTranslator.accept(type, bytes);
             return BinaryWire.this;
@@ -1852,8 +1852,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut uuid(@NotNull UUID uuid) {
-            if (bytes.retainsComments())
-                bytes.comment(uuid.toString());
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(uuid.toString());
             writeCode(UUID).writeLong(uuid.getMostSignificantBits()).writeLong(uuid.getLeastSignificantBits());
             return BinaryWire.this;
         }
@@ -1861,8 +1861,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut int32forBinding(int value) {
-            if (bytes.retainsComments())
-                bytes.comment("int32 for binding");
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription("int32 for binding");
             writeAlignTo(Integer.BYTES, 1);
             fixedInt32(value);
             return BinaryWire.this;
@@ -1871,8 +1871,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut int64forBinding(long value) {
-            if (bytes.retainsComments())
-                bytes.comment("int64 for binding");
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription("int64 for binding");
             writeAlignTo(Long.BYTES, 1);
             fixedOrderedInt64(value);
             return BinaryWire.this;
@@ -1881,8 +1881,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut int32forBinding(int value, @NotNull IntValue intValue) {
-            if (bytes.retainsComments())
-                bytes.comment("int32 for binding");
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription("int32 for binding");
             int32forBinding(value);
             ((BinaryIntReference) intValue).bytesStore(bytes, bytes.writePosition() - 4, 4);
             return BinaryWire.this;
@@ -1891,8 +1891,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut int64forBinding(long value, @NotNull LongValue longValue) {
-            if (bytes.retainsComments())
-                bytes.comment("int64 for binding");
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription("int64 for binding");
             int64forBinding(value);
             ((BinaryLongReference) longValue).bytesStore(bytes, bytes.writePosition() - 8, 8);
             return BinaryWire.this;
@@ -1918,8 +1918,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public <T> WireOut sequence(T t, @NotNull BiConsumer<T, ValueOut> writer) {
-            if (bytes.retainsComments())
-                bytes.comment("sequence");
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription("sequence");
             writeCode(BYTES_LENGTH32);
             long position = bytes.writePosition();
             bytes.writeInt(0);
@@ -1941,8 +1941,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public <T, K> WireOut sequence(T t, K kls, @NotNull TriConsumer<T, K, ValueOut> writer) {
-            if (bytes.retainsComments())
-                bytes.comment("sequence");
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription("sequence");
             writeCode(BYTES_LENGTH32);
             long position = bytes.writePosition();
             bytes.writeInt(0);
@@ -1956,8 +1956,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut marshallable(@NotNull WriteMarshallable object) {
-            if (bytes.retainsComments())
-                bytes.comment(object.getClass().getSimpleName());
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(object.getClass().getSimpleName());
             final BinaryLengthLength binaryLengthLength = object.binaryLengthLength();
             long pos = binaryLengthLength.initialise(bytes);
 
@@ -1972,8 +1972,8 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @Override
         public WireOut bytesMarshallable(WriteBytesMarshallable object) {
-            if (bytes.retainsComments())
-                bytes.comment(object.getClass().getSimpleName());
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(object.getClass().getSimpleName());
             writeCode(BYTES_LENGTH32);
             long position = bytes.writePosition();
             bytes.writeInt(0);
@@ -1990,8 +1990,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut marshallable(@NotNull Serializable object) {
-            if (bytes.retainsComments())
-                bytes.comment(object.getClass().getSimpleName());
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(object.getClass().getSimpleName());
             writeCode(BYTES_LENGTH32);
             long position = bytes.writePosition();
             bytes.writeInt(0);
@@ -2036,15 +2036,15 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @Override
         public WireOut writeInt(IntConverter intConverter, int i) {
-            if (bytes.retainsComments())
-                bytes.comment(intConverter.asString(i));
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(intConverter.asString(i));
             return writeInt(i);
         }
 
         @Override
         public WireOut writeLong(LongConverter longConverter, long l) {
-            if (bytes.retainsComments())
-                bytes.comment(longConverter.asString(l));
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(longConverter.asString(l));
             return writeLong(l);
         }
 
@@ -2294,20 +2294,20 @@ public class BinaryWire extends AbstractWire implements Wire {
         private boolean writeAsFixedPoint(float l, long l6) {
             long i2 = l6 / 10000;
             if (i2 / 1e2f == l) {
-                if (bytes.retainsComments()) bytes.comment(i2 + "/1e2");
+                if (bytes.retainedHexDumpDescription()) bytes.writeHexDumpDescription(i2 + "/1e2");
                 writeCode(FLOAT_STOP_2).writeStopBit(i2);
                 return true;
             }
 
             long i4 = l6 / 100;
             if (i4 / 1e4f == l) {
-                if (bytes.retainsComments()) bytes.comment(i4 + "/1e4");
+                if (bytes.retainedHexDumpDescription()) bytes.writeHexDumpDescription(i4 + "/1e4");
                 writeCode(FLOAT_STOP_4).writeStopBit(i4);
                 return true;
             }
 
             if (l6 / 1e6f == l) {
-                if (bytes.retainsComments()) bytes.comment(l6 + "/1e6");
+                if (bytes.retainedHexDumpDescription()) bytes.writeHexDumpDescription(l6 + "/1e6");
                 writeCode(FLOAT_STOP_6).writeStopBit(l6);
                 return true;
             }
@@ -2317,20 +2317,20 @@ public class BinaryWire extends AbstractWire implements Wire {
         private boolean writeAsFixedPoint(double l, long l6) {
             long i2 = l6 / 10000;
             if (i2 / 1e2 == l) {
-                if (bytes.retainsComments()) bytes.comment(i2 + "/1e2");
+                if (bytes.retainedHexDumpDescription()) bytes.writeHexDumpDescription(i2 + "/1e2");
                 writeCode(FLOAT_STOP_2).writeStopBit(i2);
                 return true;
             }
 
             long i4 = l6 / 100;
             if (i4 / 1e4 == l) {
-                if (bytes.retainsComments()) bytes.comment(i4 + "/1e4");
+                if (bytes.retainedHexDumpDescription()) bytes.writeHexDumpDescription(i4 + "/1e4");
                 writeCode(FLOAT_STOP_4).writeStopBit(i4);
                 return true;
             }
 
             if (l6 / 1e6 == l) {
-                if (bytes.retainsComments()) bytes.comment(l6 + "/1e6");
+                if (bytes.retainedHexDumpDescription()) bytes.writeHexDumpDescription(l6 + "/1e6");
                 writeCode(FLOAT_STOP_6).writeStopBit(l6);
                 return true;
             }

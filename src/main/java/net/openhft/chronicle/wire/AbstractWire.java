@@ -18,7 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesComment;
+import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
@@ -161,7 +161,7 @@ public abstract class AbstractWire implements Wire {
     }
 
     @Override
-    public BytesComment<?> bytesComment() {
+    public HexDumpBytesDescription<?> bytesComment() {
         return bytes;
     }
 
@@ -499,16 +499,6 @@ public abstract class AbstractWire implements Wire {
     @Override
     public void parent(Object parent) {
         this.parent = parent;
-    }
-
-    @Override
-    public boolean startUse() {
-        return true;
-    }
-
-    @Override
-    public boolean endUse() {
-        return true;
     }
 
     @Override

@@ -38,7 +38,6 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
     };
     protected boolean recordHistory;
     protected String genericEvent = "";
-    private MethodWriterInterceptorReturns methodWriterInterceptorReturns;
     private BiConsumer<Method, Object[]> handleInvoke;
     private boolean useMethodIds;
 
@@ -49,14 +48,8 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
 
     @Override
     protected Object doInvoke(Object proxy, Method method, Object[] args) {
+        handleInvoke(method, args);
 
-        if (methodWriterInterceptorReturns != null) {
-            this.proxy.set(proxy);
-            // TODO: ignores retval
-            methodWriterInterceptorReturns.intercept(method, args, onMethod);
-        } else {
-            handleInvoke(method, args);
-        }
         return method.getReturnType().isInterface() ? proxy : null;
     }
 
@@ -115,11 +108,6 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
     @Override
     public void recordHistory(boolean recordHistory) {
         this.recordHistory = recordHistory;
-    }
-
-    @Override
-    public void methodWriterInterceptorReturns(MethodWriterInterceptorReturns methodWriterInterceptorReturns) {
-        this.methodWriterInterceptorReturns = methodWriterInterceptorReturns;
     }
 
     @Override

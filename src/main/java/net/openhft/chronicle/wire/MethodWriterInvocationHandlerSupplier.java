@@ -26,7 +26,6 @@ import java.util.function.Supplier;
 public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWriterInvocationHandler> {
     private final Supplier<MethodWriterInvocationHandler> supplier;
     private boolean recordHistory;
-    private MethodWriterInterceptorReturns methodWriterInterceptorReturns;
     private Closeable closeable;
     private boolean disableThreadSafe;
     private String genericEvent;
@@ -40,17 +39,6 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
 
     public void recordHistory(boolean recordHistory) {
         this.recordHistory = recordHistory;
-    }
-
-    @Deprecated(/* to be removed in x.24 */)
-    public MethodWriterInvocationHandlerSupplier methodWriterInterceptorReturns(MethodWriterInterceptorReturns methodWriterInterceptorReturns) {
-        this.methodWriterInterceptorReturns = methodWriterInterceptorReturns;
-        return this;
-    }
-
-    @Deprecated(/* to be removed in x.24 */)
-    public MethodWriterInterceptorReturns methodWriterInterceptorReturns() {
-        return methodWriterInterceptorReturns;
     }
 
     public void onClose(Closeable closeable) {
@@ -72,7 +60,6 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
     private MethodWriterInvocationHandler newHandler() {
         MethodWriterInvocationHandler h = supplier.get();
         h.genericEvent(genericEvent);
-        h.methodWriterInterceptorReturns(methodWriterInterceptorReturns);
         h.onClose(closeable);
         h.recordHistory(recordHistory);
         h.useMethodIds(useMethodIds);
