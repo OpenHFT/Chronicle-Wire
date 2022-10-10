@@ -100,12 +100,12 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     @NotNull
     public static TextWire fromFile(String name) throws IOException {
-        return new TextWire(BytesUtil.readFile(name), true);
+        return new TextWire(BytesUtil.readFile(name), true).useTextDocuments();
     }
 
     @NotNull
     public static TextWire from(@NotNull String text) {
-        return new TextWire(Bytes.from(text));
+        return new TextWire(Bytes.from(text)).useTextDocuments();
     }
 
     public static String asText(@NotNull Wire wire) {

@@ -68,7 +68,9 @@ public class JSONWire extends TextWire {
 
     @NotNull
     public static JSONWire from(@NotNull String text) {
-        return new JSONWire(Bytes.from(text));
+        final JSONWire wire = new JSONWire(Bytes.from(text));
+        wire.useTextDocuments();
+        return wire;
     }
 
     public static String asText(@NotNull Wire wire) {

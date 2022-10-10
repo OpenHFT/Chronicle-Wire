@@ -78,12 +78,12 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
     @NotNull
     public static YamlWire fromFile(String name) throws IOException {
-        return new YamlWire(BytesUtil.readFile(name), true);
+        return new YamlWire(BytesUtil.readFile(name), true).useTextDocuments();
     }
 
     @NotNull
     public static YamlWire from(@NotNull String text) {
-        return new YamlWire(Bytes.from(text));
+        return new YamlWire(Bytes.from(text)).useTextDocuments();
     }
 
     public static String asText(@NotNull Wire wire) {
