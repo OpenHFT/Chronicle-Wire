@@ -191,10 +191,9 @@
                             <goal>enforcer</goal>
                         </goals>
                         <configuration>
-                            <referenceVersion>2.23ea0</referenceVersion>
+                            <referenceVersion>2.24ea0</referenceVersion>
                             <artifactsURI>https://teamcity.chronicle.software/repository/download</artifactsURI>
-                            <!-- to be restored after 2.24 is out -->
-                            <binaryCompatibilityPercentageRequired>90.0</binaryCompatibilityPercentageRequired>
+                            <binaryCompatibilityPercentageRequired>100</binaryCompatibilityPercentageRequired>
                             <extraOptions>
                                 <extraOption>
                                     <name>skip-internal-packages</name>
