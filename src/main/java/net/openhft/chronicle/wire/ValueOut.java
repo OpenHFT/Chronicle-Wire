@@ -49,8 +49,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
-import static net.openhft.chronicle.wire.SerializationStrategies.ANY_NESTED;
-import static net.openhft.chronicle.wire.SerializationStrategies.ANY_OBJECT;
+import static net.openhft.chronicle.wire.Wires.isScalar;
 
 /**
  * Write out data after writing a field.
@@ -481,14 +480,6 @@ public interface ValueOut {
             // Make sure we close the type scope
             endTypePrefix();
         }
-    }
-
-    default boolean isScalar(Serializable object) {
-        if (object instanceof Comparable) {
-            final SerializationStrategy strategy = Wires.CLASS_STRATEGY.get(object.getClass());
-            return strategy != ANY_OBJECT && strategy != ANY_NESTED;
-        }
-        return false;
     }
 
     @NotNull

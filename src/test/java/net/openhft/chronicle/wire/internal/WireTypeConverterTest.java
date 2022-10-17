@@ -1,6 +1,9 @@
 package net.openhft.chronicle.wire.internal;
+
 import org.junit.Assert;
 import org.junit.Test;
+
+import static junit.framework.TestCase.assertEquals;
 
 public class WireTypeConverterTest {
 
@@ -42,15 +45,42 @@ public class WireTypeConverterTest {
     @Test(expected = ClassCastException.class)
     public void testYamlClassCastException() throws Exception {
         new WireTypeConverter().yamlToJson("!net.openhft.chronicle.wire.internal.MyClass2 {\n" +
-                "  myClass: !net.openhft.chronicle.wire.internal.MyClass2 { }\n" +
+                "  myClass: !net.openhft.chronicle.wire.internal.MyClass2 { x: aa }\n" +
                 "}\n");
+    }
+
+    @Test
+    public void testYamlNoClassCastException() throws Exception {
+        final WireTypeConverter converter = new WireTypeConverter();
+        converter.addAlias(MyClass3.class, "net.openhft.chronicle.wire.internal.MyOldClass");
+        final CharSequence json = converter.yamlToJson("!net.openhft.chronicle.wire.internal.MyClass2 {\n" +
+                "  myClass: !net.openhft.chronicle.wire.internal.MyOldClass { x: abc }\n" +
+                "}\n");
+        assertEquals("" +
+                        "{\"@net.openhft.chronicle.wire.internal.MyClass2\":{\"myClass\":{\"@MyOldClass\":{\"x\":\"abc\"}}}}",
+                json.toString());
     }
 
     @Test(expected = ClassCastException.class)
     public void testJsonClassCastException() throws Exception {
-        new WireTypeConverter().jsonToYaml("\"@net.openhft.chronicle.wire.internal.MyClass2\": {\n" +
-                " myClass: {\"@net.openhft.chronicle.wire.internal.MyClass2\": { } }\n" +
+        new WireTypeConverter().jsonToYaml("{\"@net.openhft.chronicle.wire.internal.MyClass2\": {\n" +
+                " myClass: {\"@net.openhft.chronicle.wire.internal.MyClass2\": { \"x\": \"bb\" } }\n" +
                 "}\n");
     }
 
+    @Test
+    public void testJsonNoClassCastException() throws Exception {
+        final WireTypeConverter converter = new WireTypeConverter();
+        converter.addAlias(MyClass3.class, "MyOldClass");
+        final CharSequence yaml = converter.jsonToYaml("" +
+                "{\"@net.openhft.chronicle.wire.internal.MyClass2\": {\n" +
+                "  myClass: {\"@MyOldClass\": { x: abcd } }\n" +
+                "}\n");
+        assertEquals("" +
+                "!net.openhft.chronicle.wire.internal.MyClass2 {\n" +
+                "  myClass: {\n" +
+                "    x: abcd\n" +
+                "  }\n" +
+                "}\n", yaml.toString());
+    }
 }

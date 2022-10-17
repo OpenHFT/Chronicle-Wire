@@ -710,12 +710,12 @@ public class JSONWire extends TextWire {
 
         @Override
         public <E> @Nullable E object(@Nullable Class<E> clazz) {
-            return useTypes ? parseType(null, clazz) : super.object(clazz);
+            return useTypes ? parseType(null, clazz, true) : super.object(null, clazz, true);
         }
 
         @Override
-        public <E> E object(@Nullable E using, @Nullable Class clazz) {
-            return useTypes ? parseType(using, clazz) : super.object(using, clazz);
+        public <E> E object(@Nullable E using, @Nullable Class clazz, boolean bestEffort) {
+            return useTypes ? parseType(using, clazz, bestEffort) : super.object(using, clazz, bestEffort);
         }
 
 
@@ -760,13 +760,13 @@ public class JSONWire extends TextWire {
                 sb.setLength(0);
                 this.wireIn().read(sb);
                 final Class<?> clazz = classLookup().forName(sb.subSequence(1, sb.length()));
-                return parseType(null, clazz);
+                return parseType(null, clazz, true);
             }
         }
 
-        private <E> E parseType(@Nullable E using, @Nullable Class clazz) {
+        private <E> E parseType(@Nullable E using, @Nullable Class clazz, boolean bestEffort) {
             if (!hasTypeDefinition()) {
-                return super.object(using, clazz);
+                return super.object(using, clazz, bestEffort);
             } else {
                 final StringBuilder sb = acquireStringBuilder();
                 sb.setLength(0);
@@ -776,7 +776,7 @@ public class JSONWire extends TextWire {
                     throw new ClassCastException("Unable to cast " + overrideClass.getName() + " to " + clazz.getName());
                 if (using != null && !overrideClass.isInstance(using))
                     throw new ClassCastException("Unable to reuse a " + using.getClass().getName() + " as a " + overrideClass.getName());
-                final E result = super.object(using, overrideClass);
+                final E result = super.object(using, overrideClass, bestEffort);
 
                 // remove the closing bracket from the type definition
                 consumePadding();

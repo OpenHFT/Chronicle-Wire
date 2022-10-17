@@ -725,7 +725,7 @@ public class WireMarshaller<T> {
                 long pos = read.wireIn().bytes().readPosition();
                 try {
                     setValue(o, read, overwrite);
-                } catch (UnexpectedFieldHandlingException e) {
+                } catch (UnexpectedFieldHandlingException | ClassCastException e) {
                     Jvm.rethrow(e);
                 } catch (Exception e) {
                     read.wireIn().bytes().readPosition(pos);
@@ -840,7 +840,7 @@ public class WireMarshaller<T> {
 
                 Object object = null;
                 try {
-                    object = read.object(using, type);
+                    object = read.object(using, type, false);
                 } catch (Exception e) {
                     // "Unhandled" Abstract classes that are not types should be null (Enums are abstract classes in Java but should not be null here)
                     if (using == null &&
@@ -859,7 +859,7 @@ public class WireMarshaller<T> {
                     ((SingleThreadedChecked) object).singleThreadedCheckReset();
                 field.set(o, object);
 
-            } catch (UnexpectedFieldHandlingException e) {
+            } catch (UnexpectedFieldHandlingException | ClassCastException e) {
                 Jvm.rethrow(e);
             } catch (Exception e) {
                 read.wireIn().bytes().readPosition(pos);

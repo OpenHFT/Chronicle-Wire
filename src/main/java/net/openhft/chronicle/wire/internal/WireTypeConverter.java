@@ -83,4 +83,15 @@ public class WireTypeConverter {
             }
         });
     }
+
+    /**
+     * Explicit support for leniency on different types.
+     *
+     * @param newClass    to use instead
+     * @param oldTypeName to support
+     */
+    public void addAlias(Class newClass, String oldTypeName) {
+        jsonWire.classLookup().addAlias(newClass, oldTypeName);
+        yamlWire.classLookup().addAlias(newClass, oldTypeName);
+    }
 }

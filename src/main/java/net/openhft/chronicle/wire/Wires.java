@@ -588,6 +588,10 @@ public enum Wires {
 
     @Nullable
     public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class clazz) {
+        return object0(in, using, clazz, true);
+    }
+
+    public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class clazz, boolean bestEffort) {
         if (using instanceof AbstractMarshallableCfg)
             ((AbstractMarshallableCfg) using).reset();
 
@@ -603,20 +607,24 @@ public enum Wires {
             if (using == null)
                 using = (E) Bytes.allocateElasticOnHeap(32);
             clazz = Base64.class;
+            bestEffort = true;
         }
         if (clazz2 == null && clazz != null) {
             clazz = ObjectUtils.implementationToUse(clazz);
         }
 
         if (clazz2 != null &&
-                clazz != clazz2 &&
-                (clazz == null
-                        || clazz.isAssignableFrom(clazz2)
-                        || ReadResolvable.class.isAssignableFrom(clazz2)
-                        || !ObjectUtils.isConcreteClass(clazz))) {
-            clazz = clazz2;
-            if (!clazz.isInstance(using))
-                using = null;
+                clazz != clazz2) {
+            if (clazz == null
+                    || clazz.isAssignableFrom(clazz2)
+                    || ReadResolvable.class.isAssignableFrom(clazz2)
+                    || !ObjectUtils.isConcreteClass(clazz)) {
+                clazz = clazz2;
+                if (!clazz.isInstance(using))
+                    using = null;
+            } else if (!bestEffort && !(isScalarClass(clazz) && isScalarClass(clazz2))) {
+                throw new ClassCastException("Unable to read a " + clazz2 + " as a " + clazz);
+            }
         }
         if (clazz == null)
             clazz = Object.class;
@@ -653,6 +661,22 @@ public enum Wires {
             default:
                 throw new AssertionError();
         }
+    }
+
+    static boolean isScalar(Serializable object) {
+        if (object instanceof Comparable) {
+            final SerializationStrategy strategy = Wires.CLASS_STRATEGY.get(object.getClass());
+            return strategy != ANY_OBJECT && strategy != ANY_NESTED;
+        }
+        return false;
+    }
+
+    static boolean isScalarClass(Class type) {
+        if (Comparable.class.isAssignableFrom(type)) {
+            final SerializationStrategy strategy = Wires.CLASS_STRATEGY.get(type);
+            return strategy != ANY_OBJECT && strategy != ANY_NESTED;
+        }
+        return false;
     }
 
     public static boolean dtoInterface(Class clazz) {
