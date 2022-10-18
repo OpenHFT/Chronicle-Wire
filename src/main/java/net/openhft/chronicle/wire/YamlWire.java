@@ -21,25 +21,20 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.ref.*;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.Externalizable;
 import java.io.IOException;
-import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
@@ -47,7 +42,6 @@ import java.util.*;
 import java.util.function.*;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static net.openhft.chronicle.bytes.BytesStore.empty;
 
 /**
  * YAML Based wire format
@@ -1679,6 +1673,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
         @Nullable
         Object objectWithInferredType0(Object using, @NotNull SerializationStrategy strategy, Class type) {
+            boolean bestEffort = type != null;
             if (yt.current() == YamlToken.TAG) {
                 Class aClass = typePrefix();
                 if (type == null || type == Object.class || type.isInterface())
@@ -1693,7 +1688,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                         if (type == Object.class || Map.class.isAssignableFrom(type) || using instanceof Map)
                             return map(Object.class, Object.class, (Map) using);
                     }
-                    return valueIn.object(using, type);
+                    return valueIn.object(using, type, bestEffort);
 
                 case SEQUENCE_START:
                     return readSequence(type);

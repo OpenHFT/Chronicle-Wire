@@ -530,7 +530,11 @@ public interface ValueIn {
 
     @Nullable
     default <E> E object(@Nullable E using, @Nullable Class clazz) {
-        return Wires.object0(this, using, clazz);
+        return object(using, clazz, true);
+    }
+
+    default <E> E object(@Nullable E using, @Nullable Class clazz, boolean bestEffort) {
+        return Wires.object0(this, using, clazz, bestEffort);
     }
 
     @NotNull
