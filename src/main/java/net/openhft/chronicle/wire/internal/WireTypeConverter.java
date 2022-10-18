@@ -5,6 +5,7 @@ import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
+
 public class WireTypeConverter {
     private final Bytes bytes = Bytes.allocateElasticOnHeap();
     private final Wire yamlWire = WireType.YAML_ONLY.apply(bytes);
@@ -12,10 +13,11 @@ public class WireTypeConverter {
 
     private Exception e;
 
-    {
+    public WireTypeConverter() {
         replaceClassLookup(jsonWire);
         replaceClassLookup(yamlWire);
     }
+
     public CharSequence jsonToYaml(CharSequence json) throws Exception {
         e = null;
         jsonWire.reset();
@@ -32,6 +34,7 @@ public class WireTypeConverter {
 
         return yamlWire.bytes();
     }
+
     public CharSequence yamlToJson(CharSequence yaml) throws Exception {
         e = null;
         yamlWire.reset();
