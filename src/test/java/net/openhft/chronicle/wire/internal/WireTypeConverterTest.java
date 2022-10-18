@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire.internal;
 
+import net.openhft.chronicle.wire.WireTypeConverter;
 import org.junit.Assert;
 import org.junit.Test;
 
