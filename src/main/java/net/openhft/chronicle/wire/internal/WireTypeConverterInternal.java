@@ -6,14 +6,14 @@ import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 
-public class WireTypeConverter {
+public class WireTypeConverterInternal {
     private final Bytes bytes = Bytes.allocateElasticOnHeap();
     private final Wire yamlWire = WireType.YAML_ONLY.apply(bytes);
     private final Wire jsonWire = WireType.JSON_ONLY.apply(bytes);
 
     private Exception e;
 
-    public WireTypeConverter() {
+    public WireTypeConverterInternal() {
         replaceClassLookup(jsonWire);
         replaceClassLookup(yamlWire);
     }
@@ -60,7 +60,7 @@ public class WireTypeConverter {
                 try {
                     return delegate.forName(name);
                 } catch (Exception e) {
-                    WireTypeConverter.this.e = e;
+                    WireTypeConverterInternal.this.e = e;
                     throw e;
                 }
             }
@@ -70,7 +70,7 @@ public class WireTypeConverter {
                 try {
                     return delegate.nameFor(clazz);
                 } catch (Exception e) {
-                    WireTypeConverter.this.e = e;
+                    WireTypeConverterInternal.this.e = e;
                     throw e;
                 }
             }

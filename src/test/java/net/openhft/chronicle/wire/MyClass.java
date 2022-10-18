@@ -1,4 +1,4 @@
-package net.openhft.chronicle.wire.internal;
+package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
