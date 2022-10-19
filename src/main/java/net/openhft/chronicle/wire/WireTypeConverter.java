@@ -10,7 +10,7 @@ public class WireTypeConverter {
     }
 
     public CharSequence yamlToJson(CharSequence yaml) throws Exception {
-        return delegate.jsonToYaml(yaml);
+        return delegate.yamlToJson(yaml);
     }
 
     public void addAlias(Class newClass, String oldTypeName) {
