@@ -7,7 +7,9 @@ import static junit.framework.TestCase.assertEquals;
 
 public class WireTypeConverterTest {
 
+
     private final String json = "{\"@net.openhft.chronicle.wire.MyClass\":{\"msg\":\"msg:\\\"hello\\\"\"}}";
+
     private final String yaml = "!net.openhft.chronicle.wire.MyClass {\n" +
             "  msg: \"msg:\\\"hello\\\"\"\n" +
             "}\n";
@@ -57,6 +59,7 @@ public class WireTypeConverterTest {
                 "  myClass: !net.openhft.chronicle.wire.MyOldClass { x: abc }\n" +
                 "}\n");
         assertEquals("{\"@net.openhft.chronicle.wire.MyClass2\":{\"myClass\":{\"@MyOldClass\":{\"x\":\"abc\"}}}}",
+
                 json.toString());
     }
 
