@@ -37,6 +37,10 @@ import java.util.concurrent.TimeUnit;
 
 
 public class ChronicleGatewayMain extends ChronicleContext implements Closeable {
+    public static final int PORT = Integer.getInteger("port", 1248);
+    private static final PauserMode PAUSER_MODE = PauserMode.valueOf(
+            System.getProperty("pauserMode", PauserMode.balanced.name()));
+    private static final boolean USE_AFFINITY = Jvm.getBoolean("useAffinity");
     transient ServerSocketChannel ssc;
     transient Thread thread;
     @Comment("PauserMode to use in buffered channels")
@@ -56,11 +60,12 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
     }
 
     public static void main(String... args) throws IOException {
-        ChronicleGatewayMain chronicleGatewayMain = new ChronicleGatewayMain("tcp://localhost:" + Integer.getInteger("port", 1248))
-                .pauserMode(PauserMode.valueOf(System.getProperty("pauserMode", PauserMode.balanced.name())))
-                .buffered(Jvm.getBoolean("buffered"));
-        chronicleGatewayMain.useAffinity(Jvm.getBoolean("useAffinity"));
-        chronicleGatewayMain.pauserMode = PauserMode.valueOf(System.getProperty("pauserMode", PauserMode.balanced.name()));
+        ChronicleGatewayMain chronicleGatewayMain =
+                new ChronicleGatewayMain("tcp://localhost:" + PORT)
+                        .pauserMode(PAUSER_MODE)
+                        .buffered(Jvm.getBoolean("buffered"));
+        chronicleGatewayMain.useAffinity(USE_AFFINITY);
+        chronicleGatewayMain.pauserMode = PAUSER_MODE;
         ChronicleGatewayMain main = args.length == 0
                 ? chronicleGatewayMain
                 : Marshallable.fromFile(ChronicleGatewayMain.class, args[0]);
