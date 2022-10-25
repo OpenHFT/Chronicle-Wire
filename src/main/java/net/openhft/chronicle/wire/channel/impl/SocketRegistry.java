@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.util.WeakIdentityHashMap;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.channels.ServerSocketChannel;
@@ -72,9 +73,14 @@ public class SocketRegistry extends AbstractCloseable {
             hostname = hostnames[lastHost];
             this.lastHost = lastHost + 1;
         }
-        final SocketChannel open = SocketChannel.open(new InetSocketAddress(hostname, port));
-        Jvm.startup().on(getClass(), "Connected to " + hostname + ":" + port);
-        return open;
+        try {
+            final SocketChannel open = SocketChannel.open(new InetSocketAddress(hostname, port));
+            Jvm.startup().on(getClass(), "Connected to " + hostname + ":" + port);
+            return open;
+        } catch (IOException ioe) {
+            ioe.addSuppressed(new ConnectException("Unable to connect to " + hostname + ":" + port));
+            throw ioe;
+        }
     }
 
     private void addCloseable(Closeable closeable) {
