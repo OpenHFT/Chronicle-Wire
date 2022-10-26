@@ -69,7 +69,7 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
         ChronicleGatewayMain main = args.length == 0
                 ? chronicleGatewayMain
                 : Marshallable.fromFile(ChronicleGatewayMain.class, args[0]);
-        System.out.println("Starting  " + main);
+        Jvm.startup().on(ChronicleGatewayMain.class, "Starting  " + main);
         main.run();
     }
 
