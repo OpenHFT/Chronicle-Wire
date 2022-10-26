@@ -157,7 +157,9 @@ public class EchoHandlerTest extends WireTestCommon {
         // create a context for new channels, all channels are closed when the context is closed
         try (ChronicleContext context = ChronicleContext.newContext(url)) {
             // open a new channel that acts as an EchoHandler
-            ChronicleChannel channel = context.newChannelSupplier(new EchoHandler()).get();
+            final ChronicleChannelSupplier supplier = context.newChannelSupplier(new EchoHandler());
+            System.out.println("supplier: " + supplier);
+            ChronicleChannel channel = supplier.get();
             // create a proxy that turns each call to Says into an event on the channel
             Says say = channel.methodWriter(Says.class);
             // add an event

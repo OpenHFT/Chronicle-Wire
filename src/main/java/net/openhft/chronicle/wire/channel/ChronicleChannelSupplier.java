@@ -21,7 +21,7 @@ package net.openhft.chronicle.wire.channel;
 import java.util.function.Supplier;
 
 public class ChronicleChannelSupplier extends ChronicleChannelCfg<ChronicleChannelSupplier> implements Supplier<ChronicleChannel> {
-    private final ChronicleContext context;
+    private final transient ChronicleContext context;
     private final ChannelHandler handler;
     private String protocol;
     private String connectionId;
