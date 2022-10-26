@@ -27,6 +27,7 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class MethodIdTest extends WireTestCommon {
 
@@ -34,6 +35,8 @@ public class MethodIdTest extends WireTestCommon {
     public void methodIdInBinary() {
         Wire wire = new BinaryWire(new HexDumpBytes(), true, true, false, 128, "", false);
         final Methods methods = wire.methodWriter(Methods.class);
+        methods.methodAt('@');
+        methods.method_z('z');
         methods.methodByteMax(Byte.MAX_VALUE);
         methods.methodShortMax(Short.MAX_VALUE);
         methods.methodIntMax(Integer.MAX_VALUE);
@@ -45,6 +48,12 @@ public class MethodIdTest extends WireTestCommon {
 //        methods.methodLongMin(Long.MIN_VALUE);
 
         assertEquals("" +
+                        "04 00 00 00                                     # msg-length\n" +
+                        "ba 40                                           # methodAt ('@')\n" +
+                        "e1 40                                           # @\n" +
+                        "04 00 00 00                                     # msg-length\n" +
+                        "ba 7a                                           # method_z ('z')\n" +
+                        "e1 7a                                           # z\n" +
                         "0b 00 00 00                                     # msg-length\n" +
                         "ba 7f                                           # methodByteMax (127)\n" +
                         "a7 7f 00 00 00 00 00 00 00                      # 127\n" +
@@ -67,9 +76,13 @@ public class MethodIdTest extends WireTestCommon {
 
         Wire wire2 = Wire.newYamlWireOnHeap();
         final MethodReader reader = wire.methodReader(wire2.methodWriter(Methods.class));
-        for (int i = 0; i < 6; i++)
+        for (int i = 0; i < 8; i++)
             reader.readOne();
         assertEquals("" +
+                        "methodAt: \"@\"\n" +
+                        "...\n" +
+                        "method_z: z\n" +
+                        "...\n" +
                         "methodByteMax: 127\n" +
                         "...\n" +
                         "methodShortMax: 32767\n" +
@@ -83,12 +96,18 @@ public class MethodIdTest extends WireTestCommon {
                         "methodIntMin: -2147483648\n" +
                         "...\n",
                 wire2.toString());
+        assertFalse(reader.readOne());
     }
 
     interface Methods {
 // not supported yet
 //        @MethodId(Long.MIN_VALUE)
 //        void methodLongMin(long a);
+
+        @MethodId('@')
+        void methodAt(char at);
+        @MethodId('z')
+        void method_z(char z);
 
         @MethodId(Integer.MIN_VALUE)
         void methodIntMin(long a);
