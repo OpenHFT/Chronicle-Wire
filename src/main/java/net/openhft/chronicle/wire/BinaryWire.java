@@ -1138,10 +1138,22 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     @Override
     public ValueOut writeEventId(String name, int methodId) {
-        if (bytes.retainedHexDumpDescription())
-            bytes.writeHexDumpDescription(name + " (" + methodId + ")");
+        if (bytes.retainedHexDumpDescription()) {
+            writeEventIdDescription(name, methodId);
+        }
         writeCode(FIELD_NUMBER).writeStopBit(methodId);
         return valueOut;
+    }
+
+    private void writeEventIdDescription(String name, int methodId) {
+        final StringBuilder sb = SBP.acquireStringBuilder();
+        sb.append(name).append(" (");
+        if (' ' < methodId && methodId <= '~')
+            sb.append('\'').append((char) methodId).append('\'');
+        else
+            sb.append(methodId);
+        sb.append(')');
+        bytes.writeHexDumpDescription(sb);
     }
 
     @Override
