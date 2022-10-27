@@ -3,17 +3,29 @@ package net.openhft.chronicle.wire.internal;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
+import net.openhft.chronicle.wire.Validate;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
+import org.jetbrains.annotations.NotNull;
 
 public class WireTypeConverterInternal {
+    private static final Validate NO_OP = x -> {
+    };
     private final Bytes bytes = Bytes.allocateElasticOnHeap();
     private final Wire yamlWire = WireType.YAML_ONLY.apply(bytes);
     private final Wire jsonWire = WireType.JSON_ONLY.apply(bytes);
 
+    private final Validate validate;
     private Exception e;
 
+    public WireTypeConverterInternal(@NotNull Validate validate) {
+        this.validate = validate;
+        replaceClassLookup(jsonWire);
+        replaceClassLookup(yamlWire);
+    }
+
     public WireTypeConverterInternal() {
+        this.validate = NO_OP;
         replaceClassLookup(jsonWire);
         replaceClassLookup(yamlWire);
     }
@@ -26,7 +38,7 @@ public class WireTypeConverterInternal {
         Object object = jsonWire.getValueIn().object();
         if (e != null)
             throw e;
-
+        validate.validate(object);
         yamlWire.reset();
         yamlWire.getValueOut().object(object);
         if (e != null)
@@ -40,9 +52,11 @@ public class WireTypeConverterInternal {
         yamlWire.reset();
         yamlWire.bytes().clear().append(yaml);
         Object object = yamlWire.getValueIn().object();
+
         if (e != null)
             throw e;
 
+        validate.validate(object);
         jsonWire.reset();
         jsonWire.bytes().clear();
         jsonWire.getValueOut().object(object);
