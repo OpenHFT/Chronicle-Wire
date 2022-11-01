@@ -395,7 +395,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         public void resetState() {
             indentation = 0;
             seps.clear();
-            sep = empty();
+            sep = EMPTY;
             leaf = false;
             dropDefault = false;
             eventName = null;
@@ -403,7 +403,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         void prependSeparator() {
             appendSep();
-            sep = BytesStore.empty();
+            sep = EMPTY;
         }
 
         protected void appendSep() {
@@ -669,7 +669,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             final StringBuilder stringBuilder = acquireStringBuilder();
             stringBuilder.appendCodePoint(codepoint);
             text(stringBuilder);
-            sep = empty();
+            sep = EMPTY;
             return wireOut();
         }
 
@@ -933,7 +933,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             bytes.writeUnsignedByte('!');
             append(typeName);
             bytes.writeUnsignedByte(' ');
-            sep = BytesStore.empty();
+            sep = EMPTY;
             return this;
         }
 
@@ -1356,7 +1356,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             if (bytes.readByte(bytes.writePosition() - 1) <= ' ')
                 bytes.writeSkip(-1);
             fieldValueSeperator();
-            sep = empty();
+            sep = EMPTY;
         }
 
         public void writeComment(@NotNull CharSequence s) {
