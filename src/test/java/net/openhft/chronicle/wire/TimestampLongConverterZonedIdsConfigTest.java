@@ -49,6 +49,7 @@ public class TimestampLongConverterZonedIdsConfigTest extends WireTestCommon {
     public void timezoneCanBeConfiguredWithLegacySystemPropertyForMicroseconds() {
         final long timestamp = MicroTimestampLongConverter.INSTANCE.parse("2020/09/18T01:02:03.123456");
         System.setProperty("mtlc.zoneId", "Europe/Paris");
+        expectException("mtlc.zoneId has been deprecated");
         assertEquals("2020-09-18T03:02:03.123456+02:00", new MicroTimestampLongConverter().asString(timestamp));
     }
 
