@@ -29,12 +29,12 @@ import java.util.Arrays;
 import java.util.Collection;
 
 @RunWith(value = Parameterized.class)
-public class StrangeTextCombination {
+public class StrangeTextCombinationTest {
     private WireType wireType;
     @SuppressWarnings("rawtypes")
     private Bytes<?> bytes;
 
-    public StrangeTextCombination(WireType wireType) {
+    public StrangeTextCombinationTest(WireType wireType) {
         this.wireType = wireType;
     }
 

@@ -18,21 +18,20 @@
 
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/324
  */
 @RunWith(value = Parameterized.class)
-public class JSONTypesWithEnumsAndBoxedTypes {
+public class JSONWireWithListsTest {
 
     private final boolean useTypes;
 
@@ -44,42 +43,39 @@ public class JSONTypesWithEnumsAndBoxedTypes {
         );
     }
 
-    public JSONTypesWithEnumsAndBoxedTypes(boolean useTypes) {
+    public JSONWireWithListsTest(boolean useTypes) {
         this.useTypes = useTypes;
     }
 
-    enum Location {
-        PITS, TRACK, GRAVEL
-    }
 
-    static class F1 extends AbstractMarshallableCfg {
-
+    static class F1 {
         private String surname;
+        private int car;
 
-        // change this to and int from an Integer and, it will work !
-        private Integer car;
-        private Location location;
-
-        public F1(String surname, int car, Location location) {
+        public F1(String surname, int car) {
             this.surname = surname;
             this.car = car;
-            this.location = location;
+        }
+
+        @Override
+        public String toString() {
+            return "{" +
+                    "surname=" + surname +
+                    ", car=" + car +
+                    '}';
         }
     }
 
     @Test
     public void test() {
-        ClassAliasPool.CLASS_ALIASES.addAlias(F1.class);
+
         final JSONWire jsonWire = new JSONWire()
                 .useTypes(useTypes);
 
-        jsonWire.getValueOut()
-                .object(new F1("Hamilton", 44, Location.TRACK));
-
-         System.out.println(jsonWire.bytes());
-
+        final List<F1> drivers = Arrays.asList(new F1("Hamilton", 44), new F1("Verstappen", 33));
+        jsonWire.getValueOut().object(drivers);
 
         final String actual = jsonWire.getValueIn().object().toString();
-        Assert.assertTrue(actual.contains("TRACK"));
+        Assert.assertEquals("[{surname=Hamilton, car=44}, {surname=Verstappen, car=33}]", actual);
     }
 }
