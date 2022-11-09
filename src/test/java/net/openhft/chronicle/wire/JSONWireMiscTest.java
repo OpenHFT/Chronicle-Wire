@@ -37,7 +37,7 @@ import static net.openhft.chronicle.wire.JsonUtil.assertBalancedBrackets;
  * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/324
  */
 @RunWith(value = Parameterized.class)
-public class JSONWireMisc {
+public class JSONWireMiscTest {
 
     private final String TEXT = "abc";
     private final boolean useTypes;
@@ -51,7 +51,7 @@ public class JSONWireMisc {
         );
     }
 
-    public JSONWireMisc(boolean useTypes) {
+    public JSONWireMiscTest(boolean useTypes) {
         this.useTypes = useTypes;
     }
 
