@@ -58,7 +58,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     static final BytesStore COMMA_SPACE = BytesStore.from(", ");
     static final BytesStore COMMA_NEW_LINE = BytesStore.from(",\n");
     static final BytesStore NEW_LINE = BytesStore.from("\n");
-    static final BytesStore EMPTY_AFTER_COMMENT = BytesStore.from(""); // not the same as EMPTY so we can check this value.
+    static final BytesStore EMPTY_AFTER_COMMENT = BytesStore.wrap(new byte[0]); // not the same as EMPTY so we can check this value.
     static final BytesStore EMPTY = BytesStore.from("");
     static final BytesStore SPACE = BytesStore.from(" ");
     static final BytesStore END_FIELD = NEW_LINE;
