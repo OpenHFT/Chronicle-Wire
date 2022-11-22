@@ -482,7 +482,7 @@ public class GenerateMethodWriter {
             body.append("try (");
         body.append("final ")
                 .append(WRITE_DOCUMENT_CONTEXT)
-                .append(" dc = (")
+                .append(" _dc_ = (")
                 .append(WRITE_DOCUMENT_CONTEXT).append(") out.acquireWritingDocument(")
                 .append(metaData)
                 .append(")");
@@ -491,8 +491,8 @@ public class GenerateMethodWriter {
         else
             body.append(") {\n");
         body.append("try {\n");
-        body.append("dc.chainedElement(" + (!terminating && !passthrough) + ");\n");
-        body.append("if (out.recordHistory()) MessageHistory.writeHistory(dc);\n");
+        body.append("_dc_.chainedElement(" + (!terminating && !passthrough) + ");\n");
+        body.append("if (out.recordHistory()) MessageHistory.writeHistory(_dc_);\n");
 
         int startJ = 0;
 
@@ -513,11 +513,11 @@ public class GenerateMethodWriter {
             writeArrayOfParameters(dm, parameterTypes, len, body, startJ);
 
         if (parameterCount == 0)
-            body.append("valueOut.text(\"\");\n");
+            body.append("_valueOut_.text(\"\");\n");
 
-        body.append("} catch (Throwable t) {\n");
-        body.append("dc.rollbackOnClose();\n");
-        body.append("throw Jvm.rethrow(t);\n");
+        body.append("} catch (Throwable _t_) {\n");
+        body.append("_dc_.rollbackOnClose();\n");
+        body.append("throw Jvm.rethrow(_t_);\n");
         body.append("}\n");
 
         if (dm.getDeclaringClass() == Syncable.class) {
@@ -553,11 +553,11 @@ public class GenerateMethodWriter {
         if ((wireType != WireType.TEXT && wireType != WireType.YAML) && methodId.isPresent()) {
 
             long value = ((MethodId) methodId.get()).value();
-            body.append(format("final " + VALUE_OUT + " valueOut = dc.wire().writeEventId(%s, %d);\n", eventName, value));
+            body.append(format("final " + VALUE_OUT + " _valueOut_ = _dc_.wire().writeEventId(%s, %d);\n", eventName, value));
             methodID = format("@" + METHOD_ID + "(%d)\n", value);
 
         } else
-            body.append(format("final " + VALUE_OUT + " valueOut = dc.wire().writeEventName(%s);\n", eventName));
+            body.append(format("final " + VALUE_OUT + " _valueOut_ = _dc_.wire().writeEventName(%s);\n", eventName));
         return methodID;
     }
 
@@ -565,7 +565,7 @@ public class GenerateMethodWriter {
         final int parameterCount = dm.getParameterCount();
         final boolean multipleArgs = parameterCount > startJ + 1;
         if (multipleArgs)
-            body.append("valueOut.array(v -> {\n");
+            body.append("_valueOut_.array(_v_ -> {\n");
         for (int j = startJ; j < len; j++) {
 
             final Parameter p = dm.getParameters()[j];
@@ -577,14 +577,14 @@ public class GenerateMethodWriter {
                     longConversion != null ? longConversion.value().getName() : "";
 
             if (!name.isEmpty() && (WireType.TEXT == wireType || WireType.YAML == wireType))
-                body.append(format("valueOut.rawText(%s.INSTANCE.asText(%s));\n", name, p.getName()));
+                body.append(format("_valueOut_.rawText(%s.INSTANCE.asText(%s));\n", name, p.getName()));
             else if (p.getType().isPrimitive() || CharSequence.class.isAssignableFrom(p.getType())) {
                 if (longConversion != null && (p.getType() == long.class || CharSequence.class.isAssignableFrom(p.getType())))
-                    body.append(format("%s.writeLong(%s.INSTANCE, %s);\n", multipleArgs ? "v" : "valueOut", longConversion.value().getName(), p.getName()));
+                    body.append(format("%s.writeLong(%s.INSTANCE, %s);\n", multipleArgs ? "_v_" : "_valueOut_", longConversion.value().getName(), p.getName()));
                 else if (intConversion != null)
-                    body.append(format("%s.writeInt(%s.INSTANCE, %s);\n", multipleArgs ? "v" : "valueOut", intConversion.value().getName(), p.getName()));
+                    body.append(format("%s.writeInt(%s.INSTANCE, %s);\n", multipleArgs ? "_v_" : "_valueOut_", intConversion.value().getName(), p.getName()));
                 else
-                    body.append(format("%s.%s(%s);\n", multipleArgs ? "v" : "valueOut", toString(erase(parameterTypes[j])), p.getName()));
+                    body.append(format("%s.%s(%s);\n", multipleArgs ? "_v_" : "_valueOut_", toString(erase(parameterTypes[j])), p.getName()));
             } else
                 writeValue(dm, erase(parameterTypes[j]), body, startJ, p);
         }
@@ -597,7 +597,7 @@ public class GenerateMethodWriter {
         final String name = p.getName();
         String className = type.getTypeName().replace('$', '.');
 
-        final String vOut = dm.getParameterCount() > startJ + 1 ? "v" : "valueOut";
+        final String vOut = dm.getParameterCount() > startJ + 1 ? "_v_" : "_valueOut_";
         String after = "";
         if (!type.isInterface() && Marshallable.class.isAssignableFrom(type) && !Serializable.class.isAssignableFrom(type) && !DynamicEnum.class.isAssignableFrom(type)) {
             body.append("if (").append(name).append(" != null && ").append(className).append(".class == ").append(name).append(".getClass()) {\n")
@@ -623,7 +623,7 @@ public class GenerateMethodWriter {
             return result;
 
         if (returnType == DocumentContext.class) {
-            result.append("return dc;\n");
+            result.append("return _dc_;\n");
 
         } else if (returnType.isAssignableFrom(interfaceClazz) || returnType == interfaceClazz) {
             result.append("return this;\n");
