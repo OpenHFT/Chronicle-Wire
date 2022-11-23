@@ -24,6 +24,8 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.BiConsumer;
+
 @SuppressWarnings("rawtypes")
 public class VanillaMessageHistory extends SelfDescribingMarshallable implements MessageHistory {
     public static final int MESSAGE_HISTORY_LENGTH = 128;
@@ -40,6 +42,11 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     private final long[] sourceIndexArray = new long[MESSAGE_HISTORY_LENGTH];
     @NotNull
     private final long[] timingsArray = new long[MESSAGE_HISTORY_LENGTH * 2];
+
+    // To avoid lambda allocations
+    private final BiConsumer<VanillaMessageHistory, ValueOut> acceptSourcesConsumer = this::acceptSources;
+    private final BiConsumer<VanillaMessageHistory, ValueOut> acceptTimingsConsumer = this::acceptTimings;
+
     // true if these change have been written
     private transient boolean dirty;
     private int sources;
@@ -175,8 +182,9 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             wire.bytes().writeUnsignedByte(BinaryWireCode.BYTES_MARSHALLABLE);
             writeMarshallable(wire.bytes());
         } else {
-            wire.write("sources").sequence(this, this::acceptSources);
-            wire.write("timings").sequence(this, this::acceptTimings);
+
+            wire.write("sources").sequence(this, acceptSourcesConsumer);
+            wire.write("timings").sequence(this, acceptTimingsConsumer);
         }
         dirty = false;
     }
