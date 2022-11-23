@@ -44,8 +44,8 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     private final long[] timingsArray = new long[MESSAGE_HISTORY_LENGTH * 2];
 
     // To avoid lambda allocations
-    private final BiConsumer<VanillaMessageHistory, ValueOut> acceptSourcesConsumer = this::acceptSources;
-    private final BiConsumer<VanillaMessageHistory, ValueOut> acceptTimingsConsumer = this::acceptTimings;
+    private final transient BiConsumer<VanillaMessageHistory, ValueOut> acceptSourcesConsumer = this::acceptSources;
+    private final transient BiConsumer<VanillaMessageHistory, ValueOut> acceptTimingsConsumer = this::acceptTimings;
 
     // true if these change have been written
     private transient boolean dirty;
