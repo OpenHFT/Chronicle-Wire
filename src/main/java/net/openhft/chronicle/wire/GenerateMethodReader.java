@@ -160,6 +160,7 @@ public class GenerateMethodReader {
         handledInterfaces.clear();
         handledMethodNames.clear();
         handledMethodSignatures.clear();
+        final Set<Class<?>>[] instantInterfaces = new Set[instances.length];
 
         for (int i = 0; i < instances.length; i++) {
             final Class<?> aClass = instances[i].getClass();
@@ -172,6 +173,8 @@ public class GenerateMethodReader {
                     continue;
                 handleInterface(anInterface, "instance" + i, methodFilter, eventNameSwitchBlock, eventIdSwitchBlock);
             }
+            // TODO: WIP - won't work for >1 instances
+            instantInterfaces[i] = new HashSet<>(handledInterfaces);
         }
 
         if (!packageName().isEmpty())
@@ -189,7 +192,8 @@ public class GenerateMethodReader {
                 "import java.lang.reflect.Method;\n" +
                 "\n");
 
-        sourceCode.append(format("public class %s extends AbstractGeneratedMethodReader {\n", generatedClassName()));
+        // TODO: tidy
+        sourceCode.append(format("public class %s\n\t%s\n extends AbstractGeneratedMethodReader {\n", generatedClassName(), generateTemplates(instantInterfaces)));
 
         sourceCode.append("// instances on which parsed calls are invoked\n");
 
@@ -197,7 +201,7 @@ public class GenerateMethodReader {
             sourceCode.append(format("private final Object metaInstance%d;\n", i));
         }
         for (int i = 0; i < instances.length; i++) {
-            sourceCode.append(format("private final Object instance%d;\n", i));
+            sourceCode.append(format("private final T%d instance%d;\n", i, i));
         }
         sourceCode.append("private final WireParselet defaultParselet;\n");
         sourceCode.append("\n");
@@ -243,9 +247,9 @@ public class GenerateMethodReader {
             sourceCode.append(format("metaInstance%d = metaInstances[%d];\n", i, i));
 
         for (int i = 0; i < instances.length - 1; i++)
-            sourceCode.append(format("instance%d = instances[%d];\n", i, i));
+            sourceCode.append(format("instance%d = (T%d)instances[%d];\n", i, i, i));
 
-        sourceCode.append(format("instance%d = instances[%d];\n}\n\n", instances.length - 1, instances.length - 1));
+        sourceCode.append(format("instance%d = (T%d)instances[%d];\n}\n\n", instances.length - 1, instances.length - 1, instances.length - 1));
 
         if (hasChainedCalls) {
             sourceCode.append("" +
@@ -259,8 +263,8 @@ public class GenerateMethodReader {
 
         sourceCode.append("@Override\n" +
                 "protected boolean readOneCall(WireIn wireIn) {\n" +
-                "ValueIn valueIn = wireIn.getValueIn();\n" +
-                "String lastEventName = \"\";\n" +
+                "final ValueIn valueIn = wireIn.getValueIn();\n" +
+                "final String lastEventName;\n" +
                 "if (wireIn.bytes().peekUnsignedByte() == BinaryWireCode.FIELD_NUMBER) {\n" +
                 "int methodId = (int) wireIn.readEventNumber();\n" +
                 "switch (methodId) {\n");
@@ -344,7 +348,25 @@ public class GenerateMethodReader {
         isSourceCodeGenerated = true;
 
         if (DUMP_CODE)
-            System.out.println(sourceCode.toString());
+            System.out.println(sourceCode);
+    }
+
+    private String generateTemplates(Set<Class<?>>[] instanceInterfaces) {
+        String rv = "<";
+        for (int i=0; i<instanceInterfaces.length; i++) {
+            if (i > 0)
+                rv += ", ";
+            rv += "T" + i + " extends";
+            Set<Class<?>> interfaces = instanceInterfaces[i];
+            String is = "";
+            for (Class<?> iface : interfaces) {
+                if (is.length() > 0)
+                    is += " &";
+                is += " " + iface.getCanonicalName();
+            }
+            rv += is;
+        }
+        return rv + ">";
     }
 
     /**
@@ -469,7 +491,7 @@ public class GenerateMethodReader {
                 eventNameSwitchBlock.append("ignored = false;\n");
                 eventNameSwitchBlock.append("valueIn.sequence(this, (f, v) -> {\n");
                 eventNameSwitchBlock.append(argumentRead(m, 0, true, parameterTypes));
-                eventNameSwitchBlock.append(format("if (((MethodFilterOnFirstArg) f.%s)." +
+                eventNameSwitchBlock.append(format("if ((f.%s)." +
                                 "ignoreMethodBasedOnFirstArg(\"%s\", f.%sarg%d)) {\n",
                         instanceFieldName, m.getName(), m.getName(), 0));
                 eventNameSwitchBlock.append("f.ignored = true;\n");
@@ -557,7 +579,7 @@ public class GenerateMethodReader {
                     res.append(codeBefore).append("\n");
             }
 
-            res.append(format("%s((%s) %s).%s(%s);\n",
+            res.append(format("%s((%s) %s).%s(%s);\n",/// TODO: unnecessary cast
                     chainedCallPrefix, m.getDeclaringClass().getCanonicalName(), instanceFieldName, m.getName(),
                     String.join(", ", args)));
 
