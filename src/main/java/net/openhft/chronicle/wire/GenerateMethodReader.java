@@ -68,6 +68,7 @@ public class GenerateMethodReader {
                 MethodWriter.class,
                 SourceContext.class
         );
+        System.out.println("patched Wire");
     }
 
     private final WireType wireType;
