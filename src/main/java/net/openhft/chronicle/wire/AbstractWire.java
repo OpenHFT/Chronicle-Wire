@@ -428,6 +428,11 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public boolean writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition) {
+        return noEndOfWire(true, timeout, timeUnit, lastPosition);
+    }
+
+    @Override
+    public boolean noEndOfWire(boolean writeEOF, long timeout, TimeUnit timeUnit, long lastPosition) {
 
         long pos = Math.max(lastPosition, bytes.writePosition());
         headerNumber = Long.MIN_VALUE;
@@ -438,19 +443,26 @@ public abstract class AbstractWire implements Wire {
                     pos += BytesUtil.padOffset(pos);
 
                 if (MEMORY.safeAlignedInt(pos)) {
-                    if (bytes.readVolatileInt(pos) == 0 && bytes.compareAndSwapInt(pos, 0, END_OF_DATA)) {
-                        bytes.writePosition(pos + SPB_HEADER_SIZE);
-                        write("EOF");
-                        return true;
+                    if (bytes.readVolatileInt(pos) == 0) {
+                        if (!writeEOF)
+                            return true;
+
+                        if (bytes.compareAndSwapInt(pos, 0, END_OF_DATA)) {
+                            bytes.writePosition(pos + SPB_HEADER_SIZE);
+                            write("EOF");
+                            return true;
+                        }
                     }
 
                 } else {
                     // mis-aligned check, assume only one writer (best effort)
                     MEMORY.loadFence();
                     if (bytes.readInt(pos) == 0) {
-                        bytes.writeInt(pos, END_OF_DATA);
-                        MEMORY.storeFence();
-                        bytes.writePosition(pos + SPB_HEADER_SIZE);
+                        if (writeEOF) {
+                            bytes.writeInt(pos, END_OF_DATA);
+                            MEMORY.storeFence();
+                            bytes.writePosition(pos + SPB_HEADER_SIZE);
+                        }
                         return true;
                     }
                 }
@@ -460,6 +472,9 @@ public abstract class AbstractWire implements Wire {
                 if (header == END_OF_DATA)
                     return false; // already written.
                 if (Wires.isNotComplete(header)) {
+                    if (!writeEOF) // Header not complete - queue still writable
+                        return true;
+
                     try {
                         acquireTimedParser().pause(timeout, timeUnit);
 

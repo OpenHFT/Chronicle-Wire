@@ -193,9 +193,24 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * @param timeout      throw TimeoutException if it could not write the marker in time.
      * @param timeUnit     of the timeout
      * @param lastPosition the end of the wire
-     * @return did this method write EOF or was it already there.
+     * @return {code true} if did this method wrote EOF, {@code false} if it was already there.
      */
     boolean writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition);
+
+    /**
+     * Check if end of wire marker is not present, optionally writing it unless one is already written.
+     * This will increment the headerNumber as appropriate if successful
+     *
+     * @param writeEOF     if {@code true}, write end of wire marker unless already exists
+     * @param timeout      throw TimeoutException if it could not write the marker in time.
+     * @param timeUnit     of the timeout
+     * @param lastPosition the end of the wire
+     * @return {@code true} if did this method could write an EOF (depending on write parameter).
+     *         {@code false} if it was it already there.
+     */
+    default boolean noEndOfWire(boolean writeEOF, long timeout, TimeUnit timeUnit, long lastPosition) {
+        throw new UnsupportedOperationException("Optional operation, please use writeEndOfWire");
+    }
 
     /**
      * Start an event object, mostly for internal use.
