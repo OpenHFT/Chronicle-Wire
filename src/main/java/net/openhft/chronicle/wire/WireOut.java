@@ -198,17 +198,16 @@ public interface WireOut extends WireCommon, MarshallableOut {
     boolean writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition);
 
     /**
-     * Check if end of wire marker is not present, optionally writing it unless one is already written.
+     * Check if end of wire marker is present, optionally writing it unless one is already written.
      * This will increment the headerNumber as appropriate if successful
      *
      * @param writeEOF     if {@code true}, write end of wire marker unless already exists
      * @param timeout      throw TimeoutException if it could not write the marker in time.
      * @param timeUnit     of the timeout
      * @param lastPosition the end of the wire
-     * @return {@code true} if did this method could write an EOF (depending on write parameter).
-     *         {@code false} if it was it already there.
+     * @return {@link EndOfWire} enum corresponding to EOF presence
      */
-    default boolean noEndOfWire(boolean writeEOF, long timeout, TimeUnit timeUnit, long lastPosition) {
+    default EndOfWire endOfWire(boolean writeEOF, long timeout, TimeUnit timeUnit, long lastPosition) {
         throw new UnsupportedOperationException("Optional operation, please use writeEndOfWire");
     }
 
@@ -233,5 +232,14 @@ public interface WireOut extends WireCommon, MarshallableOut {
      */
     default boolean writingIsComplete() {
         return true;
+    }
+
+    enum EndOfWire {
+        /** EOF marker is not present and was not written */
+        NOT_PRESENT,
+        /** EOF marker was not present have been written and now in place */
+        PRESENT_AFTER_UPDATE,
+        /** EOF marker is present */
+        PRESENT;
     }
 }

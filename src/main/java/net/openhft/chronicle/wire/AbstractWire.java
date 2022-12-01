@@ -428,11 +428,11 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public boolean writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition) {
-        return noEndOfWire(true, timeout, timeUnit, lastPosition);
+        return endOfWire(true, timeout, timeUnit, lastPosition) == EndOfWire.PRESENT_AFTER_UPDATE;
     }
 
     @Override
-    public boolean noEndOfWire(boolean writeEOF, long timeout, TimeUnit timeUnit, long lastPosition) {
+    public EndOfWire endOfWire(boolean writeEOF, long timeout, TimeUnit timeUnit, long lastPosition) {
 
         long pos = Math.max(lastPosition, bytes.writePosition());
         headerNumber = Long.MIN_VALUE;
@@ -445,12 +445,12 @@ public abstract class AbstractWire implements Wire {
                 if (MEMORY.safeAlignedInt(pos)) {
                     if (bytes.readVolatileInt(pos) == 0) {
                         if (!writeEOF)
-                            return true;
+                            return EndOfWire.NOT_PRESENT;
 
                         if (bytes.compareAndSwapInt(pos, 0, END_OF_DATA)) {
                             bytes.writePosition(pos + SPB_HEADER_SIZE);
                             write("EOF");
-                            return true;
+                            return EndOfWire.PRESENT_AFTER_UPDATE;
                         }
                     }
 
@@ -458,22 +458,23 @@ public abstract class AbstractWire implements Wire {
                     // mis-aligned check, assume only one writer (best effort)
                     MEMORY.loadFence();
                     if (bytes.readInt(pos) == 0) {
-                        if (writeEOF) {
-                            bytes.writeInt(pos, END_OF_DATA);
-                            MEMORY.storeFence();
-                            bytes.writePosition(pos + SPB_HEADER_SIZE);
-                        }
-                        return true;
+                        if (!writeEOF)
+                            return EndOfWire.NOT_PRESENT;
+
+                        bytes.writeInt(pos, END_OF_DATA);
+                        MEMORY.storeFence();
+                        bytes.writePosition(pos + SPB_HEADER_SIZE);
+                        return EndOfWire.PRESENT_AFTER_UPDATE;
                     }
                 }
 
                 int header = bytes.readVolatileInt(pos);
                 // two states where it is unable to continue.
                 if (header == END_OF_DATA)
-                    return false; // already written.
+                    return EndOfWire.PRESENT;
                 if (Wires.isNotComplete(header)) {
-                    if (!writeEOF) // Header not complete - queue still writable
-                        return true;
+                    if (!writeEOF)
+                        return EndOfWire.NOT_PRESENT;
 
                     try {
                         acquireTimedParser().pause(timeout, timeUnit);
@@ -488,6 +489,8 @@ public abstract class AbstractWire implements Wire {
                                 "header: " + Integer.toHexString(header) +
                                 ", pos: " + pos +
                                 ", success: " + success);
+
+                        // FIXME Should return something here?
                     }
                     continue;
                 }
