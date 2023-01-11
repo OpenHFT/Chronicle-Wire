@@ -33,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -744,7 +745,10 @@ public class GenerateMethodReader {
     }
 
     private void appendInstanceName(StringBuilder sb, Object i) {
-        final Class<?> aClass = i.getClass();
+        Class<?> aClass = i.getClass();
+        if (Proxy.isProxyClass(aClass)) {
+            aClass = aClass.getInterfaces()[0];
+        }
 
         if (aClass.getEnclosingClass() != null)
             sb.append(aClass.getEnclosingClass().getSimpleName());

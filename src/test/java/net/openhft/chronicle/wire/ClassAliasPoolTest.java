@@ -99,6 +99,8 @@ public class ClassAliasPoolTest extends WireTestCommon {
         StringWriter out = new StringWriter();
         final MethodReader reader = wire.methodReader(
                 Mocker.logging(TestedMethods.class, "", out));
+        String name = reader.getClass().getName();
+        assertFalse(name, name.contains("$Proxy"));
         assertTrue(reader.readOne());
         assertFalse(reader.readOne());
         assertEquals("" +
