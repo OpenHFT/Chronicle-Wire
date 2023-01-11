@@ -84,7 +84,7 @@ public class ClassAliasPoolTest extends WireTestCommon {
     }
 
     @Test
-    public void testUsesClassLookup() throws ClassNotFoundException {
+    public void testUsesClassLookup() {
         final ClassLookup mock = createMock(ClassLookup.class);
         expect(mock.nameFor(CAPTData.class)).andReturn("CAPTData");
         expect(mock.forName(charSequence("CAPTData"))).andReturn((Class) CAPTData.class);
