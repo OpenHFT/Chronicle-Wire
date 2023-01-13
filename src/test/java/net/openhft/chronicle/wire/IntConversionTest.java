@@ -97,8 +97,11 @@ public class IntConversionTest extends WireTestCommon {
                 "]\n" +
                 "...\n", wire.toString());
 
-        final MethodReader reader = wire.methodReader(Mocker.intercepting(
-                TwoArgumentsConversion.class, "*", sb::append));
+        final MethodReader reader = wire.methodReader(
+                Mocker.intercepting(
+                        TwoArgumentsConversion.class, "*", sb::append));
+        String name = reader.getClass().getName();
+        assertFalse(name, name.contains("$Proxy"));
         assertTrue(reader.readOne());
 
         assertEquals("*to[-715827882, 4611686018427387903]", sb.toString());
