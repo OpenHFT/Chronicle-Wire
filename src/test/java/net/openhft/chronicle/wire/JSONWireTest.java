@@ -31,6 +31,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.stream.IntStream;
 
 import static junit.framework.TestCase.assertNull;
 import static net.openhft.chronicle.wire.WireType.JSON;
@@ -377,6 +378,18 @@ public class JSONWireTest extends WireTestCommon {
         wire.getValueOut().marshallable(foo);
 
         assertEquals("{\"a\":{\"b\":\"c\"}}", bytes.toString());
+    }
+
+    @Test
+    public void escapeUnicodeValues() {
+        Map<Object, Object> map = new HashMap<>();
+        IntStream.rangeClosed(0x0000, 0x001F)
+                .forEach(code -> {
+                    map.put("key", (char)code);
+
+                    final String text = JSON.asString(map);
+                    assertEquals("{\"key\":\"" + String.format("\\u%04x", code) + "\"}", text);
+                });
     }
 
     private static class Value extends SelfDescribingMarshallable {
