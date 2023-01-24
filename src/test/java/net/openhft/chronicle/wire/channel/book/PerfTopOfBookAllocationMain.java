@@ -33,17 +33,28 @@ rate: 216.225 M objs/sec
 avgLatency: 18 ns
 
  */
+
 /**
  * Benchmark for just allocations
  */
 public class PerfTopOfBookAllocationMain {
     static final int PROCS = Runtime.getRuntime().availableProcessors();
-    static final int THREADS = Integer.getInteger("threads", PROCS);
+    static int THREADS = Integer.getInteger("threads", PROCS);
     static final int COUNT = Integer.getInteger("count", 5);
     // adjusted to approximate what is seen in more realistic benchmarks
     static final int BATCH = Integer.getInteger("batch", 10);
 
     public static void main(String[] args) {
+        int[] threadArr = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
+        if (THREADS > 0)
+            threadArr = new int[]{THREADS};
+        for (int t : threadArr) {
+            THREADS = t;
+            main0();
+        }
+    }
+
+    static void main0() {
         System.out.println(""
                 + "-Dthreads=" + THREADS + " "
                 + "-Dcount=" + COUNT + " "

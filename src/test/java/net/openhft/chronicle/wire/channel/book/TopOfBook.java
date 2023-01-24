@@ -42,6 +42,13 @@ public class TopOfBook extends BytesInBinaryMarshallable implements Cloneable {
     private double bidPrice, askPrice;
     private int bidQuantity, askQuantity;
 
+    // 100 bytes
+//    private double a6, a7, a8, a9, a10, a11, a12, a13;
+
+    // 256
+//    private int x;
+//    private double b0, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15, b16, b17;
+
     @Override
     public final void readMarshallable(BytesIn bytes) throws IORuntimeException {
         bytes.unsafeReadObject(this, START_BYTES, LENGTH_BYTES);
