@@ -1276,7 +1276,24 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @NotNull
         @Override
         public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) {
-            throw new UnsupportedOperationException(yt.toString());
+            consumePadding();
+            assert yt.current() == YamlToken.SEQUENCE_START;
+            yt.next(Integer.MIN_VALUE);
+            while (true) {
+                switch (yt.current()) {
+                    case SEQUENCE_ENTRY:
+                        yt.next(Integer.MIN_VALUE);
+                        tReader.accept(t, kls, YamlWire.this.valueIn);
+                        continue;
+
+                    case SEQUENCE_END:
+                        yt.next(Integer.MIN_VALUE);
+                        return YamlWire.this;
+
+                    default:
+                        throw new IllegalStateException(yt.toString());
+                }
+            }
         }
 
         @Override
