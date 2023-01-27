@@ -88,6 +88,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         return tw.toString();
     }
 
+    // https://yaml.org/spec/1.2.2/#escaped-characters
     private static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb,
                                                                          char blockQuote) {
         int end = 0;
@@ -135,6 +136,12 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                         break;
                     case '_':
                         ch = 0xA0;
+                        break;
+                    case 'L':
+                        ch = 0x2028;
+                        break;
+                    case 'P':
+                        ch = 0x2029;
                         break;
                     case 'x':
                         ch = (char)

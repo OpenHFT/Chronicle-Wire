@@ -424,6 +424,45 @@ public class JSONWire extends TextWire {
         bytes.writeUnsignedByte('"');
     }
 
+    // https://www.rfc-editor.org/rfc/rfc7159#section-7
+    protected void escape0(@NotNull CharSequence s, @NotNull Quotes quotes) {
+        for (int i = 0; i < s.length(); i++) {
+            char ch = s.charAt(i);
+            switch (ch) {
+                case '\b':
+                    bytes.append("\\b");
+                    break;
+                case '\t':
+                    bytes.append("\\t");
+                    break;
+                case '\f':
+                    bytes.append("\\f");
+                    break;
+                case '\n':
+                    bytes.append("\\n");
+                    break;
+                case '\r':
+                    bytes.append("\\r");
+                    break;
+                case '"':
+                    if (ch == quotes.q) {
+                        bytes.writeUnsignedByte('\\').writeUnsignedByte(ch);
+                    } else {
+                        bytes.writeUnsignedByte(ch);
+                    }
+                    break;
+                case '\\':
+                    bytes.writeUnsignedByte('\\').writeUnsignedByte(ch);
+                    break;
+                default:
+                    if (ch < ' ' || ch > 127)
+                        appendU4(ch);
+                    else
+                        bytes.append(ch);
+                    break;
+            }
+        }
+    }
     @Override
     public ValueOut writeEvent(Class expectedType, Object eventKey) {
         return super.writeEvent(String.class, "" + eventKey);

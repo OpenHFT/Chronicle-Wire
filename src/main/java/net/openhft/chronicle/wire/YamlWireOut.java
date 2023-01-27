@@ -186,36 +186,37 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         bytes.writeUnsignedByte(quotes.q);
     }
 
+    // https://yaml.org/spec/1.2.2/#escaped-characters
     protected void escape0(@NotNull CharSequence s, @NotNull Quotes quotes) {
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
             switch (ch) {
                 case '\0':
-                    bytes.appendUtf8("\\0");
+                    bytes.append("\\0");
                     break;
                 case 7:
-                    bytes.appendUtf8("\\a");
+                    bytes.append("\\a");
                     break;
                 case '\b':
-                    bytes.appendUtf8("\\b");
+                    bytes.append("\\b");
                     break;
                 case '\t':
-                    bytes.appendUtf8("\\t");
+                    bytes.append("\\t");
                     break;
                 case '\n':
-                    bytes.appendUtf8("\\n");
+                    bytes.append("\\n");
                     break;
                 case 0xB:
-                    bytes.appendUtf8("\\v");
+                    bytes.append("\\v");
                     break;
-                case 0xC:
-                    bytes.appendUtf8("\\f");
+                case '\f':
+                    bytes.append("\\f");
                     break;
                 case '\r':
-                    bytes.appendUtf8("\\r");
+                    bytes.append("\\r");
                     break;
                 case 0x1B:
-                    bytes.appendUtf8("\\e");
+                    bytes.append("\\e");
                     break;
                 case '"':
                     if (ch == quotes.q) {
@@ -234,11 +235,20 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 case '\\':
                     bytes.writeUnsignedByte('\\').writeUnsignedByte(ch);
                     break;
+//                case '/':
+//                    bytes.writeUnsignedByte('\\').writeUnsignedByte(ch);
+//                    break;
                 case 0x85:
                     bytes.appendUtf8("\\N");
                     break;
                 case 0xA0:
                     bytes.appendUtf8("\\_");
+                    break;
+                case 0x2028:
+                    bytes.appendUtf8("\\L");
+                    break;
+                case 0x2029:
+                    bytes.appendUtf8("\\P");
                     break;
                 default:
                     if (ch > 255)
@@ -259,7 +269,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         bytes.append(HEXADECIMAL[ch & 0xF]);
     }
 
-    private void appendU4(char ch) {
+    protected void appendU4(char ch) {
         bytes.append('\\');
         bytes.append('u');
         bytes.append(HEXADECIMAL[ch >> 12]);

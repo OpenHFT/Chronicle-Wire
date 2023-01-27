@@ -383,12 +383,36 @@ public class JSONWireTest extends WireTestCommon {
     @Test
     public void escapeUnicodeValues() {
         Map<Object, Object> map = new HashMap<>();
-        IntStream.rangeClosed(0x0000, 0x001F)
+        IntStream.rangeClosed(0x0000, 0x0020)
                 .forEach(code -> {
-                    map.put("key", (char)code);
+                    map.put("key", (char) code);
 
                     final String text = JSON.asString(map);
-                    assertEquals("{\"key\":\"" + String.format("\\u%04x", code) + "\"}", text);
+                    String val;
+                    switch (code) {
+                        case '\b':
+                            val = "\\b";
+                            break;
+                        case '\f':
+                            val = "\\f";
+                            break;
+                        case '\n':
+                            val = "\\n";
+                            break;
+                        case '\r':
+                            val = "\\r";
+                            break;
+                        case '\t':
+                            val = "\\t";
+                            break;
+                        case ' ':
+                            val = " ";
+                            break;
+                        default:
+                            val = String.format("\\u%04X", code);
+                            break;
+                    }
+                    assertEquals("{\"key\":\"" + val + "\"}", text);
                 });
     }
 
