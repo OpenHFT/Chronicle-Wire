@@ -121,6 +121,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
     }
 
+    // https://yaml.org/spec/1.2.2/#escaped-characters
     public static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb) {
         int end = 0;
         int length = sb.length();
@@ -162,6 +163,12 @@ public class TextWire extends YamlWireOut<TextWire> {
                     case '_':
                         ch = 0xA0;
                         break;
+                    case 'L':
+                        ch = 0x2028;
+                        break;
+                    case 'P':
+                        ch = 0x2029;
+                        break;
                     case 'x':
                         ch = (char)
                                 (Character.getNumericValue(sb.charAt(++i)) * 16 +
@@ -191,18 +198,6 @@ public class TextWire extends YamlWireOut<TextWire> {
         // reset it.
         sct.isStopChar(' ');
         return sct;
-    }
-
-    private static void checkConsecutiveSpaces(@NotNull StringBuilder sb) {
-        if (sb.length() == 0)
-            return;
-        char lastCh = sb.charAt(0);
-        for (int i = 1; i < sb.length() - 1; i++) {
-            char ch2 = sb.charAt(i);
-            if (lastCh <= ' ' && ch2 <= ' ')
-                throw new IORuntimeException("Cannot have multiple consecutive spaces in a field name '" + sb + "'");
-            lastCh = ch2;
-        }
     }
 
     /**
@@ -435,8 +430,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                 parseUntil(sb, getEscapingEndOfText());
             }
             unescape(sb);
-            // check no consecutive spaces.
-            checkConsecutiveSpaces(sb);
+
         } catch (BufferUnderflowException e) {
             Jvm.debug().on(getClass(), e);
         }
