@@ -17,6 +17,8 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
@@ -26,9 +28,7 @@ import org.junit.runners.Parameterized;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.assertEquals;
@@ -49,19 +49,28 @@ public class EscapeCharsTest extends WireTestCommon {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() {
         @NotNull List<Object[]> list = new ArrayList<>();
-        for (char i = 0; i < 300; i += 2) {
+        ExecutorService forkJoinPool = Jvm.isDebug() ? Executors.newSingleThreadExecutor() :ForkJoinPool.commonPool();
+        for (char i = 90; i < 300; i += 2) {
             char finalI = i;
             char ch1 = (char) (i + 1);
-            list.add(new Object[]{"" + i + ch1, ForkJoinPool.commonPool().submit(() -> testEscaped(finalI))});
+            Wire json = WireType.JSON_ONLY.apply(Bytes.allocateElasticDirect());
+            Wire text = WireType.TEXT.apply(Bytes.allocateElasticDirect());
+            Wire yaml = WireType.YAML_ONLY.apply(Bytes.allocateElasticDirect());
+
+            list.add(new Object[]{"JSON (" + (int) i + ") " + i + ch1, forkJoinPool.submit(() -> testEscaped(finalI, json))});
+            list.add(new Object[]{"TEXT (" + (int) i + ") " + i + ch1, forkJoinPool.submit(() -> testEscaped(finalI, text))});
+            list.add(new Object[]{"YAML (" + +(int) i + ") " + i + ch1, forkJoinPool.submit(() -> testEscaped(finalI, yaml))});
         }
         return list;
     }
 
-    static void testEscaped(char ch) {
+    static void testEscaped(char ch, @NotNull Wire wire) {
+        wire.reset();
         char ch1 = (char) (ch + 1);
-        @NotNull Wire wire = createWire();
-        wire.write("" + ch + ch1).text("" + ch + ch1);
-        wire.write("" + ch1 + ch).text("" + ch1 + ch);
+        wire.write("" + ch + ch1)
+                .text("" + ch + ch1);
+        wire.write("" + ch1 + ch)
+                .text("" + ch1 + ch);
 
         @NotNull StringBuilder sb = new StringBuilder();
         @Nullable String s = wire.read(sb).text();
@@ -70,13 +79,6 @@ public class EscapeCharsTest extends WireTestCommon {
         @Nullable String ss = wire.read(sb).text();
         assertEquals("key " + ch1 + ch, "" + ch1 + ch, sb.toString());
         assertEquals("value " + ch1 + ch, "" + ch1 + ch, ss);
-
-        wire.bytes().releaseLast();
-    }
-
-    @NotNull
-    static Wire createWire() {
-        return WireType.TEXT.apply(nativeBytes());
     }
 
     @Test
