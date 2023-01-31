@@ -555,15 +555,18 @@ public enum Wires {
         if (using == null)
             throw new IllegalStateException("failed to create instance of clazz=" + clazz + " is it aliased?");
 
-        final long position = in.wireIn().bytes().readPosition();
         Object marshallable = in.marshallable(using, strategy);
         E e = readResolve(marshallable);
         String name = nameOf(e);
         if (name != null) {
-            E e2 = (E) EnumCache.of(e.getClass()).valueOf(name);
+            Class<?> aClass = e.getClass();
+            E e2 = (E) EnumCache.of(aClass).valueOf(name);
             if (e != e2) {
-                in.wireIn().bytes().readPosition(position);
-                return (E) in.marshallable(e2, strategy);
+                Wire wire = Wires.acquireBinaryWire();
+                WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(aClass);
+                wm.writeMarshallable(e, wire);
+                wm.readMarshallable(e2, wire, null, false);
+                return e2;
             }
         }
         return e;

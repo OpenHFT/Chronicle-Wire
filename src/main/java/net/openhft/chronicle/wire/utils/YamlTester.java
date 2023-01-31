@@ -18,11 +18,18 @@
 
 package net.openhft.chronicle.wire.utils;
 
+import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.util.ThrowingFunction;
 import net.openhft.chronicle.wire.TextMethodTester;
 import net.openhft.chronicle.wire.WireOut;
+import net.openhft.chronicle.wire.YamlMethodTester;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public interface YamlTester {
@@ -100,6 +107,62 @@ public interface YamlTester {
             throw new AssertionError(ioe);
         }
     }
+
+    static <T> List<Object[]> parameters(ThrowingFunction<T, Object, Throwable> builder, Class<T> outClass, String paths, YamlAgitator... agitators) {
+        Function<T, Object> compFunction = out -> {
+            try {
+                return builder.apply(out);
+            } catch (Throwable t) {
+                throw new AssertionError(t);
+            }
+        };
+        List<Object[]> params = new ArrayList<>();
+        String[] pathArr = paths.split("\\s*,\\s*");
+        Function<T, Object> builder2 = out -> {
+            try {
+                return builder.apply(out);
+            } catch (Throwable t) {
+                throw new AssertionError(t);
+            }
+        };
+        for (String path : pathArr) {
+            String setup = path + "/_setup.yaml";
+            YamlTester yt =
+                    new YamlMethodTester<>(path + "/in.yaml", compFunction, outClass, path + "/out.yaml")
+                            .genericEvent("event")
+                            .setup(setup);
+            Object[] test = {path, yt};
+            params.add(test);
+
+            if (agitators.length > 0) {
+                Map<String, String> inputToNameMap = new LinkedHashMap<>();
+                for (YamlAgitator agitator : agitators) {
+                    Map<String, String> agitateMap = yt.agitate(agitator);
+                    for (Map.Entry<String, String> entry : agitateMap.entrySet()) {
+                        inputToNameMap.putIfAbsent(entry.getKey(), entry.getValue());
+                    }
+                }
+                for (Map.Entry<String, String> entry : inputToNameMap.entrySet()) {
+                    YamlTester yta = new YamlMethodTester<>(entry.getKey(), compFunction, outClass, path + "/" + entry.getValue() + "-out.yaml")
+                            .genericEvent("event")
+                            .setup(setup);
+
+                    Object[] testa = {path + "/" + entry.getValue(), yta};
+                    params.add(testa);
+                }
+            }
+        }
+        return params;
+    }
+
+    /**
+     * Using this test as a template, generate more tests using this YamlAgitator
+     *
+     * @param agitator to use
+     * @return a map of gerenated inputs to test names
+     * @throws IORuntimeException if an IO error occurs
+     */
+    Map<String, String> agitate(YamlAgitator agitator) throws IORuntimeException;
 
     /**
      * @return the expected String
