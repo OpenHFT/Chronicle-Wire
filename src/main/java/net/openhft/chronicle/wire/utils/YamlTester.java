@@ -72,7 +72,7 @@ public interface YamlTester {
      */
     static <T> YamlTester runTest(Function<T, Object> builder, Class<T> outClass, String path) throws AssertionError {
         try {
-            return new TextMethodTester<T>(
+            return new TextMethodTester<>(
                     path + "/in.yaml",
                     builder,
                     outClass,
@@ -96,7 +96,7 @@ public interface YamlTester {
      */
     static <T> YamlTester runTest(Function<T, Object> builder, Function<WireOut, T> outFunction, String path) throws AssertionError {
         try {
-            return new TextMethodTester<T>(
+            return new TextMethodTester<>(
                     path + "/in.yaml",
                     builder,
                     outFunction,
@@ -117,7 +117,7 @@ public interface YamlTester {
             }
         };
         List<Object[]> params = new ArrayList<>();
-        String[] pathArr = paths.split("\\s*,\\s*");
+        String[] pathArr = paths.split(",");
         Function<T, Object> builder2 = out -> {
             try {
                 return builder.apply(out);
@@ -126,6 +126,9 @@ public interface YamlTester {
             }
         };
         for (String path : pathArr) {
+            path = path.trim(); // trim without a regex
+            if (path.isEmpty())
+                continue;
             String setup = path + "/_setup.yaml";
             YamlTester yt =
                     new YamlMethodTester<>(path + "/in.yaml", compFunction, outClass, path + "/out.yaml")
