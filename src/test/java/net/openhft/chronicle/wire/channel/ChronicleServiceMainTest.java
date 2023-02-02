@@ -81,8 +81,9 @@ public class ChronicleServiceMainTest extends WireTestCommon {
                             .replaceAll("javaVendor: .*?,", "javaVendor: JV,")
                             .replaceAll("javaVersion: .*?,", "javaVersion: JV,")
             );
+        } finally {
+            main.close();
         }
-        main.close();
     }
 }
 
