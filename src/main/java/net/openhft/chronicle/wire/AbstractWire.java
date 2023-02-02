@@ -82,9 +82,9 @@ public abstract class AbstractWire implements Wire {
 
     @NotNull
     private TimingPauser acquireTimedParser() {
-        return timedParser != null
-                ? timedParser
-                : (timedParser = Pauser.timedBusy());
+        if (timedParser == null)
+                timedParser = Pauser.timedBusy();
+        return timedParser;
     }
 
     public boolean isInsideHeader() {
