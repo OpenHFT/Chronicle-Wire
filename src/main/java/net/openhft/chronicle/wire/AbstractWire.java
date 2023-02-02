@@ -130,7 +130,6 @@ public abstract class AbstractWire implements Wire {
 
     @NotNull
     private Wire headerNumber0(long headerNumber) {
-//        new Exception("thread: " + Thread.currentThread().getName() + "\n\tHeader number: " + Long.toHexString(headerNumber)).printStackTrace();
         this.headerNumber = headerNumber;
         return this;
     }
