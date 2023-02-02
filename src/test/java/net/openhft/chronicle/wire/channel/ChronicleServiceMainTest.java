@@ -62,24 +62,25 @@ public class ChronicleServiceMainTest extends WireTestCommon {
             assertEquals("" +
                             "!net.openhft.chronicle.wire.channel.OkHeader {\n" +
                             "  systemContext: {\n" +
-                            "    availableProcessors: 16,\n" +
+                            "    availableProcessors: PP,\n" +
                             "    hostId: 0,\n" +
                             "    hostName: HHH,\n" +
                             "    upTime: 20UU,\n" +
                             "    userCountry: UC,\n" +
                             "    userName: UN,\n" +
                             "    javaVendor: JV,\n" +
-                            "    javaVersion: \"1.8.0_271\"\n" +
+                            "    javaVersion: JV\n" +
                             "  },\n" +
                             "  sessionName: !!null \"\"\n" +
                             "}\n",
                     client.headerIn().toString()
+                            .replaceAll("availableProcessors: .*?,", "availableProcessors: PP,")
                             .replaceAll("hostName: .*?,", "hostName: HHH,")
                             .replaceAll("upTime: 20.*?,", "upTime: 20UU,")
                             .replaceAll("userCountry: .*?,", "userCountry: UC,")
                             .replaceAll("userName: .*?,", "userName: UN,")
                             .replaceAll("javaVendor: .*?,", "javaVendor: JV,")
-                            .replaceAll("javaVersion: .*?,", "javaVersion: JV,")
+                            .replaceAll("javaVersion: .*", "javaVersion: JV")
             );
         } finally {
             main.close();
