@@ -98,7 +98,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     @NotNull
-    private StringBuilder acquireStringBuilder() {
+    protected StringBuilder acquireStringBuilder() {
         StringUtils.setCount(sb, 0);
         return sb;
     }

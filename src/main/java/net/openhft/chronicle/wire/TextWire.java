@@ -379,12 +379,6 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     @NotNull
-    protected StringBuilder acquireStringBuilder() {
-        StringUtils.setCount(sb, 0);
-        return sb;
-    }
-
-    @NotNull
     protected StringBuilder readField(@NotNull StringBuilder sb) {
         consumePadding();
         try {
