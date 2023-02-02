@@ -18,9 +18,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
@@ -567,6 +567,7 @@ public abstract class AbstractWire implements Wire {
         IGNORING_CONSUMER {
             @Override
             public void accept(CharSequence charSequence) {
+                // method ignores all calls
             }
         }
     }
