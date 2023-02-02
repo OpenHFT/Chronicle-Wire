@@ -18,7 +18,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.bytes.MethodWriterInterceptorReturns;
 import net.openhft.chronicle.bytes.MethodWriterInvocationHandler;
 import net.openhft.chronicle.core.util.AbstractInvocationHandler;
 import org.jetbrains.annotations.NotNull;
