@@ -883,6 +883,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                     return wireOut();
                 writeSavedEventName();
             }
+            if (zonedDateTime == null)
+                return (T) nu11();
             final String s = zonedDateTime.toString();
             return (T) (s.endsWith("]") ? text(s) : asText(s));
         }
