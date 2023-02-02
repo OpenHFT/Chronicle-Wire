@@ -23,11 +23,11 @@ import net.openhft.chronicle.bytes.Bytes;
 public abstract class AbstractLongConverter implements LongConverter {
     protected final LongConverter converter;
 
-    public AbstractLongConverter(String chars) {
+    protected AbstractLongConverter(String chars) {
         this(LongConverter.forSymbols(chars));
     }
 
-    public AbstractLongConverter(LongConverter converter) {
+    protected AbstractLongConverter(LongConverter converter) {
         this.converter = converter;
     }
 
