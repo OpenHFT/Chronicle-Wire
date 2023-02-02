@@ -42,7 +42,6 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     private final MarshallableIn in;
     protected MessageHistory messageHistory;
     protected boolean dataEventProcessed;
-    private MethodReader delegate;
     private boolean closeIn = false;
     private boolean closed;
     private Consumer<MessageHistory> historyConsumer = NO_OP_MH_CONSUMER;
