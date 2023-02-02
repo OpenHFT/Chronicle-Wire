@@ -41,7 +41,7 @@ import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors
 import static net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor.builder;
 import static net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor.extractingIndex;
 
-public class DemoTest {
+public class StreamingDemoMain {
 
     public static void main(String[] args) {
 
