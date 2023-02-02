@@ -109,22 +109,9 @@ public interface YamlTester {
     }
 
     static <T> List<Object[]> parameters(ThrowingFunction<T, Object, Throwable> builder, Class<T> outClass, String paths, YamlAgitator... agitators) {
-        Function<T, Object> compFunction = out -> {
-            try {
-                return builder.apply(out);
-            } catch (Throwable t) {
-                throw new AssertionError(t);
-            }
-        };
+        Function<T, Object> compFunction = ThrowingFunction.asFunction(builder);
         List<Object[]> params = new ArrayList<>();
         String[] pathArr = paths.split(",");
-        Function<T, Object> builder2 = out -> {
-            try {
-                return builder.apply(out);
-            } catch (Throwable t) {
-                throw new AssertionError(t);
-            }
-        };
         for (String path : pathArr) {
             path = path.trim(); // trim without a regex
             if (path.isEmpty())

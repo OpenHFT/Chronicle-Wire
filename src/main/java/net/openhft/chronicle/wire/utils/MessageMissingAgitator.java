@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 
 public class MessageMissingAgitator implements YamlAgitator {
     static final Pattern SEP = Pattern.compile("[.][.][.]\\s*");
-    static YamlAgitator INSTANCE = new MessageMissingAgitator(4);
+    static final YamlAgitator INSTANCE = new MessageMissingAgitator(4);
     private int limit;
 
     public MessageMissingAgitator(int limit) {

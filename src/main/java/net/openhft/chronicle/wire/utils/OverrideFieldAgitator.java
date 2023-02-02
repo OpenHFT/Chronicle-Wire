@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire.utils;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 public class OverrideFieldAgitator implements YamlAgitator {
     private String[] fields;
@@ -39,7 +38,7 @@ public class OverrideFieldAgitator implements YamlAgitator {
             if (!yaml.contains(" " + fieldValue[0] + ": "))
                 continue;
             String yaml2 = yaml.replaceAll("( )+(" + fieldValue[0] + ": .*)",
-                    "$1# override $2 to " + field.replaceAll("\n", " ") + " \n" +
+                    "$1# override $2 to " + field.replace("\n", " ") + " \n" +
                             "$1" + field + ",\n" +
                             "$1-" + fieldValue[0] + ": ");
             if (yaml2.equals(yaml))

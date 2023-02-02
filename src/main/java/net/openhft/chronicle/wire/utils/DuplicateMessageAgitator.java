@@ -24,7 +24,8 @@ import java.util.regex.Pattern;
 
 public class DuplicateMessageAgitator implements YamlAgitator {
     static final Pattern SEP = Pattern.compile("[.][.][.]\\s*");
-    static YamlAgitator INSTANCE = new DuplicateMessageAgitator(4);
+    static final YamlAgitator INSTANCE = new DuplicateMessageAgitator(4);
+    public static final String YAML_EOD = "...\n";
     private final int limit;
 
     public DuplicateMessageAgitator(int limit) {
@@ -37,12 +38,12 @@ public class DuplicateMessageAgitator implements YamlAgitator {
         Map<String, String> ret = new LinkedHashMap<>();
         for (int i = 0; i < messages.length && i < limit; i++) {
             StringBuilder sb = new StringBuilder();
-            String sep = yaml.endsWith("...\n") ? "" : yaml.endsWith("...") ? "\n" : "...\n";
+            String sep = yaml.endsWith(YAML_EOD) ? "" : yaml.endsWith("...") ? "\n" : YAML_EOD;
             sb.append("=")
                     .append(yaml)
                     .append(sep)
                     .append(messages[i])
-                    .append("...\n");
+                    .append(YAML_EOD);
             ret.put(sb.toString(), "msg-" + i + "-duplicated");
         }
         return ret;
