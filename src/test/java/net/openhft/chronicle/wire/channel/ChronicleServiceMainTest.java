@@ -79,7 +79,7 @@ public class ChronicleServiceMainTest extends WireTestCommon {
                             .replaceAll("upTime: 20.*?,", "upTime: 20UU,")
                             .replaceAll("userCountry: .*?,", "userCountry: UC,")
                             .replaceAll("userName: .*?,", "userName: UN,")
-                            .replaceAll("javaVendor: \"Azul Systems, Inc.\",", "javaVendor: JV,")
+                            .replaceAll("javaVendor: \"[^\"]+\",", "javaVendor: JV,")
                             .replaceAll("javaVendor: .*?,", "javaVendor: JV,")
                             .replaceAll("javaVersion: .*", "javaVersion: JV")
             );
