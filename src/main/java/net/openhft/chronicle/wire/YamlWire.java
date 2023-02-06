@@ -426,12 +426,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     @NotNull
-    private StringBuilder acquireStringBuilder() {
-        StringUtils.setCount(sb, 0);
-        return sb;
-    }
-
-    @NotNull
     protected StringBuilder readField(@NotNull StringBuilder sb) {
         startEventIfTop();
         if (yt.current() == YamlToken.MAPPING_KEY) {

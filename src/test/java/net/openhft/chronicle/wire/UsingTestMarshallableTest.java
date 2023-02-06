@@ -27,6 +27,8 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+
 
 public class UsingTestMarshallableTest {
 
@@ -48,7 +50,13 @@ public class UsingTestMarshallableTest {
         //String replace = value.replace("\n", "\\n");
 
        // System.out.println(byteBufferBytes.toHexString());
-       // System.out.println(value);
+        assertEquals("" +
+                "--- !!data\n" +
+                "any-key: {\n" +
+                "  name: hello world,\n" +
+                "  count: 0\n" +
+                "}\n",
+                value);
 
          // Assert.assertTrue(replace.length() > 1);
         byteBufferBytes.releaseLast();
@@ -74,7 +82,7 @@ public class UsingTestMarshallableTest {
 
        // System.out.println(result.toString());
 
-        Assert.assertEquals("text", result.text.toString());
+        assertEquals("text", result.text.toString());
 
         bytes.releaseLast();
     }
@@ -98,8 +106,8 @@ public class UsingTestMarshallableTest {
         {
             @NotNull SortedFilter sortedFilter = new SortedFilter();
             wire.read().marshallable(sortedFilter);
-            Assert.assertEquals(1, sortedFilter.marshableFilters.size());
-            Assert.assertEquals(expected, sortedFilter.marshableFilters.get(0));
+            assertEquals(1, sortedFilter.marshableFilters.size());
+            assertEquals(expected, sortedFilter.marshableFilters.get(0));
         }
     }
 

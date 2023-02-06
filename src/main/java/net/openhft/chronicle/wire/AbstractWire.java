@@ -18,9 +18,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
@@ -82,9 +82,9 @@ public abstract class AbstractWire implements Wire {
 
     @NotNull
     private TimingPauser acquireTimedParser() {
-        return timedParser != null
-                ? timedParser
-                : (timedParser = Pauser.timedBusy());
+        if (timedParser == null)
+                timedParser = Pauser.timedBusy();
+        return timedParser;
     }
 
     public boolean isInsideHeader() {
@@ -130,7 +130,6 @@ public abstract class AbstractWire implements Wire {
 
     @NotNull
     private Wire headerNumber0(long headerNumber) {
-//        new Exception("thread: " + Thread.currentThread().getName() + "\n\tHeader number: " + Long.toHexString(headerNumber)).printStackTrace();
         this.headerNumber = headerNumber;
         return this;
     }
@@ -310,6 +309,8 @@ public abstract class AbstractWire implements Wire {
             if (isNotComplete(header)) {
                 if (header != END_OF_DATA)
                     Jvm.warn().on(getClass(), new Exception("Incomplete header found at pos: " + pos + ": " + Integer.toHexString(header) + ", overwriting"));
+                else
+                    throw new WriteAfterEOFException();
                 bytes.writeVolatileInt(pos, NOT_INITIALIZED);
                 break;
             }
@@ -568,6 +569,7 @@ public abstract class AbstractWire implements Wire {
         IGNORING_CONSUMER {
             @Override
             public void accept(CharSequence charSequence) {
+                // method ignores all calls
             }
         }
     }

@@ -17,18 +17,8 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.jetbrains.annotations.NotNull;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import java.io.StreamCorruptedException;
-
-@Ignore("Long running test")
-public class RawWirePerfTest extends WireTestCommon {
-    @Test
-    public void testRawPerf() throws StreamCorruptedException {
-        @NotNull BinaryWirePerfTest test = new BinaryWirePerfTest(-1, true, false, true);
-        test.wirePerf();
-        test.wirePerfInts();
+public class WriteAfterEOFException extends IllegalStateException {
+    public WriteAfterEOFException() {
+        super("You should not be able to write at EOF");
     }
 }

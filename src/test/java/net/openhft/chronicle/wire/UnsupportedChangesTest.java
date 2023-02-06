@@ -19,6 +19,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
+
 import net.openhft.chronicle.core.onoes.ExceptionKey;
 import net.openhft.chronicle.core.onoes.LogLevel;
 import net.openhft.chronicle.core.time.SetTimeProvider;
@@ -30,6 +31,8 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -47,14 +50,13 @@ public class UnsupportedChangesTest extends WireTestCommon {
 
     @Test
     public void scalarToMarshallable() {
-        Map<ExceptionKey, Integer> exceptions = Jvm.recordExceptions(true);
-
         Nested nested = Marshallable.fromString(Nested.class, "{\n" +
                 "inner: 128\n" +
                 "}\n");
         assertEquals("!net.openhft.chronicle.wire.UnsupportedChangesTest$Nested {\n" +
                 "  inner: !!null \"\"\n" +
                 "}\n", nested.toString());
+
         ExceptionKey ek = new ExceptionKey(
                 (long) 1e9,
                 LogLevel.WARN,
@@ -62,12 +64,13 @@ public class UnsupportedChangesTest extends WireTestCommon {
                 "Unable to parse field: inner, as a marshallable as it is 128",
                 exceptions.keySet().iterator().next().throwable);
         assertEquals(Collections.singletonMap(ek, 1), exceptions);
+
+        expectException("Unable to parse field: inner, as a marshallable as it is 128");
     }
 
     @Test
     public void marshallableToScalar() {
         assumeFalse(Jvm.isArm());
-        Map<ExceptionKey, Integer> exceptions = Jvm.recordExceptions(true);
 
         Wrapper wrapper = Marshallable.fromString(Wrapper.class, "{\n" +
                 "pnl: { a: 128, b: 1.0 },\n" +
@@ -78,13 +81,15 @@ public class UnsupportedChangesTest extends WireTestCommon {
                 "  second: 123.4\n" +
                 "}\n", wrapper.toString());
 
+
         assertEquals("{ExceptionKey{nanoTimestamp=1.0, level=WARN, clazz=class net.openhft.chronicle.wire.TextWire$TextValueIn, message='Unable to read {a=128, b=1.0} as a double.', throwable=}=1}", exceptions.toString());
+
+        expectException("Unable to read {a=128, b=1.0} as a double.");
+
     }
 
     @Test
     public void marshallableToScala2r() {
-        Map<ExceptionKey, Integer> exceptions = Jvm.recordExceptions(true);
-
         IntWrapper wrapper = Marshallable.fromString(IntWrapper.class, "{\n" +
                 "pnl: { a: 128, b: 1.0 },\n" +
                 "second: 1234," +
@@ -94,7 +99,11 @@ public class UnsupportedChangesTest extends WireTestCommon {
                 "  second: 1234\n" +
                 "}\n", wrapper.toString());
 
+
         assertEquals("{ExceptionKey{nanoTimestamp=1.0, level=WARN, clazz=class net.openhft.chronicle.wire.TextWire$TextValueIn, message='Unable to read {a=128, b=1.0} as a long.', throwable=}=1}", exceptions.toString());
+
+        expectException("Unable to read {a=128, b=1.0} as a long.");
+
     }
 
     @Test

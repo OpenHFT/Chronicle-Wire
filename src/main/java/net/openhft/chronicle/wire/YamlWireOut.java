@@ -98,7 +98,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     @NotNull
-    private StringBuilder acquireStringBuilder() {
+    protected StringBuilder acquireStringBuilder() {
         StringUtils.setCount(sb, 0);
         return sb;
     }
@@ -883,6 +883,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                     return wireOut();
                 writeSavedEventName();
             }
+            if (zonedDateTime == null)
+                return (T) nu11();
             final String s = zonedDateTime.toString();
             return (T) (s.endsWith("]") ? text(s) : asText(s));
         }

@@ -18,7 +18,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.bytes.MethodWriterInterceptorReturns;
 import net.openhft.chronicle.bytes.MethodWriterInvocationHandler;
 import net.openhft.chronicle.core.util.AbstractInvocationHandler;
 import org.jetbrains.annotations.NotNull;
@@ -31,19 +30,12 @@ import java.util.function.BiFunction;
 
 public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvocationHandler implements MethodWriterInvocationHandler {
     private final Map<Method, ParameterHolderSequenceWriter> parameterMap = new ConcurrentHashMap<>();
-    private final ThreadLocal<Object> proxy = new ThreadLocal<>();
-    private final BiFunction<Method, Object[], Object> onMethod = (m, a) -> {
-        this.handleInvoke.accept(m, a);
-        return m.getReturnType().isInterface() ? this.proxy.get() : null;
-    };
     protected boolean recordHistory;
     protected String genericEvent = "";
-    private BiConsumer<Method, Object[]> handleInvoke;
     private boolean useMethodIds;
 
     protected AbstractMethodWriterInvocationHandler(Class<?> tClass) {
         super(tClass);
-        this.handleInvoke = this::handleInvoke;
     }
 
     @Override
