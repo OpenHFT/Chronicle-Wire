@@ -21,8 +21,10 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.Closeable;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
+import net.openhft.chronicle.wire.utils.YamlAgitator;
 import net.openhft.chronicle.wire.utils.YamlTester;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,6 +51,7 @@ import java.util.function.Function;
 public class TextMethodTester<T> implements YamlTester {
     private static final boolean TESTS_INCLUDE_COMMENTS = Jvm.getBoolean("tests.include.comments", true);
 
+    private static final boolean DUMP_TESTS = Jvm.getBoolean("dump.tests");
     private static final boolean REGRESS_TESTS = Jvm.getBoolean("regress.tests");
     private final String input;
     private final Class<T> outputClass;
@@ -210,13 +213,25 @@ public class TextMethodTester<T> implements YamlTester {
         if (component instanceof PostSetup)
             ((PostSetup) component).postSetup();
 
-        Wire wire = createWire(Bytes.wrapForRead(IOTools.readFile(clazz, input)));
+        if (DUMP_TESTS)
+            System.out.println("input: " + input);
+        byte[] byteArray = input.startsWith("=")
+                ? input.substring(1).trim().getBytes()
+                : IOTools.readFile(clazz, input);
+        Wire wire = createWire(Bytes.wrapForRead(byteArray));
         if (TESTS_INCLUDE_COMMENTS)
             wire.commentListener(wireOut::writeComment);
 
         // expected
         if (retainLast == null) {
-            expected = new String(IOTools.readFile(clazz, output), StandardCharsets.ISO_8859_1).trim().replace("\r", "");
+            if (REGRESS_TESTS) {
+                expected = "";
+            } else {
+                String outStr = output.startsWith("=")
+                        ? output.substring(1)
+                        : new String(IOTools.readFile(clazz, output), StandardCharsets.ISO_8859_1);
+                expected = outStr.trim().replace("\r", "");
+            }
         } else {
             expected = loadLastValues().toString().trim();
         }
@@ -238,20 +253,27 @@ public class TextMethodTester<T> implements YamlTester {
             exceptionHandlerSetup.accept(reader, writer);
 
         long pos = -1;
-        while (readOne(reader)) {
-            if (pos == wire.bytes().readPosition()) {
-                Jvm.warn().on(getClass(), "Bailing out of malformed message");
-                break;
-            }
-            Bytes<?> bytes2 = wireOut.bytes();
-            if (retainLast == null) {
-                if (bytes2.writePosition() > 0) {
-                    int last = bytes2.peekUnsignedByte(bytes2.writePosition() - 1);
-                    if (last >= ' ')
-                        bytes2.append('\n');
+        boolean ok = false;
+        try {
+            while (readOne(reader)) {
+                if (pos == wire.bytes().readPosition()) {
+                    Jvm.warn().on(getClass(), "Bailing out of malformed message");
+                    break;
                 }
+                Bytes<?> bytes2 = wireOut.bytes();
+                if (retainLast == null) {
+                    if (bytes2.writePosition() > 0) {
+                        int last = bytes2.peekUnsignedByte(bytes2.writePosition() - 1);
+                        if (last >= ' ')
+                            bytes2.append('\n');
+                    }
+                }
+                pos = bytes2.readPosition();
             }
-            pos = bytes2.readPosition();
+            ok = true;
+        } finally {
+            if (!ok)
+                System.err.println("Unable to parse\n" + new String(byteArray, StandardCharsets.UTF_8));
         }
         if (retainLast != null)
             wireOut.bytes().clear();
@@ -269,7 +291,7 @@ public class TextMethodTester<T> implements YamlTester {
         Closeable.closeQuietly(components);
 
         actual = wireOut.toString().trim();
-        if (REGRESS_TESTS) {
+        if (REGRESS_TESTS && !output.startsWith("=")) {
             Jvm.pause(100);
             expected = actual = wireOut.toString().trim();
         } else {
@@ -303,7 +325,14 @@ public class TextMethodTester<T> implements YamlTester {
 
                     );
                 } catch (FileNotFoundException e) {
-                    throw fnfe;
+                    File out2 = new File(this.output);
+                    File out = new File(out2.getParentFile(), "out.yaml");
+                    try {
+                        String output2dir = BytesUtil.findFile(replaceTargetWithSource(out.getPath()));
+                        output2 = new File(new File(output2dir).getParentFile(), out2.getName()).getPath();
+                    } catch (FileNotFoundException e2) {
+                        throw fnfe;
+                    }
                 }
             }
             System.err.println("The expected output for " + output2 + " has been updated, check your commits");
@@ -319,6 +348,19 @@ public class TextMethodTester<T> implements YamlTester {
         if (!expected.trim().equals(actual.trim()) && !setupNotFound.isEmpty())
             Jvm.warn().on(getClass(), setupNotFound);
         return this;
+    }
+
+    @Override
+    public Map<String, String> agitate(YamlAgitator agitator) throws IORuntimeException {
+        try {
+            final Class<?> clazz = outputClass == null ? getClass() : outputClass;
+            String yaml = input.startsWith("=")
+                    ? input.substring(1)
+                    : new String(IOTools.readFile(clazz, input), StandardCharsets.UTF_8);
+            return agitator.generateInputs(yaml);
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
     }
 
     public boolean readOne(MethodReader reader0) {
@@ -381,10 +423,22 @@ public class TextMethodTester<T> implements YamlTester {
     }
 
     public String expected() {
+        if (expected == null)
+            try {
+                run();
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
         return expected;
     }
 
     public String actual() {
+        if (actual == null)
+            try {
+                run();
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
         return actual;
     }
 

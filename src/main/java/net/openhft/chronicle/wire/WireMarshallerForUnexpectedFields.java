@@ -62,11 +62,15 @@ public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
                     if (rm == null) {
                         vin.skipValue();
                     } else {
-                        try {
-                            rm.unexpectedField(sb, vin);
-                        }
-                        catch (Exception e) {
-                            throw new UnexpectedFieldHandlingException(e);
+                        // implicitly ignore fields starting with -
+                        if (sb.length() > 0 && sb.charAt(0) == '-') {
+                            vin.skipValue();
+                        } else {
+                            try {
+                                rm.unexpectedField(sb, vin);
+                            } catch (Exception e) {
+                                throw new UnexpectedFieldHandlingException(e);
+                            }
                         }
                     }
                 } else {

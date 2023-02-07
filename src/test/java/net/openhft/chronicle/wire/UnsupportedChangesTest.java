@@ -19,13 +19,33 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
+
+import net.openhft.chronicle.core.onoes.ExceptionKey;
+import net.openhft.chronicle.core.onoes.LogLevel;
+import net.openhft.chronicle.core.time.SetTimeProvider;
+import net.openhft.chronicle.core.time.SystemTimeProvider;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assume.assumeFalse;
 
 public class UnsupportedChangesTest extends WireTestCommon {
+    @Before
+    public void setUp() {
+        SystemTimeProvider.CLOCK = new SetTimeProvider((long) 1e9).autoIncrement(1, TimeUnit.SECONDS);
+    }
+
+    @After
+    public void tearDown() {
+        SystemTimeProvider.CLOCK = SystemTimeProvider.INSTANCE;
+    }
+
     @Test
     public void scalarToMarshallable() {
         Nested nested = Marshallable.fromString(Nested.class, "{\n" +
@@ -34,6 +54,15 @@ public class UnsupportedChangesTest extends WireTestCommon {
         assertEquals("!net.openhft.chronicle.wire.UnsupportedChangesTest$Nested {\n" +
                 "  inner: !!null \"\"\n" +
                 "}\n", nested.toString());
+
+        ExceptionKey ek = new ExceptionKey(
+                (long) 1e9,
+                LogLevel.WARN,
+                WireMarshaller.ObjectFieldAccess.class,
+                "Unable to parse field: inner, as a marshallable as it is 128",
+                exceptions.keySet().iterator().next().throwable);
+        assertEquals(Collections.singletonMap(ek, 1), exceptions);
+
         expectException("Unable to parse field: inner, as a marshallable as it is 128");
     }
 
@@ -49,7 +78,12 @@ public class UnsupportedChangesTest extends WireTestCommon {
                 "  pnl: 0.0,\n" +
                 "  second: 123.4\n" +
                 "}\n", wrapper.toString());
+
+        exceptions.keySet().removeIf(k -> k.level == LogLevel.DEBUG);
+        assertEquals("{ExceptionKey{nanoTimestamp=1.0, level=WARN, clazz=class net.openhft.chronicle.wire.TextWire$TextValueIn, message='Unable to read {a=128, b=1.0} as a double.', throwable=}=1}", exceptions.toString());
+
         expectException("Unable to read {a=128, b=1.0} as a double.");
+
     }
 
     @Test
@@ -62,7 +96,12 @@ public class UnsupportedChangesTest extends WireTestCommon {
                 "  pnl: 0,\n" +
                 "  second: 1234\n" +
                 "}\n", wrapper.toString());
+
+
+        assertEquals("{ExceptionKey{nanoTimestamp=1.0, level=WARN, clazz=class net.openhft.chronicle.wire.TextWire$TextValueIn, message='Unable to read {a=128, b=1.0} as a long.', throwable=}=1}", exceptions.toString());
+
         expectException("Unable to read {a=128, b=1.0} as a long.");
+
     }
 
     @Test

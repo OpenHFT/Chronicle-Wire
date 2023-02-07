@@ -52,7 +52,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     static final String BINARY_TAG = "!binary";
     static final String DATA_TAG = "!data";
 
-        //for (char ch : "?%&*@`0123456789+- ',#:{}[]|>!\\".toCharArray())
+    //for (char ch : "?%&*@`0123456789+- ',#:{}[]|>!\\".toCharArray())
     private final TextValueIn valueIn = createValueIn();
     private final YamlTokeniser yt;
     private final Map<String, Object> anchorValues = new HashMap<>();
@@ -449,13 +449,16 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @Override
     public <K> K readEvent(@NotNull Class<K> expectedClass) {
         startEventIfTop();
-        if (yt.current() == YamlToken.MAPPING_KEY) {
-            YamlToken next = yt.next();
-            if (next == YamlToken.MAPPING_KEY) {
-                return readEvent(expectedClass);
-            }
+        switch (yt.current()) {
+            case MAPPING_KEY:
+                YamlToken next = yt.next();
+                if (next == YamlToken.MAPPING_KEY) {
+                    return readEvent(expectedClass);
+                }
 
-            return valueIn.object(expectedClass);
+                return valueIn.object(expectedClass);
+            case NONE:
+                return null;
         }
         throw new UnsupportedOperationException(yt.toString());
     }
@@ -684,9 +687,12 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @Override
     public void startEvent() {
         consumePadding();
-        if (yt.current() == YamlToken.MAPPING_START) {
-            yt.next(Integer.MAX_VALUE);
-            return;
+        switch (yt.current()) {
+            case MAPPING_START:
+                yt.next(Integer.MAX_VALUE);
+                return;
+            case NONE:
+                return;
         }
         throw new UnsupportedOperationException(yt.toString());
     }
@@ -701,7 +707,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @Override
     public boolean isEndEvent() {
         consumePadding();
-        return yt.current() == YamlToken.MAPPING_END;
+        YamlToken current = yt.current();
+        return current == YamlToken.MAPPING_END
+                || current == YamlToken.NONE;
     }
 
     @Override
@@ -1271,7 +1279,31 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
         @Override
         public <T> boolean sequence(@NotNull List<T> list, @NotNull List<T> buffer, @NotNull Supplier<T> bufferAdd) {
-            throw new UnsupportedOperationException(yt.toString());
+            consumePadding();
+            if (isNull()) {
+                return false;
+            }
+            list.clear();
+            if (yt.current() == YamlToken.SEQUENCE_START) {
+                int minIndent = yt.secondTopContext().indent;
+                yt.next(Integer.MAX_VALUE);
+
+                while(hasNextSequenceItem()) {
+                    if (buffer.size() <= list.size())
+                        buffer.add(bufferAdd.get());
+                    Object using = buffer.get(list.size());
+                    list.add((T) valueIn.object(using, using.getClass()));
+                }
+
+                if (yt.current() == YamlToken.NONE)
+                    yt.next(minIndent);
+                if (yt.current() == YamlToken.SEQUENCE_END)
+                    yt.next(minIndent);
+
+            } else {
+                throw new UnsupportedOperationException(yt.toString());
+            }
+            return true;
         }
 
         @NotNull
@@ -1430,8 +1462,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             }
             switch (yt.current()) {
                 case TAG:
-                    typePrefix(null, (o, x) -> { /* sets acquireStringBuilder(); */});
-                    break;
+                    Class clazz = typePrefix();
+                    if (clazz != object.getClass())
+                        object = ObjectUtils.newInstance(clazz);
+                    return marshallable(object, strategy);
 
                 case SEQUENCE_START:
                     Jvm.warn().on(getClass(), "Expected a {} but was blank for type " + object.getClass());
