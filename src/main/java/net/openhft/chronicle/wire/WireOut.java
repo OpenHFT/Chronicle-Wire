@@ -168,11 +168,26 @@ public interface WireOut extends WireCommon, MarshallableOut {
         WireInternal.writeData(this, metaData, true, writer);
     }
 
+    /**
+     * INTERNAL METHOD, call writingDocument instead
+     * <p>
+     * Update/end a header for a document
+     */
     void updateHeader(long position, boolean metaData, int expectedHeader) throws StreamCorruptedException;
 
+    /**
+     * INTERNAL METHOD, call writingDocument instead
+     * <p>
+     * Start a header for a document
+     * @param safeLength ensure there is at least this much space
+     * @return the position of the header
+     * @throws WriteAfterEOFException if you attempt to append an excerpt after an EOF has been written
+     */
     long enterHeader(long safeLength);
 
     /**
+     * INTERNAL METHOD, call writingDocument instead
+     * <p>
      * Start the first header, if there is none This will increment the headerNumber as appropriate
      * if successful <p> Note: the file might contain other data and the caller has to check this.
      * </p>
@@ -182,6 +197,8 @@ public interface WireOut extends WireCommon, MarshallableOut {
     boolean writeFirstHeader();
 
     /**
+     * INTERNAL METHOD, call writingDocument instead
+     * <p>
      * update the first header after writing.
      */
     void updateFirstHeader();
