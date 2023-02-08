@@ -39,6 +39,10 @@ public interface YamlTester {
      * You can check the output has changing in a reasonable way when committing the changes.
      */
     boolean REGRESS_TESTS = Jvm.getBoolean("regress.tests");
+    /**
+     * When enabled only the base tests are run. i.e. generated tests are skipped.
+     */
+    boolean BASE_TESTS = Jvm.getBoolean("base.tests");
 
     /**
      * Test a component implemented in a class using in.yaml comparing with out.yaml,
@@ -130,6 +134,9 @@ public interface YamlTester {
                             .setup(setup);
             Object[] test = {path, yt};
             params.add(test);
+
+            if (BASE_TESTS)
+                continue;
 
             String in_yaml;
             try {
