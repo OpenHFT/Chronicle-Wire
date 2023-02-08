@@ -29,6 +29,7 @@ import net.openhft.chronicle.wire.YamlMethodTester;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 
@@ -124,9 +125,63 @@ public interface YamlTester {
             Object[] test = {path, yt};
             params.add(test);
 
+            String in_yaml;
+            try {
+                in_yaml = new String(IOTools.readFile(outClass, path + "/in.yaml"), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
+
+            String _setup_yaml = "";
+            try {
+                _setup_yaml = new String(IOTools.readFile(outClass, path + "/_setup.yaml"), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                // ignored
+            }
+
             final boolean REGRESS_TESTS = Jvm.getBoolean("regress.tests");
 
             SortedSet<String> skipping = new TreeSet<>();
+            // add combination tests
+            for (String path2 : pathArr) {
+                path2 = path2.trim(); // trim without a regex
+                if (path2.isEmpty())
+                    continue;
+                String name = path2.replaceAll("[:/\\\\]+", "_");
+                String output = path + "/out-" + name + ".yaml";
+
+                try {
+                    if (!REGRESS_TESTS)
+                        IOTools.urlFor(builder.getClass(), output);
+
+                    String in_yaml2;
+                    try {
+                        in_yaml2 = new String(IOTools.readFile(outClass, path2 + "/in.yaml"), StandardCharsets.UTF_8);
+                    } catch (IOException e) {
+                        throw new IORuntimeException(e);
+                    }
+
+                    String _setup_yaml2 = "";
+                    try {
+                        _setup_yaml2 = new String(IOTools.readFile(outClass, path2 + "/_setup.yaml"), StandardCharsets.UTF_8);
+                    } catch (IOException e) {
+                        // ignored
+                    }
+
+                    String in2 = "=\n" + in_yaml + "\n" + in_yaml2;
+                    String setup2 = "=\n" + _setup_yaml + "\n" + _setup_yaml2;
+                    YamlTester yt2 =
+                            new YamlMethodTester<>(in2, compFunction, outClass, output)
+                                    .genericEvent("event")
+                                    .setup(setup2);
+                    Object[] test2 = {path + "+" + path2, yt2};
+                    params.add(test2);
+                } catch (FileNotFoundException ioe) {
+                    skipping.add(path + "/" + path + "+" + path2);
+                }
+            }
+
+            // add agitated tests
             if (agitators.length > 0) {
                 Map<String, String> inputToNameMap = new LinkedHashMap<>();
                 for (YamlAgitator agitator : agitators) {

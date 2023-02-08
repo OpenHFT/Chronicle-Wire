@@ -36,7 +36,7 @@ public class YamlTesterParametersTest extends WireTestCommon {
     static final String paths = "" +
             "yaml-tester/t1," +
             "yaml-tester/t2," +
-            "yaml-tester/t3-new," +
+            "yaml-tester/t3," +
             "yaml-tester/comments-new";
 
     final String name;

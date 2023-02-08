@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.wire.utils;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.time.SetTimeProvider;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.wire.TextMethodTester;
@@ -29,6 +30,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -58,9 +60,10 @@ public class YamlTesterTest extends WireTestCommon {
 
     @Test
     public void t3() {
+        assumeFalse(Jvm.getBoolean("regress.tests"));
         expectException("setup.yaml not found");
         final YamlTester yt = YamlTester.runTest(TestImpl.class, "yaml-tester/t3");
-        assertNotEquals(yt.expected(), yt.actual());
+        assertNotEquals("This tests an inconsistency was found, so they shouldn't be the same", yt.expected(), yt.actual());
     }
 
     @Test

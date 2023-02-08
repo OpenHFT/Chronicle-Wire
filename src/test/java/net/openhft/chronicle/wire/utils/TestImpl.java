@@ -25,7 +25,7 @@ import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
 
 public class TestImpl implements TestIn {
     private final TestOut out;
-    private long time;
+    private long time, prevEventTime;
 
     public TestImpl(TestOut out) {
         this.out = out;
@@ -33,11 +33,16 @@ public class TestImpl implements TestIn {
 
     @Override
     public void time(@LongConversion(NanoTimestampLongConverter.class) long time) {
+        if (time < this.time)
+            out.error("Time cannot be turned backwards");
         this.time = time;
     }
 
     @Override
     public void testEvent(TestEvent dto) {
+        if (dto.eventTime < prevEventTime)
+            out.error("The eventTime was older than a previous message");
+        prevEventTime = dto.eventTime;
         if (time != 0)
             dto.processedTime = time;
         dto.currentTime = CLOCK.currentTimeNanos();
