@@ -60,7 +60,7 @@ public class YamlTesterTest extends WireTestCommon {
 
     @Test
     public void t3() {
-        assumeFalse(Jvm.getBoolean("regress.tests"));
+        assumeFalse(YamlTester.REGRESS_TESTS);
         expectException("setup.yaml not found");
         final YamlTester yt = YamlTester.runTest(TestImpl.class, "yaml-tester/t3");
         assertNotEquals("This tests an inconsistency was found, so they shouldn't be the same", yt.expected(), yt.actual());

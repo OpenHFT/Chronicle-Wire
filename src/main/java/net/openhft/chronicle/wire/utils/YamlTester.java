@@ -35,6 +35,12 @@ import java.util.function.Function;
 
 public interface YamlTester {
     /**
+     * Enabling this will overwrite the output yaml file instead of checking it. The test will still fail on an exception.
+     * You can check the output has changing in a reasonable way when committing the changes.
+     */
+    boolean REGRESS_TESTS = Jvm.getBoolean("regress.tests");
+
+    /**
      * Test a component implemented in a class using in.yaml comparing with out.yaml,
      * with optionally setup.yaml to initialise it.
      *
@@ -138,8 +144,6 @@ public interface YamlTester {
             } catch (IOException e) {
                 // ignored
             }
-
-            final boolean REGRESS_TESTS = Jvm.getBoolean("regress.tests");
 
             SortedSet<String> skipping = new TreeSet<>();
             // add combination tests

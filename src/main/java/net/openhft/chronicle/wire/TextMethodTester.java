@@ -52,7 +52,6 @@ public class TextMethodTester<T> implements YamlTester {
     private static final boolean TESTS_INCLUDE_COMMENTS = Jvm.getBoolean("tests.include.comments", true);
 
     private static final boolean DUMP_TESTS = Jvm.getBoolean("dump.tests");
-    private static final boolean REGRESS_TESTS = Jvm.getBoolean("regress.tests");
     private final String input;
     private final Class<T> outputClass;
     private final Function<WireOut, T> outputFunction;
