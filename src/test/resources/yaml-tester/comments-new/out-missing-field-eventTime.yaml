@@ -5,10 +5,11 @@
 # comment 4
 # comment 5
 # comment 6
+# missing eventTime: 2022-05-17T20:25:01.001
 # comment 7
 ---
 testEvent: {
-  eventTime: 2022-05-17T20:25:01.001,
+  eventTime: 0,
   processedTime: 2022-05-17T20:25:02.002,
   currentTime: 2022-05-17T20:26:00
 }

@@ -20,11 +20,13 @@ package net.openhft.chronicle.wire.utils;
 
 import net.openhft.chronicle.core.time.SetTimeProvider;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
+import net.openhft.chronicle.wire.TextMethodTester;
 import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -65,6 +67,51 @@ public class YamlTesterTest extends WireTestCommon {
     public void comments() {
         // Note using YamlWire instead of TextWire moves comment 8
         final YamlTester yt = YamlTester.runTest(TestImpl::new, TestOut.class, "yaml-tester/comments");
+        assertEquals(yt.expected(), yt.actual());
+    }
+
+    @Test
+    public void direct() throws IOException {
+        YamlTester yt = new TextMethodTester<>(
+                    "=" +
+                            "# comment 1\n" +
+                            "---\n" +
+                            "# comment 2\n" +
+                            "time: 2022-05-17T20:25:02.002\n" +
+                            "# comment 3\n" +
+                            "...\n" +
+                            "# comment 4\n" +
+                            "---\n" +
+                            "# comment 5\n" +
+                            "testEvent: {\n" +
+                            "  # comment 6\n" +
+                            "  eventTime: 2022-05-17T20:25:01.001\n" +
+                            "  # comment 7\n" +
+                            "}\n" +
+                            "# comment 8\n" +
+                            "...\n" +
+                            "# comment 9\n",
+                    TestImpl::new,
+                    TestOut.class,
+                    "=" +
+                            "# comment 1\n" +
+                            "# comment 2\n" +
+                            "---\n" +
+                            "# comment 3\n" +
+                            "# comment 4\n" +
+                            "# comment 5\n" +
+                            "# comment 6\n" +
+                            "# comment 7\n" +
+                            "# comment 8\n" +
+                            "---\n" +
+                            "testEvent: {\n" +
+                            "  eventTime: 2022-05-17T20:25:01.001,\n" +
+                            "  processedTime: 2022-05-17T20:25:02.002,\n" +
+                            "  currentTime: 2022-05-17T20:26:00\n" +
+                            "}\n" +
+                            "...\n" +
+                            "# comment 9\n")
+                    .run();
         assertEquals(yt.expected(), yt.actual());
     }
 }

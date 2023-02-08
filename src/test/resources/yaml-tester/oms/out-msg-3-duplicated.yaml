@@ -62,3 +62,14 @@ orderCancelReject: {
   reason: No such order
 }
 ...
+# Cancel Request 4
+---
+orderCancelReject: {
+  sender: OMS,
+  target: CLIENT,
+  sendingTime: 2019-12-03T09:54:40.863498,
+  symbol: EURUSD,
+  clOrdID: dkj4378fxx,
+  reason: No such order
+}
+...

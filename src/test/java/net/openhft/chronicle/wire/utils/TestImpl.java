@@ -38,7 +38,8 @@ public class TestImpl implements TestIn {
 
     @Override
     public void testEvent(TestEvent dto) {
-        dto.processedTime = time;
+        if (time != 0)
+            dto.processedTime = time;
         dto.currentTime = CLOCK.currentTimeNanos();
         out.testEvent(dto);
     }

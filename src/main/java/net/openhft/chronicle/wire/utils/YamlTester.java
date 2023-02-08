@@ -18,18 +18,18 @@
 
 package net.openhft.chronicle.wire.utils;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.util.ThrowingFunction;
 import net.openhft.chronicle.wire.TextMethodTester;
 import net.openhft.chronicle.wire.WireOut;
 import net.openhft.chronicle.wire.YamlMethodTester;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 public interface YamlTester {
@@ -124,6 +124,9 @@ public interface YamlTester {
             Object[] test = {path, yt};
             params.add(test);
 
+            final boolean REGRESS_TESTS = Jvm.getBoolean("regress.tests");
+
+            SortedSet<String> skipping = new TreeSet<>();
             if (agitators.length > 0) {
                 Map<String, String> inputToNameMap = new LinkedHashMap<>();
                 for (YamlAgitator agitator : agitators) {
@@ -133,14 +136,24 @@ public interface YamlTester {
                     }
                 }
                 for (Map.Entry<String, String> entry : inputToNameMap.entrySet()) {
-                    YamlTester yta = new YamlMethodTester<>(entry.getKey(), compFunction, outClass, path + "/" + entry.getValue() + "-out.yaml")
-                            .genericEvent("event")
-                            .setup(setup);
+                    String name = entry.getValue();
+                    String output = path + "/out-" + name + ".yaml";
+                    try {
+                        if (!REGRESS_TESTS)
+                            IOTools.urlFor(builder.getClass(), output);
+                        YamlTester yta = new YamlMethodTester<>(entry.getKey(), compFunction, outClass, output)
+                                .genericEvent("event")
+                                .setup(setup);
 
-                    Object[] testa = {path + "/" + entry.getValue(), yta};
-                    params.add(testa);
+                        Object[] testa = {path + "/" + name, yta};
+                        params.add(testa);
+                    } catch (FileNotFoundException ioe) {
+                        skipping.add(path + "/" + name);
+                    }
                 }
             }
+            if (!skipping.isEmpty())
+                Jvm.debug().on(YamlTester.class, "Skipping " + skipping);
         }
         return params;
     }
