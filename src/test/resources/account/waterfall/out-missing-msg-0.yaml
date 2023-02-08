@@ -1,0 +1,20 @@
+# Missing message 0
+# Bob sends 20 USD to Cate
+---
+transferFailed: {
+  sender: vault,
+  target: gw2,
+  sendingTime: 2023-01-20T10:10:00.003,
+  transfer: {
+    sender: gw2,
+    target: vault,
+    sendingTime: 2023-01-20T10:04:00,
+    from: 101025,
+    to: 101037,
+    currency: EUR,
+    amount: 20.0,
+    reference: Coffee
+  },
+  reason: insufficient funds
+}
+...

@@ -1,0 +1,40 @@
+# Alice sends 10 EUR to bob
+# missing to: 101025,
+---
+transferFailed: {
+  sender: vault,
+  target: gw2,
+  sendingTime: 2023-01-20T10:10:00.002,
+  transfer: {
+    sender: gw2,
+    target: vault,
+    sendingTime: 2023-01-20T10:01:00,
+    from: 101013,
+    to: 0,
+    currency: EUR,
+    amount: 10.0,
+    reference: Dog food
+  },
+  reason: to account doesn't exist
+}
+...
+# Alice sends 10 USD to bob
+# missing to: 101025,
+---
+transferFailed: {
+  sender: vault,
+  target: gw2,
+  sendingTime: 2023-01-20T10:10:00.003,
+  transfer: {
+    sender: gw2,
+    target: vault,
+    sendingTime: 2023-01-20T10:02:00,
+    from: 101013,
+    to: 0,
+    currency: USD,
+    amount: 10.0,
+    reference: Dog food
+  },
+  reason: from account currency doesn't match
+}
+...
