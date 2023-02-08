@@ -30,9 +30,10 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assume.assumeFalse;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
 
 public class YamlTesterTest extends WireTestCommon {
     @Before
@@ -60,9 +61,15 @@ public class YamlTesterTest extends WireTestCommon {
 
     @Test
     public void t3() {
+        final YamlTester yt = YamlTester.runTest(TestImpl::new, TestOut.class, "yaml-tester/t3");
+        assertEquals(yt.expected(), yt.actual());
+    }
+
+    @Test
+    public void mismatched() {
         assumeFalse(YamlTester.REGRESS_TESTS);
         expectException("setup.yaml not found");
-        final YamlTester yt = YamlTester.runTest(TestImpl.class, "yaml-tester/t3");
+        final YamlTester yt = YamlTester.runTest(TestImpl.class, "yaml-tester/mismatch");
         assertNotEquals("This tests an inconsistency was found, so they shouldn't be the same", yt.expected(), yt.actual());
     }
 
