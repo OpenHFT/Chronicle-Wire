@@ -44,7 +44,7 @@ public class OverrideFieldAgitator implements YamlAgitator {
             if (yaml2.equals(yaml))
                 continue;
             String field2 = field.replaceFirst(": +", "=")
-                    .replaceAll("[: ]", "_");
+                    .replaceAll("[: \"\']", "_");
             ret.put("=" + yaml2, "set-field-" + field2);
         }
         return ret;
