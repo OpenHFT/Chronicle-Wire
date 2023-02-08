@@ -19,37 +19,46 @@
 package net.openhft.chronicle.wire.channel.book;
 
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.wire.TextMethodTester;
 import net.openhft.chronicle.wire.WireTestCommon;
+import net.openhft.chronicle.wire.utils.YamlAgitator;
+import net.openhft.chronicle.wire.utils.YamlTester;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-import java.io.IOException;
+import java.util.List;
 
 import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@RunWith(Parameterized.class)
 public class TopOfBookHandlerTest extends WireTestCommon {
-    public static void test(String basename) {
-        assumeFalse(Jvm.isAzulZing());
-        TextMethodTester<TopOfBookListener> tester = new TextMethodTester<>(
-                basename + "/in.yaml",
+    static final String paths = "" +
+            "echo-tob";
+
+    final String name;
+    final YamlTester tester;
+
+    public TopOfBookHandlerTest(String name, YamlTester tester) {
+        this.name = name;
+        this.tester = tester;
+    }
+
+    @Parameterized.Parameters(name = "{0}")
+    public static List<Object[]> parameters() {
+        return YamlTester.parameters(
                 out -> new EchoTopOfBookHandler().out(out),
                 TopOfBookListener.class,
-                basename + "/out.yaml");
-        tester.setup(basename + "/setup.yaml");
-        try {
-            tester.run();
-        } catch (IOException e) {
-            throw new IORuntimeException(e);
-        }
-        assertEquals(tester.expected(), tester.actual());
+                paths,
+                YamlAgitator.messageMissing(),
+                YamlAgitator.duplicateMessage());
     }
-
 
     @Test
-    public void testTwo() {
-        test("echo-tob");
-    }
+    public void runTester() {
+        // uses trivially copyable objects
+        assumeFalse(Jvm.isAzulZing());
 
+        assertEquals(tester.expected(), tester.actual());
+    }
 }
