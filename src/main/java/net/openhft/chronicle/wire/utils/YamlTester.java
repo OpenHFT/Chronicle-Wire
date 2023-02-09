@@ -179,8 +179,8 @@ public interface YamlTester {
                         // ignored
                     }
 
-                    String in2 = "=\n" + in_yaml + "\n" + in_yaml2;
-                    String setup2 = "=\n" + _setup_yaml + "\n" + _setup_yaml2;
+                    String in2 = "=\n" + in_yaml + "\n...\n" + in_yaml2;
+                    String setup2 = "=\n" + _setup_yaml + "\n...\n" + _setup_yaml2;
                     YamlTester yt2 =
                             new YamlMethodTester<>(in2, compFunction, outClass, output)
                                     .genericEvent("event")

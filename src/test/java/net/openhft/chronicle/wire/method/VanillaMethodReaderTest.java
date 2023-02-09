@@ -91,12 +91,12 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     public void readMethods() throws IOException {
-        Wire wire = new TextWire(BytesUtil.readFile("methods-in.yaml"))
+        Wire wire = new TextWire(BytesUtil.readFile("methods/in.yaml"))
                 .useTextDocuments();
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
                 .useTextDocuments();
         // expected
-        Bytes<?> expected = BytesUtil.readFile("methods-in.yaml");
+        Bytes<?> expected = BytesUtil.readFile("methods/out.yaml");
         MockMethods writer = wire2.methodWriter(MockMethods.class);
         MethodReader reader = wire.methodReader(writer);
         checkReaderType(reader);

@@ -125,9 +125,7 @@ public class TextReadDocumentContext implements ReadDocumentContext {
 
         present = false;
         wire.consumePadding();
-        if (bytes.startsWith(EOD_SEP) && isWhiteSpaceAt(bytes))
-            skipSep(bytes);
-        if (bytes.startsWith(SOD_SEP) && isWhiteSpaceAt(bytes))
+        while(isEndOfMessage(bytes))
             skipSep(bytes);
 
         if (bytes.readRemaining() < 1) {
