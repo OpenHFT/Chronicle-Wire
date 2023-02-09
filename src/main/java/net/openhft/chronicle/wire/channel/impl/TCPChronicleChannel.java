@@ -39,7 +39,7 @@ import static java.util.Objects.requireNonNull;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 import static net.openhft.chronicle.core.io.ClosedIORuntimeException.newIORuntimeException;
 
-public class TCPChronicleChannel extends SimpleCloseable implements InternalChronicleChannel {
+public class TCPChronicleChannel extends AbstractCloseable implements InternalChronicleChannel {
     // tune for message sizes up to this
     static final int CAPACITY = Integer.getInteger("tcp.capacity", 2 << 20); // 2 MB
     private static final String HEADER = "header";
@@ -72,17 +72,22 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
     public TCPChronicleChannel(ChronicleChannelCfg channelCfg,
                                ChannelHeader headerOut,
                                SocketRegistry socketRegistry) {
-        this.channelCfg = requireNonNull(channelCfg);
-        this.headerOut = requireNonNull(headerOut);
-        this.socketRegistry = socketRegistry;
-        this.replaceInHeader = null;
-        this.replaceOutHeader = null;
-        if (channelCfg.port() < -1)
-            throw new IllegalArgumentException("Invalid port " + channelCfg.port());
+        try {
+            this.channelCfg = requireNonNull(channelCfg);
+            this.headerOut = requireNonNull(headerOut);
+            this.socketRegistry = socketRegistry;
+            this.replaceInHeader = null;
+            this.replaceOutHeader = null;
+            if (channelCfg.port() < -1)
+                throw new IllegalArgumentException("Invalid port " + channelCfg.port());
 
-        this.sc = null;
-        assert channelCfg.initiator();
-        checkConnected();
+            this.sc = null;
+            assert channelCfg.initiator();
+            checkConnected();
+        } catch (Throwable t) {
+            close();
+            throw t;
+        }
     }
 
     /**
@@ -93,14 +98,19 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
                                SocketChannel sc,
                                Function<ChannelHeader, ChannelHeader> replaceInHeader,
                                Function<ChannelHeader, ChannelHeader> replaceOutHeader) {
-        this.systemContext = systemContext;
-        this.channelCfg = requireNonNull(channelCfg);
-        this.sc = requireNonNull(sc);
-        this.replaceInHeader = requireNonNull(replaceInHeader);
-        this.replaceOutHeader = requireNonNull(replaceOutHeader);
+        try {
+            this.systemContext = systemContext;
+            this.channelCfg = requireNonNull(channelCfg);
+            this.sc = requireNonNull(sc);
+            this.replaceInHeader = requireNonNull(replaceInHeader);
+            this.replaceOutHeader = requireNonNull(replaceOutHeader);
 
-        this.headerOut = null;
-        assert !channelCfg.initiator();
+            this.headerOut = null;
+            assert !channelCfg.initiator();
+        } catch (Throwable t) {
+            close();
+            throw t;
+        }
     }
 
     @SuppressWarnings("SameReturnValue")
@@ -272,7 +282,6 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
 
     @Override
     protected void performClose() {
-        super.performClose();
         Closeable.closeQuietly(sc);
         if (privateSocketRegistry)
             Closeable.closeQuietly(socketRegistry);
