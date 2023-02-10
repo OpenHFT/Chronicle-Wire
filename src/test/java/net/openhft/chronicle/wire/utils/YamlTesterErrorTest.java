@@ -16,45 +16,50 @@
  * limitations under the License.
  */
 
-package net.openhft.chronicle.wire.channel.book;
+package net.openhft.chronicle.wire.utils;
 
-import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.onoes.ExceptionHandler;
+import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.wire.WireTestCommon;
-import net.openhft.chronicle.wire.utils.YamlAgitator;
-import net.openhft.chronicle.wire.utils.YamlTester;
-import net.openhft.chronicle.wire.utils.YamlTesterParametersBuilder;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.slf4j.Logger;
 
 import java.util.List;
 
-import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(Parameterized.class)
-public class TopOfBookHandlerTest extends WireTestCommon {
+public class YamlTesterErrorTest extends WireTestCommon {
     static final String paths = "" +
-            "echo-tob";
+            "yaml-tester/errors";
 
     final String name;
     final YamlTester tester;
 
-    public TopOfBookHandlerTest(String name, YamlTester tester) {
+    public YamlTesterErrorTest(String name, YamlTester tester) {
         this.name = name;
         this.tester = tester;
     }
 
     @Parameterized.Parameters(name = "{0}")
     public static List<Object[]> parameters() {
-        return new YamlTesterParametersBuilder<>(out -> new EchoTopOfBookHandler().out(out), TopOfBookListener.class, paths).agitators(new YamlAgitator[]{YamlAgitator.messageMissing(), YamlAgitator.duplicateMessage()}).get();
+        return new YamlTesterParametersBuilder<>(ErrorsImpl::new, ErrorsOut.class, paths)
+                .exceptionHandlerFunction(out -> (log, msg, thrown) -> out.error(msg + " " + thrown))
+                .get();
+    }
+
+    @After
+    public void tearDown() {
+        SystemTimeProvider.CLOCK = SystemTimeProvider.INSTANCE;
     }
 
     @Test
     public void runTester() {
-        // uses trivially copyable objects
-        assumeFalse(Jvm.isAzulZing());
-
         assertEquals(tester.expected(), tester.actual());
     }
 }

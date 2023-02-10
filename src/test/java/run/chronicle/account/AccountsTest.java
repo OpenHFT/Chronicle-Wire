@@ -24,6 +24,7 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.converter.Base85;
 import net.openhft.chronicle.wire.utils.YamlAgitator;
 import net.openhft.chronicle.wire.utils.YamlTester;
+import net.openhft.chronicle.wire.utils.YamlTesterParametersBuilder;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,14 +54,7 @@ public class AccountsTest extends WireTestCommon {
 
     @Parameterized.Parameters(name = "{0}")
     public static List<Object[]> parameters() {
-        return YamlTester.parameters(
-                out -> new AccountsImpl(out).id(VAULT),
-                AccountsOut.class,
-                paths,
-                YamlAgitator.messageMissing(),
-                YamlAgitator.duplicateMessage(),
-                YamlAgitator.overrideFields("currency: , amount: NaN, amount: -1".split(", *")),
-                YamlAgitator.missingFields("name, account, sender, target, sendingTime, from, to, currency, amount, reference".split(", *")));
+        return new YamlTesterParametersBuilder<>(out -> new AccountsImpl(out).id(VAULT), AccountsOut.class, paths).agitators(new YamlAgitator[]{YamlAgitator.messageMissing(), YamlAgitator.duplicateMessage(), YamlAgitator.overrideFields("currency: , amount: NaN, amount: -1".split(", *")), YamlAgitator.missingFields("name, account, sender, target, sendingTime, from, to, currency, amount, reference".split(", *"))}).get();
     }
 
     @After

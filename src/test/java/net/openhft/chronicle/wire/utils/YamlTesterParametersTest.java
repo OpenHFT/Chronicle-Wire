@@ -49,18 +49,11 @@ public class YamlTesterParametersTest extends WireTestCommon {
 
     @Parameterized.Parameters(name = "{0}")
     public static List<Object[]> parameters() {
-        return YamlTester.parameters(
-                TestImpl::new,
-                TestOut.class,
-                paths,
-                YamlAgitator.messageMissing(),
-                YamlAgitator.messageMissing(), // ignored as duplicate
-                YamlAgitator.duplicateMessage(),
-                YamlAgitator.duplicateMessage(), // ignored
-                YamlAgitator.duplicateMessage(), // also ignored as duplicates
-                YamlAgitator.missingFields("eventTime"),
-                YamlAgitator.overrideFields("eventTime: 1999-01-01T01:01:01"),
-                YamlAgitator.replaceAll("5 to 6", "[5]", "6"));
+        // ignored as duplicate
+        // ignored
+        // also ignored as duplicates
+        YamlAgitator[] agitators = new YamlAgitator[]{YamlAgitator.messageMissing(), YamlAgitator.messageMissing(), YamlAgitator.duplicateMessage(), YamlAgitator.duplicateMessage(), YamlAgitator.duplicateMessage(), YamlAgitator.missingFields("eventTime"), YamlAgitator.overrideFields("eventTime: 1999-01-01T01:01:01"), YamlAgitator.replaceAll("5 to 6", "[5]", "6")};
+        return new YamlTesterParametersBuilder<>(TestImpl::new, TestOut.class, paths).agitators(agitators).get();
     }
 
     @After
