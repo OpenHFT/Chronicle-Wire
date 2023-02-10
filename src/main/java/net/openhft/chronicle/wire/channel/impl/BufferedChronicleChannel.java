@@ -87,7 +87,7 @@ public class BufferedChronicleChannel extends DelegateChronicleChannel {
                 exchanger.releaseConsumer();
             }
         } catch (Throwable t) {
-            if (!isClosing())
+            if (!isClosing() && !channel.isClosing())
                 Jvm.warn().on(getClass(), "bgWriter died", t);
         } finally {
             bgWriter.shutdown();
