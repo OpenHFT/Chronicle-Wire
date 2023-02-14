@@ -44,7 +44,7 @@ public class YamlTesterParametersBuilder<T> {
         this.paths = paths;
     }
 
-    public YamlTesterParametersBuilder<T> agitators(YamlAgitator[] agitators) {
+    public YamlTesterParametersBuilder<T> agitators(YamlAgitator... agitators) {
         this.agitators = agitators;
         return this;
     }
