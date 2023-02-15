@@ -36,6 +36,11 @@ public class MilliTimestampLongConverter extends AbstractTimestampLongConverter 
         super(zoneId, TimeUnit.MILLISECONDS);
     }
 
+    @Deprecated(/* To be removed in x.26 */)
+    public MilliTimestampLongConverter(String zoneId, boolean includeZoneSuffixForUTC) {
+        super(zoneId, TimeUnit.MILLISECONDS, includeZoneSuffixForUTC);
+    }
+
     @Override
     protected long parseFormattedDate(ZonedDateTime value) {
         long time = value.getLong(ChronoField.EPOCH_DAY) * 86400_000L;

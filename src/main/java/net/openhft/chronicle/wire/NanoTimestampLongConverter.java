@@ -36,6 +36,11 @@ public class NanoTimestampLongConverter extends AbstractTimestampLongConverter {
         super(zoneId, TimeUnit.NANOSECONDS);
     }
 
+    @Deprecated(/* To be removed in x.26 */)
+    public NanoTimestampLongConverter(String zoneId, boolean includeZoneSuffixForUTC) {
+        super(zoneId, TimeUnit.NANOSECONDS, includeZoneSuffixForUTC);
+    }
+
     @Override
     protected long parseFormattedDate(ZonedDateTime value) {
         long time = value.getLong(ChronoField.EPOCH_DAY) * 86400_000_000_000L;

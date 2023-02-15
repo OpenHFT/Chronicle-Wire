@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.AppendableUtil;
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -41,13 +42,18 @@ import java.util.concurrent.TimeUnit;
  * <p>
  * Parsing of ISO dates with or without timestamps is supported. When an ISO date
  * is read with no timezone, it is assumed to be in the converter's zone.
- *
  */
 public abstract class AbstractTimestampLongConverter implements LongConverter {
     public static final ZoneId UTC = ZoneId.of("UTC");
     public static final String TIMESTAMP_LONG_CONVERTERS_ZONE_ID_SYSTEM_PROPERTY = "timestampLongConverters.zoneId";
+    /**
+     * To be removed in x.26, UTC dates will always be written with a Z suffix then
+     */
+    public static final String INCLUDE_ZONE_SUFFIX_WHEN_ZONE_IS_UTC_SYSTEM_PROPERTY = "timestampLongConverters.includeZoneSuffixWhenZoneIsUTC";
     private final ZoneId zoneId;
-    private final DateTimeFormatter dtf;
+    private final DateTimeFormatter formatterForParsing;
+    private final DateTimeFormatter formatterForFormatting;
+    private final boolean writingUtcDatesWithNoSuffix;
     private final long amountPerSecond;
     private final long nanosPerAmount;
 
@@ -56,10 +62,21 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
     }
 
     protected AbstractTimestampLongConverter(String zoneId, TimeUnit timeUnit) {
+        this(zoneId, timeUnit, Jvm.getBoolean(INCLUDE_ZONE_SUFFIX_WHEN_ZONE_IS_UTC_SYSTEM_PROPERTY));
+    }
+
+    @Deprecated(/* To be removed in x.26 */)
+    protected AbstractTimestampLongConverter(String zoneId, TimeUnit timeUnit, boolean includeZoneSuffixForUTC) {
         this.zoneId = ZoneId.of(zoneId);
+        this.writingUtcDatesWithNoSuffix = this.zoneId.equals(UTC) && !includeZoneSuffixForUTC;
         this.amountPerSecond = timeUnit.convert(1, TimeUnit.SECONDS);
         this.nanosPerAmount = TimeUnit.NANOSECONDS.convert(1, timeUnit);
-        this.dtf = createFormatter();
+        this.formatterForParsing = createFormatter();
+        if (writingUtcDatesWithNoSuffix) {
+            this.formatterForFormatting = createFormatterWithNoZoneSuffix();
+        } else {
+            this.formatterForFormatting = formatterForParsing;
+        }
     }
 
     @Override
@@ -69,7 +86,7 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
         try {
             if (text.length() > 4 && text.charAt(4) == '/')
                 text = text.toString().replace('/', '-');
-            final TemporalAccessor parse = dtf.parse(text);
+            final TemporalAccessor parse = formatterForParsing.parse(text);
             if (parse.query(TemporalQueries.zoneId()) != null) {
                 return parseFormattedDate(ZonedDateTime.from(parse).withZoneSameInstant(UTC));
             } else {
@@ -108,6 +125,13 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
         return builder.toFormatter();
     }
 
+    private DateTimeFormatter createFormatterWithNoZoneSuffix() {
+        final DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder()
+                .appendPattern("yyyy-MM-dd'T'HH:mm:ss");
+        appendFraction(builder);
+        return builder.toFormatter();
+    }
+
     /**
      * Append any fractions we expect to parse
      *
@@ -124,10 +148,10 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
                 value / amountPerSecond,
                 (int) (value % amountPerSecond * nanosPerAmount),
                 ZoneOffset.UTC);
-        if (zoneId.equals(UTC)) {
-            dtf.formatTo(ldt, text);
+        if (writingUtcDatesWithNoSuffix) {
+            formatterForFormatting.formatTo(ldt, text);
         } else {
-            dtf.formatTo(ZonedDateTime.of(ldt, UTC)
+            formatterForFormatting.formatTo(ZonedDateTime.of(ldt, UTC)
                     .withZoneSameInstant(zoneId), text);
         }
     }
