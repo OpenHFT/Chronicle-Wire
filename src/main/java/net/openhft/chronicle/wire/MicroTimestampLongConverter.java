@@ -50,6 +50,11 @@ public class MicroTimestampLongConverter extends AbstractTimestampLongConverter 
         super(zoneId, TimeUnit.MICROSECONDS);
     }
 
+    @Deprecated(/* To be removed in x.26 */)
+    public MicroTimestampLongConverter(String zoneId, boolean includeZoneSuffixForUTC) {
+        super(zoneId, TimeUnit.MICROSECONDS, includeZoneSuffixForUTC);
+    }
+
     @Override
     protected void appendFraction(DateTimeFormatterBuilder builder) {
         builder.appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true);
