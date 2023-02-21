@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.Resettable;
@@ -34,12 +35,16 @@ import java.util.stream.Stream;
 
 import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
 import static net.openhft.chronicle.wire.WireType.TEXT;
+import static net.openhft.chronicle.wire.WireType.YAML;
 
 /**
  * The implementation of this interface is both readable and write-able as marshallable data.
  */
 @DontChain
 public interface Marshallable extends WriteMarshallable, ReadMarshallable, Resettable {
+    WireType FROM_STRING_WIRE = Jvm.getBoolean("wire.testAsYaml")
+            ? YAML : TEXT;
+
     static boolean $equals(@NotNull WriteMarshallable $this, Object o) {
         return o instanceof WriteMarshallable &&
                 ($this == o || Wires.isEquals($this, o));
@@ -50,17 +55,17 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     static String $toString(WriteMarshallable $this) {
-        return TEXT.asString($this);
+        return FROM_STRING_WIRE.asString($this);
     }
 
     @Nullable
     static <T> T fromString(@NotNull CharSequence cs) {
-        return TEXT.fromString(cs);
+        return FROM_STRING_WIRE.fromString(cs);
     }
 
     @Nullable
     static <T> T fromString(@NotNull Class<T> tClass, @NotNull CharSequence cs) {
-        return TEXT.fromString(tClass, cs);
+        return FROM_STRING_WIRE.fromString(tClass, cs);
     }
 
     /**
@@ -71,12 +76,12 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      */
     @NotNull
     static <T> T fromFile(String filename) throws IOException {
-        return TEXT.fromFile(filename);
+        return FROM_STRING_WIRE.fromFile(filename);
     }
 
     static <T> T fromString(@NotNull InputStream is) {
         Scanner s = new Scanner(is).useDelimiter("\\A");
-        return TEXT.fromString(s.hasNext() ? s.next() : "");
+        return FROM_STRING_WIRE.fromString(s.hasNext() ? s.next() : "");
     }
 
     /**
@@ -88,17 +93,17 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      */
     @Nullable
     static <T> T fromFile(@NotNull Class<T> expectedType, String filename) throws IOException {
-        return TEXT.fromFile(expectedType, filename);
+        return FROM_STRING_WIRE.fromFile(expectedType, filename);
     }
 
     @NotNull
     static <T> Stream<T> streamFromFile(String filename) throws IOException {
-        return TEXT.streamFromFile(filename);
+        return FROM_STRING_WIRE.streamFromFile(filename);
     }
 
     @Nullable
     static <T> Stream<T> streamFromFile(@NotNull Class<T> expectedType, String filename) throws IOException {
-        return TEXT.streamFromFile(expectedType, filename);
+        return FROM_STRING_WIRE.streamFromFile(expectedType, filename);
     }
 
     @Nullable
