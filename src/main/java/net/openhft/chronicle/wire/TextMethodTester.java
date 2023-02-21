@@ -52,6 +52,9 @@ import java.util.function.Function;
 public class TextMethodTester<T> implements YamlTester {
     private static final boolean TESTS_INCLUDE_COMMENTS = Jvm.getBoolean("tests.include.comments", true);
 
+    public static final boolean SINGLE_THREADED_CHECK_DISABLED = !Jvm.getBoolean("yaml.tester.single.threaded.check.enabled", false);
+
+
     private static final boolean DUMP_TESTS = Jvm.getBoolean("dump.tests");
     private final String input;
     private final Class<T> outputClass;
@@ -170,7 +173,9 @@ public class TextMethodTester<T> implements YamlTester {
 
     @NotNull
     public TextMethodTester<T> run() throws IOException {
-        Wire wireOut = createWire(Bytes.allocateElasticOnHeap());
+        OnHeapBytes b = Bytes.allocateElasticOnHeap();
+        b.singleThreadedCheckDisabled(SINGLE_THREADED_CHECK_DISABLED);
+        Wire wireOut = createWire(b);
 
         T writer0;
         if (outputClass != null) {
