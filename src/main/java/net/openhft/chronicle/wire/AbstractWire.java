@@ -419,7 +419,12 @@ public abstract class AbstractWire implements Wire {
         // header should use wire format so can add padding for cache alignment
         padToCacheAlign();
         long pos = bytes.writePosition();
-        long actualLength = pos - SPB_HEADER_SIZE;
+        updateFirstHeader(pos);
+    }
+
+    @Override
+    public void updateFirstHeader(long headerEndPos) {
+        long actualLength = headerEndPos - SPB_HEADER_SIZE;
         if (actualLength >= 1 << 30)
             throw new IllegalStateException("Header too large was " + actualLength);
         int header = (int) (META_DATA | actualLength);

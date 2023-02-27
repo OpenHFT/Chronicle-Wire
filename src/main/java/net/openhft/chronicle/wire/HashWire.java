@@ -237,6 +237,11 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
     }
 
     @Override
+    public void updateFirstHeader(long headerLen) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition) {
         throw new UnsupportedOperationException();
     }
