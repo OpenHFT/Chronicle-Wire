@@ -204,6 +204,13 @@ public interface WireOut extends WireCommon, MarshallableOut {
     void updateFirstHeader();
 
     /**
+     * INTERNAL METHOD, call writingDocument instead
+     * <p>
+     * update the first header after writing {@code headerEndPos} bytes.
+     */
+    void updateFirstHeader(long headerLen);
+
+    /**
      * Write the end of wire marker, unless one is already written. This will increment the
      * headerNumber as appropriate if successful
      *
