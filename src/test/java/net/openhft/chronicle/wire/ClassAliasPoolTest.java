@@ -71,6 +71,13 @@ public class ClassAliasPoolTest extends WireTestCommon {
                                         "}\n" +
                                         "...\n",
                                 w.toString())},
+                {WireType.YAML,
+                        (Consumer<WireIn>) w -> assertEquals("" +
+                                        "handle: !CAPTData {\n" +
+                                        "  value: 0\n" +
+                                        "}\n" +
+                                        "...\n",
+                                w.toString())},
                 {WireType.BINARY,
                         (Consumer<WireIn>) w -> assertEquals("" +
                                         "1f 00 00 00                                     # msg-length\n" +

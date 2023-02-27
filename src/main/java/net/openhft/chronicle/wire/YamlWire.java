@@ -193,6 +193,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 () -> newTextMethodWriterInvocationHandler(tClass));
         for (Class aClass : additional)
             builder.addInterface(aClass);
+        useTextDocuments();
         builder.marshallableOut(this);
         return builder.build();
     }
