@@ -657,6 +657,10 @@ public class YamlTokeniser {
         return lineStart;
     }
 
+    public void lineStart(long lineStart) {
+        this.lineStart = lineStart;
+    }
+
     public long blockStart() {
         return blockStart;
     }

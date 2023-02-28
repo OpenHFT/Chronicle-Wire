@@ -250,6 +250,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         if (readContext == null)
             useBinaryDocuments();
         readContext.start();
+        yt.lineStart(bytes.readPosition());
     }
 
     @NotNull

@@ -40,11 +40,12 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
         this.wireType = wireType;
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {WireType.JSON},
                 {WireType.TEXT},
+                {WireType.YAML},
                 {WireType.BINARY}
         });
     }
@@ -57,9 +58,6 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
 
         wire.writeDocument(false, w -> new MDTO2(1, 2, "3").writeMarshallable(w));
        // System.out.println(Wires.fromSizePrefixedBlobs(wire));
-
-        if (wire instanceof TextWire)
-            ((TextWire) wire).useBinaryDocuments();
 
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())
