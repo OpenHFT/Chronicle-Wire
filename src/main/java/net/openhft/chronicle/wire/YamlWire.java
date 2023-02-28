@@ -595,11 +595,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @NotNull
     @Override
     public Wire readComment(@NotNull StringBuilder s) {
-        sb.setLength(0);
+        s.setLength(0);
         if (yt.current() == YamlToken.COMMENT) {
-            // Skip the initial '#'
-            YamlToken next = yt.next();
-            sb.append(yt.text());
+            s.append(yt.text());
+            yt.next();
         }
         return this;
     }
