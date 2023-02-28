@@ -452,6 +452,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     public <K> K readEvent(@NotNull Class<K> expectedClass) {
         startEventIfTop();
         switch (yt.current()) {
+            case MAPPING_START:
+                yt.next();
+                assert yt.current() == YamlToken.MAPPING_KEY;
+                // Deliberate fall-through
             case MAPPING_KEY:
                 YamlToken next = yt.next();
                 if (next == YamlToken.MAPPING_KEY) {
@@ -1661,6 +1665,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public long int64() {
             consumePadding();
+            if (yt.current() == YamlToken.SEQUENCE_ENTRY)
+                yt.next();
             valueIn.skipType();
             if (yt.current() != YamlToken.TEXT) {
                 Jvm.warn().on(getClass(), "Unable to read " + valueIn.object() + " as a long.");
@@ -1673,9 +1679,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public double float64() {
             consumePadding();
+            if (yt.current() == YamlToken.SEQUENCE_ENTRY)
+                yt.next();
             valueIn.skipType();
             if (yt.current() != YamlToken.TEXT) {
-                Jvm.warn().on(getClass(), "Unable to read " + valueIn.object() + " as a long.");
+                Jvm.warn().on(getClass(), "Unable to read " + valueIn.object() + " as a double.");
                 return 0;
             }
             return getADouble();

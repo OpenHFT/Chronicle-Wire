@@ -38,11 +38,12 @@ public class NestedMapsTest extends WireTestCommon {
         this.wireType = wireType;
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
                 new Object[]{WireType.JSON},
                 new Object[]{WireType.TEXT},
+                new Object[]{WireType.YAML},
                 new Object[]{WireType.BINARY},
                 new Object[]{WireType.FIELDLESS_BINARY}
         );
