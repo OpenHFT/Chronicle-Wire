@@ -62,11 +62,12 @@ public class ReorderedTest extends WireTestCommon {
         this.wireType = wireType;
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() {
         return Arrays.asList(new Object[][]{
                 {WireType.JSON},
                 {WireType.TEXT},
+                {WireType.YAML},
                 {WireType.BINARY}
         });
     }

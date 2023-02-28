@@ -73,6 +73,7 @@ public class YamlTokeniser {
         blockQuote = 0;
         hasSequenceEntry = false;
         lastKeyPosition = -1;
+        pushed.clear();
         last = YamlToken.STREAM_START;
         pushContext0(YamlToken.STREAM_START, NO_INDENT);
     }
