@@ -64,6 +64,7 @@ public class WireTests {
                 {WireType.BINARY, true},
                 {WireType.BINARY, false},
                 {WireType.TEXT, false},
+                {WireType.YAML, false},
                 {WireType.JSON, false}
         };
         return Arrays.asList(list);
