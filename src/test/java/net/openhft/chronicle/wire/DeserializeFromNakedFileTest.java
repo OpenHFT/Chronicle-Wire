@@ -20,29 +20,51 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.BytesMarshallable;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
+@RunWith(value = Parameterized.class)
 public class DeserializeFromNakedFileTest extends WireTestCommon {
+    private final WireType wireType;
+
+    public DeserializeFromNakedFileTest(WireType wireType) {
+        this.wireType = wireType;
+    }
+
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> combinations() {
+        Object[][] list = {
+                {WireType.TEXT},
+                {WireType.YAML}
+        };
+        return Arrays.asList(list);
+    }
+
     @Test
     public void testPOJO() throws IOException {
-        PlainOldJavaClass res = Marshallable.fromFile(PlainOldJavaClass.class, "naked.yaml");
+        PlainOldJavaClass res = wireType.fromFile(PlainOldJavaClass.class, "naked.yaml");
 
         assertEquals(20, res.heartBtInt);
     }
 
     @Test
     public void testSelfDescribing() throws IOException {
-        SelfDescribingClass res = Marshallable.fromFile(SelfDescribingClass.class, "naked.yaml");
+        SelfDescribingClass res = wireType.fromFile(SelfDescribingClass.class, "naked.yaml");
 
         assertEquals(20, res.heartBtInt);
     }
 
     @Test
     public void testBytes() throws IOException {
-        BytesClass res = Marshallable.fromFile(BytesClass.class, "naked.yaml");
+        assumeFalse(wireType == WireType.YAML);
+        BytesClass res = wireType.fromFile(BytesClass.class, "naked.yaml");
 
         // The result of parsing first 4 bytes as integer value
         assertEquals(0x72616548, res.heartBtInt);
