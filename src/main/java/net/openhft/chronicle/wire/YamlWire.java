@@ -1450,7 +1450,20 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer)
                 throws IORuntimeException, BufferUnderflowException {
-            throw new UnsupportedOperationException(yt.toString());
+            if (yt.current() != YamlToken.TAG)
+                throw new UnsupportedOperationException(yt.toString());
+
+            if (!yt.isText("type"))
+                throw new UnsupportedOperationException(yt.text());
+
+            if (yt.next() != YamlToken.TEXT)
+                throw new UnsupportedOperationException(yt.toString());
+
+            StringBuilder stringBuilder = acquireStringBuilder();
+            textTo(stringBuilder);
+            classNameConsumer.accept(t, stringBuilder);
+
+            return YamlWire.this;
         }
 
         @Override
