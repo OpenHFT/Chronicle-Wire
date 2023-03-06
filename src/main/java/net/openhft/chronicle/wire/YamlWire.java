@@ -1320,7 +1320,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             while (true) {
                 switch (yt.current()) {
                     case SEQUENCE_ENTRY:
-                        yt.next(Integer.MIN_VALUE);
                         tReader.accept(t, kls, YamlWire.this.valueIn);
                         continue;
 
@@ -1357,9 +1356,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         public boolean hasNextSequenceItem() {
             consumePadding();
             switch (yt.current()) {
+                // Perhaps should be negative selection instead of positive
                 case SEQUENCE_START:
-                case TEXT:
                 case SEQUENCE_ENTRY:
+                // Allows scalar value to be converted into singleton array
+                case TEXT:
                     return true;
             }
             return false;
