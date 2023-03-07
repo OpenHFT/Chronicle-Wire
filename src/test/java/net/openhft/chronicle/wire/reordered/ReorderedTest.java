@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
@@ -52,10 +53,15 @@ public class ReorderedTest extends WireTestCommon {
         outerClass1.addListB().setTextNumber("num1BB", 122);
         outerClass2.addListA().setTextNumber("num2A", 21);
         outerClass2.addListB().setTextNumber("num2B", 22);
+
+        nestedReadSubsets = Arrays.asList(
+                new NestedReadSubset().setTextNumber("one", 1.1),
+                new NestedReadSubset().setTextNumber("two", 2.2));
     }
 
     @SuppressWarnings("rawtypes")
     private final Function<Bytes<?>, Wire> wireType;
+    private static final Collection<NestedReadSubset> nestedReadSubsets;
 
     @SuppressWarnings("rawtypes")
     public ReorderedTest(Function<Bytes<?>, Wire> wireType) {
@@ -95,6 +101,18 @@ public class ReorderedTest extends WireTestCommon {
         assertEquals(outerClass2.toString().replace(',', '\n'), outerClass0.toString().replace(',', '\n'));
 
         bytes.releaseLast();
+    }
+
+    @Test
+    public void testWithSubsetFields() {
+        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Wire wire = wireType.apply(bytes);
+        wire.writeEventName(() -> "test1").collection(nestedReadSubsets, NestedReadSubset.class);
+
+        @NotNull StringBuilder sb = new StringBuilder();
+
+        assertEquals(nestedReadSubsets.toString().replace(',', '\n'), wire.readEventName(sb).collection(ArrayList::new, NestedReadSubset.class).toString().replace(',', '\n'));
+        assertEquals("test1", sb.toString());
     }
 
     @SuppressWarnings("rawtypes")

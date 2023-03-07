@@ -734,11 +734,12 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             yt.next(Integer.MIN_VALUE);
         } else {
             while (yt.current() == YamlToken.MAPPING_KEY) {
-                yt.next();
                 valueIn.consumeAny(minIndent);
             }
         }
-        if (yt.current() == YamlToken.MAPPING_END || yt.current() == YamlToken.DOCUMENT_END || yt.current() == YamlToken.NONE) {
+        if (yt.current() == YamlToken.MAPPING_END ||
+                yt.current() == YamlToken.DOCUMENT_END ||
+                yt.current() == YamlToken.NONE) {
             yt.next(Integer.MIN_VALUE);
             return;
         }
