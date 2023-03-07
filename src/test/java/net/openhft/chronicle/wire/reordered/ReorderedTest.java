@@ -48,11 +48,11 @@ public class ReorderedTest extends WireTestCommon {
         outerClass1.clearListB();
         outerClass2.clearListB();
         outerClass1.addListA().setTextNumber("num1A", 11);
-        outerClass1.addListB().setTextNumber("num1B", 12);
-        outerClass1.addListA().setTextNumber("num1AA", 111);
+        outerClass1.addListB().setTextNumber("num1B", 12).nest("num1Bbis", 121);
+        outerClass1.addListA().setTextNumber("num1AA", 111).nest("num1AAbis", 1111);
         outerClass1.addListB().setTextNumber("num1BB", 122);
         outerClass2.addListA().setTextNumber("num2A", 21);
-        outerClass2.addListB().setTextNumber("num2B", 22);
+        outerClass2.addListB().setTextNumber("num2B", 22).nest("num2Bbis", 222);
 
         nestedReadSubsets = Arrays.asList(
                 new NestedReadSubset().setTextNumber("one", 1.1),
