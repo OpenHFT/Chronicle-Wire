@@ -538,6 +538,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     return valueIn;
                 }
             }
+            // Next lines not covered by any tests
             yt.revertToContext(contextSize);
             bytes.readPosition(pos);
             yt.next();
@@ -551,7 +552,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 return valueIn;
 
             keys.push(lastKeyPosition);
-            valueIn.consumeAny(minIndent);
+            // Avoid consuming '}' but consume to next mapping key
+            valueIn.consumeAny(minIndent >= 0 ? minIndent : Integer.MAX_VALUE);
         }
 
         return defaultValueIn;
