@@ -820,8 +820,8 @@ public class YamlWireTest extends WireTestCommon {
     public void testABCDBytes() {
         @NotNull Wire wire = createWire();
         wire.bytes().append(
-                "A: \"hi\",\n" +
-                        "B: 'hi',\n" +
+                "A : \"hi\",\n" +
+                        "B\t : 'hi',\n" +
                         "C: hi,\n" +
                         "D: bye,\n");
         ABCD abcd = new ABCD();

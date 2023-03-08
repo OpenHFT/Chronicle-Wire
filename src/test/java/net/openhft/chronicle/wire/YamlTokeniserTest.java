@@ -1349,9 +1349,9 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
                 doTest(
-                        "=A: \n" +
-                                "  b: 1234\n" +
-                                "  c: hi\n" +
+                        "=A : \n" +
+                                "  b  : 1234\n" +
+                                "  c\t: hi\n" +
                                 "  d: abc\n" +
                                 "B: \n" +
                                 "  c: lo\n" +
@@ -1389,5 +1389,30 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "DOCUMENT_END \n",
                 doTest(
                         "=" + "#\nb: AA\nc: {}\nd: \n  A: 1\n  B: 2\ne: end"));
+    }
+
+    @Test
+    public void sample7() {
+        assertEquals(
+                "DIRECTIVES_END \n" +
+                        "TAG Data\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT name\n" +
+                        "TEXT NAME\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT time\n" +
+                        "TEXT 12:34:45\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT empty\n" +
+                        "TEXT ' \n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n",
+                doTest(
+                        "=!Data {\n" +
+                                "  name : NAME,\n" +
+                                "  time\t: 12:34:45,\n" +
+                                "  empty  : ''\n" +
+                                "}\n"));
     }
 }
