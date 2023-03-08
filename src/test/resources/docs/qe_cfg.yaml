@@ -1,0 +1,17 @@
+!ChronicleQueueReplicationCfg {
+  context: !QueueClusterContext {
+    heartbeatIntervalMs: 60000,
+    heartbeatTimeoutMs: 120000,
+  },
+  hosts: {
+    server: { connectUri: localhost:7072 },
+    client: { connectUri: localhost:7073 }
+  },
+  queues: {
+    trades: {
+      path: trades,
+      master: server,
+      acknowledge: true
+    }
+  }
+}
