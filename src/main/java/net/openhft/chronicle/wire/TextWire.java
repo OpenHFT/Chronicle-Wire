@@ -81,9 +81,9 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     protected final TextValueIn valueIn = createValueIn();
     protected long lineStart = 0;
+    private DefaultValueIn defaultValueIn;
     protected WriteDocumentContext writeContext;
     protected ReadDocumentContext readContext;
-    private DefaultValueIn defaultValueIn;
     private boolean strict = false;
 
     public TextWire(@NotNull Bytes<?> bytes, boolean use8bit) {
@@ -923,11 +923,6 @@ public class TextWire extends YamlWireOut<TextWire> {
             return true;
         }
         return false;
-    }
-
-    @Override
-    public boolean writingIsComplete() {
-        return !writeContext.isNotComplete();
     }
 
     enum NoObject {NO_OBJECT}
@@ -2410,5 +2405,10 @@ public class TextWire extends YamlWireOut<TextWire> {
         public String toString() {
             return TextWire.this.toString();
         }
+    }
+
+    @Override
+    public boolean writingIsComplete() {
+        return !writeContext.isNotComplete();
     }
 }
