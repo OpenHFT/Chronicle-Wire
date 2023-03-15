@@ -145,8 +145,8 @@ public class TextWireTest extends WireTestCommon {
     @Test
     public void handleUnexpectedFields() {
         TwoFields tf = Marshallable.fromString("!" + TwoFields.class.getName() + " {" +
-                "a: 1,\n" +
-                "b: two,\n" +
+                "a : 1,\n" +
+                "b\t : two,\n" +
                 "c: three,\n" +
                 "d: 44,\n" +
                 "e: also,\n" +

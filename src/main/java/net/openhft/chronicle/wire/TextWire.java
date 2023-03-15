@@ -32,14 +32,11 @@ import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.Externalizable;
 import java.io.IOException;
-import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Type;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
@@ -48,7 +45,6 @@ import java.util.function.*;
 import java.util.regex.Pattern;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static net.openhft.chronicle.bytes.BytesStore.empty;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.wire.TextStopCharTesters.END_OF_TYPE;
 
@@ -422,6 +418,8 @@ public class TextWire extends YamlWireOut<TextWire> {
 
             } else {
                 parseUntil(sb, getEscapingEndOfText());
+                trimTheEnd(sb);
+
             }
             unescape(sb);
 
@@ -429,6 +427,11 @@ public class TextWire extends YamlWireOut<TextWire> {
             Jvm.debug().on(getClass(), e);
         }
         return sb;
+    }
+
+    private void trimTheEnd(@NotNull StringBuilder sb) {
+        while (sb.length() > 0 && Character.isWhitespace(sb.charAt(sb.length() - 1)))
+            sb.setLength(sb.length() - 1);
     }
 
     @Nullable
