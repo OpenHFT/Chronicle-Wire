@@ -19,6 +19,7 @@
 package net.openhft.chronicle.wire.domestic.extractor;
 
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.internal.extractor.DocumentExtractorBuilder;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +44,7 @@ public interface DocumentExtractor<T> {
      * @return extracted value or {@code null}
      */
     @Nullable
-    T extract(@NotNull Wire wire, @NonNegative long index);
+    T extract(@NotNull Wire wire, @NonNegative long index) throws InvalidMarshallableException;
 
     /**
      * Creates and returns a new DocumentExtractor consisting of the results (of type R) of applying the provided

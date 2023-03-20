@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.ReadBytesMarshallable;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,7 +42,7 @@ public interface MarshallableIn {
      * @param reader user to read the document
      * @return {@code true} if successful
      */
-    default boolean readDocument(@NotNull ReadMarshallable reader) {
+    default boolean readDocument(@NotNull ReadMarshallable reader) throws InvalidMarshallableException {
         try (@NotNull DocumentContext dc = readingDocument()) {
             if (!dc.isPresent())
                 return false;
@@ -54,7 +55,7 @@ public interface MarshallableIn {
      * @param reader used to read the document
      * @return {@code true} if successful
      */
-    default boolean readBytes(@NotNull ReadBytesMarshallable reader) {
+    default boolean readBytes(@NotNull ReadBytesMarshallable reader) throws InvalidMarshallableException {
         try (@NotNull DocumentContext dc = readingDocument()) {
             if (!dc.isPresent())
                 return false;
@@ -68,7 +69,7 @@ public interface MarshallableIn {
      * @return {@code true} if successful
      */
     @SuppressWarnings("rawtypes")
-    default boolean readBytes(@NotNull Bytes<?> using) {
+    default boolean readBytes(@NotNull Bytes<?> using) throws InvalidMarshallableException {
         try (@NotNull DocumentContext dc = readingDocument()) {
             if (!dc.isPresent())
                 return false;
@@ -86,7 +87,7 @@ public interface MarshallableIn {
      * @return the String or null if there is none.
      */
     @Nullable
-    default String readText() {
+    default String readText() throws InvalidMarshallableException {
         try (@NotNull DocumentContext dc = readingDocument()) {
             if (!dc.isPresent()) {
                 return null;
@@ -105,7 +106,7 @@ public interface MarshallableIn {
      * @param sb to copy the text into
      * @return true if there was a message, or false if not.
      */
-    default boolean readText(@NotNull StringBuilder sb) {
+    default boolean readText(@NotNull StringBuilder sb) throws InvalidMarshallableException {
         try (@NotNull DocumentContext dc = readingDocument()) {
             if (!dc.isPresent()) {
                 sb.setLength(0);
@@ -123,7 +124,7 @@ public interface MarshallableIn {
      */
     @SuppressWarnings("unchecked")
     @Nullable
-    default <K, V> Map<K, V> readMap() {
+    default <K, V> Map<K, V> readMap() throws InvalidMarshallableException {
         try (@NotNull DocumentContext dc = readingDocument()) {
             if (!dc.isPresent()) {
                 return null;

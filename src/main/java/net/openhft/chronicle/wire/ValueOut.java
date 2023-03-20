@@ -24,6 +24,7 @@ import net.openhft.chronicle.bytes.WriteBytesMarshallable;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import net.openhft.chronicle.core.util.ObjectUtils;
@@ -465,7 +466,7 @@ public interface ValueOut {
     /**
      * Write a sequence value using the provided parametrized writer.
      */
-    @NotNull <T, K> WireOut sequence(T t, K param, TriConsumer<T, K, ValueOut> writer);
+    @NotNull <T, K> WireOut sequence(T t, K param, TriConsumer<T, K, ValueOut> writer) throws InvalidMarshallableException;
 
     /**
      * Write a sequence value of a specified length.
@@ -583,13 +584,13 @@ public interface ValueOut {
      * Write a {@link WriteMarshallable} value.
      */
     @NotNull
-    WireOut marshallable(WriteMarshallable object);
+    WireOut marshallable(WriteMarshallable object) throws InvalidMarshallableException;
 
     /**
      * Write a {@link Serializable} value.
      */
     @NotNull
-    WireOut marshallable(Serializable object);
+    WireOut marshallable(Serializable object) throws InvalidMarshallableException;
 
     /**
      * writes the contents of the map to wire
@@ -599,7 +600,7 @@ public interface ValueOut {
      * @return throws IllegalArgumentException  If the type of the map is not one of those listed above
      */
     @NotNull
-    WireOut map(Map map);
+    WireOut map(Map map) throws InvalidMarshallableException;
 
     default boolean swapLeaf(boolean isLeaf) {
         return false;
@@ -613,7 +614,7 @@ public interface ValueOut {
      * @return the original wire
      */
     @NotNull
-    default WireOut typedMarshallable(@Nullable WriteMarshallable marshallable) {
+    default WireOut typedMarshallable(@Nullable WriteMarshallable marshallable) throws InvalidMarshallableException {
         if (marshallable == null)
             return nu11();
         String typeName = Wires.typeNameFor(classLookup(), marshallable);
@@ -635,7 +636,7 @@ public interface ValueOut {
      * If you are not sure, use the {@link #object(Object)} method.
      */
     @NotNull
-    default WireOut typedMarshallable(@Nullable Serializable object) {
+    default WireOut typedMarshallable(@Nullable Serializable object) throws InvalidMarshallableException {
         if (object == null)
             return nu11();
 
@@ -673,7 +674,7 @@ public interface ValueOut {
      * Write a {@link WriteMarshallable} value, prepending it with specified type prefix.
      */
     @NotNull
-    default WireOut typedMarshallable(CharSequence typeName, WriteMarshallable object) {
+    default WireOut typedMarshallable(CharSequence typeName, WriteMarshallable object) throws InvalidMarshallableException {
         typePrefix(typeName);
         return marshallable(object);
     }
@@ -690,7 +691,7 @@ public interface ValueOut {
      * Write a set (collection) value.
      */
     @NotNull
-    default <V> WireOut set(Set<V> coll) {
+    default <V> WireOut set(Set<V> coll) throws InvalidMarshallableException {
         return set(coll, null);
     }
 
@@ -698,7 +699,7 @@ public interface ValueOut {
      * Write a set containing specified type of entries.
      */
     @NotNull
-    default <V> WireOut set(Set<V> coll, Class<V> assumedClass) {
+    default <V> WireOut set(Set<V> coll, Class<V> assumedClass) throws InvalidMarshallableException {
         return collection(coll, assumedClass);
     }
 
@@ -706,7 +707,7 @@ public interface ValueOut {
      * Write a list (collection) value.
      */
     @NotNull
-    default <V> WireOut list(List<V> coll) {
+    default <V> WireOut list(List<V> coll) throws InvalidMarshallableException {
         return list(coll, null);
     }
 
@@ -714,7 +715,7 @@ public interface ValueOut {
      * Write a list containing specified type of entries.
      */
     @NotNull
-    default <V> WireOut list(List<V> coll, Class<V> assumedClass) {
+    default <V> WireOut list(List<V> coll, Class<V> assumedClass) throws InvalidMarshallableException {
         sequence(coll, assumedClass, (s, kls, out) -> {
             int size = s.size();
             //noinspection ForLoopReplaceableByForEach
@@ -731,7 +732,7 @@ public interface ValueOut {
      * Write a collection containing specified type of entries.
      */
     @NotNull
-    default <V> WireOut collection(Collection<V> coll, Class<V> assumedClass) {
+    default <V> WireOut collection(Collection<V> coll, Class<V> assumedClass) throws InvalidMarshallableException {
         sequence(coll, assumedClass, (s, kls, out) -> {
             for (V v : s) {
                 object(kls, v);
@@ -744,7 +745,7 @@ public interface ValueOut {
      * Write an object value of specified type.
      */
     @NotNull
-    default <V> WireOut object(@NotNull Class<V> expectedType, V v) {
+    default <V> WireOut object(@NotNull Class<V> expectedType, V v) throws InvalidMarshallableException {
         Class<?> vClass = v == null ? void.class : v.getClass();
         if (v instanceof WriteMarshallable && !isAnEnum(v))
             if (ObjectUtils.matchingClass(expectedType, vClass)) {
@@ -763,7 +764,7 @@ public interface ValueOut {
      * Write a map.
      */
     @NotNull
-    default <K, V> WireOut marshallable(Map<K, V> map) {
+    default <K, V> WireOut marshallable(Map<K, V> map) throws InvalidMarshallableException {
         return marshallable(map, (Class) Object.class, (Class) Object.class, true);
     }
 
@@ -771,7 +772,7 @@ public interface ValueOut {
      * Write a map containing specified key and value typed objects.
      */
     @NotNull
-    default <K, V> WireOut marshallable(@Nullable Map<K, V> map, @NotNull Class<K> kClass, @NotNull Class<V> vClass, boolean leaf) {
+    default <K, V> WireOut marshallable(@Nullable Map<K, V> map, @NotNull Class<K> kClass, @NotNull Class<V> vClass, boolean leaf) throws InvalidMarshallableException {
         if (map == null) {
             nu11();
             return wireOut();
@@ -787,7 +788,7 @@ public interface ValueOut {
      * Write an object value.
      */
     @NotNull
-    default WireOut object(@Nullable Object value) {
+    default WireOut object(@Nullable Object value) throws InvalidMarshallableException {
         if (value == null)
             return nu11();
         // look for exact matches
@@ -1007,7 +1008,7 @@ public interface ValueOut {
         }
     }
 
-    default WireOut bytesMarshallable(WriteBytesMarshallable value) {
+    default WireOut bytesMarshallable(WriteBytesMarshallable value) throws InvalidMarshallableException {
         throw new UnsupportedOperationException();
     }
 
@@ -1074,7 +1075,7 @@ public interface ValueOut {
      * Write an untyped object value.
      */
     @NotNull
-    default WireOut untypedObject(@Nullable Object value) {
+    default WireOut untypedObject(@Nullable Object value) throws InvalidMarshallableException {
         if (value == null)
             return nu11();
         // look for exact matches
@@ -1150,7 +1151,7 @@ public interface ValueOut {
      * Write a throwable value.
      */
     @NotNull
-    default WireOut throwable(@NotNull Throwable t) {
+    default WireOut throwable(@NotNull Throwable t) throws InvalidMarshallableException {
         typedMarshallable(t.getClass().getName(), (WireOut w) -> {
             w.write("message").text(t.getMessage())
                     .write("stackTrace").sequence(w3 -> {
@@ -1302,7 +1303,7 @@ public interface ValueOut {
         }
 
         @Override
-        public void writeMarshallable(@NotNull WireOut wire) {
+        public void writeMarshallable(@NotNull WireOut wire) throws InvalidMarshallableException {
             for (@NotNull Map.Entry<K, V> entry : map.entrySet()) {
                 ValueOut valueOut = wire.writeEvent(kClass, entry.getKey());
                 boolean wasLeaf = valueOut.swapLeaf(leaf);

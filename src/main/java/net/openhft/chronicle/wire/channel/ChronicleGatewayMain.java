@@ -21,6 +21,7 @@ package net.openhft.chronicle.wire.channel;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.ClosedIORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.threads.NamedThreadFactory;
 import net.openhft.chronicle.threads.PauserMode;
 import net.openhft.chronicle.wire.Comment;
@@ -49,17 +50,17 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
     private boolean buffered = false;
     private ExecutorService service;
 
-    public ChronicleGatewayMain(String url) {
+    public ChronicleGatewayMain(String url) throws InvalidMarshallableException {
         this(url, new SocketRegistry(), SystemContext.INSTANCE);
         addCloseable(socketRegistry());
     }
 
-    public ChronicleGatewayMain(String url, SocketRegistry socketRegistry, SystemContext systemContext) {
+    public ChronicleGatewayMain(String url, SocketRegistry socketRegistry, SystemContext systemContext) throws InvalidMarshallableException {
         super(url, socketRegistry);
         this.systemContext(systemContext);
     }
 
-    public static void main(String... args) throws IOException {
+    public static void main(String... args) throws IOException, InvalidMarshallableException {
         ChronicleGatewayMain chronicleGatewayMain =
                 new ChronicleGatewayMain("tcp://localhost:" + PORT)
                         .pauserMode(PAUSER_MODE)

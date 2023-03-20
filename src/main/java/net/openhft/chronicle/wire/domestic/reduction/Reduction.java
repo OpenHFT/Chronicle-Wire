@@ -19,6 +19,7 @@
 package net.openhft.chronicle.wire.domestic.reduction;
 
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.ExcerptListener;
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.Wire;
@@ -44,7 +45,7 @@ public interface Reduction<T> extends ExcerptListener {
      * If this method is referenced as an {@link ExcerptListener} then the Reduction must be
      * thread-safe.
      **/
-    void onExcerpt(@NotNull Wire wire, @NonNegative long index);
+    void onExcerpt(@NotNull Wire wire, @NonNegative long index) throws InvalidMarshallableException;
 
     /**
      * Returns a view of the underlying reduction.
@@ -67,7 +68,7 @@ public interface Reduction<T> extends ExcerptListener {
      * @return the last index seen or -1 if no index was seen
      * @throws NullPointerException if the provided {@code tailer} is {@code null}
      */
-    default long accept(@NotNull final MarshallableIn tailer) {
+    default long accept(@NotNull final MarshallableIn tailer) throws InvalidMarshallableException {
         requireNonNull(tailer);
         return ReductionUtil.accept(tailer, this);
     }

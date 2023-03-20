@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.UpdateInterceptor;
 import net.openhft.chronicle.core.Mocker;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
@@ -72,7 +73,7 @@ public class MethodWriter2Test extends WireTestCommon {
         check(false, ARGUMENT.NONE);
     }
 
-    private void check(boolean allowThrough, ARGUMENT argument) {
+    private void check(boolean allowThrough, ARGUMENT argument) throws InvalidMarshallableException {
         Wire wire = WireType.BINARY.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
 

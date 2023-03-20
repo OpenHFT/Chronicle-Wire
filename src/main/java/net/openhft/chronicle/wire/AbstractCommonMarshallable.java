@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.BytesMarshallable;
+import net.openhft.chronicle.core.io.ValidatableUtil;
 
 /**
  * This uses bytes marshallable, non self describing messages by default.
@@ -38,6 +39,12 @@ public abstract class AbstractCommonMarshallable implements Marshallable, BytesM
 
     @Override
     public String toString() {
-        return Marshallable.$toString(this);
+        // this allows even invalid DTOs to be written to dump on a best effort basis.
+        ValidatableUtil.startValidatableDisabled();
+        try {
+            return Marshallable.$toString(this);
+        } finally {
+            ValidatableUtil.endValidateDisabled();
+        }
     }
 }

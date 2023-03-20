@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 
 public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
@@ -33,7 +34,7 @@ public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
     }
 
     @Override
-    public void readMarshallable(T t, @NotNull WireIn in, T defaults, boolean overwrite) {
+    public void readMarshallable(T t, @NotNull WireIn in, T defaults, boolean overwrite) throws InvalidMarshallableException {
         try {
             ReadMarshallable rm = t instanceof ReadMarshallable ? (ReadMarshallable) t : null;
             StringBuilder sb = WireInternal.acquireStringBuilder();

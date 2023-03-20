@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
@@ -71,7 +72,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
         checkWriteRead(simple);
     }
 
-    private void checkWriteRead(Simple simple) {
+    private void checkWriteRead(Simple simple) throws InvalidMarshallableException {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(32));
         Simple writer = wire.methodWriter(Simple.class);
         MethodReader reader = wire.methodReader(simple);

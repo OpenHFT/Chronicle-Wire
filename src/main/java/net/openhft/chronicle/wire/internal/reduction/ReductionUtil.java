@@ -19,6 +19,7 @@
 package net.openhft.chronicle.wire.internal.reduction;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.ExcerptListener;
@@ -42,7 +43,7 @@ public final class ReductionUtil {
     }
 
     public static long accept(@NotNull final MarshallableIn tailer,
-                              @NotNull final ExcerptListener excerptListener) {
+                              @NotNull final ExcerptListener excerptListener) throws InvalidMarshallableException {
         requireNonNull(tailer);
         long lastIndex = -1;
         boolean end = false;
@@ -78,7 +79,7 @@ public final class ReductionUtil {
         }
 
         @Override
-        public void onExcerpt(@NotNull Wire wire, long index) {
+        public void onExcerpt(@NotNull Wire wire, long index) throws InvalidMarshallableException {
             final E element = extractor.extract(wire, index);
             if (element != null) {
                 collector.accumulator()
@@ -97,7 +98,7 @@ public final class ReductionUtil {
         }
 
         @Override
-        public long accept(@NotNull final MarshallableIn tailer) {
+        public long accept(@NotNull final MarshallableIn tailer) throws InvalidMarshallableException {
             requireNonNull(tailer);
             return ReductionUtil.accept(tailer, this);
         }
@@ -121,7 +122,7 @@ public final class ReductionUtil {
         }
 
         @Override
-        public void onExcerpt(@NotNull Wire wire, long index) {
+        public void onExcerpt(@NotNull Wire wire, long index) throws InvalidMarshallableException {
             final long element = extractor.extractAsLong(wire, index);
             if (element != Long.MIN_VALUE) {
                 accumulator.accept(accumulation, element);
@@ -135,7 +136,7 @@ public final class ReductionUtil {
         }
 
         @Override
-        public long accept(@NotNull final MarshallableIn tailer) {
+        public long accept(@NotNull final MarshallableIn tailer) throws InvalidMarshallableException {
             requireNonNull(tailer);
             return ReductionUtil.accept(tailer, this);
         }
@@ -159,7 +160,7 @@ public final class ReductionUtil {
         }
 
         @Override
-        public void onExcerpt(@NotNull Wire wire, long index) {
+        public void onExcerpt(@NotNull Wire wire, long index) throws InvalidMarshallableException {
             final double element = extractor.extractAsDouble(wire, index);
             if (!Double.isNaN(element)) {
                 accumulator.accept(accumulation, element);
@@ -173,7 +174,7 @@ public final class ReductionUtil {
         }
 
         @Override
-        public long accept(@NotNull final MarshallableIn tailer) {
+        public long accept(@NotNull final MarshallableIn tailer) throws InvalidMarshallableException {
             requireNonNull(tailer);
             return ReductionUtil.accept(tailer, this);
         }

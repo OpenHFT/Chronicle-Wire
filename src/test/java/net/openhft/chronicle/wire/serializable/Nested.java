@@ -17,6 +17,9 @@
 
 package net.openhft.chronicle.wire.serializable;
 
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.Validatable;
+import net.openhft.chronicle.core.io.ValidatableUtil;
 import net.openhft.chronicle.wire.Wires;
 
 import java.io.Serializable;
@@ -26,7 +29,7 @@ import java.util.Set;
 
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
-public class Nested implements Serializable {
+public class Nested implements Serializable, Validatable {
     ScalarValues values;
     List<String> strings;
     Set<Integer> ints;
@@ -50,5 +53,14 @@ public class Nested implements Serializable {
     @Override
     public String toString() {
         return TEXT.asString(this);
+    }
+
+    @Override
+    public void validate() throws InvalidMarshallableException {
+        ValidatableUtil.requireNonNull(values, "values");
+        values.validate();
+        ValidatableUtil.requireNonNull(strings, "strings");
+        ValidatableUtil.requireNonNull(ints, "ints");
+        ValidatableUtil.requireNonNull(map, "map");
     }
 }

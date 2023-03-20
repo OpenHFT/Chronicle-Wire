@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire.channel.echo;
 
 import net.openhft.affinity.AffinityLock;
 import net.openhft.chronicle.core.io.ClosedIORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.channel.*;
@@ -28,7 +29,7 @@ import net.openhft.chronicle.wire.channel.echo.internal.EchoChannel;
 public class EchoHandler extends AbstractHandler<EchoHandler> {
 
     @Override
-    public void run(ChronicleContext context, ChronicleChannel channel) throws ClosedIORuntimeException {
+    public void run(ChronicleContext context, ChronicleChannel channel) throws ClosedIORuntimeException, InvalidMarshallableException {
         try (AffinityLock lock = context.affinityLock()) {
             Pauser pauser = Pauser.balanced();
             while (!channel.isClosed()) {

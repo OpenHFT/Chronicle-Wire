@@ -18,9 +18,12 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.UnresolvedType;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.Resettable;
+import net.openhft.chronicle.core.io.ValidatableUtil;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.*;
@@ -218,13 +221,13 @@ public interface ValueIn {
 
     <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader);
 
-    <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0);
+    <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0) throws InvalidMarshallableException;
 
-    default <T> boolean sequence(@NotNull T t, @NotNull SerializationStrategy<T> tReader) {
+    default <T> boolean sequence(@NotNull T t, @NotNull SerializationStrategy<T> tReader) throws InvalidMarshallableException {
         return sequence(t, (using, in) -> tReader.readUsing(null, using, in, BracketType.UNKNOWN));
     }
 
-    default <T> void reader0(ValueIn v, List<T> list, List<T> buffer, Supplier<T> bufferAdd) {
+    default <T> void reader0(ValueIn v, List<T> list, List<T> buffer, Supplier<T> bufferAdd) throws InvalidMarshallableException {
         while (v.hasNextSequenceItem()) {
             int size = list.size();
             if (buffer.size() <= size) {
@@ -247,12 +250,12 @@ public interface ValueIn {
      */
     default <T> boolean sequence(@NotNull List<T> list,
                                  @NotNull List<T> buffer,
-                                 @NotNull Supplier<T> bufferAdd) {
+                                 @NotNull Supplier<T> bufferAdd) throws InvalidMarshallableException {
         list.clear();
         return sequence(list, buffer, bufferAdd, this::reader0);
     }
 
-    @NotNull <T, K> WireIn sequence(@NotNull T t, K k, @NotNull TriConsumer<T, K, ValueIn> tReader);
+    @NotNull <T, K> WireIn sequence(@NotNull T t, K k, @NotNull TriConsumer<T, K, ValueIn> tReader) throws InvalidMarshallableException;
 
     default <T> int sequenceWithLength(@NotNull T t, @NotNull ToIntBiFunction<ValueIn, T> tReader) {
         int[] length = {0};
@@ -341,15 +344,15 @@ public interface ValueIn {
         });
     }
 
-    default <T> Set<T> set(Class<T> t) {
+    default <T> Set<T> set(Class<T> t) throws InvalidMarshallableException {
         return collection(LinkedHashSet::new, t);
     }
 
-    default <T> List<T> list(Class<T> t) {
+    default <T> List<T> list(Class<T> t) throws InvalidMarshallableException {
         return collection(ArrayList::new, t);
     }
 
-    default <T, C extends Collection<T>> C collection(@NotNull Supplier<C> supplier, Class<T> t) {
+    default <T, C extends Collection<T>> C collection(@NotNull Supplier<C> supplier, Class<T> t) throws InvalidMarshallableException {
         C list = supplier.get();
         sequence(list, t, (s, kls, v) -> {
             while (v.hasNextSequenceItem())
@@ -359,17 +362,17 @@ public interface ValueIn {
     }
 
     @NotNull
-    default <O, T extends ReadMarshallable> WireIn set(@NotNull O o, Function<O, T> tSupplier) {
+    default <O, T extends ReadMarshallable> WireIn set(@NotNull O o, Function<O, T> tSupplier) throws InvalidMarshallableException {
         return collection(o, tSupplier);
     }
 
     @NotNull
-    default <O, T extends ReadMarshallable> WireIn list(@NotNull O o, Function<O, T> tSupplier) {
+    default <O, T extends ReadMarshallable> WireIn list(@NotNull O o, Function<O, T> tSupplier) throws InvalidMarshallableException {
         return collection(o, tSupplier);
     }
 
     @NotNull
-    default <O, T extends ReadMarshallable> WireIn collection(@NotNull O o, Function<O, T> tSupplier) {
+    default <O, T extends ReadMarshallable> WireIn collection(@NotNull O o, Function<O, T> tSupplier) throws InvalidMarshallableException {
         sequence(o, tSupplier, (o2, ts, v) -> {
             while (v.hasNextSequenceItem()) {
                 T t = ts.apply(o2);
@@ -380,7 +383,7 @@ public interface ValueIn {
     }
 
     @Nullable
-    default <K, V> Map<K, V> marshallableAsMap(Class<K> kClass, @NotNull Class<V> vClass) {
+    default <K, V> Map<K, V> marshallableAsMap(Class<K> kClass, @NotNull Class<V> vClass) throws InvalidMarshallableException {
         return marshallableAsMap(kClass, vClass, new LinkedHashMap<>());
     }
 
@@ -391,11 +394,11 @@ public interface ValueIn {
 
     @Nullable <T> T applyToMarshallable(Function<WireIn, T> marshallableReader);
 
-    @Nullable <T> T typedMarshallable() throws IORuntimeException;
+    @Nullable <T> T typedMarshallable() throws IORuntimeException, InvalidMarshallableException;
 
     @Nullable
     default <T> T typedMarshallable(@NotNull Function<Class, ReadMarshallable> marshallableFunction)
-            throws IORuntimeException {
+            throws IORuntimeException, InvalidMarshallableException {
         @Nullable final Class aClass = typePrefix();
 
         if (ReadMarshallable.class.isAssignableFrom(aClass)) {
@@ -430,13 +433,13 @@ public interface ValueIn {
 
     @Nullable
     Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy)
-            throws BufferUnderflowException, IORuntimeException;
+            throws BufferUnderflowException, IORuntimeException, InvalidMarshallableException;
 
-    default boolean marshallable(@NotNull Serializable object) throws BufferUnderflowException, IORuntimeException {
+    default boolean marshallable(@NotNull Serializable object) throws BufferUnderflowException, IORuntimeException, InvalidMarshallableException {
         return marshallable(object, SerializationStrategies.SERIALIZABLE) != null;
     }
 
-    default boolean marshallable(@NotNull ReadMarshallable object) throws BufferUnderflowException, IORuntimeException {
+    default boolean marshallable(@NotNull ReadMarshallable object) throws BufferUnderflowException, IORuntimeException, InvalidMarshallableException {
         return marshallable(object, SerializationStrategies.MARSHALLABLE) != null;
     }
 
@@ -490,7 +493,7 @@ public interface ValueIn {
 
     Type typeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler);
 
-    default Throwable throwable(boolean appendCurrentStack) {
+    default Throwable throwable(boolean appendCurrentStack) throws InvalidMarshallableException {
         return WireInternal.throwable(this, appendCurrentStack);
     }
 
@@ -518,22 +521,37 @@ public interface ValueIn {
      *              if {@link Wires#GENERATE_TUPLES} is enabled.
      */
     @Nullable
-    default <E> E object(@Nullable Class<E> clazz) {
+    default <E> E object(@Nullable Class<E> clazz) throws InvalidMarshallableException {
         return Wires.object0(this, null, clazz);
     }
 
     @Nullable
-    default Object object() {
+    default Object object() throws InvalidMarshallableException {
         @Nullable final Object o = objectWithInferredType(null, SerializationStrategies.ANY_OBJECT, null);
         return o;
     }
 
+    /**
+     * Used for logging whatever we can get
+     * @return the object or Throwable
+     */
+    default Object objectBestEffort() {
+        ValidatableUtil.startValidatableDisabled();
+        try {
+            return object();
+        } catch (Throwable t) {
+            return t;
+        } finally {
+            ValidatableUtil.endValidateDisabled();
+        }
+    }
+
     @Nullable
-    default <E> E object(@Nullable E using, @Nullable Class clazz) {
+    default <E> E object(@Nullable E using, @Nullable Class clazz) throws InvalidMarshallableException {
         return object(using, clazz, true);
     }
 
-    default <E> E object(@Nullable E using, @Nullable Class clazz, boolean bestEffort) {
+    default <E> E object(@Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
         return Wires.object0(this, using, clazz, bestEffort);
     }
 
@@ -543,7 +561,7 @@ public interface ValueIn {
     boolean isNull();
 
     @Nullable
-    default <T, E> WireIn object(@NotNull Class<E> clazz, T t, @NotNull BiConsumer<T, E> e) {
+    default <T, E> WireIn object(@NotNull Class<E> clazz, T t, @NotNull BiConsumer<T, E> e) throws InvalidMarshallableException {
         e.accept(t, object(clazz));
         return wireIn();
     }
@@ -561,7 +579,7 @@ public interface ValueIn {
     void resetState();
 
     @Nullable
-    Object objectWithInferredType(Object using, SerializationStrategy strategy, Class type);
+    Object objectWithInferredType(Object using, SerializationStrategy strategy, Class type) throws InvalidMarshallableException;
 
     /**
      * Check if the value is present
@@ -624,6 +642,6 @@ public interface ValueIn {
     }
 
     interface Reader {
-        <T> void accept(ValueIn valueIn, List<T> list, List<T> buffer, Supplier<T> bufferAdd);
+        <T> void accept(ValueIn valueIn, List<T> list, List<T> buffer, Supplier<T> bufferAdd) throws InvalidMarshallableException;
     }
 }

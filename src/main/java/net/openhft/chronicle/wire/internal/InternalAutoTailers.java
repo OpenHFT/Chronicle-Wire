@@ -19,6 +19,7 @@
 package net.openhft.chronicle.wire.internal;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.threads.InvalidEventHandlerException;
 import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.wire.ExcerptListener;
@@ -70,7 +71,7 @@ public final class InternalAutoTailers {
         }
 
         @Override
-        public boolean action() throws InvalidEventHandlerException {
+        public boolean action() throws InvalidEventHandlerException, InvalidMarshallableException {
             if (!running()) {
                 closer().run();
                 throw InvalidEventHandlerException.reusable();

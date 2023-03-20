@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.CommonMarshallable;
 import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -40,9 +41,9 @@ public interface ReadMarshallable extends CommonMarshallable {
      * @param wire to read from in an ordered manner.
      * @throws IORuntimeException the stream wasn't ordered or formatted as expected.
      */
-    void readMarshallable(@NotNull WireIn wire) throws IORuntimeException;
+    void readMarshallable(@NotNull WireIn wire) throws IORuntimeException, InvalidMarshallableException;
 
-    default void unexpectedField(Object event, ValueIn valueIn) {
+    default void unexpectedField(Object event, ValueIn valueIn) throws InvalidMarshallableException {
         valueIn.skipValue();
     }
 }

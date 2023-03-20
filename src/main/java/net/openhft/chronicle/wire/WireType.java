@@ -23,6 +23,8 @@ import net.openhft.chronicle.bytes.ref.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.LicenceCheck;
 import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.ValidatableUtil;
 import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -76,7 +78,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
 
         @Nullable
         @Override
-        public <T> T fromString(Class<T> tClass, @NotNull CharSequence cs) {
+        public <T> T fromString(Class<T> tClass, @NotNull CharSequence cs) throws InvalidMarshallableException {
             Bytes<?> bytes = Bytes.allocateElasticDirect(cs.length());
             try {
                 bytes.appendUtf8(cs);
@@ -113,7 +115,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
 
         @Nullable
         @Override
-        public <T> T fromString(@NotNull CharSequence cs) {
+        public <T> T fromString(@NotNull CharSequence cs) throws InvalidMarshallableException {
             return fromHexString(cs);
         }
     },
@@ -135,7 +137,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
 
         @Nullable
         @Override
-        public <T> T fromString(@NotNull CharSequence cs) {
+        public <T> T fromString(@NotNull CharSequence cs) throws InvalidMarshallableException {
             return fromHexString(cs);
         }
     },
@@ -185,7 +187,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
 
         @Nullable
         @Override
-        public <T> T fromString(@NotNull CharSequence cs) {
+        public <T> T fromString(@NotNull CharSequence cs) throws InvalidMarshallableException {
             return fromHexString(cs);
         }
     },
@@ -234,7 +236,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
 
         @Nullable
         @Override
-        public <T> T fromString(@NotNull CharSequence cs) {
+        public <T> T fromString(@NotNull CharSequence cs) throws InvalidMarshallableException {
             return fromHexString(cs);
         }
     },
@@ -253,7 +255,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
 
         @Nullable
         @Override
-        public <T> T fromString(@NotNull CharSequence cs) {
+        public <T> T fromString(@NotNull CharSequence cs) throws InvalidMarshallableException {
             return fromHexString(cs);
         }
     },
@@ -272,7 +274,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
 
         @Nullable
         @Override
-        public <T> T fromString(@NotNull CharSequence cs) {
+        public <T> T fromString(@NotNull CharSequence cs) throws InvalidMarshallableException {
             return fromHexString(cs);
         }
     },
@@ -344,7 +346,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
 
         @Nullable
         @Override
-        public <T> T fromString(@NotNull CharSequence cs) {
+        public <T> T fromString(@NotNull CharSequence cs) throws InvalidMarshallableException {
             return fromHexString(cs);
         }
     },
@@ -463,12 +465,17 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     }
 
     public String asString(Object marshallable) {
-        Bytes<?> bytes = asBytes(marshallable);
-        return bytes.toString();
+        ValidatableUtil.startValidatableDisabled();
+        try {
+            Bytes<?> bytes = asBytes(marshallable);
+            return bytes.toString();
+        } finally {
+            ValidatableUtil.endValidateDisabled();
+        }
     }
 
     @NotNull
-    private Bytes<?> asBytes(Object marshallable) {
+    private Bytes<?> asBytes(Object marshallable) throws InvalidMarshallableException {
         Bytes<?> bytes = getBytesForToString();
         Wire wire = apply(bytes);
         wire.usePadding(wire.isBinary() && AbstractWire.DEFAULT_USE_PADDING);
@@ -498,7 +505,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      * @throws ClassCastException if the object is not a T
      */
     @Nullable
-    public <T> T fromString(@NotNull CharSequence cs) {
+    public <T> T fromString(@NotNull CharSequence cs) throws InvalidMarshallableException {
         return (T) fromString(/* Allow Marshallable tuples by not requesting  Object */ null, cs);
     }
 
@@ -509,7 +516,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      * @param cs     text to deserialize
      * @return the object deserialized
      */
-    public <T> T fromString(Class<T> tClass, @NotNull CharSequence cs) {
+    public <T> T fromString(Class<T> tClass, @NotNull CharSequence cs) throws InvalidMarshallableException {
         if (cs.length() == 0)
             throw new IllegalArgumentException("cannot deserialize an empty string");
         Bytes<?> bytes = getBytes2();
@@ -519,12 +526,12 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     }
 
     @NotNull
-    public <T> T fromFile(String filename) throws IOException {
+    public <T> T fromFile(String filename) throws IOException, InvalidMarshallableException {
         return (T) fromFile(Marshallable.class, filename);
     }
 
     @Nullable
-    public <T> T fromFile(@NotNull Class<T> expectedType, String filename) throws IOException {
+    public <T> T fromFile(@NotNull Class<T> expectedType, String filename) throws IOException, InvalidMarshallableException {
         File file = new File(filename);
         URL url = null;
         if (!file.exists()) {
@@ -585,7 +592,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     }
 
     @NotNull
-    public <T> Map<String, T> fromFileAsMap(String filename, @NotNull Class<T> tClass) throws IOException {
+    public <T> Map<String, T> fromFileAsMap(String filename, @NotNull Class<T> tClass) throws IOException, InvalidMarshallableException {
         @NotNull Map<String, T> map = new LinkedHashMap<>();
         Wire wire = apply(BytesUtil.readFile(filename));
         @NotNull StringBuilder sb = new StringBuilder();
@@ -597,12 +604,12 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     }
 
     public <T extends Marshallable> void toFileAsMap(@NotNull String filename, @NotNull Map<String, T> map)
-            throws IOException {
+            throws IOException, InvalidMarshallableException {
         toFileAsMap(filename, map, false);
     }
 
     public <T extends Marshallable> void toFileAsMap(@NotNull String filename, @NotNull Map<String, T> map, boolean compact)
-            throws IOException {
+            throws IOException, InvalidMarshallableException {
         Bytes<?> bytes = WireInternal.acquireInternalBytes();
         Wire wire = apply(bytes);
         for (@NotNull Map.Entry<String, T> entry : map.entrySet()) {
@@ -623,7 +630,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
     }
 
-    public void toFile(@NotNull String filename, WriteMarshallable marshallable) throws IOException {
+    public void toFile(@NotNull String filename, WriteMarshallable marshallable) throws IOException, InvalidMarshallableException {
         Bytes<?> bytes = WireInternal.acquireInternalBytes();
         Wire wire = apply(bytes);
         wire.getValueOut().typedMarshallable(marshallable);
@@ -638,11 +645,16 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
 
     @NotNull
     String asHexString(Object marshallable) {
-        Bytes<?> bytes = asBytes(marshallable);
-        return bytes.toHexString();
+        ValidatableUtil.startValidatableDisabled();
+        try {
+            Bytes<?> bytes = asBytes(marshallable);
+            return bytes.toHexString();
+        } finally {
+            ValidatableUtil.endValidateDisabled();
+        }
     }
 
-    @Nullable <T> T fromHexString(@NotNull CharSequence s) {
+    @Nullable <T> T fromHexString(@NotNull CharSequence s) throws InvalidMarshallableException {
         Bytes<?> bytes = Bytes.fromHexString(s.toString());
         try {
             Wire wire = apply(bytes);
@@ -653,7 +665,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     }
 
     @Nullable
-    public Map<String, Object> asMap(@NotNull CharSequence cs) {
+    public Map<String, Object> asMap(@NotNull CharSequence cs) throws InvalidMarshallableException {
         Bytes<?> bytes = getBytes2();
         bytes.appendUtf8(cs);
         Wire wire = apply(bytes);

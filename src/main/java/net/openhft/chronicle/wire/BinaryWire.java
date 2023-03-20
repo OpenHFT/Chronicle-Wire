@@ -28,6 +28,8 @@ import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.ValidatableUtil;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.util.*;
@@ -249,7 +251,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     @Override
-    public void copyTo(@NotNull WireOut wire) {
+    public void copyTo(@NotNull WireOut wire) throws InvalidMarshallableException {
         if (wire.getClass() == getClass()) {
             final Bytes<?> bytes2 = wire.bytes();
             if (bytes2.retainedHexDumpDescription())
@@ -264,7 +266,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
     }
 
-    public void copyOne(@NotNull WireOut wire) {
+    public void copyOne(@NotNull WireOut wire) throws InvalidMarshallableException {
         int peekCode = peekCode();
         outerSwitch:
         switch (peekCode >> 4) {
@@ -409,7 +411,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     @SuppressWarnings("incomplete-switch")
-    public void readWithLength(@NotNull WireOut wire, int len) {
+    public void readWithLength(@NotNull WireOut wire, int len) throws InvalidMarshallableException {
         long lim = bytes.readLimit();
         try {
             bytes.readLimit(bytes.readPosition() + len);
@@ -507,7 +509,15 @@ public class BinaryWire extends AbstractWire implements Wire {
             // if no old field nor current field matches, set to default values.
             // we may come back and set the field later if we find it.
             curr.addUnexpected(position);
-            valueIn.consumeNext();
+
+            ValidatableUtil.startValidatableDisabled();
+            try {
+                valueIn.consumeNext();
+            } catch (InvalidMarshallableException e) {
+                throw new AssertionError(e);
+            } finally {
+                ValidatableUtil.endValidateDisabled();
+            }
             consumePadding();
         }
 
@@ -610,7 +620,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     @Nullable
     @Override
-    public <K> K readEvent(@NotNull Class<K> expectedClass) {
+    public <K> K readEvent(@NotNull Class<K> expectedClass) throws InvalidMarshallableException {
         int peekCode = peekCodeAfterPadding();
         switch (peekCode >> 4) {
             case BinaryWireHighCode.END_OF_STREAM:
@@ -641,7 +651,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     @Nullable
-    private <K> K readSpecialField(int peekCode, @NotNull Class<K> expectedClass) {
+    private <K> K readSpecialField(int peekCode, @NotNull Class<K> expectedClass) throws InvalidMarshallableException {
         switch (peekCode) {
             case FIELD_NUMBER:
                 bytes.uncheckedReadSkipOne();
@@ -816,7 +826,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         return sb;
     }
 
-    private void copySpecial(@NotNull WireOut wire, int peekCode) {
+    private void copySpecial(@NotNull WireOut wire, int peekCode) throws InvalidMarshallableException {
         switch (peekCode) {
             case COMMENT: {
                 bytes.uncheckedReadSkipOne();
@@ -1952,7 +1962,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public <T, K> WireOut sequence(T t, K kls, @NotNull TriConsumer<T, K, ValueOut> writer) {
+        public <T, K> WireOut sequence(T t, K kls, @NotNull TriConsumer<T, K, ValueOut> writer) throws InvalidMarshallableException {
             if (bytes.retainedHexDumpDescription())
                 bytes.writeHexDumpDescription("sequence");
             writeCode(BYTES_LENGTH32);
@@ -1967,7 +1977,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut marshallable(@NotNull WriteMarshallable object) {
+        public WireOut marshallable(@NotNull WriteMarshallable object) throws InvalidMarshallableException {
             if (bytes.retainedHexDumpDescription())
                 bytes.writeHexDumpDescription(object.getClass().getSimpleName());
             final BinaryLengthLength binaryLengthLength = object.binaryLengthLength();
@@ -1983,7 +1993,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public WireOut bytesMarshallable(WriteBytesMarshallable object) {
+        public WireOut bytesMarshallable(WriteBytesMarshallable object) throws InvalidMarshallableException {
             if (bytes.retainedHexDumpDescription())
                 bytes.writeHexDumpDescription(object.getClass().getSimpleName());
             writeCode(BYTES_LENGTH32);
@@ -2001,7 +2011,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut marshallable(@NotNull Serializable object) {
+        public WireOut marshallable(@NotNull Serializable object) throws InvalidMarshallableException {
             if (bytes.retainedHexDumpDescription())
                 bytes.writeHexDumpDescription(object.getClass().getSimpleName());
             writeCode(BYTES_LENGTH32);
@@ -2024,7 +2034,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut map(Map map) {
+        public WireOut map(Map map) throws InvalidMarshallableException {
             return marshallable(map);
         }
 
@@ -2890,7 +2900,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         public WireIn skipValue() {
             final long length = readLength();
             if (length < 0)
-                object();
+                objectBestEffort();
             else
                 bytes.readSkip(length);
 
@@ -3271,7 +3281,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public <T> boolean sequence(@NotNull List<T> list,
                                     @NotNull List<T> buffer,
-                                    @NotNull Supplier<T> bufferAdd) {
+                                    @NotNull Supplier<T> bufferAdd) throws InvalidMarshallableException {
             list.clear();
             return sequence(list, buffer, bufferAdd, reader0field);
         }
@@ -3280,7 +3290,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         public <T> boolean sequence(List<T> list,
                                     @NotNull List<T> buffer,
                                     Supplier<T> bufferAdd,
-                                    Reader tReader) {
+                                    Reader tReader) throws InvalidMarshallableException {
             if (isNull())
                 return false;
             long length = readLength();
@@ -3301,7 +3311,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) {
+        public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) throws InvalidMarshallableException {
             consumePadding();
             int code = readCode();
             long length = readLengthPrefixed(code);
@@ -3383,7 +3393,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @Override
         @Nullable
-        public <T> T typedMarshallable() throws IORuntimeException {
+        public <T> T typedMarshallable() throws IORuntimeException, InvalidMarshallableException {
             pushState();
             try {
                 int code = readCode();
@@ -3410,7 +3420,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Nullable
-        protected <T> T typedMarshallable0() {
+        protected <T> T typedMarshallable0() throws InvalidMarshallableException {
             @Nullable StringBuilder sb = readUtf8();
             if (sb == null)
                 return null;
@@ -3432,19 +3442,19 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @NotNull
-        protected <T> T updateAlias() {
+        protected <T> T updateAlias() throws InvalidMarshallableException {
             throw new UnsupportedOperationException("Used by DeltaWire");
         }
 
         @NotNull
-        protected <T> T anchor() {
+        protected <T> T anchor() throws InvalidMarshallableException {
             throw new UnsupportedOperationException("Used by DeltaWire");
         }
 
         @Override
         @Nullable
         public <T> T typedMarshallable(@NotNull Function<Class, ReadMarshallable> marshallableFunction)
-                throws IORuntimeException {
+                throws IORuntimeException, InvalidMarshallableException {
 
             int code = peekCode();
             if (code != TYPE_PREFIX)
@@ -3565,12 +3575,12 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @Override
         public boolean marshallable(@NotNull ReadMarshallable object)
-                throws BufferUnderflowException, IORuntimeException {
+                throws BufferUnderflowException, IORuntimeException, InvalidMarshallableException {
             return marshallable(object, true);
         }
 
         public boolean marshallable(@NotNull ReadMarshallable object, boolean overwrite)
-                throws BufferUnderflowException, IORuntimeException {
+                throws BufferUnderflowException, IORuntimeException, InvalidMarshallableException {
             consumePadding();
             if (this.isNull())
                 return false;
@@ -3613,7 +3623,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         @Nullable
         public Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy)
-                throws BufferUnderflowException, IORuntimeException {
+                throws BufferUnderflowException, IORuntimeException, InvalidMarshallableException {
             if (this.isNull())
                 return null;
             pushState();
@@ -3642,7 +3652,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Nullable
-        private Object readMarshallableAnchor(@NotNull Object object) {
+        private Object readMarshallableAnchor(@NotNull Object object) throws InvalidMarshallableException {
             int code = peekCode();
             switch (code) {
                 case ANCHOR:
@@ -3850,7 +3860,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class type) {
+        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class type) throws InvalidMarshallableException {
             int code = peekCode();
             if ((code & 0x80) == 0) {
                 bytes.uncheckedReadSkipOne();
@@ -3994,7 +4004,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return code == EVENT_NAME || (FIELD_NAME0 <= code && code <= FIELD_NAME31);
         }
 
-        void consumeNext() {
+        void consumeNext() throws InvalidMarshallableException {
             int code = peekCode();
             if ((code & 0x80) == 0) {
                 bytes.uncheckedReadSkipOne();
@@ -4020,7 +4030,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                             return;
                         case ANCHOR:
                         case UPDATED_ALIAS:
-                            valueIn.object();
+                            valueIn.objectBestEffort();
                             return;
                         case FIELD_ANCHOR:
                             bytes.readSkip(1);
@@ -4127,7 +4137,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        protected <T> T anchor() {
+        protected <T> T anchor() throws InvalidMarshallableException {
             long ref = bytes.readStopBit();
 //            System.out.println("anchor " + ref + " inObjects " + Integer.toHexString(inObjects.hashCode()));
             if (ref >= inObjects.length)
@@ -4139,7 +4149,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        protected <T> T updateAlias() {
+        protected <T> T updateAlias() throws InvalidMarshallableException {
             int ref = Maths.toUInt31(bytes.readStopBit());
 //            System.out.println("update " + ref + " inObjects " + Integer.toHexString(inObjects.hashCode()));
             Marshallable previous = inObjects[ref];

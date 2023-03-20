@@ -22,6 +22,8 @@ import net.openhft.chronicle.bytes.ref.*;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.ValidatableUtil;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.*;
@@ -80,7 +82,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         return new YamlWire(Bytes.from(text));
     }
 
-    public static String asText(@NotNull Wire wire) {
+    public static String asText(@NotNull Wire wire) throws InvalidMarshallableException {
         long pos = wire.bytes().readPosition();
         @NotNull Wire tw = Wire.newYamlWireOnHeap();
         wire.copyTo(tw);
@@ -296,7 +298,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     @Override
-    public void copyTo(@NotNull WireOut wire) {
+    public void copyTo(@NotNull WireOut wire) throws InvalidMarshallableException {
         if (wire instanceof TextWire || wire instanceof YamlWire) {
             final Bytes<?> bytes0 = bytes();
             wire.bytes().write(this.bytes, yt.blockStart(), bytes0.readLimit() - yt.blockStart);
@@ -309,7 +311,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
     }
 
-    private void copyOne(WireOut wire, boolean nested) {
+    private void copyOne(WireOut wire, boolean nested) throws InvalidMarshallableException {
         switch (yt.current()) {
             case NONE:
                 break;
@@ -384,7 +386,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
     }
 
-    private void copyMappingKey(WireOut wire, boolean nested) {
+    private void copyMappingKey(WireOut wire, boolean nested) throws InvalidMarshallableException {
         yt.next();
         if (yt.current() == YamlToken.MAPPING_KEY)
             yt.next();
@@ -447,7 +449,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
     @Nullable
     @Override
-    public <K> K readEvent(@NotNull Class<K> expectedClass) {
+    public <K> K readEvent(@NotNull Class<K> expectedClass) throws InvalidMarshallableException {
         startEventIfTop();
         switch (yt.current()) {
             case MAPPING_KEY:
@@ -552,9 +554,14 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     public String dumpContext() {
-        Wire yw = Wire.newYamlWireOnHeap();
-        yw.getValueOut().list(yt.contexts, YamlTokeniser.YTContext.class);
-        return yw.toString();
+        ValidatableUtil.startValidatableDisabled();
+        try {
+            Wire yw = Wire.newYamlWireOnHeap();
+            yw.getValueOut().list(yt.contexts, YamlTokeniser.YTContext.class);
+            return yw.toString();
+        } finally {
+            ValidatableUtil.endValidateDisabled();
+        }
     }
 
     private boolean checkForMatch(@NotNull String keyName) {
@@ -764,13 +771,13 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     @Override
-    public boolean readDocument(@Nullable ReadMarshallable metaDataConsumer, @Nullable ReadMarshallable dataConsumer) {
+    public boolean readDocument(@Nullable ReadMarshallable metaDataConsumer, @Nullable ReadMarshallable dataConsumer) throws InvalidMarshallableException {
         valueIn.resetState();
         return super.readDocument(metaDataConsumer, dataConsumer);
     }
 
     @Override
-    public boolean readDocument(long position, @Nullable ReadMarshallable metaDataConsumer, @Nullable ReadMarshallable dataConsumer) {
+    public boolean readDocument(long position, @Nullable ReadMarshallable metaDataConsumer, @Nullable ReadMarshallable dataConsumer) throws InvalidMarshallableException {
         valueIn.resetState();
         return super.readDocument(position, metaDataConsumer, dataConsumer);
     }
@@ -931,8 +938,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 });
                 if (uncompressed != null) {
                     Bytes<byte[]> bytes = Bytes.wrapForRead(uncompressed);
-                    bytesConsumer.readMarshallable(bytes);
-                    bytes.releaseLast();
+                    try {
+                        bytesConsumer.readMarshallable(bytes);
+                    } finally {
+                        bytes.releaseLast();
+                    }
 
                 } else if (StringUtils.isEqual(sb, "!null")) {
                     bytesConsumer.readMarshallable(null);
@@ -944,16 +954,18 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             } else {
                 textTo(sb);
                 Bytes<byte[]> bytes = Bytes.wrapForRead(sb.toString().getBytes(ISO_8859_1));
-                bytesConsumer.readMarshallable(bytes);
-                bytes.releaseLast();
+                try {
+                    bytesConsumer.readMarshallable(bytes);
+                } finally {
+                    bytes.releaseLast();
+                }
             }
             return YamlWire.this;
         }
 
         @Override
-        public byte @Nullable [] bytes(byte[] using) {
+        public byte @Nullable [] bytes(byte[] using)  {
             return (byte[]) objectWithInferredType(using, SerializationStrategies.ANY_OBJECT, byte[].class);
-
         }
 
         @NotNull
@@ -1273,12 +1285,12 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             return true;
         }
 
-        public <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0) {
+        public <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0) throws InvalidMarshallableException {
             return sequence(list, buffer, bufferAdd);
         }
 
         @Override
-        public <T> boolean sequence(@NotNull List<T> list, @NotNull List<T> buffer, @NotNull Supplier<T> bufferAdd) {
+        public <T> boolean sequence(@NotNull List<T> list, @NotNull List<T> buffer, @NotNull Supplier<T> bufferAdd) throws InvalidMarshallableException {
             consumePadding();
             if (isNull()) {
                 return false;
@@ -1308,7 +1320,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
         @NotNull
         @Override
-        public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) {
+        public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) throws InvalidMarshallableException {
             consumePadding();
             assert yt.current() == YamlToken.SEQUENCE_START;
             yt.next(Integer.MIN_VALUE);
@@ -1466,7 +1478,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Nullable
         @Override
         public Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy)
-                throws BufferUnderflowException, IORuntimeException {
+                throws BufferUnderflowException, IORuntimeException, InvalidMarshallableException {
             if (isNull()) {
                 consumeAny(yt.topContext().indent);
                 return null;
@@ -1553,14 +1565,14 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
         @Override
         @Nullable
-        public <T> T typedMarshallable() {
+        public <T> T typedMarshallable() throws InvalidMarshallableException {
             return (T) objectWithInferredType(null, SerializationStrategies.ANY_NESTED, null);
         }
 
         @Nullable
         private <K, V> Map<K, V> map(@NotNull final Class<K> kClass,
                                      @NotNull final Class<V> vClass,
-                                     @Nullable Map<K, V> usingMap) {
+                                     @Nullable Map<K, V> usingMap) throws InvalidMarshallableException {
             consumePadding();
             if (usingMap == null)
                 usingMap = new LinkedHashMap<>();
@@ -1581,7 +1593,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         @Nullable
-        private <K, V> Map<K, V> typedMap(@NotNull Class<K> kClazz, @NotNull Class<V> vClass, @NotNull Map<K, V> usingMap, @NotNull StringBuilder sb) {
+        private <K, V> Map<K, V> typedMap(@NotNull Class<K> kClazz, @NotNull Class<V> vClass, @NotNull Map<K, V> usingMap, @NotNull StringBuilder sb) throws InvalidMarshallableException {
             yt.text(sb);
             yt.next();
             if (("!null").contentEquals(sb)) {
@@ -1661,7 +1673,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             consumePadding();
             valueIn.skipType();
             if (yt.current() != YamlToken.TEXT) {
-                Jvm.warn().on(getClass(), "Unable to read " + valueIn.object() + " as a long.");
+                Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a long.");
                 return 0;
             }
 
@@ -1673,7 +1685,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             consumePadding();
             valueIn.skipType();
             if (yt.current() != YamlToken.TEXT) {
-                Jvm.warn().on(getClass(), "Unable to read " + valueIn.object() + " as a long.");
+                Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a long.");
                 return 0;
             }
             return getADouble();
@@ -1714,7 +1726,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         @Override
-        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class type) {
+        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class type) throws InvalidMarshallableException {
             consumePadding();
             if (yt.current() == YamlToken.SEQUENCE_ENTRY)
                 yt.next();
@@ -1724,7 +1736,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         @Nullable
-        Object objectWithInferredType0(Object using, @NotNull SerializationStrategy strategy, Class type) {
+        Object objectWithInferredType0(Object using, @NotNull SerializationStrategy strategy, Class type) throws InvalidMarshallableException {
             boolean bestEffort = type != null;
             if (yt.current() == YamlToken.TAG) {
                 Class aClass = typePrefix();
@@ -1871,7 +1883,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             });
         }
 
-        private Object decodeBinary(Class type) {
+        private Object decodeBinary(Class type) throws InvalidMarshallableException {
             Object o = objectWithInferredType(null, SerializationStrategies.ANY_SCALAR, String.class);
             byte[] decoded = Base64.getDecoder().decode(o == null ? "" : o.toString().replaceAll("\\s", ""));
 

@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire.channel;
 
 
 import net.openhft.chronicle.core.io.ClosedIORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 
 public interface ChannelHandler extends ChannelHeader {
 
@@ -27,7 +28,7 @@ public interface ChannelHandler extends ChannelHeader {
         return new OkHeader();
     }
 
-    void run(ChronicleContext context, ChronicleChannel channel) throws ClosedIORuntimeException;
+    void run(ChronicleContext context, ChronicleChannel channel) throws ClosedIORuntimeException, InvalidMarshallableException;
 
     default boolean closeWhenRunEnds() {
         return true;

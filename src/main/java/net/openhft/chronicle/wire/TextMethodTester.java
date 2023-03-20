@@ -20,9 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.io.Closeable;
-import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.onoes.ExceptionHandler;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import net.openhft.chronicle.wire.utils.YamlAgitator;
@@ -239,7 +237,12 @@ public class TextMethodTester<T> implements YamlTester {
                 expected = outStr.trim().replace("\r", "");
             }
         } else {
-            expected = loadLastValues().toString().trim();
+            ValidatableUtil.startValidatableDisabled();
+            try {
+                expected = loadLastValues().toString().trim();
+            } finally {
+                ValidatableUtil.endValidateDisabled();
+            }
         }
         String originalExpected = expected;
         boolean[] sepOnNext = {true};
@@ -389,7 +392,7 @@ public class TextMethodTester<T> implements YamlTester {
 
         } catch (Throwable t) {
             if (exceptionHandler == null)
-                throw t;
+                throw Jvm.rethrow(t);
             exceptionHandler.on(getClass(), "Unhandled exception", t);
         }
         return true;
@@ -407,7 +410,7 @@ public class TextMethodTester<T> implements YamlTester {
     }
 
     @NotNull
-    protected StringBuilder loadLastValues() throws IOException {
+    protected StringBuilder loadLastValues() throws IOException, InvalidMarshallableException {
         Wire wireOut = createWire(BytesUtil.readFile(output));
         Map<String, String> events = new TreeMap<>();
         consumeDocumentSeparator(wireOut);

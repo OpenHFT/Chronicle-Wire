@@ -18,12 +18,13 @@
 
 package run.chronicle.account.api;
 
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import run.chronicle.account.dto.AccountStatus;
 import run.chronicle.account.dto.CheckPoint;
 import run.chronicle.account.dto.Transfer;
 
 public interface AccountsIn {
-    void accountStatus(AccountStatus accountStatus);
+    void accountStatus(AccountStatus accountStatus) throws InvalidMarshallableException;
     void transfer(Transfer transfer);
     void checkPoint(CheckPoint checkPoint);
 }
