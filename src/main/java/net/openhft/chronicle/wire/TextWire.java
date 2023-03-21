@@ -104,7 +104,7 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     public static String asText(@NotNull Wire wire) {
         NativeBytes<Void> bytes = nativeBytes();
-        ValidatableUtil.startValidatableDisabled();
+        ValidatableUtil.startValidateDisabled();
         try {
             long pos = wire.bytes().readPosition();
             @NotNull Wire tw = WireType.TEXT.apply(bytes);

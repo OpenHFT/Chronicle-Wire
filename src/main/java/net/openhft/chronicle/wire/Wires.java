@@ -250,7 +250,7 @@ public enum Wires {
 
     @NotNull
     public static CharSequence asText(@NotNull WireIn wireIn) {
-        ValidatableUtil.startValidatableDisabled();
+        ValidatableUtil.startValidateDisabled();
         try {
             return asType(wireIn, Wires::newTextWire);
         } finally {

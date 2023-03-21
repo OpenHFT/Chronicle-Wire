@@ -237,7 +237,7 @@ public class TextMethodTester<T> implements YamlTester {
                 expected = outStr.trim().replace("\r", "");
             }
         } else {
-            ValidatableUtil.startValidatableDisabled();
+            ValidatableUtil.startValidateDisabled();
             try {
                 expected = loadLastValues().toString().trim();
             } finally {

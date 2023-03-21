@@ -465,7 +465,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     }
 
     public String asString(Object marshallable) {
-        ValidatableUtil.startValidatableDisabled();
+        ValidatableUtil.startValidateDisabled();
         try {
             Bytes<?> bytes = asBytes(marshallable);
             return bytes.toString();
@@ -645,7 +645,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
 
     @NotNull
     String asHexString(Object marshallable) {
-        ValidatableUtil.startValidatableDisabled();
+        ValidatableUtil.startValidateDisabled();
         try {
             Bytes<?> bytes = asBytes(marshallable);
             return bytes.toHexString();

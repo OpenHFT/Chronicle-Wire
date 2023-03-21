@@ -554,7 +554,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     public String dumpContext() {
-        ValidatableUtil.startValidatableDisabled();
+        ValidatableUtil.startValidateDisabled();
         try {
             Wire yw = Wire.newYamlWireOnHeap();
             yw.getValueOut().list(yt.contexts, YamlTokeniser.YTContext.class);
