@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire.serializable;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
@@ -34,32 +35,37 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 @RunWith(value = Parameterized.class)
 public class SerializableWireTest extends WireTestCommon {
     private final WireType wireType;
     private final Serializable m;
+    private final boolean ime;
 
-    public SerializableWireTest(WireType wireType, Serializable m) {
+    public SerializableWireTest(WireType wireType, Serializable m, boolean ime) {
         this.wireType = wireType;
         this.m = m;
+        this.ime = ime;
     }
 
     @NotNull
-    @Parameterized.Parameters(name = "wt: {0}, object: {1}")
+    @Parameterized.Parameters(name = "wt: {0}, object: {1}, IME: {2}") // toString() implicility called here
     public static Collection<Object[]> combinations() {
         @NotNull List<Object[]> list = new ArrayList<>();
         @NotNull WireType[] wireTypes = {WireType.TEXT/*, WireType.BINARY*/};
         @NotNull Serializable[] objects = {
                 new Nested(),
-                new Nested(new ScalarValues(), Collections.emptyList(), Collections.emptySet(), Collections.emptyMap()),
                 new ScalarValues(),
+                new Nested(new ScalarValues(), Collections.emptyList(), Collections.emptySet(), Collections.emptyMap()),
+                new Nested(new ScalarValues(1), null, Collections.emptySet(), Collections.emptyMap()),
+                new Nested(new ScalarValues(1), Collections.emptyList(), Collections.emptySet(), Collections.emptyMap()),
                 new ScalarValues(1),
                 new ScalarValues(10)
         };
         for (WireType wt : wireTypes) {
             for (Serializable object : objects) {
-                @NotNull Object[] test = {wt, object};
+                @NotNull Object[] test = {wt, object, list.size() < 4};
                 list.add(test);
             }
         }
@@ -69,15 +75,24 @@ public class SerializableWireTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void writeMarshallable() {
+        if (ime) // TODO Fix to be expected
+            ignoreException(ek -> ek.throwable instanceof InvalidMarshallableException, "IME");
         Bytes<?> bytes = Bytes.elasticByteBuffer();
-        Wire wire = wireType.apply(bytes);
+        try {
+            Wire wire = wireType.apply(bytes);
 
-        wire.getValueOut().object(m);
-       // System.out.println(wire);
+            wire.getValueOut().object(m);
+            // System.out.println(wire);
 
-        @Nullable Object m2 = wire.getValueIn().object();
-        assertEquals(m, m2);
-
-        bytes.releaseLast();
+            @Nullable Object m2 = wire.getValueIn().object();
+            assertEquals(m, m2);
+            if (ime)
+                fail();
+        } catch (InvalidMarshallableException e) {
+            if (!ime)
+                throw e;
+        } finally {
+            bytes.releaseLast();
+        }
     }
 }

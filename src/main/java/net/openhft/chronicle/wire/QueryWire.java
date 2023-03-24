@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.StopCharTester;
 import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
 import net.openhft.chronicle.core.annotation.ForceInline;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntArrayValues;
 import net.openhft.chronicle.core.values.IntValue;
@@ -319,7 +320,7 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public <T, K> QueryWire sequence(T t, K kls, @NotNull TriConsumer<T, K, ValueOut> writer) {
+        public <T, K> QueryWire sequence(T t, K kls, @NotNull TriConsumer<T, K, ValueOut> writer) throws InvalidMarshallableException {
             prependSeparator();
             pushState();
             bytes.appendUtf8("[");
@@ -345,7 +346,7 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public QueryWire marshallable(@NotNull WriteMarshallable object) {
+        public QueryWire marshallable(@NotNull WriteMarshallable object) throws InvalidMarshallableException {
             pushState();
 
             prependSeparator();

@@ -18,6 +18,7 @@
 
 package run.chronicle.account;
 
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import run.chronicle.account.api.AccountsIn;
 import run.chronicle.account.api.AccountsOut;
@@ -53,7 +54,7 @@ public class AccountsImpl
     }
 
     @Override
-    public void accountStatus(AccountStatus accountStatus) {
+    public void accountStatus(AccountStatus accountStatus) throws InvalidMarshallableException {
         if (accountStatus.target() != id) {
             sendAccountStatusFailed(accountStatus, "target mismatch");
             return;

@@ -19,6 +19,7 @@
 package net.openhft.chronicle.wire.domestic.extractor;
 
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.Wire;
 import org.jetbrains.annotations.NotNull;
 

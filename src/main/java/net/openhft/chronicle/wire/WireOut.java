@@ -18,7 +18,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.DontChain;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ObjectOutput;
@@ -51,7 +53,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    default ValueOut writeEvent(Class expectedType, Object eventKey) {
+    default ValueOut writeEvent(Class expectedType, Object eventKey) throws InvalidMarshallableException {
         if (eventKey instanceof WireKey)
             return writeEventName((WireKey) eventKey);
         if (eventKey instanceof CharSequence)
@@ -134,7 +136,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
     /**
      * This will increment the headerNumber as appropriate if successful
      */
-    default void writeDocument(boolean metaData, @NotNull WriteMarshallable writer) {
+    default void writeDocument(boolean metaData, @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
         WireInternal.writeData(this, metaData, false, writer);
     }
 
@@ -164,7 +166,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * @param metaData {@code true} if the write should write metaData rather than data
      * @param writer   writes bytes to the wire
      */
-    default void writeNotCompleteDocument(boolean metaData, @NotNull WriteMarshallable writer) {
+    default void writeNotCompleteDocument(boolean metaData, @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
         WireInternal.writeData(this, metaData, true, writer);
     }
 

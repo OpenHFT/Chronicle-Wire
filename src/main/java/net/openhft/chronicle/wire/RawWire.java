@@ -24,6 +24,7 @@ import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
 import net.openhft.chronicle.bytes.ref.BinaryLongReference;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.*;
@@ -163,7 +164,7 @@ public class RawWire extends AbstractWire implements Wire {
 
     @Nullable
     @Override
-    public <K> K readEvent(@NotNull Class<K> expectedClass) {
+    public <K> K readEvent(@NotNull Class<K> expectedClass) throws InvalidMarshallableException {
         return valueIn.object(expectedClass);
     }
 
@@ -618,7 +619,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public <T, K> WireOut sequence(T t, K kls, @NotNull TriConsumer<T, K, ValueOut> writer) {
+        public <T, K> WireOut sequence(T t, K kls, @NotNull TriConsumer<T, K, ValueOut> writer) throws InvalidMarshallableException {
             long position = bytes.writePosition();
             bytes.writeInt(0);
 
@@ -630,7 +631,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut marshallable(@NotNull WriteMarshallable object) {
+        public WireOut marshallable(@NotNull WriteMarshallable object) throws InvalidMarshallableException {
             long position = bytes.writePosition();
             bytes.writeInt(0);
 
@@ -643,7 +644,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut marshallable(@NotNull Serializable object) {
+        public WireOut marshallable(@NotNull Serializable object) throws InvalidMarshallableException {
             long position = bytes.writePosition();
             bytes.writeInt(0);
 
@@ -654,7 +655,7 @@ public class RawWire extends AbstractWire implements Wire {
             return RawWire.this;
         }
 
-        private void writeSerializable(@NotNull Serializable object) {
+        private void writeSerializable(@NotNull Serializable object) throws InvalidMarshallableException {
             try {
                 if (object instanceof Externalizable)
                     ((Externalizable) object).writeExternal(objectOutput());
@@ -1089,9 +1090,9 @@ public class RawWire extends AbstractWire implements Wire {
 
         @Override
         @Nullable
-        public Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy) {
+        public Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy) throws InvalidMarshallableException {
             long length = bytes.readUnsignedInt();
-            if (length == 0xFFFF_FFFF)
+            if (length == 0xFFFF_FFFFL)
                 return null;
             if (length > bytes.readRemaining()) {
                 throw new IllegalStateException("Length was " + length

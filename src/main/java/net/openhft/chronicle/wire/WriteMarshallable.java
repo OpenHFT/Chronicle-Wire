@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.CommonMarshallable;
 import net.openhft.chronicle.bytes.util.BinaryLengthLength;
 import net.openhft.chronicle.core.annotation.DontChain;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 
 @FunctionalInterface
@@ -34,10 +35,10 @@ public interface WriteMarshallable extends WriteValue, CommonMarshallable {
      *
      * @param wire to write to.
      */
-    void writeMarshallable(@NotNull WireOut wire);
+    void writeMarshallable(@NotNull WireOut wire) throws InvalidMarshallableException;
 
     @Override
-    default void writeValue(@NotNull ValueOut out) {
+    default void writeValue(@NotNull ValueOut out) throws InvalidMarshallableException {
         out.marshallable(this);
     }
 

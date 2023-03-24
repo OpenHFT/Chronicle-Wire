@@ -19,22 +19,25 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class AbstractMarshallableCfg extends SelfDescribingMarshallable {
 
     @Override
-    public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
-        Wires.readMarshallable(this, wire, false);
+    public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException, InvalidMarshallableException {
+        WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(this.getClass());
+        wm.readMarshallable(this, wire, wm.defaultValue(), false);
     }
 
     @Override
-    public void writeMarshallable(@NotNull WireOut wire) {
-        Wires.writeMarshallable(this, wire, false);
+    public void writeMarshallable(@NotNull WireOut wire) throws InvalidMarshallableException {
+        WireMarshaller marshaller = WireMarshaller.WIRE_MARSHALLER_CL.get(this.getClass());
+        marshaller.writeMarshallable(this, wire, marshaller.defaultValue(), false);
     }
 
     @Override
-    public void unexpectedField(Object event, ValueIn valueIn) {
-        Jvm.warn().on(getClass(), "Field " + event + " ignored, was " + valueIn.object());
+    public void unexpectedField(Object event, ValueIn valueIn) throws InvalidMarshallableException {
+        Jvm.warn().on(getClass(), "Field " + event + " ignored, was " + valueIn.objectBestEffort());
     }
 }

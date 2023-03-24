@@ -17,13 +17,14 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface SerializationStrategy<T> {
 
     @Nullable
-    T readUsing(Class clazz, T using, ValueIn in, BracketType bracketType);
+    T readUsing(Class clazz, T using, ValueIn in, BracketType bracketType) throws InvalidMarshallableException;
 
     /**
      * Constructs and returns a new instance using the provided {@code type}

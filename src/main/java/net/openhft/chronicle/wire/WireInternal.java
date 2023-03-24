@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
@@ -116,7 +117,7 @@ public enum WireInternal {
     }
 
     public static long writeData(@NotNull WireOut wireOut, boolean metaData, boolean notComplete,
-                                 @NotNull WriteMarshallable writer) {
+                                 @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
         wireOut.getValueOut().resetBetweenDocuments();
         long position;
 
@@ -155,7 +156,7 @@ public enum WireInternal {
     public static boolean readData(long offset,
                                    @NotNull WireIn wireIn,
                                    @Nullable ReadMarshallable metaDataConsumer,
-                                   @Nullable ReadMarshallable dataConsumer) {
+                                   @Nullable ReadMarshallable dataConsumer) throws InvalidMarshallableException {
         @NotNull final Bytes<?> bytes = wireIn.bytes();
         long position = bytes.readPosition();
         long limit = bytes.readLimit();
@@ -171,7 +172,7 @@ public enum WireInternal {
 
     public static boolean readData(@NotNull WireIn wireIn,
                                    @Nullable ReadMarshallable metaDataConsumer,
-                                   @Nullable ReadMarshallable dataConsumer) {
+                                   @Nullable ReadMarshallable dataConsumer) throws InvalidMarshallableException {
         @NotNull final Bytes<?> bytes = wireIn.bytes();
         boolean read = false;
         while (true) {
@@ -221,7 +222,7 @@ public enum WireInternal {
         return read;
     }
 
-    public static void rawReadData(@NotNull WireIn wireIn, @NotNull ReadMarshallable dataConsumer) {
+    public static void rawReadData(@NotNull WireIn wireIn, @NotNull ReadMarshallable dataConsumer) throws InvalidMarshallableException {
         @NotNull final Bytes<?> bytes = wireIn.bytes();
         int header = bytes.readInt();
         assert Wires.isReady(header) && Wires.isData(header);
@@ -241,14 +242,14 @@ public enum WireInternal {
         return (len & (Wires.META_DATA | Wires.LENGTH_MASK)) != Wires.UNKNOWN_LENGTH;
     }
 
-    public static Throwable throwable(@NotNull ValueIn valueIn, boolean appendCurrentStack) {
+    public static Throwable throwable(@NotNull ValueIn valueIn, boolean appendCurrentStack) throws InvalidMarshallableException {
         @Nullable Class type = valueIn.typePrefix();
         Throwable throwable = ObjectUtils.newInstance((Class<Throwable>) type);
 
         return throwable(valueIn, appendCurrentStack, throwable);
     }
 
-    protected static Throwable throwable(@NotNull ValueIn valueIn, boolean appendCurrentStack, Throwable throwable) {
+    protected static Throwable throwable(@NotNull ValueIn valueIn, boolean appendCurrentStack, Throwable throwable) throws InvalidMarshallableException {
         final Throwable finalThrowable = throwable;
         @NotNull final List<StackTraceElement> stes = new ArrayList<>();
         valueIn.marshallable(m -> {

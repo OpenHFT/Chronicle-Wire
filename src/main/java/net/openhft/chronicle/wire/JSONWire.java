@@ -23,6 +23,7 @@ import net.openhft.chronicle.bytes.StopCharTesters;
 import net.openhft.chronicle.bytes.StopCharsTester;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -71,7 +72,7 @@ public class JSONWire extends TextWire {
         return new JSONWire(Bytes.from(text));
     }
 
-    public static String asText(@NotNull Wire wire) {
+    public static String asText(@NotNull Wire wire) throws InvalidMarshallableException {
         long pos = wire.bytes().readPosition();
         @NotNull JSONWire tw = new JSONWire(nativeBytes());
         wire.copyTo(tw);
@@ -127,7 +128,7 @@ public class JSONWire extends TextWire {
                 switch (peekCode()) {
                     case '[':
                     case '{':
-                        Jvm.warn().on(getClass(), "Unable to read " + valueIn.object() + " as a double.");
+                        Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a double.");
                         return 0;
                 }
 
@@ -166,7 +167,7 @@ public class JSONWire extends TextWire {
     }
 
     @Override
-    public void copyTo(@NotNull WireOut wire) {
+    public void copyTo(@NotNull WireOut wire) throws InvalidMarshallableException {
         if (wire.getClass() == getClass()) {
             final Bytes<?> bytes0 = bytes();
             final long length = bytes0.readRemaining();
@@ -199,7 +200,7 @@ public class JSONWire extends TextWire {
         return bytes.peekUnsignedByte(bytes.readLimit() - 1);
     }
 
-    public void copyOne(@NotNull WireOut wire, boolean inMap, boolean topLevel) {
+    public void copyOne(@NotNull WireOut wire, boolean inMap, boolean topLevel) throws InvalidMarshallableException {
         int ch = bytes.readUnsignedByte();
         switch (ch) {
             case '\'':
@@ -258,7 +259,7 @@ public class JSONWire extends TextWire {
         throw new IORuntimeException("Unexpected chars '" + bytes.parse8bit(StopCharTesters.CONTROL_STOP) + "'");
     }
 
-    private void copyTypePrefix(WireOut wire) {
+    private void copyTypePrefix(WireOut wire) throws InvalidMarshallableException {
         final StringBuilder sb = acquireStringBuilder();
         // the type literal
         getValueIn().text(sb);
@@ -283,7 +284,7 @@ public class JSONWire extends TextWire {
                 && bytes.peekUnsignedByte(rp + 1) == '@';
     }
 
-    private void copyQuote(WireOut wire, int ch, boolean inMap, boolean topLevel) {
+    private void copyQuote(WireOut wire, int ch, boolean inMap, boolean topLevel) throws InvalidMarshallableException {
         final StringBuilder sb = acquireStringBuilder();
         while (bytes.readRemaining() > 0) {
             int ch2 = bytes.readUnsignedByte();
@@ -303,7 +304,7 @@ public class JSONWire extends TextWire {
         }
     }
 
-    private void copyMap(WireOut wire) {
+    private void copyMap(WireOut wire) throws InvalidMarshallableException {
         wire.getValueOut().marshallable(out -> {
             consumePadding();
 
@@ -464,7 +465,7 @@ public class JSONWire extends TextWire {
         }
     }
     @Override
-    public ValueOut writeEvent(Class expectedType, Object eventKey) {
+    public ValueOut writeEvent(Class expectedType, Object eventKey) throws InvalidMarshallableException {
         return super.writeEvent(String.class, "" + eventKey);
     }
 
@@ -681,7 +682,7 @@ public class JSONWire extends TextWire {
         }
 
         @Override
-        public @NotNull <V> JSONWire object(@NotNull Class<V> expectedType, V v) {
+        public @NotNull <V> JSONWire object(@NotNull Class<V> expectedType, V v) throws InvalidMarshallableException {
             return (JSONWire) (useTypes ? super.object(v) : super.object(expectedType, v));
         }
 
@@ -697,7 +698,7 @@ public class JSONWire extends TextWire {
         }
 
         @Override
-        public @NotNull <K, V> JSONWire marshallable(@Nullable Map<K, V> map, @NotNull Class<K> kClass, @NotNull Class<V> vClass, boolean leaf) {
+        public @NotNull <K, V> JSONWire marshallable(@Nullable Map<K, V> map, @NotNull Class<K> kClass, @NotNull Class<V> vClass, boolean leaf) throws InvalidMarshallableException {
             return (JSONWire) super.marshallable(map, (Class) String.class, vClass, leaf);
         }
 
@@ -743,17 +744,17 @@ public class JSONWire extends TextWire {
         }
 
         @Override
-        public @Nullable Object object() {
+        public @Nullable Object object() throws InvalidMarshallableException {
             return useTypes ? parseType() : super.object();
         }
 
         @Override
-        public <E> @Nullable E object(@Nullable Class<E> clazz) {
+        public <E> @Nullable E object(@Nullable Class<E> clazz) throws InvalidMarshallableException {
             return useTypes ? parseType(null, clazz, true) : super.object(null, clazz, true);
         }
 
         @Override
-        public <E> E object(@Nullable E using, @Nullable Class clazz, boolean bestEffort) {
+        public <E> E object(@Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
             return useTypes ? parseType(using, clazz, bestEffort) : super.object(using, clazz, bestEffort);
         }
 
@@ -781,7 +782,7 @@ public class JSONWire extends TextWire {
         }
 
         @Override
-        public @Nullable Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
+        public @Nullable Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException, InvalidMarshallableException {
             return super.marshallable(object, strategy);
         }
 
@@ -791,7 +792,7 @@ public class JSONWire extends TextWire {
             return useTypes || super.isTyped();
         }
 
-        private Object parseType() {
+        private Object parseType() throws InvalidMarshallableException {
             if (!hasTypeDefinition()) {
                 return super.object();
             } else {
@@ -803,7 +804,7 @@ public class JSONWire extends TextWire {
             }
         }
 
-        private <E> E parseType(@Nullable E using, @Nullable Class clazz, boolean bestEffort) {
+        private <E> E parseType(@Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
             if (!hasTypeDefinition()) {
                 return super.object(using, clazz, bestEffort);
             } else {

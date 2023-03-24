@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.ClosedIORuntimeException;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.threads.PauserMode;
 import net.openhft.chronicle.wire.DocumentContext;
@@ -38,7 +39,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
 public interface ChronicleChannel extends Closeable, MarshallableOut, MarshallableIn {
-    static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg channelCfg, ChannelHeader headerOut) {
+    static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg channelCfg, ChannelHeader headerOut) throws InvalidMarshallableException {
         TCPChronicleChannel simpleConnection = new TCPChronicleChannel(channelCfg, headerOut, socketRegistry);
         final ChannelHeader marshallable = simpleConnection.headerIn();
         Jvm.debug().on(ChronicleChannel.class, "Client got " + marshallable);
@@ -76,7 +77,7 @@ public interface ChronicleChannel extends Closeable, MarshallableOut, Marshallab
      * @return any data transfer object
      * @throws ClosedIORuntimeException if this ChronicleChannel is closed
      */
-    default <T> T readOne(StringBuilder eventType, Class<T> expectedType) throws ClosedIORuntimeException {
+    default <T> T readOne(StringBuilder eventType, Class<T> expectedType) throws ClosedIORuntimeException, InvalidMarshallableException {
         while (!isClosed()) {
             try (DocumentContext dc = readingDocument()) {
                 if (dc.isPresent()) {

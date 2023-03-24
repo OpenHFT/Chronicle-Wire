@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.wire.domestic.streaming.streams;
 
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.MarshallableIn;
@@ -42,6 +43,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static net.openhft.chronicle.wire.domestic.streaming.CreateUtil.*;
 import static net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor.builder;
+import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -84,6 +86,34 @@ final class StreamsDemoTest {
                 "  high: 110.0,\n" +
                 "  low: 90.0\n" +
                 "}\n", s);
+    }
+
+    @Test
+    void streamTypeMarketDataSimpleWIthInvalid() {
+        ClassAliasPool.CLASS_ALIASES.addAlias(MarketData.class);
+        MarketData invalid = new MarketData("invalid", 0, 0, 0);
+        // toString() still works.
+        assertEquals("" +
+                        "!MarketData {\n" +
+                        "  symbol: invalid,\n" +
+                        "  last: 0.0,\n" +
+                        "  high: 0.0,\n" +
+                        "  low: 0.0\n" +
+                        "}\n",
+                invalid.toString());
+
+        try {
+            MarshallableIn wire = createThenValueOuts(
+                    vo -> vo.object(new MarketData("MSFT", 100, 110, 90)),
+                    vo -> vo.object(new MarketData("AAPL", 200, 220, 180)),
+                    vo -> vo.object(new MarketData("MSFT", 101, 110, 90)),
+                    vo -> vo.object(invalid)
+            );
+
+            fail(wire.toString());
+        } catch (InvalidMarshallableException expected) {
+            // expected
+        }
     }
 
     @Test
