@@ -98,6 +98,18 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
         wire.methodWriter(GenerateMethodWriterInheritanceTest.class);
     }
 
+    @Test
+    public void testGenerateForLongGeneratedClassName() {
+        final Wire wire = BINARY.apply(Bytes.elasticByteBuffer());
+
+        wire.methodWriter(
+                NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener1.class,
+                NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener2.class,
+                NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener3.class
+        );
+    }
+
+
     interface AnInterface {
         void sayHello(String name);
     }
@@ -143,6 +155,18 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
         public void sayHello(String name) {
             callRegistered.set(true);
         }
+    }
+
+    interface NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener1 {
+
+    }
+
+    interface NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener2 {
+
+    }
+
+    interface NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener3 {
+
     }
 }
 
