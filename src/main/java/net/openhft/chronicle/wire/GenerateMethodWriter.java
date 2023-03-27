@@ -109,6 +109,7 @@ public class GenerateMethodWriter {
     private final boolean useUpdateInterceptor;
     private final ConcurrentMap<Class<?>, String> methodWritersMap = new ConcurrentHashMap<>();
     final private AtomicInteger indent = new AtomicInteger();
+    private final boolean verboseTypes;
 
     private GenerateMethodWriter(final String packageName,
                                  final Set<Class<?>> interfaces,
@@ -118,7 +119,8 @@ public class GenerateMethodWriter {
                                  final String genericEvent,
                                  final boolean metaData,
                                  final boolean useMethodId,
-                                 final boolean useUpdateInterceptor) {
+                                 final boolean useUpdateInterceptor,
+                                 final boolean verboseTypes) {
 
         this.packageName = packageName;
         this.interfaces = interfaces;
@@ -129,6 +131,7 @@ public class GenerateMethodWriter {
         this.metaData = metaData;
         this.useMethodId = useMethodId;
         this.useUpdateInterceptor = useUpdateInterceptor;
+        this.verboseTypes = verboseTypes;
     }
 
     /**
@@ -136,6 +139,7 @@ public class GenerateMethodWriter {
      * @return a proxy class from an interface class or null if it can't be created
      */
     @Nullable
+    @Deprecated
     public static Class<?> newClass(String fullClassName,
                                     Set<Class<?>> interfaces,
                                     ClassLoader classLoader,
@@ -155,9 +159,40 @@ public class GenerateMethodWriter {
                 classLoader,
                 wireType,
                 genericEvent,
-                metaData, useMethodId, useUpdateInterceptor)
+                metaData, useMethodId, useUpdateInterceptor, false)
                 .createClass();
     }
+
+
+    /**
+     * @param interfaces an interface class
+     * @return a proxy class from an interface class or null if it can't be created
+     */
+    @Nullable
+    public static Class<?> newClass(String fullClassName,
+                                    Set<Class<?>> interfaces,
+                                    ClassLoader classLoader,
+                                    final WireType wireType,
+                                    final String genericEvent,
+                                    boolean metaData,
+                                    boolean useMethodId,
+                                    final boolean useUpdateInterceptor,
+                                    boolean verboseTypes) {
+        String packageName = ReflectionUtil.generatedPackageName(fullClassName);
+
+        int lastDot = fullClassName.lastIndexOf('.');
+        String className = lastDot == -1 ? fullClassName : fullClassName.substring(lastDot + 1);
+
+        return new GenerateMethodWriter(packageName,
+                interfaces,
+                className,
+                classLoader,
+                wireType,
+                genericEvent,
+                metaData, useMethodId, useUpdateInterceptor, verboseTypes)
+                .createClass();
+    }
+
 
     @SuppressWarnings("unused")
     public static DocumentContext acquireDocumentContext(boolean metaData,
@@ -599,20 +634,31 @@ public class GenerateMethodWriter {
 
         final String vOut = dm.getParameterCount() > startJ + 1 ? "_v_" : "_valueOut_";
         String after = "";
+
+
         if (!type.isInterface() && Marshallable.class.isAssignableFrom(type) && !Serializable.class.isAssignableFrom(type) && !DynamicEnum.class.isAssignableFrom(type)) {
             body.append("if (").append(name).append(" != null && ").append(className).append(".class == ").append(name).append(".getClass()) {\n")
                     .append(vOut).append(".marshallable(").append(name).append(");\n")
                     .append("} else  {\n");
             after = "}\n";
         }
-        body
-                .append(vOut)
-                .append(".object(")
-                .append(className)
-                .append(".class, ")
-                .append(name)
-                .append(");\n")
-                .append(after);
+
+        if (verboseTypes) {
+            body.append(vOut)
+                    .append(".object(")
+                    .append(name)
+                    .append(");\n")
+                    .append(after);
+        } else {
+            body
+                    .append(vOut)
+                    .append(".object(")
+                    .append(className)
+                    .append(".class, ")
+                    .append(name)
+                    .append(");\n")
+                    .append(after);
+        }
     }
 
     private StringBuilder methodReturn(final Method dm, final Class<?> interfaceClazz) {
