@@ -70,6 +70,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     private WireType wireType;
     private Class<?> proxyClass;
     private UpdateInterceptor updateInterceptor;
+    private boolean verboseTypes;
 
     public VanillaMethodWriterBuilder(@NotNull Class<T> tClass,
                                       WireType wireType,
@@ -97,6 +98,12 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     @NotNull
     public MethodWriterBuilder<T> updateInterceptor(UpdateInterceptor updateInterceptor) {
         this.updateInterceptor = updateInterceptor;
+        return this;
+    }
+
+    @NotNull
+    public MethodWriterBuilder<T> verboseTypes(boolean verboseTypes) {
+        this.verboseTypes = verboseTypes;
         return this;
     }
 
@@ -166,6 +173,8 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         sb.append(this.metaData ? "MetadataAware" : "");
         sb.append(updateInterceptor != null ? "Intercepting" : "");
         sb.append(toFirstCapCase(wireType().toString().replace("_", "")));
+        if (verboseTypes)
+            sb.append("Verbose");
         sb.append("MethodWriter");
         return sb.toString();
     }
@@ -230,7 +239,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                     genericEvent,
                     metaData,
                     true,
-                    updateInterceptor != null);
+                    updateInterceptor != null, verboseTypes);
         GenerateMethodWriter2 gmw = new GenerateMethodWriter2();
         gmw.metaData()
                 .packageName(fullClassName.substring(0, fullClassName.lastIndexOf('.')))

@@ -33,18 +33,18 @@ public class VanillaMethodWriterBuilderVerboseTypesTest {
     public static Collection<Object[]> combinations() {
         return Arrays.asList(new Object[]{true, "print: !MyObject {\n" +
                 "  list: [\n" +
-                "    !MyObject2 { str: hello world, value: 23 }\n" +
+                "    { str: hello world, value: 23 }\n" +
                 "  ]\n" +
                 "}\n" +
-                "...\n"}, new Object[]{false, "print: !MyObject {\n" +
+                "...\n"}, new Object[]{false, "print: {\n" +
                 "  list: [\n" +
-                "    !MyObject2 { str: hello world, value: 23 }\n" +
+                "    { str: hello world, value: 23 }\n" +
                 "  ]\n" +
                 "}\n" +
                 "...\n"});
     }
 
-    public static class MyObject2 {
+    public static class MyObject2 extends SelfDescribingMarshallable {
 
         private final String str;
         private final int value;
@@ -55,7 +55,7 @@ public class VanillaMethodWriterBuilderVerboseTypesTest {
         }
     }
 
-    public static class MyObject {
+    public static class MyObject extends SelfDescribingMarshallable {
 
         private final ArrayList<MyObject2> list = new ArrayList<>();
 

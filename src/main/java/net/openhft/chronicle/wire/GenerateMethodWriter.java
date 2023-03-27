@@ -139,7 +139,7 @@ public class GenerateMethodWriter {
      * @return a proxy class from an interface class or null if it can't be created
      */
     @Nullable
-    @Deprecated
+    @Deprecated /* to be removed is version x.26. */
     public static Class<?> newClass(String fullClassName,
                                     Set<Class<?>> interfaces,
                                     ClassLoader classLoader,
@@ -192,7 +192,6 @@ public class GenerateMethodWriter {
                 metaData, useMethodId, useUpdateInterceptor, verboseTypes)
                 .createClass();
     }
-
 
     @SuppressWarnings("unused")
     public static DocumentContext acquireDocumentContext(boolean metaData,
@@ -635,21 +634,21 @@ public class GenerateMethodWriter {
         final String vOut = dm.getParameterCount() > startJ + 1 ? "_v_" : "_valueOut_";
         String after = "";
 
-
-        if (!type.isInterface() && Marshallable.class.isAssignableFrom(type) && !Serializable.class.isAssignableFrom(type) && !DynamicEnum.class.isAssignableFrom(type)) {
-            body.append("if (").append(name).append(" != null && ").append(className).append(".class == ").append(name).append(".getClass()) {\n")
-                    .append(vOut).append(".marshallable(").append(name).append(");\n")
-                    .append("} else  {\n");
-            after = "}\n";
-        }
-
         if (verboseTypes) {
-            body.append(vOut)
+            body
+                    .append(vOut)
                     .append(".object(")
                     .append(name)
                     .append(");\n")
                     .append(after);
         } else {
+
+            if (!type.isInterface() && Marshallable.class.isAssignableFrom(type) && !Serializable.class.isAssignableFrom(type) && !DynamicEnum.class.isAssignableFrom(type)) {
+                body.append("if (").append(name).append(" != null && ").append(className).append(".class == ").append(name).append(".getClass()) {\n")
+                        .append(vOut).append(".marshallable(").append(name).append(");\n")
+                        .append("} else  {\n");
+                after = "}\n";
+            }
             body
                     .append(vOut)
                     .append(".object(")
