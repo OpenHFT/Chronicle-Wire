@@ -24,10 +24,12 @@ import net.openhft.chronicle.bytes.StopCharsTester;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Type;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
@@ -49,6 +51,7 @@ public class JSONWire extends TextWire {
     public static final @NotNull Bytes<byte[]> ULL = Bytes.from("ull");
     @SuppressWarnings("rawtypes")
     static final BytesStore COMMA = BytesStore.from(",");
+    static final ThreadLocal<WeakReference<StopCharsTester>> STRICT_ESCAPED_END_OF_TEXT_JSON = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
     static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_JSON_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT_JSON::escaping;
     boolean useTypes;
 
@@ -493,6 +496,16 @@ public class JSONWire extends TextWire {
 
     @Override
     @NotNull
+    protected StopCharsTester getStrictEscapingEndOfText() {
+        StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT_JSON, strictEndOfTextEscaping());
+        // reset it.
+        escaping.isStopChar(' ', ' ');
+        return escaping;
+    }
+
+    @Override
+    @NotNull
+    @Deprecated
     protected Supplier<StopCharsTester> strictEndOfTextEscaping() {
         return STRICT_END_OF_TEXT_JSON_ESCAPING;
     }
