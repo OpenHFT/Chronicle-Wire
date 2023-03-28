@@ -518,6 +518,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     @NotNull
+    @Deprecated(/** Will be inlined in x.25 */)
     protected Supplier<StopCharsTester> strictEndOfTextEscaping() {
         return STRICT_END_OF_TEXT_ESCAPING;
     }
