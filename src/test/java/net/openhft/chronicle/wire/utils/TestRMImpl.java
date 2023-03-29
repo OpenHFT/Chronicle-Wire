@@ -18,21 +18,18 @@
 
 package net.openhft.chronicle.wire.utils;
 
-public interface ErrorsIn {
-    void debug(String msg);
+import net.openhft.chronicle.wire.utils.api.TestRMIn;
+import net.openhft.chronicle.wire.utils.dto.ReadMarshallableDTO;
 
-    void debugWithException(String msg);
+public class TestRMImpl  implements TestRMIn {
+    private final TestRMIn out;
 
-    void warn(String msg);
+    public TestRMImpl(TestRMIn out) {
+        this.out = out;
+    }
 
-    void warnWithException(String msg);
-
-    void outError(String msg);
-    void error(String msg);
-
-    void errorWithException(String msg);
-
-    void throwException(String msg);
-
-    void throwError(String msg);
+    @Override
+    public void rm(ReadMarshallableDTO dto) {
+        out.rm(dto);
+    }
 }

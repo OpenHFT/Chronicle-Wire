@@ -21,12 +21,14 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.*;
+import net.openhft.chronicle.core.onoes.ChainedExceptionHandler;
 import net.openhft.chronicle.core.onoes.ExceptionHandler;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import net.openhft.chronicle.wire.utils.YamlAgitator;
 import net.openhft.chronicle.wire.utils.YamlTester;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -37,10 +39,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -54,8 +53,11 @@ public class TextMethodTester<T> implements YamlTester {
 
 
     private static final boolean DUMP_TESTS = Jvm.getBoolean("dump.tests");
+    public static final Consumer<InvocationTargetRuntimeException> DEFAULT_INVOCATION_TARGET_RUNTIME_EXCEPTION_CONSUMER =
+            e -> Jvm.warn().on(TextMethodTester.class, "Exception calling target method. Continuing", e);
     private final String input;
     private final Class<T> outputClass;
+    private final Set<Class> additionalOutputClasses = new LinkedHashSet<>();
     private final Function<WireOut, T> outputFunction;
     private final String output;
     private final BiFunction<T, UpdateInterceptor, Object> componentFunction;
@@ -72,6 +74,7 @@ public class TextMethodTester<T> implements YamlTester {
     private long timeoutMS = 25;
     private UpdateInterceptor updateInterceptor;
     private Consumer<InvocationTargetRuntimeException> onInvocationException;
+    private boolean exceptionHandlerFunctionAndLog;
 
     public TextMethodTester(String input, Function<T, Object> componentFunction, Class<T> outputClass, String output) {
         this(input, (out, ui) -> componentFunction.apply(out), outputClass, output);
@@ -93,7 +96,12 @@ public class TextMethodTester<T> implements YamlTester {
         this.output = output;
 
         this.setups = Collections.emptyList();
-        this.onInvocationException = e -> Jvm.warn().on(TextMethodTester.class, "Exception calling target method. Continuing", e);
+        this.onInvocationException = DEFAULT_INVOCATION_TARGET_RUNTIME_EXCEPTION_CONSUMER;
+    }
+
+    public TextMethodTester<T> addOutputClass(Class outputClass) {
+        additionalOutputClasses.add(outputClass);
+        return this;
     }
 
     public static boolean resourceExists(String resourceName) {
@@ -178,6 +186,7 @@ public class TextMethodTester<T> implements YamlTester {
         T writer0;
         if (outputClass != null) {
             MethodWriterBuilder<T> methodWriterBuilder = wireOut.methodWriterBuilder(outputClass);
+            additionalOutputClasses.forEach(((VanillaMethodWriterBuilder) methodWriterBuilder)::addInterface);
             if (updateInterceptor != null)
                 methodWriterBuilder.updateInterceptor(updateInterceptor);
 
@@ -252,8 +261,7 @@ public class TextMethodTester<T> implements YamlTester {
         ExceptionHandler error = Jvm.error();
         ExceptionHandler debug = Jvm.debug();
         if (exceptionHandlerFunction != null) {
-            exceptionHandler = exceptionHandlerFunction.apply(writer0);
-            Jvm.setExceptionHandlers(exceptionHandler, exceptionHandler, debug);
+            exceptionHandler = createExceptionHandler(writer0, warn, error);
         }
         MethodReader reader = wire.methodReaderBuilder()
                 .methodReaderInterceptorReturns((Method m, Object o, Object[] args, net.openhft.chronicle.bytes.Invocation invocation) -> {
@@ -371,6 +379,37 @@ public class TextMethodTester<T> implements YamlTester {
         return this;
     }
 
+    private ExceptionHandler createExceptionHandler(T writer0, ExceptionHandler warn, ExceptionHandler error) {
+        ExceptionHandler exceptionHandler;
+        exceptionHandler = exceptionHandlerFunction.apply(writer0);
+
+        if (exceptionHandlerFunctionAndLog) {
+            if (onInvocationException == DEFAULT_INVOCATION_TARGET_RUNTIME_EXCEPTION_CONSUMER) {
+                ChainedExceptionHandler eh2 = new ChainedExceptionHandler(error, exceptionHandler);
+                Consumer<InvocationTargetRuntimeException> invocationException =
+                        er -> eh2.on(LoggerFactory.getLogger(classNameFor(er.getCause())), "Unhandled Exception", er.getCause());
+                onInvocationException = invocationException;
+            }
+
+            Jvm.setExceptionHandlers(
+                    new ChainedExceptionHandler(error, exceptionHandler),
+                    new ChainedExceptionHandler(warn, exceptionHandler),
+                    null);
+        } else {
+            if (onInvocationException == DEFAULT_INVOCATION_TARGET_RUNTIME_EXCEPTION_CONSUMER) {
+                ExceptionHandler eh = exceptionHandler;
+                Consumer<InvocationTargetRuntimeException> invocationException =
+                        er -> eh.on(LoggerFactory.getLogger(classNameFor(er.getCause())), "Unhandled Exception", er.getCause());
+                onInvocationException = invocationException;
+            }
+            Jvm.setExceptionHandlers(
+                    exceptionHandler,
+                    exceptionHandler,
+                    null);
+        }
+        return exceptionHandler;
+    }
+
     @Override
     public Map<String, String> agitate(YamlAgitator agitator) throws IORuntimeException {
         try {
@@ -392,10 +431,16 @@ public class TextMethodTester<T> implements YamlTester {
 
         } catch (Throwable t) {
             if (exceptionHandler == null)
-                throw Jvm.rethrow(t);
-            exceptionHandler.on(getClass(), "Unhandled exception", t);
+                throw t;
+            exceptionHandler.on(LoggerFactory.getLogger(classNameFor(t)), t.toString());
         }
         return true;
+    }
+
+    @NotNull
+    private static String classNameFor(Throwable t) {
+        StackTraceElement[] stackTrace = t.getStackTrace();
+        return stackTrace.length == 0 ? "TextMethodTester": stackTrace[0].getClassName();
     }
 
     private String replaceTargetWithSource(String replace) {
@@ -485,6 +530,11 @@ public class TextMethodTester<T> implements YamlTester {
 
     public TextMethodTester<T> exceptionHandlerFunction(Function<T, ExceptionHandler> exceptionHandlerFunction) {
         this.exceptionHandlerFunction = exceptionHandlerFunction;
+        return this;
+    }
+
+    public TextMethodTester<T> exceptionHandlerFunctionAndLog(boolean exceptionHandlerFunctionAndLog) {
+        this.exceptionHandlerFunctionAndLog = exceptionHandlerFunctionAndLog;
         return this;
     }
 

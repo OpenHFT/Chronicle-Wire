@@ -50,5 +50,6 @@ public class YamlKeys {
         int length = count - i;
         if (length > 0)
             System.arraycopy(offsets, i + 1, offsets, i, length);
+        offsets[count] = 0;
     }
 }

@@ -21,7 +21,7 @@ package net.openhft.chronicle.wire.utils;
 import net.openhft.chronicle.core.time.SetTimeProvider;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.wire.WireTestCommon;
-import net.openhft.chronicle.wire.utils.api.OMSOut;
+import net.openhft.chronicle.wire.utils.api.TestRMIn;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,36 +33,32 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(Parameterized.class)
-public class OMSEventsTest extends WireTestCommon {
+public class YamlTesterReadMarshallableTest extends WireTestCommon {
     static final String paths = "" +
-            "yaml-tester/oms";
+            "yaml-tester/rm,"+
+            "yaml-tester/rm-indent";
 
     final String name;
     final YamlTester tester;
 
-    public OMSEventsTest(String name, YamlTester tester) {
+    public YamlTesterReadMarshallableTest(String name, YamlTester tester) {
         this.name = name;
         this.tester = tester;
     }
 
     @Parameterized.Parameters(name = "{0}")
     public static List<Object[]> parameters() {
-        return new YamlTesterParametersBuilder<>(OMSImpl::new, OMSOut.class, paths)
+        // ignored as duplicate
+        // ignored
+        // also ignored as duplicates
+        return new YamlTesterParametersBuilder<>(TestRMImpl::new, TestRMIn.class, paths)
                 .agitators(
-                        YamlAgitator.messageMissing(),
-                        YamlAgitator.duplicateMessage())
+                        YamlAgitator.missingFields("a", "b", "c"))
                 .get();
-    }
-
-    @After
-    public void tearDown() {
-        SystemTimeProvider.CLOCK = SystemTimeProvider.INSTANCE;
     }
 
     @Test
     public void runTester() {
-        SystemTimeProvider.CLOCK = new SetTimeProvider("2019-12-03T09:54:40")
-                .autoIncrement(1, TimeUnit.MILLISECONDS);
         assertEquals(tester.expected(), tester.actual());
     }
 }

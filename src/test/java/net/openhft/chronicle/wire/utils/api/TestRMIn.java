@@ -16,23 +16,10 @@
  * limitations under the License.
  */
 
-package net.openhft.chronicle.wire.utils;
+package net.openhft.chronicle.wire.utils.api;
 
-public interface ErrorsIn {
-    void debug(String msg);
+import net.openhft.chronicle.wire.utils.dto.ReadMarshallableDTO;
 
-    void debugWithException(String msg);
-
-    void warn(String msg);
-
-    void warnWithException(String msg);
-
-    void outError(String msg);
-    void error(String msg);
-
-    void errorWithException(String msg);
-
-    void throwException(String msg);
-
-    void throwError(String msg);
+public interface TestRMIn {
+    void rm(ReadMarshallableDTO dto);
 }

@@ -18,7 +18,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.util.ReadResolvable;
 import org.jetbrains.annotations.NotNull;
 

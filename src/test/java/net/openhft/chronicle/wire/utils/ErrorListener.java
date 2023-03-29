@@ -18,21 +18,6 @@
 
 package net.openhft.chronicle.wire.utils;
 
-public interface ErrorsIn {
-    void debug(String msg);
-
-    void debugWithException(String msg);
-
-    void warn(String msg);
-
-    void warnWithException(String msg);
-
-    void outError(String msg);
-    void error(String msg);
-
-    void errorWithException(String msg);
-
-    void throwException(String msg);
-
-    void throwError(String msg);
+public interface ErrorListener {
+    void jvmError(String msg);
 }

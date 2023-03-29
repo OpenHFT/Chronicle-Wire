@@ -47,7 +47,11 @@ public class TopOfBookHandlerTest extends WireTestCommon {
 
     @Parameterized.Parameters(name = "{0}")
     public static List<Object[]> parameters() {
-        return new YamlTesterParametersBuilder<>(out -> new EchoTopOfBookHandler().out(out), TopOfBookListener.class, paths).agitators(new YamlAgitator[]{YamlAgitator.messageMissing(), YamlAgitator.duplicateMessage()}).get();
+        return new YamlTesterParametersBuilder<>(out -> new EchoTopOfBookHandler().out(out), TopOfBookListener.class, paths)
+                .agitators(
+                        YamlAgitator.messageMissing(),
+                        YamlAgitator.duplicateMessage())
+                .get();
     }
 
     @Test

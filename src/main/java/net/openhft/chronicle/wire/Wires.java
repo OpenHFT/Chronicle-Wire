@@ -89,8 +89,8 @@ public enum Wires {
         Class[] interfaces = {Marshallable.class, tClass};
         if (tClass == Marshallable.class)
             interfaces = new Class[]{Marshallable.class};
-        Class<?> proxyClass = Proxy.getProxyClass(tClass.getClassLoader(), interfaces);
         try {
+            Class<?> proxyClass = Proxy.getProxyClass(tClass.getClassLoader(), interfaces);
             Constructor<?> constructor = proxyClass.getConstructor(InvocationHandler.class);
             constructor.setAccessible(true);
             return typeName -> newInstance(constructor, typeName);

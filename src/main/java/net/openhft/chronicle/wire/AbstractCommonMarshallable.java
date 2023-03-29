@@ -43,6 +43,8 @@ public abstract class AbstractCommonMarshallable implements Marshallable, BytesM
         ValidatableUtil.startValidateDisabled();
         try {
             return Marshallable.$toString(this);
+        } catch (Throwable e) {
+            return getClass() + "  " + e;
         } finally {
             ValidatableUtil.endValidateDisabled();
         }

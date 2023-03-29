@@ -18,8 +18,6 @@
 
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 
 public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMarshallableCfg implements Event<E> {

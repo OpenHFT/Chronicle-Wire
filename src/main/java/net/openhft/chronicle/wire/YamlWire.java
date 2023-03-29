@@ -61,6 +61,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     private DefaultValueIn defaultValueIn;
     private WriteDocumentContext writeContext;
     private ReadDocumentContext readContext;
+    private YamlWire rereadWire;
 
     public YamlWire(@NotNull Bytes<?> bytes, boolean use8bit) {
         super(bytes, use8bit);
@@ -479,17 +480,13 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
     }
 
-    @Nullable
-    private <K> K toExpected(Class<K> expectedClass, StringBuilder sb) {
-        return ObjectUtils.convertTo(expectedClass, WireInternal.INTERNER.intern(sb));
-    }
-
     @Override
     public void consumePadding() {
         while (true) {
             switch (yt.current()) {
                 case COMMENT:
-                    commentListener.accept(yt.text());
+                    String text = yt.text();
+                    commentListener.accept(text);
                     // fall through
                 case DIRECTIVE:
                 case DIRECTIVES_END:
@@ -522,27 +519,32 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         YamlKeys keys = yt.keys();
         int count = keys.count();
         if (count > 0) {
-            long pos = yt.lastKeyPosition();
             long[] offsets = keys.offsets();
-            int contextSize = yt.contextSize();
+            if (rereadWire == null) {
+                initRereadWire();
+            }
+            int indent = yt.topContext().indent;
             for (int i = 0; i < count; i++) {
-                yt.revertToContext(contextSize);
-                YamlToken next = yt.rereadAndNext(offsets[i]);
-                assert next == YamlToken.MAPPING_KEY;
-                if (checkForMatch(keyName)) {
+                rereadWire.yt.topContext().indent = indent;
+                long end = bytes.readPosition();
+                long offset = offsets[i];
+                rereadWire.bytes.readPositionRemaining(offset, end - offset);
+                rereadWire.yt.rereadFrom(offset);
+                YamlToken next = rereadWire.yt.next();
+                if (next == YamlToken.MAPPING_START) // indented rather than iin { }
+                    next = rereadWire.yt.next();
+                assert next == YamlToken.MAPPING_KEY : "next: " + next;
+                if (rereadWire.checkForMatch(keyName)) {
                     keys.removeIndex(i);
-                    return valueIn;
+                    return rereadWire.valueIn;
                 }
             }
-            yt.revertToContext(contextSize);
-            bytes.readPosition(pos);
-            yt.next();
         }
-
-        int minIndent = yt.topContext().indent;
+        YamlTokeniser.YTContext yc = yt.topContext();
+        int minIndent = yc.indent;
         // go through remaining keys
         while (yt.current() == YamlToken.MAPPING_KEY) {
-            long lastKeyPosition = yt.lastKeyPosition();
+            long lastKeyPosition = yt.lineStart;
             if (checkForMatch(keyName))
                 return valueIn;
 
@@ -551,6 +553,17 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         return defaultValueIn;
+    }
+
+    private void initRereadWire() {
+        rereadWire = new YamlWire(bytes.bytesStore().bytesForRead());
+        YamlToken yamlToken;
+        do {
+            yamlToken = rereadWire.yt.next();
+        } while (yamlToken == YamlToken.STREAM_START
+                || yamlToken == YamlToken.DIRECTIVES_END
+                || yamlToken == YamlToken.COMMENT
+                || yamlToken == YamlToken.MAPPING_START);
     }
 
     public String dumpContext() {
@@ -721,7 +734,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
     @Override
     public void endEvent() {
-        int minIndent = yt.topContext().indent;
+        YamlTokeniser.YTContext context = yt.topContext();
+        int minIndent = context.indent;
 
         switch (yt.current()) {
             case MAPPING_END:
@@ -729,7 +743,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             case NONE:
                 break;
             default:
-                valueIn.consumeAny(minIndent);
+                do {
+                    valueIn.consumeAny(minIndent);
+                } while (yt.current() == YamlToken.COMMENT);
                 break;
         }
         if (yt.current() == YamlToken.NONE) {
@@ -1300,7 +1316,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 int minIndent = yt.secondTopContext().indent;
                 yt.next(Integer.MAX_VALUE);
 
-                while(hasNextSequenceItem()) {
+                while (hasNextSequenceItem()) {
                     if (buffer.size() <= list.size())
                         buffer.add(bufferAdd.get());
                     Object using = buffer.get(list.size());

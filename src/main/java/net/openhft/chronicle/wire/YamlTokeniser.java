@@ -114,6 +114,7 @@ public class YamlTokeniser {
         blockStart = blockEnd = in.readPosition();
         if (temp != null)
             temp.clear();
+        YTContext context = topContext();
         int indent2 = Math.toIntExact(in.readPosition() - lineStart) * 2;
         int ch = in.readUnsignedByte();
         switch (ch) {
@@ -230,8 +231,9 @@ public class YamlTokeniser {
             case '{':
                 return flow(YamlToken.MAPPING_START);
             case '}':
-                if (minIndent == Integer.MAX_VALUE)
+                if (minIndent == Integer.MAX_VALUE || context.keysCount() > 0) {
                     return dontRead();
+                }
                 return flowPop(YamlToken.MAPPING_START, '}');
             case '[':
                 hasSequenceEntry = false;
@@ -394,7 +396,7 @@ public class YamlTokeniser {
     }
 
     private YamlToken indent(
-            @NotNull YamlToken indented,
+            YamlToken indented,
             @NotNull YamlToken key,
             @NotNull YamlToken push,
             int indent) {
@@ -407,11 +409,12 @@ public class YamlTokeniser {
         while (indent < contextIndent()) {
             contextPop();
         }
-        if (indent != contextIndent())
+        int contextIndent = contextIndent();
+        if (indented != null && indent != contextIndent)
             this.pushed.add(indented);
         this.pushed.add(key);
         reversePushed(pos);
-        if (indent > contextIndent())
+        if (indented != null && indent > contextIndent())
             contextPush(indented, indent);
         return popPushed();
     }
@@ -423,7 +426,7 @@ public class YamlTokeniser {
         readWords();
         if (isFieldEnd()) {
             lastKeyPosition = pos;
-            if (contexts.get(contexts.size() - 1).token != YamlToken.MAPPING_KEY)
+            if (topContext().token != YamlToken.MAPPING_KEY)
                 return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent2);
         }
 
@@ -768,19 +771,18 @@ public class YamlTokeniser {
         return key;
     }
 
-    public long lastKeyPosition() {
-        return lastKeyPosition;
-    }
-
-    public YamlToken rereadAndNext(long offset) {
-        in.readPosition(offset);
+    public void rereadFrom(long offset) {
         lineStart = offset;
-        return next();
+        pushed.clear();
     }
 
     static class YTContext extends SelfDescribingMarshallable {
         YamlToken token;
         int indent;
         YamlKeys keys = null;
+
+        int keysCount() {
+            return keys == null ? 0 : keys.count;
+        }
     }
 }

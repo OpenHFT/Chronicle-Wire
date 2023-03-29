@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.onoes.ExceptionHandler;
 import net.openhft.chronicle.core.util.ThrowingFunction;
+import net.openhft.chronicle.wire.TextMethodTester;
 import net.openhft.chronicle.wire.YamlMethodTester;
 
 import java.io.FileNotFoundException;
@@ -35,8 +36,10 @@ public class YamlTesterParametersBuilder<T> {
     private final ThrowingFunction<T, Object, Throwable> builder;
     private final Class<T> outClass;
     private final String paths;
+    private final Set<Class> additionalOutputClasses = new LinkedHashSet<>();
     private YamlAgitator[] agitators = {};
     private Function<T, ExceptionHandler> exceptionHandlerFunction;
+    private boolean exceptionHandlerFunctionAndLog;
 
     public YamlTesterParametersBuilder(ThrowingFunction<T, Object, Throwable> builder, Class<T> outClass, String paths) {
         this.builder = builder;
@@ -67,7 +70,9 @@ public class YamlTesterParametersBuilder<T> {
                     new YamlMethodTester<>(path + "/in.yaml", compFunction, outClass, path + "/out.yaml")
                             .genericEvent("event")
                             .setup(setup)
-                            .exceptionHandlerFunction(exceptionHandlerFunction);
+                            .exceptionHandlerFunction(exceptionHandlerFunction)
+                            .exceptionHandlerFunctionAndLog(exceptionHandlerFunctionAndLog);
+            addOutputClasses(yt);
             Object[] test = {path, yt};
             params.add(test);
 
@@ -121,7 +126,9 @@ public class YamlTesterParametersBuilder<T> {
                             new YamlMethodTester<>(in2, compFunction, outClass, output)
                                     .genericEvent("event")
                                     .setup(setup2)
-                                    .exceptionHandlerFunction(exceptionHandlerFunction);
+                                    .exceptionHandlerFunction(exceptionHandlerFunction)
+                                    .exceptionHandlerFunctionAndLog(exceptionHandlerFunctionAndLog);
+                    addOutputClasses(yt2);
                     Object[] test2 = {path + "+" + path2, yt2};
                     params.add(test2);
                 } catch (FileNotFoundException ioe) {
@@ -147,7 +154,9 @@ public class YamlTesterParametersBuilder<T> {
                         YamlTester yta = new YamlMethodTester<>(entry.getKey(), compFunction, outClass, output)
                                 .genericEvent("event")
                                 .setup(setup)
-                                .exceptionHandlerFunction(exceptionHandlerFunction);
+                                .exceptionHandlerFunction(exceptionHandlerFunction)
+                                .exceptionHandlerFunctionAndLog(exceptionHandlerFunctionAndLog);
+                        addOutputClasses(yta);
 
                         Object[] testa = {path + "/" + name, yta};
                         params.add(testa);
@@ -160,5 +169,23 @@ public class YamlTesterParametersBuilder<T> {
                 Jvm.debug().on(YamlTester.class, "Skipping " + skipping);
         }
         return params;
+    }
+
+    private void addOutputClasses(YamlTester yta) {
+        additionalOutputClasses.forEach(((TextMethodTester<?>) yta)::addOutputClass);
+    }
+
+    public YamlTesterParametersBuilder<T> addOutputClass(Class outputClass) {
+        additionalOutputClasses.add(outputClass);
+        return this;
+    }
+
+    public boolean exceptionHandlerFunctionAndLog() {
+        return exceptionHandlerFunctionAndLog;
+    }
+
+    public YamlTesterParametersBuilder<T> exceptionHandlerFunctionAndLog(boolean exceptionHandlerFunctionAndLog) {
+        this.exceptionHandlerFunctionAndLog = exceptionHandlerFunctionAndLog;
+        return this;
     }
 }

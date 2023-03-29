@@ -1,21 +1,30 @@
+# debug messages ignored
 ---
-error: warning one null
+# debug messages ignored even with exceptions
+---
+---
+jvmError: warning one
 ...
 ---
-error: "warning two net.openhft.chronicle.core.StackTrace: stack trace on main"
+jvmError: "warning two net.openhft.chronicle.core.StackTrace: stack trace on main"
 ...
 ---
-error: error one null
+jvmError: error one
 ...
 ---
-error: "error two net.openhft.chronicle.core.StackTrace: stack trace on main"
+jvmError: "error two net.openhft.chronicle.core.StackTrace: stack trace on main"
 ...
 ---
-error: "Exception calling target method. Continuing net.openhft.chronicle.core.util.InvocationTargetRuntimeException: java.lang.RuntimeException: exception one"
+error: error three
 ...
 ---
-error: "Exception calling target method. Continuing net.openhft.chronicle.core.util.InvocationTargetRuntimeException: java.lang.AssertionError: exception two"
+jvmError: "Unhandled Exception java.lang.RuntimeException: exception one"
 ...
 ---
-error: warnings done null
+jvmError: "Unhandled Exception net.openhft.chronicle.wire.utils.ErrorsImpl$MyAssertionError: exception two"
+...
+---
+jvmError: warnings done
+...
+jvmError: Unknown method-name='unknownMethod' from -1 at 1ae ~ 430
 ...
