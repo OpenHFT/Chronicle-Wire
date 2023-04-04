@@ -18,11 +18,15 @@
 
 package run.chronicle.account.dto;
 
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.Validatable;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.converter.Base85;
 import net.openhft.chronicle.wire.converter.NanoTime;
 
-public class AbstractEvent<E extends AbstractEvent<E>> extends SelfDescribingMarshallable {
+import java.util.Objects;
+
+public class AbstractEvent<E extends AbstractEvent<E>> extends SelfDescribingMarshallable implements Validatable {
     @Base85
     private long sender;
     @Base85
@@ -56,5 +60,12 @@ public class AbstractEvent<E extends AbstractEvent<E>> extends SelfDescribingMar
     public E sendingTime(long sendingTime) {
         this.sendingTime = sendingTime;
         return (E) this;
+    }
+
+    @Override
+    public void validate() throws InvalidMarshallableException {
+        if (sender == 0) throw new InvalidMarshallableException("sender must be set");
+        if (target == 0) throw new InvalidMarshallableException("target must be set");
+        if (sendingTime == 0) throw new InvalidMarshallableException("sendingTime must be set");
     }
 }

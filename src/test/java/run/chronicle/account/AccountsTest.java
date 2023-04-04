@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.time.SetTimeProvider;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.converter.Base85;
+import net.openhft.chronicle.wire.utils.ErrorListener;
 import net.openhft.chronicle.wire.utils.YamlAgitator;
 import net.openhft.chronicle.wire.utils.YamlTester;
 import net.openhft.chronicle.wire.utils.YamlTesterParametersBuilder;
@@ -54,7 +55,15 @@ public class AccountsTest extends WireTestCommon {
 
     @Parameterized.Parameters(name = "{0}")
     public static List<Object[]> parameters() {
-        return new YamlTesterParametersBuilder<>(out -> new AccountsImpl(out).id(VAULT), AccountsOut.class, paths).agitators(new YamlAgitator[]{YamlAgitator.messageMissing(), YamlAgitator.duplicateMessage(), YamlAgitator.overrideFields("currency: , amount: NaN, amount: -1".split(", *")), YamlAgitator.missingFields("name, account, sender, target, sendingTime, from, to, currency, amount, reference".split(", *"))}).get();
+        return new YamlTesterParametersBuilder<>(out -> new AccountsImpl(out).id(VAULT), AccountsOut.class, paths)
+                .agitators(
+                        YamlAgitator.messageMissing(),
+                        YamlAgitator.duplicateMessage(),
+                        YamlAgitator.overrideFields("currency: , amount: NaN, amount: -1".split(", *")),
+                        YamlAgitator.missingFields("name, account, sender, target, sendingTime, from, to, currency, amount, reference".split(", *")))
+                .exceptionHandlerFunction(out -> (log, msg, thrown) -> ((ErrorListener) out).jvmError(thrown == null ? msg : (msg + " " + thrown)))
+                .exceptionHandlerFunctionAndLog(true)
+                .get();
     }
 
     @After

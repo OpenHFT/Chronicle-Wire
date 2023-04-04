@@ -50,6 +50,7 @@ public class YamlTesterErrorTest extends WireTestCommon {
                 .exceptionHandlerFunction(out -> (log, msg, thrown) -> ((ErrorListener) out).jvmError(thrown == null ? msg : (msg + " " + thrown)))
                 .exceptionHandlerFunctionAndLog(true)
                 .addOutputClass(ErrorListener.class)
+                .agitators(YamlAgitator.duplicateMessage())
                 .get();
     }
 

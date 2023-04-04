@@ -18,6 +18,7 @@
 
 package run.chronicle.account.dto;
 
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.converter.Base85;
 
 public class AccountStatus extends AbstractEvent<AccountStatus> {
@@ -61,5 +62,14 @@ public class AccountStatus extends AbstractEvent<AccountStatus> {
     public AccountStatus amount(double amount) {
         this.amount = amount;
         return this;
+    }
+
+    @Override
+    public void validate() throws InvalidMarshallableException {
+        super.validate();
+        if (name == null) throw new InvalidMarshallableException("name must be set");
+        if (account == 0) throw new InvalidMarshallableException("account must be set");
+        if (currency == 0) throw new InvalidMarshallableException("currency must be set");
+        if (amount == 0) throw new InvalidMarshallableException("amount must be set");
     }
 }

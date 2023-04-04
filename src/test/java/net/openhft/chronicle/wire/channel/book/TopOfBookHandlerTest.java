@@ -50,7 +50,9 @@ public class TopOfBookHandlerTest extends WireTestCommon {
         return new YamlTesterParametersBuilder<>(out -> new EchoTopOfBookHandler().out(out), TopOfBookListener.class, paths)
                 .agitators(
                         YamlAgitator.messageMissing(),
-                        YamlAgitator.duplicateMessage())
+                        YamlAgitator.duplicateMessage(),
+                        YamlAgitator.overrideFields("ecn: RFX"),
+                        YamlAgitator.missingFields("bidPrice"))
                 .get();
     }
 

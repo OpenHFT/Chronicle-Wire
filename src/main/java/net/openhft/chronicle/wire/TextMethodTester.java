@@ -40,10 +40,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.*;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TextMethodTester<T> implements YamlTester {
@@ -75,6 +72,7 @@ public class TextMethodTester<T> implements YamlTester {
     private UpdateInterceptor updateInterceptor;
     private Consumer<InvocationTargetRuntimeException> onInvocationException;
     private boolean exceptionHandlerFunctionAndLog;
+    private Predicate<String> testFilter = s -> true;
 
     public TextMethodTester(String input, Function<T, Object> componentFunction, Class<T> outputClass, String output) {
         this(input, (out, ui) -> componentFunction.apply(out), outputClass, output);
@@ -343,40 +341,48 @@ public class TextMethodTester<T> implements YamlTester {
             actual = actual.replace("\r\n", "\n");
         }
         if (REGRESS_TESTS && !originalExpected.equals(expected)) {
-            String output = replaceTargetWithSource(this.output);
-            String output2;
-            try {
-                output2 = BytesUtil.findFile(output);
-            } catch (FileNotFoundException fnfe) {
-                try {
-                    output2 = BytesUtil.findFile(replaceTargetWithSource(input
-                            .replace("in.yaml", "out.yaml"))
-
-                    );
-                } catch (FileNotFoundException e) {
-                    File out2 = new File(this.output);
-                    File out = new File(out2.getParentFile(), "out.yaml");
-                    try {
-                        String output2dir = BytesUtil.findFile(replaceTargetWithSource(out.getPath()));
-                        output2 = new File(new File(output2dir).getParentFile(), out2.getName()).getPath();
-                    } catch (FileNotFoundException e2) {
-                        throw fnfe;
-                    }
-                }
-            }
-            System.err.println("The expected output for " + output2 + " has been updated, check your commits");
-
-            try (FileWriter fw = new FileWriter(output2)) {
-                String actual2 = actual.endsWith("\n") ? actual : (actual + "\n");
-                if (OS.isWindows())
-                    actual2 = actual2.replace("\n", "\r\n");
-                fw.write(actual2);
-            }
+            updateOutput();
         }
         // add a warning if they don't match and there was a setup missing.
         if (!expected.trim().equals(actual.trim()) && !setupNotFound.isEmpty())
             Jvm.warn().on(getClass(), setupNotFound);
         return this;
+    }
+
+    private void updateOutput() throws IOException {
+        String output = replaceTargetWithSource(this.output);
+        String output2;
+        try {
+            output2 = BytesUtil.findFile(output);
+        } catch (FileNotFoundException fnfe) {
+            try {
+                output2 = BytesUtil.findFile(replaceTargetWithSource(input
+                        .replace("in.yaml", "out.yaml"))
+
+                );
+            } catch (FileNotFoundException e) {
+                File out2 = new File(this.output);
+                File out = new File(out2.getParentFile(), "out.yaml");
+                try {
+                    String output2dir = BytesUtil.findFile(replaceTargetWithSource(out.getPath()));
+                    output2 = new File(new File(output2dir).getParentFile(), out2.getName()).getPath();
+                } catch (FileNotFoundException e2) {
+                    throw fnfe;
+                }
+            }
+        }
+        String actual2 = actual.endsWith("\n") ? actual : (actual + "\n");
+        if (!testFilter.test(actual2)) {
+            System.err.println("The expected output for " + output2 + " has been drops as it is too similar to previous results");
+            return;
+        }
+        System.err.println("The expected output for " + output2 + " has been updated, check your commits");
+
+        try (FileWriter fw = new FileWriter(output2)) {
+            if (OS.isWindows())
+                actual2 = actual2.replace("\n", "\r\n");
+            fw.write(actual2);
+        }
     }
 
     private ExceptionHandler createExceptionHandler(T writer0, ExceptionHandler warn, ExceptionHandler error) {
@@ -440,7 +446,7 @@ public class TextMethodTester<T> implements YamlTester {
     @NotNull
     private static String classNameFor(Throwable t) {
         StackTraceElement[] stackTrace = t.getStackTrace();
-        return stackTrace.length == 0 ? "TextMethodTester": stackTrace[0].getClassName();
+        return stackTrace.length == 0 ? "TextMethodTester" : stackTrace[0].getClassName();
     }
 
     private String replaceTargetWithSource(String replace) {
@@ -535,6 +541,11 @@ public class TextMethodTester<T> implements YamlTester {
 
     public TextMethodTester<T> exceptionHandlerFunctionAndLog(boolean exceptionHandlerFunctionAndLog) {
         this.exceptionHandlerFunctionAndLog = exceptionHandlerFunctionAndLog;
+        return this;
+    }
+
+    public TextMethodTester<T> testFilter(Predicate<String> testFilter) {
+        this.testFilter = testFilter;
         return this;
     }
 

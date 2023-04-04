@@ -1,47 +1,17 @@
 # 1000 EUR for Alice
 # missing name: alice,
----
-accountStatusFailed: {
-  sender: vault,
-  target: gw1,
-  sendingTime: 2023-01-20T10:10:00,
-  accountStatus: {
-    sender: gw1,
-    target: vault,
-    sendingTime: 2023-01-20T10:00:00,
-    name: !!null "",
-    account: 101013,
-    currency: EUR,
-    amount: 1E3
-  },
-  reason: name not set
-}
+jvmError: "net.openhft.chronicle.core.io.InvalidMarshallableException: name must be set"
 ...
 # 1000 EUR for Bob
 # missing name: bob,
----
-accountStatusFailed: {
-  sender: vault,
-  target: gw1,
-  sendingTime: 2023-01-20T10:10:00.001,
-  accountStatus: {
-    sender: gw1,
-    target: vault,
-    sendingTime: 2023-01-20T10:00:01,
-    name: !!null "",
-    account: 101025,
-    currency: EUR,
-    amount: 1E3
-  },
-  reason: name not set
-}
+jvmError: "net.openhft.chronicle.core.io.InvalidMarshallableException: name must be set"
 ...
 # Alice sends 10 EUR to bob
 ---
 transferFailed: {
   sender: vault,
   target: gw2,
-  sendingTime: 2023-01-20T10:10:00.002,
+  sendingTime: 2023-01-20T10:10:00,
   transfer: {
     sender: gw2,
     target: vault,

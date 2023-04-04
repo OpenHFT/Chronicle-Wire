@@ -34,7 +34,7 @@ public class OverrideFieldAgitator implements YamlAgitator {
         for (String field : fields) {
             String[] fieldValue = field.split(": ", 2);
             if (fieldValue.length != 2)
-                throw new IllegalArgumentException("invalid field: value as ;" + field + "'");
+                throw new IllegalArgumentException("invalid field: value as " + field + "'");
             if (!yaml.contains(" " + fieldValue[0] + ": "))
                 continue;
             String yaml2 = yaml.replaceAll("( )+(" + fieldValue[0] + ": .*)",

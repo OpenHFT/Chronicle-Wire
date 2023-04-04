@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class YamlTesterParametersBuilder<T> {
     private final ThrowingFunction<T, Object, Throwable> builder;
@@ -40,6 +41,7 @@ public class YamlTesterParametersBuilder<T> {
     private YamlAgitator[] agitators = {};
     private Function<T, ExceptionHandler> exceptionHandlerFunction;
     private boolean exceptionHandlerFunctionAndLog;
+    private Predicate<String> testFilter = new ContainsDifferentMessageFilter();
 
     public YamlTesterParametersBuilder(ThrowingFunction<T, Object, Throwable> builder, Class<T> outClass, String paths) {
         this.builder = builder;
@@ -61,6 +63,8 @@ public class YamlTesterParametersBuilder<T> {
         Function<T, Object> compFunction = ThrowingFunction.asFunction(builder);
         List<Object[]> params = new ArrayList<>();
         String[] pathArr = paths.split(",");
+        Predicate<String> testFilter = this.testFilter;
+        Map<String, YamlTester> testers = new LinkedHashMap<>();
         for (String path : pathArr) {
             path = path.trim(); // trim without a regex
             if (path.isEmpty())
@@ -71,13 +75,60 @@ public class YamlTesterParametersBuilder<T> {
                             .genericEvent("event")
                             .setup(setup)
                             .exceptionHandlerFunction(exceptionHandlerFunction)
-                            .exceptionHandlerFunctionAndLog(exceptionHandlerFunctionAndLog);
+                            .exceptionHandlerFunctionAndLog(exceptionHandlerFunctionAndLog)
+                            .testFilter(s -> {
+                                // include it
+                                testFilter.test(s);
+                                // always add it
+                                return true;
+                            });
+            testers.put(path, yt);
             addOutputClasses(yt);
             Object[] test = {path, yt};
             params.add(test);
+        }
+        if (YamlTester.BASE_TESTS)
+            return params;
 
-            if (YamlTester.BASE_TESTS)
-                continue;
+        SortedSet<String> skipping = new TreeSet<>();
+        for (Map.Entry<String, YamlTester> pyt : testers.entrySet()) {
+            String path = pyt.getKey();
+            YamlTester yt = pyt.getValue();
+            String setup = path + "/_setup.yaml";
+
+            // add agitated tests
+            if (agitators.length > 0) {
+                Map<String, String> inputToNameMap = new LinkedHashMap<>();
+                for (YamlAgitator agitator : agitators) {
+                    Map<String, String> agitateMap = yt.agitate(agitator);
+                    for (Map.Entry<String, String> entry : agitateMap.entrySet()) {
+                        inputToNameMap.putIfAbsent(entry.getKey(), entry.getValue());
+                    }
+                }
+                for (Map.Entry<String, String> entry : inputToNameMap.entrySet()) {
+                    String name = entry.getValue();
+                    String output = path + "/out-" + name + ".yaml";
+                    try {
+                        if (!YamlTester.REGRESS_TESTS)
+                            IOTools.urlFor(builder.getClass(), output);
+                        YamlTester yta = new YamlMethodTester<>(entry.getKey(), compFunction, outClass, output)
+                                .genericEvent("event")
+                                .setup(setup)
+                                .exceptionHandlerFunction(exceptionHandlerFunction)
+                                .exceptionHandlerFunctionAndLog(exceptionHandlerFunctionAndLog)
+                                .testFilter(testFilter());
+                        addOutputClasses(yta);
+
+                        Object[] testa = {path + "/" + name, yta};
+                        params.add(testa);
+                    } catch (FileNotFoundException ioe) {
+                        skipping.add(path + "/" + name);
+                    }
+                }
+            }
+        }
+        for (Map.Entry<String, YamlTester> pyt : testers.entrySet()) {
+            String path = pyt.getKey();
 
             String in_yaml;
             try {
@@ -93,7 +144,6 @@ public class YamlTesterParametersBuilder<T> {
                 // ignored
             }
 
-            SortedSet<String> skipping = new TreeSet<>();
             // add combination tests
             for (String path2 : pathArr) {
                 path2 = path2.trim(); // trim without a regex
@@ -127,42 +177,13 @@ public class YamlTesterParametersBuilder<T> {
                                     .genericEvent("event")
                                     .setup(setup2)
                                     .exceptionHandlerFunction(exceptionHandlerFunction)
-                                    .exceptionHandlerFunctionAndLog(exceptionHandlerFunctionAndLog);
+                                    .exceptionHandlerFunctionAndLog(exceptionHandlerFunctionAndLog)
+                                    .testFilter(testFilter());
                     addOutputClasses(yt2);
                     Object[] test2 = {path + "+" + path2, yt2};
                     params.add(test2);
                 } catch (FileNotFoundException ioe) {
                     skipping.add(path + "/" + path + "+" + path2);
-                }
-            }
-
-            // add agitated tests
-            if (agitators.length > 0) {
-                Map<String, String> inputToNameMap = new LinkedHashMap<>();
-                for (YamlAgitator agitator : agitators) {
-                    Map<String, String> agitateMap = yt.agitate(agitator);
-                    for (Map.Entry<String, String> entry : agitateMap.entrySet()) {
-                        inputToNameMap.putIfAbsent(entry.getKey(), entry.getValue());
-                    }
-                }
-                for (Map.Entry<String, String> entry : inputToNameMap.entrySet()) {
-                    String name = entry.getValue();
-                    String output = path + "/out-" + name + ".yaml";
-                    try {
-                        if (!YamlTester.REGRESS_TESTS)
-                            IOTools.urlFor(builder.getClass(), output);
-                        YamlTester yta = new YamlMethodTester<>(entry.getKey(), compFunction, outClass, output)
-                                .genericEvent("event")
-                                .setup(setup)
-                                .exceptionHandlerFunction(exceptionHandlerFunction)
-                                .exceptionHandlerFunctionAndLog(exceptionHandlerFunctionAndLog);
-                        addOutputClasses(yta);
-
-                        Object[] testa = {path + "/" + name, yta};
-                        params.add(testa);
-                    } catch (FileNotFoundException ioe) {
-                        skipping.add(path + "/" + name);
-                    }
                 }
             }
             if (!skipping.isEmpty())
@@ -187,5 +208,26 @@ public class YamlTesterParametersBuilder<T> {
     public YamlTesterParametersBuilder<T> exceptionHandlerFunctionAndLog(boolean exceptionHandlerFunctionAndLog) {
         this.exceptionHandlerFunctionAndLog = exceptionHandlerFunctionAndLog;
         return this;
+    }
+
+    public Predicate<String> testFilter() {
+        return testFilter;
+    }
+
+    public YamlTesterParametersBuilder<T> testFilter(Predicate<String> testFilter) {
+        this.testFilter = testFilter;
+        return this;
+    }
+
+    static class ContainsDifferentMessageFilter implements Predicate<String> {
+        final Set<String> msgs = new HashSet<>();
+
+        @Override
+        public boolean test(String s) {
+            boolean added = false;
+            for (String msg : s.split("...\\n"))
+                added |= msgs.add(msg);
+            return added;
+        }
     }
 }

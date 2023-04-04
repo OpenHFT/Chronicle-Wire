@@ -18,9 +18,10 @@
 
 package run.chronicle.account.api;
 
+import net.openhft.chronicle.wire.utils.ErrorListener;
 import run.chronicle.account.dto.*;
 
-public interface AccountsOut {
+public interface AccountsOut extends ErrorListener {
     void accountStatusOK(AccountStatusOK accountStatusOK);
     void accountStatusFailed(AccountStatusFailed accountStatusFailed);
 

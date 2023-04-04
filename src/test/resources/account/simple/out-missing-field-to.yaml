@@ -34,23 +34,7 @@ accountStatusOK: {
 ...
 # Alice sends 10 EUR to bob
 # missing to: 101025,
----
-transferFailed: {
-  sender: vault,
-  target: gw2,
-  sendingTime: 2023-01-20T10:10:00.002,
-  transfer: {
-    sender: gw2,
-    target: vault,
-    sendingTime: 2023-01-20T10:01:00,
-    from: 101013,
-    to: 0,
-    currency: EUR,
-    amount: 10.0,
-    reference: Dog food
-  },
-  reason: to account doesn't exist
-}
+jvmError: "net.openhft.chronicle.core.io.InvalidMarshallableException: to must be set"
 ...
 # dump all the accounts
 ---
@@ -63,7 +47,7 @@ startCheckpoint: {
 accountStatusOK: {
   sender: vault,
   target: gw1,
-  sendingTime: 2023-01-20T10:10:00.003,
+  sendingTime: 2023-01-20T10:10:00.002,
   accountStatus: {
     sender: gw1,
     target: vault,
@@ -78,7 +62,7 @@ accountStatusOK: {
 accountStatusOK: {
   sender: vault,
   target: gw1,
-  sendingTime: 2023-01-20T10:10:00.004,
+  sendingTime: 2023-01-20T10:10:00.003,
   accountStatus: {
     sender: gw1,
     target: vault,

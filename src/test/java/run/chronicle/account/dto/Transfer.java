@@ -19,6 +19,7 @@
 package run.chronicle.account.dto;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.converter.Base85;
 
 public class Transfer extends AbstractEvent<Transfer> {
@@ -71,5 +72,15 @@ public class Transfer extends AbstractEvent<Transfer> {
     public Transfer reference(Bytes reference) {
         this.reference.clear().append(reference);
         return this;
+    }
+
+    @Override
+    public void validate() throws InvalidMarshallableException {
+        super.validate();
+        if (from == 0) throw new InvalidMarshallableException("from must be set");
+        if (to == 0) throw new InvalidMarshallableException("to must be set");
+        if (currency == 0) throw new InvalidMarshallableException("currency must be set");
+        if (amount == 0) throw new InvalidMarshallableException("amount must be set");
+        if (reference == null) throw new InvalidMarshallableException("reference must be set");
     }
 }

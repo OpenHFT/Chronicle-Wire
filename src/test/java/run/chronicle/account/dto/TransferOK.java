@@ -18,6 +18,8 @@
 
 package run.chronicle.account.dto;
 
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+
 public class TransferOK extends AbstractEvent<TransferOK> {
     private Transfer transfer;
 
@@ -28,5 +30,11 @@ public class TransferOK extends AbstractEvent<TransferOK> {
     public TransferOK transfer(Transfer transfer) {
         this.transfer = transfer;
         return this;
+    }
+
+    @Override
+    public void validate() throws InvalidMarshallableException {
+        super.validate();
+        if (transfer == null) throw new InvalidMarshallableException("transfer must be set");
     }
 }

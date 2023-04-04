@@ -50,7 +50,8 @@ public class OMSEventsTest extends WireTestCommon {
         return new YamlTesterParametersBuilder<>(OMSImpl::new, OMSOut.class, paths)
                 .agitators(
                         YamlAgitator.messageMissing(),
-                        YamlAgitator.duplicateMessage())
+                        YamlAgitator.duplicateMessage(),
+                        YamlAgitator.missingFields("sender, target, sendingTime, symbol, side, transactTime, orderQty, price, clOrdID, ordType".split(", ")))
                 .get();
     }
 
