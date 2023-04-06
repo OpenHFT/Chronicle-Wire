@@ -75,7 +75,7 @@ public class MethodWriterClassNameGeneratorTest {
 
     private String generatedClassName(String genericEvent, boolean metaData, boolean intercepting, WireType wireType, Class<?>... interfaces) {
         Set<Class<?>> setOfClasses = new LinkedHashSet<>(Arrays.asList(interfaces));
-        return classNameGenerator.getClassName(setOfClasses, genericEvent, metaData, intercepting, wireType);
+        return classNameGenerator.getClassName(setOfClasses, genericEvent, metaData, intercepting, wireType, false);
     }
 
     interface JustAnInterface {
