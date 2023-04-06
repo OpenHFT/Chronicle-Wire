@@ -62,6 +62,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
 
     private final MethodWriterClassNameGenerator methodWriterClassNameGenerator;
     private final String packageName;
+    private final MethodWriterClassNameGenerator methodWriterClassNameGenerator;
     private ClassLoader classLoader;
     @NotNull
     private final MethodWriterInvocationHandlerSupplier handlerSupplier;
@@ -72,6 +73,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     private WireType wireType;
     private Class<?> proxyClass;
     private UpdateInterceptor updateInterceptor;
+    private boolean verboseTypes;
 
     public VanillaMethodWriterBuilder(@NotNull Class<T> tClass,
                                       WireType wireType,
@@ -83,6 +85,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         // TODO Using loader of parent class may not be safe if it's not accepting new classes.
         //  Maybe have an option to always use current thread class loader?
         this.classLoader = clsLdr != null ? clsLdr : getClass().getClassLoader();
+        this.methodWriterClassNameGenerator = new MethodWriterClassNameGenerator();
         this.handlerSupplier = new MethodWriterInvocationHandlerSupplier(handlerSupplier);
         this.methodWriterClassNameGenerator = new MethodWriterClassNameGenerator();
     }
@@ -100,6 +103,12 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     @NotNull
     public MethodWriterBuilder<T> updateInterceptor(UpdateInterceptor updateInterceptor) {
         this.updateInterceptor = updateInterceptor;
+        return this;
+    }
+
+    @NotNull
+    public MethodWriterBuilder<T> verboseTypes(boolean verboseTypes) {
+        this.verboseTypes = verboseTypes;
         return this;
     }
 
@@ -158,7 +167,9 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      */
     @NotNull
     private String getClassName() {
-        return methodWriterClassNameGenerator.getClassName(interfaces, genericEvent, metaData, updateInterceptor != null, wireType());
+
+        return methodWriterClassNameGenerator.getClassName(interfaces, genericEvent, metaData, updateInterceptor != null, wireType(),verboseTypes);
+
     }
 
     @NotNull
@@ -221,7 +232,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                     genericEvent,
                     metaData,
                     true,
-                    updateInterceptor != null);
+                    updateInterceptor != null, verboseTypes);
         GenerateMethodWriter2 gmw = new GenerateMethodWriter2();
         gmw.metaData()
                 .packageName(fullClassName.substring(0, fullClassName.lastIndexOf('.')))
