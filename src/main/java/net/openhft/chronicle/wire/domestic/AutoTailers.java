@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.wire.domestic;
 
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.threads.EventHandler;
 import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.wire.ExcerptListener;
@@ -47,7 +48,7 @@ public final class AutoTailers {
     }
 
     public static long replayOnto(@NotNull final MarshallableIn tailer,
-                                  @NotNull final ExcerptListener excerptListener) {
+                                  @NotNull final ExcerptListener excerptListener) throws InvalidMarshallableException {
         requireNonNull(tailer);
         requireNonNull(excerptListener);
 

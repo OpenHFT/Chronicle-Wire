@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire.internal;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.*;
 
 import java.io.FileOutputStream;
@@ -60,7 +61,7 @@ public class FileMarshallableOut implements MarshallableOut {
         }
     };
 
-    public FileMarshallableOut(MarshallableOutBuilder builder, WireType wireType) {
+    public FileMarshallableOut(MarshallableOutBuilder builder, WireType wireType) throws InvalidMarshallableException {
         this.url = builder.url();
         assert url.getProtocol().equals("file");
         final String query = url.getQuery();

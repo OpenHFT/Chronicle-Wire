@@ -17,6 +17,8 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+
 public interface FieldNumberParselet {
-    void readOne(long methodId, WireIn wire);
+    void readOne(long methodId, WireIn wire) throws InvalidMarshallableException;
 }

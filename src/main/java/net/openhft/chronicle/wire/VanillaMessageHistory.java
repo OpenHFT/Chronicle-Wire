@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.bytes.util.BinaryLengthLength;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -153,7 +154,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     }
 
     @Override
-    public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
+    public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException, InvalidMarshallableException {
         Bytes<?> bytes = wire.bytes();
         if (bytes.peekUnsignedByte() == BinaryWireCode.BYTES_MARSHALLABLE) {
             bytes.readSkip(1);
@@ -302,7 +303,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
      * @return copy of this
      */
     @Override
-    public @NotNull VanillaMessageHistory deepCopy() {
+    public @NotNull VanillaMessageHistory deepCopy() throws InvalidMarshallableException {
         @NotNull VanillaMessageHistory copy = super.deepCopy();
         // remove the extra timing
         copy.timingsArray[this.timings] = 0;

@@ -19,6 +19,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
@@ -38,7 +39,7 @@ public interface ExcerptListener {
      * @param wire  representing access to the excerpt that was stored (non-null).
      * @param index in the queue where the except was placed (non-negative)
      */
-    void onExcerpt(@NotNull Wire wire, @NonNegative long index);
+    void onExcerpt(@NotNull Wire wire, @NonNegative long index) throws InvalidMarshallableException;
 
     /**
      * Returns a composed ExcerptListener that first accepts excerpts to this ExcerptListener,

@@ -71,7 +71,7 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
      */
     public TCPChronicleChannel(ChronicleChannelCfg channelCfg,
                                ChannelHeader headerOut,
-                               SocketRegistry socketRegistry) {
+                               SocketRegistry socketRegistry) throws InvalidMarshallableException {
         try {
             this.channelCfg = requireNonNull(channelCfg);
             this.headerOut = requireNonNull(headerOut);
@@ -234,7 +234,7 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
         return in.readingDocument();
     }
 
-    synchronized void checkConnected() {
+    synchronized void checkConnected() throws InvalidMarshallableException {
         if (sc != null && sc.isOpen()) {
             if (headerOut == null) {
                 acceptorRespondToHeader();
@@ -287,7 +287,7 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
             Closeable.closeQuietly(socketRegistry);
     }
 
-    synchronized void acceptorRespondToHeader() {
+    synchronized void acceptorRespondToHeader() throws InvalidMarshallableException {
         headerOut = NO_HEADER;
         readHeader();
         headerInToUse = replaceInHeader.apply(headerIn);
@@ -306,7 +306,7 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
         writeHeader();
     }
 
-    private void writeHeader() {
+    private void writeHeader() throws InvalidMarshallableException {
         try (DocumentContext dc = writingDocument(true)) {
             dc.wire().write(HEADER).object(headerOut);
         }
@@ -335,7 +335,7 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
         return headerInToUse;
     }
 
-    private void readHeader() {
+    private void readHeader() throws InvalidMarshallableException {
         while (!Thread.currentThread().isInterrupted()) {
             try (DocumentContext dc = readingDocument()) {
                 if (!dc.isPresent()) {

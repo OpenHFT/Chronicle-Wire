@@ -23,9 +23,8 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.ForceInline;
+import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.io.Closeable;
-import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.pool.EnumCache;
@@ -149,7 +148,7 @@ public enum Wires {
      * @param obj  the object that replays the data in the specified file
      * @throws IOException is thrown if an IO operation fails
      */
-    public static void replay(String file, Object obj) throws IOException {
+    public static void replay(String file, Object obj) throws IOException, InvalidMarshallableException {
         Bytes bytes = BytesUtil.readFile(file);
         Wire wire = new YamlWire(bytes).useTextDocuments();
         MethodReader readerObj = wire.methodReader(obj);
@@ -251,7 +250,12 @@ public enum Wires {
 
     @NotNull
     public static CharSequence asText(@NotNull WireIn wireIn) {
-        return asType(wireIn, Wires::newTextWire);
+        ValidatableUtil.startValidateDisabled();
+        try {
+            return asType(wireIn, Wires::newTextWire);
+        } finally {
+            ValidatableUtil.endValidateDisabled();
+        }
     }
 
 
@@ -260,11 +264,11 @@ public enum Wires {
     }
 
     @NotNull
-    public static Bytes asBinary(@NotNull WireIn wireIn) {
+    public static Bytes asBinary(@NotNull WireIn wireIn) throws InvalidMarshallableException {
         return asType(wireIn, BinaryWire::new);
     }
 
-    private static Bytes asType(@NotNull WireIn wireIn, Function<Bytes, Wire> wireProvider) {
+    private static Bytes asType(@NotNull WireIn wireIn, Function<Bytes, Wire> wireProvider) throws InvalidMarshallableException {
         long pos = wireIn.bytes().readPosition();
         try {
             Bytes<?> bytes = WireInternal.acquireInternalBytes();
@@ -276,7 +280,7 @@ public enum Wires {
     }
 
     @NotNull
-    public static Bytes asJson(@NotNull WireIn wireIn) {
+    public static Bytes asJson(@NotNull WireIn wireIn) throws InvalidMarshallableException {
         return asType(wireIn, Wires::newJsonWire);
     }
 
@@ -338,12 +342,12 @@ public enum Wires {
     @ForceInline
     public static <T extends WriteMarshallable> long writeData(
             @NotNull WireOut wireOut,
-            @NotNull T writer) {
+            @NotNull T writer) throws InvalidMarshallableException {
         return WireInternal.writeData(wireOut, false, false, writer);
     }
 
     @ForceInline
-    public static long readWire(@NotNull WireIn wireIn, long size, @NotNull ReadMarshallable readMarshallable) {
+    public static long readWire(@NotNull WireIn wireIn, long size, @NotNull ReadMarshallable readMarshallable) throws InvalidMarshallableException {
         @NotNull final Bytes<?> bytes = wireIn.bytes();
         final long limit0 = bytes.readLimit();
         final long limit = bytes.readPosition() + size;
@@ -409,22 +413,22 @@ public enum Wires {
         return WireDumper.of(bytes).asString(position, length);
     }
 
-    public static void readMarshallable(@NotNull Object marshallable, @NotNull WireIn wire, boolean overwrite) {
+    public static void readMarshallable(@NotNull Object marshallable, @NotNull WireIn wire, boolean overwrite) throws InvalidMarshallableException {
         final Class<?> clazz = marshallable.getClass();
         readMarshallable(clazz, marshallable, wire, overwrite);
     }
 
-    public static void readMarshallable(Class<?> clazz, @NotNull Object marshallable, @NotNull WireIn wire, boolean overwrite) {
+    public static void readMarshallable(Class<?> clazz, @NotNull Object marshallable, @NotNull WireIn wire, boolean overwrite) throws InvalidMarshallableException {
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(clazz == null ? marshallable.getClass() : clazz);
         wm.readMarshallable(marshallable, wire, wm.defaultValue(), overwrite);
     }
 
-    public static void writeMarshallable(@NotNull Object marshallable, @NotNull WireOut wire) {
+    public static void writeMarshallable(@NotNull Object marshallable, @NotNull WireOut wire) throws InvalidMarshallableException {
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass());
         wm.writeMarshallable(marshallable, wire);
     }
 
-    public static void writeMarshallable(@NotNull Object marshallable, @NotNull WireOut wire, boolean writeDefault) {
+    public static void writeMarshallable(@NotNull Object marshallable, @NotNull WireOut wire, boolean writeDefault) throws InvalidMarshallableException {
         WireMarshaller marshaller = WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass());
         if (writeDefault)
             marshaller.writeMarshallable(marshallable, wire);
@@ -432,7 +436,7 @@ public enum Wires {
             marshaller.writeMarshallable(marshallable, wire, marshaller.defaultValue(), false);
     }
 
-    public static void writeMarshallable(@NotNull Object marshallable, @NotNull WireOut wire, @NotNull Object previous, boolean copy) {
+    public static void writeMarshallable(@NotNull Object marshallable, @NotNull WireOut wire, @NotNull Object previous, boolean copy) throws InvalidMarshallableException {
         assert marshallable.getClass() == previous.getClass();
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass());
         wm.writeMarshallable(marshallable, wire, previous, copy);
@@ -444,7 +448,7 @@ public enum Wires {
     }
 
     @NotNull
-    public static <T extends Marshallable> T deepCopy(@NotNull T marshallable) {
+    public static <T extends Marshallable> T deepCopy(@NotNull T marshallable) throws InvalidMarshallableException {
         if (Enum.class.isAssignableFrom(marshallable.getClass()))
             return marshallable;
 
@@ -462,7 +466,7 @@ public enum Wires {
     }
 
     @NotNull
-    public static <T> T copyTo(Object source, @NotNull T target) {
+    public static <T> T copyTo(Object source, @NotNull T target) throws InvalidMarshallableException {
         Wire wire = acquireBinaryWire();
         wire.getValueOut().object(source);
         wire.getValueIn().typePrefix(); // drop the type prefix.
@@ -471,7 +475,7 @@ public enum Wires {
     }
 
     @NotNull
-    public static <T> T project(Class<T> tClass, Object source) {
+    public static <T> T project(Class<T> tClass, Object source) throws InvalidMarshallableException {
         T target = ObjectUtils.newInstance(tClass);
         Wires.copyTo(source, target);
         return target;
@@ -541,7 +545,7 @@ public enum Wires {
     }
 
     @Nullable
-    public static <E> E objectMap(ValueIn in, @Nullable E using, @Nullable Class clazz, @NotNull SerializationStrategy<E> strategy) {
+    public static <E> E objectMap(ValueIn in, @Nullable E using, @Nullable Class clazz, @NotNull SerializationStrategy<E> strategy) throws InvalidMarshallableException {
         if (in.isNull())
             return null;
         if (clazz == Object.class)
@@ -590,11 +594,15 @@ public enum Wires {
     }
 
     @Nullable
-    public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class clazz) {
-        return object0(in, using, clazz, true);
+    public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class clazz) throws InvalidMarshallableException {
+        return ValidatableUtil.validate(object1(in, using, clazz, true));
     }
 
-    public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class clazz, boolean bestEffort) {
+    public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
+        return ValidatableUtil.validate(object1(in, using, clazz, bestEffort));
+    }
+
+    public static <E> E object1(ValueIn in, @Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
         if (using instanceof AbstractMarshallableCfg)
             ((AbstractMarshallableCfg) using).reset();
 

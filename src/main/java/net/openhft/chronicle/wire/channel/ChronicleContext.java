@@ -22,6 +22,7 @@ import net.openhft.affinity.AffinityLock;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.SimpleCloseable;
 import net.openhft.chronicle.core.util.WeakIdentityHashMap;
 import net.openhft.chronicle.wire.QueryWire;
@@ -104,7 +105,7 @@ public class ChronicleContext extends SimpleCloseable {
         }
     }
 
-    public ChronicleChannelSupplier newChannelSupplier(ChannelHandler handler) {
+    public ChronicleChannelSupplier newChannelSupplier(ChannelHandler handler) throws InvalidMarshallableException {
         startServerIfNeeded();
 
         final ChronicleChannelSupplier connectionSupplier = new ChronicleChannelSupplier(this, handler);
@@ -126,13 +127,13 @@ public class ChronicleContext extends SimpleCloseable {
         return connectionSupplier;
     }
 
-    private void startServerIfNeeded() {
+    private void startServerIfNeeded() throws InvalidMarshallableException {
         if (url().getProtocol().equals("tcp") && "".equals(url().getHost())) {
             startNewGateway();
         }
     }
 
-    public synchronized void startNewGateway() {
+    public synchronized void startNewGateway() throws InvalidMarshallableException {
         if (gateway != null)
             return;
         gateway = new ChronicleGatewayMain(url, socketRegistry, systemContext());
@@ -178,11 +179,11 @@ public class ChronicleContext extends SimpleCloseable {
         return socketRegistry;
     }
 
-    public void systemContext(SystemContext systemContext) {
+    public void systemContext(SystemContext systemContext) throws InvalidMarshallableException {
         this.systemContext = systemContext.deepCopy();
     }
 
-    public SystemContext systemContext() {
+    public SystemContext systemContext() throws InvalidMarshallableException {
         return systemContext == null ? SystemContext.INSTANCE.deepCopy() : systemContext;
     }
 

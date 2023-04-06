@@ -20,9 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.core.*;
-import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.IOTools;
-import net.openhft.chronicle.core.io.SingleThreadedChecked;
+import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -258,7 +256,8 @@ public class WireMarshaller<T> {
                 isLeaf, defaultValue);
     }
 
-    public void writeMarshallable(T t, @NotNull WireOut out) {
+    public void writeMarshallable(T t, @NotNull WireOut out) throws InvalidMarshallableException {
+        ValidatableUtil.validate(t);
         HexDumpBytesDescription bytes = out.bytesComment();
         bytes.adjustHexDumpIndentation(+1);
         try {
@@ -280,7 +279,8 @@ public class WireMarshaller<T> {
         }
     }
 
-    public void writeMarshallable(T t, @NotNull WireOut out, T previous, boolean copy) {
+    public void writeMarshallable(T t, @NotNull WireOut out, T previous, boolean copy) throws InvalidMarshallableException {
+        ValidatableUtil.validate(t);
         try {
             for (@NotNull FieldAccess field : fields) {
                 field.write(t, out, previous, copy);
@@ -290,25 +290,27 @@ public class WireMarshaller<T> {
         }
     }
 
-    public void readMarshallable(T t, @NotNull WireIn in, T defaults, boolean overwrite) {
+    public void readMarshallable(T t, @NotNull WireIn in, T defaults, boolean overwrite) throws InvalidMarshallableException {
         if (in.hintReadInputOrder())
             readMarshallableInputOrder(t, in, defaults, overwrite);
         else
             readMarshallableDTOOrder(t, in, defaults, overwrite);
+        ValidatableUtil.validate(t);
     }
 
-    public void readMarshallableDTOOrder(T t, @NotNull WireIn in, T defaults, boolean overwrite) {
+    public void readMarshallableDTOOrder(T t, @NotNull WireIn in, T defaults, boolean overwrite) throws InvalidMarshallableException {
         try {
             for (@NotNull FieldAccess field : fields) {
                 ValueIn vin = in.read(field.key);
                 field.readValue(t, defaults, vin, overwrite);
             }
+            ValidatableUtil.validate(t);
         } catch (IllegalAccessException e) {
             throw new AssertionError(e);
         }
     }
 
-    public void readMarshallableInputOrder(T t, @NotNull WireIn in, T defaults, boolean overwrite) {
+    public void readMarshallableInputOrder(T t, @NotNull WireIn in, T defaults, boolean overwrite) throws InvalidMarshallableException {
         try {
             StringBuilder sb = SBP.acquireStringBuilder();
             for (int i = 0; i < fields.length; i++) {
@@ -667,7 +669,7 @@ public class WireMarshaller<T> {
                     '}';
         }
 
-        void write(Object o, @NotNull WireOut out) throws IllegalAccessException {
+        void write(Object o, @NotNull WireOut out) throws IllegalAccessException, InvalidMarshallableException {
 
             ValueOut valueOut = out.write(field.getName());
 
@@ -680,7 +682,7 @@ public class WireMarshaller<T> {
 
         }
 
-        private void getValueCommentAnnotated(Object o, @NotNull WireOut out, ValueOut valueOut) throws IllegalAccessException {
+        private void getValueCommentAnnotated(Object o, @NotNull WireOut out, ValueOut valueOut) throws IllegalAccessException, InvalidMarshallableException {
             CommentAnnotationNotifier notifier = (CommentAnnotationNotifier) valueOut;
             notifier.hasPrecedingComment(true);
             try {
@@ -691,7 +693,7 @@ public class WireMarshaller<T> {
             }
         }
 
-        void write(Object o, @NotNull WireOut out, Object previous, boolean copy) throws IllegalAccessException {
+        void write(Object o, @NotNull WireOut out, Object previous, boolean copy) throws IllegalAccessException, InvalidMarshallableException {
             if (sameValue(o, previous))
                 return;
             ValueOut write = out.write(field.getName());
@@ -715,9 +717,9 @@ public class WireMarshaller<T> {
             unsafePutObject(to, offset, unsafeGetObject(from, offset));
         }
 
-        protected abstract void getValue(Object o, ValueOut write, Object previous) throws IllegalAccessException;
+        protected abstract void getValue(Object o, ValueOut write, Object previous) throws IllegalAccessException, InvalidMarshallableException;
 
-        protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
+        protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException, InvalidMarshallableException {
             if (!read.isPresent()) {
                 if (overwrite && defaults != null)
                     copy(Objects.requireNonNull(defaults), o);
@@ -818,7 +820,7 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(@NotNull Object o, @NotNull ValueOut write, Object previous)
-                throws IllegalAccessException {
+                throws IllegalAccessException, InvalidMarshallableException {
             Boolean wasLeaf = null;
             if (isLeaf != null)
                 wasLeaf = write.swapLeaf(isLeaf);
@@ -863,13 +865,7 @@ public class WireMarshaller<T> {
                 Jvm.rethrow(e);
             } catch (Exception e) {
                 read.wireIn().bytes().readPosition(pos);
-                Object object = null;
-                try {
-                    object = read.object();
-                } catch (Exception ex) {
-                    object = ex;
-                }
-                Jvm.warn().on(getClass(), "Unable to parse field: " + field.getName() + ", as a marshallable as it is " + object, e);
+                Jvm.warn().on(getClass(), "Unable to parse field: " + field.getName() + ", as a marshallable as it is " + read.objectBestEffort(), e);
                 if (overwrite)
                     field.set(o, ObjectUtils.defaultValue(field.getType()));
             }
@@ -1167,7 +1163,8 @@ public class WireMarshaller<T> {
                                            ValueOut out,
                                            Object[] values,
                                            Field field,
-                                           Class componentType) {
+                                           Class componentType)
+                throws InvalidMarshallableException {
             final EnumSet coll;
             try {
                 coll = (EnumSet) field.get(o);
@@ -1508,7 +1505,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, @NotNull ValueOut write, Object previous) throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull ValueOut write, Object previous) throws IllegalAccessException, InvalidMarshallableException {
             @NotNull Map map = (Map) field.get(o);
             write.marshallable(map, keyType, valueType, Boolean.TRUE.equals(isLeaf));
         }
@@ -1533,7 +1530,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
+        protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException, InvalidMarshallableException {
             Map map = (Map) field.get(o);
             if (map == null) {
                 map = collectionSupplier.get();

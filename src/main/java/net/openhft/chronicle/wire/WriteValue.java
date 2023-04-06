@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.annotation.DontChain;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 
 @FunctionalInterface
 @DontChain
@@ -26,5 +27,5 @@ public interface WriteValue {
     /**
      * Writes a value to the provided {@link ValueOut}.
      */
-    void writeValue(ValueOut out);
+    void writeValue(ValueOut out) throws InvalidMarshallableException;
 }

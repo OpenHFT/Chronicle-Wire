@@ -22,6 +22,7 @@ import net.openhft.affinity.AffinityLock;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.ClosedIORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.threads.NamedThreadFactory;
 import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.wire.Marshallable;
@@ -51,7 +52,7 @@ public class ChronicleServiceMain extends SelfDescribingMarshallable implements 
     transient volatile boolean closed;
     transient Set<ChronicleChannel> channels;
 
-    public static void main(String... args) throws IOException {
+    public static void main(String... args) throws IOException, InvalidMarshallableException {
         ChronicleServiceMain main = Marshallable.fromFile(ChronicleServiceMain.class, args[0]);
         main.buffered = Jvm.getBoolean("buffered", main.buffered);
         main.run();

@@ -60,6 +60,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     private final boolean disableProxyGen = Jvm.getBoolean(DISABLE_WRITER_PROXY_CODEGEN, false);
     private final Set<Class<?>> interfaces = Collections.synchronizedSet(new LinkedHashSet<>());
 
+    private final MethodWriterClassNameGenerator methodWriterClassNameGenerator;
     private final String packageName;
     private final MethodWriterClassNameGenerator methodWriterClassNameGenerator;
     private ClassLoader classLoader;
@@ -86,6 +87,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         this.classLoader = clsLdr != null ? clsLdr : getClass().getClassLoader();
         this.methodWriterClassNameGenerator = new MethodWriterClassNameGenerator();
         this.handlerSupplier = new MethodWriterInvocationHandlerSupplier(handlerSupplier);
+        this.methodWriterClassNameGenerator = new MethodWriterClassNameGenerator();
     }
 
     @NotNull
@@ -159,13 +161,15 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     }
 
     /**
-     * because we cache the classes in {@code classCache}, its very important to come up with a name that is unique for what the class does.
+     * because we cache the classes in {@code classCache}, it's very important to come up with a name that is unique for what the class does.
      *
      * @return the name of the new class
      */
     @NotNull
     private String getClassName() {
+
         return methodWriterClassNameGenerator.getClassName(interfaces, genericEvent, metaData, updateInterceptor != null, wireType(),verboseTypes);
+
     }
 
     @NotNull

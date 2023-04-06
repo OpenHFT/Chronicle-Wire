@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodWriterInvocationHandler;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.util.AbstractInvocationHandler;
 import org.jetbrains.annotations.NotNull;
 
@@ -52,7 +53,7 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
 
     protected abstract void handleInvoke(Method method, Object[] args);
 
-    protected void handleInvoke(@NotNull Method method, Object[] args, Wire wire) {
+    protected void handleInvoke(@NotNull Method method, Object[] args, Wire wire) throws InvalidMarshallableException {
         if (recordHistory) {
             wire.writeEventName(MethodReader.HISTORY)
                     .marshallable(MessageHistory.get());
@@ -65,17 +66,17 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
         writeEvent(wire, method, methodName, args);
     }
 
-    private void writeEvent(Wire wire, @NotNull Method method, String methodName, Object[] args) {
+    private void writeEvent(Wire wire, @NotNull Method method, String methodName, Object[] args) throws InvalidMarshallableException {
         writeEvent0(wire, method, args, methodName, 0);
     }
 
-    private void writeGenericEvent(Wire wire, @NotNull Method method, Object[] args) {
+    private void writeGenericEvent(Wire wire, @NotNull Method method, Object[] args) throws InvalidMarshallableException {
         String methodName = args[0].toString();
         writeEvent0(wire, method, args, methodName, 1);
     }
 
     @SuppressWarnings("unchecked")
-    private void writeEvent0(Wire wire, @NotNull Method method, Object[] args, String methodName, int oneParam) {
+    private void writeEvent0(Wire wire, @NotNull Method method, Object[] args, String methodName, int oneParam) throws InvalidMarshallableException {
         final ParameterHolderSequenceWriter phsw = parameterMap.computeIfAbsent(method, ParameterHolderSequenceWriter::new);
         boolean useMethodId = useMethodIds && phsw.methodId >= 0 && wire.getValueOut().isBinary();
         ValueOut valueOut = useMethodId

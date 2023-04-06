@@ -19,7 +19,9 @@ public class MethodWriterClassNameGenerator {
     private static final int MAX_LENGTH_OF_HASH = CLASSNAME_HASH_LONG_CONVERTER.asText(Long.MIN_VALUE).length();
 
     @NotNull
+
     public String getClassName(@NotNull Set<Class<?>> interfaces, @Nullable String genericEvent, boolean metaData, boolean intercepting, @NotNull WireType wireType, boolean verboseTypes) {
+
         final StringBuilder sb = new StringBuilder();
 
         interfaces.forEach(i -> {
@@ -34,6 +36,7 @@ public class MethodWriterClassNameGenerator {
         sb.append(this.toFirstCapCase(wireType.toString().replace("_", "")));
         if (verboseTypes)
             sb.append("Verbose");
+
         sb.append("MethodWriter");
         if (sb.length() > MAXIMUM_CLASS_NAME_LENGTH) {
             int firstIndexTruncated = endOfInterfacesIndex - (sb.length() - MAXIMUM_CLASS_NAME_LENGTH) - MAX_LENGTH_OF_HASH;
@@ -48,4 +51,6 @@ public class MethodWriterClassNameGenerator {
     private String toFirstCapCase(@NotNull String name) {
         return Character.toUpperCase(name.charAt(0)) + name.substring(1).toLowerCase();
     }
+
 }
+

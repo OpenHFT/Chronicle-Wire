@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -256,7 +257,7 @@ public class CSVWire extends TextWire {
         }
 
         @Override
-        public boolean marshallable(@NotNull ReadMarshallable object) {
+        public boolean marshallable(@NotNull ReadMarshallable object) throws InvalidMarshallableException {
             if (isNull())
                 return false;
             pushState();

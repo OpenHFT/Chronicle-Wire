@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -31,7 +32,7 @@ public interface TriConsumer<T, U, V> {
      * @param u the second input argument
      * @param v the third input argument
      */
-    void accept(T t, U u, V v);
+    void accept(T t, U u, V v) throws InvalidMarshallableException;
 
     /**
      * Returns a composed {@code TriConsumer} that performs, in sequence, this

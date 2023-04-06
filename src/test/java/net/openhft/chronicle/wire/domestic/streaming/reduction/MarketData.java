@@ -18,13 +18,16 @@
 
 package net.openhft.chronicle.wire.domestic.streaming.reduction;
 
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.Validatable;
+import net.openhft.chronicle.core.io.ValidatableUtil;
 import net.openhft.chronicle.wire.Base85LongConverter;
 import net.openhft.chronicle.wire.LongConversion;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
-public final class MarketData extends SelfDescribingMarshallable {
+public final class MarketData extends SelfDescribingMarshallable implements Validatable {
 
     @LongConversion(Base85LongConverter.class)
     private long symbol;
@@ -122,5 +125,13 @@ public final class MarketData extends SelfDescribingMarshallable {
         temp = Double.doubleToLongBits(low);
         result = 31 * result + (int) (temp ^ (temp >>> 32));
         return result;
+    }
+
+    @Override
+    public void validate() throws InvalidMarshallableException {
+        ValidatableUtil.requireTrue(symbol > 0, "symbol must be set");
+        ValidatableUtil.requireTrue(last >= 0, "last must be non-negative");
+        ValidatableUtil.requireTrue(high > 0, "high must be positive");
+        ValidatableUtil.requireTrue(low > 0, "low must be positive");
     }
 }

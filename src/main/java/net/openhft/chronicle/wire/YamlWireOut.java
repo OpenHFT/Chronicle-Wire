@@ -28,6 +28,7 @@ import net.openhft.chronicle.bytes.ref.TextLongReference;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.*;
@@ -128,7 +129,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     @Override
-    public ValueOut writeEvent(Class expectedType, Object eventKey) {
+    public ValueOut writeEvent(Class expectedType, Object eventKey) throws InvalidMarshallableException {
         if (eventKey instanceof WireKey)
             return writeEventName((WireKey) eventKey);
         if (eventKey instanceof CharSequence)
@@ -319,7 +320,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             bytes.appendUtf8(cs, offset, length);
     }
 
-    public void writeObject(Object o) {
+    public void writeObject(Object o) throws InvalidMarshallableException {
         if (o instanceof Iterable) {
             for (Object o2 : (Iterable) o) {
                 writeObject(o2, 2);
@@ -336,7 +337,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
     }
 
-    private void writeObject(Object o, int indentation) {
+    private void writeObject(Object o, int indentation) throws InvalidMarshallableException {
         writeTwo('-', ' ');
         indentation(indentation - 2);
         valueOut.object(o);
@@ -1103,7 +1104,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         @NotNull
         @Override
-        public <E, K> T sequence(E e, K kls, @NotNull TriConsumer<E, K, ValueOut> writer) {
+        public <E, K> T sequence(E e, K kls, @NotNull TriConsumer<E, K, ValueOut> writer) throws InvalidMarshallableException {
             boolean leaf = this.leaf;
             startBlock('[');
             if (leaf)
@@ -1159,7 +1160,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         @NotNull
         @Override
-        public T marshallable(@NotNull WriteMarshallable object) {
+        public T marshallable(@NotNull WriteMarshallable object) throws InvalidMarshallableException {
             WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(object.getClass());
             boolean wasLeaf0 = leaf;
             if (indentation > 1 && wm.isLeaf())
@@ -1217,7 +1218,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         @NotNull
         @Override
-        public T marshallable(@NotNull Serializable object) {
+        public T marshallable(@NotNull Serializable object) throws InvalidMarshallableException {
             if (dropDefault) {
                 writeSavedEventName();
             }
@@ -1267,7 +1268,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             return wireOut();
         }
 
-        private void writeSerializable(@NotNull Serializable object) {
+        private void writeSerializable(@NotNull Serializable object) throws InvalidMarshallableException {
             try {
                 if (object instanceof Externalizable)
                     ((Externalizable) object).writeExternal(objectOutput());
@@ -1290,7 +1291,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         @NotNull
         @Override
-        public T map(@NotNull final Map map) {
+        public T map(@NotNull final Map map) throws InvalidMarshallableException {
             if (dropDefault) {
                 writeSavedEventName();
             }
@@ -1341,7 +1342,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         @NotNull
-        public YamlValueOut write(Class expectedType, @NotNull Object objectKey) {
+        public YamlValueOut write(Class expectedType, @NotNull Object objectKey) throws InvalidMarshallableException {
             if (dropDefault) {
                 if (expectedType != String.class)
                     throw new UnsupportedOperationException("todo");
