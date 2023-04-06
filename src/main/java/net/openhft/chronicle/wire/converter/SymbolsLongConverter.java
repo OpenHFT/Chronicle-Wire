@@ -63,6 +63,11 @@ public class SymbolsLongConverter implements LongConverter {
 
     @Override
     public void append(StringBuilder text, long value) {
+        if (value == 0) {
+            text.append(decode[0]);
+            return;
+        }
+
         final int start = text.length();
         if (value < 0) {
             int v = (int) Long.remainderUnsigned(value, factor);

@@ -34,7 +34,7 @@ public class Base85LongConverterTest extends WireTestCommon {
     public void parse() {
         LongConverter c = Base85LongConverter.INSTANCE;
         // System.out.println(c.asString(-1L));
-        for (String s : ",a,ab,abc,abcd,ab.de,123=56,1234567,12345678,zzzzzzzzz,+ko2&)z.0".split(",")) {
+        for (String s : "a,ab,abc,abcd,ab.de,123=56,1234567,12345678,zzzzzzzzz,+ko2&)z.0".split(",")) {
             long v = c.parse(s);
             StringBuilder sb = new StringBuilder();
             c.append(sb, v);
@@ -89,6 +89,20 @@ public class Base85LongConverterTest extends WireTestCommon {
     public void allSafeCharsYamlWire() {
         Wire wire = new YamlWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
         allSafeChars(wire);
+    }
+
+    @Test
+    public void willParseEmptyStringAsZero() {
+        assertEquals(0, Base85LongConverter.INSTANCE.converter.parse(""));
+    }
+
+    @Test
+    public void testEncodeAndDecodeZero() {
+        assertEquals(0, Base85LongConverter.INSTANCE.converter.parse("0"));
+        assertEquals("0", Base85LongConverter.INSTANCE.converter.asText(0).toString());
+        StringBuilder b = new StringBuilder();
+        Base85LongConverter.INSTANCE.append(b, 0);
+        assertEquals("0", b.toString());
     }
 
     private void allSafeChars(Wire wire) {
