@@ -162,7 +162,23 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      */
     @NotNull
     private String getClassName() {
+        final StringBuilder sb = new StringBuilder();
+
+        interfaces.forEach(i -> {
+            if (i.getEnclosingClass() != null)
+                sb.append(i.getEnclosingClass().getSimpleName());
+            sb.append(i.getSimpleName());
+        });
+        sb.append(this.genericEvent == null ? "" : this.genericEvent);
+        sb.append(this.metaData ? "MetadataAware" : "");
+        sb.append(updateInterceptor != null ? "Intercepting" : "");
+        sb.append(toFirstCapCase(wireType().toString().replace("_", "")));
+        if (verboseTypes)
+            sb.append("Verbose");
+        sb.append("MethodWriter");
         return methodWriterClassNameGenerator.getClassName(interfaces, genericEvent, metaData, updateInterceptor != null, wireType());
+
+        return sb.toString();
     }
 
     @NotNull
