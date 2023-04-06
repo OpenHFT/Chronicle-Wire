@@ -62,7 +62,6 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
 
     private final MethodWriterClassNameGenerator methodWriterClassNameGenerator;
     private final String packageName;
-    private final MethodWriterClassNameGenerator methodWriterClassNameGenerator;
     private ClassLoader classLoader;
     @NotNull
     private final MethodWriterInvocationHandlerSupplier handlerSupplier;
@@ -87,7 +86,6 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         this.classLoader = clsLdr != null ? clsLdr : getClass().getClassLoader();
         this.methodWriterClassNameGenerator = new MethodWriterClassNameGenerator();
         this.handlerSupplier = new MethodWriterInvocationHandlerSupplier(handlerSupplier);
-        this.methodWriterClassNameGenerator = new MethodWriterClassNameGenerator();
     }
 
     @NotNull
@@ -168,7 +166,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     @NotNull
     private String getClassName() {
 
-        return methodWriterClassNameGenerator.getClassName(interfaces, genericEvent, metaData, updateInterceptor != null, wireType(),verboseTypes);
+        return methodWriterClassNameGenerator.getClassName(interfaces, genericEvent, metaData, updateInterceptor != null, wireType(), verboseTypes);
 
     }
 
