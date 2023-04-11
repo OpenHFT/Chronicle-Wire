@@ -23,7 +23,6 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
-import net.openhft.chronicle.core.io.ValidatableUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.URL;

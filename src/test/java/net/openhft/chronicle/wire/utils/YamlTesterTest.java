@@ -82,6 +82,7 @@ public class YamlTesterTest extends WireTestCommon {
 
     @Test
     public void direct() throws IOException {
+        assumeFalse(Jvm.getBoolean("regress.tests"));
         YamlTester yt = new TextMethodTester<>(
                     "=" +
                             "# comment 1\n" +

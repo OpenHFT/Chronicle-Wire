@@ -1,60 +1,14 @@
 # 1000 EUR for Alice
-# override currency: EUR, to currency:
----
-accountStatusFailed: {
-  sender: vault,
-  target: gw1,
-  sendingTime: 2023-01-20T10:10:00,
-  accountStatus: {
-    sender: gw1,
-    target: vault,
-    sendingTime: 2023-01-20T10:00:00,
-    name: alice,
-    account: 101013,
-    currency: "",
-    amount: 0.0
-  },
-  reason: currency not set
-}
+# override currency: EUR to currency:
+jvmError: "net.openhft.chronicle.core.io.InvalidMarshallableException: currency must be set"
 ...
 # 1000 EUR for Bob
-# override currency: EUR, to currency:
----
-accountStatusFailed: {
-  sender: vault,
-  target: gw1,
-  sendingTime: 2023-01-20T10:10:00.001,
-  accountStatus: {
-    sender: gw1,
-    target: vault,
-    sendingTime: 2023-01-20T10:00:01,
-    name: bob,
-    account: 101025,
-    currency: "",
-    amount: 0.0
-  },
-  reason: currency not set
-}
+# override currency: EUR to currency:
+jvmError: "net.openhft.chronicle.core.io.InvalidMarshallableException: currency must be set"
 ...
 # Alice sends 10 EUR to bob
-# override currency: EUR, to currency:
----
-transferFailed: {
-  sender: vault,
-  target: gw2,
-  sendingTime: 2023-01-20T10:10:00.002,
-  transfer: {
-    sender: gw2,
-    target: vault,
-    sendingTime: 2023-01-20T10:01:00,
-    from: 101013,
-    to: 101025,
-    currency: "",
-    amount: 0.0,
-    reference: Dog food
-  },
-  reason: invalid amount
-}
+# override currency: EUR to currency:
+jvmError: "net.openhft.chronicle.core.io.InvalidMarshallableException: currency must be set"
 ...
 # dump all the accounts
 ---

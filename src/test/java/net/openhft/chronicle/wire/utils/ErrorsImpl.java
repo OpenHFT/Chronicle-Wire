@@ -30,9 +30,20 @@ public class ErrorsImpl implements ErrorsIn {
     }
 
     @Override
+    public void debug(String msg) {
+        Jvm.debug().on(getClass(), msg);
+    }
+
+    @Override
+    public void debugWithException(String msg) {
+        Jvm.debug().on(getClass(), msg, new StackTrace());
+    }
+
+    @Override
     public void warn(String msg) {
         Jvm.warn().on(getClass(), msg);
     }
+
     @Override
     public void warnWithException(String msg) {
         Jvm.warn().on(getClass(), msg, new StackTrace());
@@ -42,17 +53,30 @@ public class ErrorsImpl implements ErrorsIn {
     public void error(String msg) {
         Jvm.error().on(getClass(), msg);
     }
+
     @Override
     public void errorWithException(String msg) {
         Jvm.error().on(getClass(), msg, new StackTrace());
     }
 
     @Override
+    public void outError(String msg) {
+        out.error(msg);
+    }
+
+    @Override
     public void throwException(String msg) {
         throw new RuntimeException(msg);
     }
+
     @Override
     public void throwError(String msg) {
-        throw new AssertionError(msg);
+        throw new MyAssertionError(msg);
+    }
+
+    public static class MyAssertionError extends AssertionError {
+        public MyAssertionError(String msg) {
+            super(msg);
+        }
     }
 }

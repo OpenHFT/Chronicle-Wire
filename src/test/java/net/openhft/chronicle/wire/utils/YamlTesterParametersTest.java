@@ -52,8 +52,17 @@ public class YamlTesterParametersTest extends WireTestCommon {
         // ignored as duplicate
         // ignored
         // also ignored as duplicates
-        YamlAgitator[] agitators = new YamlAgitator[]{YamlAgitator.messageMissing(), YamlAgitator.messageMissing(), YamlAgitator.duplicateMessage(), YamlAgitator.duplicateMessage(), YamlAgitator.duplicateMessage(), YamlAgitator.missingFields("eventTime"), YamlAgitator.overrideFields("eventTime: 1999-01-01T01:01:01"), YamlAgitator.replaceAll("5 to 6", "[5]", "6")};
-        return new YamlTesterParametersBuilder<>(TestImpl::new, TestOut.class, paths).agitators(agitators).get();
+        return new YamlTesterParametersBuilder<>(TestImpl::new, TestOut.class, paths)
+                .agitators(
+                        YamlAgitator.messageMissing(),
+                        YamlAgitator.messageMissing(),
+                        YamlAgitator.duplicateMessage(),
+                        YamlAgitator.duplicateMessage(),
+                        YamlAgitator.duplicateMessage(),
+                        YamlAgitator.missingFields("eventTime"),
+                        YamlAgitator.overrideFields("eventTime: 1999-01-01T01:01:01"),
+                        YamlAgitator.replaceAll("5 to 6", "[5]", "6"))
+                .get();
     }
 
     @After

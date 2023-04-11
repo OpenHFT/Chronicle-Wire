@@ -19,6 +19,8 @@
 package run.chronicle.account.dto;
 
 
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+
 public class TransferFailed extends AbstractEvent<TransferFailed> {
     private Transfer transfer;
     private String reason;
@@ -39,5 +41,12 @@ public class TransferFailed extends AbstractEvent<TransferFailed> {
     public TransferFailed reason(String reason) {
         this.reason = reason;
         return this;
+    }
+
+    @Override
+    public void validate() throws InvalidMarshallableException {
+        super.validate();
+        if (transfer == null) throw new InvalidMarshallableException("transfer must be set");
+        if (reason == null) throw new InvalidMarshallableException("reason must be set");
     }
 }

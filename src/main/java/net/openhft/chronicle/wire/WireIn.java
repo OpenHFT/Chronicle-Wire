@@ -84,7 +84,13 @@ public interface WireIn extends WireCommon, MarshallableIn {
         try {
             return read(name);
         } catch (Exception e) {
-            throw new IORuntimeException("failed to parse bytes=" + bytes().toDebugString(128), e);
+            String s;
+            try {
+                s = bytes().toDebugString(128);
+            } catch (Throwable ex) {
+                s = ex.toString();
+            }
+            throw new IORuntimeException("failed to parse bytes=" + s, e);
         }
     }
 

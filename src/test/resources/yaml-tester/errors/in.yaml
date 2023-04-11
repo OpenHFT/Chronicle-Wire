@@ -1,4 +1,12 @@
 ---
+# debug messages ignored
+debug: debug one
+...
+---
+# debug messages ignored even with exceptions
+debugWithException: debug two
+...
+---
 warn: warning one
 ...
 ---
@@ -11,6 +19,9 @@ error: error one
 errorWithException: error two
 ...
 ---
+outError: error three
+...
+---
 throwException: exception one
 ...
 ---
@@ -18,4 +29,7 @@ throwError: exception two
 ...
 ---
 warn: warnings done
+...
+---
+unknownMethod: should report this
 ...

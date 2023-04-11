@@ -19,6 +19,8 @@
 package run.chronicle.account.dto;
 
 
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+
 public class AccountStatusFailed extends AbstractEvent<AccountStatusFailed> {
     private AccountStatus accountStatus;
     private String reason;
@@ -39,5 +41,12 @@ public class AccountStatusFailed extends AbstractEvent<AccountStatusFailed> {
     public AccountStatusFailed reason(String reason) {
         this.reason = reason;
         return this;
+    }
+
+    @Override
+    public void validate() throws InvalidMarshallableException {
+        super.validate();
+        if (accountStatus == null) throw new InvalidMarshallableException("accountStatus must be set");
+        if (reason == null) throw new InvalidMarshallableException("reason must be set");
     }
 }

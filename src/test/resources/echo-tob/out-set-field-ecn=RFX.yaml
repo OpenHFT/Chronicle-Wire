@@ -1,9 +1,10 @@
 # first top-of-book
+# override ecn: EBS to ecn: RFX
 ---
 topOfBook: {
   sendingTimeNS: 2022-09-05T12:34:56.789012345,
   symbol: EUR/USD,
-  ecn: EBS,
+  ecn: RFX,
   bidPrice: 0.9913,
   askPrice: 0.9917,
   bidQuantity: 1000000,
@@ -11,23 +12,12 @@ topOfBook: {
 }
 ...
 # second top-of-book
+# override ecn: EBS to ecn: RFX
 ---
 topOfBook: {
   sendingTimeNS: 2022-09-05T12:34:56.789123456,
   symbol: EUR/USD,
-  ecn: EBS,
-  bidPrice: 0.9914,
-  askPrice: 0.9918,
-  bidQuantity: 1500000,
-  askQuantity: 2000000
-}
-...
-# second top-of-book
----
-topOfBook: {
-  sendingTimeNS: 2022-09-05T12:34:56.789123456,
-  symbol: EUR/USD,
-  ecn: EBS,
+  ecn: RFX,
   bidPrice: 0.9914,
   askPrice: 0.9918,
   bidQuantity: 1500000,

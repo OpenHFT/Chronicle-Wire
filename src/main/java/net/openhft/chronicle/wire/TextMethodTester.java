@@ -21,12 +21,14 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.*;
+import net.openhft.chronicle.core.onoes.ChainedExceptionHandler;
 import net.openhft.chronicle.core.onoes.ExceptionHandler;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import net.openhft.chronicle.wire.utils.YamlAgitator;
 import net.openhft.chronicle.wire.utils.YamlTester;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -37,14 +39,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.*;
+import java.util.function.*;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TextMethodTester<T> implements YamlTester {
@@ -54,8 +50,11 @@ public class TextMethodTester<T> implements YamlTester {
 
 
     private static final boolean DUMP_TESTS = Jvm.getBoolean("dump.tests");
+    public static final Consumer<InvocationTargetRuntimeException> DEFAULT_INVOCATION_TARGET_RUNTIME_EXCEPTION_CONSUMER =
+            e -> Jvm.warn().on(TextMethodTester.class, "Exception calling target method. Continuing", e);
     private final String input;
     private final Class<T> outputClass;
+    private final Set<Class> additionalOutputClasses = new LinkedHashSet<>();
     private final Function<WireOut, T> outputFunction;
     private final String output;
     private final BiFunction<T, UpdateInterceptor, Object> componentFunction;
@@ -72,6 +71,8 @@ public class TextMethodTester<T> implements YamlTester {
     private long timeoutMS = 25;
     private UpdateInterceptor updateInterceptor;
     private Consumer<InvocationTargetRuntimeException> onInvocationException;
+    private boolean exceptionHandlerFunctionAndLog;
+    private Predicate<String> testFilter = s -> true;
 
     public TextMethodTester(String input, Function<T, Object> componentFunction, Class<T> outputClass, String output) {
         this(input, (out, ui) -> componentFunction.apply(out), outputClass, output);
@@ -93,7 +94,12 @@ public class TextMethodTester<T> implements YamlTester {
         this.output = output;
 
         this.setups = Collections.emptyList();
-        this.onInvocationException = e -> Jvm.warn().on(TextMethodTester.class, "Exception calling target method. Continuing", e);
+        this.onInvocationException = DEFAULT_INVOCATION_TARGET_RUNTIME_EXCEPTION_CONSUMER;
+    }
+
+    public TextMethodTester<T> addOutputClass(Class outputClass) {
+        additionalOutputClasses.add(outputClass);
+        return this;
     }
 
     public static boolean resourceExists(String resourceName) {
@@ -178,6 +184,7 @@ public class TextMethodTester<T> implements YamlTester {
         T writer0;
         if (outputClass != null) {
             MethodWriterBuilder<T> methodWriterBuilder = wireOut.methodWriterBuilder(outputClass);
+            additionalOutputClasses.forEach(((VanillaMethodWriterBuilder) methodWriterBuilder)::addInterface);
             if (updateInterceptor != null)
                 methodWriterBuilder.updateInterceptor(updateInterceptor);
 
@@ -252,8 +259,7 @@ public class TextMethodTester<T> implements YamlTester {
         ExceptionHandler error = Jvm.error();
         ExceptionHandler debug = Jvm.debug();
         if (exceptionHandlerFunction != null) {
-            exceptionHandler = exceptionHandlerFunction.apply(writer0);
-            Jvm.setExceptionHandlers(exceptionHandler, exceptionHandler, debug);
+            exceptionHandler = createExceptionHandler(writer0, warn, error);
         }
         MethodReader reader = wire.methodReaderBuilder()
                 .methodReaderInterceptorReturns((Method m, Object o, Object[] args, net.openhft.chronicle.bytes.Invocation invocation) -> {
@@ -335,40 +341,79 @@ public class TextMethodTester<T> implements YamlTester {
             actual = actual.replace("\r\n", "\n");
         }
         if (REGRESS_TESTS && !originalExpected.equals(expected)) {
-            String output = replaceTargetWithSource(this.output);
-            String output2;
-            try {
-                output2 = BytesUtil.findFile(output);
-            } catch (FileNotFoundException fnfe) {
-                try {
-                    output2 = BytesUtil.findFile(replaceTargetWithSource(input
-                            .replace("in.yaml", "out.yaml"))
-
-                    );
-                } catch (FileNotFoundException e) {
-                    File out2 = new File(this.output);
-                    File out = new File(out2.getParentFile(), "out.yaml");
-                    try {
-                        String output2dir = BytesUtil.findFile(replaceTargetWithSource(out.getPath()));
-                        output2 = new File(new File(output2dir).getParentFile(), out2.getName()).getPath();
-                    } catch (FileNotFoundException e2) {
-                        throw fnfe;
-                    }
-                }
-            }
-            System.err.println("The expected output for " + output2 + " has been updated, check your commits");
-
-            try (FileWriter fw = new FileWriter(output2)) {
-                String actual2 = actual.endsWith("\n") ? actual : (actual + "\n");
-                if (OS.isWindows())
-                    actual2 = actual2.replace("\n", "\r\n");
-                fw.write(actual2);
-            }
+            updateOutput();
         }
         // add a warning if they don't match and there was a setup missing.
         if (!expected.trim().equals(actual.trim()) && !setupNotFound.isEmpty())
             Jvm.warn().on(getClass(), setupNotFound);
         return this;
+    }
+
+    private void updateOutput() throws IOException {
+        String output = replaceTargetWithSource(this.output);
+        String output2;
+        try {
+            output2 = BytesUtil.findFile(output);
+        } catch (FileNotFoundException fnfe) {
+            try {
+                output2 = BytesUtil.findFile(replaceTargetWithSource(input
+                        .replace("in.yaml", "out.yaml"))
+
+                );
+            } catch (FileNotFoundException e) {
+                File out2 = new File(this.output);
+                File out = new File(out2.getParentFile(), "out.yaml");
+                try {
+                    String output2dir = BytesUtil.findFile(replaceTargetWithSource(out.getPath()));
+                    output2 = new File(new File(output2dir).getParentFile(), out2.getName()).getPath();
+                } catch (FileNotFoundException e2) {
+                    throw fnfe;
+                }
+            }
+        }
+        String actual2 = actual.endsWith("\n") ? actual : (actual + "\n");
+        if (!testFilter.test(actual2)) {
+            System.err.println("The expected output for " + output2 + " has been drops as it is too similar to previous results");
+            return;
+        }
+        System.err.println("The expected output for " + output2 + " has been updated, check your commits");
+
+        try (FileWriter fw = new FileWriter(output2)) {
+            if (OS.isWindows())
+                actual2 = actual2.replace("\n", "\r\n");
+            fw.write(actual2);
+        }
+    }
+
+    private ExceptionHandler createExceptionHandler(T writer0, ExceptionHandler warn, ExceptionHandler error) {
+        ExceptionHandler exceptionHandler;
+        exceptionHandler = exceptionHandlerFunction.apply(writer0);
+
+        if (exceptionHandlerFunctionAndLog) {
+            if (onInvocationException == DEFAULT_INVOCATION_TARGET_RUNTIME_EXCEPTION_CONSUMER) {
+                ChainedExceptionHandler eh2 = new ChainedExceptionHandler(error, exceptionHandler);
+                Consumer<InvocationTargetRuntimeException> invocationException =
+                        er -> eh2.on(LoggerFactory.getLogger(classNameFor(er.getCause())), "Unhandled Exception", er.getCause());
+                onInvocationException = invocationException;
+            }
+
+            Jvm.setExceptionHandlers(
+                    new ChainedExceptionHandler(error, exceptionHandler),
+                    new ChainedExceptionHandler(warn, exceptionHandler),
+                    null);
+        } else {
+            if (onInvocationException == DEFAULT_INVOCATION_TARGET_RUNTIME_EXCEPTION_CONSUMER) {
+                ExceptionHandler eh = exceptionHandler;
+                Consumer<InvocationTargetRuntimeException> invocationException =
+                        er -> eh.on(LoggerFactory.getLogger(classNameFor(er.getCause())), "Unhandled Exception", er.getCause());
+                onInvocationException = invocationException;
+            }
+            Jvm.setExceptionHandlers(
+                    exceptionHandler,
+                    exceptionHandler,
+                    null);
+        }
+        return exceptionHandler;
     }
 
     @Override
@@ -392,10 +437,16 @@ public class TextMethodTester<T> implements YamlTester {
 
         } catch (Throwable t) {
             if (exceptionHandler == null)
-                throw Jvm.rethrow(t);
-            exceptionHandler.on(getClass(), "Unhandled exception", t);
+                throw t;
+            exceptionHandler.on(LoggerFactory.getLogger(classNameFor(t)), t.toString());
         }
         return true;
+    }
+
+    @NotNull
+    private static String classNameFor(Throwable t) {
+        StackTraceElement[] stackTrace = t.getStackTrace();
+        return stackTrace.length == 0 ? "TextMethodTester" : stackTrace[0].getClassName();
     }
 
     private String replaceTargetWithSource(String replace) {
@@ -485,6 +536,16 @@ public class TextMethodTester<T> implements YamlTester {
 
     public TextMethodTester<T> exceptionHandlerFunction(Function<T, ExceptionHandler> exceptionHandlerFunction) {
         this.exceptionHandlerFunction = exceptionHandlerFunction;
+        return this;
+    }
+
+    public TextMethodTester<T> exceptionHandlerFunctionAndLog(boolean exceptionHandlerFunctionAndLog) {
+        this.exceptionHandlerFunctionAndLog = exceptionHandlerFunctionAndLog;
+        return this;
+    }
+
+    public TextMethodTester<T> testFilter(Predicate<String> testFilter) {
+        this.testFilter = testFilter;
         return this;
     }
 

@@ -18,8 +18,6 @@
 
 package net.openhft.chronicle.wire.internal.stream;
 
-import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.Wire;

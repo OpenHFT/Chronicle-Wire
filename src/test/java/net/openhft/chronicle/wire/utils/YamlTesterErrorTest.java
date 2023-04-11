@@ -18,16 +18,14 @@
 
 package net.openhft.chronicle.wire.utils;
 
-import net.openhft.chronicle.core.onoes.ExceptionHandler;
+import net.openhft.chronicle.core.StackTrace;
+import net.openhft.chronicle.core.onoes.ExceptionKey;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.wire.WireTestCommon;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.slf4j.Logger;
 
 import java.util.List;
 
@@ -49,7 +47,10 @@ public class YamlTesterErrorTest extends WireTestCommon {
     @Parameterized.Parameters(name = "{0}")
     public static List<Object[]> parameters() {
         return new YamlTesterParametersBuilder<>(ErrorsImpl::new, ErrorsOut.class, paths)
-                .exceptionHandlerFunction(out -> (log, msg, thrown) -> out.error(msg + " " + thrown))
+                .exceptionHandlerFunction(out -> (log, msg, thrown) -> ((ErrorListener) out).jvmError(thrown == null ? msg : (msg + " " + thrown)))
+                .exceptionHandlerFunctionAndLog(true)
+                .addOutputClass(ErrorListener.class)
+                .agitators(YamlAgitator.duplicateMessage())
                 .get();
     }
 
@@ -60,6 +61,15 @@ public class YamlTesterErrorTest extends WireTestCommon {
 
     @Test
     public void runTester() {
+        ignoreException(" to the classpath");
+        expectException("Unknown method-name='unknownMethod' ");
+        expectException((ExceptionKey ek) -> ek.throwable instanceof StackTrace, "StackTrace");
+        expectException((ExceptionKey ek) -> ek.throwable instanceof ErrorsImpl.MyAssertionError, "MyAssertionError");
+
+        expectException("warning one");
+        expectException("error one");
+        expectException("exception one");
+        expectException("warnings done");
         assertEquals(tester.expected(), tester.actual());
     }
 }

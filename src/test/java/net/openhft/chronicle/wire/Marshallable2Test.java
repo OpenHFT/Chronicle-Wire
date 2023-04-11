@@ -18,6 +18,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.Validatable;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -62,6 +64,7 @@ public class Marshallable2Test extends WireTestCommon {
         wire.getValueOut().object(source);
         Outer target = wire.getValueIn().object(source.getClass());
         Assert.assertEquals(source, target);
+        assertTrue(target.validated);
     }
 
     @Test
@@ -91,13 +94,19 @@ public class Marshallable2Test extends WireTestCommon {
     }
 
     @SuppressWarnings("unused")
-    private static class Outer extends SelfDescribingMarshallable {
+    private static class Outer extends SelfDescribingMarshallable implements Validatable {
         String name;
         Inner1 inner1;
         Inner2 inner2;
+        transient boolean validated;
 
         public Outer(String name) {
             this.name = name;
+        }
+
+        @Override
+        public void validate() throws InvalidMarshallableException {
+            validated = true;
         }
     }
 
