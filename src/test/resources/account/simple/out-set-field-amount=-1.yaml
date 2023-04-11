@@ -37,7 +37,7 @@ accountStatusFailed: {
 }
 ...
 # Alice sends 10 EUR to bob
-# override amount: 10, to amount: -1
+# override amount: 10 to amount: -1
 ---
 transferFailed: {
   sender: vault,
@@ -51,7 +51,7 @@ transferFailed: {
     to: 101025,
     currency: EUR,
     amount: -1.0,
-    reference: ""
+    reference: Dog food
   },
   reason: invalid amount
 }

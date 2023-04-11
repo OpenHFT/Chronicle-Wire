@@ -33,9 +33,10 @@ public class MissingFieldAgitator implements YamlAgitator {
         Map<String, String> ret = new LinkedHashMap<>();
         for (String field : fields) {
             // field starting with a '-' are implictly ignored
-            String yaml2 = yaml.replaceAll("( )+(" + field + ": .*)",
-                    "$1# missing $2\n" +
-                            "$1-$2 ");
+            String regex = "( +)(" + field + ": [^,\\n]*,?)";
+            String replacement = "$1# missing $2\n" +
+                    "$1-$2";
+            String yaml2 = yaml.replaceAll(regex, replacement);
             if (yaml2.equals(yaml))
                 continue;
             ret.put("=" + yaml2, "missing-field-" + field);

@@ -548,7 +548,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             if (checkForMatch(keyName))
                 return valueIn;
 
-            keys.push(lastKeyPosition);
+            if (!StringUtils.startsWith(sb, "-"))
+                keys.push(lastKeyPosition);
             valueIn.consumeAny(minIndent);
         }
 
@@ -980,7 +981,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         @Override
-        public byte @Nullable [] bytes(byte[] using)  {
+        public byte @Nullable [] bytes(byte[] using) {
             return (byte[]) objectWithInferredType(using, SerializationStrategies.ANY_OBJECT, byte[].class);
         }
 
