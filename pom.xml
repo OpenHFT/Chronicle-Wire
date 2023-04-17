@@ -504,17 +504,19 @@
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
 
+                        <configuration>
+                            <classpathScope>test</classpathScope>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>long-converter-test</id>
                                 <phase>test</phase>
                                 <goals>
-                                    <goal>java</goal>
+                                    <goal>exec</goal>
                                 </goals>
                                 <configuration>
-                                    <skip>false</skip>
-                                    <mainClass>net.openhft.chronicle.wire.AbstractTimestampLongConverterJLBHBenchmark</mainClass>
-                                    <classpathScope>test</classpathScope>
+                                    <executable>${java.home}/bin/java</executable>
+                                    <commandlineArgs>${jvm.requiredArgs} -classpath %classpath net.openhft.chronicle.wire.AbstractTimestampLongConverterJLBHBenchmark</commandlineArgs>
                                 </configuration>
                             </execution>
                         </executions>
