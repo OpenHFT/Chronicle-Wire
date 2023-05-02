@@ -62,7 +62,7 @@ public class YamlTesterErrorTest extends WireTestCommon {
     @Test
     public void runTester() {
         ignoreException(" to the classpath");
-        expectException("Unknown method-name='unknownMethod' ");
+        expectException("Unknown method-name='unknownMethod'");
         expectException((ExceptionKey ek) -> ek.throwable instanceof StackTrace, "StackTrace");
         expectException((ExceptionKey ek) -> ek.throwable instanceof ErrorsImpl.MyAssertionError, "MyAssertionError");
 

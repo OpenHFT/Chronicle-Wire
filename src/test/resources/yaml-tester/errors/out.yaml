@@ -26,5 +26,5 @@ jvmError: "Unhandled Exception net.openhft.chronicle.wire.utils.ErrorsImpl$MyAss
 ---
 jvmError: warnings done
 ...
-jvmError: Unknown method-name='unknownMethod' from -1 at 1ae ~ 430
+jvmError: Unknown method-name='unknownMethod'
 ...
