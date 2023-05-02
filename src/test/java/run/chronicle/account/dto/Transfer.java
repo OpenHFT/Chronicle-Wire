@@ -65,10 +65,6 @@ public class Transfer extends AbstractEvent<Transfer> {
         return this;
     }
 
-    public Bytes reference() {
-        return reference;
-    }
-
     public Transfer reference(Bytes reference) {
         this.reference.clear().append(reference);
         return this;

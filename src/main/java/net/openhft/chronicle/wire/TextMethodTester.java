@@ -355,20 +355,13 @@ public class TextMethodTester<T> implements YamlTester {
         try {
             output2 = BytesUtil.findFile(output);
         } catch (FileNotFoundException fnfe) {
+            File out2 = new File(this.output);
+            File out = new File(out2.getParentFile(), "out.yaml");
             try {
-                output2 = BytesUtil.findFile(replaceTargetWithSource(input
-                        .replace("in.yaml", "out.yaml"))
-
-                );
-            } catch (FileNotFoundException e) {
-                File out2 = new File(this.output);
-                File out = new File(out2.getParentFile(), "out.yaml");
-                try {
-                    String output2dir = BytesUtil.findFile(replaceTargetWithSource(out.getPath()));
-                    output2 = new File(new File(output2dir).getParentFile(), out2.getName()).getPath();
-                } catch (FileNotFoundException e2) {
-                    throw fnfe;
-                }
+                String output2dir = BytesUtil.findFile(replaceTargetWithSource(out.getPath()));
+                output2 = new File(new File(output2dir).getParentFile(), out2.getName()).getPath();
+            } catch (FileNotFoundException e2) {
+                throw fnfe;
             }
         }
         String actual2 = actual.endsWith("\n") ? actual : (actual + "\n");
@@ -450,7 +443,8 @@ public class TextMethodTester<T> implements YamlTester {
     }
 
     private String replaceTargetWithSource(String replace) {
-        return replace.replace("\\target\\test-classes\\", "\\src\\test\\resources\\")
+        return replace
+                .replace('\\', '/')
                 .replace("/target/test-classes/", "/src/test/resources/");
     }
 

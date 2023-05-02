@@ -59,7 +59,7 @@ public class AccountsTest extends WireTestCommon {
                 .agitators(
                         YamlAgitator.messageMissing(),
                         YamlAgitator.duplicateMessage(),
-                        YamlAgitator.overrideFields("currency: , amount: NaN, amount: -1".split(", *")),
+                        YamlAgitator.overrideFields("currency: , amount: NaN, amount: -1, target: no-vault".split(", *")),
                         YamlAgitator.missingFields("name, account, sender, target, sendingTime, from, to, currency, amount, reference".split(", *")))
                 .exceptionHandlerFunction(out -> (log, msg, thrown) -> ((ErrorListener) out).jvmError(thrown == null ? msg : (msg + " " + thrown)))
                 .exceptionHandlerFunctionAndLog(true)
