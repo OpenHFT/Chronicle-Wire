@@ -63,8 +63,11 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     private static String errorMsg(CharSequence s, MessageHistory history, long sourceIndex) {
 
         final String identifierType = s.length() != 0 && Character.isDigit(s.charAt(0)) ? "@MethodId" : "method-name";
-        return "Unknown " + identifierType + "='" + s + "' from " + history.lastSourceId() + " at " +
-                Long.toHexString(sourceIndex) + " ~ " + (int) sourceIndex;
+        String msg = "Unknown " + identifierType + "='" + s + "'";
+        if (history.lastSourceId() >= 0)
+            msg += " from " + history.lastSourceId() + " at " +
+                    Long.toHexString(sourceIndex) + " ~ " + (int) sourceIndex;
+        return msg;
     }
 
     @Deprecated(/* Not used. To be removed in x.25 */)

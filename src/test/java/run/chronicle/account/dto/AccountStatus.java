@@ -37,10 +37,6 @@ public class AccountStatus extends AbstractEvent<AccountStatus> {
         return this;
     }
 
-    public String name() {
-        return name;
-    }
-
     public AccountStatus name(String name) {
         this.name = name;
         return this;

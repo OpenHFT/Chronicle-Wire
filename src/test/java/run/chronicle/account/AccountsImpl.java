@@ -59,18 +59,6 @@ public class AccountsImpl
             sendAccountStatusFailed(accountStatus, "target mismatch");
             return;
         }
-        if (accountStatus.name() == null || accountStatus.name().isEmpty()) {
-            sendAccountStatusFailed(accountStatus, "name not set");
-            return;
-        }
-        if (accountStatus.account() == 0) {
-            sendAccountStatusFailed(accountStatus, "account not set");
-            return;
-        }
-        if (accountStatus.currency() == 0) {
-            sendAccountStatusFailed(accountStatus, "currency not set");
-            return;
-        }
         if (!(accountStatus.amount() >= 0)) {
             sendAccountStatusFailed(accountStatus, "invalid amount");
             return;

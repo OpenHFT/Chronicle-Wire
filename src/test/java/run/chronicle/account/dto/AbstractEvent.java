@@ -53,10 +53,6 @@ public class AbstractEvent<E extends AbstractEvent<E>> extends SelfDescribingMar
         return (E) this;
     }
 
-    public long sendingTime() {
-        return sendingTime;
-    }
-
     public E sendingTime(long sendingTime) {
         this.sendingTime = sendingTime;
         return (E) this;
