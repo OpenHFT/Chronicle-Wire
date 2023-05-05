@@ -36,6 +36,8 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  * Base class for generated method readers.
  */
 public abstract class AbstractGeneratedMethodReader implements MethodReader {
+    @Deprecated(/* to be removed in x.26 */)
+    private static final boolean RETRY_UNKOWN_METHOD = Jvm.getBoolean("retry.unknown.method", true);
     private static final Consumer<MessageHistory> NO_OP_MH_CONSUMER = Mocker.ignored(Consumer.class);
     private static final MessageHistoryThreadLocal TEMP_MESSAGE_HISTORY = new MessageHistoryThreadLocal();
     protected final WireParselet debugLoggingParselet;
@@ -83,17 +85,30 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      * @param wireIn Data input.
      * @return <code>true</code> if reading is successful, <code>false</code> if reading should be delegated.
      */
-    protected abstract boolean readOneCall(WireIn wireIn);
+    protected Boolean readOneGenerated(WireIn wireIn) {
+        return readOneCall(wireIn);
+    }
 
+    @Deprecated(/* for removal in x.26*/)
+    protected boolean readOneCall(WireIn wireIn) {
+        // one of these methods must be overridden
+        return Boolean.TRUE.equals(readOneGenerated(wireIn));
+    }
+
+    protected Boolean readOneMetaGenerated(WireIn wireIn) {
+        return readOneCallMeta(wireIn);
+    }
+    @Deprecated(/* for removal in x.26*/)
     protected boolean readOneCallMeta(WireIn wireIn) {
-        return false;
+        // one of these methods must be overridden
+        return Boolean.TRUE.equals(readOneMetaGenerated(wireIn));
     }
 
     /**
      * @param context Reading document context.
      * @return <code>true</code> if reading is successful, <code>false</code> if reading should be delegated.
      */
-    public boolean readOne0(DocumentContext context) {
+    public Boolean readOne0(DocumentContext context) {
         if (context.isMetaData())
             return false;
 
@@ -122,7 +137,10 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
                     break;
                 long start = bytes.readPosition();
 
-                if (readOneCall(wireIn))
+                Boolean read = readOneGenerated(wireIn);
+                if (read == null)
+                    return decoded ? Boolean.TRUE : null;
+                if (read)
                     decoded = true;
 
                 if (restIgnored())
@@ -149,7 +167,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         }
     }
 
-    public boolean readOneMeta(DocumentContext context) {
+    public Boolean readOneMeta(DocumentContext context) {
         WireIn wireIn = context.wire();
         if (wireIn == null)
             return false;
@@ -162,7 +180,10 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
                 break;
             long start = bytes.readPosition();
 
-            if (readOneCallMeta(wireIn))
+            Boolean read = readOneMetaGenerated(wireIn);
+            if (read == null)
+                return decoded ? Boolean.TRUE : null;
+            if (read)
                 decoded = true;
 
             if (restIgnored())
@@ -220,19 +241,26 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     public boolean readOne() {
         throwExceptionIfClosed();
 
-        boolean ok;
+        do {
+            try (DocumentContext context = in.readingDocument()) {
+                if (!context.isPresent()) {
+                    return false;
+                }
 
-        try (DocumentContext context = in.readingDocument()) {
-            if (!context.isPresent()) {
-                return false;
+                if (context.isMetaData()) {
+                    Boolean ok = readOneMeta(context);
+                    if (Boolean.FALSE.equals(ok))
+                        return false;
+                    // retry on a metadata message even if known
+                } else {
+                    Boolean ok = readOne0(context);
+                    if (ok != null)
+                        return ok;
+                    // retry on a data message unless a known message is found.
+                }
             }
-
-            ok = context.isMetaData()
-                    ? readOneMeta(context)
-                    : readOne0(context);
-        }
-
-        return ok;
+        } while(RETRY_UNKOWN_METHOD && !isClosing());
+        return false;
     }
 
     public void throwExceptionIfClosed() {

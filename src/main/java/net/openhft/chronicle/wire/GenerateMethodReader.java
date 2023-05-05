@@ -259,7 +259,7 @@ public class GenerateMethodReader {
         }
 
         sourceCode.append("@Override\n" +
-                "protected boolean readOneCall(WireIn wireIn) {\n" +
+                "protected Boolean readOneGenerated(WireIn wireIn) {\n" +
                 "ValueIn valueIn = wireIn.getValueIn();\n" +
                 "String lastEventName = \"\";\n" +
                 "if (wireIn.bytes().peekUnsignedByte() == BinaryWireCode.FIELD_NUMBER) {\n" +
@@ -292,7 +292,7 @@ public class GenerateMethodReader {
 
         sourceCode.append("default:\n" +
                 "defaultParselet.accept(lastEventName, valueIn);\n" +
-                "return true;\n" +
+                "return null;\n" +
                 "}\n" +
                 "return true;\n" +
                 "} \n" +
@@ -302,7 +302,7 @@ public class GenerateMethodReader {
                 "}\n");
 
         sourceCode.append("@Override\n" +
-                "protected boolean readOneCallMeta(WireIn wireIn) {\n" +
+                "protected Boolean readOneMetaGenerated(WireIn wireIn) {\n" +
                 "ValueIn valueIn = wireIn.getValueIn();\n" +
                 "String lastEventName = \"\";\n" +
                 "if (wireIn.bytes().peekUnsignedByte() == BinaryWireCode.FIELD_NUMBER) {\n" +
@@ -333,7 +333,7 @@ public class GenerateMethodReader {
 
         sourceCode.append("default:\n" +
                 "valueIn.skipValue();\n" +
-                "return true;\n" +
+                "return null;\n" +
                 "}\n" +
                 "return true;\n" +
                 "} \n" +
