@@ -127,6 +127,6 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
             boolean read = reader.readOne();
             out.append("# ").append(Boolean.toString(read)).append("\n");
         }
-        assertEquals(expected, out.toString());
+        assertEquals(expected, out.toString().replace("\r", ""));
     }
 }
