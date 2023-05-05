@@ -111,22 +111,22 @@ public class MethodReaderDelegationTest extends WireTestCommon {
         reader.readOne();
         assertEquals(myFall, delegatedMethodCall.get());
 
-        assertTrue(reader.readOne());
-
         assertEquals("*myCall[]*myCall[]", sb.toString());
+        // unknown methods are skipped
+        assertFalse(reader.readOne());
     }
 
     @Test
     public void testUnsuccessfulCallNoDelegate() {
-        testUnsuccessfulCallNoDelegate(false);
+        testUnsuccessfulCallNoDelegate(false, false);
     }
 
     @Test
     public void testUnsuccessfulCallNoDelegateProxy() {
-        testUnsuccessfulCallNoDelegate(true);
+        testUnsuccessfulCallNoDelegate(true, true);
     }
 
-    private void testUnsuccessfulCallNoDelegate(boolean proxy) {
+    private void testUnsuccessfulCallNoDelegate(boolean proxy, boolean third) {
         if (proxy)
             System.setProperty(DISABLE_READER_PROXY_CODEGEN, "true");
 
@@ -146,11 +146,11 @@ public class MethodReaderDelegationTest extends WireTestCommon {
                     .build(Mocker.intercepting(MyInterface.class, "*", sb::append));
 
             assertTrue(reader.readOne());
-            reader.readOne();
             assertTrue(reader.readOne());
+            assertEquals(third, reader.readOne());
+            assertEquals("*myCall[]*myCall[]", sb.toString());
             assertFalse(reader.readOne());
 
-            assertEquals("*myCall[]*myCall[]", sb.toString());
         } finally {
             System.clearProperty(DISABLE_READER_PROXY_CODEGEN);
         }
