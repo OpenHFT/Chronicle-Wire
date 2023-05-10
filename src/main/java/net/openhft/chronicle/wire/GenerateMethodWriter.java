@@ -392,7 +392,6 @@ public class GenerateMethodWriter {
             addMarshallableOut(imports);
             imports.append(interfaceMethods);
             imports.append("\n}\n");
-
             if (DUMP_CODE)
                 System.out.println(imports);
 
