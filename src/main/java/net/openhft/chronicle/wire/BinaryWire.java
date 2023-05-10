@@ -869,7 +869,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                             wire.getValueOut().object(aClass, valueIn.object(aClass));
                             break;
                         }
-                        if (usesSelfDescribing(aClass) || aClass.isInterface())
+                        if (aClass.isInterface() || usesSelfDescribing(aClass))
                             break;
                         Marshallable m = (Marshallable) ObjectUtils.newInstance(aClass);
                         valueIn.marshallable(m);
