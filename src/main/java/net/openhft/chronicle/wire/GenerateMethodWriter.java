@@ -392,7 +392,6 @@ public class GenerateMethodWriter {
             addMarshallableOut(imports);
             imports.append(interfaceMethods);
             imports.append("\n}\n");
-
             if (DUMP_CODE)
                 System.out.println(imports);
 
@@ -470,6 +469,8 @@ public class GenerateMethodWriter {
                 "this.closeable = closeable;");
         for (Map.Entry<Class<?>, String> e : methodWritersMap.entrySet()) {
             result.append(format("\n%s = ThreadLocal.withInitial(() -> out.get().methodWriter(%s.class));", e.getValue(), nameForClass(e.getKey())));
+            result.append(format("\n%s = ThreadLocal.withInitial(() -> out.get().methodWriterBuilder(%s.class)" +
+                    ".verboseTypes(%b).build());", e.getValue(), nameForClass(e.getKey()), verboseTypes));
         }
 
         result.append("\n}\n\n");
