@@ -41,6 +41,7 @@ public class ProjectTest extends WireTestCommon {
         Object[][] list = {
                 {WireType.BINARY},
                 {WireType.TEXT},
+                {WireType.YAML_ONLY},
                 {WireType.JSON}
         };
         return Arrays.asList(list);

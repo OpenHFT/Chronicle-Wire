@@ -69,6 +69,7 @@ public class NestedClassTest extends WireTestCommon {
         return Arrays.asList(
                 new Object[]{(Function<Bytes<?>, Wire>) bytes -> new BinaryWire(bytes, false, true, false, 128, "binary", false)},
                 new Object[]{WireType.TEXT},
+                new Object[]{WireType.YAML_ONLY},
                 new Object[]{WireType.BINARY},
                 new Object[]{WireType.BINARY_LIGHT},
                 new Object[]{WireType.FIELDLESS_BINARY},

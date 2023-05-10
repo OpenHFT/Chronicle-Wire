@@ -51,7 +51,7 @@ public class HandleSkippedValueReadsTest {
                 new Object[]{WireType.BINARY_LIGHT},
                 new Object[]{WireType.TEXT}
                 // TODO FIX
-//                new Object[]{WireType.YAML}
+//                new Object[]{WireType.YAML_ONLY}
         );
     }
 

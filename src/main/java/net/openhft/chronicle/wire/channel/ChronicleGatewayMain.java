@@ -35,6 +35,7 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 
 public class ChronicleGatewayMain extends ChronicleContext implements Closeable {
@@ -61,16 +62,23 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
     }
 
     public static void main(String... args) throws IOException, InvalidMarshallableException {
-        ChronicleGatewayMain chronicleGatewayMain =
-                new ChronicleGatewayMain("tcp://localhost:" + PORT)
-                        .pauserMode(PAUSER_MODE)
-                        .buffered(Jvm.getBoolean("buffered"));
-        chronicleGatewayMain.useAffinity(USE_AFFINITY);
-        chronicleGatewayMain.pauserMode = PAUSER_MODE;
-        ChronicleGatewayMain main = args.length == 0
-                ? chronicleGatewayMain
-                : Marshallable.fromFile(ChronicleGatewayMain.class, args[0]);
-        Jvm.startup().on(ChronicleGatewayMain.class, "Starting  " + main);
+        main(ChronicleGatewayMain.class, ChronicleGatewayMain::new, args.length == 0 ? "" : args[0]);
+    }
+
+    protected static <T extends ChronicleGatewayMain> void main(Class<T> mainClass, Function<String, T> supplier, String config) throws IOException {
+        ChronicleGatewayMain main;
+        if (config.isEmpty()) {
+            ChronicleGatewayMain chronicleGatewayMain =
+                    supplier.apply("tcp://localhost:" + PORT)
+                            .pauserMode(PAUSER_MODE)
+                            .buffered(Jvm.getBoolean("buffered"));
+            chronicleGatewayMain.useAffinity(USE_AFFINITY);
+            chronicleGatewayMain.pauserMode = PAUSER_MODE;
+            main = chronicleGatewayMain;
+        } else {
+            main = Marshallable.fromFile(mainClass, config);
+        }
+        Jvm.startup().on(mainClass, "Starting  " + main);
         main.run();
     }
 

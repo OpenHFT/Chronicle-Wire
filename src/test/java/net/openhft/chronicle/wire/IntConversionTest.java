@@ -81,9 +81,8 @@ public class IntConversionTest extends WireTestCommon {
         assertEquals(uh2, uh);
     }
 
-    @Test
-    public void twoArgumentsConversion() {
-        Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(128));
+    private static void extracted(WireType wireType) {
+        Wire wire = wireType.apply(Bytes.allocateElasticOnHeap(128));
 
         final TwoArgumentsConversion writer = wire.methodWriter(TwoArgumentsConversion.class);
 
@@ -105,6 +104,16 @@ public class IntConversionTest extends WireTestCommon {
         assertTrue(reader.readOne());
 
         assertEquals("*to[-715827882, 4611686018427387903]", sb.toString());
+    }
+
+    @Test
+    public void twoArgumentsConversion() {
+        extracted(WireType.TEXT);
+    }
+
+    @Test
+    public void twoArgumentsConversionYaml() {
+        extracted(WireType.YAML_ONLY);
     }
 
     public interface TwoArgumentsConversion {

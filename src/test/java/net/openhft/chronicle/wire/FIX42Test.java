@@ -163,7 +163,7 @@ public class FIX42Test extends WireTestCommon {
         @NotNull MarketDataSnapshot mds = new MarketDataSnapshot("EURUSD", 1.1187, 1.1179);
         mds.writeMarshallable(wire);
         System.out.println(wire.getClass().getSimpleName() + ", fixed=" + fixed + ", numericField=" + numericField + ", fieldLess=" + fieldLess);
-        if (wire instanceof TextWire)
+        if (!wire.isBinary())
             assertEquals(dump, wire.bytes().toString());
         else
             assertEquals(dump, wire.bytes().toHexString());

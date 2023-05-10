@@ -26,6 +26,7 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -64,7 +65,17 @@ public class JSON222Test extends WireTestCommon {
     }
 
     @Test
-    public void testJSON() throws IOException {
+    public void testJSONAsTextWire() throws IOException {
+        testJSON(WireType.TEXT);
+    }
+
+    @Ignore(/* TODO FIX */)
+    @Test
+    public void testJSONAsYamlWire() throws IOException {
+        testJSON(WireType.YAML_ONLY);
+    }
+
+    private void testJSON(WireType wireType) throws IOException {
         int len = Maths.toUInt31(file.length());
         @NotNull byte[] bytes = new byte[len];
         try (@NotNull InputStream in = new FileInputStream(file)) {
@@ -74,7 +85,7 @@ public class JSON222Test extends WireTestCommon {
         Bytes<?> b = Bytes.wrapForRead(bytes);
         @NotNull Wire wire = new JSONWire(b);
         Bytes<?> bytes2 = Bytes.elasticByteBuffer();
-        @NotNull Wire out = WireType.TEXT.apply(bytes2);
+        @NotNull Wire out = wireType.apply(bytes2);
 
         boolean fail = file.getName().startsWith("n");
         Bytes<?> bytes3 = Bytes.elasticByteBuffer();
@@ -84,7 +95,7 @@ public class JSON222Test extends WireTestCommon {
                 @Nullable final Object object = wire.getValueIn()
                         .object();
 
-                @NotNull Wire out3 = WireType.TEXT.apply(bytes3);
+                @NotNull Wire out3 = wireType.apply(bytes3);
                 out3.getValueOut()
                         .object(object);
                 // System.out.println("As YAML " + bytes3);
