@@ -283,10 +283,12 @@ public class GenerateMethodReader {
                 "debugLoggingParselet.accept(lastEventName, valueIn);\n" +
                 "if (lastEventName == null)\n" +
                 "throw new IllegalStateException(\"Failed to read method name or ID\");\n" +
-                "switch (lastEventName) {\n" +
-                "case MethodReader.HISTORY:\n" +
-                "valueIn.marshallable(messageHistory);\n" +
-                "return null;\n\n");
+                "switch (lastEventName) {\n");
+        if (!eventNameSwitchBlock.contains("case \"history\":"))
+            sourceCode.append("" +
+                    "case MethodReader.HISTORY:\n" +
+                    "valueIn.marshallable(messageHistory);\n" +
+                    "return null;\n\n");
 
         sourceCode.append(eventNameSwitchBlock);
 
