@@ -55,6 +55,11 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
     }
 
     @Override
+    public boolean isEmpty() {
+        return notComplete && wire().bytes().writePosition() == position + 4;
+    }
+
+    @Override
     public void reset() {
         if (count > 0)
             close();

@@ -100,4 +100,9 @@ public class DocumentContextHolder implements DocumentContext, WriteDocumentCont
     public void chainedElement(boolean chainedElement) {
         ((WriteDocumentContext) dc).chainedElement(chainedElement);
     }
+
+    @Override
+    public boolean isEmpty() {
+        return ((WriteDocumentContext) dc).isEmpty();
+    }
 }
