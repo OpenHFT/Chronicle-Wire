@@ -544,6 +544,11 @@ public class JSONWire extends TextWire {
         }
 
         @Override
+        public boolean isEmpty() {
+            return wire().bytes().writePosition() == position + 1;
+        }
+
+        @Override
         public void start(boolean metaData) {
             int count = this.count;
             super.start(metaData);
