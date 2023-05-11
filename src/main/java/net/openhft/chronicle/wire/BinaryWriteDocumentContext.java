@@ -81,8 +81,9 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
     public void close() {
         if (chainedElement)
             return;
+        // redundant close
         if (count == 0)
-            throw new IllegalStateException("count == 0");
+            return;
         count--;
         if (count > 0)
             return;

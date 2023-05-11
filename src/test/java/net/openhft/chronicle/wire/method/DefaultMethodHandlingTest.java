@@ -39,9 +39,8 @@ interface WithDefault {
 }
 
 public class DefaultMethodHandlingTest extends WireTestCommon {
-    @Test
-    public void withDefault() {
-        Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
+    private static void doTest(WireType wireType) {
+        Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         WithDefault withDefault = wire.methodWriter(WithDefault.class);
         withDefault.method1("one");
         withDefault.method2("two");
@@ -57,5 +56,15 @@ public class DefaultMethodHandlingTest extends WireTestCommon {
         assertFalse(reader.readOne());
         assertEquals("method1[one]\n" +
                 "method2[two]\n", sw.toString().replace("\r", ""));
+    }
+
+    @Test
+    public void withDefault() {
+        doTest(WireType.TEXT);
+    }
+
+    @Test
+    public void withDefaultYaml() {
+        doTest(WireType.YAML_ONLY);
     }
 }

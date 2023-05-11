@@ -18,8 +18,6 @@
 
 package net.openhft.chronicle.wire.utils;
 
-import org.intellij.lang.annotations.Language;
-
 import java.util.Map;
 
 public interface YamlAgitator {
@@ -45,6 +43,10 @@ public interface YamlAgitator {
     static YamlAgitator overrideFields(String... fields) {
         return new OverrideFieldAgitator(fields);
     }
-    static YamlAgitator replaceAll(String name, @Language("RegExp") String regex, String replaceAll) { return new RegexFieldAgitator(name, regex, replaceAll); }
+
+    static YamlAgitator replaceAll(String name, String regex, String replaceAll) {
+        return new RegexFieldAgitator(name, regex, replaceAll);
+    }
+
     Map<String, String> generateInputs(String yaml);
 }

@@ -53,7 +53,8 @@ public class SerializableWireTest extends WireTestCommon {
     @Parameterized.Parameters(name = "wt: {0}, object: {1}, IME: {2}") // toString() implicility called here
     public static Collection<Object[]> combinations() {
         @NotNull List<Object[]> list = new ArrayList<>();
-        @NotNull WireType[] wireTypes = {WireType.TEXT/*, WireType.BINARY*/};
+        // TODO FIX
+        @NotNull WireType[] wireTypes = {WireType.TEXT/*, WireType.YAML_ONLY, WireType.BINARY*/};
         @NotNull Serializable[] objects = {
                 new Nested(),
                 new ScalarValues(),

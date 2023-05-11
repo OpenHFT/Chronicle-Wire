@@ -43,6 +43,8 @@ public class NestedMapsTest extends WireTestCommon {
         return Arrays.asList(
                 new Object[]{WireType.JSON},
                 new Object[]{WireType.TEXT},
+                // TODO FIX
+//                new Object[]{WireType.YAML_ONLY},
                 new Object[]{WireType.BINARY},
                 new Object[]{WireType.FIELDLESS_BINARY}
         );

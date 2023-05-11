@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
+import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
@@ -45,6 +46,8 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
         return Arrays.asList(new Object[][]{
                 {WireType.JSON},
                 {WireType.TEXT},
+                // TODO FIX
+//                {WireType.YAML},
                 {WireType.BINARY}
         });
     }
@@ -53,10 +56,12 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
     public void marshableStringBuilderTest() throws Exception {
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
         wire.usePadding(wire.isBinary());
-        CLASS_ALIASES.addAlias(MDTO2.class, "MDTO");
+        ClassLookup wrap1 = CLASS_ALIASES.wrap();
+        wrap1.addAlias(MDTO2.class, "MDTO");
+        wire.classLookup(wrap1);
 
         wire.writeDocument(false, w -> new MDTO2(1, 2, "3").writeMarshallable(w));
-       // System.out.println(Wires.fromSizePrefixedBlobs(wire));
+        // System.out.println(Wires.fromSizePrefixedBlobs(wire));
 
         if (wire instanceof TextWire)
             ((TextWire) wire).useBinaryDocuments();
@@ -76,16 +81,18 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
 
     @Test
     public void backwardsCompatibility() {
-        expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityMarshallableTest$MDTO1 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityMarshallableTest$MDTO2");
-
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
         wire.usePadding(wire.isBinary());
+        ClassLookup wrap1 = CLASS_ALIASES.wrap();
+        wrap1.addAlias(MDTO2.class, "MDTO");
+        wire.classLookup(wrap1);
         CLASS_ALIASES.addAlias(MDTO1.class, "MDTO");
 
         wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new MDTO1(1)));
-       // System.out.println(Wires.fromSizePrefixedBlobs(wire));
-
-        CLASS_ALIASES.addAlias(MDTO2.class, "MDTO");
+        // System.out.println(Wires.fromSizePrefixedBlobs(wire));
+        ClassLookup wrap2 = CLASS_ALIASES.wrap();
+        wrap2.addAlias(MDTO2.class, "MDTO");
+        wire.classLookup(wrap2);
         if (wire instanceof TextWire)
             ((TextWire) wire).useBinaryDocuments();
         try (DocumentContext dc = wire.readingDocument()) {
@@ -103,19 +110,24 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
 
     @Test
     public void forwardCompatibility() {
-        expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityMarshallableTest$MDTO2 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityMarshallableTest$MDTO1");
 
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
         wire.usePadding(wire.isBinary());
-        CLASS_ALIASES.addAlias(MDTO2.class, "MDTO");
+        ClassLookup wrap2 = CLASS_ALIASES.wrap();
+        wrap2.addAlias(MDTO2.class, "MDTO");
+        wire.classLookup(wrap2);
 
         wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new MDTO2(1, 2, "3")));
-       // System.out.println(Wires.fromSizePrefixedBlobs(wire));
+        // System.out.println(Wires.fromSizePrefixedBlobs(wire));
 
-        CLASS_ALIASES.addAlias(MDTO1.class, "MDTO");
+        ClassLookup wrap1 = CLASS_ALIASES.wrap();
+        wrap1.addAlias(MDTO2.class, "MDTO");
+        wire.classLookup(wrap1);
 
         if (wire instanceof TextWire)
             ((TextWire) wire).useBinaryDocuments();
+        if (wire instanceof YamlWire)
+            ((YamlWire) wire).useBinaryDocuments();
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())
                 Assert.fail();

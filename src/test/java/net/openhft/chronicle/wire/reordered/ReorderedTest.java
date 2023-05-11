@@ -67,6 +67,8 @@ public class ReorderedTest extends WireTestCommon {
         return Arrays.asList(new Object[][]{
                 {WireType.JSON},
                 {WireType.TEXT},
+                // TODO FIX
+                // {WireType.YAML_ONLY},
                 {WireType.BINARY}
         });
     }

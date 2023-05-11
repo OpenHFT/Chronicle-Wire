@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.util.SerializableFunction;
 import net.openhft.chronicle.core.util.SerializableUpdater;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.Serializable;
@@ -53,16 +54,15 @@ public class WireSerializedLambdaTest extends WireTestCommon {
         assertFalse(WireSerializedLambda.isSerializableLambda(this.getClass()));
     }
 
-    @Test
-    public void testTextWire() {
-        @NotNull Wire wire = WireType.TEXT.apply(Bytes.elasticByteBuffer());
+    private static void doTestText(WireType wireType) {
+        @NotNull Wire wire = wireType.apply(Bytes.elasticByteBuffer());
         SerializableFunction<String, String> fun = String::toUpperCase;
 
         wire.write(() -> "one").object(fun)
                 .write(() -> "two").object(Fun.ADD_A)
                 .write(() -> "three").object(Update.INCR);
 
-       // System.out.println(wire.bytes().toString());
+        // System.out.println(wire.bytes().toString());
 
         assertEquals("one: !SerializedLambda {\n" +
                 "  cc: !type net.openhft.chronicle.wire.WireSerializedLambdaTest,\n" +
@@ -91,6 +91,17 @@ public class WireSerializedLambdaTest extends WireTestCommon {
         assertEquals(1, aLong.get());
 
         wire.bytes().releaseLast();
+    }
+
+    @Test
+    public void testTextWire() {
+        doTestText(WireType.TEXT);
+    }
+
+    @Ignore(/* TODO FIX */)
+    @Test
+    public void testYamlWire() {
+        doTestText(WireType.YAML_ONLY);
     }
 
     @Test

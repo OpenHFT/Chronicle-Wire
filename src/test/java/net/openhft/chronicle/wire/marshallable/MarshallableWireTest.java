@@ -49,7 +49,7 @@ public class MarshallableWireTest extends WireTestCommon {
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
         @NotNull List<Object[]> list = new ArrayList<>();
-        @NotNull WireType[] wireTypes = {WireType.TEXT, WireType.BINARY};
+        @NotNull WireType[] wireTypes = {WireType.TEXT, WireType.YAML_ONLY, WireType.BINARY};
         @NotNull Marshallable[] objects = {
                 new Nested(),
                 new Nested(new ScalarValues(), Collections.emptyList(), Collections.emptySet(), Collections.emptyMap(), new String[0]),

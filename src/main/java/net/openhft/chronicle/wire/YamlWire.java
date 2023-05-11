@@ -1483,9 +1483,13 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             if (yt.current() == YamlToken.TAG) {
                 if (yt.text().equals("type")) {
                     if (yt.next() == YamlToken.TEXT) {
-                        Class aClass = classLookup().forName(yt.text());
+                        String text = yt.text();
                         yt.next();
-                        return aClass;
+                        try {
+                            return classLookup().forName(text);
+                        } catch (ClassNotFoundRuntimeException e) {
+                            return unresolvedHandler.apply(text, e.getCause());
+                        }
                     }
                 }
             }
