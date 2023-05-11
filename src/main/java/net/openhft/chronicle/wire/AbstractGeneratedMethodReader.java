@@ -98,6 +98,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     protected Boolean readOneMetaGenerated(WireIn wireIn) {
         return readOneCallMeta(wireIn);
     }
+
     @Deprecated(/* for removal in x.26*/)
     protected boolean readOneCallMeta(WireIn wireIn) {
         // one of these methods must be overridden
@@ -131,31 +132,28 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
             wireIn.consumePadding();
             Bytes<?> bytes = wireIn.bytes();
             dataEventProcessed = false;
-            boolean decoded = false;
+            Boolean decoded = false;
             while (bytes.readRemaining() > 0) {
                 if (wireIn.isEndEvent())
                     break;
                 long start = bytes.readPosition();
 
                 Boolean read = readOneGenerated(wireIn);
-                if (read == null)
-                    return decoded ? Boolean.TRUE : null;
-                if (read)
+                if (read == null && Boolean.FALSE.equals(decoded))
+                    decoded = null;
+                else if (Boolean.TRUE.equals(read))
                     decoded = true;
 
                 if (restIgnored())
-                    break;
+                    return decoded;
 
                 wireIn.consumePadding();
                 if (bytes.readPosition() == start) {
-                    Jvm.warn().on(getClass(), "Failed to progress reading " + bytes.readRemaining() + " bytes left.");
-                    break;
+                    logNonProgressWarning(bytes.readRemaining());
+                    return decoded;
                 }
             }
-            // only called if the end of the message is reached normally.
-            if (decoded)
-                wireIn.endEvent();
-
+            wireIn.endEvent();
             return decoded;
 
         } finally {
@@ -165,6 +163,10 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
                 swapMessageHistoryIfDirty();
             messageHistory.reset();
         }
+    }
+
+    private void logNonProgressWarning(long bytes) {
+        Jvm.warn().on(getClass(), "Failed to progress reading " + bytes + " bytes left.");
     }
 
     public Boolean readOneMeta(DocumentContext context) {
@@ -191,7 +193,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
 
             wireIn.consumePadding();
             if (bytes.readPosition() == start) {
-                Jvm.warn().on(getClass(), "Failed to progress reading " + bytes.readRemaining() + " bytes left.");
+                logNonProgressWarning(bytes.readRemaining());
                 break;
             }
         }
@@ -259,7 +261,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
                     // retry on a data message unless a known message is found.
                 }
             }
-        } while(RETRY_UNKOWN_METHOD && !isClosing());
+        } while (RETRY_UNKOWN_METHOD && !isClosing());
         return false;
     }
 

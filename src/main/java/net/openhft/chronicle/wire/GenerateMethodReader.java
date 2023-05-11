@@ -286,16 +286,18 @@ public class GenerateMethodReader {
                 "switch (lastEventName) {\n" +
                 "case MethodReader.HISTORY:\n" +
                 "valueIn.marshallable(messageHistory);\n" +
-                "break;\n\n");
+                "return null;\n\n");
 
         sourceCode.append(eventNameSwitchBlock);
 
         sourceCode.append("default:\n" +
                 "defaultParselet.accept(lastEventName, valueIn);\n" +
                 "return null;\n" +
-                "}\n" +
-                "return true;\n" +
-                "} \n" +
+                "}\n");
+
+        if (eventNameSwitchBlock.contains("break;"))
+            sourceCode.append("return true;\n");
+        sourceCode.append("} \n" +
                 "catch (InvocationTargetRuntimeException e) {\n" +
                 "throw e;\n" +
                 "}\n" +
@@ -327,16 +329,18 @@ public class GenerateMethodReader {
                 "switch (lastEventName) {\n" +
                 "case MethodReader.HISTORY:\n" +
                 "valueIn.marshallable(messageHistory);\n" +
-                "break;\n\n");
+                "return null;\n\n");
 
         sourceCode.append(eventNameSwitchBlockMeta);
 
         sourceCode.append("default:\n" +
-                "valueIn.skipValue();\n" +
+                "defaultParselet.accept(lastEventName, valueIn);\n" +
                 "return null;\n" +
-                "}\n" +
-                "return true;\n" +
-                "} \n" +
+                "}\n");
+
+        if (eventNameSwitchBlockMeta.contains("break;"))
+            sourceCode.append("return true;\n");
+        sourceCode.append("} \n" +
                 "catch (InvocationTargetRuntimeException e) {\n" +
                 "throw e;\n" +
                 "}\n" +

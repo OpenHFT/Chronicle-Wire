@@ -100,13 +100,24 @@ public class HandleSkippedValueReadsTest {
         assertTrue(reader.readOne());
         assertEquals("M meta[one]\n" +
                         "M meta[three]\n" +
-                        "D data[four]\n",
+                        "D data[four]\n" +
+                        "D data[fourB]\n",
                 sw.toString().replace("\r", ""));
         assertTrue(reader.readOne());
         assertEquals("M meta[one]\n" +
                 "M meta[three]\n" +
                 "D data[four]\n" +
-                "D data[six]\n", sw.toString().replace("\r", ""));
+                "D data[fourB]\n" +
+                "D data[five]\n",
+                sw.toString().replace("\r", ""));
+        assertTrue(reader.readOne());
+        assertEquals("M meta[one]\n" +
+                "M meta[three]\n" +
+                "D data[four]\n" +
+                "D data[fourB]\n" +
+                "D data[five]\n" +
+                "D data[six]\n",
+                sw.toString().replace("\r", ""));
         assertFalse(reader.readOne());
     }
 
