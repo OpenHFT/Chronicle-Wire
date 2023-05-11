@@ -57,7 +57,7 @@ public class ReadOneTest extends WireTestCommon {
     @Test
     public void test() throws InterruptedException {
 
-        final Bytes<?> b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.allocateElasticOnHeap();
         Wire wire = new TextWire(b) {
             @Override
             public boolean recordHistory() {
