@@ -98,7 +98,6 @@ public class WireSerializedLambdaTest extends WireTestCommon {
         doTestText(WireType.TEXT);
     }
 
-    @Ignore(/* TODO FIX */)
     @Test
     public void testYamlWire() {
         doTestText(WireType.YAML_ONLY);

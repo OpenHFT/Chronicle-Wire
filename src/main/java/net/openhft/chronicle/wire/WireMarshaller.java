@@ -344,7 +344,7 @@ public class WireMarshaller<T> {
     }
 
     public boolean matchesFieldName(StringBuilder sb, FieldAccess field) {
-        return sb.length() == 0 || StringUtils.isEqual(field.field.getName(), sb);
+        return sb.length() == 0 || StringUtils.equalsCaseIgnore(field.field.getName(), sb);
     }
 
     public void writeKey(T t, Bytes<?> bytes) {
