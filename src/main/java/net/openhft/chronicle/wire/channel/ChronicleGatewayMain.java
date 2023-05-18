@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 
-public class ChronicleGatewayMain extends ChronicleContext implements Closeable {
+public class ChronicleGatewayMain extends ChronicleContext implements Closeable, Runnable {
     public static final int PORT = Integer.getInteger("port", 1248);
     private static final PauserMode PAUSER_MODE = PauserMode.valueOf(
             System.getProperty("pauserMode", PauserMode.balanced.name()));
@@ -62,10 +62,10 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
     }
 
     public static void main(String... args) throws IOException, InvalidMarshallableException {
-        main(ChronicleGatewayMain.class, ChronicleGatewayMain::new, args.length == 0 ? "" : args[0]);
+        main(ChronicleGatewayMain.class, ChronicleGatewayMain::new, args.length == 0 ? "" : args[0]).run();
     }
 
-    protected static <T extends ChronicleGatewayMain> void main(Class<T> mainClass, Function<String, T> supplier, String config) throws IOException {
+    protected static <T extends ChronicleGatewayMain> ChronicleGatewayMain main(Class<T> mainClass, Function<String, T> supplier, String config) throws IOException {
         ChronicleGatewayMain main;
         if (config.isEmpty()) {
             ChronicleGatewayMain chronicleGatewayMain =
@@ -78,8 +78,7 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
         } else {
             main = Marshallable.fromFile(mainClass, config);
         }
-        Jvm.startup().on(mainClass, "Starting  " + main);
-        main.run();
+        return main;
     }
 
     public ChronicleGatewayMain pauserMode(PauserMode pauserMode) {
@@ -114,7 +113,9 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable 
         }
     }
 
-    private void run() {
+    @Override
+    public void run() {
+        Jvm.startup().on(getClass(), "Starting  " + this);
         service = Executors.newCachedThreadPool(new NamedThreadFactory("connections"));
         Throwable thrown = null;
         try {
