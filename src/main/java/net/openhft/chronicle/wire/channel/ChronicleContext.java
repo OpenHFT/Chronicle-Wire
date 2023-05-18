@@ -43,7 +43,7 @@ public class ChronicleContext extends SimpleCloseable {
         Handler.init();
     }
 
-    private final Set<Closeable> closeableSet =
+    private transient final Set<Closeable> closeableSet =
             Collections.synchronizedSet(
                     Collections.newSetFromMap(
                             new WeakIdentityHashMap<>()));

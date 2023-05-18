@@ -22,12 +22,8 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.wire.DocumentContext;
-import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.channel.*;
-import net.openhft.chronicle.wire.channel.impl.TCPChronicleChannel;
-import org.jetbrains.annotations.Nullable;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -81,7 +77,6 @@ public class EchoHandlerTest extends WireTestCommon {
     }
 
     @Test
-    @Ignore(/* TODO FIX */)
     public void serverBuffered() {
         ignoreException("Closed");
         if (Jvm.isArm()) {
