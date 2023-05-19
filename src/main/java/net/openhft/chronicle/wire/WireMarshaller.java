@@ -140,8 +140,9 @@ public class WireMarshaller<T> {
             if ("ordinal".equals(field.getName()) && Enum.class.isAssignableFrom(clazz))
                 continue;
             String name = field.getName();
-            if (name.equals("this$0") && ValidatableUtil.validateEnabled()) {
-                Jvm.warn().on(WireMarshaller.class, "Found this$0, in " + clazz + " which will be ignored!");
+            if (name.startsWith("this$0")) {
+                if (ValidatableUtil.validateEnabled())
+                    Jvm.warn().on(WireMarshaller.class, "Found " + name + ", in " + clazz + " which will be ignored!");
                 continue;
             }
             Jvm.setAccessible(field);
