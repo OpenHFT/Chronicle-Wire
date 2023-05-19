@@ -73,6 +73,7 @@ public class YamlTokeniser {
         blockQuote = 0;
         hasSequenceEntry = false;
         lastKeyPosition = -1;
+        pushed.clear();
         last = YamlToken.STREAM_START;
         pushContext0(YamlToken.STREAM_START, NO_INDENT);
     }
@@ -658,6 +659,10 @@ public class YamlTokeniser {
 
     public long lineStart() {
         return lineStart;
+    }
+
+    public void lineStart(long lineStart) {
+        this.lineStart = lineStart;
     }
 
     public long blockStart() {

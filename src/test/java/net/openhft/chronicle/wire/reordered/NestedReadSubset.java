@@ -23,50 +23,41 @@ import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
 import org.jetbrains.annotations.NotNull;
 
-public class NestedClass implements Marshallable {
+public class NestedReadSubset implements Marshallable {
     String text;
     String text2;
     double number;
     double number2;
-    double number4; // out of order
-    NestedClass doublyNested;
+    double number4;
 
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
-        wire.read(() -> "text").text(this, (t, v) -> t.text = v)
-                .read(() -> "text2").text(this, (t, v) -> t.text2 = v)
-                .read(() -> "doublyNested").object(NestedClass.class, this, (t, v) -> t.doublyNested = v)
-                .read(() -> "number").float64(this, (t, v) -> t.number = v)
-                .read(() -> "number2").float64(this, (t, v) -> t.number2 = v)
-                .read(() -> "number4").float64(this, (t, v) -> t.number4 = v);
+        String text = wire.read("text").text();
+        double number = wire.read("number").float64();
+        setTextNumber(text, number);
     }
 
     @Override
     public void writeMarshallable(@NotNull WireOut wire) {
-        // write version has 2 extra fields but is missing two fields
+        // write version has way more fields
         wire.write(() -> "text").text(text)
+                .write(() -> "number").float64(number)
                 .write(() -> "text3").text("is text3")
                 .write(() -> "number4").float64(number4)
-                .write(() -> "number").float64(number)
-                .write(() -> "doublyNested").object(doublyNested)
                 .write(() -> "number3").float64(333.3);
     }
 
-    public NestedClass setTextNumber(String text, double number) {
+    public NestedReadSubset setTextNumber(String text, double number) {
         this.text = text;
         this.number = number;
         this.number4 = number * 4;
         return this;
     }
 
-    public void nest(String text, double number) {
-        this.doublyNested = new NestedClass().setTextNumber(text, number);
-    }
-
     @NotNull
     @Override
     public String toString() {
-        return "NestedClass{" +
+        return "NestedReadSubset{" +
                 "text='" + text + '\'' +
                 ", text2='" + text2 + '\'' +
                 ", number=" + number +
