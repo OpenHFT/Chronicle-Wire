@@ -27,7 +27,7 @@ public abstract class AbstractMarshallableCfg extends SelfDescribingMarshallable
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException, InvalidMarshallableException {
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(this.getClass());
-        wm.readMarshallable(this, wire, wm.defaultValue(), false);
+        wm.readMarshallable(this, wire, wm.defaultValue(), true);
     }
 
     @Override
