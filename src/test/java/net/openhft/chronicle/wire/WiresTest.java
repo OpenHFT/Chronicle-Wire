@@ -103,6 +103,7 @@ public class WiresTest extends WireTestCommon {
         Wires.copyTo(container1, container2);
         assertEquals(container2Bytes, container2.bytesField);
         assertEquals("12", container2.bytesField.toString());
+        container2.bytesField.append("123");
     }
 
     @Test
@@ -246,10 +247,8 @@ public class WiresTest extends WireTestCommon {
     @Test
     public void copyTo() {
         OneTwoFour o124 = new OneTwoFour(11, 222, 44444);
-        TwoFourThree o243 = new TwoFourThree(2, 4, 3);
+        TwoFourThree o243 = new TwoFourThree(0, 0, 0);
         Wires.copyTo(o124, o243);
-        // source overwrites fields in dest. As source does not have a "three" field, that field is
-        // defaulted to 0 (as overwrite=true in Marshallable.readMarshallable)
         assertEquals("!net.openhft.chronicle.wire.WiresTest$TwoFourThree {\n" +
                 "  two: 222,\n" +
                 "  four: 44444,\n" +
