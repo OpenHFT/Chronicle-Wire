@@ -115,7 +115,7 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable,
 
     @Override
     public void run() {
-        Jvm.startup().on(getClass(), "Starting  " + this);
+       // Jvm.startup().on(getClass(), "Starting  " + this);
         service = Executors.newCachedThreadPool(new NamedThreadFactory("connections"));
         Throwable thrown = null;
         try {
