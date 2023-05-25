@@ -28,6 +28,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import static java.lang.ThreadLocal.withInitial;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
@@ -47,6 +48,13 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     private boolean closeIn = false;
     private boolean closed;
     private Consumer<MessageHistory> historyConsumer = NO_OP_MH_CONSUMER;
+
+    private Predicate predicate;
+
+    public AbstractGeneratedMethodReader predicate(Predicate predicate) {
+        this.predicate = predicate;
+        return this;
+    }
 
     protected AbstractGeneratedMethodReader(MarshallableIn in,
                                             WireParselet debugLoggingParselet) {
@@ -110,6 +118,9 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      * @return <code>true</code> if reading is successful, <code>false</code> if reading should be delegated.
      */
     public Boolean readOne0(DocumentContext context) {
+
+
+
         if (context.isMetaData())
             return false;
 
@@ -242,6 +253,9 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     @Override
     public boolean readOne() {
         throwExceptionIfClosed();
+
+        if (!predicate.test(this))
+            return false;
 
         do {
             try (DocumentContext context = in.readingDocument()) {

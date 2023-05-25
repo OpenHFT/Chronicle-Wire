@@ -18,15 +18,60 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.marshallable.TriviallyCopyableMarketData;
+import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
 public class VanillaMethodReaderTest {
+
+    public interface MyMethod {
+        void msg(String str);
+    }
+
+    @Test
+    public void testPredicateFalse() {
+
+        Bytes b = Bytes.elasticByteBuffer();
+        Wire w = new TextWire(b);
+        MyMethod build1 = w.methodWriterBuilder(MyMethod.class)
+                .build();
+        build1.msg("hi");
+
+        final String[] value = new String[1];
+        MethodReader reader = new VanillaMethodReaderBuilder(w)
+                .predicate(x -> false)
+                .build((MyMethod) str -> value[0] = str);
+
+        Assert.assertFalse(reader.readOne());
+        Assert.assertNull(value[0]);
+    }
+
+    @Test
+    public void testPredicateTrue() {
+
+        Bytes b = Bytes.elasticByteBuffer();
+        Wire w = new TextWire(b);
+        MyMethod build1 = w.methodWriterBuilder(MyMethod.class)
+                .build();
+
+        build1.msg("hi");
+
+        VanillaMethodReaderBuilder builder = new VanillaMethodReaderBuilder(w);
+        builder.predicate(x -> true);
+
+        final String[] value = new String[1];
+        MethodReader reader = builder.build((MyMethod) str -> value[0] = str);
+
+        Assert.assertTrue(reader.readOne());
+        Assert.assertEquals("hi", value[0]);
+    }
 
     @Test
     public void logMessage0() {

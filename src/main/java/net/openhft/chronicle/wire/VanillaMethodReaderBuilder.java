@@ -29,6 +29,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
+
+import static net.openhft.chronicle.wire.WireParser.SKIP_READABLE_BYTES;
 
 public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     public static final String DISABLE_READER_PROXY_CODEGEN = "disableReaderProxyCodegen";
@@ -42,6 +45,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     private WireType wireType;
     private Object[] metaDataHandler = null;
     private ExceptionHandler exceptionHandlerOnUnknownMethod = Jvm.debug();
+    private Predicate predicate = x -> true;
 
     public VanillaMethodReaderBuilder(MarshallableIn in) {
         this.in = in;
@@ -118,7 +122,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         if (ignoreDefaults || Jvm.getBoolean(DISABLE_READER_PROXY_CODEGEN))
             return null;
 
-        GenerateMethodReader generateMethodReader = new GenerateMethodReader(wireType, methodReaderInterceptorReturns, metaDataHandler,  impls);
+        GenerateMethodReader generateMethodReader = new GenerateMethodReader(wireType, methodReaderInterceptorReturns, metaDataHandler, impls);
 
         String fullClassName = generateMethodReader.packageName() + "." + generateMethodReader.generatedClassName();
 
@@ -150,8 +154,13 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
         WireParselet debugLoggingParselet = VanillaMethodReader::logMessage;
 
-        return (MethodReader) constructor.newInstance(
-                in, defaultParselet, debugLoggingParselet, methodReaderInterceptorReturns, metaDataHandler, impls);
+        MethodReader reader = (MethodReader) constructor.newInstance(
+                in, defaultParselet, debugLoggingParselet, methodReaderInterceptorReturns, metaDataHandler,
+                impls);
+        if (reader instanceof AbstractGeneratedMethodReader)
+            ((AbstractGeneratedMethodReader) reader).predicate(predicate);
+
+        return reader;
     }
 
     @Override
@@ -167,8 +176,15 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
         final MethodReader generatedInstance = createGeneratedInstance(impls);
 
-        return generatedInstance == null ? new VanillaMethodReader(
-                in, ignoreDefaults, defaultParselet, methodReaderInterceptorReturns, metaDataHandler, impls) :
+        return generatedInstance == null ? new VanillaMethodReader(in, ignoreDefaults, defaultParselet, SKIP_READABLE_BYTES,
+                methodReaderInterceptorReturns, metaDataHandler, predicate,
+                impls) :
                 generatedInstance;
+    }
+
+    @Override
+    public MethodReaderBuilder predicate(Predicate<?> predicate) {
+        this.predicate = predicate;
+        return this;
     }
 }
