@@ -41,18 +41,16 @@ public class VanillaMethodReaderTest {
         Bytes b = Bytes.elasticByteBuffer();
         Wire w = new TextWire(b);
         MyMethod build1 = w.methodWriterBuilder(MyMethod.class)
-                //  .predicate(x->true)
                 .build();
         build1.msg("hi");
 
-        VanillaMethodReaderBuilder builder = new VanillaMethodReaderBuilder(w);
-        builder.predicate(x -> false);
-
         final String[] value = new String[1];
-        MethodReader reader = builder.build((MyMethod) str -> value[0] = str);
+        MethodReader reader = new VanillaMethodReaderBuilder(w)
+                .predicate(x -> false)
+                .build((MyMethod) str -> value[0] = str);
 
         Assert.assertFalse(reader.readOne());
-        Assert.assertNull(  value[0]);
+        Assert.assertNull(value[0]);
     }
 
     @Test
@@ -61,8 +59,8 @@ public class VanillaMethodReaderTest {
         Bytes b = Bytes.elasticByteBuffer();
         Wire w = new TextWire(b);
         MyMethod build1 = w.methodWriterBuilder(MyMethod.class)
-                //  .predicate(x->true)
                 .build();
+
         build1.msg("hi");
 
         VanillaMethodReaderBuilder builder = new VanillaMethodReaderBuilder(w);
@@ -71,7 +69,7 @@ public class VanillaMethodReaderTest {
         final String[] value = new String[1];
         MethodReader reader = builder.build((MyMethod) str -> value[0] = str);
 
-        boolean b1 = reader.readOne();
+        Assert.assertTrue(reader.readOne());
         Assert.assertEquals("hi", value[0]);
     }
 
