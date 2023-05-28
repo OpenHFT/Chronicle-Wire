@@ -19,11 +19,20 @@
 package net.openhft.chronicle.wire.channel;
 
 /**
- * This handler leaves the default behaviour to the Gateway.
+ * GatewayHandler is a specific implementation of the ErrorReplyHandler.
  * <p>
- * If the gateway doesn't replace it with the Handler the gateway supports, an error is returned
+ * This handler delegates the default behaviour to the Gateway. If the Gateway
+ * doesn't replace this handler with a handler it supports, an error message is returned.
+ * The error message will indicate that there is no default handler provided by the Gateway.
  */
 public class GatewayHandler extends ErrorReplyHandler {
+
+    /**
+     * Constructor for GatewayHandler.
+     * <p>
+     * Initializes the errorMsg in the parent class (ErrorReplyHandler) with
+     * a message indicating the absence of a default handler for the Gateway.
+     */
     public GatewayHandler() {
         errorMsg("No default handler for the gateway");
     }

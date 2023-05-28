@@ -20,6 +20,19 @@ package net.openhft.chronicle.wire.channel;
 
 import net.openhft.chronicle.core.io.Closeable;
 
+/**
+ * EventPoller interface for handling polling events on a ChronicleChannel.
+ * This interface extends the Closeable interface, hence any class implementing
+ * EventPoller should provide implementation for the close() method from the Closeable interface.
+ */
 public interface EventPoller extends Closeable {
+
+    /**
+     * This method is called to poll an event on the given ChronicleChannel.
+     *
+     * @param channel The ChronicleChannel on which the event needs to be polled.
+     * @return a boolean indicating the success/failure of the operation. True indicates
+     * that the polling was successful in doing something, and false indicates it was not, i.e. there was nothing to do.
+     */
     boolean onPoll(ChronicleChannel channel);
 }

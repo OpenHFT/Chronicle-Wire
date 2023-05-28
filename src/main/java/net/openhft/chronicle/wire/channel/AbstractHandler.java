@@ -19,22 +19,32 @@
 package net.openhft.chronicle.wire.channel;
 
 /**
- * Abstract class supporting the common fields implied by ChannelHandler
+ * This abstract class supports the common fields implied by ChannelHandler.
  *
  * @param <H> the same class so setters can return this
  */
 public abstract class AbstractHandler<H extends AbstractHandler<H>>
         extends AbstractHeader<H>
         implements ChannelHandler {
+
+    // A flag to determine whether or not a channel should be buffered
     private Boolean buffered;
 
+    /**
+     * Getter for the buffered status of the channel.
+     *
+     * @return the buffered status as a Boolean object, can be null to indicate no preference.
+     */
     public Boolean buffered() {
         return buffered;
     }
 
     /**
-     * @param buffered determine if a channel should be buffered on the other side, or null if left to the server
-     * @return this
+     * Setter for the buffered status of the channel.
+     *
+     * @param buffered a Boolean object indicating if a channel should be buffered on the other side,
+     *                 or null if left to the server
+     * @return this instance of the handler
      */
     public H buffered(Boolean buffered) {
         this.buffered = buffered;
