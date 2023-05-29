@@ -43,6 +43,21 @@ public class TextMethodTesterTest extends WireTestCommon {
         compareResults(test);
     }
 
+    @SuppressWarnings("rawtypes")
+    @Test
+    public void runToLower() throws IOException {
+        TextMethodTester test = new TextMethodTester<>(
+                "tmtt/upper-methods-in.yaml",
+                MockMethodsImpl::new,
+                MockMethods.class,
+                "tmtt/lower-methods-out.yaml")
+                .setup("tmtt/methods-out.yaml") // calls made here are not validated in the output.
+                .inputFunction(String::toLowerCase)
+                .run();
+        compareResults(test);
+    }
+
+
     @Test
     public void runTestEmptyOut() throws IOException {
         TextMethodTester test = new TextMethodTester<>(
