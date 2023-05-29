@@ -63,6 +63,7 @@ public class TextMethodTester<T> implements YamlTester {
     private BiConsumer<MethodReader, T> exceptionHandlerSetup;
     private String genericEvent;
     private List<String> setups;
+    private Function<String, String> inputFunction;
     private Function<String, String> afterRun;
     private String expected;
     private String actual;
@@ -206,8 +207,8 @@ public class TextMethodTester<T> implements YamlTester {
         final Class<?> clazz = outputClass == null ? getClass() : outputClass;
         for (String setup : setups) {
             try {
-                final Bytes<?> bytes = Bytes.wrapForRead(IOTools.readFile(clazz, setup));
-                Wire wire0 = createWire(bytes);
+                byte[] setupBytes = IOTools.readFile(clazz, setup);
+                Wire wire0 = createWire(setupBytes);
                 MethodReader reader0 = wire0.methodReaderBuilder()
                         .methodReaderInterceptorReturns(methodReaderInterceptorReturns)
                         .warnMissing(true)
@@ -226,10 +227,12 @@ public class TextMethodTester<T> implements YamlTester {
 
         if (DUMP_TESTS)
             System.out.println("input: " + input);
-        byte[] byteArray = input.startsWith("=")
+
+        byte[] inputBytes = input.startsWith("=")
                 ? input.substring(1).trim().getBytes()
                 : IOTools.readFile(clazz, input);
-        Wire wire = createWire(Bytes.wrapForRead(byteArray));
+
+        Wire wire = createWire(inputBytes);
         if (TESTS_INCLUDE_COMMENTS)
             wire.commentListener(wireOut::writeComment);
 
@@ -300,7 +303,7 @@ public class TextMethodTester<T> implements YamlTester {
                 Jvm.setExceptionHandlers(error, warn, debug);
 
             if (!ok)
-                System.err.println("Unable to parse\n" + new String(byteArray, StandardCharsets.UTF_8));
+                System.err.println("Unable to parse\n" + new String(inputBytes, StandardCharsets.UTF_8));
         }
         if (retainLast != null)
             wireOut.bytes().clear();
@@ -448,6 +451,16 @@ public class TextMethodTester<T> implements YamlTester {
                 .replace("/target/test-classes/", "/src/test/resources/");
     }
 
+    protected Wire createWire(byte[] byteArray) {
+        final Bytes<?> bytes;
+        if (inputFunction == null) {
+            bytes = Bytes.wrapForRead(byteArray);
+        } else {
+            bytes = Bytes.from(inputFunction.apply(new String(byteArray, StandardCharsets.ISO_8859_1)));
+        }
+        return createWire(bytes);
+    }
+
     protected Wire createWire(Bytes<?> bytes) {
         return TEXT_AS_YAML
                 ? new YamlWire(bytes).useTextDocuments().addTimeStamps(true)
@@ -540,6 +553,11 @@ public class TextMethodTester<T> implements YamlTester {
 
     public TextMethodTester<T> testFilter(Predicate<String> testFilter) {
         this.testFilter = testFilter;
+        return this;
+    }
+
+    public TextMethodTester<T> inputFunction(Function<String, String> inputFunction) {
+        this.inputFunction = inputFunction;
         return this;
     }
 
