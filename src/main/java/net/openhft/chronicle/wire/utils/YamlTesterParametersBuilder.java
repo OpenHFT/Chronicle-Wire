@@ -173,8 +173,8 @@ public class YamlTesterParametersBuilder<T> {
                         // ignored
                     }
 
-                    String in2 = "=\n" + in_yaml + "\n...\n" + in_yaml2;
-                    String setup2 = "=\n" + _setup_yaml + "\n...\n" + _setup_yaml2;
+                    String in2 = "=\n" + in_yaml.replaceFirst("\n[.]{3}\\s*$", "") + "\n...\n" + in_yaml2;
+                    String setup2 = "=\n" + _setup_yaml.replaceFirst("\n[.]{3}\\s*$", "")  + "\n...\n" + _setup_yaml2;
                     YamlTester yt2 =
                             new YamlMethodTester<>(in2, compFunction, outClass, output)
                                     .genericEvent("event")

@@ -57,24 +57,44 @@ public class MethodReaderDelegationTest extends WireTestCommon {
     public void testUnsuccessfulCallIsDelegatedBinaryWire() {
         final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
 
-        doTestUnsuccessfulCallIsDelegated(wire);
+        doTestUnsuccessfulCallIsDelegated(wire, false);
+    }
+
+    @Test
+    public void testUnsuccessfulCallIsDelegatedBinaryWireScanning() {
+        final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
+
+        doTestUnsuccessfulCallIsDelegated(wire, true);
     }
 
     @Test
     public void testUnsuccessfulCallIsDelegatedTextWire() {
         final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
-        doTestUnsuccessfulCallIsDelegated(wire);
+        doTestUnsuccessfulCallIsDelegated(wire, false);
+    }
+    @Test
+    public void testUnsuccessfulCallIsDelegatedTextWireScanning() {
+        final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
+
+        doTestUnsuccessfulCallIsDelegated(wire, true);
     }
 
     @Test
     public void testUnsuccessfulCallIsDelegatedYamlWire() {
         final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
-        doTestUnsuccessfulCallIsDelegated(wire);
+        doTestUnsuccessfulCallIsDelegated(wire, false);
+    }
+    @Test
+    public void testUnsuccessfulCallIsDelegatedYamlWireScanning() {
+        final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
+
+        doTestUnsuccessfulCallIsDelegated(wire, true);
     }
 
-    private void doTestUnsuccessfulCallIsDelegated(Wire wire) {
+    private void doTestUnsuccessfulCallIsDelegated(Wire wire, boolean scanning) {
+        wire.reset();
         wire.usePadding(true);
 
         final Class<? extends MyInterface> ifaceClass = useMethodId ? MyInterfaceMethodId.class : MyInterface.class;
@@ -98,6 +118,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
         StringBuilder sb = new StringBuilder();
 
         final MethodReader reader = wire.methodReaderBuilder()
+                .scanning(scanning)
                 .defaultParselet((s, in) -> {
                     delegatedMethodCall.set(s.toString());
                     in.skipValue();
@@ -110,28 +131,41 @@ public class MethodReaderDelegationTest extends WireTestCommon {
 
         reader.readOne();
         assertEquals(myFall, delegatedMethodCall.get());
-
-        assertEquals("*myCall[]*myCall[]", sb.toString());
-        // unknown methods are skipped
-        assertFalse(reader.readOne());
+        if (scanning) {
+            assertEquals("*myCall[]*myCall[]", sb.toString());
+            // unknown methods are skipped
+            assertFalse(reader.readOne());
+        } else {
+            assertTrue(reader.readOne());
+            assertEquals("*myCall[]*myCall[]", sb.toString());
+        }
     }
 
     @Test
     public void testUnsuccessfulCallNoDelegate() {
-        testUnsuccessfulCallNoDelegate(false, false);
+        testUnsuccessfulCallNoDelegate(false, false, false);
+    }
+
+    @Test
+    public void testUnsuccessfulCallNoDelegateScanning() {
+        testUnsuccessfulCallNoDelegate(false, false, true);
     }
 
     @Test
     public void testUnsuccessfulCallNoDelegateProxy() {
-        testUnsuccessfulCallNoDelegate(true, true);
+        testUnsuccessfulCallNoDelegate(true, true, false);
+    }
+    @Test
+    public void testUnsuccessfulCallNoDelegateProxyScanning() {
+        testUnsuccessfulCallNoDelegate(true, true, true);
     }
 
-    private void testUnsuccessfulCallNoDelegate(boolean proxy, boolean third) {
+    private void testUnsuccessfulCallNoDelegate(boolean proxy, boolean third, boolean scanning) {
         if (proxy)
             System.setProperty(DISABLE_READER_PROXY_CODEGEN, "true");
 
         try {
-            final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
+            final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
             final MyInterface writer = wire.methodWriter(MyInterface.class);
             writer.myCall();
 
@@ -143,13 +177,22 @@ public class MethodReaderDelegationTest extends WireTestCommon {
 
             StringBuilder sb = new StringBuilder();
             final MethodReader reader = wire.methodReaderBuilder()
+                    .scanning(scanning)
                     .build(Mocker.intercepting(MyInterface.class, "*", sb::append));
 
             assertTrue(reader.readOne());
-            assertTrue(reader.readOne());
-            assertEquals(third, reader.readOne());
-            assertEquals("*myCall[]*myCall[]", sb.toString());
-            assertFalse(reader.readOne());
+            if (scanning) {
+                assertTrue(reader.readOne());
+                assertEquals(third, reader.readOne());
+                assertEquals("*myCall[]*myCall[]", sb.toString());
+                assertFalse(reader.readOne());
+            } else {
+                reader.readOne();
+                assertTrue(reader.readOne());
+                assertFalse(reader.readOne());
+
+                assertEquals("*myCall[]*myCall[]", sb.toString());
+            }
 
         } finally {
             System.clearProperty(DISABLE_READER_PROXY_CODEGEN);
@@ -191,8 +234,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
             });
 
             assertTrue(reader instanceof VanillaMethodReader);
-        }
-        finally {
+        } finally {
             System.clearProperty(DISABLE_READER_PROXY_CODEGEN);
         }
     }

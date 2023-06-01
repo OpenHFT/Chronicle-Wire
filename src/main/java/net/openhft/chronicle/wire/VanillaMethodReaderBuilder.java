@@ -47,6 +47,8 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     private ExceptionHandler exceptionHandlerOnUnknownMethod = Jvm.debug();
     private Predicate predicate = x -> true;
 
+    private boolean scanning = false;
+
     public VanillaMethodReaderBuilder(MarshallableIn in) {
         this.in = in;
     }
@@ -108,12 +110,25 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         return this;
     }
 
+    /**
+     * @return the wireType to generate for
+     */
     public WireType wireType() {
         return wireType;
     }
 
     public VanillaMethodReaderBuilder wireType(WireType wireType) {
         this.wireType = wireType;
+        return this;
+    }
+
+    /**
+     * When enabled, readOne() will skip over meta data and unknown events to find at least one event.
+     * @param scanning whether to read events until it finds a known one.
+     * @return this
+     */
+    public VanillaMethodReaderBuilder scanning(boolean scanning) {
+        this.scanning = scanning;
         return this;
     }
 
@@ -157,18 +172,30 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         MethodReader reader = (MethodReader) constructor.newInstance(
                 in, defaultParselet, debugLoggingParselet, methodReaderInterceptorReturns, metaDataHandler,
                 impls);
-        if (reader instanceof AbstractGeneratedMethodReader)
-            ((AbstractGeneratedMethodReader) reader).predicate(predicate);
+        if (reader instanceof AbstractGeneratedMethodReader) {
+            AbstractGeneratedMethodReader reader0 = (AbstractGeneratedMethodReader) reader;
+            reader0.predicate(predicate);
+            reader0.scanning(scanning);
+        }
 
         return reader;
     }
 
+    /**
+     * @param components to call on a meta data messagre
+     * @return this
+     */
     @Override
     public MethodReaderBuilder metaDataHandler(Object... components) {
         this.metaDataHandler = components;
         return this;
     }
 
+    /**
+     *
+     * @param impls to call for data messages
+     * @return a MethodReader to call readOne() on
+     */
     @NotNull
     public MethodReader build(Object... impls) {
         if (this.defaultParselet == null)
@@ -182,6 +209,11 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
                 generatedInstance;
     }
 
+    /**
+     * Act as a gate on whether this reader should read.
+     * @param predicate a predicate to determine if readOne() should read a message. The default value is {@code true},
+     * @return this
+     */
     @Override
     public MethodReaderBuilder predicate(Predicate<?> predicate) {
         this.predicate = predicate;
