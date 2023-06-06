@@ -925,9 +925,7 @@ public class BinaryWireTest extends WireTestCommon {
 
     @Test
     public void type() {
-        expectException("Unable to copy MyType safely will try anyway");
-        expectException("Unable to copy AlsoMyType safely will try anyway");
-        expectException("Unable to copy com.sun.java.swing.plaf.nimbus.InternalFrameInternalFrameTitlePaneInternalFrameTitlePaneMaximizeButtonWindowNotFocusedState safely will try anyway");
+        ignoreException("Unable to copy object safely, message will not be repeated: net.openhft.chronicle.core.util.ClassNotFoundRuntimeException");
 
         @NotNull Wire wire = createWire();
         wire.write().typePrefix("MyType");
