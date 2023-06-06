@@ -45,17 +45,22 @@ public class MethodWriterByInterfaceTest extends WireTestCommon {
 
     @Test
     public void writeReadViaImplementation() {
-        checkWriteReadViaImplementation();
+        checkWriteReadViaImplementation(WireType.TEXT);
     }
 
     @Test
     public void writeReadViaImplementationGenerateTuples() {
         Wires.GENERATE_TUPLES = true;
-        checkWriteReadViaImplementation();
+        checkWriteReadViaImplementation(WireType.TEXT);
     }
 
-    private void checkWriteReadViaImplementation() {
-        Wire tw = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
+    @Test
+    public void writeReadViaImplementationYaml() {
+        checkWriteReadViaImplementation(WireType.YAML_ONLY);
+    }
+
+    private void checkWriteReadViaImplementation(WireType wireType) {
+        Wire tw = wireType.apply(Bytes.allocateElasticOnHeap());
         MWBI0 mwbi0 = tw.methodWriter(MWBI0.class);
         mwbi0.method(new MWBImpl("name", 1234567890123456L));
         assertFalse(Proxy.isProxyClass(mwbi0.getClass()));

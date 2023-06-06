@@ -141,4 +141,8 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
         sb.append(stringable);
         return this;
     }
+
+    public boolean contains(String text) {
+        return sb.indexOf(text) >= 0;
+    }
 }

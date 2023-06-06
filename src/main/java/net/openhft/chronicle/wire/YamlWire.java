@@ -1344,7 +1344,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             while (true) {
                 switch (yt.current()) {
                     case SEQUENCE_ENTRY:
-                        yt.next(Integer.MIN_VALUE);
                         tReader.accept(t, kls, YamlWire.this.valueIn);
                         continue;
 
@@ -1688,6 +1687,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public long int64() {
             consumePadding();
+            if (yt.current() == YamlToken.SEQUENCE_ENTRY)
+                yt.next();
             valueIn.skipType();
             if (yt.current() != YamlToken.TEXT) {
                 Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a long.");
@@ -1700,9 +1701,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public double float64() {
             consumePadding();
+            if (yt.current() == YamlToken.SEQUENCE_ENTRY)
+                yt.next();
             valueIn.skipType();
             if (yt.current() != YamlToken.TEXT) {
-                Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a long.");
+                Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a double.");
                 return 0;
             }
             return getADouble();

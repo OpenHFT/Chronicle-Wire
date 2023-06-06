@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodReaderBuilder;
 import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.onoes.ExceptionHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,6 +29,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
+
+import static net.openhft.chronicle.wire.WireParser.SKIP_READABLE_BYTES;
 
 public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     public static final String DISABLE_READER_PROXY_CODEGEN = "disableReaderProxyCodegen";
@@ -41,6 +45,8 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     private MethodReaderInterceptorReturns methodReaderInterceptorReturns;
     private WireType wireType;
     private Object[] metaDataHandler = null;
+
+    private boolean scanning = false;
 
     public VanillaMethodReaderBuilder(MarshallableIn in) {
         this.in = in;
@@ -115,6 +121,16 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         return this;
     }
 
+    /**
+     * When enabled, readOne() will skip over meta data and unknown events to find at least one event.
+     * @param scanning whether to read events until it finds a known one.
+     * @return this
+     */
+    public VanillaMethodReaderBuilder scanning(boolean scanning) {
+        this.scanning = scanning;
+        return this;
+    }
+
     @Nullable
     private MethodReader createGeneratedInstance(Object... impls) {
         if (ignoreDefaults || Jvm.getBoolean(DISABLE_READER_PROXY_CODEGEN))
@@ -152,8 +168,15 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
         WireParselet debugLoggingParselet = VanillaMethodReader::logMessage;
 
-        return (MethodReader) constructor.newInstance(
-                in, defaultParselet, debugLoggingParselet, methodReaderInterceptorReturns, metaDataHandler, impls);
+        MethodReader reader = (MethodReader) constructor.newInstance(
+                in, defaultParselet, debugLoggingParselet, methodReaderInterceptorReturns, metaDataHandler,
+                impls);
+        if (reader instanceof AbstractGeneratedMethodReader) {
+            AbstractGeneratedMethodReader reader0 = (AbstractGeneratedMethodReader) reader;
+            reader0.scanning(scanning);
+        }
+
+        return reader;
     }
 
     @Override

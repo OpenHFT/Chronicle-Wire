@@ -25,6 +25,7 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.wire.*;
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Test;
@@ -76,13 +77,13 @@ public class VanillaMethodReaderTest extends WireTestCommon {
             checkReaderType(methodReader);
             {
                 boolean succeeded = methodReader.readOne();
-                assertTrue(succeeded);
                 assertEquals(5, this.instance.x);
+                assertTrue(succeeded); // only meta data
             }
             {
                 boolean succeeded = methodReader.readOne();
-                assertTrue(succeeded);
                 assertEquals(5, this.instance.x);
+                assertTrue(succeeded); // only meta data
             }
         } finally {
             b.releaseLast();
@@ -180,7 +181,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 "  field2: \"2\"\n" +
                 "}\n" +
                 "]\n";
-        String actual = sw.toString().replace("\r", "");
+        String actual = asString(sw);
         assertEquals(expected, actual);
     }
 
@@ -320,6 +321,15 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     public void parseMetaData() {
+        doParseMetaData(false);
+    }
+
+    @Test
+    public void parseMetaDataScanning() {
+        doParseMetaData(true);
+    }
+
+    public void doParseMetaData(boolean scanning) {
         Wire wire = WireType.BINARY_LIGHT.apply(new HexDumpBytes());
         final RoutedSaying routedSaying = wire.methodWriter(RoutedSaying.class);
         final RoutedSaying metaRoutedSaying = wire.methodWriterBuilder(true, RoutedSaying.class).build();
@@ -351,10 +361,35 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 wire.bytes().toHexString());
         StringWriter out = new StringWriter();
         final MethodReader reader = wire.methodReaderBuilder()
+                .scanning(scanning)
                 .metaDataHandler(Mocker.logging(RoutedSaying.class, "meta: ", out))
                 .build(Mocker.logging(RoutedSaying.class, "data: ", out));
-        for (int i = 4; i >= 0; i--)
-            assertEquals(i > 0, reader.readOne());
+        if (!scanning) {
+            assertTrue(reader.readOne());
+            assertEquals("" +
+                            "meta: to[aye]\n" +
+                            "meta: say[hi AAA]\n",
+                    asString(out));
+        }
+        assertTrue(reader.readOne());
+        assertEquals("" +
+                        "meta: to[aye]\n" +
+                        "meta: say[hi AAA]\n" +
+                        "data: to[one]\n" +
+                        "data: say[hi 111]\n",
+                asString(out));
+        if (!scanning) {
+            assertTrue(reader.readOne());
+            assertEquals("" +
+                            "meta: to[aye]\n" +
+                            "meta: say[hi AAA]\n" +
+                            "data: to[one]\n" +
+                            "data: say[hi 111]\n" +
+                            "meta: to[bee]\n" +
+                            "meta: say[hi BBB]\n",
+                    asString(out));
+        }
+        assertTrue(reader.readOne());
         assertEquals("" +
                         "meta: to[aye]\n" +
                         "meta: say[hi AAA]\n" +
@@ -364,8 +399,14 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                         "meta: say[hi BBB]\n" +
                         "data: to[two]\n" +
                         "data: say[hi 222]\n",
-                out.toString().replace("\r", ""));
+                asString(out));
+        assertFalse(reader.readOne());
         wire.bytes().releaseLast();
+    }
+
+    @NotNull
+    private static String asString(StringWriter out) {
+        return out.toString().replace("\r", "");
     }
 
     private void checkReaderType(MethodReader reader) {

@@ -184,6 +184,7 @@ public class GenerateMethodReader {
                 "import net.openhft.chronicle.core.util.ObjectUtils;\n" +
                 "import net.openhft.chronicle.bytes.*;\n" +
                 "import net.openhft.chronicle.wire.*;\n" +
+                "import net.openhft.chronicle.wire.utils.*;\n" +
                 "import net.openhft.chronicle.wire.BinaryWireCode;\n" +
                 "\n" +
                 "import java.util.Map;\n" +
@@ -259,7 +260,7 @@ public class GenerateMethodReader {
         }
 
         sourceCode.append("@Override\n" +
-                "protected boolean readOneCall(WireIn wireIn) {\n" +
+                "protected MethodReaderStatus readOneGenerated(WireIn wireIn) {\n" +
                 "ValueIn valueIn = wireIn.getValueIn();\n" +
                 "String lastEventName = \"\";\n" +
                 "if (wireIn.bytes().peekUnsignedByte() == BinaryWireCode.FIELD_NUMBER) {\n" +
@@ -283,26 +284,30 @@ public class GenerateMethodReader {
                 "debugLoggingParselet.accept(lastEventName, valueIn);\n" +
                 "if (lastEventName == null)\n" +
                 "throw new IllegalStateException(\"Failed to read method name or ID\");\n" +
-                "switch (lastEventName) {\n" +
-                "case MethodReader.HISTORY:\n" +
-                "valueIn.marshallable(messageHistory);\n" +
-                "break;\n\n");
+                "switch (lastEventName) {\n");
+        if (!eventNameSwitchBlock.contains("case \"history\":"))
+            sourceCode.append("" +
+                    "case MethodReader.HISTORY:\n" +
+                    "valueIn.marshallable(messageHistory);\n" +
+                    "return MethodReaderStatus.HISTORY;\n\n");
 
         sourceCode.append(eventNameSwitchBlock);
 
         sourceCode.append("default:\n" +
                 "defaultParselet.accept(lastEventName, valueIn);\n" +
-                "return true;\n" +
-                "}\n" +
-                "return true;\n" +
-                "} \n" +
+                "return MethodReaderStatus.UNKNOWN;\n" +
+                "}\n");
+
+        if (eventNameSwitchBlock.contains("break;"))
+            sourceCode.append("return MethodReaderStatus.KNOWN;\n");
+        sourceCode.append("} \n" +
                 "catch (InvocationTargetRuntimeException e) {\n" +
                 "throw e;\n" +
                 "}\n" +
                 "}\n");
 
         sourceCode.append("@Override\n" +
-                "protected boolean readOneCallMeta(WireIn wireIn) {\n" +
+                "protected MethodReaderStatus readOneMetaGenerated(WireIn wireIn) {\n" +
                 "ValueIn valueIn = wireIn.getValueIn();\n" +
                 "String lastEventName = \"\";\n" +
                 "if (wireIn.bytes().peekUnsignedByte() == BinaryWireCode.FIELD_NUMBER) {\n" +
@@ -313,7 +318,7 @@ public class GenerateMethodReader {
 
         sourceCode.append("default:\n" +
                 "valueIn.skipValue();\n" +
-                "return true;\n" +
+                "return MethodReaderStatus.UNKNOWN;\n" +
                 "}\n" +
                 "}\n" +
                 "else {\n" +
@@ -327,16 +332,18 @@ public class GenerateMethodReader {
                 "switch (lastEventName) {\n" +
                 "case MethodReader.HISTORY:\n" +
                 "valueIn.marshallable(messageHistory);\n" +
-                "break;\n\n");
+                "return MethodReaderStatus.HISTORY;\n\n");
 
         sourceCode.append(eventNameSwitchBlockMeta);
 
         sourceCode.append("default:\n" +
-                "valueIn.skipValue();\n" +
-                "return true;\n" +
-                "}\n" +
-                "return true;\n" +
-                "} \n" +
+                "defaultParselet.accept(lastEventName, valueIn);\n" +
+                "return MethodReaderStatus.UNKNOWN;\n" +
+                "}\n");
+
+        if (eventNameSwitchBlockMeta.contains("break;"))
+            sourceCode.append("return MethodReaderStatus.KNOWN;\n");
+        sourceCode.append("} \n" +
                 "catch (InvocationTargetRuntimeException e) {\n" +
                 "throw e;\n" +
                 "}\n" +
@@ -345,7 +352,7 @@ public class GenerateMethodReader {
         isSourceCodeGenerated = true;
 
         if (DUMP_CODE)
-            System.out.println(sourceCode.toString());
+            System.out.println(sourceCode);
     }
 
     /**

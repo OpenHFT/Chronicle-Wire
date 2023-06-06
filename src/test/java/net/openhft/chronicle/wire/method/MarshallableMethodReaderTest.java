@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.Wire;
@@ -29,8 +30,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class MarshallableMethodReaderTest {
     @Test
@@ -43,13 +43,36 @@ public class MarshallableMethodReaderTest {
 
     @Test
     public void ignoredMethods() {
+        doIgnoredMethods(false);
+    }
+    @Test
+    public void ignoredMethodsScanning() {
+        doIgnoredMethods(true);
+    }
+
+    public void doIgnoredMethods(boolean scanning) {
         Wire wire = Wire.newYamlWireOnHeap();
         final SayingMicroservice sm = new SayingMicroservice();
-        final MethodReader reader = wire.methodReader(sm);
-        for (Method method : sm.getClass().getMethods()) {
-            final String name = method.getName();
-            wire.write(name).text("");
-            assertTrue(method.toString(), reader.readOne());
+        final MethodReader reader = wire.methodReaderBuilder().scanning(scanning).build(sm);
+        writeDoc(wire, "say");
+        assertTrue(reader.readOne());
+
+        writeDoc(wire, "bye");
+        if (!scanning)
+            assertTrue(reader.readOne());
+        assertFalse(reader.readOne());
+
+        writeDoc(wire, "bye");
+        writeDoc(wire, "say");
+        assertTrue(reader.readOne());
+        if (!scanning)
+            assertTrue(reader.readOne());
+        assertFalse(reader.readOne());
+    }
+
+    private static void writeDoc(Wire wire, String say) {
+        try (DocumentContext dc = wire.writingDocument()) {
+            wire.write(say).text("");
         }
     }
 
@@ -63,6 +86,10 @@ public class MarshallableMethodReaderTest {
         @Override
         public void say(String hi) {
             said.add(hi);
+        }
+
+        // not called as not on an interface
+        public void bye(String reason) {
         }
     }
 }
