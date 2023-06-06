@@ -53,6 +53,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     static final String SEQ_MAP = "!seqmap";
     static final String BINARY_TAG = "!binary";
     static final String DATA_TAG = "!data";
+    static final String NULL_TAG = "!null";
 
     //for (char ch : "?%&*@`0123456789+- ',#:{}[]|>!\\".toCharArray())
     private final TextValueIn valueIn = createValueIn();
@@ -845,9 +846,19 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         public Bytes<?> textTo(@NotNull Bytes<?> bytes) {
             bytes.clear();
             if (yt.current() == YamlToken.TEXT) {
-                bytes.clear();
                 bytes.append(yt.text());
                 yt.next();
+            } else if (yt.current() == YamlToken.TAG) {
+                if (yt.isText(NULL_TAG)) {
+                    yt.next();
+                    yt.next();
+                    return null;
+                } else if (yt.isText(BINARY_TAG)) {
+                    yt.next();
+                    bytes.write((byte[]) decodeBinary(byte[].class));
+                } else {
+                    throw new UnsupportedOperationException(yt.toString());
+                }
             } else {
                 throw new UnsupportedOperationException(yt.toString());
             }
@@ -879,17 +890,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         @Nullable
-        Bytes<?> textTo0(@NotNull Bytes<?> a) {
-            consumePadding();
-            if (yt.current() == YamlToken.TEXT) {
-                a.append(yt.text());
-            } else {
-                throw new UnsupportedOperationException(yt.toString());
-            }
-            return a;
-        }
-
-        @Nullable
         StringBuilder textTo0(@NotNull StringBuilder a) {
             consumePadding();
             if (yt.current() == YamlToken.SEQUENCE_ENTRY)
@@ -900,7 +900,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     unescape(a, yt.blockQuote());
                 yt.next();
             } else if (yt.current() == YamlToken.TAG) {
-                if (yt.isText("!null")) {
+                if (yt.isText(NULL_TAG)) {
                     yt.next();
                     yt.next();
                     return null;
@@ -969,7 +969,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                         bytes.releaseLast();
                     }
 
-                } else if (StringUtils.isEqual(sb, "!null")) {
+                } else if (StringUtils.isEqual(sb, NULL_TAG)) {
                     bytesConsumer.readMarshallable(null);
                     yt.next();
 
@@ -1639,7 +1639,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         private <K, V> Map<K, V> typedMap(@NotNull Class<K> kClazz, @NotNull Class<V> vClass, @NotNull Map<K, V> usingMap, @NotNull StringBuilder sb) throws InvalidMarshallableException {
             yt.text(sb);
             yt.next();
-            if (("!null").contentEquals(sb)) {
+            if (NULL_TAG.contentEquals(sb)) {
                 text();
                 return null;
 
@@ -1766,7 +1766,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         public boolean isNull() {
             consumePadding();
 
-            if (yt.current() == YamlToken.TAG && yt.isText("!null")) {
+            if (yt.current() == YamlToken.TAG && yt.isText(NULL_TAG)) {
                 consumeAny(0);
                 return true;
             }
