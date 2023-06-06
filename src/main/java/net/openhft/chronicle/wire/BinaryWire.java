@@ -74,6 +74,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return ((Marshallable) m).usesSelfDescribingMessage();
         return true;
     });
+    private static volatile Exception warnMissingClass;
     private final FixedBinaryValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
     private final FixedBinaryValueOut valueOut;
@@ -858,6 +859,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     wire.getValueOut().text(valueIn.text());
                 } else {
                     wire.getValueOut().typePrefix(sb);
+
                     try {
                         Class aClass = classLookup.forName(sb);
                         if (aClass == byte[].class) {
@@ -874,6 +876,9 @@ public class BinaryWire extends AbstractWire implements Wire {
                         Marshallable m = (Marshallable) ObjectUtils.newInstance(aClass);
                         valueIn.marshallable(m);
                         wire.getValueOut().marshallable(m);
+                    } catch (ClassNotFoundRuntimeException ex) {
+                        warnMissingClass = ex;
+                        ClassLookupWarning.warn();
                     } catch (Exception e) {
                         Jvm.warn().on(getClass(), "Unable to copy " + sb + " safely will try anyway " + e);
                     }
@@ -4237,6 +4242,15 @@ public class BinaryWire extends AbstractWire implements Wire {
                     return super.float64();
             }
         }
+    }
+
+    private static class ClassLookupWarning {
+        static {
+            Jvm.warn().on(BinaryWire.class, "Unable to copy object safely, message will not be repeated: " +
+                    warnMissingClass);
+        }
+
+        public static void warn() { }
     }
 }
 
