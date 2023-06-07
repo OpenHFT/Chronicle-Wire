@@ -23,8 +23,8 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.ForceInline;
-import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.io.Closeable;
+import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.pool.EnumCache;
@@ -34,6 +34,7 @@ import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.ReadResolvable;
 import net.openhft.chronicle.wire.internal.StringConsumerMarshallableOut;
+import net.openhft.chronicle.wire.scoped.ScopedResource;
 import net.openhft.compiler.CachedCompiler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -399,6 +400,10 @@ public enum Wires {
         return wire;
     }
 
+    public static ScopedResource<Wire> acquireBinaryWireScoped() {
+        return WireInternal.BINARY_WIRE_SCOPED_TL.get();
+    }
+
     @NotNull
     public static Bytes<?> acquireAnotherBytes() {
         if (Jvm.isDebug())
@@ -452,26 +457,30 @@ public enum Wires {
         if (Enum.class.isAssignableFrom(marshallable.getClass()))
             return marshallable;
 
-        Wire wire = acquireBinaryWire();
-        @NotNull T t = (T) ObjectUtils.newInstance(marshallable.getClass());
-        boolean useSelfDescribing = t.usesSelfDescribingMessage() || !(t instanceof BytesMarshallable);
-        if (useSelfDescribing) {
-            marshallable.writeMarshallable(wire);
-            t.readMarshallable(wire);
-        } else {
-            ((BytesMarshallable) marshallable).writeMarshallable(wire.bytes());
-            ((BytesMarshallable) t).readMarshallable(wire.bytes());
+        try (ScopedResource<Wire> wireSR = acquireBinaryWireScoped()) {
+            Wire wire = wireSR.get();
+            @NotNull T t = (T) ObjectUtils.newInstance(marshallable.getClass());
+            boolean useSelfDescribing = t.usesSelfDescribingMessage() || !(t instanceof BytesMarshallable);
+            if (useSelfDescribing) {
+                marshallable.writeMarshallable(wire);
+                t.readMarshallable(wire);
+            } else {
+                ((BytesMarshallable) marshallable).writeMarshallable(wire.bytes());
+                ((BytesMarshallable) t).readMarshallable(wire.bytes());
+            }
+            return t;
         }
-        return t;
     }
 
     @NotNull
     public static <T> T copyTo(Object source, @NotNull T target) throws InvalidMarshallableException {
-        Wire wire = acquireBinaryWire();
-        wire.getValueOut().object(source);
-        wire.getValueIn().typePrefix(); // drop the type prefix.
-        wire.getValueIn().object(target, target.getClass());
-        return target;
+        try (ScopedResource<Wire> wireSR = acquireBinaryWireScoped()) {
+            Wire wire = wireSR.get();
+            wire.getValueOut().object(source);
+            wire.getValueIn().typePrefix(); // drop the type prefix.
+            wire.getValueIn().object(target, target.getClass());
+            return target;
+        }
     }
 
     @NotNull
@@ -566,10 +575,12 @@ public enum Wires {
             Class<?> aClass = e.getClass();
             E e2 = (E) EnumCache.of(aClass).valueOf(name);
             if (e != e2) {
-                Wire wire = Wires.acquireBinaryWire();
-                WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(aClass);
-                wm.writeMarshallable(e, wire);
-                wm.readMarshallable(e2, wire, null, false);
+                try (ScopedResource<Wire> wireSR = Wires.acquireBinaryWireScoped()) {
+                    Wire wire = wireSR.get();
+                    WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(aClass);
+                    wm.writeMarshallable(e, wire);
+                    wm.readMarshallable(e2, wire, null, false);
+                }
                 return e2;
             }
         }

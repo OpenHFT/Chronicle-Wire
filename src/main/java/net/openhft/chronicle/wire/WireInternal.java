@@ -29,6 +29,7 @@ import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.wire.internal.FromStringInterner;
+import net.openhft.chronicle.wire.scoped.ScopedThreadLocal;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,6 +55,9 @@ public enum WireInternal {
     static final ThreadLocal<WeakReference<Bytes<?>>> BYTES_F2S_TL = new ThreadLocal<>();
     static final ThreadLocal<WeakReference<Wire>> BINARY_WIRE_TL = new ThreadLocal<>();
     static final ThreadLocal<WeakReference<Bytes<?>>> INTERNAL_BYTES_TL = new ThreadLocal<>();
+    static final ScopedThreadLocal<Wire> BINARY_WIRE_SCOPED_TL = new ScopedThreadLocal<>(
+            () -> new BinaryWire(Wires.unmonitoredDirectBytes())
+                    .setOverrideSelfDescribing(true), Wire::clear, 4);
 
     static final StackTraceElement[] NO_STE = {};
     static final Set<Class> INTERNABLE = new HashSet<>(Arrays.asList(
