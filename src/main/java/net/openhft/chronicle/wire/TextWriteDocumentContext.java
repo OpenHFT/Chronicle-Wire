@@ -28,6 +28,7 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
     protected int count = 0;
     private boolean chainedElement;
     private boolean rollback;
+    protected long position;
 
     public TextWriteDocumentContext(Wire wire) {
         this.wire = wire;
@@ -45,6 +46,12 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         notComplete = true;
         chainedElement = false;
         rollback = false;
+        position = wire().bytes().writePosition();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return wire().bytes().writePosition() == position;
     }
 
     @Override

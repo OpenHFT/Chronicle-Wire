@@ -364,20 +364,23 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 .scanning(scanning)
                 .metaDataHandler(Mocker.logging(RoutedSaying.class, "meta: ", out))
                 .build(Mocker.logging(RoutedSaying.class, "data: ", out));
+
         if (!scanning) {
             assertTrue(reader.readOne());
             assertEquals("" +
                             "meta: to[aye]\n" +
                             "meta: say[hi AAA]\n",
-                    asString(out));
+                     asString(out));
         }
+
         assertTrue(reader.readOne());
         assertEquals("" +
                         "meta: to[aye]\n" +
                         "meta: say[hi AAA]\n" +
                         "data: to[one]\n" +
                         "data: say[hi 111]\n",
-                asString(out));
+
+                     asString(out));
         if (!scanning) {
             assertTrue(reader.readOne());
             assertEquals("" +
@@ -389,6 +392,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                             "meta: say[hi BBB]\n",
                     asString(out));
         }
+
         assertTrue(reader.readOne());
         assertEquals("" +
                         "meta: to[aye]\n" +
@@ -400,6 +404,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                         "data: to[two]\n" +
                         "data: say[hi 222]\n",
                 asString(out));
+
         assertFalse(reader.readOne());
         wire.bytes().releaseLast();
     }

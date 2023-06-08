@@ -54,17 +54,21 @@ public class MarshallableMethodReaderTest {
         Wire wire = Wire.newYamlWireOnHeap();
         final SayingMicroservice sm = new SayingMicroservice();
         final MethodReader reader = wire.methodReaderBuilder().scanning(scanning).build(sm);
+
         writeDoc(wire, "say");
         assertTrue(reader.readOne());
 
         writeDoc(wire, "bye");
+
         if (!scanning)
             assertTrue(reader.readOne());
+
         assertFalse(reader.readOne());
 
         writeDoc(wire, "bye");
         writeDoc(wire, "say");
         assertTrue(reader.readOne());
+
         if (!scanning)
             assertTrue(reader.readOne());
         assertFalse(reader.readOne());

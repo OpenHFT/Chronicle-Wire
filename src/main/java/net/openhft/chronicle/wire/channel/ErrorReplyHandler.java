@@ -18,18 +18,41 @@
 
 package net.openhft.chronicle.wire.channel;
 
+/**
+ * This class handles replies containing error messages.
+ * It extends ReplyingHandler and overrides its responseHeader method
+ * to return an ErrorHeader populated with the current error message.
+ */
 public class ErrorReplyHandler extends ReplyingHandler<ErrorReplyHandler> {
     private String errorMsg = "unknown";
 
+    /**
+     * Get the current error message.
+     *
+     * @return A String representing the current error message.
+     */
     public String errorMsg() {
         return errorMsg;
     }
 
+    /**
+     * Set the error message for this handler.
+     *
+     * @param errorMsg A String representing the error message to be set.
+     * @return This ErrorReplyHandler instance for method chaining.
+     */
     public ErrorReplyHandler errorMsg(String errorMsg) {
         this.errorMsg = errorMsg;
         return this;
     }
 
+    /**
+     * Create a response header with the current error message.
+     * This method overrides the responseHeader method from ReplyingHandler.
+     *
+     * @param context A ChronicleContext object. This parameter is not used in this implementation.
+     * @return A ChannelHeader object, which is an instance of ErrorHeader populated with the current error message.
+     */
     @Override
     public ChannelHeader responseHeader(ChronicleContext context) {
         return new ErrorHeader().errorMsg(errorMsg);

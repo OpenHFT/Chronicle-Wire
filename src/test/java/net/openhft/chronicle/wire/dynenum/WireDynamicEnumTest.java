@@ -43,9 +43,8 @@ public class WireDynamicEnumTest extends WireTestCommon {
         ClassAliasPool.CLASS_ALIASES.addAlias(WDENum2.class);
     }
 
-    @Test
-    public void addedEnum() throws NoSuchFieldException {
-        Wire tw = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
+    private static void doAddedEnum(WireType wireType) throws NoSuchFieldException {
+        Wire tw = wireType.apply(Bytes.allocateElasticOnHeap());
         UsesWDENums nums = tw.methodWriter(UsesWDENums.class);
         nums.push(WDENums.ONE);
 
@@ -92,6 +91,16 @@ public class WireDynamicEnumTest extends WireTestCommon {
                 "...\n" +
                 "push2: ACE\n" +
                 "...\n", tw.toString());
+    }
+
+    @Test
+    public void addedEnum() throws NoSuchFieldException {
+        doAddedEnum(WireType.TEXT);
+    }
+
+    @Test
+    public void addedEnumYaml() throws NoSuchFieldException {
+        doAddedEnum(WireType.YAML_ONLY);
     }
 
     @Test

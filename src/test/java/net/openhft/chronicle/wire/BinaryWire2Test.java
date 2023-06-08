@@ -450,7 +450,6 @@ public class BinaryWire2Test extends WireTestCommon {
     public void fieldAfterText() {
         assumeFalse(usePadding);
 
-        expectException("Unable to copy !UpdateEvent safely will try anyway");
         @NotNull Wire wire = createWire();
         wire.writeDocument(false, w -> w.write("data")
                 .typePrefix("!UpdateEvent").marshallable(
@@ -476,7 +475,6 @@ public class BinaryWire2Test extends WireTestCommon {
 
     @Test
     public void fieldAfterNull() {
-        expectException("Unable to copy !UpdateEvent safely will try anyway");
         @NotNull Wire wire = createWire();
         wire.writeDocument(false, w -> w.write("data").typedMarshallable("!UpdateEvent",
                 v -> v.write("assetName").text("/name")
@@ -501,7 +499,8 @@ public class BinaryWire2Test extends WireTestCommon {
 
     @Test
     public void fieldAfterNullContext() {
-        expectException("Unable to copy !UpdateEvent safely will try anyway");
+        ignoreException("Unable to copy object safely, message will not be repeated: " +
+                "net.openhft.chronicle.core.util.ClassNotFoundRuntimeException: java.lang.ClassNotFoundException: !UpdateEvent");
         @NotNull Wire wire = createWire();
         try (DocumentContext ignored = wire.writingDocument(true)) {
             wire.write("tid").int64(1234567890L);
@@ -801,7 +800,6 @@ public class BinaryWire2Test extends WireTestCommon {
     }
 
     public void doTestUnicodeReadAndWrite() {
-        expectException("Unable to copy !UpdateEvent safely will try anyway");
         @NotNull Wire wire = createWire();
         try {
             wire.writeDocument(false, w -> w.write("data")

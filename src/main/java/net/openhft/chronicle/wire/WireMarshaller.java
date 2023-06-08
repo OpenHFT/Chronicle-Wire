@@ -140,8 +140,9 @@ public class WireMarshaller<T> {
             if ("ordinal".equals(field.getName()) && Enum.class.isAssignableFrom(clazz))
                 continue;
             String name = field.getName();
-            if (name.equals("this$0")) {
-                Jvm.warn().on(WireMarshaller.class, "Found this$0, in " + clazz + " which will be ignored!");
+            if (name.startsWith("this$0")) {
+                if (ValidatableUtil.validateEnabled())
+                    Jvm.warn().on(WireMarshaller.class, "Found " + name + ", in " + clazz + " which will be ignored!");
                 continue;
             }
             Jvm.setAccessible(field);
@@ -344,7 +345,7 @@ public class WireMarshaller<T> {
     }
 
     public boolean matchesFieldName(StringBuilder sb, FieldAccess field) {
-        return sb.length() == 0 || StringUtils.isEqual(field.field.getName(), sb);
+        return sb.length() == 0 || StringUtils.equalsCaseIgnore(field.field.getName(), sb);
     }
 
     public void writeKey(T t, Bytes<?> bytes) {

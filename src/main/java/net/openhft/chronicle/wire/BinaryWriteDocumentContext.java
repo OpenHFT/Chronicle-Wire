@@ -55,6 +55,11 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
     }
 
     @Override
+    public boolean isEmpty() {
+        return notComplete && wire().bytes().writePosition() == position + 4;
+    }
+
+    @Override
     public void reset() {
         if (count > 0)
             close();
@@ -76,8 +81,9 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
     public void close() {
         if (chainedElement)
             return;
+        // redundant close
         if (count == 0)
-            throw new IllegalStateException("count == 0");
+            return;
         count--;
         if (count > 0)
             return;

@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
@@ -47,26 +48,33 @@ public class ReorderedTest extends WireTestCommon {
         outerClass1.clearListB();
         outerClass2.clearListB();
         outerClass1.addListA().setTextNumber("num1A", 11);
-        outerClass1.addListB().setTextNumber("num1B", 12);
-        outerClass1.addListA().setTextNumber("num1AA", 111);
+        outerClass1.addListB().setTextNumber("num1B", 12).nest("num1Bbis", 121);
+        outerClass1.addListA().setTextNumber("num1AA", 111).nest("num1AAbis", 1111);
         outerClass1.addListB().setTextNumber("num1BB", 122);
         outerClass2.addListA().setTextNumber("num2A", 21);
-        outerClass2.addListB().setTextNumber("num2B", 22);
+        outerClass2.addListB().setTextNumber("num2B", 22).nest("num2Bbis", 222);
+
+        nestedReadSubsets = Arrays.asList(
+                new NestedReadSubset().setTextNumber("one", 1.1),
+                new NestedReadSubset().setTextNumber("two", 2.2));
     }
 
     @SuppressWarnings("rawtypes")
     private final Function<Bytes<?>, Wire> wireType;
+    private static final Collection<NestedReadSubset> nestedReadSubsets;
 
     @SuppressWarnings("rawtypes")
     public ReorderedTest(Function<Bytes<?>, Wire> wireType) {
         this.wireType = wireType;
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() {
         return Arrays.asList(new Object[][]{
                 {WireType.JSON},
                 {WireType.TEXT},
+                // https://github.com/OpenHFT/Chronicle-Wire/issues/665
+                //{WireType.YAML_ONLY},
                 {WireType.BINARY}
         });
     }
@@ -94,6 +102,18 @@ public class ReorderedTest extends WireTestCommon {
         assertEquals(outerClass2.toString().replace(',', '\n'), outerClass0.toString().replace(',', '\n'));
 
         bytes.releaseLast();
+    }
+
+    @Test
+    public void testWithSubsetFields() {
+        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Wire wire = wireType.apply(bytes);
+        wire.writeEventName(() -> "test1").collection(nestedReadSubsets, NestedReadSubset.class);
+
+        @NotNull StringBuilder sb = new StringBuilder();
+
+        assertEquals(nestedReadSubsets.toString().replace(',', '\n'), wire.readEventName(sb).collection(ArrayList::new, NestedReadSubset.class).toString().replace(',', '\n'));
+        assertEquals("test1", sb.toString());
     }
 
     @SuppressWarnings("rawtypes")

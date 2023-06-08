@@ -62,6 +62,7 @@ public class YamlTesterParametersTest extends WireTestCommon {
                         YamlAgitator.missingFields("eventTime"),
                         YamlAgitator.overrideFields("eventTime: 1999-01-01T01:01:01"),
                         YamlAgitator.replaceAll("5 to 6", "[5]", "6"))
+                .inputFunction(s -> s.replace("# Replace comment", ""))
                 .get();
     }
 

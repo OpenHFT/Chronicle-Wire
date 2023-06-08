@@ -42,6 +42,7 @@ public class YamlTesterParametersBuilder<T> {
     private Function<T, ExceptionHandler> exceptionHandlerFunction;
     private boolean exceptionHandlerFunctionAndLog;
     private Predicate<String> testFilter = new ContainsDifferentMessageFilter();
+    private Function<String, String> inputFunction;
 
     public YamlTesterParametersBuilder(ThrowingFunction<T, Object, Throwable> builder, Class<T> outClass, String paths) {
         this.builder = builder;
@@ -76,6 +77,7 @@ public class YamlTesterParametersBuilder<T> {
                             .setup(setup)
                             .exceptionHandlerFunction(exceptionHandlerFunction)
                             .exceptionHandlerFunctionAndLog(exceptionHandlerFunctionAndLog)
+                            .inputFunction(inputFunction)
                             .testFilter(s -> {
                                 // include it
                                 testFilter.test(s);
@@ -116,6 +118,7 @@ public class YamlTesterParametersBuilder<T> {
                                 .setup(setup)
                                 .exceptionHandlerFunction(exceptionHandlerFunction)
                                 .exceptionHandlerFunctionAndLog(exceptionHandlerFunctionAndLog)
+                                .inputFunction(inputFunction)
                                 .testFilter(testFilter());
                         addOutputClasses(yta);
 
@@ -178,6 +181,7 @@ public class YamlTesterParametersBuilder<T> {
                                     .setup(setup2)
                                     .exceptionHandlerFunction(exceptionHandlerFunction)
                                     .exceptionHandlerFunctionAndLog(exceptionHandlerFunctionAndLog)
+                                    .inputFunction(inputFunction)
                                     .testFilter(testFilter());
                     addOutputClasses(yt2);
                     Object[] test2 = {path + "+" + path2, yt2};
@@ -216,6 +220,11 @@ public class YamlTesterParametersBuilder<T> {
 
     public YamlTesterParametersBuilder<T> testFilter(Predicate<String> testFilter) {
         this.testFilter = testFilter;
+        return this;
+    }
+
+    public YamlTesterParametersBuilder<T> inputFunction(Function<String, String> inputFunction) {
+        this.inputFunction = inputFunction;
         return this;
     }
 

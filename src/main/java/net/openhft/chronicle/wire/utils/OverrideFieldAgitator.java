@@ -37,7 +37,7 @@ public class OverrideFieldAgitator implements YamlAgitator {
                 throw new IllegalArgumentException("invalid field: value as " + field + "'");
             if (!yaml.contains(" " + fieldValue[0] + ": "))
                 continue;
-            String regex = "( +)(" + fieldValue[0] + ": [^,\\n]*)";
+            String regex = "( +)(" + fieldValue[0] + ": [^,\\n\\r]*)";
             String replacement = "$1# override $2 to " + field.replace("\n", " ") + " \n" +
                     "$1" + field + ",\n" +
                     "$1-$2";

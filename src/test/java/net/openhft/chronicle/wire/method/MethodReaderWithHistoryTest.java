@@ -58,6 +58,7 @@ public class MethodReaderWithHistoryTest extends WireTestCommon {
             assertEquals(22, h.sourceIndex(0));
             return (Saying) s -> says2[0] = s;
         });
+
         assertTrue(reader2.readOne());
         assertEquals("bye", says2[0]);
     }

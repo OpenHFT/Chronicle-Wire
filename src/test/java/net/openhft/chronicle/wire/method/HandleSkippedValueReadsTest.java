@@ -52,7 +52,7 @@ public class HandleSkippedValueReadsTest {
                 new Object[]{WireType.BINARY_LIGHT},
                 new Object[]{WireType.TEXT}
                 // TODO FIX
-//                new Object[]{WireType.YAML}
+//                new Object[]{WireType.YAML_ONLY}
         );
     }
 
@@ -197,7 +197,6 @@ public class HandleSkippedValueReadsTest {
         Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         try (DocumentContext dc = wire.writingDocument(true)) {
             dc.wire()
-                    .write("index2index").int64array(32)
                     .write("meta").text("one");
         }
         try (DocumentContext dc = wire.writingDocument(true)) {
@@ -215,6 +214,7 @@ public class HandleSkippedValueReadsTest {
                 .build(Mocker.logging(DataMethod.class, "D ", sw));
 
         assertTrue(reader.readOne());
+
         if (!scanning) {
             // one
             assertEquals("" +
@@ -233,7 +233,6 @@ public class HandleSkippedValueReadsTest {
                         "D data[six]\n"
                 , asString(sw));
         assertFalse(reader.readOne());
-
     }
 
     interface MetaMethod {

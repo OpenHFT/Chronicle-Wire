@@ -131,6 +131,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
 
         reader.readOne();
         assertEquals(myFall, delegatedMethodCall.get());
+
         if (scanning) {
             assertEquals("*myCall[]*myCall[]", sb.toString());
             // unknown methods are skipped
@@ -139,6 +140,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
             assertTrue(reader.readOne());
             assertEquals("*myCall[]*myCall[]", sb.toString());
         }
+
     }
 
     @Test
@@ -153,6 +155,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
 
     @Test
     public void testUnsuccessfulCallNoDelegateProxy() {
+
         testUnsuccessfulCallNoDelegate(true, true, false);
     }
     @Test
@@ -181,6 +184,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
                     .build(Mocker.intercepting(MyInterface.class, "*", sb::append));
 
             assertTrue(reader.readOne());
+
             if (scanning) {
                 assertTrue(reader.readOne());
                 assertEquals(third, reader.readOne());

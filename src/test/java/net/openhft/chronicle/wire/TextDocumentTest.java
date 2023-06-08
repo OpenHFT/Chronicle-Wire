@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.time.ZonedDateTime;
@@ -32,10 +33,9 @@ import static org.junit.Assert.assertEquals;
 
 public class TextDocumentTest extends WireTestCommon {
 
-    @Test
-    public void testDocument() {
+    private static void doTestDocument(WireType wireType) {
         @NotNull Bytes<?> bytes1 = Bytes.allocateElasticOnHeap();
-        @NotNull final Wire wire = WireType.TEXT.apply(bytes1);
+        @NotNull final Wire wire = wireType.apply(bytes1);
         @NotNull final Header wheader = new Header();
         @NotNull final Header rheader = new Header();
 
@@ -54,6 +54,17 @@ public class TextDocumentTest extends WireTestCommon {
         assertEquals(wheader.created, rheader.created);
         wheader.closeAll();
         rheader.closeAll();
+    }
+
+    @Test
+    public void testDocument() {
+        doTestDocument(WireType.TEXT);
+    }
+
+    @Ignore(/* TODO FIX */)
+    @Test
+    public void testDocumentYaml() {
+        doTestDocument(WireType.YAML_ONLY);
     }
 
     enum Keys implements WireKey {

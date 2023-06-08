@@ -18,19 +18,34 @@
 
 package net.openhft.chronicle.wire.channel;
 
-import net.openhft.chronicle.wire.SelfDescribingMarshallable;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Class RedirectHeader extends the AbstractHeader class and is similar to an HTTP redirect header.
+ * It maintains a list of location URLs to which the request can be redirected.
+ */
 public class RedirectHeader extends AbstractHeader<RedirectHeader> {
+
+    // A list of location URLs to which the request can be redirected.
     private final List<String> locations = new ArrayList<>();
 
+    /**
+     * Constructs a new RedirectHeader instance and populates the list of
+     * locations to which the request can be redirected.
+     *
+     * @param locations A list of location URLs.
+     */
     public RedirectHeader(List<String> locations) {
         this.locations.addAll(locations);
     }
 
+    /**
+     * Retrieves an unmodifiable list of location URLs to which the request can be redirected.
+     *
+     * @return An unmodifiable list of location URLs.
+     */
     public List<String> locations() {
         return Collections.unmodifiableList(locations);
     }

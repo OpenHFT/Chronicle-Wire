@@ -18,7 +18,8 @@
 
 package net.openhft.chronicle.wire.channel;
 
-import net.openhft.chronicle.wire.SelfDescribingMarshallable;
-
+/**
+ * Class OkHeader extends the AbstractHeader class and indicate the channel was established ok.
+ */
 public class OkHeader extends AbstractHeader<OkHeader> {
 }

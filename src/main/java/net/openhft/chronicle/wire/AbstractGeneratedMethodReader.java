@@ -29,6 +29,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import static java.lang.ThreadLocal.withInitial;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
@@ -37,6 +38,8 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  * Base class for generated method readers.
  */
 public abstract class AbstractGeneratedMethodReader implements MethodReader {
+    @Deprecated(/* to be removed in x.26 */)
+    private static final boolean RETRY_UNKOWN_METHOD = Jvm.getBoolean("retry.unknown.method", true);
     private static final Consumer<MessageHistory> NO_OP_MH_CONSUMER = Mocker.ignored(Consumer.class);
     private static final MessageHistoryThreadLocal TEMP_MESSAGE_HISTORY = new MessageHistoryThreadLocal();
     protected final WireParselet debugLoggingParselet;
@@ -47,7 +50,12 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     private boolean closed;
     private Consumer<MessageHistory> historyConsumer = NO_OP_MH_CONSUMER;
 
-    private boolean scanning;
+    private Predicate predicate;
+
+    public AbstractGeneratedMethodReader predicate(Predicate predicate) {
+        this.predicate = predicate;
+        return this;
+    }
 
     protected AbstractGeneratedMethodReader(MarshallableIn in,
                                             WireParselet debugLoggingParselet) {
@@ -170,8 +178,8 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
 
                 wireIn.consumePadding();
                 if (bytes.readPosition() == start) {
-                    Jvm.warn().on(getClass(), "Failed to progress reading " + bytes.readRemaining() + " bytes left.");
-                    break;
+                    logNonProgressWarning(bytes.readRemaining());
+                    return decoded;
                 }
             }
             wireIn.endEvent();
@@ -184,6 +192,10 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
                 swapMessageHistoryIfDirty();
             messageHistory.reset();
         }
+    }
+
+    private void logNonProgressWarning(long bytes) {
+        Jvm.warn().on(getClass(), "Failed to progress reading " + bytes + " bytes left.");
     }
 
     protected boolean restIgnored() {

@@ -56,12 +56,32 @@ public class CSVBytesMarshallableTest extends WireTestCommon {
 
     // wire marshalling.
     @Test
-    public void marshallable() {
+    public void marshallableJSON() {
         doTest(WireType.JSON, false);
-        doTest(WireType.TEXT, false);
+    }
 
+    @Test
+    public void marshallableTEXT() {
+        doTest(WireType.TEXT, false);
+    }
+
+    @Test
+    public void marshallableYAML_ONLY() {
+        doTest(WireType.YAML_ONLY, false);
+    }
+
+    @Test
+    public void marshallableBINARY() {
         doTest(WireType.BINARY, true);
+    }
+
+    @Test
+    public void marshallableFIELDLESS() {
         doTest(WireType.FIELDLESS_BINARY, true);
+    }
+
+    @Test
+    public void marshallableRAW() {
         doTest(WireType.RAW, true);
     }
 

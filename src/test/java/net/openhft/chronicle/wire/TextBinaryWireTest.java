@@ -31,6 +31,8 @@ import java.util.function.ObjIntConsumer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 
 @RunWith(value = Parameterized.class)
 public class TextBinaryWireTest extends WireTestCommon {
@@ -42,13 +44,14 @@ public class TextBinaryWireTest extends WireTestCommon {
         this.wireType = wireType;
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() {
         Object[][] list = {
                 {WireType.BINARY},
                 {WireType.FIELDLESS_BINARY},
                 {WireType.RAW},
                 {WireType.TEXT},
+                {WireType.YAML},
                 {WireType.JSON}
         };
         return Arrays.asList(list);
@@ -87,21 +90,21 @@ public class TextBinaryWireTest extends WireTestCommon {
 
     @Test
     public void testReadComment() {
-        if (wireType == WireType.TEXT || wireType == WireType.BINARY) {
-            Wire wire = createWire();
-            wire.writeComment("This is a comment");
-            @NotNull StringBuilder sb = new StringBuilder();
-            wire.readComment(sb);
-            assertEquals("This is a comment", sb.toString());
+        assumeTrue(wireType == WireType.TEXT || wireType == WireType.BINARY || wireType == WireType.YAML);
 
-            wire.bytes().releaseLast();
-        }
+        Wire wire = createWire();
+        wire.writeComment("This is a comment");
+        @NotNull StringBuilder sb = new StringBuilder();
+        wire.readComment(sb);
+        assertEquals("This is a comment", sb.toString());
+
+        wire.bytes().releaseLast();
     }
 
     @Test
     public void readFieldAsObject() {
-        if (wireType == WireType.RAW || wireType == WireType.FIELDLESS_BINARY)
-            return;
+        assumeFalse(wireType == WireType.RAW || wireType == WireType.FIELDLESS_BINARY);
+
         Wire wire = createWire();
         wire.write("CLASS").text("class")
                 .write("RUNTIME").text("runtime");
@@ -117,8 +120,8 @@ public class TextBinaryWireTest extends WireTestCommon {
 
     @Test
     public void readFieldAsLong() {
-        if (wireType == WireType.RAW || wireType == WireType.FIELDLESS_BINARY)
-            return;
+        assumeFalse(wireType == WireType.RAW || wireType == WireType.FIELDLESS_BINARY);
+
         Wire wire = createWire();
         // todo fix to ensure a field number is used.
         wire.writeEvent(Long.class, 1L).text("class")
@@ -138,8 +141,7 @@ public class TextBinaryWireTest extends WireTestCommon {
 
     @Test
     public void testConvertToNum() {
-        if (wireType == WireType.RAW)
-            return;
+        assumeFalse(wireType == WireType.RAW || /* No support for bool conversions */ wireType == WireType.YAML);
 
         Wire wire = createWire();
         wire.write("a").bool(false)

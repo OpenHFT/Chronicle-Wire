@@ -196,6 +196,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 () -> newTextMethodWriterInvocationHandler(tClass));
         for (Class aClass : additional)
             builder.addInterface(aClass);
+        useTextDocuments();
         builder.marshallableOut(this);
         return builder.build();
     }
@@ -252,6 +253,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         if (readContext == null)
             useBinaryDocuments();
         readContext.start();
+        yt.lineStart(bytes.readPosition());
     }
 
     @NotNull
@@ -453,6 +455,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     public <K> K readEvent(@NotNull Class<K> expectedClass) throws InvalidMarshallableException {
         startEventIfTop();
         switch (yt.current()) {
+            case MAPPING_START:
+                yt.next();
+                assert yt.current() == YamlToken.MAPPING_KEY;
+                // Deliberate fall-through
             case MAPPING_KEY:
                 YamlToken next = yt.next();
                 if (next == YamlToken.MAPPING_KEY) {
@@ -539,6 +545,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     return rereadWire.valueIn;
                 }
             }
+            // Next lines not covered by any tests
         }
         YamlTokeniser.YTContext yc = yt.topContext();
         int minIndent = yc.indent;
@@ -550,7 +557,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
             if (!StringUtils.startsWith(sb, "-"))
                 keys.push(lastKeyPosition);
-            valueIn.consumeAny(minIndent);
+            // Avoid consuming '}' but consume to next mapping key
+            valueIn.consumeAny(minIndent >= 0 ? minIndent : Integer.MAX_VALUE);
         }
 
         return defaultValueIn;
@@ -610,11 +618,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @NotNull
     @Override
     public Wire readComment(@NotNull StringBuilder s) {
-        sb.setLength(0);
+        s.setLength(0);
         if (yt.current() == YamlToken.COMMENT) {
-            // Skip the initial '#'
-            YamlToken next = yt.next();
-            sb.append(yt.text());
+            s.append(yt.text());
+            yt.next();
         }
         return this;
     }
@@ -753,11 +760,12 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             yt.next(Integer.MIN_VALUE);
         } else {
             while (yt.current() == YamlToken.MAPPING_KEY) {
-                yt.next();
                 valueIn.consumeAny(minIndent);
             }
         }
-        if (yt.current() == YamlToken.MAPPING_END || yt.current() == YamlToken.DOCUMENT_END || yt.current() == YamlToken.NONE) {
+        if (yt.current() == YamlToken.MAPPING_END ||
+                yt.current() == YamlToken.DOCUMENT_END ||
+                yt.current() == YamlToken.NONE) {
             yt.next(Integer.MIN_VALUE);
             return;
         }
@@ -1344,7 +1352,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             while (true) {
                 switch (yt.current()) {
                     case SEQUENCE_ENTRY:
-                        yt.next(Integer.MIN_VALUE);
                         tReader.accept(t, kls, YamlWire.this.valueIn);
                         continue;
 
@@ -1381,9 +1388,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         public boolean hasNextSequenceItem() {
             consumePadding();
             switch (yt.current()) {
+                // Perhaps should be negative selection instead of positive
                 case SEQUENCE_START:
-                case TEXT:
                 case SEQUENCE_ENTRY:
+                // Allows scalar value to be converted into singleton array
+                case TEXT:
                     return true;
             }
             return false;
@@ -1474,7 +1483,20 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer)
                 throws IORuntimeException, BufferUnderflowException {
-            throw new UnsupportedOperationException(yt.toString());
+            if (yt.current() != YamlToken.TAG)
+                throw new UnsupportedOperationException(yt.toString());
+
+            if (!yt.isText("type"))
+                throw new UnsupportedOperationException(yt.text());
+
+            if (yt.next() != YamlToken.TEXT)
+                throw new UnsupportedOperationException(yt.toString());
+
+            StringBuilder stringBuilder = acquireStringBuilder();
+            textTo(stringBuilder);
+            classNameConsumer.accept(t, stringBuilder);
+
+            return YamlWire.this;
         }
 
         @Override
@@ -1483,9 +1505,13 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             if (yt.current() == YamlToken.TAG) {
                 if (yt.text().equals("type")) {
                     if (yt.next() == YamlToken.TEXT) {
-                        Class aClass = classLookup().forName(yt.text());
+                        String text = yt.text();
                         yt.next();
-                        return aClass;
+                        try {
+                            return classLookup().forName(text);
+                        } catch (ClassNotFoundRuntimeException e) {
+                            return unresolvedHandler.apply(text, e.getCause());
+                        }
                     }
                 }
             }
@@ -1708,7 +1734,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 yt.next();
             valueIn.skipType();
             if (yt.current() != YamlToken.TEXT) {
-                Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a long.");
+                Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a double.");
                 return 0;
             }
             return getADouble();

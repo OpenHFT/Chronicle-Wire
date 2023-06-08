@@ -18,39 +18,61 @@
 
 package net.openhft.chronicle.wire.channel;
 
-import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireOut;
 
 /**
- * Advanced options that may change in the future
+ * Interface InternalChronicleChannel extends ChronicleChannel and defines several additional
+ * methods to support advanced functionality within Chronicle Channels.
+ * Note: This interface's options might change in future versions of the system.
  */
 public interface InternalChronicleChannel extends ChronicleChannel {
+
     /**
-     * The header in to use based on the acceptors replacement rules.
+     * This method returns the header to be used for incoming data based on the acceptor's
+     * replacement rules.
+     *
+     * @return the header for incoming data.
      */
     ChannelHeader headerInToUse();
 
     /**
-     * @return true if eventPollers are supported by this Channel.
+     * Checks if the event poller is supported by this channel.
+     *
+     * @return true if event pollers are supported, false otherwise.
      */
     boolean supportsEventPoller();
 
     /**
-     * @return the EventPoller set
+     * Gets the EventPoller instance associated with this channel.
+     *
+     * @return the EventPoller instance set on this channel.
      */
     EventPoller eventPoller();
 
     /**
-     * Set an EventPoller to include in any background processing.
+     * Associates an EventPoller with this channel to include in any background processing.
      *
-     * @param eventPoller to use
-     * @return this
+     * @param eventPoller the EventPoller instance to set.
+     * @return this channel instance, allowing for method chaining.
      */
     ChronicleChannel eventPoller(EventPoller eventPoller);
 
+    /**
+     * Acquires a producer instance associated with this channel.
+     *
+     * @return the producer instance as a WireOut object.
+     */
     WireOut acquireProducer();
 
+    /**
+     * Releases the producer instance associated with this channel.
+     */
     void releaseProducer();
 
+    /**
+     * Gets the buffer size used by this channel.
+     *
+     * @return the buffer size as an integer.
+     */
     int bufferSize();
 }
