@@ -2,23 +2,26 @@ package net.openhft.chronicle.wire.scoped;
 
 import java.io.Closeable;
 
-public class ScopedResource<T> implements Closeable {
+/**
+ * A scoped resource, it is drawn from a "pool" of sorts, and will be returned
+ * to that pool when {@link #close()} is called.
+ * <p>
+ * Do not keep a reference to the contained resource beyond the scope.
+ *
+ * @param <T> The type of the resource contained
+ */
+public interface ScopedResource<T> extends Closeable {
 
-    private final ScopedThreadLocal<T> scopedThreadLocal;
-    private final T resource;
+    /**
+     * Get the contained resource
+     *
+     * @return The resource
+     */
+    T get();
 
-    ScopedResource(ScopedThreadLocal<T> scopedThreadLocal, T resource) {
-        this.scopedThreadLocal = scopedThreadLocal;
-        this.resource = resource;
-    }
-
-    public T get() {
-        return resource;
-    }
-
+    /**
+     * Signifies the end of the scope, will return the resource to the "pool" for use by other acquirers
+     */
     @Override
-    public void close() {
-        scopedThreadLocal.returnInstance(this);
-    }
+    void close();
 }
-

@@ -57,7 +57,7 @@ public enum WireInternal {
     static final ThreadLocal<WeakReference<Bytes<?>>> INTERNAL_BYTES_TL = new ThreadLocal<>();
     static final ScopedThreadLocal<Wire> BINARY_WIRE_SCOPED_TL = new ScopedThreadLocal<>(
             () -> new BinaryWire(Wires.unmonitoredDirectBytes())
-                    .setOverrideSelfDescribing(true), Wire::clear, 4);
+                    .setOverrideSelfDescribing(true), Wire::clear, 4, true);
 
     static final StackTraceElement[] NO_STE = {};
     static final Set<Class> INTERNABLE = new HashSet<>(Arrays.asList(
