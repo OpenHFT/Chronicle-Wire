@@ -1714,6 +1714,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public long int64() {
             consumePadding();
+            // Fix an issue in MethodReaderWithHistoryTest
             if (yt.current() == YamlToken.SEQUENCE_ENTRY)
                 yt.next();
             valueIn.skipType();
@@ -1728,6 +1729,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public double float64() {
             consumePadding();
+            // Fix an issue in MethodReaderWithHistoryTest
             if (yt.current() == YamlToken.SEQUENCE_ENTRY)
                 yt.next();
             valueIn.skipType();

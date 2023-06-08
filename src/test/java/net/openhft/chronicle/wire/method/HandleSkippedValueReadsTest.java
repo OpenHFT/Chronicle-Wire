@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -57,18 +58,27 @@ public class HandleSkippedValueReadsTest {
 
     @Test
     public void test() {
+        doTest(false);
+    }
+
+    @Test
+    public void testScanning() {
+        doTest(true);
+    }
+
+    public void doTest(boolean scanning) {
         Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         try (DocumentContext dc = wire.writingDocument(true)) {
             dc.wire()
                     .write("meta").text("one")
-                    .write("prefix").object(WireType.BINARY_LIGHT) // dropped
+                    .write("prefix").object(WireType.BINARY_LIGHT) // skipped
                     .write("meta").text("oneB");
         }
 
         try (DocumentContext dc = wire.writingDocument(true)) {
             dc.wire()
                     .write("other").text("two") // skipped
-                    .write("meta").text("two"); // dropped
+                    .write("meta").text("two");
         }
 
         try (DocumentContext dc = wire.writingDocument(true)) {
@@ -78,14 +88,14 @@ public class HandleSkippedValueReadsTest {
         try (DocumentContext dc = wire.writingDocument()) {
             dc.wire()
                     .write("data").text("four")
-                    .write("prefix").object(WireType.BINARY_LIGHT)
-                    .write("data").text("fourB"); // dropped
+                    .write("prefix").object(WireType.BINARY_LIGHT) // skipped
+                    .write("data").text("fourB");
         }
 
         try (DocumentContext dc = wire.writingDocument()) {
             dc.wire()
                     .write("other").text("five") // skipped
-                    .write("data").text("five"); // dropped
+                    .write("data").text("five");
         }
 
         try (DocumentContext dc = wire.writingDocument()) {
@@ -94,35 +104,96 @@ public class HandleSkippedValueReadsTest {
 
         StringWriter sw = new StringWriter();
         final MethodReader reader = wire.methodReaderBuilder()
+                .scanning(scanning)
                 .metaDataHandler(Mocker.logging(MetaMethod.class, "M ", sw))
                 .build(Mocker.logging(DataMethod.class, "D ", sw));
 
+        if (scanning) {
+            assertTrue(reader.readOne());
+            assertEquals("" +
+                            "M meta[one]\n" +
+                            "M meta[oneB]\n" +
+                            "M meta[two]\n" +
+                            "M meta[three]\n" +
+                            "D data[four]\n" +
+                            "D data[fourB]\n",
+                    asString(sw));
+
+        } else {
+            // one
+            assertTrue(reader.readOne());
+            assertEquals("" +
+                            "M meta[one]\n" +
+                            "M meta[oneB]\n",
+                    asString(sw));
+            // two
+            assertTrue(reader.readOne());
+            assertEquals("" +
+                            "M meta[one]\n" +
+                            "M meta[oneB]\n" +
+                            "M meta[two]\n",
+                    asString(sw));
+            // three
+            assertTrue(reader.readOne());
+            assertEquals("" +
+                            "M meta[one]\n" +
+                            "M meta[oneB]\n" +
+                            "M meta[two]\n" +
+                            "M meta[three]\n",
+                    asString(sw));
+            // four
+            assertTrue(reader.readOne());
+            assertEquals("" +
+                            "M meta[one]\n" +
+                            "M meta[oneB]\n" +
+                            "M meta[two]\n" +
+                            "M meta[three]\n" +
+                            "D data[four]\n" +
+                            "D data[fourB]\n",
+                    asString(sw));
+        }
+        // five
         assertTrue(reader.readOne());
-        assertEquals("M meta[one]\n" +
+        assertEquals("" +
+                        "M meta[one]\n" +
+                        "M meta[oneB]\n" +
+                        "M meta[two]\n" +
                         "M meta[three]\n" +
                         "D data[four]\n" +
-                        "D data[fourB]\n",
-                sw.toString().replace("\r", ""));
+                        "D data[fourB]\n" +
+                        "D data[five]\n",
+                asString(sw));
+        // six
         assertTrue(reader.readOne());
-        assertEquals("M meta[one]\n" +
-                "M meta[three]\n" +
-                "D data[four]\n" +
-                "D data[fourB]\n" +
-                "D data[five]\n",
-                sw.toString().replace("\r", ""));
-        assertTrue(reader.readOne());
-        assertEquals("M meta[one]\n" +
-                "M meta[three]\n" +
-                "D data[four]\n" +
-                "D data[fourB]\n" +
-                "D data[five]\n" +
-                "D data[six]\n",
-                sw.toString().replace("\r", ""));
+        assertEquals("" +
+                        "M meta[one]\n" +
+                        "M meta[oneB]\n" +
+                        "M meta[two]\n" +
+                        "M meta[three]\n" +
+                        "D data[four]\n" +
+                        "D data[fourB]\n" +
+                        "D data[five]\n" +
+                        "D data[six]\n",
+                asString(sw));
         assertFalse(reader.readOne());
+    }
+
+    @NotNull
+    private static String asString(StringWriter sw) {
+        return sw.toString().replace("\r", "");
     }
 
     @Test
     public void index2index() {
+        doIndex2index(false);
+    }
+
+    @Test
+    public void index2indexScanning() {
+        doIndex2index(true);
+    }
+
+    public void doIndex2index(boolean scanning) {
         Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         try (DocumentContext dc = wire.writingDocument(true)) {
             dc.wire()
@@ -138,16 +209,30 @@ public class HandleSkippedValueReadsTest {
 
         StringWriter sw = new StringWriter();
         final MethodReader reader = wire.methodReaderBuilder()
+                .scanning(scanning)
                 .metaDataHandler(Mocker.logging(MetaMethod.class, "M ", sw))
                 .build(Mocker.logging(DataMethod.class, "D ", sw));
 
         assertTrue(reader.readOne());
+
+        if (!scanning) {
+            // one
+            assertEquals("" +
+                            "M meta[one]\n"
+                    , asString(sw));
+            assertTrue(reader.readOne());
+            // i2i
+            assertEquals("" +
+                            "M meta[one]\n"
+                    , asString(sw));
+            assertTrue(reader.readOne());
+        }
+        // data six
         assertEquals("" +
                         "M meta[one]\n" +
                         "D data[six]\n"
-                , sw.toString().replace("\r", ""));
+                , asString(sw));
         assertFalse(reader.readOne());
-
     }
 
     interface MetaMethod {
