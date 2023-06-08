@@ -9,6 +9,22 @@ import java.lang.reflect.Array;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * A scoped thread-local resource.
+ * <p>
+ * This is used for small, tightly-scoped thread-local resource "pools", a safer alternative
+ * to a thread-local singleton.
+ * <p>
+ * Example of use:
+ * <pre>{@code
+ *   try (ScopedResource<Wire> sharedWire = sharedWireScopedThreadLocal.get()) {
+ *     Wire wire = sharedWire.get();
+ *     // ... do something with the wire
+ *   } // it is returned for use by inner scopes here
+ * }</pre>
+ *
+ * @param <T>
+ */
 public class ScopedThreadLocal<T> {
 
     private final Supplier<T> supplier;
