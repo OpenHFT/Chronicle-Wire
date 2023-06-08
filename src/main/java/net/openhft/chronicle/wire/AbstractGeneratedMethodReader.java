@@ -38,8 +38,6 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  * Base class for generated method readers.
  */
 public abstract class AbstractGeneratedMethodReader implements MethodReader {
-    @Deprecated(/* to be removed in x.26 */)
-    private static final boolean RETRY_UNKOWN_METHOD = Jvm.getBoolean("retry.unknown.method", true);
     private static final Consumer<MessageHistory> NO_OP_MH_CONSUMER = Mocker.ignored(Consumer.class);
     private static final MessageHistoryThreadLocal TEMP_MESSAGE_HISTORY = new MessageHistoryThreadLocal();
     protected final WireParselet debugLoggingParselet;
@@ -51,16 +49,17 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     private Consumer<MessageHistory> historyConsumer = NO_OP_MH_CONSUMER;
 
     private Predicate predicate;
-
-    public AbstractGeneratedMethodReader predicate(Predicate predicate) {
-        this.predicate = predicate;
-        return this;
-    }
+    private boolean scanning;
 
     protected AbstractGeneratedMethodReader(MarshallableIn in,
                                             WireParselet debugLoggingParselet) {
         this.in = in;
         this.debugLoggingParselet = debugLoggingParselet;
+    }
+
+    public AbstractGeneratedMethodReader predicate(Predicate predicate) {
+        this.predicate = predicate;
+        return this;
     }
 
     /**
@@ -235,6 +234,9 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
 
     @Override
     public boolean readOne() {
+        if (!predicate.test(this))
+            return false;
+
         do {
             throwExceptionIfClosed();
 

@@ -53,9 +53,16 @@ public class ReadOneTest extends WireTestCommon {
         void snapshot(SnapshotDTO dto);
     }
 
-
     @Test
     public void test() throws InterruptedException {
+        doTest(false);
+    }
+    @Test
+    public void testScanning() throws InterruptedException {
+        doTest(true);
+    }
+
+    public void doTest(boolean scanning) throws InterruptedException {
 
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
         Wire wire = new TextWire(b) {
@@ -89,17 +96,34 @@ public class ReadOneTest extends WireTestCommon {
         SnapshotDTO[] q = {null};
 
         MethodReader reader = wire.methodReaderBuilder()
+                .scanning(scanning)
                 .build((SnapshotListener) d -> q[0] = d);
 
+        if (!scanning) {
+            // 1
+            assertTrue(reader.readOne());
+        }
+        // 2
         assertTrue(reader.readOne());
         assertNotNull(q[0]);
         assertEquals("one", q[0].data);
         q[0] = null;
 
+        if (!scanning) {
+            // 3
+            assertTrue(reader.readOne());
+            // 4
+            assertTrue(reader.readOne());
+        }
+        // 5
         assertTrue(reader.readOne());
         assertNotNull(q[0]);
         assertEquals("two", q[0].data);
 
+        if (!scanning) {
+            // 6
+            assertTrue(reader.readOne());
+        }
         assertFalse(reader.readOne());
     }
 
