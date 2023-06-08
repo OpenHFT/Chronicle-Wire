@@ -136,6 +136,7 @@ public class ScopedThreadLocal<T> {
                 instances[++headIndex] = instance;
             } else {
                 Jvm.warn().on(ScopedThreadLocal.class, "Pool capacity exceeded, consider increasing maxInstances, maxInstances=" + instances.length);
+                instance.closeResource();
             }
         }
 

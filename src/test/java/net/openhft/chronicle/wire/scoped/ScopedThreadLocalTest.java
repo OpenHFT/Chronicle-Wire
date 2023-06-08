@@ -2,8 +2,9 @@ package net.openhft.chronicle.wire.scoped;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.threads.CleaningThread;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import net.openhft.chronicle.wire.WireTestCommon;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.Closeable;
 import java.util.ArrayList;
@@ -12,20 +13,34 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-class ScopedThreadLocalTest {
+
+public class ScopedThreadLocalTest extends WireTestCommon {
+
+    private static final int MAX_INSTANCES = 3;
 
     private ScopedThreadLocal<AtomicLong> scopedThreadLocal;
 
-    @BeforeEach
-    void setUp() {
-        scopedThreadLocal = new ScopedThreadLocal<>(AtomicLong::new, al -> al.set(0), 3);
+    @Before
+    public void createSTL() {
+        scopedThreadLocal = new ScopedThreadLocal<>(AtomicLong::new, al -> al.set(0), MAX_INSTANCES);
     }
 
     @Test
-    void nestedCallsWillGetDifferentResources() {
+    public void warningWillBeDisplayedWhenWeUseMoreThanMaxInstances() {
+        expectException("Pool capacity exceeded, consider increasing maxInstances, maxInstances=3");
+        ArrayList<ScopedResource<AtomicLong>> allLongs = new ArrayList<>();
+        for (int i = 0; i < MAX_INSTANCES + 1; i++) {
+            allLongs.add(scopedThreadLocal.get());
+        }
+        closeQuietly(allLongs);
+    }
+
+    @Test
+    public void nestedCallsWillGetDifferentResources() {
         try (ScopedResource<AtomicLong> l1 = scopedThreadLocal.get()) {
             l1.get().set(123);
             try (ScopedResource<AtomicLong> l2 = scopedThreadLocal.get()) {
@@ -40,7 +55,7 @@ class ScopedThreadLocalTest {
     }
 
     @Test
-    void differentThreadsWillGetDifferentResources() throws InterruptedException {
+    public void differentThreadsWillGetDifferentResources() throws InterruptedException {
         Set<Integer> instanceObjectIDs = new HashSet<>();
         final int numThreads = 10;
         for (int i = 0; i < numThreads; i++) {
@@ -62,7 +77,7 @@ class ScopedThreadLocalTest {
     }
 
     @Test
-    void onAcquireIsPerformedBeforeEachAcquisition() {
+    public void onAcquireIsPerformedBeforeEachAcquisition() {
         int objectId;
         try (ScopedResource<AtomicLong> l1 = scopedThreadLocal.get()) {
             l1.get().set(123);
@@ -75,7 +90,7 @@ class ScopedThreadLocalTest {
     }
 
     @Test
-    void cleaningThreadWillCloseResources() throws InterruptedException {
+    public void cleaningThreadWillCloseResources() throws InterruptedException {
         List<CloseableResource> allResources = new ArrayList<>();
         ScopedThreadLocal<CloseableResource> stl = new ScopedThreadLocal<>(() -> {
             CloseableResource cr = new CloseableResource();
