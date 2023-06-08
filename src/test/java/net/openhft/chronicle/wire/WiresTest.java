@@ -21,6 +21,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesMarshallable;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -263,6 +264,33 @@ public class WiresTest extends WireTestCommon {
         ContainsBM containsBM2 = new ContainsBM(null);
         Wires.copyTo(containsBM, containsBM2);
         assertEquals(containsBM.inner.name, containsBM2.inner.name);
+    }
+
+    @Test
+    public void deepCopyWillWorkWhenDynamicEnumIsAnnotatedAsMarshallable() {
+        ClassAliasPool.CLASS_ALIASES.addAlias(Thing.class, EnumThing.class);
+
+        Thing thing2 = Marshallable.fromString(
+                "!Thing {" +
+                        "   eventTime: 2020-09-09T01:46:41,\n" +
+                        "   dee1: !EnumThing {\n" +
+                        "      name: ONE,\n" +
+                        "   }\n" +
+                        "   someString: bla bla,\n" +
+                        "}\n");
+        final Thing thingCopy = thing2.deepCopy();
+        assertEquals(thing2, thingCopy);
+    }
+
+    static class Thing extends AbstractEventCfg<Thing> {
+        @AsMarshallable
+        DynamicEnum dee1;
+        String someString;
+    }
+
+    enum EnumThing implements DynamicEnum {
+        ONE,
+        TWO;
     }
 
     static class OneTwoFour extends BytesInBinaryMarshallable {
