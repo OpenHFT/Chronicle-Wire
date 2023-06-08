@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -33,11 +34,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(Parameterized.class)
 public class YamlTesterParametersTest extends WireTestCommon {
-    static final String paths = "" +
-            "yaml-tester/t1," +
-            "yaml-tester/t2," +
-            "yaml-tester/t3," +
-            "yaml-tester/comments-new";
+    static final String[] paths = {
+            "yaml-tester/t1",
+            "yaml-tester/t2",
+            "yaml-tester/t3",
+            "yaml-tester/comments-new"};
 
     final String name;
     final YamlTester tester;
@@ -52,7 +53,7 @@ public class YamlTesterParametersTest extends WireTestCommon {
         // ignored as duplicate
         // ignored
         // also ignored as duplicates
-        return new YamlTesterParametersBuilder<>(TestImpl::new, TestOut.class, paths)
+        return new YamlTesterParametersBuilder<>(TestImpl::new, TestOut.class, Arrays.asList(paths))
                 .agitators(
                         YamlAgitator.messageMissing(),
                         YamlAgitator.messageMissing(),
