@@ -32,6 +32,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import run.chronicle.account.api.AccountsOut;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -39,10 +40,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(Parameterized.class)
 public class AccountsTest extends WireTestCommon {
-    static final String paths = "" +
-            "account/simple," +
-            "account/mixed," +
-            "account/waterfall";
+    static final String[] paths = {
+            "account/simple",
+            "account/mixed",
+            "account/waterfall"
+    };
     static final long VAULT = Base85.INSTANCE.parse("vault");
 
     final String name;
@@ -55,13 +57,13 @@ public class AccountsTest extends WireTestCommon {
 
     @Parameterized.Parameters(name = "{0}")
     public static List<Object[]> parameters() {
-        return new YamlTesterParametersBuilder<>(out -> new AccountsImpl(out).id(VAULT), AccountsOut.class, paths)
+        return new YamlTesterParametersBuilder<>(out -> new AccountsImpl(out).id(VAULT), AccountsOut.class, Arrays.asList(paths))
                 .agitators(
                         YamlAgitator.messageMissing(),
                         YamlAgitator.duplicateMessage(),
                         YamlAgitator.overrideFields("currency: , amount: NaN, amount: -1, target: no-vault".split(", *")),
                         YamlAgitator.missingFields("name, account, sender, target, sendingTime, from, to, currency, amount, reference".split(", *")))
-                .exceptionHandlerFunction(out -> (log, msg, thrown) -> ((ErrorListener) out).jvmError(thrown == null ? msg : (msg + " " + thrown)))
+                .exceptionHandlerFunction(out -> (log, msg, thrown) -> out.jvmError(thrown == null ? msg : (msg + " " + thrown)))
                 .exceptionHandlerFunctionAndLog(true)
                 .get();
     }
