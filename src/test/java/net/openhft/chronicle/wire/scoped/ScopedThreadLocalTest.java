@@ -1,14 +1,19 @@
 package net.openhft.chronicle.wire.scoped;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.threads.CleaningThread;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.Closeable;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ScopedThreadLocalTest {
 
@@ -66,6 +71,39 @@ class ScopedThreadLocalTest {
         try (ScopedResource<AtomicLong> l1 = scopedThreadLocal.get()) {
             assertEquals(0L, l1.get().get());
             assertEquals(objectId, System.identityHashCode(l1.get()));
+        }
+    }
+
+    @Test
+    void cleaningThreadWillCloseResources() throws InterruptedException {
+        List<CloseableResource> allResources = new ArrayList<>();
+        ScopedThreadLocal<CloseableResource> stl = new ScopedThreadLocal<>(() -> {
+            CloseableResource cr = new CloseableResource();
+            allResources.add(cr);
+            return cr;
+        }, 2);
+        final CleaningThread cleaningThread = new CleaningThread(() -> {
+            try (final ScopedResource<CloseableResource> cr1 = stl.get();
+                 final ScopedResource<CloseableResource> cr2 = stl.get()) {
+                // Create two resources, do nothing
+            }
+            // None should be closed
+            assertTrue(allResources.stream().noneMatch(cr -> cr.closed));
+        });
+        cleaningThread.start();
+        cleaningThread.join();
+        // All should be closed
+        assertEquals(2, allResources.size());
+        assertTrue(allResources.stream().allMatch(cr -> cr.closed));
+    }
+
+    private static class CloseableResource implements Closeable {
+
+        private boolean closed = false;
+
+        @Override
+        public void close() {
+            closed = true;
         }
     }
 }

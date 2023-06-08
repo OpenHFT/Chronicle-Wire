@@ -1,5 +1,7 @@
 package net.openhft.chronicle.wire.scoped;
 
+import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
+
 /**
  * A {@link ScopedResource} that will always retain a strong reference to the
  * contained resource, even when not "in use"
@@ -17,6 +19,11 @@ public class StrongReferenceScopedResource<T> extends AbstractScopedResource<T> 
 
     public T get() {
         return resource;
+    }
+
+    @Override
+    public void closeResource() {
+        closeQuietly(resource);
     }
 }
 

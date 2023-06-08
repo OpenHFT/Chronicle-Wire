@@ -1,5 +1,7 @@
 package net.openhft.chronicle.wire.scoped;
 
+import net.openhft.chronicle.core.io.Closeable;
+
 import java.lang.ref.WeakReference;
 import java.util.function.Supplier;
 
@@ -42,5 +44,14 @@ public class WeakReferenceScopedResource<T> extends AbstractScopedResource<T> {
     public void close() {
         strongRef = null;
         super.close();
+    }
+
+    @Override
+    public void closeResource() {
+        if (ref != null) {
+            Closeable.closeQuietly(ref.get());
+            ref.clear();
+            ref = null;
+        }
     }
 }

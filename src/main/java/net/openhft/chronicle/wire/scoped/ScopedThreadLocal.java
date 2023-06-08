@@ -1,6 +1,8 @@
 package net.openhft.chronicle.wire.scoped;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.AbstractCloseable;
+import net.openhft.chronicle.core.threads.CleaningThreadLocal;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
@@ -11,7 +13,7 @@ public class ScopedThreadLocal<T> {
 
     private final Supplier<T> supplier;
     private final Consumer<T> onAcquire;
-    private final ThreadLocal<SimpleStack> instancesTL;
+    private final CleaningThreadLocal<SimpleStack> instancesTL;
     private final boolean useWeakReferences;
 
     /**
@@ -46,7 +48,7 @@ public class ScopedThreadLocal<T> {
     public ScopedThreadLocal(@NotNull Supplier<T> supplier, @NotNull Consumer<T> onAcquire, int maxInstances, boolean useWeakReferences) {
         this.supplier = supplier;
         this.onAcquire = onAcquire;
-        this.instancesTL = ThreadLocal.withInitial(() -> new SimpleStack(maxInstances));
+        this.instancesTL = CleaningThreadLocal.withCloseQuietly(() -> new SimpleStack(maxInstances));
         this.useWeakReferences = useWeakReferences;
     }
 
@@ -94,7 +96,7 @@ public class ScopedThreadLocal<T> {
     /**
      * A simple array-based stack for managing retained {@link ScopedResource}s
      */
-    class SimpleStack {
+    class SimpleStack extends AbstractCloseable {
 
         private final AbstractScopedResource<T>[] instances;
         private int headIndex = -1;
@@ -123,6 +125,16 @@ public class ScopedThreadLocal<T> {
 
         boolean isEmpty() {
             return headIndex == -1;
+        }
+
+        @Override
+        protected void performClose() throws IllegalStateException {
+            for (int i = 0; i < instances.length; i++) {
+                if (instances[i] != null) {
+                    instances[i].closeResource();
+                    instances[i] = null;
+                }
+            }
         }
     }
 }

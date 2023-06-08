@@ -1,11 +1,16 @@
 package net.openhft.chronicle.wire.scoped;
 
-public abstract class AbstractScopedResource<T> implements ScopedResource<T> {
+abstract class AbstractScopedResource<T> implements ScopedResource<T> {
 
     private final ScopedThreadLocal<T> scopedThreadLocal;
 
     protected AbstractScopedResource(ScopedThreadLocal<T> scopedThreadLocal) {
         this.scopedThreadLocal = scopedThreadLocal;
+    }
+
+    @Override
+    public void close() {
+        scopedThreadLocal.returnResource(this);
     }
 
     /**
@@ -15,8 +20,8 @@ public abstract class AbstractScopedResource<T> implements ScopedResource<T> {
         // Do nothing by default
     }
 
-    @Override
-    public void close() {
-        scopedThreadLocal.returnResource(this);
-    }
+    /**
+     * Close the contained resource and clear any references
+     */
+    abstract void closeResource();
 }
