@@ -20,12 +20,16 @@ import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.bytes.util.BinaryLengthLength;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.wire.converter.NanoTime;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
+
+import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
 
 @SuppressWarnings("rawtypes")
 public class VanillaMessageHistory extends SelfDescribingMarshallable implements MessageHistory {
@@ -37,6 +41,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
                 return veh;
             });
     static boolean USE_BYTES_MARSHALLABLE = Boolean.getBoolean("history.as.bytes");
+    private final boolean HISTORY_WALL_CLOCK = Jvm.getBoolean("history.wall.clock");
     @NotNull
     private final int[] sourceIdArray = new int[MESSAGE_HISTORY_LENGTH];
     @NotNull
@@ -183,7 +188,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             wire.bytes().writeUnsignedByte(BinaryWireCode.BYTES_MARSHALLABLE);
             writeMarshallable(wire.bytes());
         } else {
-
             wire.write("sources").sequence(this, acceptSourcesConsumer);
             wire.write("timings").sequence(this, acceptTimingsConsumer);
         }
@@ -227,7 +231,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     }
 
     protected long nanoTime() {
-        return System.nanoTime();
+        return HISTORY_WALL_CLOCK ? CLOCK.currentTimeNanos() : System.nanoTime();
     }
 
     private void acceptSources(VanillaMessageHistory t, ValueOut out) {
@@ -285,16 +289,17 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     /**
      * We need a custom toString as the base class toString calls writeMarshallable which does not mutate this,
      * but will display a different result every time you toString the object as it outputs System.nanoTime
+     * or Wall Clock in NS if the wall.clock.message.history system property is set
      *
      * @return String representation
      */
     @Override
     public String toString() {
-        return "VanillaMessageHistory{" +
+        return "VanillaMessageHistory { " +
                 "sources: [" + toStringSources() +
-                "] timings: [" + toStringTimings() +
-                "] addSourceDetails=" + addSourceDetails +
-                '}';
+                "], timings: [" + toStringTimings() +
+                "], addSourceDetails=" + addSourceDetails +
+                " }";
     }
 
     /**
@@ -311,22 +316,28 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         return copy;
     }
 
-    private String toStringSources() {
+    private CharSequence toStringSources() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < sources; i++) {
             if (i > 0) sb.append(',');
             sb.append(sourceIdArray[i]).append("=0x").append(Long.toHexString(sourceIndexArray[i]));
         }
-        return sb.toString();
+        return sb;
     }
 
-    private String toStringTimings() {
+    private CharSequence toStringTimings() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < timings; i++) {
-            if (i > 0) sb.append(',');
-            sb.append(timingsArray[i]);
+            if (i > 0)
+                sb.append(',');
+            if (HISTORY_WALL_CLOCK)
+                sb.append(' ').append(NanoTime.INSTANCE.asString(timingsArray[i]));
+            else
+                sb.append(timingsArray[i]);
         }
-        return sb.toString();
+        if (HISTORY_WALL_CLOCK)
+            sb.append(' ');
+        return sb;
     }
 
     @Override

@@ -131,6 +131,7 @@ public class WireTestCommon {
         assertReferencesReleased();
         checkThreadDump();
         checkExceptions();
+        MessageHistory.set(null);
     }
 
     protected void preAfter() {

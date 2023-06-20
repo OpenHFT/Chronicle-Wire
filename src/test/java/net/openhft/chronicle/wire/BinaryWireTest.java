@@ -1103,7 +1103,8 @@ public class BinaryWireTest extends WireTestCommon {
                 "" +
                         "c1 41                                           # A:\n" +
                         "82 3f 00 00 00                                  # MyTypesCustom\n" +
-                        "c6 42 5f 46 4c 41 47 b1                         # B_FLAG:\n" +
+                        "c6 42 5f 46 4c 41 47                            # B_FLAG:\n" +
+                        "b1                                              # true\n" +
                         "c5 53 5f 4e 55 4d                               # S_NUM:\n" +
                         "a5 39 30                                        # 12345\n" +
                         "c5 44 5f 4e 55 4d                               # D_NUM:\n" +
@@ -1116,7 +1117,8 @@ public class BinaryWireTest extends WireTestCommon {
                         "eb 48 65 6c 6c 6f 20 57 6f 72 6c 64             # Hello World\n" +
                         "c1 42                                           # B:\n" +
                         "82 3b 00 00 00                                  # MyTypesCustom\n" +
-                        "c6 42 5f 46 4c 41 47 b0                         # B_FLAG:\n" +
+                        "c6 42 5f 46 4c 41 47                            # B_FLAG:\n" +
+                        "b0                                              # false\n" +
                         "c5 53 5f 4e 55 4d                               # S_NUM:\n" +
                         "a5 d2 04                                        # 1234\n" +
                         "c5 44 5f 4e 55 4d                               # D_NUM:\n" +
@@ -1130,7 +1132,8 @@ public class BinaryWireTest extends WireTestCommon {
                 "" +
                         "c1 41                                           # A:\n" +
                         "82 3f 00 00 00                                  # MyTypesCustom\n" +
-                        "c6 42 5f 46 4c 41 47 b1                         # B_FLAG:\n" +
+                        "c6 42 5f 46 4c 41 47                            # B_FLAG:\n" +
+                        "b1                                              # true\n" +
                         "c5 53 5f 4e 55 4d                               # S_NUM:\n" +
                         "a5 39 30                                        # 12345\n" +
                         "c5 44 5f 4e 55 4d                               # D_NUM:\n" +
@@ -1143,7 +1146,8 @@ public class BinaryWireTest extends WireTestCommon {
                         "eb 48 65 6c 6c 6f 20 57 6f 72 6c 64             # Hello World\n" +
                         "c1 42                                           # B:\n" +
                         "82 3b 00 00 00                                  # MyTypesCustom\n" +
-                        "c6 42 5f 46 4c 41 47 b0                         # B_FLAG:\n" +
+                        "c6 42 5f 46 4c 41 47                            # B_FLAG:\n" +
+                        "b0                                              # false\n" +
                         "c5 53 5f 4e 55 4d                               # S_NUM:\n" +
                         "a5 d2 04                                        # 1234\n" +
                         "c5 44 5f 4e 55 4d                               # D_NUM:\n" +
@@ -1157,7 +1161,8 @@ public class BinaryWireTest extends WireTestCommon {
                 "" +
                         "c1 41                                           # A:\n" +
                         "82 4b 00 00 00                                  # MyTypesCustom\n" +
-                        "c6 42 5f 46 4c 41 47 b1                         # B_FLAG:\n" +
+                        "c6 42 5f 46 4c 41 47                            # B_FLAG:\n" +
+                        "b1                                              # true\n" +
                         "c5 53 5f 4e 55 4d                               # S_NUM:\n" +
                         "a5 39 30                                        # 12345\n" +
                         "c5 44 5f 4e 55 4d                               # D_NUM:\n" +
@@ -1170,7 +1175,8 @@ public class BinaryWireTest extends WireTestCommon {
                         "eb 48 65 6c 6c 6f 20 57 6f 72 6c 64             # Hello World\n" +
                         "c1 42                                           # B:\n" +
                         "82 47 00 00 00                                  # MyTypesCustom\n" +
-                        "c6 42 5f 46 4c 41 47 b0                         # B_FLAG:\n" +
+                        "c6 42 5f 46 4c 41 47                            # B_FLAG:\n" +
+                        "b0                                              # false\n" +
                         "c5 53 5f 4e 55 4d                               # S_NUM:\n" +
                         "a5 d2 04                                        # 1234\n" +
                         "c5 44 5f 4e 55 4d                               # D_NUM:\n" +
@@ -1184,7 +1190,8 @@ public class BinaryWireTest extends WireTestCommon {
                 "" +
                         "ba 41                                           # 65\n" +
                         "82 27 00 00 00                                  # MyTypesCustom\n" +
-                        "ba 00 b1                                        # 0\n" +
+                        "ba 00                                           # 0\n" +
+                        "b1                                              # true\n" +
                         "ba 01                                           # 1\n" +
                         "a5 39 30                                        # 12345\n" +
                         "ba 02                                           # 2\n" +
@@ -1197,7 +1204,8 @@ public class BinaryWireTest extends WireTestCommon {
                         "eb 48 65 6c 6c 6f 20 57 6f 72 6c 64             # Hello World\n" +
                         "ba 42                                           # 66\n" +
                         "82 23 00 00 00                                  # MyTypesCustom\n" +
-                        "ba 00 b0                                        # 0\n" +
+                        "ba 00                                           # 0\n" +
+                        "b0                                              # false\n" +
                         "ba 01                                           # 1\n" +
                         "a5 d2 04                                        # 1234\n" +
                         "ba 02                                           # 2\n" +
@@ -1211,7 +1219,8 @@ public class BinaryWireTest extends WireTestCommon {
                 "" +
                         "ba 41                                           # 65\n" +
                         "82 33 00 00 00                                  # MyTypesCustom\n" +
-                        "ba 00 b1                                        # 0\n" +
+                        "ba 00                                           # 0\n" +
+                        "b1                                              # true\n" +
                         "ba 01                                           # 1\n" +
                         "a5 39 30                                        # 12345\n" +
                         "ba 02                                           # 2\n" +
@@ -1224,7 +1233,8 @@ public class BinaryWireTest extends WireTestCommon {
                         "eb 48 65 6c 6c 6f 20 57 6f 72 6c 64             # Hello World\n" +
                         "ba 42                                           # 66\n" +
                         "82 2f 00 00 00                                  # MyTypesCustom\n" +
-                        "ba 00 b0                                        # 0\n" +
+                        "ba 00                                           # 0\n" +
+                        "b0                                              # false\n" +
                         "ba 01                                           # 1\n" +
                         "a5 d2 04                                        # 1234\n" +
                         "ba 02                                           # 2\n" +
@@ -1236,26 +1246,30 @@ public class BinaryWireTest extends WireTestCommon {
                         "ba 05                                           # 5\n" +
                         "e7 42 79 65 20 6e 6f 77                         # Bye now\n",
                 "" +
-                        "82 1b 00 00 00 b1                               # MyTypesCustom\n" +
+                        "82 1b 00 00 00                                  # MyTypesCustom\n" +
+                        "b1                                              # true\n" +
                         "a5 39 30                                        # 12345\n" +
                         "94 80 ad 4b                                     # 1234560/1e4\n" +
                         "a1 00                                           # 0\n" +
                         "a6 43 9e 43 ff                                  # -12345789\n" +
                         "eb 48 65 6c 6c 6f 20 57 6f 72 6c 64             # Hello World\n" +
-                        "82 17 00 00 00 b0                               # MyTypesCustom\n" +
+                        "82 17 00 00 00                                  # MyTypesCustom\n" +
+                        "b0                                              # false\n" +
                         "a5 d2 04                                        # 1234\n" +
                         "94 87 ad 4b                                     # 1234567/1e4\n" +
                         "a1 00                                           # 0\n" +
                         "a6 9e 2e a4 f8                                  # -123457890\n" +
                         "e7 42 79 65 20 6e 6f 77                         # Bye now\n",
                 "" +
-                        "82 27 00 00 00 b1                               # MyTypesCustom\n" +
+                        "82 27 00 00 00                                  # MyTypesCustom\n" +
+                        "b1                                              # true\n" +
                         "a5 39 30                                        # 12345\n" +
                         "91 77 be 9f 1a 2f dd 5e 40                      # 123.456\n" +
                         "a7 00 00 00 00 00 00 00 00                      # 0\n" +
                         "a6 43 9e 43 ff                                  # -12345789\n" +
                         "eb 48 65 6c 6c 6f 20 57 6f 72 6c 64             # Hello World\n" +
-                        "82 23 00 00 00 b0                               # MyTypesCustom\n" +
+                        "82 23 00 00 00                                  # MyTypesCustom\n" +
+                        "b0                                              # false\n" +
                         "a5 d2 04                                        # 1234\n" +
                         "91 53 05 a3 92 3a dd 5e 40                      # 123.4567\n" +
                         "a7 00 00 00 00 00 00 00 00                      # 0\n" +
