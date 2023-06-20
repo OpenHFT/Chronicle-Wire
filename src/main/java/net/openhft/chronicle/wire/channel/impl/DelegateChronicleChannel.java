@@ -116,4 +116,9 @@ public class DelegateChronicleChannel implements InternalChronicleChannel, Close
     public int bufferSize() {
         return channel.bufferSize();
     }
+
+    @Override
+    public boolean recordHistory() {
+        return channel.recordHistory();
+    }
 }

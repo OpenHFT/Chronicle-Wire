@@ -1460,6 +1460,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut bool(@Nullable Boolean flag) {
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(flag == null ? "null" : flag ? "true" : "false");
             bytes.writeUnsignedByte(flag == null
                     ? NULL
                     : (flag ? TRUE : FALSE));

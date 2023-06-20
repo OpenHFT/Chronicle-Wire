@@ -25,11 +25,13 @@ import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.threads.PauserMode;
 import net.openhft.chronicle.wire.*;
 import net.openhft.chronicle.wire.channel.*;
+import net.openhft.chronicle.wire.channel.impl.tcp.Handler;
 import net.openhft.chronicle.wire.converter.NanoTime;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channel;
 import java.nio.channels.SocketChannel;
 import java.util.Collections;
 import java.util.Set;
@@ -446,6 +448,15 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
 
     public int bufferSize() {
         return bufferSize;
+    }
+
+    @Override
+    public boolean recordHistory() {
+        if (headerOut instanceof ChannelHandler
+                && ((ChannelHandler) headerOut).recordHistory())
+            return true;
+        return headerInToUse instanceof ChannelHandler
+                && ((ChannelHandler) headerInToUse).recordHistory();
     }
 
     private class ConnectionDocumentContextHolder extends DocumentContextHolder implements WriteDocumentContext {

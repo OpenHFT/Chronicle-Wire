@@ -81,10 +81,10 @@ public class MessageHistoryTest extends WireTestCommon {
         history.writeMarshallable(bw);
         VanillaMessageHistory history2 = new SetTimeMessageHistory();
         history2.readMarshallable(bw);
-        assertEquals("VanillaMessageHistory{" +
-                "sources: [1=0xff,2=0xfff] " +
-                "timings: [10000,20000,120962203520100] " +
-                "addSourceDetails=false}", history2.toString());
+        assertEquals("VanillaMessageHistory { " +
+                "sources: [1=0xff,2=0xfff], " +
+                "timings: [10000,20000,120962203520100], " +
+                "addSourceDetails=false }", history2.toString());
 
         bw.bytes().readPosition(0);
         history2.addSourceDetails(true);
@@ -100,48 +100,53 @@ public class MessageHistoryTest extends WireTestCommon {
         };
         bw.parent(sc);
         history2.readMarshallable(bw);
-        assertEquals("VanillaMessageHistory{" +
-                "sources: [1=0xff,2=0xfff,3=0xffff] " +
-                "timings: [10000,20000,120962203520100,120962203520100] " +
-                "addSourceDetails=true}", history2.toString());
+        assertEquals("VanillaMessageHistory { " +
+                "sources: [1=0xff,2=0xfff,3=0xffff], " +
+                "timings: [10000,20000,120962203520100,120962203520100], " +
+                "addSourceDetails=true }", history2.toString());
     }
 
     @Test
     public void checkToString() {
-        VanillaMessageHistory history = new SetTimeMessageHistory();
-        history.addSourceDetails(true);
-        history.addSource(1, 0xff);
-        history.addSource(2, 0xfff);
-        history.addTiming(10_000);
-        history.addTiming(20_000);
-        assertEquals(2, history.sources());
-        assertEquals(2, history.timings());
+        try {
+            System.setProperty("history.wall.clock", "true");
+            VanillaMessageHistory history = new SetTimeMessageHistory();
+            history.addSourceDetails(true);
+            history.addSource(1, 0xff);
+            history.addSource(2, 0xfff);
+            history.addTiming(1_000_000_000_000_000_000L);
+            history.addTiming(1_000_000_000_000_010_000L);
+            assertEquals(2, history.sources());
+            assertEquals(2, history.timings());
 
-        BinaryWire bw = new BinaryWire(new HexDumpBytes());
-        bw.writeEventName(MethodReader.HISTORY).marshallable(history);
-        assertEquals("" +
-                        "b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
-                        "81 3f 00                                        # SetTimeMessageHistory\n" +
-                        "c7 73 6f 75 72 63 65 73                         # sources:\n" +
-                        "82 16 00 00 00                                  # sequence\n" +
-                        "                                                # source id & index\n" +
-                        "a1 01 af ff 00 00 00 00 00 00 00                # 1\n" +
-                        "                                                # source id & index\n" +
-                        "a1 02 af ff 0f 00 00 00 00 00 00                # 2\n" +
-                        "c7 74 69 6d 69 6e 67 73                         # timings:\n" +
-                        "82 0f 00 00 00                                  # sequence\n" +
-                        "                                                # timing in nanos\n" +
-                        "a5 10 27                                        # 10000\n" +
-                        "                                                # timing in nanos\n" +
-                        "a5 20 4e                                        # 20000\n" +
-                        "a7 64 0c 2c b5 03 6e 00 00                      # 120962203520100\n",
-                bw.bytes().toHexString());
-        bw.bytes().releaseLast();
+            BinaryWire bw = new BinaryWire(new HexDumpBytes());
+            bw.writeEventName(MethodReader.HISTORY).marshallable(history);
+            assertEquals("" +
+                            "b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
+                            "81 4b 00                                        # SetTimeMessageHistory\n" +
+                            "c7 73 6f 75 72 63 65 73                         # sources:\n" +
+                            "82 16 00 00 00                                  # sequence\n" +
+                            "                                                # source id & index\n" +
+                            "a1 01 af ff 00 00 00 00 00 00 00                # 1\n" +
+                            "                                                # source id & index\n" +
+                            "a1 02 af ff 0f 00 00 00 00 00 00                # 2\n" +
+                            "c7 74 69 6d 69 6e 67 73                         # timings:\n" +
+                            "82 1b 00 00 00                                  # sequence\n" +
+                            "                                                # timing in nanos\n" +
+                            "a7 00 00 64 a7 b3 b6 e0 0d                      # 1000000000000000000\n" +
+                            "                                                # timing in nanos\n" +
+                            "a7 10 27 64 a7 b3 b6 e0 0d                      # 1000000000000010000\n" +
+                            "a7 64 0c 2c b5 03 6e 00 00                      # 120962203520100\n",
+                    bw.bytes().toHexString());
+            bw.bytes().releaseLast();
 
-        assertEquals("VanillaMessageHistory{sources: [1=0xff,2=0xfff] timings: [10000,20000] addSourceDetails=true}",
-                history.toString());
-        assertEquals(2, history.sources());
-        assertEquals(2, history.timings());
+            assertEquals("VanillaMessageHistory { sources: [1=0xff,2=0xfff], timings: [ 2001-09-09T01:46:40, 2001-09-09T01:46:40.00001 ], addSourceDetails=true }",
+                    history.toString());
+            assertEquals(2, history.sources());
+            assertEquals(2, history.timings());
+        } finally {
+            System.clearProperty("history.wall.clock");
+        }
     }
 
     @After
@@ -151,48 +156,53 @@ public class MessageHistoryTest extends WireTestCommon {
 
     @Test
     public void testReadMarshallable() {
-        SetTimeMessageHistory vmh = new SetTimeMessageHistory();
-        vmh.addSource(1, 2);
-        vmh.addTiming(1111);
-        vmh.addTiming(2222);
+        try {
+            System.setProperty("history.wall.clock", "true");
+            SetTimeMessageHistory vmh = new SetTimeMessageHistory();
+            vmh.addSource(1, 2);
+            vmh.addTiming(1111);
+            vmh.addTiming(2222);
 
-        HexDumpBytes bytes = new HexDumpBytes();
-        Wire wire = new BinaryWire(bytes);
-        VanillaMessageHistory.USE_BYTES_MARSHALLABLE = false;
-        wire.writeEventName(MethodReader.HISTORY).object(SetTimeMessageHistory.class, vmh);
+            HexDumpBytes bytes = new HexDumpBytes();
+            Wire wire = new BinaryWire(bytes);
+            VanillaMessageHistory.USE_BYTES_MARSHALLABLE = false;
+            wire.writeEventName(MethodReader.HISTORY).object(SetTimeMessageHistory.class, vmh);
 
-        vmh.nanoTime = 120962203520000L;
-        VanillaMessageHistory.USE_BYTES_MARSHALLABLE = true;
-        wire.writeEventId(MESSAGE_HISTORY_METHOD_ID).object(SetTimeMessageHistory.class, vmh);
+            vmh.nanoTime = 120962203520000L;
+            VanillaMessageHistory.USE_BYTES_MARSHALLABLE = true;
+            wire.writeEventId(MESSAGE_HISTORY_METHOD_ID).object(SetTimeMessageHistory.class, vmh);
 
-        assertEquals("" +
-                        "b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
-                        "81 34 00                                        # SetTimeMessageHistory\n" +
-                        "c7 73 6f 75 72 63 65 73                         # sources:\n" +
-                        "82 0b 00 00 00                                  # sequence\n" +
-                        "                                                # source id & index\n" +
-                        "a1 01 af 02 00 00 00 00 00 00 00                # 1\n" +
-                        "c7 74 69 6d 69 6e 67 73                         # timings:\n" +
-                        "82 0f 00 00 00                                  # sequence\n" +
-                        "                                                # timing in nanos\n" +
-                        "a5 57 04                                        # 1111\n" +
-                        "                                                # timing in nanos\n" +
-                        "a5 ae 08                                        # 2222\n" +
-                        "a7 64 0c 2c b5 03 6e 00 00 ba 80 00             # 120962203520100\n" +
-                        "81 27 00 86                                     # SetTimeMessageHistory\n" +
-                        "01 01 00 00 00 02 00 00 00 00 00 00 00          # sources\n" +
-                        "03 57 04 00 00 00 00 00 00 ae 08 00 00 00 00 00 # timings\n" +
-                        "00 64 0c 2c b5 03 6e 00 00\n",
-                bytes.toHexString());
-        vmh.addTiming(120962203520100L);
+            assertEquals("" +
+                            "b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
+                            "81 34 00                                        # SetTimeMessageHistory\n" +
+                            "c7 73 6f 75 72 63 65 73                         # sources:\n" +
+                            "82 0b 00 00 00                                  # sequence\n" +
+                            "                                                # source id & index\n" +
+                            "a1 01 af 02 00 00 00 00 00 00 00                # 1\n" +
+                            "c7 74 69 6d 69 6e 67 73                         # timings:\n" +
+                            "82 0f 00 00 00                                  # sequence\n" +
+                            "                                                # timing in nanos\n" +
+                            "a5 57 04                                        # 1111\n" +
+                            "                                                # timing in nanos\n" +
+                            "a5 ae 08                                        # 2222\n" +
+                            "a7 64 0c 2c b5 03 6e 00 00 ba 80 00             # 120962203520100\n" +
+                            "81 27 00 86                                     # SetTimeMessageHistory\n" +
+                            "01 01 00 00 00 02 00 00 00 00 00 00 00          # sources\n" +
+                            "03 57 04 00 00 00 00 00 00 ae 08 00 00 00 00 00 # timings\n" +
+                            "00 64 0c 2c b5 03 6e 00 00\n",
+                    bytes.toHexString());
+            vmh.addTiming(120962203520100L);
 
-        VanillaMessageHistory vmh2 = new VanillaMessageHistory();
-        wire.read().object(vmh2, VanillaMessageHistory.class);
-        assertEquals(vmh.toString(), vmh2.toString());
+            VanillaMessageHistory vmh2 = new VanillaMessageHistory();
+            wire.read().object(vmh2, VanillaMessageHistory.class);
+            assertEquals(vmh.toString(), vmh2.toString());
 
-        VanillaMessageHistory vmh3 = new VanillaMessageHistory();
-        wire.read().object(vmh3, VanillaMessageHistory.class);
-        assertEquals(vmh.toString(), vmh3.toString());
+            VanillaMessageHistory vmh3 = new VanillaMessageHistory();
+            wire.read().object(vmh3, VanillaMessageHistory.class);
+            assertEquals(vmh.toString(), vmh3.toString());
+        } finally {
+            System.clearProperty("history.wall.clock");
+        }
     }
 
     static class SetTimeMessageHistory extends VanillaMessageHistory {
