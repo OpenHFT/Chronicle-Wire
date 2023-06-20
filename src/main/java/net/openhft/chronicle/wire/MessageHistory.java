@@ -126,4 +126,15 @@ public interface MessageHistory extends Marshallable {
      * {@link Marshallable#writeMarshallable(net.openhft.chronicle.wire.WireOut)}
      */
     boolean isDirty();
+
+    /**
+     * @return whether to use wall clock for timings or not
+     */
+    boolean wallClock();
+
+    /**
+     * @param wallClock use the wallClock if true
+     * @return this
+     */
+    MessageHistory wallClock(boolean wallClock);
 }

@@ -152,7 +152,7 @@ public class GenerateMethodReader {
             final Class<?> aClass = metaDataHandler[i].getClass();
 
             for (Class<?> anInterface : ReflectionUtil.interfaces(aClass)) {
-                if (anInterface.getAnnotation(DontChain.class) != null)
+                if (Jvm.dontChain(anInterface))
                     continue;
                 handleInterface(anInterface, "metaInstance" + i, false, eventNameSwitchBlockMeta, eventIdSwitchBlockMeta);
             }

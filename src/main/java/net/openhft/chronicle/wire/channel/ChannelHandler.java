@@ -72,4 +72,11 @@ public interface ChannelHandler extends ChannelHeader {
      * @return a Boolean value, can be null if not specified
      */
     Boolean buffered();
+
+    /**
+     * @return whether writers to this channel should include the history in the output
+     */
+    default boolean recordHistory() {
+        return false;
+    }
 }

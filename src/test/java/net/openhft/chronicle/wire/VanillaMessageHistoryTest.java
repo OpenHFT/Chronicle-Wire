@@ -40,7 +40,7 @@ public class VanillaMessageHistoryTest {
         assertEquals("" +
                         "c3 76 6d 68                                     # vmh:\n" +
                         "b6 03 56 4d 48                                  # VMH\n" +
-                        "81 33 00                                        # VanillaMessageHistory\n" +
+                        "81 3e 00                                        # VanillaMessageHistory\n" +
                         "c7 73 6f 75 72 63 65 73                         # sources:\n" +
                         "82 0b 00 00 00                                  # sequence\n" +
                         "                                                # source id & index\n" +
@@ -49,7 +49,9 @@ public class VanillaMessageHistoryTest {
                         "82 0e 00 00 00                                  # sequence\n" +
                         "                                                # timing in nanos\n" +
                         "a6 7c f4 b8 00                                  # 12121212\n" +
-                        "a7 timestamp\n",
+                        "a7 timestamp\n" +
+                        "c9 77 61 6c 6c 43 6c 6f 63 6b                   # wallClock:\n" +
+                        "b0                                              # false\n",
                 wire.bytes().toHexString().replaceAll("\na7.*\n", "\na7 timestamp\n"));
 
         VanillaMessageHistory vmh2 = new VanillaMessageHistory();

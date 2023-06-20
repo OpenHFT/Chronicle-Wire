@@ -27,6 +27,7 @@ import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.UnrecoverableTimeoutException;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireOut;
+import net.openhft.chronicle.wire.channel.ChannelHandler;
 import net.openhft.chronicle.wire.channel.EventPoller;
 
 import java.util.concurrent.ExecutorService;

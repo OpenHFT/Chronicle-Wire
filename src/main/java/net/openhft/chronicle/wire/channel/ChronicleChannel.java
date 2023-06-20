@@ -21,9 +21,8 @@ package net.openhft.chronicle.wire.channel;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.ClosedIORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
-import net.openhft.chronicle.wire.DocumentContext;
-import net.openhft.chronicle.wire.MarshallableIn;
-import net.openhft.chronicle.wire.MarshallableOut;
+import net.openhft.chronicle.core.util.StringUtils;
+import net.openhft.chronicle.wire.*;
 import net.openhft.chronicle.wire.channel.impl.ChronicleChannelUtils;
 import net.openhft.chronicle.wire.channel.impl.SocketRegistry;
 import net.openhft.chronicle.wire.converter.NanoTime;
@@ -80,7 +79,12 @@ public interface ChronicleChannel extends Closeable, MarshallableOut, Marshallab
         while (!isClosed()) {
             try (DocumentContext dc = readingDocument()) {
                 if (dc.isPresent()) {
-                    return dc.wire().read(eventType).object(expectedType);
+                    ValueIn in = dc.wire().read(eventType);
+                    if (StringUtils.isEqual(eventType, "history")) {
+                        in.object(MessageHistory.get(), VanillaMessageHistory.class);
+                        in = dc.wire().read(eventType);
+                    }
+                    return in.object(expectedType);
                 }
             }
         }

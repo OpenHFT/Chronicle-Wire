@@ -125,12 +125,12 @@ public class WireTestCommon {
         CleaningThread.performCleanup(Thread.currentThread());
 
         // find any discarded resources.
-        System.gc();
-        AbstractCloseable.waitForCloseablesToClose(100);
+        AbstractCloseable.gcAndWaitForCloseablesToClose();
 
         assertReferencesReleased();
         checkThreadDump();
         checkExceptions();
+        MessageHistory.set(null);
     }
 
     protected void preAfter() {

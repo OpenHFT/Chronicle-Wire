@@ -1419,11 +1419,23 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
     }
 
+    private static class ClassLookupWarning {
+        static {
+            Jvm.warn().on(BinaryWire.class, "Unable to copy object safely, message will not be repeated: " +
+                    warnMissingClass);
+        }
+
+        public static void warn() {
+        }
+    }
+
     protected class FixedBinaryValueOut implements ValueOut {
 
         @NotNull
         @Override
         public WireOut bool(@Nullable Boolean flag) {
+            if (bytes.retainedHexDumpDescription())
+                bytes.writeHexDumpDescription(flag == null ? "null" : flag ? "true" : "false");
             bytes.writeUnsignedByte(flag == null
                     ? NULL
                     : (flag ? TRUE : FALSE));
@@ -4242,15 +4254,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                     return super.float64();
             }
         }
-    }
-
-    private static class ClassLookupWarning {
-        static {
-            Jvm.warn().on(BinaryWire.class, "Unable to copy object safely, message will not be repeated: " +
-                    warnMissingClass);
-        }
-
-        public static void warn() { }
     }
 }
 
