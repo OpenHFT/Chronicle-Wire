@@ -72,8 +72,8 @@ public class DefaultMarshallerTest extends WireTestCommon {
                 "  b: true,\n" +
                 "  bb: 1,\n" +
                 "  s: 6,\n" +
-                "  f: 3.0,\n" +
-                "  d: 2.0,\n" +
+                "  f: 3,\n" +
+                "  d: 2,\n" +
                 "  l: 5,\n" +
                 "  i: 4,\n" +
                 "  nested: [\n" +

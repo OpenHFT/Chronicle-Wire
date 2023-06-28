@@ -469,6 +469,8 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         try {
             Bytes<?> bytes = asBytes(marshallable);
             return bytes.toString();
+        } catch (Throwable e) {
+            return getClass() + "  " + e;
         } finally {
             ValidatableUtil.endValidateDisabled();
         }

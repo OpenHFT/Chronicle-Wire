@@ -174,8 +174,8 @@ public class MarshallableTest extends WireTestCommon {
                 "  s: 2,\n" +
                 "  ch: \"3\",\n" +
                 "  i: 4,\n" +
-                "  f: 5.0,\n" +
-                "  d: 6.0,\n" +
+                "  f: 5,\n" +
+                "  d: 6,\n" +
                 "  l: 7\n" +
                 "}\n", mt.toString());
         mt.reset();
@@ -186,8 +186,8 @@ public class MarshallableTest extends WireTestCommon {
                 "  s: 0,\n" +
                 "  ch: \"\\0\",\n" +
                 "  i: 0,\n" +
-                "  f: 0.0,\n" +
-                "  d: 0.0,\n" +
+                "  f: 0,\n" +
+                "  d: 0,\n" +
                 "  l: 0\n" +
                 "}\n", mt.toString());
     }

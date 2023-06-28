@@ -52,8 +52,8 @@ public class TextWithArraysTest extends WireTestCommon {
                 "  chars: [ H, e, l, l, o ],\n" +
                 "  ints: [ -1, 0, 1 ],\n" +
                 "  longs: [ -1, 0, 1 ],\n" +
-                "  floats: [ -1.0, 0.0, 1.0 ],\n" +
-                "  doubles: [ -1.0, 0.0, 1.0 ],\n" +
+                "  floats: [ -1, 0, 1 ],\n" +
+                "  doubles: [ -1, 0, 1 ],\n" +
                 "  words: [ Hello, World, Bye, for, now ]\n" +
                 "}\n", wa.toString());
 

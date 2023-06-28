@@ -25,6 +25,7 @@ import net.openhft.chronicle.bytes.ref.TextBooleanReference;
 import net.openhft.chronicle.bytes.ref.TextIntReference;
 import net.openhft.chronicle.bytes.ref.TextLongArrayReference;
 import net.openhft.chronicle.bytes.ref.TextLongReference;
+import net.openhft.chronicle.bytes.render.GeneralDecimaliser;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
@@ -82,6 +83,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
     protected YamlWireOut(@NotNull Bytes bytes, boolean use8bit) {
         super(bytes, use8bit);
+        bytes.decimaliser(GeneralDecimaliser.GENERAL);
     }
 
     public boolean addTimeStamps() {
@@ -597,7 +599,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 writeSavedEventName();
             }
             if (bytesStore == null)
-                return (T)nu11();
+                return (T) nu11();
             prependSeparator();
             typePrefix(type);
             append(Base64.getEncoder().encodeToString(bytesStore.toByteArray()));
@@ -814,7 +816,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             }
             prependSeparator();
             double af = Math.abs(f);
-            if (af >= 1e-3 && af < 1e6)
+            if (af == 0 || (af >= 1e-3 && af < 1e6))
                 bytes.append(f);
             else
                 bytes.append(floatToString(f));
@@ -833,7 +835,9 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             }
             prependSeparator();
             double ad = Math.abs(d);
-            if (ad >= 1e-7 && ad < 1e15) {
+            if (ad == 0) {
+                bytes.append(d);
+            } else if (ad >= 1e-7 && ad < 1e15) {
                 if ((int) (ad / 1e6) * 1e6 == ad) {
                     bytes.append((int) (d / 1e6)).append("E6");
                 } else if ((int) (ad / 1e3) * 1e3 == ad) {
