@@ -276,6 +276,12 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
 
         @Override
         public String codeBeforeCall(Method m, String objectName, String[] argumentNames) {
+            return null;
+        }
+
+
+        @Override
+        public String codeBeforeCall(Method m, String objectName, String[] argumentNames, String serviceName) {
             if (m.getName().equals("oneArg")) {
                 return String.format("if (%s == 2)\n" +
                         "break;\n", argumentNames[0]);
@@ -310,8 +316,9 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
             return "skipping";
         }
 
+
         @Override
-        public String codeBeforeCall(Method m, String objectName, String[] argumentNames) {
+        public String codeBeforeCall(Method m, String objectName, String[] argumentNames, String serviceName) {
             if (m.getName().equals("twoArgs"))
                 return "if (" + argumentNames[0] + " != null) {";
             else

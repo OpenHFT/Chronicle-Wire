@@ -32,7 +32,7 @@ import java.lang.reflect.Method;
  *
  * <p>Simple example that allows to skip call of method "foo" in case its second argument is null:
  * <pre>{@code
- *     public String codeBeforeCall(Method m, String objectName, String[] argumentNames) {
+ *     public String codeBeforeCall(Method m, String objectName, String[] argumentNames, String serviceName) {
  *         if (m.getName().equals("foo"))
  *             return "if (" + argumentNames[1] + " != null) {";
  *         else
@@ -64,16 +64,31 @@ public interface GeneratingMethodReaderInterceptorReturns extends MethodReaderIn
     String generatorId();
 
     /**
-     * @param m Calling method.
-     * @param objectName Object instance name.
+     * @param m             Calling method.
+     * @param objectName    Object instance name.
      * @param argumentNames Call argument names.
      * @return Source code to add before the method call.
+     * @deprecated use codeBeforeCall(java.lang.reflect.Method, java.lang.String, java.lang.String[], java.lang.String)
      */
-    String codeBeforeCall(Method m, String objectName, String[] argumentNames);
+    @Deprecated
+    default String codeBeforeCall(Method m, String objectName, String[] argumentNames) {
+        return codeBeforeCall(m, objectName, argumentNames, "");
+    }
 
     /**
-     * @param m Calling method.
-     * @param objectName Object instance name.
+     * @param m             Calling method.
+     * @param objectName    Object instance name.
+     * @param argumentNames Call argument names.
+     * @param serviceName   the name of the service
+     * @return Source code to add before the method call.
+     */
+    default String codeBeforeCall(Method m, String objectName, String[] argumentNames, String serviceName) {
+        return codeBeforeCall(m, objectName, argumentNames);
+    }
+
+    /**
+     * @param m             Calling method.
+     * @param objectName    Object instance name.
      * @param argumentNames Call argument names.
      * @return Source code to add after the method call.
      */

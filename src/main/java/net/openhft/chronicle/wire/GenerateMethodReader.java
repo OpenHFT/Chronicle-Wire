@@ -90,6 +90,7 @@ public class GenerateMethodReader {
     private boolean methodFilterPresent;
     private boolean isSourceCodeGenerated;
     private boolean hasChainedCalls;
+    private String serviceName;
 
     public GenerateMethodReader(WireType wireType, MethodReaderInterceptorReturns interceptor, Object[] metaDataHandler, Object... instances) {
         this.wireType = wireType;
@@ -97,6 +98,10 @@ public class GenerateMethodReader {
         this.metaDataHandler = metaDataHandler;
         this.instances = instances;
         this.generatedClassName = generatedClassName0();
+    }
+
+    public void serviceName(String serviceName) {
+        this.serviceName = serviceName;
     }
 
     private static String signature(Method m, Class type) {
@@ -559,7 +564,7 @@ public class GenerateMethodReader {
                     (GeneratingMethodReaderInterceptorReturns) interceptor : null;
 
             if (generatingInterceptor != null) {
-                final String codeBefore = generatingInterceptor.codeBeforeCall(m, instanceFieldName, args);
+                final String codeBefore = generatingInterceptor.codeBeforeCall(m, instanceFieldName, args, serviceName);
 
                 if (codeBefore != null)
                     res.append(codeBefore).append("\n");

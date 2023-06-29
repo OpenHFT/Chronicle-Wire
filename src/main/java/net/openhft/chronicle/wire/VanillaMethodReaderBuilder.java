@@ -49,6 +49,17 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
     private boolean scanning = false;
 
+    public String serviceName() {
+        return serviceName;
+    }
+
+    public VanillaMethodReaderBuilder serviceName(String serviceName) {
+        this.serviceName = serviceName;
+        return this;
+    }
+
+    private String serviceName ="";
+
     public VanillaMethodReaderBuilder(MarshallableIn in) {
         this.in = in;
     }
@@ -121,6 +132,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
     /**
      * When enabled, readOne() will skip over meta data and unknown events to find at least one event.
+     *
      * @param scanning whether to read events until it finds a known one.
      * @return this
      */
@@ -135,6 +147,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
             return null;
 
         GenerateMethodReader generateMethodReader = new GenerateMethodReader(wireType, methodReaderInterceptorReturns, metaDataHandler, impls);
+        generateMethodReader.serviceName(serviceName);
 
         String fullClassName = generateMethodReader.packageName() + "." + generateMethodReader.generatedClassName();
 
