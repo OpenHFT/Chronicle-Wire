@@ -70,21 +70,21 @@ final class StreamsDemoTest {
 
         assertEquals("!MarketData {\n" +
                 "  symbol: MSFT,\n" +
-                "  last: 100,\n" +
-                "  high: 110,\n" +
-                "  low: 90\n" +
+                "  last: 100.0,\n" +
+                "  high: 110.0,\n" +
+                "  low: 90.0\n" +
                 "}\n" +
                 ",!MarketData {\n" +
                 "  symbol: AAPL,\n" +
-                "  last: 200,\n" +
-                "  high: 220,\n" +
-                "  low: 180\n" +
+                "  last: 200.0,\n" +
+                "  high: 220.0,\n" +
+                "  low: 180.0\n" +
                 "}\n" +
                 ",!MarketData {\n" +
                 "  symbol: MSFT,\n" +
-                "  last: 101,\n" +
-                "  high: 110,\n" +
-                "  low: 90\n" +
+                "  last: 101.0,\n" +
+                "  high: 110.0,\n" +
+                "  low: 90.0\n" +
                 "}\n", s);
     }
 

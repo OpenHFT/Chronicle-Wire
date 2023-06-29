@@ -21,7 +21,7 @@ public class TransferFailedTest {
             "    from: 12345,\n" +
             "    to: 67890,\n" +
             "    currency: CURR,\n" +
-            "    amount: 1,\n" +
+            "    amount: 1.0,\n" +
             "    reference: reference\n" +
             "  },\n" +
             "  reason: reasons\n" +

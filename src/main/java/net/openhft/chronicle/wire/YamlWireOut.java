@@ -26,6 +26,7 @@ import net.openhft.chronicle.bytes.ref.TextIntReference;
 import net.openhft.chronicle.bytes.ref.TextLongArrayReference;
 import net.openhft.chronicle.bytes.ref.TextLongReference;
 import net.openhft.chronicle.bytes.render.GeneralDecimaliser;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
@@ -53,6 +54,8 @@ import static net.openhft.chronicle.bytes.BytesStore.empty;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire {
+    private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
+
     public static final BytesStore TYPE = BytesStore.from("!type ");
     static final String NULL = "!null \"\"";
     static final BitSet STARTS_QUOTE_CHARS = new BitSet();
@@ -83,7 +86,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
     protected YamlWireOut(@NotNull Bytes bytes, boolean use8bit) {
         super(bytes, use8bit);
-        bytes.decimaliser(GeneralDecimaliser.GENERAL);
+        bytes.decimaliser(GeneralDecimaliser.GENERAL)
+                .fpAppend0(APPEND_0);
     }
 
     public boolean addTimeStamps() {

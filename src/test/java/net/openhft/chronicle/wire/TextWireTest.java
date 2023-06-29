@@ -643,10 +643,10 @@ public class TextWireTest extends WireTestCommon {
         wire.write().float64(1);
         wire.write(BWKey.field1).float64(2);
         wire.write(() -> "Test").float64(3);
-        assertEquals("\"\": 1\n" +
-                "field1: 2\n" +
-                "Test: 3\n", wire.toString());
-        expectWithSnakeYaml("{=1, field1=2, Test=3}", wire);
+        assertEquals("\"\": 1.0\n" +
+                "field1: 2.0\n" +
+                "Test: 3.0\n", wire.toString());
+        expectWithSnakeYaml("{=1.0, field1=2.0, Test=3.0}", wire);
 
         // ok as blank matches anything
         class Floater {
@@ -1646,16 +1646,16 @@ public class TextWireTest extends WireTestCommon {
     public void testDoubleEngineering() {
         ClassAliasPool.CLASS_ALIASES.addAlias(DoubleWrapper.class, "D");
         assertEquals("!D {\n" +
-                "  d: 1,\n" +
-                "  n: -1\n" +
+                "  d: 1.0,\n" +
+                "  n: -1.0\n" +
                 "}\n", new DoubleWrapper(1.0).toString());
         assertEquals("!D {\n" +
-                "  d: 11,\n" +
-                "  n: -11\n" +
+                "  d: 11.0,\n" +
+                "  n: -11.0\n" +
                 "}\n", new DoubleWrapper(11.0).toString());
         assertEquals("!D {\n" +
-                "  d: 101,\n" +
-                "  n: -101\n" +
+                "  d: 101.0,\n" +
+                "  n: -101.0\n" +
                 "}\n", new DoubleWrapper(101.0).toString());
         assertEquals("!D {\n" +
                 "  d: 1E3,\n" +

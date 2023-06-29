@@ -205,18 +205,18 @@ public class JSONWireTest extends WireTestCommon {
             assertEquals("!net.openhft.chronicle.wire.JSONWireTest$TwoLists {\n" +
                     "  name: !!null \"\",\n" +
                     "  list1: [\n" +
-                    "    { name: !!null \"\", number1: 0, number2: 0 },\n" +
-                    "    { name: !!null \"\", number1: 1, number2: 10 },\n" +
-                    "    { name: !!null \"\", number1: 2, number2: 20 },\n" +
-                    "    { name: !!null \"\", number1: 3, number2: 30 },\n" +
-                    "    { name: !!null \"\", number1: 4, number2: 40 }\n" +
+                    "    { name: !!null \"\", number1: 0, number2: 0.0 },\n" +
+                    "    { name: !!null \"\", number1: 1, number2: 10.0 },\n" +
+                    "    { name: !!null \"\", number1: 2, number2: 20.0 },\n" +
+                    "    { name: !!null \"\", number1: 3, number2: 30.0 },\n" +
+                    "    { name: !!null \"\", number1: 4, number2: 40.0 }\n" +
                     "  ],\n" +
                     "  list2: [\n" +
-                    "    { name: !!null \"\", number1: 0, number2: 0 },\n" +
-                    "    { name: !!null \"\", number1: 1, number2: 10 },\n" +
-                    "    { name: !!null \"\", number1: 2, number2: 20 },\n" +
-                    "    { name: !!null \"\", number1: 3, number2: 30 },\n" +
-                    "    { name: !!null \"\", number1: 4, number2: 40 }\n" +
+                    "    { name: !!null \"\", number1: 0, number2: 0.0 },\n" +
+                    "    { name: !!null \"\", number1: 1, number2: 10.0 },\n" +
+                    "    { name: !!null \"\", number1: 2, number2: 20.0 },\n" +
+                    "    { name: !!null \"\", number1: 3, number2: 30.0 },\n" +
+                    "    { name: !!null \"\", number1: 4, number2: 40.0 }\n" +
                     "  ]\n" +
                     "}\n", lists1.toString());
             final String str = JSON.asString(lists1);

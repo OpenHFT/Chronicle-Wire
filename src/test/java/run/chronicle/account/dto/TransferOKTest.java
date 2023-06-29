@@ -23,7 +23,7 @@ public class TransferOKTest {
             "    from: 12345,\n" +
             "    to: 67890,\n" +
             "    currency: CURR,\n" +
-            "    amount: 1,\n" +
+            "    amount: 1.0,\n" +
             "    reference: reference\n" +
             "  }\n" +
             "}\n";

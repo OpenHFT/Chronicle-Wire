@@ -17,7 +17,7 @@ public class AccountStatusTest {
                         "  name: name,\n" +
                         "  account: 2,\n" +
                         "  currency: CURR,\n" +
-                        "  amount: 1\n" +
+                        "  amount: 1.0\n" +
                         "}\n",
                 getAccountStatus().toString());
     }
