@@ -181,7 +181,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             wire.read("sources").sequence(this, VanillaMessageHistory::acceptSourcesRead);
             timings = 0;
             wire.read("timings").sequence(this, VanillaMessageHistory::acceptTimingsRead);
-            wallClock = wire.read("wallClock").bool();
         }
         if (addSourceDetails) {
             @Nullable Object o = wire.parent();
@@ -203,7 +202,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         } else {
             wire.write("sources").sequence(this, acceptSourcesConsumer);
             wire.write("timings").sequence(this, acceptTimingsConsumer);
-            wire.write("wallClock").bool(wallClock);
         }
         dirty = false;
     }
@@ -243,8 +241,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             bytes.writeLong(timingsArray[i]);
         }
         bytes.writeLong(nanoTime()); // add time for this output
-        bytes.writeHexDumpDescription("wallClock")
-                .writeBoolean(wallClock);
         dirty = false;
     }
 
