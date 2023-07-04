@@ -96,8 +96,9 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "    lifecycle: !net.openhft.chronicle.threads.EventLoopLifecycle NEW,\n" +
                     "    name: test/blocking-event-loop,\n" +
                     "    handlers: [    ],\n" +
+                    "    runners: [    ],\n" +
                     "    threadFactory: test/blocking-event-loop,\n" +
-                    "    pauser: !net.openhft.chronicle.threads.LongPauser { minPauseTimeNS: 500000, maxPauseTimeNS: 20000000, pausing: false, minBusyNS: 0, minYieldNS: 50000, busyNS: 9223372036854775807, yieldNS: 9223372036854775807, pauseTimeNS: 500000, timePaused: 0, countPaused: 0, thread: !!null \"\", yieldStart: 0, timeOutStart: 9223372036854775807, pauseUntilNS: 0, pauseStartNS: 0 }\n" +
+                    "    pauserSupplier: !net.openhft.chronicle.threads.PauserMode sleepy\n" +
                     "  },\n" +
                     "  pauser: !net.openhft.chronicle.threads.LongPauser {\n" +
                     "    minPauseTimeNS: 500000,\n" +
@@ -133,16 +134,8 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "  concThreads: [\n" +
                     "    !!null \"\"\n" +
                     "  ],\n" +
-                    "  milliPauser: !net.openhft.chronicle.threads.MilliPauser {\n" +
-                    "    pausing: false,\n" +
-                    "    pauseTimeMS: 1,\n" +
-                    "    timePaused: 0,\n" +
-                    "    countPaused: 0,\n" +
-                    "    pauseUntilMS: 0\n" +
-                    "  },\n" +
                     "  daemon: true,\n" +
                     "  replicationPauser: !!null \"\",\n" +
-                    "  blockingPauserSupplier: !net.openhft.chronicle.threads.PauserMode sleepy,\n" +
                     "  replication: !!null \"\"\n" +
                     "}\n", actual);
         }
