@@ -57,8 +57,7 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "    lifecycle: !net.openhft.chronicle.threads.EventLoopLifecycle NEW,\n" +
                     "    name: test/~monitortest/event~loop~monitor,\n" +
                     "    handlers: [\n" +
-                    "      !net.openhft.chronicle.threads.MonitorEventLoop$IdempotentLoopStartedEventHandler { referenceId: 0, handler: \"PauserMonitor<test/core-pauser>\", loopStarted: false },\n" +
-                    "      !net.openhft.chronicle.threads.MonitorEventLoop$IdempotentLoopStartedEventHandler { referenceId: 0, handler: \"ThreadMonitorHarness<null>\", loopStarted: false }\n" +
+                    "      !net.openhft.chronicle.threads.MonitorEventLoop$IdempotentLoopStartedEventHandler { referenceId: 0, handler: \"PauserMonitor<test/core-pauser>\", loopStarted: false }\n" +
                     "    ],\n" +
                     "    pauser: !net.openhft.chronicle.threads.MilliPauser { pausing: false, pauseTimeMS: 10, timePaused: 0, countPaused: 0, pauseUntilMS: 0 }\n" +
                     "  },\n" +
