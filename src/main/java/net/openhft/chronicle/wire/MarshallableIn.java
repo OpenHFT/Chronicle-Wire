@@ -29,18 +29,27 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Anything you can read marshallable object from.
+ * This functional interface defines methods for reading marshallable objects.
+ * It can be used to parse a series of data from a source, where each unit of data is a marshallable object.
+ * The size of the internal cache for interning strings can be configured via a system property "marshallableIn.intern.size".
  */
 @FunctionalInterface
 public interface MarshallableIn {
     int MARSHALLABLE_IN_INTERN_SIZE = Integer.getInteger("marshallableIn.intern.size", 128);
 
+    /**
+     * Read the next document from the data source.
+     *
+     * @return The document context which encapsulates the document read.
+     */
     @NotNull
     DocumentContext readingDocument();
 
     /**
-     * @param reader user to read the document
-     * @return {@code true} if successful
+     * Reads the next document using the provided reader.
+     *
+     * @param reader The reader used to read the document.
+     * @return {@code true} if a document was successfully read, {@code false} otherwise.
      */
     default boolean readDocument(@NotNull ReadMarshallable reader) throws InvalidMarshallableException {
         try (@NotNull DocumentContext dc = readingDocument()) {
@@ -52,8 +61,10 @@ public interface MarshallableIn {
     }
 
     /**
-     * @param reader used to read the document
-     * @return {@code true} if successful
+     * Reads the next set of bytes using the provided reader.
+     *
+     * @param reader The reader used to read the bytes.
+     * @return {@code true} if bytes were successfully read, {@code false} otherwise.
      */
     default boolean readBytes(@NotNull ReadBytesMarshallable reader) throws InvalidMarshallableException {
         try (@NotNull DocumentContext dc = readingDocument()) {
@@ -65,8 +76,10 @@ public interface MarshallableIn {
     }
 
     /**
-     * @param using used to read the document
-     * @return {@code true} if successful
+     * Reads the next set of bytes into the provided Bytes object.
+     *
+     * @param using The Bytes object where the read bytes will be written.
+     * @return {@code true} if bytes were successfully read, {@code false} otherwise.
      */
     @SuppressWarnings("rawtypes")
     default boolean readBytes(@NotNull Bytes<?> using) throws InvalidMarshallableException {
@@ -82,9 +95,9 @@ public interface MarshallableIn {
     }
 
     /**
-     * Read the next message as a String
+     * Reads the next message as a String.
      *
-     * @return the String or null if there is none.
+     * @return The message as a String or null if no message is present.
      */
     @Nullable
     default String readText() throws InvalidMarshallableException {
@@ -101,9 +114,9 @@ public interface MarshallableIn {
     }
 
     /**
-     * Read the next message as  string
+     * Reads the next message into the provided StringBuilder.
      *
-     * @param sb to copy the text into
+     * @param sb StringBuilder to copy the text into.
      * @return true if there was a message, or false if not.
      */
     default boolean readText(@NotNull StringBuilder sb) throws InvalidMarshallableException {
@@ -118,9 +131,9 @@ public interface MarshallableIn {
     }
 
     /**
-     * Read a Map&gt;String, Object&gt; from the content.
+     * Reads a Map<String, Object> from the content of the next message.
      *
-     * @return the Map, or null if no message is waiting.
+     * @return The Map, or null if no message is waiting.
      */
     @SuppressWarnings("unchecked")
     @Nullable
@@ -143,9 +156,9 @@ public interface MarshallableIn {
     }
 
     /**
-     * Reads messages from this tails as methods.  It returns a BooleanSupplier which returns
+     * Reads messages from the tail of this queue as methods.
      *
-     * @param objects which implement the methods serialized to the file.
+     * @param objects The objects which implement the methods serialized to the file.
      * @return a reader which will read one Excerpt at a time
      */
     @NotNull
@@ -153,9 +166,13 @@ public interface MarshallableIn {
         return methodReaderBuilder().build(objects);
     }
 
+    /**
+     * Create a builder for a MethodReader.
+     *
+     * @return a new MethodReaderBuilder.
+     */
     @NotNull
     default VanillaMethodReaderBuilder methodReaderBuilder() {
         return new VanillaMethodReaderBuilder(this);
     }
 }
-

@@ -21,7 +21,7 @@ package net.openhft.chronicle.wire;
  * Unsigned 64-bit number.
  */
 @Deprecated(/* to remove in x.25 */)
-public class Base40LongConverter extends AbstractLongConverter {
+public class Base40LongConverter extends DelegatingLongConverter {
 
     public static final int MAX_LENGTH = LongConverter.maxParseLength(40);
     public static final Base40LongConverter UPPER = new Base40LongConverter();

@@ -18,12 +18,27 @@
 package net.openhft.chronicle.wire;
 
 /**
- * Unsigned 64-bit number with encoding with all 0-9, A-Z and a-z, plus period and plus
+ * The Base64LongConverter class is a subclass of DelegatingLongConverter.
+ * It represents an unsigned 64-bit number and encodes it using a custom Base64 scheme.
+ * The custom Base64 encoding includes all alphanumeric characters (0-9, A-Z, and a-z),
+ * along with period (.) and underscore (_).
  */
-public class Base64LongConverter extends AbstractLongConverter {
+public class Base64LongConverter extends DelegatingLongConverter {
+
+    /**
+     * A singleton instance of the Base64LongConverter.
+     */
     public static final Base64LongConverter INSTANCE = new Base64LongConverter();
+
+    /**
+     * The character set used for the custom Base64 encoding.
+     */
     private static final String CHARS = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
 
+    /**
+     * Constructs a Base64LongConverter.
+     * This private constructor initializes the internal LongConverter with a custom defined character set.
+     */
     private Base64LongConverter() {
         super(CHARS);
     }

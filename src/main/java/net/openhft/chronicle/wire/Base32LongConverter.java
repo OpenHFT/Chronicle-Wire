@@ -18,16 +18,31 @@
 package net.openhft.chronicle.wire;
 
 /**
- * Unsigned 64-bit number with encoding to be as disambiguated as possible.
+ * The Base32LongConverter class is a subclass of DelegatingLongConverter.
+ * It represents an unsigned 64-bit number and encodes it to be as disambiguated as possible
+ * by following the Base32 encoding scheme.
  */
-public class Base32LongConverter extends AbstractLongConverter {
+public class Base32LongConverter extends DelegatingLongConverter {
 
+    /**
+     * A singleton instance of the Base32LongConverter.
+     */
     public static final Base32LongConverter INSTANCE = new Base32LongConverter();
+
+    /**
+     * The character set used for the Base32 encoding.
+     */
     private static final String CHARS = "234567ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+    /**
+     * Constructs a Base32LongConverter.
+     * This constructor initializes the internal LongConverter with a defined character set
+     * and configures additional encodings to avoid ambiguity.
+     */
     public Base32LongConverter() {
         super(CHARS);
 
+        // Add encoding in case of ambiguity
         converter.addEncode('0', 'O');
         converter.addEncode('1', 'l');
         converter.addEncode('8', 'B');

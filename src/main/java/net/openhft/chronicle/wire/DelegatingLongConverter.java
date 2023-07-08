@@ -20,34 +20,63 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 
-public abstract class AbstractLongConverter implements LongConverter {
+/**
+ * The DelegatingLongConverter class is an abstract class that implements the LongConverter interface.
+ * It delegates all the method calls to a given LongConverter instance.
+ */
+public abstract class DelegatingLongConverter implements LongConverter {
     protected final LongConverter converter;
 
-    protected AbstractLongConverter(String chars) {
+    /**
+     * Constructs a DelegatingLongConverter with a given set of characters.
+     * It internally uses the {@link LongConverter#forSymbols(String)} method to create the internal converter.
+     *
+     * @param chars the characters to be used for the internal converter
+     */
+    protected DelegatingLongConverter(String chars) {
         this(LongConverter.forSymbols(chars));
     }
 
-    protected AbstractLongConverter(LongConverter converter) {
+    /**
+     * Constructs a DelegatingLongConverter with a given LongConverter instance.
+     * All method calls will be delegated to this converter.
+     *
+     * @param converter the LongConverter instance to be used for delegation
+     */
+    protected DelegatingLongConverter(LongConverter converter) {
         this.converter = converter;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int maxParseLength() {
         return converter.maxParseLength();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public long parse(CharSequence text) {
         return converter.parse(text);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void append(StringBuilder text, long value) {
         converter.append(text, value);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void append(Bytes<?> bytes, long value) {
         converter.append(bytes, value);
     }
 }
+

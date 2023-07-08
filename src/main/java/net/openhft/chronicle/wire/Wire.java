@@ -25,11 +25,24 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 
 /**
- * The defines the stand interface for writing and reading sequentially to/from a Bytes stream. <p>
+ * Defines a standard interface for sequential reading and writing to/from a Bytes stream.
+ * A Wire object encapsulates the operations for manipulating a stream of bytes, supporting different formats such as JSON, Binary YAML, and YAML.
+ * Implementations of this interface are expected to be used in a single-threaded context and not chained.
+ * <p>
  */
 @SingleThreaded
 @DontChain
 public interface Wire extends WireIn, WireOut {
+
+    /**
+     * Creates a Wire object from a file, the type of the Wire is inferred from the file extension.
+     * This method is deprecated and might be removed in the future.
+     *
+     * @param name The name of the file
+     * @return A Wire object for the given file
+     * @throws IOException If an I/O error occurs
+     * @throws IllegalArgumentException If the file type is unknown
+     */
     @Deprecated(/*to be removed?*/)
     static Wire fromFile(@NotNull String name) throws IOException {
         @NotNull String ext = name.substring(name.lastIndexOf('.') + 1).toLowerCase();
@@ -44,15 +57,22 @@ public interface Wire extends WireIn, WireOut {
     }
 
     /**
-     * Create a YamlWire that write to an on heap Bytes
+     * Creates a new YamlWire that writes to an on-heap Bytes object.
      *
-     * @return the Wire
+     * @return A new instance of YamlWire
      */
     static Wire newYamlWireOnHeap() {
-        return new YamlWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
+        return new YamlWire();
     }
 
+    /**
+     * Sets the header number for the Wire instance.
+     *
+     * @param headerNumber The header number to be set
+     * @return The current Wire instance with updated header number
+     */
     @Override
     @NotNull
     Wire headerNumber(long headerNumber);
 }
+

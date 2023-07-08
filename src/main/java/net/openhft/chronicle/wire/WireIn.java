@@ -32,11 +32,20 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 /**
- * The defines the stand interface for writing and reading sequentially to/from a Bytes stream.
+ * This interface defines standard methods for sequential reading and writing to/from a Bytes stream.
  */
 @DontChain
 public interface WireIn extends WireCommon, MarshallableIn {
 
+    /**
+     * Reads all entries from the wire and populates the provided map with them.
+     *
+     * @param kClass the class of the key
+     * @param vClass the class of the value
+     * @param map    the map to be populated with entries read from the wire
+     * @return the populated map
+     * @throws InvalidMarshallableException if an object cannot be unmarshalled from the wire
+     */
     @NotNull
     default <K, V> Map<K, V> readAllAsMap(Class<K> kClass, @NotNull Class<V> vClass, @NotNull Map<K, V> map) throws InvalidMarshallableException {
         while (isNotEmptyAfterPadding()) {
@@ -51,10 +60,16 @@ public interface WireIn extends WireCommon, MarshallableIn {
         return map;
     }
 
+    /**
+     * Copies all remaining bytes from this wire to another.
+     *
+     * @param wire the wire to copy to
+     * @throws InvalidMarshallableException if an object cannot be unmarshalled from the wire
+     */
     void copyTo(@NotNull WireOut wire) throws InvalidMarshallableException;
 
     /**
-     * Read the field if present, or empty string if not present.
+     * Reads a field from the wire if it's present, or returns an empty string if it's not.
      */
     @NotNull
     ValueIn read();
@@ -65,19 +80,30 @@ public interface WireIn extends WireCommon, MarshallableIn {
     @NotNull
     ValueIn read(@NotNull WireKey key);
 
+    /**
+     * Reads a field using the provided string as the field name.
+     *
+     * @param fieldName the name of the field to be read
+     * @return the value contained in the field
+     */
     @NotNull
     default ValueIn read(String fieldName) {
         return read(() -> fieldName);
     }
 
     /**
-     * @return field number or Long.MIN_VALUE if no number.
+     * Retrieves the number associated with the current event field or Long.MIN_VALUE if there isn't any.
+     *
+     * @return the event number or Long.MIN_VALUE if no number.
      */
     long readEventNumber();
 
     /**
      * Read a field, or string which is always written, even for formats which might drop the field
      * such as RAW.
+     *
+     * @param name the StringBuilder to hold the field name
+     * @return the value associated with the field
      */
     @NotNull
     default ValueIn readEventName(@NotNull StringBuilder name) {
@@ -116,6 +142,11 @@ public interface WireIn extends WireCommon, MarshallableIn {
     @NotNull
     ValueIn getValueIn();
 
+    /**
+     * Provides a wrapper around an input object stream.
+     *
+     * @return an ObjectInput instance associated with the wire
+     */
     ObjectInput objectInput();
 
     /*
@@ -154,6 +185,12 @@ public interface WireIn extends WireCommon, MarshallableIn {
         return bytes().isEmpty();
     }
 
+    /**
+     * Adjusts the read position of the underlying Bytes to be aligned to the specified alignment boundary.
+     *
+     * @param alignment the byte boundary to align the read position to
+     * @return this wire
+     */
     @NotNull
     default WireIn readAlignTo(int alignment) {
         return this;
@@ -190,6 +227,11 @@ public interface WireIn extends WireCommon, MarshallableIn {
 
     void consumePadding();
 
+    /**
+     * Sets a listener that will be notified when a comment is read from the wire.
+     *
+     * @param commentListener the listener to be notified of comments
+     */
     void commentListener(Consumer<CharSequence> commentListener);
 
     /**
@@ -220,27 +262,54 @@ public interface WireIn extends WireCommon, MarshallableIn {
         return Wires.asText(this);
     }
 
+    /**
+     * Returns a peek of the data in the wire in YAML format.
+     *
+     * @return a string representation of the data in the wire
+     */
     String readingPeekYaml();
 
-    // Use for processing events/method flows.
+    /**
+     * Called to signal the start of an event when processing events or method flows.
+     */
     default void startEvent() {
     }
 
+    /**
+     * Checks if the end of an event has been reached when processing events or method flows.
+     *
+     * @return true if the end of the event has been reached, false otherwise
+     */
     default boolean isEndEvent() {
         return false;
     }
 
+    /**
+     * Called to signal the end of an event when processing events or method flows.
+     */
     default void endEvent() {
     }
 
+    /**
+     * Provides a hint on whether the read operations should follow the order of the input data.
+     *
+     * @return true if the order of the input data should be followed, false otherwise
+     */
     default boolean hintReadInputOrder() {
         return false;
     }
 
+    /**
+     * Checks if the wire has a metadata prefix.
+     *
+     * @return true if the wire has a metadata prefix, false otherwise
+     */
     default boolean hasMetaDataPrefix() {
         return false;
     }
-
+    /**
+     * Enum indicating the type of header encountered in the wire.
+     */
     enum HeaderType {
         NONE, DATA, META_DATA, EOF
     }

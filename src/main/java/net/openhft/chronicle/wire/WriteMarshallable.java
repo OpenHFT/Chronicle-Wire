@@ -22,28 +22,44 @@ import net.openhft.chronicle.bytes.util.BinaryLengthLength;
 import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
-
+/**
+ * An interface that represents a marshallable object that can write itself to a {@link WireOut} object.
+ * This interface extends both {@link WriteValue} and {@link CommonMarshallable}.
+ */
 @FunctionalInterface
 @DontChain
 public interface WriteMarshallable extends WriteValue, CommonMarshallable {
+
+    /**
+     * An empty instance of WriteMarshallable that performs no action.
+     */
     WriteMarshallable EMPTY = wire -> {
         // nothing
     };
 
     /**
-     * Write data to the wire
+     * Writes this object to the specified wire.
      *
-     * @param wire to write to.
+     * @param wire the wire to write to.
+     * @throws InvalidMarshallableException if an error occurs during marshalling of this object
      */
     void writeMarshallable(@NotNull WireOut wire) throws InvalidMarshallableException;
 
+    /**
+     * Default implementation that writes this object as a marshallable.
+     *
+     * @param out the ValueOut object to write to
+     * @throws InvalidMarshallableException if an error occurs during marshalling of this object
+     */
     @Override
     default void writeValue(@NotNull ValueOut out) throws InvalidMarshallableException {
         out.marshallable(this);
     }
 
     /**
-     * @return the size in bytes to assume the length will be
+     * Provides the size in bytes to assume the length of the binary data will be.
+     *
+     * @return the size in bytes to assume the length will be, default is 32 bits.
      */
     default BinaryLengthLength binaryLengthLength() {
         return BinaryLengthLength.LENGTH_32BIT;

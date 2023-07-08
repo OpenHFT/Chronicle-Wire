@@ -38,38 +38,78 @@ import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
 /**
- * The implementation of this interface is both readable and write-able as marshallable data.
+ * Represents a marshallable object that can both write and read its state from and to a wire,
+ * and can be reset to a default state.
+ * <p>
+ * It is annotated with {@link DontChain} to prevent method chaining.
  */
 @DontChain
 public interface Marshallable extends WriteMarshallable, ReadMarshallable, Resettable {
+
+    /**
+     * Checks equality of the current instance with the given object.
+     *
+     * @param $this current instance
+     * @param o object to compare with the current instance
+     * @return true if both objects are equal, false otherwise
+     */
     static boolean $equals(@NotNull WriteMarshallable $this, Object o) {
         return o instanceof WriteMarshallable &&
                 ($this == o || Wires.isEquals($this, o));
     }
 
+    /**
+     * Calculates hash code for the current instance.
+     *
+     * @param $this current instance
+     * @return calculated hash code
+     */
     static int $hashCode(WriteMarshallable $this) {
         return HashWire.hash32($this);
     }
 
+    /**
+     * Converts the current instance into a string representation.
+     *
+     * @param $this current instance
+     * @return string representation of the current instance
+     */
     static String $toString(WriteMarshallable $this) {
         return TEXT.asString($this);
     }
 
+    /**
+     * Creates an object from its string representation.
+     *
+     * @param cs string representation of the object
+     * @return created object
+     * @throws InvalidMarshallableException if unable to create object from string
+     */
     @Nullable
     static <T> T fromString(@NotNull CharSequence cs) throws InvalidMarshallableException {
         return TEXT.fromString(cs);
     }
 
+    /**
+     * Creates an object of the specified type from its string representation.
+     *
+     * @param tClass class of the object
+     * @param cs string representation of the object
+     * @return created object
+     * @throws InvalidMarshallableException if unable to create object from string
+     */
     @Nullable
     static <T> T fromString(@NotNull Class<T> tClass, @NotNull CharSequence cs) throws InvalidMarshallableException {
         return TEXT.fromString(tClass, cs);
     }
 
     /**
-     * Reads the file from the current working directory, or the class path.
+     * Reads a marshallable object from a file in the current working directory or the class path.
      *
-     * @param filename or path to read
-     * @return the marshallable object
+     * @param filename The name or path of the file to read
+     * @return The read marshallable object
+     * @throws IOException If an I/O error occurs
+     * @throws InvalidMarshallableException If an error occurs during deserialization of the object
      */
     @NotNull
     static <T> T fromFile(String filename) throws IOException, InvalidMarshallableException {
@@ -82,11 +122,13 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /**
-     * Reads the file from the current working directory, or the class path.
+     * Reads a marshallable object of the specified type from a file in the current working directory or the class path.
      *
-     * @param filename     or path to read
-     * @param expectedType to deserialize as
-     * @return the marshallable object
+     * @param expectedType The class of the object to read
+     * @param filename The name or path of the file to read
+     * @return The read marshallable object
+     * @throws IOException If an I/O error occurs
+     * @throws InvalidMarshallableException If an error occurs during deserialization of the object
      */
     @Nullable
     static <T> T fromFile(@NotNull Class<T> expectedType, String filename) throws IOException, InvalidMarshallableException {
@@ -103,6 +145,14 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
         return TEXT.streamFromFile(expectedType, filename);
     }
 
+    /**
+     * Gets the value of the field with the specified name of the specified type.
+     *
+     * @param name The name of the field
+     * @param tClass The class of the field
+     * @return The value of the field
+     * @throws NoSuchFieldException If a field with the specified name is not found
+     */
     @Nullable
     default <T> T getField(String name, Class<T> tClass) throws NoSuchFieldException {
         return Wires.getField(this, name, tClass);
@@ -134,6 +184,12 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
         wm.writeMarshallable(this, wire);
     }
 
+    /**
+     * Performs a deep copy of this marshallable object.
+     *
+     * @return The copied marshallable object
+     * @throws InvalidMarshallableException If an error occurs during copying of the object
+     */
     @SuppressWarnings("unchecked")
     @NotNull
     default <T> T deepCopy() throws InvalidMarshallableException {
@@ -144,6 +200,13 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
         return Wires.copyTo(this, t);
     }
 
+    /**
+     * Merges this marshallable object into the specified map using the specified key function.
+     *
+     * @param map The map to merge into
+     * @param getKey The function to determine the key for this object
+     * @return The result of the merge operation
+     */
     default <K, T extends Marshallable> T mergeToMap(@NotNull Map<K, T> map, @NotNull Function<T, K> getKey) {
         @NotNull @SuppressWarnings("unchecked")
         T t = (T) this;
@@ -164,6 +227,10 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
         return ClassAliasPool.CLASS_ALIASES.nameFor(getClass());
     }
 
+    /**
+     * Resets this marshallable object to its default state.
+     */
+    @Override
     default void reset() {
         Wires.reset(this);
     }

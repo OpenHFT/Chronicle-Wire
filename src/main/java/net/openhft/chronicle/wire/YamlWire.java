@@ -64,6 +64,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     private ReadDocumentContext readContext;
     private YamlWire rereadWire;
 
+    public YamlWire() {
+        this(Bytes.allocateElasticOnHeap());
+        useTextDocuments();
+    }
+
     public YamlWire(@NotNull Bytes<?> bytes, boolean use8bit) {
         super(bytes, use8bit);
         yt = new YamlTokeniser(bytes);

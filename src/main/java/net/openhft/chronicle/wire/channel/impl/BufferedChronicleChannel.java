@@ -62,7 +62,7 @@ public class BufferedChronicleChannel extends DelegateChronicleChannel {
 
     @Override
     public BufferedChronicleChannel eventPoller(EventPoller eventPoller) {
-        this.eventPoller = eventPoller;
+        this.channel.eventPoller(eventPoller);
         return this;
     }
 

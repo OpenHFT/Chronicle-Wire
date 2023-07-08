@@ -20,12 +20,19 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 
+/**
+ * A functional interface representing a writer that writes a value to a {@link ValueOut} object.
+ * It is annotated with {@link DontChain} to prevent method chaining on its implementation.
+ */
 @FunctionalInterface
 @DontChain
 public interface WriteValue {
 
     /**
      * Writes a value to the provided {@link ValueOut}.
+     *
+     * @param out The ValueOut object to write to
+     * @throws InvalidMarshallableException if an error occurs during marshalling of the value
      */
     void writeValue(ValueOut out) throws InvalidMarshallableException;
 }

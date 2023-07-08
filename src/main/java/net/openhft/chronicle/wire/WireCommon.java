@@ -26,48 +26,61 @@ import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * The WireCommon interface defines a common set of operations for managing
+ * wire message configurations and states. It provides methods for handling
+ * class lookups, blocking operations, accessing underlying bytes, manipulating
+ * specific value types, and managing parent objects.
+ * <p>
+ * Implementations of this interface can customize their class lookup,
+ * pausing, and marshalling strategies, as well as various settings such as
+ * header numbers and padding.
+ * <p>
+ * The interface also provides methods to check whether the wire protocol
+ * is binary, reset the state of the wire.
+ */
 public interface WireCommon {
 
     /**
-     * Sets the {@link ClassLookup} implementation to be used for class lookup.
+     * Configures the {@link ClassLookup} implementation to be used for class lookups within this instance.
      *
-     * @param classLookup implementation to be used for class lookup.
+     * @param classLookup implementation to handle class lookups.
      */
     void classLookup(ClassLookup classLookup);
 
     /**
-     * Returns the current {@link ClassLookup} implementation being used for class lookup.
+     * Retrieves the currently configured {@link ClassLookup} implementation for class lookups.
      *
-     * @return the current {@link ClassLookup} implementation being used for class lookup
+     * @return Current {@link ClassLookup} implementation.
      */
     ClassLookup classLookup();
 
     /**
-     * Sets the {@link Pauser} implementation to be used for blocking operations.
+     * Configures the {@link Pauser} implementation to be used for handling blocking operations within this instance.
      *
-     * @param pauser implementation to be used for blocking operations.
+     * @param pauser Implementation to handle blocking operations.
      */
     void pauser(Pauser pauser);
 
     /**
-     * Returns the current {@link Pauser} implementation being used for blocking operations.
+     * Retrieves the currently configured {@link Pauser} implementation for handling blocking operations.
      *
-     * @return the current {@link Pauser} implementation being used for blocking operations
+     * @return Current {@link Pauser} implementation.
      */
     Pauser pauser();
 
     /**
-     * Returns the underlying {@link Bytes} stored by the wire.
+     * Retrieves the underlying {@link Bytes} instance stored within this wire.
      *
-     * @return the underlying {@link Bytes} stored by the wire
+     * @return Underlying {@link Bytes} instance.
      */
     @NotNull
     Bytes<?> bytes();
 
     /**
-     * Returns the bytes() but only for comment.
+     * Provides a hexadecimal dump of the bytes, useful for comment or debugging purposes.
      *
-     * @return the bytes() but only for comment
+     * @return Hexadecimal dump of the bytes.
      */
     HexDumpBytesDescription<?> bytesComment();
 
@@ -119,23 +132,22 @@ public interface WireCommon {
     IntArrayValues newIntArrayReference();
 
     /**
-     * Resets the state of the underlying {@link Bytes} stored by the wire.
+     * Resets the state of the underlying {@link Bytes} instance stored within this wire, allowing for reuse.
      */
     void clear();
 
     /**
-     * Returns the wire parent object. If the parent was not assigned, {@code null} is
-     * returned instead.
+     * Retrieves the parent object of this wire, if one has been assigned.
      *
-     * @return the wire parent object or {@code null} if none was assigned.
+     * @return Parent object of the wire or {@code null} if none was assigned.
      */
     @Nullable
     Object parent();
 
     /**
-     * Assigns the wire parent object for later retrieval.
+     * Assigns a parent object to this wire. This object can be retrieved later for contextual use.
      *
-     * @param parent to set, or null if there isn't one.
+     * @param parent Parent object to assign, or null to unassign.
      */
     void parent(Object parent);
 
@@ -152,13 +164,34 @@ public interface WireCommon {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Sets a header number for the current wire message.
+     *
+     * @param headerNumber A long representing the header number.
+     * @return the WireOut instance after setting the header number.
+     */
     @NotNull
     WireOut headerNumber(long headerNumber);
 
+    /**
+     * Retrieves the current header number of the wire message.
+     *
+     * @return A long representing the current header number.
+     */
     long headerNumber();
 
+    /**
+     * Enables or disables padding for the wire messages.
+     *
+     * @param usePadding A boolean value indicating whether to use padding.
+     */
     void usePadding(boolean usePadding);
 
+    /**
+     * Retrieves the current setting for padding in wire messages.
+     *
+     * @return A boolean value indicating whether padding is currently being used.
+     */
     boolean usePadding();
 
     /**
@@ -171,21 +204,22 @@ public interface WireCommon {
     BooleanValue newBooleanReference();
 
     /**
-     * Should this wire write the object as a Marshallable or BytesMarshallable
+     * Sets whether the object should be written as a Marshallable or BytesMarshallable.
      *
-     * @return use Marshallable
+     * @param object The object to check.
+     * @return true if the object should be written as a Marshallable, false otherwise.
      */
     boolean useSelfDescribingMessage(@NotNull CommonMarshallable object);
 
     /**
-     * Determine whether direct access to the underlying byte() makes sense or should it be treated as text
+     * Checks if the protocol of the wire is binary.
      *
-     * @return Is this a binary protocol
+     * @return true if the protocol is binary, false otherwise.
      */
     boolean isBinary();
 
     /**
-     * Reset the state of the wire
+     * Resets the state of the wire, allowing it to be reused.
      */
     void reset();
 }

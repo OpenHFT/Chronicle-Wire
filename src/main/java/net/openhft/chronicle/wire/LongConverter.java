@@ -25,14 +25,19 @@ import net.openhft.chronicle.wire.converter.SymbolsLongConverter;
 import static java.lang.Math.log;
 import static java.text.MessageFormat.format;
 
-// TODO add a pattern for validation
+/**
+ * The LongConverter interface provides methods for parsing long primitives
+ * from character sequences and for appending long primitives to StringBuilder and Bytes.
+ * Also, the interface provides an ability to manage parsing length limits and encoding text as a number.
+ * This interface has two concrete implementations: {@link PowerOfTwoLongConverter} and {@link SymbolsLongConverter}.
+ */
 public interface LongConverter {
 
     /**
-     * Creates an implementation for delegation
+     * Creates a LongConverter implementation according to the given symbols.
      *
      * @param chars symbols to use
-     * @return an implementation of a LongConverter
+     * @return a {@link PowerOfTwoLongConverter} implementation if the length of chars is power of 2, otherwise a {@link SymbolsLongConverter}
      */
     static LongConverter forSymbols(String chars) {
         return Maths.isPowerOf2(chars.length())
@@ -40,28 +45,38 @@ public interface LongConverter {
                 : new SymbolsLongConverter(chars);
     }
 
+    /**
+     * Calculates the maximum number of characters that can be parsed, based on the given radix.
+     * This method uses the formula: ceil(64 / log(based) * log(2)).
+     *
+     * @param based the radix to use for the calculation
+     * @return the maximum number of characters that can be parsed
+     */
     static int maxParseLength(int based) {
         return (int) Math.ceil(64 / log(based) * log(2));
     }
 
     /**
-     * Parses the provided {@link CharSequence} and returns the parsed results as a
-     * {@code long} primitive.
+     * Parses the provided text as a long primitive.
      *
-     * @return the parsed {@code text} as an {@code long} primitive.
+     * @param text the CharSequence to be parsed
+     * @return the parsed text as a long primitive
      */
     long parse(CharSequence text);
 
     /**
-     * Appends the provided {@code value} to the provided {@code text}.
+     * Appends the provided value to the given StringBuilder text.
+     *
+     * @param text StringBuilder to which the value will be appended
+     * @param value the long value to be appended
      */
     void append(StringBuilder text, long value);
 
     /**
-     * * Appends to provided {@code value} to the provided {@code text}.
+     * Appends the provided value to the given Bytes.
      *
-     * @param value to append as text
-     * @return bytes to append to
+     * @param bytes Bytes to which the value will be appended
+     * @param value the long value to be appended
      */
     default void append(Bytes<?> bytes, long value) {
         final StringBuilder sb = WireInternal.acquireStringBuilder();
@@ -69,14 +84,32 @@ public interface LongConverter {
         bytes.append(sb);
     }
 
+    /**
+     * Converts the provided long value to a String.
+     *
+     * @param value the long value to be converted
+     * @return the String representation of the value
+     */
     default String asString(long value) {
         return asText(value).toString();
     }
 
+    /**
+     * Converts the provided int value to a CharSequence.
+     *
+     * @param value the int value to be converted
+     * @return the CharSequence representation of the value
+     */
     default CharSequence asText(int value) {
         return asText(value & 0xFFFF_FFFFL);
     }
 
+    /**
+     * Converts the provided long value to a CharSequence.
+     *
+     * @param value the long value to be converted
+     * @return the CharSequence representation of the value
+     */
     default CharSequence asText(long value) {
         StringBuilder sb = new StringBuilder();
         append(sb, value);
@@ -84,16 +117,19 @@ public interface LongConverter {
     }
 
     /**
-     * @return the maximum number of character that this base is able to parse or Integer.MAX_VALUE if this is not enforced
+     * Returns the maximum number of characters that this base is able to parse or Integer.MAX_VALUE if this is not enforced.
+     *
+     * @return the maximum allowable parsing length
      */
     default int maxParseLength() {
         return Integer.MAX_VALUE;
     }
 
     /**
-     * checks that the length of the text is not greater than {@link LongConverter#maxParseLength()}
+     * Verifies that the length of the provided text is not greater than the maximum parse length.
      *
-     * @param text to check
+     * @param text the CharSequence to check
+     * @throws IllegalArgumentException if text length exceeds the maximum allowable length
      */
     default void lengthCheck(CharSequence text) {
         if (text.length() > maxParseLength())
@@ -101,9 +137,9 @@ public interface LongConverter {
     }
 
     /**
-     * All safe character for a give WireOut type without quotes or escaping.
+     * Checks if all characters of a given WireOut type are safe without quotes or escaping.
      *
-     * @param wireOut to write to
+     * @param wireOut the WireOut instance to write to
      * @return true if no characters need escaping or put in additional quotes for YAML
      */
     default boolean allSafeChars(WireOut wireOut) {
@@ -111,10 +147,11 @@ public interface LongConverter {
     }
 
     /**
-     * Add an alias for encoding text as a number
+     * Adds an alias for encoding text as a number.
      *
-     * @param alias to make the same as another character
-     * @param as    to make ti the same as
+     * @param alias character to be made the same as another character
+     * @param as character to be used as the alias
+     * @throws UnsupportedOperationException if this method is not supported
      */
     default void addEncode(char alias, char as) {
         throw new UnsupportedOperationException();

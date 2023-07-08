@@ -17,7 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
-public class HexadecimalLongConverter extends AbstractLongConverter {
+public class HexadecimalLongConverter extends DelegatingLongConverter {
     public static final LongConverter INSTANCE = new HexadecimalLongConverter();
     private static final String CHARS = "0123456789abcdef";
 

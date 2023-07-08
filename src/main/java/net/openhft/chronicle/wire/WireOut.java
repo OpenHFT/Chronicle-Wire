@@ -51,7 +51,16 @@ public interface WireOut extends WireCommon, MarshallableOut {
     default ValueOut writeEventName(CharSequence key) {
         return write(key);
     }
-
+    /**
+     * Write an event name. The event key can be of type WireKey or CharSequence.
+     * If it doesn't match any of these types, an attempt will be made to write it as a
+     * generic object. This method is mostly for internal use.
+     *
+     * @param expectedType The expected class of the event key
+     * @param eventKey The event key to be written
+     * @return An instance of ValueOut, which is used for further writing operations
+     * @throws InvalidMarshallableException if the eventKey cannot be written
+     */
     @SuppressWarnings({"rawtypes", "unchecked"})
     default ValueOut writeEvent(Class expectedType, Object eventKey) throws InvalidMarshallableException {
         if (eventKey instanceof WireKey)
@@ -64,16 +73,34 @@ public interface WireOut extends WireCommon, MarshallableOut {
         return getValueOut();
     }
 
+    /**
+     * Write an event id. This method constructs a MethodWireKey with the given id and
+     * passes it to the write method.
+     *
+     * @param methodId The id of the method to be written
+     * @return An instance of ValueOut, which is used for further writing operations
+     */
     default ValueOut writeEventId(int methodId) {
         return write(new MethodWireKey(null, methodId));
     }
 
+    /**
+     * Write an event id. This method constructs a MethodWireKey with the given name and id
+     * and passes it to the write method.
+     *
+     * @param name The name of the method to be written
+     * @param methodId The id of the method to be written
+     * @return An instance of ValueOut, which is used for further writing operations
+     */
     default ValueOut writeEventId(String name, int methodId) {
         return write(new MethodWireKey(name, methodId));
     }
 
     /**
-     * Write a key for wires that support fields.
+     * Get the current ValueOut instance. The ValueOut interface is used to write values
+     * of various types to the wire.
+     *
+     * @return The current ValueOut instance
      */
     @NotNull
     ValueOut write(WireKey key);
@@ -86,10 +113,19 @@ public interface WireOut extends WireCommon, MarshallableOut {
     @NotNull
     ValueOut getValueOut();
 
+    /**
+     * Get the current ObjectOutput instance. The ObjectOutput interface is used for
+     * writing objects to an underlying output stream.
+     *
+     * @return The current ObjectOutput instance
+     */
     ObjectOutput objectOutput();
 
-    /*
-     * read and write comments.
+    /**
+     * Write a comment. This method allows for writing comments to the wire.
+     *
+     * @param s The comment to be written
+     * @return The current WireOut instance
      */
     @NotNull
     WireOut writeComment(CharSequence s);
@@ -117,6 +153,14 @@ public interface WireOut extends WireCommon, MarshallableOut {
         return this;
     }
 
+    /**
+     * Align the write position to a specified boundary. This method pads the write
+     * position to a specified alignment boundary.
+     *
+     * @param alignment The alignment boundary
+     * @param plus The additional number of bytes to be written
+     * @return The current WireOut instance
+     */
     @NotNull
     default WireOut writeAlignTo(int alignment, int plus) {
         assert Integer.bitCount(alignment) == 1;
@@ -154,7 +198,12 @@ public interface WireOut extends WireCommon, MarshallableOut {
     default DocumentContext writingDocument() {
         return writingDocument(false);
     }
-
+    /**
+     * Acquire the current writing DocumentContext. This method is mostly for internal use.
+     *
+     * @param metaData The metadata for the writing document
+     * @return The current writing DocumentContext
+     */
     DocumentContext acquireWritingDocument(boolean metaData);
 
     /**
@@ -164,6 +213,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
      *
      * @param metaData {@code true} if the write should write metaData rather than data
      * @param writer   writes bytes to the wire
+     * @throws InvalidMarshallableException If the document could not be written
      */
     default void writeNotCompleteDocument(boolean metaData, @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
         WireInternal.writeData(this, metaData, true, writer);
@@ -172,7 +222,11 @@ public interface WireOut extends WireCommon, MarshallableOut {
     /**
      * INTERNAL METHOD, call writingDocument instead
      * <p>
-     * Update/end a header for a document
+     *
+     * @param position The position of the header
+     * @param metaData The metadata for the document
+     * @param expectedHeader The expected header of the document
+     * @throws StreamCorruptedException If the stream is corrupted
      */
     void updateHeader(long position, boolean metaData, int expectedHeader) throws StreamCorruptedException;
 
@@ -200,14 +254,17 @@ public interface WireOut extends WireCommon, MarshallableOut {
     /**
      * INTERNAL METHOD, call writingDocument instead
      * <p>
-     * update the first header after writing.
+     * Update the first header of a document after writing. This method is mostly for internal use.
      */
     void updateFirstHeader();
 
     /**
      * INTERNAL METHOD, call writingDocument instead
      * <p>
-     * update the first header after writing {@code headerEndPos} bytes.
+     * Update the first header of a document after writing a certain amount of bytes.
+     * This method is mostly for internal use.
+     *
+     * @param headerLen The length of the header in bytes
      */
     void updateFirstHeader(long headerLen);
 
@@ -241,18 +298,38 @@ public interface WireOut extends WireCommon, MarshallableOut {
      */
     void writeStartEvent();
 
+    /**
+     * End an event object, mostly for internal use.
+     */
     void writeEndEvent();
 
+    /**
+     * Write a map as series of events. Each entry is written as a separate event.
+     *
+     * @param kClass The class of the map keys
+     * @param vClass The class of the map values
+     * @param map The map to be written
+     */
     default <K, V> void writeAllAsMap(Class<K> kClass, Class<V> vClass, @NotNull Map<K, V> map) {
         map.forEach((k, v) -> writeEvent(kClass, k).object(vClass, v));
     }
 
+    /**
+     * Specify whether default values should be dropped when writing. This is a no-op in this default
+     * implementation but can be overridden in specific implementations.
+     *
+     * @param dropDefault Whether to drop default values when writing
+     * @return The current WireOut instance
+     */
     @NotNull
     default WireOut dropDefault(boolean dropDefault) {
         return this;
     }
 
     /**
+     * Check if writing is complete. This is a no-op in this default implementation but can be overridden
+     * in specific implementations.
+     *
      * @return true unless there is an incomplete/chained message
      */
     default boolean writingIsComplete() {

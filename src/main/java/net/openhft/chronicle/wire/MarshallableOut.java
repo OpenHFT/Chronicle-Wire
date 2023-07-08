@@ -31,11 +31,18 @@ import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 /**
- * Anything you can write Marshallable objects to.
+ * This interface defines methods for outputting Marshallable objects. It provides various methods for
+ * writing different types of data, including documents, messages, and values.
  */
 @DontChain
 public interface MarshallableOut extends DocumentWritten {
 
+    /**
+     * Returns a new MarshallableOutBuilder for the specified URL.
+     *
+     * @param url the URL to be used by the builder
+     * @return a new instance of MarshallableOutBuilder
+     */
     static MarshallableOutBuilder builder(URL url) {
         return new MarshallableOutBuilder(url);
     }
@@ -59,6 +66,8 @@ public interface MarshallableOut extends DocumentWritten {
      *      and tailers.
      * }
      * </pre>
+     * @return a new DocumentContext
+     * @throws UnrecoverableTimeoutException if the operation times out
      */
     @NotNull
     default DocumentContext writingDocument() throws UnrecoverableTimeoutException {
@@ -66,28 +75,38 @@ public interface MarshallableOut extends DocumentWritten {
     }
 
     /**
-     * Start a new DocumentContext, must always call close() when done.
+     * Begins writing a new DocumentContext. This method always requires a close() call when done.
+     *
+     * @param metaData metadata to be associated with the document
+     * @return a new DocumentContext
+     * @throws UnrecoverableTimeoutException if the operation times out
      */
     DocumentContext writingDocument(boolean metaData) throws UnrecoverableTimeoutException;
 
     /**
-     * Start or reuse an existing a DocumentContext, optionally call close() when done.
+     * Begins writing a new DocumentContext or reuses an existing one. It's optional to call close() when done.
+     *
+     * @param metaData metadata to be associated with the document
+     * @return an existing or a new DocumentContext
+     * @throws UnrecoverableTimeoutException if the operation times out
      */
     DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException;
 
     /**
-     * @return true if this output is configured to expect the history of the message to be written
-     * to.
+     * Checks if this output is configured to record the history of the message.
+     *
+     * @return true if history recording is enabled, false otherwise
      */
     default boolean recordHistory() {
         return false;
     }
 
     /**
-     * Wrie a key and value which could be a scalar or a marshallable.
+     * Writes a key-value pair, which could be a scalar or a Marshallable object, as a message.
      *
-     * @param key   to write
-     * @param value to write with it.
+     * @param key   the key to be written
+     * @param value the value to be written with the key
+     * @throws UnrecoverableTimeoutException if the operation times out
      */
     default void writeMessage(WireKey key, Object value) throws UnrecoverableTimeoutException {
         @NotNull DocumentContext dc = writingDocument();
@@ -102,6 +121,13 @@ public interface MarshallableOut extends DocumentWritten {
         }
     }
 
+    /**
+     * Writes an event name and its corresponding value as a message.
+     *
+     * @param eventName the name of the event to be written
+     * @param value     the value to be written with the event name
+     * @throws UnrecoverableTimeoutException if the operation times out
+     */
     default void writeMessage(String eventName, Object value) throws UnrecoverableTimeoutException {
         @NotNull DocumentContext dc = writingDocument();
         try {
@@ -116,9 +142,11 @@ public interface MarshallableOut extends DocumentWritten {
     }
 
     /**
-     * Write the Marshallable as a document/message
+     * Writes the given Marshallable as a document or message.
      *
-     * @param writer to write
+     * @param writer the Marshallable to write
+     * @throws UnrecoverableTimeoutException  if the operation times out
+     * @throws InvalidMarshallableException if the provided Marshallable is invalid
      */
     default void writeDocument(@NotNull WriteMarshallable writer) throws UnrecoverableTimeoutException, InvalidMarshallableException {
         try (@NotNull DocumentContext dc = writingDocument(false)) {

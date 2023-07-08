@@ -24,25 +24,35 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * This interface marks a object which can be reloaded from stream re-using an
- * existing object.
- * <p>
- * For objects which must deserialize final field see Demarshallable
+ * This interface marks an object which can be reloaded from a stream, re-using an
+ * existing object. For objects which must deserialize final fields, see {@link Demarshallable}.
  */
 @FunctionalInterface
 @DontChain
 public interface ReadMarshallable extends CommonMarshallable {
+
+    /**
+     * An instance of ReadMarshallable that performs no action when reading.
+     */
     ReadMarshallable DISCARD = w -> {
     };
 
     /**
-     * Straight line ordered decoding.
+     * Reads the state of this object from the specified wire in a straight line ordered manner.
      *
-     * @param wire to read from in an ordered manner.
-     * @throws IORuntimeException the stream wasn't ordered or formatted as expected.
+     * @param wire the wire to read from
+     * @throws IORuntimeException        if the stream wasn't ordered or formatted as expected
+     * @throws InvalidMarshallableException if an error occurs during demarshalling of this object
      */
     void readMarshallable(@NotNull WireIn wire) throws IORuntimeException, InvalidMarshallableException;
 
+    /**
+     * Handles the scenario where an unexpected field is encountered while reading.
+     *
+     * @param event   the unexpected event encountered
+     * @param valueIn the current value being read
+     * @throws InvalidMarshallableException if an error occurs while skipping the unexpected value
+     */
     default void unexpectedField(Object event, ValueIn valueIn) throws InvalidMarshallableException {
         valueIn.skipValue();
     }

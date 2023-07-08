@@ -62,7 +62,7 @@ import static org.junit.Assert.*;
 @SuppressWarnings({"rawtypes", "unchecked"})
 @RunWith(value = Parameterized.class)
 public class YamlWireTest extends WireTestCommon {
-    static Wire wire = Wire.newYamlWireOnHeap();
+    final Wire wire = Wire.newYamlWireOnHeap();
     final boolean usePadding;
 
     public YamlWireTest(boolean usePadding) {
