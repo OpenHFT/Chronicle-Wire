@@ -17,12 +17,18 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import org.jetbrains.annotations.NotNull;
 
 public class DemarshallableObject implements Demarshallable, WriteMarshallable {
-    @NotNull
     final String name;
     final int value;
+
+    @UsedViaReflection
+    DemarshallableObject() {
+        this.name = null;
+        this.value = 0;
+    }
 
     public DemarshallableObject(@NotNull String name, int value) {
         this.name = name;

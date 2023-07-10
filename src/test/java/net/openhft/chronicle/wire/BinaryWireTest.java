@@ -1506,6 +1506,9 @@ public class BinaryWireTest extends WireTestCommon {
 
         String text;
 
+        DTO() {
+        }
+
         DTO(String text) {
             this.text = text;
         }

@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.bytes.NoBytesStore;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.TextWireTest.ABCD;
 import net.openhft.chronicle.wire.converter.NanoTime;
@@ -873,7 +872,7 @@ public class YamlWireTest extends WireTestCommon {
         @NotNull byte[] allBytes = new byte[256];
         for (int i = 0; i < 256; i++)
             allBytes[i] = (byte) i;
-        wire.write().bytes(NoBytesStore.NO_BYTES)
+        wire.write().bytes(Bytes.elasticHeapByteBuffer())
                 .write().bytes(Bytes.wrapForRead("Hello".getBytes(ISO_8859_1)))
                 .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
                 .write().bytes(allBytes);
@@ -1151,18 +1150,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testException() {
-        @NotNull Exception e = new InvalidAlgorithmParameterException("Reference cannot be null") {
-            @NotNull
-            @Override
-            public StackTraceElement[] getStackTrace() {
-                @NotNull StackTraceElement[] stack = {
-                        new StackTraceElement("net.openhft.chronicle.wire.YamlWireTest", "testException", "YamlWireTest.java", 783),
-                        new StackTraceElement("net.openhft.chronicle.wire.YamlWireTest", "runTestException", "YamlWireTest.java", 73),
-                        new StackTraceElement("sun.reflect.NativeMethodAccessorImpl", "invoke0", "NativeMethodAccessorImpl.java", -2)
-                };
-                return stack;
-            }
-        };
+        @NotNull Exception e = new MyInvalidAlgorithmParameterException();
         @NotNull final Wire wire = new YamlWire(Bytes.allocateElasticOnHeap());
         wire.usePadding(usePadding);
 
@@ -1260,7 +1248,7 @@ public class YamlWireTest extends WireTestCommon {
         @NotNull byte[] compressedBytes = str.getBytes(ISO_8859_1);
         wire.write().compress("gzip", Bytes.wrapForRead(compressedBytes));
 
-        @NotNull Bytes<?> bytes = allocateElasticDirect();
+        @NotNull Bytes<?> bytes = allocateElasticOnHeap();
         wire.read().bytes(bytes);
         assertEquals(str, bytes.toString());
     }
@@ -1274,7 +1262,7 @@ public class YamlWireTest extends WireTestCommon {
         @NotNull byte[] compressedBytes = str.getBytes(ISO_8859_1);
         wire.write().compress("lzw", Bytes.wrapForRead(compressedBytes));
 
-        @NotNull Bytes<?> bytes = allocateElasticDirect();
+        @NotNull Bytes<?> bytes = allocateElasticOnHeap();
         wire.read().bytes(bytes);
         assertEquals(str, bytes.toString());
     }
@@ -1928,7 +1916,7 @@ public class YamlWireTest extends WireTestCommon {
 
     static class BytesWrapper extends SelfDescribingMarshallable {
         @NotNull
-        Bytes<?> bytes = allocateElasticDirect();
+        Bytes<?> bytes = allocateElasticOnHeap();
 
         public void bytes(@NotNull CharSequence cs) {
             bytes.clear();
@@ -1945,6 +1933,23 @@ public class YamlWireTest extends WireTestCommon {
         long timeNS;
         Bytes bytes;
         byte[] data;
+    }
+
+    static class MyInvalidAlgorithmParameterException extends InvalidAlgorithmParameterException {
+        public MyInvalidAlgorithmParameterException() {
+            super("Reference cannot be null");
+        }
+
+        @NotNull
+        @Override
+        public StackTraceElement[] getStackTrace() {
+            @NotNull StackTraceElement[] stack = {
+                    new StackTraceElement("net.openhft.chronicle.wire.YamlWireTest", "testException", "YamlWireTest.java", 783),
+                    new StackTraceElement("net.openhft.chronicle.wire.YamlWireTest", "runTestException", "YamlWireTest.java", 73),
+                    new StackTraceElement("sun.reflect.NativeMethodAccessorImpl", "invoke0", "NativeMethodAccessorImpl.java", -2)
+            };
+            return stack;
+        }
     }
 
     class Circle implements Marshallable {

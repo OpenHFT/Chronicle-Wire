@@ -17,6 +17,7 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,6 +25,10 @@ class MyMarshallable extends SelfDescribingMarshallable {
 
     @Nullable
     String someData;
+
+    @UsedViaReflection
+    MyMarshallable() {
+    }
 
     MyMarshallable(@Nullable String someData) {
         this.someData = someData;

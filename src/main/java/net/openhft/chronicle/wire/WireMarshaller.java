@@ -45,6 +45,8 @@ public class WireMarshaller<T> {
     private static final FieldAccess[] NO_FIELDS = {};
     private static final StringBuilderPool RSBP = new StringBuilderPool();
     private static final StringBuilderPool WSBP = new StringBuilderPool();
+    private static final WireMarshaller WITH_NO_FIELDS = new WireMarshaller(NO_FIELDS, true, new Object());
+    private static final WireMarshaller NOT_SERIALIZABLE = new NotSerializableWireMarshaller();
     @NotNull
     final FieldAccess[] fields;
     final TreeMap<CharSequence, FieldAccess> fieldMap = new TreeMap<>(WireMarshaller::compare);
@@ -56,14 +58,7 @@ public class WireMarshaller<T> {
         this(fields, isLeaf, defaultValueForType(tClass));
     }
 
-    public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial
-            (tClass ->
-                    Throwable.class.isAssignableFrom(tClass)
-                            ? WireMarshaller.ofThrowable(tClass)
-                            : WireMarshaller.of(tClass)
-            );
-
-    private WireMarshaller(@NotNull FieldAccess[] fields, boolean isLeaf, @Nullable T defaultValue) {
+    protected WireMarshaller(@NotNull FieldAccess[] fields, boolean isLeaf, @Nullable T defaultValue) {
         this.fields = fields;
         this.isLeaf = isLeaf;
         this.defaultValue = defaultValue;
@@ -71,6 +66,23 @@ public class WireMarshaller<T> {
             fieldMap.put(field.key.name(), field);
         }
     }
+
+    private static boolean isNotSerialziable(Class<?> tClass) {
+        return tClass.getName().startsWith("sun.");
+    }
+
+    private static boolean isLambda(Class<?> tClass) {
+        return tClass.getName().contains("$Lambda$");
+    }    public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial
+            (tClass ->
+                    Throwable.class.isAssignableFrom(tClass)
+                            ? WireMarshaller.ofThrowable(tClass)
+                            : isNotSerialziable(tClass)
+                            ? NOT_SERIALIZABLE
+                            : isLambda(tClass)
+                            ? WITH_NO_FIELDS
+                            : WireMarshaller.of(tClass)
+            );
 
     @NotNull
     public static <T> WireMarshaller<T> of(@NotNull Class<T> tClass) {
@@ -444,6 +456,42 @@ public class WireMarshaller<T> {
 
     public boolean isLeaf() {
         return isLeaf;
+    }
+
+    static class NotSerializableWireMarshaller extends WireMarshaller {
+        public NotSerializableWireMarshaller() {
+            super(NO_FIELDS, true, new Object());
+        }
+
+        @Override
+        public void writeMarshallable(Object o, @NotNull WireOut out) throws InvalidMarshallableException {
+            throw new IllegalArgumentException();
+        }
+
+        @Override
+        public void writeMarshallable(Object o, Bytes bytes) {
+            throw new IllegalArgumentException();
+        }
+
+        @Override
+        public void writeMarshallable(Object o, @NotNull WireOut out, Object previous, boolean copy) throws InvalidMarshallableException {
+            throw new IllegalArgumentException();
+        }
+
+        @Override
+        public void readMarshallable(Object o, @NotNull WireIn in, Object defaults, boolean overwrite) throws InvalidMarshallableException {
+            throw new IllegalArgumentException();
+        }
+
+        @Override
+        public void readMarshallableDTOOrder(Object o, @NotNull WireIn in, Object defaults, boolean overwrite) throws InvalidMarshallableException {
+            throw new IllegalArgumentException();
+        }
+
+        @Override
+        public void readMarshallableInputOrder(Object o, @NotNull WireIn in, Object defaults, boolean overwrite) throws InvalidMarshallableException {
+            throw new IllegalArgumentException();
+        }
     }
 
     static class LongConverterFieldAccess extends FieldAccess {
@@ -2031,6 +2079,8 @@ public class WireMarshaller<T> {
             unsafePutDouble(to, offset, unsafeGetDouble(from, offset));
         }
     }
+
+
 
 
 }

@@ -79,7 +79,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         @Nullable
         @Override
         public <T> T fromString(Class<T> tClass, @NotNull CharSequence cs) throws InvalidMarshallableException {
-            Bytes<?> bytes = Bytes.allocateElasticDirect(cs.length());
+            Bytes<?> bytes = Bytes.allocateElasticOnHeap(cs.length());
             try {
                 bytes.appendUtf8(cs);
                 @NotNull Wire wire = apply(bytes);
