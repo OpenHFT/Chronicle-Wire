@@ -25,10 +25,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 /**
- * This is similar to ReadMarshallable however it is expected that
- * a new potentially immutable object will be created each time.
- * <p>
- * Any implementation must have a constructor which takes a WireIn for deserialization.
+ * An interface representing an object that can be demarshalled
+ * from a WireIn instance. Each demarshalling operation is expected
+ * to create a new, potentially immutable, object.
+ *
+ * Implementations of this interface must have a constructor
+ * that takes a WireIn instance as a parameter for deserialization.
  */
 public interface Demarshallable {
 
@@ -51,6 +53,16 @@ public interface Demarshallable {
 
     @SuppressWarnings("unchecked")
     @NotNull
+    /**
+     * Creates a new instance of a class implementing the Demarshallable interface
+     * using the provided WireIn for initialization.
+     *
+     * @param clazz the class of which an instance should be created.
+     * @param wireIn the WireIn instance used for initialization.
+     * @return a new instance of the specified class.
+     * @throws AssertionError if an instance could not be created due to access restrictions.
+     * @throws IORuntimeException if the underlying constructor throws an exception.
+     */
     static <T extends Demarshallable> T newInstance(@NotNull Class<T> clazz, WireIn wireIn) {
         try {
             Constructor<Demarshallable> constructor = DEMARSHALLABLES.get(clazz);

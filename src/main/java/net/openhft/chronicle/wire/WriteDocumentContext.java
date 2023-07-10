@@ -16,9 +16,20 @@
  * limitations under the License.
  */
 package net.openhft.chronicle.wire;
-
+/**
+ * WriteDocumentContext is an extension of the DocumentContext interface
+ * that is specifically tailored for write operations. This interface provides
+ * methods to start writing data, check and modify the chaining state of elements,
+ * and verify if the context is empty.
+ */
 public interface WriteDocumentContext extends DocumentContext {
 
+    /**
+     * Starts the write operation in the current DocumentContext,
+     * setting the metadata flag as specified.
+     *
+     * @param metaData A boolean flag indicating whether the context is metadata.
+     */
     void start(boolean metaData);
 
     /**
@@ -31,9 +42,20 @@ public interface WriteDocumentContext extends DocumentContext {
     boolean chainedElement();
 
     /**
-     * Marks this {@code WriteDocumentContext} as a chained element.
+     * Sets the current WriteDocumentContext's chain status.
+     * If {@code chainedElement} is true, this WriteDocumentContext will be
+     * marked as part of a chain of elements.
+     *
+     * @param chainedElement A boolean flag indicating whether the context is
+     *                       part of a chain of elements.
      */
     void chainedElement(boolean chainedElement);
 
+    /**
+     * Checks if the current WriteDocumentContext is empty.
+     *
+     * @return {@code true} if the current WriteDocumentContext is empty,
+     *         otherwise {@code false}.
+     */
     boolean isEmpty();
 }

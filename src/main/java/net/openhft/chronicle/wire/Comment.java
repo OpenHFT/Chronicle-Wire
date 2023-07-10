@@ -22,9 +22,26 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * The Comment annotation is used to associate a human-readable comment with
+ * a field, parameter or type. This can be useful for auto-generation of
+ * documentation, and for including explanatory comments in serialized
+ * output of objects.
+ * <p>
+ * The value of the Comment annotation is intended to be a format string,
+ * which can include a "%s" placeholder. If the annotated item is a String,
+ * this placeholder will be replaced with the value of the String when the
+ * comment is included in serialized output.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})
 public @interface Comment {
+
+    /**
+     * Returns the comment associated with this annotation.
+     *
+     * @return A string containing the comment text.
+     */
     String value();
 }
 

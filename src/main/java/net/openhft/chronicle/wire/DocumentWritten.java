@@ -17,20 +17,40 @@
  */
 
 package net.openhft.chronicle.wire;
-
+/**
+ * The DocumentWritten interface provides methods for creating and acquiring DocumentContexts.
+ * A DocumentContext provides a context for reading or writing document data. Methods in this
+ * interface are used to initiate the writing process.
+ */
 public interface DocumentWritten {
+
     /**
-     * @return a context to use in a try-with-resource block
+     * Retrieves a new DocumentContext which should be used in a try-with-resources block
+     * to ensure proper resource management.
+     *
+     * @return A new DocumentContext for writing operations.
      */
     DocumentContext writingDocument();
 
     /**
-     * Start a new DocumentContext, must always call close() when done.
+     * Creates a new DocumentContext for writing, with a flag to indicate whether the context
+     * is metadata. After operations are completed, the close() method must be invoked to ensure
+     * resources are released properly.
+     *
+     * @param metaData A boolean flag indicating whether the context is metadata.
+     * @return A new DocumentContext for writing operations.
+     * @throws UnrecoverableTimeoutException If there is a timeout while creating the DocumentContext.
      */
     DocumentContext writingDocument(boolean metaData) throws UnrecoverableTimeoutException;
 
     /**
-     * Start or reuse an existing a DocumentContext, optionally call close() when done.
+     * Attempts to acquire an existing DocumentContext for writing, or creates a new one if none exists.
+     * The close() method can optionally be invoked after operations are done. This provides more flexibility
+     * when dealing with DocumentContexts that might be used across different scopes.
+     *
+     * @param metaData A boolean flag indicating whether the context is metadata.
+     * @return An existing or new DocumentContext for writing operations.
+     * @throws UnrecoverableTimeoutException If there is a timeout while acquiring the DocumentContext.
      */
     DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException;
 }

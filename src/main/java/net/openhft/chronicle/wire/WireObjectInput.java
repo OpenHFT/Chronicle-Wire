@@ -25,6 +25,10 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInput;
 
+/**
+ * Implementation of the ObjectInput interface that allows reading Java objects from WireIn.
+ * This class wraps a WireIn object, providing methods to read various types of data.
+ */
 class WireObjectInput implements ObjectInput {
     private final WireIn wire;
 

@@ -23,6 +23,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * The AsMarshallable annotation is used to explicitly mark a field or parameter as marshallable,
+ * overriding the default behavior of the framework. This annotation is useful
+ * when a field or parameter is not an instance of Marshallable, but should be treated as such.
+ *
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 public @interface AsMarshallable {

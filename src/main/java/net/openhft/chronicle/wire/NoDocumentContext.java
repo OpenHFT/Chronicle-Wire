@@ -16,50 +16,96 @@
  * limitations under the License.
  */
 package net.openhft.chronicle.wire;
-
+/**
+ * Singleton implementation of the DocumentContext interface that represents a state with no document.
+ */
 public enum NoDocumentContext implements DocumentContext {
+    /**
+     * The singleton instance of NoDocumentContext.
+     */
     INSTANCE;
 
+    /**
+     * Always returns false as there is no metadata in the absence of a document.
+     *
+     * @return false
+     */
     @Override
     public boolean isMetaData() {
         return false;
     }
 
+    /**
+     * Always returns false as there is no document present.
+     *
+     * @return false
+     */
     @Override
     public boolean isPresent() {
         return false;
     }
 
+    /**
+     * Always returns false as there is no data in the absence of a document.
+     *
+     * @return false
+     */
     @Override
     public boolean isData() {
         return false;
     }
 
+    /**
+     * Always returns null as there is no wire associated in the absence of a document.
+     *
+     * @return null
+     */
     @Override
     public Wire wire() {
         return null;
     }
 
+    /**
+     * Returns the identifier for the source which, by convention, is -1 for no document context.
+     *
+     * @return -1
+     */
     @Override
     public int sourceId() {
         return -1;
     }
 
+    /**
+     * Always returns Long.MIN_VALUE as there is no index associated in the absence of a document.
+     *
+     * @return Long.MIN_VALUE
+     */
     @Override
     public long index() {
         return Long.MIN_VALUE;
     }
 
+    /**
+     * Always returns false as there is no incomplete operation in the absence of a document.
+     *
+     * @return false
+     */
     @Override
     public boolean isNotComplete() {
         return false;
     }
 
+    /**
+     * This method has no effect as there is no document to close.
+     */
     @Override
     public void close() {
         // Do nothing
     }
 
+    /**
+     * This method has no effect as there is no document to reset.
+     */
     @Override
     public void reset() {
         close();

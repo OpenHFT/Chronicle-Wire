@@ -24,6 +24,11 @@ import org.jetbrains.annotations.NotNull;
 
 import static net.openhft.chronicle.wire.Wires.toIntU30;
 
+/**
+ * A `BinaryWriteDocumentContext` is a concrete implementation of the `WriteDocumentContext` interface,
+ * providing methods to write binary data to a document. This class has a variety of metadata fields
+ * and flags that can be manipulated while writing data.
+ */
 public class BinaryWriteDocumentContext implements WriteDocumentContext {
     protected Wire wire;
     protected long position = -1;
@@ -33,10 +38,20 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
     private volatile boolean notComplete;
     private boolean chainedElement;
 
+    /**
+     * Constructs a `BinaryWriteDocumentContext` with the provided `Wire` object.
+     *
+     * @param wire The `Wire` object to be used for writing operations.
+     */
     public BinaryWriteDocumentContext(Wire wire) {
         this.wire = wire;
     }
 
+    /**
+     * Begins the process of writing data to the document.
+     *
+     * @param metaData A flag indicating if the current writing operation concerns metadata.
+     */
     public void start(boolean metaData) {
         count++;
         if (count > 1) {
@@ -54,11 +69,19 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         chainedElement = false;
     }
 
+    /**
+     * Checks if the `WriteDocumentContext` is currently empty.
+     *
+     * @return true if the context is not completed and no data has been written, false otherwise.
+     */
     @Override
     public boolean isEmpty() {
         return notComplete && wire().bytes().writePosition() == position + 4;
     }
 
+    /**
+     * Resets the current context, clearing any writing operations or flags that have been set.
+     */
     @Override
     public void reset() {
         if (count > 0)
@@ -71,11 +94,19 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         chainedElement = false;
     }
 
+    /**
+     * Checks if the context is currently in the state of writing metadata.
+     *
+     * @return true if metadata is being written, false otherwise.
+     */
     @Override
     public boolean isMetaData() {
         return metaDataBit != 0;
     }
 
+    /**
+     * Closes the context after all writing operations have been finished.
+     */
     @Override
     @SuppressWarnings("rawtypes")
     public void close() {
@@ -105,6 +136,11 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         notComplete = false;
     }
 
+    /**
+     * Checks if the context is reset after opening.
+     *
+     * @return true if the context was not complete after opening, false otherwise.
+     */
     protected boolean checkResetOpened() {
         if (!notComplete)
             Jvm.warn().on(getClass(), "Closing but not opened");
@@ -113,11 +149,21 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         return !wasOpened;
     }
 
+    /**
+     * Checks if the current context is a chained element.
+     *
+     * @return true if the context is a chained element, false otherwise.
+     */
     @Override
     public boolean chainedElement() {
         return chainedElement;
     }
 
+    /**
+     * Sets the context as a chained element or removes it from being a chained element.
+     *
+     * @param chainedElement true to set the context as a chained element, false to remove it.
+     */
     @Override
     public void chainedElement(boolean chainedElement) {
         this.chainedElement = chainedElement;

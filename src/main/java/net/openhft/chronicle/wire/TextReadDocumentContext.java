@@ -22,7 +22,9 @@ import net.openhft.chronicle.bytes.BytesStore;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
-
+/**
+ * Implementation of the ReadDocumentContext interface for reading text data from a document.
+ */
 public class TextReadDocumentContext implements ReadDocumentContext {
     public static final BytesStore<?, ?> SOD_SEP = BytesStore.from("---");
     public static final BytesStore<?, ?> EOD_SEP = BytesStore.from("...");
@@ -35,10 +37,21 @@ public class TextReadDocumentContext implements ReadDocumentContext {
     private long start = -1;
     private boolean rollback;
 
+    /**
+     * Constructor of TextReadDocumentContext that initializes the context with an instance of AbstractWire.
+     *
+     * @param wire Instance of AbstractWire.
+     */
     public TextReadDocumentContext(@Nullable AbstractWire wire) {
         this.wire = wire;
     }
 
+
+    /**
+     * Consumes to the end of the message in the provided Bytes object.
+     *
+     * @param bytes Bytes object to be consumed.
+     */
     public static void consumeToEndOfMessage(Bytes<?> bytes) {
         while (bytes.readRemaining() > 0) {
             while (bytes.readRemaining() > 0 && bytes.readUnsignedByte() >= ' ') {
@@ -59,6 +72,12 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         return bytes.peekUnsignedByte(bytes.readPosition() + 3) <= ' ';
     }
 
+
+    /**
+     * Returns if the context has metadata available for reading.
+     *
+     * @return boolean value indicating if metadata is present.
+     */
     @Override
     public boolean isMetaData() {
         return metaData;
@@ -85,6 +104,9 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         return wire;
     }
 
+    /**
+     * Closes the current context. Updates the read limits and positions. Rolls back if rollback flag is set.
+     */
     @Override
     public void close() {
         long readLimit = this.readLimit;
@@ -107,6 +129,9 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         present = false;
     }
 
+    /**
+     * Resets the current context, clearing any reading operations or flags that have been set.
+     */
     @Override
     public void reset() {
         close();
@@ -118,6 +143,9 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         rollback = false;
     }
 
+    /**
+     * Starts the process of reading data from the document.
+     */
     @Override
     public void start() {
         wire.getValueIn().resetState();
@@ -152,6 +180,10 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         wire.consumePadding();
     }
 
+    /**
+     * Sets the rollback flag to true. It means that the document context will be rolled back to
+     * the state before opening when it is closed.
+     */
     @Override
     public void rollbackOnClose() {
         rollback = true;

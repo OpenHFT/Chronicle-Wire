@@ -22,8 +22,22 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Annotation to specify a {@link CharConverter} for a field or parameter.
+ * <p>
+ * This annotation can be used to indicate that a specific {@link CharConverter}
+ * should be used to convert the annotated field or parameter to and from character data.
+ * The value of the annotation should be the class of the {@link CharConverter} to use.
+ * <p>
+ * This annotation is retained at runtime and can be applied to both fields and parameters.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 public @interface CharConversion {
+    /**
+     * Returns the {@link CharConverter} class to be used for the annotated field or parameter.
+     *
+     * @return the {@link CharConverter} class
+     */
     Class<? extends CharConverter> value();
 }

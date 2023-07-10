@@ -23,14 +23,28 @@ import org.jetbrains.annotations.NotNull;
 import java.io.ObjectOutput;
 import java.util.List;
 import java.util.Map;
-
+/**
+ * Implementation of the ObjectOutput interface that allows writing Java objects to WireOut.
+ * This class wraps a WireOut object, providing methods to write various types of data.
+ */
 class WireObjectOutput implements ObjectOutput {
     private final WireOut wire;
 
+    /**
+     * Constructs a WireObjectOutput with a given WireOut.
+     *
+     * @param wire the WireOut to write data to
+     */
     WireObjectOutput(WireOut wire) {
         this.wire = wire;
     }
 
+    /**
+     * Writes the specified object to the underlying WireOut.
+     * If the object is an instance of Map or List, an appropriate type prefix is written first.
+     *
+     * @param obj the object to be written
+     */
     @Override
     public void writeObject(Object obj) {
         @NotNull final ValueOut valueOut = wire.getValueOut();

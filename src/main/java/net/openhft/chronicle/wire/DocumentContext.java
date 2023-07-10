@@ -21,7 +21,12 @@ import net.openhft.chronicle.core.Mocker;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
-
+/**
+ * DocumentContext is an interface that represents a specific context within a document.
+ * It provides the ability to inspect and interact with the state of the document. This
+ * includes checking whether the document context is metadata, data or present, retrieving
+ * the associated Wire, and other related operations.
+ */
 public interface DocumentContext extends Closeable, SourceContext {
     DocumentContext NOOP = Mocker.ignored(DocumentContext.class);
 
@@ -45,7 +50,8 @@ public interface DocumentContext extends Closeable, SourceContext {
      * Checks if the {@code DocumentContext} is data. If it is, {@code true} is returned,
      * otherwise {@code false}
      *
-     * @return true - is the entry is data
+     * @return {@code true} if the DocumentContext represents data,
+     *         otherwise {@code false}.
      */
     default boolean isData() {
         return isPresent() && !isMetaData();
@@ -61,26 +67,41 @@ public interface DocumentContext extends Closeable, SourceContext {
     Wire wire();
 
     /**
-     * @return whether the NOT_COMPLETE flag has been set.
+     * Checks if the NOT_COMPLETE flag has been set for the DocumentContext.
+     *
+     * @return {@code true} if the NOT_COMPLETE flag is set,
+     *         otherwise {@code false}.
      */
     boolean isNotComplete();
 
+    /**
+     * Verifies if the DocumentContext is currently open, by checking the NOT_COMPLETE flag.
+     *
+     * @return {@code true} if the DocumentContext is open,
+     *         otherwise {@code false}.
+     */
     default boolean isOpen() {
         return isNotComplete();
     }
 
     /**
-     * Call this if you have detected an error condition and you want the context
-     * rolled back when it is closed, rather than half a message committed
+     * Invokes this method when an error condition is detected and
+     * you want the context to be rolled back when it is closed,
+     * rather than committing half a message.
      */
     default void rollbackOnClose() {
     }
 
+    /**
+     * Closes the DocumentContext. Specifics of the closing operation
+     * depend on the implementation.
+     */
     @Override
     void close();
 
     /**
-     * call close once, then discard any remaining state
+     * Resets the DocumentContext. This involves closing the context
+     * once and discarding any remaining state.
      */
     void reset();
 }

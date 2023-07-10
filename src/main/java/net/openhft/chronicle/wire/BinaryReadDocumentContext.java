@@ -25,7 +25,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import static net.openhft.chronicle.wire.Wires.lengthOf;
-
+/**
+ * BinaryReadDocumentContext is a concrete implementation of the ReadDocumentContext interface,
+ * providing methods for reading binary data from a document. It also supports rollback operations
+ * for error recovery during reading.
+ */
 public class BinaryReadDocumentContext implements ReadDocumentContext {
     private final boolean ensureFullRead;
     public long start = -1;
@@ -39,10 +43,21 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     protected boolean metaData;
     protected boolean rollback;
 
+    /**
+     * Constructs a BinaryReadDocumentContext with the provided Wire object.
+     *
+     * @param wire The Wire object to be used for reading operations.
+     */
     public BinaryReadDocumentContext(@Nullable Wire wire) {
         this(wire, wire != null && wire.getValueIn() instanceof BinaryWire.DeltaValueIn);
     }
 
+    /**
+     * Constructs a BinaryReadDocumentContext with the provided Wire object and an ensureFullRead flag.
+     *
+     * @param wire The Wire object to be used for reading operations.
+     * @param ensureFullRead The flag indicating whether to ensure full read operation.
+     */
     public BinaryReadDocumentContext(@Nullable Wire wire, boolean ensureFullRead) {
         this.wire = (AbstractWire) wire;
         this.ensureFullRead = ensureFullRead;
@@ -109,6 +124,10 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         }
     }
 
+    /**
+     * Closes the current document context. If rollback is needed, it will be performed.
+     * If the start position of reading is valid and further content is present, a full read is performed.
+     */
     @Override
     public void close() {
         if (rollbackIfNeeded())
@@ -134,6 +153,9 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         present = false;
     }
 
+    /**
+     * Resets the current context, clearing any reading operations or flags that have been set.
+     */
     @Override
     public void reset() {
         close();
@@ -142,9 +164,9 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     }
 
     /**
-     * Rolls back document context state to a one before opening if rollback marker is set.
+     * If the rollback flag is set, it rolls back the document context state to a one before opening.
      *
-     * @return If rolled back.
+     * @return true if the state was rolled back, false otherwise.
      */
     protected boolean rollbackIfNeeded() {
         if (rollback) {
@@ -159,6 +181,9 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         return false;
     }
 
+    /**
+     * Starts reading operation from the document context.
+     */
     @Override
     public void start() {
         rollback = false;

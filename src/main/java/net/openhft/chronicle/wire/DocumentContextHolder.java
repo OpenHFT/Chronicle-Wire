@@ -21,9 +21,16 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * DocumentContextHolder is a concrete class that implements both DocumentContext and
+ * WriteDocumentContext interfaces. This class is used to encapsulate a DocumentContext and
+ * provide additional write functionality, allowing it to interact with the encapsulated
+ * DocumentContext and manage its state.
+ */
 public class DocumentContextHolder implements DocumentContext, WriteDocumentContext {
 
-    DocumentContext dc;
+    // The encapsulated DocumentContext
+    private DocumentContext dc;
 
     @Override
     public boolean isMetaData() {
@@ -46,10 +53,20 @@ public class DocumentContextHolder implements DocumentContext, WriteDocumentCont
         return dc.isNotComplete();
     }
 
+    /**
+     * Retrieves the encapsulated DocumentContext.
+     *
+     * @return The encapsulated DocumentContext.
+     */
     public DocumentContext documentContext() {
         return dc;
     }
 
+    /**
+     * Sets the encapsulated DocumentContext.
+     *
+     * @param dc The new DocumentContext to encapsulate.
+     */
     public void documentContext(DocumentContext dc) {
         this.dc = dc;
     }
@@ -82,6 +99,12 @@ public class DocumentContextHolder implements DocumentContext, WriteDocumentCont
         return dc.index();
     }
 
+    /**
+     * Checks if the encapsulated DocumentContext is closed.
+     *
+     * @return {@code true} if the encapsulated DocumentContext is closed,
+     *         otherwise {@code false}.
+     */
     public boolean isClosed() {
         return dc == null;
     }

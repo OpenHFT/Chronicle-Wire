@@ -21,6 +21,10 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * TextWriteDocumentContext is a concrete implementation of the WriteDocumentContext interface,
+ * providing methods for writing text data to a document.
+ */
 public class TextWriteDocumentContext implements WriteDocumentContext {
     protected Wire wire;
     private boolean metaData;
@@ -30,10 +34,20 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
     private boolean rollback;
     protected long position;
 
+    /**
+     * Constructs a TextWriteDocumentContext with the provided Wire object.
+     *
+     * @param wire The Wire object to be used for writing operations.
+     */
     public TextWriteDocumentContext(Wire wire) {
         this.wire = wire;
     }
 
+    /**
+     * Starts the process of writing data to the document.
+     *
+     * @param metaData Specifies whether the data being written is metadata.
+     */
     public void start(boolean metaData) {
         count++;
         if (count > 1) {
@@ -54,6 +68,10 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         return wire().bytes().writePosition() == position;
     }
 
+    /**
+     * Closes the current document context. If chainedElement is true, no operation is performed.
+     * If the rollback flag is set, it will rollback to the previous state.
+     */
     @Override
     public boolean isMetaData() {
         return metaData;
@@ -83,6 +101,9 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         notComplete = false;
     }
 
+    /**
+     * Resets the current context, clearing any writing operations or flags that have been set.
+     */
     @Override
     public void reset() {
         chainedElement = false;
@@ -93,6 +114,10 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         notComplete = false;
     }
 
+    /**
+     * Sets the rollback flag to true. It means that the document context will be rolled back to
+     * the state before opening when it is closed.
+     */
     @Override
     public void rollbackOnClose() {
         rollback = true;

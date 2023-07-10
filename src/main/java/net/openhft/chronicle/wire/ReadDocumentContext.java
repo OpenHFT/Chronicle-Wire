@@ -17,17 +17,32 @@
  */
 package net.openhft.chronicle.wire;
 
+/**
+ * ReadDocumentContext is an interface that extends the DocumentContext interface.
+ * It is tailored specifically for read operations within a document context.
+ * The interface provides methods to initiate read operations and to set the read
+ * limit and position within the context.
+ */
 public interface ReadDocumentContext extends DocumentContext {
 
+    /**
+     * Starts the read operation in the current DocumentContext.
+     */
     void start();
 
     /**
-     * Sets the read limit for this {@code ReadDocumentContext}.
+     * Defines the read limit for the current ReadDocumentContext.
+     * The read limit represents the maximum amount of data that can be read.
+     *
+     * @param readLimit The maximum amount of data (in bytes) to be read.
      */
     void closeReadLimit(long readLimit);
 
     /**
-     * Sets the read position for this {@code ReadDocumentContext}.
+     * Sets the position at which reading begins in the current ReadDocumentContext.
+     * The read position is a pointer to where the reading should start in the data stream.
+     *
+     * @param readPosition The position (in bytes) in the data stream where reading begins.
      */
     void closeReadPosition(long readPosition);
 }

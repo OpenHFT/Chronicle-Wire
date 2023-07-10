@@ -17,6 +17,20 @@
  */
 package net.openhft.chronicle.wire;
 
+/**
+ * This interface provides a mechanism for notifying
+ * the presence of a preceding Comment annotation on a field.
+ * Implementations can use this information to control
+ * how the field is processed, typically to include the comment
+ * in the serialized output.
+ */
 interface CommentAnnotationNotifier {
+
+    /**
+     * Notifies if there is a preceding Comment annotation.
+     *
+     * @param hasCommentAnnotation true if a preceding Comment annotation exists,
+     *                             false otherwise
+     */
     void hasPrecedingComment(boolean hasCommentAnnotation);
 }
