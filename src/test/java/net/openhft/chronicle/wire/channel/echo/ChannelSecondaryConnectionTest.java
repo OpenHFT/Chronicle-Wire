@@ -3,6 +3,7 @@ package net.openhft.chronicle.wire.channel.echo;
 import net.openhft.chronicle.wire.channel.ChronicleChannel;
 import net.openhft.chronicle.wire.channel.ChronicleChannelCfg;
 import net.openhft.chronicle.wire.channel.ChronicleContext;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -45,4 +46,27 @@ public class ChannelSecondaryConnectionTest {
         }
     }
 
+
+    // toto: Peter to complete
+    @Ignore
+    @Test
+    public void testEchoHandlerOnSecondaryConnection2() {
+        try (ChronicleContext gatewayContext = ChronicleContext.newContext("tcp://:0?sessionName=testId")) {
+            gatewayContext.startNewGateway();
+
+            try (ChronicleContext clientContext = ChronicleContext.newContext("tcp://localhost:8092|" +
+                    "tcp://localhost:" + gatewayContext.port())) {
+
+                try (ChronicleChannel channel =
+                             clientContext.newChannelSupplier(new EchoHandler()).get()) {
+
+                    channel.methodWriter(SayMsg.class).say(EXPECTED);
+
+                    final StringBuilder eventType = new StringBuilder();
+                    String actual = channel.readOne(eventType, String.class);
+                    assertEquals(EXPECTED, actual);
+                }
+            }
+        }
+    }
 }
