@@ -78,7 +78,7 @@ public interface Reduction<T> extends ExcerptListener {
     /**
      * Creates and returns a new ReductionBuilder that will use the provided
      * {@code extractor) to extract elements of type E.
-     *
+     * <p>
      * @param extractor (non-null)
      * @param <E>       element type
      * @return a new ReductionBuilder
@@ -92,7 +92,7 @@ public interface Reduction<T> extends ExcerptListener {
     /**
      * Creates and returns a new LongReductionBuilder that will use the provided
      * {@code extractor) to extract elements of type {@code long}.
-     *
+     * <p>
      * @param extractor (non-null)
      * @return a new LongReductionBuilder
      * @see {@link #ofLong(ToLongDocumentExtractor)} and {@link #ofDouble(ToDoubleDocumentExtractor)}
@@ -105,7 +105,7 @@ public interface Reduction<T> extends ExcerptListener {
     /**
      * Creates and returns a new DoubleReductionBuilder that will use the provided
      * {@code extractor) to extract elements of type {@code double}.
-     *
+     * <p>
      * @param extractor (non-null)
      * @return a new DoubleReductionBuilder
      * @see {@link #of(DocumentExtractor)} and {@link #ofLong(ToLongDocumentExtractor)}

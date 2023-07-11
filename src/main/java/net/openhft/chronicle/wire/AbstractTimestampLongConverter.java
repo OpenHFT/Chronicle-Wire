@@ -212,11 +212,9 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
     }
 
     /**
-     * Appends the provided long value to the given {@code Appendable}. The long value is converted into a date-time string
-     * before appending. If the value is less than or equal to 0, it is appended as is.
+     * Appends the fraction of the second to the provided {@code DateTimeFormatterBuilder}.
      *
-     * @param text  the {@code Appendable} to append to
-     * @param value the long value to be appended
+     * @param builder The builder after the initial date format has been added
      */
     protected abstract void appendFraction(DateTimeFormatterBuilder builder);
 

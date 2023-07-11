@@ -515,7 +515,7 @@ public interface ValueIn {
     }
 
     /**
-     * @param clazz Expected object type. <code>null</code> can be passed to request proxy marshallable tuple
+     * @param clazz Expected object type. {@code null} can be passed to request proxy marshallable tuple
      *              if {@link Wires#GENERATE_TUPLES} is enabled.
      */
     @Nullable

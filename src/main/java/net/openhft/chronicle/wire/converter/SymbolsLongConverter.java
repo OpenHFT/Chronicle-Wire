@@ -51,9 +51,6 @@ public class SymbolsLongConverter implements LongConverter {
         maxParseLength = LongConverter.maxParseLength(length);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int maxParseLength() {
         return maxParseLength;

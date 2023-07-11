@@ -159,7 +159,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
 
     /**
      * This will increment the headerNumber as appropriate if successful
-     * <p/>
+     * <p>
      * This is used in networking, but no longer used in queue.
      *
      * @param metaData {@code true} if the write should write metaData rather than data

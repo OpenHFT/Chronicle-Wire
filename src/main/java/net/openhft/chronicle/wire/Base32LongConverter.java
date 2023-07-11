@@ -21,7 +21,7 @@ package net.openhft.chronicle.wire;
  * This class is responsible for converting 64-bit unsigned numbers into a base32 representation.
  * The base32 representation uses a specific character set defined by RFC 4648 (though not the same order) to ensure readability and to avoid common interpretation mistakes.
  * For example, it avoids using similar characters such as '0' and 'O', or '1' and 'l'.
- *
+ * <p>
  * This class extends the {@code AbstractLongConverter} class and reuses its methods to perform the conversions.
  *
  * <p>The class is a singleton, accessed via the {@code INSTANCE} constant. It's thread-safe and can be used across the application.

@@ -518,7 +518,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     @NotNull
-    @Deprecated(/** Will be inlined in x.25 */)
+    @Deprecated(/* Will be inlined in x.25 */)
     protected Supplier<StopCharsTester> strictEndOfTextEscaping() {
         return STRICT_END_OF_TEXT_ESCAPING;
     }
@@ -624,7 +624,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * returns <code>true</code> if the next string is {@code str}
+     * returns {@code true} if the next string is {@code str}
      *
      * @param source string
      * @return true if the strings are the same

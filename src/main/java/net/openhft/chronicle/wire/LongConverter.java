@@ -28,7 +28,7 @@ import static java.text.MessageFormat.format;
 /**
  * This interface provides methods to handle long-to-string conversions and vice versa.
  * It supports conversions with symbols and power of two representations.
- *
+ * <p>
  * The converter can be configured to handle special encoding cases with an alias system.
  */
 public interface LongConverter {
