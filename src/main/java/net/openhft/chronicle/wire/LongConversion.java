@@ -22,11 +22,23 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Annotation used to specify the converter to be used for handling long values.
+ * The converter specified by this annotation can be used to implement custom conversion logic for
+ * serializing/deserializing long values. The class specified in {@link #value()} should be a valid
+ * {@link LongConverter} implementation.
+ *
+ * @see LongConverter
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.ANNOTATION_TYPE, ElementType.FIELD, ElementType.PARAMETER})
 public @interface LongConversion {
     /**
-     * @return the implementing class which either has a static final INSTANCE, or takes a string for initialisation
+     * The {@link LongConverter} class to be used for conversion.
+     * The class specified should either have a static final field named INSTANCE,
+     * or a constructor that takes a single string parameter for initialization.
+     *
+     * @return the implementing class which is used for long conversion.
      */
     Class<?> value();
 }

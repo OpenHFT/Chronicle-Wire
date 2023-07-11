@@ -39,10 +39,19 @@ public class IdentifierLongConverter implements LongConverter {
     static final String MIN_DATE = "2019-09-13T01:08:00.910795776";
     static final String MAX_DATE = "2262-04-11T23:47:16.854775807";
 
-
+    /**
+     * Default constructor that's protected to prevent direct instantiation.
+     */
     protected IdentifierLongConverter() {
     }
 
+    /**
+     * Parses the provided {@link CharSequence} into a long identifier.
+     * The parsing behavior changes depending on the length of the CharSequence.
+     *
+     * @param text the CharSequence to parse
+     * @return the parsed long identifier
+     */
     @Override
     public long parse(CharSequence text) {
         return text.length() <= 10
@@ -50,6 +59,13 @@ public class IdentifierLongConverter implements LongConverter {
                 : NanoTimestampLongConverter.INSTANCE.parse(text);
     }
 
+    /**
+     * Appends a long identifier to a provided {@link StringBuilder} instance.
+     * The behavior changes depending on the magnitude of the identifier.
+     *
+     * @param text the StringBuilder to append the identifier to
+     * @param value the long identifier
+     */
     @Override
     public void append(StringBuilder text, long value) {
         if (value < 0)
@@ -60,6 +76,13 @@ public class IdentifierLongConverter implements LongConverter {
             NanoTimestampLongConverter.INSTANCE.append(text, value);
     }
 
+    /**
+     * Appends a long identifier to a provided {@link Bytes} instance.
+     * The behavior changes depending on the magnitude of the identifier.
+     *
+     * @param bytes the Bytes to append the identifier to
+     * @param value the long identifier
+     */
     @Override
     public void append(Bytes<?> bytes, long value) {
         if (value < 0)
@@ -70,6 +93,13 @@ public class IdentifierLongConverter implements LongConverter {
             NanoTimestampLongConverter.INSTANCE.append(bytes, value);
     }
 
+    /**
+     * Returns the maximum length of the {@link CharSequence} that this converter is able
+     * to parse, which in this case is the maximum parse length of
+     * the {@code NanoTimestampLongConverter}.
+     *
+     * @return the maximum parse length
+     */
     @Override
     public int maxParseLength() {
         return NanoTimestampLongConverter.INSTANCE.maxParseLength();

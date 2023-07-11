@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package net.openhft.chronicle.wire.converter;
 
 import net.openhft.chronicle.bytes.Bytes;
@@ -26,12 +25,21 @@ import net.openhft.chronicle.wire.LongConverter;
 
 import java.util.Arrays;
 
+/**
+ * A converter for long values based on a specific set of symbols.
+ * The converter uses these symbols for encoding and decoding operations.
+ */
 public class SymbolsLongConverter implements LongConverter {
     private final int factor;
     private final short[] encode;
     private final char[] decode;
     private final int maxParseLength;
 
+    /**
+     * Initializes a new converter with the given symbols.
+     *
+     * @param symbols the symbols to use for encoding and decoding
+     */
     public SymbolsLongConverter(String symbols) {
         final int length = symbols.length();
         factor = length;
@@ -43,11 +51,21 @@ public class SymbolsLongConverter implements LongConverter {
         maxParseLength = LongConverter.maxParseLength(length);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int maxParseLength() {
         return maxParseLength;
     }
 
+    /**
+     * Parses a sequence of characters into a long value.
+     *
+     * @param text the character sequence to parse
+     * @return the parsed long value
+     * @throws IllegalArgumentException if the character sequence contains unexpected characters
+     */
     @Override
     public long parse(CharSequence text) {
         lengthCheck(text);
@@ -61,6 +79,12 @@ public class SymbolsLongConverter implements LongConverter {
         return v;
     }
 
+    /**
+     * Appends a long value to a StringBuilder.
+     *
+     * @param text the StringBuilder to append to
+     * @param value the long value to append
+     */
     @Override
     public void append(StringBuilder text, long value) {
         final int start = text.length();
@@ -84,6 +108,12 @@ public class SymbolsLongConverter implements LongConverter {
         }
     }
 
+    /**
+     * Appends a long value to a Bytes object.
+     *
+     * @param text the Bytes object to append to
+     * @param value the long value to append
+     */
     public void append(Bytes<?> text, long value) {
         final int start = text.length();
         if (value < 0) {
@@ -106,6 +136,12 @@ public class SymbolsLongConverter implements LongConverter {
         }
     }
 
+    /**
+     * Adds an additional alias for a given character in the encoding table.
+     *
+     * @param alias the character to alias
+     * @param as the character to alias it as
+     */
     public void addEncode(char alias, char as) {
         encode[alias] = encode[as];
     }

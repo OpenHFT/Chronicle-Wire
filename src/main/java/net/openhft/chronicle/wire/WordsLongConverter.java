@@ -26,6 +26,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+/**
+ * A converter for long values into words and vice versa. The converter
+ * uses a set of common words for encoding and decoding operations.
+ */
 public class WordsLongConverter implements LongConverter {
     static final Pattern NON_LETTER = Pattern.compile("\\W");
     static final String[] WORDS;
@@ -39,7 +43,6 @@ public class WordsLongConverter implements LongConverter {
                 String word = WORDS[i];
                 Integer ii = WORD_ID.put(word, i);
                 assert ii == null : "Duplicate " + word;
-
             }
         } catch (IOException e) {
             throw new AssertionError(e);
@@ -48,14 +51,29 @@ public class WordsLongConverter implements LongConverter {
 
     private final String sep;
 
+    /**
+     * Default constructor which uses '.' as separator.
+     */
     public WordsLongConverter() {
         this('.');
     }
 
+    /**
+     * Initializes a new converter with the given separator.
+     *
+     * @param sep the separator to use for encoding and decoding
+     */
     public WordsLongConverter(char sep) {
         this.sep = Character.toString(sep);
     }
 
+    /**
+     * Parses a sequence of characters into a long value.
+     *
+     * @param text the character sequence to parse
+     * @return the parsed long value
+     * @throws IllegalArgumentException if the character sequence contains an unknown word
+     */
     @Override
     public long parse(CharSequence text) {
         String[] split = NON_LETTER.split(text.toString().trim(), 0);
@@ -71,6 +89,12 @@ public class WordsLongConverter implements LongConverter {
         return value;
     }
 
+    /**
+     * Appends a long value to a StringBuilder.
+     *
+     * @param text the StringBuilder to append to
+     * @param value the long value to append
+     */
     @Override
     public void append(StringBuilder text, long value) {
         String asep = "";
@@ -82,6 +106,12 @@ public class WordsLongConverter implements LongConverter {
         } while (value > 0);
     }
 
+    /**
+     * Appends a long value to a Bytes object.
+     *
+     * @param bytes the Bytes object to append to
+     * @param value the long value to append
+     */
     @Override
     public void append(Bytes<?> bytes, long value) {
         String asep = "";

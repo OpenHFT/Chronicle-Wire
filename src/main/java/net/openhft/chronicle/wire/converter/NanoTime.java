@@ -28,7 +28,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotate fields or parameters to signify the long value represent a Nanosecond resolution timestamp from epoch.
+ * Annotation used to signify that the annotated field or parameter represents
+ * a Nanosecond resolution timestamp from epoch.
+ * <p>
+ * The INSTANCE field is an instance of the NanoTimestampLongConverter class,
+ * which is used to perform the conversion between long values and the nanosecond timestamp.
+ * <p>
+ * This could be used in scenarios where nanosecond-level time precision is required,
+ * such as high-frequency trading or scientific computing.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
