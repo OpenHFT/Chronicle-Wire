@@ -1391,7 +1391,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 // Perhaps should be negative selection instead of positive
                 case SEQUENCE_START:
                 case SEQUENCE_ENTRY:
-                // Allows scalar value to be converted into singleton array
+                    // Allows scalar value to be converted into singleton array
                 case TEXT:
                     return true;
             }

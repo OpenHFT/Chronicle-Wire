@@ -83,7 +83,7 @@ public abstract class AbstractWire implements Wire {
     @NotNull
     private TimingPauser acquireTimedParser() {
         if (timedParser == null)
-                timedParser = Pauser.timedBusy();
+            timedParser = Pauser.timedBusy();
         return timedParser;
     }
 

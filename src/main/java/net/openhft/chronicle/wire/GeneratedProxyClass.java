@@ -120,7 +120,7 @@ public enum GeneratedProxyClass {
 
     private static void addFieldsAndConstructor(final int maxArgs, final Set<Method> declaredMethods, final StringBuilder sb, final String className, final StringBuilder methodArray) {
         sb.append("  private final MethodWriterInvocationHandlerSupplier handler;\n" +
-                "    private final Method[] methods = new Method[")
+                        "    private final Method[] methods = new Method[")
                 .append(declaredMethods.size())
                 .append("];\n")
                 .append("  private static final int maxArgs = " + maxArgs + ";\n")

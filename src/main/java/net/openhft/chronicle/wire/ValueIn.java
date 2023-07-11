@@ -469,7 +469,6 @@ public interface ValueIn {
     }
 
     /**
-     *
      * @return the value as a float, or -0.0 indicates that we have not been able to parse this data ( we don't throw an exception )
      */
     double float64();
@@ -532,6 +531,7 @@ public interface ValueIn {
 
     /**
      * Used for logging whatever we can get
+     *
      * @return the object or Throwable
      */
     default Object objectBestEffort() {

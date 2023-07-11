@@ -262,7 +262,7 @@ public class YamlTokeniser {
                     return pushed.isEmpty() ? next0(minIndent) : popPushed();
                 }
                 break;
-                // other symbols
+            // other symbols
             case '+':
             case '$':
             case '(':
