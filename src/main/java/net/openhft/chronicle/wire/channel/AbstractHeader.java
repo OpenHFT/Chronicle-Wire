@@ -19,26 +19,29 @@
 package net.openhft.chronicle.wire.channel;
 
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+
 /**
- * An abstract class that serves as a base for all types of channel headers.
- * This class also includes fields for a system context and a session name, which can be set and retrieved.
+ * The AbstractHeader class serves as a foundational template for all channel header types.
+ * The class extends the SelfDescribingMarshallable and implements the ChannelHeader interface.
+ * It includes fields for a system context and a session name, providing methods to get and set these fields.
+ * This class is designed to be extended by other header types to standardize their functionality.
  *
- * @param <H> the class extending AbstractHeader, used to allow method chaining
+ * @param <H> Type of the class that extends AbstractHeader. Used to ensure the correct type is returned by the builder methods, supporting method chaining.
  */
-public class AbstractHeader<H extends AbstractHeader<H>>
+public abstract class AbstractHeader<H extends AbstractHeader<H>>
         extends SelfDescribingMarshallable
         implements ChannelHeader {
 
-    // The system context for this header
+    // System context associated with this header
     private SystemContext systemContext;
 
-    // The session name for this header
+    // Session name associated with this header
     private String sessionName;
 
     /**
-     * Retrieves the system context of this header.
+     * Retrieves the system context associated with this header.
      *
-     * @return the system context as a SystemContext object
+     * @return the system context as a SystemContext object. Null if no system context has been set.
      */
     @Override
     public SystemContext systemContext() {
@@ -46,10 +49,10 @@ public class AbstractHeader<H extends AbstractHeader<H>>
     }
 
     /**
-     * Sets the system context of this header.
+     * Sets the system context associated with this header.
      *
-     * @param systemContext the new system context to be set
-     * @return this instance of the header
+     * @param systemContext the SystemContext object to set as the system context for this header.
+     * @return this instance of the header, allowing method chaining.
      */
     @Override
     public H systemContext(SystemContext systemContext) {
@@ -58,9 +61,9 @@ public class AbstractHeader<H extends AbstractHeader<H>>
     }
 
     /**
-     * Retrieves the session name of this header.
+     * Retrieves the session name associated with this header.
      *
-     * @return the session name as a String
+     * @return the session name as a String. Null if no session name has been set.
      */
     @Override
     public String sessionName() {
@@ -68,10 +71,10 @@ public class AbstractHeader<H extends AbstractHeader<H>>
     }
 
     /**
-     * Sets the session name of this header.
+     * Sets the session name associated with this header.
      *
-     * @param sessionName the new session name to be set
-     * @return this instance of the header
+     * @param sessionName the String to set as the session name for this header.
+     * @return this instance of the header, allowing method chaining.
      */
     @Override
     public H sessionName(String sessionName) {
@@ -79,3 +82,4 @@ public class AbstractHeader<H extends AbstractHeader<H>>
         return (H) this;
     }
 }
+

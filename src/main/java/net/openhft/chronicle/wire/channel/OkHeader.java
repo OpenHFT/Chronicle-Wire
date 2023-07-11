@@ -19,7 +19,10 @@
 package net.openhft.chronicle.wire.channel;
 
 /**
- * Class OkHeader extends the AbstractHeader class and indicate the channel was established ok.
+ * An extension of the {@link AbstractHeader} class designed to indicate successful establishment of a channel.
+ *
+ * <p>This class doesn't introduce new methods or fields. Its existence is primarily for type distinction, serving as a marker
+ * to symbolize successful operations in the context of channel communication.
  */
 public class OkHeader extends AbstractHeader<OkHeader> {
 }

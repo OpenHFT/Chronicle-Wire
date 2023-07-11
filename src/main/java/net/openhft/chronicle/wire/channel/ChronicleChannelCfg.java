@@ -24,10 +24,11 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.channel.impl.internal.Handler;
 
 /**
- * ChronicleChannelCfg is a configuration class for ChronicleChannel instances.
- * It provides fluent API to set various parameters of the ChronicleChannel.
+ * The ChronicleChannelCfg class is a configuration object for creating and configuring ChronicleChannel instances.
+ * It offers a fluent API to customize parameters including the initiator flag, buffering mode, host parameters,
+ * pauser mode and connection timeout settings.
  *
- * @param <C> the type of the implementing class
+ * @param <C> the type of the implementing class that is derived from ChronicleChannelCfg
  */
 public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfDescribingMarshallable {
     static {
@@ -67,10 +68,10 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
     }
 
     /**
-     * Sets the hostname.
+     * Sets the hostname for the connection.
      *
-     * @param hostname the hostname
-     * @return this configuration instance
+     * @param hostname the hostname to use for the connection
+     * @return this configuration instance for chaining method calls
      */
     public C hostname(String hostname) {
         this.hostname = hostname;
@@ -103,10 +104,10 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
     }
 
     /**
-     * Sets the buffered flag.
+     * Sets the buffering mode for the connection.
      *
-     * @param buffered the buffered flag
-     * @return this configuration instance
+     * @param buffered if true, enables buffering
+     * @return this configuration instance for chaining method calls
      */
     public C buffered(boolean buffered) {
         this.buffered = buffered;
@@ -121,10 +122,10 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
     }
 
     /**
-     * Sets the PauserMode.
+     * Sets the PauserMode to be used by the connection.
      *
      * @param pauser the PauserMode
-     * @return this configuration instance
+     * @return this configuration instance for chaining method calls
      */
     public C pauserMode(PauserMode pauser) {
         this.pauser = pauser;
@@ -148,7 +149,7 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
      * Sets the connection timeout in seconds.
      *
      * @param connectionTimeoutSecs the connection timeout in seconds
-     * @return this configuration instance
+     * @return this configuration instance for chaining method calls
      */
     public C connectionTimeoutSecs(double connectionTimeoutSecs) {
         this.connectionTimeoutSecs = connectionTimeoutSecs;

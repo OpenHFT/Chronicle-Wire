@@ -66,8 +66,8 @@ public class EchoHandlerTest extends WireTestCommon {
 
     @Test
     public void server() {
-        String url = "tcp://:0";
         IOTools.deleteDirWithFiles("target/server");
+        String url = "tcp://:0";
         try (ChronicleContext context = ChronicleContext.newContext(url)
                 .name("target/server")
                 .buffered(true)
@@ -83,8 +83,8 @@ public class EchoHandlerTest extends WireTestCommon {
             ignoreException("Using Pauser.balanced() as not enough processors");
             ignoreException("bgWriter died");
         }
-        String url = "tcp://:0";
         IOTools.deleteDirWithFiles("target/server");
+        String url = "tcp://:0";
         try (ChronicleContext context = ChronicleContext.newContext(url)
                 .name("target/server")
                 .buffered(true)
