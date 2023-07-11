@@ -44,6 +44,8 @@ public class ChannelVisitorTest {
         }
     }
 
+
+
     static class ChannelSessionName extends ChannelVisitor<String> {
         @Override
         public String visit(ChronicleChannel channel) {

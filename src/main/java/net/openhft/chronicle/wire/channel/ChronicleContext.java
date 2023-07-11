@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire.channel;
 
 import net.openhft.affinity.AffinityLock;
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
@@ -33,8 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 
 import static net.openhft.chronicle.wire.WireType.YAML;
 
@@ -45,16 +45,21 @@ import static net.openhft.chronicle.wire.WireType.YAML;
  */
 public class ChronicleContext extends SimpleCloseable {
     static {
+        // Initialize Handler at static context
         Handler.init();
     }
 
+    // The set to manage all the closeable resources
     private transient final Set<Closeable> closeableSet =
             Collections.synchronizedSet(
                     Collections.newSetFromMap(
                             new WeakIdentityHashMap<>()));
+    // URL for the Chronicle context
     private final String url;
     private String name;
     private transient URL _url;
+
+    // Socket Registry for handling socket related operations
     private transient SocketRegistry socketRegistry;
     private boolean buffered;
     private boolean useAffinity;
@@ -113,6 +118,26 @@ public class ChronicleContext extends SimpleCloseable {
     }
 
     /**
+     * Obtain a URL from a String, loading any custom Handler as needed.
+     *
+     * @param spec to use for the URL
+     * @return the URL
+     * @throws IORuntimeException if malformed
+     */
+    public static List<URL> urlsFor(String spec) throws IORuntimeException {
+
+        List<URL> result = new ArrayList<>();
+        for (String s : spec.split(";")) {
+            try {
+                result.add(urlFor(s.trim()));
+            } catch (Exception e) {
+                Jvm.warn().on(ChronicleContext.class, e);
+            }
+        }
+        return result;
+    }
+
+    /**
      * @return an AffinityLock appropriate for this context
      */
     public AffinityLock affinityLock() {
@@ -158,13 +183,14 @@ public class ChronicleContext extends SimpleCloseable {
 
         final ChronicleChannelSupplier connectionSupplier = new ChronicleChannelSupplier(this, handler);
         final String hostname = url().getHost();
-        final int port = gateway == null ? url().getPort() : gateway.port();
+        final int port = port();
         String query = url().getQuery();
         String connectionId = null;
         if (query != null) {
             QueryWire wire = new QueryWire(Bytes.from(query));
             connectionId = wire.read("sessionName").text();
         }
+
         connectionSupplier
                 .protocol(url().getProtocol())
                 .hostname(hostname == null || hostname.isEmpty() ? "localhost" : hostname)
@@ -188,6 +214,7 @@ public class ChronicleContext extends SimpleCloseable {
      * @throws InvalidMarshallableException if there's a problem creating or starting the gateway
      */
     public synchronized void startNewGateway() throws InvalidMarshallableException {
+        // If gateway already exists, don't start a new one
         if (gateway != null)
             return;
         gateway = new ChronicleGatewayMain(url, socketRegistry, systemContext());
@@ -195,7 +222,9 @@ public class ChronicleContext extends SimpleCloseable {
                 .buffered(buffered())
                 .useAffinity(useAffinity());
         try {
+            // Add the gateway to the set of closeable resources
             addCloseable(gateway);
+            // Start the gateway
             gateway.start();
         } catch (IOException e) {
             throw new IORuntimeException(e);
@@ -311,5 +340,12 @@ public class ChronicleContext extends SimpleCloseable {
     @Override
     public String toString() {
         return YAML.asString(this);
+    }
+
+    /**
+     * @return the port for the gateway, if it exists, otherwise the port from the URL
+     */
+    public int port() {
+        return gateway == null ? url().getPort() : gateway.port();
     }
 }

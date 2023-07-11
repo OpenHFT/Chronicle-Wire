@@ -10,8 +10,9 @@ import net.openhft.chronicle.threads.PauserMode;
 import net.openhft.chronicle.wire.channel.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.net.URL;
 import java.util.function.BooleanSupplier;
+
+import static net.openhft.chronicle.wire.channel.ChronicleContext.*;
 
 public final class ChronicleChannelUtils {
     private ChronicleChannelUtils() {
@@ -24,13 +25,12 @@ public final class ChronicleChannelUtils {
         if (marshallable instanceof RedirectHeader) {
             Closeable.closeQuietly(simpleConnection);
             RedirectHeader rh = (RedirectHeader) marshallable;
+
             for (String location : rh.locations()) {
                 try {
-                    URL url = ChronicleContext.urlFor(location);
-                    channelCfg.hostname(url.getHost());
-                    channelCfg.port(url.getPort());
+                    channelCfg.clearHostnamePort();
+                    urlsFor(location).forEach(url -> channelCfg.addHostnamePort(url.getHost(), url.getPort()));
                     return newChannel(socketRegistry, channelCfg, headerOut);
-
                 } catch (IORuntimeException e) {
                     Jvm.debug().on(ChronicleChannel.class, e);
                 }
