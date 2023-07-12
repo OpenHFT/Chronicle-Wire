@@ -23,8 +23,10 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Class RedirectHeader extends the AbstractHeader class and is similar to an HTTP redirect header.
- * It maintains a list of location URLs to which the request can be redirected.
+ * A specialized version of {@link AbstractHeader}, acting similar to an HTTP redirect header.
+ * It encapsulates a list of URL locations that a request can be redirected to.
+ *
+ * <p>This class is useful in scenarios where a request needs to be redirected to multiple potential locations.
  */
 public class RedirectHeader extends AbstractHeader<RedirectHeader> {
 
@@ -32,19 +34,20 @@ public class RedirectHeader extends AbstractHeader<RedirectHeader> {
     private final List<String> locations = new ArrayList<>();
 
     /**
-     * Constructs a new RedirectHeader instance and populates the list of
-     * locations to which the request can be redirected.
+     * Constructs a new RedirectHeader instance, populating its internal list of
+     * URL locations with the provided list.
      *
-     * @param locations A list of location URLs.
+     * @param locations A list of URLs to which the request can be redirected. This list is copied to prevent external modification.
      */
     public RedirectHeader(List<String> locations) {
         this.locations.addAll(locations);
     }
 
     /**
-     * Retrieves an unmodifiable list of location URLs to which the request can be redirected.
+     * Retrieves an unmodifiable view of the list of URL locations to which the request can be redirected.
+     * This prevents modifications to the list of locations outside of this class.
      *
-     * @return An unmodifiable list of location URLs.
+     * @return An unmodifiable list of URL locations.
      */
     public List<String> locations() {
         return Collections.unmodifiableList(locations);

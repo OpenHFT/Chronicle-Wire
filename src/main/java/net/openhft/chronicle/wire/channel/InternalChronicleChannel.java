@@ -21,58 +21,65 @@ package net.openhft.chronicle.wire.channel;
 import net.openhft.chronicle.wire.WireOut;
 
 /**
- * Interface InternalChronicleChannel extends ChronicleChannel and defines several additional
- * methods to support advanced functionality within Chronicle Channels.
- * Note: This interface's options might change in future versions of the system.
+ * The InternalChronicleChannel interface extends the ChronicleChannel interface and provides
+ * additional methods that support advanced functionalities within Chronicle Channels.
+ * This interface is intended for internal use within the system and its options might change
+ * in future versions, hence it should be used with caution.
  */
 public interface InternalChronicleChannel extends ChronicleChannel {
 
     /**
-     * This method returns the header to be used for incoming data based on the acceptor's
-     * replacement rules.
+     * Returns the ChannelHeader to be used for incoming data. The header is determined based on the
+     * acceptor's replacement rules.
      *
-     * @return the header for incoming data.
+     * @return the ChannelHeader for incoming data.
      */
     ChannelHeader headerInToUse();
 
     /**
-     * Checks if the event poller is supported by this channel.
+     * Determines if the current channel supports the EventPoller mechanism for polling events.
      *
-     * @return true if event pollers are supported, false otherwise.
+     * @return true if event pollers are supported by this channel, false otherwise.
      */
     boolean supportsEventPoller();
 
     /**
-     * Gets the EventPoller instance associated with this channel.
+     * Retrieves the EventPoller instance associated with this channel. This EventPoller
+     * can be used to poll events from the channel.
      *
-     * @return the EventPoller instance set on this channel.
+     * @return the EventPoller instance associated with this channel.
      */
     EventPoller eventPoller();
 
     /**
-     * Associates an EventPoller with this channel to include in any background processing.
+     * Associates a given EventPoller instance with this channel. This EventPoller will be included
+     * in any background processing associated with the channel.
      *
-     * @param eventPoller the EventPoller instance to set.
+     * @param eventPoller the EventPoller instance to associate with this channel.
      * @return this channel instance, allowing for method chaining.
      */
     ChronicleChannel eventPoller(EventPoller eventPoller);
 
     /**
-     * Acquires a producer instance associated with this channel.
+     * Retrieves a producer instance associated with this channel. This producer can be used
+     * to write data to the channel.
      *
      * @return the producer instance as a WireOut object.
      */
     WireOut acquireProducer();
 
     /**
-     * Releases the producer instance associated with this channel.
+     * Releases the producer instance previously acquired with acquireProducer(). This method should
+     * be called when the producer instance is no longer needed, to free up resources.
      */
     void releaseProducer();
 
     /**
-     * Gets the buffer size used by this channel.
+     * Returns the size of the buffer used by this channel. The buffer size can impact the performance
+     * of the channel, with larger buffers typically providing better throughput at the cost of
+     * increased memory usage.
      *
-     * @return the buffer size as an integer.
+     * @return the size of the buffer used by this channel, in bytes.
      */
     int bufferSize();
 }

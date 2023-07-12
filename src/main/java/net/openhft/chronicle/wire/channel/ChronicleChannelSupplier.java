@@ -21,9 +21,9 @@ package net.openhft.chronicle.wire.channel;
 import java.util.function.Supplier;
 
 /**
- * ChronicleChannelSupplier is a specialized ChronicleChannelCfg that also
- * implements Supplier interface. It provides an instance of ChronicleChannel
- * depending on the set protocol.
+ * The ChronicleChannelSupplier class is a specialized version of ChronicleChannelCfg,
+ * also implementing the Supplier interface to provide ChronicleChannel instances
+ * based on a specified protocol. The protocols currently supported are 'tcp' and 'internal'.
  *
  * @see java.util.function.Supplier
  */
@@ -34,10 +34,10 @@ public class ChronicleChannelSupplier extends ChronicleChannelCfg<ChronicleChann
     private String connectionId;
 
     /**
-     * Creates a new ChronicleChannelSupplier with the provided context and handler.
+     * Constructs a new ChronicleChannelSupplier with the provided context and handler.
      *
-     * @param context the context for this supplier
-     * @param handler the handler for this supplier
+     * @param context the ChronicleContext that serves as the system context for this supplier
+     * @param handler the ChannelHandler responsible for handling events on the channel
      */
     public ChronicleChannelSupplier(ChronicleContext context, ChannelHandler handler) {
         this.context = context;
@@ -45,10 +45,12 @@ public class ChronicleChannelSupplier extends ChronicleChannelCfg<ChronicleChann
     }
 
     /**
-     * Depending on the protocol set, it creates a new instance of ChronicleChannel,
-     * adds it to the context and returns it.
+     * Depending on the specified protocol, it instantiates a new ChronicleChannel,
+     * registers it with the context, and returns the newly created ChronicleChannel instance.
      *
-     * @return a new instance of ChronicleChannel
+     * @return a new instance of ChronicleChannel. The type of ChronicleChannel (TCP or internal)
+     * depends on the protocol set on this supplier.
+     * @throws IllegalArgumentException if the protocol is unsupported
      */
     @Override
     public ChronicleChannel get() {
@@ -84,17 +86,19 @@ public class ChronicleChannelSupplier extends ChronicleChannelCfg<ChronicleChann
     }
 
     /**
-     * @return the protocol
+     * Retrieves the protocol used by this supplier for creating ChronicleChannel instances.
+     *
+     * @return the protocol as a string
      */
     public String protocol() {
         return protocol;
     }
 
     /**
-     * Sets the protocol.
+     * Sets the protocol used by this supplier for creating ChronicleChannel instances.
      *
-     * @param protocol the protocol
-     * @return this ChronicleChannelSupplier instance
+     * @param protocol the protocol as a string
+     * @return this ChronicleChannelSupplier instance, to allow method chaining
      */
     public ChronicleChannelSupplier protocol(String protocol) {
         this.protocol = protocol;
@@ -102,17 +106,19 @@ public class ChronicleChannelSupplier extends ChronicleChannelCfg<ChronicleChann
     }
 
     /**
-     * @return the connection ID
+     * Retrieves the connection ID associated with this supplier.
+     *
+     * @return the connection ID as a string
      */
     public String connectionId() {
         return connectionId;
     }
 
     /**
-     * Sets the connection ID.
+     * Sets the connection ID associated with this supplier.
      *
-     * @param connectionId the connection ID
-     * @return this ChronicleChannelSupplier instance
+     * @param connectionId the connection ID as a string
+     * @return this ChronicleChannelSupplier instance, to allow method chaining
      */
     public ChronicleChannelSupplier connectionId(String connectionId) {
         this.connectionId = connectionId;

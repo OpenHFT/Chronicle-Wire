@@ -19,26 +19,30 @@
 package net.openhft.chronicle.wire.channel;
 
 /**
- * This class represents a header that contains an error message.
- * It extends AbstractHeader and provides methods to get and set the error message.
+ * A specialized type of {@link AbstractHeader} that encapsulates an error message.
+ *
+ * <p>ErrorHeader instances are used to convey error information between different components of a system
+ * via a {@link ChronicleChannel}. The error message can be retrieved and modified using provided getter
+ * and setter methods.
  */
 public class ErrorHeader extends AbstractHeader<ErrorHeader> {
     private String errorMsg;
 
     /**
-     * Get the error message stored in the header.
+     * Retrieves the error message encapsulated by this header.
      *
-     * @return A String representing the error message.
+     * @return A string representing the stored error message. If no error message has been set, this may return null.
      */
     public String errorMsg() {
         return errorMsg;
     }
 
     /**
-     * Set the error message to be stored in the header.
+     * Sets the error message to be encapsulated by this header.
      *
-     * @param errorMsg A String representing the error message to be set.
-     * @return This ErrorHeader instance for method chaining.
+     * @param errorMsg A string representing the error message to be stored.
+     * This could be the description of an error or an exception message.
+     * @return This ErrorHeader instance, to support fluent interface design and method chaining.
      */
     public ErrorHeader errorMsg(String errorMsg) {
         this.errorMsg = errorMsg;

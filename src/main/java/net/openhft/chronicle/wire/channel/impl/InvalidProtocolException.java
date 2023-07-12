@@ -20,7 +20,7 @@ package net.openhft.chronicle.wire.channel.impl;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
 
-public class InvalidProtocolException  extends IORuntimeException {
+public class InvalidProtocolException extends IORuntimeException {
     public InvalidProtocolException(String message) {
         super(message);
     }

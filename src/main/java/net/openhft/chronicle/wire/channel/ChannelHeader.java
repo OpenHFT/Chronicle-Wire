@@ -20,39 +20,41 @@ package net.openhft.chronicle.wire.channel;
 import net.openhft.chronicle.wire.Marshallable;
 
 /**
- * The ChannelHeader interface extends the Marshallable interface, so it can be passed over a {@link ChronicleChannel}.
- * It provides methods for setting and retrieving the system context
- * and the session name of a channel.
+ * ChannelHeader represents the metadata of a {@link ChronicleChannel}. It maintains a system context
+ * and a session name for a channel, facilitating system-specific and session-specific configurations.
+ * <p>
+ * This interface extends Marshallable, making it possible for a ChannelHeader instance to be marshalled
+ * and unmarshalled for communication over a ChronicleChannel.
  */
 public interface ChannelHeader extends Marshallable {
 
     /**
-     * Returns the system context of the channel.
+     * Fetches the associated system context of the channel.
      *
-     * @return the system context as a SystemContext object
+     * @return The SystemContext object representing the system context of the channel.
      */
     SystemContext systemContext();
 
     /**
-     * Sets the system context of the channel.
+     * Assigns a new system context to the channel.
      *
-     * @param systemContext the new system context to be set
-     * @return this instance of the channel header
+     * @param systemContext The new SystemContext object to be set as the system context.
+     * @return The current ChannelHeader instance, allowing for method chaining.
      */
     ChannelHeader systemContext(SystemContext systemContext);
 
     /**
-     * Returns the session name of the channel.
+     * Fetches the session name of the channel.
      *
-     * @return the session name as a String
+     * @return The session name of the channel as a String.
      */
     String sessionName();
 
     /**
-     * Sets the session name of the channel.
+     * Assigns a new session name to the channel.
      *
-     * @param connectionId the new session name to be set
-     * @return this instance of the channel header
+     * @param sessionName The new session name to be assigned to the channel.
+     * @return The current ChannelHeader instance, allowing for method chaining.
      */
-    ChannelHeader sessionName(String connectionId);
+    ChannelHeader sessionName(String sessionName);
 }
