@@ -32,6 +32,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
@@ -78,9 +79,6 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
             this.socketRegistry = socketRegistry;
             this.replaceInHeader = null;
             this.replaceOutHeader = null;
-            if (channelCfg.port() < -1)
-                throw new IllegalArgumentException("Invalid port " + channelCfg.port());
-
             this.sc = null;
             assert channelCfg.initiator();
             checkConnected();
@@ -244,28 +242,50 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
         closeQuietly(sc);
         if (isClosing())
             throw new IllegalStateException("Closed");
-        if (channelCfg.initiator()) {
-            long end = System.nanoTime()
-                    + (long) (channelCfg.connectionTimeoutSecs() * 1e9);
-            if (socketRegistry == null) {
-                socketRegistry = new SocketRegistry();
-                privateSocketRegistry = true;
-            }
-            for (int delay = 1; ; delay++) {
-                try {
-                    sc = socketRegistry.createSocketChannel(channelCfg.hostname(), channelCfg.port());
-                    configureSocket();
-                    writeHeader();
-                    readHeader();
-                    break;
 
-                } catch (IOException e) {
-                    if (System.nanoTime() > end)
-                        throw new IORuntimeException(e);
-                    Jvm.pause(delay);
+        final Set<HostPortCfg> hostPorts = channelCfg.hostPorts();
+
+        if (channelCfg.initiator()) {
+            boolean success = false;
+            Outer:
+            for (HostPortCfg hp : hostPorts) {
+
+                if (hp.port() < -1)
+                    throw new IllegalArgumentException("Invalid port " + hp.port() + " connecting to " + hp.hostname());
+
+                try {
+
+                    long end = System.nanoTime()
+                            + (long) (channelCfg.connectionTimeoutSecs() * 1e9);
+                    if (socketRegistry == null) {
+                        socketRegistry = new SocketRegistry();
+                        privateSocketRegistry = true;
+                    }
+                    for (int delay = 1; ; delay++) {
+                        try {
+                            sc = socketRegistry.createSocketChannel(hp.hostname(), hp.port());
+                            configureSocket();
+                            writeHeader();
+                            readHeader();
+                            success = true;
+                            break Outer;
+
+                        } catch (IOException e) {
+                            if (System.nanoTime() > end)
+                                throw new IORuntimeException("hostport=" + hp, e);
+                            Jvm.pause(delay);
+                        }
+                    }
+
+                } catch (Exception e) {
+                    Jvm.warn().on(getClass(), "failed to connect to host-port=" + hp);
                 }
+
             }
+            if (!success)
+                throw new IORuntimeException("failed to connect to any of the following " + hostPorts);
         }
+
         in.clear();
         out.clear();
     }

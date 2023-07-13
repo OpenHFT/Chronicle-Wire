@@ -64,16 +64,21 @@ import static net.openhft.chronicle.wire.WireType.YAML;
  */
 public class ChronicleContext extends SimpleCloseable {
     static {
+        // Initialize Handler at static context
         Handler.init();
     }
 
+    // The set to manage all the closeable resources
     private transient final Set<Closeable> closeableSet =
             Collections.synchronizedSet(
                     Collections.newSetFromMap(
                             new WeakIdentityHashMap<>()));
+    // URL for the Chronicle context
     private final String url;
     private String name;
     private transient URL _url;
+
+    // Socket Registry for handling socket related operations
     private transient SocketRegistry socketRegistry;
     private boolean buffered;
     private boolean useAffinity;
@@ -137,6 +142,7 @@ public class ChronicleContext extends SimpleCloseable {
     }
 
     /**
+     * @return an AffinityLock appropriate for this context
      * Acquires an AffinityLock instance based on the affinity usage status of the context. If affinity usage is enabled,
      * a lock is acquired without a specific tag. If affinity usage is disabled, a lock is acquired with a null tag.
      *
@@ -190,13 +196,14 @@ public class ChronicleContext extends SimpleCloseable {
 
         final ChronicleChannelSupplier connectionSupplier = new ChronicleChannelSupplier(this, handler);
         final String hostname = url().getHost();
-        final int port = gateway == null ? url().getPort() : gateway.port();
+        final int port = port();
         String query = url().getQuery();
         String connectionId = null;
         if (query != null) {
             QueryWire wire = new QueryWire(Bytes.from(query));
             connectionId = wire.read("sessionName").text();
         }
+
         connectionSupplier
                 .protocol(url().getProtocol())
                 .hostname(hostname == null || hostname.isEmpty() ? "localhost" : hostname)
@@ -221,6 +228,7 @@ public class ChronicleContext extends SimpleCloseable {
      * @throws InvalidMarshallableException if there's an error during the creation or starting of the gateway.
      */
     public synchronized void startNewGateway() throws InvalidMarshallableException {
+        // If gateway already exists, don't start a new one
         if (gateway != null)
             return;
         gateway = new ChronicleGatewayMain(url, socketRegistry, systemContext());
@@ -228,7 +236,9 @@ public class ChronicleContext extends SimpleCloseable {
                 .buffered(buffered())
                 .useAffinity(useAffinity());
         try {
+            // Add the gateway to the set of closeable resources
             addCloseable(gateway);
+            // Start the gateway
             gateway.start();
         } catch (IOException e) {
             throw new IORuntimeException(e);
@@ -355,5 +365,12 @@ public class ChronicleContext extends SimpleCloseable {
     @Override
     public String toString() {
         return YAML.asString(this);
+    }
+
+    /**
+     * @return the port for the gateway, if it exists, otherwise the port from the URL
+     */
+    public int port() {
+        return gateway == null ? url().getPort() : gateway.port();
     }
 }

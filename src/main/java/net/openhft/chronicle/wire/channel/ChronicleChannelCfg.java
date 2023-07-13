@@ -23,6 +23,10 @@ import net.openhft.chronicle.threads.PauserMode;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.channel.impl.internal.Handler;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 /**
  * The ChronicleChannelCfg class is a configuration object for creating and configuring ChronicleChannel instances.
  * It offers a fluent API to customize parameters including the initiator flag, buffering mode, host parameters,
@@ -38,9 +42,48 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
     private boolean initiator;
     private boolean buffered;
     private PauserMode pauser = PauserMode.yielding;
+    @Deprecated
     private String hostname;
+    @Deprecated
     private int port;
     private double connectionTimeoutSecs = 1.0;
+    private final Set<HostPortCfg> hostports = new LinkedHashSet<>();
+
+    /**
+     * Returns the set of host ports configured for the ChronicleChannel.
+     * If hostname and port are set, they will be included in the set.
+     *
+     * @return the set of host ports
+     */
+    public Set<HostPortCfg> hostPorts() {
+        LinkedHashSet<HostPortCfg> result = new LinkedHashSet<>();
+        if (hostname != null)
+            result.add(new HostPortCfg(hostname, port));
+        result.addAll(hostports);
+        return Collections.unmodifiableSet(result);
+    }
+
+    /**
+     * Adds a hostname and port to the set of host ports.
+     *
+     * @param hostname the hostname
+     * @param port     the port number
+     * @return this configuration instance
+     */
+    public ChronicleChannelCfg<C> addHostnamePort(String hostname, int port) {
+        hostports.add(new HostPortCfg(hostname, port));
+        return this;
+    }
+
+    /**
+     * Removes a hostname and port from the set of host ports.
+     *
+     * @param hostname the hostname
+     * @param port     the port number
+     */
+    public void removeHostnamePort(String hostname, int port) {
+        hostports.remove(new HostPortCfg(hostname, port));
+    }
 
     /**
      * Sets the initiator flag.
@@ -48,12 +91,14 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
      * @param initiator the initiator flag
      * @return this configuration instance
      */
-    public ChronicleChannelCfg initiator(boolean initiator) {
+    public ChronicleChannelCfg<C> initiator(boolean initiator) {
         this.initiator = initiator;
         return this;
     }
 
     /**
+     * Returns the initiator flag.
+     *
      * @return the initiator flag
      */
     public boolean initiator() {
@@ -61,8 +106,12 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
     }
 
     /**
+     * Returns the hostname.
+     *
      * @return the hostname
+     * @deprecated use {@link ChronicleChannelCfg#hostPorts()}
      */
+    @Deprecated
     public String hostname() {
         return hostname;
     }
@@ -70,17 +119,23 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
     /**
      * Sets the hostname for the connection.
      *
-     * @param hostname the hostname to use for the connection
-     * @return this configuration instance for chaining method calls
+     * @param hostname the hostname
+     * @return this configuration instance
+     * @deprecated use {@link ChronicleChannelCfg#addHostnamePort(String, int)}
      */
+    @Deprecated
     public C hostname(String hostname) {
         this.hostname = hostname;
         return (C) this;
     }
 
     /**
+     * Returns the port number.
+     *
      * @return the port number
+     * @deprecated use {@link ChronicleChannelCfg#hostPorts()}
      */
+    @Deprecated
     public int port() {
         return port;
     }
@@ -90,13 +145,17 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
      *
      * @param port the port number
      * @return this configuration instance
+     * @deprecated use {@link ChronicleChannelCfg#addHostnamePort(String, int)}
      */
+    @Deprecated
     public C port(int port) {
         this.port = port;
         return (C) this;
     }
 
     /**
+     * Returns the buffered flag.
+     *
      * @return the buffered flag
      */
     public boolean buffered() {
@@ -115,6 +174,8 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
     }
 
     /**
+     * Returns the PauserMode.
+     *
      * @return the PauserMode
      */
     public PauserMode pauserMode() {
@@ -154,5 +215,12 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
     public C connectionTimeoutSecs(double connectionTimeoutSecs) {
         this.connectionTimeoutSecs = connectionTimeoutSecs;
         return (C) this;
+    }
+
+    /**
+     * Clears all the host ports you have set up.
+     */
+    public void clearHostnamePort() {
+        hostports.clear();
     }
 }
