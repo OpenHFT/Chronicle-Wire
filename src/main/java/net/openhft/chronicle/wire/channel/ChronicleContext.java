@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire.channel;
 
 import net.openhft.affinity.AffinityLock;
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
@@ -34,7 +33,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.Collections;
+import java.util.Set;
 
 import static net.openhft.chronicle.wire.WireType.YAML;
 
@@ -139,26 +139,6 @@ public class ChronicleContext extends SimpleCloseable {
         } catch (MalformedURLException e) {
             throw new IORuntimeException(e);
         }
-    }
-
-    /**
-     * Obtain a URL from a String, loading any custom Handler as needed.
-     *
-     * @param spec to use for the URL
-     * @return the URL
-     * @throws IORuntimeException if malformed
-     */
-    public static List<URL> urlsFor(String spec) throws IORuntimeException {
-
-        List<URL> result = new ArrayList<>();
-        for (String s : spec.split(";")) {
-            try {
-                result.add(urlFor(s.trim()));
-            } catch (Exception e) {
-                Jvm.warn().on(ChronicleContext.class, e);
-            }
-        }
-        return result;
     }
 
     /**
