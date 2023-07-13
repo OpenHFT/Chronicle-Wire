@@ -23,53 +23,56 @@ import net.openhft.chronicle.core.io.ClosedIORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 
 /**
- * An interface representing a channel handler passed from the client to the gateway or set by the gateway based on context.
- * The handler is responsible for managing channel-level operations such as running actions within a context,
- * handling responses, and configuring channel settings.
+ * This interface represents a channel handler that performs various channel-related operations
+ * such as executing actions within a context, handling responses, and configuring channel settings.
+ * The ChannelHandler is passed from the client to the gateway or set by the gateway based on context.
  */
 public interface ChannelHandler extends ChannelHeader {
 
     /**
-     * Provides a response header to return to the client.
-     * Default implementation returns an OkHeader.
+     * Provides a response header to send back to the client.
+     * Default implementation returns an OkHeader instance.
      *
-     * @param context the context for which the response header is needed
-     * @return a response header object
+     * @param context the ChronicleContext within which the response header is needed
+     * @return a ChannelHeader object that represents the response header
      */
     default ChannelHeader responseHeader(ChronicleContext context) {
         return new OkHeader();
     }
 
     /**
-     * Runs actions within a given context and channel.
+     * Executes actions within the provided context and channel.
      *
-     * @param context the context within which to run the actions
-     * @param channel the channel within which to run the actions
-     * @throws ClosedIORuntimeException     if any I/O error occurs
+     * @param context the ChronicleContext within which actions will be executed
+     * @param channel the ChronicleChannel within which actions will be executed
+     * @throws ClosedIORuntimeException     if an I/O error occurs
      * @throws InvalidMarshallableException if a Marshallable object is invalid
      */
     void run(ChronicleContext context, ChronicleChannel channel) throws ClosedIORuntimeException, InvalidMarshallableException;
 
     /**
-     * @return true if the {@link ChronicleChannel} should be closed when the run method ends, or false if it should continue to be open, e.g. a subscribe only channel.
+     * Determines whether the ChronicleChannel should be closed when the run method ends.
+     * If false, the channel will continue to be open after the run method ends, e.g., a subscribe-only channel.
+     *
+     * @return true if the channel should be closed when the run method ends, false otherwise
      */
     default boolean closeWhenRunEnds() {
         return true;
     }
 
     /**
-     * Converts the current ChannelHandler to an internal channel with the given context and channel configuration.
+     * Converts the current ChannelHandler to an internal channel using the provided context and channel configuration.
      *
-     * @param context    the context within which to create the internal channel
-     * @param channelCfg the configuration for the new internal channel
+     * @param context    the ChronicleContext within which the internal channel is created
+     * @param channelCfg the ChronicleChannelCfg used to configure the new internal channel
      * @return a new ChronicleChannel instance
      */
     ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg channelCfg);
 
     /**
-     * Checks whether the handler supports buffering or not.
+     * Indicates whether the handler supports buffering.
      *
-     * @return a Boolean value, can be null if not specified
+     * @return a Boolean value that indicates if buffering is supported, null if not specified
      */
     Boolean buffered();
 }

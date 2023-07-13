@@ -39,9 +39,28 @@ import java.util.*;
 import static net.openhft.chronicle.wire.WireType.YAML;
 
 /**
- * This class represents a context for a Chronicle channel.
- * It contains all the parameters required to create and handle a channel including socket registry,
- * gateway and system context. This context can also hold other closeable resources and manage their lifecycle.
+ * This class encapsulates the context for a Chronicle channel, including parameters necessary for creating
+ * and managing a channel, such as the socket registry, gateway, and system context.
+ * The context can also manage the lifecycle of other closeable resources.
+ *
+ * <p>The ChronicleContext provides methods to set important parameters such as the context's URL, whether
+ * to use buffering and affinity, and the context's name (which can define the relative directory).
+ * It also manages the lifecycle of closeable resources and provides the URL, buffering state, and the socket registry.</p>
+ *
+ * <p>Example usage:</p>
+ * {@code
+ * String url = "tcp://:0";
+ * try (ChronicleContext context = ChronicleContext.newContext(url)
+ * .name("target/server")
+ * .buffered(true)
+ * .useAffinity(true)) {
+ * ChronicleChannel channel = context.newChannelSupplier(new EchoHandler().buffered(false)).connectionTimeoutSecs(1).get();
+ * Says says = channel.methodWriter(Says.class);
+ * says.say("Hello World");
+ * StringBuilder eventType = new StringBuilder();
+ * String text = channel.readOne(eventType, String.class);
+ * assertEquals("say: Hello World", eventType + ": " + text);
+ * }
  */
 public class ChronicleContext extends SimpleCloseable {
     static {
@@ -99,11 +118,16 @@ public class ChronicleContext extends SimpleCloseable {
     }
 
     /**
-     * Obtain a URL from a String, loading any custom Handler as needed.
+     * Parses a URL from a string, initializing any custom handlers as necessary.
      *
-     * @param spec to use for the URL
-     * @return the URL
-     * @throws IORuntimeException if malformed
+     * <p>This method supports "internal:" and "tcp:" URL schemas in addition to the standard schemas.
+     * If a URL starts with "internal:", a new Handler object is used as the URLStreamHandler.
+     * If a URL starts with "tcp:", a new tcp.Handler object is used as the URLStreamHandler.
+     * For other URL schemas, no custom URLStreamHandler is used.</p>
+     *
+     * @param spec the string to parse as a URL.
+     * @return the URL parsed from the string.
+     * @throws IORuntimeException if the string cannot be parsed as a URL.
      */
     public static URL urlFor(String spec) throws IORuntimeException {
         try {
@@ -139,6 +163,10 @@ public class ChronicleContext extends SimpleCloseable {
 
     /**
      * @return an AffinityLock appropriate for this context
+     * Acquires an AffinityLock instance based on the affinity usage status of the context. If affinity usage is enabled,
+     * a lock is acquired without a specific tag. If affinity usage is disabled, a lock is acquired with a null tag.
+     *
+     * @return an AffinityLock instance suitable for the context's affinity usage settings.
      */
     public AffinityLock affinityLock() {
         return useAffinity()
@@ -147,23 +175,28 @@ public class ChronicleContext extends SimpleCloseable {
     }
 
     /**
-     * @return whether affinity should be enabled.
+     * Retrieves the status of affinity usage in this context.
+     *
+     * @return true if affinity usage is enabled, false otherwise.
      */
     public boolean useAffinity() {
         return useAffinity;
     }
 
     /**
-     * Set whether affinity should be used if available.
+     * Sets the status of affinity usage in this context.
      *
-     * @param useAffinity if true
-     * @return this
+     * @param useAffinity a boolean flag indicating whether to enable affinity usage.
+     * @return the current ChronicleContext instance, allowing for method chaining.
      */
     public ChronicleContext useAffinity(boolean useAffinity) {
         this.useAffinity = useAffinity;
         return this;
     }
 
+    /**
+     * Initializes the context, specifically it creates a new SocketRegistry instance if one is not already set.
+     */
     protected void init() {
         if (socketRegistry == null) {
             socketRegistry = new SocketRegistry();
@@ -172,11 +205,11 @@ public class ChronicleContext extends SimpleCloseable {
     }
 
     /**
-     * Creates a new ChronicleChannelSupplier with this context and the given ChannelHandler.
+     * Constructs a new ChronicleChannelSupplier object using the provided ChannelHandler and the settings from this context.
      *
-     * @param handler the ChannelHandler for the new ChronicleChannelSupplier
-     * @return a new ChronicleChannelSupplier
-     * @throws InvalidMarshallableException if there's a problem validating the header
+     * @param handler the ChannelHandler to be used by the new ChronicleChannelSupplier.
+     * @return the newly created ChronicleChannelSupplier.
+     * @throws InvalidMarshallableException if there is an error during the validation of the header.
      */
     public ChronicleChannelSupplier newChannelSupplier(ChannelHandler handler) throws InvalidMarshallableException {
         startServerIfNeeded();
@@ -208,10 +241,11 @@ public class ChronicleContext extends SimpleCloseable {
     }
 
     /**
-     * Starts a new Chronicle gateway if one doesn't already exist for this context.
-     * The gateway is configured using the context's current parameters and added to the list of resources managed by the context.
+     * Starts a new instance of ChronicleGatewayMain if one is not already instantiated for this context.
+     * Configures the new gateway with the context's current parameters and adds it to the list of
+     * closeable resources managed by the context.
      *
-     * @throws InvalidMarshallableException if there's a problem creating or starting the gateway
+     * @throws InvalidMarshallableException if there's an error during the creation or starting of the gateway.
      */
     public synchronized void startNewGateway() throws InvalidMarshallableException {
         // If gateway already exists, don't start a new one
@@ -232,16 +266,19 @@ public class ChronicleContext extends SimpleCloseable {
     }
 
     /**
-     * Add a closeable to be closed when this context is closed
+     * Adds a Closeable resource to the context's internal set of resources.
+     * This resource will be closed when the context itself is closed.
      *
-     * @param closeable to close
+     * @param closeable the Closeable resource to add.
      */
     public void addCloseable(Closeable closeable) {
         closeableSet.add(closeable);
     }
 
     /**
-     * Closes all the resources managed by this context.
+     * Closes all resources managed by this context in a quiet manner, i.e., without throwing any exceptions.
+     * After closing, the set of Closeable resources is cleared. If the SocketRegistry was privately
+     * created by this context, it is also closed.
      */
     protected void performClose() {
         Closeable.closeQuietly(closeableSet);
@@ -251,7 +288,9 @@ public class ChronicleContext extends SimpleCloseable {
     }
 
     /**
-     * @return the URL for this context
+     * Retrieves the URL of this context. If the URL hasn't been initialized yet, this method initializes it.
+     *
+     * @return the URL for this context.
      */
     public URL url() {
         if (_url == null)
@@ -261,17 +300,19 @@ public class ChronicleContext extends SimpleCloseable {
     }
 
     /**
-     * @return should buffering be used
+     * Indicates whether buffering should be used in this context.
+     *
+     * @return true if buffering should be used, false otherwise.
      */
     public boolean buffered() {
         return buffered;
     }
 
     /**
-     * Sets whether buffering should be used.
+     * Sets the buffering preference for this context. If true, buffering will be used.
      *
-     * @param buffered if true.
-     * @return this
+     * @param buffered a boolean representing the preference for buffering.
+     * @return this instance of ChronicleContext for method chaining.
      */
     public ChronicleContext buffered(boolean buffered) {
         this.buffered = buffered;
@@ -279,26 +320,30 @@ public class ChronicleContext extends SimpleCloseable {
     }
 
     /**
-     * @return the {@link SocketRegistry} for this context
+     * Retrieves the SocketRegistry associated with this context.
+     *
+     * @return the {@link SocketRegistry} for this context.
      */
     public SocketRegistry socketRegistry() {
         return socketRegistry;
     }
 
     /**
-     * Sets the system context for this context.
+     * Sets the system context for this context. The given system context will be deep copied to prevent
+     * modifications to the original SystemContext from affecting this context.
      *
-     * @param systemContext the new system context
-     * @throws InvalidMarshallableException if there's a problem setting the system context
+     * @param systemContext the new system context to be set.
+     * @throws InvalidMarshallableException if there's an error while performing a deep copy of the system context.
      */
     public void systemContext(SystemContext systemContext) throws InvalidMarshallableException {
         this.systemContext = systemContext.deepCopy();
     }
 
     /**
-     * This current {@link SystemContext} for this process or remote host
+     * Retrieves the current SystemContext for this process or remote host. If the system context is not set,
+     * a new SystemContext instance is created, deep copied, and returned.
      *
-     * @return the SystemContext
+     * @return the current {@link SystemContext} for this process or remote host.
      */
     public SystemContext systemContext() {
         return systemContext == null ? SystemContext.INSTANCE.deepCopy() : systemContext;

@@ -25,12 +25,14 @@ import net.openhft.chronicle.core.time.TimeProvider;
 import net.openhft.chronicle.wire.LongConversion;
 import net.openhft.chronicle.wire.NanoTimestampLongConverter;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+
 /**
- * Class representing a context for a running system. It provides various system-related information,
- * such as the number of available processors, host ID and name, the time the system has been up,
- * the country and name of the user, and the Java vendor and version.
+ * Encapsulates system-related information into a singleton object, such as:
+ * the number of available processors, host ID, host name, system up time,
+ * user's country and name, and the Java vendor and version.
  * <p>
- * This context is implemented as a singleton using the INSTANCE constant. However, a SystemContext deserialized from another host would have different information.
+ * The singleton instance is initialized with the system's current state.
+ * If deserialized from another host, the SystemContext object would contain the information of that host at the moment of serialization.
  */
 @SuppressWarnings("unused")
 public class SystemContext extends SelfDescribingMarshallable {
@@ -46,7 +48,11 @@ public class SystemContext extends SelfDescribingMarshallable {
     private String javaVersion;
 
     /**
-     * Retrieves the singleton instance of SystemContext, creating it if necessary.
+     * Singleton accessor. It lazily initializes and retrieves the SystemContext instance.
+     * This method captures the system's current state including processor count, host info,
+     * up time, user info and Java environment details.
+     *
+     * @return The singleton instance of SystemContext.
      */
     private static SystemContext getInstance() {
         SystemContext sc = new SystemContext();
@@ -64,72 +70,72 @@ public class SystemContext extends SelfDescribingMarshallable {
     }
 
     /**
-     * Returns the number of available processors in the system.
+     * Provides the number of available processors in the current system.
      *
-     * @return the number of available processors.
+     * @return Number of available processors.
      */
     public int availableProcessors() {
         return availableProcessors;
     }
 
     /**
-     * Returns the host ID of the system.
+     * Provides the unique identifier for the host system.
      *
-     * @return the host ID.
+     * @return System's host ID.
      */
     public int hostId() {
         return hostId;
     }
 
     /**
-     * Returns the host name of the system.
+     * Provides the name of the host system.
      *
-     * @return the host name.
+     * @return System's host name.
      */
     public String hostName() {
         return hostName;
     }
 
     /**
-     * Returns the Java vendor of the system.
+     * Provides the vendor information of the Java environment in the current system.
      *
-     * @return the Java vendor.
+     * @return The Java environment vendor.
      */
     public String javaVendor() {
         return javaVendor;
     }
 
     /**
-     * Returns the Java version of the system.
+     * Provides the version of the Java environment in the current system.
      *
-     * @return the Java version.
+     * @return The Java environment version.
      */
     public String javaVersion() {
         return javaVersion;
     }
 
     /**
-     * Returns the time (in nanoseconds) that the system has been up.
+     * Provides the system's up time in nanoseconds.
      *
-     * @return the up time.
+     * @return The system's up time in nanoseconds.
      */
     public long upTime() {
         return upTime;
     }
 
     /**
-     * Returns the user's country on the system.
+     * Provides the user's country in the current system.
      *
-     * @return the user's country.
+     * @return The country code of the user.
      */
     public String userCountry() {
         return userCountry;
     }
 
     /**
-     * Returns the username of the system user.
+     * Provides the username of the current user in the system.
      *
-     * @return the username.
+     * @return The username of the current user.
      */
     public String userName() {
         return userName;

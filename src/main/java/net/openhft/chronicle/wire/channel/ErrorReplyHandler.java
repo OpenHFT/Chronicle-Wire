@@ -19,27 +19,28 @@
 package net.openhft.chronicle.wire.channel;
 
 /**
- * This class handles replies containing error messages.
- * It extends ReplyingHandler and overrides its responseHeader method
- * to return an ErrorHeader populated with the current error message.
+ * A specialized {@link ReplyingHandler} designed to manage error responses.
+ *
+ * <p>This handler maintains an error message, which can be set and retrieved through dedicated methods. When generating
+ * a response header, it produces an {@link ErrorHeader} instance populated with the current error message.
  */
 public class ErrorReplyHandler extends ReplyingHandler<ErrorReplyHandler> {
     private String errorMsg = "unknown";
 
     /**
-     * Get the current error message.
+     * Retrieves the current error message set for this handler.
      *
-     * @return A String representing the current error message.
+     * @return A string representing the current error message.
      */
     public String errorMsg() {
         return errorMsg;
     }
 
     /**
-     * Set the error message for this handler.
+     * Sets the error message for this handler.
      *
-     * @param errorMsg A String representing the error message to be set.
-     * @return This ErrorReplyHandler instance for method chaining.
+     * @param errorMsg The error message to be assigned to this handler.
+     * @return This ErrorReplyHandler instance, facilitating method chaining.
      */
     public ErrorReplyHandler errorMsg(String errorMsg) {
         this.errorMsg = errorMsg;
@@ -47,11 +48,11 @@ public class ErrorReplyHandler extends ReplyingHandler<ErrorReplyHandler> {
     }
 
     /**
-     * Create a response header with the current error message.
-     * This method overrides the responseHeader method from ReplyingHandler.
+     * Creates an {@link ErrorHeader} as a response, populated with the current error message.
+     * Overrides the responseHeader method from the {@link ReplyingHandler} superclass.
      *
-     * @param context A ChronicleContext object. This parameter is not used in this implementation.
-     * @return A ChannelHeader object, which is an instance of ErrorHeader populated with the current error message.
+     * @param context A {@link ChronicleContext} object. Not used in this implementation.
+     * @return A {@link ChannelHeader} object, specifically an instance of {@link ErrorHeader}, populated with the current error message.
      */
     @Override
     public ChannelHeader responseHeader(ChronicleContext context) {

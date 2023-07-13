@@ -30,8 +30,6 @@ import net.openhft.chronicle.wire.channel.ChronicleChannelCfg;
 import net.openhft.chronicle.wire.channel.OkHeader;
 import net.openhft.chronicle.wire.converter.NanoTime;
 
-import java.util.function.Function;
-
 public class EchoChannel extends SimpleCloseable implements ChronicleChannel {
 
     private static final OkHeader OK = new OkHeader();
