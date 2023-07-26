@@ -57,13 +57,14 @@ public class WireTestCommon {
         AbstractReferenceCounted.assertReferencesReleased();
     }
 
-    @Before
+    // add @Before for tests that might create threads.
     public void threadDump() {
         threadDump = new ThreadDump();
     }
 
     public void checkThreadDump() {
-        threadDump.assertNoNewThreads();
+        if (threadDump != null)
+            threadDump.assertNoNewThreads();
     }
 
     @Before
@@ -125,7 +126,6 @@ public class WireTestCommon {
         CleaningThread.performCleanup(Thread.currentThread());
 
         // find any discarded resources.
-        System.gc();
         AbstractCloseable.waitForCloseablesToClose(100);
 
         assertReferencesReleased();

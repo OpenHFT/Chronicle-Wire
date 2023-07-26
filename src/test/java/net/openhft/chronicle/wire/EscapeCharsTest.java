@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -39,6 +40,12 @@ public class EscapeCharsTest extends WireTestCommon {
     @NotNull
     final String chs;
     private final Future future;
+
+    @Override
+    @Before
+    public void threadDump() {
+        super.threadDump();
+    }
 
     public EscapeCharsTest(@NotNull String chs, Future future) {
         this.chs = chs;

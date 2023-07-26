@@ -20,11 +20,19 @@ package net.openhft.chronicle.wire.channel.echo;
 
 import net.openhft.chronicle.wire.channel.ChronicleChannel;
 import net.openhft.chronicle.wire.channel.ChronicleContext;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class ChannelVisitorTest {
+public class ChannelVisitorTest extends net.openhft.chronicle.wire.WireTestCommon {
+
+    @Override
+    @Before
+    public void threadDump() {
+        super.threadDump();
+    }
+
     static <T> T visitOne(ChronicleChannel channel, ChannelVisiting visiting, ChannelVisitor<T> visitor) {
         StringBuilder reply = new StringBuilder();
         visiting.visitor(visitor);

@@ -27,7 +27,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class Issue620Test {
+public class Issue620Test extends net.openhft.chronicle.wire.WireTestCommon {
     @Test
     public void readBytes() {
         Wire wire = WireType.FIELDLESS_BINARY.apply(new HexDumpBytes());

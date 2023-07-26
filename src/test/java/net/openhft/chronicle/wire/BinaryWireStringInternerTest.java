@@ -63,6 +63,12 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
         return builder.toString();
     }
 
+    @Override
+    @Before
+    public void threadDump() {
+        super.threadDump();
+    }
+
     @Before
     public void createTestData() throws Exception {
         for (int i = 0; i < DATA_SET_SIZE; i++) {

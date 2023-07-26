@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.channel.*;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -33,6 +34,13 @@ import java.util.Arrays;
 import static org.junit.Assert.*;
 
 public class EchoHandlerTest extends WireTestCommon {
+
+    @Override
+    @Before
+    public void threadDump() {
+        super.threadDump();
+    }
+
 
     private static void doTest(ChronicleContext context, ChannelHandler handler) {
         ChronicleChannel channel = context.newChannelSupplier(handler).connectionTimeoutSecs(1).get();

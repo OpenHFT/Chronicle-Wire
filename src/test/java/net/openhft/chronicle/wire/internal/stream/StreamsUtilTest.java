@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
 
-public class StreamsUtilTest {
+public class StreamsUtilTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     @Test
     public void VanillaSpliterator_estimateSize_alwaysReturnsLongMaxValue() {

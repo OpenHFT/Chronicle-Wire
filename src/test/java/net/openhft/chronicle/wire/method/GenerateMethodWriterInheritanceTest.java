@@ -35,7 +35,7 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
 
     @Test
     public void testSameClassInHierarchy() {
-        final Wire wire = BINARY.apply(Bytes.elasticByteBuffer());
+        final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
 
         final AnInterface writer = wire.methodWriter(AnInterface.class, ADescendant.class);
@@ -59,7 +59,7 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
 
     @Test
     public void testSameNamedMethod() {
-        final Wire wire = BINARY.apply(Bytes.elasticByteBuffer());
+        final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
 
         final AnInterface writer = wire.methodWriter(AnInterface.class, AnInterfaceSameName.class);
@@ -85,7 +85,7 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
 
     @Test(expected = MethodWriterValidationException.class)
     public void testDuplicateMethodIds() {
-        final Wire wire = BINARY.apply(Bytes.elasticByteBuffer());
+        final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
 
         final VanillaMethodWriterBuilder<AnInterfaceMethodId> builder = (VanillaMethodWriterBuilder<AnInterfaceMethodId>) wire.methodWriterBuilder(AnInterfaceMethodId.class);
         builder.addInterface(AnInterfaceSameMethodId.class).build();
@@ -93,14 +93,14 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
 
     @Test(expected = MethodWriterValidationException.class)
     public void testGenerateForClass() {
-        final Wire wire = BINARY.apply(Bytes.elasticByteBuffer());
+        final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
 
         wire.methodWriter(GenerateMethodWriterInheritanceTest.class);
     }
 
     @Test
     public void testGenerateForLongGeneratedClassName() {
-        final Wire wire = BINARY.apply(Bytes.elasticByteBuffer());
+        final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
 
         wire.methodWriter(
                 NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener1.class,

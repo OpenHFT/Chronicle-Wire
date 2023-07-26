@@ -26,7 +26,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class GenericMethodWriterTest {
+public class GenericMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon {
     @Test
     public void genericParameter() {
         Wire wire = Wire.newYamlWireOnHeap();

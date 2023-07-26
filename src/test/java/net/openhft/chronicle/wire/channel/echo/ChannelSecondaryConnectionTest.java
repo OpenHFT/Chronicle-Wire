@@ -3,16 +3,23 @@ package net.openhft.chronicle.wire.channel.echo;
 import net.openhft.chronicle.wire.channel.ChronicleChannel;
 import net.openhft.chronicle.wire.channel.ChronicleChannelCfg;
 import net.openhft.chronicle.wire.channel.ChronicleContext;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class ChannelSecondaryConnectionTest {
+public class ChannelSecondaryConnectionTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     public static final String EXPECTED = "secondary is much better !";
 
     public interface SayMsg {
         void say(String say);
+    }
+
+    @Override
+    @Before
+    public void threadDump() {
+        super.threadDump();
     }
 
     /**
@@ -23,6 +30,7 @@ public class ChannelSecondaryConnectionTest {
      */
     @Test
     public void testEchoHandlerOnSecondaryConnection() {
+        expectException("failed to connect to host-port");
         try (ChronicleContext context = ChronicleContext.newContext("tcp://:0?sessionName=testId")) {
             context.startNewGateway();
 

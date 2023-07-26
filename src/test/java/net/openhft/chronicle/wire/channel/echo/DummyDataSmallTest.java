@@ -26,7 +26,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-public class DummyDataSmallTest {
+public class DummyDataSmallTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     @Test
     public void readMarshallable() {

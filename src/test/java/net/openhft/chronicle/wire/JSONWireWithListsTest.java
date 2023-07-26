@@ -31,7 +31,7 @@ import java.util.List;
  * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/324
  */
 @RunWith(value = Parameterized.class)
-public class JSONWireWithListsTest {
+public class JSONWireWithListsTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     private final boolean useTypes;
 

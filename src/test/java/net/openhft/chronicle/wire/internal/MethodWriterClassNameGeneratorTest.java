@@ -11,7 +11,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-public class MethodWriterClassNameGeneratorTest {
+public class MethodWriterClassNameGeneratorTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     private final MethodWriterClassNameGenerator classNameGenerator = new MethodWriterClassNameGenerator();
 
