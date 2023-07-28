@@ -40,6 +40,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.function.*;
 
@@ -190,23 +191,23 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     @Nullable
-    static Object readNumberOrTextFrom(char bq, @Nullable StringBuilder s) {
-        if (s == null
-                || bq != 0
-                || s.length() < 1
-                || s.length() > 40
-                || "0123456789.+-".indexOf(s.charAt(0)) < 0)
+    static Object readNumberOrTextFrom(char bq, final @Nullable StringBuilder s) {
+        if (leaveUnparsed(bq, s))
             return s;
 
-        if (s.indexOf("_") >= 0) {
-            removeUnderscore(s);
+        StringBuilder sb = s;
+        // YAML octal notation
+        if (StringUtils.startsWith(s, "0o")) {
+            sb = new StringBuilder(s);
+            sb.deleteCharAt(1);
         }
 
-        // YAML octal notation
-        if (StringUtils.startsWith(s, "0o"))
-            s.deleteCharAt(1);
+        if (s.indexOf("_") >= 0) {
+            sb = new StringBuilder(s);
+            removeUnderscore(sb);
+        }
 
-        String ss = s.toString();
+        String ss = sb.toString();
         try {
             return Long.decode(ss);
         } catch (NumberFormatException fallback) {
@@ -218,26 +219,37 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             // fallback
         }
         try {
-            if (s.length() == 7 && s.charAt(1) == ':')
-                return LocalTime.parse('0' + ss);
-            if (s.length() == 8 && s.charAt(2) == ':')
-                return LocalTime.parse(s);
+            return parseDateOrTime(s, ss);
         } catch (DateTimeParseException fallback) {
             // fallback
         }
-        try {
-            if (s.length() == 10)
-                return LocalDate.parse(s);
-        } catch (DateTimeParseException fallback) {
-            // fallback
-        }
-        try {
-            if (s.length() >= 22)
-                return ZonedDateTime.parse(s);
-        } catch (DateTimeParseException fallback) {
-            // fallback
-        }
+        // the original string without underscores removed
         return s;
+    }
+
+
+    private static boolean leaveUnparsed(char bq, @Nullable StringBuilder s) {
+        return s == null
+                || bq != 0
+                || s.length() < 1
+                || s.length() > 40
+                || "0123456789.+-".indexOf(s.charAt(0)) < 0;
+    }
+
+    private static TemporalAccessor parseDateOrTime(StringBuilder s, String ss) {
+        if (s.length() == 7 && s.charAt(1) == ':') {
+            return LocalTime.parse('0' + ss);
+        }
+        if (s.length() == 8 && s.charAt(2) == ':') {
+            return LocalTime.parse(s);
+        }
+        if (s.length() == 10) {
+            return LocalDate.parse(s);
+        }
+        if (s.length() >= 22) {
+            return ZonedDateTime.parse(s);
+        }
+        throw new DateTimeParseException("Unable to parse date or time", s, 0);
     }
 
     @Override
