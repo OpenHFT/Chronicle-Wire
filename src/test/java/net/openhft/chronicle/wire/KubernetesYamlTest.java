@@ -19,6 +19,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.annotation.RequiredForClient;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -29,6 +30,7 @@ import static net.openhft.chronicle.wire.WireType.YAML;
 import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("rawtypes")
+@RequiredForClient
 public class KubernetesYamlTest extends WireTestCommon {
     static String DIR = "/yaml/k8s/";
 
