@@ -132,7 +132,17 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     static boolean textable(@NotNull BytesStore bytes) {
         for (long pos = bytes.readPosition(); pos < bytes.readLimit(); pos++) {
-            if (bytes.readByte(pos) >= 127)
+            byte b = bytes.readByte(pos);
+            if (b < ' ' && b != '\n')
+                return false;
+        }
+        return true;
+    }
+
+    static boolean textable(@NotNull CharSequence cs) {
+        for (int pos = 0; pos < cs.length(); pos++) {
+            char b = cs.charAt(pos);
+            if (b < ' ')
                 return false;
         }
         return true;
@@ -262,12 +272,18 @@ public class BinaryWire extends AbstractWire implements Wire {
             return;
         }
 
+        boolean first = true;
         while (bytes.readRemaining() > 0) {
-            copyOne(wire);
+            copyOne(wire, first);
+            first = false;
         }
     }
 
     public void copyOne(@NotNull WireOut wire) throws InvalidMarshallableException {
+        copyOne(wire, true);
+    }
+
+    private void copyOne(@NotNull WireOut wire, boolean first) throws InvalidMarshallableException {
         int peekCode = peekCode();
         outerSwitch:
         switch (peekCode >> 4) {
@@ -279,6 +295,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             case BinaryWireHighCode.NUM5:
             case BinaryWireHighCode.NUM6:
             case BinaryWireHighCode.NUM7:
+                if (first)
+                    throw new IllegalArgumentException();
                 bytes.uncheckedReadSkipOne();
                 wire.getValueOut().uint8checked(peekCode);
                 break;
@@ -314,15 +332,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                         break outerSwitch;
                     }
 
-                    case U8_ARRAY:
-                        bytes.uncheckedReadSkipOne();
-                        if (textable(bytes))
-                            wire.getValueOut().text(bytes);
-                        else
-                            wire.getValueOut().bytes(bytes);
-                        bytes.readPositionRemaining(bytes.readLimit(), 0);
-                        break outerSwitch;
-
                     case I64_ARRAY:
                         bytes.uncheckedReadSkipOne();
                         long len2 = bytes.readLong();
@@ -348,19 +357,12 @@ public class BinaryWire extends AbstractWire implements Wire {
                             });
 
                         break outerSwitch;
-                    case FIELD_ANCHOR: {
-                        bytes.uncheckedReadSkipOne();
-                        @NotNull StringBuilder sb = acquireStringBuilder();
-                        readFieldAnchor(sb);
-                        wire.write(sb);
-                        break outerSwitch;
-                    }
+
+                    case U8_ARRAY:
+                    case FIELD_ANCHOR:
                     case ANCHOR:
-                    case UPDATED_ALIAS: {
-                        @Nullable final Object o = valueIn.object();
-                        wire.getValueOut().object(o);
-                        break outerSwitch;
-                    }
+                    case UPDATED_ALIAS:
+                        throw new IORuntimeException("Unexpected code in this context");
                 }
                 unknownCode(wire);
                 break;
@@ -399,6 +401,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             case BinaryWireHighCode.FIELD0:
             case BinaryWireHighCode.FIELD1:
                 @Nullable StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH.name(), ANY_CODE_MATCH.code(), acquireStringBuilder(), false);
+                if (!textable(fsb))
+                    throw new IllegalArgumentException();
                 wire.write(fsb);
                 break;
 
@@ -413,9 +417,12 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     @SuppressWarnings("incomplete-switch")
     public void readWithLength(@NotNull WireOut wire, int len) throws InvalidMarshallableException {
-        long lim = bytes.readLimit();
+        long limit = bytes.readLimit();
+        long newLimit = bytes.readPosition() + len;
+        if (newLimit > limit)
+            throw new IORuntimeException("Can't extend the limit");
         try {
-            bytes.readLimit(bytes.readPosition() + len);
+            bytes.readLimit(newLimit);
             @NotNull final ValueOut wireValueOut = wire.getValueOut();
             switch (getBracketTypeNext()) {
                 case MAP:
@@ -438,12 +445,12 @@ public class BinaryWire extends AbstractWire implements Wire {
                     break;
             }
         } finally {
-            bytes.readLimit(lim);
+            bytes.readLimit(limit);
         }
     }
 
-    private void unknownCode(@NotNull WireOut wire) {
-        wire.writeComment("# " + stringForCode(bytes.readUnsignedByte()));
+    protected void unknownCode(@NotNull WireOut wire) {
+        throw new IllegalArgumentException(stringForCode(bytes.readUnsignedByte()));
     }
 
     @NotNull

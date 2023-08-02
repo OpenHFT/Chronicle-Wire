@@ -109,9 +109,9 @@ public enum BinaryWireCode {
                     STRING_FOR_CODE[field.getInt(null)] = field.getName();
             }
             for (int i = FIELD_NAME0; i <= FIELD_NAME31; i++)
-                STRING_FOR_CODE[i] = "FIELD_" + i;
+                STRING_FOR_CODE[i] = "FIELD_" + (i - FIELD_NAME0);
             for (int i = STRING_0; i <= STRING_31; i++)
-                STRING_FOR_CODE[i] = "STRING_" + i;
+                STRING_FOR_CODE[i] = "STRING_" + (i - STRING_0);
             for (int i = 0; i < STRING_FOR_CODE.length; i++) {
                 if (STRING_FOR_CODE[i] == null)
                     if (i <= ' ' || i >= 127) {

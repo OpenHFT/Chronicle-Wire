@@ -103,8 +103,10 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
         assertSame(mw, value);
         assertEquals(disableProxyCodegen, Proxy.isProxyClass(mw.getClass()));
         assumeFalse(disableProxyCodegen);
+        // data is written but on hold until the end of message is written.
+        // WireDumper no longer scans data that is written but not ready
         assertEquals("" +
-                        "--- !!not-ready-data #binary\n" +
+                        "--- !!not-ready-data\n" +
                         "...\n" +
                         "# 15 bytes remaining\n",
                 Wires.fromSizePrefixedBlobs(wire));
