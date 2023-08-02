@@ -273,6 +273,10 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         boolean first = true;
+        copyTo(wire, first);
+    }
+
+    void copyTo(@NotNull WireOut wire, boolean first) {
         while (bytes.readRemaining() > 0) {
             copyOne(wire, first);
             first = false;
@@ -429,7 +433,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     wireValueOut.marshallable(this::copyTo);
                     break;
                 case SEQ:
-                    wireValueOut.sequence(v -> copyTo(v.wireOut()));
+                    wireValueOut.sequence(v -> copyTo(v.wireOut(), false));
                     break;
                 case NONE:
                     @Nullable Object object = this.getValueIn().object();
