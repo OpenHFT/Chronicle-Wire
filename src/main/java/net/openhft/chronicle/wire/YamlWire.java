@@ -40,6 +40,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.function.*;
 
@@ -178,6 +179,79 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         AppendableUtil.setLength(sb, end);
     }
 
+    static void removeUnderscore(@NotNull StringBuilder s) {
+        int i = 0;
+        for (int j = 0; j < s.length(); j++) {
+            char ch = s.charAt(j);
+            s.setCharAt(i, ch);
+            if (ch != '_')
+                i++;
+        }
+        s.setLength(i);
+    }
+
+    @Nullable
+    static Object readNumberOrTextFrom(char bq, final @Nullable StringBuilder s) {
+        if (leaveUnparsed(bq, s))
+            return s;
+
+        StringBuilder sb = s;
+        // YAML octal notation
+        if (StringUtils.startsWith(s, "0o")) {
+            sb = new StringBuilder(s);
+            sb.deleteCharAt(1);
+        }
+
+        if (s.indexOf("_") >= 0) {
+            sb = new StringBuilder(s);
+            removeUnderscore(sb);
+        }
+
+        String ss = sb.toString();
+        try {
+            return Long.decode(ss);
+        } catch (NumberFormatException fallback) {
+            // fallback
+        }
+        try {
+            return Double.parseDouble(ss);
+        } catch (NumberFormatException fallback) {
+            // fallback
+        }
+        try {
+            return parseDateOrTime(s, ss);
+        } catch (DateTimeParseException fallback) {
+            // fallback
+        }
+        // the original string without underscores removed
+        return s;
+    }
+
+
+    private static boolean leaveUnparsed(char bq, @Nullable StringBuilder s) {
+        return s == null
+                || bq != 0
+                || s.length() < 1
+                || s.length() > 40
+                || "0123456789.+-".indexOf(s.charAt(0)) < 0;
+    }
+
+    private static TemporalAccessor parseDateOrTime(StringBuilder s, String ss) {
+        if (s.length() == 7 && s.charAt(1) == ':') {
+            return LocalTime.parse('0' + ss);
+        }
+        if (s.length() == 8 && s.charAt(2) == ':') {
+            return LocalTime.parse(s);
+        }
+        if (s.length() == 10) {
+            return LocalDate.parse(s);
+        }
+        if (s.length() >= 22) {
+            return ZonedDateTime.parse(s);
+        }
+        throw new DateTimeParseException("Unable to parse date or time", s, 0);
+    }
+
     @Override
     public boolean isBinary() {
         return false;
@@ -308,7 +382,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             wire.bytes().write(this.bytes, yt.blockStart(), bytes0.readLimit() - yt.blockStart);
             this.bytes.readPosition(this.bytes.readLimit());
         } else {
-            while (!isEmpty()) {
+            while (!endOfDocument()) {
                 copyOne(wire, true);
                 yt.next();
             }
@@ -316,6 +390,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     private void copyOne(WireOut wire, boolean nested) throws InvalidMarshallableException {
+        ValueOut wireValueOut = wire.getValueOut();
         switch (yt.current()) {
             case NONE:
                 break;
@@ -323,7 +398,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 wire.writeComment(yt.text());
                 break;
             case TAG:
-                wire.getValueOut().typePrefix(yt.text());
+                wireValueOut.typePrefix(yt.text());
                 yt.next();
                 copyOne(wire, true);
                 yt.next();
@@ -334,7 +409,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 break;
             case DIRECTIVES_END:
                 yt.next();
-                while (!isEmpty()) {
+                while (!endOfDocument()) {
                     copyOne(wire, false);
                     yt.next();
                 }
@@ -347,7 +422,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             case MAPPING_START: {
                 if (nested) {
                     yt.next();
-                    wire.getValueOut().marshallable(w -> {
+                    wireValueOut.marshallable(w -> {
                         while (yt.current() == YamlToken.MAPPING_KEY) {
                             copyMappingKey(wire, true);
                             yt.next();
@@ -363,7 +438,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             case SEQUENCE_START: {
                 yt.next();
                 YamlWire yw = this;
-                wire.getValueOut().sequence(w -> {
+                wireValueOut.sequence(w -> {
                     while (yt.current() != YamlToken.SEQUENCE_END) {
                         yw.copyOne(w.wireOut(), true);
                         yw.yt.next();
@@ -372,10 +447,14 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 break;
             }
             case TEXT:
-                wire.getValueOut().text(yt.text());
+                Object o = valueIn.readNumberOrText();
+                if (o instanceof Long)
+                    wireValueOut.int64((long) o);
+                else
+                    wireValueOut.object(o);
                 break;
             case LITERAL:
-                wire.getValueOut().text(yt.text());
+                wireValueOut.text(yt.text());
                 break;
             case ANCHOR:
                 break;
@@ -387,6 +466,20 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 break;
             case STREAM_START:
                 break;
+        }
+    }
+
+    private boolean endOfDocument() {
+        if (isEmpty())
+            return true;
+        switch (yt.current()) {
+            case STREAM_END:
+            case STREAM_START:
+            case DOCUMENT_END:
+            case NONE:
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -466,7 +559,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     return readEvent(expectedClass);
                 }
 
-                return valueIn.object(expectedClass);
+                K object = valueIn.object(expectedClass);
+                if (object instanceof StringBuilder)
+                    return (K) object.toString();
+                return object;
             case NONE:
                 return null;
         }
@@ -824,6 +920,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public String text() {
             @Nullable CharSequence cs = textTo0(acquireStringBuilder());
+            yt.next();
             return cs == null ? null : WireInternal.INTERNER.intern(cs);
         }
 
@@ -832,6 +929,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         public StringBuilder textTo(@NotNull StringBuilder sb) {
             sb.setLength(0);
             @Nullable CharSequence cs = textTo0(sb);
+            yt.next();
             if (cs == null)
                 return null;
             if (cs != sb) {
@@ -898,11 +996,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 a.append(yt.text());
                 if (yt.current() == YamlToken.TEXT)
                     unescape(a, yt.blockQuote());
-                yt.next();
+
             } else if (yt.current() == YamlToken.TAG) {
                 if (yt.isText(NULL_TAG)) {
                     yt.next();
-                    yt.next();
+
                     return null;
                 }
 
@@ -1391,7 +1489,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 // Perhaps should be negative selection instead of positive
                 case SEQUENCE_START:
                 case SEQUENCE_ENTRY:
-                // Allows scalar value to be converted into singleton array
+                    // Allows scalar value to be converted into singleton array
                 case TEXT:
                     return true;
             }
@@ -1809,6 +1907,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 case TEXT:
                 case LITERAL:
                     Object o = valueIn.readNumberOrText();
+                    yt.next();
+                    if (o instanceof StringBuilder)
+                        o = o.toString();
                     return ObjectUtils.convertTo(type, o);
 
                 case ANCHOR:
@@ -1850,55 +1951,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Nullable
         protected Object readNumberOrText() {
             char bq = yt.blockQuote();
-            @Nullable String s = text();
+            @Nullable StringBuilder s = textTo0(acquireStringBuilder());
             if (yt.current() == YamlToken.LITERAL)
                 return s;
-            if (s == null
-                    || bq != 0
-                    || s.length() < 1
-                    || s.length() > 40
-                    || "0123456789.+-".indexOf(s.charAt(0)) < 0)
-                return s;
-
-            String ss = s;
-            if (s.indexOf('_') >= 0)
-                ss = ss.replace("_", "");
-
-            // YAML octal notation
-            if (s.startsWith("0o"))
-                ss = "0" + s.substring(2);
-
-            try {
-                return Long.decode(ss);
-            } catch (NumberFormatException fallback) {
-                // fallback
-            }
-            try {
-                return Double.parseDouble(ss);
-            } catch (NumberFormatException fallback) {
-                // fallback
-            }
-            try {
-                if (s.length() == 7 && s.charAt(1) == ':')
-                    return LocalTime.parse('0' + s);
-                if (s.length() == 8 && s.charAt(2) == ':')
-                    return LocalTime.parse(s);
-            } catch (DateTimeParseException fallback) {
-                // fallback
-            }
-            try {
-                if (s.length() == 10)
-                    return LocalDate.parse(s);
-            } catch (DateTimeParseException fallback) {
-                // fallback
-            }
-            try {
-                if (s.length() >= 22)
-                    return ZonedDateTime.parse(s);
-            } catch (DateTimeParseException fallback) {
-                // fallback
-            }
-            return s;
+            return readNumberOrTextFrom(bq, s);
         }
 
         @NotNull
@@ -1961,6 +2017,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         public String toString() {
             return YamlWire.this.toString();
         }
+
     }
 
     @Override
