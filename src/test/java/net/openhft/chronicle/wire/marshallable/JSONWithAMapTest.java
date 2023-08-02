@@ -30,7 +30,7 @@ import org.junit.Test;
 
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
-public class JSONWithAMapTest {
+public class JSONWithAMapTest extends net.openhft.chronicle.wire.WireTestCommon {
     @Test
     public void test1() {
         final String expected = "{\"@ResponseItem\":{\"index\":\"4ab100000005\",\"key\":\"seqNumber\",\"payload\":null}}";
@@ -114,7 +114,7 @@ public class JSONWithAMapTest {
 
     static class ResponseItem extends SelfDescribingMarshallable {
         @NotNull String index;
-        Bytes<?> key = Bytes.elasticByteBuffer();
+        Bytes<?> key = Bytes.allocateElasticOnHeap();
         private Object payload;
     }
 }

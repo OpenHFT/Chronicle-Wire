@@ -7,12 +7,12 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JSONEmptySequencesTest {
+public class JSONEmptySequencesTest extends net.openhft.chronicle.wire.WireTestCommon {
     @Test
     public void emptySequence() {
         ClassAliasPool.CLASS_ALIASES.addAlias(Foo.class);
 
-        final Bytes data = Bytes.elasticByteBuffer();
+        final Bytes data = Bytes.allocateElasticOnHeap();
         data.append("!Foo {\n" +
                 "  field1: 1234,\n" +
                 "  field2: 456,\n" +

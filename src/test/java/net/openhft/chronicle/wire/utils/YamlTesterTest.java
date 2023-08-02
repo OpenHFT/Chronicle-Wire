@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.wire.TextMethodTester;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.YamlMethodTester;
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,46 +32,75 @@ import org.junit.Test;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
+import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
 
 public class YamlTesterTest extends WireTestCommon {
+    private static TestImpl testImpl;
+
     @Before
     public void setUp() {
-        SystemTimeProvider.CLOCK = new SetTimeProvider("2022-05-17T20:26:00")
+        CLOCK = new SetTimeProvider("2022-05-17T20:26:00")
                 .autoIncrement(1, TimeUnit.MICROSECONDS);
+    }
+
+    @Override
+    protected void preAfter() {
+        super.preAfter();
+        if (testImpl != null)
+            assertTrue(testImpl.isClosed());
     }
 
     @After
     public void tearDown() {
-        SystemTimeProvider.CLOCK = SystemTimeProvider.INSTANCE;
+        CLOCK = SystemTimeProvider.INSTANCE;
     }
 
     @Test
     public void t1() {
         YamlTester yt = new YamlMethodTester<>(
                 "yaml-tester/t1/in.yaml",
-                TestImpl::new,
+                newTestImplFunction(),
                 TestOut.class,
                 "yaml-tester/t1/out.yaml")
                 .setup("yaml-tester/t1/setup.yaml")
-                .inputFunction(s  -> s.replace("# Replace comment", ""));
+                .inputFunction(s -> s.replace("# Replace comment", ""));
         assertEquals(yt.expected(), yt.actual());
     }
 
     @Test
     public void t2() {
-        final YamlTester yt = YamlTester.runTest(TestImpl::new, TestOut.class, "yaml-tester/t2");
+        final YamlTester yt = YamlTester.runTest(newTestImplFunction(), TestOut.class, "yaml-tester/t2");
         assertEquals(yt.expected(), yt.actual());
     }
 
     @Test
     public void t3() {
-        final YamlTester yt = YamlTester.runTest(TestImpl::new, TestOut.class, "yaml-tester/t3");
+        final YamlTester yt = YamlTester.runTest(newTestImplFunction(), TestOut.class, "yaml-tester/t3");
         assertEquals(yt.expected(), yt.actual());
+    }
+
+    @NotNull
+    private static Function<TestOut, Object> newTestImplFunction() {
+        return out -> testImpl = new TestImpl(out);
+    }
+
+    @Test
+    public void t2error() {
+        System.err.println("### The Following NullPointerException Are Expected ###");
+        expectException("java.lang.NullPointerException");
+        CLOCK = null;
+        final YamlTester yt = YamlTester.runTest(newTestImplFunction(), TestOut.class, "yaml-tester/t2");
+        assertEquals("" +
+                        "---\n" +
+                        "---\n" +
+                        "---",
+                yt.actual());
+        assertTrue(testImpl.isClosed());
     }
 
     @Test
@@ -84,7 +114,7 @@ public class YamlTesterTest extends WireTestCommon {
     @Test
     public void comments() {
         // Note using YamlWire instead of TextWire moves comment 8
-        final YamlTester yt = YamlTester.runTest(TestImpl::new, TestOut.class, "yaml-tester/comments");
+        final YamlTester yt = YamlTester.runTest(newTestImplFunction(), TestOut.class, "yaml-tester/comments");
         assertEquals(yt.expected(), yt.actual());
     }
 
@@ -110,7 +140,7 @@ public class YamlTesterTest extends WireTestCommon {
                         "# comment 8\n" +
                         "...\n" +
                         "# comment 9\n",
-                TestImpl::new,
+                newTestImplFunction(),
                 TestOut.class,
                 "=" +
                         "# comment 1\n" +

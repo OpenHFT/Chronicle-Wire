@@ -47,7 +47,7 @@ import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-final class StreamsDemoTest {
+final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     @Test
     void streamTypeMarketDataSimple() {

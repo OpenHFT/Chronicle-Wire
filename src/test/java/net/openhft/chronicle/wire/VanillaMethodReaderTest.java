@@ -29,7 +29,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
-public class VanillaMethodReaderTest {
+public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     public interface MyMethod {
         void msg(String str);
@@ -38,7 +38,7 @@ public class VanillaMethodReaderTest {
     @Test
     public void testPredicateFalse() {
 
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<byte[]> b = Bytes.allocateElasticOnHeap();
         Wire w = new TextWire(b);
         MyMethod build1 = w.methodWriterBuilder(MyMethod.class)
                 .build();
@@ -56,7 +56,7 @@ public class VanillaMethodReaderTest {
     @Test
     public void testPredicateTrue() {
 
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<byte[]> b = Bytes.allocateElasticOnHeap();
         Wire w = new TextWire(b);
         MyMethod build1 = w.methodWriterBuilder(MyMethod.class)
                 .build();

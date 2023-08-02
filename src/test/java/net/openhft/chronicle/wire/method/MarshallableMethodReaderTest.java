@@ -32,7 +32,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class MarshallableMethodReaderTest {
+public class MarshallableMethodReaderTest extends net.openhft.chronicle.wire.WireTestCommon {
     @Test
     public void test() {
         Wire wire = new TextWire(Bytes.from("say: hi")).useTextDocuments();

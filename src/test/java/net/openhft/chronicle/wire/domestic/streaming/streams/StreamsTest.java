@@ -42,7 +42,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-final class StreamsTest {
+final class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     @TestFactory
     Stream<DynamicTest> test() {

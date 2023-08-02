@@ -32,7 +32,7 @@ import static java.util.stream.Collectors.toList;
 import static net.openhft.chronicle.wire.domestic.streaming.CreateUtil.createThenValueOuts;
 import static org.junit.jupiter.api.Assertions.*;
 
-class StreamsTest {
+class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
 
 
     @Test

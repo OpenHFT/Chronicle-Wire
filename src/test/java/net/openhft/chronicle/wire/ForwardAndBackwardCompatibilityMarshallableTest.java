@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -37,6 +38,7 @@ import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCommon {
 
     private final WireType wireType;
+    private Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
     public ForwardAndBackwardCompatibilityMarshallableTest(WireType wireType) {
         this.wireType = wireType;
@@ -52,9 +54,15 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
         });
     }
 
+    @Override
+    public void afterChecks() {
+        bytes.releaseLast();
+        super.afterChecks();
+    }
+
     @Test
     public void marshableStringBuilderTest() throws Exception {
-        final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
+        final Wire wire = wireType.apply(bytes);
         wire.usePadding(wire.isBinary());
         ClassLookup wrap1 = CLASS_ALIASES.wrap();
         wrap1.addAlias(MDTO2.class, "MDTO");
@@ -72,13 +80,11 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
             Assert.assertEquals(2, dto2.two);
             Assert.assertTrue("3".contentEquals(dto2.three));
         }
-
-        wire.bytes().releaseLast();
     }
 
     @Test
     public void backwardsCompatibility() {
-        final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
+        final Wire wire = wireType.apply(bytes);
         wire.usePadding(wire.isBinary());
         ClassLookup wrap1 = CLASS_ALIASES.wrap();
         wrap1.addAlias(MDTO2.class, "MDTO");
@@ -101,14 +107,11 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
             Assert.assertEquals(0, dto2.two);
 
         }
-
-        wire.bytes().releaseLast();
     }
 
     @Test
     public void forwardCompatibility() {
-
-        final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
+        final Wire wire = wireType.apply(bytes);
         Assume.assumeFalse(wire instanceof YamlWire);
         wire.usePadding(wire.isBinary());
         ClassLookup wrap2 = CLASS_ALIASES.wrap();
@@ -132,8 +135,6 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
                     .marshallable(dto1);
             Assert.assertEquals(1, dto1.one);
         }
-
-        wire.bytes().releaseLast();
     }
 
     public static class MDTO1 extends SelfDescribingMarshallable implements Demarshallable {

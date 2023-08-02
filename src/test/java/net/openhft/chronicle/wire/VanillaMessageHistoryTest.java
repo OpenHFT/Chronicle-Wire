@@ -26,7 +26,7 @@ import org.junit.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class VanillaMessageHistoryTest {
+public class VanillaMessageHistoryTest extends net.openhft.chronicle.wire.WireTestCommon {
     @Test
     public void equalsHashCode() {
         VanillaMessageHistory vmh = new VanillaMessageHistory();

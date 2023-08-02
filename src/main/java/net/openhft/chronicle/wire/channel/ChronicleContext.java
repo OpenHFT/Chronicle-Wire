@@ -48,19 +48,19 @@ import static net.openhft.chronicle.wire.WireType.YAML;
  * It also manages the lifecycle of closeable resources and provides the URL, buffering state, and the socket registry.</p>
  *
  * <p>Example usage:</p>
- * {@code
+ * <pre>
  * String url = "tcp://:0";
  * try (ChronicleContext context = ChronicleContext.newContext(url)
- * .name("target/server")
- * .buffered(true)
- * .useAffinity(true)) {
- * ChronicleChannel channel = context.newChannelSupplier(new EchoHandler().buffered(false)).connectionTimeoutSecs(1).get();
- * Says says = channel.methodWriter(Says.class);
- * says.say("Hello World");
- * StringBuilder eventType = new StringBuilder();
- * String text = channel.readOne(eventType, String.class);
- * assertEquals("say: Hello World", eventType + ": " + text);
- * }
+ *     .name("target/server")
+ *     .buffered(true)
+ *     .useAffinity(true)) {
+ *   ChronicleChannel channel = context.newChannelSupplier(new EchoHandler().buffered(false)).connectionTimeoutSecs(1).get();
+ *   Says says = channel.methodWriter(Says.class);
+ *   says.say("Hello World");
+ *   StringBuilder eventType = new StringBuilder();
+ *   String text = channel.readOne(eventType, String.class);
+ *   assertEquals("say: Hello World", eventType + ": " + text);
+ * </pre>
  */
 public class ChronicleContext extends SimpleCloseable {
     static {

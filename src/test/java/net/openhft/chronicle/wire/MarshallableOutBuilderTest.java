@@ -28,6 +28,7 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.jlbh.JLBH;
 import net.openhft.chronicle.jlbh.JLBHOptions;
 import net.openhft.chronicle.jlbh.JLBHTask;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -43,7 +44,14 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-public class MarshallableOutBuilderTest {
+public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireTestCommon {
+
+    @Override
+    @Before
+    public void threadDump() {
+        super.threadDump();
+    }
+
     @Test
     public void fileAppend() throws IOException {
         final String expected = "" +

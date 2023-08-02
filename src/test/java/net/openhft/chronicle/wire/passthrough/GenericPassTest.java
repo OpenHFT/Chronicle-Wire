@@ -26,7 +26,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class GenericPassTest {
+public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
     @Test
     public void sayingBroker() {
         Wire wire1 = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());

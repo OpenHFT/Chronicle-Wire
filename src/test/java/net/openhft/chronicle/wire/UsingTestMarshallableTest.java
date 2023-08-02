@@ -30,7 +30,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 
-public class UsingTestMarshallableTest {
+public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     @Test
     public void testConverMarshallableToTextName() {
