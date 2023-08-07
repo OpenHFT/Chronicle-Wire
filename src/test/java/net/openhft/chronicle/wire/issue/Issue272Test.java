@@ -98,8 +98,7 @@ public class Issue272Test {
                         "c3 6f 6e 65                                     # one:\n" +
                         "a1 01                                           # 1\n" +
                         "c3 74 77 6f                                     # two:\n" +
-                        "a1 02                                           # 2\n" +
-                        "00 00 00 00                                     # msg-length\n",
+                        "a1 02                                           # 2\n",
                 bytes.toHexString());
 
         Wire wire2 = new YamlWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
@@ -114,11 +113,6 @@ public class Issue272Test {
                         "    two: 2\n" +
                         "  }\n" +
                         "}\n" +
-                        "...\n" +
-                        "0\n" +
-                        "0\n" +
-                        "0\n" +
-                        "0\n" +
                         "...\n",
                 wire2.toString());
     }
