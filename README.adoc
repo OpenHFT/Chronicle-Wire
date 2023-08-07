@@ -1342,7 +1342,7 @@ If the code provided by generating interceptor differs from the code provided by
 
 See `MethodReaderInterceptorReturnsTest` for more examples.
 
-=== Spring Boots and dynamic compilation in Chronicle Wire
+=== Spring Boot and dynamic compilation in Chronicle Wire
 Chronicle Wire's `MethodReader` and `MethodWriter` dynamically compile Java code to get around some limitations in Java's underlying proxy mechanism and to do this the Java platform's standard compilation mechanism is used. The platform compiler uses the classpath variable to look for classes in directories and JAR files, and is not able to make use of classloaders to find classes.
 Spring Boot uses a custom deployment mechanism - all classes and JARs are deployed in a fat JAR and Spring's classloader can extract classes from this. In order for the compiler to be able to see classes from the fat JAR, the classes should be extracted onto the disk somewhere. This is easy if the classes are contained in a JAR (i.e. a JAR inside the fat JAR) - Spring can be made to extract the JAR to a temp directory, such as by configuring Maven Spring Boot plugin:
 
