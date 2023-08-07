@@ -109,7 +109,6 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
         );
     }
 
-
     interface AnInterface {
         void sayHello(String name);
     }
