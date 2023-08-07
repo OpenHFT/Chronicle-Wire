@@ -102,11 +102,14 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
     public void testGenerateForLongGeneratedClassName() {
         final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
 
-        wire.methodWriter(
+        Object writer = wire.methodWriter(
                 NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener1.class,
                 NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener2.class,
                 NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener3.class
         );
+        assertTrue(writer instanceof NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener1);
+        assertTrue(writer instanceof NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener2);
+        assertTrue(writer instanceof NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener3);
     }
 
     interface AnInterface {
