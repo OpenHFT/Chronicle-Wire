@@ -91,15 +91,23 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         long readPosition = this.readPosition;
 
         AbstractWire wire0 = this.wire;
-        wire0.bytes.readLimit(readLimit);
+        Bytes<?> bytes = wire0.bytes;
+        bytes.readLimit(readLimit);
 
         if (rollback) {
             if (start > -1)
-                wire0.bytes.readPosition(start);
+                bytes.readPosition(start);
 
             rollback = false;
         } else {
-            wire0.bytes.readPosition(readPosition);
+            bytes.readPosition(readPosition);
+            if (isEndOfMessage(bytes))
+                bytes.readSkip(3);
+            while(!bytes.isEmpty()) {
+                if (bytes.peekUnsignedByte() > ' ')
+                    break;
+                bytes.readSkip(1);
+            }
         }
         start = -1;
 
