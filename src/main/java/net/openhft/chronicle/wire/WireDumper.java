@@ -141,7 +141,7 @@ public class WireDumper {
         if (Wires.isEndOfFile(header)) {
             binary = true;
         } else {
-            for (int i = 0; i < 4 && i < this.bytes.readRemaining(); i++) {
+            for (int i = 0, end = Math.min(32, len0); i < end; i++) {
                 byte b = (byte) this.bytes.peekUnsignedByte(this.bytes.readPosition() + i);
                 if (b < ' ' && b != '\n') {
                     binary = true;
@@ -173,13 +173,7 @@ public class WireDumper {
             int sblen = sb.length();
 
             try {
-                byte firstByte = this.bytes.readByte(this.bytes.readPosition());
-                if (firstByte >= 0) {
-                    dumpAsHexadecimal(sb, len, readPosition, sblen);
-                    return false;
-                }
-
-                Bytes<?> bytes2 = buffer == null ? Bytes.elasticByteBuffer() : buffer.clear();
+                Bytes<?> bytes2 = buffer == null ? Bytes.allocateElasticOnHeap() : buffer.clear();
                 @NotNull TextWire textWire = new TextWire(bytes2);
 
                 this.bytes.readLimit(readPosition + len);
