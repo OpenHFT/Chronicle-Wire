@@ -4,11 +4,6 @@
 
 package net.openhft.chronicle.wire.utils.dto;
 
-import net.openhft.chronicle.bytes.BytesIn;
-import net.openhft.chronicle.bytes.BytesOut;
-import net.openhft.chronicle.wire.Base85LongConverter;
-import net.openhft.chronicle.wire.WireIn;
-import net.openhft.chronicle.wire.WireOut;
 import net.openhft.chronicle.wire.converter.Base85;
 
 public class OrderCancelReject extends AbstractEvent<OrderCancelReject> {

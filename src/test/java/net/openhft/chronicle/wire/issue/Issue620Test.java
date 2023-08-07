@@ -18,7 +18,6 @@
 
 package net.openhft.chronicle.wire.issue;
 
-import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.Wire;
