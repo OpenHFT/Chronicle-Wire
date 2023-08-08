@@ -51,4 +51,9 @@ public class TestImpl extends SimpleCloseable implements TestIn {
         dto.currentTime = CLOCK.currentTimeNanos();
         out.testEvent(dto);
     }
+
+    @Override
+    public void testAbstractMarshallableCfgEvent(TestAbstractMarshallableCfgEvent dto) {
+        out.testAbstractMarshallableCfgEvent(dto);
+    }
 }
