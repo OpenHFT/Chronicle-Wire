@@ -18,13 +18,8 @@
 
 package net.openhft.chronicle.wire.utils;
 
-import net.openhft.chronicle.wire.LongConversion;
-import net.openhft.chronicle.wire.NanoTimestampLongConverter;
+import net.openhft.chronicle.wire.AbstractMarshallableCfg;
 
-public interface TestIn {
-    void time(@LongConversion(NanoTimestampLongConverter.class) long time);
-
-    void testEvent(TestEvent dto);
-
-    void testAbstractMarshallableCfgEvent(TestAbstractMarshallableCfgEvent dto);
+public class TestAbstractMarshallableCfgEvent extends AbstractMarshallableCfg {
+    private long number;
 }

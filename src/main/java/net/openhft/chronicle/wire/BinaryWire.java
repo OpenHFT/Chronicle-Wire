@@ -80,7 +80,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     private final FixedBinaryValueOut valueOut;
     @NotNull
-    private final BinaryValueIn valueIn;
+    protected final BinaryValueIn valueIn;
     private final boolean numericFields;
     private final boolean fieldLess;
     private final int compressedSize;
@@ -189,7 +189,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     @NotNull
-    StringBuilder acquireStringBuilder() {
+    protected StringBuilder acquireStringBuilder() {
         stringBuilder.setLength(0);
         return stringBuilder;
     }
@@ -367,11 +367,19 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                         break outerSwitch;
 
-                    case U8_ARRAY:
-                    case FIELD_ANCHOR:
+                    case FIELD_ANCHOR: {
+                        fieldAnchor(wire);
+                        break outerSwitch;
+                    }
+
                     case ANCHOR:
-                    case UPDATED_ALIAS:
-                        throw new IORuntimeException("Unexpected code in this context");
+                    case UPDATED_ALIAS: {
+                        anchor(wire);
+                        break outerSwitch;
+                    }
+
+                    case U8_ARRAY:
+                        unexpectedCode();
                 }
                 unknownCode(wire);
                 break;
@@ -422,6 +430,18 @@ public class BinaryWire extends AbstractWire implements Wire {
                 wire.getValueOut().text(sb);
                 break;
         }
+    }
+
+    protected static void unexpectedCode() {
+        throw new IORuntimeException("Unexpected code in this context");
+    }
+
+    protected void anchor(@NotNull WireOut wire) {
+        unexpectedCode();
+    }
+
+    protected void fieldAnchor(@NotNull WireOut wire) {
+        unexpectedCode();
     }
 
     @SuppressWarnings("incomplete-switch")

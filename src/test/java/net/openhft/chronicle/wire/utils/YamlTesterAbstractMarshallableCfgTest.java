@@ -18,13 +18,16 @@
 
 package net.openhft.chronicle.wire.utils;
 
-import net.openhft.chronicle.wire.LongConversion;
-import net.openhft.chronicle.wire.NanoTimestampLongConverter;
+import net.openhft.chronicle.wire.WireTestCommon;
+import org.junit.Test;
 
-public interface TestIn {
-    void time(@LongConversion(NanoTimestampLongConverter.class) long time);
+import static org.junit.Assert.assertEquals;
 
-    void testEvent(TestEvent dto);
 
-    void testAbstractMarshallableCfgEvent(TestAbstractMarshallableCfgEvent dto);
+public class YamlTesterAbstractMarshallableCfgTest extends WireTestCommon {
+    @Test
+    public void testAbstractMarshallableCfgResetTest() {
+        final YamlTester yt = YamlTester.runTest(TestImpl::new, TestOut.class, "yaml-tester/tamc");
+        assertEquals(yt.expected(), yt.actual());
+    }
 }

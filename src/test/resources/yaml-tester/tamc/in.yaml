@@ -1,0 +1,9 @@
+---
+testAbstractMarshallableCfgEvent: {
+  number: 1234
+}
+...
+---
+testAbstractMarshallableCfgEvent: {
+}
+...
