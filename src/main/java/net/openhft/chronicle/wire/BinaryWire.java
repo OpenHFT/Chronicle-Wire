@@ -51,6 +51,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.*;
 
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
@@ -74,7 +75,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return ((Marshallable) m).usesSelfDescribingMessage();
         return true;
     });
-    private static volatile Exception warnMissingClass;
+    private static final AtomicBoolean FIRST_WARN_MISSING_CLASS = new AtomicBoolean();
     private final FixedBinaryValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
     private final FixedBinaryValueOut valueOut;
@@ -130,7 +131,9 @@ public class BinaryWire extends AbstractWire implements Wire {
         return new BinaryWire(bytes, false, false, false, Integer.MAX_VALUE, "binary", false);
     }
 
-    static boolean textable(@NotNull BytesStore bytes) {
+    static boolean textable(BytesStore bytes) {
+        if (bytes == null)
+            return false;
         for (long pos = bytes.readPosition(); pos < bytes.readLimit(); pos++) {
             byte b = bytes.readByte(pos);
             if (b < ' ' && b != '\n')
@@ -139,7 +142,9 @@ public class BinaryWire extends AbstractWire implements Wire {
         return true;
     }
 
-    static boolean textable(@NotNull CharSequence cs) {
+    static boolean textable(CharSequence cs) {
+        if (cs == null)
+            return false;
         for (int pos = 0; pos < cs.length(); pos++) {
             char b = cs.charAt(pos);
             if (b < ' ')
@@ -888,8 +893,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                         valueIn.marshallable(m);
                         wire.getValueOut().marshallable(m);
                     } catch (ClassNotFoundRuntimeException ex) {
-                        warnMissingClass = ex;
-                        ClassLookupWarning.warn();
+                        if (FIRST_WARN_MISSING_CLASS.compareAndSet(false, true))
+                            Jvm.warn().on(BinaryWire.class, "Unable to copy object safely, message will not be repeated: " + ex);
                     } catch (Exception e) {
                         Jvm.warn().on(getClass(), "Unable to copy " + sb + " safely will try anyway " + e);
                     }
@@ -4257,15 +4262,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                     return super.float64();
             }
         }
-    }
-
-    private static class ClassLookupWarning {
-        static {
-            Jvm.warn().on(BinaryWire.class, "Unable to copy object safely, message will not be repeated: " +
-                    warnMissingClass);
-        }
-
-        public static void warn() { }
     }
 }
 
