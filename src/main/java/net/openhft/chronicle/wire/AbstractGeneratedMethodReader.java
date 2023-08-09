@@ -307,6 +307,8 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         if (o instanceof Map) // Maps are not cleaned by default.
             ((Map<?, ?>) o).clear();
 
+        if (o instanceof AbstractMarshallableCfg)
+            ((AbstractMarshallableCfg) o).reset();
         return o;
     }
 
