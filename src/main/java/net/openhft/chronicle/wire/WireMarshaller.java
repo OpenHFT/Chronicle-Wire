@@ -280,9 +280,22 @@ public class WireMarshaller<T> {
         }
     }
 
+    /**
+     * Writes the values of the fields from the provided object (DTO) to the output. Before writing,
+     * the object is validated. The method also supports optional copying of the values
+     * from the source object to a previous instance.
+     *
+     * @param t        Object whose field values are to be written.
+     * @param out      Output destination where the field values are written to.
+     * @param previous Previous object to compare for optional copying.
+     * @param copy     Flag indicating whether to copy values from the source object to the previous object.
+     * @throws InvalidMarshallableException If there's an error during marshalling.
+     */
     public void writeMarshallable(T t, @NotNull WireOut out, T previous, boolean copy) throws InvalidMarshallableException {
+        // Validate the object before writing
         ValidatableUtil.validate(t);
         try {
+            // Iterate through all fields and write their values to the output
             for (@NotNull FieldAccess field : fields) {
                 field.write(t, out, previous, copy);
             }
@@ -291,14 +304,36 @@ public class WireMarshaller<T> {
         }
     }
 
+    /**
+     * Reads and populates the DTO based on the provided input. The input order can be hinted.
+     * After reading, the object is validated.
+     *
+     * @param t         Object to populate with read values.
+     * @param in        Input source from which values are read.
+     * @param defaults  Default values to use if a value isn't provided in the input.
+     * @param overwrite Flag indicating whether to overwrite the existing value in the target object.
+     * @throws InvalidMarshallableException If there is an error during marshalling.
+     */
     public void readMarshallable(T t, @NotNull WireIn in, T defaults, boolean overwrite) throws InvalidMarshallableException {
+        // Choose the reading method based on the hint
         if (in.hintReadInputOrder())
             readMarshallableInputOrder(t, in, defaults, overwrite);
         else
             readMarshallableDTOOrder(t, in, defaults, overwrite);
+
+        // Validate the object after reading
         ValidatableUtil.validate(t);
     }
 
+    /**
+     * Reads and populates the DTO based on the provided order.
+     *
+     * @param t         Target object to populate with read values.
+     * @param in        Input source from which values are read.
+     * @param defaults  Default values to use if a value isn't provided in the input.
+     * @param overwrite Flag indicating whether to overwrite the existing value in the target object.
+     * @throws InvalidMarshallableException If there is an error during marshalling.
+     */
     public void readMarshallableDTOOrder(T t, @NotNull WireIn in, T defaults, boolean overwrite) throws InvalidMarshallableException {
         try {
             for (@NotNull FieldAccess field : fields) {
@@ -311,30 +346,48 @@ public class WireMarshaller<T> {
         }
     }
 
+    /**
+     * Reads and populates the DTO based on the input's order.
+     *
+     * @param t         Target object to populate with read values.
+     * @param in        Input source from which values are read.
+     * @param defaults  Default values to use if a value isn't provided in the input.
+     * @param overwrite Flag indicating whether to overwrite the existing value in the target object.
+     * @throws InvalidMarshallableException If there is an error during marshalling.
+     */
     public void readMarshallableInputOrder(T t, @NotNull WireIn in, T defaults, boolean overwrite) throws InvalidMarshallableException {
         try {
             StringBuilder sb = SBP.acquireStringBuilder();
+
+            // Iterating over all fields to read their values
             for (int i = 0; i < fields.length; i++) {
                 boolean more = in.hasMore();
                 FieldAccess field = fields[i];
+
                 ValueIn vin = more ? in.read(sb) : null;
-                // are the fields all present and in order?
+
+                // Check if fields are present and in order
                 if (more && matchesFieldName(sb, field)) {
                     field.readValue(t, defaults, in.getValueIn(), overwrite);
 
                 } else {
+                    // If not, copy default values
                     for (; i < fields.length; i++) {
                         FieldAccess field2 = fields[i];
                         field2.copy(defaults, t);
                     }
+
                     if (vin == null || sb.length() <= 0)
                         return;
+
+                    // Read the next set of values if there are any left
                     do {
                         FieldAccess fieldAccess = fieldMap.get(sb);
                         if (fieldAccess == null)
                             vin.skipValue();
                         else
                             fieldAccess.readValue(t, defaults, vin, overwrite);
+
                         vin = in.read(sb);
                     } while (in.hasMore());
                 }
@@ -694,11 +747,28 @@ public class WireMarshaller<T> {
             }
         }
 
+        /**
+         * Writes the value of the field from the provided object to the output. If the value is the same
+         * as the previous value, it skips the writing. If the copy flag is set, it also copies the value
+         * from the source object to the previous object.
+         *
+         * @param o        Object from which the field value is fetched.
+         * @param out      Output destination where the value is written to.
+         * @param previous Previous object to compare for sameness and optionally copy to.
+         * @param copy     Flag indicating whether to copy the value from source to the previous object.
+         * @throws IllegalAccessException       If there's an access violation when fetching the field value.
+         * @throws InvalidMarshallableException If there's an error during marshalling.
+         */
         void write(Object o, @NotNull WireOut out, Object previous, boolean copy) throws IllegalAccessException, InvalidMarshallableException {
+            // Check if the current and previous values are the same
             if (sameValue(o, previous))
                 return;
+
+            // Write the field's value to the output
             ValueOut write = out.write(field.getName());
             getValue(o, write, previous);
+
+            // Copy value from source object to previous object, if required
             if (copy)
                 copy(o, previous);
         }
