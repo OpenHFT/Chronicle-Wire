@@ -21,7 +21,6 @@ package net.openhft.chronicle.wire.channel.echo;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.Wire;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;

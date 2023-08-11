@@ -19,10 +19,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.DistributedUniqueTimeProvider;
-import net.openhft.chronicle.bytes.MappedUniqueTimeProvider;
-import net.openhft.chronicle.core.time.SystemTimeProvider;
-
-import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
 
 public class EgMain {
     static class Event extends SelfDescribingMarshallable {
