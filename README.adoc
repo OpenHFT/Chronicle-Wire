@@ -743,6 +743,71 @@ class Data implements Marshallable {
 }
 ----
 
+== LongConverter
+
+Provides an abstraction for converting between long values and their string representations,
+potentially based on a custom character or symbol set.
+
+The conversion allows encoding long values into compact, human-readable strings and vice versa,
+useful in contexts where storage efficiency is a concern.
+
+Some example `LongConverters` are `NanoTimestampLongConverter` which stores a nanosecond timestamp as a long and renders it as a human-readable timestamp, or `Base64LongConverter` which can store a string of up to 11 characters in a long.
+
+`LongConverter` can also convert byte, short, char, and int fields.
+
+For example:
+
+[source, java]
+----
+    long ts = NanoTimestampLongConverter.INSTANCE.parse("2023-02-15T05:31:49.856123456");
+    System.out.println(ts); // 1676439109856123456
+    System.out.println(NanoTimestampLongConverter.INSTANCE.asString(ts)); // "2023-02-15T05:31:49.856123456"
+----
+
+and
+[source, java]
+----
+    long code = Base64LongConverter.INSTANCE.parse("UXX0UXZ0");
+    System.out.println(code); // 94034908776117
+    System.out.println(Base64LongConverter.INSTANCE.asString(code));
+----
+
+If you are writing your own converters you may wish to use the more concise style of custom annotation.
+
+----
+/**
+* Annotate fields or parameters to signify the long value represents a Nanosecond resolution timestamp from epoch.
+*/
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.PARAMETER})
+@LongConversion(NanoTime.class)                                            //// <- required
+public @interface NanoTime {
+    LongConverter INSTANCE = new NanoTimestampLongConverter();             //// <- required
+}
+
+/**
+* Annotate fields or parameters to signify the long value represent a String of 0 to 10 characters in Base85
+*/
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.PARAMETER})
+@LongConversion(Base85.class)
+public @interface Base85 {
+    LongConverter INSTANCE = Base85LongConverter.INSTANCE;
+}
+
+----
+
+NOTE:: The annotation must have a field called `INSTANCE` to act as the converter
+
+----
+public class Person extends SelfDescribingMarshallable {
+    private String name;
+    @NanoTime
+    private long timestampNS;
+    @Base85
+    private long userName;
+----
+
 == A note on `Wires.reset()`
 
 Chronicle Wire allows (and encourages) objects to be re-used in order to reduce allocation rates.
