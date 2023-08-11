@@ -816,6 +816,49 @@ class Data implements Marshallable {
 }
 ----
 
+== LongConverter
+
+Support was added to allow byte, short, char, and int fields via `LongConvertor`, making `IntConvertor` redundant.
+As such, `LongConverter` will be used for any integer values.
+
+NOTE:: Some care might need to be taken for values that don't fit in their target type, i.e. how overflows are handled might change as a result.
+
+If you are writing your own converters you may wish to use the more concise style of custom annotation.
+
+----
+/**
+* Annotate fields or parameters to signify the long value represents a Nanosecond resolution timestamp from epoch.
+*/
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.PARAMETER})
+@LongConversion(NanoTime.class)                                            //// <- required
+public @interface NanoTime {
+    LongConverter INSTANCE = new NanoTimestampLongConverter();             //// <- required
+}
+
+/**
+* Annotate fields or parameters to signify the long value represent a String of 0 to 10 characters in Base85
+*/
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.PARAMETER})
+@LongConversion(Base85.class)
+public @interface Base85 {
+    LongConverter INSTANCE = Base85LongConverter.INSTANCE;
+}
+
+----
+
+NOTE:: The annotation must have a field called `INSTANCE` to act as the converter
+
+----
+public class Person extends SelfDescribingMarshallable {
+    private String name;
+    @NanoTime
+    private long timestampNS;
+    @Base85
+    private long userName;
+----
+
 == A note on `Wires.reset()`
 
 Chronicle Wire allows (and encourages) objects to be re-used in order to reduce allocation rates.
