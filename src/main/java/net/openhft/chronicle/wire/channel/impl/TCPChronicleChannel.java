@@ -455,7 +455,11 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
         public void close() {
             super.close();
             if (!chainedElement)
-                flush();
+                try {
+                    flush();
+                } catch (ClosedIORuntimeException ignored) {
+                    // ignored
+                }
             lock.unlock();
         }
 
