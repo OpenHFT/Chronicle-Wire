@@ -22,7 +22,6 @@ import net.openhft.chronicle.core.time.SetTimeProvider;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.converter.Base85;
-import net.openhft.chronicle.wire.utils.ErrorListener;
 import net.openhft.chronicle.wire.utils.YamlAgitator;
 import net.openhft.chronicle.wire.utils.YamlTester;
 import net.openhft.chronicle.wire.utils.YamlTesterParametersBuilder;

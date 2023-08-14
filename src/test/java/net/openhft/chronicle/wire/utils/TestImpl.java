@@ -18,7 +18,6 @@
 
 package net.openhft.chronicle.wire.utils;
 
-import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.SimpleCloseable;
 import net.openhft.chronicle.wire.LongConversion;
 import net.openhft.chronicle.wire.NanoTimestampLongConverter;

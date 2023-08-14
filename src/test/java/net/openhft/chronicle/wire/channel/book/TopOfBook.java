@@ -27,7 +27,6 @@ import net.openhft.chronicle.wire.Base85LongConverter;
 import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
 import net.openhft.chronicle.wire.LongConversion;
 import net.openhft.chronicle.wire.converter.NanoTime;
-import org.jetbrains.annotations.NotNull;
 
 public class TopOfBook extends BytesInBinaryMarshallable implements Cloneable {
     static final int START_BYTES = BytesUtil.triviallyCopyableStart(TopOfBook.class);

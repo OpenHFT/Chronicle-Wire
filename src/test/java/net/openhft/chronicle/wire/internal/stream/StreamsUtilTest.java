@@ -1,14 +1,9 @@
 package net.openhft.chronicle.wire.internal.stream;
 
-import net.openhft.chronicle.core.internal.util.RangeUtil;
-import net.openhft.chronicle.core.values.DoubleValue;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;

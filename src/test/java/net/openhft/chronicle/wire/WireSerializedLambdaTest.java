@@ -24,7 +24,6 @@ import net.openhft.chronicle.core.util.SerializableFunction;
 import net.openhft.chronicle.core.util.SerializableUpdater;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.Serializable;

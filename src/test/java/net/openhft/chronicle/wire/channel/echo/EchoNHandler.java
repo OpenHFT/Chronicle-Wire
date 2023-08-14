@@ -18,7 +18,6 @@
 
 package net.openhft.chronicle.wire.channel.echo;
 
-import net.openhft.affinity.AffinityLock;
 import net.openhft.chronicle.core.io.ClosedIORuntimeException;
 import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.wire.DocumentContext;
