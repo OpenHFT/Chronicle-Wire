@@ -270,8 +270,8 @@ public class GenerateMethodWriter {
             Parameter p = parameters[i];
             result.append(sep);
             sep = ", ";
-            IntConversion intConversion = p.getAnnotation(IntConversion.class);
-            LongConversion longConversion = p.getAnnotation(LongConversion.class);
+            IntConversion intConversion = Jvm.findAnnotation(p, IntConversion.class);
+            LongConversion longConversion = Jvm.findAnnotation(p, LongConversion.class);
 
             if (intConversion != null)
                 result.append("@IntConversion(")

@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import org.junit.Test;
@@ -73,6 +74,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
 
         doTestUnsuccessfulCallIsDelegated(wire, false);
     }
+
     @Test
     public void testUnsuccessfulCallIsDelegatedTextWireScanning() {
         final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
@@ -86,6 +88,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
 
         doTestUnsuccessfulCallIsDelegated(wire, false);
     }
+
     @Test
     public void testUnsuccessfulCallIsDelegatedYamlWireScanning() {
         final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
@@ -158,6 +161,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
 
         testUnsuccessfulCallNoDelegate(true, true, false);
     }
+
     @Test
     public void testUnsuccessfulCallNoDelegateProxyScanning() {
         testUnsuccessfulCallNoDelegate(true, true, true);
@@ -222,7 +226,16 @@ public class MethodReaderDelegationTest extends WireTestCommon {
         };
         final MethodReader reader = wire.methodReader(useMethodId ? (MyInterfaceMethodId) () -> myInterface.myCall() : myInterface);
 
-        assertThrows(InvocationTargetRuntimeException.class, () -> reader.readOne());
+        if (Jvm.majorVersion() > 10) {
+            try {
+                fail(useMethodId + ": InvocationTargetRuntimeException expected " + reader.readOne());
+
+            } catch (InvocationTargetRuntimeException expected) {
+                // ignored
+            }
+        } else {
+            assertThrows(InvocationTargetRuntimeException.class, () -> reader.readOne());
+        }
     }
 
     // TODO: test below with interceptor

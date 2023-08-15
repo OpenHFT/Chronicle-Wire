@@ -18,7 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.MethodId;
-import net.openhft.chronicle.core.util.Annotations;
+import net.openhft.chronicle.core.Jvm;
 
 import java.lang.reflect.Method;
 import java.util.function.BiConsumer;
@@ -42,7 +42,7 @@ class ParameterHolderSequenceWriter {
             for (int i = 1; i < parameterTypes.length; i++)
                 v.object(parameterTypes[i], a[i]);
         };
-        MethodId methodId = Annotations.getAnnotation(method, MethodId.class);
+        MethodId methodId = Jvm.findAnnotation(method, MethodId.class);
         this.methodId = methodId == null ? Long.MIN_VALUE : methodId.value();
     }
 }
