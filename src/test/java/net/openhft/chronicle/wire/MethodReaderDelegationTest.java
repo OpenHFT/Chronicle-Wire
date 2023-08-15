@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import org.junit.Test;
@@ -226,16 +225,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
         };
         final MethodReader reader = wire.methodReader(useMethodId ? (MyInterfaceMethodId) () -> myInterface.myCall() : myInterface);
 
-        if (Jvm.majorVersion() > 10) {
-            try {
-                fail(useMethodId + ": InvocationTargetRuntimeException expected " + reader.readOne());
-
-            } catch (InvocationTargetRuntimeException expected) {
-                // ignored
-            }
-        } else {
-            assertThrows(InvocationTargetRuntimeException.class, () -> reader.readOne());
-        }
+        assertThrows(InvocationTargetRuntimeException.class, () -> reader.readOne());
     }
 
     // TODO: test below with interceptor

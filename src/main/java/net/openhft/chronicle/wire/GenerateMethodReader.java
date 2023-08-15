@@ -601,7 +601,7 @@ public class GenerateMethodReader {
                     res.append(codeBefore).append("\n");
             }
 
-            res.append(format("%s((%s) %s).%s(%s);\n",
+            res.append(format("%s((%s) %s).%s(%s);%n",
                     chainedCallPrefix, m.getDeclaringClass().getCanonicalName(), instanceFieldName, m.getName(),
                     String.join(", ", args)));
 
@@ -803,7 +803,7 @@ public class GenerateMethodReader {
             sb.append(aClass.getEnclosingClass().getSimpleName());
 
         String name = aClass.getName();
-        if (name.contains("$$Lambda$"))
+        if (aClass.isSynthetic() && name.contains("$$Lambda"))
             name = aClass.getInterfaces()[0].getName();
 
         final int packageDelimiterIndex = name.lastIndexOf('.');
