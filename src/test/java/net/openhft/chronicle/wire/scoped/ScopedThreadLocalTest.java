@@ -59,7 +59,7 @@ public class ScopedThreadLocalTest extends WireTestCommon {
         Set<Integer> instanceObjectIDs = new HashSet<>();
         final int numThreads = 10;
         for (int i = 0; i < numThreads; i++) {
-            final Thread thread = new Thread(() -> {
+            final Thread thread = new CleaningThread(() -> {
                 try (final ScopedResource<AtomicLong> resource = scopedThreadLocal.get()) {
                     if (resource == null) {
                         throw new IllegalStateException();
