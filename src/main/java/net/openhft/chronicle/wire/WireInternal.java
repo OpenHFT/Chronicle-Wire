@@ -46,7 +46,7 @@ import static net.openhft.chronicle.wire.Wires.toIntU30;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum WireInternal {
     ; // none
-    static final StringInterner INTERNER = new StringInterner(Integer.getInteger("wire.interner.size", 4096));
+    static final StringInterner INTERNER = new StringInterner(Jvm.getInteger("wire.interner.size", 4096));
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final StringBuilderPool ASBP = new StringBuilderPool();
     static final StringBuilderPool SBPVI = new StringBuilderPool();
@@ -55,9 +55,10 @@ public enum WireInternal {
     static final ThreadLocal<WeakReference<Bytes<?>>> BYTES_F2S_TL = new ThreadLocal<>();
     static final ThreadLocal<WeakReference<Wire>> BINARY_WIRE_TL = new ThreadLocal<>();
     static final ThreadLocal<WeakReference<Bytes<?>>> INTERNAL_BYTES_TL = new ThreadLocal<>();
+    static final int SCOPED_SIZE = Jvm.getInteger("wire.scoped.size", 4);
     static final ScopedThreadLocal<Wire> BINARY_WIRE_SCOPED_TL = new ScopedThreadLocal<>(
             () -> new BinaryWire(Wires.unmonitoredDirectBytes())
-                    .setOverrideSelfDescribing(true), Wire::clear, 4, true);
+                    .setOverrideSelfDescribing(true), Wire::clear, SCOPED_SIZE, true);
 
     static final StackTraceElement[] NO_STE = {};
     static final Set<Class> INTERNABLE = new HashSet<>(Arrays.asList(
