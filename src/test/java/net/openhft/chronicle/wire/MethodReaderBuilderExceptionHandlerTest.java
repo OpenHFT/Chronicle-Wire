@@ -70,8 +70,20 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
     @Test
     public void testNothing() {
         doTest("" +
+                        "# true\n" +
+                        "# true\n" +
+                        "# true\n" +
+                        "# true\n" +
+                        "# true\n" +
+                        "# true\n",
+                ExceptionHandler.ignoresEverything(), IgnoresEverything.class, false);
+    }
+
+    @Test
+    public void testNothingScanning() {
+        doTest("" +
                         "# false\n",
-                ExceptionHandler.ignoresEverything(), IgnoresEverything.class);
+                ExceptionHandler.ignoresEverything(), IgnoresEverything.class, true);
     }
 
     @Test
@@ -79,14 +91,44 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
         doTest("" +
                         "a[a1]\n" +
                         "# true\n" +
+                        "# true\n" +
+                        "# true\n" +
+                        "a[a2]\n" +
+                        "# true\n" +
+                        "# true\n" +
+                        "# true\n",
+                ExceptionHandler.ignoresEverything(), _A.class, false);
+    }
+
+    @Test
+    public void testAScanning() {
+        doTest("" +
+                        "a[a1]\n" +
+                        "# true\n" +
                         "a[a2]\n" +
                         "# true\n" +
                         "# false\n",
-                ExceptionHandler.ignoresEverything(), _A.class);
+                ExceptionHandler.ignoresEverything(), _A.class, true);
     }
 
     @Test
     public void testBC() {
+        doTest("" +
+                        "# true\n" +
+                        "b[b1]\n" +
+                        "# true\n" +
+                        "c[c1]\n" +
+                        "# true\n" +
+                        "# true\n" +
+                        "b[b2]\n" +
+                        "# true\n" +
+                        "c[c2]\n" +
+                        "# true\n",
+                ExceptionHandler.ignoresEverything(), _BC.class, false);
+    }
+
+    @Test
+    public void testBCScanning() {
         doTest("" +
                         "b[b1]\n" +
                         "# true\n" +
@@ -95,13 +137,29 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
                         "b[b2]\n" +
                         "# true\n" +
                         "c[c2]\n" +
-                        "# true\n" +
-                        "# false\n",
-                ExceptionHandler.ignoresEverything(), _BC.class);
+                        "# true\n",
+                ExceptionHandler.ignoresEverything(), _BC.class, true);
     }
 
     @Test
     public void testBCWarn() {
+        expectException("Unknown method-name='a'");
+        doTest("" +
+                        "# true\n" +
+                        "b[b1]\n" +
+                        "# true\n" +
+                        "c[c1]\n" +
+                        "# true\n" +
+                        "# true\n" +
+                        "b[b2]\n" +
+                        "# true\n" +
+                        "c[c2]\n" +
+                        "# true\n",
+                Jvm.warn(), _BC.class, false);
+    }
+
+    @Test
+    public void testBCWarnScanning() {
         expectException("Unknown method-name='a'");
         doTest("" +
                         "b[b1]\n" +
@@ -111,16 +169,16 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
                         "b[b2]\n" +
                         "# true\n" +
                         "c[c2]\n" +
-                        "# true\n" +
-                        "# false\n",
-                Jvm.warn(), _BC.class);
+                        "# true\n",
+                Jvm.warn(), _BC.class, true);
     }
 
-    private void doTest(String expected, ExceptionHandler eh, Class type) {
+    private void doTest(String expected, ExceptionHandler eh, Class type, boolean scanning) {
         @NotNull StringWriter out = new StringWriter();
         Wire wire = WireType.YAML_ONLY.apply(Bytes.from(input));
         MethodReader reader = wire
                 .methodReaderBuilder()
+                .scanning(scanning)
                 .exceptionHandlerOnUnknownMethod(eh)
                 .build(Mocker.logging(type, "", out));
         while (!wire.isEmpty()) {

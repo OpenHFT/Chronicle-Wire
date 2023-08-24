@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire.utils;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.StackTrace;
-import net.openhft.chronicle.core.onoes.ExceptionHandler;
 
 public class ErrorsImpl implements ErrorsIn {
     private final ErrorsOut out;

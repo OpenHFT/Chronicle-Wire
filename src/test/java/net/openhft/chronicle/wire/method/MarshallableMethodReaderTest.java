@@ -26,13 +26,12 @@ import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.Wire;
 import org.junit.Test;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class MarshallableMethodReaderTest {
+public class MarshallableMethodReaderTest extends net.openhft.chronicle.wire.WireTestCommon {
     @Test
     public void test() {
         Wire wire = new TextWire(Bytes.from("say: hi")).useTextDocuments();
@@ -43,18 +42,35 @@ public class MarshallableMethodReaderTest {
 
     @Test
     public void ignoredMethods() {
+        doIgnoredMethods(false);
+    }
+    @Test
+    public void ignoredMethodsScanning() {
+        doIgnoredMethods(true);
+    }
+
+    public void doIgnoredMethods(boolean scanning) {
         Wire wire = Wire.newYamlWireOnHeap();
         final SayingMicroservice sm = new SayingMicroservice();
-        final MethodReader reader = wire.methodReader(sm);
+        final MethodReader reader = wire.methodReaderBuilder().scanning(scanning).build(sm);
+
         writeDoc(wire, "say");
         assertTrue(reader.readOne());
 
         writeDoc(wire, "bye");
+
+        if (!scanning)
+            assertTrue(reader.readOne());
+
         assertFalse(reader.readOne());
 
         writeDoc(wire, "bye");
         writeDoc(wire, "say");
         assertTrue(reader.readOne());
+
+        if (!scanning)
+            assertTrue(reader.readOne());
+        assertFalse(reader.readOne());
     }
 
     private static void writeDoc(Wire wire, String say) {

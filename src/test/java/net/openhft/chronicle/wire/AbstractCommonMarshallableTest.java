@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class AbstractCommonMarshallableTest {
+class AbstractCommonMarshallableTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     @Test
     void doesNotUseSelfDescribingMessagesByDefault() {

@@ -21,36 +21,49 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.util.Arrays;
+import java.util.Collection;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+@RunWith(value = Parameterized.class)
 public class BinaryInTextTest extends WireTestCommon {
+    private final WireType wireType;
+
+    public BinaryInTextTest(WireType wireType) {
+        this.wireType = wireType;
+    }
+
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> wireTypes() {
+        return Arrays.asList(
+                new Object[]{WireType.TEXT},
+                new Object[]{WireType.YAML});
+    }
+
     @SuppressWarnings("rawtypes")
     @Test
     public void testBytesFromText() {
-        Bytes<?> a = Marshallable.fromString(Bytes.class, "A==");
+        Bytes<?> a = wireType.fromString(Bytes.class, "A==");
         assertEquals("A==", a.toString());
 
-        BytesStore a2 = Marshallable.fromString(BytesStore.class, "A==");
+        BytesStore a2 = wireType.fromString(BytesStore.class, "A==");
         assertEquals("A==", a2.toString());
 
-        Bytes<?> b = Marshallable.fromString(Bytes.class, "!!binary BA==");
-        assertEquals("[pos: 0, rlim: 1, wlim: 2147483632, cap: 2147483632 ] ǁ⒋‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", b.toDebugString());
+        Bytes<?> b = wireType.fromString(Bytes.class, "!!binary BA==");
+        assertEquals("00000000 04", b.toHexString().substring(0, 58).trim());
 
-        Bytes<?> b2 = Marshallable.fromString(Bytes.class, "!!binary A1==");
-        assertEquals("[pos: 0, rlim: 1, wlim: 2147483632, cap: 2147483632 ] ǁ⒊‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", b2.toDebugString());
+        Bytes<?> b2 = wireType.fromString(Bytes.class, "!!binary A1==");
+        assertEquals("00000000 03", b2.toHexString().substring(0, 58).trim());
     }
 
     @Test
     public void testReserialize() {
-        BIT b = new BIT();
-        byte[] a = new byte[5];
-        b.b = Bytes.wrapForRead(a);
-        b.c = Bytes.wrapForRead(a);
-       // System.out.println(b);
-
-        BIT bit = Marshallable.fromString(BIT.class, "{\n" +
+        BIT bit = wireType.fromString(BIT.class, "{\n" +
                 "b: !!binary AAAAAAA=,\n" +
                 "c: !!binary CCCCCCCC,\n" +
                 "}");

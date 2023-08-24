@@ -17,7 +17,6 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
@@ -120,17 +119,42 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
         Wires.setLongField(this, name, value);
     }
 
+    /**
+     * Reads the state of the Marshallable object from the given wire input. The method
+     * obtains a WireMarshaller specific to the class of the current object and delegates
+     * the reading process to that marshaller.
+     * <p>
+     * The default implementation will use a default value for each field not present
+     *
+     * @param wire The wire input source.
+     * @throws IORuntimeException           If an IO error occurs during the read operation.
+     * @throws InvalidMarshallableException If there's an error during marshalling.
+     */
     @Override
     default void readMarshallable(@NotNull WireIn wire) throws IORuntimeException, InvalidMarshallableException {
-        // Wires.readMarshallable(this, wire, true);
+        // Obtain the WireMarshaller for the current class
         WireMarshaller<Object> wm = WIRE_MARSHALLER_CL.get(this.getClass());
+
+        // Delegate the reading process to the obtained WireMarshaller
         wm.readMarshallable(this, wire, wm.defaultValue(), true);
     }
 
+    /**
+     * Writes the state of the Marshallable object to the given wire output. The method
+     * obtains a WireMarshaller specific to the class of the current object and delegates
+     * the writing process to that marshaller.
+     * <p>
+     * The default implementation will write all values even if they are a default value. c.f. readMarshallable
+     *
+     * @param wire The wire output destination.
+     * @throws InvalidMarshallableException If there's an error during marshalling.
+     */
     @Override
     default void writeMarshallable(@NotNull WireOut wire) throws InvalidMarshallableException {
-        // Wires.writeMarshallable(this, wire);
+        // Obtain the WireMarshaller for the current class
         WireMarshaller<Object> wm = WIRE_MARSHALLER_CL.get(this.getClass());
+
+        // Delegate the writing process to the obtained WireMarshaller
         wm.writeMarshallable(this, wire);
     }
 

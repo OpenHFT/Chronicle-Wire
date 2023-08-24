@@ -21,13 +21,12 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class MethodWriterBytesTest {
+public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCommon {
     private ArrayBlockingQueue<Bytes> q = new ArrayBlockingQueue(1);
 
     interface Print {

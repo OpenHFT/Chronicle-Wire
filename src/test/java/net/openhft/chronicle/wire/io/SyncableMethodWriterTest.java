@@ -34,7 +34,7 @@ import java.io.FileNotFoundException;
 
 import static org.junit.Assert.assertEquals;
 
-public class SyncableMethodWriterTest {
+public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon {
     interface SayAndSync extends Syncable {
         void say(String say);
     }

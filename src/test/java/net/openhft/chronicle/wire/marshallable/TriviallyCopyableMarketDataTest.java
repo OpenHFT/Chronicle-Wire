@@ -27,7 +27,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
-public class TriviallyCopyableMarketDataTest {
+public class TriviallyCopyableMarketDataTest extends net.openhft.chronicle.wire.WireTestCommon {
     @Test
     public void test() {
         assumeFalse(Jvm.isAzulZing());

@@ -832,6 +832,8 @@ public interface ValueOut {
                 return bool(((AtomicBoolean) value).get());
             case "java.lang.String":
                 return text((String) value);
+            case "java.lang.StringBuilder":
+                return text((StringBuilder) value);
             case "java.lang.Byte":
                 return fixedInt8((byte) value);
             case "java.lang.Boolean":

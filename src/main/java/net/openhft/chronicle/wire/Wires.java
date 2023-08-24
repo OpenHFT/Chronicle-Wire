@@ -614,9 +614,6 @@ public enum Wires {
     }
 
     public static <E> E object1(ValueIn in, @Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
-        if (using instanceof AbstractMarshallableCfg)
-            ((AbstractMarshallableCfg) using).reset();
-
         Object o = in.typePrefixOrObject(clazz);
         if (o != null && !(o instanceof Class)) {
             return (E) in.marshallable(o, MARSHALLABLE);

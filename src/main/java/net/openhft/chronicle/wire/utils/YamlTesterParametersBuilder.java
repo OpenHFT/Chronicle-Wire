@@ -36,7 +36,7 @@ import java.util.function.Predicate;
 public class YamlTesterParametersBuilder<T> {
     private final ThrowingFunction<T, Object, Throwable> builder;
     private final Class<T> outClass;
-    private final String paths;
+    private final List<String> paths;
     private final Set<Class> additionalOutputClasses = new LinkedHashSet<>();
     private YamlAgitator[] agitators = {};
     private Function<T, ExceptionHandler> exceptionHandlerFunction;
@@ -45,6 +45,10 @@ public class YamlTesterParametersBuilder<T> {
     private Function<String, String> inputFunction;
 
     public YamlTesterParametersBuilder(ThrowingFunction<T, Object, Throwable> builder, Class<T> outClass, String paths) {
+        this(builder, outClass, Arrays.asList(paths.split(" *, *")));
+    }
+
+    public YamlTesterParametersBuilder(ThrowingFunction<T, Object, Throwable> builder, Class<T> outClass, List<String> paths) {
         this.builder = builder;
         this.outClass = outClass;
         this.paths = paths;
@@ -63,10 +67,9 @@ public class YamlTesterParametersBuilder<T> {
     public List<Object[]> get() {
         Function<T, Object> compFunction = ThrowingFunction.asFunction(builder);
         List<Object[]> params = new ArrayList<>();
-        String[] pathArr = paths.split(",");
         Predicate<String> testFilter = this.testFilter;
         Map<String, YamlTester> testers = new LinkedHashMap<>();
-        for (String path : pathArr) {
+        for (String path : paths) {
             path = path.trim(); // trim without a regex
             if (path.isEmpty())
                 continue;
@@ -148,7 +151,7 @@ public class YamlTesterParametersBuilder<T> {
             }
 
             // add combination tests
-            for (String path2 : pathArr) {
+            for (String path2 : paths) {
                 path2 = path2.trim(); // trim without a regex
                 if (path2.isEmpty())
                     continue;

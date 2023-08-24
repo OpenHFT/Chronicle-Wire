@@ -520,8 +520,12 @@ public class JSONWire extends TextWire {
         @Override
         public void start() {
             first = bytes.peekUnsignedByte();
-            if (first == '{')
+            if (first == '{') {
                 bytes.readSkip(1);
+                long lastOffset = bytes.readLimit() - 1;
+                if (bytes.peekUnsignedByte(lastOffset) == '}')
+                    bytes.readLimit(lastOffset);
+            }
             super.start();
         }
 

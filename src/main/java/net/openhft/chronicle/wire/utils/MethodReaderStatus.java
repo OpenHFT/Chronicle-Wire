@@ -16,8 +16,11 @@
  * limitations under the License.
  */
 
-package net.openhft.chronicle.wire.channel;
+package net.openhft.chronicle.wire.utils;
 
-public interface TesterControl {
-    void waitFor(int ms);
+public enum MethodReaderStatus {
+    EMPTY,
+    HISTORY,
+    KNOWN,
+    UNKNOWN
 }

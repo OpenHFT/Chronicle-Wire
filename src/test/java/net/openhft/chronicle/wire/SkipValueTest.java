@@ -42,7 +42,7 @@ import static org.junit.Assert.assertNotNull;
 
 @SuppressWarnings("rawtypes")
 @RunWith(value = Parameterized.class)
-public class SkipValueTest {
+public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     private final String name;
     private final int code;

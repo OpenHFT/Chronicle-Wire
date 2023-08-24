@@ -31,7 +31,7 @@ import java.util.TreeSet;
 
 import static org.junit.Assert.assertEquals;
 
-public class MonetaTest {
+public class MonetaTest extends net.openhft.chronicle.wire.WireTestCommon {
     @Test
     public void monetary() {
         SortedSet<NonScalarComparable> set = new TreeSet<>();

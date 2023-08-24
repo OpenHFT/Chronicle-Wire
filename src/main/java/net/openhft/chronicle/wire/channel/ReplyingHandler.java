@@ -21,11 +21,13 @@ package net.openhft.chronicle.wire.channel;
 import net.openhft.chronicle.core.io.ClosedIORuntimeException;
 
 /**
- * This Handler performs a single action and returns a response in the reply header.
- * <p>
- * This would typically be either an OkHeader, ReplyHeader, ErrorHandler
+ * An abstract handler that provides a mechanism for sending responses in a communication protocol.
+ * Typically, these responses could be of type OkHeader, ReplyHeader, ErrorHandler.
  *
- * @param <H> the subclass
+ * <p>It extends {@link AbstractHandler}, and subclasses of this handler are expected to implement
+ * the {@link #responseHeader(ChronicleContext)} method to provide a custom channel header for responses.
+ *
+ * @param <H> The specific subclass of ReplyingHandler, used for ensuring type correctness in fluent APIs.
  */
 public abstract class ReplyingHandler<H extends ReplyingHandler<H>> extends AbstractHandler<H> {
     @Override
@@ -33,11 +35,11 @@ public abstract class ReplyingHandler<H extends ReplyingHandler<H>> extends Abst
 
     @Override
     public void run(ChronicleContext context, ChronicleChannel channel) throws ClosedIORuntimeException {
-        // nothing to do
+        // This method is intentionally left blank
     }
 
     @Override
     public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg channelCfg) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("asInternalChannel operation is not supported in ReplyingHandler");
     }
 }

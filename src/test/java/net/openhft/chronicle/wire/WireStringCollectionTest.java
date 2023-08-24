@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class WireStringCollectionTest {
+public class WireStringCollectionTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     @Test
     public void readAndWrite() {

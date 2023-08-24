@@ -45,6 +45,12 @@ public class ChronicleServiceMainTest extends WireTestCommon {
                 .close();
     }
 
+    @Override
+    @Before
+    public void threadDump() {
+        super.threadDump();
+    }
+
     @Test
     public void handshake() {
         // TODO FIX

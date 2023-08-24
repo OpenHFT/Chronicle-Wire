@@ -31,7 +31,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-public class SkipsIgnoresEveryThingTest {
+public class SkipsIgnoresEveryThingTest extends net.openhft.chronicle.wire.WireTestCommon {
     @Test
     public void selective() {
         String text = "" +

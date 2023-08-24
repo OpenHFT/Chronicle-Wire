@@ -47,6 +47,8 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     private ExceptionHandler exceptionHandlerOnUnknownMethod = Jvm.debug();
     private Predicate predicate = x -> true;
 
+    private boolean scanning = false;
+
     public VanillaMethodReaderBuilder(MarshallableIn in) {
         this.in = in;
     }
@@ -117,6 +119,16 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         return this;
     }
 
+    /**
+     * When enabled, readOne() will skip over meta data and unknown events to find at least one event.
+     * @param scanning whether to read events until it finds a known one.
+     * @return this
+     */
+    public VanillaMethodReaderBuilder scanning(boolean scanning) {
+        this.scanning = scanning;
+        return this;
+    }
+
     @Nullable
     private MethodReader createGeneratedInstance(Object... impls) {
         if (ignoreDefaults || Jvm.getBoolean(DISABLE_READER_PROXY_CODEGEN))
@@ -157,8 +169,11 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         MethodReader reader = (MethodReader) constructor.newInstance(
                 in, defaultParselet, debugLoggingParselet, methodReaderInterceptorReturns, metaDataHandler,
                 impls);
-        if (reader instanceof AbstractGeneratedMethodReader)
-            ((AbstractGeneratedMethodReader) reader).predicate(predicate);
+        if (reader instanceof AbstractGeneratedMethodReader) {
+            AbstractGeneratedMethodReader reader0 = (AbstractGeneratedMethodReader) reader;
+            reader0.scanning(scanning);
+            reader0.predicate(predicate);
+        }
 
         return reader;
     }

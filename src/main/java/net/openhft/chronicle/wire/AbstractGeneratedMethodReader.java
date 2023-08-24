@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Mocker;
+import net.openhft.chronicle.wire.utils.MethodReaderStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
@@ -37,8 +38,6 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  * Base class for generated method readers.
  */
 public abstract class AbstractGeneratedMethodReader implements MethodReader {
-    @Deprecated(/* to be removed in x.26 */)
-    private static final boolean RETRY_UNKOWN_METHOD = Jvm.getBoolean("retry.unknown.method", true);
     private static final Consumer<MessageHistory> NO_OP_MH_CONSUMER = Mocker.ignored(Consumer.class);
     private static final MessageHistoryThreadLocal TEMP_MESSAGE_HISTORY = new MessageHistoryThreadLocal();
     protected final WireParselet debugLoggingParselet;
@@ -50,16 +49,17 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     private Consumer<MessageHistory> historyConsumer = NO_OP_MH_CONSUMER;
 
     private Predicate predicate;
-
-    public AbstractGeneratedMethodReader predicate(Predicate predicate) {
-        this.predicate = predicate;
-        return this;
-    }
+    private boolean scanning;
 
     protected AbstractGeneratedMethodReader(MarshallableIn in,
                                             WireParselet debugLoggingParselet) {
         this.in = in;
         this.debugLoggingParselet = debugLoggingParselet;
+    }
+
+    public AbstractGeneratedMethodReader predicate(Predicate predicate) {
+        this.predicate = predicate;
+        return this;
     }
 
     /**
@@ -91,42 +91,47 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      * Implementation of this method is generated in runtime, see {@link GenerateMethodReader}.
      *
      * @param wireIn Data input.
-     * @return <code>true</code> if reading is successful, <code>false</code> if reading should be delegated.
+     * @return MethodReaderStatus.
      */
-    protected Boolean readOneGenerated(WireIn wireIn) {
-        return readOneCall(wireIn);
+    protected MethodReaderStatus readOneGenerated(WireIn wireIn) {
+        readOneCall(wireIn);
+        return MethodReaderStatus.KNOWN;
     }
 
+    /**
+     * Reads call name and arguments from the wire and performs invocation on a target object instance.
+     * Implementation of this method is generated in runtime, see {@link GenerateMethodReader}.
+     *
+     * @param wireIn Data input.
+     * @return <code>true</code> read a known event, <code>false</code> if reading should be delegated.
+     */
     @Deprecated(/* for removal in x.26*/)
     protected boolean readOneCall(WireIn wireIn) {
         // one of these methods must be overridden
-        return Boolean.TRUE.equals(readOneGenerated(wireIn));
+        readOneGenerated(wireIn);
+        return true;
     }
 
-    protected Boolean readOneMetaGenerated(WireIn wireIn) {
-        return readOneCallMeta(wireIn);
+    protected MethodReaderStatus readOneMetaGenerated(WireIn wireIn) {
+        readOneCallMeta(wireIn);
+        return MethodReaderStatus.KNOWN;
     }
 
     @Deprecated(/* for removal in x.26*/)
     protected boolean readOneCallMeta(WireIn wireIn) {
         // one of these methods must be overridden
-        return Boolean.TRUE.equals(readOneMetaGenerated(wireIn));
+        readOneMetaGenerated(wireIn);
+        return true;
     }
 
     /**
      * @param context Reading document context.
-     * @return <code>true</code> if reading is successful, <code>false</code> if reading should be delegated.
+     * @return KNOWN, UNKNOWN, or EMPTY (no content)
      */
-    public Boolean readOne0(DocumentContext context) {
-
-
-
-        if (context.isMetaData())
-            return false;
-
+    public MethodReaderStatus readOne0(DocumentContext context) {
         WireIn wireIn = context.wire();
         if (wireIn == null)
-            return false;
+            return MethodReaderStatus.EMPTY;
 
         if (historyConsumer != NO_OP_MH_CONSUMER) {
             writeUnwrittenMessageHistory(context);
@@ -143,17 +148,29 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
             wireIn.consumePadding();
             Bytes<?> bytes = wireIn.bytes();
             dataEventProcessed = false;
-            Boolean decoded = false;
+            MethodReaderStatus decoded = MethodReaderStatus.EMPTY; // no message
             while (bytes.readRemaining() > 0) {
                 if (wireIn.isEndEvent())
                     break;
                 long start = bytes.readPosition();
 
-                Boolean read = readOneGenerated(wireIn);
-                if (read == null && Boolean.FALSE.equals(decoded))
-                    decoded = null;
-                else if (Boolean.TRUE.equals(read))
-                    decoded = true;
+                MethodReaderStatus mrs = context.isData()
+                        ? readOneGenerated(wireIn)
+                        : readOneMetaGenerated(wireIn);
+                switch (mrs) {
+                    case HISTORY:
+                        // unchanged
+                        break;
+                    case KNOWN:
+                        decoded = MethodReaderStatus.KNOWN;
+                        break;
+                    case UNKNOWN:
+                        if (decoded == MethodReaderStatus.EMPTY)
+                            decoded = MethodReaderStatus.UNKNOWN;
+                        break;
+                    default:
+                        throw new AssertionError(mrs);
+                }
 
                 if (restIgnored())
                     return decoded;
@@ -178,41 +195,6 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
 
     private void logNonProgressWarning(long bytes) {
         Jvm.warn().on(getClass(), "Failed to progress reading " + bytes + " bytes left.");
-    }
-
-    public Boolean readOneMeta(DocumentContext context) {
-        WireIn wireIn = context.wire();
-        if (wireIn == null)
-            return false;
-
-        wireIn.startEvent();
-        Bytes<?> bytes = wireIn.bytes();
-        boolean decoded = false;
-        while (bytes.readRemaining() > 0) {
-            if (wireIn.isEndEvent())
-                break;
-            long start = bytes.readPosition();
-
-            Boolean read = readOneMetaGenerated(wireIn);
-            if (read == null)
-                return decoded ? Boolean.TRUE : null;
-            if (read)
-                decoded = true;
-
-            if (restIgnored())
-                break;
-
-            wireIn.consumePadding();
-            if (bytes.readPosition() == start) {
-                logNonProgressWarning(bytes.readRemaining());
-                break;
-            }
-        }
-        // only called if the end of the message is reached normally.
-        if (decoded)
-            wireIn.endEvent();
-
-        return decoded;
     }
 
     protected boolean restIgnored() {
@@ -252,30 +234,34 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
 
     @Override
     public boolean readOne() {
-        throwExceptionIfClosed();
-
         if (!predicate.test(this))
             return false;
 
         do {
+            throwExceptionIfClosed();
+
             try (DocumentContext context = in.readingDocument()) {
                 if (!context.isPresent()) {
-                    return false;
+                    break;
                 }
 
-                if (context.isMetaData()) {
-                    Boolean ok = readOneMeta(context);
-                    if (Boolean.FALSE.equals(ok))
-                        return false;
-                    // retry on a metadata message even if known
-                } else {
-                    Boolean ok = readOne0(context);
-                    if (ok != null)
-                        return ok;
-                    // retry on a data message unless a known message is found.
+                MethodReaderStatus mrs = readOne0(context);
+                switch (mrs) {
+                    case KNOWN:
+                        if (scanning && context.isMetaData())
+                            break; // continue
+                        return true;
+                    case EMPTY:
+                    case UNKNOWN:
+                        if (scanning)
+                            break; // continue looking
+                        return true;
+                    default:
+                        throw new AssertionError(mrs);
                 }
+                // retry on a data message unless a known message is found.
             }
-        } while (RETRY_UNKOWN_METHOD && !isClosing());
+        } while (scanning);
         return false;
     }
 
@@ -309,20 +295,37 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     }
 
     /**
-     * Workaround to disable "object recycling read" {@link ValueIn#object(Object, Class)} for some object types.
+     * Offers a workaround to selectively disable "object recycling read" provided by {@link ValueIn#object(Object, Class)}
+     * for specific object types. This ensures that certain objects, such as arrays and collections, are
+     * not unintentionally reused or recycled during the reading process.
+     *
+     * @param <T> The generic type of the object to check.
+     * @param o   The object instance to verify and possibly recycle.
+     * @return The object itself if recycling is not applied, or {@code null} if the object is either
+     * {@code null} or an array. If the object is a collection or map, the method will clear its
+     * content and return the object.
      */
     protected <T> T checkRecycle(T o) {
-        if (o == null || o.getClass().isArray()) // Arrays are kept intact by default.
+        if (o == null || o.getClass().isArray()) // If the object is null or an array, return null to prevent recycling.
             return null;
 
-        if (o instanceof Collection) // Collections are not cleaned by default.
+        if (o instanceof Collection) { // If the object is a collection, clear its content.
             ((Collection<?>) o).clear();
+        }
 
-        if (o instanceof Map) // Maps are not cleaned by default.
+        if (o instanceof Map) { // If the object is a map, clear its content.
             ((Map<?, ?>) o).clear();
+        }
 
+        // For objects of type AbstractMarshallableCfg, reset them to their default state.
+        if (o instanceof AbstractMarshallableCfg) {
+            ((AbstractMarshallableCfg) o).reset();
+        }
+
+        // Return the potentially modified object.
         return o;
     }
+
 
     protected Object actualInvoke(Method method, Object o, Object[] objects) {
         try {
@@ -337,6 +340,10 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
             messageHistory = MessageHistory.get();
 
         return messageHistory;
+    }
+
+    public void scanning(boolean scanning) {
+        this.scanning = scanning;
     }
 
     private static final class MessageHistoryThreadLocal {

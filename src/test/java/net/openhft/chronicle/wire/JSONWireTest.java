@@ -322,11 +322,12 @@ public class JSONWireTest extends WireTestCommon {
         final List<Object> list = jsonWire.getValueIn().list(Object.class);
         assertNotNull(list);
         testCopyToBinaryAndBack(text);
+        byteBufferBytes.releaseLast();
     }
 
     @Test
     public void testQuotedFieldsEmptySequence() {
-        final Bytes data = Bytes.elasticByteBuffer();
+        final Bytes<byte[]> data = Bytes.allocateElasticOnHeap();
         data.append("{\n" +
                 "  \"field1\": 1234,\n" +
                 "  \"field2\": 456,\n" +
