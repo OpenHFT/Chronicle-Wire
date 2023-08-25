@@ -30,16 +30,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static net.openhft.chronicle.wire.WireType.BINARY;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
 
     @Test
     public void testSameClassInHierarchy() {
-        final Wire wire = BINARY.apply(Bytes.elasticByteBuffer());
+        final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
 
         final AnInterface writer = wire.methodWriter(AnInterface.class, ADescendant.class);
-        assertTrue(writer instanceof MethodWriter);
+        assertInstanceOf(MethodWriter.class, writer);
 
         writer.sayHello("hello world");
 
@@ -59,11 +60,11 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
 
     @Test
     public void testSameNamedMethod() {
-        final Wire wire = BINARY.apply(Bytes.elasticByteBuffer());
+        final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
 
         final AnInterface writer = wire.methodWriter(AnInterface.class, AnInterfaceSameName.class);
-        assertTrue(writer instanceof MethodWriter);
+        assertInstanceOf(MethodWriter.class, writer);
 
         writer.sayHello("hello world");
 
@@ -85,7 +86,7 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
 
     @Test(expected = MethodWriterValidationException.class)
     public void testDuplicateMethodIds() {
-        final Wire wire = BINARY.apply(Bytes.elasticByteBuffer());
+        final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
 
         final VanillaMethodWriterBuilder<AnInterfaceMethodId> builder = (VanillaMethodWriterBuilder<AnInterfaceMethodId>) wire.methodWriterBuilder(AnInterfaceMethodId.class);
         builder.addInterface(AnInterfaceSameMethodId.class).build();
@@ -93,22 +94,24 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
 
     @Test(expected = MethodWriterValidationException.class)
     public void testGenerateForClass() {
-        final Wire wire = BINARY.apply(Bytes.elasticByteBuffer());
+        final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
 
         wire.methodWriter(GenerateMethodWriterInheritanceTest.class);
     }
 
     @Test
     public void testGenerateForLongGeneratedClassName() {
-        final Wire wire = BINARY.apply(Bytes.elasticByteBuffer());
+        final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
 
-        wire.methodWriter(
+        Object writer = wire.methodWriter(
                 NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener1.class,
                 NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener2.class,
                 NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener3.class
         );
+        assertInstanceOf(NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener1.class, writer);
+        assertInstanceOf(NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener2.class, writer);
+        assertInstanceOf(NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener3.class, writer);
     }
-
 
     interface AnInterface {
         void sayHello(String name);

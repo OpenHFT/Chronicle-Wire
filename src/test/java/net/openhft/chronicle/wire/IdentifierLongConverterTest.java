@@ -24,7 +24,7 @@ import org.junit.Test;
 import static net.openhft.chronicle.wire.IdentifierLongConverter.*;
 import static org.junit.Assert.assertEquals;
 
-public class IdentifierLongConverterTest {
+public class IdentifierLongConverterTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     public static final String MAX_SMALL_POSITIVE_STR = "^^^^^^^^^^";
 

@@ -39,11 +39,12 @@ import java.util.function.Function;
 
 
 /**
- * The main entry point for a Chronicle Gateway. The Gateway is responsible for accepting incoming connections
- * and handling requests according to a specific protocol.
+ * Represents the entry point for a Chronicle Gateway, which is responsible for accepting
+ * incoming connections and handling requests according to a defined protocol.
  * <p>
- * This class extends {@link ChronicleContext} and implements {@link Closeable} and {@link Runnable}, meaning it is capable
- * of managing its own lifecycle and can be executed in a separate thread.
+ * This class extends {@link ChronicleContext} and implements {@link Closeable} and {@link Runnable}.
+ * Therefore, instances of this class can manage their own lifecycle and can be executed in separate threads.
+ * The Gateway can be configured using system properties.
  */
 public class ChronicleGatewayMain extends ChronicleContext implements Closeable, Runnable {
     public static final int PORT = Integer.getInteger("port", 1248);
@@ -54,15 +55,16 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable,
     transient Thread thread;
     @Comment("PauserMode to use in buffered channels")
     PauserMode pauserMode = PauserMode.balanced;
-    @Comment("Default buffered if not set by the Handler")
+    @Comment("Default buffering configuration if not set by the Handler")
     private boolean buffered = false;
     private ExecutorService service;
 
     /**
-     * Constructs a new instance of ChronicleGatewayMain with a specific URL.
+     * Constructs a new ChronicleGatewayMain instance with a specific URL.
+     * The gateway will use the default system context and a new socket registry.
      *
      * @param url the URL for the Gateway
-     * @throws InvalidMarshallableException if there's a problem creating the gateway
+     * @throws InvalidMarshallableException if there's an issue while creating the gateway
      */
     public ChronicleGatewayMain(String url) throws InvalidMarshallableException {
         this(url, new SocketRegistry(), SystemContext.INSTANCE);
@@ -70,18 +72,28 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable,
     }
 
     /**
-     * Constructs a new instance of ChronicleGatewayMain with a specific URL, socket registry, and system context.
+     * Constructs a new ChronicleGatewayMain instance with a specific URL,
+     * socket registry, and system context.
      *
      * @param url            the URL for the Gateway
-     * @param socketRegistry the socket registry used by the gateway
-     * @param systemContext  the system context for the gateway
-     * @throws InvalidMarshallableException if there's a problem creating the gateway
+     * @param socketRegistry the SocketRegistry used by the gateway for managing socket connections
+     * @param systemContext  the SystemContext that defines system-level configuration for the gateway
+     * @throws InvalidMarshallableException if there's an issue while creating the gateway
      */
     public ChronicleGatewayMain(String url, SocketRegistry socketRegistry, SystemContext systemContext) throws InvalidMarshallableException {
         super(url, socketRegistry);
         this.systemContext(systemContext);
     }
 
+    /**
+     * The main method acts as the entry point to start the ChronicleGatewayMain.
+     * It creates a new instance of the class and runs it.
+     * The URL for the gateway can be optionally specified as a command-line argument.
+     *
+     * @param args Command line arguments. If the first argument is provided, it will be used as the URL for the gateway.
+     * @throws IOException                  if there is an I/O issue while starting the gateway
+     * @throws InvalidMarshallableException if there's an issue while creating the gateway
+     */
     public static void main(String... args) throws IOException, InvalidMarshallableException {
         main(ChronicleGatewayMain.class, ChronicleGatewayMain::new, args.length == 0 ? "" : args[0]).run();
     }

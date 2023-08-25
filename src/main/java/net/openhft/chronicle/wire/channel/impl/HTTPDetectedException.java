@@ -18,7 +18,7 @@
 
 package net.openhft.chronicle.wire.channel.impl;
 
-public class HTTPDetectedException extends InvalidProtocolException{
+public class HTTPDetectedException extends InvalidProtocolException {
     public HTTPDetectedException(String message) {
         super(message);
     }

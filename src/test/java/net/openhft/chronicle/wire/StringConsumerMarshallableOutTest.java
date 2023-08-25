@@ -27,7 +27,7 @@ import java.io.StringWriter;
 
 import static org.junit.Assert.assertEquals;
 
-public class StringConsumerMarshallableOutTest {
+public class StringConsumerMarshallableOutTest extends net.openhft.chronicle.wire.WireTestCommon {
     @Test
     public void saysYaml() {
         final WireType wireType = WireType.YAML_ONLY;

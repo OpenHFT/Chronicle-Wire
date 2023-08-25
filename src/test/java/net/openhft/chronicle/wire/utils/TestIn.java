@@ -25,4 +25,6 @@ public interface TestIn {
     void time(@LongConversion(NanoTimestampLongConverter.class) long time);
 
     void testEvent(TestEvent dto);
+
+    void testAbstractMarshallableCfgEvent(TestAbstractMarshallableCfgEvent dto);
 }

@@ -106,7 +106,7 @@ public class ReorderedTest extends WireTestCommon {
 
     @Test
     public void testWithSubsetFields() {
-        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
         wire.writeEventName(() -> "test1").collection(nestedReadSubsets, NestedReadSubset.class);
 
@@ -119,7 +119,7 @@ public class ReorderedTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testTopLevel() {
-        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
         for (int i = 1; i < 5; i++) {
             wire.clear();

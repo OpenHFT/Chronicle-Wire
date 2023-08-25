@@ -8,13 +8,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
 @RunWith(value = Parameterized.class)
-public class VanillaMethodWriterBuilderVerboseTypesTest {
+public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(MyObject.class, MyObject2.class);
@@ -72,7 +71,7 @@ public class VanillaMethodWriterBuilderVerboseTypesTest {
     @Test
     public void test() {
 
-        final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
+        final Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap();
         TextWire textWire = new TextWire(bytes);
 
         VanillaMethodWriterBuilder<Printer> methodWriterBuilder = (VanillaMethodWriterBuilder) textWire.methodWriterBuilder(false, Printer.class);

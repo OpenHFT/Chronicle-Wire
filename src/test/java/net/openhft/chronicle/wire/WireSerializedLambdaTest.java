@@ -24,7 +24,6 @@ import net.openhft.chronicle.core.util.SerializableFunction;
 import net.openhft.chronicle.core.util.SerializableUpdater;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.Serializable;
@@ -114,7 +113,7 @@ public class WireSerializedLambdaTest extends WireTestCommon {
 
         assertEquals("c3 6f 6e 65                                     # one:\n" +
                         "b6 10 53 65 72 69 61 6c 69 7a 65 64 4c 61 6d 62 # SerializedLambda\n" +
-                        "64 61 82 21 01 00 00                            # WireSerializedLambda$$Lambda$\n" +
+                        "64 61 82 21 01 00 00                            # Marshallable\n" +
                         "c2 63 63                                        # cc:\n" +
                         "bc 33 6e 65 74 2e 6f 70 65 6e 68 66 74 2e 63 68 # net.openhft.chronicle.wire.WireSerializedLambdaTest\n" +
                         "72 6f 6e 69 63 6c 65 2e 77 69 72 65 2e 57 69 72\n" +
@@ -147,7 +146,7 @@ public class WireSerializedLambdaTest extends WireTestCommon {
                         "c5 74 68 72 65 65                               # three:\n" +
                         "b6 06 55 70 64 61 74 65                         # Update\n" +
                         "e4 44 45 43 52                                  # DECR\n",
-                wire.bytes().toHexString().replaceAll("\\$\\$Lambda.*", "\\$\\$Lambda\\$"));
+                wire.bytes().toHexString());
 
         @Nullable Function<String, String> function = wire.read().object(Function.class);
         assertEquals("HELLO", function.apply("hello"));

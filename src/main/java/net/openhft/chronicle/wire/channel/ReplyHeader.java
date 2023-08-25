@@ -27,7 +27,7 @@ package net.openhft.chronicle.wire.channel;
 public class ReplyHeader<R> extends AbstractHeader<ReplyHeader<R>> {
 
     // The reply object.
-    private R reply;
+    private final R reply;
 
     /**
      * Constructs a new ReplyHeader instance with the specified reply object.

@@ -295,20 +295,37 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     }
 
     /**
-     * Workaround to disable "object recycling read" {@link ValueIn#object(Object, Class)} for some object types.
+     * Offers a workaround to selectively disable "object recycling read" provided by {@link ValueIn#object(Object, Class)}
+     * for specific object types. This ensures that certain objects, such as arrays and collections, are
+     * not unintentionally reused or recycled during the reading process.
+     *
+     * @param <T> The generic type of the object to check.
+     * @param o   The object instance to verify and possibly recycle.
+     * @return The object itself if recycling is not applied, or {@code null} if the object is either
+     * {@code null} or an array. If the object is a collection or map, the method will clear its
+     * content and return the object.
      */
     protected <T> T checkRecycle(T o) {
-        if (o == null || o.getClass().isArray()) // Arrays are kept intact by default.
+        if (o == null || o.getClass().isArray()) // If the object is null or an array, return null to prevent recycling.
             return null;
 
-        if (o instanceof Collection) // Collections are not cleaned by default.
+        if (o instanceof Collection) { // If the object is a collection, clear its content.
             ((Collection<?>) o).clear();
+        }
 
-        if (o instanceof Map) // Maps are not cleaned by default.
+        if (o instanceof Map) { // If the object is a map, clear its content.
             ((Map<?, ?>) o).clear();
+        }
 
+        // For objects of type AbstractMarshallableCfg, reset them to their default state.
+        if (o instanceof AbstractMarshallableCfg) {
+            ((AbstractMarshallableCfg) o).reset();
+        }
+
+        // Return the potentially modified object.
         return o;
     }
+
 
     protected Object actualInvoke(Method method, Object o, Object[] objects) {
         try {

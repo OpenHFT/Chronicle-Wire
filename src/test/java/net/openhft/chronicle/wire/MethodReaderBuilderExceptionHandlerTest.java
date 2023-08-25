@@ -75,8 +75,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
                         "# true\n" +
                         "# true\n" +
                         "# true\n" +
-                        "# true\n" +
-                        "# false\n",
+                        "# true\n",
                 ExceptionHandler.ignoresEverything(), IgnoresEverything.class, false);
     }
 
@@ -97,8 +96,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
                         "a[a2]\n" +
                         "# true\n" +
                         "# true\n" +
-                        "# true\n" +
-                        "# false\n",
+                        "# true\n",
                 ExceptionHandler.ignoresEverything(), _A.class, false);
     }
 
@@ -125,8 +123,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
                         "b[b2]\n" +
                         "# true\n" +
                         "c[c2]\n" +
-                        "# true\n" +
-                        "# false\n",
+                        "# true\n",
                 ExceptionHandler.ignoresEverything(), _BC.class, false);
     }
 
@@ -140,8 +137,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
                         "b[b2]\n" +
                         "# true\n" +
                         "c[c2]\n" +
-                        "# true\n" +
-                        "# false\n",
+                        "# true\n",
                 ExceptionHandler.ignoresEverything(), _BC.class, true);
     }
 
@@ -158,8 +154,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
                         "b[b2]\n" +
                         "# true\n" +
                         "c[c2]\n" +
-                        "# true\n" +
-                        "# false\n",
+                        "# true\n",
                 Jvm.warn(), _BC.class, false);
     }
 
@@ -174,8 +169,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
                         "b[b2]\n" +
                         "# true\n" +
                         "c[c2]\n" +
-                        "# true\n" +
-                        "# false\n",
+                        "# true\n",
                 Jvm.warn(), _BC.class, true);
     }
 

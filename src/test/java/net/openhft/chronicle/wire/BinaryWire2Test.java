@@ -388,18 +388,17 @@ public class BinaryWire2Test extends WireTestCommon {
                         "48 00 00 00                                     # msg-length\n" +
                         "c8 65 6e 74 72 79 53 65 74                      # entrySet:\n" +
                         "82 3a 00 00 00                                  # sequence\n" +
-                        "82 18 00 00 00                                  # BinaryWire2Test$$Lambda$XXX\n" +
+                        "82 18 00 00 00                                  # Marshallable\n" +
                         "c3 6b 65 79                                     # key:\n" +
                         "e5 6b 65 79 2d 31                               # key-1\n" +
                         "c5 76 61 6c 75 65                               # value:\n" +
                         "e7 76 61 6c 75 65 2d 31                         # value-1\n" +
-                        "82 18 00 00 00                                  # BinaryWire2Test$$Lambda$XXX\n" +
+                        "82 18 00 00 00                                  # Marshallable\n" +
                         "c3 6b 65 79                                     # key:\n" +
                         "e5 6b 65 79 2d 32                               # key-2\n" +
                         "c5 76 61 6c 75 65                               # value:\n" +
                         "e7 76 61 6c 75 65 2d 32                         # value-2\n",
-                wire.bytes().toHexString()
-                        .replaceAll("BinaryWire2Test\\$\\$Lambda.*", "BinaryWire2Test\\$\\$Lambda\\$XXX"));
+                wire.bytes().toHexString());
 
         @NotNull Wire twire = WireType.TEXT.apply(Bytes.elasticByteBuffer());
         writeMessageContext(twire);

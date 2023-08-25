@@ -35,7 +35,7 @@ import static org.junit.Assert.assertTrue;
  * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/324
  */
 @RunWith(value = Parameterized.class)
-public class JSONTypesWithMapsTest {
+public class JSONTypesWithMapsTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     private final boolean useTypes;
 

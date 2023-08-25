@@ -78,7 +78,7 @@ public interface LongConverter {
      * * Appends to provided {@code value} to the provided {@code text}.
      *
      * @param bytes {@code Bytes} object to append the value to.
-     * @param value The value to be appended.
+     * @param value to append as text
      */
     default void append(Bytes<?> bytes, long value) {
         final StringBuilder sb = WireInternal.acquireStringBuilder();

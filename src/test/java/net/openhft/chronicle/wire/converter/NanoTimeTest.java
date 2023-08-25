@@ -24,7 +24,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class NanoTimeTest {
+public class NanoTimeTest extends net.openhft.chronicle.wire.WireTestCommon {
     @Test
     public void yaml() {
         Wire wire = Wire.newYamlWireOnHeap();

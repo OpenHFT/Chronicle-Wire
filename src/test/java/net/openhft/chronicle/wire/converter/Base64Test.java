@@ -25,7 +25,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class Base64Test {
+public class Base64Test extends net.openhft.chronicle.wire.WireTestCommon {
     @Test
     public void onAnField() {
         Wire wire = Wire.newYamlWireOnHeap();

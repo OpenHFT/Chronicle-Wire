@@ -16,8 +16,18 @@
  * limitations under the License.
  */
 
-package net.openhft.chronicle.wire.channel;
+package net.openhft.chronicle.wire.utils;
 
-public interface TesterControl {
-    void waitFor(int ms);
+import net.openhft.chronicle.wire.WireTestCommon;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+
+public class YamlTesterAbstractMarshallableCfgTest extends WireTestCommon {
+    @Test
+    public void testAbstractMarshallableCfgResetTest() {
+        final YamlTester yt = YamlTester.runTest(TestImpl::new, TestOut.class, "yaml-tester/tamc");
+        assertEquals(yt.expected(), yt.actual());
+    }
 }

@@ -1,6 +1,5 @@
 package run.chronicle.account.dto;
 
-import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.converter.Base85;
 import net.openhft.chronicle.wire.converter.NanoTime;

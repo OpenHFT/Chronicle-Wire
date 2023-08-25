@@ -38,7 +38,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(Parameterized.class)
-public class HandleSkippedValueReadsTest {
+public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     final WireType wireType;
 

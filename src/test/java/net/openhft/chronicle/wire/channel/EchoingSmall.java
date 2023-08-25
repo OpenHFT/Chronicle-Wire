@@ -19,7 +19,6 @@
 package net.openhft.chronicle.wire.channel;
 
 import net.openhft.chronicle.bytes.MethodId;
-import net.openhft.chronicle.wire.channel.echo.DummyData;
 import net.openhft.chronicle.wire.channel.echo.DummyDataSmall;
 
 interface EchoingSmall {

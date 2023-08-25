@@ -298,27 +298,28 @@ public class TextMethodTester<T> implements YamlTester {
                 pos = bytes2.readPosition();
             }
             ok = true;
+
+            if (retainLast != null)
+                wireOut.bytes().clear();
+
+            if (retainLast != null) {
+                CachedInvocationHandler invocationHandler =
+                        (CachedInvocationHandler) Proxy.getInvocationHandler(writer);
+                try {
+                    invocationHandler.flush();
+                } catch (Exception e) {
+                    throw new IOException(e);
+                }
+            }
+
         } finally {
             if (exceptionHandlerFunction != null)
                 Jvm.setExceptionHandlers(error, warn, debug);
 
             if (!ok)
                 System.err.println("Unable to parse\n" + new String(inputBytes, StandardCharsets.UTF_8));
+            Closeable.closeQuietly(components);
         }
-        if (retainLast != null)
-            wireOut.bytes().clear();
-
-        if (retainLast != null) {
-            CachedInvocationHandler invocationHandler =
-                    (CachedInvocationHandler) Proxy.getInvocationHandler(writer);
-            try {
-                invocationHandler.flush();
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
-        }
-
-        Closeable.closeQuietly(components);
 
         actual = wireOut.toString().trim();
         if (REGRESS_TESTS && !output.startsWith("=")) {
