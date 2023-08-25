@@ -90,6 +90,8 @@ public class BufferedChronicleChannel extends DelegateChronicleChannel {
                 exchanger.releaseConsumer();
             }
         } catch (Throwable t) {
+            // don't rely on the closer calling close() in the right order
+            Thread.yield();
             if (!isClosing() && !channel.isClosing())
                 Jvm.warn().on(getClass(), "bgWriter died", t);
         } finally {
