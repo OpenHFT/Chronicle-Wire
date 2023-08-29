@@ -26,32 +26,73 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Consumer;
 
 /**
- * Interface to parseOne arbitrary field-value data.
+ * Defines the interface for parsing arbitrary field-value data from wire input.
  */
 public interface WireParser extends Consumer<WireIn> {
 
+    /**
+     * A predefined parselet that skips all readable bytes in the wire.
+     */
     FieldNumberParselet SKIP_READABLE_BYTES = WireParser::skipReadable;
 
+    /**
+     * Creates a new WireParser with a default consumer.
+     *
+     * @param defaultConsumer The default consumer that handles the wire data when no specific handler is provided.
+     * @return A new WireParser instance.
+     */
     @NotNull
     static WireParser wireParser(WireParselet defaultConsumer) {
         return new VanillaWireParser(defaultConsumer, SKIP_READABLE_BYTES);
     }
 
+    /**
+     * Creates a new WireParser with a default consumer and a custom field number parselet.
+     *
+     * @param defaultConsumer     The default consumer to handle the wire data when no specific handler is provided.
+     * @param fieldNumberParselet Custom field number parselet to handle field numbers in the wire data.
+     * @return A new WireParser instance.
+     */
     @NotNull
     static WireParser wireParser(@NotNull WireParselet defaultConsumer,
                                  @NotNull FieldNumberParselet fieldNumberParselet) {
         return new VanillaWireParser(defaultConsumer, fieldNumberParselet);
     }
 
+    /**
+     * Skips all readable bytes in the wire.
+     *
+     * @param ignoreMethodId The method ID to ignore. (Currently unused in the method's logic)
+     * @param wire           The wire input source.
+     */
     static void skipReadable(long ignoreMethodId, WireIn wire) {
         Bytes<?> bytes = wire.bytes();
         bytes.readPosition(bytes.readLimit());
     }
 
+    /**
+     * Retrieves the default consumer of this parser.
+     *
+     * @return The default consumer.
+     */
     WireParselet getDefaultConsumer();
 
+    /**
+     * Parses a single field-value data from the provided wire input.
+     *
+     * @param wireIn The wire input source.
+     * @throws InvocationTargetRuntimeException When there's a failure invoking the target action for a field.
+     * @throws InvalidMarshallableException     When the wire data cannot be marshaled into the desired format.
+     */
     void parseOne(@NotNull WireIn wireIn) throws InvocationTargetRuntimeException, InvalidMarshallableException;
 
+    /**
+     * Default implementation for the Consumer's accept method. This method
+     * reads and processes data from the wire input, invoking the appropriate
+     * parselets for handling the data.
+     *
+     * @param wireIn The wire input source.
+     */
     @Override
     default void accept(@NotNull WireIn wireIn) {
         wireIn.startEvent();
@@ -71,15 +112,22 @@ public interface WireParser extends Consumer<WireIn> {
     }
 
     /**
-     * Performs a {@link WireParselet} lookup based on the provided {@code name}. If
-     * a {@link WireParselet} is not associated with the provided {@code name}, {@code null}
-     * is returned.
+     * Searches for a {@link WireParselet} associated with a given name.
      *
-     * @return {@link WireParselet} associated with the provided {@code name},
-     * {@code null} if no {@link WireParselet} was found.
+     * @param name The name to search the associated {@link WireParselet} for.
+     * @return The found {@link WireParselet}, or {@code null} if not found.
      */
     WireParselet lookup(CharSequence name);
 
+    /**
+     * Attempts to register a new {@link WireParselet} for a given key. If a parselet
+     * is already registered with the same key, a warning is emitted and the new
+     * registration is ignored.
+     *
+     * @param key            The key to associate the parselet with.
+     * @param valueInConsumer The parselet to register.
+     * @return This instance for method chaining.
+     */
     @NotNull
     default VanillaWireParser registerOnce(WireKey key, WireParselet valueInConsumer) {
         CharSequence name = key.name();
@@ -91,11 +139,25 @@ public interface WireParser extends Consumer<WireIn> {
         return (VanillaWireParser) this;
     }
 
+    /**
+     * Registers a new {@link WireParselet} for a given key.
+     *
+     * @param key            The key to associate the parselet with.
+     * @param valueInConsumer The parselet to register.
+     * @return This instance for method chaining.
+     */
     @NotNull
     default VanillaWireParser register(WireKey key, WireParselet valueInConsumer) {
         return register(key.toString(), valueInConsumer);
     }
 
+    /**
+     * Registers a new {@link WireParselet} for a given key name.
+     *
+     * @param keyName        The name of the key to associate the parselet with.
+     * @param valueInConsumer The parselet to register.
+     * @return This instance for method chaining.
+     */
     @NotNull
     VanillaWireParser register(String keyName, WireParselet valueInConsumer);
 
