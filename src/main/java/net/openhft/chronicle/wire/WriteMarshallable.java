@@ -27,11 +27,13 @@ import org.jetbrains.annotations.NotNull;
  * Represents a marshallable entity capable of writing its state to a given wire format.
  * Implementations of this interface can describe their serialization logic by defining
  * the {@link #writeMarshallable(WireOut)} method.
- * <p>
+ *
  * This interface is annotated with {@code @FunctionalInterface}, indicating that it is
  * intended to be used primarily for lambda expressions and method references.
  * Furthermore, the {@code @DontChain} annotation suggests that implementations should
  * not be chained for certain operations.
+ *
+ * @since 2023-08-29
  */
 @FunctionalInterface
 @DontChain

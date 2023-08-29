@@ -28,6 +28,7 @@ package net.openhft.chronicle.wire;
  * custom serialization behavior for specific types.
  *
  * @param <T> the type of the object to be serialized to the wire format.
+ * @since 2023-08-29
  */
 @FunctionalInterface
 public interface WritingMarshaller<T> {

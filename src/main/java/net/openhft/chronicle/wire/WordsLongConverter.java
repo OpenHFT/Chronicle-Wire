@@ -27,14 +27,11 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * The {@code WordsLongConverter} class implements the LongConverter interface.
- * Its primary purpose is to convert long numbers into their equivalent word representation using a predefined word list.
- * <p>
- * The word list is sourced from the 'common-words.txt' file associated with this class.
- * </p>
- * <p>
- * For example, a long value might be represented by a sequence of words from this list.
- * </p>
+ * This is the WordsLongConverter class implementing the LongConverter interface.
+ * The primary purpose of this class is to convert long numbers to their equivalent word representation using a predefined word list.
+ * The word list is sourced from a 'common-words.txt' file associated with this class.
+ *
+ * For example, a long value might be represented by a sequence of words.
  */
 public class WordsLongConverter implements LongConverter {
 

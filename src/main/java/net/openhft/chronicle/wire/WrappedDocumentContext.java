@@ -24,6 +24,8 @@ import org.jetbrains.annotations.Nullable;
  * This is the WrappedDocumentContext class which implements the DocumentContext interface.
  * The purpose of this class is to wrap another DocumentContext and delegate the behavior to the wrapped instance.
  * This can be used as a base for any specialized versions of DocumentContext which need to extend the default behavior.
+ *
+ * @since 2023-08-29
  */
 public abstract class WrappedDocumentContext implements DocumentContext {
 
