@@ -29,9 +29,20 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * A tokenizer for YAML documents. The YamlTokeniser class is responsible for
+ * converting a raw YAML input into individual tokens, each representing
+ * a distinct construct or symbol in YAML. This class is integral to
+ * processes such as parsing or tokenization of YAML documents.
+ *
+ * @since 2023-08-29
+ */
 public class YamlTokeniser {
 
+    /** Represents an undefined or invalid indentation. */
     static final int NO_INDENT = -1;
+
+    /** Set of YAML tokens that don't contain any associated text content. */
     static final Set<YamlToken> NO_TEXT = EnumSet.of(
             YamlToken.SEQUENCE_START,
             YamlToken.SEQUENCE_ENTRY,
@@ -40,30 +51,72 @@ public class YamlTokeniser {
             YamlToken.MAPPING_KEY,
             YamlToken.MAPPING_END,
             YamlToken.DIRECTIVES_END);
+
+    /** A pool of StringBuilders to improve efficiency and reduce memory overhead. */
     static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal(1);
+
+    /** Stack to manage contextual information during tokenization. */
     protected final List<YTContext> contexts = new ArrayList<>();
+
+    /** The input source containing the raw YAML content. */
     private final BytesIn<?> in;
+
+    /** A pool of reusable context objects to manage YAML structures. */
     private final List<YTContext> freeContexts = new ArrayList<>();
+
+    /** List of tokens that have been identified but not yet processed. */
     private final List<YamlToken> pushed = new ArrayList<>();
+
+    /** Temporary bytes buffer. */
     Bytes<?> temp = null;
+
+    /** Position marker for the start of a line. */
     long lineStart;
+
+    /** Position marker for the start of a block. */
     long blockStart;
+
+    /** Position marker for the end of a block. */
     long blockEnd;
+
+    /** Current depth of flow structures, like lists or maps. */
     int flowDepth = Integer.MAX_VALUE;
+
+    /** Character used to denote quoting in a block. */
     char blockQuote = 0;
+
+    /** Flag to indicate if a sequence entry has been encountered. */
     boolean hasSequenceEntry;
+
+    /** Position marker for the last key in a key-value pair. */
     long lastKeyPosition = -1;
+
+    /** The last token that was processed. */
     private YamlToken last = YamlToken.STREAM_START;
 
+    /**
+     * Constructs a new YAML tokenizer with the specified input.
+     *
+     * @param in The input source containing raw YAML content.
+     */
     public YamlTokeniser(BytesIn<?> in) {
         reset();
         this.in = in;
     }
 
+    /**
+     * Retrieves the number of context objects currently being managed.
+     *
+     * @return The size of the context list.
+     */
     public int contextSize() {
         return contexts.size();
     }
 
+    /**
+     * Resets the state of the tokenizer. This method prepares the tokenizer
+     * for processing a new input or to restart the tokenization of the current input.
+     */
     void reset() {
         contexts.clear();
         freeContexts.clear();

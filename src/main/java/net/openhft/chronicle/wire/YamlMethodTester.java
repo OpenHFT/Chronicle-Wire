@@ -21,7 +21,22 @@ import net.openhft.chronicle.bytes.Bytes;
 
 import java.util.function.Function;
 
+/**
+ * Extends the {@link TextMethodTester} for testing methods with YAML-based wire format.
+ *
+ * @param <T> The type parameter for the tested method's output.
+ * @since 2023-08-29
+ */
 public class YamlMethodTester<T> extends TextMethodTester<T> {
+
+    /**
+     * Constructs a new {@code YamlMethodTester} instance with the given parameters.
+     *
+     * @param input             The input text to be used for testing.
+     * @param componentFunction The function mapping to the method/component being tested.
+     * @param outputClass       The expected output class type.
+     * @param output            The expected output text.
+     */
     public YamlMethodTester(String input, Function<T, Object> componentFunction, Class<T> outputClass, String output) {
         super(input, componentFunction, outputClass, output);
     }

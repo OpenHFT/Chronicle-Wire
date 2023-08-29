@@ -679,6 +679,14 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         return streamFromBytes(expectedType, b);
     }
 
+    /**
+     * Streams objects of a specified type from a {@link Bytes} instance.
+     *
+     * @param expectedType The expected type of the objects to be streamed.
+     * @param b The {@link Bytes} instance containing the serialized objects.
+     * @param <T> The type of the objects to be streamed.
+     * @return A stream of the deserialized objects.
+     */
     @NotNull
     public <T> Stream<T> streamFromBytes(@NotNull Class<T> expectedType, Bytes<?> b) {
         Wire wire = apply(b);
@@ -709,6 +717,16 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
                 }, false);
     }
 
+    /**
+     * Deserializes a map from a file, with string keys and values of a specified type.
+     *
+     * @param filename The path to the file containing the serialized map.
+     * @param tClass The class of the values in the map.
+     * @param <T> The type of the values in the map.
+     * @return The deserialized map.
+     * @throws IOException If there's an error reading the file.
+     * @throws InvalidMarshallableException If the map cannot be properly deserialized.
+     */
     @NotNull
     public <T> Map<String, T> fromFileAsMap(String filename, @NotNull Class<T> tClass) throws IOException, InvalidMarshallableException {
         @NotNull Map<String, T> map = new LinkedHashMap<>();
@@ -721,11 +739,30 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         return map;
     }
 
+    /**
+     * Serializes a map to a file, with string keys and values of a specified type.
+     *
+     * @param filename The path to the file where the map should be serialized.
+     * @param map The map to serialize.
+     * @param <T> The type of the values in the map.
+     * @throws IOException If there's an error writing to the file.
+     * @throws InvalidMarshallableException If the map cannot be properly serialized.
+     */
     public <T extends Marshallable> void toFileAsMap(@NotNull String filename, @NotNull Map<String, T> map)
             throws IOException, InvalidMarshallableException {
         toFileAsMap(filename, map, false);
     }
 
+    /**
+     * Writes a map of string keys and Marshallable values to a file.
+     *
+     * @param filename The name of the file to write to.
+     * @param map The map to write.
+     * @param compact A flag indicating whether the serialized form should be compacted.
+     * @param <T> The type of values in the map, which should extend {@link Marshallable}.
+     * @throws IOException If there's an error writing to the file.
+     * @throws InvalidMarshallableException If the map cannot be properly serialized.
+     */
     public <T extends Marshallable> void toFileAsMap(@NotNull String filename, @NotNull Map<String, T> map, boolean compact)
             throws IOException, InvalidMarshallableException {
         String tempFilename = IOTools.tempName(filename);
@@ -750,6 +787,14 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
     }
 
+    /**
+     * Writes a {@link WriteMarshallable} object to a file.
+     *
+     * @param filename The name of the file to write to.
+     * @param marshallable The object to write.
+     * @throws IOException If there's an error writing to the file.
+     * @throws InvalidMarshallableException If the object cannot be properly serialized.
+     */
     public void toFile(@NotNull String filename, WriteMarshallable marshallable) throws IOException, InvalidMarshallableException {
         String tempFilename = IOTools.tempName(filename);
         try (ScopedResource<Bytes<?>> stlBytes = Wires.acquireBytesScoped()) {
@@ -765,6 +810,12 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
     }
 
+    /**
+     * Converts a Marshallable object to its HexString representation.
+     *
+     * @param marshallable The object to convert.
+     * @return A HexString representation of the object.
+     */
     @NotNull
     String asHexString(Object marshallable) {
         ValidatableUtil.startValidateDisabled();
@@ -777,6 +828,14 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
     }
 
+    /**
+     * Deserializes an object from its HexString representation.
+     *
+     * @param s The HexString to deserialize from.
+     * @param <T> The type of the deserialized object.
+     * @return The deserialized object.
+     * @throws InvalidMarshallableException If the HexString cannot be properly deserialized.
+     */
     @Nullable <T> T fromHexString(@NotNull CharSequence s) throws InvalidMarshallableException {
         Bytes<?> bytes = Bytes.fromHexString(s.toString());
         try {
@@ -787,6 +846,13 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
     }
 
+    /**
+     * Converts the provided CharSequence into a Map<String, Object> representation using Wire.
+     *
+     * @param cs The CharSequence to be converted.
+     * @return A Map with String keys and Object values.
+     * @throws InvalidMarshallableException If the CharSequence cannot be properly deserialized.
+     */
     @Nullable
     public Map<String, Object> asMap(@NotNull CharSequence cs) throws InvalidMarshallableException {
         try (ScopedResource<Bytes<?>> stlBytes = Wires.acquireBytesScoped()) {
@@ -806,6 +872,12 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         return true;
     }
 
+    /**
+     * Indicates if this WireType is of a textual nature.
+     * This implementation returns false, indicating it's not textual.
+     *
+     * @return true if the WireType is textual; false otherwise.
+     */
     public boolean isText() {
         return false;
     }
