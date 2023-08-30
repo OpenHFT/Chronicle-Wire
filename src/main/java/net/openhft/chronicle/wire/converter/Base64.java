@@ -27,7 +27,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotate fields or parameters to signify the long value represent a String of 0 to 10 characters in Base64
+ * This annotation is applied to fields or parameters that are intended to represent a long value
+ * as a String of 0 to 10 characters in Base64.
+ *
+ * @see PowerOfTwoLongConverter
+ * @see LongConverter
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})

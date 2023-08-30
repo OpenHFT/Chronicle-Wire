@@ -158,7 +158,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
 
     /**
      * This will increment the headerNumber as appropriate if successful
-     * <p/>
+     * <p>
      * This is used in networking, but no longer used in queue.
      *
      * @param metaData {@code true} if the write should write metaData rather than data
@@ -179,6 +179,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * INTERNAL METHOD, call writingDocument instead
      * <p>
      * Start a header for a document
+     *
      * @param safeLength ensure there is at least this much space
      * @return the position of the header
      * @throws WriteAfterEOFException if you attempt to append an excerpt after an EOF has been written
@@ -190,7 +191,6 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * <p>
      * Start the first header, if there is none This will increment the headerNumber as appropriate
      * if successful <p> Note: the file might contain other data and the caller has to check this.
-     * </p>
      *
      * @return true if the header needs to be written, false if there is a data already
      */
@@ -259,11 +259,17 @@ public interface WireOut extends WireCommon, MarshallableOut {
     }
 
     enum EndOfWire {
-        /** EOF marker is not present and was not written */
+        /**
+         * EOF marker is not present and was not written
+         */
         NOT_PRESENT,
-        /** EOF marker was not present have been written and now in place */
+        /**
+         * EOF marker was not present have been written and now in place
+         */
         PRESENT_AFTER_UPDATE,
-        /** EOF marker is present */
+        /**
+         * EOF marker is present
+         */
         PRESENT;
     }
 }

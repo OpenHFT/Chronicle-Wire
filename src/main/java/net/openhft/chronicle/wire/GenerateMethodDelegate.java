@@ -63,7 +63,7 @@ public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMetho
             withLineNumber(mainCode)
                     .append("public void delegate(Object delegate) {\n" +
                             "this.delegate = (").append(getDelegateType()).append(") delegate;\n" +
-                    "}\n");
+                            "}\n");
         } else {
             super.generateMethod(method, mainCode);
         }

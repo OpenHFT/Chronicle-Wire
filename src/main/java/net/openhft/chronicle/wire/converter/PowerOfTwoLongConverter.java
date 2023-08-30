@@ -27,12 +27,22 @@ import net.openhft.chronicle.wire.LongConverter;
 
 import java.util.Arrays;
 
+/**
+ * A converter for long values based on power of two operations.
+ * The converter makes use of a specific set of symbols for encoding and decoding operations.
+ */
 public class PowerOfTwoLongConverter implements LongConverter {
     private final int shift, mask;
     private final short[] encode;
     private final char[] decode;
     private final int maxParseLength;
 
+    /**
+     * Initializes a new converter with the given symbols.
+     * The number of symbols must be a power of two.
+     *
+     * @param symbols the symbols to use for encoding and decoding
+     */
     public PowerOfTwoLongConverter(String symbols) {
         final int length = symbols.length();
         assert Maths.isPowerOf2(length);
@@ -51,6 +61,13 @@ public class PowerOfTwoLongConverter implements LongConverter {
         return maxParseLength;
     }
 
+    /**
+     * Parses a sequence of characters into a long value.
+     *
+     * @param text the character sequence to parse
+     * @return the parsed long value
+     * @throws IllegalArgumentException if the character sequence contains unexpected characters
+     */
     @Override
     public long parse(CharSequence text) {
         lengthCheck(text);
@@ -64,6 +81,12 @@ public class PowerOfTwoLongConverter implements LongConverter {
         return v;
     }
 
+    /**
+     * Appends a long value to a StringBuilder.
+     *
+     * @param text the StringBuilder to append to
+     * @param value the long value to append
+     */
     @Override
     public void append(StringBuilder text, long value) {
         int start = text.length();
@@ -81,6 +104,12 @@ public class PowerOfTwoLongConverter implements LongConverter {
         }
     }
 
+    /**
+     * Appends a long value to a Bytes object.
+     *
+     * @param text the Bytes object to append to
+     * @param value the long value to append
+     */
     @Override
     public void append(Bytes<?> text, long value) {
         int start = text.length();
@@ -98,6 +127,12 @@ public class PowerOfTwoLongConverter implements LongConverter {
         }
     }
 
+    /**
+     * Adds an additional alias for a given character in the encoding table.
+     *
+     * @param alias the character to alias
+     * @param as the character to alias it as
+     */
     public void addEncode(char alias, char as) {
         encode[alias] = encode[as];
     }

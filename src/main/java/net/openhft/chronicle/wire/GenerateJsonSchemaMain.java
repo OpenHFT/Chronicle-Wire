@@ -53,7 +53,7 @@ public class GenerateJsonSchemaMain {
         System.out.println(json);
     }
 
-     static String main0(String... args) throws ClassNotFoundException {
+    static String main0(String... args) throws ClassNotFoundException {
         Set<Class<?>> interfaces = new LinkedHashSet<>();
         for (String arg : args) {
             interfaces.add(Class.forName(arg));

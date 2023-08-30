@@ -64,16 +64,16 @@ public interface GeneratingMethodReaderInterceptorReturns extends MethodReaderIn
     String generatorId();
 
     /**
-     * @param m Calling method.
-     * @param objectName Object instance name.
+     * @param m             Calling method.
+     * @param objectName    Object instance name.
      * @param argumentNames Call argument names.
      * @return Source code to add before the method call.
      */
     String codeBeforeCall(Method m, String objectName, String[] argumentNames);
 
     /**
-     * @param m Calling method.
-     * @param objectName Object instance name.
+     * @param m             Calling method.
+     * @param objectName    Object instance name.
      * @param argumentNames Call argument names.
      * @return Source code to add after the method call.
      */

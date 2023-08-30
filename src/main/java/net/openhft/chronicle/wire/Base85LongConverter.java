@@ -17,10 +17,28 @@
  */
 package net.openhft.chronicle.wire;
 
+/**
+ * This class provides an implementation for encoding/decoding long values to/from a Base85 string.
+ * The provided Base85 string consists of the specified characters in the CHARS constant.
+ *
+ * @see AbstractLongConverter
+ * @see LongConverter
+ */
 public class Base85LongConverter extends AbstractLongConverter {
 
+    /**
+     * The maximum length of a parseable string.
+     */
     public static final int MAX_LENGTH = 10;
+
+    /**
+     * Singleton instance of the Base85LongConverter.
+     */
     public static final Base85LongConverter INSTANCE = new Base85LongConverter();
+
+    /**
+     * The character set for Base85 encoding.
+     */
     private static final String CHARS =
             "0123456789" +
                     ":;<=>?@" +
@@ -28,15 +46,29 @@ public class Base85LongConverter extends AbstractLongConverter {
                     "abcdefghijklmnopqrstuvwxyz" +
                     "\"#$%&'()*+,-./ ";
 
+    /**
+     * Private constructor to prevent external instantiation.
+     */
     private Base85LongConverter() {
         super(CHARS);
     }
 
+    /**
+     * Provides the maximum length of the parseable string.
+     *
+     * @return the maximum length of the parseable string.
+     */
     @Override
     public int maxParseLength() {
         return MAX_LENGTH;
     }
 
+    /**
+     * Determines if all characters in the wireOut are safe.
+     *
+     * @param wireOut the WireOut instance to check.
+     * @return false, as not all characters in Base85 are safe.
+     */
     @Override
     public boolean allSafeChars(WireOut wireOut) {
         return false;

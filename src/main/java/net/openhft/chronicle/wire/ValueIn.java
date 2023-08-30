@@ -469,7 +469,6 @@ public interface ValueIn {
     }
 
     /**
-     *
      * @return the value as a float, or -0.0 indicates that we have not been able to parse this data ( we don't throw an exception )
      */
     double float64();
@@ -516,7 +515,7 @@ public interface ValueIn {
     }
 
     /**
-     * @param clazz Expected object type. <code>null</code> can be passed to request proxy marshallable tuple
+     * @param clazz Expected object type. {@code null} can be passed to request proxy marshallable tuple
      *              if {@link Wires#GENERATE_TUPLES} is enabled.
      */
     @Nullable
@@ -532,6 +531,7 @@ public interface ValueIn {
 
     /**
      * Used for logging whatever we can get
+     *
      * @return the object or Throwable
      */
     default Object objectBestEffort() {

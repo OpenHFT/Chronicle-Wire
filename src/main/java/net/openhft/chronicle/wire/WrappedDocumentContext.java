@@ -43,7 +43,7 @@ public abstract class WrappedDocumentContext implements DocumentContext {
 
     @Override
     public boolean isPresent() {
-       return dc.isPresent();
+        return dc.isPresent();
     }
 
     @Nullable

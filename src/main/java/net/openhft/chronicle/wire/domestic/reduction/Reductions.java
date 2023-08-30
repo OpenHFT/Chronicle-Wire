@@ -50,8 +50,8 @@ public final class Reductions {
      * <p>
      * The returned Reduction is guaranteed to not create any internal objects.
      *
-     * @param extractor to apply on each document (non-null)
-     * @param identity initial start value
+     * @param extractor   to apply on each document (non-null)
+     * @param identity    initial start value
      * @param accumulator to apply for each element (non-null)
      * @return a new Reduction reducing long values
      * @throws NullPointerException if any objects provided are {@code null}.
@@ -77,8 +77,8 @@ public final class Reductions {
      * <p>
      * The returned Reduction is guaranteed to not create any internal objects.
      *
-     * @param extractor to apply on each document (non-null)
-     * @param identity initial start value
+     * @param extractor   to apply on each document (non-null)
+     * @param identity    initial start value
      * @param accumulator to apply for each element (non-null)
      * @return a new Reduction reducing double values
      * @throws NullPointerException if any objects provided are {@code null}.

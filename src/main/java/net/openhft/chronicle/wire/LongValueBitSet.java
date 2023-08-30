@@ -34,7 +34,7 @@ import java.util.stream.StreamSupport;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
 /**
- * This <code>BitSet</code> is intended to be shared between processes. To minimize locking constraints, it is implemented as a lock-free solution
+ * This {@code BitSet} is intended to be shared between processes. To minimize locking constraints, it is implemented as a lock-free solution
  * without support for resizing.
  */
 public class LongValueBitSet extends AbstractCloseable implements Marshallable, ChronicleBitSet {
@@ -538,7 +538,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Returns <code>true</code> if the specified {@code ChronicleBitSet} has any bits set to {@code true} that are also set to {@code true} in this {@code ChronicleBitSet}.
+     * Returns {@code true} if the specified {@code ChronicleBitSet} has any bits set to {@code true} that are also set to {@code true} in this {@code ChronicleBitSet}.
      */
     public boolean intersects(ChronicleBitSet set) {
         throwExceptionIfClosed();
