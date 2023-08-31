@@ -66,6 +66,8 @@ public class TextWire extends YamlWireOut<TextWire> {
     static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT::escaping;
     static final Supplier<StopCharsTester> END_EVENT_NAME_ESCAPING = TextStopCharsTesters.END_EVENT_NAME::escaping;
     static final Bytes<?> META_DATA = Bytes.from("!!meta-data");
+    @Deprecated(/* for removal in x.26, make default true in x.25 */)
+    static final boolean IAE_ON_CNF = Jvm.getBoolean("illegal.argument.for.missing.class.alias", false);
 
     static {
         IOTools.unmonitor(BINARY);
@@ -1846,7 +1848,10 @@ public class TextWire extends YamlWireOut<TextWire> {
                 try {
                     return classLookup().forName(stringBuilder);
                 } catch (ClassNotFoundRuntimeException e) {
-                    Jvm.warn().on(getClass(), "Unable to find " + stringBuilder + " " + e.getCause());
+                    String message = "Unable to find " + stringBuilder + " " + e.getCause();
+                    if (IAE_ON_CNF)
+                        throw new IllegalArgumentException(message);
+                    Jvm.warn().on(getClass(), message);
                     return null;
                 }
             }
@@ -1871,7 +1876,10 @@ public class TextWire extends YamlWireOut<TextWire> {
                         if (Wires.GENERATE_TUPLES) {
                             return Wires.tupleFor(null, stringBuilder.toString());
                         }
-                        Jvm.warn().on(TextWire.class, "Unable to load " + stringBuilder + ", is a class alias missing.");
+                        String message = "Unable to load " + stringBuilder + ", is a class alias missing.";
+                        if (IAE_ON_CNF)
+                            throw new IllegalArgumentException(message);
+                        Jvm.warn().on(TextWire.class, message);
                         return null;
                     }
 
