@@ -279,7 +279,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @NotNull
     TextMethodWriterInvocationHandler newTextMethodWriterInvocationHandler(Class... interfaces) {
         for (Class<?> anInterface : interfaces) {
-            Comment c = anInterface.getAnnotation(Comment.class);
+            Comment c = Jvm.findAnnotation(anInterface, Comment.class);
             if (c != null)
                 writeComment(c.value());
         }

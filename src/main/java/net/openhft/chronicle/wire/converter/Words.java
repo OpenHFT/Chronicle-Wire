@@ -28,8 +28,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation is applied to fields or parameters that are intended to represent a long value
- * as a String of 0 to 6 words in base 2048.
+ * Annotates fields or parameters to signify that the long value represents a string consisting
+ * of 0 to 6 words using a base 2048 encoding. This is mainly utilized for converting between
+ * long representations and word sequences for better human readability.
+ * <p>
+ * The actual conversion between long values and words is handled by the {@link WordsLongConverter} class.
+ * </p>
  *
  * @see WordsLongConverter
  * @see LongConverter
@@ -38,5 +42,10 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @LongConversion(Words.class)
 public @interface Words {
+
+    /**
+     * An instance of the {@link WordsLongConverter} to be used for
+     * converting between long values and their word representations.
+     */
     LongConverter INSTANCE = new WordsLongConverter();
 }

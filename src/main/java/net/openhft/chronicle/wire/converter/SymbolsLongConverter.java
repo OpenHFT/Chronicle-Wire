@@ -26,28 +26,42 @@ import net.openhft.chronicle.wire.LongConverter;
 import java.util.Arrays;
 
 /**
- * A converter for long values based on a specific set of symbols.
- * The converter uses these symbols for encoding and decoding operations.
+ * A specialized implementation of the {@link LongConverter} interface for
+ * converting long values to and from strings using arbitrary bases, specifically
+ * those not necessarily in powers of two.
+ *
+ * <p>This converter efficiently manages conversion using provided symbols,
+ * allowing flexible and adaptable encoding and decoding processes.</p>
  */
 public class SymbolsLongConverter implements LongConverter {
+
+    // Multiplicative factor for the conversion based on symbol length.
     private final int factor;
+
+    // Encoding array for fast look-up.
     private final short[] encode;
+
+    // Decoding array.
     private final char[] decode;
+
+    // Maximum allowed length for parsing.
     private final int maxParseLength;
 
     /**
-     * Initializes a new converter with the given symbols.
+     * Initializes a new instance with a given set of symbols.
      *
-     * @param symbols the symbols to use for encoding and decoding
+     * @param symbols A string containing unique symbols for conversion.
      */
     public SymbolsLongConverter(String symbols) {
         final int length = symbols.length();
         factor = length;
         decode = symbols.toCharArray();
-        encode = new short[128];
+        encode = new short[128]; // 128 is chosen for ASCII range.
         Arrays.fill(encode, (short) -1);
+
         for (int i = 0; i < decode.length; i++)
             encode[decode[i]] = (short) i;
+
         maxParseLength = LongConverter.maxParseLength(length);
     }
 
@@ -66,11 +80,16 @@ public class SymbolsLongConverter implements LongConverter {
     @Override
     public long parse(CharSequence text) {
         lengthCheck(text);
+
         long v = 0;
         for (int i = 0; i < text.length(); i++) {
             final char ch = text.charAt(i);
+
+            // Check for characters outside of the encoding range or not present in the encoding map.
             if (ch >= encode.length || encode[ch] < 0)
                 throw new IllegalArgumentException("Unexpected character '" + ch + "' in \"" + text + "\"");
+
+            // Convert the character into its corresponding long value.
             v = v * factor + encode[ch];
         }
         return v;
@@ -85,6 +104,8 @@ public class SymbolsLongConverter implements LongConverter {
     @Override
     public void append(StringBuilder text, long value) {
         final int start = text.length();
+
+        // Handle negative values by converting them using unsigned operations.
         if (value < 0) {
             int v = (int) Long.remainderUnsigned(value, factor);
             value = Long.divideUnsigned(value, factor);
@@ -97,7 +118,7 @@ public class SymbolsLongConverter implements LongConverter {
             text.append(decode[v]);
         }
 
-        StringUtils.reverse(text, start);
+        StringUtils.reverse(text, start); // Reverse the result since it's constructed backward.
 
         if (text.length() > start + maxParseLength()) {
             Jvm.warn().on(getClass(), "truncated because the value was too large");
@@ -111,8 +132,11 @@ public class SymbolsLongConverter implements LongConverter {
      * @param text the Bytes object to append to
      * @param value the long value to append
      */
+    @Override
     public void append(Bytes<?> text, long value) {
         final int start = text.length();
+
+        // Handle negative values in bytes format.
         if (value < 0) {
             int v = (int) Long.remainderUnsigned(value, factor);
             value = Long.divideUnsigned(value, factor);
@@ -125,7 +149,7 @@ public class SymbolsLongConverter implements LongConverter {
             text.append(decode[v]);
         }
 
-        BytesUtil.reverse(text, start);
+        BytesUtil.reverse(text, start); // Reverse the result for bytes.
 
         if (text.length() > start + maxParseLength()) {
             Jvm.warn().on(getClass(), "truncated because the value was too large");
@@ -134,10 +158,11 @@ public class SymbolsLongConverter implements LongConverter {
     }
 
     /**
-     * Adds an additional alias for a given character in the encoding table.
+     * Adds an alias character for encoding. The alias character will be treated
+     * the same as the "as" character in the encoding process.
      *
-     * @param alias the character to alias
-     * @param as the character to alias it as
+     * @param alias The character to treat as an alias.
+     * @param as The character that the alias should be treated as.
      */
     public void addEncode(char alias, char as) {
         encode[alias] = encode[as];

@@ -26,20 +26,21 @@ import static java.lang.Math.log;
 import static java.text.MessageFormat.format;
 
 /**
- * This interface provides methods to handle long-to-string conversions and vice versa.
- * It supports conversions with symbols and power of two representations.
+ * Provides an abstraction for converting between long values and their string representations,
+ * potentially based on a custom character or symbol set.
  * <p>
- * The converter can be configured to handle special encoding cases with an alias system.
+ * The conversion allows encoding long values into compact, human-readable strings and vice versa,
+ * useful in contexts where storage efficiency or readability is a concern.
  */
 public interface LongConverter {
 
     /**
-     * Creates a {@code LongConverter} instance depending on the provided symbol string.
-     * If the length of the symbol string is a power of two, a {@code PowerOfTwoLongConverter} is used.
-     * Otherwise, a {@code SymbolsLongConverter} is used.
+     * Creates an instance of the appropriate implementation of {@link LongConverter}
+     * based on the length of the provided character set.
      *
-     * @param chars Symbol string used for conversion.
-     * @return an instance of a {@code LongConverter}.
+     * @param chars A set of symbols or characters to be used in the conversion.
+     * @return An instance of {@link LongConverter}. If the length of chars is a power of 2,
+     *         a {@link PowerOfTwoLongConverter} is returned; otherwise, a {@link SymbolsLongConverter} is returned.
      */
     static LongConverter forSymbols(String chars) {
         return Maths.isPowerOf2(chars.length())
@@ -50,8 +51,8 @@ public interface LongConverter {
     /**
      * Calculates the maximum length of a parsed string based on the provided base.
      *
-     * @param based The base for the calculation.
-     * @return The maximum length of a parsed string.
+     * @param based The base for conversion.
+     * @return The maximum length a string can have to represent a long value.
      */
     static int maxParseLength(int based) {
         return (int) Math.ceil(64 / log(based) * log(2));
@@ -61,24 +62,23 @@ public interface LongConverter {
      * Parses the provided {@link CharSequence} and returns the parsed results as a
      * {@code long} primitive.
      *
-         * @param text Text to be parsed.
-         * @return the parsed {@code text} as an {@code long} primitive.
+     * @return the parsed {@code text} as an {@code long} primitive.
      */
     long parse(CharSequence text);
 
     /**
-     * Appends the provided {@code value} to the provided {@code text}.
-      *
-     * @param text Text builder to append the value to.
-     * @param value The value to be appended.
-         */
+     * Converts the given long value to a string and appends it to the provided StringBuilder.
+     *
+     * @param text The StringBuilder to which the converted value is appended.
+     * @param value The long value to convert.
+     */
     void append(StringBuilder text, long value);
 
     /**
-     * * Appends to provided {@code value} to the provided {@code text}.
+     * Converts the given long value to a string and appends it to the provided Bytes object.
      *
-     * @param bytes {@code Bytes} object to append the value to.
-     * @param value to append as text
+     * @param bytes The Bytes object to which the converted value is appended.
+     * @param value The long value to convert.
      */
     default void append(Bytes<?> bytes, long value) {
         final StringBuilder sb = WireInternal.acquireStringBuilder();
@@ -87,9 +87,9 @@ public interface LongConverter {
     }
 
     /**
-     * Converts the provided long value to a string.
+     * Converts the given long value to a string.
      *
-     * @param value The long value to be converted.
+     * @param value The long value to convert.
      * @return The string representation of the value.
      */
     default String asString(long value) {
@@ -97,20 +97,20 @@ public interface LongConverter {
     }
 
     /**
-     * Converts the provided int value to a {@code CharSequence}.
+     * Converts the provided integer value to a CharSequence representation.
      *
-     * @param value The int value to be converted.
-     * @return The {@code CharSequence} representation of the value.
+     * @param value The integer value to convert.
+     * @return The CharSequence representation of the value.
      */
     default CharSequence asText(int value) {
         return asText(value & 0xFFFF_FFFFL);
     }
 
     /**
-     * Converts the provided long value to a {@code CharSequence}.
+     * Converts the provided long value to a CharSequence representation.
      *
-     * @param value The long value to be converted.
-     * @return The {@code CharSequence} representation of the value.
+     * @param value The long value to convert.
+     * @return The CharSequence representation of the value.
      */
     default CharSequence asText(long value) {
         StringBuilder sb = new StringBuilder();
@@ -119,20 +119,19 @@ public interface LongConverter {
     }
 
     /**
-     * Returns the maximum number of characters that can be parsed by this converter.
-     * By default, it returns Integer.MAX_VALUE which means there is no limit unless overridden.
+     * Returns the maximum number of characters that this converter can parse.
      *
-     * @return the maximum number of characters that can be parsed.
+     * @return The maximum parse length, or Integer.MAX_VALUE if there's no limit.
      */
     default int maxParseLength() {
         return Integer.MAX_VALUE;
     }
 
     /**
-     * Checks if the length of the provided text exceeds {@link LongConverter#maxParseLength()}.
-     * If it does, an {@code IllegalArgumentException} is thrown.
+     * Checks that the length of the provided text does not exceed the allowable maximum.
      *
-     * @param text The text to be checked.
+     * @param text The text to check.
+     * @throws IllegalArgumentException if the text length exceeds the maximum allowable length.
      */
     default void lengthCheck(CharSequence text) {
         if (text.length() > maxParseLength())
@@ -140,21 +139,24 @@ public interface LongConverter {
     }
 
     /**
-     * Checks if all characters are safe to be written to the provided {@code WireOut} without needing escaping or additional quotes for YAML.
+     * Checks if the characters in the provided {@link WireOut} object are "safe",
+     * meaning they don't require additional quoting or escaping, especially in contexts
+     * like YAML serialization.
      *
-     * @param wireOut The output stream to check for safe characters.
-     * @return True if no characters need escaping or adding additional quotes for YAML.
+     * @param wireOut The WireOut instance to check.
+     * @return {@code true} if no characters need escaping or additional quoting for YAML, {@code false} otherwise.
      */
     default boolean allSafeChars(WireOut wireOut) {
         return true;
     }
 
     /**
-     * Adds an alias for a character to be encoded as a number.
-     * This method is optional and throws an {@code UnsupportedOperationException} if not overridden.
+     * Introduces a character alias for encoding, facilitating the interpretation of one character
+     * as another during encoding.
      *
-     * @param alias Character to be mapped to a number.
-     * @param as    Number to be mapped to the alias character.
+     * @param alias The character to treat as an alias.
+     * @param as The character that the alias should be treated as.
+     * @throws UnsupportedOperationException If the operation is not supported.
      */
     default void addEncode(char alias, char as) {
         throw new UnsupportedOperationException();
