@@ -348,8 +348,8 @@ public abstract class AbstractWire implements Wire {
                 bytesStore.writeByte(pos + i, 0);
         }
 
-        final long value = pos - position - 4;
-        int header = (int) value;
+        final int lengthAfterLengthHeader = Math.toIntExact(pos - position - 4);
+        int header = lengthAfterLengthHeader;
         if (metaData) header |= META_DATA;
         // shouldn't happen due to padding above.
 //        assert header == UNKNOWN_LENGTH;
@@ -362,6 +362,9 @@ public abstract class AbstractWire implements Wire {
         if (!bytes.compareAndSwapInt(position, expectedHeader, header)) {
             unexpectedValue(position, expectedHeader);
         }
+        // Write checksum (todo: incorporate prior checksum and index)
+        int checksum = bytes.fastHash(position + SPB_HEADER_SIZE, lengthAfterLengthHeader - 4);
+        bytes.writeInt(position + 4, checksum);
 
         bytes.writeLimit(bytes.capacity());
         if (!metaData)
