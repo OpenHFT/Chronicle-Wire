@@ -38,8 +38,8 @@ The `Stream` above shows an example of a pagination service where the third page
 Once the `Stream` is created, it behaves like any `Stream` and can take advantage of the whole `Stream` ecosystem.
 
 The snippet above might produce the following output (shortened):
-[source,text]
 
+[source,text]
 ----
 !MarketData {
   symbol: MSFT,
@@ -108,8 +108,8 @@ LongSummaryStatistics stat = Streams.ofLong(
 ==== Stream: Objects of a Certain Type
 
 This example shows an example of creating a `Stream<MarketData>`.
-[source,java]
 
+[source,java]
 ----
 Stream<MarketData> stream = Streams.of(queue.createTailer(), builder(MarketData.class).build());
 ----
@@ -180,6 +180,7 @@ Iterator<MarketData> iterator = Streams.iterator(
 As can be seen, the procedure here is similar to creating a `Stream`.
 
 ==== Parallel Streams
+
 Streams handle thread-safety issues with `MarshallableIn` objects but the provided `MarshallableIn` must be able to run on different threads (e.g. cannot have `ThreadLocal` variables) or else the result is undefined.
 
 === Constrains and Best Practices
@@ -270,7 +271,6 @@ groups...
 Streams are likely to create objects during construction and use.
 Therefore, the Stream Bridge features are not recommended in the same JVM as deterministic low-latency applications.
 Once these objects are reclaimed by the Garbage Collector, jitter may be incurred on executing Threads.
-
 
 == To be Documented or todo
 

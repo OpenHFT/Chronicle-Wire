@@ -19,35 +19,79 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-
+/**
+ * An abstract class that serves as a base implementation for the {@link LongConverter} interface.
+ * <p>
+ * This class delegates the core conversion operations to an encapsulated {@link LongConverter} instance.
+ * Subclasses can build upon this base while retaining or customizing the behavior of the underlying converter.
+ * </p>
+ */
 public abstract class AbstractLongConverter implements LongConverter {
+
+    /**
+     * Encapsulated instance of {@link LongConverter} that provides core conversion logic.
+     */
     protected final LongConverter converter;
 
+    /**
+     * Constructs an {@code AbstractLongConverter} using a given set of characters.
+     *
+     * @param chars set of characters to use for conversion.
+     */
     protected AbstractLongConverter(String chars) {
         this(LongConverter.forSymbols(chars));
     }
 
+    /**
+     * Constructs an {@code AbstractLongConverter} with a specified converter.
+     *
+     * @param converter the underlying {@link LongConverter} to be used for conversions.
+     */
     protected AbstractLongConverter(LongConverter converter) {
         this.converter = converter;
     }
 
+    /**
+     * Retrieves the maximum number of characters that can be parsed by the underlying converter.
+     *
+     * @return the maximum length for the parsed string.
+     */
     @Override
     public int maxParseLength() {
         return converter.maxParseLength();
     }
 
+    /**
+     * Parses the provided text using the underlying converter.
+     *
+     * @param text the text to parse.
+     * @return the parsed long value.
+     */
     @Override
     public long parse(CharSequence text) {
         return converter.parse(text);
     }
 
+    /**
+     * Appends the provided long value to the provided {@code StringBuilder} text.
+     *
+     * @param text the StringBuilder to append to.
+     * @param value the long value to convert and append.
+     */
     @Override
     public void append(StringBuilder text, long value) {
         converter.append(text, value);
     }
 
+    /**
+     * Appends the provided long value to the provided {@code Bytes<?>} text.
+     *
+     * @param bytes the Bytes object to append to.
+     * @param value the long value to convert and append.
+     */
     @Override
     public void append(Bytes<?> bytes, long value) {
         converter.append(bytes, value);
     }
 }
+

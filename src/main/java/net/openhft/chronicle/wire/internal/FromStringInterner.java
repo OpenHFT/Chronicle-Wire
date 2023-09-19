@@ -24,8 +24,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
 
-import static net.openhft.chronicle.core.Maths.hash32;
-
 /**
  * This cache only gaurentees it will provide a String which matches the decoded bytes.
  * <p>
@@ -53,13 +51,14 @@ public abstract class FromStringInterner<T> {
 
     public T intern(@NotNull String s)
             throws IllegalArgumentException, IORuntimeException, BufferUnderflowException {
-        int hash = hash32(s);
-        int h = hash & mask;
+        long h1 = Maths.hash64(s);
+        h1 ^= h1 >> 32;
+        int h = (int) h1 & mask;
         InternerEntry<T> ie = entries[h];
         int length = s.length();
         if (ie != null && ie.key.length() == length && ie.key.equals(s))
             return ie.t;
-        int h2 = (hash >> shift) & mask;
+        int h2 = (int) (h1 >> shift) & mask;
         InternerEntry<T> s2 = entries[h2];
         if (s2 != null && s2.key.length() == length && s2.key.equals(s))
             return s2.t;

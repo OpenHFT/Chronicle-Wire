@@ -53,7 +53,7 @@ public class GenerateJsonSchemaMain {
         System.out.println(json);
     }
 
-     static String main0(String... args) throws ClassNotFoundException {
+    static String main0(String... args) throws ClassNotFoundException {
         Set<Class<?>> interfaces = new LinkedHashSet<>();
         for (String arg : args) {
             interfaces.add(Class.forName(arg));
@@ -175,7 +175,7 @@ public class GenerateJsonSchemaMain {
             sb.append("\n" +
                     "],\n");
         }
-        Comment comment = type.getAnnotation(Comment.class);
+        Comment comment = Jvm.findAnnotation(type, Comment.class);
         if (comment != null)
             sb.append("\"description\": \"" + comment.value() + "\",\n");
 

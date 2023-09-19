@@ -103,7 +103,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      * Implementation of this method is generated in runtime, see {@link GenerateMethodReader}.
      *
      * @param wireIn Data input.
-     * @return <code>true</code> read a known event, <code>false</code> if reading should be delegated.
+     * @return {@code true} read a known event, <code>false</code> if reading should be delegated.
      */
     @Deprecated(/* for removal in x.26*/)
     protected boolean readOneCall(WireIn wireIn) {

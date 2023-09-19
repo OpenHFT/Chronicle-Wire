@@ -24,15 +24,33 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 import java.util.concurrent.TimeUnit;
-
+/**
+ * A {@code MicroTimestampLongConverter} is an implementation of {@code AbstractTimestampLongConverter}
+ * which handles conversions between long timestamps and date-time strings.
+ * The precision of this converter is to the microsecond.
+ * This converter is singleton, the instance can be accessed using the public field INSTANCE.
+ */
 public class MicroTimestampLongConverter extends AbstractTimestampLongConverter {
+
+    /**
+     * The singleton instance of this converter.
+     */
     public static final MicroTimestampLongConverter INSTANCE = new MicroTimestampLongConverter();
 
+    /**
+     * Constructs a new {@code MicroTimestampLongConverter} with the default zone ID (fetched from the system property or UTC).
+     * Supports the old system property for micro timestamps specifically.
+     */
     public MicroTimestampLongConverter() {
         // Support the old system property for micro timestamps specifically
         super(timestampConversionProperty(), TimeUnit.MICROSECONDS);
     }
 
+    /**
+     * Gets the timestamp conversion property from the system property. If it's not defined, it will default to UTC.
+     *
+     * @return The timestamp conversion property
+     */
     private static String timestampConversionProperty() {
         String property = System.getProperty(AbstractTimestampLongConverter.TIMESTAMP_LONG_CONVERTERS_ZONE_ID_SYSTEM_PROPERTY);
         if (property != null)
@@ -46,10 +64,22 @@ public class MicroTimestampLongConverter extends AbstractTimestampLongConverter 
         return "UTC";
     }
 
+    /**
+     * Constructs a new {@code MicroTimestampLongConverter} with the specified zone ID.
+     *
+     * @param zoneId the zone ID to be used for the conversion of long values
+     */
     public MicroTimestampLongConverter(String zoneId) {
         super(zoneId, TimeUnit.MICROSECONDS);
     }
 
+    /**
+     * Constructs a new {@code MicroTimestampLongConverter} with the specified zone ID and flag for including zone suffix for UTC.
+     * This constructor is set to be deprecated in x.26 version.
+     *
+     * @param zoneId                 the zone ID to be used for the conversion of long values
+     * @param includeZoneSuffixForUTC the flag to indicate if 'Z' suffix should be included for UTC zone timestamps
+     */
     @Deprecated(/* To be removed in x.26 */)
     public MicroTimestampLongConverter(String zoneId, boolean includeZoneSuffixForUTC) {
         super(zoneId, TimeUnit.MICROSECONDS, includeZoneSuffixForUTC);
@@ -60,6 +90,13 @@ public class MicroTimestampLongConverter extends AbstractTimestampLongConverter 
         builder.appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true);
     }
 
+    /**
+     * Parses a formatted date into a long timestamp.
+     * This implementation uses the epoch day and time of the day to compute the long timestamp.
+     *
+     * @param value The parsed formatted date (in UTC zone)
+     * @return The value as a long timestamp
+     */
     @Override
     protected long parseFormattedDate(ZonedDateTime value) {
         long time = value.getLong(ChronoField.EPOCH_DAY) * 86400_000_000L;
@@ -73,6 +110,15 @@ public class MicroTimestampLongConverter extends AbstractTimestampLongConverter 
         return time;
     }
 
+    /**
+     * Parses a long timestamp.
+     * The provided timestamp value is converted to microseconds.
+     * A debug log is printed if the timestamp is in microseconds or if it's a non-zero value.
+     *
+     * @param value The parsed timestamp
+     * @param text  The text version of the timestamp
+     * @return The value as a long timestamp
+     */
     @Override
     protected long parseTimestamp(long value, CharSequence text) {
         long number = LongTime.toMicros(value);

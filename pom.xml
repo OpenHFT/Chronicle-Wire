@@ -22,7 +22,7 @@
     <parent>
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
-        <version>1.24.0-SNAPSHOT</version>
+        <version>1.24.0</version>
         <relativePath />
     </parent>
 
@@ -46,7 +46,7 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>third-party-bom</artifactId>
-                <version>3.24.0-SNAPSHOT</version>
+                <version>3.24.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -93,6 +93,12 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
         </dependency>
 

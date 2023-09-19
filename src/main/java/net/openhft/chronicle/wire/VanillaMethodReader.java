@@ -24,7 +24,6 @@ import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.Closeable;
-import net.openhft.chronicle.core.util.Annotations;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
@@ -414,7 +413,7 @@ public class VanillaMethodReader implements MethodReader {
 
     @NotNull
     protected MethodWireKey createWireKey(@NotNull Method m, String name) {
-        MethodId annotation = Annotations.getAnnotation(m, MethodId.class);
+        MethodId annotation = Jvm.findAnnotation(m, MethodId.class);
         return new MethodWireKey(name, annotation == null
                 ? name.hashCode()
                 : Maths.toInt32(annotation.value()));
@@ -520,7 +519,7 @@ public class VanillaMethodReader implements MethodReader {
      * reads one message
      *
      * @return true if there was a message, or false if no more data is available.
-     * If we read a metadata message, <code>true</code> is returned even if it was ignored
+     * If we read a metadata message, {@code true} is returned even if it was ignored
      */
     public boolean readOne() throws InvocationTargetRuntimeException {
         throwExceptionIfClosed();

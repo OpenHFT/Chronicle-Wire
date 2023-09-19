@@ -121,6 +121,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
     /**
      * When enabled, readOne() will skip over meta data and unknown events to find at least one event.
+     *
      * @param scanning whether to read events until it finds a known one.
      * @return this
      */

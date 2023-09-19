@@ -22,7 +22,6 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.Closeable;
-import net.openhft.chronicle.core.util.Annotations;
 import net.openhft.chronicle.core.util.GenericReflection;
 import net.openhft.chronicle.core.util.IgnoresEverything;
 import net.openhft.chronicle.wire.utils.JavaSourceCodeFormatter;
@@ -356,14 +355,31 @@ public class GenerateMethodReader {
     }
 
     /**
-     * Generates code for handling all method calls of passed interface.
-     * Called recursively for chained methods.
+     * This method is used to generate code for handling all method calls of a given interface.
+     * It processes the methods recursively in case of chained methods.
      *
-     * @param anInterface          Processed interface.
-     * @param instanceFieldName    In generated code, methods are executed on field with this name.
-     * @param methodFilter         <code>true</code> if passed interface is marked with {@link MethodFilterOnFirstArg}.
-     * @param eventNameSwitchBlock
-     * @param eventIdSwitchBlock
+     * <p>It first checks if the given interface should be chained using {@code Jvm.dontChain()} method.
+     * If not, it immediately returns without executing further. It also checks whether the interface
+     * has already been processed. If yes, it immediately returns.
+     *
+     * <p>Then it proceeds to process all non-static, non-synthetic methods declared in the given
+     * interface but not in {@code java.lang.Object}.
+     * If a method has already been processed, it's skipped.
+     *
+     * <p>It also validates that the method isn't one of those defined in {@code java.lang.Object},
+     * if it is, it's skipped.
+     *
+     * <p>If a method name has already been processed before, it throws an {@code IllegalStateException}.
+     * This is because MethodReader does not support overloaded methods.
+     *
+     * <p>Finally, it calls {@code handleMethod()} on the current method if it passed all the above checks.
+     *
+     * @param anInterface          The interface being processed.
+     * @param instanceFieldName    In the generated code, methods are executed on a field with this name.
+     * @param methodFilter         Indicates if the passed interface is marked with {@link MethodFilterOnFirstArg}. If true, only certain methods are processed.
+     * @ blocks based on method event IDs.
+     * @param eventNameSwitchBlock The block of code that handles the switching of event names.
+     * @param eventIdSwitchBlock   The block of code that handles the switching of event IDs.
      */
     private void handleInterface(Class<?> anInterface, String instanceFieldName, boolean methodFilter, SourceCodeFormatter eventNameSwitchBlock, SourceCodeFormatter eventIdSwitchBlock) {
         if (Jvm.dontChain(anInterface))
@@ -403,13 +419,33 @@ public class GenerateMethodReader {
     }
 
     /**
-     * Generates code for handling a method call.
+     * This method generates code for handling the call of a specific method. It sets up necessary fields and structures,
+     * prepares parameters, and constructs a switch block for method calls.
      *
-     * @param m                  Code for handling calls of this method is generated.
-     * @param anInterface        Interface which method is processed.
-     * @param instanceFieldName  In generated code, method is executed on field with this name.
-     * @param methodFilter       <code>true</code> if passed interface is marked with {@link MethodFilterOnFirstArg}.
-     * @param eventIdSwitchBlock
+     * <p>Initially, it ensures that the method is accessible and obtains its parameter types and return type.
+     * It processes the method parameters and creates fields for storing them. It also checks if the return type of the method
+     * is chainable and updates the state accordingly.
+     *
+     * <p>If a real interceptor is returned by the method, it creates an array field to store the interceptor's arguments
+     * and also adds a static field to hold a reference to the method itself.
+     *
+     * <p>Furthermore, if the method is annotated with {@code MethodId}, it extracts the method ID from the annotation
+     * and adds a switch case for this ID to the {@code eventIdSwitchBlock}.
+     *
+     * <p>Then, it builds a case for the method in the {@code eventNameSwitchBlock}. The structure of this case varies
+     * depending on the number of parameters the method has and if it's marked with {@code MethodFilterOnFirstArg}.
+     *
+     * <p>If the method's return type is {@code DocumentContext}, it also adds code to copy the method's result to the wire
+     * and close it.
+     *
+     * <p>Finally, if the method's return type is chainable, it calls {@code handleInterface()} on it.
+     *
+     * @param m                  The method for which code is generated.
+     * @param anInterface        The interface containing the method.
+     * @param instanceFieldName  In the generated code, this method is executed on a field with this name.
+     * @param methodFilter       Indicates if the passed interface is marked with {@link MethodFilterOnFirstArg}. If true, only certain methods are processed.
+     * @param eventIdSwitchBlock The block of code that handles the switching of event IDs.
+     * @param eventNameSwitchBlock The block of code that handles the switching of event names.
      */
     private void handleMethod(Method m, Class<?> anInterface, String instanceFieldName, boolean methodFilter, SourceCodeFormatter eventNameSwitchBlock, SourceCodeFormatter eventIdSwitchBlock) {
         Jvm.setAccessible(m);
@@ -456,7 +492,7 @@ public class GenerateMethodReader {
         if (parameterTypes.length > 0 || hasRealInterceptorReturns())
             fields.append("\n");
 
-        final MethodId methodIdAnnotation = Annotations.getAnnotation(m, MethodId.class);
+        final MethodId methodIdAnnotation = Jvm.findAnnotation(m, MethodId.class);
 
         if (methodIdAnnotation != null) {
             int methodId = Maths.toInt32(methodIdAnnotation.value());
@@ -565,7 +601,7 @@ public class GenerateMethodReader {
                     res.append(codeBefore).append("\n");
             }
 
-            res.append(format("%s((%s) %s).%s(%s);\n",
+            res.append(format("%s((%s) %s).%s(%s);%n",
                     chainedCallPrefix, m.getDeclaringClass().getCanonicalName(), instanceFieldName, m.getName(),
                     String.join(", ", args)));
 
@@ -598,15 +634,21 @@ public class GenerateMethodReader {
     }
 
     /**
-     * Generates code for reading an argument.
-     * Side-effect: registers a converter as a field if {@link IntConversion} or {@link LongConversion} is used.
+     * Generates code for reading an argument of a method from a {@link ValueIn} object.
+     * The argument's index and type, and whether it is read in a lambda function,
+     * influence the generated code. If {@link IntConversion} or {@link LongConversion}
+     * annotations are present on the argument, a converter field is registered.
      *
-     * @param m              Method for which an argument is read.
-     * @param argIndex       Index of an argument.
-     * @param inLambda       <code>true</code> if argument is read in lambda passed to a
-     *                       {@link ValueIn#sequence(Object, BiConsumer)} call.
-     * @param parameterTypes
-     * @return Code that retrieves specified argument from {@link ValueIn} input.
+     * @param m Method for which an argument is read.
+     * @param argIndex Index of an argument to be read.
+     * @param inLambda {@code true} if argument is read in a lambda passed to a
+     *                 {@link ValueIn#sequence(Object, BiConsumer)} call.
+     * @param parameterTypes The types of the method parameters.
+     * @return Code in the form of a String that retrieves the specified argument from {@link ValueIn} input.
+     *
+     * @see IntConversion
+     * @see LongConversion
+     * @see ValueIn
      */
     private String argumentRead(Method m, int argIndex, boolean inLambda, Type[] parameterTypes) {
         Class<?> numericConversionClass = null;
@@ -761,7 +803,7 @@ public class GenerateMethodReader {
             sb.append(aClass.getEnclosingClass().getSimpleName());
 
         String name = aClass.getName();
-        if (name.contains("$$Lambda$"))
+        if (aClass.isSynthetic() && name.contains("$$Lambda"))
             name = aClass.getInterfaces()[0].getName();
 
         final int packageDelimiterIndex = name.lastIndexOf('.');

@@ -73,6 +73,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
 
         doTestUnsuccessfulCallIsDelegated(wire, false);
     }
+
     @Test
     public void testUnsuccessfulCallIsDelegatedTextWireScanning() {
         final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
@@ -86,6 +87,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
 
         doTestUnsuccessfulCallIsDelegated(wire, false);
     }
+
     @Test
     public void testUnsuccessfulCallIsDelegatedYamlWireScanning() {
         final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
@@ -158,6 +160,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
 
         testUnsuccessfulCallNoDelegate(true, true, false);
     }
+
     @Test
     public void testUnsuccessfulCallNoDelegateProxyScanning() {
         testUnsuccessfulCallNoDelegate(true, true, true);

@@ -78,9 +78,9 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
                             .write(() -> "ims").text(sl.getImplMethodSignature())
                             .write(() -> "imt").text(sl.getInstantiatedMethodType())
                             .write(() -> "ca").sequence(v2 -> {
-                        for (int i = 0; i < sl.getCapturedArgCount(); i++)
-                            v2.object(sl.getCapturedArg(i));
-                    }));
+                                for (int i = 0; i < sl.getCapturedArgCount(); i++)
+                                    v2.object(sl.getCapturedArg(i));
+                            }));
         } catch (Exception e) {
             throw new AssertionError(e);
         }
@@ -100,9 +100,9 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
                 .read(() -> "ims").text(this, (o, s) -> o.implMethodSignature = s)
                 .read(() -> "imt").text(this, (o, s) -> o.instantiatedMethodType = s)
                 .read(() -> "ca").sequence(this, (o, v) -> {
-            while (v.hasNextSequenceItem())
-                capturedArgs.add(v.object(Object.class));
-        });
+                    while (v.hasNextSequenceItem())
+                        capturedArgs.add(v.object(Object.class));
+                });
 
     }
 
