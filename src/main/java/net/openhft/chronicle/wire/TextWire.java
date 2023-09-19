@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.pool.ClassLookup;
+import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.*;
@@ -561,11 +562,13 @@ public class TextWire extends YamlWireOut<TextWire> {
                     readCode();
                     while (peekCode() == ' ')
                         readCode();
-                    final StringBuilder sb = WireInternal.acquireAnotherStringBuilder(this.sb);
-                    for (int ch; notNewLine(ch = readCode()); )
-                        sb.append((char) ch);
-                    if (!valueIn.consumeAny)
-                        commentListener.accept(sb);
+                    try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                        final StringBuilder sb = stlSb.get();
+                        for (int ch; notNewLine(ch = readCode()); )
+                            sb.append((char) ch);
+                        if (!valueIn.consumeAny)
+                            commentListener.accept(sb);
+                    }
                     this.lineStart = bytes.readPosition();
                     break;
                 case ',':
@@ -891,13 +894,11 @@ public class TextWire extends YamlWireOut<TextWire> {
     @NotNull
     private Map readMap(int indentation, Class valueType) throws InvalidMarshallableException {
         @NotNull Map map = new LinkedHashMap<>();
-        StringBuilder sb = WireInternal.acquireAnotherStringBuilder(acquireStringBuilder());
         consumePadding();
         while (bytes.readRemaining() > 0) {
             if (indentation() < indentation || bytes.readRemaining() == 0)
                 break;
-            read(sb);
-            @Nullable String key = WireInternal.INTERNER.intern(sb);
+            @Nullable String key = readAndIntern();
             if (key.equals("..."))
                 break;
             @Nullable Object value = valueIn.objectWithInferredType(null, SerializationStrategies.ANY_OBJECT, valueType);
@@ -905,6 +906,14 @@ public class TextWire extends YamlWireOut<TextWire> {
             consumePadding(1);
         }
         return map;
+    }
+
+    private String readAndIntern() {
+        try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+            StringBuilder sb = stlSb.get();
+            read(sb);
+            return WireInternal.INTERNER.intern(sb);
+        }
     }
 
     @Override

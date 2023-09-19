@@ -26,6 +26,7 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.ClassLookup;
+import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
@@ -1021,18 +1022,22 @@ public class RawWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts) {
-            StringBuilder sb = WireInternal.acquireStringBuilder();
-            bytes.readUtf8(sb);
-            ts.accept(t, sb);
+            try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                StringBuilder sb = stlSb.get();
+                bytes.readUtf8(sb);
+                ts.accept(t, sb);
+            }
             return this;
         }
 
         @NotNull
         @Override
         public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer) {
-            StringBuilder sb = WireInternal.acquireStringBuilder();
-            bytes.readUtf8(sb);
-            classNameConsumer.accept(t, sb);
+            try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                StringBuilder sb = stlSb.get();
+                bytes.readUtf8(sb);
+                classNameConsumer.accept(t, sb);
+            }
             return RawWire.this;
         }
 
@@ -1043,12 +1048,14 @@ public class RawWire extends AbstractWire implements Wire {
 
         @Override
         public Type typeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
-            StringBuilder sb = WireInternal.acquireStringBuilder();
-            bytes.readUtf8(sb);
-            try {
-                return classLookup.forName(sb);
-            } catch (ClassNotFoundRuntimeException e) {
-                return unresolvedHandler.apply(sb, e.getCause());
+            try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                StringBuilder sb = stlSb.get();
+                bytes.readUtf8(sb);
+                try {
+                    return classLookup.forName(sb);
+                } catch (ClassNotFoundRuntimeException e) {
+                    return unresolvedHandler.apply(sb, e.getCause());
+                }
             }
         }
 

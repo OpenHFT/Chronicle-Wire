@@ -23,12 +23,14 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.ForceInline;
-import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.io.Closeable;
+import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.pool.EnumCache;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
+import net.openhft.chronicle.core.scoped.ScopedResource;
+import net.openhft.chronicle.core.scoped.ScopedResourcePool;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import net.openhft.chronicle.core.util.ObjectUtils;
@@ -98,7 +100,7 @@ public enum Wires {
             throw new IllegalStateException(e);
         }
     });
-    static final StringBuilderPool SBP = new StringBuilderPool();
+    static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal();
     static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(Bytes.allocateElasticOnHeap()));
     static final boolean DUMP_CODE_TO_TARGET = Jvm.getBoolean("dumpCodeToTarget", Jvm.isDebug());
     private static final int TID_MASK = 0b00111111_11111111_11111111_11111111;
@@ -247,12 +249,20 @@ public enum Wires {
         return WireDumper.of(wireIn).asString(abbrev);
     }
 
-
+    /**
+     * @deprecated Use {@link #asText(WireIn, Bytes)} instead
+     */
+    @Deprecated(/* To be removed in x.26 */)
     @NotNull
     public static CharSequence asText(@NotNull WireIn wireIn) {
+        return asText(wireIn, WireInternal.acquireInternalBytes());
+    }
+
+    @NotNull
+    public static CharSequence asText(@NotNull WireIn wireIn, Bytes<?> output) {
         ValidatableUtil.startValidateDisabled();
         try {
-            return asType(wireIn, Wires::newTextWire);
+            return asType(wireIn, Wires::newTextWire, output);
         } finally {
             ValidatableUtil.endValidateDisabled();
         }
@@ -263,25 +273,41 @@ public enum Wires {
         return new JSONWire(bytes).useTypes(true).trimFirstCurly(false).useTextDocuments();
     }
 
+    /**
+     * @deprecated Use {@link #asBinary(WireIn, Bytes)} instead
+     */
+    @Deprecated(/* To be removed in x.26 */)
     @NotNull
     public static Bytes asBinary(@NotNull WireIn wireIn) throws InvalidMarshallableException {
-        return asType(wireIn, BinaryWire::new);
+        return asType(wireIn, BinaryWire::new, WireInternal.acquireInternalBytes());
     }
 
-    private static Bytes asType(@NotNull WireIn wireIn, Function<Bytes, Wire> wireProvider) throws InvalidMarshallableException {
+    public static Bytes<?> asBinary(@NotNull WireIn wireIn, Bytes<?> output) throws InvalidMarshallableException {
+        return asType(wireIn, BinaryWire::new, output);
+    }
+
+    private static Bytes<?> asType(@NotNull WireIn wireIn, Function<Bytes, Wire> wireProvider, Bytes<?> output) throws InvalidMarshallableException {
         long pos = wireIn.bytes().readPosition();
         try {
-            Bytes<?> bytes = WireInternal.acquireInternalBytes();
-            wireIn.copyTo(new TextWire(bytes).addTimeStamps(true));
-            return bytes;
+            wireIn.copyTo(new TextWire(output).addTimeStamps(true));
+            return output;
         } finally {
             wireIn.bytes().readPosition(pos);
         }
     }
 
+
+    /**
+     * @deprecated Use {@link #asJson(WireIn, Bytes)} instead
+     */
+    @Deprecated(/* To be removed in x.26 */)
     @NotNull
     public static Bytes asJson(@NotNull WireIn wireIn) throws InvalidMarshallableException {
-        return asType(wireIn, Wires::newJsonWire);
+        return asType(wireIn, Wires::newJsonWire, WireInternal.acquireInternalBytes());
+    }
+
+    public static Bytes<?> asJson(@NotNull WireIn wireIn, Bytes<?> output) throws InvalidMarshallableException {
+        return asType(wireIn, Wires::newJsonWire, output);
     }
 
     private static Wire newTextWire(Bytes bytes) {
@@ -289,8 +315,23 @@ public enum Wires {
     }
 
 
+    /**
+     * @deprecated Use {@link #acquireStringBuilderScoped()} instead
+     */
+    @Deprecated(/* To be removed in x.26 */)
     public static StringBuilder acquireStringBuilder() {
-        return Jvm.isDebug() ? new StringBuilder() : SBP.acquireStringBuilder();
+        if (Jvm.isDebug()) {
+            return new StringBuilder();
+        } else {
+            // Dangerous, but equivalent to existing behaviour
+            try (final ScopedResource<StringBuilder> scopedResource = SBP.get()) {
+                return scopedResource.get();
+            }
+        }
+    }
+
+    public static ScopedResource<StringBuilder> acquireStringBuilderScoped() {
+        return SBP.get();
     }
 
     public static int lengthOf(int len) {
@@ -368,6 +409,10 @@ public enum Wires {
         return bytes;
     }
 
+    /**
+     * @deprecated Use {@link #acquireBytesScoped()} instead
+     */
+    @Deprecated(/* To be removed in x.26 */)
     @NotNull
     public static Bytes<?> acquireBytes() {
         if (Jvm.isDebug())
@@ -378,6 +423,15 @@ public enum Wires {
         return bytes;
     }
 
+    @NotNull
+    public static ScopedResource<Bytes<?>> acquireBytesScoped() {
+        return WireInternal.BYTES_SCOPED_THREAD_LOCAL.get();
+    }
+
+    /**
+     * @deprecated Use {@link #acquireBytesScoped()} instead
+     */
+    @Deprecated(/* To be removed in x.26 */)
     @NotNull
     static Bytes<?> acquireBytesForToString() {
         // otherwise we get confusing debug messages.
@@ -390,6 +444,10 @@ public enum Wires {
         return bytes;
     }
 
+    /**
+     * @deprecated Use {@link #acquireBinaryWireScoped()} instead
+     */
+    @Deprecated(/* To be removed in x.26 */)
     @NotNull
     public static Wire acquireBinaryWire() {
         Wire wire = ThreadLocalHelper.getTL(WireInternal.BINARY_WIRE_TL,
@@ -399,6 +457,15 @@ public enum Wires {
         return wire;
     }
 
+    public static ScopedResource<Wire> acquireBinaryWireScoped() {
+        return WireInternal.BINARY_WIRE_SCOPED_TL.get();
+    }
+
+    /**
+     * @return
+     * @deprecated Use {@link Wires#acquireBytesScoped()} instead
+     */
+    @Deprecated(/* To be removed in x.26 */)
     @NotNull
     public static Bytes<?> acquireAnotherBytes() {
         if (Jvm.isDebug())
@@ -452,26 +519,30 @@ public enum Wires {
         if (Enum.class.isAssignableFrom(marshallable.getClass()))
             return marshallable;
 
-        Wire wire = acquireBinaryWire();
-        @NotNull T t = (T) ObjectUtils.newInstance(marshallable.getClass());
-        boolean useSelfDescribing = t.usesSelfDescribingMessage() || !(t instanceof BytesMarshallable);
-        if (useSelfDescribing) {
-            marshallable.writeMarshallable(wire);
-            t.readMarshallable(wire);
-        } else {
-            ((BytesMarshallable) marshallable).writeMarshallable(wire.bytes());
-            ((BytesMarshallable) t).readMarshallable(wire.bytes());
+        try (ScopedResource<Wire> wireSR = acquireBinaryWireScoped()) {
+            Wire wire = wireSR.get();
+            @NotNull T t = (T) ObjectUtils.newInstance(marshallable.getClass());
+            boolean useSelfDescribing = t.usesSelfDescribingMessage() || !(t instanceof BytesMarshallable);
+            if (useSelfDescribing) {
+                marshallable.writeMarshallable(wire);
+                t.readMarshallable(wire);
+            } else {
+                ((BytesMarshallable) marshallable).writeMarshallable(wire.bytes());
+                ((BytesMarshallable) t).readMarshallable(wire.bytes());
+            }
+            return t;
         }
-        return t;
     }
 
     @NotNull
     public static <T> T copyTo(Object source, @NotNull T target) throws InvalidMarshallableException {
-        Wire wire = acquireBinaryWire();
-        wire.getValueOut().object(source);
-        wire.getValueIn().typePrefix(); // drop the type prefix.
-        wire.getValueIn().object(target, target.getClass());
-        return target;
+        try (ScopedResource<Wire> wireSR = acquireBinaryWireScoped()) {
+            Wire wire = wireSR.get();
+            wire.getValueOut().object(source);
+            wire.getValueIn().typePrefix(); // drop the type prefix.
+            wire.getValueIn().object(target, target.getClass());
+            return target;
+        }
     }
 
     @NotNull
@@ -566,10 +637,12 @@ public enum Wires {
             Class<?> aClass = e.getClass();
             E e2 = (E) EnumCache.of(aClass).valueOf(name);
             if (e != e2) {
-                Wire wire = Wires.acquireBinaryWire();
-                WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(aClass);
-                wm.writeMarshallable(e, wire);
-                wm.readMarshallable(e2, wire, null, false);
+                try (ScopedResource<Wire> wireSR = Wires.acquireBinaryWireScoped()) {
+                    Wire wire = wireSR.get();
+                    WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(aClass);
+                    wm.writeMarshallable(e, wire);
+                    wm.readMarshallable(e2, wire, null, false);
+                }
                 return e2;
             }
         }
@@ -895,10 +968,12 @@ public enum Wires {
 
                 case "java.lang.StringBuilder":
                     return ScalarStrategy.of(StringBuilder.class, (o, in) -> {
-                        StringBuilder builder = (o == null)
-                                ? WireInternal.acquireStringBuilder()
-                                : o;
-                        in.textTo(builder);
+                        try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                            StringBuilder builder = (o == null)
+                                    ? stlSb.get()
+                                    : o;
+                            in.textTo(builder);
+                        }
                         return o;
                     });
 
@@ -1055,15 +1130,17 @@ public enum Wires {
         INSTANCE;
 
         static Bytes<?> decodeBase64(Bytes<?> o, ValueIn in) {
-            @NotNull StringBuilder sb0 = WireInternal.acquireStringBuilder();
-            in.text(sb0);
-            String s = WireInternal.INTERNER.intern(sb0);
-            byte[] decode = Base64.getDecoder().decode(s);
-            if (o == null)
-                return Bytes.wrapForRead(decode);
-            o.clear();
-            o.write(decode);
-            return o;
+            try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                @NotNull StringBuilder sb0 = stlSb.get();
+                in.text(sb0);
+                String s = WireInternal.INTERNER.intern(sb0);
+                byte[] decode = Base64.getDecoder().decode(s);
+                if (o == null)
+                    return Bytes.wrapForRead(decode);
+                o.clear();
+                o.write(decode);
+                return o;
+            }
         }
 
         @Override

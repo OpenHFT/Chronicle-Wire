@@ -89,8 +89,8 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
 
     @Test
     public void test() {
-
-        Wire wire = WireType.BINARY.apply(WireInternal.acquireInternalBytes());
+        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Wire wire = WireType.BINARY.apply(bytes);
         @NotNull MarshableFilter expected = new MarshableFilter("hello", "world");
 
         // write
@@ -109,6 +109,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
             assertEquals(1, sortedFilter.marshableFilters.size());
             assertEquals(expected, sortedFilter.marshableFilters.get(0));
         }
+        bytes.releaseLast();
     }
 
     public static class MyMarshallable implements Marshallable {

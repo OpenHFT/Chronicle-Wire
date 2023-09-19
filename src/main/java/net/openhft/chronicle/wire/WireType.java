@@ -25,6 +25,7 @@ import net.openhft.chronicle.core.LicenceCheck;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.ValidatableUtil;
+import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -392,11 +393,19 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
     }
 
+    /**
+     * @deprecated Use {@link Wires#acquireBytesScoped()} instead
+     */
+    @Deprecated(/* To be removed in x.26 */)
     @NotNull
     static Bytes<?> getBytesForToString() {
         return Wires.acquireBytesForToString();
     }
 
+    /**
+     * @deprecated Use {@link Wires#acquireBytesScoped()} instead
+     */
+    @Deprecated(/* To be removed in x.26 */)
     @NotNull
     static Bytes<?> getBytes2() {
         // when in debug, the output becomes confused if you reuse the buffer.
@@ -466,17 +475,16 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
 
     public String asString(Object marshallable) {
         ValidatableUtil.startValidateDisabled();
-        try {
-            Bytes<?> bytes = asBytes(marshallable);
+        try (ScopedResource<Bytes<?>> stlBytes = Wires.acquireBytesScoped()) {
+            final Bytes<?> bytes = stlBytes.get();
+            asBytes(marshallable, bytes);
             return bytes.toString();
         } finally {
             ValidatableUtil.endValidateDisabled();
         }
     }
 
-    @NotNull
-    private Bytes<?> asBytes(Object marshallable) throws InvalidMarshallableException {
-        Bytes<?> bytes = getBytesForToString();
+    private void asBytes(Object marshallable, Bytes<?> bytes) throws InvalidMarshallableException {
         Wire wire = apply(bytes);
         wire.usePadding(wire.isBinary() && AbstractWire.DEFAULT_USE_PADDING);
         @NotNull final ValueOut valueOut = wire.getValueOut();
@@ -493,7 +501,6 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
             valueOut.typedMarshallable(Wires.typeNameFor(marshallable),
                     w -> Wires.writeMarshallable(marshallable, w));
         }
-        return bytes;
     }
 
     /**
@@ -519,10 +526,12 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     public <T> T fromString(Class<T> tClass, @NotNull CharSequence cs) throws InvalidMarshallableException {
         if (cs.length() == 0)
             throw new IllegalArgumentException("cannot deserialize an empty string");
-        Bytes<?> bytes = getBytes2();
-        bytes.appendUtf8(cs);
-        Wire wire = apply(bytes);
-        return wire.getValueIn().object(tClass);
+        try (ScopedResource<Bytes<?>> stlBytes = Wires.acquireBytesScoped()) {
+            Bytes<?> bytes = stlBytes.get();
+            bytes.appendUtf8(cs);
+            Wire wire = apply(bytes);
+            return wire.getValueIn().object(tClass);
+        }
     }
 
     @NotNull
@@ -610,16 +619,18 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
 
     public <T extends Marshallable> void toFileAsMap(@NotNull String filename, @NotNull Map<String, T> map, boolean compact)
             throws IOException, InvalidMarshallableException {
-        Bytes<?> bytes = WireInternal.acquireInternalBytes();
-        Wire wire = apply(bytes);
-        for (@NotNull Map.Entry<String, T> entry : map.entrySet()) {
-            @NotNull ValueOut valueOut = wire.writeEventName(entry::getKey);
-            boolean wasLeaf = valueOut.swapLeaf(compact);
-            valueOut.marshallable(entry.getValue());
-            valueOut.swapLeaf(wasLeaf);
-        }
         String tempFilename = IOTools.tempName(filename);
-        IOTools.writeFile(tempFilename, bytes.toByteArray());
+        try (ScopedResource<Bytes<?>> stlBytes = Wires.acquireBytesScoped()) {
+            Bytes<?> bytes = stlBytes.get();
+            Wire wire = apply(bytes);
+            for (@NotNull Map.Entry<String, T> entry : map.entrySet()) {
+                @NotNull ValueOut valueOut = wire.writeEventName(entry::getKey);
+                boolean wasLeaf = valueOut.swapLeaf(compact);
+                valueOut.marshallable(entry.getValue());
+                valueOut.swapLeaf(wasLeaf);
+            }
+            IOTools.writeFile(tempFilename, bytes.toByteArray());
+        }
         @NotNull File file2 = new File(tempFilename);
         @NotNull File dest = new File(filename);
         if (!file2.renameTo(dest)) {
@@ -631,11 +642,13 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     }
 
     public void toFile(@NotNull String filename, WriteMarshallable marshallable) throws IOException, InvalidMarshallableException {
-        Bytes<?> bytes = WireInternal.acquireInternalBytes();
-        Wire wire = apply(bytes);
-        wire.getValueOut().typedMarshallable(marshallable);
         String tempFilename = IOTools.tempName(filename);
-        IOTools.writeFile(tempFilename, bytes.toByteArray());
+        try (ScopedResource<Bytes<?>> stlBytes = Wires.acquireBytesScoped()) {
+            Bytes<?> bytes = stlBytes.get();
+            Wire wire = apply(bytes);
+            wire.getValueOut().typedMarshallable(marshallable);
+            IOTools.writeFile(tempFilename, bytes.toByteArray());
+        }
         @NotNull File file2 = new File(tempFilename);
         if (!file2.renameTo(new File(filename))) {
             file2.delete();
@@ -646,8 +659,9 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     @NotNull
     String asHexString(Object marshallable) {
         ValidatableUtil.startValidateDisabled();
-        try {
-            Bytes<?> bytes = asBytes(marshallable);
+        try (ScopedResource<Bytes<?>> stlBytes = Wires.acquireBytesScoped()) {
+            final Bytes<?> bytes = stlBytes.get();
+            asBytes(marshallable, bytes);
             return bytes.toHexString();
         } finally {
             ValidatableUtil.endValidateDisabled();
@@ -666,10 +680,12 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
 
     @Nullable
     public Map<String, Object> asMap(@NotNull CharSequence cs) throws InvalidMarshallableException {
-        Bytes<?> bytes = getBytes2();
-        bytes.appendUtf8(cs);
-        Wire wire = apply(bytes);
-        return wire.getValueIn().marshallableAsMap(String.class, Object.class);
+        try (ScopedResource<Bytes<?>> stlBytes = Wires.acquireBytesScoped()) {
+            Bytes<?> bytes = stlBytes.get();
+            bytes.appendUtf8(cs);
+            Wire wire = apply(bytes);
+            return wire.getValueIn().marshallableAsMap(String.class, Object.class);
+        }
     }
 
     @Override

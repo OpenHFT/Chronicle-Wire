@@ -26,6 +26,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.ClassLookup;
+import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.values.*;
@@ -50,6 +51,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
+import static net.openhft.chronicle.wire.Wires.getField;
 import static net.openhft.chronicle.wire.Wires.isScalar;
 
 /**
@@ -99,7 +101,9 @@ public interface ValueOut {
      */
     @NotNull
     default WireOut text(char c) {
-        return text(WireInternal.acquireStringBuilderForValueOut().append(c));
+        try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+            return text(stlSb.get().append(c));
+        }
     }
 
     /**
@@ -649,14 +653,16 @@ public interface ValueOut {
             } else if (isScalar(object)) {
                 if (object instanceof LocalDate) {
                     LocalDate d = (LocalDate) object;
-                    return text(WireInternal.acquireStringBuilderForValueOut()
-                            .append(d.getYear())
-                            .append('-')
-                            .append(d.getMonthValue() < 10 ? "0" : "")
-                            .append(d.getMonthValue())
-                            .append('-')
-                            .append(d.getDayOfMonth() < 10 ? "0" : "")
-                            .append(d.getDayOfMonth()));
+                    try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                        return text(stlSb.get()
+                                .append(d.getYear())
+                                .append('-')
+                                .append(d.getMonthValue() < 10 ? "0" : "")
+                                .append(d.getMonthValue())
+                                .append('-')
+                                .append(d.getDayOfMonth() < 10 ? "0" : "")
+                                .append(d.getDayOfMonth()));
+                    }
                 }
                 return text(object.toString());
             } else if (object instanceof Locale) {
@@ -1180,10 +1186,12 @@ public interface ValueOut {
             return nu11();
         if (uncompressedBytes.readRemaining() < SMALL_MESSAGE)
             return bytes(uncompressedBytes);
-        Bytes<?> tmpBytes = WireInternal.acquireInternalBytes();
-        Compression.compress(compression, uncompressedBytes, tmpBytes);
-        bytes(compression, tmpBytes);
-        return wireOut();
+        try (ScopedResource<Bytes<?>> stlBytes = Wires.acquireBytesScoped()) {
+            Bytes<?> tmpBytes = stlBytes.get();
+            Compression.compress(compression, uncompressedBytes, tmpBytes);
+            bytes(compression, tmpBytes);
+            return wireOut();
+        }
     }
 
     default int compressedSize() {
@@ -1270,21 +1278,25 @@ public interface ValueOut {
      * Write an int value with a specified converter.
      */
     default WireOut writeInt(IntConverter intConverter, int i) {
-        StringBuilder sb = WireInternal.acquireStringBuilderForValueOut();
-        intConverter.append(sb, i);
-        return rawText(sb);
+        try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+            StringBuilder sb = stlSb.get();
+            intConverter.append(sb, i);
+            return rawText(sb);
+        }
     }
 
     /**
      * Write a long value with a specified converter.
      */
     default WireOut writeLong(LongConverter longConverter, long l) {
-        StringBuilder sb = WireInternal.acquireStringBuilderForValueOut();
-        longConverter.append(sb, l);
-        if (longConverter.allSafeChars(wireOut()) && sb.length() > 0)
-            return rawText(sb);
-        else
-            return text(sb);
+        try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+            StringBuilder sb = stlSb.get();
+            longConverter.append(sb, l);
+            if (longConverter.allSafeChars(wireOut()) && sb.length() > 0)
+                return rawText(sb);
+            else
+                return text(sb);
+        }
     }
 
     /**

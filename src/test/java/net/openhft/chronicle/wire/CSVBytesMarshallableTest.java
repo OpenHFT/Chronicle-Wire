@@ -21,9 +21,11 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.EnumInterner;
+import net.openhft.chronicle.core.scoped.ScopedResource;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
+import static net.openhft.chronicle.wire.Wires.acquireStringBuilderScoped;
 import static org.junit.Assert.assertEquals;
 
 enum CcyPair {
@@ -138,9 +140,11 @@ class FXPrice implements BytesMarshallable {
     }
 
     private <T extends Enum<T>> T parseEnum(@NotNull BytesIn<?> bytes, @NotNull EnumInterner<T> interner) {
-        StringBuilder sb = Wires.acquireStringBuilder();
-        bytes.parseUtf8(sb, StopCharTesters.COMMA_STOP);
-        return interner.intern(sb);
+        try (ScopedResource<StringBuilder> stlSb = acquireStringBuilderScoped()) {
+            StringBuilder sb = stlSb.get();
+            bytes.parseUtf8(sb, StopCharTesters.COMMA_STOP);
+            return interner.intern(sb);
+        }
     }
 }
 

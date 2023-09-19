@@ -26,6 +26,7 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
+import net.openhft.chronicle.core.scoped.ScopedThreadLocal;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.wire.internal.FromStringInterner;
@@ -45,15 +46,30 @@ import static net.openhft.chronicle.wire.Wires.toIntU30;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum WireInternal {
     ; // none
-    static final StringInterner INTERNER = new StringInterner(Integer.getInteger("wire.interner.size", 4096));
+    static final StringInterner INTERNER = new StringInterner(Jvm.getInteger("wire.interner.size", 4096));
+    private static final int BINARY_WIRE_SCOPED_INSTANCES_PER_THREAD = Jvm.getInteger("chronicle.wireInternal.pool.binaryWire.instancesPerThread", 4);
+    private static final int BYTES_SCOPED_INSTANCES_PER_THREAD = Jvm.getInteger("chronicle.wireInternal.pool.bytes.instancesPerThread", 2);
+    @Deprecated(/* For removal in x.26 */)
     static final StringBuilderPool SBP = new StringBuilderPool();
+    @Deprecated(/* For removal in x.26 */)
     static final StringBuilderPool ASBP = new StringBuilderPool();
+    @Deprecated(/* For removal in x.26 */)
     static final StringBuilderPool SBPVI = new StringBuilderPool();
+    @Deprecated(/* For removal in x.26 */)
     static final StringBuilderPool SBPVO = new StringBuilderPool();
     static final ThreadLocal<WeakReference<Bytes<?>>> BYTES_TL = new ThreadLocal<>();
     static final ThreadLocal<WeakReference<Bytes<?>>> BYTES_F2S_TL = new ThreadLocal<>();
     static final ThreadLocal<WeakReference<Wire>> BINARY_WIRE_TL = new ThreadLocal<>();
     static final ThreadLocal<WeakReference<Bytes<?>>> INTERNAL_BYTES_TL = new ThreadLocal<>();
+    static final ScopedThreadLocal<Wire> BINARY_WIRE_SCOPED_TL = new ScopedThreadLocal<>(
+            () -> new BinaryWire(Wires.unmonitoredDirectBytes())
+                    .setOverrideSelfDescribing(true),
+            Wire::clear,
+            BINARY_WIRE_SCOPED_INSTANCES_PER_THREAD);
+    static final ScopedThreadLocal<Bytes<?>> BYTES_SCOPED_THREAD_LOCAL = new ScopedThreadLocal<>(
+            Wires::unmonitoredDirectBytes,
+            Bytes::clear,
+            BYTES_SCOPED_INSTANCES_PER_THREAD);
 
     static final StackTraceElement[] NO_STE = {};
     static final Set<Class> INTERNABLE = new HashSet<>(Arrays.asList(
@@ -104,11 +120,19 @@ public enum WireInternal {
         return (E) EnumInterner.ENUM_INTERNER.get(eClass).intern(cs);
     }
 
+    /**
+     * @deprecated Use {@link Wires#acquireStringBuilderScoped()} instead
+     */
+    @Deprecated(/* To be removed in x.26 */)
     // these might be used internally so not safe for end users.
     static StringBuilder acquireStringBuilder() {
         return SBP.acquireStringBuilder();
     }
 
+    /**
+     * @deprecated Use {@link Wires#acquireStringBuilderScoped()} instead
+     */
+    @Deprecated(/* To be removed in x.26 */)
     // these might be used internally so not safe for end users.
     static StringBuilder acquireAnotherStringBuilder(CharSequence cs) {
         StringBuilder sb = ASBP.acquireStringBuilder();
@@ -313,7 +337,11 @@ public enum WireInternal {
         return ObjectUtils.convertTo(tClass, o);
     }
 
+    /**
+     * @deprecated Use {@link Wires#acquireBytesScoped()} instead
+     */
     @NotNull
+    @Deprecated(/* To be removed in x.26 */)
     static Bytes<?> acquireInternalBytes() {
         if (Jvm.isDebug())
             return Bytes.allocateElasticOnHeap();
@@ -323,10 +351,18 @@ public enum WireInternal {
         return bytes;
     }
 
+    /**
+     * @deprecated Use {@link Wires#acquireStringBuilderScoped()} instead
+     */
+    @Deprecated(/* To be removed in x.26 */)
     static StringBuilder acquireStringBuilderForValueIn() {
         return SBPVI.acquireStringBuilder();
     }
 
+    /**
+     * @deprecated Use {@link Wires#acquireStringBuilderScoped()} instead
+     */
+    @Deprecated(/* To be removed in x.26 */)
     static StringBuilder acquireStringBuilderForValueOut() {
         return SBPVO.acquireStringBuilder();
     }

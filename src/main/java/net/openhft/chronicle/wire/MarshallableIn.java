@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.ReadBytesMarshallable;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.scoped.ScopedResource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -92,11 +93,13 @@ public interface MarshallableIn {
             if (!dc.isPresent()) {
                 return null;
             }
-            StringBuilder sb = WireInternal.acquireStringBuilder();
-            dc.wire().getValueIn().text(sb);
-            return sb.length() < MARSHALLABLE_IN_INTERN_SIZE
-                    ? WireInternal.INTERNER.intern(sb)
-                    : sb.toString();
+            try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                StringBuilder sb = stlSb.get();
+                dc.wire().getValueIn().text(sb);
+                return sb.length() < MARSHALLABLE_IN_INTERN_SIZE
+                        ? WireInternal.INTERNER.intern(sb)
+                        : sb.toString();
+            }
         }
     }
 

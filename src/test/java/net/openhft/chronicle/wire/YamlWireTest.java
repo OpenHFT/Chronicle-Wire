@@ -1754,7 +1754,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testDoublePrecisionOverYamlWire() {
-        final Bytes<?> bytes = Wires.acquireBytes();
+        final Bytes<?> bytes = Bytes.elasticByteBuffer();
 
         final Wire wire = WireType.YAML.apply(bytes);
         final double d = 0.000212345678901;
@@ -1764,6 +1764,7 @@ public class YamlWireTest extends WireTestCommon {
         final double d2 = wire2.getValueIn().float64();
 
         Assert.assertEquals(d2, d, 0);
+        bytes.releaseLast();
     }
 
     @Test

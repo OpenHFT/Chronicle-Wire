@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.Resettable;
 import net.openhft.chronicle.core.io.ValidatableUtil;
 import net.openhft.chronicle.core.pool.ClassLookup;
+import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
@@ -66,11 +67,13 @@ public interface ValueIn {
     }
 
     default char character() {
-        @Nullable CharSequence cs = textTo(WireInternal.acquireStringBuilderForValueIn());
-        if (cs == null || cs.length() == 0)
-            return '\u0000';
+        try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+            @Nullable CharSequence cs = textTo(stlSb.get());
+            if (cs == null || cs.length() == 0)
+                return '\u0000';
 
-        return cs.charAt(0);
+            return cs.charAt(0);
+        }
     }
 
     @NotNull
@@ -497,9 +500,11 @@ public interface ValueIn {
 
     @Nullable
     default <E extends Enum<E>> E asEnum(Class<E> eClass) {
-        StringBuilder sb = WireInternal.acquireStringBuilderForValueIn();
-        text(sb);
-        return sb.length() == 0 ? null : WireInternal.internEnum(eClass, sb);
+        try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+            StringBuilder sb = stlSb.get();
+            text(sb);
+            return sb.length() == 0 ? null : WireInternal.internEnum(eClass, sb);
+        }
     }
 
     @NotNull
@@ -605,9 +610,11 @@ public interface ValueIn {
     }
 
     default long readLong(LongConverter longConverter) {
-        StringBuilder sb = WireInternal.acquireStringBuilderForValueIn();
-        text(sb);
-        return longConverter.parse(sb);
+        try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+            StringBuilder sb = stlSb.get();
+            text(sb);
+            return longConverter.parse(sb);
+        }
     }
 
     default boolean readBoolean() {
