@@ -25,7 +25,7 @@ import static org.junit.Assert.assertEquals;
 public class TextWireTypeArrayTest extends WireTestCommon {
     @Test
     public void shouldUnmarshalArrayOfType() {
-        final Bytes<?> bytes = Wires.acquireBytes();
+        final Bytes<?> bytes = Bytes.elasticByteBuffer();
 
         final Wire wire = WireType.TEXT.apply(bytes);
         final HasClasses hasClasses = new HasClasses();
@@ -39,6 +39,7 @@ public class TextWireTypeArrayTest extends WireTestCommon {
         final TextWire textWire = TextWire.from(bytes.toString());
         final Object a = textWire.getValueIn().typedMarshallable();
         assertEquals(expected, a.toString());
+        bytes.releaseLast();
     }
 
     static class HasClasses extends SelfDescribingMarshallable {

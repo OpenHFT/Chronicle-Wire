@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.wire.converter.PowerOfTwoLongConverter;
 import net.openhft.chronicle.wire.converter.SymbolsLongConverter;
 
@@ -40,7 +41,7 @@ public interface LongConverter {
      *
      * @param chars A set of symbols or characters to be used in the conversion.
      * @return An instance of {@link LongConverter}. If the length of chars is a power of 2,
-     *         a {@link PowerOfTwoLongConverter} is returned; otherwise, a {@link SymbolsLongConverter} is returned.
+     * a {@link PowerOfTwoLongConverter} is returned; otherwise, a {@link SymbolsLongConverter} is returned.
      */
     static LongConverter forSymbols(String chars) {
         return Maths.isPowerOf2(chars.length())
@@ -69,7 +70,7 @@ public interface LongConverter {
     /**
      * Converts the given long value to a string and appends it to the provided StringBuilder.
      *
-     * @param text The StringBuilder to which the converted value is appended.
+     * @param text  The StringBuilder to which the converted value is appended.
      * @param value The long value to convert.
      */
     void append(StringBuilder text, long value);
@@ -81,9 +82,11 @@ public interface LongConverter {
      * @param value The long value to convert.
      */
     default void append(Bytes<?> bytes, long value) {
-        final StringBuilder sb = WireInternal.acquireStringBuilder();
-        append(sb, value);
-        bytes.append(sb);
+        try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+            final StringBuilder sb = stlSb.get();
+            append(sb, value);
+            bytes.append(sb);
+        }
     }
 
     /**
@@ -155,7 +158,7 @@ public interface LongConverter {
      * as another during encoding.
      *
      * @param alias The character to treat as an alias.
-     * @param as The character that the alias should be treated as.
+     * @param as    The character that the alias should be treated as.
      * @throws UnsupportedOperationException If the operation is not supported.
      */
     default void addEncode(char alias, char as) {

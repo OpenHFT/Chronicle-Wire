@@ -23,6 +23,7 @@ import net.openhft.chronicle.bytes.StopCharTester;
 import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntArrayValues;
 import net.openhft.chronicle.core.values.IntValue;
@@ -392,7 +393,9 @@ public class QueryWire extends TextWire {
     class QueryValueIn extends TextValueIn {
         @Override
         public String text() {
-            return StringUtils.toString(textTo(WireInternal.acquireStringBuilder()));
+            try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                return StringUtils.toString(textTo(stlSb.get()));
+            }
         }
 
         @Nullable
@@ -414,17 +417,21 @@ public class QueryWire extends TextWire {
         @Override
         @NotNull
         public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer) {
-            StringBuilder sb = WireInternal.acquireStringBuilder();
-            textTo(sb);
-            classNameConsumer.accept(t, sb);
+            try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                StringBuilder sb = stlSb.get();
+                textTo(sb);
+                classNameConsumer.accept(t, sb);
+            }
             return wireIn();
         }
 
         @Override
         public Type typeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
-            StringBuilder sb = WireInternal.acquireStringBuilder();
-            textTo(sb);
-            return classLookup().forName(sb);
+            try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                StringBuilder sb = stlSb.get();
+                textTo(sb);
+                return classLookup().forName(sb);
+            }
         }
 
         @Override

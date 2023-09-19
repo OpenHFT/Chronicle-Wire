@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.ScopeConfined;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.VanillaReferenceOwner;
+import net.openhft.chronicle.core.scoped.ScopedResource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
@@ -1376,7 +1377,7 @@ public class BinaryWireTest extends WireTestCommon {
 
             // System.out.println(Wires.fromSizePrefixedBlobs(dc));
 
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = new StringBuilder();
 
             @NotNull ValueIn valueIn1 = dc.wire().readEventName(sb);
             Assert.assertTrue("hello1".contentEquals(sb));

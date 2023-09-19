@@ -18,10 +18,14 @@
 
 package net.openhft.chronicle.wire.marshallable;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.onoes.ExceptionKey;
 import net.openhft.chronicle.wire.*;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.time.ZoneId;
 import java.util.Map;
@@ -61,16 +65,17 @@ public class NullFieldMarshallingTest extends WireTestCommon {
         assertNull(object2.zoneId);
     }
 
-       // @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/165")
     @Test
     public void testAbstractNullFieldUnmarshalledCorrectlyBinary() {
         VO object = new VO();
-        final Wire wire = Wires.acquireBinaryWire();
+
+        final Wire wire = WireType.BINARY.apply(Bytes.elasticByteBuffer());
         wire.write().typedMarshallable(object);
 
         VO object2 = wire.read().typedMarshallable();
         assertNotNull(object2);
         assertNull(object2.zoneId);
+        wire.bytes().releaseLast();
     }
 
     static class VO extends SelfDescribingMarshallable {

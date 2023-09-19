@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.io.*;
+import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
@@ -41,11 +42,8 @@ import static net.openhft.chronicle.core.UnsafeMemory.*;
 
 @SuppressWarnings({"restriction", "rawtypes", "unchecked"})
 public class WireMarshaller<T> {
-    static final StringBuilderPool SBP = new StringBuilderPool();
     private static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
     private static final FieldAccess[] NO_FIELDS = {};
-    private static final StringBuilderPool RSBP = new StringBuilderPool();
-    private static final StringBuilderPool WSBP = new StringBuilderPool();
     @NotNull
     final FieldAccess[] fields;
     final TreeMap<CharSequence, FieldAccess> fieldMap = new TreeMap<>(WireMarshaller::compare);
@@ -357,8 +355,8 @@ public class WireMarshaller<T> {
      * @throws InvalidMarshallableException If there is an error during marshalling.
      */
     public void readMarshallableInputOrder(T t, @NotNull WireIn in, T defaults, boolean overwrite) throws InvalidMarshallableException {
-        try {
-            StringBuilder sb = SBP.acquireStringBuilder();
+        try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+            StringBuilder sb = stlSb.get();
 
             // Iterating over all fields to read their values
             for (int i = 0; i < fields.length; i++) {
@@ -558,12 +556,14 @@ public class WireMarshaller<T> {
             if (write.isBinary()) {
                 write.int64(aLong);
             } else {
-                StringBuilder sb = WSBP.acquireStringBuilder();
-                longConverter.append(sb, aLong);
-                if (!write.isBinary() && sb.length() == 0)
-                    write.text("");
-                else
-                    write.rawText(sb);
+                try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                    StringBuilder sb = stlSb.get();
+                    longConverter.append(sb, aLong);
+                    if (!write.isBinary() && sb.length() == 0)
+                        write.text("");
+                    else
+                        write.rawText(sb);
+                }
             }
         }
 
@@ -590,11 +590,13 @@ public class WireMarshaller<T> {
             if (read.isBinary()) {
                 i = read.int64();
             } else {
-                StringBuilder sb = RSBP.acquireStringBuilder();
-                read.text(sb);
-                i = longConverter.parse(sb);
-                if (!rangeCheck(i))
-                    throw new IORuntimeException("value '" + sb + "' is out of range for a " + field.getType());
+                try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                    StringBuilder sb = stlSb.get();
+                    read.text(sb);
+                    i = longConverter.parse(sb);
+                    if (!rangeCheck(i))
+                        throw new IORuntimeException("value '" + sb + "' is out of range for a " + field.getType());
+                }
             }
             setLong(o, i);
         }
@@ -627,10 +629,12 @@ public class WireMarshaller<T> {
          */
         @Override
         public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
-            StringBuilder sb = WSBP.acquireStringBuilder();
-            bytes.readUtf8(sb);
-            long i = longConverter.parse(sb);
-            bytes.writeLong(i);
+            try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                StringBuilder sb = stlSb.get();
+                bytes.readUtf8(sb);
+                long i = longConverter.parse(sb);
+                bytes.writeLong(i);
+            }
         }
 
         /**
@@ -945,9 +949,11 @@ public class WireMarshaller<T> {
                     Jvm.rethrow(e);
                 } catch (Exception e) {
                     read.wireIn().bytes().readPosition(pos);
-                    StringBuilder sb = RSBP.acquireStringBuilder();
-                    read.text(sb);
-                    Jvm.warn().on(getClass(), "Failed to read '" + this.field.getName() + "' with '" + sb + "' taking default", e);
+                    try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                        StringBuilder sb = stlSb.get();
+                        read.text(sb);
+                        Jvm.warn().on(getClass(), "Failed to read '" + this.field.getName() + "' with '" + sb + "' taking default", e);
+                    }
                     copy(defaults, o);
                 }
             }
@@ -1231,12 +1237,14 @@ public class WireMarshaller<T> {
         }
 
         private void decodeBytes(@NotNull ValueIn read, Bytes<?> bytes) {
-            @NotNull StringBuilder sb0 = RSBP.acquireStringBuilder();
-            read.text(sb0);
-            String s = WireInternal.INTERNER.intern(sb0);
-            byte[] decode = Base64.getDecoder().decode(s);
-            bytes.clear();
-            bytes.write(decode);
+            try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                @NotNull StringBuilder sb0 = stlSb.get();
+                read.text(sb0);
+                String s = WireInternal.INTERNER.intern(sb0);
+                byte[] decode = Base64.getDecoder().decode(s);
+                bytes.clear();
+                bytes.write(decode);
+            }
         }
 
         @Override
@@ -1909,9 +1917,11 @@ public class WireMarshaller<T> {
             if (c == (char) 0xFFFF) {
                 write.nu11();
             } else {
-                StringBuilder sb = WSBP.acquireStringBuilder();
-                sb.append(c);
-                write.text(sb);
+                try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                    StringBuilder sb = stlSb.get();
+                    sb.append(c);
+                    write.text(sb);
+                }
             }
         }
 
@@ -2222,12 +2232,14 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
-            StringBuilder sb = WSBP.acquireStringBuilder();
-            intConverter.append(sb, getChar(o));
-            if (!write.isBinary() && sb.length() == 0)
-                write.text("");
-            else
-                write.rawText(sb);
+            try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                StringBuilder sb = stlSb.get();
+                intConverter.append(sb, getChar(o));
+                if (!write.isBinary() && sb.length() == 0)
+                    write.text("");
+                else
+                    write.rawText(sb);
+            }
         }
 
         protected char getChar(Object o) {
@@ -2236,10 +2248,12 @@ public class WireMarshaller<T> {
 
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            StringBuilder sb = RSBP.acquireStringBuilder();
-            read.text(sb);
-            char i = intConverter.parse(sb);
-            putChar(o, i);
+            try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                StringBuilder sb = stlSb.get();
+                read.text(sb);
+                char i = intConverter.parse(sb);
+                putChar(o, i);
+            }
         }
 
         protected void putChar(Object o, char i) {
@@ -2248,10 +2262,12 @@ public class WireMarshaller<T> {
 
         @Override
         public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
-            StringBuilder sb = WSBP.acquireStringBuilder();
-            bytes.readUtf8(sb);
-            int i = intConverter.parse(sb);
-            bytes.writeInt(i);
+            try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                StringBuilder sb = stlSb.get();
+                bytes.readUtf8(sb);
+                int i = intConverter.parse(sb);
+                bytes.writeInt(i);
+            }
         }
 
         @Override
@@ -2280,12 +2296,14 @@ public class WireMarshaller<T> {
             if (write.isBinary()) {
                 write.int32(anInt);
             } else {
-                StringBuilder sb = WSBP.acquireStringBuilder();
-                intConverter.append(sb, anInt);
-                if (!write.isBinary() && sb.length() == 0)
-                    write.text("");
-                else
-                    write.rawText(sb);
+                try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                    StringBuilder sb = stlSb.get();
+                    intConverter.append(sb, anInt);
+                    if (!write.isBinary() && sb.length() == 0)
+                        write.text("");
+                    else
+                        write.rawText(sb);
+                }
             }
         }
 
@@ -2300,9 +2318,11 @@ public class WireMarshaller<T> {
                 i = read.int32();
 
             } else {
-                StringBuilder sb = RSBP.acquireStringBuilder();
-                read.text(sb);
-                i = intConverter.parse(sb);
+                try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                    StringBuilder sb = stlSb.get();
+                    read.text(sb);
+                    i = intConverter.parse(sb);
+                }
             }
             putInt(o, i);
         }
@@ -2313,10 +2333,12 @@ public class WireMarshaller<T> {
 
         @Override
         public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
-            StringBuilder sb = WSBP.acquireStringBuilder();
-            bytes.readUtf8(sb);
-            int i = intConverter.parse(sb);
-            bytes.writeInt(i);
+            try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                StringBuilder sb = stlSb.get();
+                bytes.readUtf8(sb);
+                int i = intConverter.parse(sb);
+                bytes.writeInt(i);
+            }
         }
 
         @Override

@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Mocker;
+import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -93,9 +94,11 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
                 IntConverter ic = ObjectUtils.newInstance(intConversion.value());
                 return a -> {
                     if (a[0] instanceof Number) {
-                        StringBuilder sb = WireInternal.acquireStringBuilder();
-                        ic.append(sb, ((Number) a[0]).intValue());
-                        a[0] = new RawText(sb);
+                        try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                            StringBuilder sb = stlSb.get();
+                            ic.append(sb, ((Number) a[0]).intValue());
+                            a[0] = new RawText(sb);
+                        }
                     }
                 };
             }
@@ -116,9 +119,11 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
         LongConverter finalLc = lc;
         return a -> {
             if (a[0] instanceof Number) {
-                StringBuilder sb = WireInternal.acquireStringBuilder();
-                finalLc.append(sb, ((Number) a[0]).longValue());
-                a[0] = new RawText(sb);
+                try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                    StringBuilder sb = stlSb.get();
+                    finalLc.append(sb, ((Number) a[0]).longValue());
+                    a[0] = new RawText(sb);
+                }
             }
         };
     }

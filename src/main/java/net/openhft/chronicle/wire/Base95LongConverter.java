@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.util.StringUtils;
 
 /**
@@ -68,9 +69,11 @@ public class Base95LongConverter implements LongConverter {
 
     @Override
     public void append(Bytes<?> bytes, long value) {
-        StringBuilder sb = WireInternal.acquireStringBuilder();
-        append(sb, value);
-        bytes.append(sb);
+        try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+            StringBuilder sb = stlSb.get();
+            append(sb, value);
+            bytes.append(sb);
+        }
     }
 
     @Override

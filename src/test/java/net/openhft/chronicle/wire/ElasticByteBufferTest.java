@@ -28,7 +28,7 @@ import java.nio.ByteBuffer;
 public class ElasticByteBufferTest extends WireTestCommon {
 
     @Test
-    public void testElasticByteBufferWithWire() throws Exception {
+    public void testElasticByteBufferWithWire() {
 
         Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer(10);
 
@@ -40,7 +40,7 @@ public class ElasticByteBufferTest extends WireTestCommon {
         }
 
         @Nullable ByteBuffer byteBuffer = byteBufferBytes.underlyingObject();
-        StringBuilder stringBuilder = Wires.acquireStringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
         while (byteBuffer.remaining() > 0) {
             stringBuilder.append((char) byteBuffer.get());
         }

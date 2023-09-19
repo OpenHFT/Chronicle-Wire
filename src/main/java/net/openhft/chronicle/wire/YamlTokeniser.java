@@ -20,6 +20,8 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
+import net.openhft.chronicle.core.scoped.ScopedResource;
+import net.openhft.chronicle.core.scoped.ScopedResourcePool;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -38,7 +40,7 @@ public class YamlTokeniser {
             YamlToken.MAPPING_KEY,
             YamlToken.MAPPING_END,
             YamlToken.DIRECTIVES_END);
-    static final StringBuilderPool SBP = new StringBuilderPool();
+    static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal(1);
     protected final List<YTContext> contexts = new ArrayList<>();
     private final BytesIn<?> in;
     private final List<YTContext> freeContexts = new ArrayList<>();
@@ -694,9 +696,11 @@ public class YamlTokeniser {
 
     // for testing.
     public String text() {
-        StringBuilder sb = SBP.acquireStringBuilder();
-        text(sb);
-        return sb.length() == 0 ? "" : sb.toString();
+        try (ScopedResource<StringBuilder> sbTl = SBP.get()) {
+            final StringBuilder sb = sbTl.get();
+            text(sb);
+            return sb.length() == 0 ? "" : sb.toString();
+        }
     }
 
     public void text(StringBuilder sb) {
@@ -742,15 +746,17 @@ public class YamlTokeniser {
             in.readPosition(blockStart);
             if (in.peekUnsignedByte() == '0') {
                 final int i = in.peekUnsignedByte(in.readPosition() + 1);
-                StringBuilder sb = SBP.acquireStringBuilder();
-                if (Character.isDigit(i)) {
-                    in.readSkip(1);
-                    in.parseUtf8(sb, Math.toIntExact(blockEnd - blockStart) - 1);
-                    return Long.parseLong(sb.toString(), 8);
-                } else if (i == 'o') {
-                    in.readSkip(2);
-                    in.parseUtf8(sb, Math.toIntExact(blockEnd - blockStart) - 2);
-                    return Long.parseLong(sb.toString(), 8);
+                try (final ScopedResource<StringBuilder> sbTl = SBP.get()) {
+                    StringBuilder sb = sbTl.get();
+                    if (Character.isDigit(i)) {
+                        in.readSkip(1);
+                        in.parseUtf8(sb, Math.toIntExact(blockEnd - blockStart) - 1);
+                        return Long.parseLong(sb.toString(), 8);
+                    } else if (i == 'o') {
+                        in.readSkip(2);
+                        in.parseUtf8(sb, Math.toIntExact(blockEnd - blockStart) - 2);
+                        return Long.parseLong(sb.toString(), 8);
+                    }
                 }
             }
             return in.parseLong();

@@ -32,6 +32,8 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.ValidatableUtil;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
+import net.openhft.chronicle.core.scoped.ScopedResource;
+import net.openhft.chronicle.core.scoped.ScopedResourcePool;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
@@ -65,7 +67,7 @@ import static net.openhft.chronicle.wire.Wires.GENERATE_TUPLES;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class BinaryWire extends AbstractWire implements Wire {
 
-    static final StringBuilderPool SBP = new StringBuilderPool();
+    static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal();
     private static final boolean SUPPORT_DELTA = supportDelta();
     private static final UTF8StringInterner UTF8 = new UTF8StringInterner(4096);
     private static final Bit8StringInterner BIT8 = new Bit8StringInterner(1024);
@@ -704,9 +706,11 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             case FIELD_ANCHOR: {
                 bytes.uncheckedReadSkipOne();
-                final StringBuilder sb = SBP.acquireStringBuilder();
-                readFieldAnchor(sb);
-                return ObjectUtils.convertTo(expectedClass, sb);
+                try (final ScopedResource<StringBuilder> sbTl = SBP.get()) {
+                    final StringBuilder sb = sbTl.get();
+                    readFieldAnchor(sb);
+                    return ObjectUtils.convertTo(expectedClass, sb);
+                }
             }
 
             case EVENT_OBJECT:
@@ -1197,14 +1201,16 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     private void writeEventIdDescription(String name, int methodId) {
-        final StringBuilder sb = SBP.acquireStringBuilder();
-        sb.append(name).append(" (");
-        if (' ' < methodId && methodId <= '~')
-            sb.append('\'').append((char) methodId).append('\'');
-        else
-            sb.append(methodId);
-        sb.append(')');
-        bytes.writeHexDumpDescription(sb);
+        try (ScopedResource<StringBuilder> sbTl = SBP.get()) {
+            final StringBuilder sb = sbTl.get();
+            sb.append(name).append(" (");
+            if (' ' < methodId && methodId <= '~')
+                sb.append('\'').append((char) methodId).append('\'');
+            else
+                sb.append(methodId);
+            sb.append(')');
+            bytes.writeHexDumpDescription(sb);
+        }
     }
 
     @Override
@@ -1374,7 +1380,9 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             case BinaryWireHighCode.FIELD0:
             case BinaryWireHighCode.FIELD1:
-                readField(SBP.acquireStringBuilder(), "", code);
+                try (final ScopedResource<StringBuilder> sbTl = SBP.get()) {
+                    readField(sbTl.get(), "", code);
+                }
                 AppendableUtil.setLength(sb, 0);
                 return readText(peekCode(), sb);
             default:

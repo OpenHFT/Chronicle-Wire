@@ -21,6 +21,8 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
+import net.openhft.chronicle.core.scoped.ScopedResource;
+import net.openhft.chronicle.core.scoped.ScopedResourcePool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -78,7 +80,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         return rollback;
     }
 
-    static final StringBuilderPool SBP = new StringBuilderPool();
+    static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal(1);
 
     private static void fullReadForDeltaWire(AbstractWire wire0, long start) {
         long readPosition1 = wire0.bytes().readPosition();
@@ -93,7 +95,9 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
                 if (read.isTyped()) {
                     read.skipValue();
                 } else {
-                    read.text(SBP.acquireStringBuilder());  // todo remove this and use skipValue
+                    try (final ScopedResource<StringBuilder> tlSb = SBP.get()){
+                        read.text(tlSb.get());  // todo remove this and use skipValue
+                    }
                 }
 
                 if (wire0.bytes().readRemaining() == remaining) {
