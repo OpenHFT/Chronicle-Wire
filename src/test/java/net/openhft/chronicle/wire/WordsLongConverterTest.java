@@ -27,10 +27,15 @@ import static org.junit.Assert.assertEquals;
 
 public class WordsLongConverterTest extends WireTestCommon {
 
+    // Test how WordsLongConverter integrates with YAML Wire
     @Test
     public void inYaml() {
+        // Initialize YAML wire
         Wire wire = Wire.newYamlWireOnHeap();
+
+        // Create method writer
         final AsWords words = wire.methodWriter(AsWords.class);
+        // Write words and validate YAML output
         words.words(Words.INSTANCE.parse("eat.red.apple"));
         words.words(Words.INSTANCE.parse("blue.clay,sets"));
         words.words(Words.INSTANCE.parse("many.looks.now"));
@@ -46,10 +51,16 @@ public class WordsLongConverterTest extends WireTestCommon {
                 "...\n", wire.toString());
     }
 
+    // Test the conversion of longs to strings
     @Test
     public void asString() {
+        // Initialize WordsLongConverter
         LongConverter bic = new WordsLongConverter();
+
+        // StringBuilder for accumulating the output
         StringBuilder sb = new StringBuilder();
+
+        // Loop through various long values, convert them to strings and validate
         for (long i = 1; i > 0; i *= 17)
             sb.append(i).append(": ").append(bic.asString(i)).append("\n");
         System.out.println(sb);
@@ -73,8 +84,10 @@ public class WordsLongConverterTest extends WireTestCommon {
                 sb.toString());
     }
 
+    // Test the parsing capabilities of WordsLongConverter
     @Test
     public void parse() {
+        // Initialize WordsLongConverter
         LongConverter bic = new WordsLongConverter();
         for (String s : ("square.army.plan.player.wash.disk\n" +
                 "instant.our.ocean.gold.thank.bang\n" +
@@ -112,6 +125,7 @@ public class WordsLongConverterTest extends WireTestCommon {
         }
     }
 
+    // Interface for testing words conversion
     interface AsWords {
         void words(@Words long words);
     }
