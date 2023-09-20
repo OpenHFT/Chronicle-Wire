@@ -31,15 +31,30 @@ import java.net.URL;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 
 /**
- * Equivalent to wget --post-data='{data}' http://{host}:{port}/url...
+ * This class allows for the serialization of {@link Marshallable} objects and their transmission over HTTP using the POST method.
+ * It is conceptually similar to the command {@code wget --post-data='{data}' http://{host}:{port}/url...}.
+ *
+ * The class encapsulates a {@link Wire} which holds the serialized representation. On closure of a document context,
+ * the serialized content is posted to the given URL.
+ *
+ * @since 2023-09-16
  */
 
 public class HTTPMarshallableOut implements MarshallableOut {
+
+    // The target URL to which serialized data is posted
     private final URL url;
+
+    // The encapsulated Wire object for serialization
     private final Wire wire;
+
+    // Document context holder for managing the wire and the HTTP communication
     private final DocumentContextHolder dcHolder = new DocumentContextHolder() {
+
+        // Inline comment about override functionality
         @Override
         public void close() {
+            // Logic for managing wire and HTTP communication
             final boolean chainedElement = chainedElement();
             super.close();
             if (chainedElement)
@@ -77,6 +92,12 @@ public class HTTPMarshallableOut implements MarshallableOut {
         }
     };
 
+    /**
+     * Constructs an HTTPMarshallableOut object with the provided builder and wire type.
+     *
+     * @param builder   The {@link MarshallableOutBuilder} providing configuration details.
+     * @param wireType  The type of Wire for serialization.
+     */
     public HTTPMarshallableOut(MarshallableOutBuilder builder, WireType wireType) {
         this.url = builder.url();
 
@@ -88,10 +109,12 @@ public class HTTPMarshallableOut implements MarshallableOut {
         startWire();
     }
 
+    // Method for resetting the wire state
     void startWire() {
         wire.clear();
     }
 
+    // Method for finalizing the wire content
     void endWire() {
         if (!wire.isBinary()) {
             final Bytes<?> bytes = wire.bytes();

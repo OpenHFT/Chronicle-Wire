@@ -39,16 +39,20 @@ import static org.junit.Assume.assumeFalse;
 
 @SuppressWarnings("unchecked")
 public class WireSerializedLambdaTest extends WireTestCommon {
+
+    // Static initializer block for class alias configurations
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(Fun.class);
         ClassAliasPool.CLASS_ALIASES.addAlias(Update.class);
     }
 
+    // Ensure that the test is not executed for Java versions 21 and above
     @Before
     public void notSupportedInJava21() {
         assumeFalse(Jvm.majorVersion() >= 21);
     }
 
+    // Test to check if various lambda functions are serializable
     @Test
     public void testIsLambda() {
         @NotNull Function<String, String> fun = (Function<String, String> & Serializable) String::toUpperCase;
@@ -61,6 +65,7 @@ public class WireSerializedLambdaTest extends WireTestCommon {
         assertFalse(WireSerializedLambda.isSerializableLambda(this.getClass()));
     }
 
+    // Helper function to test text-based wire formats
     private static void doTestText(WireType wireType) {
         @NotNull Wire wire = wireType.apply(Bytes.elasticByteBuffer());
         SerializableFunction<String, String> fun = String::toUpperCase;
@@ -70,7 +75,7 @@ public class WireSerializedLambdaTest extends WireTestCommon {
                 .write(() -> "three").object(Update.INCR);
 
         // System.out.println(wire.bytes().toString());
-
+        // Verify the serialized content of the wire object
         assertEquals("one: !SerializedLambda {\n" +
                 "  cc: !type net.openhft.chronicle.wire.WireSerializedLambdaTest,\n" +
                 "  fic: net/openhft/chronicle/core/util/SerializableFunction,\n" +
@@ -100,16 +105,19 @@ public class WireSerializedLambdaTest extends WireTestCommon {
         wire.bytes().releaseLast();
     }
 
+    // Test the serialization and deserialization using TextWire
     @Test
     public void testTextWire() {
         doTestText(WireType.TEXT);
     }
 
+    // Test the serialization and deserialization using YamlWire
     @Test
     public void testYamlWire() {
         doTestText(WireType.YAML_ONLY);
     }
 
+    // Test the serialization and deserialization using BinaryWire
     @Test
     public void testBinaryWire() {
         @NotNull Wire wire = new BinaryWire(new HexDumpBytes());
@@ -119,6 +127,7 @@ public class WireSerializedLambdaTest extends WireTestCommon {
                 .write(() -> "two").object(Fun.ADD_A)
                 .write(() -> "three").object(Update.DECR);
 
+        // Verify the serialized binary content of the wire object
         assertEquals("c3 6f 6e 65                                     # one:\n" +
                         "b6 10 53 65 72 69 61 6c 69 7a 65 64 4c 61 6d 62 # SerializedLambda\n" +
                         "64 61 82 21 01 00 00                            # Marshallable\n" +

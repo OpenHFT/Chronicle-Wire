@@ -21,9 +21,27 @@ package net.openhft.chronicle.wire.utils;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * The MissingFieldAgitator class is an implementation of the YamlAgitator interface.
+ * It's designed to simulate missing fields in YAML content. Given a set of field names,
+ * this agitator will generate versions of the input YAML with these fields marked as missing.
+ * Fields that start with a '-' are implicitly ignored and aren't considered missing.
+ * <p>
+ * A primary use-case for this agitator would be in testing parsers or consumers of the YAML content
+ * to ensure they handle and react correctly to missing fields.
+ *
+ * @since 2023-09-16
+ */
 public class MissingFieldAgitator implements YamlAgitator {
+
+    // Fields to be marked as missing in the YAML content
     private String[] fields;
 
+    /**
+     * Constructs a new MissingFieldAgitator with the specified field names to be marked as missing.
+     *
+     * @param fields Varargs of field names to be made missing.
+     */
     public MissingFieldAgitator(String... fields) {
         this.fields = fields;
     }

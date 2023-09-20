@@ -23,9 +23,24 @@ import net.openhft.chronicle.wire.*;
 
 import java.util.function.Consumer;
 
+/**
+ * An implementation of {@link MarshallableOut} that serializes {@link Marshallable} objects and forwards
+ * the serialized string representation to a provided {@link Consumer<String>}.
+ *
+ * The class encapsulates a {@link Wire} to hold the serialized representation. Upon closing of a document context,
+ * the serialized content is converted to a string and passed to the given string consumer.
+ *
+ * @since 2023-09-16
+ */
 public class StringConsumerMarshallableOut implements MarshallableOut {
+
+    // Consumer to process the serialized string representation
     private Consumer<String> stringConsumer;
+
+    // Wire object responsible for serialization
     private Wire wire;
+
+    // Document context holder for managing the wire and forwarding the serialized content to the stringConsumer
     private final DocumentContextHolder dcHolder = new DocumentContextHolder() {
         @Override
         public void close() {
@@ -40,6 +55,12 @@ public class StringConsumerMarshallableOut implements MarshallableOut {
         }
     };
 
+    /**
+     * Constructs a StringConsumerMarshallableOut object with the provided string consumer and wire type.
+     *
+     * @param stringConsumer The consumer to process serialized string representation.
+     * @param wireType       The type of Wire used for serialization.
+     */
     public StringConsumerMarshallableOut(Consumer<String> stringConsumer, WireType wireType) {
         this.stringConsumer = stringConsumer;
         this.wire = wireType.apply(Bytes.allocateElasticOnHeap());

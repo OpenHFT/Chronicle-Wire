@@ -19,6 +19,15 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.StopCharsTester;
 
+/**
+ * Enumerates testers that determine if a combination of characters should act as stopping
+ * points during parsing based on various contexts.
+ * <p>
+ * Each tester in this enum can take into account the current character as well as a peek
+ * at the next character to decide if it should signal a stop.
+ *
+ * @since 2023-09-11
+ */
 enum TextStopCharsTesters implements StopCharsTester {
     STRICT_END_OF_TEXT {
         @Override
@@ -69,6 +78,12 @@ enum TextStopCharsTesters implements StopCharsTester {
         }
     };
 
+    /**
+     * Checks if the given character is a typical separator in textual data.
+     *
+     * @param peekNextCh The character to test.
+     * @return True if the character is a separator; false otherwise.
+     */
     public static boolean isASeparator(int peekNextCh) {
         return peekNextCh <= ' '
                 || peekNextCh == '!'

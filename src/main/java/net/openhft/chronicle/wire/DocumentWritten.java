@@ -18,19 +18,43 @@
 
 package net.openhft.chronicle.wire;
 
+/**
+ * Represents an entity that supports writing documents. The interface provides methods
+ * to initiate and manage the context in which documents are written. It is crucial
+ * to manage the lifecycle of the {@link DocumentContext} correctly, either by using
+ * try-with-resources or explicitly invoking the close() method.
+ *
+ * @since 2023-09-14
+ */
 public interface DocumentWritten {
     /**
-     * @return a context to use in a try-with-resource block
+     * Creates a new {@link DocumentContext} for writing a document.
+     * This context is designed for use within a try-with-resource block to ensure
+     * proper resource management.
+     *
+     * @return A fresh {@link DocumentContext} for writing.
      */
     DocumentContext writingDocument();
 
     /**
-     * Start a new DocumentContext, must always call close() when done.
+     * Initiates a new {@link DocumentContext} for writing, with an option to include
+     * metadata. It is imperative to always invoke the close() method on the context
+     * after completing the write operation.
+     *
+     * @param metaData A boolean indicating if metadata should be included during writing.
+     * @return A fresh {@link DocumentContext} tailored to the metadata preference.
+     * @throws UnrecoverableTimeoutException If the operation times out in an unrecoverable manner.
      */
     DocumentContext writingDocument(boolean metaData) throws UnrecoverableTimeoutException;
 
     /**
-     * Start or reuse an existing a DocumentContext, optionally call close() when done.
+     * Obtains a {@link DocumentContext} for writing. This method either initiates a new context
+     * or reuses an existing one. Depending on the use case, calling the close() method
+     * on the context might be optional.
+     *
+     * @param metaData A boolean indicating if metadata should be included during writing.
+     * @return An existing or new {@link DocumentContext} tailored to the metadata preference.
+     * @throws UnrecoverableTimeoutException If the operation times out in an unrecoverable manner.
      */
     DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException;
 }

@@ -22,7 +22,23 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.BitSet;
 
+/**
+ * Defines testers that determine if a character should act as a stopping
+ * character based on various parsing contexts.
+ * <p>
+ * This enum primarily caters to text parsing scenarios, especially when
+ * determining the end of specific types or textual blocks.
+ *
+ * @since 2023-09-11
+ */
 enum TextStopCharTesters implements StopCharTester {
+
+    /**
+     * Tester for determining the end of a type.
+     * <p>
+     * This tester checks if a character is considered to be a termination
+     * point based on Java identifier rules, but with a few exceptions.
+     */
     END_OF_TYPE {
         @NotNull
         private final BitSet eow = TextStopCharTesters.endOfTypeBitSet();
@@ -54,6 +70,15 @@ enum TextStopCharTesters implements StopCharTester {
         }
     };
 
+    /**
+     * Constructs a BitSet representing characters that mark
+     * the end of a type.
+     * <p>
+     * By default, it considers all non-Java identifier characters as stop chars
+     * but makes exceptions for certain characters.
+     *
+     * @return A BitSet representing the stop characters for a type.
+     */
     private static BitSet endOfTypeBitSet() {
         final BitSet eow = new BitSet();
         for (int i = 0; i < 127; i++) {
@@ -61,13 +86,14 @@ enum TextStopCharTesters implements StopCharTester {
                 eow.set(i);
         }
 
-        eow.clear('['); // not in spec
-        eow.clear(']'); // not in spec
-        eow.clear('-'); // not in spec
+        // Clearing specific characters from the default set
+        // as they aren't considered stop chars for a type context.
+        eow.clear('[');
+        eow.clear(']');
+        eow.clear('-');
         eow.clear('!');
         eow.clear('.');
         eow.clear('$');
         return eow;
     }
-
 }

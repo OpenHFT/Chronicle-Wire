@@ -22,12 +22,42 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+/**
+ * A YAML agitator that generates various permutations of a given YAML content by duplicating specific messages.
+ *
+ * <p>
+ * This agitator uses regular expressions to identify distinct YAML messages within a given input and
+ * then duplicates certain messages based on a predefined limit. This can be useful for testing how systems
+ * handle duplicated YAML messages or simulating specific scenarios.
+ * </p>
+ *
+ * <p>
+ * An example of its usage might be to generate inputs for fuzz testing or to validate how a YAML parser
+ * deals with redundant information.
+ * </p>
+ *
+ * @see YamlAgitator
+ * @since 2023-09-16
+ */
 public class DuplicateMessageAgitator implements YamlAgitator {
+
+    /** Pattern to identify the separation between distinct YAML messages. */
     static final Pattern SEP = Pattern.compile("[.][.][.]\\s*");
+
+    /** Singleton instance of this agitator with a default duplication limit. */
     static final YamlAgitator INSTANCE = new DuplicateMessageAgitator(4);
+
+    /** Marker indicating the end of a YAML message. */
     public static final String YAML_EOD = "...\n";
+
+    /** The maximum number of messages to duplicate from the input YAML. */
     private final int limit;
 
+    /**
+     * Constructs a new instance with a specified limit on the number of messages to duplicate.
+     *
+     * @param limit The maximum number of messages to duplicate from the input YAML.
+     */
     public DuplicateMessageAgitator(int limit) {
         this.limit = limit;
     }

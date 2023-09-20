@@ -20,17 +20,55 @@ package net.openhft.chronicle.wire.utils;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * A formatter specifically tailored for formatting Java source code.
+ *
+ * <p>
+ * This formatter extends the generic {@link SourceCodeFormatter} to provide specific
+ * formatting capabilities for Java source code. It ensures that long literals are
+ * appropriately suffixed with an 'L' and also provides multiple constructors
+ * to initialize and control the indentation level.
+ * </p>
+ *
+ * <p>
+ * By default, the formatter uses an indentation of 4 spaces for Java code,
+ * in line with common Java coding conventions. However, this can be customized
+ * if needed.
+ * </p>
+ *
+ * @see SourceCodeFormatter
+ * @since 2023-09-16
+ */
 public class JavaSourceCodeFormatter extends SourceCodeFormatter {
+
+    /** Default number of spaces for indentation in Java source code. */
     private static final int INDENT_SPACES = 4;
 
+    /**
+     * Constructs a new Java source code formatter with the default indentation level.
+     */
     public JavaSourceCodeFormatter() {
         super(INDENT_SPACES);
     }
 
+    /**
+     * Constructs a new Java source code formatter with a specified initial indentation level.
+     *
+     * @param indent Initial indentation level.
+     */
     public JavaSourceCodeFormatter(int indent) {
         super(INDENT_SPACES, indent);
     }
 
+    /**
+     * Constructs a new Java source code formatter with a provided AtomicInteger to manage the indentation level.
+     *
+     * <p>
+     * This can be useful in scenarios where the indentation needs to be managed or adjusted externally.
+     * </p>
+     *
+     * @param indent AtomicInteger managing the indentation level.
+     */
     public JavaSourceCodeFormatter(AtomicInteger indent) {
         super(INDENT_SPACES, indent);
     }

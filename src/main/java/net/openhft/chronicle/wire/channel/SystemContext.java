@@ -27,24 +27,43 @@ import net.openhft.chronicle.wire.NanoTimestampLongConverter;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
 /**
- * Encapsulates system-related information into a singleton object, such as:
+ * Represents the system context by encapsulating system-specific information such as:
  * the number of available processors, host ID, host name, system up time,
  * user's country and name, and the Java vendor and version.
  * <p>
- * The singleton instance is initialized with the system's current state.
- * If deserialized from another host, the SystemContext object would contain the information of that host at the moment of serialization.
+ * The {@code SystemContext} acts as a singleton, initialized with the current system's state.
+ * When deserialized from another host, the {@code SystemContext} reflects the state of that host
+ * at the time of serialization.
  */
 @SuppressWarnings("unused")
 public class SystemContext extends SelfDescribingMarshallable {
+
+    // Singleton instance representing the current system context.
     public static final SystemContext INSTANCE = getInstance();
+
+    // Represents the number of available processors in the system.
     private int availableProcessors;
+
+    // A unique identifier for the host system.
     private int hostId;
+
+    // The name of the host system.
     private String hostName;
+
+    // The system's up time, in nanoseconds.
     @LongConversion(NanoTimestampLongConverter.class)
     private long upTime;
+
+    // The country code associated with the current user's environment settings.
     private String userCountry;
+
+    // The name of the current user of the system.
     private String userName;
+
+    // The name of the Java vendor for the current JVM.
     private String javaVendor;
+
+    // The version of the Java runtime environment.
     private String javaVersion;
 
     /**

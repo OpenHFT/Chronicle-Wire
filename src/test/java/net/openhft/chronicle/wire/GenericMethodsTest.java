@@ -26,22 +26,35 @@ import java.lang.reflect.Proxy;
 
 import static junit.framework.TestCase.assertFalse;
 
+
+// A generic interface which allows for method chaining and a terminator method
 interface MyInterface<I extends MyInterface> {
     I hello(String hello);
 
     void terminator();
 }
 
+// Test class to validate the behavior of generic methods in the context of Wire operations
 public class GenericMethodsTest extends WireTestCommon {
+
+    // Test for chained method calls with TextWire
     @Test
     public void chainedText() {
+
+        // Create a new TextWire instance with elastic byte allocation
         TextWire wire = new TextWire(Bytes.allocateElasticOnHeap(128))
                 .useTextDocuments();
+
+        // Generate a method writer for the MyInterface
         MyInterface top = wire.methodWriter(MyInterface.class);
+
+        // Ensure the created object is not a proxy class
         assertFalse(Proxy.isProxyClass(top.getClass()));
 
+        // Chain multiple method calls and terminate
         top.hello("hello world").hello("hello world 2").terminator();
 
+        // Assert the expected output from the wire after the method calls
         Assert.assertEquals("hello: hello world\n" +
                 "hello: hello world 2\n" +
                 "terminator: \"\"\n" +

@@ -20,10 +20,25 @@ package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * The AbstractEventCfg class represents a generic configuration for events.
+ * It extends the AbstractMarshallableCfg and implements the Event interface.
+ * This class provides methods to retrieve and set event properties such as ID, time, and service ID.
+ * It also follows the builder pattern, allowing chained method calls.
+ *
+ * @param <E> The type parameter extending AbstractEventCfg
+ * @since 2023-09-15
+ */
 public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMarshallableCfg implements Event<E> {
+
+    // The unique identifier for the event
     private String eventId = "";
+
+    // The timestamp indicating the time of the event
     @LongConversion(ServicesTimestampLongConverter.class)
     private long eventTime;
+
+    // The service ID associated with the event
     private String serviceId = "";
 
     @NotNull
@@ -57,20 +72,34 @@ public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMar
     }
 
     /**
-     * Used for cfg event routing. serviceId of the destination event
+     * This method retrieves the service ID associated with the event, used for event routing.
+     * It returns the ID of the destination event.
      *
-     * @return serviceId
+     * @return The current service ID of this object
      */
     @NotNull
     public String serviceId() {
         return serviceId;
     }
 
+    /**
+     * This method sets the provided service ID to the instance variable.
+     * It returns the current instance, allowing chained method calls.
+     *
+     * @param serviceId The new service ID to be set
+     * @return The current instance of AbstractEventCfg class
+     */
     public E serviceId(String serviceId) {
         this.serviceId = serviceId;
         return (E) this;
     }
 
+    /**
+     * This method checks if the event is routed to a specific destination service.
+     *
+     * @param destServiceId The destination service ID to check against
+     * @return true if the event is routed to the specified service, false otherwise
+     */
     public boolean routedTo(String destServiceId) {
         return this.serviceId == null || this.serviceId().isEmpty() || this.serviceId().equals(destServiceId);
     }

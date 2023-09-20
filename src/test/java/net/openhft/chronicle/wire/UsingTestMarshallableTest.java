@@ -31,24 +31,32 @@ import static org.junit.Assert.assertEquals;
 
 public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTestCommon {
 
+    // Test case to verify the conversion of a Marshallable object to its text representation
     @Test
     public void testConverMarshallableToTextName() {
 
+        // Initialize a TestMarshallable object and set its name
         @NotNull TestMarshallable testMarshallable = new TestMarshallable();
         testMarshallable.setName("hello world");
 
+        // Create a ByteBuffer to hold the serialized data
         Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer();
 
+        // Initialize a Wire object with TEXT type
         @NotNull Wire wire = WireType.TEXT.apply(byteBufferBytes);
         wire.bytes().readPosition();
 
+        // Write the TestMarshallable object to the Wire
         wire.writeDocument(false, d -> d.write(() -> "any-key").marshallable(testMarshallable));
 
+        // Deserialize the Wire's bytes to a String
         String value = Wires.fromSizePrefixedBlobs(wire.bytes());
 
         //String replace = value.replace("\n", "\\n");
 
        // System.out.println(byteBufferBytes.toHexString());
+
+        // Ensure the serialized output matches the expected format
         assertEquals("" +
                 "--- !!data\n" +
                 "any-key: {\n" +
@@ -58,41 +66,51 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
                 value);
 
          // Assert.assertTrue(replace.length() > 1);
+        // Release the ByteBuffer's resources
         byteBufferBytes.releaseLast();
     }
 
-    /**
-     * see WIRE-37 issue when using numbers as keys in binary wire
-     */
+    // Test case to check the marshalling functionality using numbers as keys in binary wire
+    // This test addresses the WIRE-37 issue
     @Test
     public void testMarshall() {
 
+        // Create a ByteBuffer to hold the serialized data
         @SuppressWarnings("rawtypes")
         Bytes<?> bytes = Bytes.elasticByteBuffer();
+
+        // Initialize a Wire object with BINARY type
         @NotNull Wire wire = new BinaryWire(bytes);
 
+        // Create and initialize an instance of MyMarshallable
         @NotNull MyMarshallable x = new MyMarshallable();
         x.text.append("text");
 
+        // Write the MyMarshallable object to the Wire
         wire.write(() -> "key").typedMarshallable(x);
 
+        // Read back the MyMarshallable object from the Wire
         @NotNull final ValueIn read = wire.read(() -> "key");
         @Nullable final MyMarshallable result = read.typedMarshallable();
 
        // System.out.println(result.toString());
 
+        // Ensure the read value matches the written one
         assertEquals("text", result.text.toString());
 
+        // Release the ByteBuffer's resources
         bytes.releaseLast();
     }
 
+    // Test case to check the write and read functionality for a Marshallable object
     @Test
     public void test() {
+
         Bytes<?> bytes = Bytes.elasticByteBuffer();
         Wire wire = WireType.BINARY.apply(bytes);
         @NotNull MarshableFilter expected = new MarshableFilter("hello", "world");
 
-        // write
+        // Write the MarshableFilter to the Wire
         {
             @NotNull SortedFilter sortedFilter = new SortedFilter();
 
@@ -101,7 +119,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
             wire.write().marshallable(sortedFilter);
         }
 
-        // read
+        // Read back the MarshableFilter from the Wire
         {
             @NotNull SortedFilter sortedFilter = new SortedFilter();
             wire.read().marshallable(sortedFilter);

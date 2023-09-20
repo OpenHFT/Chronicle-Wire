@@ -18,9 +18,21 @@
 package net.openhft.chronicle.wire;
 
 /**
- * This uses bytes marshallable, non self describing messages by default.
+ * Represents an abstract base class for binary marshallables that primarily deal with bytes.
+ * By default, this class does not use self-describing messages.
+ *
+ * This class extends the {@link AbstractCommonMarshallable} to provide common functionalities
+ * shared among marshallables.
+ *
+ * @since 2023-09-14
  */
 public abstract class BytesInBinaryMarshallable extends AbstractCommonMarshallable {
+
+    /**
+     * Determines whether this marshallable uses self-describing messages.
+     *
+     * @return {@code false} indicating that this marshallable does not use self-describing messages by default.
+     */
     @Override
     public boolean usesSelfDescribingMessage() {
         return false;

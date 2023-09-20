@@ -22,6 +22,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
 
+/**
+ * Represents a context that governs the interactions and state management for a document.
+ * It provides methods to interrogate and manipulate the state of the associated document,
+ * ensuring consistent and safe operations. This interface offers checks for metadata,
+ * presence, and completion status of the document, as well as operations to manage the context's
+ * lifecycle such as open, close, and reset.
+ * <p>
+ * Implementations must ensure proper handling of resources and consistency of the document state.
+ *
+ * @since 2023-09-14
+ */
 public interface DocumentContext extends Closeable, SourceContext {
     DocumentContext NOOP = Mocker.ignored(DocumentContext.class);
 
@@ -42,10 +53,11 @@ public interface DocumentContext extends Closeable, SourceContext {
     boolean isPresent();
 
     /**
-     * Checks if the {@code DocumentContext} is data. If it is, {@code true} is returned,
-     * otherwise {@code false}
+     * Determines if the {@code DocumentContext} is in an open state.
+     * This method essentially checks the inverse of the completion status of the context.
      *
-     * @return true - is the entry is data
+     * @return {@code true} if the context is open (i.e., the NOT_COMPLETE flag is set),
+     * {@code false} otherwise.
      */
     default boolean isData() {
         return isPresent() && !isMetaData();
@@ -70,8 +82,9 @@ public interface DocumentContext extends Closeable, SourceContext {
     }
 
     /**
-     * Call this if you have detected an error condition and you want the context
-     * rolled back when it is closed, rather than half a message committed
+     * Invoked to signal an error condition in the current context.
+     * This ensures that upon closing the context, any changes made during its lifecycle
+     * are rolled back rather than committing a potentially erroneous state.
      */
     default void rollbackOnClose() {
     }
@@ -83,11 +96,18 @@ public interface DocumentContext extends Closeable, SourceContext {
         throw new UnsupportedOperationException(getClass().getName());
     }
 
+    /**
+     * Closes the {@code DocumentContext} and releases any held resources.
+     * It is crucial to ensure that this method is invoked after the context's operations are completed
+     * to prevent any potential resource leaks or data corruption.
+     */
     @Override
     void close();
 
     /**
-     * call close once, then discard any remaining state
+     * Cleans up the {@code DocumentContext} by invoking the close method, then discarding
+     * any lingering state associated with it. This provides a way to ensure the context
+     * is in a fresh state and free of any residual data or settings.
      */
     void reset();
 }

@@ -21,19 +21,56 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Provides a concrete implementation of the {@link WriteDocumentContext} for text-based wire representations.
+ * This class manages and tracks the state of the document being written and contains functionalities
+ * for starting a new write transaction in the document.
+ * <p>
+ * While writing, it can be ensured that meta-data is correctly specified, and the position of the write
+ * operation is recorded.
+ * </p>
+ *
+ * @since 2023-09-11
+ */
 public class TextWriteDocumentContext implements WriteDocumentContext {
+
+    // The wire used for writing.
     protected Wire wire;
+
+    // Flag to check if the current data being written is meta-data.
     private boolean metaData;
+
+    // Indicates if the write operation is completed.
     private volatile boolean notComplete;
+
+    // Maintains the count of start operations.
     protected int count = 0;
+
+    // Indicates if the current element is chained to the previous one.
     private boolean chainedElement;
+
+    // Indicates if the current write operation should be rolled back.
     private boolean rollback;
+
+    // Maintains the current position of the write operation.
     protected long position;
 
+    /**
+     * Constructs a new context for the specified wire.
+     *
+     * @param wire The wire instance to be used for writing
+     */
     public TextWriteDocumentContext(Wire wire) {
         this.wire = wire;
     }
 
+    /**
+     * Starts a new write transaction in the document. If a transaction is already in progress,
+     * this method ensures the meta-data flag is consistent. It also sets the write position
+     * and other state flags to their initial values.
+     *
+     * @param metaData Indicates if the data being written is meta-data
+     */
     public void start(boolean metaData) {
         count++;
         if (count > 1) {

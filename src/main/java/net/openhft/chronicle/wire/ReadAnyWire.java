@@ -28,15 +28,21 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Supplier;
 
 /**
- * A wire type than can be either
- * <p>
- * TextWire BinaryWire
+ * Represents a wire type that can be either {@code TextWire} or {@code BinaryWire}.
+ * The specific wire type is determined dynamically based on the provided bytes.
+ * This class provides flexibility in reading from wires that could be in either format.
  *
- * @author Rob Austin.
+ * @since 2023-09-11
  */
 @SuppressWarnings("rawtypes")
 public class ReadAnyWire extends AbstractAnyWire implements Wire {
 
+    /**
+     * Constructs a new instance of {@code ReadAnyWire} with the provided bytes.
+     * The specific wire type will be determined based on these bytes.
+     *
+     * @param bytes The bytes from which to determine the wire type.
+     */
     public ReadAnyWire(@NotNull Bytes<?> bytes) {
         super(bytes, new ReadAnyWireAcquisition(bytes));
     }
@@ -85,6 +91,11 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
         return bytes;
     }
 
+    /**
+     * Represents a mechanism to acquire the correct wire type based on provided bytes.
+     * This class is responsible for dynamically determining whether the bytes
+     * correspond to a {@code TextWire} or a {@code BinaryWire}.
+     */
     static class ReadAnyWireAcquisition implements WireAcquisition {
         private final Bytes<?> bytes;
         WireType wireType;
@@ -92,6 +103,11 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
         Wire wire = null;
         private ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
 
+        /**
+         * Constructs a new instance of {@code ReadAnyWireAcquisition} with the provided bytes.
+         *
+         * @param bytes The bytes used to determine and acquire the appropriate wire type.
+         */
         public ReadAnyWireAcquisition(Bytes<?> bytes) {
             this.bytes = bytes;
         }

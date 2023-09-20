@@ -17,21 +17,44 @@
  */
 package net.openhft.chronicle.wire;
 
+/**
+ * Represents a converter for transforming characters to and from textual representations.
+ * This interface provides methods for parsing a {@link CharSequence} to produce a character and
+ * for appending a character to a {@link StringBuilder}.
+ * <p>
+ * Implementations can use this interface to create custom representations or transformations
+ * for characters as needed.
+ *
+ * @since 2023-09-14
+ */
 public interface CharConverter {
 
     /**
-     * Parses the provided {@link CharSequence} and returns the parsed results as a
-     * {@code char} primitive.
+     * Parses the provided {@link CharSequence} to produce a character. Implementing classes
+     * should define how the text is transformed to a character primitive.
      *
-     * @return the parsed {@code text} as an {@code char} primitive.
+     * @param text the textual representation of a character to be parsed.
+     * @return the parsed character.
+     * @throws IllegalArgumentException if the provided {@code text} cannot be parsed into a char.
      */
     char parse(CharSequence text);
 
     /**
-     * Appends the provided {@code value} to the provided {@code text}.
+     * Appends the string representation of the provided character {@code value} to the end
+     * of the {@code text}. Implementing classes should define how the character is transformed
+     * to its textual representation.
+     *
+     * @param text  the {@link StringBuilder} to which the character's textual representation should be appended.
+     * @param value the character to be converted and appended to the text.
      */
     void append(StringBuilder text, char value);
 
+    /**
+     * Converts the provided {@code value} into its string representation.
+     *
+     * @param value the character to be converted to its string representation.
+     * @return the string representation of the provided character.
+     */
     default String asString(final char value) {
         final StringBuilder sb = new StringBuilder();
         append(sb, value);

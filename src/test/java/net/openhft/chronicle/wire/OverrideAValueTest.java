@@ -27,15 +27,20 @@ import static org.junit.Assert.assertEquals;
 public class OverrideAValueTest extends WireTestCommon {
     @Test
     public void testDontTouchImmutables() {
+        // Deserialize a NumberHolder with num set to 2
         @Nullable NumberHolder nh = Marshallable.fromString("!" + NumberHolder.class.getName() + " { num: 2 } ");
+        // Assert the immutable ONE constant and the deserialized value
         assertEquals(1, NumberHolder.ONE.intValue());
         assertEquals(2, nh.num.intValue());
     }
 
     @Test
     public void testDontTouchImmutables2() {
+        // Mark NumberHolder class as immutable
         ObjectUtils.immutabile(NumberHolder.class, true);
+        // Deserialize an ObjectHolder with a nested NumberHolder
         @Nullable ObjectHolder oh = Marshallable.fromString("!" + ObjectHolder.class.getName() + " { nh: !" + NumberHolder.class.getName() + " { num: 3 } } ");
+        // Assert various values remain unchanged after deserialization
         assertEquals(1, NumberHolder.ONE.intValue());
         assertEquals(1, ObjectHolder.NH.num.intValue());
         assertEquals(3, oh.nh.num.intValue());
@@ -43,7 +48,9 @@ public class OverrideAValueTest extends WireTestCommon {
 
     @Test
     public void testAllowClassChange() {
+        // Deserialize a ParentHolder with a nested SubClass object
         @Nullable ParentHolder ph = Marshallable.fromString("!" + ParentHolder.class.getName() + " { object: !" + SubClass.class.getName() + " { name: bob, value: 3.3 } } ");
+        // Assert the deserialized structure
         assertEquals("!net.openhft.chronicle.wire.OverrideAValueTest$ParentHolder {\n" +
                 "  object: !net.openhft.chronicle.wire.OverrideAValueTest$SubClass {\n" +
                 "    name: bob,\n" +
@@ -52,6 +59,7 @@ public class OverrideAValueTest extends WireTestCommon {
                 "}\n", ph.toString());
     }
 
+    // Various helper classes to demonstrate object hierarchy and nested deserialization
     static class NumberHolder extends SelfDescribingMarshallable {
         @SuppressWarnings("UnnecessaryBoxing")
         public static final Integer ONE = new Integer(1);

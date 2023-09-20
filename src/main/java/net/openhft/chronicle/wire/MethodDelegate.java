@@ -18,6 +18,25 @@
 
 package net.openhft.chronicle.wire;
 
+/**
+ * Represents an interface that provides a mechanism for method delegation.
+ * Implementors of this interface can set a delegate to which method invocations are
+ * forwarded. By using this interface, users can achieve behavior modification,
+ * augmentation, or decoration of method calls by setting appropriate delegates.
+ *
+ * @param <OUT> The type of the delegate to which method calls will be forwarded.
+ *
+ * @since 2023-09-12
+ */
 public interface MethodDelegate<OUT> {
+
+    /**
+     * Sets the delegate to which method invocations will be forwarded.
+     * <p>
+     * This mechanism allows the delegation of method calls to an alternate implementation,
+     * enabling behaviors like logging, mocking, or additional processing.
+     * </p>
+     * @param delegate The object that will receive the delegated method calls.
+     */
     void delegate(OUT delegate);
 }

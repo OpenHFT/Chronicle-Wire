@@ -18,10 +18,16 @@
 
 package net.openhft.chronicle.wire;
 
+// Class representing a nested data structure that is self-describing.
 class DMNestedClass extends SelfDescribingMarshallable {
+
+    // String representation of the nested class.
     String str;
+
+    // Numerical value associated with the nested class.
     int num;
 
+    // Constructor to initialize the nested class with given values.
     public DMNestedClass(String str, int num) {
         this.str = str;
         this.num = num;

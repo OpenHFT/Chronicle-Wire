@@ -22,7 +22,16 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * This class extends the WireMarshaller and provides the ability to handle unexpected fields.
+ * It maps fields by their name (both in their original form and lower-cased) for easy access.
+ * It overrides the method to read marshallable objects and provides specialized logic to
+ * handle unexpected fields that might be present in the data source.
+ *
+ * @since 2023-09-07
+ */
 public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
+    // Map for storing fields based on their names.
     final CharSequenceObjectMap<FieldAccess> fieldMap;
 
     /** @deprecated To be removed in x.26 */

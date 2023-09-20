@@ -26,27 +26,38 @@ import static org.junit.Assert.assertEquals;
 @SuppressWarnings("rawtypes")
 public class WireInternalTest extends WireTestCommon {
 
+    // Test the serialization and deserialization of a Throwable object using Wire's object method.
     @Test
     public void testThrowableAsObject() {
+        // Create an elastic byte buffer for testing.
         final Bytes<?> bytes = Bytes.elasticByteBuffer();
         try {
+            // Initialize the BinaryWire for serialization/deserialization.
             final Wire wire = new BinaryWire(bytes);
 
+            // Create a new exception for testing.
             final Exception exc = new Exception();
 
+            // Serialize the exception using Wire.
             wire.write(() -> "exc").object(exc);
 
+            // Deserialize the exception from Wire.
             final Throwable actual = (Throwable) wire.read("exc").object();
+
+            // Compare the stack traces of the original and deserialized exceptions.
             StackTraceElement[] expectedST = exc.getStackTrace();
             StackTraceElement[] actualST = actual.getStackTrace();
             assertEquals(expectedST.length, actualST.length);
         } finally {
+            // Release the resources used by the byte buffer.
             bytes.releaseLast();
         }
     }
 
+    // Test the serialization and deserialization of a Throwable using Wire's dedicated throwable method.
     @Test
     public void testThrowable() {
+        // Similar setup to the previous test but uses TEXT wire type and the dedicated throwable methods.
         final Bytes<?> bytes = Bytes.elasticByteBuffer();
         try {
             final Wire wire = WireType.TEXT.apply(bytes);
@@ -64,12 +75,14 @@ public class WireInternalTest extends WireTestCommon {
         }
     }
 
+    // Test the conversion of a size-prefixed binary message to text using Wire.
     @Test
     public void testFromSizePrefixedBinaryToText() {
         Bytes<?> bytes = Bytes.elasticByteBuffer();
         @NotNull Wire wire = new BinaryWire(bytes);
         wire.usePadding(true);
 
+        // Create and write multiple documents using Wire.
         wire.writeDocument(true, w -> w
                 .write(() -> "csp").text("csp://hello-world")
                 .write(() -> "tid").int64(123456789));
@@ -85,7 +98,10 @@ public class WireInternalTest extends WireTestCommon {
                 }));
         wire.writeDocument(false, wireOut -> wireOut.writeEventName(() -> "userid").text("peter"));
 
+        // Convert the size-prefixed binary blobs in the byte buffer to a text representation.
         String actual = Wires.fromSizePrefixedBlobs(bytes);
+
+        // Validate the converted output against the expected string.
         assertEquals("" +
                 "--- !!meta-data #binary\n" +
                 "csp: \"csp://hello-world\"\n" +
@@ -108,6 +124,7 @@ public class WireInternalTest extends WireTestCommon {
                 "--- !!data #binary\n" +
                 "userid: peter\n", actual);
 
+        // Release the resources used by the byte buffer.
         bytes.releaseLast();
     }
 }

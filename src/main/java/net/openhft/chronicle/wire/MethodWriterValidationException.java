@@ -19,9 +19,20 @@
 package net.openhft.chronicle.wire;
 
 /**
- * Thrown if we cannot generate a {@link MethodWriter} and should not fall back to proxy impl.
+ * The {@code MethodWriterValidationException} is a specialized exception class that indicates a failure
+ * in generating a {@link MethodWriter}. This exception type prevents falling back to the default proxy
+ * implementation. It is typically thrown when there are invalid conditions or configurations related to
+ * {@link MethodWriter} creation.
+ *
+ * @since 2023-09-12
  */
 public class MethodWriterValidationException extends IllegalArgumentException {
+
+    /**
+     * Constructs a new {@code MethodWriterValidationException} with the specified detail message.
+     *
+     * @param s the detail message explaining the reason for the exception.
+     */
     public MethodWriterValidationException(String s) {
         super(s);
     }

@@ -28,24 +28,45 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
 
+/**
+ * This test verifies that the MethodReader can identify methods using their IDs.
+ */
 public class MethodReaderMethodIdsTest extends WireTestCommon {
 
+    /**
+     * Test case to verify that method calls can be identified by Method IDs.
+     */
     @Test
     public void shouldDetermineMethodNamesFromMethodIds() {
         final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
 
+        // Create a method writer proxy for the Speaker interface
         final Speaker speaker = wire.methodWriterBuilder(Speaker.class).get();
+
+        // Ensure we're not using a proxy instance
         assertFalse("check we are using generated code", Proxy.isProxyClass(speaker.getClass()));
+
+        // Call a method on the proxy
         speaker.say("hello");
 
+        // Counter to track messages heard by the reader
         final AtomicInteger heard = new AtomicInteger();
+
+        // Create a MethodReader instance with a Speaker implementation that increments 'heard'
         final MethodReader reader = new VanillaMethodReaderBuilder(wire).build((Speaker) message -> heard.incrementAndGet());
+
+        // Ensure we're using a generated code instance and not a VanillaMethodReader
         assertFalse("check we are using generated code", reader instanceof VanillaMethodReader);
+
+        // Read one message from the wire
         assertTrue(reader.readOne());
+
+        // Verify the message was "heard"
         assertEquals(1, heard.get());
     }
 
+    // Speaker interface with a method having a specific ID
     interface Speaker {
         @MethodId(7)
         void say(final String message);

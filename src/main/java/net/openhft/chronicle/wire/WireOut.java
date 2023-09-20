@@ -205,7 +205,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
     /**
      * Writes a document to the wire. This will automatically handle header numbering.
      *
-     * @param metaData Indicates if meta data should be written.
+     * @param metaData Indicates if metadata should be written.
      * @param writer The logic for writing the content of the document.
      */
     default void writeDocument(boolean metaData, @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
@@ -213,16 +213,16 @@ public interface WireOut extends WireCommon, MarshallableOut {
     }
 
     /**
-     * Starts the process of writing a document to the wire with an option for meta data.
+     * Starts the process of writing a document to the wire with an option for metadata.
      *
-     * @param metaData If true, the returned document context will be used for writing meta data.
+     * @param metaData If true, the returned document context will be used for writing metadata.
      * @return A context for the document being written.
      */
     @Override
     DocumentContext writingDocument(boolean metaData);
 
     /**
-     * Starts the process of writing a data document (not meta data) to the wire.
+     * Starts the process of writing a data document (not metadata) to the wire.
      *
      * @return A context for the document being written.
      */
@@ -233,9 +233,9 @@ public interface WireOut extends WireCommon, MarshallableOut {
     }
 
     /**
-     * Retrieves a context for writing either data or meta data, reusing an existing context if available.
+     * Retrieves a context for writing either data or metadata, reusing an existing context if available.
      *
-     * @param metaData If true, the returned context will be used for writing meta data.
+     * @param metaData If true, the returned context will be used for writing metadata.
      * @return A context for the document being written.
      */
     DocumentContext acquireWritingDocument(boolean metaData);
@@ -244,7 +244,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * Writes a document to the wire without marking its completion. This is primarily used in
      * networking scenarios, but no longer used for queues.
      *
-     * @param metaData If true, meta data will be written instead of regular data.
+     * @param metaData If true, metadata will be written instead of regular data.
      * @param writer Logic for writing the content of the document.
      */
     default void writeNotCompleteDocument(boolean metaData, @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
@@ -353,6 +353,6 @@ public interface WireOut extends WireCommon, MarshallableOut {
         /**
          * EOF marker is present
          */
-        PRESENT;
+        PRESENT
     }
 }

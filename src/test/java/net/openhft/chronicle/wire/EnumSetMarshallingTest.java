@@ -32,7 +32,12 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 
+/**
+ * Tests for marshalling and unmarshalling of EnumSets using Wire.
+ */
 public class EnumSetMarshallingTest extends WireTestCommon {
+
+    // Serialized representation of a complete set of thread states
     private static final String FULL_SET_SERIALISED_FORM =
             "--- !!data #binary\n" +
                     "key: {\n" +
@@ -46,14 +51,19 @@ public class EnumSetMarshallingTest extends WireTestCommon {
                     "  ]\n" +
                     "}\n";
 
+    // Serialized representation of an empty set of thread states
     private static final String EMPTY_SET_SERIALISED_FORM =
             "--- !!data #binary\n" +
                     "key: {\n" +
                     "  f: [ ]\n" +
                     "}\n";
 
+    /**
+     * Test marshalling an empty set of thread states.
+     */
     @Test
     public void shouldMarshallEmptySet() {
+        // Initialization of resources and test data
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         final Foo written = new Foo(EnumSet.noneOf(Thread.State.class));
         final Foo read = new Foo(EnumSet.allOf(Thread.State.class));
@@ -64,15 +74,21 @@ public class EnumSetMarshallingTest extends WireTestCommon {
             w.write(() -> "key").marshallable(written);
         });
 
+        // Validate serialized form and read data back into object
         assertEquals(EMPTY_SET_SERIALISED_FORM, Wires.fromSizePrefixedBlobs(bytes));
         tw.readingDocument().wire().read("key").marshallable(read);
 
+        // Ensure original and read data match
         assertEquals(written.f, read.f);
         bytes.releaseLast();
     }
 
+    /**
+     * Test marshalling a full set of thread states.
+     */
     @Test
     public void shouldMarshallFullSet() {
+        // Initialization of resources and test data
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         final Foo written = new Foo(EnumSet.allOf(Thread.State.class));
         final Foo read = new Foo(EnumSet.noneOf(Thread.State.class));
@@ -84,15 +100,21 @@ public class EnumSetMarshallingTest extends WireTestCommon {
             w.write(() -> "key").marshallable(written);
         });
 
+        // Validate serialized form and read data back into object
         assertEquals(FULL_SET_SERIALISED_FORM, Wires.fromSizePrefixedBlobs(bytes));
         tw.readingDocument().wire().read("key").marshallable(read);
 
+        // Ensure original and read data match
         assertEquals(written.f, read.f);
         bytes.releaseLast();
     }
 
+    /**
+     * Test unmarshalling into a container that initially has a null value for the EnumSet.
+     */
     @Test
     public void shouldUnmarshallToContainerWithNullValue() {
+        // Initialization of resources and test data
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         final Foo written = new Foo(EnumSet.allOf(Thread.State.class));
         final Foo read = new Foo(EnumSet.noneOf(Thread.State.class));
@@ -105,15 +127,21 @@ public class EnumSetMarshallingTest extends WireTestCommon {
             w.write(() -> "key").marshallable(written);
         });
 
+        // Validate serialized form and read data back into object
         assertEquals(FULL_SET_SERIALISED_FORM, Wires.fromSizePrefixedBlobs(bytes));
         tw.readingDocument().wire().read("key").marshallable(read);
 
+        // Ensure original and read data match
         assertEquals(written.f, read.f);
         bytes.releaseLast();
     }
 
+    /**
+     * Test handling multiple instances of EnumSets within an object graph.
+     */
     @Test
     public void shouldAllowMultipleInstancesInObjectGraph() {
+        // Initialization of resources and test data
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         final Container written = new Container();
         final Container read = new Container();
@@ -124,17 +152,25 @@ public class EnumSetMarshallingTest extends WireTestCommon {
             w.write(() -> "key").marshallable(written);
         });
 
+        // Read data back into object
         tw.readingDocument().wire().read("key").marshallable(read);
 
+        // Ensure that the two EnumSets in the object graph are distinct
         assertThat(read.f1.get(0).f, is(not(read.f2.get(0).f)));
         bytes.releaseLast();
     }
 
+    /**
+     * Container class with two lists containing EnumSet instances.
+     */
     private static final class Container extends SelfDescribingMarshallable {
         private List<Foo> f1 = new ArrayList<>(Arrays.asList(new Foo(EnumSet.allOf(Thread.State.class))));
         private List<Foo> f2 = new ArrayList<>(Arrays.asList(new Foo(EnumSet.noneOf(Thread.State.class))));
     }
 
+    /**
+     * Simple class encapsulating an EnumSet of thread states.
+     */
     private static final class Foo extends SelfDescribingMarshallable {
         private EnumSet<Thread.State> f;
 

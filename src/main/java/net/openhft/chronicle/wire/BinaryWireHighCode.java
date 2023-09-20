@@ -18,7 +18,25 @@
 package net.openhft.chronicle.wire;
 
 /**
- * These are the ranges of values to help decode the protocol.
+ * Enum to represent various high-level codes used in the binary wire protocol.
+ * Each constant in this enum serves as a marker to categorize the range of values
+ * used for decoding in the binary wire format. Although the enum itself does not
+ * contain any instances (indicated by the empty enum body), it does define several
+ * static final fields that serve as unique identifiers for each type of high-level code.
+ *
+ * <p><strong>High-Level Code Definitions:</strong></p>
+ * <ul>
+ *     <li>{@code END_OF_STREAM} (-1): Indicates the end of the data stream.</li>
+ *     <li>{@code NUM0} to {@code NUM7} (0x0 to 0x7): Represent numerical values.</li>
+ *     <li>{@code CONTROL} (0x8): Indicates a control sequence.</li>
+ *     <li>{@code FLOAT} (0x9): Indicates a floating-point number.</li>
+ *     <li>{@code INT} (0xA): Indicates an integer value.</li>
+ *     <li>{@code SPECIAL} (0xB): Indicates a special type.</li>
+ *     <li>{@code FIELD0} and {@code FIELD1} (0xC, 0xD): Represent fields.</li>
+ *     <li>{@code STR0} and {@code STR1} (0xE, 0xF): Represent string types.</li>
+ * </ul>
+ *
+ * @since 2023-09-14
  */
 public enum BinaryWireHighCode {
     ; // none

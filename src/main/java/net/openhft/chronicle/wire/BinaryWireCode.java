@@ -22,31 +22,51 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Field;
 
 /**
- * These are the predefined bytes codes for the Binary YAML wire format.
+ * Enumerates the predefined byte codes for the Binary YAML wire format.
+ * Each constant in this class provides a specific purpose when working with the wire format,
+ * enabling efficient serialization and deserialization processes.
+ *
+ * @since 2023-09-14
  */
 public enum BinaryWireCode {
-    ; // none
-    // sequence of length 0 - 255 bytes
-    public static final int BYTES_LENGTH8 = 0x80;
-    //     sequence of length 0 - 2^16-1 bytes
-    public static final int BYTES_LENGTH16 = 0x81;
-    // sequence of length 0 - 2^32-1
-    public static final int BYTES_LENGTH32 = 0x82;
-    // sequence of length 0 - 255
-//        public static final int BYTES_LENGTH64 = 0x83;
+    ; // Indicates no default enum instances
 
-    public static final int BYTES_MARSHALLABLE = 0x86; // explicitly BytesMarshallable.
+    // Definitions for sequence lengths:
+
+    // Sequence of length ranging from 0 to 255 bytes.
+    public static final int BYTES_LENGTH8 = 0x80;
+
+    // Sequence of length ranging from 0 to 2^16-1 bytes.
+    public static final int BYTES_LENGTH16 = 0x81;
+
+    // Sequence of length ranging from 0 to 2^32-1 bytes.
+    public static final int BYTES_LENGTH32 = 0x82;
+
+    // Explicitly indicates BytesMarshallable sequences.
+    public static final int BYTES_MARSHALLABLE = 0x86;
+
+    // Indicates a field anchor point within the serialized structure.
     public static final int FIELD_ANCHOR = 0x87;
+
+    // Indicates a general anchor point within the serialized structure.
     public static final int ANCHOR = 0x88;
+
+    // Denotes an updated alias value.
     public static final int UPDATED_ALIAS = 0x89;
 
-    // an array of unsigned bytes
+    // Definitions for array types:
+
+    // Array of unsigned bytes.
     public static final int U8_ARRAY = 0x8A;
     //        public static final int U16_ARRAY = 0x8B;
 //        public static final int I32_ARRAY = 0x8C;
     public static final int I64_ARRAY = 0x8D;
+
+    // Padding sequences to ensure alignment.
     public static final int PADDING32 = 0x8E;
     public static final int PADDING = 0x8F;
+
+    // Floating point number representations:
 
     public static final int FLOAT32 = 0x90;
     public static final int FLOAT64 = 0x91;
@@ -58,7 +78,11 @@ public enum BinaryWireCode {
     public static final int FLOAT_SET_LOW_4 = 0x9C;
     // 0x98 - 0x9F
 
+    // UUID representation.
     public static final int UUID = 0xA0;
+
+    // Different integer representations.
+
     public static final int UINT8 = 0xA1;
     public static final int UINT16 = 0xA2;
     public static final int UINT32 = 0xA3;
@@ -75,33 +99,80 @@ public enum BinaryWireCode {
 //    public static final int FIXED_1 = 0xAE;
     public static final int INT64_0x = 0xAF;
 
+    // Representation for boolean values:
+
+    // Represents the boolean value 'false'.
     public static final int FALSE = 0xB0;
+
+    // Represents the boolean value 'true'.
     public static final int TRUE = 0xB1;
+
+    // Different date and time representations:
+
+    // Represents a time value.
     public static final int TIME = 0xB2;
+
+    // Represents a date value.
     public static final int DATE = 0xB3;
+
+    // Represents a date-time value.
     public static final int DATE_TIME = 0xB4;
+
+    // Represents a zoned date-time value.
     public static final int ZONED_DATE_TIME = 0xB5;
+
+    // Miscellaneous representations:
+
+    // Represents a type prefix.
     public static final int TYPE_PREFIX = 0xB6;
+
+    // Denotes any field name.
     public static final int FIELD_NAME_ANY = 0xB7;
+
+    // Denotes any string.
     public static final int STRING_ANY = 0xB8;
+
+    // Represents an event name.
     public static final int EVENT_NAME = 0xB9;
+
+    // Represents a field number.
     public static final int FIELD_NUMBER = 0xBA;
+
+    // Represents a null value.
     public static final int NULL = 0xBB;
+
+    // Represents a type literal.
     public static final int TYPE_LITERAL = 0xBC;
+
+    // Denotes an event object.
     public static final int EVENT_OBJECT = 0xBD;
+
+    // Denotes a comment.
     public static final int COMMENT = 0xBE;
+
+    // Denotes a hint for serialization or deserialization.
     public static final int HINT = 0xBF;
 
+    // Definitions for field names:
+
+    // Represents the starting field name code.
     public static final int FIELD_NAME0 = 0xC0;
     // ...
+    // Represents the ending field name code.
     public static final int FIELD_NAME31 = 0xDF;
 
+    // Definitions for strings:
+
+    // Represents the starting string code.
     public static final int STRING_0 = 0xE0;
     // ...
+    // Represents the ending string code.
     public static final int STRING_31 = 0xFF;
 
+    // Array containing string representations for each binary wire code.
     public static final String[] STRING_FOR_CODE = new String[256];
 
+    // Static initializer to populate the STRING_FOR_CODE array:
     static {
         try {
             for (@NotNull Field field : BinaryWireCode.class.getDeclaredFields()) {
@@ -125,12 +196,24 @@ public enum BinaryWireCode {
         }
     }
 
+    /**
+     * Determines if the provided code corresponds to a field name.
+     *
+     * @param code The binary wire code value.
+     * @return True if the code corresponds to a field, false otherwise.
+     */
     public static boolean isFieldCode(int code) {
         return code == FIELD_NAME_ANY ||
                 code == FIELD_NUMBER ||
                 (code >= FIELD_NAME0 && code <= FIELD_NAME31);
     }
 
+    /**
+     * Retrieves the string representation of a binary wire code.
+     *
+     * @param code The binary wire code value.
+     * @return The string representation for the given code.
+     */
     @NotNull
     public static String stringForCode(int code) {
         return code == -1 ? "EndOfFile" : STRING_FOR_CODE[code];

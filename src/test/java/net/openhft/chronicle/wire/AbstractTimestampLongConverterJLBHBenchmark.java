@@ -8,18 +8,23 @@ import net.openhft.chronicle.jlbh.TeamCityHelper;
 
 public class AbstractTimestampLongConverterJLBHBenchmark implements JLBHTask {
 
+    // Constants for testing
     private static final long TIMESTAMP_MILLIS = 1675177572L;
     private static final String TIMESTAMP_STRING_SUFFIX = "1970-01-20T19:19:37.572+10:00";
     private static final String TIMESTAMP_STRING_NO_SUFFIX = "1970-01-20T09:19:37.572";
     private static final int ITERATIONS = 100_100;
 
+    // Disabling JVM resource tracing
     static {
         System.setProperty("jvm.resource.tracing", "false");
     }
 
+    // Converter instances for test scenarios
     private final LongConverter converterWithTimeZone = new MilliTimestampLongConverter("Australia/Melbourne");
     private final LongConverter converterUTC = new MilliTimestampLongConverter("UTC");
     private final StringBuilder sb = new StringBuilder();
+
+    // JLBH-related fields for measuring performance
     private JLBH jlbh;
     private NanoSampler parseTZnoSuffix;
     private NanoSampler parseTZsuffix;
@@ -28,10 +33,12 @@ public class AbstractTimestampLongConverterJLBHBenchmark implements JLBHTask {
     private NanoSampler parseUTCsuffix;
     private NanoSampler appendUTC;
 
+    // Main entry point to run the benchmark
     public static void main(String[] args) {
         new AbstractTimestampLongConverterJLBHBenchmark().run();
     }
 
+    // Configure and initiate the JLBH benchmark
     public void run() {
         JLBHOptions jlbhOptions = new JLBHOptions()
                 .iterations(ITERATIONS)
@@ -44,6 +51,7 @@ public class AbstractTimestampLongConverterJLBHBenchmark implements JLBHTask {
         jlbh.start();
     }
 
+    // Initializing JLBH probes for performance measurement
     @Override
     public void init(JLBH jlbh) {
         this.jlbh = jlbh;
@@ -55,26 +63,25 @@ public class AbstractTimestampLongConverterJLBHBenchmark implements JLBHTask {
         appendUTC = jlbh.addProbe("appendUTC");
     }
 
+    // Benchmarking the performance of both converters with different scenarios
     @Override
     public void run(long startTimeNS) {
-        /*
-            Converter with timezone
-         */
+        // Testing converter with a timezone
         runTests(converterWithTimeZone, appendTZ, parseTZnoSuffix, parseTZsuffix);
 
-        /*
-            Converter in UTC (no suffix)
-         */
+        // Testing converter in UTC (without a suffix)
         runTests(converterUTC, appendUTC, parseUTCnoSuffix, parseUTCsuffix);
 
         jlbh.sampleNanos(System.nanoTime() - startTimeNS);
     }
 
+    // Called when the benchmark completes
     @Override
     public void complete() {
         TeamCityHelper.teamCityStatsLastRun("LongConverterPerf", jlbh, ITERATIONS, System.out);
     }
 
+    // Private utility function to run specific performance tests for a given converter
     private void runTests(LongConverter converter, NanoSampler appendSampler, NanoSampler parseNoSuffixSampler, NanoSampler parseSuffixSampler) {
         // append
         long testStartTime = System.nanoTime();
@@ -82,12 +89,12 @@ public class AbstractTimestampLongConverterJLBHBenchmark implements JLBHTask {
         converter.append(sb, TIMESTAMP_MILLIS);
         appendSampler.sampleNanos(System.nanoTime() - testStartTime);
 
-        // parse (no suffix)
+        // parse (without suffix)
         testStartTime = System.nanoTime();
         converter.parse(TIMESTAMP_STRING_NO_SUFFIX);
         parseNoSuffixSampler.sampleNanos(System.nanoTime() - testStartTime);
 
-        // parse (suffix)
+        // parse (with suffix)
         testStartTime = System.nanoTime();
         converter.parse(TIMESTAMP_STRING_SUFFIX);
         parseSuffixSampler.sampleNanos(System.nanoTime() - testStartTime);

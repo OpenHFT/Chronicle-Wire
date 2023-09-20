@@ -33,9 +33,18 @@ import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toConcurrentMap;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
+/**
+ * Provides utility methods to obtain concurrent {@code Collector}s that can be used
+ * in conjunction with the Java Stream API. These collectors allow for thread-safe
+ * accumulation of elements into collections or other aggregate results.
+ *
+ * @since 2023-09-15
+ */
 public final class ConcurrentCollectors {
 
-    // Suppresses default constructor, ensuring non-instantiability.
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
     private ConcurrentCollectors() {
     }
 
@@ -50,6 +59,7 @@ public final class ConcurrentCollectors {
     @NotNull
     public static <T>
     Collector<T, ?, List<T>> toConcurrentList() {
+        // Creates a synchronized list for concurrent access and sets up accumulation and combination operations.
         return Collector.of(
                 () -> Collections.synchronizedList(new ArrayList<>()),
                 List::add,
@@ -75,6 +85,7 @@ public final class ConcurrentCollectors {
     @NotNull
     public static <T>
     Collector<T, ?, Set<T>> toConcurrentSet() {
+        // Collects elements into a synchronized map and then retrieves the key set.
         return collectingAndThen(
                 toConcurrentMap(Function.identity(),
                         t -> Boolean.TRUE,
@@ -100,8 +111,10 @@ public final class ConcurrentCollectors {
     public static <T>
     Collector<T, ?, T> reducingConcurrent(final T identity,
                                           @NotNull final BinaryOperator<T> op) {
+                                          // Ensure the binary operator is not null.
         requireNonNull(op);
 
+        // Set up a concurrent reduction using an AtomicReference as the accumulator.
         return Collector.of(
                 () -> new AtomicReference<>(identity),
                 (AtomicReference<T> ar, T e) -> ar.accumulateAndGet(e, op),

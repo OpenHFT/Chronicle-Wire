@@ -25,8 +25,23 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 
+/**
+ * Represents field information for long fields, extending the generic field information capabilities
+ * provided by {@link UnsafeFieldInfo}. This class offers direct memory access functionality to get and set
+ * long values in objects, leveraging unsafe operations for performance enhancement.
+ *
+ * @since 2023-09-15
+ */
 public final class LongFieldInfo extends UnsafeFieldInfo {
 
+    /**
+     * Constructs an instance of LongFieldInfo with the provided details about a long field.
+     *
+     * @param name        The name of the field.
+     * @param type        The type of the field.
+     * @param bracketType The bracket type associated with the field.
+     * @param field       The actual field representation.
+     */
     public LongFieldInfo(String name, Class type, BracketType bracketType, @NotNull Field field) {
         super(name, type, bracketType, field);
     }

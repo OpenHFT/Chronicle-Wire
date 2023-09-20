@@ -79,15 +79,27 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(value = Parameterized.class)
 public class FIX42Test extends WireTestCommon {
+    // Test ID for identification
     final int testId;
+
+    // Flag to determine if the test is fixed
     final boolean fixed;
+
+    // Flag to determine if the field is numeric
     final boolean numericField;
+
+    // Flag to determine if the field is absent
     final boolean fieldLess;
+
+    // Dump string for storing binary representations
     private final String dump;
+
+    // Elastic byte buffer for writing and reading data
     @SuppressWarnings("rawtypes")
     @NotNull
     Bytes<?> bytes = allocateElasticOnHeap();
 
+    // Constructor to initialize the test parameters
     public FIX42Test(int testId, boolean fixed, boolean numericField, boolean fieldLess, String dump) {
         this.testId = testId;
         this.fixed = fixed;
@@ -96,8 +108,10 @@ public class FIX42Test extends WireTestCommon {
         this.dump = dump;
     }
 
+    // Provides various combinations of parameters to run the test with
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() {
+        // Various dump strings representing different binary data scenarios
         String dump_1 = "" +
                 "Symbol: EURUSD\n" +
                 "NoMDEntries: 2\n" +
@@ -136,6 +150,8 @@ public class FIX42Test extends WireTestCommon {
                 "00000000 e6 45 55 52 55 53 44 a6  02 00 00 00 a1 34 91 2e ·EURUSD· ·····4·.\n" +
                 "00000010 90 a0 f8 31 e6 f1 3f a1  35 91 a5 2c 43 1c eb e2 ···1··?· 5··,C···\n" +
                 "00000020 f1 3f                                            ·?               \n";
+
+        // Return a list of objects arrays containing different test parameter combinations
         return Arrays.asList(
                 new Object[]{-1, false, false, false, dump_1},
                 new Object[]{0, false, false, false, dump0},
@@ -147,9 +163,13 @@ public class FIX42Test extends WireTestCommon {
         );
     }
 
+    // Construct a Wire instance based on testId and other configuration flags
     @NotNull
     private Wire createWire() {
+        // Clear any data in the 'bytes' field before constructing the Wire
         bytes.clear();
+
+        // If 'testId' is negative, use TEXT WireType. Otherwise, initialize a binary wire with various configurations.
         @NotNull Wire wire = testId < 0
                 ? WireType.TEXT.apply(bytes)
                 : new BinaryWire(bytes, fixed, numericField, fieldLess, Integer.MAX_VALUE, "binary", true);
@@ -157,30 +177,45 @@ public class FIX42Test extends WireTestCommon {
         return wire;
     }
 
+    // Test method to dump the wire representation of a MarketDataSnapshot instance
     @Test
     public void dump() {
+        // Create a Wire instance
         @NotNull Wire wire = createWire();
+
+        // Initialize a MarketDataSnapshot instance with some sample values
         @NotNull MarketDataSnapshot mds = new MarketDataSnapshot("EURUSD", 1.1187, 1.1179);
+
+        // Serialize the market data snapshot to the wire
         mds.writeMarshallable(wire);
+
+        // Print wire's class and configurations to standard output
         System.out.println(wire.getClass().getSimpleName() + ", fixed=" + fixed + ", numericField=" + numericField + ", fieldLess=" + fieldLess);
+
+        // Assert the wire's content, using either its string or hex representation
         if (!wire.isBinary())
             assertEquals(dump, wire.bytes().toString());
         else
             assertEquals(dump, wire.bytes().toHexString());
     }
 
+    // Inner static class representing a snapshot of market data
     static class MarketDataSnapshot implements WriteMarshallable {
+        // Fields representing the currency symbol and its opening and closing prices
         String symbol;
         double openingPrice, closingPrice;
 
+        // Constructor to initialize the market data snapshot with provided values
         public MarketDataSnapshot(String symbol, double openingPrice, double closingPrice) {
             this.symbol = symbol;
             this.openingPrice = openingPrice;
             this.closingPrice = closingPrice;
         }
 
+        // Method to serialize this object into a wire format
         @Override
         public void writeMarshallable(@NotNull WireOut wire) {
+            // Serialize the symbol, entry type, and prices to the provided wire
             wire.write(FIX42.Symbol).text(symbol)
                     .write(FIX42.NoMDEntries).int32(2)
                     .write(FIX42.MDEntryType).uint8('4')

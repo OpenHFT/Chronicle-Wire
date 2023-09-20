@@ -27,13 +27,29 @@ import org.jetbrains.annotations.NotNull;
 
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
+/**
+ * Represents a mechanism to exchange data between two wires, ensuring that data is accessed
+ * in a thread-safe and efficient manner. This class extends the SimpleCloseable class,
+ * inheriting its closeable functionalities, and implements the MarshallableOut interface,
+ * providing serialization capabilities.
+ *
+ * <p>The class utilizes two wires for data exchange and manages their state using various
+ * constants indicating whether a wire is free, locked, or dirty. An atomic operation is
+ * used to ensure thread safety while manipulating the state of wires.</p>
+ *
+ * @since 2023-09-16
+ */
 public class WireExchanger extends SimpleCloseable implements MarshallableOut {
+
+    // State constants representing the status of the wires.
     static final int USED_MASK = 0x001;
     static final int FREE = 0x000, LOCKED = 0x010, DIRTY = 0x100;
     static final int FREE0 = 0x000, LOCKED0 = 0x010, DIRTY0 = 0x100;
     static final int FREE1 = 0x001, LOCKED1 = 0x011, DIRTY1 = 0x101;
     private static final int INIT_CAPACITY = TCPChronicleChannel.CAPACITY;
     private static final long valueOffset;
+
+    // Empty wire representation for initialization purposes.
     private static final Wire EMPTY_WIRE = WireType.BINARY_LIGHT.apply(Bytes.from(""));
 
     static {
@@ -45,15 +61,28 @@ public class WireExchanger extends SimpleCloseable implements MarshallableOut {
         }
     }
 
+    // The two wires used for data exchange.
     private final Wire wire0, wire1;
+
+    // The document context associated with write operations.
     private final WEDocumentContext writeContext = new WEDocumentContext();
     private int delay = 0;
+
+    // Volatile value used for atomic operations to ensure thread safety.
     private volatile int value;
 
+    /**
+     * Initializes the WireExchanger with a default initial capacity.
+     */
     public WireExchanger() {
         this(INIT_CAPACITY);
     }
 
+    /**
+     * Initializes the WireExchanger with the specified initial capacity.
+     *
+     * @param initCapacity The initial capacity for the wires.
+     */
     @NotNull
     public WireExchanger(int initCapacity) {
         wire0 = WireType.BINARY_LIGHT.apply(
@@ -71,6 +100,13 @@ public class WireExchanger extends SimpleCloseable implements MarshallableOut {
         wire1.bytes().releaseLast();
     }
 
+    /**
+     * Acquires a producer wire for data exchange.
+     * This method ensures that the wire is not locked or dirty before returning it.
+     * If the wire is currently in use, this method will attempt to release the producer and acquire a new one.
+     *
+     * @return A wire that can be used for producing data.
+     */
     public Wire acquireProducer() {
         {
             int val = lock();
@@ -86,6 +122,13 @@ public class WireExchanger extends SimpleCloseable implements MarshallableOut {
         return acquireProducer2();
     }
 
+    /**
+     * Acquires a secondary producer wire for data exchange.
+     * This method is invoked when the primary wire is found to be in use.
+     * The producer will pause momentarily before attempting to access the wire.
+     *
+     * @return A wire that can be used for producing data.
+     */
     @NotNull
     private Wire acquireProducer2() {
         Jvm.pause(delay++);
@@ -103,15 +146,31 @@ public class WireExchanger extends SimpleCloseable implements MarshallableOut {
         }
     }
 
+    /**
+     * Marks the currently locked producer wire as dirty after data has been written into it.
+     * This signifies that the wire contains new data that hasn't been read by the consumer yet.
+     */
     public void releaseProducer() {
         final int val2 = DIRTY | (value & USED_MASK);
         MEMORY.writeOrderedInt(this, valueOffset, val2);
     }
 
+    /**
+     * Returns the wire instance based on the provided index.
+     *
+     * @param writeTo The index representing which wire to access.
+     * @return The wire associated with the provided index.
+     */
     private Wire wireAt(int writeTo) {
         return writeTo == 0 ? wire0 : wire1;
     }
 
+    /**
+     * Acquires a consumer wire for data reading.
+     * If the wire does not have any new data (i.e., it isn't dirty), an empty wire is returned.
+     *
+     * @return A wire that can be used for consuming data.
+     */
     public Wire acquireConsumer() {
         if ((value & DIRTY) == 0)
             return EMPTY_WIRE;
@@ -125,6 +184,13 @@ public class WireExchanger extends SimpleCloseable implements MarshallableOut {
         return wireAt(writeTo);
     }
 
+    /**
+     * Attempts to lock a wire for exclusive access, ensuring thread safety.
+     * This method will keep trying to obtain a lock until it succeeds or times out after 10 seconds.
+     *
+     * @return The value indicating the locked wire's index.
+     * @throws IllegalStateException if the locking attempt times out.
+     */
     public int lock() throws IllegalStateException {
         long start = System.currentTimeMillis();
         for (; ; Jvm.nanoPause()) {
@@ -142,6 +208,10 @@ public class WireExchanger extends SimpleCloseable implements MarshallableOut {
         }
     }
 
+    /**
+     * Releases the currently locked consumer wire.
+     * This method is currently a placeholder and may be needed for future implementations.
+     */
     public void releaseConsumer() {
         // may be needed in the future
     }
@@ -163,7 +233,14 @@ public class WireExchanger extends SimpleCloseable implements MarshallableOut {
                 : this.writingDocument(metaData);
     }
 
+    /**
+     * The WEDocumentContext class extends DocumentContextHolder and implements the WriteDocumentContext interface.
+     * This class provides a context for writing to a document within the WireExchanger and handles the
+     * lifecycle of the document, including its chaining state and closure.
+     */
     class WEDocumentContext extends DocumentContextHolder implements WriteDocumentContext {
+
+        // The Wire instance associated with this document context
         private Wire wire;
 
         @Override
@@ -196,6 +273,11 @@ public class WireExchanger extends SimpleCloseable implements MarshallableOut {
             }
         }
 
+        /**
+         * Sets the Wire instance associated with this document context.
+         *
+         * @param wire The Wire instance to be associated.
+         */
         public void wire(Wire wire) {
             this.wire = wire;
         }
