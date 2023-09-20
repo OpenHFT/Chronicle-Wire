@@ -28,6 +28,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
 
+/**
+ * This test verifies that the MethodReader can identify methods using their IDs.
+ */
 public class MethodReaderMethodIdsTest extends WireTestCommon {
 
     /**

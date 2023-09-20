@@ -24,7 +24,7 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
  * Represents an entity capable of writing its value to a specified output format.
  * This interface is intended to be implemented by classes or lambdas that need
  * to serialize their state to a given value representation.
- *
+ * <p>
  * It's designed with the {@code @FunctionalInterface} annotation, suggesting that
  * it's primarily intended for lambda expressions and method references.
  * The {@code @DontChain} annotation indicates a recommendation against chaining

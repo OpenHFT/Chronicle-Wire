@@ -386,6 +386,7 @@ public class RawWireTest extends WireTestCommon {
         wire.write().text("Hello");
         wire.write(BWKey.field1).text("world");
         @NotNull String name1 = "Long field name which is more than 32 characters, \\ \nBye";
+        wire.write(() -> "Test").text(name1);
 
         wire.write(() -> "Test")
                 .text(name1);
