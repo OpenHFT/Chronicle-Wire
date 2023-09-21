@@ -40,6 +40,7 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+import static net.openhft.chronicle.wire.Wires.SPB_HEADER_SIZE;
 
 /**
  * JSON wire format
@@ -139,7 +140,7 @@ public class JSONWire extends TextWire {
 
                 long l = bytes.readLimit();
                 try {
-                    bytes.readLimit(bytes.readPosition() + 4);
+                    bytes.readLimit(bytes.readPosition() + SPB_HEADER_SIZE);
                     isNull = "null".contentEquals(bytes);
                 } finally {
                     bytes.readLimit(l);
@@ -742,7 +743,7 @@ public class JSONWire extends TextWire {
             consumePadding();
 
             if (peekStringIgnoreCase("null")) {
-                bytes.readSkip(4);
+                bytes.readSkip(Integer.BYTES);
                 // Skip to the next token, consuming any padding and/or a comma
                 consumePadding(1);
 

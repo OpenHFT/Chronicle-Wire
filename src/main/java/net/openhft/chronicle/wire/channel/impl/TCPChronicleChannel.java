@@ -39,6 +39,7 @@ import java.util.function.Function;
 import static java.util.Objects.requireNonNull;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 import static net.openhft.chronicle.core.io.ClosedIORuntimeException.newIORuntimeException;
+import static net.openhft.chronicle.wire.Wires.SPB_HEADER_SIZE;
 
 public class TCPChronicleChannel extends AbstractCloseable implements InternalChronicleChannel {
     // tune for message sizes up to this
@@ -226,7 +227,7 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
                 throw new InvalidProtocolException("Dump\n" + bytes.toHexString());
             }
         }
-        assert bytes.readRemaining() < 4 || validateHeader(header);
+        assert bytes.readRemaining() < SPB_HEADER_SIZE || validateHeader(header);
         if (DUMP_YAML)
             System.out.println("in - " + Integer.toUnsignedString(header, 16) + "\n" + Wires.fromSizePrefixedBlobs(in));
         return in.readingDocument();

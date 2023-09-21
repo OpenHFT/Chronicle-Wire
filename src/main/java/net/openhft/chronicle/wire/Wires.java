@@ -218,7 +218,7 @@ public enum Wires {
                 assert wireType != null;
                 Wire tempWire = wireType.apply(tempBytes);
 
-                return WireDumper.of(tempWire).asString(0, length + 4);
+                return WireDumper.of(tempWire).asString(0, length + SPB_HEADER_SIZE);
 
             } finally {
                 tempBytes.releaseLast();
@@ -229,14 +229,14 @@ public enum Wires {
                 if (start != -1)
                     headerPosition = start;
                 else
-                    headerPosition = bytes.readPosition() - 4;
+                    headerPosition = bytes.readPosition() - SPB_HEADER_SIZE;
             } else
-                headerPosition = bytes.readPosition() - 4;
+                headerPosition = bytes.readPosition() - SPB_HEADER_SIZE;
 
             length = Wires.lengthOf(bytes.readInt(headerPosition));
         }
 
-        return WireDumper.of(wire).asString(headerPosition, length + 4);
+        return WireDumper.of(wire).asString(headerPosition, length + SPB_HEADER_SIZE);
     }
 
     public static String fromSizePrefixedBlobs(@NotNull WireIn wireIn) {

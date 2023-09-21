@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.pool.StringBuilderPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static net.openhft.chronicle.wire.Wires.SPB_HEADER_SIZE;
 import static net.openhft.chronicle.wire.Wires.lengthOf;
 
 public class BinaryReadDocumentContext implements ReadDocumentContext {
@@ -86,7 +87,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
             // we have to read back from the start, as close may have been called in
             // the middle of reading a value
             wire0.bytes().readPosition(start);
-            wire0.bytes().readSkip(4);
+            wire0.bytes().readSkip(SPB_HEADER_SIZE);
             while (wire0.hasMore()) {
                 final long remaining = wire0.bytes().readRemaining();
                 final ValueIn read = wire0.read();
@@ -169,7 +170,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         setStart(bytes.readPosition());
 
         present = false;
-        if (bytes.readRemaining() < 4) {
+        if (bytes.readRemaining() < SPB_HEADER_SIZE) {
             notComplete = false;
             return;
         }
@@ -183,12 +184,12 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
             return;
         }
 
-        bytes.readSkip(4);
+        bytes.readSkip(SPB_HEADER_SIZE);
 
         final int len = lengthOf(header);
 
         if (len > bytes.readRemaining()) {
-            bytes.readSkip(-4);
+            bytes.readSkip(-SPB_HEADER_SIZE);
             return;
         }
 

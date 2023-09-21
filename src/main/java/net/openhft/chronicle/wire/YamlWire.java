@@ -45,6 +45,7 @@ import java.util.*;
 import java.util.function.*;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static net.openhft.chronicle.wire.Wires.SPB_HEADER_SIZE;
 
 /**
  * YAML Based wire format
@@ -729,7 +730,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     protected void consumeDocumentStart() {
-        if (bytes.readRemaining() > 4) {
+        if (bytes.readRemaining() > SPB_HEADER_SIZE) {
             long pos = bytes.readPosition();
             if (bytes.readByte(pos) == '-' && bytes.readByte(pos + 1) == '-' && bytes.readByte(pos + 2) == '-')
                 bytes.readSkip(3);

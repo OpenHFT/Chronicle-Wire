@@ -53,7 +53,7 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
         int ints0 = (description0 >>> 16) & 0xFF;
         int shorts0 = (description0 >>> 8) & 0x7F;
         int bytes0 = description0 & 0xFF;
-        int length = longs0 * 8 + ints0 * 4 + shorts0 * 2 + bytes0;
+        int length = longs0 * 8 + ints0 * Integer.BYTES + shorts0 * 2 + bytes0;
         if (Integer.bitCount(description0) % 2 == 0 || length > in.readRemaining())
             throw new IllegalStateException("Invalid description: " + Integer.toHexString(description0) + ", length: " + length + ", remaining: " + in.readRemaining());
 
@@ -74,7 +74,7 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
                 value = in.readInt();
             if (i < ints) {
                 MEMORY.writeInt(this, offset, value);
-                offset += 4;
+                offset += Integer.BYTES;
             }
         }
         int shorts = ($description() >>> 8) & 0x7F; // max 127

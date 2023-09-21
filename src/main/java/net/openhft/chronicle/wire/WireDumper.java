@@ -22,6 +22,8 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static net.openhft.chronicle.wire.Wires.SPB_HEADER_SIZE;
+
 @SuppressWarnings("rawtypes")
 public class WireDumper {
     @NotNull
@@ -82,7 +84,7 @@ public class WireDumper {
             bytes.readLimit(limit2);
 
             long missing = position + length - limit2;
-            while (bytes.readRemaining() >= 4) {
+            while (bytes.readRemaining() >= SPB_HEADER_SIZE) {
                 if (dumpOne(sb, bytes2, abbrev))
                     break;
 
@@ -208,7 +210,7 @@ public class WireDumper {
             sb.append('\n');
         if (wireIn.usePadding())
             len0 = (len0 + 3) & ~3;
-        this.bytes.readPosition(Math.min(this.bytes.readLimit(), start + 4 + len0));
+        this.bytes.readPosition(Math.min(this.bytes.readLimit(), start + SPB_HEADER_SIZE + len0));
         return false;
     }
 

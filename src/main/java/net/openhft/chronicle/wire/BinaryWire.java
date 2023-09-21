@@ -58,6 +58,7 @@ import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.BinaryWire.AnyCodeMatch.ANY_CODE_MATCH;
 import static net.openhft.chronicle.wire.BinaryWireCode.*;
 import static net.openhft.chronicle.wire.Wires.GENERATE_TUPLES;
+import static net.openhft.chronicle.wire.Wires.SPB_HEADER_SIZE;
 
 /**
  * This Wire is a binary translation of TextWire which is a sub set of YAML.
@@ -1947,7 +1948,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (bytes.retainedHexDumpDescription())
                 bytes.writeHexDumpDescription("int32 for binding");
             int32forBinding(value);
-            ((BinaryIntReference) intValue).bytesStore(bytes, bytes.writePosition() - 4, 4);
+            ((BinaryIntReference) intValue).bytesStore(bytes, bytes.writePosition() - Integer.BYTES, Integer.BYTES);
             return BinaryWire.this;
         }
 
@@ -1994,7 +1995,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         private void setSequenceLength(long position) {
-            long length0 = bytes.lengthWritten(position) - 4;
+            long length0 = bytes.lengthWritten(position) - Integer.BYTES;
             int length = bytes instanceof HexDumpBytes
                     ? (int) length0
                     : Maths.toInt32(length0, "Document length %,d out of 32-bit int range.");
@@ -2047,7 +2048,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             object.writeMarshallable(BinaryWire.this.bytes());
 
-            long length = bytes.lengthWritten(position) - 4;
+            long length = bytes.lengthWritten(position) - Integer.BYTES;
             if (length > Integer.MAX_VALUE && bytes instanceof HexDumpBytes)
                 length = (int) length;
             bytes.writeOrderedInt(position, Maths.toInt32(length, "Document length %,d out of 32-bit int range."));
@@ -2073,7 +2074,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 throw new IORuntimeException(e);
             }
 
-            bytes.writeOrderedInt(position, Maths.toInt32(bytes.lengthWritten(position) - 4, "Document length %,d out of 32-bit int range."));
+            bytes.writeOrderedInt(position, Maths.toInt32(bytes.lengthWritten(position) - SPB_HEADER_SIZE, "Document length %,d out of 32-bit int range."));
             return BinaryWire.this;
         }
 
@@ -2502,7 +2503,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 case BYTES_LENGTH16:
                     return getBracketTypeFor(bytes.readUnsignedByte(bytes.readPosition() + 2 + 1));
                 case BYTES_LENGTH32:
-                    return getBracketTypeFor(bytes.readUnsignedByte(bytes.readPosition() + 4 + 1));
+                    return getBracketTypeFor(bytes.readUnsignedByte(bytes.readPosition() + Integer.BYTES + 1));
                 case NULL:
                     return BracketType.NONE;
             }
@@ -2759,7 +2760,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             } else {
                 bytes.readPosition(pos);
                 long limit = bytes.readLimit();
-                bytes.readLimit(pos + 4 + length);
+                bytes.readLimit(pos + Integer.BYTES + length);
                 try {
                     sb.append(Wires.fromSizePrefixedBlobs(bytes));
                 } finally {
@@ -3292,7 +3293,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             int code = readCode();
             if (code != INT32)
                 cantRead(code);
-            if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 4) {
+            if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != Integer.BYTES) {
                 value = new BinaryIntReference();
                 setter.accept(t, value);
             }

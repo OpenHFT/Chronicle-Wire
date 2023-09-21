@@ -244,7 +244,7 @@ public abstract class AbstractWire implements Wire {
     @Override
     public void readFirstHeader() throws StreamCorruptedException {
         int header;
-        if (bytes.realCapacity() >= 4) {
+        if (bytes.realCapacity() >= SPB_HEADER_SIZE) {
             header = bytes.readVolatileInt(0L);
             if (!isReady(header))
                 throw new StreamCorruptedException("Not ready header is found");
@@ -265,7 +265,7 @@ public abstract class AbstractWire implements Wire {
             boolean hasAtLeast4 = false;
             for (; ; ) {
 
-                if (hasAtLeast4 || bytes.realCapacity() >= 4) {
+                if (hasAtLeast4 || bytes.realCapacity() >= SPB_HEADER_SIZE) {
                     hasAtLeast4 = true;
                     header = bytes.readVolatileInt(0L);
                     if (isReady(header))
@@ -329,7 +329,7 @@ public abstract class AbstractWire implements Wire {
         // the reason we add padding is so that a message gets sent ( this is, mostly for queue as
         // it cant handle a zero len message )
         long pos = bytes.writePosition();
-        if (pos == position + 4) {
+        if (pos == position + SPB_HEADER_SIZE) {
             addPadding(1);
             pos = bytes.writePosition();
         }
@@ -348,7 +348,7 @@ public abstract class AbstractWire implements Wire {
                 bytesStore.writeByte(pos + i, 0);
         }
 
-        final long value = pos - position - 4;
+        final long value = pos - position - SPB_HEADER_SIZE;
         int header = (int) value;
         if (metaData) header |= META_DATA;
         // shouldn't happen due to padding above.
@@ -382,9 +382,9 @@ public abstract class AbstractWire implements Wire {
 
     private boolean checkNoDataAfterEnd(long pos) {
         // can't do this check without jumping back.
-        if (!bytes.inside(pos, 4L))
+        if (!bytes.inside(pos, SPB_HEADER_SIZE))
             return true;
-        if (pos <= bytes.writeLimit() - 4) {
+        if (pos <= bytes.writeLimit() - SPB_HEADER_SIZE) {
             final int value = bytes.bytesStore().readVolatileInt(pos);
             if (value != 0) {
                 String text;

@@ -40,6 +40,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
+import static net.openhft.chronicle.wire.Wires.SPB_HEADER_SIZE;
 import static net.openhft.chronicle.wire.Wires.toIntU30;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -141,7 +142,7 @@ public enum WireInternal {
         int length;
         if (bytes instanceof HexDumpBytes) {
             // Todo: this looks suspicious. Why cast to int individually rather than use long arithmetics?
-            length = metaDataBit | toIntU30((int) position1 - (int) position - 4, "Document length %,d out of 30-bit int range.");
+            length = metaDataBit | toIntU30((int) position1 - (int) position - SPB_HEADER_SIZE, "Document length %,d out of 30-bit int range.");
         } else {
             length = metaDataBit | toIntU30(position1 - position - 4L, "Document length %,d out of 30-bit int range.");
         }
@@ -177,12 +178,12 @@ public enum WireInternal {
         boolean read = false;
         while (true) {
             bytes.readPositionForHeader(wireIn.usePadding());
-            if (bytes.readRemaining() < 4) break;
+            if (bytes.readRemaining() < SPB_HEADER_SIZE) break;
             long position = bytes.readPosition();
             int header = bytes.readVolatileInt(position);
             if (!isKnownLength(header))
                 return read;
-            bytes.readSkip(4);
+            bytes.readSkip(SPB_HEADER_SIZE);
 
             final int len = Wires.lengthOf(header);
             if (Wires.isData(header)) {

@@ -45,6 +45,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.*;
 
+import static net.openhft.chronicle.wire.Wires.SPB_HEADER_SIZE;
+
 /**
  * This format writes just the data, without meta data.
  */
@@ -585,7 +587,7 @@ public class RawWire extends AbstractWire implements Wire {
         @Override
         public WireOut int32forBinding(int value, @NotNull IntValue intValue) {
             int32forBinding(value);
-            ((BinaryIntReference) intValue).bytesStore(bytes, bytes.writePosition() - 4, 4);
+            ((BinaryIntReference) intValue).bytesStore(bytes, bytes.writePosition() - Integer.BYTES, Integer.BYTES);
             return RawWire.this;
         }
 
@@ -613,7 +615,7 @@ public class RawWire extends AbstractWire implements Wire {
 
             writer.accept(t, this);
 
-            bytes.writeOrderedInt(position, Maths.toInt32(bytes.lengthWritten(position) - 4, "Document length %,d out of 32-bit int range."));
+            bytes.writeOrderedInt(position, Maths.toInt32(bytes.lengthWritten(position) - Integer.BYTES, "Document length %,d out of 32-bit int range."));
             return RawWire.this;
         }
 
@@ -625,7 +627,7 @@ public class RawWire extends AbstractWire implements Wire {
 
             writer.accept(t, kls, this);
 
-            bytes.writeOrderedInt(position, Maths.toInt32(bytes.lengthWritten(position) - 4, "Document length %,d out of 32-bit int range."));
+            bytes.writeOrderedInt(position, Maths.toInt32(bytes.lengthWritten(position) - Integer.BYTES, "Document length %,d out of 32-bit int range."));
             return RawWire.this;
         }
 
@@ -637,7 +639,7 @@ public class RawWire extends AbstractWire implements Wire {
 
             object.writeMarshallable(RawWire.this);
 
-            int length = Maths.toInt32(bytes.lengthWritten(position) - 4, "Document length %,d out of 32-bit int range.");
+            int length = Maths.toInt32(bytes.lengthWritten(position) - Integer.BYTES, "Document length %,d out of 32-bit int range.");
             bytes.writeOrderedInt(position, length);
             return RawWire.this;
         }
@@ -650,7 +652,7 @@ public class RawWire extends AbstractWire implements Wire {
 
             writeSerializable(object);
 
-            int length = Maths.toInt32(bytes.lengthWritten(position) - 4, "Document length %,d out of 32-bit int range.");
+            int length = Maths.toInt32(bytes.lengthWritten(position) - SPB_HEADER_SIZE, "Document length %,d out of 32-bit int range.");
             bytes.writeOrderedInt(position, length);
             return RawWire.this;
         }

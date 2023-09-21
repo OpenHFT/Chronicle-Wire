@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
+import static net.openhft.chronicle.wire.Wires.SPB_HEADER_SIZE;
 import static net.openhft.chronicle.wire.Wires.toIntU30;
 
 public class BinaryWriteDocumentContext implements WriteDocumentContext {
@@ -56,7 +57,7 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
 
     @Override
     public boolean isEmpty() {
-        return notComplete && wire().bytes().writePosition() == position + 4;
+        return notComplete && wire().bytes().writePosition() == position + SPB_HEADER_SIZE;
     }
 
     @Override
@@ -93,7 +94,7 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         long position1 = bytes.writePosition();
 //        if (position1 < position)
 //            System.out.println("Message truncated from " + position + " to " + position1);
-        long length0 = position1 - position - 4;
+        long length0 = position1 - position - SPB_HEADER_SIZE;
         if (length0 > Integer.MAX_VALUE && bytes instanceof HexDumpBytes)
             length0 = (int) length0;
         int length = metaDataBit | toIntU30(length0, "Document length %,d out of 30-bit int range.");
