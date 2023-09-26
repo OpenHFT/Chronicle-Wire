@@ -124,14 +124,14 @@ public class ExtendingWireTest {
     }
 
     /**
-     * This added metadata after the message, this could be visible to MethodReaders if they had the right interface, otherwise ignored. c.f. AdditionalDTO
+     * This added metadata after the message, this could be visible to MethodReaders if they had the right interface, otherwise ignored. c.f. AdditionalID
      */
     @Test
     public void secondMessage() {
         addMessage(wire);
         long id = wire.headerNumber();
         // much later by a different thread/process so the checksum can be processed offline
-        wire.methodWriter(AdditionalID.class)
+        wire.methodWriterBuilder(true, AdditionalID.class).build()
                 .addId(new AddedWithId(0x12345678, "hi", id));
 
         assertEquals("" +
@@ -142,7 +142,7 @@ public class ExtendingWireTest {
                         "   a1 80                                           # 128\n" +
                         "   c4 74 65 78 74                                  # text:\n" +
                         "   e5 48 65 6c 6c 6f                               # Hello\n" +
-                        "24 00 00 00                                     # msg-length\n" +
+                        "24 00 00 40                                     # msg-length\n" +
                         "b9 05 61 64 64 49 64                            # addId: (event)\n" +
                         "80 1b                                           # AddedWithId\n" +
                         "   c4 63 73 75 6d                                  # csum:\n" +
@@ -150,7 +150,7 @@ public class ExtendingWireTest {
                         "   c5 6f 74 68 65 72                               # other:\n" +
                         "   e2 68 69                                        # hi\n" +
                         "   c2 69 64                                        # id:\n" +
-                        "   90 00 00 00 df                                  # -9.223372E18\n\n",
+                        "   90 00 00 00 df                                  # -9.223372E18\n",
                 wire.bytes().toHexString());
     }
 
