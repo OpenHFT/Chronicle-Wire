@@ -230,7 +230,6 @@ Reduction<Map<String, MarketData>> latestProtected = Reduction.of(
         );
 ----
 
-
 ==== More Complex Reductions
 
 As Collectors can be composed to an arbitrary depth, more complex reductions can easily be constructed.
