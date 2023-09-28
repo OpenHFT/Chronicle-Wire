@@ -570,8 +570,14 @@ public interface ValueIn {
     @Nullable
     Class typePrefix();
 
+    /**
+     * read a class with a super class or actual class as a hint
+     * @param tClass the super-class, or actual class to use
+     * @return the class or an instance of an object to use.
+     * @throws ClassNotFoundRuntimeException if the specific class couldn't be found.
+     */
     @Nullable
-    default Object typePrefixOrObject(Class tClass) {
+    default Object typePrefixOrObject(Class tClass) throws ClassNotFoundRuntimeException {
         return typePrefix();
     }
 

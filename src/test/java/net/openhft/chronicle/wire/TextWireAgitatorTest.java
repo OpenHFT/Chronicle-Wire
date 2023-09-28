@@ -19,6 +19,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import org.junit.Test;
 
 import java.util.Map;
@@ -28,7 +29,7 @@ import static org.junit.Assert.*;
 // Test created as a result of agitator tests i.e. random character changes
 public class TextWireAgitatorTest extends WireTestCommon {
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = ClassNotFoundRuntimeException.class)
     public void lowerCaseClass() {
         assertTrue(Marshallable.fromString("!" + TextWireTest.MyDto.class.getName().toLowerCase() + " { }") instanceof Map);
     }
