@@ -21,24 +21,29 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 /**
- * Annotation used to specify the converter to be used for handling long values.
- * The converter specified by this annotation can be used to implement custom conversion logic for
- * serializing/deserializing long values. The class specified in {@link #value()} should be a valid
- * {@link LongConverter} implementation.
+ * Annotation to specify the conversion strategy for a `long` value.
+ * <p>
+ * This annotation can be applied to fields, parameters, or other annotations to define
+ * a custom conversion strategy using a specific {@link LongConverter} implementation.
+ * The referenced converter annotation should either have a static final instance named
+ * `INSTANCE` or should be a {@link LongConverter}
  *
  * @see LongConverter
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.ANNOTATION_TYPE, ElementType.FIELD, ElementType.PARAMETER})
 public @interface LongConversion {
+
     /**
+     * Returns the class responsible for converting the long value or an annotation with an INSTANCE of one.
+     *<p>
      * The {@link LongConverter} class to be used for conversion.
      * The class specified should either have a static final field named INSTANCE,
      * or a constructor that takes a single string parameter for initialization.
      *
-     * @return the implementing class which is used for long conversion.
+     * @return The implementing class which either contains a static final field named `INSTANCE`
+     *         or provides a constructor that takes a string for initialization.
      */
     Class<?> value();
 }

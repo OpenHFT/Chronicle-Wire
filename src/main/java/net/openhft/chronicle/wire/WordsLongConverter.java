@@ -27,18 +27,31 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * A converter for long values into words and vice versa. The converter
- * uses a set of common words for encoding and decoding operations.
+ * Converts long values to a sequence of words and vice-versa. The conversion uses a predefined list of common words,
+ * and each word is mapped to a unique segment of the long value.
  */
 public class WordsLongConverter implements LongConverter {
+
+    /** A regex pattern to match non-letter characters. */
     static final Pattern NON_LETTER = Pattern.compile("\\W");
+
+    /** An array of words loaded from a file, used for conversions. */
     static final String[] WORDS;
+
+    /**
+     * A mapping of words to their respective indexes. Used to quickly find
+     * a word's index, which is crucial for the conversion to long.
+     */
     static final Map<String, Integer> WORD_ID = new HashMap<>();
 
+    // Static block to initialize the WORDS array and the WORD_ID map.
     static {
         try {
+            // Load the words from a resource file.
             String[] words = new String(IOTools.readFile(WordsLongConverter.class, "common-words.txt"), StandardCharsets.ISO_8859_1).split("\\s+");
             WORDS = words;
+
+            // Populate the WORD_ID map.
             for (int i = 0; i < WORDS.length; i++) {
                 String word = WORDS[i];
                 Integer ii = WORD_ID.put(word, i);
@@ -49,30 +62,31 @@ public class WordsLongConverter implements LongConverter {
         }
     }
 
+    /** The character used to separate words in the string representation. */
     private final String sep;
 
     /**
-     * Default constructor which uses '.' as separator.
+     * Default constructor. Uses a period as the default word separator.
      */
     public WordsLongConverter() {
         this('.');
     }
 
     /**
-     * Initializes a new converter with the given separator.
+     * Constructor with a specified word separator.
      *
-     * @param sep the separator to use for encoding and decoding
+     * @param sep The character used to separate words.
      */
     public WordsLongConverter(char sep) {
         this.sep = Character.toString(sep);
     }
 
     /**
-     * Parses a sequence of characters into a long value.
+     * Parses the provided text to produce a long value.
      *
-     * @param text the character sequence to parse
-     * @return the parsed long value
-     * @throws IllegalArgumentException if the character sequence contains an unknown word
+     * @param text The sequence of words to parse.
+     * @return The long value corresponding to the given word sequence.
+     * @throws IllegalArgumentException If a word in the sequence is not recognized.
      */
     @Override
     public long parse(CharSequence text) {
@@ -90,10 +104,10 @@ public class WordsLongConverter implements LongConverter {
     }
 
     /**
-     * Appends a long value to a StringBuilder.
+     * Appends the word representation of the given long value to the provided StringBuilder.
      *
-     * @param text the StringBuilder to append to
-     * @param value the long value to append
+     * @param text The StringBuilder to append to.
+     * @param value The long value to be converted and appended.
      */
     @Override
     public void append(StringBuilder text, long value) {
@@ -107,10 +121,10 @@ public class WordsLongConverter implements LongConverter {
     }
 
     /**
-     * Appends a long value to a Bytes object.
+     * Appends the word representation of the given long value to the provided Bytes object.
      *
-     * @param bytes the Bytes object to append to
-     * @param value the long value to append
+     * @param bytes The Bytes object to append to.
+     * @param value The long value to be converted and appended.
      */
     @Override
     public void append(Bytes<?> bytes, long value) {

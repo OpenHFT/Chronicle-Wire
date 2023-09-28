@@ -22,7 +22,6 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.Closeable;
-import net.openhft.chronicle.core.util.Annotations;
 import net.openhft.chronicle.core.util.GenericReflection;
 import net.openhft.chronicle.core.util.IgnoresEverything;
 import net.openhft.chronicle.wire.utils.JavaSourceCodeFormatter;
@@ -493,7 +492,7 @@ public class GenerateMethodReader {
         if (parameterTypes.length > 0 || hasRealInterceptorReturns())
             fields.append("\n");
 
-        final MethodId methodIdAnnotation = Annotations.getAnnotation(m, MethodId.class);
+        final MethodId methodIdAnnotation = Jvm.findAnnotation(m, MethodId.class);
 
         if (methodIdAnnotation != null) {
             int methodId = Maths.toInt32(methodIdAnnotation.value());
@@ -602,7 +601,7 @@ public class GenerateMethodReader {
                     res.append(codeBefore).append("\n");
             }
 
-            res.append(format("%s((%s) %s).%s(%s);\n",
+            res.append(format("%s((%s) %s).%s(%s);%n",
                     chainedCallPrefix, m.getDeclaringClass().getCanonicalName(), instanceFieldName, m.getName(),
                     String.join(", ", args)));
 
@@ -804,7 +803,7 @@ public class GenerateMethodReader {
             sb.append(aClass.getEnclosingClass().getSimpleName());
 
         String name = aClass.getName();
-        if (name.contains("$$Lambda$"))
+        if (aClass.isSynthetic() && name.contains("$$Lambda"))
             name = aClass.getInterfaces()[0].getName();
 
         final int packageDelimiterIndex = name.lastIndexOf('.');

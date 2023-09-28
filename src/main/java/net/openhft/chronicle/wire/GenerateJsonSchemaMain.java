@@ -175,7 +175,7 @@ public class GenerateJsonSchemaMain {
             sb.append("\n" +
                     "],\n");
         }
-        Comment comment = type.getAnnotation(Comment.class);
+        Comment comment = Jvm.findAnnotation(type, Comment.class);
         if (comment != null)
             sb.append("\"description\": \"" + comment.value() + "\",\n");
 

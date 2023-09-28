@@ -500,15 +500,34 @@ public class WireMarshaller<T> {
         return isLeaf;
     }
 
+    /**
+     * Provides a field accessor that's specialized for handling fields which require
+     * conversion between integer values and string representations using a LongConverter.
+     */
     static class LongConverterFieldAccess extends FieldAccess {
+
+        // The LongConverter instance used for conversion operations.
         @NotNull
         private final LongConverter longConverter;
 
+        /**
+         * Constructor to initialize field access with a specific LongConverter.
+         *
+         * @param field         The field being accessed.
+         * @param longConverter The converter to use for this field.
+         */
         LongConverterFieldAccess(@NotNull Field field, @NotNull LongConverter longConverter) {
             super(field);
             this.longConverter = longConverter;
         }
 
+        /**
+         * Fetches the LongConverter instance associated with a given class.
+         * Tries to retrieve a static "INSTANCE" field or creates a new instance if not found.
+         *
+         * @param clazz The class which presumably has a LongConverter.
+         * @return The LongConverter instance.
+         */
         static LongConverter getInstance(Class clazz) {
             try {
                 Field converterField = clazz.getDeclaredField("INSTANCE");
@@ -520,6 +539,13 @@ public class WireMarshaller<T> {
             }
         }
 
+        /**
+         * Reads the long value from an object and writes it using the provided ValueOut writer.
+         *
+         * @param o        The source object.
+         * @param write    The writer for output.
+         * @param previous The previous value (currently not used).
+         */
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
             long aLong = getLong(o);
@@ -535,10 +561,23 @@ public class WireMarshaller<T> {
             }
         }
 
+        /**
+         * Retrieves the long value from an object.
+         *
+         * @param o The object from which to retrieve the value.
+         * @return The long value of the field.
+         */
         protected long getLong(Object o) {
             return unsafeGetLong(o, offset);
         }
 
+        /**
+         * Sets the value of the object's field based on the provided ValueIn reader.
+         *
+         * @param o         The target object.
+         * @param read      The reader for input.
+         * @param overwrite Whether to overwrite existing values (currently not used).
+         */
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
             long i;
@@ -548,14 +587,38 @@ public class WireMarshaller<T> {
                 StringBuilder sb = RSBP.acquireStringBuilder();
                 read.text(sb);
                 i = longConverter.parse(sb);
+                if (!rangeCheck(i))
+                    throw new IORuntimeException("value '" + sb + "' is out of range for a " + field.getType());
             }
             setLong(o, i);
         }
 
+        /**
+         * Checks if the provided long value is within acceptable ranges.
+         *
+         * @param i The long value to check.
+         * @return True if the value is within range; otherwise, false.
+         */
+        protected boolean rangeCheck(long i) {
+            return true;
+        }
+
+        /**
+         * Sets a long value to the field of an object.
+         *
+         * @param o The target object.
+         * @param i The value to set.
+         */
         protected void setLong(Object o, long i) {
             unsafePutLong(o, offset, i);
         }
 
+        /**
+         * Reads a string value from the object and writes its long representation to the provided bytes.
+         *
+         * @param o     The source object.
+         * @param bytes The bytes to write the long representation to.
+         */
         @Override
         public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             StringBuilder sb = WSBP.acquireStringBuilder();
@@ -564,17 +627,34 @@ public class WireMarshaller<T> {
             bytes.writeLong(i);
         }
 
+        /**
+         * Checks if two objects have the same long value for the accessed field.
+         *
+         * @param o  First object.
+         * @param o2 Second object.
+         * @return True if values are the same; otherwise, false.
+         */
         @Override
         protected boolean sameValue(Object o, Object o2) {
             return getLong(o) == getLong(o2);
         }
 
+        /**
+         * Copies the long value of the accessed field from one object to another.
+         *
+         * @param from Source object.
+         * @param to   Destination object.
+         */
         @Override
         protected void copy(Object from, Object to) {
             setLong(to, getLong(from));
         }
     }
 
+    /**
+     * Abstract class to manage access to fields of objects.
+     * This class provides utility methods to read and write fields from/to objects.
+     */
     abstract static class FieldAccess {
         @NotNull
         final Field field;
@@ -585,10 +665,21 @@ public class WireMarshaller<T> {
         Comment commentAnnotation;
         Boolean isLeaf;
 
+        /**
+         * Constructor initializing field with given value.
+         *
+         * @param field Field to be accessed.
+         */
         FieldAccess(@NotNull Field field) {
             this(field, null);
         }
 
+        /**
+         * Constructor initializing field and isLeaf with given values.
+         *
+         * @param field  Field to be accessed.
+         * @param isLeaf Flag to indicate whether the field is a leaf node.
+         */
         FieldAccess(@NotNull Field field, Boolean isLeaf) {
             this.field = field;
 
@@ -596,12 +687,20 @@ public class WireMarshaller<T> {
             key = field::getName;
             this.isLeaf = isLeaf;
             try {
-                commentAnnotation = field.getAnnotation(Comment.class);
+                commentAnnotation = Jvm.findAnnotation(field, Comment.class);
             } catch (NullPointerException ignore) {
 
             }
         }
 
+        // ... (code continues)
+
+        /**
+         * Create a specific FieldAccess object based on the field type.
+         *
+         * @param field Field for which FieldAccess object is created.
+         * @return FieldAccess object specific to the field type.
+         */
         @Nullable
         public static Object create(@NotNull Field field) {
             Class<?> type = field.getType();
@@ -636,22 +735,25 @@ public class WireMarshaller<T> {
                     LongConverter longConverter = acquireLongConverter(field);
                     if (longConverter != null)
                         return new ByteLongConverterFieldAccess(field, longConverter);
-                    IntConversion intConversion = field.getAnnotation(IntConversion.class);
+                    IntConversion intConversion = Jvm.findAnnotation(field, IntConversion.class);
                     return intConversion == null
                             ? new ByteFieldAccess(field)
                             : new ByteIntConversionFieldAccess(field, intConversion);
                 }
-                case "char":
-                    CharConversion charConversion = field.getAnnotation(CharConversion.class);
+                case "char": {
+                    LongConverter longConverter = acquireLongConverter(field);
+                    if (longConverter != null)
+                        return new CharLongConverterFieldAccess(field, longConverter);
+                    CharConversion charConversion = Jvm.findAnnotation(field, CharConversion.class);
                     return charConversion == null
                             ? new CharFieldAccess(field)
                             : new CharConversionFieldAccess(field, charConversion);
-
+                }
                 case "short": {
                     LongConverter longConverter = acquireLongConverter(field);
                     if (longConverter != null)
                         return new ShortLongConverterFieldAccess(field, longConverter);
-                    IntConversion intConversion = field.getAnnotation(IntConversion.class);
+                    IntConversion intConversion = Jvm.findAnnotation(field, IntConversion.class);
                     return intConversion == null
                             ? new ShortFieldAccess(field)
                             : new ShortIntConversionFieldAccess(field, intConversion);
@@ -660,7 +762,7 @@ public class WireMarshaller<T> {
                     LongConverter longConverter = acquireLongConverter(field);
                     if (longConverter != null)
                         return new IntLongConverterFieldAccess(field, longConverter);
-                    IntConversion intConversion = field.getAnnotation(IntConversion.class);
+                    IntConversion intConversion = Jvm.findAnnotation(field, IntConversion.class);
                     return intConversion == null
                             ? new IntegerFieldAccess(field)
                             : new IntConversionFieldAccess(field, intConversion);
@@ -774,6 +876,14 @@ public class WireMarshaller<T> {
                 copy(o, previous);
         }
 
+        /**
+         * Check if the values of a field in two objects are the same.
+         *
+         * @param o  First object.
+         * @param o2 Second object.
+         * @return true if values are the same, false otherwise.
+         * @throws IllegalAccessException If unable to access the field.
+         */
         protected boolean sameValue(Object o, Object o2) throws IllegalAccessException {
             final Object v1 = field.get(o);
             final Object v2 = field.get(o2);
@@ -782,6 +892,13 @@ public class WireMarshaller<T> {
             return Objects.equals(v1, v2);
         }
 
+        /**
+         * Copies the value of a field from one object to another.
+         *
+         * @param from Source object.
+         * @param to   Destination object.
+         * @throws IllegalAccessException If unable to access the field.
+         */
         protected void copy(Object from, Object to) throws IllegalAccessException {
             ObjectUtils.requireNonNull(from);
             ObjectUtils.requireNonNull(to);
@@ -789,8 +906,27 @@ public class WireMarshaller<T> {
             unsafePutObject(to, offset, unsafeGetObject(from, offset));
         }
 
+        /**
+         * Abstract method to get the value of a field from an object.
+         *
+         * @param o        Object from which to get the value.
+         * @param write    Output destination.
+         * @param previous Previous object for comparison.
+         * @throws IllegalAccessException       If unable to access the field.
+         * @throws InvalidMarshallableException If marshalling fails.
+         */
         protected abstract void getValue(Object o, ValueOut write, Object previous) throws IllegalAccessException, InvalidMarshallableException;
 
+        /**
+         * Reads the value of a field from an input and sets it in an object.
+         *
+         * @param o         Object to set the value in.
+         * @param defaults  Default values.
+         * @param read      Input source.
+         * @param overwrite Whether to overwrite existing value.
+         * @throws IllegalAccessException       If unable to access the field.
+         * @throws InvalidMarshallableException If marshalling fails.
+         */
         protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException, InvalidMarshallableException {
             if (!read.isPresent()) {
                 if (overwrite && defaults != null)
@@ -811,10 +947,32 @@ public class WireMarshaller<T> {
             }
         }
 
+        /**
+         * Abstract method to set the value of a field in an object.
+         *
+         * @param o         Object to set the value in.
+         * @param read      Input source.
+         * @param overwrite Whether to overwrite existing value.
+         * @throws IllegalAccessException If unable to access the field.
+         */
         protected abstract void setValue(Object o, ValueIn read, boolean overwrite) throws IllegalAccessException;
 
+        /**
+         * Abstract method to convert the value of a field in an object to bytes.
+         *
+         * @param o     Object containing the field.
+         * @param bytes Destination to write the bytes to.
+         * @throws IllegalAccessException If unable to access the field.
+         */
         public abstract void getAsBytes(Object o, Bytes<?> bytes) throws IllegalAccessException;
 
+        /**
+         * Checks whether the values of a field in two objects are equal.
+         *
+         * @param o1 First object.
+         * @param o2 Second object.
+         * @return true if the values are equal, false otherwise.
+         */
         public boolean isEqual(Object o1, Object o2) {
             try {
                 return sameValue(o1, o2);
@@ -886,7 +1044,7 @@ public class WireMarshaller<T> {
 
         ObjectFieldAccess(@NotNull Field field, Boolean isLeaf) {
             super(field, isLeaf);
-            asMarshallable = field.getAnnotation(AsMarshallable.class);
+            asMarshallable = Jvm.findAnnotation(field, AsMarshallable.class);
             type = field.getType();
         }
 
@@ -1719,6 +1877,9 @@ public class WireMarshaller<T> {
     }
 
     static class CharFieldAccess extends FieldAccess {
+
+        public static final String INVALID_CHAR_STR = String.valueOf((char) 0xFFFF);
+
         CharFieldAccess(@NotNull Field field) {
             super(field);
         }
@@ -1740,7 +1901,7 @@ public class WireMarshaller<T> {
             String text = read.text();
             if (text == null || text.length() < 1) {
                 if (overwrite)
-                    text = String.valueOf((char) 0xFFFF);
+                    text = INVALID_CHAR_STR;
                 else
                     return;
             }
@@ -1830,48 +1991,200 @@ public class WireMarshaller<T> {
         }
     }
 
+    /**
+     * A field access that provides a way to interact with a byte field as if it's a long,
+     * by using a {@link LongConverter} for any necessary transformations.
+     */
     static class ByteLongConverterFieldAccess extends LongConverterFieldAccess {
+
+        /**
+         * Constructs a new instance of {@link ByteLongConverterFieldAccess}.
+         *
+         * @param field         The byte field to be accessed.
+         * @param longConverter The converter to be used for the transformations.
+         */
         public ByteLongConverterFieldAccess(@NotNull Field field, LongConverter longConverter) {
             super(field, longConverter);
         }
 
+        /**
+         * Checks if the given long value fits into an unsigned byte range.
+         *
+         * @param i The long value to check.
+         * @return True if the value is within the byte range, otherwise false.
+         */
+        @Override
+        protected boolean rangeCheck(long i) {
+            return (i & 0xFF) == i;
+        }
+
+        /**
+         * Retrieves the unsigned byte value from the given object and returns it as a long.
+         *
+         * @param o The object containing the field.
+         * @return The long representation of the byte value.
+         */
         @Override
         protected long getLong(Object o) {
             return unsafeGetByte(o, offset) & 0xFFL;
         }
 
+        /**
+         * Sets the value of the byte field in the given object using a long value.
+         *
+         * @param o The object containing the field.
+         * @param i The long value to set.
+         */
         @Override
         protected void setLong(Object o, long i) {
             unsafePutByte(o, offset, (byte) i);
         }
     }
 
+    /**
+     * A field access that provides a way to interact with a short field as if it's a long,
+     * by using a {@link LongConverter} for any necessary transformations.
+     */
     static class ShortLongConverterFieldAccess extends LongConverterFieldAccess {
+
+        /**
+         * Constructs a new instance of {@link ShortLongConverterFieldAccess}.
+         *
+         * @param field         The short field to be accessed.
+         * @param longConverter The converter to be used for the transformations.
+         */
         public ShortLongConverterFieldAccess(@NotNull Field field, LongConverter longConverter) {
             super(field, longConverter);
         }
 
+        /**
+         * Checks if the given long value fits into a short range.
+         *
+         * @param i The long value to check.
+         * @return True if the value is within the short range, otherwise false.
+         */
+        @Override
+        protected boolean rangeCheck(long i) {
+            return (i & 0xFFFFL) == i;
+        }
+
+        /**
+         * Retrieves the short value from the given object and returns it as a long.
+         *
+         * @param o The object containing the field.
+         * @return The long representation of the short value.
+         */
         @Override
         protected long getLong(Object o) {
             return unsafeGetShort(o, offset) & 0xFFFFL;
         }
 
+        /**
+         * Sets the value of the short field in the given object using a long value.
+         *
+         * @param o The object containing the field.
+         * @param i The long value to set.
+         */
         @Override
         protected void setLong(Object o, long i) {
             unsafePutShort(o, offset, (short) i);
         }
     }
 
+    /**
+     * A field access that provides a way to interact with a char field as if it's a long,
+     * leveraging a {@link LongConverter} for any necessary transformations.
+     */
+    static class CharLongConverterFieldAccess extends LongConverterFieldAccess {
+
+        /**
+         * Constructs a new instance of {@link CharLongConverterFieldAccess}.
+         *
+         * @param field         The char field to be accessed.
+         * @param longConverter The converter used for transformations.
+         */
+        public CharLongConverterFieldAccess(@NotNull Field field, LongConverter longConverter) {
+            super(field, longConverter);
+        }
+
+        /**
+         * Checks if the given long value can be represented as a char.
+         *
+         * @param i The long value to check.
+         * @return True if the value can be represented as a char, otherwise false.
+         */
+        @Override
+        protected boolean rangeCheck(long i) {
+            return (char) i == i;
+        }
+
+        /**
+         * Retrieves the char value from the given object and returns it as a long.
+         *
+         * @param o The object containing the field.
+         * @return The long representation of the char value.
+         */
+        @Override
+        protected long getLong(Object o) {
+            return unsafeGetChar(o, offset);
+        }
+
+        /**
+         * Sets the value of the char field in the given object using a long value.
+         *
+         * @param o The object containing the field.
+         * @param i The long value to set.
+         */
+        @Override
+        protected void setLong(Object o, long i) {
+            unsafePutChar(o, offset, (char) i);
+        }
+    }
+
+    /**
+     * A field access that provides a way to interact with an int field as if it's a long,
+     * leveraging a {@link LongConverter} for any necessary transformations.
+     */
     static class IntLongConverterFieldAccess extends LongConverterFieldAccess {
+
+        /**
+         * Constructs a new instance of {@link IntLongConverterFieldAccess}.
+         *
+         * @param field         The int field to be accessed.
+         * @param longConverter The converter used for transformations.
+         */
         public IntLongConverterFieldAccess(@NotNull Field field, @NotNull LongConverter longConverter) {
             super(field, longConverter);
         }
 
+        /**
+         * Checks if the given long value can be represented as an int.
+         *
+         * @param i The long value to check.
+         * @return True if the value can be represented as an int, otherwise false.
+         */
+        @Override
+        protected boolean rangeCheck(long i) {
+            return (i & 0xFFFF_FFFFL) == i;
+        }
+
+        /**
+         * Retrieves the int value from the given object and returns it as a long.
+         *
+         * @param o The object containing the field.
+         * @return The long representation of the int value.
+         */
         @Override
         protected long getLong(Object o) {
             return unsafeGetInt(o, offset) & 0xFFFF_FFFFL;
         }
 
+        /**
+         * Sets the value of the int field in the given object using a long value.
+         *
+         * @param o The object containing the field.
+         * @param i The long value to set.
+         */
         @Override
         protected void setLong(Object o, long i) {
             unsafePutInt(o, offset, (int) i);
