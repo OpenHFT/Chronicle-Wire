@@ -50,7 +50,8 @@ MarketData latestAppleMarketData = latest.reduction().get("AAPL");  <7>
 
 The `Reduction` above shows an example of a latest-seen service where the latest `MarketData` per symbol (key) is maintained.
 
-The `Reductions.of()` takes an `DocumentExtractor` that is used to extract objects from the queue and a standard Java Collector (which needs to be concurrent). The Collector shown above operates on Maps and, as described above, will map objects of type `MarketData` using `MarketData::symbol` to extract keys and `Function.identity()` to extract values.
+The `Reductions.of()` takes an `DocumentExtractor` that is used to extract objects from the queue and a standard Java Collector (which needs to be concurrent).
+The Collector shown above operates on Maps and, as described above, will map objects of type `MarketData` using `MarketData::symbol` to extract keys and `Function.identity()` to extract values.
 In case there is already an old value associated with a particular key, the provided merger `Reductions.replacingMerger()` is applied (which will replace the old existing value for a key with the new value).
 
 Once a `Reduction` is created, it can accept an `ExcerptTailer` to boostrap from an existing queue.
@@ -89,6 +90,7 @@ Reduction<LongSupplier> counting = Reductions.counting() <1>
 ...
 long count = counting.reduction().getAsLong();           <2>
 ----
+
 <1> Maintains a count of the number of excerpts encountered.
 <2> Shows how one can access the current reduction value.
 
@@ -104,6 +106,7 @@ Reduction<LongSupplier> lastSeeing =
 long lastSeen = lastSeeing.reduction().getAsLong();
 
 ----
+
 <1> Maintains a view of the last index encountered or 0 if no index was encountered
 
 ==== Highest Index Seen
@@ -117,6 +120,7 @@ Reduction<LongSupplier> maxIndexing =
 ...
 long maxIndex = maxIndexing.reduction().getAsLong();
 ----
+
 <1> Maintains a view of the highest index encountered or 0 if no index was encountered.
 
 ==== Lowest Index Seen
@@ -139,6 +143,7 @@ Maintains a List of all MarketData elements encountered in a List. This should b
                 Reduction.of(builder(MarketData.class).build())
                         .collecting(ConcurrentCollectors.toConcurrentList()); <1>
 ----
+
 <1> Maintains a List of all MarketData elements encountered in a List.
 
 ==== Set of Elements with Mapping and Filtering
@@ -202,6 +207,7 @@ MarketData latestAppleMarketData = latest.reduction().get("AAPL");
 Map<String, MarketData> liveQueueBackedMap = latest.reduction(); <1>
 
 ----
+
 <1> This creates a live concurrent view of the reduction that can be invoked at any time.
 
 ==== Using a protected Reduction
@@ -226,7 +232,11 @@ Reduction<Map<String, MarketData>> latestProtected = Reduction.of(
 
 
 ==== More Complex Reductions
-As Collectors can be composed to an arbitrary depth, more complex reductions can easily be constructed. As long as the first-level collector is concurrent, the lower level ones need not be concurrent. Here is an example:
+
+As Collectors can be composed to an arbitrary depth, more complex reductions can easily be constructed.
+As long as the first-level collector is concurrent, the lower level ones need not be concurrent.
+Here is an example:
+
 [source,java]
 ----
 Reduction<ConcurrentMap<String, DoubleSummaryStatistics>> stats = Reduction.of(
@@ -239,6 +249,7 @@ Reduction<ConcurrentMap<String, DoubleSummaryStatistics>> stats = Reduction.of(
                 )
         );
 ----
+
 This will maintain statistics per symbol on `MarketData::last` using vanilla Java classes (creates objects).
 
 ==== Register with a Queue

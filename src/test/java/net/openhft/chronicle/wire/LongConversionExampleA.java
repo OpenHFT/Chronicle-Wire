@@ -18,13 +18,14 @@
 
 package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.wire.converter.Base64;
 
 public class LongConversionExampleA {
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(LongConversionExampleA.House.class);
     }
     public static class House {
-        @LongConversion(Base64LongConverter.class)
+        @Base64
         long owner;
         public void owner(CharSequence owner) {
             this.owner = Base64LongConverter.INSTANCE.parse(owner);

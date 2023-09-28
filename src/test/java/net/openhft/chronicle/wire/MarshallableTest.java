@@ -91,16 +91,15 @@ public class MarshallableTest extends WireTestCommon {
         assertEquals(source, destination);
     }
 
-    @Test
-    public void testCopy() {
+    private static void doTestCopy(WireType wireType) {
         DTO2 dto2 = new DTO2();
         dto2.one = RetentionPolicy.CLASS;
         dto2.two = Arrays.asList(1L, 22L);
         dto2.three = "2018-11-02";
 
-        String s = WireType.TEXT.asString(dto2);
-       // System.out.println(s);
-        DTO1 dto1 = WireType.TEXT.fromString(DTO1.class, s);
+        String s = wireType.asString(dto2);
+        // System.out.println(s);
+        DTO1 dto1 = wireType.fromString(DTO1.class, s);
         assertEquals("!net.openhft.chronicle.wire.MarshallableTest$DTO1 {\n" +
                 "  one: CLASS,\n" +
                 "  two: [\n" +
@@ -108,7 +107,18 @@ public class MarshallableTest extends WireTestCommon {
                 "    22\n" +
                 "  ],\n" +
                 "  three: 2018-11-02\n" +
-                "}\n", WireType.TEXT.asString(dto1));
+                "}\n", wireType.asString(dto1));
+    }
+
+    @Test
+    public void testCopy() {
+        doTestCopy(WireType.TEXT);
+    }
+
+    @Ignore(/* TODO FIX */)
+    @Test
+    public void testCopyYaml() {
+        doTestCopy(WireType.YAML_ONLY);
     }
 
     @Test

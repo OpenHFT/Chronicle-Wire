@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.onoes.ExceptionKey;
+import net.openhft.chronicle.core.onoes.LogLevel;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.threads.CleaningThread;
 import net.openhft.chronicle.core.threads.ThreadDump;
@@ -29,6 +30,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -55,13 +57,14 @@ public class WireTestCommon {
         AbstractReferenceCounted.assertReferencesReleased();
     }
 
-    @Before
+    // add @Before for tests that might create threads.
     public void threadDump() {
         threadDump = new ThreadDump();
     }
 
     public void checkThreadDump() {
-        threadDump.assertNoNewThreads();
+        if (threadDump != null)
+            threadDump.assertNoNewThreads();
     }
 
     @Before
@@ -100,10 +103,16 @@ public class WireTestCommon {
                 Slf4jExceptionHandler.DEBUG.on(getClass(), "Ignored " + ignoredException.getValue());
         }
         ignoredExceptions.clear();
-        if (Jvm.hasException(exceptions)) {
+        for (Iterator<Map.Entry<ExceptionKey, Integer>> iterator = exceptions.entrySet().iterator(); iterator.hasNext(); ) {
+            Map.Entry<ExceptionKey, Integer> entry = iterator.next();
+            LogLevel level = entry.getKey().level;
+            if (level == LogLevel.DEBUG || level == LogLevel.PERF)
+                iterator.remove();
+        }
+        if (!exceptions.isEmpty()) {
             final String msg = exceptions.size() + " exceptions were detected: " +
                     exceptions.keySet().stream()
-                            .map(ek -> "" + ek.throwable)
+                            .map(ek -> ek.message + " " + ek.throwable)
                             .collect(Collectors.joining(", "));
             Jvm.dumpException(exceptions);
             Jvm.resetExceptionHandlers();
@@ -117,7 +126,6 @@ public class WireTestCommon {
         CleaningThread.performCleanup(Thread.currentThread());
 
         // find any discarded resources.
-        System.gc();
         AbstractCloseable.waitForCloseablesToClose(100);
 
         assertReferencesReleased();

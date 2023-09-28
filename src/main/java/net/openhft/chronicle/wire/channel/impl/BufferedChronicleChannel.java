@@ -20,7 +20,7 @@ package net.openhft.chronicle.wire.channel.impl;
 
 import net.openhft.affinity.AffinityThreadFactory;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.io.Closeable;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.threads.NamedThreadFactory;
 import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.wire.DocumentContext;
@@ -33,6 +33,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
+import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 import static net.openhft.chronicle.wire.channel.impl.TCPChronicleChannel.validateHeader;
 
 public class BufferedChronicleChannel extends DelegateChronicleChannel {
@@ -62,6 +63,8 @@ public class BufferedChronicleChannel extends DelegateChronicleChannel {
 
     @Override
     public BufferedChronicleChannel eventPoller(EventPoller eventPoller) {
+        if (isClosed())
+            throw new ClosedIllegalStateException(this.getClass().getName() + " closed for " + Thread.currentThread().getName());
         this.eventPoller = eventPoller;
         return this;
     }
@@ -87,11 +90,13 @@ public class BufferedChronicleChannel extends DelegateChronicleChannel {
                 exchanger.releaseConsumer();
             }
         } catch (Throwable t) {
-            if (!isClosing())
+            // don't rely on the closer calling close() in the right order
+            Thread.yield();
+            if (!isClosing() && !channel.isClosing())
                 Jvm.warn().on(getClass(), "bgWriter died", t);
         } finally {
             bgWriter.shutdown();
-            Closeable.closeQuietly(eventPoller());
+            closeQuietly(eventPoller());
         }
     }
 
@@ -118,6 +123,6 @@ public class BufferedChronicleChannel extends DelegateChronicleChannel {
     @Override
     public void close() {
         super.close();
-        exchanger.close();
+        closeQuietly(eventPoller, exchanger);
     }
 }

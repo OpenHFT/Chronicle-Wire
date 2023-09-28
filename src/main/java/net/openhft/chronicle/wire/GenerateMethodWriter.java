@@ -109,6 +109,7 @@ public class GenerateMethodWriter {
     private final boolean useUpdateInterceptor;
     private final ConcurrentMap<Class<?>, String> methodWritersMap = new ConcurrentHashMap<>();
     final private AtomicInteger indent = new AtomicInteger();
+    private final boolean verboseTypes;
 
     private GenerateMethodWriter(final String packageName,
                                  final Set<Class<?>> interfaces,
@@ -118,7 +119,8 @@ public class GenerateMethodWriter {
                                  final String genericEvent,
                                  final boolean metaData,
                                  final boolean useMethodId,
-                                 final boolean useUpdateInterceptor) {
+                                 final boolean useUpdateInterceptor,
+                                 final boolean verboseTypes) {
 
         this.packageName = packageName;
         this.interfaces = interfaces;
@@ -129,6 +131,7 @@ public class GenerateMethodWriter {
         this.metaData = metaData;
         this.useMethodId = useMethodId;
         this.useUpdateInterceptor = useUpdateInterceptor;
+        this.verboseTypes = verboseTypes;
     }
 
     /**
@@ -136,6 +139,7 @@ public class GenerateMethodWriter {
      * @return a proxy class from an interface class or null if it can't be created
      */
     @Nullable
+    @Deprecated /* to be removed is version x.26. */
     public static Class<?> newClass(String fullClassName,
                                     Set<Class<?>> interfaces,
                                     ClassLoader classLoader,
@@ -155,7 +159,37 @@ public class GenerateMethodWriter {
                 classLoader,
                 wireType,
                 genericEvent,
-                metaData, useMethodId, useUpdateInterceptor)
+                metaData, useMethodId, useUpdateInterceptor, false)
+                .createClass();
+    }
+
+
+    /**
+     * @param interfaces an interface class
+     * @return a proxy class from an interface class or null if it can't be created
+     */
+    @Nullable
+    public static Class<?> newClass(String fullClassName,
+                                    Set<Class<?>> interfaces,
+                                    ClassLoader classLoader,
+                                    final WireType wireType,
+                                    final String genericEvent,
+                                    boolean metaData,
+                                    boolean useMethodId,
+                                    final boolean useUpdateInterceptor,
+                                    boolean verboseTypes) {
+        String packageName = ReflectionUtil.generatedPackageName(fullClassName);
+
+        int lastDot = fullClassName.lastIndexOf('.');
+        String className = lastDot == -1 ? fullClassName : fullClassName.substring(lastDot + 1);
+
+        return new GenerateMethodWriter(packageName,
+                interfaces,
+                className,
+                classLoader,
+                wireType,
+                genericEvent,
+                metaData, useMethodId, useUpdateInterceptor, verboseTypes)
                 .createClass();
     }
 
@@ -236,8 +270,8 @@ public class GenerateMethodWriter {
             Parameter p = parameters[i];
             result.append(sep);
             sep = ", ";
-            IntConversion intConversion = p.getAnnotation(IntConversion.class);
-            LongConversion longConversion = p.getAnnotation(LongConversion.class);
+            IntConversion intConversion = Jvm.findAnnotation(p, IntConversion.class);
+            LongConversion longConversion = Jvm.findAnnotation(p, LongConversion.class);
 
             if (intConversion != null)
                 result.append("@IntConversion(")
@@ -358,7 +392,6 @@ public class GenerateMethodWriter {
             addMarshallableOut(imports);
             imports.append(interfaceMethods);
             imports.append("\n}\n");
-
             if (DUMP_CODE)
                 System.out.println(imports);
 
@@ -436,6 +469,8 @@ public class GenerateMethodWriter {
                 "this.closeable = closeable;");
         for (Map.Entry<Class<?>, String> e : methodWritersMap.entrySet()) {
             result.append(format("\n%s = ThreadLocal.withInitial(() -> out.get().methodWriter(%s.class));", e.getValue(), nameForClass(e.getKey())));
+            result.append(format("\n%s = ThreadLocal.withInitial(() -> out.get().methodWriterBuilder(%s.class)" +
+                    ".verboseTypes(%b).build());", e.getValue(), nameForClass(e.getKey()), verboseTypes));
         }
 
         result.append("\n}\n\n");
@@ -482,7 +517,7 @@ public class GenerateMethodWriter {
             body.append("try (");
         body.append("final ")
                 .append(WRITE_DOCUMENT_CONTEXT)
-                .append(" dc = (")
+                .append(" _dc_ = (")
                 .append(WRITE_DOCUMENT_CONTEXT).append(") out.acquireWritingDocument(")
                 .append(metaData)
                 .append(")");
@@ -491,8 +526,8 @@ public class GenerateMethodWriter {
         else
             body.append(") {\n");
         body.append("try {\n");
-        body.append("dc.chainedElement(" + (!terminating && !passthrough) + ");\n");
-        body.append("if (out.recordHistory()) MessageHistory.writeHistory(dc);\n");
+        body.append("_dc_.chainedElement(" + (!terminating && !passthrough) + ");\n");
+        body.append("if (out.recordHistory()) MessageHistory.writeHistory(_dc_);\n");
 
         int startJ = 0;
 
@@ -513,11 +548,11 @@ public class GenerateMethodWriter {
             writeArrayOfParameters(dm, parameterTypes, len, body, startJ);
 
         if (parameterCount == 0)
-            body.append("valueOut.text(\"\");\n");
+            body.append("_valueOut_.text(\"\");\n");
 
-        body.append("} catch (Throwable t) {\n");
-        body.append("dc.rollbackOnClose();\n");
-        body.append("throw Jvm.rethrow(t);\n");
+        body.append("} catch (Throwable _t_) {\n");
+        body.append("_dc_.rollbackOnClose();\n");
+        body.append("throw Jvm.rethrow(_t_);\n");
         body.append("}\n");
 
         if (dm.getDeclaringClass() == Syncable.class) {
@@ -553,11 +588,11 @@ public class GenerateMethodWriter {
         if ((wireType != WireType.TEXT && wireType != WireType.YAML) && methodId.isPresent()) {
 
             long value = ((MethodId) methodId.get()).value();
-            body.append(format("final " + VALUE_OUT + " valueOut = dc.wire().writeEventId(%s, %d);\n", eventName, value));
+            body.append(format("final " + VALUE_OUT + " _valueOut_ = _dc_.wire().writeEventId(%s, %d);\n", eventName, value));
             methodID = format("@" + METHOD_ID + "(%d)\n", value);
 
         } else
-            body.append(format("final " + VALUE_OUT + " valueOut = dc.wire().writeEventName(%s);\n", eventName));
+            body.append(format("final " + VALUE_OUT + " _valueOut_ = _dc_.wire().writeEventName(%s);\n", eventName));
         return methodID;
     }
 
@@ -565,7 +600,7 @@ public class GenerateMethodWriter {
         final int parameterCount = dm.getParameterCount();
         final boolean multipleArgs = parameterCount > startJ + 1;
         if (multipleArgs)
-            body.append("valueOut.array(v -> {\n");
+            body.append("_valueOut_.array(_v_ -> {\n");
         for (int j = startJ; j < len; j++) {
 
             final Parameter p = dm.getParameters()[j];
@@ -577,14 +612,14 @@ public class GenerateMethodWriter {
                     longConversion != null ? longConversion.value().getName() : "";
 
             if (!name.isEmpty() && (WireType.TEXT == wireType || WireType.YAML == wireType))
-                body.append(format("valueOut.rawText(%s.INSTANCE.asText(%s));\n", name, p.getName()));
+                body.append(format("_valueOut_.rawText(%s.INSTANCE.asText(%s));\n", name, p.getName()));
             else if (p.getType().isPrimitive() || CharSequence.class.isAssignableFrom(p.getType())) {
                 if (longConversion != null && (p.getType() == long.class || CharSequence.class.isAssignableFrom(p.getType())))
-                    body.append(format("%s.writeLong(%s.INSTANCE, %s);\n", multipleArgs ? "v" : "valueOut", longConversion.value().getName(), p.getName()));
+                    body.append(format("%s.writeLong(%s.INSTANCE, %s);\n", multipleArgs ? "_v_" : "_valueOut_", longConversion.value().getName(), p.getName()));
                 else if (intConversion != null)
-                    body.append(format("%s.writeInt(%s.INSTANCE, %s);\n", multipleArgs ? "v" : "valueOut", intConversion.value().getName(), p.getName()));
+                    body.append(format("%s.writeInt(%s.INSTANCE, %s);\n", multipleArgs ? "_v_" : "_valueOut_", intConversion.value().getName(), p.getName()));
                 else
-                    body.append(format("%s.%s(%s);\n", multipleArgs ? "v" : "valueOut", toString(erase(parameterTypes[j])), p.getName()));
+                    body.append(format("%s.%s(%s);\n", multipleArgs ? "_v_" : "_valueOut_", toString(erase(parameterTypes[j])), p.getName()));
             } else
                 writeValue(dm, erase(parameterTypes[j]), body, startJ, p);
         }
@@ -597,22 +632,33 @@ public class GenerateMethodWriter {
         final String name = p.getName();
         String className = type.getTypeName().replace('$', '.');
 
-        final String vOut = dm.getParameterCount() > startJ + 1 ? "v" : "valueOut";
+        final String vOut = dm.getParameterCount() > startJ + 1 ? "_v_" : "_valueOut_";
         String after = "";
-        if (!type.isInterface() && Marshallable.class.isAssignableFrom(type) && !Serializable.class.isAssignableFrom(type) && !DynamicEnum.class.isAssignableFrom(type)) {
-            body.append("if (").append(name).append(" != null && ").append(className).append(".class == ").append(name).append(".getClass()) {\n")
-                    .append(vOut).append(".marshallable(").append(name).append(");\n")
-                    .append("} else  {\n");
-            after = "}\n";
+
+        if (verboseTypes) {
+            body
+                    .append(vOut)
+                    .append(".object(")
+                    .append(name)
+                    .append(");\n")
+                    .append(after);
+        } else {
+
+            if (!type.isInterface() && Marshallable.class.isAssignableFrom(type) && !Serializable.class.isAssignableFrom(type) && !DynamicEnum.class.isAssignableFrom(type)) {
+                body.append("if (").append(name).append(" != null && ").append(className).append(".class == ").append(name).append(".getClass()) {\n")
+                        .append(vOut).append(".marshallable(").append(name).append(");\n")
+                        .append("} else  {\n");
+                after = "}\n";
+            }
+            body
+                    .append(vOut)
+                    .append(".object(")
+                    .append(className)
+                    .append(".class, ")
+                    .append(name)
+                    .append(");\n")
+                    .append(after);
         }
-        body
-                .append(vOut)
-                .append(".object(")
-                .append(className)
-                .append(".class, ")
-                .append(name)
-                .append(");\n")
-                .append(after);
     }
 
     private StringBuilder methodReturn(final Method dm, final Class<?> interfaceClazz) {
@@ -623,7 +669,7 @@ public class GenerateMethodWriter {
             return result;
 
         if (returnType == DocumentContext.class) {
-            result.append("return dc;\n");
+            result.append("return _dc_;\n");
 
         } else if (returnType.isAssignableFrom(interfaceClazz) || returnType == interfaceClazz) {
             result.append("return this;\n");

@@ -21,8 +21,18 @@ import net.openhft.chronicle.bytes.Bytes;
 
 import java.time.Duration;
 
+/**
+ * Implementation of {@link LongConverter} to convert durations represented as microseconds.
+ * This class operates on long values, converting them to and from Java's {@link Duration}.
+ */
 public class MicroDurationLongConverter implements LongConverter {
 
+    /**
+     * Parses the provided {@link CharSequence} into a duration and returns the equivalent duration in microseconds.
+     *
+     * @param text the {@link CharSequence} to parse
+     * @return the parsed duration as a long value in microseconds
+     */
     @Override
     public long parse(CharSequence text) {
         final Duration parse = Duration.parse(text);
@@ -30,18 +40,37 @@ public class MicroDurationLongConverter implements LongConverter {
     }
 
 
+    /**
+     * Converts a duration represented in microseconds to a {@link Duration} object.
+     *
+     * @param value the duration as a long value in microseconds
+     * @return a {@link Duration} representing the same duration
+     */
     private Duration duration(long value) {
         return Duration.ofSeconds(value / 1_000_000,
                 value % 1_000_000 * 1_000);
     }
 
+    /**
+     * Appends a {@link Duration} representation of the provided long value (in microseconds) to the provided {@link StringBuilder}.
+     *
+     * @param text the {@link StringBuilder} to append to
+     * @param value the duration as a long value in microseconds
+     */
     @Override
     public void append(StringBuilder text, long value) {
         text.append(duration(value));
     }
 
+    /**
+     * Appends a {@link Duration} representation of the provided long value (in microseconds) to the provided {@link Bytes}.
+     *
+     * @param bytes the {@link Bytes} object to append to
+     * @param value the duration as a long value in microseconds
+     */
     @Override
     public void append(Bytes<?> bytes, long value) {
         bytes.append(duration(value).toString());
     }
 }
+

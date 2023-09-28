@@ -55,6 +55,7 @@ public class WireCollectionTest extends WireTestCommon {
     public static Collection<Object[]> combinations() {
         return Arrays.asList(
                 new Object[]{WireType.TEXT},
+                new Object[]{WireType.YAML_ONLY},
                 new Object[]{(Function<Bytes<?>, Wire>) bytes -> new BinaryWire(bytes, false, true, false, 128, "binary", false)},
                 new Object[]{WireType.BINARY},
                 new Object[]{WireType.BINARY_LIGHT},

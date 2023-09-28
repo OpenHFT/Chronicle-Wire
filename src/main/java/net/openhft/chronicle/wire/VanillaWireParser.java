@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.util.CharSequenceComparator;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -57,7 +58,7 @@ public class VanillaWireParser implements WireParser {
         return defaultConsumer;
     }
 
-    public void parseOne(@NotNull WireIn wireIn) throws InvocationTargetRuntimeException {
+    public void parseOne(@NotNull WireIn wireIn) throws InvocationTargetRuntimeException, InvalidMarshallableException {
         long start = wireIn.bytes().readPosition();
         if (peekCode(wireIn) == BinaryWireCode.FIELD_NUMBER) {
             parseOneBinary(wireIn);
@@ -98,7 +99,7 @@ public class VanillaWireParser implements WireParser {
                     "The previous message was\n" + wireIn.bytes().toHexString(lastStart, start - lastStart));
     }
 
-    private void parseOneBinary(@NotNull WireIn wireIn) {
+    private void parseOneBinary(@NotNull WireIn wireIn) throws InvalidMarshallableException {
         long methodId = wireIn.readEventNumber();
         if (methodId == (int) methodId) {
             Map.Entry<String, WireParselet> entry = numberedConsumer.get((int) methodId);

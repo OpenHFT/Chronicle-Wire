@@ -24,7 +24,6 @@ import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.Closeable;
-import net.openhft.chronicle.core.util.Annotations;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +36,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static net.openhft.chronicle.wire.VanillaWireParser.SKIP_READABLE_BYTES;
@@ -53,6 +53,8 @@ public class VanillaMethodReader implements MethodReader {
     private final WireParser metaWireParser;
     private final WireParser dataWireParser;
     private final MethodReaderInterceptorReturns methodReaderInterceptorReturns;
+    private final Predicate predicate;
+
     private MessageHistory messageHistory;
     private boolean closeIn = false;
     private boolean closed;
@@ -65,6 +67,7 @@ public class VanillaMethodReader implements MethodReader {
                                @NotNull Object... objects) {
         this(in, ignoreDefault, defaultParselet, SKIP_READABLE_BYTES, methodReaderInterceptorReturns, metaDataHandler, objects);
     }
+
 
     public VanillaMethodReader(MarshallableIn in,
                                boolean ignoreDefault,
@@ -82,8 +85,25 @@ public class VanillaMethodReader implements MethodReader {
                                MethodReaderInterceptorReturns methodReaderInterceptorReturns,
                                Object[] metaDataHandler,
                                @NotNull Object... objects) {
+        this(in,
+                ignoreDefault,
+                defaultParselet,
+                fieldNumberParselet,
+                methodReaderInterceptorReturns, metaDataHandler,
+                x -> true, objects);
+    }
+
+    public VanillaMethodReader(MarshallableIn in,
+                               boolean ignoreDefault,
+                               WireParselet defaultParselet,
+                               FieldNumberParselet fieldNumberParselet,
+                               MethodReaderInterceptorReturns methodReaderInterceptorReturns,
+                               Object[] metaDataHandler,
+                               Predicate predicate,
+                               @NotNull Object... objects) {
         this.in = in;
         this.methodReaderInterceptorReturns = methodReaderInterceptorReturns;
+        this.predicate = predicate;
         if (objects[0] instanceof WireParselet)
             defaultParselet = (WireParselet) objects[0];
 
@@ -393,7 +413,7 @@ public class VanillaMethodReader implements MethodReader {
 
     @NotNull
     protected MethodWireKey createWireKey(@NotNull Method m, String name) {
-        MethodId annotation = Annotations.getAnnotation(m, MethodId.class);
+        MethodId annotation = Jvm.findAnnotation(m, MethodId.class);
         return new MethodWireKey(name, annotation == null
                 ? name.hashCode()
                 : Maths.toInt32(annotation.value()));
@@ -499,12 +519,13 @@ public class VanillaMethodReader implements MethodReader {
      * reads one message
      *
      * @return true if there was a message, or false if no more data is available.
-     * If we read a metadata message, <code>true</code> is returned even if it was ignored
+     * If we read a metadata message, {@code true} is returned even if it was ignored
      */
     public boolean readOne() throws InvocationTargetRuntimeException {
         throwExceptionIfClosed();
-
-        return readOne0();
+        // return readOne0();
+        boolean test = predicate.test(this);
+        return test && readOne0();
     }
 
     private boolean readOne0() {

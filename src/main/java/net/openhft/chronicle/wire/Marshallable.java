@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.Resettable;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
@@ -54,12 +55,12 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     @Nullable
-    static <T> T fromString(@NotNull CharSequence cs) {
+    static <T> T fromString(@NotNull CharSequence cs) throws InvalidMarshallableException {
         return TEXT.fromString(cs);
     }
 
     @Nullable
-    static <T> T fromString(@NotNull Class<T> tClass, @NotNull CharSequence cs) {
+    static <T> T fromString(@NotNull Class<T> tClass, @NotNull CharSequence cs) throws InvalidMarshallableException {
         return TEXT.fromString(tClass, cs);
     }
 
@@ -70,11 +71,11 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * @return the marshallable object
      */
     @NotNull
-    static <T> T fromFile(String filename) throws IOException {
+    static <T> T fromFile(String filename) throws IOException, InvalidMarshallableException {
         return TEXT.fromFile(filename);
     }
 
-    static <T> T fromString(@NotNull InputStream is) {
+    static <T> T fromString(@NotNull InputStream is) throws  InvalidMarshallableException {
         Scanner s = new Scanner(is).useDelimiter("\\A");
         return TEXT.fromString(s.hasNext() ? s.next() : "");
     }
@@ -87,7 +88,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * @return the marshallable object
      */
     @Nullable
-    static <T> T fromFile(@NotNull Class<T> expectedType, String filename) throws IOException {
+    static <T> T fromFile(@NotNull Class<T> expectedType, String filename) throws IOException, InvalidMarshallableException {
         return TEXT.fromFile(expectedType, filename);
     }
 
@@ -118,27 +119,52 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
         Wires.setLongField(this, name, value);
     }
 
+    /**
+     * Reads the state of the Marshallable object from the given wire input. The method
+     * obtains a WireMarshaller specific to the class of the current object and delegates
+     * the reading process to that marshaller.
+     * <p>
+     * The default implementation will use a default value for each field not present
+     *
+     * @param wire The wire input source.
+     * @throws IORuntimeException           If an IO error occurs during the read operation.
+     * @throws InvalidMarshallableException If there's an error during marshalling.
+     */
     @Override
-    default void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
-        // Wires.readMarshallable(this, wire, true);
+    default void readMarshallable(@NotNull WireIn wire) throws IORuntimeException, InvalidMarshallableException {
+        // Obtain the WireMarshaller for the current class
         WireMarshaller<Object> wm = WIRE_MARSHALLER_CL.get(this.getClass());
+
+        // Delegate the reading process to the obtained WireMarshaller
         wm.readMarshallable(this, wire, wm.defaultValue(), true);
     }
 
+    /**
+     * Writes the state of the Marshallable object to the given wire output. The method
+     * obtains a WireMarshaller specific to the class of the current object and delegates
+     * the writing process to that marshaller.
+     * <p>
+     * The default implementation will write all values even if they are a default value. c.f. readMarshallable
+     *
+     * @param wire The wire output destination.
+     * @throws InvalidMarshallableException If there's an error during marshalling.
+     */
     @Override
-    default void writeMarshallable(@NotNull WireOut wire) {
-        // Wires.writeMarshallable(this, wire);
+    default void writeMarshallable(@NotNull WireOut wire) throws InvalidMarshallableException {
+        // Obtain the WireMarshaller for the current class
         WireMarshaller<Object> wm = WIRE_MARSHALLER_CL.get(this.getClass());
+
+        // Delegate the writing process to the obtained WireMarshaller
         wm.writeMarshallable(this, wire);
     }
 
     @SuppressWarnings("unchecked")
     @NotNull
-    default <T> T deepCopy() {
+    default <T> T deepCopy() throws InvalidMarshallableException {
         return (T) Wires.deepCopy(this);
     }
 
-    default <T extends Marshallable> T copyTo(@NotNull T t) {
+    default <T extends Marshallable> T copyTo(@NotNull T t) throws InvalidMarshallableException {
         return Wires.copyTo(this, t);
     }
 
@@ -146,7 +172,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
         @NotNull @SuppressWarnings("unchecked")
         T t = (T) this;
         return map.merge(getKey.apply(t), t,
-                (p, c) -> p == null ? c.deepCopy() : Wires.copyTo(p, c));
+                Wires::copyTo);
     }
 
     @NotNull

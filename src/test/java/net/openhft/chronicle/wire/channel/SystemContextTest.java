@@ -24,7 +24,7 @@ import static net.openhft.chronicle.wire.channel.SystemContext.INSTANCE;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
-public class SystemContextTest {
+public class SystemContextTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     @Test
     public void availableProcessors() {

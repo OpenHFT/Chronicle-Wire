@@ -27,7 +27,6 @@ import net.openhft.chronicle.wire.Base85LongConverter;
 import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
 import net.openhft.chronicle.wire.LongConversion;
 import net.openhft.chronicle.wire.converter.NanoTime;
-import org.jetbrains.annotations.NotNull;
 
 public class TopOfBook extends BytesInBinaryMarshallable implements Cloneable {
     static final int START_BYTES = BytesUtil.triviallyCopyableStart(TopOfBook.class);
@@ -41,6 +40,13 @@ public class TopOfBook extends BytesInBinaryMarshallable implements Cloneable {
 
     private double bidPrice, askPrice;
     private int bidQuantity, askQuantity;
+
+    // 100 bytes
+//    private double a6, a7, a8, a9, a10, a11, a12, a13;
+
+    // 256
+//    private int x;
+//    private double b0, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15, b16, b17;
 
     @Override
     public final void readMarshallable(BytesIn bytes) throws IORuntimeException {

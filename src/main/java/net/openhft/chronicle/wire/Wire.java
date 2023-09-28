@@ -25,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 
 /**
- * The defines the stand interface for writing and reading sequentially to/from a Bytes stream. <p>
+ * The defines the stand interface for writing and reading sequentially to/from a Bytes stream. It is used to write and read data in a wire format.
  */
 @SingleThreaded
 @DontChain

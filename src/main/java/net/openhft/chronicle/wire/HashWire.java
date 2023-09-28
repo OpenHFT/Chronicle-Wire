@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.CommonMarshallable;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.*;
@@ -233,6 +234,11 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
 
     @Override
     public void updateFirstHeader() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void updateFirstHeader(long headerLen) {
         throw new UnsupportedOperationException();
     }
 
@@ -555,21 +561,21 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
 
         @NotNull
         @Override
-        public <T, K> WireOut sequence(T t, K kls, @NotNull TriConsumer<T, K, ValueOut> writer) {
+        public <T, K> WireOut sequence(T t, K kls, @NotNull TriConsumer<T, K, ValueOut> writer) throws InvalidMarshallableException {
             writer.accept(t, kls, this);
             return HashWire.this;
         }
 
         @NotNull
         @Override
-        public WireOut marshallable(@NotNull WriteMarshallable object) {
+        public WireOut marshallable(@NotNull WriteMarshallable object) throws InvalidMarshallableException {
             object.writeMarshallable(HashWire.this);
             return HashWire.this;
         }
 
         @NotNull
         @Override
-        public WireOut marshallable(@NotNull Serializable object) {
+        public WireOut marshallable(@NotNull Serializable object) throws InvalidMarshallableException {
             Wires.writeMarshallable(object, HashWire.this);
             return HashWire.this;
         }

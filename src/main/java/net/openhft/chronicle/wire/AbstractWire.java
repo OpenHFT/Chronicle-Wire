@@ -18,9 +18,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
@@ -82,9 +82,9 @@ public abstract class AbstractWire implements Wire {
 
     @NotNull
     private TimingPauser acquireTimedParser() {
-        return timedParser != null
-                ? timedParser
-                : (timedParser = Pauser.timedBusy());
+        if (timedParser == null)
+            timedParser = Pauser.timedBusy();
+        return timedParser;
     }
 
     public boolean isInsideHeader() {
@@ -130,7 +130,6 @@ public abstract class AbstractWire implements Wire {
 
     @NotNull
     private Wire headerNumber0(long headerNumber) {
-//        new Exception("thread: " + Thread.currentThread().getName() + "\n\tHeader number: " + Long.toHexString(headerNumber)).printStackTrace();
         this.headerNumber = headerNumber;
         return this;
     }
@@ -310,6 +309,8 @@ public abstract class AbstractWire implements Wire {
             if (isNotComplete(header)) {
                 if (header != END_OF_DATA)
                     Jvm.warn().on(getClass(), new Exception("Incomplete header found at pos: " + pos + ": " + Integer.toHexString(header) + ", overwriting"));
+                else
+                    throw new WriteAfterEOFException();
                 bytes.writeVolatileInt(pos, NOT_INITIALIZED);
                 break;
             }
@@ -418,7 +419,12 @@ public abstract class AbstractWire implements Wire {
         // header should use wire format so can add padding for cache alignment
         padToCacheAlign();
         long pos = bytes.writePosition();
-        long actualLength = pos - SPB_HEADER_SIZE;
+        updateFirstHeader(pos);
+    }
+
+    @Override
+    public void updateFirstHeader(long headerEndPos) {
+        long actualLength = headerEndPos - SPB_HEADER_SIZE;
         if (actualLength >= 1 << 30)
             throw new IllegalStateException("Header too large was " + actualLength);
         int header = (int) (META_DATA | actualLength);
@@ -428,6 +434,11 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public boolean writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition) {
+        return endOfWire(true, timeout, timeUnit, lastPosition) == EndOfWire.PRESENT_AFTER_UPDATE;
+    }
+
+    @Override
+    public EndOfWire endOfWire(boolean writeEOF, long timeout, TimeUnit timeUnit, long lastPosition) {
 
         long pos = Math.max(lastPosition, bytes.writePosition());
         headerNumber = Long.MIN_VALUE;
@@ -438,28 +449,39 @@ public abstract class AbstractWire implements Wire {
                     pos += BytesUtil.padOffset(pos);
 
                 if (MEMORY.safeAlignedInt(pos)) {
-                    if (bytes.readVolatileInt(pos) == 0 && bytes.compareAndSwapInt(pos, 0, END_OF_DATA)) {
-                        bytes.writePosition(pos + SPB_HEADER_SIZE);
-                        write("EOF");
-                        return true;
+                    if (bytes.readVolatileInt(pos) == 0) {
+                        if (!writeEOF)
+                            return EndOfWire.NOT_PRESENT;
+
+                        if (bytes.compareAndSwapInt(pos, 0, END_OF_DATA)) {
+                            bytes.writePosition(pos + SPB_HEADER_SIZE);
+                            write("EOF");
+                            return EndOfWire.PRESENT_AFTER_UPDATE;
+                        }
                     }
 
                 } else {
                     // mis-aligned check, assume only one writer (best effort)
                     MEMORY.loadFence();
                     if (bytes.readInt(pos) == 0) {
+                        if (!writeEOF)
+                            return EndOfWire.NOT_PRESENT;
+
                         bytes.writeInt(pos, END_OF_DATA);
                         MEMORY.storeFence();
                         bytes.writePosition(pos + SPB_HEADER_SIZE);
-                        return true;
+                        return EndOfWire.PRESENT_AFTER_UPDATE;
                     }
                 }
 
                 int header = bytes.readVolatileInt(pos);
                 // two states where it is unable to continue.
                 if (header == END_OF_DATA)
-                    return false; // already written.
+                    return EndOfWire.PRESENT;
                 if (Wires.isNotComplete(header)) {
+                    if (!writeEOF)
+                        return EndOfWire.NOT_PRESENT;
+
                     try {
                         acquireTimedParser().pause(timeout, timeUnit);
 
@@ -473,6 +495,8 @@ public abstract class AbstractWire implements Wire {
                                 "header: " + Integer.toHexString(header) +
                                 ", pos: " + pos +
                                 ", success: " + success);
+
+                        // FIXME Should return something here?
                     }
                     continue;
                 }
@@ -550,6 +574,7 @@ public abstract class AbstractWire implements Wire {
         IGNORING_CONSUMER {
             @Override
             public void accept(CharSequence charSequence) {
+                // method ignores all calls
             }
         }
     }

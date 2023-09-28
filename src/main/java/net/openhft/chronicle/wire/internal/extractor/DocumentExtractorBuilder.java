@@ -57,7 +57,7 @@ public final class DocumentExtractorBuilder<E> implements DocumentExtractor.Buil
     @NotNull
     @Override
     public <I> DocumentExtractor.Builder<E> withMethod(@NotNull final Class<I> interfaceType,
-                                     @NotNull final BiConsumer<? super I, ? super E> methodReference) {
+                                                       @NotNull final BiConsumer<? super I, ? super E> methodReference) {
         methodRef = (MethodRef<Object, E>) new MethodRef<>(interfaceType, methodReference);
         return this;
     }

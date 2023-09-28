@@ -22,9 +22,7 @@ import net.openhft.chronicle.bytes.ref.*;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.IOTools;
-import net.openhft.chronicle.core.io.Resettable;
+import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.*;
@@ -32,14 +30,11 @@ import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.Externalizable;
 import java.io.IOException;
-import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Type;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
@@ -48,7 +43,6 @@ import java.util.function.*;
 import java.util.regex.Pattern;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static net.openhft.chronicle.bytes.BytesStore.empty;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.wire.TextStopCharTesters.END_OF_TYPE;
 
@@ -72,6 +66,8 @@ public class TextWire extends YamlWireOut<TextWire> {
     static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT::escaping;
     static final Supplier<StopCharsTester> END_EVENT_NAME_ESCAPING = TextStopCharsTesters.END_EVENT_NAME::escaping;
     static final Bytes<?> META_DATA = Bytes.from("!!meta-data");
+    @Deprecated(/* for removal in x.26, make default true in x.25 */)
+    static final boolean IAE_ON_CNF = Jvm.getBoolean("illegal.argument.for.missing.class.alias", false);
 
     static {
         IOTools.unmonitor(BINARY);
@@ -110,6 +106,7 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     public static String asText(@NotNull Wire wire) {
         NativeBytes<Void> bytes = nativeBytes();
+        ValidatableUtil.startValidateDisabled();
         try {
             long pos = wire.bytes().readPosition();
             @NotNull Wire tw = WireType.TEXT.apply(bytes);
@@ -117,10 +114,12 @@ public class TextWire extends YamlWireOut<TextWire> {
             wire.bytes().readPosition(pos);
             return tw.toString();
         } finally {
+            ValidatableUtil.endValidateDisabled();
             bytes.releaseLast();
         }
     }
 
+    // https://yaml.org/spec/1.2.2/#escaped-characters
     public static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb) {
         int end = 0;
         int length = sb.length();
@@ -162,6 +161,12 @@ public class TextWire extends YamlWireOut<TextWire> {
                     case '_':
                         ch = 0xA0;
                         break;
+                    case 'L':
+                        ch = 0x2028;
+                        break;
+                    case 'P':
+                        ch = 0x2029;
+                        break;
                     case 'x':
                         ch = (char)
                                 (Character.getNumericValue(sb.charAt(++i)) * 16 +
@@ -193,18 +198,6 @@ public class TextWire extends YamlWireOut<TextWire> {
         return sct;
     }
 
-    private static void checkConsecutiveSpaces(@NotNull StringBuilder sb) {
-        if (sb.length() == 0)
-            return;
-        char lastCh = sb.charAt(0);
-        for (int i = 1; i < sb.length() - 1; i++) {
-            char ch2 = sb.charAt(i);
-            if (lastCh <= ' ' && ch2 <= ' ')
-                throw new IORuntimeException("Cannot have multiple consecutive spaces in a field name '" + sb + "'");
-            lastCh = ch2;
-        }
-    }
-
     /**
      * Loads an Object from a file
      *
@@ -213,7 +206,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      * @return an instance of the object created fromt the data in the file
      * @throws IOException if the file can not be found or read
      */
-    public static <T> T load(String filename) throws IOException {
+    public static <T> T load(String filename) throws IOException, InvalidMarshallableException {
         return (T) TextWire.fromFile(filename).readObject();
     }
 
@@ -247,7 +240,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     @NotNull
     TextMethodWriterInvocationHandler newTextMethodWriterInvocationHandler(Class... interfaces) {
         for (Class<?> anInterface : interfaces) {
-            Comment c = anInterface.getAnnotation(Comment.class);
+            Comment c = Jvm.findAnnotation(anInterface, Comment.class);
             if (c != null)
                 writeComment(c.value());
         }
@@ -353,7 +346,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     @Override
-    public void copyTo(@NotNull WireOut wire) {
+    public void copyTo(@NotNull WireOut wire) throws InvalidMarshallableException {
         if (wire instanceof TextWire || wire instanceof YamlWire) {
             final Bytes<?> bytes0 = bytes();
             final long length = bytes0.readRemaining();
@@ -381,12 +374,6 @@ public class TextWire extends YamlWireOut<TextWire> {
     public ValueIn read() {
         readField(acquireStringBuilder());
         return valueIn;
-    }
-
-    @NotNull
-    protected StringBuilder acquireStringBuilder() {
-        StringUtils.setCount(sb, 0);
-        return sb;
     }
 
     @NotNull
@@ -433,19 +420,25 @@ public class TextWire extends YamlWireOut<TextWire> {
 
             } else {
                 parseUntil(sb, getEscapingEndOfText());
+                trimTheEnd(sb);
+
             }
             unescape(sb);
-            // check no consecutive spaces.
-            checkConsecutiveSpaces(sb);
+
         } catch (BufferUnderflowException e) {
             Jvm.debug().on(getClass(), e);
         }
         return sb;
     }
 
+    private void trimTheEnd(@NotNull StringBuilder sb) {
+        while (sb.length() > 0 && Character.isWhitespace(sb.charAt(sb.length() - 1)))
+            sb.setLength(sb.length() - 1);
+    }
+
     @Nullable
     @Override
-    public <K> K readEvent(@NotNull Class<K> expectedClass) {
+    public <K> K readEvent(@NotNull Class<K> expectedClass) throws InvalidMarshallableException {
         consumePadding(0);
         @NotNull StringBuilder sb = acquireStringBuilder();
         try {
@@ -527,6 +520,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     @NotNull
+    @Deprecated(/* Will be inlined in x.25 */)
     protected Supplier<StopCharsTester> strictEndOfTextEscaping() {
         return STRICT_END_OF_TEXT_ESCAPING;
     }
@@ -632,7 +626,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * returns <code>true</code> if the next string is {@code str}
+     * returns {@code true} if the next string is {@code str}
      *
      * @param source string
      * @return true if the strings are the same
@@ -821,14 +815,14 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     @Nullable
-    public Object readObject() {
+    public Object readObject() throws InvalidMarshallableException {
         consumePadding();
         consumeDocumentStart();
         return getValueIn().object(Object.class);
     }
 
     @Nullable
-    Object readObject(int indentation) {
+    Object readObject(int indentation) throws InvalidMarshallableException {
         consumePadding();
         int code = peekCode();
         int indentation2 = indentation();
@@ -861,7 +855,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     @Nullable
-    private Object readTypedObject() {
+    private Object readTypedObject() throws InvalidMarshallableException {
         return valueIn.object(Object.class);
     }
 
@@ -871,7 +865,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     @NotNull
-    List readList(int indentation, Class elementType) {
+    List readList(int indentation, Class elementType) throws InvalidMarshallableException {
         @NotNull List<Object> objects = new ArrayList<>();
         while (peekCode() == '-') {
             if (indentation() < indentation)
@@ -895,7 +889,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     @NotNull
-    private Map readMap(int indentation, Class valueType) {
+    private Map readMap(int indentation, Class valueType) throws InvalidMarshallableException {
         @NotNull Map map = new LinkedHashMap<>();
         StringBuilder sb = WireInternal.acquireAnotherStringBuilder(acquireStringBuilder());
         consumePadding();
@@ -1685,12 +1679,12 @@ public class TextWire extends YamlWireOut<TextWire> {
             return true;
         }
 
-        public <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0) {
+        public <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0) throws InvalidMarshallableException {
             return sequence(list, buffer, bufferAdd);
         }
 
         @Override
-        public <T> boolean sequence(@NotNull List<T> list, @NotNull List<T> buffer, @NotNull Supplier<T> bufferAdd) {
+        public <T> boolean sequence(@NotNull List<T> list, @NotNull List<T> buffer, @NotNull Supplier<T> bufferAdd) throws InvalidMarshallableException {
 
             list.clear();
             consumePadding();
@@ -1733,7 +1727,7 @@ public class TextWire extends YamlWireOut<TextWire> {
 
         @NotNull
         @Override
-        public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) {
+        public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) throws InvalidMarshallableException {
 
             consumePadding();
             char code = (char) peekCode();
@@ -1854,7 +1848,10 @@ public class TextWire extends YamlWireOut<TextWire> {
                 try {
                     return classLookup().forName(stringBuilder);
                 } catch (ClassNotFoundRuntimeException e) {
-                    Jvm.warn().on(getClass(), "Unable to find " + stringBuilder + " " + e.getCause());
+                    String message = "Unable to find " + stringBuilder + " " + e.getCause();
+                    if (IAE_ON_CNF)
+                        throw new IllegalArgumentException(message);
+                    Jvm.warn().on(getClass(), message);
                     return null;
                 }
             }
@@ -1879,7 +1876,10 @@ public class TextWire extends YamlWireOut<TextWire> {
                         if (Wires.GENERATE_TUPLES) {
                             return Wires.tupleFor(null, stringBuilder.toString());
                         }
-                        Jvm.warn().on(TextWire.class, "Unable to load " + stringBuilder + ", is a class alias missing.");
+                        String message = "Unable to load " + stringBuilder + ", is a class alias missing.";
+                        if (IAE_ON_CNF)
+                            throw new IllegalArgumentException(message);
+                        Jvm.warn().on(TextWire.class, message);
                         return null;
                     }
 
@@ -1959,7 +1959,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         @Nullable
         @Override
         public Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy)
-                throws BufferUnderflowException, IORuntimeException {
+                throws BufferUnderflowException, IORuntimeException, InvalidMarshallableException {
             long position0 = bytes.readPosition();
             if (isNull()) {
                 consumePadding(1);
@@ -2061,13 +2061,13 @@ public class TextWire extends YamlWireOut<TextWire> {
 
         @Override
         @Nullable
-        public <T> T typedMarshallable() {
+        public <T> T typedMarshallable() throws InvalidMarshallableException {
             return (T) objectWithInferredType(null, SerializationStrategies.ANY_NESTED, null);
         }
 
         @Nullable <K, V> Map<K, V> map(@NotNull final Class<K> kClass,
                                        @NotNull final Class<V> vClass,
-                                       @Nullable Map<K, V> usingMap) {
+                                       @Nullable Map<K, V> usingMap) throws InvalidMarshallableException {
             consumePadding();
             if (usingMap == null)
                 usingMap = new LinkedHashMap<>();
@@ -2089,7 +2089,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         @Nullable
-        private <K, V> Map<K, V> typedMap(@NotNull Class<K> kClazz, @NotNull Class<V> vClass, @NotNull Map<K, V> usingMap, @NotNull StringBuilder sb) {
+        private <K, V> Map<K, V> typedMap(@NotNull Class<K> kClazz, @NotNull Class<V> vClass, @NotNull Map<K, V> usingMap, @NotNull StringBuilder sb) throws InvalidMarshallableException {
             parseUntil(sb, StopCharTesters.SPACE_STOP);
             @Nullable String str = WireInternal.INTERNER.intern(sb);
 
@@ -2173,7 +2173,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             switch (peekCode()) {
                 case '[':
                 case '{':
-                    Jvm.warn().on(getClass(), "Unable to read " + valueIn.object() + " as a long.");
+                    Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a long.");
                     return 0;
             }
 
@@ -2206,7 +2206,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                     return 0;
                 case '[':
                 case '{':
-                    Jvm.warn().on(getClass(), "Unable to read " + valueIn.object() + " as a double.");
+                    Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a double.");
                     return 0;
             }
             final double v = bytes.parseDouble();
@@ -2252,7 +2252,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         @Override
-        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class type) {
+        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class type) throws InvalidMarshallableException {
             consumePadding();
             @Nullable Object o = objectWithInferredType0(using, strategy, type);
             consumePadding();
@@ -2264,7 +2264,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         @NotNull
-        Object readRestOfMap(Object using, Object o) {
+        Object readRestOfMap(Object using, Object o) throws InvalidMarshallableException {
             readCode();
             consumePadding();
             @Nullable Object value = objectWithInferredType0(using, SerializationStrategies.ANY_OBJECT, Object.class);
@@ -2275,7 +2275,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         @Nullable
-        Object objectWithInferredType0(Object using, @NotNull SerializationStrategy strategy, Class type) {
+        Object objectWithInferredType0(Object using, @NotNull SerializationStrategy strategy, Class type) throws InvalidMarshallableException {
             int code = peekCode();
             switch (code) {
                 case '?':

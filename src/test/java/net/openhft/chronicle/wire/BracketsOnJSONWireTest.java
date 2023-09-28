@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertEquals;
 
-public class BracketsOnJSONWireTest {
+public class BracketsOnJSONWireTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     String actual;
 
@@ -26,8 +26,8 @@ public class BracketsOnJSONWireTest {
         assertEquals("{\"print\":\"hello\"}", wire.toString());
 
         wire.methodReader((Printer) msg -> actual = msg).readOne();
+        t.releaseLast();
+
         assertEquals("hello", actual);
     }
-
-
 }

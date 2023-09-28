@@ -38,7 +38,6 @@ public class SequenceTest extends WireTestCommon {
 
     public SequenceTest(WireType wireType) {
         this.wireType = wireType;
-
     }
 
     @Parameterized.Parameters(name = "{0}")

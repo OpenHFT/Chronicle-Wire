@@ -18,65 +18,66 @@
 
 package net.openhft.chronicle.wire.channel;
 
-import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.ClosedIORuntimeException;
-import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.threads.Pauser;
-import net.openhft.chronicle.threads.PauserMode;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.MarshallableOut;
-import net.openhft.chronicle.wire.channel.impl.BufferedChronicleChannel;
+import net.openhft.chronicle.wire.channel.impl.ChronicleChannelUtils;
 import net.openhft.chronicle.wire.channel.impl.SocketRegistry;
-import net.openhft.chronicle.wire.channel.impl.TCPChronicleChannel;
 import net.openhft.chronicle.wire.converter.NanoTime;
 
-import java.net.URL;
-import java.util.function.BooleanSupplier;
-import java.util.function.Function;
-
+/**
+ * The ChronicleChannel interface encapsulates a communication channel that can process various data types.
+ * It extends the Closeable, MarshallableOut, and MarshallableIn interfaces, thereby supporting a wide range of I/O operations.
+ */
 public interface ChronicleChannel extends Closeable, MarshallableOut, MarshallableIn {
-    static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg channelCfg, ChannelHeader headerOut) {
-        TCPChronicleChannel simpleConnection = new TCPChronicleChannel(channelCfg, headerOut, socketRegistry);
-        final ChannelHeader marshallable = simpleConnection.headerIn();
-        Jvm.debug().on(ChronicleChannel.class, "Client got " + marshallable);
-        if (marshallable instanceof RedirectHeader) {
-            Closeable.closeQuietly(simpleConnection);
-            RedirectHeader rh = (RedirectHeader) marshallable;
-            for (String location : rh.locations()) {
-                try {
-                    URL url = ChronicleContext.urlFor(location);
-                    channelCfg.hostname(url.getHost());
-                    channelCfg.port(url.getPort());
-                    return newChannel(socketRegistry, channelCfg, headerOut);
 
-                } catch (IORuntimeException e) {
-                    Jvm.debug().on(ChronicleChannel.class, e);
-                }
-            }
-            throw new IORuntimeException("No urls available " + rh);
-        }
-        return channelCfg.buffered()
-                ? new BufferedChronicleChannel(simpleConnection, channelCfg.pauserMode().get())
-                : simpleConnection;
+    /**
+     * Creates a new instance of a ChronicleChannel.
+     *
+     * @param socketRegistry the SocketRegistry for managing the socket
+     * @param channelCfg     the ChronicleChannelCfg providing the configuration for the channel
+     * @param headerOut      the ChannelHeader for outgoing messages
+     * @return a new ChronicleChannel instance
+     * @throws InvalidMarshallableException if there's an error marshalling the objects for communication
+     */
+    static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg channelCfg, ChannelHeader headerOut) throws InvalidMarshallableException {
+        return ChronicleChannelUtils.newChannel(socketRegistry, channelCfg, headerOut);
     }
 
+    /**
+     * Retrieves the configuration of the channel.
+     *
+     * @return the ChronicleChannelCfg instance representing the channel configuration
+     */
     ChronicleChannelCfg channelCfg();
 
+    /**
+     * Retrieves the header for outgoing messages.
+     *
+     * @return the ChannelHeader instance representing the header for outgoing messages
+     */
     ChannelHeader headerOut();
 
+    /**
+     * Retrieves the header for incoming messages.
+     *
+     * @return the ChannelHeader instance representing the header for incoming messages
+     */
     ChannelHeader headerIn();
 
     /**
-     * Read one event and return a value
+     * Reads a single event of the expected type from the channel.
      *
-     * @param eventType of the event read
-     * @return any data transfer object
-     * @throws ClosedIORuntimeException if this ChronicleChannel is closed
+     * @param eventType    a StringBuilder object to append the event type
+     * @param expectedType the Class of the expected event type
+     * @return an instance of the expected type representing the read data
+     * @throws ClosedIORuntimeException     if this ChronicleChannel has been closed
+     * @throws InvalidMarshallableException if the Marshallable object fails to be read
      */
-    default <T> T readOne(StringBuilder eventType, Class<T> expectedType) throws ClosedIORuntimeException {
+    default <T> T readOne(StringBuilder eventType, Class<T> expectedType) throws ClosedIORuntimeException, InvalidMarshallableException {
         while (!isClosed()) {
             try (DocumentContext dc = readingDocument()) {
                 if (dc.isPresent()) {
@@ -88,61 +89,26 @@ public interface ChronicleChannel extends Closeable, MarshallableOut, Marshallab
     }
 
     /**
-     * Reading all events and call the same method on the event handler
+     * Creates a Runnable that reads all events from the channel and delegates them to the provided event handler.
      *
-     * @param eventHandler to handle events
-     * @return a Runnable that can be passed to a Thread or ExecutorService
+     * @param eventHandler an object that handles the processed events
+     * @return a Runnable instance that can be submitted to a Thread or ExecutorService
      */
     default Runnable eventHandlerAsRunnable(Object eventHandler) {
-        @SuppressWarnings("resource") final MethodReader reader = methodReader(eventHandler);
-        final BooleanSupplier handlerClosed;
-        if (eventHandler instanceof Closeable) {
-            Closeable sh = (Closeable) eventHandler;
-            handlerClosed = sh::isClosed;
-        } else {
-            handlerClosed = () -> false;
-        }
-
-        return () -> {
-            try {
-                PauserMode pauserMode = channelCfg().pauserMode();
-                if (pauserMode == null)
-                    pauserMode = PauserMode.balanced;
-                Pauser pauser = pauserMode.get();
-                while (true) {
-                    if (isClosed()) {
-                        Jvm.debug().on(eventHandler.getClass(), "Reader on " + this + " is closed");
-                        break;
-                    }
-                    if (handlerClosed.getAsBoolean()) {
-                        Jvm.debug().on(eventHandler.getClass(), "Handler " + eventHandler + " is closed");
-                        break;
-                    }
-
-                    if (reader.readOne())
-                        pauser.reset();
-                    else
-                        pauser.pause();
-                }
-            } catch (Throwable t) {
-                if (!isClosed() && !handlerClosed.getAsBoolean())
-                    Jvm.warn().on(eventHandler.getClass(), "Error stopped reading thread", t);
-            } finally {
-                Closeable.closeQuietly(reader);
-                Closeable.closeQuietly(eventHandler);
-            }
-        };
+        return ChronicleChannelUtils.eventHandlerAsRunnable(this, eventHandler);
     }
 
     /**
-     * Send a test message so the caller can wait for the response via lastTestMessage()
+     * Sends a test message using a monotonically increasing timestamp, enabling the caller to wait for a response via lastTestMessage().
      *
      * @param now a monotonically increasing timestamp
      */
     void testMessage(@NanoTime long now);
 
     /**
-     * @return the highest timestamp received
+     * Retrieves the highest timestamp received from the test messages.
+     *
+     * @return the highest timestamp received as a long
      */
     long lastTestMessage();
 }

@@ -29,11 +29,13 @@ public class NestedClass implements Marshallable {
     double number;
     double number2;
     double number4; // out of order
+    NestedClass doublyNested;
 
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
         wire.read(() -> "text").text(this, (t, v) -> t.text = v)
                 .read(() -> "text2").text(this, (t, v) -> t.text2 = v)
+                .read(() -> "doublyNested").object(NestedClass.class, this, (t, v) -> t.doublyNested = v)
                 .read(() -> "number").float64(this, (t, v) -> t.number = v)
                 .read(() -> "number2").float64(this, (t, v) -> t.number2 = v)
                 .read(() -> "number4").float64(this, (t, v) -> t.number4 = v);
@@ -46,13 +48,19 @@ public class NestedClass implements Marshallable {
                 .write(() -> "text3").text("is text3")
                 .write(() -> "number4").float64(number4)
                 .write(() -> "number").float64(number)
+                .write(() -> "doublyNested").object(doublyNested)
                 .write(() -> "number3").float64(333.3);
     }
 
-    public void setTextNumber(String text, double number) {
+    public NestedClass setTextNumber(String text, double number) {
         this.text = text;
         this.number = number;
         this.number4 = number * 4;
+        return this;
+    }
+
+    public void nest(String text, double number) {
+        this.doublyNested = new NestedClass().setTextNumber(text, number);
     }
 
     @NotNull

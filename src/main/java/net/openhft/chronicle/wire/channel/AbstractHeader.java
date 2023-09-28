@@ -20,31 +20,66 @@ package net.openhft.chronicle.wire.channel;
 
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
-public class AbstractHeader<H extends AbstractHeader<H>>
+/**
+ * The AbstractHeader class serves as a foundational template for all channel header types.
+ * The class extends the SelfDescribingMarshallable and implements the ChannelHeader interface.
+ * It includes fields for a system context and a session name, providing methods to get and set these fields.
+ * This class is designed to be extended by other header types to standardize their functionality.
+ *
+ * @param <H> Type of the class that extends AbstractHeader. Used to ensure the correct type is returned by the builder methods, supporting method chaining.
+ */
+public abstract class AbstractHeader<H extends AbstractHeader<H>>
         extends SelfDescribingMarshallable
         implements ChannelHeader {
+
+    // System context associated with this header
     private SystemContext systemContext;
+
+    // Session name associated with this header
     private String sessionName;
 
+    /**
+     * Retrieves the system context associated with this header.
+     *
+     * @return the system context as a SystemContext object. Null if no system context has been set.
+     */
     @Override
     public SystemContext systemContext() {
         return systemContext;
     }
 
+    /**
+     * Sets the system context associated with this header.
+     *
+     * @param systemContext the SystemContext object to set as the system context for this header.
+     * @return this instance of the header, allowing method chaining.
+     */
     @Override
     public H systemContext(SystemContext systemContext) {
         this.systemContext = systemContext;
         return (H) this;
     }
 
+    /**
+     * Retrieves the session name associated with this header.
+     *
+     * @return the session name as a String. Null if no session name has been set.
+     */
     @Override
     public String sessionName() {
         return sessionName;
     }
 
+    /**
+     * Sets the session name associated with this header.
+     *
+     * @param sessionName the String to set as the session name for this header.
+     * @return this instance of the header, allowing method chaining.
+     */
     @Override
     public H sessionName(String sessionName) {
         this.sessionName = sessionName;
         return (H) this;
     }
 }
+

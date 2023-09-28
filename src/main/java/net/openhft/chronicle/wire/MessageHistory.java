@@ -44,7 +44,7 @@ public interface MessageHistory extends Marshallable {
     @UsedViaReflection
     static void writeHistory(DocumentContext dc) {
         Wire wire = dc.wire();
-        if (wire.bytes().readRemaining() == 0) // only add to the start of a message. i.e. for chained calls.
+        if (((WriteDocumentContext) dc).isEmpty()) // only add to the start of a message. i.e. for chained calls.
             wire.writeEventName(MethodReader.HISTORY)
                     .marshallable(get());
     }

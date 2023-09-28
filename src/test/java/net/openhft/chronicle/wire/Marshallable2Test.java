@@ -18,7 +18,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Assert;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.Validatable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -26,6 +27,7 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -50,6 +52,24 @@ public class Marshallable2Test extends WireTestCommon {
         );
     }
 
+    @Test
+    public void writeDocumentIsEmpty() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(16);
+        Wire wire = wireType.apply(bytes);
+        try (DocumentContext dc = wire.writingDocument()) {
+            WriteDocumentContext wdc = (WriteDocumentContext) dc;
+            assertTrue(wdc.isEmpty());
+            wdc.wire().write("hi");
+            assertFalse(wdc.isEmpty());
+        }
+        try (DocumentContext dc = wire.writingDocument(true)) {
+            WriteDocumentContext wdc = (WriteDocumentContext) dc;
+            assertTrue(wdc.isEmpty());
+            wdc.wire().write("hi");
+            assertFalse(wdc.isEmpty());
+        }
+    }
+
     @SuppressWarnings("rawtypes")
     @Test
     public void testObject() {
@@ -61,7 +81,8 @@ public class Marshallable2Test extends WireTestCommon {
 
         wire.getValueOut().object(source);
         Outer target = wire.getValueIn().object(source.getClass());
-        Assert.assertEquals(source, target);
+        assertEquals(source, target);
+        assertTrue(target.validated);
     }
 
     @Test
@@ -91,13 +112,19 @@ public class Marshallable2Test extends WireTestCommon {
     }
 
     @SuppressWarnings("unused")
-    private static class Outer extends SelfDescribingMarshallable {
+    private static class Outer extends SelfDescribingMarshallable implements Validatable {
         String name;
         Inner1 inner1;
         Inner2 inner2;
+        transient boolean validated;
 
         public Outer(String name) {
             this.name = name;
+        }
+
+        @Override
+        public void validate() throws InvalidMarshallableException {
+            validated = true;
         }
     }
 

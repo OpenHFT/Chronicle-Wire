@@ -24,18 +24,54 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 import java.util.concurrent.TimeUnit;
-
+/**
+ * A {@code MilliTimestampLongConverter} is an implementation of {@code AbstractTimestampLongConverter}
+ * which handles conversions between long timestamps and date-time strings.
+ * The precision of this converter is to the millisecond.
+ * This converter is singleton, the instance can be accessed using the public field INSTANCE.
+ */
 public class MilliTimestampLongConverter extends AbstractTimestampLongConverter {
+
+    /**
+     * The singleton instance of this converter.
+     */
     public static final MilliTimestampLongConverter INSTANCE = new MilliTimestampLongConverter();
 
+    /**
+     * Constructs a new {@code MilliTimestampLongConverter} with the default zone ID (fetched from the system property or UTC).
+     */
     public MilliTimestampLongConverter() {
         super(TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * Constructs a new {@code MilliTimestampLongConverter} with the specified zone ID.
+     *
+     * @param zoneId the zone ID to be used for the conversion of long values
+     */
     public MilliTimestampLongConverter(String zoneId) {
         super(zoneId, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * Constructs a new {@code MilliTimestampLongConverter} with the specified zone ID and flag for including zone suffix for UTC.
+     * This constructor is set to be deprecated in x.26 version.
+     *
+     * @param zoneId                 the zone ID to be used for the conversion of long values
+     * @param includeZoneSuffixForUTC the flag to indicate if 'Z' suffix should be included for UTC zone timestamps
+     */
+    @Deprecated(/* To be removed in x.26 */)
+    public MilliTimestampLongConverter(String zoneId, boolean includeZoneSuffixForUTC) {
+        super(zoneId, TimeUnit.MILLISECONDS, includeZoneSuffixForUTC);
+    }
+
+    /**
+     * Parses a formatted date into a long timestamp.
+     * This implementation uses the epoch day and time of the day to compute the long timestamp.
+     *
+     * @param value The parsed formatted date (in UTC zone)
+     * @return The value as a long timestamp
+     */
     @Override
     protected long parseFormattedDate(ZonedDateTime value) {
         long time = value.getLong(ChronoField.EPOCH_DAY) * 86400_000L;
@@ -47,6 +83,15 @@ public class MilliTimestampLongConverter extends AbstractTimestampLongConverter 
         return time;
     }
 
+    /**
+     * Parses a long timestamp.
+     * The provided timestamp value is converted to milliseconds.
+     * A debug log is printed if the timestamp is in milliseconds or if it's a non-zero value.
+     *
+     * @param value The parsed timestamp
+     * @param text  The text version of the timestamp
+     * @return The value as a long timestamp
+     */
     @Override
     protected long parseTimestamp(long value, CharSequence text) {
         long number = LongTime.toMillis(value);
@@ -59,6 +104,12 @@ public class MilliTimestampLongConverter extends AbstractTimestampLongConverter 
         return number;
     }
 
+    /**
+     * Appends the fraction of the second to the provided {@code DateTimeFormatterBuilder}.
+     * The fraction is defined in milliseconds and can be 0 to 3 digits long.
+     *
+     * @param builder The builder after the initial date format has been added
+     */
     @Override
     protected void appendFraction(DateTimeFormatterBuilder builder) {
         builder.appendFraction(ChronoField.MILLI_OF_SECOND, 0, 3, true);

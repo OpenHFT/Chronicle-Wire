@@ -15,15 +15,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package net.openhft.chronicle.wire.channel;
 
 import net.openhft.chronicle.wire.Marshallable;
 
+/**
+ * ChannelHeader represents the metadata of a {@link ChronicleChannel}. It maintains a system context
+ * and a session name for a channel, facilitating system-specific and session-specific configurations.
+ * <p>
+ * This interface extends Marshallable, making it possible for a ChannelHeader instance to be marshalled
+ * and unmarshalled for communication over a ChronicleChannel.
+ */
 public interface ChannelHeader extends Marshallable {
+
+    /**
+     * Fetches the associated system context of the channel.
+     *
+     * @return The SystemContext object representing the system context of the channel.
+     */
     SystemContext systemContext();
+
+    /**
+     * Assigns a new system context to the channel.
+     *
+     * @param systemContext The new SystemContext object to be set as the system context.
+     * @return The current ChannelHeader instance, allowing for method chaining.
+     */
     ChannelHeader systemContext(SystemContext systemContext);
 
+    /**
+     * Fetches the session name of the channel.
+     *
+     * @return The session name of the channel as a String.
+     */
     String sessionName();
-    ChannelHeader sessionName(String connectionId);
+
+    /**
+     * Assigns a new session name to the channel.
+     *
+     * @param sessionName The new session name to be assigned to the channel.
+     * @return The current ChannelHeader instance, allowing for method chaining.
+     */
+    ChannelHeader sessionName(String sessionName);
 }

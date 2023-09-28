@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.WriteBytesMarshallable;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.Closeable;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.URL;
@@ -119,7 +120,7 @@ public interface MarshallableOut extends DocumentWritten {
      *
      * @param writer to write
      */
-    default void writeDocument(@NotNull WriteMarshallable writer) throws UnrecoverableTimeoutException {
+    default void writeDocument(@NotNull WriteMarshallable writer) throws UnrecoverableTimeoutException, InvalidMarshallableException {
         try (@NotNull DocumentContext dc = writingDocument(false)) {
             try {
                 Wire wire = dc.wire();
@@ -134,7 +135,7 @@ public interface MarshallableOut extends DocumentWritten {
     /**
      * @param marshallable to write to excerpt.
      */
-    default void writeBytes(@NotNull WriteBytesMarshallable marshallable) throws UnrecoverableTimeoutException {
+    default void writeBytes(@NotNull WriteBytesMarshallable marshallable) throws UnrecoverableTimeoutException, InvalidMarshallableException {
         @NotNull DocumentContext dc = writingDocument();
         try {
             marshallable.writeMarshallable(dc.wire().bytes());
@@ -152,7 +153,7 @@ public interface MarshallableOut extends DocumentWritten {
      * @param t      to write
      * @param writer using this code
      */
-    default <T> void writeDocument(T t, @NotNull BiConsumer<ValueOut, T> writer) throws UnrecoverableTimeoutException {
+    default <T> void writeDocument(T t, @NotNull BiConsumer<ValueOut, T> writer) throws UnrecoverableTimeoutException, InvalidMarshallableException {
         @NotNull DocumentContext dc = writingDocument();
         try {
             Wire wire = dc.wire();

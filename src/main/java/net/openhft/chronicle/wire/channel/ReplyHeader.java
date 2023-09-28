@@ -19,15 +19,30 @@
 package net.openhft.chronicle.wire.channel;
 
 /**
- * Header containing a reply object
+ * Class ReplyHeader extends the AbstractHeader class and encapsulates a reply object of type {@code R}.
+ * This class is typically used to include a response object in a message header.
+ *
+ * @param <R> the type of the reply object this header carries.
  */
 public class ReplyHeader<R> extends AbstractHeader<ReplyHeader<R>> {
-    private R reply;
 
+    // The reply object.
+    private final R reply;
+
+    /**
+     * Constructs a new ReplyHeader instance with the specified reply object.
+     *
+     * @param reply the reply object to be stored in the header.
+     */
     public ReplyHeader(R reply) {
         this.reply = reply;
     }
 
+    /**
+     * Retrieves the reply object stored in the header.
+     *
+     * @return the reply object of type {@code R}.
+     */
     public R replay() {
         return reply;
     }

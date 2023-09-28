@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.annotation.DontChain;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ObjectOutput;
@@ -51,7 +52,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    default ValueOut writeEvent(Class expectedType, Object eventKey) {
+    default ValueOut writeEvent(Class expectedType, Object eventKey) throws InvalidMarshallableException {
         if (eventKey instanceof WireKey)
             return writeEventName((WireKey) eventKey);
         if (eventKey instanceof CharSequence)
@@ -104,15 +105,14 @@ public interface WireOut extends WireCommon, MarshallableOut {
     @NotNull
     default WireOut padToCacheAlign() {
         @NotNull Bytes<?> bytes = bytes();
-        try {
-            long offset = bytes.writePosition();
-            if (bytes.start() != 0)
-                offset = bytes.addressForRead(offset);
-            int mod = (int) (offset & 63);
-            if (mod > 60)
-                addPadding(64 - mod);
-        } catch (IllegalArgumentException ignored) {
-        }
+
+        long offset = bytes.writePosition();
+        if (bytes.start() != 0)
+            offset = bytes.addressForRead(offset);
+        int mod = (int) (offset & 63);
+        if (mod > 60)
+            addPadding(64 - mod);
+
         return this;
     }
 
@@ -134,7 +134,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
     /**
      * This will increment the headerNumber as appropriate if successful
      */
-    default void writeDocument(boolean metaData, @NotNull WriteMarshallable writer) {
+    default void writeDocument(boolean metaData, @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
         WireInternal.writeData(this, metaData, false, writer);
     }
 
@@ -158,33 +158,57 @@ public interface WireOut extends WireCommon, MarshallableOut {
 
     /**
      * This will increment the headerNumber as appropriate if successful
-     * <p/>
+     * <p>
      * This is used in networking, but no longer used in queue.
      *
      * @param metaData {@code true} if the write should write metaData rather than data
      * @param writer   writes bytes to the wire
      */
-    default void writeNotCompleteDocument(boolean metaData, @NotNull WriteMarshallable writer) {
+    default void writeNotCompleteDocument(boolean metaData, @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
         WireInternal.writeData(this, metaData, true, writer);
     }
 
+    /**
+     * INTERNAL METHOD, call writingDocument instead
+     * <p>
+     * Update/end a header for a document
+     */
     void updateHeader(long position, boolean metaData, int expectedHeader) throws StreamCorruptedException;
 
+    /**
+     * INTERNAL METHOD, call writingDocument instead
+     * <p>
+     * Start a header for a document
+     *
+     * @param safeLength ensure there is at least this much space
+     * @return the position of the header
+     * @throws WriteAfterEOFException if you attempt to append an excerpt after an EOF has been written
+     */
     long enterHeader(long safeLength);
 
     /**
+     * INTERNAL METHOD, call writingDocument instead
+     * <p>
      * Start the first header, if there is none This will increment the headerNumber as appropriate
      * if successful <p> Note: the file might contain other data and the caller has to check this.
-     * </p>
      *
      * @return true if the header needs to be written, false if there is a data already
      */
     boolean writeFirstHeader();
 
     /**
+     * INTERNAL METHOD, call writingDocument instead
+     * <p>
      * update the first header after writing.
      */
     void updateFirstHeader();
+
+    /**
+     * INTERNAL METHOD, call writingDocument instead
+     * <p>
+     * update the first header after writing {@code headerEndPos} bytes.
+     */
+    void updateFirstHeader(long headerLen);
 
     /**
      * Write the end of wire marker, unless one is already written. This will increment the
@@ -193,9 +217,23 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * @param timeout      throw TimeoutException if it could not write the marker in time.
      * @param timeUnit     of the timeout
      * @param lastPosition the end of the wire
-     * @return did this method write EOF or was it already there.
+     * @return {code true} if did this method wrote EOF, {@code false} if it was already there.
      */
     boolean writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition);
+
+    /**
+     * Check if end of wire marker is present, optionally writing it unless one is already written.
+     * This will increment the headerNumber as appropriate if successful
+     *
+     * @param writeEOF     if {@code true}, write end of wire marker unless already exists
+     * @param timeout      throw TimeoutException if it could not write the marker in time.
+     * @param timeUnit     of the timeout
+     * @param lastPosition the end of the wire
+     * @return {@link EndOfWire} enum corresponding to EOF presence
+     */
+    default EndOfWire endOfWire(boolean writeEOF, long timeout, TimeUnit timeUnit, long lastPosition) {
+        throw new UnsupportedOperationException("Optional operation, please use writeEndOfWire");
+    }
 
     /**
      * Start an event object, mostly for internal use.
@@ -218,5 +256,20 @@ public interface WireOut extends WireCommon, MarshallableOut {
      */
     default boolean writingIsComplete() {
         return true;
+    }
+
+    enum EndOfWire {
+        /**
+         * EOF marker is not present and was not written
+         */
+        NOT_PRESENT,
+        /**
+         * EOF marker was not present have been written and now in place
+         */
+        PRESENT_AFTER_UPDATE,
+        /**
+         * EOF marker is present
+         */
+        PRESENT;
     }
 }

@@ -18,13 +18,17 @@
 package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
+import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.StreamCorruptedException;
+
+@Ignore("Long running test")
 public class RawWirePerfTest extends WireTestCommon {
     @Test
-    public void testRawPerf() {
+    public void testRawPerf() throws StreamCorruptedException {
         @NotNull BinaryWirePerfTest test = new BinaryWirePerfTest(-1, true, false, true);
-       // test.wirePerf();
+        test.wirePerf();
         test.wirePerfInts();
     }
 }

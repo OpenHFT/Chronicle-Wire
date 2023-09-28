@@ -27,22 +27,50 @@ import net.openhft.chronicle.wire.LongConverter;
 
 import java.util.Arrays;
 
+/**
+ * A specialized implementation of the {@link LongConverter} interface
+ * for converting long values to and from strings using power-of-two bases.
+ *
+ * <p>This converter leverages certain mathematical properties of power-of-two bases
+ * to optimize the conversion process.</p>
+ */
 public class PowerOfTwoLongConverter implements LongConverter {
-    private final int shift, mask;
+
+    // Bit-shift value based on the length of the symbol set.
+    private final int shift;
+
+    // Bit-mask for isolating bits.
+    private final int mask;
+
+    // Encoding array for fast look-up.
     private final short[] encode;
+
+    // Decoding array.
     private final char[] decode;
+
+    // Maximum allowed length for parsing.
     private final int maxParseLength;
 
+    /**
+     * Initializes a new instance with a given set of symbols.
+     *
+     * @param symbols A string containing unique symbols for conversion. The length of this string
+     *                should be a power of 2.
+     */
     public PowerOfTwoLongConverter(String symbols) {
         final int length = symbols.length();
-        assert Maths.isPowerOf2(length);
-        shift = Maths.intLog2(length);
-        mask = (1 << shift) - 1;
+        assert Maths.isPowerOf2(length); // Ensure length is a power of 2.
+
+        shift = Maths.intLog2(length); // Compute log2 for the length.
+        mask = (1 << shift) - 1; // Compute the mask.
+
         decode = symbols.toCharArray();
-        encode = new short[128];
+        encode = new short[128]; // 128 is chosen for ASCII range.
         Arrays.fill(encode, (short) -1);
+
         for (int i = 0; i < decode.length; i++)
             encode[decode[i]] = (short) i;
+
         maxParseLength = LongConverter.maxParseLength(length);
     }
 
@@ -51,29 +79,47 @@ public class PowerOfTwoLongConverter implements LongConverter {
         return maxParseLength;
     }
 
+    /**
+     * Parses a sequence of characters into a long value.
+     *
+     * @param text the character sequence to parse
+     * @return the parsed long value
+     * @throws IllegalArgumentException if the character sequence contains unexpected characters
+     */
     @Override
     public long parse(CharSequence text) {
         lengthCheck(text);
+
         long v = 0;
         for (int i = 0; i < text.length(); i++) {
             final char ch = text.charAt(i);
+
+            // Check for characters outside of the encoding range or not present in the encoding map.
             if (ch >= encode.length || encode[ch] < 0)
                 throw new IllegalArgumentException("Unexpected character '" + ch + "' in \"" + text + "\"");
+
+            // Convert the character into its corresponding long value.
             v = (v << shift) + encode[ch];
         }
         return v;
     }
 
+    /**
+     * Appends a long value to a StringBuilder.
+     *
+     * @param text the StringBuilder to append to
+     * @param value the long value to append
+     */
     @Override
     public void append(StringBuilder text, long value) {
         int start = text.length();
         while (value != 0) {
-            int val = (int) (value & mask);
+            int val = (int) (value & mask); // Isolate bits for the current value.
             text.append(decode[val]);
-            value >>>= shift;
+            value >>>= shift; // Right-shift to move to the next value.
         }
 
-        StringUtils.reverse(text, start);
+        StringUtils.reverse(text, start); // Reverse the result since it's constructed backward.
 
         if (text.length() > start + maxParseLength()) {
             Jvm.warn().on(getClass(), "truncated because the value was too large");
@@ -81,6 +127,12 @@ public class PowerOfTwoLongConverter implements LongConverter {
         }
     }
 
+    /**
+     * Appends a long value to a Bytes object.
+     *
+     * @param text the Bytes object to append to
+     * @param value the long value to append
+     */
     @Override
     public void append(Bytes<?> text, long value) {
         int start = text.length();
@@ -90,7 +142,7 @@ public class PowerOfTwoLongConverter implements LongConverter {
             value >>>= shift;
         }
 
-        BytesUtil.reverse(text, start);
+        BytesUtil.reverse(text, start); // Reverse the result for bytes.
 
         if (text.length() > start + maxParseLength()) {
             Jvm.warn().on(getClass(), "truncated because the value was too large");
@@ -98,6 +150,13 @@ public class PowerOfTwoLongConverter implements LongConverter {
         }
     }
 
+    /**
+     * Adds an alias character for encoding. The alias character will be treated
+     * the same as the "as" character in the encoding process.
+     *
+     * @param alias The character to treat as an alias.
+     * @param as The character that the alias should be treated as.
+     */
     public void addEncode(char alias, char as) {
         encode[alias] = encode[as];
     }

@@ -16,13 +16,16 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
+import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.bytes.util.BinaryLengthLength;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.BiConsumer;
 
 @SuppressWarnings("rawtypes")
 public class VanillaMessageHistory extends SelfDescribingMarshallable implements MessageHistory {
@@ -40,6 +43,11 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     private final long[] sourceIndexArray = new long[MESSAGE_HISTORY_LENGTH];
     @NotNull
     private final long[] timingsArray = new long[MESSAGE_HISTORY_LENGTH * 2];
+
+    // To avoid lambda allocations
+    private final transient BiConsumer<VanillaMessageHistory, ValueOut> acceptSourcesConsumer = this::acceptSources;
+    private final transient BiConsumer<VanillaMessageHistory, ValueOut> acceptTimingsConsumer = this::acceptTimings;
+
     // true if these change have been written
     private transient boolean dirty;
     private int sources;
@@ -146,7 +154,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     }
 
     @Override
-    public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
+    public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException, InvalidMarshallableException {
         Bytes<?> bytes = wire.bytes();
         if (bytes.peekUnsignedByte() == BinaryWireCode.BYTES_MARSHALLABLE) {
             bytes.readSkip(1);
@@ -175,8 +183,9 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             wire.bytes().writeUnsignedByte(BinaryWireCode.BYTES_MARSHALLABLE);
             writeMarshallable(wire.bytes());
         } else {
-            wire.write("sources").sequence(this, this::acceptSources);
-            wire.write("timings").sequence(this, this::acceptTimings);
+
+            wire.write("sources").sequence(this, acceptSourcesConsumer);
+            wire.write("timings").sequence(this, acceptTimingsConsumer);
         }
         dirty = false;
     }
@@ -294,7 +303,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
      * @return copy of this
      */
     @Override
-    public @NotNull VanillaMessageHistory deepCopy() {
+    public @NotNull VanillaMessageHistory deepCopy() throws InvalidMarshallableException {
         @NotNull VanillaMessageHistory copy = super.deepCopy();
         // remove the extra timing
         copy.timingsArray[this.timings] = 0;

@@ -67,5 +67,6 @@ public class DoubleTest extends WireTestCommon {
             final String message = bytes.toString();
             assertFalse(message + " has trailing 0", message.endsWith("0"));
         }
+        bytes.releaseLast();
     }
 }

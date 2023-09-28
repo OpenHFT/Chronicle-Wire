@@ -18,14 +18,27 @@
 
 package net.openhft.chronicle.wire.utils;
 
+import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.TextMethodTester;
 import net.openhft.chronicle.wire.WireOut;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.util.*;
 import java.util.function.Function;
 
 public interface YamlTester {
+    /**
+     * Enabling this will overwrite the output yaml file instead of checking it. The test will still fail on an exception.
+     * You can check the output has changing in a reasonable way when committing the changes.
+     */
+    boolean REGRESS_TESTS = Jvm.getBoolean("regress.tests");
+    /**
+     * When enabled only the base tests are run. i.e. generated tests are skipped.
+     */
+    boolean BASE_TESTS = Jvm.getBoolean("base.tests");
+
     /**
      * Test a component implemented in a class using in.yaml comparing with out.yaml,
      * with optionally setup.yaml to initialise it.
@@ -65,7 +78,7 @@ public interface YamlTester {
      */
     static <T> YamlTester runTest(Function<T, Object> builder, Class<T> outClass, String path) throws AssertionError {
         try {
-            return new TextMethodTester<T>(
+            return new TextMethodTester<>(
                     path + "/in.yaml",
                     builder,
                     outClass,
@@ -89,7 +102,7 @@ public interface YamlTester {
      */
     static <T> YamlTester runTest(Function<T, Object> builder, Function<WireOut, T> outFunction, String path) throws AssertionError {
         try {
-            return new TextMethodTester<T>(
+            return new TextMethodTester<>(
                     path + "/in.yaml",
                     builder,
                     outFunction,
@@ -99,6 +112,19 @@ public interface YamlTester {
         } catch (IOException ioe) {
             throw new AssertionError(ioe);
         }
+    }
+
+    /**
+     * Using this test as a template, generate more tests using this YamlAgitator
+     *
+     * @param agitator to use
+     * @return a map of gerenated inputs to test names
+     * @throws IORuntimeException if an IO error occurs
+     */
+    default Map<String, String> agitate(YamlAgitator agitator) throws IORuntimeException {
+        @Deprecated(/* make non-default in x.25 */)
+        int dummy;
+        throw new UnsupportedOperationException();
     }
 
     /**

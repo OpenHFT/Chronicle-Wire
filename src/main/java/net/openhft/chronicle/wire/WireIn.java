@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,7 +38,7 @@ import java.util.function.Consumer;
 public interface WireIn extends WireCommon, MarshallableIn {
 
     @NotNull
-    default <K, V> Map<K, V> readAllAsMap(Class<K> kClass, @NotNull Class<V> vClass, @NotNull Map<K, V> map) {
+    default <K, V> Map<K, V> readAllAsMap(Class<K> kClass, @NotNull Class<V> vClass, @NotNull Map<K, V> map) throws InvalidMarshallableException {
         while (isNotEmptyAfterPadding()) {
             long len = bytes().readRemaining();
             final K k = readEvent(kClass);
@@ -50,7 +51,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
         return map;
     }
 
-    void copyTo(@NotNull WireOut wire);
+    void copyTo(@NotNull WireOut wire) throws InvalidMarshallableException;
 
     /**
      * Read the field if present, or empty string if not present.
@@ -83,7 +84,13 @@ public interface WireIn extends WireCommon, MarshallableIn {
         try {
             return read(name);
         } catch (Exception e) {
-            throw new IORuntimeException("failed to parse bytes=" + bytes().toDebugString(128), e);
+            String s;
+            try {
+                s = bytes().toDebugString(128);
+            } catch (Throwable ex) {
+                s = ex.toString();
+            }
+            throw new IORuntimeException("failed to parse bytes=" + s, e);
         }
     }
 
@@ -101,7 +108,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
      * @param expectedClass to use as a hint, or Object.class if no hint available.
      * @return an instance of expectedClass
      */
-    @Nullable <K> K readEvent(Class<K> expectedClass);
+    @Nullable <K> K readEvent(Class<K> expectedClass) throws InvalidMarshallableException;
 
     /**
      * Obtain the value in for advanced use (typically after a call to readEvent above)
@@ -155,17 +162,17 @@ public interface WireIn extends WireCommon, MarshallableIn {
     // TODO add a try-with-resource support for readDocument.
 
     default boolean readDocument(@Nullable ReadMarshallable metaDataConsumer,
-                                 @Nullable ReadMarshallable dataConsumer) {
+                                 @Nullable ReadMarshallable dataConsumer) throws InvalidMarshallableException {
         return WireInternal.readData(this, metaDataConsumer, dataConsumer);
     }
 
     default boolean readDocument(long position,
                                  @Nullable ReadMarshallable metaDataConsumer,
-                                 @Nullable ReadMarshallable dataConsumer) {
+                                 @Nullable ReadMarshallable dataConsumer) throws InvalidMarshallableException {
         return WireInternal.readData(position, this, metaDataConsumer, dataConsumer);
     }
 
-    default void rawReadData(@NotNull ReadMarshallable marshallable) {
+    default void rawReadData(@NotNull ReadMarshallable marshallable) throws InvalidMarshallableException {
         WireInternal.rawReadData(this, marshallable);
     }
 

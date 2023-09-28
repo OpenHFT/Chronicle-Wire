@@ -20,4 +20,8 @@ package net.openhft.chronicle.wire.utils;
 
 public interface TestOut {
     void testEvent(TestEvent dto);
+
+    void error(String message);
+
+    void testAbstractMarshallableCfgEvent(TestAbstractMarshallableCfgEvent dto);
 }

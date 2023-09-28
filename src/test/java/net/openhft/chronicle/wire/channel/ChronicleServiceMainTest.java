@@ -27,6 +27,7 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
 interface NoOut {
@@ -44,6 +45,12 @@ public class ChronicleServiceMainTest extends WireTestCommon {
                 .close();
     }
 
+    @Override
+    @Before
+    public void threadDump() {
+        super.threadDump();
+    }
+
     @Test
     public void handshake() {
         // TODO FIX
@@ -57,9 +64,34 @@ public class ChronicleServiceMainTest extends WireTestCommon {
         t.start();
 
         final ChronicleChannelCfg channelCfg = new ChronicleChannelCfg().hostname("localhost").port(65432).initiator(true).buffered(true);
-        ChronicleChannel client = ChronicleChannel.newChannel(null, channelCfg, new OkHeader());
-        client.close();
-        main.close();
+        try (ChronicleChannel client = ChronicleChannel.newChannel(null, channelCfg, new OkHeader())) {
+            assertEquals("" +
+                            "!net.openhft.chronicle.wire.channel.OkHeader {\n" +
+                            "  systemContext: {\n" +
+                            "    availableProcessors: PP,\n" +
+                            "    hostId: 0,\n" +
+                            "    hostName: HHH,\n" +
+                            "    upTime: 20UU,\n" +
+                            "    userCountry: UC,\n" +
+                            "    userName: UN,\n" +
+                            "    javaVendor: JV,\n" +
+                            "    javaVersion: JV\n" +
+                            "  },\n" +
+                            "  sessionName: !!null \"\"\n" +
+                            "}\n",
+                    client.headerIn().toString()
+                            .replaceAll("availableProcessors: .*?,", "availableProcessors: PP,")
+                            .replaceAll("hostName: .*?,", "hostName: HHH,")
+                            .replaceAll("upTime: 20.*?,", "upTime: 20UU,")
+                            .replaceAll("userCountry: .*?,", "userCountry: UC,")
+                            .replaceAll("userName: .*?,", "userName: UN,")
+                            .replaceAll("javaVendor: \"[^\"]+\",", "javaVendor: JV,")
+                            .replaceAll("javaVendor: .*?,", "javaVendor: JV,")
+                            .replaceAll("javaVersion: .*", "javaVersion: JV")
+            );
+        } finally {
+            main.close();
+        }
     }
 }
 

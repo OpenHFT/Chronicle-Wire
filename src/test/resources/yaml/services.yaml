@@ -1,0 +1,18 @@
+# Copyright 2021 - http://chronicle.software
+{
+  services: {
+    fix-web-gateway: {
+      # 534534
+
+      inputs: #523523523
+        [
+          web-gateway-periodic-updates,
+
+          # errwe
+          session-state-updates,
+          fix-config-out,
+          fix-search-out
+        ]
+    }
+  }
+}

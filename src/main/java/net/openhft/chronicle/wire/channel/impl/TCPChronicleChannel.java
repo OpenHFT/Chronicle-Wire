@@ -32,6 +32,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
@@ -39,7 +40,7 @@ import static java.util.Objects.requireNonNull;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 import static net.openhft.chronicle.core.io.ClosedIORuntimeException.newIORuntimeException;
 
-public class TCPChronicleChannel extends SimpleCloseable implements InternalChronicleChannel {
+public class TCPChronicleChannel extends AbstractCloseable implements InternalChronicleChannel {
     // tune for message sizes up to this
     static final int CAPACITY = Integer.getInteger("tcp.capacity", 2 << 20); // 2 MB
     private static final String HEADER = "header";
@@ -71,18 +72,20 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
      */
     public TCPChronicleChannel(ChronicleChannelCfg channelCfg,
                                ChannelHeader headerOut,
-                               SocketRegistry socketRegistry) {
-        this.channelCfg = requireNonNull(channelCfg);
-        this.headerOut = requireNonNull(headerOut);
-        this.socketRegistry = socketRegistry;
-        this.replaceInHeader = null;
-        this.replaceOutHeader = null;
-        if (channelCfg.port() < -1)
-            throw new IllegalArgumentException("Invalid port " + channelCfg.port());
-
-        this.sc = null;
-        assert channelCfg.initiator();
-        checkConnected();
+                               SocketRegistry socketRegistry) throws InvalidMarshallableException {
+        try {
+            this.channelCfg = requireNonNull(channelCfg);
+            this.headerOut = requireNonNull(headerOut);
+            this.socketRegistry = socketRegistry;
+            this.replaceInHeader = null;
+            this.replaceOutHeader = null;
+            this.sc = null;
+            assert channelCfg.initiator();
+            checkConnected();
+        } catch (Throwable t) {
+            close();
+            throw t;
+        }
     }
 
     /**
@@ -93,14 +96,19 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
                                SocketChannel sc,
                                Function<ChannelHeader, ChannelHeader> replaceInHeader,
                                Function<ChannelHeader, ChannelHeader> replaceOutHeader) {
-        this.systemContext = systemContext;
-        this.channelCfg = requireNonNull(channelCfg);
-        this.sc = requireNonNull(sc);
-        this.replaceInHeader = requireNonNull(replaceInHeader);
-        this.replaceOutHeader = requireNonNull(replaceOutHeader);
+        try {
+            this.systemContext = systemContext;
+            this.channelCfg = requireNonNull(channelCfg);
+            this.sc = requireNonNull(sc);
+            this.replaceInHeader = requireNonNull(replaceInHeader);
+            this.replaceOutHeader = requireNonNull(replaceOutHeader);
 
-        this.headerOut = null;
-        assert !channelCfg.initiator();
+            this.headerOut = null;
+            assert !channelCfg.initiator();
+        } catch (Throwable t) {
+            close();
+            throw t;
+        }
     }
 
     @SuppressWarnings("SameReturnValue")
@@ -224,7 +232,7 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
         return in.readingDocument();
     }
 
-    synchronized void checkConnected() {
+    synchronized void checkConnected() throws InvalidMarshallableException {
         if (sc != null && sc.isOpen()) {
             if (headerOut == null) {
                 acceptorRespondToHeader();
@@ -234,28 +242,50 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
         closeQuietly(sc);
         if (isClosing())
             throw new IllegalStateException("Closed");
-        if (channelCfg.initiator()) {
-            long end = System.nanoTime()
-                    + (long) (channelCfg.connectionTimeoutSecs() * 1e9);
-            if (socketRegistry == null) {
-                socketRegistry = new SocketRegistry();
-                privateSocketRegistry = true;
-            }
-            for (int delay = 1; ; delay++) {
-                try {
-                    sc = socketRegistry.createSocketChannel(channelCfg.hostname(), channelCfg.port());
-                    configureSocket();
-                    writeHeader();
-                    readHeader();
-                    break;
 
-                } catch (IOException e) {
-                    if (System.nanoTime() > end)
-                        throw new IORuntimeException(e);
-                    Jvm.pause(delay);
+        final Set<HostPortCfg> hostPorts = channelCfg.hostPorts();
+
+        if (channelCfg.initiator()) {
+            boolean success = false;
+            Outer:
+            for (HostPortCfg hp : hostPorts) {
+
+                if (hp.port() < -1)
+                    throw new IllegalArgumentException("Invalid port " + hp.port() + " connecting to " + hp.hostname());
+
+                try {
+
+                    long end = System.nanoTime()
+                            + (long) (channelCfg.connectionTimeoutSecs() * 1e9);
+                    if (socketRegistry == null) {
+                        socketRegistry = new SocketRegistry();
+                        privateSocketRegistry = true;
+                    }
+                    for (int delay = 1; ; delay++) {
+                        try {
+                            sc = socketRegistry.createSocketChannel(hp.hostname(), hp.port());
+                            configureSocket();
+                            writeHeader();
+                            readHeader();
+                            success = true;
+                            break Outer;
+
+                        } catch (IOException e) {
+                            if (System.nanoTime() > end)
+                                throw new IORuntimeException("hostport=" + hp, e);
+                            Jvm.pause(delay);
+                        }
+                    }
+
+                } catch (Exception e) {
+                    Jvm.warn().on(getClass(), "failed to connect to host-port=" + hp);
                 }
+
             }
+            if (!success)
+                throw new IORuntimeException("failed to connect to any of the following " + hostPorts);
         }
+
         in.clear();
         out.clear();
     }
@@ -272,13 +302,12 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
 
     @Override
     protected void performClose() {
-        super.performClose();
         Closeable.closeQuietly(sc);
         if (privateSocketRegistry)
             Closeable.closeQuietly(socketRegistry);
     }
 
-    synchronized void acceptorRespondToHeader() {
+    synchronized void acceptorRespondToHeader() throws InvalidMarshallableException {
         headerOut = NO_HEADER;
         readHeader();
         headerInToUse = replaceInHeader.apply(headerIn);
@@ -297,7 +326,7 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
         writeHeader();
     }
 
-    private void writeHeader() {
+    private void writeHeader() throws InvalidMarshallableException {
         try (DocumentContext dc = writingDocument(true)) {
             dc.wire().write(HEADER).object(headerOut);
         }
@@ -326,7 +355,7 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
         return headerInToUse;
     }
 
-    private void readHeader() {
+    private void readHeader() throws InvalidMarshallableException {
         while (!Thread.currentThread().isInterrupted()) {
             try (DocumentContext dc = readingDocument()) {
                 if (!dc.isPresent()) {
@@ -426,7 +455,11 @@ public class TCPChronicleChannel extends SimpleCloseable implements InternalChro
         public void close() {
             super.close();
             if (!chainedElement)
-                flush();
+                try {
+                    flush();
+                } catch (ClosedIORuntimeException ignored) {
+                    // ignored
+                }
             lock.unlock();
         }
 

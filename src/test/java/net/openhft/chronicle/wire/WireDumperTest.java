@@ -99,8 +99,8 @@ public class WireDumperTest extends WireTestCommon {
 
     private void initTestData() {
         expectedContentByType.put(WireType.TEXT, "" +
-                "--- !!data #binary\n" +
-                "00000000             31 37 0a                                 17·          \n" +
+                "--- !!data\n" +
+                "17\n" +
                 "# position: 8, header: 1\n" +
                 "--- !!data\n" +
                 "bark\n" +
@@ -110,8 +110,8 @@ public class WireDumperTest extends WireTestCommon {
                 "");
 
         expectedContentByType.put(WireType.YAML, "" +
-                "--- !!data #binary\n" +
-                "00000000             31 37 0a                                 17·          \n" +
+                "--- !!data\n" +
+                "17\n" +
                 "# position: 8, header: 1\n" +
                 "--- !!data\n" +
                 "bark\n" +
@@ -138,8 +138,8 @@ public class WireDumperTest extends WireTestCommon {
         expectedContentByType.put(WireType.COMPRESSED_BINARY, expectedBinary);
 
         expectedContentByType.put(WireType.JSON, "" +
-                "--- !!data #binary\n" +
-                "00000000             31 37                                    17           \n" +
+                "--- !!data\n" +
+                "17\n" +
                 "# position: 8, header: 1\n" +
                 "--- !!data\n" +
                 "\"bark\"\n" +
@@ -171,26 +171,26 @@ public class WireDumperTest extends WireTestCommon {
                 "...\n");
 
         expectedPartialContent.put(WireType.TEXT, "" +
-                "--- !!data #binary\n" +
-                "00000000             31 37 0a                                 17·          \n" +
+                "--- !!data\n" +
+                "17\n" +
                 "# position: 8, header: 0 or 1\n" +
                 "--- !!not-ready-data\n" +
                 "...\n" +
                 "# 5 bytes remaining\n" +
                 "");
-        expectedPartialContent.put(WireType.YAML,
-                "--- !!data #binary\n" +
-                        "00000000             31 37 0a                                 17·          \n" +
-                        "# position: 8, header: 0 or 1\n" +
-                        "--- !!not-ready-data\n" +
-                        "...\n" +
-                        "# 5 bytes remaining\n" +
-                        "");
+        expectedPartialContent.put(WireType.YAML, "" +
+                "--- !!data\n" +
+                "17\n" +
+                "# position: 8, header: 0 or 1\n" +
+                "--- !!not-ready-data\n" +
+                "...\n" +
+                "# 5 bytes remaining\n" +
+                "");
         final String expectedPartialBinary = "" +
                 "--- !!data #binary\n" +
                 "17\n" +
                 "# position: 8, header: 0 or 1\n" +
-                "--- !!not-ready-data #binary\n" +
+                "--- !!not-ready-data\n" +
                 "...\n" +
                 "# 5 bytes remaining\n";
         expectedPartialContent.put(WireType.BINARY, expectedPartialBinary);
@@ -202,8 +202,8 @@ public class WireDumperTest extends WireTestCommon {
         expectedPartialContent.put(WireType.COMPRESSED_BINARY, expectedPartialBinary);
 
         expectedPartialContent.put(WireType.JSON, "" +
-                "--- !!data #binary\n" +
-                "00000000             31 37                                    17           \n" +
+                "--- !!data\n" +
+                "17\n" +
                 "# position: 8, header: 0 or 1\n" +
                 "--- !!not-ready-data\n" +
                 "...\n" +
@@ -218,7 +218,7 @@ public class WireDumperTest extends WireTestCommon {
                 "--- !!data #binary\n" +
                 "00000000             11 00 00 00  00 00 00 00                 ···· ····    \n" +
                 "# position: 12, header: 0 or 1\n" +
-                "--- !!not-ready-data #binary\n" +
+                "--- !!not-ready-data\n" +
                 "...\n" +
                 "# 5 bytes remaining\n" +
                 "");

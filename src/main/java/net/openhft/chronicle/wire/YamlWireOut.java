@@ -25,9 +25,12 @@ import net.openhft.chronicle.bytes.ref.TextBooleanReference;
 import net.openhft.chronicle.bytes.ref.TextIntReference;
 import net.openhft.chronicle.bytes.ref.TextLongArrayReference;
 import net.openhft.chronicle.bytes.ref.TextLongReference;
+import net.openhft.chronicle.bytes.render.GeneralDecimaliser;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.*;
@@ -51,6 +54,8 @@ import static net.openhft.chronicle.bytes.BytesStore.empty;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire {
+    private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
+
     public static final BytesStore TYPE = BytesStore.from("!type ");
     static final String NULL = "!null \"\"";
     static final BitSet STARTS_QUOTE_CHARS = new BitSet();
@@ -58,7 +63,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     static final BytesStore COMMA_SPACE = BytesStore.from(", ");
     static final BytesStore COMMA_NEW_LINE = BytesStore.from(",\n");
     static final BytesStore NEW_LINE = BytesStore.from("\n");
-    static final BytesStore EMPTY_AFTER_COMMENT = BytesStore.from(""); // not the same as EMPTY so we can check this value.
+    static final BytesStore EMPTY_AFTER_COMMENT = BytesStore.wrap(new byte[0]); // not the same as EMPTY so we can check this value.
     static final BytesStore EMPTY = BytesStore.from("");
     static final BytesStore SPACE = BytesStore.from(" ");
     static final BytesStore END_FIELD = NEW_LINE;
@@ -81,6 +86,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
     protected YamlWireOut(@NotNull Bytes bytes, boolean use8bit) {
         super(bytes, use8bit);
+        bytes.decimaliser(GeneralDecimaliser.GENERAL)
+                .fpAppend0(APPEND_0);
     }
 
     public boolean addTimeStamps() {
@@ -98,7 +105,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     @NotNull
-    private StringBuilder acquireStringBuilder() {
+    protected StringBuilder acquireStringBuilder() {
         StringUtils.setCount(sb, 0);
         return sb;
     }
@@ -128,7 +135,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     @Override
-    public ValueOut writeEvent(Class expectedType, Object eventKey) {
+    public ValueOut writeEvent(Class expectedType, Object eventKey) throws InvalidMarshallableException {
         if (eventKey instanceof WireKey)
             return writeEventName((WireKey) eventKey);
         if (eventKey instanceof CharSequence)
@@ -186,36 +193,37 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         bytes.writeUnsignedByte(quotes.q);
     }
 
+    // https://yaml.org/spec/1.2.2/#escaped-characters
     protected void escape0(@NotNull CharSequence s, @NotNull Quotes quotes) {
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
             switch (ch) {
                 case '\0':
-                    bytes.appendUtf8("\\0");
+                    bytes.append("\\0");
                     break;
                 case 7:
-                    bytes.appendUtf8("\\a");
+                    bytes.append("\\a");
                     break;
                 case '\b':
-                    bytes.appendUtf8("\\b");
+                    bytes.append("\\b");
                     break;
                 case '\t':
-                    bytes.appendUtf8("\\t");
+                    bytes.append("\\t");
                     break;
                 case '\n':
-                    bytes.appendUtf8("\\n");
+                    bytes.append("\\n");
                     break;
                 case 0xB:
-                    bytes.appendUtf8("\\v");
+                    bytes.append("\\v");
                     break;
-                case 0xC:
-                    bytes.appendUtf8("\\f");
+                case '\f':
+                    bytes.append("\\f");
                     break;
                 case '\r':
-                    bytes.appendUtf8("\\r");
+                    bytes.append("\\r");
                     break;
                 case 0x1B:
-                    bytes.appendUtf8("\\e");
+                    bytes.append("\\e");
                     break;
                 case '"':
                     if (ch == quotes.q) {
@@ -234,11 +242,20 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 case '\\':
                     bytes.writeUnsignedByte('\\').writeUnsignedByte(ch);
                     break;
+//                case '/':
+//                    bytes.writeUnsignedByte('\\').writeUnsignedByte(ch);
+//                    break;
                 case 0x85:
                     bytes.appendUtf8("\\N");
                     break;
                 case 0xA0:
                     bytes.appendUtf8("\\_");
+                    break;
+                case 0x2028:
+                    bytes.appendUtf8("\\L");
+                    break;
+                case 0x2029:
+                    bytes.appendUtf8("\\P");
                     break;
                 default:
                     if (ch > 255)
@@ -259,7 +276,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         bytes.append(HEXADECIMAL[ch & 0xF]);
     }
 
-    private void appendU4(char ch) {
+    protected void appendU4(char ch) {
         bytes.append('\\');
         bytes.append('u');
         bytes.append(HEXADECIMAL[ch >> 12]);
@@ -309,7 +326,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             bytes.appendUtf8(cs, offset, length);
     }
 
-    public void writeObject(Object o) {
+    public void writeObject(Object o) throws InvalidMarshallableException {
         if (o instanceof Iterable) {
             for (Object o2 : (Iterable) o) {
                 writeObject(o2, 2);
@@ -326,7 +343,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
     }
 
-    private void writeObject(Object o, int indentation) {
+    private void writeObject(Object o, int indentation) throws InvalidMarshallableException {
         writeTwo('-', ' ');
         indentation(indentation - 2);
         valueOut.object(o);
@@ -586,7 +603,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 writeSavedEventName();
             }
             if (bytesStore == null)
-                return (T)nu11();
+                return (T) nu11();
             prependSeparator();
             typePrefix(type);
             append(Base64.getEncoder().encodeToString(bytesStore.toByteArray()));
@@ -803,7 +820,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             }
             prependSeparator();
             double af = Math.abs(f);
-            if (af >= 1e-3 && af < 1e6)
+            if (af == 0 || (af >= 1e-3 && af < 1e6))
                 bytes.append(f);
             else
                 bytes.append(floatToString(f));
@@ -822,7 +839,9 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             }
             prependSeparator();
             double ad = Math.abs(d);
-            if (ad >= 1e-7 && ad < 1e15) {
+            if (ad == 0) {
+                bytes.append(d);
+            } else if (ad >= 1e-7 && ad < 1e15) {
                 if ((int) (ad / 1e6) * 1e6 == ad) {
                     bytes.append((int) (d / 1e6)).append("E6");
                 } else if ((int) (ad / 1e3) * 1e3 == ad) {
@@ -873,6 +892,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                     return wireOut();
                 writeSavedEventName();
             }
+            if (zonedDateTime == null)
+                return (T) nu11();
             final String s = zonedDateTime.toString();
             return (T) (s.endsWith("]") ? text(s) : asText(s));
         }
@@ -1091,7 +1112,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         @NotNull
         @Override
-        public <E, K> T sequence(E e, K kls, @NotNull TriConsumer<E, K, ValueOut> writer) {
+        public <E, K> T sequence(E e, K kls, @NotNull TriConsumer<E, K, ValueOut> writer) throws InvalidMarshallableException {
             boolean leaf = this.leaf;
             startBlock('[');
             if (leaf)
@@ -1147,7 +1168,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         @NotNull
         @Override
-        public T marshallable(@NotNull WriteMarshallable object) {
+        public T marshallable(@NotNull WriteMarshallable object) throws InvalidMarshallableException {
             WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(object.getClass());
             boolean wasLeaf0 = leaf;
             if (indentation > 1 && wm.isLeaf())
@@ -1205,7 +1226,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         @NotNull
         @Override
-        public T marshallable(@NotNull Serializable object) {
+        public T marshallable(@NotNull Serializable object) throws InvalidMarshallableException {
             if (dropDefault) {
                 writeSavedEventName();
             }
@@ -1255,7 +1276,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             return wireOut();
         }
 
-        private void writeSerializable(@NotNull Serializable object) {
+        private void writeSerializable(@NotNull Serializable object) throws InvalidMarshallableException {
             try {
                 if (object instanceof Externalizable)
                     ((Externalizable) object).writeExternal(objectOutput());
@@ -1278,7 +1299,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         @NotNull
         @Override
-        public T map(@NotNull final Map map) {
+        public T map(@NotNull final Map map) throws InvalidMarshallableException {
             if (dropDefault) {
                 writeSavedEventName();
             }
@@ -1329,7 +1350,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         @NotNull
-        public YamlValueOut write(Class expectedType, @NotNull Object objectKey) {
+        public YamlValueOut write(Class expectedType, @NotNull Object objectKey) throws InvalidMarshallableException {
             if (dropDefault) {
                 if (expectedType != String.class)
                     throw new UnsupportedOperationException("todo");

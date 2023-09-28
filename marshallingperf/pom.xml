@@ -19,9 +19,15 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>net.openhft</groupId>
+    <parent>
+        <groupId>net.openhft</groupId>
+        <artifactId>java-parent-pom</artifactId>
+        <version>1.24.0-SNAPSHOT</version>
+        <relativePath />
+    </parent>
+
     <artifactId>chronicle-wire-marshallingperf</artifactId>
-    <version>2.21-SNAPSHOT</version>
+    <version>2.24-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Wire/MarshallingPerf</name>
     <description>Chronicle-Wire-MarshallingPerf</description>
 
@@ -34,7 +40,7 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>third-party-bom</artifactId>
-                <version>3.22.3</version>
+                <version>3.24.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -111,7 +117,6 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
-                        <version>3.1.0</version>
 
                         <configuration>
                             <systemProperties>
@@ -127,60 +132,55 @@
                                 <id>BytesInBytesMarshallableMain</id>
                                 <phase>test</phase>
                                 <goals>
-                                    <goal>java</goal>
+                                    <goal>exec</goal>
                                 </goals>
                                 <configuration>
-                                    <mainClass>
-                                        run.chronicle.wire.perf.BytesInBytesMarshallableMain
-                                    </mainClass>
+                                    <executable>${java.home}/bin/java</executable>
+                                    <commandlineArgs>${jvm.requiredArgs} -classpath %classpath run.chronicle.wire.perf.BytesInBytesMarshallableMain</commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
                                 <id>PrimitivesInBytesMarshallableMain</id>
                                 <phase>test</phase>
                                 <goals>
-                                    <goal>java</goal>
+                                    <goal>exec</goal>
                                 </goals>
                                 <configuration>
-                                    <mainClass>
-                                        run.chronicle.wire.perf.PrimitivesInBytesMarshallableMain
-                                    </mainClass>
+                                    <executable>${java.home}/bin/java</executable>
+                                    <commandlineArgs>${jvm.requiredArgs} -classpath %classpath run.chronicle.wire.perf.PrimitivesInBytesMarshallableMain</commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
                                 <id>StringsInBytesMarshallableMain</id>
                                 <phase>test</phase>
                                 <goals>
-                                    <goal>java</goal>
+                                    <goal>exec</goal>
                                 </goals>
                                 <configuration>
-                                    <mainClass>
-                                        run.chronicle.wire.perf.StringsInBytesMarshallableMain
-                                    </mainClass>
+                                    <executable>${java.home}/bin/java</executable>
+                                    <commandlineArgs>${jvm.requiredArgs} -classpath %classpath run.chronicle.wire.perf.StringsInBytesMarshallableMain</commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
                                 <id>MessageHistoryBytesMarshallableMain</id>
                                 <phase>test</phase>
                                 <goals>
-                                    <goal>java</goal>
+                                    <goal>exec</goal>
                                 </goals>
                                 <configuration>
-                                    <mainClass>
-                                        run.chronicle.wire.perf.MessageHistoryBytesMarshallableMain
-                                    </mainClass>
+                                    <executable>${java.home}/bin/java</executable>
+                                    <commandlineArgs>${jvm.requiredArgs} -classpath %classpath run.chronicle.wire.perf.MessageHistoryBytesMarshallableMain</commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
                                 <id>MessageHistoryWireMarshallableMain</id>
                                 <phase>test</phase>
                                 <goals>
-                                    <goal>java</goal>
+                                    <goal>exec</goal>
                                 </goals>
                                 <configuration>
-                                    <mainClass>
-                                        run.chronicle.wire.perf.MessageHistoryWireMarshallableMain
-                                    </mainClass>
+                                    <executable>${java.home}/bin/java</executable>
+                                    <commandlineArgs>${jvm.requiredArgs} -classpath %classpath run.chronicle.wire.perf.MessageHistoryWireMarshallableMain</commandlineArgs>
                                 </configuration>
                             </execution>
                         </executions>

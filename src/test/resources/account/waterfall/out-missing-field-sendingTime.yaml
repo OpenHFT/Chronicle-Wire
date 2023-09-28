@@ -1,0 +1,8 @@
+# Alice sends 100 EUR to Bob
+# missing sendingTime: 2023-01-20T10:03:00,
+jvmError: "net.openhft.chronicle.core.io.InvalidMarshallableException: sendingTime must be set"
+...
+# Bob sends 20 USD to Cate
+# missing sendingTime: 2023-01-20T10:04:00,
+jvmError: "net.openhft.chronicle.core.io.InvalidMarshallableException: sendingTime must be set"
+...

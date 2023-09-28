@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.Invocation;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
@@ -34,6 +35,13 @@ import java.util.function.Supplier;
 import static org.junit.Assert.*;
 
 public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
+
+    @Override
+    @Before
+    public void threadDump() {
+        super.threadDump();
+    }
+
     /**
      * Checks that regular {@link MethodReaderInterceptorReturns} is supported in generated method reader.
      */
@@ -278,7 +286,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
         public String codeBeforeCall(Method m, String objectName, String[] argumentNames) {
             if (m.getName().equals("oneArg")) {
                 return String.format("if (%s == 2)\n" +
-                        " return true;\n", argumentNames[0]);
+                        "break;\n", argumentNames[0]);
             }
 
             return null;

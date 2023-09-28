@@ -27,11 +27,37 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotate fields or parameters to signify the long value represent a String of 0 to 10 characters in Base64
+ * Annotation to indicate that a given field or parameter, represented as a long value,
+ * should be treated as a string containing 0 to 10 characters in Base64 format.
+ * <p>
+ * When this annotation is applied to a field or parameter, it provides a hint about the expected format
+ * and representation of the data, allowing for potential encoding and decoding operations based on Base64.
+ * </p>
+ * <p>
+ * The provided {@link #INSTANCE} is a default converter that can be used for operations relevant to the Base64 format.
+ * </p>
+ *
+ * <b>Example:</b>
+ * <pre>
+ * {@code
+ * @Base64
+ * private long encodedData;
+ * }
+ * </pre>
+ *
+ * @see LongConverter
+ * @see PowerOfTwoLongConverter
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @LongConversion(Base64.class)
 public @interface Base64 {
+
+    /**
+     * An instance of {@link PowerOfTwoLongConverter} specifically configured for Base64 conversions.
+     * This converter uses a defined character set suitable for Base64 representations.
+     *
+     * @return the Base64 long converter instance.
+     */
     LongConverter INSTANCE = new PowerOfTwoLongConverter(".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_");
 }

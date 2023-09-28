@@ -26,6 +26,14 @@ import net.openhft.chronicle.wire.LongConversion;
 import net.openhft.chronicle.wire.NanoTimestampLongConverter;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
+/**
+ * Encapsulates system-related information into a singleton object, such as:
+ * the number of available processors, host ID, host name, system up time,
+ * user's country and name, and the Java vendor and version.
+ * <p>
+ * The singleton instance is initialized with the system's current state.
+ * If deserialized from another host, the SystemContext object would contain the information of that host at the moment of serialization.
+ */
 @SuppressWarnings("unused")
 public class SystemContext extends SelfDescribingMarshallable {
     public static final SystemContext INSTANCE = getInstance();
@@ -36,10 +44,16 @@ public class SystemContext extends SelfDescribingMarshallable {
     private long upTime;
     private String userCountry;
     private String userName;
-
     private String javaVendor;
     private String javaVersion;
 
+    /**
+     * Singleton accessor. It lazily initializes and retrieves the SystemContext instance.
+     * This method captures the system's current state including processor count, host info,
+     * up time, user info and Java environment details.
+     *
+     * @return The singleton instance of SystemContext.
+     */
     private static SystemContext getInstance() {
         SystemContext sc = new SystemContext();
         final Runtime runtime = Runtime.getRuntime();
@@ -55,34 +69,74 @@ public class SystemContext extends SelfDescribingMarshallable {
         return sc;
     }
 
+    /**
+     * Provides the number of available processors in the current system.
+     *
+     * @return Number of available processors.
+     */
     public int availableProcessors() {
         return availableProcessors;
     }
 
+    /**
+     * Provides the unique identifier for the host system.
+     *
+     * @return System's host ID.
+     */
     public int hostId() {
         return hostId;
     }
 
+    /**
+     * Provides the name of the host system.
+     *
+     * @return System's host name.
+     */
     public String hostName() {
         return hostName;
     }
 
+    /**
+     * Provides the vendor information of the Java environment in the current system.
+     *
+     * @return The Java environment vendor.
+     */
     public String javaVendor() {
         return javaVendor;
     }
 
+    /**
+     * Provides the version of the Java environment in the current system.
+     *
+     * @return The Java environment version.
+     */
     public String javaVersion() {
         return javaVersion;
     }
 
+    /**
+     * Provides the system's up time in nanoseconds.
+     *
+     * @return The system's up time in nanoseconds.
+     */
     public long upTime() {
         return upTime;
     }
 
+    /**
+     * Provides the user's country in the current system.
+     *
+     * @return The country code of the user.
+     */
     public String userCountry() {
         return userCountry;
     }
 
+    /**
+     * Provides the username of the current user in the system.
+     *
+     * @return The username of the current user.
+     */
     public String userName() {
         return userName;
     }

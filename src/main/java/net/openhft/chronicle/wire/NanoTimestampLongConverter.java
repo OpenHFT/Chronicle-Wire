@@ -25,17 +25,54 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * A {@code NanoTimestampLongConverter} is an implementation of {@code AbstractTimestampLongConverter}
+ * which handles conversions between long timestamps and date-time strings.
+ * The precision of this converter is to the nanosecond.
+ * This converter is singleton, the instance can be accessed using the public field INSTANCE.
+ */
 public class NanoTimestampLongConverter extends AbstractTimestampLongConverter {
+
+    /**
+     * The singleton instance of this converter.
+     */
     public static final NanoTimestampLongConverter INSTANCE = new NanoTimestampLongConverter();
 
+    /**
+     * Constructs a new {@code NanoTimestampLongConverter} with the default zone ID (fetched from the system property or UTC).
+     */
     public NanoTimestampLongConverter() {
         super(TimeUnit.NANOSECONDS);
     }
 
+    /**
+     * Constructs a new {@code NanoTimestampLongConverter} with the specified zone ID.
+     *
+     * @param zoneId the zone ID to be used for the conversion of long values
+     */
     public NanoTimestampLongConverter(String zoneId) {
         super(zoneId, TimeUnit.NANOSECONDS);
     }
 
+    /**
+     * Constructs a new {@code NanoTimestampLongConverter} with the specified zone ID and flag for including zone suffix for UTC.
+     * This constructor is set to be deprecated in x.26 version.
+     *
+     * @param zoneId                 the zone ID to be used for the conversion of long values
+     * @param includeZoneSuffixForUTC the flag to indicate if 'Z' suffix should be included for UTC zone timestamps
+     */
+    @Deprecated(/* To be removed in x.26 */)
+    public NanoTimestampLongConverter(String zoneId, boolean includeZoneSuffixForUTC) {
+        super(zoneId, TimeUnit.NANOSECONDS, includeZoneSuffixForUTC);
+    }
+
+    /**
+     * Parses a formatted date into a long timestamp.
+     * This implementation uses the epoch day and time of the day to compute the long timestamp.
+     *
+     * @param value The parsed formatted date (in UTC zone)
+     * @return The value as a long timestamp
+     */
     @Override
     protected long parseFormattedDate(ZonedDateTime value) {
         long time = value.getLong(ChronoField.EPOCH_DAY) * 86400_000_000_000L;
@@ -51,6 +88,15 @@ public class NanoTimestampLongConverter extends AbstractTimestampLongConverter {
         return time;
     }
 
+    /**
+     * Parses a long timestamp.
+     * The provided timestamp value is converted to nanoseconds.
+     * A debug log is printed if the timestamp is in microseconds or if it's a non-zero value.
+     *
+     * @param value The parsed timestamp
+     * @param text  The text version of the timestamp
+     * @return The value as a long timestamp
+     */
     @Override
     protected long parseTimestamp(long value, CharSequence text) {
         long number = LongTime.toNanos(value);
@@ -63,6 +109,12 @@ public class NanoTimestampLongConverter extends AbstractTimestampLongConverter {
         return number;
     }
 
+    /**
+     * Appends the fraction of the second to the provided {@code DateTimeFormatterBuilder}.
+     * The fraction is defined in nanoseconds and can be 0 to 9 digits long.
+     *
+     * @param builder The builder after the initial date format has been added
+     */
     @Override
     protected void appendFraction(DateTimeFormatterBuilder builder) {
         builder.appendFraction(ChronoField.NANO_OF_SECOND, 0, 9, true);

@@ -28,9 +28,8 @@ import static org.junit.Assert.*;
 // Test created as a result of agitator tests i.e. random character changes
 public class TextWireAgitatorTest extends WireTestCommon {
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void lowerCaseClass() {
-        expectException("Unable to load net.openhft.chronicle.wire.textwiretest$mydto, is a class alias missing");
         assertTrue(Marshallable.fromString("!" + TextWireTest.MyDto.class.getName().toLowerCase() + " { }") instanceof Map);
     }
 

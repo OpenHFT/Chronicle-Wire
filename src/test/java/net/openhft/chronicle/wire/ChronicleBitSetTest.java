@@ -41,6 +41,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IOTools;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -62,6 +63,12 @@ public class ChronicleBitSetTest extends WireTestCommon {
     private final ChronicleBitSet emptyBS1;
     private final ChronicleBitSet emptyBS127;
     private final ChronicleBitSet emptyBS128;
+
+    @Override
+    @Before
+    public void threadDump() {
+        super.threadDump();
+    }
 
     public ChronicleBitSetTest(Class clazz) {
         assumeTrue(Jvm.is64bit());

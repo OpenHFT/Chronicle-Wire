@@ -74,7 +74,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         writeMessageOne(wire);
 
         assertEquals("" +
-                        "[pos: 0, rlim: 132, wlim: 2147483632, cap: 2147483632 ] ǁ$٠٠@Ãcspñ///service-lookupÃtid§u\\u009F)å\"٠٠٠\\u008FX٠٠٠Ælookup\\u0082I٠٠٠ËrelativeUriätestÄview¼⒊MapÅtypes\\u0082#٠٠٠ÇkeyType¼⒎IntegerÉvalueType¼⒍String\\u008F\\u008F\\u008F‡٠٠٠٠٠٠٠٠",
+                        "[pos: 0, rlim: 132, wlim: 2147483632, cap: 2147483632 ] ǁ$٠٠@Ãcspñ///service-lookupÃtid§u\\u009F)å\"٠٠٠\\u008FX٠٠٠Ælookup\\u0082I٠٠٠ËrelativeUriätestÄview¼⒊MapÅtypes\\u0082#٠٠٠ÇkeyType¼⒎IntegerÉvalueType¼⒍String\\u008F\\u008F\\u008F‡٠٠٠٠٠٠٠٠٠٠٠٠٠",
                 bytes.toDebugString());
 
         @NotNull Wire raw = new RawWire(bytes);
@@ -124,7 +124,7 @@ put: [ 3, bye ]
                         "}\n",
                 Wires.fromSizePrefixedBlobs(bytes));
         assertEquals("" +
-                        "[pos: 0, rlim: 148, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@csp: //server1/test⒑cid: 1⒑ $٠٠٠put: {⒑  key: 1,⒑  value: hello⒑}⒑  $٠٠٠put: {⒑  key: 2,⒑  value: world⒑}⒑   ٠٠٠put: {⒑  key: 3,⒑  value: bye⒑}⒑‡٠٠٠٠٠٠٠٠",
+                        "[pos: 0, rlim: 148, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@csp: //server1/test⒑cid: 1⒑ $٠٠٠put: {⒑  key: 1,⒑  value: hello⒑}⒑  $٠٠٠put: {⒑  key: 2,⒑  value: world⒑}⒑   ٠٠٠put: {⒑  key: 3,⒑  value: bye⒑}⒑‡٠٠٠٠٠٠٠٠٠٠٠٠٠",
                 bytes.toDebugString());
 
         clear(bytes);
@@ -132,7 +132,7 @@ put: [ 3, bye ]
 
         // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
         assertEquals("" +
-                        "[pos: 0, rlim: 128, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@Ãcspî//server1/testÃcid¡⒈\\u008F\\u008F\\u008F\\u001C٠٠٠Ãput\\u0082⒙٠٠٠Ãkey¡⒈Åvalueåhello\\u008F\\u001C٠٠٠Ãput\\u0082⒙٠٠٠Ãkey¡⒉Åvalueåworld\\u008F\\u001C٠٠٠Ãput\\u0082⒗٠٠٠Ãkey¡⒊Åvalueãbye\\u008F\\u008F\\u008F‡٠٠٠٠٠٠٠٠",
+                        "[pos: 0, rlim: 128, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@Ãcspî//server1/testÃcid¡⒈\\u008F\\u008F\\u008F\\u001C٠٠٠Ãput\\u0082⒙٠٠٠Ãkey¡⒈Åvalueåhello\\u008F\\u001C٠٠٠Ãput\\u0082⒙٠٠٠Ãkey¡⒉Åvalueåworld\\u008F\\u001C٠٠٠Ãput\\u0082⒗٠٠٠Ãkey¡⒊Åvalueãbye\\u008F\\u008F\\u008F‡٠٠٠٠٠٠٠٠٠",
                 bytes.toDebugString());
 
         clear(bytes);

@@ -22,6 +22,8 @@ import net.openhft.chronicle.bytes.ref.*;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.ValidatableUtil;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.*;
@@ -38,6 +40,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.function.*;
 
@@ -51,14 +54,16 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     static final String SEQ_MAP = "!seqmap";
     static final String BINARY_TAG = "!binary";
     static final String DATA_TAG = "!data";
+    static final String NULL_TAG = "!null";
 
-        //for (char ch : "?%&*@`0123456789+- ',#:{}[]|>!\\".toCharArray())
+    //for (char ch : "?%&*@`0123456789+- ',#:{}[]|>!\\".toCharArray())
     private final TextValueIn valueIn = createValueIn();
     private final YamlTokeniser yt;
     private final Map<String, Object> anchorValues = new HashMap<>();
     private DefaultValueIn defaultValueIn;
     private WriteDocumentContext writeContext;
     private ReadDocumentContext readContext;
+    private YamlWire rereadWire;
 
     public YamlWire(@NotNull Bytes<?> bytes, boolean use8bit) {
         super(bytes, use8bit);
@@ -80,7 +85,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         return new YamlWire(Bytes.from(text));
     }
 
-    public static String asText(@NotNull Wire wire) {
+    public static String asText(@NotNull Wire wire) throws InvalidMarshallableException {
         long pos = wire.bytes().readPosition();
         @NotNull Wire tw = Wire.newYamlWireOnHeap();
         wire.copyTo(tw);
@@ -88,6 +93,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         return tw.toString();
     }
 
+    // https://yaml.org/spec/1.2.2/#escaped-characters
     private static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb,
                                                                          char blockQuote) {
         int end = 0;
@@ -136,6 +142,12 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     case '_':
                         ch = 0xA0;
                         break;
+                    case 'L':
+                        ch = 0x2028;
+                        break;
+                    case 'P':
+                        ch = 0x2029;
+                        break;
                     case 'x':
                         ch = (char)
                                 (Character.getNumericValue(sb.charAt(++i)) * 16 +
@@ -167,6 +179,79 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         AppendableUtil.setLength(sb, end);
     }
 
+    static void removeUnderscore(@NotNull StringBuilder s) {
+        int i = 0;
+        for (int j = 0; j < s.length(); j++) {
+            char ch = s.charAt(j);
+            s.setCharAt(i, ch);
+            if (ch != '_')
+                i++;
+        }
+        s.setLength(i);
+    }
+
+    @Nullable
+    static Object readNumberOrTextFrom(char bq, final @Nullable StringBuilder s) {
+        if (leaveUnparsed(bq, s))
+            return s;
+
+        StringBuilder sb = s;
+        // YAML octal notation
+        if (StringUtils.startsWith(s, "0o")) {
+            sb = new StringBuilder(s);
+            sb.deleteCharAt(1);
+        }
+
+        if (s.indexOf("_") >= 0) {
+            sb = new StringBuilder(s);
+            removeUnderscore(sb);
+        }
+
+        String ss = sb.toString();
+        try {
+            return Long.decode(ss);
+        } catch (NumberFormatException fallback) {
+            // fallback
+        }
+        try {
+            return Double.parseDouble(ss);
+        } catch (NumberFormatException fallback) {
+            // fallback
+        }
+        try {
+            return parseDateOrTime(s, ss);
+        } catch (DateTimeParseException fallback) {
+            // fallback
+        }
+        // the original string without underscores removed
+        return s;
+    }
+
+
+    private static boolean leaveUnparsed(char bq, @Nullable StringBuilder s) {
+        return s == null
+                || bq != 0
+                || s.length() < 1
+                || s.length() > 40
+                || "0123456789.+-".indexOf(s.charAt(0)) < 0;
+    }
+
+    private static TemporalAccessor parseDateOrTime(StringBuilder s, String ss) {
+        if (s.length() == 7 && s.charAt(1) == ':') {
+            return LocalTime.parse('0' + ss);
+        }
+        if (s.length() == 8 && s.charAt(2) == ':') {
+            return LocalTime.parse(s);
+        }
+        if (s.length() == 10) {
+            return LocalDate.parse(s);
+        }
+        if (s.length() >= 22) {
+            return ZonedDateTime.parse(s);
+        }
+        throw new DateTimeParseException("Unable to parse date or time", s, 0);
+    }
+
     @Override
     public boolean isBinary() {
         return false;
@@ -186,6 +271,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 () -> newTextMethodWriterInvocationHandler(tClass));
         for (Class aClass : additional)
             builder.addInterface(aClass);
+        useTextDocuments();
         builder.marshallableOut(this);
         return builder.build();
     }
@@ -193,7 +279,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @NotNull
     TextMethodWriterInvocationHandler newTextMethodWriterInvocationHandler(Class... interfaces) {
         for (Class<?> anInterface : interfaces) {
-            Comment c = anInterface.getAnnotation(Comment.class);
+            Comment c = Jvm.findAnnotation(anInterface, Comment.class);
             if (c != null)
                 writeComment(c.value());
         }
@@ -242,6 +328,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         if (readContext == null)
             useBinaryDocuments();
         readContext.start();
+        yt.lineStart(bytes.readPosition());
     }
 
     @NotNull
@@ -289,20 +376,21 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     @Override
-    public void copyTo(@NotNull WireOut wire) {
+    public void copyTo(@NotNull WireOut wire) throws InvalidMarshallableException {
         if (wire instanceof TextWire || wire instanceof YamlWire) {
             final Bytes<?> bytes0 = bytes();
             wire.bytes().write(this.bytes, yt.blockStart(), bytes0.readLimit() - yt.blockStart);
             this.bytes.readPosition(this.bytes.readLimit());
         } else {
-            while (!isEmpty()) {
+            while (!endOfDocument()) {
                 copyOne(wire, true);
                 yt.next();
             }
         }
     }
 
-    private void copyOne(WireOut wire, boolean nested) {
+    private void copyOne(WireOut wire, boolean nested) throws InvalidMarshallableException {
+        ValueOut wireValueOut = wire.getValueOut();
         switch (yt.current()) {
             case NONE:
                 break;
@@ -310,7 +398,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 wire.writeComment(yt.text());
                 break;
             case TAG:
-                wire.getValueOut().typePrefix(yt.text());
+                wireValueOut.typePrefix(yt.text());
                 yt.next();
                 copyOne(wire, true);
                 yt.next();
@@ -321,7 +409,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 break;
             case DIRECTIVES_END:
                 yt.next();
-                while (!isEmpty()) {
+                while (!endOfDocument()) {
                     copyOne(wire, false);
                     yt.next();
                 }
@@ -334,7 +422,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             case MAPPING_START: {
                 if (nested) {
                     yt.next();
-                    wire.getValueOut().marshallable(w -> {
+                    wireValueOut.marshallable(w -> {
                         while (yt.current() == YamlToken.MAPPING_KEY) {
                             copyMappingKey(wire, true);
                             yt.next();
@@ -350,7 +438,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             case SEQUENCE_START: {
                 yt.next();
                 YamlWire yw = this;
-                wire.getValueOut().sequence(w -> {
+                wireValueOut.sequence(w -> {
                     while (yt.current() != YamlToken.SEQUENCE_END) {
                         yw.copyOne(w.wireOut(), true);
                         yw.yt.next();
@@ -359,10 +447,14 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 break;
             }
             case TEXT:
-                wire.getValueOut().text(yt.text());
+                Object o = valueIn.readNumberOrText();
+                if (o instanceof Long)
+                    wireValueOut.int64((long) o);
+                else
+                    wireValueOut.object(o);
                 break;
             case LITERAL:
-                wire.getValueOut().text(yt.text());
+                wireValueOut.text(yt.text());
                 break;
             case ANCHOR:
                 break;
@@ -377,7 +469,21 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
     }
 
-    private void copyMappingKey(WireOut wire, boolean nested) {
+    private boolean endOfDocument() {
+        if (isEmpty())
+            return true;
+        switch (yt.current()) {
+            case STREAM_END:
+            case STREAM_START:
+            case DOCUMENT_END:
+            case NONE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private void copyMappingKey(WireOut wire, boolean nested) throws InvalidMarshallableException {
         yt.next();
         if (yt.current() == YamlToken.MAPPING_KEY)
             yt.next();
@@ -419,12 +525,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     @NotNull
-    private StringBuilder acquireStringBuilder() {
-        StringUtils.setCount(sb, 0);
-        return sb;
-    }
-
-    @NotNull
     protected StringBuilder readField(@NotNull StringBuilder sb) {
         startEventIfTop();
         if (yt.current() == YamlToken.MAPPING_KEY) {
@@ -446,15 +546,25 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
     @Nullable
     @Override
-    public <K> K readEvent(@NotNull Class<K> expectedClass) {
+    public <K> K readEvent(@NotNull Class<K> expectedClass) throws InvalidMarshallableException {
         startEventIfTop();
-        if (yt.current() == YamlToken.MAPPING_KEY) {
-            YamlToken next = yt.next();
-            if (next == YamlToken.MAPPING_KEY) {
-                return readEvent(expectedClass);
-            }
+        switch (yt.current()) {
+            case MAPPING_START:
+                yt.next();
+                assert yt.current() == YamlToken.MAPPING_KEY;
+                // Deliberate fall-through
+            case MAPPING_KEY:
+                YamlToken next = yt.next();
+                if (next == YamlToken.MAPPING_KEY) {
+                    return readEvent(expectedClass);
+                }
 
-            return valueIn.object(expectedClass);
+                K object = valueIn.object(expectedClass);
+                if (object instanceof StringBuilder)
+                    return (K) object.toString();
+                return object;
+            case NONE:
+                return null;
         }
         throw new UnsupportedOperationException(yt.toString());
     }
@@ -473,17 +583,13 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
     }
 
-    @Nullable
-    private <K> K toExpected(Class<K> expectedClass, StringBuilder sb) {
-        return ObjectUtils.convertTo(expectedClass, WireInternal.INTERNER.intern(sb));
-    }
-
     @Override
     public void consumePadding() {
         while (true) {
             switch (yt.current()) {
                 case COMMENT:
-                    commentListener.accept(yt.text());
+                    String text = yt.text();
+                    commentListener.accept(text);
                     // fall through
                 case DIRECTIVE:
                 case DIRECTIVES_END:
@@ -516,41 +622,65 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         YamlKeys keys = yt.keys();
         int count = keys.count();
         if (count > 0) {
-            long pos = yt.lastKeyPosition();
             long[] offsets = keys.offsets();
-            int contextSize = yt.contextSize();
+            if (rereadWire == null) {
+                initRereadWire();
+            }
+            int indent = yt.topContext().indent;
             for (int i = 0; i < count; i++) {
-                yt.revertToContext(contextSize);
-                YamlToken next = yt.rereadAndNext(offsets[i]);
-                assert next == YamlToken.MAPPING_KEY;
-                if (checkForMatch(keyName)) {
+                rereadWire.yt.topContext().indent = indent;
+                long end = bytes.readPosition();
+                long offset = offsets[i];
+                rereadWire.bytes.readPositionRemaining(offset, end - offset);
+                rereadWire.yt.rereadFrom(offset);
+                YamlToken next = rereadWire.yt.next();
+                if (next == YamlToken.MAPPING_START) // indented rather than iin { }
+                    next = rereadWire.yt.next();
+                assert next == YamlToken.MAPPING_KEY : "next: " + next;
+                if (rereadWire.checkForMatch(keyName)) {
                     keys.removeIndex(i);
-                    return valueIn;
+                    return rereadWire.valueIn;
                 }
             }
-            yt.revertToContext(contextSize);
-            bytes.readPosition(pos);
-            yt.next();
+            // Next lines not covered by any tests
         }
-
-        int minIndent = yt.topContext().indent;
+        YamlTokeniser.YTContext yc = yt.topContext();
+        int minIndent = yc.indent;
         // go through remaining keys
         while (yt.current() == YamlToken.MAPPING_KEY) {
-            long lastKeyPosition = yt.lastKeyPosition();
+            long lastKeyPosition = yt.lineStart;
             if (checkForMatch(keyName))
                 return valueIn;
 
-            keys.push(lastKeyPosition);
-            valueIn.consumeAny(minIndent);
+            if (!StringUtils.startsWith(sb, "-"))
+                keys.push(lastKeyPosition);
+            // Avoid consuming '}' but consume to next mapping key
+            valueIn.consumeAny(minIndent >= 0 ? minIndent : Integer.MAX_VALUE);
         }
 
         return defaultValueIn;
     }
 
+    private void initRereadWire() {
+        rereadWire = new YamlWire(bytes.bytesStore().bytesForRead());
+        YamlToken yamlToken;
+        do {
+            yamlToken = rereadWire.yt.next();
+        } while (yamlToken == YamlToken.STREAM_START
+                || yamlToken == YamlToken.DIRECTIVES_END
+                || yamlToken == YamlToken.COMMENT
+                || yamlToken == YamlToken.MAPPING_START);
+    }
+
     public String dumpContext() {
-        Wire yw = Wire.newYamlWireOnHeap();
-        yw.getValueOut().list(yt.contexts, YamlTokeniser.YTContext.class);
-        return yw.toString();
+        ValidatableUtil.startValidateDisabled();
+        try {
+            Wire yw = Wire.newYamlWireOnHeap();
+            yw.getValueOut().list(yt.contexts, YamlTokeniser.YTContext.class);
+            return yw.toString();
+        } finally {
+            ValidatableUtil.endValidateDisabled();
+        }
     }
 
     private boolean checkForMatch(@NotNull String keyName) {
@@ -585,11 +715,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @NotNull
     @Override
     public Wire readComment(@NotNull StringBuilder s) {
-        sb.setLength(0);
+        s.setLength(0);
         if (yt.current() == YamlToken.COMMENT) {
-            // Skip the initial '#'
-            YamlToken next = yt.next();
-            sb.append(yt.text());
+            s.append(yt.text());
+            yt.next();
         }
         return this;
     }
@@ -683,9 +812,12 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @Override
     public void startEvent() {
         consumePadding();
-        if (yt.current() == YamlToken.MAPPING_START) {
-            yt.next(Integer.MAX_VALUE);
-            return;
+        switch (yt.current()) {
+            case MAPPING_START:
+                yt.next(Integer.MAX_VALUE);
+                return;
+            case NONE:
+                return;
         }
         throw new UnsupportedOperationException(yt.toString());
     }
@@ -700,12 +832,15 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @Override
     public boolean isEndEvent() {
         consumePadding();
-        return yt.current() == YamlToken.MAPPING_END;
+        YamlToken current = yt.current();
+        return current == YamlToken.MAPPING_END
+                || current == YamlToken.NONE;
     }
 
     @Override
     public void endEvent() {
-        int minIndent = yt.topContext().indent;
+        YamlTokeniser.YTContext context = yt.topContext();
+        int minIndent = context.indent;
 
         switch (yt.current()) {
             case MAPPING_END:
@@ -713,18 +848,21 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             case NONE:
                 break;
             default:
-                valueIn.consumeAny(minIndent);
+                do {
+                    valueIn.consumeAny(minIndent);
+                } while (yt.current() == YamlToken.COMMENT);
                 break;
         }
         if (yt.current() == YamlToken.NONE) {
             yt.next(Integer.MIN_VALUE);
         } else {
             while (yt.current() == YamlToken.MAPPING_KEY) {
-                yt.next();
                 valueIn.consumeAny(minIndent);
             }
         }
-        if (yt.current() == YamlToken.MAPPING_END || yt.current() == YamlToken.DOCUMENT_END || yt.current() == YamlToken.NONE) {
+        if (yt.current() == YamlToken.MAPPING_END ||
+                yt.current() == YamlToken.DOCUMENT_END ||
+                yt.current() == YamlToken.NONE) {
             yt.next(Integer.MIN_VALUE);
             return;
         }
@@ -755,13 +893,13 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     @Override
-    public boolean readDocument(@Nullable ReadMarshallable metaDataConsumer, @Nullable ReadMarshallable dataConsumer) {
+    public boolean readDocument(@Nullable ReadMarshallable metaDataConsumer, @Nullable ReadMarshallable dataConsumer) throws InvalidMarshallableException {
         valueIn.resetState();
         return super.readDocument(metaDataConsumer, dataConsumer);
     }
 
     @Override
-    public boolean readDocument(long position, @Nullable ReadMarshallable metaDataConsumer, @Nullable ReadMarshallable dataConsumer) {
+    public boolean readDocument(long position, @Nullable ReadMarshallable metaDataConsumer, @Nullable ReadMarshallable dataConsumer) throws InvalidMarshallableException {
         valueIn.resetState();
         return super.readDocument(position, metaDataConsumer, dataConsumer);
     }
@@ -782,6 +920,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public String text() {
             @Nullable CharSequence cs = textTo0(acquireStringBuilder());
+            yt.next();
             return cs == null ? null : WireInternal.INTERNER.intern(cs);
         }
 
@@ -790,6 +929,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         public StringBuilder textTo(@NotNull StringBuilder sb) {
             sb.setLength(0);
             @Nullable CharSequence cs = textTo0(sb);
+            yt.next();
             if (cs == null)
                 return null;
             if (cs != sb) {
@@ -804,9 +944,19 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         public Bytes<?> textTo(@NotNull Bytes<?> bytes) {
             bytes.clear();
             if (yt.current() == YamlToken.TEXT) {
-                bytes.clear();
                 bytes.append(yt.text());
                 yt.next();
+            } else if (yt.current() == YamlToken.TAG) {
+                if (yt.isText(NULL_TAG)) {
+                    yt.next();
+                    yt.next();
+                    return null;
+                } else if (yt.isText(BINARY_TAG)) {
+                    yt.next();
+                    bytes.write((byte[]) decodeBinary(byte[].class));
+                } else {
+                    throw new UnsupportedOperationException(yt.toString());
+                }
             } else {
                 throw new UnsupportedOperationException(yt.toString());
             }
@@ -838,17 +988,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         @Nullable
-        Bytes<?> textTo0(@NotNull Bytes<?> a) {
-            consumePadding();
-            if (yt.current() == YamlToken.TEXT) {
-                a.append(yt.text());
-            } else {
-                throw new UnsupportedOperationException(yt.toString());
-            }
-            return a;
-        }
-
-        @Nullable
         StringBuilder textTo0(@NotNull StringBuilder a) {
             consumePadding();
             if (yt.current() == YamlToken.SEQUENCE_ENTRY)
@@ -857,11 +996,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 a.append(yt.text());
                 if (yt.current() == YamlToken.TEXT)
                     unescape(a, yt.blockQuote());
-                yt.next();
+
             } else if (yt.current() == YamlToken.TAG) {
-                if (yt.isText("!null")) {
+                if (yt.isText(NULL_TAG)) {
                     yt.next();
-                    yt.next();
+
                     return null;
                 }
 
@@ -922,10 +1061,13 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 });
                 if (uncompressed != null) {
                     Bytes<byte[]> bytes = Bytes.wrapForRead(uncompressed);
-                    bytesConsumer.readMarshallable(bytes);
-                    bytes.releaseLast();
+                    try {
+                        bytesConsumer.readMarshallable(bytes);
+                    } finally {
+                        bytes.releaseLast();
+                    }
 
-                } else if (StringUtils.isEqual(sb, "!null")) {
+                } else if (StringUtils.isEqual(sb, NULL_TAG)) {
                     bytesConsumer.readMarshallable(null);
                     yt.next();
 
@@ -935,8 +1077,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             } else {
                 textTo(sb);
                 Bytes<byte[]> bytes = Bytes.wrapForRead(sb.toString().getBytes(ISO_8859_1));
-                bytesConsumer.readMarshallable(bytes);
-                bytes.releaseLast();
+                try {
+                    bytesConsumer.readMarshallable(bytes);
+                } finally {
+                    bytes.releaseLast();
+                }
             }
             return YamlWire.this;
         }
@@ -944,7 +1089,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public byte @Nullable [] bytes(byte[] using) {
             return (byte[]) objectWithInferredType(using, SerializationStrategies.ANY_OBJECT, byte[].class);
-
         }
 
         @NotNull
@@ -1264,19 +1408,59 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             return true;
         }
 
-        public <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0) {
+        public <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0) throws InvalidMarshallableException {
             return sequence(list, buffer, bufferAdd);
         }
 
         @Override
-        public <T> boolean sequence(@NotNull List<T> list, @NotNull List<T> buffer, @NotNull Supplier<T> bufferAdd) {
-            throw new UnsupportedOperationException(yt.toString());
+        public <T> boolean sequence(@NotNull List<T> list, @NotNull List<T> buffer, @NotNull Supplier<T> bufferAdd) throws InvalidMarshallableException {
+            consumePadding();
+            if (isNull()) {
+                return false;
+            }
+            list.clear();
+            if (yt.current() == YamlToken.SEQUENCE_START) {
+                int minIndent = yt.secondTopContext().indent;
+                yt.next(Integer.MAX_VALUE);
+
+                while (hasNextSequenceItem()) {
+                    if (buffer.size() <= list.size())
+                        buffer.add(bufferAdd.get());
+                    Object using = buffer.get(list.size());
+                    list.add((T) valueIn.object(using, using.getClass()));
+                }
+
+                if (yt.current() == YamlToken.NONE)
+                    yt.next(minIndent);
+                if (yt.current() == YamlToken.SEQUENCE_END)
+                    yt.next(minIndent);
+
+            } else {
+                throw new UnsupportedOperationException(yt.toString());
+            }
+            return true;
         }
 
         @NotNull
         @Override
-        public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) {
-            throw new UnsupportedOperationException(yt.toString());
+        public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) throws InvalidMarshallableException {
+            consumePadding();
+            assert yt.current() == YamlToken.SEQUENCE_START;
+            yt.next(Integer.MIN_VALUE);
+            while (true) {
+                switch (yt.current()) {
+                    case SEQUENCE_ENTRY:
+                        tReader.accept(t, kls, YamlWire.this.valueIn);
+                        continue;
+
+                    case SEQUENCE_END:
+                        yt.next(Integer.MIN_VALUE);
+                        return YamlWire.this;
+
+                    default:
+                        throw new IllegalStateException(yt.toString());
+                }
+            }
         }
 
         @Override
@@ -1302,9 +1486,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         public boolean hasNextSequenceItem() {
             consumePadding();
             switch (yt.current()) {
+                // Perhaps should be negative selection instead of positive
                 case SEQUENCE_START:
-                case TEXT:
                 case SEQUENCE_ENTRY:
+                    // Allows scalar value to be converted into singleton array
+                case TEXT:
                     return true;
             }
             return false;
@@ -1395,7 +1581,20 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer)
                 throws IORuntimeException, BufferUnderflowException {
-            throw new UnsupportedOperationException(yt.toString());
+            if (yt.current() != YamlToken.TAG)
+                throw new UnsupportedOperationException(yt.toString());
+
+            if (!yt.isText("type"))
+                throw new UnsupportedOperationException(yt.text());
+
+            if (yt.next() != YamlToken.TEXT)
+                throw new UnsupportedOperationException(yt.toString());
+
+            StringBuilder stringBuilder = acquireStringBuilder();
+            textTo(stringBuilder);
+            classNameConsumer.accept(t, stringBuilder);
+
+            return YamlWire.this;
         }
 
         @Override
@@ -1404,9 +1603,13 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             if (yt.current() == YamlToken.TAG) {
                 if (yt.text().equals("type")) {
                     if (yt.next() == YamlToken.TEXT) {
-                        Class aClass = classLookup().forName(yt.text());
+                        String text = yt.text();
                         yt.next();
-                        return aClass;
+                        try {
+                            return classLookup().forName(text);
+                        } catch (ClassNotFoundRuntimeException e) {
+                            return unresolvedHandler.apply(text, e.getCause());
+                        }
                     }
                 }
             }
@@ -1416,7 +1619,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Nullable
         @Override
         public Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy)
-                throws BufferUnderflowException, IORuntimeException {
+                throws BufferUnderflowException, IORuntimeException, InvalidMarshallableException {
             if (isNull()) {
                 consumeAny(yt.topContext().indent);
                 return null;
@@ -1429,8 +1632,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             }
             switch (yt.current()) {
                 case TAG:
-                    typePrefix(null, (o, x) -> { /* sets acquireStringBuilder(); */});
-                    break;
+                    Class clazz = typePrefix();
+                    if (clazz != object.getClass())
+                        object = ObjectUtils.newInstance(clazz);
+                    return marshallable(object, strategy);
 
                 case SEQUENCE_START:
                     Jvm.warn().on(getClass(), "Expected a {} but was blank for type " + object.getClass());
@@ -1501,14 +1706,14 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
         @Override
         @Nullable
-        public <T> T typedMarshallable() {
+        public <T> T typedMarshallable() throws InvalidMarshallableException {
             return (T) objectWithInferredType(null, SerializationStrategies.ANY_NESTED, null);
         }
 
         @Nullable
         private <K, V> Map<K, V> map(@NotNull final Class<K> kClass,
                                      @NotNull final Class<V> vClass,
-                                     @Nullable Map<K, V> usingMap) {
+                                     @Nullable Map<K, V> usingMap) throws InvalidMarshallableException {
             consumePadding();
             if (usingMap == null)
                 usingMap = new LinkedHashMap<>();
@@ -1529,10 +1734,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         @Nullable
-        private <K, V> Map<K, V> typedMap(@NotNull Class<K> kClazz, @NotNull Class<V> vClass, @NotNull Map<K, V> usingMap, @NotNull StringBuilder sb) {
+        private <K, V> Map<K, V> typedMap(@NotNull Class<K> kClazz, @NotNull Class<V> vClass, @NotNull Map<K, V> usingMap, @NotNull StringBuilder sb) throws InvalidMarshallableException {
             yt.text(sb);
             yt.next();
-            if (("!null").contentEquals(sb)) {
+            if (NULL_TAG.contentEquals(sb)) {
                 text();
                 return null;
 
@@ -1607,9 +1812,12 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public long int64() {
             consumePadding();
+            // Fix an issue in MethodReaderWithHistoryTest
+            if (yt.current() == YamlToken.SEQUENCE_ENTRY)
+                yt.next();
             valueIn.skipType();
             if (yt.current() != YamlToken.TEXT) {
-                Jvm.warn().on(getClass(), "Unable to read " + valueIn.object() + " as a long.");
+                Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a long.");
                 return 0;
             }
 
@@ -1619,9 +1827,12 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public double float64() {
             consumePadding();
+            // Fix an issue in MethodReaderWithHistoryTest
+            if (yt.current() == YamlToken.SEQUENCE_ENTRY)
+                yt.next();
             valueIn.skipType();
             if (yt.current() != YamlToken.TEXT) {
-                Jvm.warn().on(getClass(), "Unable to read " + valueIn.object() + " as a long.");
+                Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a double.");
                 return 0;
             }
             return getADouble();
@@ -1653,7 +1864,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         public boolean isNull() {
             consumePadding();
 
-            if (yt.current() == YamlToken.TAG && yt.isText("!null")) {
+            if (yt.current() == YamlToken.TAG && yt.isText(NULL_TAG)) {
                 consumeAny(0);
                 return true;
             }
@@ -1662,7 +1873,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         @Override
-        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class type) {
+        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class type) throws InvalidMarshallableException {
             consumePadding();
             if (yt.current() == YamlToken.SEQUENCE_ENTRY)
                 yt.next();
@@ -1672,7 +1883,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         @Nullable
-        Object objectWithInferredType0(Object using, @NotNull SerializationStrategy strategy, Class type) {
+        Object objectWithInferredType0(Object using, @NotNull SerializationStrategy strategy, Class type) throws InvalidMarshallableException {
             boolean bestEffort = type != null;
             if (yt.current() == YamlToken.TAG) {
                 Class aClass = typePrefix();
@@ -1696,6 +1907,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 case TEXT:
                 case LITERAL:
                     Object o = valueIn.readNumberOrText();
+                    yt.next();
+                    if (o instanceof StringBuilder)
+                        o = o.toString();
                     return ObjectUtils.convertTo(type, o);
 
                 case ANCHOR:
@@ -1737,55 +1951,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Nullable
         protected Object readNumberOrText() {
             char bq = yt.blockQuote();
-            @Nullable String s = text();
+            @Nullable StringBuilder s = textTo0(acquireStringBuilder());
             if (yt.current() == YamlToken.LITERAL)
                 return s;
-            if (s == null
-                    || bq != 0
-                    || s.length() < 1
-                    || s.length() > 40
-                    || "0123456789.+-".indexOf(s.charAt(0)) < 0)
-                return s;
-
-            String ss = s;
-            if (s.indexOf('_') >= 0)
-                ss = ss.replace("_", "");
-
-            // YAML octal notation
-            if (s.startsWith("0o"))
-                ss = "0" + s.substring(2);
-
-            try {
-                return Long.decode(ss);
-            } catch (NumberFormatException fallback) {
-                // fallback
-            }
-            try {
-                return Double.parseDouble(ss);
-            } catch (NumberFormatException fallback) {
-                // fallback
-            }
-            try {
-                if (s.length() == 7 && s.charAt(1) == ':')
-                    return LocalTime.parse('0' + s);
-                if (s.length() == 8 && s.charAt(2) == ':')
-                    return LocalTime.parse(s);
-            } catch (DateTimeParseException fallback) {
-                // fallback
-            }
-            try {
-                if (s.length() == 10)
-                    return LocalDate.parse(s);
-            } catch (DateTimeParseException fallback) {
-                // fallback
-            }
-            try {
-                if (s.length() >= 22)
-                    return ZonedDateTime.parse(s);
-            } catch (DateTimeParseException fallback) {
-                // fallback
-            }
-            return s;
+            return readNumberOrTextFrom(bq, s);
         }
 
         @NotNull
@@ -1819,7 +1988,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             });
         }
 
-        private Object decodeBinary(Class type) {
+        private Object decodeBinary(Class type) throws InvalidMarshallableException {
             Object o = objectWithInferredType(null, SerializationStrategies.ANY_SCALAR, String.class);
             byte[] decoded = Base64.getDecoder().decode(o == null ? "" : o.toString().replaceAll("\\s", ""));
 
@@ -1848,6 +2017,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         public String toString() {
             return YamlWire.this.toString();
         }
+
     }
 
     @Override

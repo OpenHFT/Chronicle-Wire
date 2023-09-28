@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.IntArrayValues;
 import net.openhft.chronicle.core.values.IntValue;
@@ -57,7 +58,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
     }
 
     @Override
-    public void copyTo(@NotNull WireOut wire) {
+    public void copyTo(@NotNull WireOut wire) throws InvalidMarshallableException {
         wireAcquisition.acquireWire().copyTo(wire);
     }
 
@@ -81,7 +82,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
 
     @Nullable
     @Override
-    public <K> K readEvent(Class<K> expectedClass) {
+    public <K> K readEvent(Class<K> expectedClass) throws InvalidMarshallableException {
         return wireAcquisition.acquireWire().readEvent(expectedClass);
     }
 
@@ -170,7 +171,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
     }
 
     @Override
-    public ValueOut writeEvent(Class expectedType, Object eventKey) {
+    public ValueOut writeEvent(Class expectedType, Object eventKey) throws InvalidMarshallableException {
         return wireAcquisition.acquireWire().writeEvent(expectedType, eventKey);
     }
 

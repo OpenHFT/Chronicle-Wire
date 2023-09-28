@@ -17,7 +17,9 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+
 @FunctionalInterface
 public interface WireParselet {
-    void accept(CharSequence s, ValueIn in);
+    void accept(CharSequence s, ValueIn in) throws InvalidMarshallableException;
 }

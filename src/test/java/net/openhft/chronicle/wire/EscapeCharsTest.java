@@ -17,8 +17,11 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -26,11 +29,8 @@ import org.junit.runners.Parameterized;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
-import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -39,6 +39,12 @@ public class EscapeCharsTest extends WireTestCommon {
     @NotNull
     final String chs;
     private final Future future;
+
+    @Override
+    @Before
+    public void threadDump() {
+        super.threadDump();
+    }
 
     public EscapeCharsTest(@NotNull String chs, Future future) {
         this.chs = chs;
@@ -49,34 +55,41 @@ public class EscapeCharsTest extends WireTestCommon {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() {
         @NotNull List<Object[]> list = new ArrayList<>();
-        for (char i = 0; i < 300; i += 2) {
-            char finalI = i;
+        ExecutorService es = Jvm.isDebug() ? Executors.newSingleThreadExecutor() : ForkJoinPool.commonPool();
+        for (char i = 0; i <= 300; i += 4) {
+            if (i == 300)
+                i = 0x2028;
             char ch1 = (char) (i + 1);
-            list.add(new Object[]{"" + i + ch1, ForkJoinPool.commonPool().submit(() -> testEscaped(finalI))});
+            char ch2 = (char) (i + 2);
+            char ch3 = (char) (i + 3);
+            Wire json = WireType.JSON_ONLY.apply(Bytes.allocateElasticDirect());
+            Wire text = WireType.TEXT.apply(Bytes.allocateElasticDirect());
+            Wire yaml = WireType.YAML_ONLY.apply(Bytes.allocateElasticDirect());
+
+            String str = "" + i + ch1 + ch2 + ch3;
+            String desc = "(" + (int) i + ") " + str;
+            list.add(new Object[]{"JSON " + desc, es.submit(() -> testEscaped(str, json))});
+            list.add(new Object[]{"TEXT " + desc, es.submit(() -> testEscaped(str, text))});
+            list.add(new Object[]{"YAML " + desc, es.submit(() -> testEscaped(str, yaml))});
         }
         return list;
     }
 
-    static void testEscaped(char ch) {
-        char ch1 = (char) (ch + 1);
-        @NotNull Wire wire = createWire();
-        wire.write("" + ch + ch1).text("" + ch + ch1);
-        wire.write("" + ch1 + ch).text("" + ch1 + ch);
+    static void testEscaped(String str, @NotNull Wire wire) {
+        wire.reset();
+        wire.write(str)
+                .text(str);
+        String str2 = str.substring(2) + str.substring(0, 2);
+        wire.write(str2)
+                .text(str2);
 
         @NotNull StringBuilder sb = new StringBuilder();
         @Nullable String s = wire.read(sb).text();
-        assertEquals("key " + ch + ch1, "" + ch + ch1, sb.toString());
-        assertEquals("value " + ch1 + ch, "" + ch + ch1, s);
+        assertEquals("key " + str, str, sb.toString());
+        assertEquals("value " + str, str, s);
         @Nullable String ss = wire.read(sb).text();
-        assertEquals("key " + ch1 + ch, "" + ch1 + ch, sb.toString());
-        assertEquals("value " + ch1 + ch, "" + ch1 + ch, ss);
-
-        wire.bytes().releaseLast();
-    }
-
-    @NotNull
-    static Wire createWire() {
-        return WireType.TEXT.apply(nativeBytes());
+        assertEquals("key " + str2, str2, sb.toString());
+        assertEquals("value " + str2, str2, ss);
     }
 
     @Test

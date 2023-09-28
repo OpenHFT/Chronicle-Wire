@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 public class GenerateJsonSchemaMain {
     final Map<Class<?>, String> aliases = new LinkedHashMap<>();
     final Map<Class<?>, String> definitions = new LinkedHashMap<>();
-    final Map<String, String> events = new LinkedHashMap<>();
+    final Map<String, String> events = new TreeMap<>();
     final Set<Class<?>> eventClasses = new LinkedHashSet<>();
 
     public GenerateJsonSchemaMain() {
@@ -49,6 +49,11 @@ public class GenerateJsonSchemaMain {
     }
 
     public static void main(String... args) throws ClassNotFoundException {
+        final String json = main0(args);
+        System.out.println(json);
+    }
+
+    static String main0(String... args) throws ClassNotFoundException {
         Set<Class<?>> interfaces = new LinkedHashSet<>();
         for (String arg : args) {
             interfaces.add(Class.forName(arg));
@@ -57,7 +62,8 @@ public class GenerateJsonSchemaMain {
         for (Class<?> aClass : interfaces) {
             g.generateEventSchemaFor(aClass);
         }
-        System.out.println(g.asJson());
+        final String json = g.asJson();
+        return json;
     }
 
     String asJson() {
@@ -169,7 +175,7 @@ public class GenerateJsonSchemaMain {
             sb.append("\n" +
                     "],\n");
         }
-        Comment comment = type.getAnnotation(Comment.class);
+        Comment comment = Jvm.findAnnotation(type, Comment.class);
         if (comment != null)
             sb.append("\"description\": \"" + comment.value() + "\",\n");
 

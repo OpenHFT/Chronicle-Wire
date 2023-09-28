@@ -24,7 +24,6 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.threads.ThreadDump;
-import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.channel.ChronicleChannelSupplier;

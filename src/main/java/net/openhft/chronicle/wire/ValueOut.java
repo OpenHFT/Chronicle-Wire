@@ -24,6 +24,7 @@ import net.openhft.chronicle.bytes.WriteBytesMarshallable;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import net.openhft.chronicle.core.util.ObjectUtils;
@@ -66,107 +67,191 @@ public interface ValueOut {
     }
 
     /**
-     * scalar data types
+     * Write a boolean value.
      */
     @NotNull
     WireOut bool(Boolean flag);
 
+    /**
+     * Write a text value.
+     */
     @NotNull
     WireOut text(@Nullable CharSequence s);
 
+    /**
+     * Write a text value. Delegates to {@link #text(CharSequence)}.
+     */
     @NotNull
     default WireOut text(@Nullable String s) {
         return text((CharSequence) s);
     }
 
+    /**
+     * Write a null value.
+     */
     @NotNull
     default WireOut nu11() {
         return text((CharSequence) null);
     }
 
+    /**
+     * Write a text value comprised of a single character.
+     */
     @NotNull
     default WireOut text(char c) {
         return text(WireInternal.acquireStringBuilderForValueOut().append(c));
     }
 
+    /**
+     * Write a character value. Delegates to {@link #text(CharSequence)}.
+     */
     @NotNull
     default WireOut character(char c) {
         return text(c);
     }
 
+    /**
+     * Write a text value of {@link BytesStore} contents.
+     */
     @NotNull
     default WireOut text(@Nullable BytesStore s) {
         return text((CharSequence) s);
     }
 
+    /**
+     * Write a signed 8-bit integer value. Delegates to {@link #int8(byte)}.
+     *
+     * @throws ArithmeticException if supplied argument does not fit in unsigned 8-bit.
+     */
     @NotNull
     default WireOut int8(long x) {
         return int8(Maths.toInt8(x));
     }
 
+    /**
+     * Write a signed 8-bit integer value.
+     */
     @NotNull
     WireOut int8(byte i8);
 
+    /**
+     * Write a byte sequence value from {@link BytesStore}.
+     */
     @NotNull
     WireOut bytes(@Nullable BytesStore fromBytes);
 
+    /**
+     * Write a byte sequence value from {@link BytesStore} as a literal, if supported by wire type.
+     * Defaults to {@link #bytes(BytesStore)}.
+     */
     @NotNull
     default WireOut bytesLiteral(@Nullable BytesStore fromBytes) {
         return bytes(fromBytes);
     }
 
+    /**
+     * Write a typed bytes sequence value from {@link BytesStore}.
+     */
     @NotNull
     WireOut bytes(String type, @Nullable BytesStore fromBytes);
 
+    /**
+     * Write a raw bytes sequence value. Behavior is implementation-dependent.
+     */
     @NotNull
     WireOut rawBytes(byte[] value);
 
+    /**
+     * Write a raw text value. Behavior is implementation-dependent. Defaults to {@link #text(CharSequence)}.
+     */
     @NotNull
     default WireOut rawText(CharSequence value) {
         return text(value);
     }
 
+    /**
+     * Writes value length if supported by implementation.
+     */
     @NotNull
     ValueOut writeLength(long remaining);
 
+    /**
+     * Write a byte sequence value.
+     */
     @NotNull
     WireOut bytes(byte[] fromBytes);
 
+    /**
+     * Write a typed byte sequence value.
+     */
     @NotNull
     WireOut bytes(String type, byte[] fromBytes);
 
+    /**
+     * Write an unsigned 8-bit integer value.
+     *
+     * @throws ArithmeticException if supplied argument does not fit in unsigned 8-bit.
+     */
     @NotNull
     default WireOut uint8(int x) {
         return uint8checked(Maths.toUInt8(x & 0xFF));
     }
 
+    /**
+     * Write an unsigned 8-bit integer value. The argument is assumed to be of correct bounds.
+     */
     @NotNull
     WireOut uint8checked(int u8);
 
+    /**
+     * Write a signed 16-bit integer value.
+     *
+     * @throws ArithmeticException if supplied argument does not fit in signed 16-bit.
+     */
     @NotNull
     default WireOut int16(long x) {
         return int16(Maths.toInt16(x));
     }
 
+    /**
+     * Write a signed 16-bit integer value. The argument is assumed to be of correct bounds.
+     */
     @NotNull
     WireOut int16(short i16);
 
+    /**
+     * Write an unsigned 16-bit integer value. Delegates to {@link #uint16checked(int)}.
+     */
     @NotNull
     default WireOut uint16(long x) {
         return uint16checked((int) x);
     }
 
+    /**
+     * Write an unsigned 16-bit integer value. The argument is assumed to be of correct bounds.
+     */
     @NotNull
     WireOut uint16checked(int u16);
 
+    /**
+     * Write a single Java 16-bit Unicode codepoint. Behavior is implementation-dependent.
+     */
     @NotNull
     WireOut utf8(int codepoint);
 
+    /**
+     * Write a signed 32-bit integer value.
+     *
+     * @throws ArithmeticException if supplied argument does not fit in signed 32-bit.
+     */
     @NotNull
     default WireOut int32(long x) {
         return int32(Maths.toInt32(x));
     }
 
+    /**
+     * Write a signed 32-bit integer value. The argument is assumed to be of correct bounds.
+     */
     @NotNull
     WireOut int32(int i32);
 
@@ -175,14 +260,23 @@ public interface ValueOut {
         return int32(i32);
     }
 
+    /**
+     * Write an unsigned 32-bit integer value. Delegates to {@link #uint32checked(long)}.
+     */
     @NotNull
     default WireOut uint32(long x) {
         return uint32checked(x);
     }
 
+    /**
+     * Write an unsigned 32-bit integer value. The argument is assumed to be of correct bounds.
+     */
     @NotNull
     WireOut uint32checked(long u32);
 
+    /**
+     * Write a signed 64-bit integer value.
+     */
     @NotNull
     WireOut int64(long i64);
 
@@ -194,18 +288,30 @@ public interface ValueOut {
     @NotNull
     WireOut int128forBinding(long i64x0, long i64x1, TwoLongValue value);
 
+    /**
+     * Write a 64-bit integer as a hex value, if supported by wire type.
+     */
     @NotNull
     WireOut int64_0x(long i64);
 
     @NotNull
     WireOut int64array(long capacity);
 
+    /**
+     * Write a 64-bit integer sequence value.
+     */
     @NotNull
     WireOut int64array(long capacity, LongArrayValues values);
 
+    /**
+     * Write a 32-bit float value.
+     */
     @NotNull
     WireOut float32(float f);
 
+    /**
+     * Write a 64-bit float (double) value.
+     */
     @NotNull
     WireOut float64(double d);
 
@@ -219,21 +325,39 @@ public interface ValueOut {
         return float64(d);
     }
 
+    /**
+     * Write a time value.
+     */
     @NotNull
     WireOut time(LocalTime localTime);
 
+    /**
+     * Write a date time value with time zone.
+     */
     @NotNull
     WireOut zonedDateTime(ZonedDateTime zonedDateTime);
 
+    /**
+     * Write a date value.
+     */
     @NotNull
     WireOut date(LocalDate localDate);
 
+    /**
+     * Write a date time value.
+     */
     @NotNull
     WireOut dateTime(LocalDateTime localDateTime);
 
+    /**
+     * Write a type prefix for a value.
+     */
     @NotNull
     ValueOut typePrefix(CharSequence typeName);
 
+    /**
+     * Write a type prefix for a value of a specified {@link Class}.
+     */
     @NotNull
     default ValueOut typePrefix(Class type) {
         return type == null ? this : typePrefix(classLookup().nameFor(type));
@@ -241,12 +365,18 @@ public interface ValueOut {
 
     ClassLookup classLookup();
 
+    /**
+     * Write a type literal value of a specified {@link Class}.
+     */
     @NotNull
     default WireOut typeLiteral(@Nullable Class type) {
         return type == null ? nu11()
                 : typeLiteral((t, b) -> b.appendUtf8(classLookup().nameFor(t)), type);
     }
 
+    /**
+     * Write a type literal value of a specified {@link Type}.
+     */
     @NotNull
     default WireOut typeLiteral(@Nullable Type type) {
         return type == null ? nu11()
@@ -254,12 +384,21 @@ public interface ValueOut {
                 : typeLiteral(type.getTypeName());
     }
 
+    /**
+     * Write a type literal value.
+     */
     @NotNull
     WireOut typeLiteral(@Nullable CharSequence type);
 
+    /**
+     * Write a type literal value using the specified type translator.
+     */
     @NotNull
     WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class type);
 
+    /**
+     * Write a UUID value.
+     */
     @NotNull
     WireOut uuid(UUID uuid);
 
@@ -283,11 +422,17 @@ public interface ValueOut {
     @NotNull
     WireOut boolForBinding(boolean value, @NotNull BooleanValue longValue);
 
+    /**
+     * Write a sequence value.
+     */
     @NotNull
     default WireOut sequence(WriteValue writer) {
         return sequence(writer, WriteValue::writeValue);
     }
 
+    /**
+     * Write a sequence value from {@link Iterator}.
+     */
     @NotNull
     default <T> WireOut sequence(Iterable<T> t) {
         final Class<?> typePrefix;
@@ -313,10 +458,19 @@ public interface ValueOut {
         return result;
     }
 
+    /**
+     * Write a sequence value using the provided writer.
+     */
     @NotNull <T> WireOut sequence(T t, BiConsumer<T, ValueOut> writer);
 
-    @NotNull <T, K> WireOut sequence(T t, K kls, TriConsumer<T, K, ValueOut> writer);
+    /**
+     * Write a sequence value using the provided parametrized writer.
+     */
+    @NotNull <T, K> WireOut sequence(T t, K param, TriConsumer<T, K, ValueOut> writer) throws InvalidMarshallableException;
 
+    /**
+     * Write a sequence value of a specified length.
+     */
     default <T> WireOut sequenceWithLength(T t, int length, ObjectIntObjectConsumer<T, ValueOut> writer) {
         boolean b = swapLeaf(true);
         WireOut sequence = sequence(t, length, writer::accept);
@@ -324,6 +478,9 @@ public interface ValueOut {
         return sequence;
     }
 
+    /**
+     * Write an array of bytes sequences of a specified length.
+     */
     default WireOut array(Bytes[] array, int length) {
         return sequenceWithLength(array, length, (a, len, out) -> {
             for (int i = 0; i < len; i++)
@@ -331,6 +488,9 @@ public interface ValueOut {
         });
     }
 
+    /**
+     * Write an array of doubles of a specified length.
+     */
     default WireOut array(double[] array, int length) {
         return sequenceWithLength(array, length, (a, len, out) -> {
             for (int i = 0; i < len; i++)
@@ -356,6 +516,9 @@ public interface ValueOut {
         });
     }
 
+    /**
+     * Write an array of booleans of a specified length.
+     */
     default WireOut array(boolean[] array, int length) {
         return sequenceWithLength(array, length, (a, len, out) -> {
             for (int i = 0; i < len; i++)
@@ -363,6 +526,9 @@ public interface ValueOut {
         });
     }
 
+    /**
+     * Write an array of longs of a specified length.
+     */
     default WireOut array(long[] array, int length) {
         return sequenceWithLength(array, length, (a, len, out) -> {
             for (int i = 0; i < len; i++)
@@ -380,6 +546,9 @@ public interface ValueOut {
         });
     }
 
+    /**
+     * Write an array of ints of a specified length.
+     */
     default WireOut array(int[] array, int length) {
         return sequenceWithLength(array, length, (a, len, out) -> {
             for (int i = 0; i < len; i++)
@@ -387,6 +556,9 @@ public interface ValueOut {
         });
     }
 
+    /**
+     * Write an array of bytes of a specified length.
+     */
     default WireOut array(byte[] array, int length) {
         return sequenceWithLength(array, length, (a, len, out) -> {
             for (int i = 0; i < len; i++)
@@ -394,6 +566,9 @@ public interface ValueOut {
         });
     }
 
+    /**
+     * Write an array of specified type objects.
+     */
     @NotNull
     default WireOut array(@NotNull WriteValue writer, @NotNull Class arrayType) {
         if (arrayType == String[].class) {
@@ -404,11 +579,18 @@ public interface ValueOut {
         return sequence(writer);
     }
 
-    @NotNull
-    WireOut marshallable(WriteMarshallable object);
 
+    /**
+     * Write a {@link WriteMarshallable} value.
+     */
     @NotNull
-    WireOut marshallable(Serializable object);
+    WireOut marshallable(WriteMarshallable object) throws InvalidMarshallableException;
+
+    /**
+     * Write a {@link Serializable} value.
+     */
+    @NotNull
+    WireOut marshallable(Serializable object) throws InvalidMarshallableException;
 
     /**
      * writes the contents of the map to wire
@@ -418,20 +600,21 @@ public interface ValueOut {
      * @return throws IllegalArgumentException  If the type of the map is not one of those listed above
      */
     @NotNull
-    WireOut map(Map map);
+    WireOut map(Map map) throws InvalidMarshallableException;
 
     default boolean swapLeaf(boolean isLeaf) {
         return false;
     }
 
     /**
-     * To be used when you know it is a typed marshallable object. e.g. an Enum is not, it's a scalar. If you are not sure, use the object(x) method.
+     * To be used when you know it is a typed marshallable object. e.g. an Enum is not, it's a scalar.
+     * If you are not sure, use the {@link #object(Object)} method.
      *
      * @param marshallable to write
      * @return the original wire
      */
     @NotNull
-    default WireOut typedMarshallable(@Nullable WriteMarshallable marshallable) {
+    default WireOut typedMarshallable(@Nullable WriteMarshallable marshallable) throws InvalidMarshallableException {
         if (marshallable == null)
             return nu11();
         String typeName = Wires.typeNameFor(classLookup(), marshallable);
@@ -447,8 +630,13 @@ public interface ValueOut {
 
     }
 
+    /**
+     * Write a {@link Serializable} value.
+     * To be used when you know it is a typed serializable object.
+     * If you are not sure, use the {@link #object(Object)} method.
+     */
     @NotNull
-    default WireOut typedMarshallable(@Nullable Serializable object) {
+    default WireOut typedMarshallable(@Nullable Serializable object) throws InvalidMarshallableException {
         if (object == null)
             return nu11();
 
@@ -482,34 +670,52 @@ public interface ValueOut {
         }
     }
 
+    /**
+     * Write a {@link WriteMarshallable} value, prepending it with specified type prefix.
+     */
     @NotNull
-    default WireOut typedMarshallable(CharSequence typeName, WriteMarshallable object) {
+    default WireOut typedMarshallable(CharSequence typeName, WriteMarshallable object) throws InvalidMarshallableException {
         typePrefix(typeName);
         return marshallable(object);
     }
 
+    /**
+     * Write an enum value.
+     */
     @NotNull
     default <E extends Enum<E>> WireOut asEnum(@Nullable E e) {
         return text(e == null ? null : e.name());
     }
 
+    /**
+     * Write a set (collection) value.
+     */
     @NotNull
-    default <V> WireOut set(Set<V> coll) {
+    default <V> WireOut set(Set<V> coll) throws InvalidMarshallableException {
         return set(coll, null);
     }
 
+    /**
+     * Write a set containing specified type of entries.
+     */
     @NotNull
-    default <V> WireOut set(Set<V> coll, Class<V> assumedClass) {
+    default <V> WireOut set(Set<V> coll, Class<V> assumedClass) throws InvalidMarshallableException {
         return collection(coll, assumedClass);
     }
 
+    /**
+     * Write a list (collection) value.
+     */
     @NotNull
-    default <V> WireOut list(List<V> coll) {
+    default <V> WireOut list(List<V> coll) throws InvalidMarshallableException {
         return list(coll, null);
     }
 
+    /**
+     * Write a list containing specified type of entries.
+     */
     @NotNull
-    default <V> WireOut list(List<V> coll, Class<V> assumedClass) {
+    default <V> WireOut list(List<V> coll, Class<V> assumedClass) throws InvalidMarshallableException {
         sequence(coll, assumedClass, (s, kls, out) -> {
             int size = s.size();
             //noinspection ForLoopReplaceableByForEach
@@ -522,8 +728,11 @@ public interface ValueOut {
         return wireOut();
     }
 
+    /**
+     * Write a collection containing specified type of entries.
+     */
     @NotNull
-    default <V> WireOut collection(Collection<V> coll, Class<V> assumedClass) {
+    default <V> WireOut collection(Collection<V> coll, Class<V> assumedClass) throws InvalidMarshallableException {
         sequence(coll, assumedClass, (s, kls, out) -> {
             for (V v : s) {
                 object(kls, v);
@@ -532,8 +741,11 @@ public interface ValueOut {
         return wireOut();
     }
 
+    /**
+     * Write an object value of specified type.
+     */
     @NotNull
-    default <V> WireOut object(@NotNull Class<V> expectedType, V v) {
+    default <V> WireOut object(@NotNull Class<V> expectedType, V v) throws InvalidMarshallableException {
         Class<?> vClass = v == null ? void.class : v.getClass();
         if (v instanceof WriteMarshallable && !isAnEnum(v))
             if (ObjectUtils.matchingClass(expectedType, vClass)) {
@@ -548,13 +760,19 @@ public interface ValueOut {
         return wireOut();
     }
 
+    /**
+     * Write a map.
+     */
     @NotNull
-    default <K, V> WireOut marshallable(Map<K, V> map) {
+    default <K, V> WireOut marshallable(Map<K, V> map) throws InvalidMarshallableException {
         return marshallable(map, (Class) Object.class, (Class) Object.class, true);
     }
 
+    /**
+     * Write a map containing specified key and value typed objects.
+     */
     @NotNull
-    default <K, V> WireOut marshallable(@Nullable Map<K, V> map, @NotNull Class<K> kClass, @NotNull Class<V> vClass, boolean leaf) {
+    default <K, V> WireOut marshallable(@Nullable Map<K, V> map, @NotNull Class<K> kClass, @NotNull Class<V> vClass, boolean leaf) throws InvalidMarshallableException {
         if (map == null) {
             nu11();
             return wireOut();
@@ -566,8 +784,11 @@ public interface ValueOut {
         return wireOut();
     }
 
+    /**
+     * Write an object value.
+     */
     @NotNull
-    default WireOut object(@Nullable Object value) {
+    default WireOut object(@Nullable Object value) throws InvalidMarshallableException {
         if (value == null)
             return nu11();
         // look for exact matches
@@ -611,6 +832,8 @@ public interface ValueOut {
                 return bool(((AtomicBoolean) value).get());
             case "java.lang.String":
                 return text((String) value);
+            case "java.lang.StringBuilder":
+                return text((StringBuilder) value);
             case "java.lang.Byte":
                 return fixedInt8((byte) value);
             case "java.lang.Boolean":
@@ -787,7 +1010,7 @@ public interface ValueOut {
         }
     }
 
-    default WireOut bytesMarshallable(WriteBytesMarshallable value) {
+    default WireOut bytesMarshallable(WriteBytesMarshallable value) throws InvalidMarshallableException {
         throw new UnsupportedOperationException();
     }
 
@@ -802,38 +1025,59 @@ public interface ValueOut {
         return this;
     }
 
+    /**
+     * Write a type-prefixed float value.
+     */
     @NotNull
     default WireOut fixedFloat32(float value) {
         return typePrefix(float.class).float32(value);
     }
 
+    /**
+     * Write a type-prefixed signed 8-bit value.
+     */
     @NotNull
     default WireOut fixedInt8(byte value) {
         return typePrefix(byte.class).int8(value);
     }
 
+    /**
+     * Write a type-prefixed signed 16-bit value.
+     */
     @NotNull
     default WireOut fixedInt16(short value) {
         return typePrefix(short.class).int16(value);
     }
 
+    /**
+     * Write a type-prefixed signed 32-bit value.
+     */
     @NotNull
     default WireOut fixedInt32(int value) {
         return typePrefix(int.class).int32(value);
     }
 
+    /**
+     * Write a type-prefixed double value.
+     */
     @NotNull
     default WireOut fixedFloat64(double value) {
         return float64(value);
     }
 
+    /**
+     * Write a type-prefixed signed 64-bit value.
+     */
     @NotNull
     default WireOut fixedInt64(long value) {
         return int64(value);
     }
 
+    /**
+     * Write an untyped object value.
+     */
     @NotNull
-    default WireOut untypedObject(@Nullable Object value) {
+    default WireOut untypedObject(@Nullable Object value) throws InvalidMarshallableException {
         if (value == null)
             return nu11();
         // look for exact matches
@@ -886,6 +1130,9 @@ public interface ValueOut {
         return object(value);
     }
 
+    /**
+     * Write an typed scalar value as type prefixed text.
+     */
     @NotNull
     default WireOut typedScalar(@NotNull Object value) {
         typePrefix(Wires.typeNameFor(classLookup(), value));
@@ -902,8 +1149,11 @@ public interface ValueOut {
         return wireOut();
     }
 
+    /**
+     * Write a throwable value.
+     */
     @NotNull
-    default WireOut throwable(@NotNull Throwable t) {
+    default WireOut throwable(@NotNull Throwable t) throws InvalidMarshallableException {
         typedMarshallable(t.getClass().getName(), (WireOut w) -> {
             w.write("message").text(t.getMessage())
                     .write("stackTrace").sequence(w3 -> {
@@ -946,52 +1196,88 @@ public interface ValueOut {
 
     void resetState();
 
+    /**
+     * @return {@code true} if this wire type is binary wire.
+     */
     default boolean isBinary() {
         return false;
     }
 
+    /**
+     * Write a boolean value. Delegates to {@link #bool(Boolean)}.
+     */
     default WireOut writeBoolean(boolean x) {
         return bool(x);
     }
 
+    /**
+     * Write a byte value. Delegates to {@link #int8(byte)}.
+     */
     default WireOut writeByte(byte x) {
         return int8(x);
     }
 
+    /**
+     * Write a char value. Delegates to {@link #uint16(long)}.
+     */
     default WireOut writeChar(char x) {
         return uint16(x);
     }
 
+    /**
+     * Write a short value. Delegates to {@link #int16(long)}.
+     */
     default WireOut writeShort(short x) {
         return int16(x);
     }
 
+    /**
+     * Write an int value. Delegates to {@link #int32(long)}.
+     */
     default WireOut writeInt(int x) {
         return int32(x);
     }
 
+    /**
+     * Write a long value. Delegates to {@link #int64(long)}.
+     */
     default WireOut writeLong(long x) {
         return int64(x);
     }
 
+    /**
+     * Write a float value. Delegates to {@link #float32(float)}.
+     */
     default WireOut writeFloat(float x) {
         return float32(x);
     }
 
+    /**
+     * Write a double value. Delegates to {@link #float64(double)}.
+     */
     default WireOut writeDouble(double x) {
         return float64(x);
     }
 
+    /**
+     * Write a string value. Delegates to {@link #text(CharSequence)}.
+     */
     default WireOut writeString(CharSequence x) {
         return text(x);
     }
 
+    /**
+     * Write an int value with a specified converter.
+     */
     default WireOut writeInt(IntConverter intConverter, int i) {
         StringBuilder sb = WireInternal.acquireStringBuilderForValueOut();
         intConverter.append(sb, i);
         return rawText(sb);
     }
 
+    /**
+     * Write a long value with a specified converter.
+     */
     default WireOut writeLong(LongConverter longConverter, long l) {
         StringBuilder sb = WireInternal.acquireStringBuilderForValueOut();
         longConverter.append(sb, l);
@@ -1019,7 +1305,7 @@ public interface ValueOut {
         }
 
         @Override
-        public void writeMarshallable(@NotNull WireOut wire) {
+        public void writeMarshallable(@NotNull WireOut wire) throws InvalidMarshallableException {
             for (@NotNull Map.Entry<K, V> entry : map.entrySet()) {
                 ValueOut valueOut = wire.writeEvent(kClass, entry.getKey());
                 boolean wasLeaf = valueOut.swapLeaf(leaf);

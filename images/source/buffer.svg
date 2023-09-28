@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 26.2.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 529.2 256.3" style="enable-background:new 0 0 529.2 256.3;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#222649;}
+	.st1{fill:#FFFFFF;stroke:#FFFFFF;stroke-miterlimit:10;}
+	.st2{fill:#E4972F;stroke:#FFFFFF;stroke-width:0.75;stroke-miterlimit:10;}
+	.st3{fill:#00A79D;stroke:#FFFFFF;stroke-width:0.75;stroke-miterlimit:10;}
+	.st4{fill:#D2D2D2;}
+	.st5{fill:#FFFFFF;}
+	.st6{font-family:'Poppins-Medium';}
+	.st7{font-size:10px;}
+	.st8{enable-background:new    ;}
+	.st9{fill:none;stroke:#FFFFFF;stroke-miterlimit:8;}
+	.st10{fill:none;stroke:#FFFFFF;stroke-miterlimit:10;}
+	.st11{font-size:12px;}
+	.st12{font-size:9px;}
+	.st13{font-size:8px;}
+</style>
+<rect id="rect152" x="0.2" class="st0" width="529.1" height="256.3"/>
+<line class="st1" x1="374.8" y1="151.5" x2="374.8" y2="143.9"/>
+<rect x="140.3" y="58.7" class="st2" width="62.8" height="38.3"/>
+<rect x="140.3" y="97.1" class="st3" width="62.8" height="17.3"/>
+<rect x="140.3" y="114.3" class="st2" width="62.8" height="73.3"/>
+<rect x="140.3" y="187.2" class="st2" width="62.8" height="36.8"/>
+<rect x="234.6" y="82" class="st4" width="98.7" height="37.2"/>
+<text transform="matrix(1 0 0 1 162.7041 109.8298)" class="st5 st6 st7">len</text>
+<text transform="matrix(1 0 0 1 154.138 148.6048)" class="st8"><tspan x="0" y="0" class="st5 st6 st7">Actual </tspan><tspan x="5.4" y="12" class="st5 st6 st7">Data</tspan></text>
+<text transform="matrix(1 0 0 1 240.0458 98.7141)" class="st8"><tspan x="0" y="0" class="st6 st7">Writer(Appender)</tspan><tspan x="0" y="12" class="st6 st7">Application 1</tspan></text>
+<rect x="234.6" y="172.4" class="st4" width="98.7" height="37.2"/>
+<text transform="matrix(1 0 0 1 240.0458 189.1394)" class="st8"><tspan x="0" y="0" class="st6 st7">Writer(Appender)</tspan><tspan x="0" y="12" class="st6 st7">Application 2</tspan></text>
+<rect x="23.6" y="74.5" class="st4" width="84.8" height="37.2"/>
+<text transform="matrix(1 0 0 1 29.6956 90.7141)" class="st8"><tspan x="0" y="0" class="st6 st7">Reader(Tailer)</tspan><tspan x="0" y="12" class="st6 st7">Application</tspan></text>
+<path class="st9" d="M203.1,99.1c2.4,0,4.4,0.7,4.4,1.5v41c0,0.8,2,1.5,4.4,1.5c-2.4,0-4.4,0.7-4.4,1.5v41c0,0.8-2,1.5-4.4,1.5"/>
+<text transform="matrix(1 0 0 1 218.8687 140.0747)" class="st8"><tspan x="0" y="0" class="st5 st6 st7">Message </tspan><tspan x="0" y="12" class="st5 st6 st7">Size</tspan></text>
+<g>
+	<line class="st5" x1="203.1" y1="99.1" x2="234.6" y2="99.1"/>
+	<g>
+		<line class="st10" x1="208.9" y1="99.1" x2="234.6" y2="99.1"/>
+		<g>
+			<polygon class="st5" points="210,103 203.1,99.1 210,95.1 			"/>
+		</g>
+	</g>
+</g>
+<g>
+	<line class="st5" x1="203.1" y1="190.2" x2="234.6" y2="190.2"/>
+	<g>
+		<line class="st10" x1="208.9" y1="190.2" x2="234.6" y2="190.2"/>
+		<g>
+			<polygon class="st5" points="210,194.2 203.1,190.2 210,186.2 			"/>
+		</g>
+	</g>
+</g>
+<g>
+	<line class="st5" x1="139.9" y1="93.1" x2="108.4" y2="93.1"/>
+	<g>
+		<line class="st10" x1="134.1" y1="93.1" x2="108.4" y2="93.1"/>
+		<g>
+			<polygon class="st5" points="133,89.1 139.9,93.1 133,97 			"/>
+		</g>
+	</g>
+</g>
+<text transform="matrix(1 0 0 1 154.4591 41.0051)" class="st5 st6 st11">Buffer</text>
+<g>
+	<rect x="386.5" y="123.7" class="st3" width="116.7" height="20.3"/>
+	<text transform="matrix(1 0 0 1 391.6754 137.6264)" class="st5 st6 st12">Length of data (30 bits)</text>
+	<rect x="378.7" y="123.7" class="st3" width="7.8" height="20.3"/>
+	<rect x="370.8" y="123.7" class="st3" width="7.8" height="20.3"/>
+</g>
+<text transform="matrix(1 0 0 1 408.5499 109.714)" class="st5 st6 st7">Len (32 bits)</text>
+<line class="st1" x1="382.6" y1="151.5" x2="382.6" y2="143.9"/>
+<line class="st1" x1="375.3" y1="151" x2="366.5" y2="151"/>
+<line class="st1" x1="390.9" y1="151" x2="382.1" y2="151"/>
+<line class="st1" x1="390.4" y1="155.4" x2="390.4" y2="150.6"/>
+<line class="st1" x1="367" y1="155.4" x2="367" y2="150.5"/>
+<text transform="matrix(1 0 0 1 338.8231 164.0299)" class="st5 st6 st13">complete</text>
+<text transform="matrix(1 0 0 1 382.0934 164.1023)" class="st5 st6 st13">metadata</text>
+</svg>

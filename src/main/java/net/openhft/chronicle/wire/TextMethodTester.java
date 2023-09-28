@@ -20,12 +20,15 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.io.Closeable;
-import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.io.*;
+import net.openhft.chronicle.core.onoes.ChainedExceptionHandler;
+import net.openhft.chronicle.core.onoes.ExceptionHandler;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
+import net.openhft.chronicle.wire.utils.YamlAgitator;
 import net.openhft.chronicle.wire.utils.YamlTester;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -36,29 +39,31 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.*;
+import java.util.function.*;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TextMethodTester<T> implements YamlTester {
     private static final boolean TESTS_INCLUDE_COMMENTS = Jvm.getBoolean("tests.include.comments", true);
 
-    private static final boolean REGRESS_TESTS = Jvm.getBoolean("regress.tests");
+    public static final boolean SINGLE_THREADED_CHECK_DISABLED = !Jvm.getBoolean("yaml.tester.single.threaded.check.enabled", false);
+
+
+    private static final boolean DUMP_TESTS = Jvm.getBoolean("dump.tests");
+    public static final Consumer<InvocationTargetRuntimeException> DEFAULT_INVOCATION_TARGET_RUNTIME_EXCEPTION_CONSUMER =
+            e -> Jvm.warn().on(TextMethodTester.class, "Exception calling target method. Continuing", e);
     private final String input;
     private final Class<T> outputClass;
+    private final Set<Class> additionalOutputClasses = new LinkedHashSet<>();
     private final Function<WireOut, T> outputFunction;
     private final String output;
     private final BiFunction<T, UpdateInterceptor, Object> componentFunction;
     private final boolean TEXT_AS_YAML = Jvm.getBoolean("wire.testAsYaml");
+    private Function<T, ExceptionHandler> exceptionHandlerFunction;
     private BiConsumer<MethodReader, T> exceptionHandlerSetup;
     private String genericEvent;
     private List<String> setups;
+    private Function<String, String> inputFunction;
     private Function<String, String> afterRun;
     private String expected;
     private String actual;
@@ -67,6 +72,8 @@ public class TextMethodTester<T> implements YamlTester {
     private long timeoutMS = 25;
     private UpdateInterceptor updateInterceptor;
     private Consumer<InvocationTargetRuntimeException> onInvocationException;
+    private boolean exceptionHandlerFunctionAndLog;
+    private Predicate<String> testFilter = s -> true;
 
     public TextMethodTester(String input, Function<T, Object> componentFunction, Class<T> outputClass, String output) {
         this(input, (out, ui) -> componentFunction.apply(out), outputClass, output);
@@ -88,7 +95,12 @@ public class TextMethodTester<T> implements YamlTester {
         this.output = output;
 
         this.setups = Collections.emptyList();
-        this.onInvocationException = e -> Jvm.warn().on(TextMethodTester.class, "Exception calling target method. Continuing", e);
+        this.onInvocationException = DEFAULT_INVOCATION_TARGET_RUNTIME_EXCEPTION_CONSUMER;
+    }
+
+    public TextMethodTester<T> addOutputClass(Class outputClass) {
+        additionalOutputClasses.add(outputClass);
+        return this;
     }
 
     public static boolean resourceExists(String resourceName) {
@@ -104,7 +116,7 @@ public class TextMethodTester<T> implements YamlTester {
     }
 
     @NotNull
-    public TextMethodTester retainLast(String... retainLast) {
+    public TextMethodTester<T> retainLast(String... retainLast) {
         this.retainLast = retainLast;
         return this;
     }
@@ -116,13 +128,13 @@ public class TextMethodTester<T> implements YamlTester {
     }
 
     @NotNull
-    public TextMethodTester setup(@Nullable String setup) {
+    public TextMethodTester<T> setup(@Nullable String setup) {
         this.setups = (setup == null) ? Collections.emptyList() : Collections.singletonList(setup);
         return this;
     }
 
     @NotNull
-    public TextMethodTester setups(@NotNull List<String> setups) {
+    public TextMethodTester<T> setups(@NotNull List<String> setups) {
         this.setups = setups;
         return this;
     }
@@ -132,7 +144,7 @@ public class TextMethodTester<T> implements YamlTester {
     }
 
     @NotNull
-    public TextMethodTester afterRun(Function<String, String> afterRun) {
+    public TextMethodTester<T> afterRun(Function<String, String> afterRun) {
         this.afterRun = afterRun;
         return this;
     }
@@ -141,7 +153,7 @@ public class TextMethodTester<T> implements YamlTester {
         return exceptionHandlerSetup;
     }
 
-    public TextMethodTester exceptionHandlerSetup(BiConsumer<MethodReader, T> exceptionHandlerSetup) {
+    public TextMethodTester<T> exceptionHandlerSetup(BiConsumer<MethodReader, T> exceptionHandlerSetup) {
         this.exceptionHandlerSetup = exceptionHandlerSetup;
         return this;
     }
@@ -150,7 +162,7 @@ public class TextMethodTester<T> implements YamlTester {
         return genericEvent;
     }
 
-    public TextMethodTester genericEvent(String genericEvent) {
+    public TextMethodTester<T> genericEvent(String genericEvent) {
         this.genericEvent = genericEvent;
         return this;
     }
@@ -159,18 +171,21 @@ public class TextMethodTester<T> implements YamlTester {
         return onInvocationException;
     }
 
-    public TextMethodTester onInvocationException(Consumer<InvocationTargetRuntimeException> onInvocationException) {
+    public TextMethodTester<T> onInvocationException(Consumer<InvocationTargetRuntimeException> onInvocationException) {
         this.onInvocationException = onInvocationException;
         return this;
     }
 
     @NotNull
-    public TextMethodTester run() throws IOException {
-        Wire wireOut = createWire(Bytes.allocateElasticOnHeap());
+    public TextMethodTester<T> run() throws IOException {
+        OnHeapBytes b = Bytes.allocateElasticOnHeap();
+        b.singleThreadedCheckDisabled(SINGLE_THREADED_CHECK_DISABLED);
+        Wire wireOut = createWire(b);
 
         T writer0;
         if (outputClass != null) {
             MethodWriterBuilder<T> methodWriterBuilder = wireOut.methodWriterBuilder(outputClass);
+            additionalOutputClasses.forEach(((VanillaMethodWriterBuilder) methodWriterBuilder)::addInterface);
             if (updateInterceptor != null)
                 methodWriterBuilder.updateInterceptor(updateInterceptor);
 
@@ -192,13 +207,13 @@ public class TextMethodTester<T> implements YamlTester {
         final Class<?> clazz = outputClass == null ? getClass() : outputClass;
         for (String setup : setups) {
             try {
-                final Bytes<?> bytes = Bytes.wrapForRead(IOTools.readFile(clazz, setup));
-                Wire wire0 = createWire(bytes);
+                byte[] setupBytes = IOTools.readFile(clazz, setup);
+                Wire wire0 = createWire(setupBytes);
                 MethodReader reader0 = wire0.methodReaderBuilder()
                         .methodReaderInterceptorReturns(methodReaderInterceptorReturns)
                         .warnMissing(true)
                         .build(components);
-                while (readOne(reader0)) {
+                while (readOne(reader0, null)) {
                     wireOut.bytes().clear();
                 }
                 wireOut.bytes().clear();
@@ -210,18 +225,45 @@ public class TextMethodTester<T> implements YamlTester {
         if (component instanceof PostSetup)
             ((PostSetup) component).postSetup();
 
-        Wire wire = createWire(Bytes.wrapForRead(IOTools.readFile(clazz, input)));
+        if (DUMP_TESTS)
+            System.out.println("input: " + input);
+
+        byte[] inputBytes = input.startsWith("=")
+                ? input.substring(1).trim().getBytes()
+                : IOTools.readFile(clazz, input);
+
+        Wire wire = createWire(inputBytes);
         if (TESTS_INCLUDE_COMMENTS)
             wire.commentListener(wireOut::writeComment);
 
         // expected
         if (retainLast == null) {
-            expected = new String(IOTools.readFile(clazz, output), StandardCharsets.ISO_8859_1).trim().replace("\r", "");
+            if (REGRESS_TESTS) {
+                expected = "";
+            } else {
+                String outStr = output.startsWith("=")
+                        ? output.substring(1)
+                        : new String(IOTools.readFile(clazz, output), StandardCharsets.ISO_8859_1);
+                expected = outStr.trim().replace("\r", "");
+            }
         } else {
-            expected = loadLastValues().toString().trim();
+            ValidatableUtil.startValidateDisabled();
+            try {
+                expected = loadLastValues().toString().trim();
+            } finally {
+                ValidatableUtil.endValidateDisabled();
+            }
         }
         String originalExpected = expected;
         boolean[] sepOnNext = {true};
+
+        ExceptionHandler exceptionHandler = null;
+        ExceptionHandler warn = Jvm.warn();
+        ExceptionHandler error = Jvm.error();
+        ExceptionHandler debug = Jvm.debug();
+        if (exceptionHandlerFunction != null) {
+            exceptionHandler = createExceptionHandler(writer0, warn, error);
+        }
         MethodReader reader = wire.methodReaderBuilder()
                 .methodReaderInterceptorReturns((Method m, Object o, Object[] args, net.openhft.chronicle.bytes.Invocation invocation) -> {
                     if (sepOnNext[0])
@@ -238,38 +280,49 @@ public class TextMethodTester<T> implements YamlTester {
             exceptionHandlerSetup.accept(reader, writer);
 
         long pos = -1;
-        while (readOne(reader)) {
-            if (pos == wire.bytes().readPosition()) {
-                Jvm.warn().on(getClass(), "Bailing out of malformed message");
-                break;
+        boolean ok = false;
+        try {
+            while (readOne(reader, exceptionHandler)) {
+                if (pos == wire.bytes().readPosition()) {
+                    Jvm.warn().on(getClass(), "Bailing out of malformed message");
+                    break;
+                }
+                Bytes<?> bytes2 = wireOut.bytes();
+                if (retainLast == null) {
+                    if (bytes2.writePosition() > 0) {
+                        int last = bytes2.peekUnsignedByte(bytes2.writePosition() - 1);
+                        if (last >= ' ')
+                            bytes2.append('\n');
+                    }
+                }
+                pos = bytes2.readPosition();
             }
-            Bytes<?> bytes2 = wireOut.bytes();
-            if (retainLast == null) {
-                if (bytes2.writePosition() > 0) {
-                    int last = bytes2.peekUnsignedByte(bytes2.writePosition() - 1);
-                    if (last >= ' ')
-                        bytes2.append('\n');
+            ok = true;
+
+            if (retainLast != null)
+                wireOut.bytes().clear();
+
+            if (retainLast != null) {
+                CachedInvocationHandler invocationHandler =
+                        (CachedInvocationHandler) Proxy.getInvocationHandler(writer);
+                try {
+                    invocationHandler.flush();
+                } catch (Exception e) {
+                    throw new IOException(e);
                 }
             }
-            pos = bytes2.readPosition();
-        }
-        if (retainLast != null)
-            wireOut.bytes().clear();
 
-        if (retainLast != null) {
-            CachedInvocationHandler invocationHandler =
-                    (CachedInvocationHandler) Proxy.getInvocationHandler(writer);
-            try {
-                invocationHandler.flush();
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
-        }
+        } finally {
+            if (exceptionHandlerFunction != null)
+                Jvm.setExceptionHandlers(error, warn, debug);
 
-        Closeable.closeQuietly(components);
+            if (!ok)
+                System.err.println("Unable to parse\n" + new String(inputBytes, StandardCharsets.UTF_8));
+            Closeable.closeQuietly(components);
+        }
 
         actual = wireOut.toString().trim();
-        if (REGRESS_TESTS) {
+        if (REGRESS_TESTS && !output.startsWith("=")) {
             Jvm.pause(100);
             expected = actual = wireOut.toString().trim();
         } else {
@@ -292,28 +345,7 @@ public class TextMethodTester<T> implements YamlTester {
             actual = actual.replace("\r\n", "\n");
         }
         if (REGRESS_TESTS && !originalExpected.equals(expected)) {
-            String output = replaceTargetWithSource(this.output);
-            String output2;
-            try {
-                output2 = BytesUtil.findFile(output);
-            } catch (FileNotFoundException fnfe) {
-                try {
-                    output2 = BytesUtil.findFile(replaceTargetWithSource(input
-                            .replace("in.yaml", "out.yaml"))
-
-                    );
-                } catch (FileNotFoundException e) {
-                    throw fnfe;
-                }
-            }
-            System.err.println("The expected output for " + output2 + " has been updated, check your commits");
-
-            try (FileWriter fw = new FileWriter(output2)) {
-                String actual2 = actual.endsWith("\n") ? actual : (actual + "\n");
-                if (OS.isWindows())
-                    actual2 = actual2.replace("\n", "\r\n");
-                fw.write(actual2);
-            }
+            updateOutput();
         }
         // add a warning if they don't match and there was a setup missing.
         if (!expected.trim().equals(actual.trim()) && !setupNotFound.isEmpty())
@@ -321,18 +353,113 @@ public class TextMethodTester<T> implements YamlTester {
         return this;
     }
 
-    public boolean readOne(MethodReader reader0) {
+    private void updateOutput() throws IOException {
+        String output = replaceTargetWithSource(this.output);
+        String output2;
+        try {
+            output2 = BytesUtil.findFile(output);
+        } catch (FileNotFoundException fnfe) {
+            File out2 = new File(this.output);
+            File out = new File(out2.getParentFile(), "out.yaml");
+            try {
+                String output2dir = BytesUtil.findFile(replaceTargetWithSource(out.getPath()));
+                output2 = new File(new File(output2dir).getParentFile(), out2.getName()).getPath();
+            } catch (FileNotFoundException e2) {
+                throw fnfe;
+            }
+        }
+        String actual2 = actual.endsWith("\n") ? actual : (actual + "\n");
+        if (!testFilter.test(actual2)) {
+            System.err.println("The expected output for " + output2 + " has been drops as it is too similar to previous results");
+            return;
+        }
+        System.err.println("The expected output for " + output2 + " has been updated, check your commits");
+
+        try (FileWriter fw = new FileWriter(output2)) {
+            if (OS.isWindows())
+                actual2 = actual2.replace("\n", "\r\n");
+            fw.write(actual2);
+        }
+    }
+
+    private ExceptionHandler createExceptionHandler(T writer0, ExceptionHandler warn, ExceptionHandler error) {
+        ExceptionHandler exceptionHandler;
+        exceptionHandler = exceptionHandlerFunction.apply(writer0);
+
+        if (exceptionHandlerFunctionAndLog) {
+            if (onInvocationException == DEFAULT_INVOCATION_TARGET_RUNTIME_EXCEPTION_CONSUMER) {
+                ChainedExceptionHandler eh2 = new ChainedExceptionHandler(error, exceptionHandler);
+                Consumer<InvocationTargetRuntimeException> invocationException =
+                        er -> eh2.on(LoggerFactory.getLogger(classNameFor(er.getCause())), "Unhandled Exception", er.getCause());
+                onInvocationException = invocationException;
+            }
+
+            Jvm.setExceptionHandlers(
+                    new ChainedExceptionHandler(error, exceptionHandler),
+                    new ChainedExceptionHandler(warn, exceptionHandler),
+                    null);
+        } else {
+            if (onInvocationException == DEFAULT_INVOCATION_TARGET_RUNTIME_EXCEPTION_CONSUMER) {
+                ExceptionHandler eh = exceptionHandler;
+                Consumer<InvocationTargetRuntimeException> invocationException =
+                        er -> eh.on(LoggerFactory.getLogger(classNameFor(er.getCause())), "Unhandled Exception", er.getCause());
+                onInvocationException = invocationException;
+            }
+            Jvm.setExceptionHandlers(
+                    exceptionHandler,
+                    exceptionHandler,
+                    null);
+        }
+        return exceptionHandler;
+    }
+
+    @Override
+    public Map<String, String> agitate(YamlAgitator agitator) throws IORuntimeException {
+        try {
+            final Class<?> clazz = outputClass == null ? getClass() : outputClass;
+            String yaml = input.startsWith("=")
+                    ? input.substring(1)
+                    : new String(IOTools.readFile(clazz, input), StandardCharsets.UTF_8);
+            return agitator.generateInputs(yaml);
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    public boolean readOne(MethodReader reader0, ExceptionHandler exceptionHandler) {
         try {
             return reader0.readOne();
         } catch (InvocationTargetRuntimeException e) {
             this.onInvocationException.accept(e);
-            return true;
+
+        } catch (Throwable t) {
+            if (exceptionHandler == null)
+                throw t;
+            exceptionHandler.on(LoggerFactory.getLogger(classNameFor(t)), t.toString());
         }
+        return true;
+    }
+
+    @NotNull
+    private static String classNameFor(Throwable t) {
+        StackTraceElement[] stackTrace = t.getStackTrace();
+        return stackTrace.length == 0 ? "TextMethodTester" : stackTrace[0].getClassName();
     }
 
     private String replaceTargetWithSource(String replace) {
-        return replace.replace("\\target\\test-classes\\", "\\src\\test\\resources\\")
+        return replace
+                .replace('\\', '/')
                 .replace("/target/test-classes/", "/src/test/resources/");
+    }
+
+    protected Wire createWire(byte[] byteArray) {
+        final Bytes<?> bytes;
+        if (inputFunction == null) {
+            bytes = Bytes.wrapForRead(byteArray);
+        } else {
+            bytes = Bytes.from(inputFunction.apply(new String(byteArray, StandardCharsets.ISO_8859_1)));
+        }
+        return createWire(bytes);
     }
 
     protected Wire createWire(Bytes<?> bytes) {
@@ -342,7 +469,7 @@ public class TextMethodTester<T> implements YamlTester {
     }
 
     @NotNull
-    protected StringBuilder loadLastValues() throws IOException {
+    protected StringBuilder loadLastValues() throws IOException, InvalidMarshallableException {
         Wire wireOut = createWire(BytesUtil.readFile(output));
         Map<String, String> events = new TreeMap<>();
         consumeDocumentSeparator(wireOut);
@@ -381,10 +508,22 @@ public class TextMethodTester<T> implements YamlTester {
     }
 
     public String expected() {
+        if (expected == null)
+            try {
+                run();
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
         return expected;
     }
 
     public String actual() {
+        if (actual == null)
+            try {
+                run();
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
         return actual;
     }
 
@@ -400,6 +539,26 @@ public class TextMethodTester<T> implements YamlTester {
 
     public TextMethodTester<T> timeoutMS(long timeoutMS) {
         this.timeoutMS = timeoutMS;
+        return this;
+    }
+
+    public TextMethodTester<T> exceptionHandlerFunction(Function<T, ExceptionHandler> exceptionHandlerFunction) {
+        this.exceptionHandlerFunction = exceptionHandlerFunction;
+        return this;
+    }
+
+    public TextMethodTester<T> exceptionHandlerFunctionAndLog(boolean exceptionHandlerFunctionAndLog) {
+        this.exceptionHandlerFunctionAndLog = exceptionHandlerFunctionAndLog;
+        return this;
+    }
+
+    public TextMethodTester<T> testFilter(Predicate<String> testFilter) {
+        this.testFilter = testFilter;
+        return this;
+    }
+
+    public TextMethodTester<T> inputFunction(Function<String, String> inputFunction) {
+        this.inputFunction = inputFunction;
         return this;
     }
 

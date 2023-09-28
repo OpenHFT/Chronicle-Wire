@@ -122,7 +122,7 @@ In the past, there wasn't a clear advantage in using a newer version of Java, ho
 |===
 | Java Version | Throughput
 
-| Oracle JDK 1.8.0_321
+| Oracle JDK 1.8.0_321 & Azul Zulu 1.8.0_322
 | 3.6 billion/min
 
 | Azul Zulu 11.0.11
@@ -131,7 +131,7 @@ In the past, there wasn't a clear advantage in using a newer version of Java, ho
 | Azul Zulu 17.0.4.1
 | 4.1 billion/min
 
-| Azul Zulu 18.0.2.1
+| Azul Zulu 18.0.2.1 & Oracle JDK 18.0.2.1
 | 4.0 billion/min
 |===
 

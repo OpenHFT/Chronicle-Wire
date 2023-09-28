@@ -18,14 +18,16 @@
 
 package net.openhft.chronicle.wire.utils;
 
+import net.openhft.chronicle.core.io.SimpleCloseable;
 import net.openhft.chronicle.wire.LongConversion;
 import net.openhft.chronicle.wire.NanoTimestampLongConverter;
 
 import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
 
-public class TestImpl implements TestIn {
+// Components are not required to be Closeable, but if they are they should be closed when finished
+public class TestImpl extends SimpleCloseable implements TestIn {
     private final TestOut out;
-    private long time;
+    private long time, prevEventTime;
 
     public TestImpl(TestOut out) {
         this.out = out;
@@ -33,13 +35,24 @@ public class TestImpl implements TestIn {
 
     @Override
     public void time(@LongConversion(NanoTimestampLongConverter.class) long time) {
+        if (time < this.time)
+            out.error("Time cannot be turned backwards");
         this.time = time;
     }
 
     @Override
     public void testEvent(TestEvent dto) {
-        dto.processedTime = time;
+        if (dto.eventTime < prevEventTime)
+            out.error("The eventTime was older than a previous message");
+        prevEventTime = dto.eventTime;
+        if (time != 0)
+            dto.processedTime = time;
         dto.currentTime = CLOCK.currentTimeNanos();
         out.testEvent(dto);
+    }
+
+    @Override
+    public void testAbstractMarshallableCfgEvent(TestAbstractMarshallableCfgEvent dto) {
+        out.testAbstractMarshallableCfgEvent(dto);
     }
 }

@@ -17,6 +17,10 @@
 
 package net.openhft.chronicle.wire.serializable;
 
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.Validatable;
+import net.openhft.chronicle.core.io.ValidatableUtil;
+import net.openhft.chronicle.wire.FieldInfo;
 import net.openhft.chronicle.wire.Wires;
 
 import java.io.File;
@@ -30,7 +34,7 @@ import java.util.UUID;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
 @SuppressWarnings("rawtypes")
-public class ScalarValues implements Serializable {
+public class ScalarValues implements Serializable, Validatable {
     boolean flag;
     byte b;
     short s;
@@ -59,7 +63,7 @@ public class ScalarValues implements Serializable {
     BigInteger bi;
     BigDecimal bd;
     File file;
-   // Path path;
+    // Path path;
 
     public ScalarValues() {
     }
@@ -103,5 +107,16 @@ public class ScalarValues implements Serializable {
     @Override
     public String toString() {
         return TEXT.asString(this);
+    }
+
+    @Override
+    public void validate() throws InvalidMarshallableException {
+        for (FieldInfo fieldInfo : Wires.fieldInfos(getClass())) {
+            if (!fieldInfo.type().isPrimitive()) {
+                String name = fieldInfo.name();
+                Object o = fieldInfo.get(this);
+                ValidatableUtil.requireNonNull(o, name);
+            }
+        }
     }
 }

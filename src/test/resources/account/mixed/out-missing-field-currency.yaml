@@ -1,0 +1,8 @@
+# Alice sends 10 EUR to bob
+# missing currency: EUR,
+jvmError: "net.openhft.chronicle.core.io.InvalidMarshallableException: currency must be set"
+...
+# Alice sends 10 USD to bob
+# missing currency: USD,
+jvmError: "net.openhft.chronicle.core.io.InvalidMarshallableException: currency must be set"
+...

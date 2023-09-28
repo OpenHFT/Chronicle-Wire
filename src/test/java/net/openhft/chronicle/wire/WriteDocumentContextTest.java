@@ -19,6 +19,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -85,6 +86,34 @@ public class WriteDocumentContextTest extends WireTestCommon {
     @Test
     public void chainedText() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
+
+        writeThreeChainedKeys(wire);
+        assertEquals(21, wire.bytes().readInt());
+        assertEquals("" +
+                        "key: 0\n" +
+                        "key: 1\n" +
+                        "key: 2\n",
+                wire.bytes().toString());
+    }
+
+    @Ignore(/* TODO FIX */)
+    @Test
+    public void nestedYaml() {
+        Wire wire = WireType.YAML_ONLY.apply(Bytes.allocateElasticOnHeap());
+
+        writeThreeKeys(wire);
+        assertEquals(21, wire.bytes().readInt());
+        assertEquals("" +
+                        "key: 0\n" +
+                        "key: 1\n" +
+                        "key: 2\n",
+                wire.bytes().toString());
+    }
+
+    @Ignore(/* TODO FIX */)
+    @Test
+    public void chainedYaml() {
+        Wire wire = WireType.YAML_ONLY.apply(Bytes.allocateElasticOnHeap());
 
         writeThreeChainedKeys(wire);
         assertEquals(21, wire.bytes().readInt());

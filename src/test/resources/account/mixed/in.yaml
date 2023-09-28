@@ -1,0 +1,26 @@
+---
+# Alice sends 10 EUR to bob
+transfer: {
+  sender: gw2,
+  target: vault,
+  sendingTime: 2023-01-20T10:01:00,
+  from: 101013,
+  to: 101025,
+  currency: EUR,
+  amount: 10,
+  reference: Dog food
+}
+...
+---
+# Alice sends 10 USD to bob
+transfer: {
+  sender: gw2,
+  target: vault,
+  sendingTime: 2023-01-20T10:02:00,
+  from: 101013,
+  to: 101025,
+  currency: USD,
+  amount: 10,
+  reference: Dog food
+}
+...

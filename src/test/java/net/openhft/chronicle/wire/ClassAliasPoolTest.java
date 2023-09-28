@@ -71,6 +71,13 @@ public class ClassAliasPoolTest extends WireTestCommon {
                                         "}\n" +
                                         "...\n",
                                 w.toString())},
+                {WireType.YAML_ONLY,
+                        (Consumer<WireIn>) w -> assertEquals("" +
+                                        "handle: !CAPTData {\n" +
+                                        "  value: 0\n" +
+                                        "}\n" +
+                                        "...\n",
+                                w.toString())},
                 {WireType.BINARY,
                         (Consumer<WireIn>) w -> assertEquals("" +
                                         "1f 00 00 00                                     # msg-length\n" +
@@ -84,7 +91,7 @@ public class ClassAliasPoolTest extends WireTestCommon {
     }
 
     @Test
-    public void testUsesClassLookup() throws ClassNotFoundException {
+    public void testUsesClassLookup() {
         final ClassLookup mock = createMock(ClassLookup.class);
         expect(mock.nameFor(CAPTData.class)).andReturn("CAPTData");
         expect(mock.forName(charSequence("CAPTData"))).andReturn((Class) CAPTData.class);
@@ -99,6 +106,8 @@ public class ClassAliasPoolTest extends WireTestCommon {
         StringWriter out = new StringWriter();
         final MethodReader reader = wire.methodReader(
                 Mocker.logging(TestedMethods.class, "", out));
+        String name = reader.getClass().getName();
+        assertFalse(name, name.contains("$Proxy"));
         assertTrue(reader.readOne());
         assertFalse(reader.readOne());
         assertEquals("" +

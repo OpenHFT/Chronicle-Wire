@@ -3,7 +3,15 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.wire.internal.WireTypeConverterInternal;
 
 public class WireTypeConverter {
-    private final WireTypeConverterInternal delegate = new WireTypeConverterInternal();
+    private final WireTypeConverterInternal delegate;
+
+    public WireTypeConverter(Validate validate) {
+        delegate = new WireTypeConverterInternal(validate);
+    }
+
+    public WireTypeConverter() {
+        delegate = new WireTypeConverterInternal();
+    }
 
     public CharSequence jsonToYaml(CharSequence json) throws Exception {
         return delegate.jsonToYaml(json);

@@ -25,6 +25,11 @@ import static org.junit.Assert.assertEquals;
 
 public class MilliTimestampLongConverterTest extends WireTestCommon {
 
+    private static final String TIMESTAMP_STRING_UTC = "2023-02-15T05:31:49.856Z";
+    private static final String TIMESTAMP_STRING_UTC_NO_SUFFIX = "2023-02-15T05:31:49.856";
+    private static final long TIMESTAMP = 1676439109856L;
+    private static final String TIMESTAMP_STRING_MELBOURNE = "2023-02-15T16:31:49.856+11:00";
+
     @Test
     public void parse() {
         long now = System.currentTimeMillis();
@@ -54,5 +59,34 @@ public class MilliTimestampLongConverterTest extends WireTestCommon {
         MilliTimestampLongConverter mtlc = new MilliTimestampLongConverter("America/New_York");
         assertEquals(mtlc.parse("2020-09-17T21:02:03.456-04:00"),
                 mtlc.parse("2020-09-17T21:02:03.456"));
+    }
+
+    @Test
+    public void appendTest() {
+        final MilliTimestampLongConverter converter = new MilliTimestampLongConverter("Australia/Melbourne");
+        StringBuilder builder = new StringBuilder();
+        converter.append(builder, TIMESTAMP);
+        assertEquals(TIMESTAMP_STRING_MELBOURNE, builder.toString());
+    }
+
+    @Test
+    public void appendTestUTC() {
+        final MilliTimestampLongConverter converter = new MilliTimestampLongConverter("UTC");
+        StringBuilder builder = new StringBuilder();
+        converter.append(builder, TIMESTAMP);
+        assertEquals(TIMESTAMP_STRING_UTC_NO_SUFFIX, builder.toString());
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void roundTripTest() {
+        roundTrip(TIMESTAMP_STRING_UTC_NO_SUFFIX, TIMESTAMP, new MilliTimestampLongConverter("UTC"));
+        roundTrip(TIMESTAMP_STRING_UTC, TIMESTAMP, new MilliTimestampLongConverter("UTC", true));
+        roundTrip(TIMESTAMP_STRING_MELBOURNE, TIMESTAMP, new MilliTimestampLongConverter("Australia/Melbourne"));
+    }
+
+    private void roundTrip(String timestampString, long timestamp, LongConverter longConverter) {
+        assertEquals(longConverter.asString(longConverter.parse(timestampString)), timestampString);
+        assertEquals(longConverter.parse(longConverter.asString(timestamp)), timestamp);
     }
 }

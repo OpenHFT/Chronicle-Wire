@@ -1,0 +1,8 @@
+# Alice sends 10 EUR to bob
+# override currency: EUR to currency:
+jvmError: "net.openhft.chronicle.core.io.InvalidMarshallableException: currency must be set"
+...
+# Alice sends 10 USD to bob
+# override currency: USD to currency:
+jvmError: "net.openhft.chronicle.core.io.InvalidMarshallableException: currency must be set"
+...

@@ -56,17 +56,17 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         List<Class<?>> dcBoolean = Stream.of(DocumentContext.class, boolean.class).collect(Collectors.toList());
         TEMPLATE_METHODS.put("acquireWritingDocument",
                 singletonMap(dcBoolean, "" +
-                        "public " + DOCUMENT_CONTEXT + " acquireWritingDocument(boolean metaData){\n" +
+                        "public " + DOCUMENT_CONTEXT + " acquireWritingDocument(boolean metaData) {\n" +
                         "    return this.outSupplier.get().acquireWritingDocument(metaData);\n" +
                         "}\n"));
         Map<List<Class<?>>, String> wd = new LinkedHashMap<>();
         wd.put(singletonList(DocumentContext.class), "" +
-                "public " + DOCUMENT_CONTEXT + " writingDocument(){\n" +
+                "public " + DOCUMENT_CONTEXT + " writingDocument() {\n" +
                 "    return this.outSupplier.get().writingDocument();\n" +
                 "}\n");
         wd.put(dcBoolean, "" +
-                "public " + DOCUMENT_CONTEXT + " writingDocument(boolean metaData){\n" +
-                "return this.outSupplier.get().writingDocument(metaData);\n" +
+                "public " + DOCUMENT_CONTEXT + " writingDocument(boolean metaData) {\n" +
+                "    return this.outSupplier.get().writingDocument(metaData);\n" +
                 "}\n");
         TEMPLATE_METHODS.put("writingDocument", wd);
     }
@@ -158,18 +158,18 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         String wdc = nameForClass(WriteDocumentContext.class);
         boolean passthrough = returnType == DocumentContext.class;
         withLineNumber(mainCode)
-                .append("MarshallableOut out = this.outSupplier.get();\n");
+                .append("MarshallableOut _out_ = this.outSupplier.get();\n");
         if (!passthrough)
             withLineNumber(mainCode)
                     .append("try (");
-        mainCode.append("final ").append(wdc).append(" dc = (").append(wdc).append(") out.acquireWritingDocument(")
+        mainCode.append("final ").append(wdc).append(" _dc_ = (").append(wdc).append(") _out_.acquireWritingDocument(")
                 .append(metaData().metaData())
                 .append(")");
         if (passthrough)
             mainCode.append(";\n");
         else mainCode.append(") {\n");
-        mainCode.append("dc.chainedElement(" + (!terminating && !passthrough) + ");\n");
-        mainCode.append("if (out.recordHistory()) MessageHistory.writeHistory(dc);\n");
+        mainCode.append("_dc_.chainedElement(" + (!terminating && !passthrough) + ");\n");
+        mainCode.append("if (_out_.recordHistory()) MessageHistory.writeHistory(_dc_);\n");
 
         int startJ = 0;
 
@@ -208,11 +208,11 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         if (methodId.isPresent()) {
             long value = ((MethodId) methodId.get()).value();
             withLineNumber(body)
-                    .append("dc.wire().writeEventId(").append(eventName).append(", ").append(String.valueOf(value)).append(")");
+                    .append("_dc_.wire().writeEventId(").append(eventName).append(", ").append(String.valueOf(value)).append(")");
 
         } else {
             withLineNumber(body)
-                    .append("dc.wire().write(").append(eventName).append(")");
+                    .append("_dc_.wire().write(").append(eventName).append(")");
         }
     }
 

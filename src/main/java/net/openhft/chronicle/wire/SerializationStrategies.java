@@ -23,6 +23,7 @@ import net.openhft.chronicle.bytes.ReadBytesMarshallable;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.EnumCache;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.ReadResolvable;
@@ -44,7 +45,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     MARSHALLABLE {
         @NotNull
         @Override
-        public Object readUsing(Class clazz, @NotNull Object o, @NotNull ValueIn in, BracketType bracketType) {
+        public Object readUsing(Class clazz, @NotNull Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
             WireIn wireIn = in.wireIn();
             if (wireIn.useSelfDescribingMessage((CommonMarshallable) o) && o instanceof ReadMarshallable) {
                 ((ReadMarshallable) o).readMarshallable(wireIn);
@@ -70,7 +71,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     ANY_OBJECT {
         @Nullable
         @Override
-        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) {
+        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
             return in.objectWithInferredType(o, ANY_NESTED, null);
         }
 
@@ -90,7 +91,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     ANY_SCALAR {
         @Nullable
         @Override
-        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) {
+        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
             return in.objectWithInferredType(o, ANY_NESTED, null);
         }
 
@@ -132,7 +133,7 @@ public enum SerializationStrategies implements SerializationStrategy {
 
         @Nullable
         @Override
-        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) {
+        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
             if (bracketType != BracketType.MAP || !(o instanceof ReadMarshallable)) {
                 String text = in.text();
                 if (o != null) {
@@ -176,7 +177,7 @@ public enum SerializationStrategies implements SerializationStrategy {
 
     ANY_NESTED {
         @Override
-        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) {
+        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
             if (in.isNull()) {
                 return null;
             }
@@ -201,7 +202,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     DEMARSHALLABLE {
         @NotNull
         @Override
-        public Object readUsing(Class clazz, Object using, @NotNull ValueIn in, BracketType bracketType) {
+        public Object readUsing(Class clazz, Object using, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
             if (using instanceof DemarshallableWrapper) {
                 @NotNull final DemarshallableWrapper wrapper = (DemarshallableWrapper) using;
                 wrapper.demarshallable = Demarshallable.newInstance(wrapper.type, in.wireIn());
@@ -228,7 +229,7 @@ public enum SerializationStrategies implements SerializationStrategy {
 
     SERIALIZABLE {
         @Override
-        public Object readUsing(Class clazz, Object o, ValueIn in, BracketType bracketType) {
+        public Object readUsing(Class clazz, Object o, ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
             SerializationStrategies strategies = o instanceof Externalizable ? EXTERNALIZABLE : ANY_OBJECT;
             strategies.readUsing(clazz, o, in, bracketType);
             return o;
@@ -268,7 +269,7 @@ public enum SerializationStrategies implements SerializationStrategy {
 
     MAP {
         @Override
-        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) {
+        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
             @NotNull Map<Object, Object> map = (o == null ? new LinkedHashMap<>() : (Map<Object, Object>) o);
             @NotNull final WireIn wireIn = in.wireIn();
             long pos = wireIn.bytes().readPosition();
@@ -304,7 +305,7 @@ public enum SerializationStrategies implements SerializationStrategy {
 
     SET {
         @Override
-        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) {
+        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
             @NotNull Set<Object> set = (o == null ? new LinkedHashSet<>() : (Set<Object>) o);
             @NotNull final WireIn wireIn = in.wireIn();
             @NotNull final Bytes<?> bytes = wireIn.bytes();
@@ -342,7 +343,7 @@ public enum SerializationStrategies implements SerializationStrategy {
 
     LIST {
         @Override
-        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) {
+        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
             @NotNull List<Object> list = (o == null ? new ArrayList<>() : (List<Object>) o);
             @NotNull final WireIn wireIn = in.wireIn();
             long pos = wireIn.bytes().readPosition();
@@ -380,7 +381,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     ARRAY {
         @NotNull
         @Override
-        public Object readUsing(Class clazz, Object using, @NotNull ValueIn in, BracketType bracketType) {
+        public Object readUsing(Class clazz, Object using, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
             if (using instanceof ArrayWrapper) {
                 @NotNull ArrayWrapper wrapper = (ArrayWrapper) using;
                 final Class componentType = wrapper.type.getComponentType();
@@ -419,7 +420,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     PRIM_ARRAY {
         @NotNull
         @Override
-        public Object readUsing(Class clazz, Object using, @NotNull ValueIn in, BracketType bracketType) {
+        public Object readUsing(Class clazz, Object using, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
             @NotNull PrimArrayWrapper wrapper = (PrimArrayWrapper) using;
             final Class<?> componentType = wrapper.type.getComponentType();
             int i = 0;

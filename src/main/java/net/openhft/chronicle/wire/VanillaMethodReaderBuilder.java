@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodReaderBuilder;
 import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.onoes.ExceptionHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,6 +29,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
+
+import static net.openhft.chronicle.wire.WireParser.SKIP_READABLE_BYTES;
 
 public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     public static final String DISABLE_READER_PROXY_CODEGEN = "disableReaderProxyCodegen";
@@ -35,27 +39,30 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     private static final Class<?> COMPILE_FAILED = ClassNotFoundException.class;
 
     private final MarshallableIn in;
-    private boolean warnMissing = false;
     private boolean ignoreDefaults;
     private WireParselet defaultParselet;
     private MethodReaderInterceptorReturns methodReaderInterceptorReturns;
     private WireType wireType;
     private Object[] metaDataHandler = null;
+    private ExceptionHandler exceptionHandlerOnUnknownMethod = Jvm.debug();
+    private Predicate predicate = x -> true;
+
+    private boolean scanning = false;
 
     public VanillaMethodReaderBuilder(MarshallableIn in) {
         this.in = in;
     }
 
     @NotNull
-    public static WireParselet createDefaultParselet(boolean warnMissing) {
+    public static WireParselet createDefaultParselet(ExceptionHandler exceptionHandlerOnUnknownMethod) {
         return (s, v) -> {
             MessageHistory history = MessageHistory.get();
             long sourceIndex = history.lastSourceIndex();
             v.skipValue();
-            if (s.length() == 0 || warnMissing)
-                Jvm.warn().on(VanillaMethodReader.class, errorMsg(s, history, sourceIndex));
-            else if (Jvm.isDebugEnabled(VanillaMethodReader.class))
-                Jvm.debug().on(VanillaMethodReader.class, errorMsg(s, history, sourceIndex));
+            ExceptionHandler eh = s.length() == 0
+                    ? Jvm.warn()
+                    : exceptionHandlerOnUnknownMethod;
+            eh.on(VanillaMethodReader.class, errorMsg(s, history, sourceIndex));
         };
     }
 
@@ -63,8 +70,11 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     private static String errorMsg(CharSequence s, MessageHistory history, long sourceIndex) {
 
         final String identifierType = s.length() != 0 && Character.isDigit(s.charAt(0)) ? "@MethodId" : "method-name";
-        return "Unknown " + identifierType + "='" + s + "' from " + history.lastSourceId() + " at " +
-                Long.toHexString(sourceIndex) + " ~ " + (int) sourceIndex;
+        String msg = "Unknown " + identifierType + "='" + s + "'";
+        if (history.lastSourceId() >= 0)
+            msg += " from " + history.lastSourceId() + " at " +
+                    Long.toHexString(sourceIndex) + " ~ " + (int) sourceIndex;
+        return msg;
     }
 
     @Deprecated(/* Not used. To be removed in x.25 */)
@@ -94,12 +104,9 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         return this;
     }
 
-    public boolean warnMissing() {
-        return warnMissing;
-    }
-
-    public VanillaMethodReaderBuilder warnMissing(boolean warnMissing) {
-        this.warnMissing = warnMissing;
+    @Override
+    public MethodReaderBuilder exceptionHandlerOnUnknownMethod(ExceptionHandler exceptionHandler) {
+        this.exceptionHandlerOnUnknownMethod = exceptionHandler;
         return this;
     }
 
@@ -109,6 +116,17 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
     public VanillaMethodReaderBuilder wireType(WireType wireType) {
         this.wireType = wireType;
+        return this;
+    }
+
+    /**
+     * When enabled, readOne() will skip over meta data and unknown events to find at least one event.
+     *
+     * @param scanning whether to read events until it finds a known one.
+     * @return this
+     */
+    public VanillaMethodReaderBuilder scanning(boolean scanning) {
+        this.scanning = scanning;
         return this;
     }
 
@@ -149,8 +167,16 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
         WireParselet debugLoggingParselet = VanillaMethodReader::logMessage;
 
-        return (MethodReader) constructor.newInstance(
-                in, defaultParselet, debugLoggingParselet, methodReaderInterceptorReturns, metaDataHandler, impls);
+        MethodReader reader = (MethodReader) constructor.newInstance(
+                in, defaultParselet, debugLoggingParselet, methodReaderInterceptorReturns, metaDataHandler,
+                impls);
+        if (reader instanceof AbstractGeneratedMethodReader) {
+            AbstractGeneratedMethodReader reader0 = (AbstractGeneratedMethodReader) reader;
+            reader0.scanning(scanning);
+            reader0.predicate(predicate);
+        }
+
+        return reader;
     }
 
     @Override
@@ -162,12 +188,19 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     @NotNull
     public MethodReader build(Object... impls) {
         if (this.defaultParselet == null)
-            this.defaultParselet = createDefaultParselet(warnMissing);
+            this.defaultParselet = createDefaultParselet(exceptionHandlerOnUnknownMethod);
 
         final MethodReader generatedInstance = createGeneratedInstance(impls);
 
-        return generatedInstance == null ? new VanillaMethodReader(
-                in, ignoreDefaults, defaultParselet, methodReaderInterceptorReturns, metaDataHandler, impls) :
+        return generatedInstance == null ? new VanillaMethodReader(in, ignoreDefaults, defaultParselet, SKIP_READABLE_BYTES,
+                methodReaderInterceptorReturns, metaDataHandler, predicate,
+                impls) :
                 generatedInstance;
+    }
+
+    @Override
+    public MethodReaderBuilder predicate(Predicate<?> predicate) {
+        this.predicate = predicate;
+        return this;
     }
 }

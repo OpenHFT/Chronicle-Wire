@@ -20,21 +20,59 @@ package net.openhft.chronicle.wire.channel;
 
 
 import net.openhft.chronicle.core.io.ClosedIORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 
+/**
+ * This interface represents a channel handler that performs various channel-related operations
+ * such as executing actions within a context, handling responses, and configuring channel settings.
+ * The ChannelHandler is passed from the client to the gateway or set by the gateway based on context.
+ */
 public interface ChannelHandler extends ChannelHeader {
 
+    /**
+     * Provides a response header to send back to the client.
+     * Default implementation returns an OkHeader instance.
+     *
+     * @param context the ChronicleContext within which the response header is needed
+     * @return a ChannelHeader object that represents the response header
+     */
     default ChannelHeader responseHeader(ChronicleContext context) {
         return new OkHeader();
     }
 
-    void run(ChronicleContext context, ChronicleChannel channel) throws ClosedIORuntimeException;
+    /**
+     * Executes actions within the provided context and channel.
+     *
+     * @param context the ChronicleContext within which actions will be executed
+     * @param channel the ChronicleChannel within which actions will be executed
+     * @throws ClosedIORuntimeException     if an I/O error occurs
+     * @throws InvalidMarshallableException if a Marshallable object is invalid
+     */
+    void run(ChronicleContext context, ChronicleChannel channel) throws ClosedIORuntimeException, InvalidMarshallableException;
 
+    /**
+     * Determines whether the ChronicleChannel should be closed when the run method ends.
+     * If false, the channel will continue to be open after the run method ends, e.g., a subscribe-only channel.
+     *
+     * @return true if the channel should be closed when the run method ends, false otherwise
+     */
     default boolean closeWhenRunEnds() {
         return true;
     }
 
+    /**
+     * Converts the current ChannelHandler to an internal channel using the provided context and channel configuration.
+     *
+     * @param context    the ChronicleContext within which the internal channel is created
+     * @param channelCfg the ChronicleChannelCfg used to configure the new internal channel
+     * @return a new ChronicleChannel instance
+     */
     ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg channelCfg);
 
+    /**
+     * Indicates whether the handler supports buffering.
+     *
+     * @return a Boolean value that indicates if buffering is supported, null if not specified
+     */
     Boolean buffered();
-
 }
