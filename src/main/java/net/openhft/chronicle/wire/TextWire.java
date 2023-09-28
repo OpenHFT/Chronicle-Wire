@@ -67,7 +67,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     static final Supplier<StopCharsTester> END_EVENT_NAME_ESCAPING = TextStopCharsTesters.END_EVENT_NAME::escaping;
     static final Bytes<?> META_DATA = Bytes.from("!!meta-data");
     @Deprecated(/* for removal in x.26, make default true in x.25 */)
-    static final boolean IAE_ON_CNF = Jvm.getBoolean("illegal.argument.for.missing.class.alias", false);
+    static final boolean IAE_ON_CNF = Jvm.getBoolean("class.not.found.for.missing.class.alias", false);
 
     static {
         IOTools.unmonitor(BINARY);
