@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.SingleThreadedChecked;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
+import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
@@ -725,7 +726,7 @@ public class WireMarshaller<T> {
                 long pos = read.wireIn().bytes().readPosition();
                 try {
                     setValue(o, read, overwrite);
-                } catch (UnexpectedFieldHandlingException e) {
+                } catch (UnexpectedFieldHandlingException | ClassCastException | ClassNotFoundRuntimeException e) {
                     Jvm.rethrow(e);
                 } catch (Exception e) {
                     read.wireIn().bytes().readPosition(pos);
@@ -859,7 +860,7 @@ public class WireMarshaller<T> {
                     ((SingleThreadedChecked) object).singleThreadedCheckReset();
                 field.set(o, object);
 
-            } catch (UnexpectedFieldHandlingException e) {
+            } catch (UnexpectedFieldHandlingException | ClassCastException | ClassNotFoundRuntimeException e) {
                 Jvm.rethrow(e);
             } catch (Exception e) {
                 read.wireIn().bytes().readPosition(pos);
