@@ -15,10 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesIn;
-import net.openhft.chronicle.bytes.BytesOut;
-import net.openhft.chronicle.bytes.HexDumpBytesDescription;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.util.BinaryLengthLength;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -40,8 +37,10 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
                 veh.addSourceDetails(true);
                 return veh;
             });
+    // TODO: x.25 make this private final like the other 2 booleans
     static boolean USE_BYTES_MARSHALLABLE = Boolean.getBoolean("history.as.bytes");
     private final boolean HISTORY_WALL_CLOCK = Jvm.getBoolean("history.wall.clock");
+    private final boolean HISTORY_METHOD_ID = Boolean.getBoolean("history.as.method_id");
     @NotNull
     private final int[] sourceIdArray = new int[MESSAGE_HISTORY_LENGTH];
     @NotNull
@@ -343,5 +342,12 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     @Override
     public BinaryLengthLength binaryLengthLength() {
         return BinaryLengthLength.LENGTH_16BIT;
+    }
+
+    @Override
+    public void doWriteHistory(DocumentContext dc) {
+        final WireOut wire = dc.wire();
+        final ValueOut valueOut = HISTORY_METHOD_ID ? wire.writeEventId(MethodReader.MESSAGE_HISTORY_METHOD_ID) : wire.writeEventName(MethodReader.HISTORY);
+        valueOut.marshallable(this);
     }
 }

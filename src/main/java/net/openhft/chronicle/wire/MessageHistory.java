@@ -32,7 +32,7 @@ public interface MessageHistory extends Marshallable {
     }
 
     /**
-     * You only need to call this if you wish to override it's behaviour.
+     * You only need to call this if you wish to override its behaviour.
      *
      * @param md to change to the default implementation for this thread. Null to clear the thread local
      *           and force withInitial to be called again
@@ -43,10 +43,13 @@ public interface MessageHistory extends Marshallable {
 
     @UsedViaReflection
     static void writeHistory(DocumentContext dc) {
-        Wire wire = dc.wire();
-        if (((WriteDocumentContext) dc).isEmpty()) // only add to the start of a message. i.e. for chained calls.
-            wire.writeEventName(MethodReader.HISTORY)
-                    .marshallable(get());
+        if (((WriteDocumentContext) dc).isEmpty()) { // only add to the start of a message. i.e. for chained calls.
+            get().doWriteHistory(dc);
+        }
+    }
+
+    default void doWriteHistory(DocumentContext dc) {
+        dc.wire().writeEventName(MethodReader.HISTORY).marshallable(get());
     }
 
     /**
