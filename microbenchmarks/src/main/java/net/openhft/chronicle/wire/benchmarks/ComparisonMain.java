@@ -16,13 +16,19 @@
 
 package net.openhft.chronicle.wire.benchmarks;
 
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONStyle;
 import net.minidev.json.parser.JSONParser;
+import net.openhft.affinity.AffinityLock;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.wire.BracketType;
+import net.openhft.chronicle.wire.JSONWire;
+import net.openhft.chronicle.wire.SerializationStrategies;
+import net.openhft.chronicle.wire.WriteMarshallable;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
@@ -32,6 +38,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.representer.Representer;
@@ -42,10 +49,13 @@ import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Compare JSON writing/parsing
+ */
 @State(Scope.Thread)
 public class ComparisonMain {
     final Yaml yaml;
-    final ExternalizableData data = new ExternalizableData(123, 1234567890L, 1234, true, "Hello World!", Side.Sell);
+    final ExternalizableData data = new ExternalizableData(123, 1234567890L, 1234.5, true, "Hello World!", Side.Sell);
     private final ByteBuffer allocate = ByteBuffer.allocate(64);
     private final UnsafeBuffer buffer = new UnsafeBuffer(allocate);
     ExternalizableData data2 = new ExternalizableData();
@@ -56,6 +66,7 @@ public class ComparisonMain {
     com.fasterxml.jackson.core.JsonFactory jsonFactory = new com.fasterxml.jackson.core.JsonFactory(); // or, for data binding, org.codehaus.jackson.mapper.MappingJsonFactory
     UnsafeBuffer directBuffer = new UnsafeBuffer(ByteBuffer.allocateDirect(128));
     Bytes<?> bytes = Bytes.allocateDirect(512).unchecked(true);
+    JSONWire jsonWire = new JSONWire(bytes);
     InputStream inputStream = bytes.inputStream();
     OutputStream outputStream = bytes.outputStream();
     Writer writer = bytes.writer();
@@ -68,19 +79,21 @@ public class ComparisonMain {
     public ComparisonMain() {
         DumperOptions options = new DumperOptions();
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        Representer representer = new Representer();
-        yaml = new Yaml(new Constructor(Data.class), representer, options);
+        Representer representer = new Representer(options);
+        LoaderOptions loaderOptions = new LoaderOptions();
+        yaml = new Yaml(new Constructor(Data.class, loaderOptions), representer, options);
         try {
             jp = jsonFactory.createParser(inputStream);
             textJP = jsonFactory.createParser(reader);
         } catch (IOException e) {
             throw new AssertionError(e);
         }
+        bytes.fpAppend0(false);
+        jsonWire.useTextDocuments();
     }
 
     public static void main(String... args) throws Exception {
-//        Affinity.setAffinity(2);
-        if (false && Jvm.isDebug()) {
+        if (Jvm.isDebug()) {
             ComparisonMain main = new ComparisonMain();
             for (Method m : ComparisonMain.class.getMethods()) {
                 main.s = null;
@@ -107,33 +120,35 @@ public class ComparisonMain {
                 }
             }
         } else {
-            int time = Jvm.getBoolean("longTest") ? 30 : 2;
-            System.out.println("measurementTime: " + time + " secs");
-            Options opt = new OptionsBuilder()
-                    .include(ComparisonMain.class.getSimpleName())
-                    .warmupIterations(5)
-                    .measurementIterations(5)
-                    .threads(2)
-                    .forks(2)
-                    .mode(Mode.SampleTime)
-                    .warmupTime(TimeValue.seconds(1))
-                    .measurementTime(TimeValue.seconds(time))
-                    .timeUnit(TimeUnit.NANOSECONDS)
-                    .build();
+            try (AffinityLock affinityLock = AffinityLock.acquireLock(Jvm.getProperty("affinity", "any"))) {
+                int time = Jvm.getBoolean("longTest") ? 30 : 2;
+                System.out.println("measurementTime: " + time + " secs");
+                Options opt = new OptionsBuilder()
+                        .include(ComparisonMain.class.getSimpleName())
+                        .warmupIterations(5)
+                        .measurementIterations(5)
+                        .threads(2)
+                        .forks(2)
+                        .mode(Mode.SampleTime)
+                        .warmupTime(TimeValue.seconds(1))
+                        .measurementTime(TimeValue.seconds(time))
+                        .timeUnit(TimeUnit.NANOSECONDS)
+                        .build();
 
-            new Runner(opt).run();
+                new Runner(opt).run();
+            }
         }
     }
 
-//    @Benchmark
+    @Benchmark
     public Data snakeYaml() {
         s = yaml.dumpAsMap(data);
-        Data data = (Data) yaml.load(s);
+        Data data = yaml.load(s);
         return data;
     }
 
-    // fails on Java 8, https://code.google.com/p/json-smart/issues/detail?id=56&thanks=56&ts=1439401767
-    //    @Benchmark
+    // fails with net.minidev.json.parser.ParseException: Malicious payload, having non natural depths, parsing stoped on { at position 0.
+//    @Benchmark
     public ExternalizableData jsonSmart() throws net.minidev.json.parser.ParseException {
         JSONObject obj = new JSONObject();
         data.writeTo(obj);
@@ -143,8 +158,9 @@ public class ComparisonMain {
         return data2;
     }
 
-    // fails on Java 8, https://code.google.com/p/json-smart/issues/detail?id=56&thanks=56&ts=1439401767
-    //    @Benchmark
+    // Used to fail on Java 8, https://code.google.com/p/json-smart/issues/detail?id=56&thanks=56&ts=1439401767
+    // Now fails with net.minidev.json.parser.ParseException: Unexpected token smallInt at position 9
+    //@Benchmark
     public void jsonSmartCompact() throws net.minidev.json.parser.ParseException {
         JSONObject obj = new JSONObject();
         data.writeTo(obj);
@@ -153,7 +169,7 @@ public class ComparisonMain {
         data.readFrom(jsonObject);
     }
 
-//    @Benchmark
+    @Benchmark
     public ExternalizableData jackson() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         JsonGenerator generator = jsonFactory.createGenerator(baos);
@@ -166,7 +182,7 @@ public class ComparisonMain {
         return data2;
     }
 
-//    @Benchmark
+    @Benchmark
     public ExternalizableData jacksonWithCBytes() throws IOException {
         bytes.clear();
         generator = jsonFactory.createGenerator(outputStream);
@@ -178,7 +194,7 @@ public class ComparisonMain {
         return data2;
     }
 
-//    @Benchmark
+    @Benchmark
     public ExternalizableData jacksonWithTextCBytes() throws IOException {
         bytes.clear();
         generator = jsonFactory.createGenerator(writer);
@@ -190,7 +206,7 @@ public class ComparisonMain {
         return data2;
     }
 
-//    @Benchmark
+    @Benchmark
     public Object externalizable() throws IOException, ClassNotFoundException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -203,7 +219,7 @@ public class ComparisonMain {
         }
     }
 
-//    @Benchmark
+    @Benchmark
     public Object externalizableWithCBytes() throws IOException, ClassNotFoundException {
         bytes.clear();
         ObjectOutputStream oos = new ObjectOutputStream(outputStream);
@@ -212,5 +228,23 @@ public class ComparisonMain {
         try (ObjectInputStream ois = new ObjectInputStream(inputStream)) {
             return ois.readObject();
         }
+    }
+
+    @Benchmark
+    public Object jsonWire() {
+        jsonWire.reset();
+        jsonWire.getValueOut().marshallable((WriteMarshallable) data);
+        // below is faster than jsonWire.getValueIn().marshallable((ReadMarshallable) data2) as it does not read length first
+        SerializationStrategies.MARSHALLABLE.readUsing(ExternalizableData.class, data2, jsonWire.getValueIn(), BracketType.MAP);
+        return data2;
+    }
+
+    @Benchmark
+    public Object fastjson() {
+        bytes.clear();
+        // TODO: JSONWriter
+        byte[] ba = JSON.toJSONBytes(data);
+        bytes.write(ba);
+        return JSON.parseObject(ba, ExternalizableData.class);
     }
 }

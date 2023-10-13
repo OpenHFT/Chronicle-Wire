@@ -17,9 +17,9 @@
 package net.openhft.chronicle.wire.benchmarks;
 
 import net.openhft.affinity.Affinity;
+import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.util.Bit8StringInterner;
 import net.openhft.chronicle.core.Jvm;
-import org.jetbrains.annotations.NotNull;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
@@ -38,15 +38,19 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Thread)
 public class ObjectPoolMain {
 
-    public static final NativeBytesStore CHAR1 = NativeBytesStore.from("A");
-    public static final NativeBytesStore CHAR2 = NativeBytesStore.from("A2");
-    public static final NativeBytesStore CHAR4 = NativeBytesStore.from("A234");
-    public static final NativeBytesStore CHAR8 = NativeBytesStore.from("A2345678");
-    public static final NativeBytesStore CHAR16 = NativeBytesStore.from("A234567890123456");
-    public static final NativeBytesStore CHAR32 = NativeBytesStore.from("A2345678901234567890123456789012");
-    public static final byte[] BUFFER = new byte[32];
-    final Bit8StringInterner si = new Bit8StringInterner(64);
+    private static final BytesStore CHAR1 = BytesStoreFrom("A");
+    private static final BytesStore CHAR2 = BytesStoreFrom("A2");
+    private static final BytesStore CHAR4 = BytesStoreFrom("A234");
+    private static final BytesStore CHAR8 = BytesStoreFrom("A2345678");
+    private static final BytesStore CHAR16 = BytesStoreFrom("A234567890123456");
+    private static final BytesStore CHAR32 = BytesStoreFrom("A2345678901234567890123456789012");
+    private static final byte[] BUFFER = new byte[32];
+    private final Bit8StringInterner si = new Bit8StringInterner(64);
 
+    private static BytesStore<?, Void> BytesStoreFrom(String s) {
+        return BytesStore.nativeStoreFrom(s.getBytes(StandardCharsets.ISO_8859_1));
+    }
+    
     public static void main(String... args) throws RunnerException, InvocationTargetException, IllegalAccessException {
         Affinity.setAffinity(2);
         if (Jvm.isDebug()) {
@@ -75,7 +79,7 @@ public class ObjectPoolMain {
     }
 
 //    @NotNull
-    protected static String newStringUTF8(NativeBytesStore bs) {
+    protected static String newStringUTF8(BytesStore bs) {
         int length = bs.length();
         bs.read(0, BUFFER, 0, length);
         return new String(BUFFER, 0, length, StandardCharsets.UTF_8);
@@ -144,12 +148,11 @@ public class ObjectPoolMain {
 
 //    @Benchmark
     public String newStringB01() {
-        NativeBytesStore bs = CHAR1;
+        BytesStore bs = CHAR1;
         return newStringHiByte0(bs);
     }
 
-    @NotNull
-    protected String newStringHiByte0(NativeBytesStore bs) {
+    protected String newStringHiByte0(BytesStore bs) {
         int length = bs.length();
         bs.read(0, BUFFER, 0, length);
         return new String(BUFFER, 0, 0, length);
