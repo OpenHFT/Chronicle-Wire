@@ -27,7 +27,7 @@
     </parent>
 
     <artifactId>chronicle-wire-marshallingperf</artifactId>
-    <version>2.24-SNAPSHOT</version>
+    <version>2.24ea-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Wire/MarshallingPerf</name>
     <description>Chronicle-Wire-MarshallingPerf</description>
 
@@ -181,6 +181,17 @@
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
                                     <commandlineArgs>${jvm.requiredArgs} -classpath %classpath run.chronicle.wire.perf.MessageHistoryWireMarshallableMain</commandlineArgs>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>JSONWireMarshallableMain</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>${java.home}/bin/java</executable>
+                                    <commandlineArgs>${jvm.requiredArgs} -classpath %classpath run.chronicle.wire.perf.JSONWireMarshallableMain</commandlineArgs>
                                 </configuration>
                             </execution>
                         </executions>

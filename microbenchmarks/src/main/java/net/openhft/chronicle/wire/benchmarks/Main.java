@@ -19,7 +19,6 @@ package net.openhft.chronicle.wire.benchmarks;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.*;
-import org.jetbrains.annotations.NotNull;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
@@ -173,7 +172,7 @@ public class Main {
         return dataB;
     }
 
-    @Benchmark
+//    @Benchmark
     public Data bytesMarshallable() {
         bytes.clear();
         bytes.writeSkip(4);
@@ -222,7 +221,6 @@ public class Main {
         return writeReadTest2(json);
     }
 
-    @NotNull
     public Data writeReadTest(Wire wire) {
         bytes.clear();
         wire.writeDocument(false, data);
@@ -230,7 +228,6 @@ public class Main {
         return dataB;
     }
 
-    @NotNull
     public Data2 writeReadTest2(Wire wire) {
         bytes.clear();
         wire.writeDocument(false, data2);

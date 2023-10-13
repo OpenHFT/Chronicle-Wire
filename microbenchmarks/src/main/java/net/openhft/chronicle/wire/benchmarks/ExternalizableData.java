@@ -20,15 +20,20 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import net.minidev.json.JSONObject;
-import net.openhft.chronicle.wire.benchmarks.bytes.NativeData;
+import net.openhft.chronicle.bytes.BytesIn;
+import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+import net.openhft.chronicle.wire.WireIn;
+import net.openhft.chronicle.wire.WireOut;
 
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.nio.ByteBuffer;
+import java.nio.BufferUnderflowException;
 
-public class ExternalizableData implements Externalizable {
+public class ExternalizableData extends SelfDescribingMarshallable implements Externalizable {
     int smallInt = 0;
     long longInt = 0;
     double price = 0;
@@ -153,15 +158,6 @@ public class ExternalizableData implements Externalizable {
         generator.close();
     }
 
-    public void copyTextTo(ByteBuffer textBuffer) {
-        for (int i = 0; i < text.length(); i++)
-            textBuffer.put((byte) text.charAt(i));
-    }
-
-    public void copyTo(NativeData nd) {
-        throw new UnsupportedOperationException();
-    }
-
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeDouble(price);
@@ -178,7 +174,33 @@ public class ExternalizableData implements Externalizable {
         setLongInt(in.readLong());
         setSmallInt(in.readInt());
         setFlag(in.readBoolean());
-        setSide((Side) in.readObject());
+        Object s = in.readObject();
+        if (s instanceof Side)
+            setSide((Side) s);
+        else if (s instanceof String)
+            setSide(Side.valueOf((String) s));
+        else
+            throw new IllegalStateException();
         setText((String) in.readObject());
+    }
+
+    @Override
+    public void writeMarshallable(WireOut wire) throws InvalidMarshallableException {
+        wire.write("price").writeDouble(price);
+        wire.write("flag").writeBoolean(flag);
+        wire.write("text").writeString(text);
+        wire.write("side").writeString(side.name());
+        wire.write("smallInt").writeInt(smallInt);
+        wire.write("longInt").writeLong(longInt);
+    }
+
+    @Override
+    public void readMarshallable(WireIn wire) throws IORuntimeException, InvalidMarshallableException {
+        price = wire.read("price").readDouble();
+        flag = wire.read("flag").readBoolean();
+        text = wire.read("text").readString();
+        side = Side.valueOf(wire.read("side").readString());
+        smallInt = wire.read("smallInt").readInt();
+        longInt = wire.read("longInt").readLong();
     }
 }
