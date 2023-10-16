@@ -18,9 +18,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.StopCharTesters;
 import net.openhft.chronicle.bytes.StopCharsTester;
+import net.openhft.chronicle.bytes.internal.HeapBytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
@@ -49,10 +49,9 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 public class JSONWire extends TextWire {
 
     public static final @NotNull Bytes<byte[]> ULL = Bytes.from("ull");
-    @SuppressWarnings("rawtypes")
-    static final BytesStore COMMA = BytesStore.from(",");
     static final ThreadLocal<WeakReference<StopCharsTester>> STRICT_ESCAPED_END_OF_TEXT_JSON = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
     static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_JSON_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT_JSON::escaping;
+    public static final @NotNull HeapBytesStore<byte[]> NULL = HeapBytesStore.wrap("null".getBytes());
     boolean useTypes;
 
     @SuppressWarnings("rawtypes")
@@ -421,7 +420,10 @@ public class JSONWire extends TextWire {
     void escape(@NotNull CharSequence s) {
         bytes.writeUnsignedByte('"');
         if (needsQuotes(s) == Quotes.NONE) {
-            bytes.appendUtf8(s);
+            if (use8bit)
+                bytes.append8bit(s);
+            else
+                bytes.appendUtf8(s);
         } else {
             escape0(s, Quotes.DOUBLE);
         }
@@ -479,8 +481,11 @@ public class JSONWire extends TextWire {
     @NotNull
     @Override
     protected StringBuilder readField(@NotNull StringBuilder sb) {
-        consumePadding();
         int code = peekCode();
+        if (code != '"') {
+            consumePadding(0);
+            code = peekCode();
+        }
         if (code == '}') {
             sb.setLength(0);
             return sb;
@@ -623,7 +628,7 @@ public class JSONWire extends TextWire {
 
         @Override
         public void elementSeparator() {
-            sep = COMMA;
+            sep = ',';
         }
 
         @Override
@@ -662,12 +667,20 @@ public class JSONWire extends TextWire {
 
         @Override
         protected void endField() {
-            sep = COMMA;
+            sep = ',';
         }
 
         @Override
         protected void fieldValueSeperator() {
-            bytes.writeUnsignedByte(':');
+            bytes.rawWriteByte((byte) ':');
+        }
+
+        @Override
+        void prependSeparator() {
+            if (sep > ' ')
+                bytes.writeByte((byte) (sep & 0xFF));
+
+            sep = EMPTY;
         }
 
         @Override

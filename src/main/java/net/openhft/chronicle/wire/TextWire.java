@@ -18,6 +18,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.internal.HeapBytesStore;
 import net.openhft.chronicle.bytes.ref.*;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
@@ -68,6 +70,8 @@ public class TextWire extends YamlWireOut<TextWire> {
     static final Bytes<?> META_DATA = Bytes.from("!!meta-data");
     @Deprecated(/* for removal in x.26, make default true in x.25 */)
     static final boolean IAE_ON_CNF = Jvm.getBoolean("class.not.found.for.missing.class.alias", false);
+    public static final @NotNull HeapBytesStore<byte[]> TRUE_COMMA = HeapBytesStore.wrap("true,".getBytes());
+    public static final @NotNull HeapBytesStore<byte[]> FALSE_COMMA = HeapBytesStore.wrap("false,".getBytes());
 
     static {
         IOTools.unmonitor(BINARY);
@@ -660,12 +664,18 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     @NotNull
     @Override
+    public ValueIn read(String fieldName) {
+        return read(fieldName, fieldName.hashCode(), null);
+    }
+
+    @NotNull
+    @Override
     public ValueIn read(@NotNull WireKey key) {
         return read(key.name(), key.code(), key.defaultValue());
     }
 
     private ValueIn read(@NotNull CharSequence keyName, int keyCode, Object defaultValue) {
-        consumePadding();
+        consumePadding(0);
         ValueInState curr = valueIn.curr();
         final StringBuilder stringBuilder = acquireStringBuilder();
         // did we save the position last time
@@ -799,10 +809,12 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     public void parseUntil(@NotNull StringBuilder sb, @NotNull StopCharTester testers) {
-        if (use8bit)
-            bytes.parse8bit(sb, testers);
-        else
-            bytes.parseUtf8(sb, testers);
+        sb.setLength(0);
+        if (use8bit) {
+            BytesInternal.read8bitAndAppend(bytes, sb, testers);
+        } else {
+            BytesInternal.parseUtf8(bytes, sb, testers);
+        }
     }
 
     public void parseUntil(@NotNull StringBuilder sb, @NotNull StopCharsTester testers) {
@@ -1067,7 +1079,10 @@ public class TextWire extends YamlWireOut<TextWire> {
                         if (a instanceof Bytes) {
                             bytes.parse8bit((Bytes) a, getStrictEscapingEndOfText());
                         } else if (use8bit) {
-                            bytes.parse8bit((StringBuilder) a, getStrictEscapingEndOfText());
+                            @NotNull StopCharsTester stopCharsTester = getStrictEscapingEndOfText();
+                            StringBuilder sb = (StringBuilder) a;
+                            sb.setLength(0);
+                            AppendableUtil.read8bitAndAppend(bytes, sb, stopCharsTester);
                         } else {
                             bytes.parseUtf8(a, getStrictEscapingEndOfText());
                         }
@@ -1111,9 +1126,17 @@ public class TextWire extends YamlWireOut<TextWire> {
 
         private <ACS extends Appendable & CharSequence> void readText(@NotNull ACS a, @NotNull StopCharTester quotes) {
             bytes.readSkip(1);
-            if (use8bit)
-                bytes.parse8bit(a, quotes);
-            else
+            if (use8bit) {
+                if (a instanceof StringBuilder) {
+                    StringBuilder sb = (StringBuilder) a;
+                    (sb).setLength(0);
+                    BytesInternal.read8bitAndAppend(bytes, sb, quotes);
+                } else {
+                    Bytes bytes2 = (Bytes) a;
+                    bytes2.clear();
+                    BytesInternal.read8bitAndAppend(bytes, bytes2, quotes);
+                }
+            } else
                 bytes.parseUtf8(a, quotes);
             unescape(a);
             consumePadding(1);
@@ -2120,6 +2143,13 @@ public class TextWire extends YamlWireOut<TextWire> {
 
         @Override
         public boolean bool() {
+            if (bytes.startsWith(TRUE_COMMA)) {
+                bytes.readSkip(5);
+                return true;
+            } else if (bytes.startsWith(FALSE_COMMA)) {
+                bytes.readSkip(6);
+                return true;
+            }
             consumePadding();
             final StringBuilder stringBuilder = acquireStringBuilder();
             if (textTo(stringBuilder) == null)

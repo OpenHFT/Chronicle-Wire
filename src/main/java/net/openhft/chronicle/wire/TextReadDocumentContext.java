@@ -19,9 +19,12 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.internal.BytesInternal;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+
+import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 
 public class TextReadDocumentContext implements ReadDocumentContext {
     public static final BytesStore<?, ?> SOD_SEP = BytesStore.from("---");
@@ -117,7 +120,8 @@ public class TextReadDocumentContext implements ReadDocumentContext {
 
     @Override
     public void reset() {
-        close();
+        wire.getValueIn().resetState();
+
         readLimit = 0;
         readPosition = 0;
         start = -1;

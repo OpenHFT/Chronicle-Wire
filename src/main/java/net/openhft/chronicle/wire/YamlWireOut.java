@@ -60,14 +60,17 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     static final String NULL = "!null \"\"";
     static final BitSet STARTS_QUOTE_CHARS = new BitSet();
     static final BitSet QUOTE_CHARS = new BitSet();
-    static final BytesStore COMMA_SPACE = BytesStore.from(", ");
-    static final BytesStore COMMA_NEW_LINE = BytesStore.from(",\n");
-    static final BytesStore NEW_LINE = BytesStore.from("\n");
-    static final BytesStore EMPTY_AFTER_COMMENT = BytesStore.wrap(new byte[0]); // not the same as EMPTY so we can check this value.
-    static final BytesStore EMPTY = BytesStore.from("");
-    static final BytesStore SPACE = BytesStore.from(" ");
-    static final BytesStore END_FIELD = NEW_LINE;
+    static final char COMMA_SPACE = ',' + (' ' << 8);
+    static final char COMMA_NEW_LINE = ',' + ('\n' << 8);
+    static final char NEW_LINE = '\n';
+    static final char EMPTY_AFTER_COMMENT = ' ' << 8; // not the same as EMPTY so we can check this value.
+    static final char EMPTY = 0;
+    static final char SPACE = ' ';
+    static final char END_FIELD = NEW_LINE;
     static final char[] HEXADECIMAL = "0123456789ABCDEF".toCharArray();
+
+    static final byte[] TRUE = "true".getBytes();
+    static final byte[] FALSE = "false".getBytes();
 
     static {
         IOTools.unmonitor(TYPE);
@@ -390,9 +393,9 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         protected int indentation = 0;
         @NotNull
-        protected List<BytesStore> seps = new ArrayList<>(4);
+        protected List<Character> seps = new ArrayList<>(4);
         @NotNull
-        protected BytesStore sep = BytesStore.empty();
+        protected char sep = EMPTY;
         protected boolean leaf = false;
         protected boolean dropDefault = false;
         @Nullable
@@ -412,7 +415,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         public void resetState() {
             indentation = 0;
             seps.clear();
-            sep = empty();
+            sep = EMPTY;
             leaf = false;
             dropDefault = false;
             eventName = null;
@@ -420,12 +423,13 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         void prependSeparator() {
             appendSep();
-            sep = BytesStore.empty();
+            sep = EMPTY;
         }
 
         protected void appendSep() {
-            append(sep);
-            trimWhiteSpace();
+            if (sep > 0)
+                bytes.writeUnsignedByte(sep);
+
             if (bytes.endsWith('\n') || sep == EMPTY_AFTER_COMMENT)
                 indent();
         }
@@ -439,7 +443,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             if (isLeaf == leaf)
                 return leaf;
             leaf = isLeaf;
-            if (!isLeaf && sep.startsWith(','))
+            if (!isLeaf && (byte) sep == ',')
                 elementSeparator();
             return !leaf;
         }
@@ -462,7 +466,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 if (leaf) {
                     sep = COMMA_SPACE;
                 } else {
-                    sep = BytesStore.empty();
+                    sep = EMPTY;
                     bytes.writeUnsignedByte('\n');
                 }
             } else {
@@ -480,7 +484,14 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 writeSavedEventName();
             }
             prependSeparator();
-            append(flag == null ? nullOut() : flag ? "true" : "false");
+            if (flag == null) {
+                append(nullOut());
+            } else if (flag) {
+                bytes.write(TRUE,  0, 4);
+            } else {
+                bytes.write(FALSE, 0, 5);
+            }
+
             elementSeparator();
             return wireOut();
         }
@@ -608,7 +619,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             typePrefix(type);
             append(Base64.getEncoder().encodeToString(bytesStore.toByteArray()));
             endTypePrefix();
-            append(END_FIELD);
+            writeChar(END_FIELD);
             elementSeparator();
 
             return wireOut();
@@ -686,7 +697,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             final StringBuilder stringBuilder = acquireStringBuilder();
             stringBuilder.appendCodePoint(codepoint);
             text(stringBuilder);
-            sep = empty();
+            sep = EMPTY;
             return wireOut();
         }
 
@@ -954,7 +965,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             bytes.writeUnsignedByte('!');
             append(typeName);
             bytes.writeUnsignedByte(' ');
-            sep = BytesStore.empty();
+            sep = EMPTY;
             return this;
         }
 
@@ -1100,9 +1111,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             if (dropDefault) {
                 writeSavedEventName();
             }
-            if (!sep.isEmpty()) {
-                append(sep);
-                trimWhiteSpace();
+            if (sep != EMPTY) {
+                bytes.writeUnsignedByte(sep);
                 indent();
                 sep = EMPTY;
             }
@@ -1192,9 +1202,9 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 newLine();
 
             object.writeMarshallable(wireOut());
-            @Nullable BytesStore popSep = null;
+            @Nullable char popSep = 1;
             if (wasLeaf) {
-                if (sep.endsWith(' '))
+                if (sep == ' ' || (sep >> 8) == ' ')
                     append(" ");
                 trimWhiteSpace();
                 leaf = false;
@@ -1205,8 +1215,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 popState();
                 newLine();
             }
-            if (sep.startsWith(',')) {
-                append(sep, 1, sep.length() - 1);
+            if ((byte) sep == ',') {
+                bytes.writeUnsignedByte(',');
                 if (!wasLeaf)
                     indent();
 
@@ -1217,7 +1227,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
             leaf = wasLeaf0;
 
-            if (popSep != null)
+            if (popSep != 1)
                 sep = popSep;
 
             elementSeparator();
@@ -1246,16 +1256,16 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 newLine();
 
             writeSerializable(object);
-            @Nullable BytesStore popSep = null;
+            @Nullable char popSep = '1';
             if (wasLeaf) {
                 leaf = false;
-            } else if (seps.size() > 0) {
+            } else if (!seps.isEmpty()) {
                 popSep = seps.get(seps.size() - 1);
                 popState();
                 newLine();
             }
-            if (sep.startsWith(',')) {
-                append(sep, 1, sep.length() - 1);
+            if ((byte) sep == ',') {
+                bytes.writeUnsignedByte(',');
                 trimWhiteSpace();
                 if (!wasLeaf)
                     indent();
@@ -1265,7 +1275,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             }
             BytesUtil.combineDoubleNewline(bytes);
             bytes.writeUnsignedByte(object instanceof Externalizable ? ']' : '}');
-            if (popSep != null)
+            if (popSep != 1)
                 sep = popSep;
             if (indentation == 0) {
                 afterClose();
@@ -1289,8 +1299,16 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         protected void afterClose() {
             newLine();
-            append(sep);
+            appendAllSep();
             sep = EMPTY;
+        }
+
+        private void appendAllSep() {
+            if ((byte) sep != 0) {
+                bytes.writeUnsignedByte(sep);
+                if (sep > 255)
+                    bytes.writeUnsignedByte(sep >> 8);
+            }
         }
 
         protected void afterOpen() {
@@ -1320,7 +1338,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             if (dropDefault) {
                 eventName = "";
             } else {
-                append(sep);
+                appendAllSep();
                 writeTwo('"', '"');
                 endEvent();
             }
@@ -1377,19 +1395,19 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             if (bytes.readByte(bytes.writePosition() - 1) <= ' ')
                 bytes.writeSkip(-1);
             fieldValueSeperator();
-            sep = empty();
+            sep = EMPTY;
         }
 
         public void writeComment(@NotNull CharSequence s) {
 
             if (hasCommentAnnotation) {
-                if (!sep.endsWith('\n'))
+                if (sep == '\n' || (sep >> 8) == '\n')
                     return;
                 sep = COMMA_SPACE;
             } else
                 prependSeparator();
 
-            append(sep);
+            appendAllSep();
 
             if (hasCommentAnnotation)
                 writeTwo('\t', '\t');
