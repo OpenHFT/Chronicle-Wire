@@ -18,9 +18,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.StopCharTesters;
 import net.openhft.chronicle.bytes.StopCharsTester;
+import net.openhft.chronicle.bytes.internal.HeapBytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
@@ -49,10 +49,9 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 public class JSONWire extends TextWire {
 
     public static final @NotNull Bytes<byte[]> ULL = Bytes.from("ull");
-    @SuppressWarnings("rawtypes")
-    static final BytesStore COMMA = BytesStore.from(",");
     static final ThreadLocal<WeakReference<StopCharsTester>> STRICT_ESCAPED_END_OF_TEXT_JSON = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
     static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_JSON_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT_JSON::escaping;
+    public static final @NotNull HeapBytesStore<byte[]> NULL = HeapBytesStore.wrap("null".getBytes());
     boolean useTypes;
 
     @SuppressWarnings("rawtypes")
@@ -126,31 +125,27 @@ public class JSONWire extends TextWire {
 
             @Override
             public double float64() {
-                consumePadding();
+                int codePoint = peekCode();
+                if (codePoint <= ' ' || codePoint == ',') {
+                    consumePadding0(0, codePoint);
+                    codePoint = peekCode();
+                }
                 valueIn.skipType();
-                switch (peekCode()) {
+                switch (codePoint) {
                     case '[':
                     case '{':
                         Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a double.");
                         return 0;
                 }
 
-                boolean isNull;
-
-                long l = bytes.readLimit();
-                try {
-                    bytes.readLimit(bytes.readPosition() + 4);
-                    isNull = "null".contentEquals(bytes);
-                } finally {
-                    bytes.readLimit(l);
-                }
-
-                if (isNull) {
-                    bytes.readSkip("null".length());
+                final double v;
+                if (bytes.startsWith(NULL)) {
+                    bytes.readSkip(4);
                     consumePadding();
+                    v = Double.NaN;
+                } else {
+                    v = bytes.parseDouble();
                 }
-
-                final double v = isNull ? Double.NaN : bytes.parseDouble();
                 checkRewind();
                 return v;
             }
@@ -419,13 +414,16 @@ public class JSONWire extends TextWire {
 
     @Override
     void escape(@NotNull CharSequence s) {
-        bytes.writeUnsignedByte('"');
+        bytes.rawWriteByte((byte) '"');
         if (needsQuotes(s) == Quotes.NONE) {
-            bytes.appendUtf8(s);
+            if (use8bit)
+                bytes.append8bit(s);
+            else
+                bytes.appendUtf8(s);
         } else {
             escape0(s, Quotes.DOUBLE);
         }
-        bytes.writeUnsignedByte('"');
+        bytes.rawWriteByte((byte) '"');
     }
 
     // https://www.rfc-editor.org/rfc/rfc7159#section-7
@@ -467,6 +465,7 @@ public class JSONWire extends TextWire {
             }
         }
     }
+
     @Override
     public ValueOut writeEvent(Class expectedType, Object eventKey) throws InvalidMarshallableException {
         return super.writeEvent(String.class, "" + eventKey);
@@ -479,8 +478,24 @@ public class JSONWire extends TextWire {
     @NotNull
     @Override
     protected StringBuilder readField(@NotNull StringBuilder sb) {
-        consumePadding();
         int code = peekCode();
+        if (code == '"') {
+            bytes.readSkip(1);
+
+            parseUntil(sb, getEscapingQuotes());
+
+            consumePadding();
+            code = readCode();
+            if (code != ':')
+                throw new UnsupportedOperationException("Expected a : at " + bytes.toDebugString() + " was " + (char) code);
+            return sb;
+        }
+        return readFieldOther(sb, code);
+    }
+
+    @NotNull
+    private StringBuilder readFieldOther(@NotNull StringBuilder sb, int code) {
+        consumePadding();
         if (code == '}') {
             sb.setLength(0);
             return sb;
@@ -508,6 +523,39 @@ public class JSONWire extends TextWire {
     @Deprecated
     protected Supplier<StopCharsTester> strictEndOfTextEscaping() {
         return STRICT_END_OF_TEXT_JSON_ESCAPING;
+    }
+
+    public void consumePadding(int commas) {
+        int codePoint = peekCode();
+        if (codePoint > ' ' && codePoint != ',')
+            return;
+        consumePadding0(commas, codePoint);
+    }
+
+    private void consumePadding0(int commas, int codePoint) {
+        for (; ; ) {
+            switch (codePoint) {
+                case ',':
+                    if (valueIn.isASeparator(peekCodeNext()) && commas-- <= 0)
+                        return;
+                    bytes.readSkip(1);
+                    if (commas == 0)
+                        return;
+                    break;
+                case ' ':
+                case '\t':
+                    bytes.readSkip(1);
+                    break;
+                case '\n':
+                case '\r':
+                    this.lineStart = bytes.readPosition() + 1;
+                    bytes.readSkip(1);
+                    break;
+                default:
+                    return;
+            }
+            codePoint = peekCode();
+        }
     }
 
     class JSONReadDocumentContext extends TextReadDocumentContext {
@@ -579,8 +627,10 @@ public class JSONWire extends TextWire {
 
         @Override
         protected void trimWhiteSpace() {
-            if (bytes.endsWith('\n') || bytes.endsWith(' '))
-                bytes.writeSkip(-1);
+            long pos = bytes.writePosition();
+            int ch = bytes.peekUnsignedByte(pos - 1);
+            if (ch == '\n' || ch == ' ')
+                bytes.writePosition(pos - 1);
         }
 
         @Override
@@ -623,7 +673,7 @@ public class JSONWire extends TextWire {
 
         @Override
         public void elementSeparator() {
-            sep = COMMA;
+            sep = ',';
         }
 
         @Override
@@ -662,12 +712,20 @@ public class JSONWire extends TextWire {
 
         @Override
         protected void endField() {
-            sep = COMMA;
+            sep = ',';
         }
 
         @Override
         protected void fieldValueSeperator() {
-            bytes.writeUnsignedByte(':');
+            bytes.rawWriteByte((byte) ':');
+        }
+
+        @Override
+        void prependSeparator() {
+            if (sep > ' ')
+                bytes.writeByte((byte) (sep & 0xFF));
+
+            sep = EMPTY;
         }
 
         @Override

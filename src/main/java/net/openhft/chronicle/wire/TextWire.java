@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.internal.HeapBytesStore;
 import net.openhft.chronicle.bytes.ref.*;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
@@ -68,6 +69,8 @@ public class TextWire extends YamlWireOut<TextWire> {
     static final Bytes<?> META_DATA = Bytes.from("!!meta-data");
     @Deprecated(/* for removal in x.26, make default true in x.25 */)
     static final boolean IAE_ON_CNF = Jvm.getBoolean("class.not.found.for.missing.class.alias", false);
+    public static final @NotNull HeapBytesStore<byte[]> TRUE_COMMA = HeapBytesStore.wrap("true,".getBytes());
+    public static final @NotNull HeapBytesStore<byte[]> FALSE_COMMA = HeapBytesStore.wrap("false,".getBytes());
 
     static {
         IOTools.unmonitor(BINARY);
@@ -381,14 +384,6 @@ public class TextWire extends YamlWireOut<TextWire> {
         consumePadding();
         try {
             int ch = peekCode();
-            // 10xx xxxx, 1111 xxxx
-            if (ch > 0x80 && ((ch & 0xC0) == 0x80 || (ch & 0xF0) == 0xF0)) {
-                throw new IllegalStateException("Attempting to read binary as TextWire ch=" + Integer.toHexString(ch));
-            }
-            if (ch < 0 || ch == '!' || ch == '[' || ch == '{') {
-                sb.setLength(0);
-                return sb;
-            }
             if (ch == '?') {
                 bytes.readSkip(1);
                 consumePadding();
@@ -404,6 +399,13 @@ public class TextWire extends YamlWireOut<TextWire> {
                 if (ch != ':')
                     throw new UnsupportedOperationException("Expected a : at " + bytes.toDebugString() + " was " + (char) ch);
 
+            } else if (ch > 0x80 && ((ch & 0xC0) == 0x80 || (ch & 0xF0) == 0xF0)) {
+                throw new IllegalStateException("Attempting to read binary as TextWire ch=" + Integer.toHexString(ch));
+
+            } else if (ch < 0 || ch == '!' || ch == '[' || ch == '{') {
+                sb.setLength(0);
+                return sb;
+
             } else if (ch == '\'') {
                 bytes.readSkip(1);
 
@@ -413,10 +415,6 @@ public class TextWire extends YamlWireOut<TextWire> {
                 ch = readCode();
                 if (ch != ':')
                     throw new UnsupportedOperationException("Expected a : at " + bytes.toDebugString() + " was " + (char) ch);
-
-            } else if (ch < 0) {
-                sb.setLength(0);
-                return sb;
 
             } else {
                 parseUntil(sb, getEscapingEndOfText());
@@ -656,6 +654,12 @@ public class TextWire extends YamlWireOut<TextWire> {
         if (bytes.readRemaining() < 1)
             return -1;
         return bytes.readUnsignedByte();
+    }
+
+    @NotNull
+    @Override
+    public ValueIn read(String fieldName) {
+        return read(fieldName, fieldName.hashCode(), null);
     }
 
     @NotNull
@@ -2120,6 +2124,13 @@ public class TextWire extends YamlWireOut<TextWire> {
 
         @Override
         public boolean bool() {
+            if (bytes.startsWith(TRUE_COMMA)) {
+                bytes.readSkip(5);
+                return true;
+            } else if (bytes.startsWith(FALSE_COMMA)) {
+                bytes.readSkip(6);
+                return true;
+            }
             consumePadding();
             final StringBuilder stringBuilder = acquireStringBuilder();
             if (textTo(stringBuilder) == null)

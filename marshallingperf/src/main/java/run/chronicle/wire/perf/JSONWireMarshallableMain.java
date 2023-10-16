@@ -34,8 +34,6 @@ public class JSONWireMarshallableMain {
                 readHist.reset();
                 writeHist.reset();
             }
-            if (i >= -1000)
-                Thread.yield();
         }
 
         histoOut("read", JSONWireMarshallableMain.class, readHist);

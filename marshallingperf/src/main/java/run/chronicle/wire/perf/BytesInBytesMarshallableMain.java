@@ -43,8 +43,6 @@ public class BytesInBytesMarshallableMain {
                 readHist.reset();
                 writeHist.reset();
             }
-            if (i >= -1000)
-                Thread.yield();
         }
 
         histoOut("read", BytesInBytesMarshallableMain.class, readHist);

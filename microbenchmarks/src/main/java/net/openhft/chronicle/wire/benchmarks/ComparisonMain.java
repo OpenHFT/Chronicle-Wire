@@ -22,17 +22,16 @@ import com.fasterxml.jackson.core.JsonParser;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONStyle;
 import net.minidev.json.parser.JSONParser;
-import net.openhft.affinity.AffinityLock;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.wire.BracketType;
 import net.openhft.chronicle.wire.JSONWire;
-import net.openhft.chronicle.wire.SerializationStrategies;
+import net.openhft.chronicle.wire.ReadMarshallable;
 import net.openhft.chronicle.wire.WriteMarshallable;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.profile.AsyncProfiler;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
@@ -49,6 +48,27 @@ import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
+/*
+Benchmark                                       Mode      Cnt       Score   Error  Units
+ComparisonMain.jacksonWithTextCBytes          sample  6850560    1651.832 ± 4.540  ns/op
+ComparisonMain.jacksonWithTextCBytes:p0.00    sample              990.000          ns/op
+ComparisonMain.jacksonWithTextCBytes:p0.50    sample             1400.000          ns/op
+ComparisonMain.jacksonWithTextCBytes:p0.90    sample             2380.000          ns/op
+ComparisonMain.jacksonWithTextCBytes:p0.95    sample             2608.000          ns/op
+ComparisonMain.jacksonWithTextCBytes:p0.99    sample             3048.000          ns/op
+ComparisonMain.jacksonWithTextCBytes:p0.999   sample             4760.000          ns/op
+ComparisonMain.jacksonWithTextCBytes:p0.9999  sample           208896.000          ns/op
+ComparisonMain.jacksonWithTextCBytes:p1.00    sample           619520.000          ns/op
+ComparisonMain.jsonWire                       sample  7763727    1025.778 ± 0.312  ns/op
+ComparisonMain.jsonWire:p0.00                 sample              910.000          ns/op
+ComparisonMain.jsonWire:p0.50                 sample              970.000          ns/op
+ComparisonMain.jsonWire:p0.90                 sample             1160.000          ns/op
+ComparisonMain.jsonWire:p0.95                 sample             1210.000          ns/op
+ComparisonMain.jsonWire:p0.99                 sample             1290.000          ns/op
+ComparisonMain.jsonWire:p0.999                sample             1850.000          ns/op
+ComparisonMain.jsonWire:p0.9999               sample            12432.000          ns/op
+ComparisonMain.jsonWire:p1.00                 sample           103168.000          ns/op
+ */
 /**
  * Compare JSON writing/parsing
  */
@@ -64,9 +84,8 @@ public class ComparisonMain {
     JSONParser jsonParser = new JSONParser(JSONParser.MODE_JSON_SIMPLE);
     // {"smallInt":123,"longInt":1234567890,"price":1234.0,"flag":true,"text":"Hello World","side":"Sell"}
     com.fasterxml.jackson.core.JsonFactory jsonFactory = new com.fasterxml.jackson.core.JsonFactory(); // or, for data binding, org.codehaus.jackson.mapper.MappingJsonFactory
-    UnsafeBuffer directBuffer = new UnsafeBuffer(ByteBuffer.allocateDirect(128));
     Bytes<?> bytes = Bytes.allocateDirect(512).unchecked(true);
-    JSONWire jsonWire = new JSONWire(bytes);
+    JSONWire jsonWire = new JSONWire(bytes, true);
     InputStream inputStream = bytes.inputStream();
     OutputStream outputStream = bytes.outputStream();
     Writer writer = bytes.writer();
@@ -120,27 +139,27 @@ public class ComparisonMain {
                 }
             }
         } else {
-            try (AffinityLock affinityLock = AffinityLock.acquireLock(Jvm.getProperty("affinity", "any"))) {
-                int time = Jvm.getBoolean("longTest") ? 30 : 2;
-                System.out.println("measurementTime: " + time + " secs");
-                Options opt = new OptionsBuilder()
-                        .include(ComparisonMain.class.getSimpleName())
-                        .warmupIterations(5)
-                        .measurementIterations(5)
-                        .threads(2)
-                        .forks(2)
-                        .mode(Mode.SampleTime)
-                        .warmupTime(TimeValue.seconds(1))
-                        .measurementTime(TimeValue.seconds(time))
-                        .timeUnit(TimeUnit.NANOSECONDS)
-                        .build();
+            int time = 10; // Jvm.getBoolean("longTest") ? 30 : 2;
+            System.out.println("measurementTime: " + time + " secs");
+            Options opt = new OptionsBuilder()
+                    .include(ComparisonMain.class.getSimpleName())
+                    .warmupIterations(5)
+                    .measurementIterations(5)
+                    .threads(5)
+                    .forks(1)
+                    .mode(Mode.SampleTime)
+                    .warmupTime(TimeValue.seconds(1))
+                    .measurementTime(TimeValue.seconds(time))
+                    .timeUnit(TimeUnit.NANOSECONDS)
+                    .jvmArgsAppend("-Xmx64m")
+//                    .addProfiler(AsyncProfiler.class)
+                    .build();
 
-                new Runner(opt).run();
-            }
+            new Runner(opt).run();
         }
     }
 
-    @Benchmark
+    //    @Benchmark
     public Data snakeYaml() {
         s = yaml.dumpAsMap(data);
         Data data = yaml.load(s);
@@ -169,7 +188,7 @@ public class ComparisonMain {
         data.readFrom(jsonObject);
     }
 
-    @Benchmark
+    //    @Benchmark
     public ExternalizableData jackson() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         JsonGenerator generator = jsonFactory.createGenerator(baos);
@@ -182,7 +201,7 @@ public class ComparisonMain {
         return data2;
     }
 
-    @Benchmark
+//        @Benchmark
     public ExternalizableData jacksonWithCBytes() throws IOException {
         bytes.clear();
         generator = jsonFactory.createGenerator(outputStream);
@@ -194,7 +213,7 @@ public class ComparisonMain {
         return data2;
     }
 
-    @Benchmark
+        @Benchmark
     public ExternalizableData jacksonWithTextCBytes() throws IOException {
         bytes.clear();
         generator = jsonFactory.createGenerator(writer);
@@ -206,7 +225,7 @@ public class ComparisonMain {
         return data2;
     }
 
-    @Benchmark
+    //    @Benchmark
     public Object externalizable() throws IOException, ClassNotFoundException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -219,7 +238,7 @@ public class ComparisonMain {
         }
     }
 
-    @Benchmark
+    //    @Benchmark
     public Object externalizableWithCBytes() throws IOException, ClassNotFoundException {
         bytes.clear();
         ObjectOutputStream oos = new ObjectOutputStream(outputStream);
@@ -233,13 +252,15 @@ public class ComparisonMain {
     @Benchmark
     public Object jsonWire() {
         jsonWire.reset();
-        jsonWire.getValueOut().marshallable((WriteMarshallable) data);
+        ((WriteMarshallable) data).writeMarshallable(jsonWire);
+        ((ReadMarshallable) data2).readMarshallable(jsonWire);
+//        jsonWire.getValueOut().marshallable((WriteMarshallable) data);
         // below is faster than jsonWire.getValueIn().marshallable((ReadMarshallable) data2) as it does not read length first
-        SerializationStrategies.MARSHALLABLE.readUsing(ExternalizableData.class, data2, jsonWire.getValueIn(), BracketType.MAP);
-        return data2;
+//        SerializationStrategies.MARSHALLABLE.readUsing(ExternalizableData.class, data2, jsonWire.getValueIn(), BracketType.MAP);
+        return data;
     }
 
-    @Benchmark
+//        @Benchmark
     public Object fastjson() {
         bytes.clear();
         // TODO: JSONWriter

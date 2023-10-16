@@ -151,7 +151,7 @@ public class ExternalizableData extends SelfDescribingMarshallable implements Ex
         generator.writeStartObject();
         generator.writeNumberField("price", price);
         generator.writeBooleanField("flag", flag);
-        generator.writeStringField("text", text.toString());
+        generator.writeStringField("text", text);
         generator.writeStringField("side", side.name());
         generator.writeNumberField("smallInt", smallInt);
         generator.writeNumberField("longInt", longInt);
