@@ -35,8 +35,7 @@ import java.util.stream.IntStream;
 
 import static junit.framework.TestCase.assertNull;
 import static net.openhft.chronicle.wire.WireType.JSON;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 public class JSONWireTest extends WireTestCommon {
     static void testCopyToBinaryAndBack(CharSequence str) {
@@ -518,5 +517,18 @@ public class JSONWireTest extends WireTestCommon {
                 data.add(reader.text());
             }
         }
+    }
+
+    @Test
+    public void classReference() {
+        DtoWithClassReference dtoWithClassReference = new DtoWithClassReference();
+        dtoWithClassReference.implClass = this.getClass();
+        assertNotEquals(
+            "{\"implClass\":!type net.openhft.chronicle.wire.JSONWireTest}",
+            JSON.asString(dtoWithClassReference));
+    }
+
+    private static class DtoWithClassReference extends SelfDescribingMarshallable {
+        private Class<?> implClass;
     }
 }
