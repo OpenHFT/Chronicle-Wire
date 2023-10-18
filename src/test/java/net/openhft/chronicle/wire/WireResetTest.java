@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.Closeable;
 import org.junit.Test;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -97,6 +98,16 @@ public class WireResetTest extends WireTestCommon {
 
     }
 
+    /**
+     * Reproduction of <a href="https://github.com/OpenHFT/Chronicle-Wire/issues/745">this issue</a>
+     */
+    @Test
+    public void canDeepResetOnDtosContainingLocalDates() {
+        Event e = new Event();
+        e.someDate = LocalDate.now();
+        e.reset();
+    }
+
     public static class Event extends SelfDescribingMarshallable implements Closeable {
 
         private boolean isClosed;
@@ -104,6 +115,7 @@ public class WireResetTest extends WireTestCommon {
         Identifier identifier = new Identifier();
         Collection<Identifier> ids = new LinkedList<>();
         String payload;
+        LocalDate someDate;
 
         @Override
         public void close() {
