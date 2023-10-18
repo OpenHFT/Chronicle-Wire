@@ -41,4 +41,11 @@ public interface DynamicEnum extends CoreDynamicEnum, Marshallable {
             fieldInfo.copy(e, nums);
         }
     }
+
+    /**
+     * Not resettable, treat as immutable.
+     */
+    default void reset() {
+        throw new UnsupportedOperationException();
+    }
 }

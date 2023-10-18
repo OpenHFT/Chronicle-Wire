@@ -1052,11 +1052,13 @@ public class WireMarshaller<T> {
     static class ObjectFieldAccess extends FieldAccess {
         private final Class type;
         private final AsMarshallable asMarshallable;
+        private final boolean resettable;
 
         ObjectFieldAccess(@NotNull Field field, Boolean isLeaf) {
             super(field, isLeaf);
             asMarshallable = Jvm.findAnnotation(field, AsMarshallable.class);
             type = field.getType();
+            resettable = !DynamicEnum.class.isAssignableFrom(type);
         }
 
         @Override
@@ -1119,7 +1121,7 @@ public class WireMarshaller<T> {
 
         @Override
         protected boolean isResettable() {
-            return true;
+            return resettable;
         }
 
     }
