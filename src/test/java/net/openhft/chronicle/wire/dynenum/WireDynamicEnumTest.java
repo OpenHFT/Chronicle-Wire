@@ -94,6 +94,22 @@ public class WireDynamicEnumTest extends WireTestCommon {
     }
 
     @Test
+    public void dontResetDynamicEnum() {
+        HoldsWDENum x = new HoldsWDENum(null, null);
+        assertEquals("!HoldsWDENum {\n" +
+                "  a: !!null \"\",\n" +
+                "  b: !!null \"\"\n" +
+                "}\n", x.toString());
+
+        HoldsWDENum a = new HoldsWDENum(WDENums.ONE, WDENums.TWO);
+        Wires.reset(a);
+        assertEquals("!HoldsWDENum {\n" +
+                "  a: !!null \"\",\n" +
+                "  b: !!null \"\"\n" +
+                "}\n", a.toString());
+    }
+
+    @Test
     public void addedEnum() throws NoSuchFieldException {
         doAddedEnum(WireType.TEXT);
     }
