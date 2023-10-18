@@ -964,6 +964,28 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         @Override
+        public <E> E object(@Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
+            YamlToken current = yt.current();
+            if (current == YamlToken.ALIAS) {
+                String alias = yt.text();
+                Object o = anchorValues.get(alias);
+                yt.next();
+                if (o == null)
+                    throw new IllegalStateException("Unknown alias " + alias + " with no corresponding anchor");
+                return (E) o;
+            } else if (current == YamlToken.ANCHOR) {
+                String alias = yt.text();
+                yt.next();
+                Object o = Wires.object0(this, using, clazz, bestEffort);
+                // Overwriting of anchor values is permitted
+                anchorValues.put(alias, o);
+                return (E) o;
+            }
+
+            return Wires.object0(this, using, clazz, bestEffort);
+        }
+
+        @Override
         public BracketType getBracketType() {
             switch (yt.current()) {
                 default:
@@ -1922,7 +1944,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
                 case ALIAS:
                     alias = yt.text();
-                    o = anchorValues.get(yt.text());
+                    o = anchorValues.get(alias);
                     if (o == null)
                         throw new IllegalStateException("Unknown alias " + alias + " with no corresponding anchor");
 
