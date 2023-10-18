@@ -488,7 +488,13 @@ public class WireMarshaller<T> {
     public void reset(T o) {
         try {
             for (FieldAccess field : fields) {
-                field.copy(defaultValue, o);
+                if (field.isResettable()) {
+                    Object value = field.field.get(o);
+                    if (value != null)
+                        Wires.reset(value);
+                } else {
+                    field.copy(defaultValue, o);
+                }
             }
         } catch (IllegalAccessException e) {
             // should never happen as the types should match.
@@ -980,6 +986,11 @@ public class WireMarshaller<T> {
                 return false;
             }
         }
+
+        protected boolean isResettable() {
+            return false;
+        }
+
     }
 
     static class IntValueAccess extends FieldAccess {
@@ -1105,6 +1116,12 @@ public class WireMarshaller<T> {
         public void getAsBytes(Object o, @NotNull Bytes<?> bytes) throws IllegalAccessException {
             bytes.writeUtf8(String.valueOf(field.get(o)));
         }
+
+        @Override
+        protected boolean isResettable() {
+            return true;
+        }
+
     }
 
     static class StringFieldAccess extends FieldAccess {
@@ -1124,7 +1141,7 @@ public class WireMarshaller<T> {
 
         @Override
         public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
-            bytes.writeUtf8((String) unsafeGetObject(o, offset));
+            bytes.writeUtf8(unsafeGetObject(o, offset));
         }
 
     }
@@ -1194,7 +1211,7 @@ public class WireMarshaller<T> {
 
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            @NotNull Bytes<?> bytes = (Bytes) unsafeGetObject(o, offset);
+            @NotNull Bytes<?> bytes = unsafeGetObject(o, offset);
             if (bytes == null)
                 unsafePutObject(o, offset, bytes = Bytes.allocateElasticOnHeap(128));
             WireIn wireIn = read.wireIn();
@@ -1228,8 +1245,8 @@ public class WireMarshaller<T> {
 
         @Override
         protected void copy(Object from, Object to) {
-            Bytes<?> fromBytes = (Bytes) unsafeGetObject(from, offset);
-            Bytes<?> toBytes = (Bytes) unsafeGetObject(to, offset);
+            Bytes<?> fromBytes = unsafeGetObject(from, offset);
+            Bytes<?> toBytes = unsafeGetObject(to, offset);
             if (fromBytes == null) {
                 unsafePutObject(to, offset, null);
                 return;
@@ -1377,7 +1394,7 @@ public class WireMarshaller<T> {
         private final BiConsumer<Object, ValueOut> sequenceGetter;
         private final Class componentType;
         private final Supplier<EnumSet> enumSetSupplier;
-        private BiConsumer<EnumSet, ValueIn> addAll;
+        private final BiConsumer<EnumSet, ValueIn> addAll;
 
         EnumSetFieldAccess(@NotNull final Field field, final Boolean isLeaf, final Object[] values, final Class componentType) {
             super(field, isLeaf);
@@ -1483,7 +1500,7 @@ public class WireMarshaller<T> {
         final Supplier<Collection> collectionSupplier;
         private final Class componentType;
         private final Class<?> type;
-        private BiConsumer<Object, ValueOut> sequenceGetter;
+        private final BiConsumer<Object, ValueOut> sequenceGetter;
 
         public CollectionFieldAccess(@NotNull Field field, Boolean isLeaf, @Nullable Supplier<Collection> collectionSupplier, Class componentType, Class<?> type) {
             super(field, isLeaf);
@@ -1619,7 +1636,7 @@ public class WireMarshaller<T> {
         final Supplier<Collection> collectionSupplier;
         private final Class<?> type;
         @NotNull
-        private BiConsumer<Collection, ValueIn> seqConsumer = (c, in2) -> {
+        private final BiConsumer<Collection, ValueIn> seqConsumer = (c, in2) -> {
             Bytes<?> bytes = in2.wireIn().bytes();
             while (in2.hasNextSequenceItem()) {
                 long start = bytes.readPosition();

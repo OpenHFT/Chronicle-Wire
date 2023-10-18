@@ -839,7 +839,7 @@ Consider the following case:
 [source,java]
 ----
 private static final class BufferContainer {
-    private ByteBuffer b = ByteBuffer.allocate(16);
+    private final ByteBuffer b = ByteBuffer.allocate(16);
 }
 
 @Test
@@ -951,7 +951,7 @@ Sometimes you need to pass the actually data, esp the first time. This can be ac
 ----
 public class RefData extends AbstractEventCfg<RefData> {
     @AsMarshallable
-    private DynamicEnum data;
+    private final DynamicEnum data;
 
     public RefData(DynamicEnum data) {
         this.data = data;
@@ -1067,7 +1067,7 @@ The provided id should be unique across all classes using the same MethodReader/
      void saysomethingnice(final String message);
  }
 
- public void shouldDetermineMethodNamesFromMethodIds() {
+ void shouldDetermineMethodNamesFromMethodIds() {
      Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
      final BinaryWire wire = new BinaryWire(bytes);
@@ -1643,8 +1643,10 @@ yourself for improved efficiency.  These default implementations can give you
 writing them yourself.
 
 === The toString()
-An important feature of the toString() method is no information is lost.  The object can be reconstructed from
-the text of the toString() method.  This is useful for building sample data in unit tests for from a file.
+
+An important feature of the `toString()` method is no information is lost.
+The object can be reconstructed from the output of the `toString()` method.
+This is useful for building sample data in unit tests for from a file.
 It also means that you can take the dump of an object in a log file and reconstruct the original object.
 
 [source, java]
@@ -1699,7 +1701,7 @@ assertEquals(mps, mps4);
 
 == Self describing messages
 
-When writing and reading from text, Marshallable are always self describing, however when using Binary there is two choices,
+When writing and reading from text, Marshallable are always self describing, however when using Binary there is two choices:
 `SelfDescribingMarshallable` which is self describing in binary and `BytesInBinaryMarshallable` which uses raw values.
 
 `SelfDescribingMarshallable` is slightly slower, and larger when writing but supports schema changes such as
@@ -1710,7 +1712,7 @@ When writing and reading from text, Marshallable are always self describing, how
 - Change the type of fields
 - Dumbing as text without access to the class specification.
 
-`BytesInBinaryMarshallable` is slower and more compact, however you need to add your own support for schema changes.
+`BytesInBinaryMarshallable` is faster and more compact, however you need to add your own support for schema changes.
 See the Code Generating section below.
 
 === Code Generation for Marshallable
@@ -1854,7 +1856,7 @@ private static final int MASHALLABLE_VERSION = 1;
 
 To explore the efficiency of the examples above, this link:https://github.com/OpenHFT/Chronicle-Wire/blob/develop/src/test/java/net/openhft/chronicle/wire/TriviallyCopyableJLBH.java[TrivallyCopyableJLBH.java] test was created.
 As can be seen on lines 18-26, we have the ability to switch between running the TriviallyCopyable House (“House1”), the BinaryWire House (“House2”) or 'UNKNOWN'.Important to note is that trivially copyable objects were used in order to improve java serialisation speeds.For further understanding on trivially copyable objects, refer to link:https://dzone.com/articles/how-to-get-c-speed-in-java-serialisation[this article].
-This shows that we can serialise and then de-serialise 100,000 messages a second.The Trivially Copyable version is even faster, especially at the higher percentiles.
+This shows that we can serialise and then de-serialise 100,000 messages in a second.The Trivially Copyable version is even faster, especially at the higher percentiles.
 
 .Benchmark Performance Between TriviallyCopyable and BinaryWire
 image::jlbhBenchmark.png[buffer,600,400]
@@ -1872,11 +1874,11 @@ https://github.com/OpenHFT/Chronicle-Wire[Back to Chronicle Wire project]
 == Network Channels in Wire
 
 Chronicle Wire supports creating channels over TCP.
-These `ChronicleChannel`s act as `MarshallableIn` and `MarshallableOut` as `Wire` does except that write to a TCP connection and read from the same connection.
+That `ChronicleChannel` acts as `MarshallableIn` and `MarshallableOut`, as `Wire` does, except that it writes to a TCP connection and reads from the same connection.
 
 === Simple ChronicleChannel - EchoHandler
 
-When you create a channel, you specific what type of connection you want.
+When you create a channel, you specify what type of connection you want.
 The simplest is an EchoHandler that echos everything you send it.
 
 [source,java]
