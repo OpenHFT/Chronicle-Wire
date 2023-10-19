@@ -25,9 +25,9 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 /**
  * see https://github.com/OpenHFT/Chronicle-Wire/issues/739
@@ -71,7 +71,11 @@ public class Issue739Test extends WireTestCommon {
                 "  two:\n" +
                 "    text: world\n" +
                 "  twoAndHalf: *first\n").getBytes()));
-        wire.getValueIn().typedMarshallable();
+        Three three = (Three) wire.getValueIn().<Map<String, Object>>typedMarshallable().get("three");
+        assertEquals("hello", three.one.text);
+        assertEquals("world", three.two.text);
+        assertEquals("hello", three.twoAndHalf.text);
+        assertSame(three.one, three.twoAndHalf);
     }
 
     @Test
@@ -82,6 +86,10 @@ public class Issue739Test extends WireTestCommon {
                 "  two: !net.openhft.chronicle.wire.issue.Issue739Test$Two\n" +
                 "    text: world\n" +
                 "  twoAndHalf: *first\n").getBytes()));
-        wire.getValueIn().typedMarshallable();
+        IThree three = (IThree) wire.getValueIn().<Map<String, Object>>typedMarshallable().get("three");
+        assertEquals("hello", ((One)three.one).text);
+        assertEquals("world", ((Two)three.two).text);
+        assertEquals("hello", ((One)three.twoAndHalf).text);
+        assertSame(three.one, three.twoAndHalf);
     }
 }
