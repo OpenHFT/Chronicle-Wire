@@ -100,7 +100,9 @@ public enum Wires {
             throw new IllegalStateException(e);
         }
     });
-    static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal();
+    static final ScopedResourcePool<StringBuilder> STRING_BUILDER_SCOPED_RESOURCE_POOL = StringBuilderPool.createThreadLocal();
+    @Deprecated(/* To be removed in x.26 */)
+    static final StringBuilderPool SBP = new StringBuilderPool();
     static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(Bytes.allocateElasticOnHeap()));
     static final boolean DUMP_CODE_TO_TARGET = Jvm.getBoolean("dumpCodeToTarget", Jvm.isDebug());
     private static final int TID_MASK = 0b00111111_11111111_11111111_11111111;
@@ -323,15 +325,12 @@ public enum Wires {
         if (Jvm.isDebug()) {
             return new StringBuilder();
         } else {
-            // Dangerous, but equivalent to existing behaviour
-            try (final ScopedResource<StringBuilder> scopedResource = SBP.get()) {
-                return scopedResource.get();
-            }
+            return SBP.acquireStringBuilder();
         }
     }
 
     public static ScopedResource<StringBuilder> acquireStringBuilderScoped() {
-        return SBP.get();
+        return STRING_BUILDER_SCOPED_RESOURCE_POOL.get();
     }
 
     public static int lengthOf(int len) {
