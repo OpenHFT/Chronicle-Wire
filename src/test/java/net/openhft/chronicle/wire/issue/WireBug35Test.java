@@ -19,9 +19,11 @@
 package net.openhft.chronicle.wire.issue;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
+import net.openhft.chronicle.wire.Wires;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
@@ -45,12 +47,14 @@ public class WireBug35Test extends WireTestCommon {
             seq.marshallable(obj -> obj.write(() -> "key").text("value"));
         });
 
-        @NotNull final String text = wire.asText().toString();
-        Object load = new Yaml().load(text);
+        try (final ScopedResource<Bytes<?>> bytesTl = Wires.acquireBytesScoped()) {
+            @NotNull final String text = Wires.asText(wire, bytesTl.get()).toString();
+            Object load = new Yaml().load(text);
 
-        assertEquals("{seq=[{key=value}, {key=value}]}", load.toString());
+            assertEquals("{seq=[{key=value}, {key=value}]}", load.toString());
 
-        bytes.releaseLast();
+            bytes.releaseLast();
+        }
     }
 
     @Test
@@ -62,10 +66,12 @@ public class WireBug35Test extends WireTestCommon {
             seq.marshallable(obj -> obj.write(() -> "key").text("value"));
         });
 
-        @NotNull final String text = wire.asText().toString();
-        Object load = new Yaml().load(text);
+        try (final ScopedResource<Bytes<?>> bytesTl = Wires.acquireBytesScoped()) {
+            @NotNull final String text = Wires.asText(wire, bytesTl.get()).toString();
+            Object load = new Yaml().load(text);
 
-        assertEquals("{seq=[{key=value}, {key=value}]}", load.toString());
+            assertEquals("{seq=[{key=value}, {key=value}]}", load.toString());
+        }
 
         bytes.releaseLast();
     }
