@@ -19,6 +19,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -63,31 +64,24 @@ public class UnknownEnumTest extends WireTestCommon {
 
         assertThrows(IllegalArgumentException.class, () -> wire.read("value").asEnum(StrictYesNo.class));
     }
-   // private enum Temp {
-       // FIRST
-   // }
 
     /*
     Documents the behaviour of BinaryWire when an enum type is unknown
      */
     @Test
-    public void shouldConvertEnumValueToStringWhenTypeIsNotKnownInBinaryWire() throws Exception {
-
-        // generates the serialised form
-       // final Bytes<ByteBuffer> b = Bytes.allocateElasticOnHeap(128);
-       // final Wire w = WireType.BINARY.apply(b);
-//
-       // final Map<String, Temp> m = new HashMap<>();
-       // m.put("key", Temp.FIRST);
-       // w.write("event").marshallable(m);
-       // final ByteBuffer hb = b.underlyingObject();
-       // hb.limit((int) b.writePosition());
-       // while (hb.remaining() != 0) {
-           // System.out.print(" " + hb.get() + ",");
-       // }
-       // System.out.println();
-
+    public void shouldConvertEnumValueToStringWhenTypeIsNotKnownInBinaryWire() {
+        Wires.THROW_CNFRE = false;
         expectException("Unknown class (net.openhft.chronicle.wire.UnknownEnumTest$Temp), perhaps you need to define an alias");
+        final Bytes<ByteBuffer> bytes = Bytes.wrapForRead(ByteBuffer.wrap(SERIALISED_MAP_DATA));
+
+        final Wire wire = WireType.BINARY.apply(bytes);
+        final Map<String, Object> enumField = wire.read("event").marshallableAsMap(String.class, Object.class);
+        assertEquals("FIRST", enumField.get("key"));
+    }
+
+    @Test(expected = ClassNotFoundRuntimeException.class)
+    public void shouldConvertEnumValueToStringWhenTypeIsNotKnownInBinaryWireThrows() {
+        Wires.THROW_CNFRE = true;
         final Bytes<ByteBuffer> bytes = Bytes.wrapForRead(ByteBuffer.wrap(SERIALISED_MAP_DATA));
 
         final Wire wire = WireType.BINARY.apply(bytes);

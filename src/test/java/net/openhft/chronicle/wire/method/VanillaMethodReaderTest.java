@@ -24,6 +24,7 @@ import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Mocker;
+import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
@@ -221,7 +222,31 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     }
 
     @Test
+    public void testNestedUnknownClassWarn() {
+        WiresTest.wiresThrowCNFRE(false);
+        Wires.GENERATE_TUPLES = false;
+
+        Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
+                .useTextDocuments();
+        MRTListener writer2 = wire2.methodWriter(MRTListener.class);
+
+        String text = "" +
+                "unknown: {\n" +
+                "  u: !!null \"\"\n" +
+                "}\n" +
+                "...\n";
+        Wire wire = TextWire.from(text)
+                .useTextDocuments();
+        MethodReader reader = wire.methodReader(writer2);
+        checkReaderType(reader);
+        assertTrue(reader.readOne());
+        assertFalse(reader.readOne());
+        assertEquals(text, wire2.toString());
+    }
+
+    @Test
     public void testNestedUnknownClass() {
+        WiresTest.wiresThrowCNFRE(true);
         Wires.GENERATE_TUPLES = true;
 
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
@@ -245,9 +270,72 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         assertEquals(text, wire2.toString());
     }
 
+    @Test(expected = ClassNotFoundRuntimeException.class)
+    public void testUnknownClassCNFREInterface() {
+        WiresTest.wiresThrowCNFRE(false);
+        Wires.GENERATE_TUPLES = false;
+
+        Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
+                .useTextDocuments();
+        MRTListener writer2 = wire2.methodWriter(MRTListener.class);
+
+        String text = "top: !UnknownClass {\n" +
+                "  one: 1,\n" +
+                "  two: 2.2,\n" +
+                "  three: words\n" +
+                "}\n" +
+                "...\n" +
+                "top: {\n" +
+                "  one: 11,\n" +
+                "  two: 22.2,\n" +
+                "  three: many words\n" +
+                "}\n" +
+                "...\n";
+        Wire wire = TextWire.from(text)
+                .useTextDocuments();
+        MethodReader reader = wire.methodReader(writer2);
+        checkReaderType(reader);
+        assertTrue(reader.readOne());
+        assertTrue(reader.readOne());
+        assertFalse(reader.readOne());
+        assertEquals(text, wire2.toString());
+    }
+
     @Test
-    public void testUnknownClass() {
+    public void testUnknownClassDoesntThrow() {
+        WiresTest.wiresThrowCNFRE(true);
         Wires.GENERATE_TUPLES = true;
+
+        Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
+                .useTextDocuments();
+        MRTListener writer2 = wire2.methodWriter(MRTListener.class);
+
+        String text = "top: !UnknownClass {\n" +
+                "  one: 1,\n" +
+                "  two: 2.2,\n" +
+                "  three: words\n" +
+                "}\n" +
+                "...\n" +
+                "top: {\n" +
+                "  one: 11,\n" +
+                "  two: 22.2,\n" +
+                "  three: many words\n" +
+                "}\n" +
+                "...\n";
+        Wire wire = TextWire.from(text)
+                .useTextDocuments();
+        MethodReader reader = wire.methodReader(writer2);
+        checkReaderType(reader);
+        assertTrue(reader.readOne());
+        assertTrue(reader.readOne());
+        assertFalse(reader.readOne());
+        assertEquals(text, wire2.toString());
+    }
+
+    @Test(expected = ClassNotFoundRuntimeException.class)
+    public void testUnknownClassThrow() {
+        WiresTest.wiresThrowCNFRE(true);
+        Wires.GENERATE_TUPLES = false;
 
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
                 .useTextDocuments();
