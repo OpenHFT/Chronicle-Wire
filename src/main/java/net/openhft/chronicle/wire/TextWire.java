@@ -1881,16 +1881,13 @@ public class TextWire extends YamlWireOut<TextWire> {
                 try {
                     return classLookup().forName(stringBuilder);
                 } catch (ClassNotFoundRuntimeException e) {
-                    if (tClass == null) {
-                        if (Wires.GENERATE_TUPLES) {
-                            return Wires.tupleFor(null, stringBuilder.toString());
-                        }
-                        String message = "Unable to load " + stringBuilder + ", is a class alias missing.";
-                        if (IAE_ON_CNF)
-                            throw new ClassNotFoundRuntimeException(new ClassNotFoundException(message));
-                        Jvm.warn().on(TextWire.class, message);
-                        return null;
+                    if (Wires.GENERATE_TUPLES) {
+                        return Wires.tupleFor(null, stringBuilder.toString());
                     }
+                    String message = "Unable to load " + stringBuilder + ", is a class alias missing.";
+                    if (IAE_ON_CNF)
+                        throw new ClassNotFoundRuntimeException(new ClassNotFoundException(message));
+                    Jvm.warn().on(TextWire.class, message);
 
                     final String className = tClass.getName();
 
