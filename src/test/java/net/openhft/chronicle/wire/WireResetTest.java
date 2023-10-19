@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.Closeable;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.time.LocalDate;
@@ -53,7 +52,6 @@ public class WireResetTest extends WireTestCommon {
         }
     }
 
-    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/745")
     @Test
     //https://github.com/OpenHFT/Chronicle-Wire/issues/732
     public void testDeepReset() {
