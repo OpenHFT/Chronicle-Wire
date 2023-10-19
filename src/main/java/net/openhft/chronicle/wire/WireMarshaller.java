@@ -1064,7 +1064,7 @@ public class WireMarshaller<T> {
             super(field, isLeaf);
             asMarshallable = Jvm.findAnnotation(field, AsMarshallable.class);
             type = field.getType();
-            resettable = !DynamicEnum.class.isAssignableFrom(type) && Marshallable.class.isAssignableFrom(type);
+            resettable = false;
         }
 
         @Override
