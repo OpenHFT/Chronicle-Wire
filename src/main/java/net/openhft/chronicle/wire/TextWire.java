@@ -1857,9 +1857,10 @@ public class TextWire extends YamlWireOut<TextWire> {
                 try {
                     return classLookup().forName(stringBuilder);
                 } catch (ClassNotFoundRuntimeException e) {
-                    String message = "Unable to find " + stringBuilder + " " + e.getCause();
+                    // Note: it's not possible to generate a Tuple without an interface implied.
                     if (THROW_CNFRE)
-                        throw new IllegalArgumentException(message);
+                        throw e;
+                    String message = "Unable to find " + stringBuilder + " " + e.getCause();
                     Jvm.warn().on(getClass(), message);
                     return null;
                 }
