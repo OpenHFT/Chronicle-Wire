@@ -45,8 +45,6 @@ public class Example5 {
         ClassAliasPool.CLASS_ALIASES.addAlias(Data.class);
         Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
 
-        //writeDocument() blocks other readers and writers, until the writing of this
-        //data is completed. See the above comment.
         wire.writeDocument(false, data);
 
         //Prints out:
