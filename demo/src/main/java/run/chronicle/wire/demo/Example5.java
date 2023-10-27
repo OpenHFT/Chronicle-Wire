@@ -32,10 +32,7 @@ import java.util.concurrent.TimeUnit;
  * Write a message with a thread safe size prefix.
  * The benefits of using this approach are that:
  * - The reader (tailer) is blocked until the message is completely written.
- * - If you have concurrent writers (appenders):
- * -- If the size of message is not known, other writers will be blocked until the message is written completely.
- * -- If the size of message is known, other writers will leave buffer space for this writer to complete writing
- * the message and concurrently write beyond the known size.
+ * - Wire by default is single writer, implementations such as Queue can add support for concurrent writers
  */
 
 public class Example5 {
