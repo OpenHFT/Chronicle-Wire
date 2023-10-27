@@ -32,10 +32,7 @@ import java.util.concurrent.TimeUnit;
  * Write a message with a thread safe size prefix.
  * The benefits of using this approach are that:
  * - The reader (tailer) is blocked until the message is completely written.
- * - If you have concurrent writers (appenders):
- * -- If the size of message is not known, other writers will be blocked until the message is written completely.
- * -- If the size of message is known, other writers will leave buffer space for this writer to complete writing
- * the message and concurrently write beyond the known size.
+ * - Wire by default is single writer, implementations such as Queue can add support for concurrent writers
  */
 
 public class Example5 {
@@ -48,8 +45,6 @@ public class Example5 {
         ClassAliasPool.CLASS_ALIASES.addAlias(Data.class);
         Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
 
-        //writeDocument() blocks other readers and writers, until the writing of this
-        //data is completed. See the above comment.
         wire.writeDocument(false, data);
 
         //Prints out:

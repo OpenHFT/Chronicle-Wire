@@ -48,15 +48,13 @@ public interface MarshallableOut extends DocumentWritten {
      * }
      * </pre>
      * <p>
-     * WARNING : any data written inside the writingDocument(),  should be performed as quickly as
-     * possible  because a write lock is held  until the DocumentContext is closed by the
-     * try-with-resources,  this blocks other appenders and tailers.
+     * WARNING : any data written inside the writingDocument(), should be performed as quickly as
+     * possible because a write lock is held until the DocumentContext is closed by the
+     * try-with-resources.
+     * For thread safe implementation such as Queue this blocks other appenders. Tailers are never blocked.
      * <pre>
      * try (DocumentContext dc = appender.writingDocument()) {
-     *      // this should be performed as quickly as possible because a write lock is held until
-     * the
-     *      // DocumentContext is closed by the try-with-resources,  this blocks other appenders
-     *      and tailers.
+     *      // this should be performed as quickly as possible for implementations that support cocurrent writers
      * }
      * </pre>
      */
