@@ -81,7 +81,7 @@ public enum Wires {
     public static final List<Function<Class, SerializationStrategy>> CLASS_STRATEGY_FUNCTIONS = new CopyOnWriteArrayList<>();
 
     @Deprecated(/* for removal in x.26, make default true in x.25 */)
-    static final boolean THROW_CNF = Jvm.getBoolean("class.not.found.for.missing.class.alias", false);
+    static boolean THROW_CNFRE = Jvm.getBoolean("class.not.found.for.missing.class.alias", false);
     static final ClassLocal<SerializationStrategy> CLASS_STRATEGY = ClassLocal.withInitial(c -> {
         for (@NotNull Function<Class, SerializationStrategy> func : CLASS_STRATEGY_FUNCTIONS) {
             final SerializationStrategy strategy = func.apply(c);
@@ -632,7 +632,7 @@ public enum Wires {
             return (E) WireInternal.throwable(in, false, (Throwable) using);
 
         if (using == null)
-            throw new IllegalStateException("failed to create instance of clazz=" + clazz + " is it aliased?");
+            throw new ClassNotFoundRuntimeException(new ClassNotFoundException("failed to create instance of clazz=" + clazz + " is it aliased?"));
 
         Object marshallable = in.marshallable(using, strategy);
         E e = readResolve(marshallable);

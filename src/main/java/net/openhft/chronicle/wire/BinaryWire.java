@@ -60,7 +60,7 @@ import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.BinaryWire.AnyCodeMatch.ANY_CODE_MATCH;
 import static net.openhft.chronicle.wire.BinaryWireCode.*;
 import static net.openhft.chronicle.wire.Wires.GENERATE_TUPLES;
-import static net.openhft.chronicle.wire.Wires.THROW_CNF;
+import static net.openhft.chronicle.wire.Wires.THROW_CNFRE;
 
 /**
  * This Wire is a binary translation of TextWire which is a sub set of YAML.
@@ -3559,7 +3559,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 if (Wires.dtoInterface(tClass) && GENERATE_TUPLES) {
                     return Wires.tupleFor(tClass, sb.toString());
                 }
-                if (THROW_CNF)
+                if (THROW_CNFRE)
                     throw e;
                 Jvm.warn().on(getClass(), "Unknown class (" + sb + "), perhaps you need to define an alias", e);
                 return null;
