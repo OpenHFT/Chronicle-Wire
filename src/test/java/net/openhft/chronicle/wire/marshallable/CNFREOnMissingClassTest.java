@@ -4,17 +4,15 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
-import net.openhft.chronicle.wire.AbstractMarshallableCfg;
-import net.openhft.chronicle.wire.Marshallable;
-import net.openhft.chronicle.wire.TextWire;
-import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.*;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
 
-public class CNFREOnMissingClassTest {
+public class CNFREOnMissingClassTest extends WireTestCommon {
     @Test(expected = ClassNotFoundRuntimeException.class)
     public void throwIllegalArgumentExceptionOnMissingClassAlias() {
+        WiresTest.wiresThrowCNFRE(true);
         Wire wire = new TextWire(Bytes.from("" +
                 "a: !Aaa { hi: bye }"));
         Object object = wire.read("a").object();
@@ -29,6 +27,7 @@ public class CNFREOnMissingClassTest {
 
     @Test(expected = ClassNotFoundRuntimeException.class)
     public void throwClassNotFoundRuntimeExceptionOnMissingClassForField() {
+        WiresTest.wiresThrowCNFRE(true);
         ClassAliasPool.CLASS_ALIASES.addAlias(TwoFields.class);
         String simpleObject = "!TwoFields { name: \"henry\", fieldOne: !ThisClassDoesntExist { } }";
         String key = "class.not.found.for.missing.class.alias";
@@ -47,6 +46,7 @@ public class CNFREOnMissingClassTest {
      */
     @Test(expected = ClassNotFoundRuntimeException.class)
     public void throwClassNotFoundRuntimeExceptionOnMissingClassForFieldNotObject() {
+        WiresTest.wiresThrowCNFRE(true);
         ClassAliasPool.CLASS_ALIASES.addAlias(TwoFields.class, UsesTwoFields.class);
         String key = "class.not.found.for.missing.class.alias";
         String simpleObject = "!UsesTwoFields { name: \"henry\", bothFields: !ThisClassDoesntExist { } }";
