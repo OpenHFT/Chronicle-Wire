@@ -46,6 +46,7 @@ import java.util.regex.Pattern;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.wire.TextStopCharTesters.END_OF_TYPE;
+import static net.openhft.chronicle.wire.Wires.THROW_CNF;
 
 /**
  * YAML Based wire format
@@ -67,8 +68,6 @@ public class TextWire extends YamlWireOut<TextWire> {
     static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT::escaping;
     static final Supplier<StopCharsTester> END_EVENT_NAME_ESCAPING = TextStopCharsTesters.END_EVENT_NAME::escaping;
     static final Bytes<?> META_DATA = Bytes.from("!!meta-data");
-    @Deprecated(/* for removal in x.26, make default true in x.25 */)
-    static final boolean IAE_ON_CNF = Jvm.getBoolean("class.not.found.for.missing.class.alias", false);
 
     static {
         IOTools.unmonitor(BINARY);
@@ -1858,7 +1857,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                     return classLookup().forName(stringBuilder);
                 } catch (ClassNotFoundRuntimeException e) {
                     String message = "Unable to find " + stringBuilder + " " + e.getCause();
-                    if (IAE_ON_CNF)
+                    if (THROW_CNF)
                         throw new IllegalArgumentException(message);
                     Jvm.warn().on(getClass(), message);
                     return null;
@@ -1881,40 +1880,49 @@ public class TextWire extends YamlWireOut<TextWire> {
                 try {
                     return classLookup().forName(stringBuilder);
                 } catch (ClassNotFoundRuntimeException e) {
-                    if (tClass == null) {
-                        if (Wires.GENERATE_TUPLES) {
-                            return Wires.tupleFor(null, stringBuilder.toString());
-                        }
-                        String message = "Unable to load " + stringBuilder + ", is a class alias missing.";
-                        if (IAE_ON_CNF)
-                            throw new ClassNotFoundRuntimeException(new ClassNotFoundException(message));
-                        Jvm.warn().on(TextWire.class, message);
-                        return null;
-                    }
-
-                    final String className = tClass.getName();
-
-                    String[] split = REGX_PATTERN.split(stringBuilder);
-                    if (split[split.length - 1].equalsIgnoreCase(tClass.getSimpleName())) {
-                        try {
-
-                            return tClass.isInterface()
-                                    ? Wires.tupleFor(tClass, stringBuilder.toString())
-                                    : classLookup().forName(className);
-
-                        } catch (ClassNotFoundRuntimeException e1) {
-                            Jvm.warn().on(getClass(), "ClassNotFoundException class=" + className);
-                            return Wires.tupleFor(tClass, className);
-                        }
-
-                    } else if (tClass.getClassLoader() == null) {
-                        throw new ClassNotFoundRuntimeException(new ClassNotFoundException("Unable to find class " + stringBuilder));
-                    } else {
-                        return Wires.tupleFor(tClass, stringBuilder.toString());
-                    }
+                    return handleCNFE(tClass, e, stringBuilder);
                 }
             }
-            return Wires.dtoInterface(tClass) && Wires.GENERATE_TUPLES && ObjectUtils.implementationToUse(tClass) == tClass ? Wires.tupleFor(tClass, null) : null;
+            if (Wires.dtoInterface(tClass) && Wires.GENERATE_TUPLES && ObjectUtils.implementationToUse(tClass) == tClass)
+                return Wires.tupleFor(tClass, null);
+            return null;
+        }
+
+        @Nullable
+        private Object handleCNFE(Class tClass, ClassNotFoundRuntimeException e, StringBuilder stringBuilder) {
+            if (tClass == null) {
+                if (Wires.GENERATE_TUPLES) {
+                    return Wires.tupleFor(null, stringBuilder.toString());
+                }
+                String message = "Unable to load " + stringBuilder + ", is a class alias missing.";
+                if (THROW_CNF)
+                    throw new ClassNotFoundRuntimeException(new ClassNotFoundException(message));
+                Jvm.warn().on(TextWire.class, message);
+                return null;
+            }
+
+            final String className = tClass.getName();
+
+            String[] split = REGX_PATTERN.split(stringBuilder);
+            if (split[split.length - 1].equalsIgnoreCase(tClass.getSimpleName())) {
+                try {
+
+                    return tClass.isInterface()
+                            ? Wires.tupleFor(tClass, stringBuilder.toString())
+                            : classLookup().forName(className);
+
+                } catch (ClassNotFoundRuntimeException e1) {
+                    if (THROW_CNF)
+                        throw e;
+                    Jvm.warn().on(getClass(), "ClassNotFoundException class=" + className);
+                    return Wires.tupleFor(tClass, className);
+                }
+
+            } else if (tClass.getClassLoader() == null || THROW_CNF) {
+                throw new ClassNotFoundRuntimeException(new ClassNotFoundException("Unable to find class " + stringBuilder));
+            } else {
+                return Wires.tupleFor(tClass, stringBuilder.toString());
+            }
         }
 
         @Override

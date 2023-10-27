@@ -32,6 +32,7 @@ import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.scoped.ScopedResourcePool;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
+import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.ReadResolvable;
@@ -78,6 +79,9 @@ public enum Wires {
     public static final Bytes<?> NO_BYTES = BytesStore.empty().bytesForRead();
     public static final int SPB_HEADER_SIZE = 4;
     public static final List<Function<Class, SerializationStrategy>> CLASS_STRATEGY_FUNCTIONS = new CopyOnWriteArrayList<>();
+
+    @Deprecated(/* for removal in x.26, make default true in x.25 */)
+    static final boolean THROW_CNF = Jvm.getBoolean("class.not.found.for.missing.class.alias", false);
     static final ClassLocal<SerializationStrategy> CLASS_STRATEGY = ClassLocal.withInitial(c -> {
         for (@NotNull Function<Class, SerializationStrategy> func : CLASS_STRATEGY_FUNCTIONS) {
             final SerializationStrategy strategy = func.apply(c);
