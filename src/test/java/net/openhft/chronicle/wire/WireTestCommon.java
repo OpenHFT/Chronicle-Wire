@@ -146,4 +146,9 @@ public class WireTestCommon {
     public void restoreGenerateTuples() {
         Wires.GENERATE_TUPLES = gt;
     }
+
+    @Before
+    public void throwCNFRE() {
+        Wires.THROW_CNFRE = true;
+    }
 }
