@@ -26,12 +26,6 @@ public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMar
     private long eventTime;
     private String serviceId = "";
 
-    @NotNull
-    @Override
-    public String eventId() {
-        return eventId;
-    }
-
     @Override
     public E eventId(@NotNull CharSequence eventId) {
         this.eventId = eventId.toString();

@@ -9,14 +9,6 @@ import org.jetbrains.annotations.NotNull;
 public interface Event<E extends Event<E>> extends Marshallable {
 
     /**
-     * Returns a unique identifier attached to this event.
-     *
-     * @return a unique identifier attached to this event.
-     */
-    @NotNull
-    CharSequence eventId();
-
-    /**
      * Assigns a unique identifier to this event. The input identifier cannot be {@code null}.
      *
      * @param eventId unique identifier to assign to this event.
@@ -68,9 +60,6 @@ public interface Event<E extends Event<E>> extends Marshallable {
      * Updates event with new event name, updating event time to now if required.
      */
     default E updateEvent() {
-        if (this.eventId().length() == 0)
-            this.eventId("");
-
         if (this.eventTime() <= 0)
             this.eventTimeNow();
         return (E) this;
@@ -83,7 +72,6 @@ public interface Event<E extends Event<E>> extends Marshallable {
      * @param to to
      */
     static void copyEventDetails(Event<?> from, Event<?> to) {
-        to.eventId(from.eventId());
         to.eventTime(from.eventTime());
     }
 }
