@@ -14,7 +14,10 @@ public interface Event<E extends Event<E>> extends Marshallable {
      * @return a unique identifier attached to this event.
      */
     @NotNull
-    CharSequence eventId();
+    @Deprecated(/* to be removed in x.25 */)
+    default CharSequence eventId() {
+        return "";
+    }
 
     /**
      * Assigns a unique identifier to this event. The input identifier cannot be {@code null}.
@@ -22,6 +25,7 @@ public interface Event<E extends Event<E>> extends Marshallable {
      * @param eventId unique identifier to assign to this event.
      * @return this
      */
+    @Deprecated(/* to be removed in x.25 */)
     default E eventId(@NotNull final CharSequence eventId) {
         return (E) this;
     }
@@ -66,10 +70,13 @@ public interface Event<E extends Event<E>> extends Marshallable {
 
     /**
      * Updates event with new event name, updating event time to now if required.
+     *
+     * @param eventName name of the event
      */
-    default E updateEvent() {
+    // TODO: x.25 remove eventName parameter
+    default E updateEvent(final String eventName) {
         if (this.eventId().length() == 0)
-            this.eventId("");
+            this.eventId(eventName);
 
         if (this.eventTime() <= 0)
             this.eventTimeNow();
