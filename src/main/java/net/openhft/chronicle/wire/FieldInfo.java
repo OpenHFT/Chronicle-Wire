@@ -34,7 +34,7 @@ import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
  */
 public interface FieldInfo {
 
-    @SuppressWarnings("deprecation" /* VanillaFieldInfo will become internal in the future, remove this suppression in x.25 */)
+    @SuppressWarnings("deprecation" /* VanillaFieldInfo will become internal in the future, remove this suppression in x.26 */)
     static FieldInfo createForField(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         if (!type.isPrimitive()) {
             return new ObjectFieldInfo(name, type, bracketType, field);

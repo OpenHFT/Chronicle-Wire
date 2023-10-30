@@ -177,8 +177,7 @@ public class GenerateMethodReader {
         if (!packageName().isEmpty())
             sourceCode.append(format("package %s;\n", packageName()));
 
-        sourceCode.append("" +
-                "import net.openhft.chronicle.core.Jvm;\n" +
+        sourceCode.append("import net.openhft.chronicle.core.Jvm;\n" +
                 "import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;\n" +
                 "import net.openhft.chronicle.core.util.ObjectUtils;\n" +
                 "import net.openhft.chronicle.bytes.*;\n" +
@@ -249,8 +248,7 @@ public class GenerateMethodReader {
         sourceCode.append(format("instance%d = instances[%d];\n}\n\n", instances.length - 1, instances.length - 1));
 
         if (hasChainedCalls) {
-            sourceCode.append("" +
-                            "@Override\n" +
+            sourceCode.append("@Override\n" +
                             "public boolean restIgnored() {\n" +
                             "  return chainedCallReturnResult instanceof ")
                     .append(IgnoresEverything.class.getName())
@@ -285,8 +283,7 @@ public class GenerateMethodReader {
                 "throw new IllegalStateException(\"Failed to read method name or ID\");\n" +
                 "switch (lastEventName) {\n");
         if (!eventNameSwitchBlock.contains("case \"history\":"))
-            sourceCode.append("" +
-                    "case MethodReader.HISTORY:\n" +
+            sourceCode.append("case MethodReader.HISTORY:\n" +
                     "valueIn.marshallable(messageHistory);\n" +
                     "return MethodReaderStatus.HISTORY;\n\n");
 
@@ -636,7 +633,7 @@ public class GenerateMethodReader {
     /**
      * Generates code for reading an argument of a method from a {@link ValueIn} object.
      * The argument's index and type, and whether it is read in a lambda function,
-     * influence the generated code. If {@link IntConversion} or {@link LongConversion}
+     * influence the generated code. If {@link LongConversion}
      * annotations are present on the argument, a converter field is registered.
      *
      * @param m Method for which an argument is read.
@@ -646,7 +643,6 @@ public class GenerateMethodReader {
      * @param parameterTypes The types of the method parameters.
      * @return Code in the form of a String that retrieves the specified argument from {@link ValueIn} input.
      *
-     * @see IntConversion
      * @see LongConversion
      * @see ValueIn
      */
@@ -658,10 +654,7 @@ public class GenerateMethodReader {
             Annotation[] annotations = m.getParameterAnnotations()[argIndex];
 
             for (Annotation a : annotations) {
-                if (a instanceof IntConversion) {
-                    numericConversionClass = ((IntConversion) a).value();
-                    break;
-                } else if (a instanceof LongConversion) {
+                if (a instanceof LongConversion) {
                     numericConversionClass = ((LongConversion) a).value();
                     break;
                 } else {
@@ -715,11 +708,6 @@ public class GenerateMethodReader {
                         numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
 
                 return format("%s = (int) %sConverter.parse(%s.text());\n", argumentName, argumentName, valueInName);
-            } else if (numericConversionClass != null && IntConverter.class.isAssignableFrom(numericConversionClass)) {
-                numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);\n",
-                        numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
-
-                return format("%s = %sConverter.parse(%s.text());\n", argumentName, argumentName, valueInName);
             } else
                 return format("%s = %s.int32();\n", argumentName, valueInName);
         } else if (long.class.equals(argumentType)) {

@@ -21,10 +21,7 @@ package net.openhft.chronicle.wire.channel.internal;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.wire.Base128LongConverter;
-import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
-import net.openhft.chronicle.wire.LongConversion;
-import net.openhft.chronicle.wire.NanoTimestampLongConverter;
+import net.openhft.chronicle.wire.*;
 
 public class ChronicleEvent extends BytesInBinaryMarshallable {
     static final int START_BYTES = BytesUtil.triviallyCopyableStart(ChronicleEvent.class);
@@ -36,7 +33,7 @@ public class ChronicleEvent extends BytesInBinaryMarshallable {
     private long transactTimeNS;
     @LongConversion(NanoTimestampLongConverter.class)
     private long dateTime1, dateTime2, dateTime3, dateTime4;
-    @LongConversion(Base128LongConverter.class)
+    @LongConversion(Base85LongConverter.class)
     private long text1, text2; // up to 9 ASCII chars
     @FieldGroup("text3")
     private long text3a, text3b, text3c;

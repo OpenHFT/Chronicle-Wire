@@ -22,11 +22,9 @@ import net.openhft.chronicle.core.io.ValidatableUtil;
 
 /**
  * This uses bytes marshallable, non self describing messages by default.
- *
- * @deprecated This will become package-private in x.25 use {@link SelfDescribingMarshallable} or {@link BytesInBinaryMarshallable} instead
+ * use {@link SelfDescribingMarshallable} or {@link BytesInBinaryMarshallable} instead
  */
-@Deprecated(/* to be made package-private in x.25 */)
-public abstract class AbstractCommonMarshallable implements Marshallable, BytesMarshallable {
+abstract class AbstractCommonMarshallable implements Marshallable, BytesMarshallable {
     @Override
     public boolean equals(Object o) {
         return Marshallable.$equals(this, o);

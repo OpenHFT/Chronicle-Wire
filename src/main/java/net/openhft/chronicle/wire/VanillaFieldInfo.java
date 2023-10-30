@@ -43,15 +43,6 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         this.field = field;
     }
 
-    /**
-     * @deprecated Use {@link FieldInfo#lookupClass(Class)} instead (to be removed in x.25)
-     */
-    @NotNull
-    @Deprecated(/* To be removed in 2.25 */)
-    public static Wires.FieldInfoPair lookupClass(@NotNull Class aClass) {
-        return FieldInfo.lookupClass(aClass);
-    }
-
     @Nullable
     @Override
     public Object get(Object object) {

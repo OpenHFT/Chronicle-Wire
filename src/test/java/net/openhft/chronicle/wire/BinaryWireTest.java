@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.internal.NoBytesStore;
 import net.openhft.chronicle.bytes.internal.SingleMappedFile;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.ScopeConfined;
@@ -93,24 +94,19 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write();
         wire.write();
         wire.write();
-        checkWire(wire, "" +
-                        "c0                                              # :\n" +
-                        "c0                                              # :\n" +
-                        "c0                                              # :\n",
-                "" +
-                        "c0                                              # :\n" +
+        checkWire(wire, "c0                                              # :\n" +
                         "c0                                              # :\n" +
                         "c0                                              # :\n",
-                "" +
-                        "c0                                              # :\n" +
-                        "c0                                              # :\n" +
-                        "c0                                              # :\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "c0                                              # :\n" +
                         "c0                                              # :\n",
-                "" +
+                "c0                                              # :\n" +
                         "c0                                              # :\n" +
+                        "c0                                              # :\n",
+                "c0                                              # :\n" +
+                        "c0                                              # :\n" +
+                        "c0                                              # :\n",
+                "c0                                              # :\n" +
                         "c0                                              # :\n" +
                         "c0                                              # :\n",
                 "",
@@ -159,24 +155,19 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write(BWKey.field1);
         wire.write(BWKey.field2);
         wire.write(BWKey.field3);
-        checkWire(wire, "" +
-                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+        checkWire(wire, "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "c6 66 69 65 6c 64 32                            # field2:\n" +
                         "c6 66 69 65 6c 64 33                            # field3:\n",
-                "" +
-                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "c6 66 69 65 6c 64 32                            # field2:\n" +
                         "c6 66 69 65 6c 64 33                            # field3:\n",
-                "" +
-                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "c6 66 69 65 6c 64 32                            # field2:\n" +
                         "c6 66 69 65 6c 64 33                            # field3:\n",
-                "" +
-                        "ba 01                                           # 1\n" +
+                "ba 01                                           # 1\n" +
                         "ba 02                                           # 2\n" +
                         "ba 03                                           # 3\n",
-                "" +
-                        "ba 01                                           # 1\n" +
+                "ba 01                                           # 1\n" +
                         "ba 02                                           # 2\n" +
                         "ba 03                                           # 3\n",
                 "",
@@ -204,33 +195,28 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write(() -> "World");
         @NotNull String name = "Long field name which is more than 32 characters, Bye";
         wire.write(() -> name);
-        checkWire(wire, "" +
-                        "c5 48 65 6c 6c 6f                               # Hello:\n" +
+        checkWire(wire, "c5 48 65 6c 6c 6f                               # Hello:\n" +
                         "c5 57 6f 72 6c 64                               # World:\n" +
                         "b7 35 4c 6f 6e 67 20 66 69 65 6c 64 20 6e 61 6d # Long field name which is more than 32 characters, Bye:\n" +
                         "65 20 77 68 69 63 68 20 69 73 20 6d 6f 72 65 20\n" +
                         "74 68 61 6e 20 33 32 20 63 68 61 72 61 63 74 65\n" +
                         "72 73 2c 20 42 79 65\n",
-                "" +
-                        "c5 48 65 6c 6c 6f                               # Hello:\n" +
+                "c5 48 65 6c 6c 6f                               # Hello:\n" +
                         "c5 57 6f 72 6c 64                               # World:\n" +
                         "b7 35 4c 6f 6e 67 20 66 69 65 6c 64 20 6e 61 6d # Long field name which is more than 32 characters, Bye:\n" +
                         "65 20 77 68 69 63 68 20 69 73 20 6d 6f 72 65 20\n" +
                         "74 68 61 6e 20 33 32 20 63 68 61 72 61 63 74 65\n" +
                         "72 73 2c 20 42 79 65\n",
-                "" +
-                        "c5 48 65 6c 6c 6f                               # Hello:\n" +
+                "c5 48 65 6c 6c 6f                               # Hello:\n" +
                         "c5 57 6f 72 6c 64                               # World:\n" +
                         "b7 35 4c 6f 6e 67 20 66 69 65 6c 64 20 6e 61 6d # Long field name which is more than 32 characters, Bye:\n" +
                         "65 20 77 68 69 63 68 20 69 73 20 6d 6f 72 65 20\n" +
                         "74 68 61 6e 20 33 32 20 63 68 61 72 61 63 74 65\n" +
                         "72 73 2c 20 42 79 65\n",
-                "" +
-                        "ba b2 d1 98 21                                  # 69609650\n" +
+                "ba b2 d1 98 21                                  # 69609650\n" +
                         "ba f2 d6 f8 27                                  # 83766130\n" +
                         "ba b4 cd fd e5 83 00                            # -1019176629\n",
-                "" +
-                        "ba b2 d1 98 21                                  # 69609650\n" +
+                "ba b2 d1 98 21                                  # 69609650\n" +
                         "ba f2 d6 f8 27                                  # 83766130\n" +
                         "ba b4 cd fd e5 83 00                            # -1019176629\n",
                 "",
@@ -307,47 +293,40 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write().int8((byte) 1);
         wire.write(BWKey.field1).int8((byte) 2);
         wire.write(() -> "Test").int8((byte) 3);
-        checkWire(wire, "" +
-                        "c0                                              # :\n" +
+        checkWire(wire, "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a1 02                                           # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a1 02                                           # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a4 01                                           # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a4 02                                           # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a4 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "ba 01                                           # 1\n" +
                         "a1 02                                           # 2\n" +
                         "ba b2 f1 9e 01                                  # 2603186\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a4 01                                           # 1\n" +
                         "ba 01                                           # 1\n" +
                         "a4 02                                           # 2\n" +
                         "ba b2 f1 9e 01                                  # 2603186\n" +
                         "a4 03                                           # 3\n",
-                "" +
-                        "a1 01                                           # 1\n" +
+                "a1 01                                           # 1\n" +
                         "a1 02                                           # 2\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "a4 01                                           # 1\n" +
+                "a4 01                                           # 1\n" +
                         "a4 02                                           # 2\n" +
                         "a4 03                                           # 3\n"
         );
@@ -376,7 +355,7 @@ public class BinaryWireTest extends WireTestCommon {
                 "\"\": " + type + "1\n" +
                         "\"1\": " + type + "2\n" +
                         "\"2603186\": " + type + "3\n",
-                "" + type + "1\n" +
+                type + "1\n" +
                         type + "2\n" +
                         type + "3\n"
         );
@@ -414,47 +393,40 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write().int16((short) 1);
         wire.write(BWKey.field1).int16((short) 2);
         wire.write(() -> "Test").int16((short) 3);
-        checkWire(wire, "" +
-                        "c0                                              # :\n" +
+        checkWire(wire, "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a1 02                                           # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a1 02                                           # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a5 01 00                                        # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a5 02 00                                        # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a5 03 00                                        # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "ba 01                                           # 1\n" +
                         "a1 02                                           # 2\n" +
                         "ba b2 f1 9e 01                                  # 2603186\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a5 01 00                                        # 1\n" +
                         "ba 01                                           # 1\n" +
                         "a5 02 00                                        # 2\n" +
                         "ba b2 f1 9e 01                                  # 2603186\n" +
                         "a5 03 00                                        # 3\n",
-                "" +
-                        "a1 01                                           # 1\n" +
+                "a1 01                                           # 1\n" +
                         "a1 02                                           # 2\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "a5 01 00                                        # 1\n" +
+                "a5 01 00                                        # 1\n" +
                         "a5 02 00                                        # 2\n" +
                         "a5 03 00                                        # 3\n");
         checkAsText123(wire, fixed ? "!short " : "");
@@ -478,47 +450,40 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write(BWKey.field1).uint8(2);
         wire.write(() -> "Test").uint8(3);
 
-        checkWire(wire, "" +
-                        "c0                                              # :\n" +
+        checkWire(wire, "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a1 02                                           # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a1 02                                           # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a1 02                                           # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "ba 01                                           # 1\n" +
                         "a1 02                                           # 2\n" +
                         "ba b2 f1 9e 01                                  # 2603186\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "ba 01                                           # 1\n" +
                         "a1 02                                           # 2\n" +
                         "ba b2 f1 9e 01                                  # 2603186\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "a1 01                                           # 1\n" +
+                "a1 01                                           # 1\n" +
                         "a1 02                                           # 2\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "a1 01                                           # 1\n" +
+                "a1 01                                           # 1\n" +
                         "a1 02                                           # 2\n" +
                         "a1 03                                           # 3\n");
         checkAsText123(wire);
@@ -541,47 +506,40 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write().uint16(1);
         wire.write(BWKey.field1).uint16(2);
         wire.write(() -> "Test").uint16(3);
-        checkWire(wire, "" +
-                        "c0                                              # :\n" +
+        checkWire(wire, "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a1 02                                           # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a1 02                                           # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a2 01 00                                        # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a2 02 00                                        # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a2 03 00                                        # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "ba 01                                           # 1\n" +
                         "a1 02                                           # 2\n" +
                         "ba b2 f1 9e 01                                  # 2603186\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a2 01 00                                        # 1\n" +
                         "ba 01                                           # 1\n" +
                         "a2 02 00                                        # 2\n" +
                         "ba b2 f1 9e 01                                  # 2603186\n" +
                         "a2 03 00                                        # 3\n",
-                "" +
-                        "a1 01                                           # 1\n" +
+                "a1 01                                           # 1\n" +
                         "a1 02                                           # 2\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "a2 01 00                                        # 1\n" +
+                "a2 01 00                                        # 1\n" +
                         "a2 02 00                                        # 2\n" +
                         "a2 03 00                                        # 3\n");
         checkAsText123(wire);
@@ -604,47 +562,40 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write().uint32(1);
         wire.write(BWKey.field1).uint32(2);
         wire.write(() -> "Test").uint32(3);
-        checkWire(wire, "" +
-                        "c0                                              # :\n" +
+        checkWire(wire, "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a1 02                                           # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a1 02                                           # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a3 01 00 00 00                                  # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a3 02 00 00 00                                  # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a3 03 00 00 00                                  # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "ba 01                                           # 1\n" +
                         "a1 02                                           # 2\n" +
                         "ba b2 f1 9e 01                                  # 2603186\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a3 01 00 00 00                                  # 1\n" +
                         "ba 01                                           # 1\n" +
                         "a3 02 00 00 00                                  # 2\n" +
                         "ba b2 f1 9e 01                                  # 2603186\n" +
                         "a3 03 00 00 00                                  # 3\n",
-                "" +
-                        "a1 01                                           # 1\n" +
+                "a1 01                                           # 1\n" +
                         "a1 02                                           # 2\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "a3 01 00 00 00                                  # 1\n" +
+                "a3 01 00 00 00                                  # 1\n" +
                         "a3 02 00 00 00                                  # 2\n" +
                         "a3 03 00 00 00                                  # 3\n");
         checkAsText123(wire);
@@ -668,47 +619,40 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write(BWKey.field1).int32(2);
         wire.write(() -> "Test").int32(3);
 
-        checkWire(wire, "" +
-                        "c0                                              # :\n" +
+        checkWire(wire, "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a1 02                                           # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a1 02                                           # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a6 01 00 00 00                                  # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a6 02 00 00 00                                  # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a6 03 00 00 00                                  # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "ba 01                                           # 1\n" +
                         "a1 02                                           # 2\n" +
                         "ba b2 f1 9e 01                                  # 2603186\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a6 01 00 00 00                                  # 1\n" +
                         "ba 01                                           # 1\n" +
                         "a6 02 00 00 00                                  # 2\n" +
                         "ba b2 f1 9e 01                                  # 2603186\n" +
                         "a6 03 00 00 00                                  # 3\n",
-                "" +
-                        "a1 01                                           # 1\n" +
+                "a1 01                                           # 1\n" +
                         "a1 02                                           # 2\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "a6 01 00 00 00                                  # 1\n" +
+                "a6 01 00 00 00                                  # 1\n" +
                         "a6 02 00 00 00                                  # 2\n" +
                         "a6 03 00 00 00                                  # 3\n");
         checkAsText123(wire);
@@ -731,47 +675,40 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write().int64(1);
         wire.write(BWKey.field1).int64(2);
         wire.write(() -> "Test").int64(3);
-        checkWire(wire, "" +
-                        "c0                                              # :\n" +
+        checkWire(wire, "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a1 02                                           # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a1 02                                           # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a7 01 00 00 00 00 00 00 00                      # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a7 02 00 00 00 00 00 00 00                      # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a7 03 00 00 00 00 00 00 00                      # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "ba 01                                           # 1\n" +
                         "a1 02                                           # 2\n" +
                         "ba b2 f1 9e 01                                  # 2603186\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a7 01 00 00 00 00 00 00 00                      # 1\n" +
                         "ba 01                                           # 1\n" +
                         "a7 02 00 00 00 00 00 00 00                      # 2\n" +
                         "ba b2 f1 9e 01                                  # 2603186\n" +
                         "a7 03 00 00 00 00 00 00 00                      # 3\n",
-                "" +
-                        "a1 01                                           # 1\n" +
+                "a1 01                                           # 1\n" +
                         "a1 02                                           # 2\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "a7 01 00 00 00 00 00 00 00                      # 1\n" +
+                "a7 01 00 00 00 00 00 00 00                      # 1\n" +
                         "a7 02 00 00 00 00 00 00 00                      # 2\n" +
                         "a7 03 00 00 00 00 00 00 00                      # 3\n");
         checkAsText123(wire, "");
@@ -815,47 +752,40 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write().float64(1);
         wire.write(BWKey.field1).float64(2);
         wire.write(() -> "Test").float64(3);
-        checkWire(wire, "" +
-                        "c0                                              # :\n" +
+        checkWire(wire, "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a1 02                                           # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "a1 02                                           # 2\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "91 00 00 00 00 00 00 f0 3f                      # 1.0\n" +
                         "c6 66 69 65 6c 64 31                            # field1:\n" +
                         "91 00 00 00 00 00 00 00 40                      # 2.0\n" +
                         "c4 54 65 73 74                                  # Test:\n" +
                         "91 00 00 00 00 00 00 08 40                      # 3.0\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
                         "ba 01                                           # 1\n" +
                         "a1 02                                           # 2\n" +
                         "ba b2 f1 9e 01                                  # 2603186\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "c0                                              # :\n" +
+                "c0                                              # :\n" +
                         "91 00 00 00 00 00 00 f0 3f                      # 1.0\n" +
                         "ba 01                                           # 1\n" +
                         "91 00 00 00 00 00 00 00 40                      # 2.0\n" +
                         "ba b2 f1 9e 01                                  # 2603186\n" +
                         "91 00 00 00 00 00 00 08 40                      # 3.0\n",
-                "" +
-                        "a1 01                                           # 1\n" +
+                "a1 01                                           # 1\n" +
                         "a1 02                                           # 2\n" +
                         "a1 03                                           # 3\n",
-                "" +
-                        "91 00 00 00 00 00 00 f0 3f                      # 1.0\n" +
+                "91 00 00 00 00 00 00 f0 3f                      # 1.0\n" +
                         "91 00 00 00 00 00 00 00 40                      # 2.0\n" +
                         "91 00 00 00 00 00 00 08 40                      # 3.0\n");
         if (wire.isBinary())
@@ -989,8 +919,7 @@ public class BinaryWireTest extends WireTestCommon {
                 .write().time(LocalTime.MAX)
                 .write().time(LocalTime.MIN);
         if (testId <= 4) {
-            assertEquals("" +
-                            "c0                                              # :\n" +
+            assertEquals("c0                                              # :\n" +
                             "b2 0c 31 32 3a 35 34 3a 30 34 2e 36 31 32       # 12:54:04.612\n" +
                             "c0                                              # :\n" +
                             "b2 12 32 33 3a 35 39 3a 35 39 2e 39 39 39 39 39 # 23:59:59.999999999\n" +
@@ -998,8 +927,7 @@ public class BinaryWireTest extends WireTestCommon {
                             "b2 05 30 30 3a 30 30                            # 00:00\n",
                     bytes.toHexString());
         } else {
-            assertEquals("" +
-                            "b2 0c 31 32 3a 35 34 3a 30 34 2e 36 31 32       # 12:54:04.612\n" +
+            assertEquals("b2 0c 31 32 3a 35 34 3a 30 34 2e 36 31 32       # 12:54:04.612\n" +
                             "b2 12 32 33 3a 35 39 3a 35 39 2e 39 39 39 39 39 # 23:59:59.999999999\n" +
                             "39 39 39 39 b2 05 30 30 3a 30 30                # 00:00\n",
                     bytes.toHexString());
@@ -1101,8 +1029,7 @@ public class BinaryWireTest extends WireTestCommon {
 
         // System.out.println(wire.bytes().toDebugString(400));
         checkWire(wire,
-                "" +
-                        "c1 41                                           # A:\n" +
+                "c1 41                                           # A:\n" +
                         "82 3f 00 00 00                                  # MyTypesCustom\n" +
                         "c6 42 5f 46 4c 41 47                            # B_FLAG:\n" +
                         "b1                                              # true\n" +
@@ -1130,8 +1057,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "a6 9e 2e a4 f8                                  # -123457890\n" +
                         "c4 54 45 58 54                                  # TEXT:\n" +
                         "e7 42 79 65 20 6e 6f 77                         # Bye now\n",
-                "" +
-                        "c1 41                                           # A:\n" +
+                "c1 41                                           # A:\n" +
                         "82 3f 00 00 00                                  # MyTypesCustom\n" +
                         "c6 42 5f 46 4c 41 47                            # B_FLAG:\n" +
                         "b1                                              # true\n" +
@@ -1159,8 +1085,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "a6 9e 2e a4 f8                                  # -123457890\n" +
                         "c4 54 45 58 54                                  # TEXT:\n" +
                         "e7 42 79 65 20 6e 6f 77                         # Bye now\n",
-                "" +
-                        "c1 41                                           # A:\n" +
+                "c1 41                                           # A:\n" +
                         "82 4b 00 00 00                                  # MyTypesCustom\n" +
                         "c6 42 5f 46 4c 41 47                            # B_FLAG:\n" +
                         "b1                                              # true\n" +
@@ -1188,8 +1113,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "a6 9e 2e a4 f8                                  # -123457890\n" +
                         "c4 54 45 58 54                                  # TEXT:\n" +
                         "e7 42 79 65 20 6e 6f 77                         # Bye now\n",
-                "" +
-                        "ba 41                                           # 65\n" +
+                "ba 41                                           # 65\n" +
                         "82 27 00 00 00                                  # MyTypesCustom\n" +
                         "ba 00                                           # 0\n" +
                         "b1                                              # true\n" +
@@ -1217,8 +1141,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "a6 9e 2e a4 f8                                  # -123457890\n" +
                         "ba 05                                           # 5\n" +
                         "e7 42 79 65 20 6e 6f 77                         # Bye now\n",
-                "" +
-                        "ba 41                                           # 65\n" +
+                "ba 41                                           # 65\n" +
                         "82 33 00 00 00                                  # MyTypesCustom\n" +
                         "ba 00                                           # 0\n" +
                         "b1                                              # true\n" +
@@ -1246,8 +1169,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "a6 9e 2e a4 f8                                  # -123457890\n" +
                         "ba 05                                           # 5\n" +
                         "e7 42 79 65 20 6e 6f 77                         # Bye now\n",
-                "" +
-                        "82 1b 00 00 00                                  # MyTypesCustom\n" +
+                "82 1b 00 00 00                                  # MyTypesCustom\n" +
                         "b1                                              # true\n" +
                         "a5 39 30                                        # 12345\n" +
                         "94 80 ad 4b                                     # 1234560/1e4\n" +
@@ -1261,8 +1183,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "a1 00                                           # 0\n" +
                         "a6 9e 2e a4 f8                                  # -123457890\n" +
                         "e7 42 79 65 20 6e 6f 77                         # Bye now\n",
-                "" +
-                        "82 27 00 00 00                                  # MyTypesCustom\n" +
+                "82 27 00 00 00                                  # MyTypesCustom\n" +
                         "b1                                              # true\n" +
                         "a5 39 30                                        # 12345\n" +
                         "91 77 be 9f 1a 2f dd 5e 40                      # 123.456\n" +
@@ -1459,8 +1380,7 @@ public class BinaryWireTest extends WireTestCommon {
         final MethodReader reader = wire.methodReader((IDTO) dto -> sb.append("dto: " + dto + "\n"));
         assertTrue(reader.readOne());
         assertFalse(reader.readOne());
-        assertEquals("" +
-                "one\n" +
+        assertEquals("one\n" +
                 "two\n" +
                 "dto: !net.openhft.chronicle.wire.BinaryWireTest$DTO {\n" +
                 "  text: text\n" +

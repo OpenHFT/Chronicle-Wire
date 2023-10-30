@@ -21,7 +21,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.Mocker;
+import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.utils.MethodReaderStatus;
 import org.jetbrains.annotations.NotNull;
 

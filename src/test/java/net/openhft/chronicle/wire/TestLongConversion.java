@@ -30,18 +30,13 @@ import static org.junit.Assert.assertEquals;
 @RunWith(value = Parameterized.class)
 public class TestLongConversion {
     public static char SEPARATOR = '/';
-    private LongConverter longConverter;
+    private final LongConverter longConverter;
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                new Object[]{Base32LongConverter.INSTANCE},
-                new Object[]{Base40LongConverter.INSTANCE},
+        return Arrays.asList(new Object[]{Base32LongConverter.INSTANCE},
                 new Object[]{Base64LongConverter.INSTANCE},
-                new Object[]{Base85LongConverter.INSTANCE},
-                new Object[]{Base95LongConverter.INSTANCE},
-                new Object[]{Base128LongConverter.INSTANCE}
-        });
+                new Object[]{Base85LongConverter.INSTANCE});
     }
 
     public TestLongConversion(LongConverter longConverter) {

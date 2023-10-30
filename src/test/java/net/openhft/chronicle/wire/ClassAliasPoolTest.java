@@ -20,8 +20,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.pool.ClassLookup;
+import net.openhft.chronicle.core.util.Mocker;
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
 import org.junit.Test;
@@ -65,22 +65,19 @@ public class ClassAliasPoolTest extends WireTestCommon {
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {WireType.TEXT,
-                        (Consumer<WireIn>) w -> assertEquals("" +
-                                        "handle: !CAPTData {\n" +
+                        (Consumer<WireIn>) w -> assertEquals("handle: !CAPTData {\n" +
                                         "  value: 0\n" +
                                         "}\n" +
                                         "...\n",
                                 w.toString())},
                 {WireType.YAML_ONLY,
-                        (Consumer<WireIn>) w -> assertEquals("" +
-                                        "handle: !CAPTData {\n" +
+                        (Consumer<WireIn>) w -> assertEquals("handle: !CAPTData {\n" +
                                         "  value: 0\n" +
                                         "}\n" +
                                         "...\n",
                                 w.toString())},
                 {WireType.BINARY,
-                        (Consumer<WireIn>) w -> assertEquals("" +
-                                        "1f 00 00 00                                     # msg-length\n" +
+                        (Consumer<WireIn>) w -> assertEquals("1f 00 00 00                                     # msg-length\n" +
                                         "b9 06 68 61 6e 64 6c 65                         # handle: (event)\n" +
                                         "b6 08 43 41 50 54 44 61 74 61                   # CAPTData\n" +
                                         "82 08 00 00 00                                  # CAPTData\n" +
@@ -110,8 +107,7 @@ public class ClassAliasPoolTest extends WireTestCommon {
         assertFalse(name, name.contains("$Proxy"));
         assertTrue(reader.readOne());
         assertFalse(reader.readOne());
-        assertEquals("" +
-                        "handle[!net.openhft.chronicle.wire.ClassAliasPoolTest$CAPTData {\n" +
+        assertEquals("handle[!net.openhft.chronicle.wire.ClassAliasPoolTest$CAPTData {\n" +
                         "  value: 0\n" +
                         "}\n" +
                         "]\n",

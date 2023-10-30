@@ -24,7 +24,6 @@ import net.openhft.chronicle.bytes.util.BinaryLengthLength;
 import net.openhft.chronicle.bytes.util.Bit8StringInterner;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
-import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -93,7 +92,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     private final boolean supportDelta;
     private final StringBuilder stringBuilder = new StringBuilder();
     private DefaultValueIn defaultValueIn;
-    private String compression;
+    private final String compression;
     private Boolean overrideSelfDescribing = null;
 
     public BinaryWire(@NotNull Bytes<?> bytes) {
@@ -2113,9 +2112,9 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public WireOut writeInt(IntConverter intConverter, int i) {
+        public WireOut writeInt(LongConverter converter, int i) {
             if (bytes.retainedHexDumpDescription())
-                bytes.writeHexDumpDescription(intConverter.asString(i));
+                bytes.writeHexDumpDescription(converter.asString(i));
             return writeInt(i);
         }
 
@@ -3524,7 +3523,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 marshallable(marshallable);
                 return (T) marshallable;
             }
-            return (T) object(null, aClass);
+            return object(null, aClass);
         }
 
         @Override

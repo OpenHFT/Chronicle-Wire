@@ -18,7 +18,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
-import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
@@ -32,10 +31,7 @@ import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.scoped.ScopedResourcePool;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
-import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
-import net.openhft.chronicle.core.util.CoreDynamicEnum;
-import net.openhft.chronicle.core.util.ObjectUtils;
-import net.openhft.chronicle.core.util.ReadResolvable;
+import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.wire.internal.StringConsumerMarshallableOut;
 import net.openhft.compiler.CachedCompiler;
 import org.jetbrains.annotations.NotNull;
@@ -80,8 +76,8 @@ public enum Wires {
     public static final int SPB_HEADER_SIZE = 4;
     public static final List<Function<Class, SerializationStrategy>> CLASS_STRATEGY_FUNCTIONS = new CopyOnWriteArrayList<>();
 
-    @Deprecated(/* for removal in x.26, make default true in x.25 */)
-    static boolean THROW_CNFRE = Jvm.getBoolean("class.not.found.for.missing.class.alias", false);
+    @Deprecated(/* for removal in x.26 */)
+    static boolean THROW_CNFRE = Jvm.getBoolean("class.not.found.for.missing.class.alias", true);
     static final ClassLocal<SerializationStrategy> CLASS_STRATEGY = ClassLocal.withInitial(c -> {
         for (@NotNull Function<Class, SerializationStrategy> func : CLASS_STRATEGY_FUNCTIONS) {
             final SerializationStrategy strategy = func.apply(c);
@@ -837,7 +833,7 @@ public enum Wires {
             CACHED_COMPILER =
                     new File(target).exists() && DUMP_CODE_TO_TARGET
                             ? new CachedCompiler(new File(target, "generated-test-sources"), new File(target, "test-classes"))
-                            : new CachedCompiler((File) null, (File) null);
+                            : new CachedCompiler(null, null);
         }
         try {
             return CACHED_COMPILER.loadFromJava(classLoader, className, code);

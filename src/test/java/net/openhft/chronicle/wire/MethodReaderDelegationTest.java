@@ -20,8 +20,8 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
+import net.openhft.chronicle.core.util.Mocker;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -39,7 +39,7 @@ import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
 public class MethodReaderDelegationTest extends WireTestCommon {
-    private boolean useMethodId;
+    private final boolean useMethodId;
 
     public MethodReaderDelegationTest(boolean useMethodId) {
         this.useMethodId = useMethodId;

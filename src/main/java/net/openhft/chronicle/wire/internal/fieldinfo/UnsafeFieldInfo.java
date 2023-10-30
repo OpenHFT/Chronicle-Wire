@@ -25,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 
-@SuppressWarnings("deprecation" /* The parent class will either be moved to internal or cease to exist in x.25 */)
+@SuppressWarnings("deprecation" /* The parent class will either be moved to internal or cease to exist in x.26 */)
 class UnsafeFieldInfo extends VanillaFieldInfo {
     private static final long UNSET_OFFSET = Long.MAX_VALUE;
     private transient long offset = UNSET_OFFSET;

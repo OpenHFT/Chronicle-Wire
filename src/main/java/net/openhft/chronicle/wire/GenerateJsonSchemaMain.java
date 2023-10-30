@@ -90,8 +90,7 @@ public class GenerateJsonSchemaMain {
             sb.append(entry.getValue());
             sb.append("},\n");
         }
-        sb.append("" +
-                "}\n" +
+        sb.append("}\n" +
                 "}\n");
         return sb.toString();
     }
@@ -110,8 +109,7 @@ public class GenerateJsonSchemaMain {
             Annotation[][] pAnnotations = method.getParameterAnnotations();
             switch (pTypes.length) {
                 case 0:
-                    desc.append("" +
-                            "\"type\": \"constant\",\n" +
+                    desc.append("\"type\": \"constant\",\n" +
                             "\"value\": \"\""
                     );
                     break;
@@ -128,8 +126,7 @@ public class GenerateJsonSchemaMain {
     }
 
     private void addProperties(Map<String, String> properties, StringBuilder sb) {
-        sb.append("" +
-                "\"properties\": {");
+        sb.append("\"properties\": {");
         String sep = "\n";
         for (Map.Entry<String, String> entry : properties.entrySet()) {
             sb.append(sep);
@@ -166,12 +163,10 @@ public class GenerateJsonSchemaMain {
         }
         sb.append("\"type\": \"object\",\n");
         if (!required.isEmpty()) {
-            sb.append("\"required\": [\n" +
-                    "");
+            sb.append("\"required\": [\n");
             sb.append(required.stream()
                     .map(s -> '"' + s + '"')
-                    .collect(Collectors.joining(",\n" +
-                            "")));
+                    .collect(Collectors.joining(",\n")));
             sb.append("\n" +
                     "],\n");
         }
@@ -196,34 +191,23 @@ public class GenerateJsonSchemaMain {
     }
 
     private void addTypeForFieldOrParam(StringBuilder desc, Class<?> pType, Annotation[] annotations) {
-        IntConversion ic = find(annotations, IntConversion.class);
-        if (ic != null) {
-            desc.append("" +
-                    "\"type\": \"string\"\n");
+        LongConversion lc = find(annotations, LongConversion.class);
+        if (lc != null) {
+            Class value = lc.value();
+            if (value.getName().contains("Timestamp"))
+                desc.append("\"type\": \"string\",\n" +
+                        "\"format\": \"date-time\"");
+            else
+                desc.append("\"type\": \"string\"\n");
+        } else if (Collection.class.isAssignableFrom(pType)) {
+            desc.append("\"type\": \"array\"\n");
+        } else if (Map.class.isAssignableFrom(pType)) {
+            desc.append("\"type\": \"object\"\n");
         } else {
-            LongConversion lc = find(annotations, LongConversion.class);
-            if (lc != null) {
-                Class value = lc.value();
-                if (value.getName().contains("Timestamp"))
-                    desc.append("" +
-                            "\"type\": \"string\",\n" +
-                            "\"format\": \"date-time\"");
-                else
-                    desc.append("" +
-                            "\"type\": \"string\"\n");
-            } else if (Collection.class.isAssignableFrom(pType)) {
-                desc.append("" +
-                        "\"type\": \"array\"\n");
-            } else if (Map.class.isAssignableFrom(pType)) {
-                desc.append("" +
-                        "\"type\": \"object\"\n");
-            } else {
-                generateObjectSchemaFor(pType);
-                String alias = aliases.get(pType);
-                String key = alias.startsWith("#") ? "$ref" : "type";
-                desc.append("" +
-                        "\"" + key + "\": \"" + alias + "\"\n");
-            }
+            generateObjectSchemaFor(pType);
+            String alias = aliases.get(pType);
+            String key = alias.startsWith("#") ? "$ref" : "type";
+            desc.append("\"" + key + "\": \"" + alias + "\"\n");
         }
     }
 

@@ -514,16 +514,10 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     @NotNull
     protected StopCharsTester getStrictEscapingEndOfText() {
-        StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT, strictEndOfTextEscaping());
+        StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT, STRICT_END_OF_TEXT_ESCAPING);
         // reset it.
         escaping.isStopChar(' ', ' ');
         return escaping;
-    }
-
-    @NotNull
-    @Deprecated(/* Will be inlined in x.25 */)
-    protected Supplier<StopCharsTester> strictEndOfTextEscaping() {
-        return STRICT_END_OF_TEXT_ESCAPING;
     }
 
     @NotNull

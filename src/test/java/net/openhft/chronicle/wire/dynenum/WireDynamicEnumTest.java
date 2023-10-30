@@ -20,9 +20,9 @@ package net.openhft.chronicle.wire.dynenum;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.EnumCache;
+import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.*;
 import org.junit.Before;
 import org.junit.Test;

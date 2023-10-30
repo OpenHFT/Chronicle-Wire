@@ -77,19 +77,6 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         return msg;
     }
 
-    @Deprecated(/* Not used. To be removed in x.25 */)
-    public boolean ignoreDefaults() {
-        return ignoreDefaults;
-    }
-
-    @Deprecated(/* Not used. To be removed in x.25 */)
-    @NotNull
-    public MethodReaderBuilder ignoreDefaults(boolean ignoreDefaults) {
-        Jvm.warn().on(getClass(), "Support for ignoreDefaults will be dropped in x.25");
-        this.ignoreDefaults = ignoreDefaults;
-        return this;
-    }
-
     public WireParselet defaultParselet() {
         return defaultParselet;
     }

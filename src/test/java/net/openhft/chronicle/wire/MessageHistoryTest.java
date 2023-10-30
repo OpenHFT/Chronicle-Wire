@@ -68,6 +68,7 @@ public class MessageHistoryTest extends WireTestCommon {
 
     @Test
     public void checkSerialiseBytes() {
+
         VanillaMessageHistory.USE_BYTES_MARSHALLABLE = true;
         VanillaMessageHistory history = new SetTimeMessageHistory();
         initExampleMessageHistory(history);
@@ -112,8 +113,7 @@ public class MessageHistoryTest extends WireTestCommon {
 
             BinaryWire bw = new BinaryWire(new HexDumpBytes());
             bw.writeEventName(MethodReader.HISTORY).marshallable(history);
-            assertEquals("" +
-                            "b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
+            assertEquals("b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
                             "81 4b 00                                        # SetTimeMessageHistory\n" +
                             "c7 73 6f 75 72 63 65 73                         # sources:\n" +
                             "82 16 00 00 00                                  # sequence\n" +
@@ -158,8 +158,7 @@ public class MessageHistoryTest extends WireTestCommon {
             VanillaMessageHistory.USE_BYTES_MARSHALLABLE = true;
             wire.writeEventId(MESSAGE_HISTORY_METHOD_ID).object(SetTimeMessageHistory.class, vmh);
 
-            assertEquals("" +
-                            "b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
+            assertEquals("b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
                             "81 34 00                                        # SetTimeMessageHistory\n" +
                             "c7 73 6f 75 72 63 65 73                         # sources:\n" +
                             "82 0b 00 00 00                                  # sequence\n" +

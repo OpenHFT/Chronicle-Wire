@@ -22,7 +22,7 @@ import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.scoped.ScopedResource;
-import net.openhft.chronicle.core.pool.StringBuilderPool;
+import net.openhft.chronicle.core.util.ClassLocal;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -745,37 +745,25 @@ public class WireMarshaller<T> {
                     LongConverter longConverter = acquireLongConverter(field);
                     if (longConverter != null)
                         return new ByteLongConverterFieldAccess(field, longConverter);
-                    IntConversion intConversion = Jvm.findAnnotation(field, IntConversion.class);
-                    return intConversion == null
-                            ? new ByteFieldAccess(field)
-                            : new ByteIntConversionFieldAccess(field, intConversion);
+                    return new ByteFieldAccess(field);
                 }
                 case "char": {
                     LongConverter longConverter = acquireLongConverter(field);
                     if (longConverter != null)
                         return new CharLongConverterFieldAccess(field, longConverter);
-                    CharConversion charConversion = Jvm.findAnnotation(field, CharConversion.class);
-                    return charConversion == null
-                            ? new CharFieldAccess(field)
-                            : new CharConversionFieldAccess(field, charConversion);
+                    return new CharFieldAccess(field);
                 }
                 case "short": {
                     LongConverter longConverter = acquireLongConverter(field);
                     if (longConverter != null)
                         return new ShortLongConverterFieldAccess(field, longConverter);
-                    IntConversion intConversion = Jvm.findAnnotation(field, IntConversion.class);
-                    return intConversion == null
-                            ? new ShortFieldAccess(field)
-                            : new ShortIntConversionFieldAccess(field, intConversion);
+                    return new ShortFieldAccess(field);
                 }
                 case "int": {
                     LongConverter longConverter = acquireLongConverter(field);
                     if (longConverter != null)
                         return new IntLongConverterFieldAccess(field, longConverter);
-                    IntConversion intConversion = Jvm.findAnnotation(field, IntConversion.class);
-                    return intConversion == null
-                            ? new IntegerFieldAccess(field)
-                            : new IntConversionFieldAccess(field, intConversion);
+                    return new IntegerFieldAccess(field);
                 }
                 case "float":
                     return new FloatFieldAccess(field);
@@ -1989,8 +1977,8 @@ public class WireMarshaller<T> {
     }
 
     static class ByteIntConversionFieldAccess extends IntConversionFieldAccess {
-        public ByteIntConversionFieldAccess(@NotNull Field field, @NotNull IntConversion intConversion) {
-            super(field, intConversion);
+        public ByteIntConversionFieldAccess(@NotNull Field field, @NotNull LongConversion conversion) {
+            super(field, conversion);
         }
 
         @Override
@@ -2005,8 +1993,8 @@ public class WireMarshaller<T> {
     }
 
     static class ShortIntConversionFieldAccess extends IntConversionFieldAccess {
-        public ShortIntConversionFieldAccess(@NotNull Field field, @NotNull IntConversion intConversion) {
-            super(field, intConversion);
+        public ShortIntConversionFieldAccess(@NotNull Field field, @NotNull LongConversion conversion) {
+            super(field, conversion);
         }
 
         @Override
@@ -2220,74 +2208,13 @@ public class WireMarshaller<T> {
         }
     }
 
-    static class CharConversionFieldAccess extends CharFieldAccess {
-
-        @NotNull
-        private final CharConverter intConverter;
-
-        CharConversionFieldAccess(@NotNull Field field, @NotNull CharConversion charConversion) {
-            super(field);
-            this.intConverter = ObjectUtils.newInstance(charConversion.value());
-        }
-
-        @Override
-        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
-            try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
-                StringBuilder sb = stlSb.get();
-                intConverter.append(sb, getChar(o));
-                if (!write.isBinary() && sb.length() == 0)
-                    write.text("");
-                else
-                    write.rawText(sb);
-            }
-        }
-
-        protected char getChar(Object o) {
-            return unsafeGetChar(o, offset);
-        }
-
-        @Override
-        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
-                StringBuilder sb = stlSb.get();
-                read.text(sb);
-                char i = intConverter.parse(sb);
-                putChar(o, i);
-            }
-        }
-
-        protected void putChar(Object o, char i) {
-            unsafePutChar(o, offset, i);
-        }
-
-        @Override
-        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
-            try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
-                StringBuilder sb = stlSb.get();
-                bytes.readUtf8(sb);
-                int i = intConverter.parse(sb);
-                bytes.writeInt(i);
-            }
-        }
-
-        @Override
-        protected boolean sameValue(Object o, Object o2) {
-            return getChar(o) == getChar(o2);
-        }
-
-        @Override
-        protected void copy(Object from, Object to) {
-            putChar(to, getChar(from));
-        }
-    }
-
     static class IntConversionFieldAccess extends FieldAccess {
         @NotNull
-        private final IntConverter intConverter;
+        private final LongConverter converter;
 
-        IntConversionFieldAccess(@NotNull Field field, @NotNull IntConversion intConversion) {
+        IntConversionFieldAccess(@NotNull Field field, @NotNull LongConversion conversion) {
             super(field);
-            this.intConverter = ObjectUtils.newInstance(intConversion.value());
+            this.converter = (LongConverter) ObjectUtils.newInstance(conversion.value());
         }
 
         @Override
@@ -2298,7 +2225,7 @@ public class WireMarshaller<T> {
             } else {
                 try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
                     StringBuilder sb = stlSb.get();
-                    intConverter.append(sb, anInt);
+                    converter.append(sb, anInt);
                     if (!write.isBinary() && sb.length() == 0)
                         write.text("");
                     else
@@ -2313,18 +2240,18 @@ public class WireMarshaller<T> {
 
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            int i;
+            long i;
             if (read.isBinary()) {
-                i = read.int32();
+                i = read.int64();
 
             } else {
                 try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
                     StringBuilder sb = stlSb.get();
                     read.text(sb);
-                    i = intConverter.parse(sb);
+                    i = converter.parse(sb);
                 }
             }
-            putInt(o, i);
+            unsafePutLong(o, offset, i);
         }
 
         protected void putInt(Object o, int i) {
@@ -2336,8 +2263,8 @@ public class WireMarshaller<T> {
             try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
                 StringBuilder sb = stlSb.get();
                 bytes.readUtf8(sb);
-                int i = intConverter.parse(sb);
-                bytes.writeInt(i);
+                long i = converter.parse(sb);
+                bytes.writeLong(i);
             }
         }
 

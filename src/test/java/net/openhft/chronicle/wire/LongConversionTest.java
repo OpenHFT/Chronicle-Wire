@@ -19,8 +19,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.util.Mocker;
 import org.junit.Test;
 
 import java.io.StringWriter;
@@ -40,7 +40,7 @@ public class LongConversionTest extends WireTestCommon {
         lh.unsigned = Long.MIN_VALUE;
         lh.timestamp = 0x05432108090a0bL;
         assertEquals("!LongHolder {\n" +
-                "  unsigned: 9223372036854775808,\n" +
+                "  unsigned: C222222222222,\n" +
                 "  hex: fedcba9876543210,\n" +
                 "  timestamp: 2016-12-08T08:00:31.345163\n" +
                 "}\n", lh.toString());
@@ -66,33 +66,12 @@ public class LongConversionTest extends WireTestCommon {
         assertEquals("to[74565]\n", sw.toString().replaceAll("\r", ""));
     }
 
-    @Test
-    public void oxmethod() {
-        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(64))
-                .useTextDocuments();
-        LongConversionTest.OxWriteWithLong write = wire.methodWriter(LongConversionTest.OxWriteWithLong.class);
-        assertSame(write, write.to(0x12345));
-
-        assertEquals("to: 0x12345\n", wire.toString());
-
-        StringWriter sw = new StringWriter();
-        LongConversionTest.OxWriteWithLong read = Mocker.logging(LongConversionTest.OxWriteWithLong.class, "", sw);
-        wire.methodReader(read).readOne();
-
-        // NOTE: Mocker which is in Core, ignores the LongConverter
-        assertEquals("to[74565]\n", sw.toString().replaceAll("\r", ""));
-    }
-
     interface WriteWithLong {
         LongConversionTest.WriteWithLong to(@LongConversion(HexadecimalLongConverter.class) int x);
     }
 
-    interface OxWriteWithLong {
-        LongConversionTest.OxWriteWithLong to(@LongConversion(OxHexadecimalLongConverter.class) int x);
-    }
-
     static class LongHolder extends SelfDescribingMarshallable {
-        @LongConversion(UnsignedLongConverter.class)
+        @LongConversion(Base32LongConverter.class)
         long unsigned;
         @LongConversion(HexadecimalLongConverter.class)
         long hex;

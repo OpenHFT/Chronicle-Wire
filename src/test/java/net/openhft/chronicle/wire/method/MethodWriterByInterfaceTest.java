@@ -20,7 +20,7 @@ package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.core.Mocker;
+import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.wire.*;
 import org.junit.After;
