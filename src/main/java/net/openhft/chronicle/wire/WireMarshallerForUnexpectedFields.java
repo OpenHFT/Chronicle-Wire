@@ -25,8 +25,14 @@ import org.jetbrains.annotations.NotNull;
 public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
     final CharSequenceObjectMap<FieldAccess> fieldMap;
 
+    /** @deprecated To be removed in x.26 */
+    @Deprecated
     public WireMarshallerForUnexpectedFields(@NotNull Class<T> tClass, @NotNull FieldAccess[] fields, boolean isLeaf) {
-        super(tClass, fields, isLeaf);
+        this(fields, isLeaf, defaultValueForType(tClass));
+    }
+
+    public WireMarshallerForUnexpectedFields(@NotNull FieldAccess[] fields, boolean isLeaf, T defaultValue) {
+        super(fields, isLeaf, defaultValue);
         fieldMap = new CharSequenceObjectMap<>(fields.length * 3);
         for (FieldAccess field : fields) {
             fieldMap.put(field.key.name().toString(), field);
@@ -35,14 +41,14 @@ public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
     }
 
     @Override
-    public void readMarshallable(T t, @NotNull WireIn in, T defaults, boolean overwrite) throws InvalidMarshallableException {
+    public void readMarshallable(T t, @NotNull WireIn in, boolean overwrite) throws InvalidMarshallableException {
         try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
             ReadMarshallable rm = t instanceof ReadMarshallable ? (ReadMarshallable) t : null;
             StringBuilder sb = stlSb.get();
             int next = 0;
             if (overwrite) {
                 for (FieldAccess field : fields) {
-                    field.copy(defaults, t);
+                    field.copy(defaultValue(), t);
                 }
             }
             while (in.hasMore()) {
@@ -76,7 +82,7 @@ public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
                         }
                     }
                 } else {
-                    field.readValue(t, defaults, vin, overwrite);
+                    field.readValue(t, defaultValue(), vin, overwrite);
                 }
                 if (pos >= in.bytes().readPosition()) {
                     Jvm.warn().on(getClass(), "Failed to parse " + in.bytes());

@@ -136,7 +136,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
         WireMarshaller<Object> wm = WIRE_MARSHALLER_CL.get(this.getClass());
 
         // Delegate the reading process to the obtained WireMarshaller
-        wm.readMarshallable(this, wire, wm.defaultValue(), true);
+        wm.readMarshallable(this, wire, true);
     }
 
     /**
