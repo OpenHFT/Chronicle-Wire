@@ -21,7 +21,6 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 
 public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMarshallableCfg implements Event<E> {
-    private String eventId = "";
     @LongConversion(ServicesTimestampLongConverter.class)
     private long eventTime;
     private String serviceId = "";
