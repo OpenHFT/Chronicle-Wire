@@ -20,8 +20,8 @@ package net.openhft.chronicle.wire.channel.impl;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.io.*;
+import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.threads.PauserMode;
 import net.openhft.chronicle.wire.*;
 import net.openhft.chronicle.wire.channel.*;

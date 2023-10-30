@@ -121,11 +121,7 @@ public interface YamlTester {
      * @return a map of gerenated inputs to test names
      * @throws IORuntimeException if an IO error occurs
      */
-    default Map<String, String> agitate(YamlAgitator agitator) throws IORuntimeException {
-        @Deprecated(/* make non-default in x.25 */)
-        int dummy;
-        throw new UnsupportedOperationException();
-    }
+    Map<String, String> agitate(YamlAgitator agitator);
 
     /**
      * @return the expected String

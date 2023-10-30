@@ -497,17 +497,10 @@ public class JSONWire extends TextWire {
     @Override
     @NotNull
     protected StopCharsTester getStrictEscapingEndOfText() {
-        StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT_JSON, strictEndOfTextEscaping());
+        StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT_JSON, STRICT_END_OF_TEXT_JSON_ESCAPING);
         // reset it.
         escaping.isStopChar(' ', ' ');
         return escaping;
-    }
-
-    @Override
-    @NotNull
-    @Deprecated
-    protected Supplier<StopCharsTester> strictEndOfTextEscaping() {
-        return STRICT_END_OF_TEXT_JSON_ESCAPING;
     }
 
     class JSONReadDocumentContext extends TextReadDocumentContext {

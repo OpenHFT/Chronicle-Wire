@@ -51,7 +51,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
-import static net.openhft.chronicle.wire.Wires.getField;
 import static net.openhft.chronicle.wire.Wires.isScalar;
 
 /**
@@ -1277,10 +1276,10 @@ public interface ValueOut {
     /**
      * Write an int value with a specified converter.
      */
-    default WireOut writeInt(IntConverter intConverter, int i) {
+    default WireOut writeInt(LongConverter converter, int i) {
         try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
             StringBuilder sb = stlSb.get();
-            intConverter.append(sb, i);
+            converter.append(sb, i);
             return rawText(sb);
         }
     }

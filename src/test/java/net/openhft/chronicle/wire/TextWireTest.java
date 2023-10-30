@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.internal.NoBytesStore;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -1506,8 +1507,7 @@ public class TextWireTest extends WireTestCommon {
         @NotNull byte[] four = {1, 2, 3, 4};
         wire.writeDocument(false, w -> w.write("four").object(four));
 
-        assertEquals("" +
-                        "--- !!data\n" +
+        assertEquals("--- !!data\n" +
                         "nothing: !byte[] !!binary\n" +
                         "# position: 32, header: 1\n" +
                         "--- !!data\n" +
@@ -1943,8 +1943,7 @@ public class TextWireTest extends WireTestCommon {
         final MethodReader reader = wire.methodReader((BinaryWireTest.IDTO) dto -> sb.append("dto: " + dto + "\n"));
         assertTrue(reader.readOne());
         assertFalse(reader.readOne());
-        assertEquals("" +
-                "one\n" +
+        assertEquals("one\n" +
                 "two\n" +
                 "three\n" +
                 "dto: !net.openhft.chronicle.wire.BinaryWireTest$DTO {\n" +
@@ -1956,8 +1955,7 @@ public class TextWireTest extends WireTestCommon {
     @Test
     public void readMetaData() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
-        wire.bytes().append("" +
-                "---\n" +
+        wire.bytes().append("---\n" +
                 "!!meta-data\n" +
                 "hello-world\n" +
                 "...\n" +
@@ -1976,8 +1974,7 @@ public class TextWireTest extends WireTestCommon {
                 "dto: {\n" +
                 "  text: hello-world\n" +
                 "}\n" +
-                "...\n" +
-                "");
+                "...\n");
         for (int i = 0; i < 4; i++) {
             try (DocumentContext dc = wire.readingDocument()) {
                 final boolean metaData = i % 2 == 0;
@@ -2023,7 +2020,7 @@ public class TextWireTest extends WireTestCommon {
     }
 
     public enum OrderLevel implements Marshallable {
-        PARENT, CHILD;
+        PARENT, CHILD
     }
 
     enum BWKey implements WireKey {
@@ -2040,7 +2037,7 @@ public class TextWireTest extends WireTestCommon {
 
     public static final class FieldWithEnum extends SelfDescribingMarshallable {
         private byte[] allowedFoos;
-        private OrderLevel orderLevel = OrderLevel.PARENT;
+        private final OrderLevel orderLevel = OrderLevel.PARENT;
     }
 
     static class FieldWithComment extends SelfDescribingMarshallable {

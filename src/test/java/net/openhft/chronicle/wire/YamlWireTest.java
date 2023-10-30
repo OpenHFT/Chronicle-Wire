@@ -20,7 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.bytes.NoBytesStore;
+import net.openhft.chronicle.bytes.internal.NoBytesStore;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.TextWireTest.ABCD;
 import net.openhft.chronicle.wire.converter.NanoTime;
@@ -154,8 +154,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testFromString() {
-        @Nullable Object w = WireType.YAML.fromString("" +
-                "changedRow: {\n" +
+        @Nullable Object w = WireType.YAML.fromString("changedRow: {\n" +
                 "  row: [\n" +
                 "  ],\n" +
                 "  oldRow: {\n" +
@@ -812,7 +811,7 @@ public class YamlWireTest extends WireTestCommon {
         wire.bytes().append("b: !byte[] !!binary AAAAAAA=\n" +
                 "c: !!binary CCCCCCCC\n");
         byte[] b = (byte[]) wire.read("b").object();
-        assertTrue(Arrays.toString(b), Arrays.equals(new byte[]{0, 0, 0, 0, 0}, b));
+        assertArrayEquals(Arrays.toString(b), new byte[]{0, 0, 0, 0, 0}, b);
         assertEquals(BytesStore.wrap(new byte[]{8, ' ', -126, 8, ' ', -126}), wire.read("c").object());
     }
 
@@ -1129,8 +1128,7 @@ public class YamlWireTest extends WireTestCommon {
 
         wire.writeDocument(false, o -> o.write(() -> "example").marshallable(expected, MyMarshallable.class, MyMarshallable.class, true));
 
-        assertEquals("" +
-                        "--- !!data\n" +
+        assertEquals("--- !!data\n" +
                         "example: {\n" +
                         "  ? { MyField: aKey }: { MyField: aValue },\n" +
                         "  ? { MyField: aKey2 }: { MyField: aValue2 }\n" +
@@ -1572,8 +1570,7 @@ public class YamlWireTest extends WireTestCommon {
         @NotNull final MyMarshallable parent = new MyMarshallable("parent");
         wire.writeDocument(false, w -> w.writeEvent(MyMarshallable.class, parent).object(map));
 
-        assertEquals("" +
-                        "--- !!data\n" +
+        assertEquals("--- !!data\n" +
                         "? { MyField: parent }: {\n" +
                         "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key1 }: value1,\n" +
                         "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key2 }: value2\n" +
@@ -1783,8 +1780,7 @@ public class YamlWireTest extends WireTestCommon {
         final MethodReader reader = wire.methodReader((BinaryWireTest.IDTO) dto -> sb.append("dto: " + dto + "\n"));
         assertTrue(reader.readOne());
         assertFalse(reader.readOne());
-        assertEquals("" +
-                "one\n" +
+        assertEquals("one\n" +
                 "two\n" +
                 "dto: !net.openhft.chronicle.wire.BinaryWireTest$DTO {\n" +
                 "  text: text\n" +
@@ -1795,8 +1791,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void readMetaData() {
-        wire.bytes().append("" +
-                "---\n" +
+        wire.bytes().append("---\n" +
                 "!!meta-data\n" +
                 "hello-world\n" +
                 "...\n" +
@@ -1815,8 +1810,7 @@ public class YamlWireTest extends WireTestCommon {
                 "dto: {\n" +
                 "  text: hello-world\n" +
                 "}\n" +
-                "...\n" +
-                "");
+                "...\n");
         for (int i = 0; i < 4; i++) {
             try (DocumentContext dc = wire.readingDocument()) {
                 final boolean metaData = i % 2 == 0;
@@ -1874,8 +1868,7 @@ public class YamlWireTest extends WireTestCommon {
         Wire wire2 = Wire.newYamlWireOnHeap();
         wire.methodReader(wire2.methodWriter(PutData.class))
                 .readOne();
-        assertEquals("" +
-                "put: [\n" +
+        assertEquals("put: [\n" +
                 "  hi,\n" +
                 "  {\n" +
                 "    timeNS: 2020-09-13T12:26:40,\n" +

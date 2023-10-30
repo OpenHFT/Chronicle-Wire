@@ -21,9 +21,9 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.onoes.ExceptionHandler;
 import net.openhft.chronicle.core.util.IgnoresEverything;
+import net.openhft.chronicle.core.util.Mocker;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
@@ -32,8 +32,7 @@ import java.io.StringWriter;
 import static org.junit.Assert.assertEquals;
 
 public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
-    static final String input = "" +
-            "---\n" +
+    static final String input = "---\n" +
             "a: a1\n" +
             "...\n" +
             "---\n" +
@@ -69,8 +68,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
 
     @Test
     public void testNothing() {
-        doTest("" +
-                        "# true\n" +
+        doTest("# true\n" +
                         "# true\n" +
                         "# true\n" +
                         "# true\n" +
@@ -81,15 +79,13 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
 
     @Test
     public void testNothingScanning() {
-        doTest("" +
-                        "# false\n",
+        doTest("# false\n",
                 ExceptionHandler.ignoresEverything(), IgnoresEverything.class, true);
     }
 
     @Test
     public void testA() {
-        doTest("" +
-                        "a[a1]\n" +
+        doTest("a[a1]\n" +
                         "# true\n" +
                         "# true\n" +
                         "# true\n" +
@@ -102,8 +98,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
 
     @Test
     public void testAScanning() {
-        doTest("" +
-                        "a[a1]\n" +
+        doTest("a[a1]\n" +
                         "# true\n" +
                         "a[a2]\n" +
                         "# true\n" +
@@ -113,8 +108,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
 
     @Test
     public void testBC() {
-        doTest("" +
-                        "# true\n" +
+        doTest("# true\n" +
                         "b[b1]\n" +
                         "# true\n" +
                         "c[c1]\n" +
@@ -129,8 +123,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
 
     @Test
     public void testBCScanning() {
-        doTest("" +
-                        "b[b1]\n" +
+        doTest("b[b1]\n" +
                         "# true\n" +
                         "c[c1]\n" +
                         "# true\n" +
@@ -144,8 +137,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
     @Test
     public void testBCWarn() {
         expectException("Unknown method-name='a'");
-        doTest("" +
-                        "# true\n" +
+        doTest("# true\n" +
                         "b[b1]\n" +
                         "# true\n" +
                         "c[c1]\n" +
@@ -161,8 +153,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
     @Test
     public void testBCWarnScanning() {
         expectException("Unknown method-name='a'");
-        doTest("" +
-                        "b[b1]\n" +
+        doTest("b[b1]\n" +
                         "# true\n" +
                         "c[c1]\n" +
                         "# true\n" +

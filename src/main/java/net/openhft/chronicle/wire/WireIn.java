@@ -214,12 +214,6 @@ public interface WireIn extends WireCommon, MarshallableIn {
 
     void readMetaDataHeader();
 
-    @Deprecated(/* to be removed in x.25 */)
-    @Nullable
-    default CharSequence asText() {
-        return Wires.asText(this);
-    }
-
     String readingPeekYaml();
 
     // Use for processing events/method flows.

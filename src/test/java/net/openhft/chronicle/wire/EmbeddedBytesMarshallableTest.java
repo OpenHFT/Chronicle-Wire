@@ -61,7 +61,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     public void ebm() {
         ClassAliasPool.CLASS_ALIASES.addAlias(EBM.class);
         EBM e1 = new EBM();
-        e1.number = Base85IntConverter.INSTANCE.parse("Hello");
+        e1.number = Base85LongConverter.INSTANCE.parse("Hello");
         e1.a.append("a12345678901234567890123456789");
         e1.b.append("a1234567890123456789abc");
         e1.c.append("a1234567890");
@@ -74,11 +74,11 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         assertEquals(expected, e1.toString());
         Bytes<?> bytes = new HexDumpBytes();
         e1.writeMarshallable(bytes);
-        assertEquals("00 80 04 07 1e 61 31 32 33 34 35 36 37 38 39 30\n" +
+        assertEquals("00 00 03 08 1e 61 31 32 33 34 35 36 37 38 39 30\n" +
                 "31 32 33 34 35 36 37 38 39 30 31 32 33 34 35 36\n" +
                 "37 38 39 00 17 61 31 32 33 34 35 36 37 38 39 30\n" +
-                "31 32 33 34 35 36 37 38 39 61 62 63 0b 61 31 32\n" +
-                "33 34 35 36 37 38 39 30 c4 5f 74 4c\n", bytes.toHexString());
+                "31 32 33 34 35 36 37 38 39 61 62 63 c4 5f 74 4c\n" +
+                "00 00 00 00 0b 61 31 32 33 34 35 36 37 38 39 30\n", bytes.toHexString());
         EBM e2 = new EBM();
         e2.readMarshallable(bytes);
         assertEquals(expected, e2.toString());
@@ -88,8 +88,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     @Test
     public void schemaChanges() {
         ClassAliasPool.CLASS_ALIASES.addAlias(EBM1.class, EBM2.class, EBM3.class);
-        EBM3 e3 = Marshallable.fromString("" +
-                "!EBM3 {\n" +
+        EBM3 e3 = Marshallable.fromString("!EBM3 {\n" +
                 "  l0: 80,\n" +
                 "  l1: 81,\n" +
                 "  l2: 82,\n" +
@@ -105,8 +104,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
                 "}");
         Bytes<?> bytes = new HexDumpBytes();
         e3.writeMarshallable(bytes);
-        assertEquals("" +
-                "03 83 03 03 50 00 00 00 00 00 00 00 51 00 00 00\n" +
+        assertEquals("03 83 03 03 50 00 00 00 00 00 00 00 51 00 00 00\n" +
                 "00 00 00 00 52 00 00 00 00 00 00 00 28 00 00 00\n" +
                 "29 00 00 00 2a 00 00 00 14 00 15 00 16 00 0a 0b\n" +
                 "0c\n", bytes.toHexString());
@@ -134,8 +132,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
 
         bytes.clear();
         e1.writeMarshallable(bytes);
-        assertEquals("" +
-                "01 81 01 01 50 00 00 00 00 00 00 00 28 00 00 00\n" +
+        assertEquals("01 81 01 01 50 00 00 00 00 00 00 00 28 00 00 00\n" +
                 "14 00 0a\n", bytes.toHexString());
         e2.readMarshallable(bytes);
         assertEquals("!EBM2 {\n" +
@@ -227,7 +224,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         @FieldGroup("c")
         transient int c0, c1, c3;
         @LongConversion(Base85LongConverter.class)
-        int number;
+        long number;
         Bytes<?> a = Bytes.forFieldGroup(this, "a");
         Bytes<?> b = Bytes.forFieldGroup(this, "b");
         Bytes<?> c = Bytes.forFieldGroup(this, "c");

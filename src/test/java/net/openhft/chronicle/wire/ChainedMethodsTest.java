@@ -20,7 +20,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.core.Mocker;
+import net.openhft.chronicle.core.util.Mocker;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -129,8 +129,7 @@ public class ChainedMethodsTest extends WireTestCommon {
                 .next2("word")
                 .echo("echo-2");
 
-        assertEquals("" +
-                "--- !!data #binary\n" +
+        assertEquals("--- !!data #binary\n" +
                 "mid: mid\n" +
                 "next: 1\n" +
                 "echo: echo-1\n" +
@@ -162,8 +161,7 @@ public class ChainedMethodsTest extends WireTestCommon {
                 .next(2)
                 .echo("echo-2");
 
-        assertEquals("" +
-                        "--- !!data #binary\n" +
+        assertEquals("--- !!data #binary\n" +
                         "midNoArg: \"\"\n" +
                         "next: 1\n" +
                         "echo: echo-1\n" +

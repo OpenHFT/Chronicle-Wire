@@ -18,7 +18,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
-import net.openhft.chronicle.core.UnresolvedType;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.Resettable;
@@ -408,7 +407,7 @@ public interface ValueIn {
             marshallable(marshallable);
             return (T) marshallable;
         }
-        return (T) object(null, aClass);
+        return object(null, aClass);
     }
 
     @NotNull <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts);

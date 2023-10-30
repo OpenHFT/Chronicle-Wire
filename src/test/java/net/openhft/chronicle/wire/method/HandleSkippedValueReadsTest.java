@@ -20,7 +20,7 @@ package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.core.Mocker;
+import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
@@ -110,8 +110,7 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
 
         if (scanning) {
             assertTrue(reader.readOne());
-            assertEquals("" +
-                            "M meta[one]\n" +
+            assertEquals("M meta[one]\n" +
                             "M meta[oneB]\n" +
                             "M meta[two]\n" +
                             "M meta[three]\n" +
@@ -122,29 +121,25 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
         } else {
             // one
             assertTrue(reader.readOne());
-            assertEquals("" +
-                            "M meta[one]\n" +
+            assertEquals("M meta[one]\n" +
                             "M meta[oneB]\n",
                     asString(sw));
             // two
             assertTrue(reader.readOne());
-            assertEquals("" +
-                            "M meta[one]\n" +
+            assertEquals("M meta[one]\n" +
                             "M meta[oneB]\n" +
                             "M meta[two]\n",
                     asString(sw));
             // three
             assertTrue(reader.readOne());
-            assertEquals("" +
-                            "M meta[one]\n" +
+            assertEquals("M meta[one]\n" +
                             "M meta[oneB]\n" +
                             "M meta[two]\n" +
                             "M meta[three]\n",
                     asString(sw));
             // four
             assertTrue(reader.readOne());
-            assertEquals("" +
-                            "M meta[one]\n" +
+            assertEquals("M meta[one]\n" +
                             "M meta[oneB]\n" +
                             "M meta[two]\n" +
                             "M meta[three]\n" +
@@ -154,8 +149,7 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
         }
         // five
         assertTrue(reader.readOne());
-        assertEquals("" +
-                        "M meta[one]\n" +
+        assertEquals("M meta[one]\n" +
                         "M meta[oneB]\n" +
                         "M meta[two]\n" +
                         "M meta[three]\n" +
@@ -165,8 +159,7 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
                 asString(sw));
         // six
         assertTrue(reader.readOne());
-        assertEquals("" +
-                        "M meta[one]\n" +
+        assertEquals("M meta[one]\n" +
                         "M meta[oneB]\n" +
                         "M meta[two]\n" +
                         "M meta[three]\n" +
@@ -217,19 +210,16 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
 
         if (!scanning) {
             // one
-            assertEquals("" +
-                            "M meta[one]\n"
+            assertEquals("M meta[one]\n"
                     , asString(sw));
             assertTrue(reader.readOne());
             // i2i
-            assertEquals("" +
-                            "M meta[one]\n"
+            assertEquals("M meta[one]\n"
                     , asString(sw));
             assertTrue(reader.readOne());
         }
         // data six
-        assertEquals("" +
-                        "M meta[one]\n" +
+        assertEquals("M meta[one]\n" +
                         "D data[six]\n"
                 , asString(sw));
         assertFalse(reader.readOne());

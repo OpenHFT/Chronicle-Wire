@@ -68,30 +68,25 @@ public class GenerateMethodWriter {
         Wires.init();
 
         TEMPLATE_METHODS.put("close",
-                singletonMap(singletonList(void.class), "" +
-                        "public void close() {\n" +
+                singletonMap(singletonList(void.class), "public void close() {\n" +
                         "   if (this.closeable != null) {\n" +
                         "        this.closeable.close();\n" +
                         "   }\n" +
                         "}\n"));
         TEMPLATE_METHODS.put("recordHistory",
-                singletonMap(singletonList(boolean.class), "" +
-                        "public boolean recordHistory() {\n" +
+                singletonMap(singletonList(boolean.class), "public boolean recordHistory() {\n" +
                         "    return out.get().recordHistory();\n" +
                         "}\n"));
         List<Class<?>> dcBoolean = Stream.of(DocumentContext.class, boolean.class).collect(Collectors.toList());
         TEMPLATE_METHODS.put("acquireWritingDocument",
-                singletonMap(dcBoolean, "" +
-                        "public " + DOCUMENT_CONTEXT + " acquireWritingDocument(boolean metaData){\n" +
+                singletonMap(dcBoolean, "public " + DOCUMENT_CONTEXT + " acquireWritingDocument(boolean metaData){\n" +
                         "    return out.get().acquireWritingDocument(metaData);\n" +
                         "}\n"));
         Map<List<Class<?>>, String> wd = new LinkedHashMap<>();
-        wd.put(singletonList(DocumentContext.class), "" +
-                "public " + DOCUMENT_CONTEXT + " writingDocument(){\n" +
+        wd.put(singletonList(DocumentContext.class), "public " + DOCUMENT_CONTEXT + " writingDocument(){\n" +
                 "    return out.get().writingDocument();\n" +
                 "}\n");
-        wd.put(dcBoolean, "" +
-                "public " + DOCUMENT_CONTEXT + " writingDocument(boolean metaData){\n" +
+        wd.put(dcBoolean, "public " + DOCUMENT_CONTEXT + " writingDocument(boolean metaData){\n" +
                 "return out.get().writingDocument(metaData);\n" +
                 "}\n");
         TEMPLATE_METHODS.put("writingDocument", wd);
@@ -270,14 +265,9 @@ public class GenerateMethodWriter {
             Parameter p = parameters[i];
             result.append(sep);
             sep = ", ";
-            IntConversion intConversion = Jvm.findAnnotation(p, IntConversion.class);
             LongConversion longConversion = Jvm.findAnnotation(p, LongConversion.class);
 
-            if (intConversion != null)
-                result.append("@IntConversion(")
-                        .append(nameForClass(importSet, intConversion.value()))
-                        .append(".class) ");
-            else if (longConversion != null)
+            if (longConversion != null)
                 result.append("@LongConversion(")
                         .append(nameForClass(importSet, longConversion.value()))
                         .append(".class) ");
@@ -298,7 +288,6 @@ public class GenerateMethodWriter {
         try {
             imports.append("package " + packageName + ";\n\n");
             SortedSet<String> importSet = new TreeSet<>();
-            importSet.add(IntConversion.class.getName());
             importSet.add(LongConversion.class.getName());
             importSet.add(GenerateMethodWriter.class.getName());
             importSet.add(MessageHistory.class.getName());
@@ -605,19 +594,15 @@ public class GenerateMethodWriter {
 
             final Parameter p = dm.getParameters()[j];
 
-            final IntConversion intConversion = Jvm.findAnnotation(p, IntConversion.class);
             final LongConversion longConversion = Jvm.findAnnotation(p, LongConversion.class);
 
-            final String name = intConversion != null ? intConversion.value().getName() :
-                    longConversion != null ? longConversion.value().getName() : "";
+            final String name = longConversion != null ? longConversion.value().getName() : "";
 
             if (!name.isEmpty() && (WireType.TEXT == wireType || WireType.YAML == wireType))
                 body.append(format("_valueOut_.rawText(%s.INSTANCE.asText(%s));\n", name, p.getName()));
             else if (p.getType().isPrimitive() || CharSequence.class.isAssignableFrom(p.getType())) {
                 if (longConversion != null && (p.getType() == long.class || CharSequence.class.isAssignableFrom(p.getType())))
                     body.append(format("%s.writeLong(%s.INSTANCE, %s);\n", multipleArgs ? "_v_" : "_valueOut_", longConversion.value().getName(), p.getName()));
-                else if (intConversion != null)
-                    body.append(format("%s.writeInt(%s.INSTANCE, %s);\n", multipleArgs ? "_v_" : "_valueOut_", intConversion.value().getName(), p.getName()));
                 else
                     body.append(format("%s.%s(%s);\n", multipleArgs ? "_v_" : "_valueOut_", toString(erase(parameterTypes[j])), p.getName()));
             } else

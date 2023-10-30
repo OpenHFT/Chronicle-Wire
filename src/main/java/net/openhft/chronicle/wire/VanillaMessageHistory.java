@@ -37,7 +37,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
                 veh.addSourceDetails(true);
                 return veh;
             });
-    // TODO: x.25 make this private final like the other 2 booleans
     static boolean USE_BYTES_MARSHALLABLE = Boolean.getBoolean("history.as.bytes");
     private final boolean HISTORY_WALL_CLOCK = Jvm.getBoolean("history.wall.clock");
     private final boolean HISTORY_METHOD_ID = Boolean.getBoolean("history.as.method_id");

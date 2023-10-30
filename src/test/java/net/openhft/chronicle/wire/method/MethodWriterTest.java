@@ -21,8 +21,8 @@ package net.openhft.chronicle.wire.method;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.io.Closeable;
+import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.*;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
@@ -135,8 +135,7 @@ public class MethodWriterTest extends WireTestCommon {
                 "  one\n" +
                 "]\n" +
                 "...\n", wire.toString());
-        assertEquals("" +
-                        "14 00 00 00                                     # msg-length\n" +
+        assertEquals("14 00 00 00                                     # msg-length\n" +
                         "b9 05 65 76 65 6e 74                            # event: (event)\n" +
                         "82 08 00 00 00                                  # sequence\n" +
                         "e3 74 77 6f                                     # two\n" +
@@ -245,8 +244,7 @@ public class MethodWriterTest extends WireTestCommon {
         Args writer = wire.methodWriter(Args.class);
         checkWriterType(writer);
         writer.primitives(true, (byte) 1, (short) 2, 3, 4, '5', 6, 7, "8", "9");
-        assertEquals("" +
-                "primitives: [\n" +
+        assertEquals("primitives: [\n" +
                 "  true,\n" +
                 "  1,\n" +
                 "  2,\n" +

@@ -23,8 +23,8 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
+import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
@@ -230,8 +230,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 .useTextDocuments();
         MRTListener writer2 = wire2.methodWriter(MRTListener.class);
 
-        String text = "" +
-                "unknown: {\n" +
+        String text = "unknown: {\n" +
                 "  u: !!null \"\"\n" +
                 "}\n" +
                 "...\n";
@@ -425,8 +424,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         routedSaying.to("one").say("hi 111");
         metaRoutedSaying.to("bee").say("hi BBB");
         routedSaying.to("two").say("hi 222");
-        assertEquals("" +
-                        "14 00 00 40                                     # msg-length\n" +
+        assertEquals("14 00 00 40                                     # msg-length\n" +
                         "b9 02 74 6f                                     # to: (event)\n" +
                         "e3 61 79 65                                     # aye\n" +
                         "b9 03 73 61 79                                  # say: (event)\n" +
@@ -455,15 +453,13 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
         if (!scanning) {
             assertTrue(reader.readOne());
-            assertEquals("" +
-                            "meta: to[aye]\n" +
+            assertEquals("meta: to[aye]\n" +
                             "meta: say[hi AAA]\n",
                      asString(out));
         }
 
         assertTrue(reader.readOne());
-        assertEquals("" +
-                        "meta: to[aye]\n" +
+        assertEquals("meta: to[aye]\n" +
                         "meta: say[hi AAA]\n" +
                         "data: to[one]\n" +
                         "data: say[hi 111]\n",
@@ -471,8 +467,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                      asString(out));
         if (!scanning) {
             assertTrue(reader.readOne());
-            assertEquals("" +
-                            "meta: to[aye]\n" +
+            assertEquals("meta: to[aye]\n" +
                             "meta: say[hi AAA]\n" +
                             "data: to[one]\n" +
                             "data: say[hi 111]\n" +
@@ -482,8 +477,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         }
 
         assertTrue(reader.readOne());
-        assertEquals("" +
-                        "meta: to[aye]\n" +
+        assertEquals("meta: to[aye]\n" +
                         "meta: say[hi AAA]\n" +
                         "data: to[one]\n" +
                         "data: say[hi 111]\n" +

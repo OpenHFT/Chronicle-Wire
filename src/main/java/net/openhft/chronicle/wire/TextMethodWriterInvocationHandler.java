@@ -18,8 +18,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.scoped.ScopedResource;
+import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -88,19 +88,6 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
             LongConversion lc2 = anno.annotationType().getAnnotation(LongConversion.class);
             if (lc2 != null) {
                 return buildLongConverter(anno.annotationType());
-            }
-            if (anno instanceof IntConversion) {
-                IntConversion intConversion = (IntConversion) anno;
-                IntConverter ic = ObjectUtils.newInstance(intConversion.value());
-                return a -> {
-                    if (a[0] instanceof Number) {
-                        try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
-                            StringBuilder sb = stlSb.get();
-                            ic.append(sb, ((Number) a[0]).intValue());
-                            a[0] = new RawText(sb);
-                        }
-                    }
-                };
             }
         }
         return NOOP_CONSUMER;

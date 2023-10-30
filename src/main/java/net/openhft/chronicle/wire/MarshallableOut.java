@@ -209,25 +209,8 @@ public interface MarshallableOut extends DocumentWritten {
     @SuppressWarnings("rawtypes")
     @NotNull
     default <T> T methodWriter(@NotNull Class<T> tClass, Class... additional) {
-        return methodWriter(false, tClass, additional);
-    }
-
-    /**
-     * Proxy an interface so each message called is written for method.
-     *
-     * @param metaData   true if you wish to write every method as meta data
-     * @param tClass     primary interface
-     * @param additional any additional interfaces
-     * @return a proxy which implements the primary interface (additional interfaces have to be
-     * cast)
-     * @deprecated use methodWriterBuilder with Stream.of(additional).forEach(builder::addInterface);
-     */
-    @Deprecated(/* to be removed in x.25 */)
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    @NotNull
-    default <T> T methodWriter(boolean metaData, @NotNull Class<T> tClass, Class... additional) {
         VanillaMethodWriterBuilder<T> builder =
-                (VanillaMethodWriterBuilder<T>) methodWriterBuilder(metaData, tClass);
+                (VanillaMethodWriterBuilder<T>) methodWriterBuilder(false, tClass);
         Stream.of(additional).forEach(builder::addInterface);
         return builder.build();
     }
