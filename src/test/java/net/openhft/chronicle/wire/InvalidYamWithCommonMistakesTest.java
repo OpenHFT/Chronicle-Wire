@@ -19,6 +19,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -69,7 +70,26 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
 
     @Test
     public void testAssumeTheTypeMissingType() {
+        Wires.THROW_CNFRE = false;
+        Wires.GENERATE_TUPLES = false;
         expectException("Cannot find a class for Xyz are you missing an alias?");
+        final String cs = "!Xyz " +
+                "{\n" +
+                "  y: hello8\n" +
+                "}\n";
+        String s = Marshallable.fromString(Dto.class, cs).toString();
+        assertEquals("" +
+                "!net.openhft.chronicle.wire.InvalidYamWithCommonMistakesTest$Dto {\n" +
+                "  y: hello8,\n" +
+                "  x: !!null \"\"\n" +
+                "}\n", s);
+    }
+
+    @Test(expected = ClassNotFoundRuntimeException.class)
+    public void testAssumeTheTypeMissingTypeThrows() {
+        Wires.THROW_CNFRE = true;
+        Wires.GENERATE_TUPLES = false;
+
         final String cs = "!Xyz " +
                 "{\n" +
                 "  y: hello8\n" +
