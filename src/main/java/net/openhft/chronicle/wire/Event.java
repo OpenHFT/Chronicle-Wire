@@ -90,6 +90,7 @@ public interface Event<E extends Event<E>> extends Marshallable {
      * @param to to
      */
     static void copyEventDetails(Event<?> from, Event<?> to) {
+        to.eventId(from.eventId());
         to.eventTime(from.eventTime());
     }
 }
