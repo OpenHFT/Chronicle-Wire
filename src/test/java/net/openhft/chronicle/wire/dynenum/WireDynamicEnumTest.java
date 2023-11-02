@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire.dynenum;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.EnumCache;
 import net.openhft.chronicle.core.util.Mocker;
@@ -31,6 +32,7 @@ import java.io.StringWriter;
 
 import static net.openhft.chronicle.wire.DynamicEnum.updateEnum;
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 public class WireDynamicEnumTest extends WireTestCommon {
     @Before
@@ -44,6 +46,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
     }
 
     private static void doAddedEnum(WireType wireType) throws NoSuchFieldException {
+        assumeFalse(Jvm.isJava20Plus());
         Wire tw = wireType.apply(Bytes.allocateElasticOnHeap());
         UsesWDENums nums = tw.methodWriter(UsesWDENums.class);
         nums.push(WDENums.ONE);
@@ -121,6 +124,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
 
     @Test
     public void deserialize() {
+        assumeFalse(Jvm.isJava20Plus());
         String text = "push: ONE\n" +
                 "...\n" +
                 "unwraps: {\n" +
