@@ -19,7 +19,10 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytesDescription;
-import net.openhft.chronicle.core.*;
+import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.util.ClassLocal;
@@ -136,9 +139,10 @@ public class WireMarshaller<T> {
         for (@NotNull Field field : clazz.getDeclaredFields()) {
             if ((field.getModifiers() & (Modifier.STATIC | Modifier.TRANSIENT)) != 0)
                 continue;
-            if ("ordinal".equals(field.getName()) && Enum.class.isAssignableFrom(clazz))
+            String fieldName = field.getName();
+            if (("ordinal".equals(fieldName) || "hash".equals(fieldName)) && Enum.class.isAssignableFrom(clazz))
                 continue;
-            String name = field.getName();
+            String name = fieldName;
             if (name.startsWith("this$0")) {
                 if (ValidatableUtil.validateEnabled())
                     Jvm.warn().on(WireMarshaller.class, "Found " + name + ", in " + clazz + " which will be ignored!");

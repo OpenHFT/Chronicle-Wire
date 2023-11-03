@@ -936,10 +936,9 @@ public interface ValueOut {
                 Jvm.debug().on(getClass(), "Treating " + valueClass + " as enum not WriteMarshallable");
                 return typedScalar(value);
             }
-            if (valueClass.getName().contains("$$Lambda"))
-                return marshallable((WriteMarshallable) value);
-            else
-                return typedMarshallable((WriteMarshallable) value);
+            return Jvm.isLambdaClass(valueClass)
+                    ? marshallable((WriteMarshallable) value)
+                    : typedMarshallable((WriteMarshallable) value);
         }
         if (value instanceof WriteBytesMarshallable) {
             if (!Wires.warnedUntypedBytesOnce) {
