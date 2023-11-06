@@ -19,13 +19,11 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.SerializableFunction;
 import net.openhft.chronicle.core.util.SerializableUpdater;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.Serializable;
@@ -35,18 +33,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
 
 @SuppressWarnings("unchecked")
 public class WireSerializedLambdaTest extends WireTestCommon {
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(Fun.class);
         ClassAliasPool.CLASS_ALIASES.addAlias(Update.class);
-    }
-
-    @Before
-    public void notSupportedInJava21() {
-        assumeFalse(Jvm.majorVersion() >= 21);
     }
 
     @Test

@@ -2030,9 +2030,10 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public WireOut marshallable(@NotNull WriteMarshallable object) throws InvalidMarshallableException {
             if (bytes.retainedHexDumpDescription()) {
-                String simpleName = object.getClass().getSimpleName();
-                if (simpleName.contains("$$Lambda"))
-                    simpleName = "Marshallable";
+                Class<? extends @NotNull WriteMarshallable> aClass = object.getClass();
+                String simpleName = Jvm.isLambdaClass(aClass)
+                        ? "Marshallable"
+                        : aClass.getSimpleName();
                 bytes.writeHexDumpDescription(simpleName);
             }
             final BinaryLengthLength binaryLengthLength = object.binaryLengthLength();

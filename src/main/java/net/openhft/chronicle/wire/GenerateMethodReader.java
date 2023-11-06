@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.util.GenericReflection;
 import net.openhft.chronicle.core.util.IgnoresEverything;
@@ -790,9 +789,9 @@ public class GenerateMethodReader {
         if (aClass.getEnclosingClass() != null)
             sb.append(aClass.getEnclosingClass().getSimpleName());
 
-        String name = aClass.getName();
-        if (aClass.isSynthetic() && name.contains("$$Lambda"))
-            name = aClass.getInterfaces()[0].getName();
+        String name = Jvm.isLambdaClass(aClass)
+                ? aClass.getInterfaces()[0].getName()
+                : aClass.getName();
 
         final int packageDelimiterIndex = name.lastIndexOf('.');
 
