@@ -35,6 +35,7 @@ import static net.openhft.chronicle.wire.WireParser.SKIP_READABLE_BYTES;
 
 public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     public static final String DISABLE_READER_PROXY_CODEGEN = "disableReaderProxyCodegen";
+    public static final String DISABLE_PROXY_REFLECTION = VanillaMethodWriterBuilder.DISABLE_PROXY_REFLECTION;
     private static final Map<String, Class<?>> classCache = new ConcurrentHashMap<>();
     private static final Class<?> COMPILE_FAILED = ClassNotFoundException.class;
 
@@ -138,10 +139,12 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
                 }
             }
         } catch (Throwable e) {
+            if (Jvm.getBoolean(DISABLE_PROXY_REFLECTION, true))
+                throw Jvm.rethrow(e);
             classCache.put(fullClassName, COMPILE_FAILED);
             Jvm.warn().on(getClass(), "Failed to compile generated method reader - " +
                     "falling back to proxy method reader. Please report this failure as support for " +
-                    "proxy method readers will be dropped in x.25.", e);
+                    "proxy method readers will be removed in x.26.", e);
         }
 
         return null;

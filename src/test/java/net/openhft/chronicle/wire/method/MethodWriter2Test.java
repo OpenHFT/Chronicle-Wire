@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_PROXY_REFLECTION;
 import static org.junit.Assert.*;
 
 public class MethodWriter2Test extends WireTestCommon {
@@ -55,6 +56,7 @@ public class MethodWriter2Test extends WireTestCommon {
     @Test
     public void allowThroughNoArg() {
         ignoreException("Generated code to call updateInterceptor for public abstract void net.openhft.chronicle.wire.method.FundingListener.fundingPrimitive(int) will box and generate garbage");
+        System.setProperty(DISABLE_PROXY_REFLECTION, "false");
         check(true, ARGUMENT.NONE);
     }
 

@@ -37,6 +37,7 @@ import java.util.function.Supplier;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBuilder<T> {
     public static final String DISABLE_WRITER_PROXY_CODEGEN = "disableProxyCodegen";
+    public static final String DISABLE_PROXY_REFLECTION = "disableProxyReflection";
 
     private static final Class<?> COMPILE_FAILED = ClassNotFoundException.class;
     private static final Map<String, Class> classCache = new ConcurrentHashMap<>();
@@ -57,7 +58,6 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
             Observer.class
     );
 
-    private final boolean disableProxyGen = Jvm.getBoolean(DISABLE_WRITER_PROXY_CODEGEN, false);
     private final Set<Class<?>> interfaces = Collections.synchronizedSet(new LinkedHashSet<>());
 
     private final MethodWriterClassNameGenerator methodWriterClassNameGenerator;
@@ -183,13 +183,16 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                     Jvm.debug().on(getClass(), e);
             }
         }
-        if (!disableProxyGen) {
+        if (!Jvm.getBoolean(DISABLE_WRITER_PROXY_CODEGEN)) {
             T t = createInstance();
             if (t != null)
                 return t;
         } else {
+            if (Jvm.getBoolean(DISABLE_PROXY_REFLECTION, true))
+                throw new IllegalStateException("Reflection based proxy disabled, set -D" + DISABLE_PROXY_REFLECTION + " to enable");
+
             Jvm.warn().on(getClass(), "Falling back to proxy method writer. Support for " +
-                    "proxy method writers will be dropped in x.25.");
+                    "proxy method writers will be removed in x.26.");
         }
 
         @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
@@ -213,10 +216,12 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         } catch (MethodWriterValidationException e) {
             throw e;
         } catch (Throwable e) {
+            if (Jvm.getBoolean(DISABLE_PROXY_REFLECTION, true))
+                throw e;
             classCache.put(fullClassName, COMPILE_FAILED);
             Jvm.warn().on(getClass(), "Failed to compile generated method writer - " +
                     "falling back to proxy method writer. Please report this failure as support for " +
-                    "proxy method writers will be dropped in x.25.", e);
+                    "proxy method writers will be removed in x.26.", e);
         }
         return null;
     }

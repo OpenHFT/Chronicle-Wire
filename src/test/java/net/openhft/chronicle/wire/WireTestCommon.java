@@ -36,6 +36,10 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static net.openhft.chronicle.wire.VanillaMethodReaderBuilder.DISABLE_READER_PROXY_CODEGEN;
+import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_PROXY_REFLECTION;
+import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN;
+
 public class WireTestCommon {
     protected ThreadDump threadDump;
     protected Map<ExceptionKey, Integer> exceptions;
@@ -150,5 +154,12 @@ public class WireTestCommon {
     @Before
     public void throwCNFRE() {
         Wires.THROW_CNFRE = true;
+    }
+
+    @After
+    public void clearProperties() {
+        System.clearProperty(DISABLE_WRITER_PROXY_CODEGEN);
+        System.clearProperty(DISABLE_READER_PROXY_CODEGEN);
+        System.clearProperty(DISABLE_PROXY_REFLECTION);
     }
 }

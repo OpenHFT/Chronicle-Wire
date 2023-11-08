@@ -29,6 +29,7 @@ import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_PROXY_REFLECTION;
 import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN;
 import static net.openhft.chronicle.wire.WireType.BINARY;
 import static org.junit.Assume.assumeFalse;
@@ -53,13 +54,9 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
     @Before
     public void setUp() {
         System.setProperty(DISABLE_WRITER_PROXY_CODEGEN, String.valueOf(disableProxyCodegen));
+        System.setProperty(DISABLE_PROXY_REFLECTION, String.valueOf(!disableProxyCodegen));
         if (disableProxyCodegen)
             expectException("Falling back to proxy method writer");
-    }
-
-    @After
-    public void cleanUp() {
-        System.clearProperty(DISABLE_WRITER_PROXY_CODEGEN);
     }
 
     @Test
