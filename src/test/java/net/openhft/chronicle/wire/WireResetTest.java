@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.Closeable;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.time.LocalDate;
@@ -53,7 +52,6 @@ public class WireResetTest extends WireTestCommon {
         }
     }
 
-    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/745")
     @Test
     //https://github.com/OpenHFT/Chronicle-Wire/issues/732
     public void testDeepReset() {
@@ -75,6 +73,7 @@ public class WireResetTest extends WireTestCommon {
         assertNull(event1.identifier.parent.id);
         assertTrue(event1.ids.isEmpty());
         assertNull(event1.payload);
+        assertNull(event1.date);
 
         Event event2 = new Event();
         Identifier identifier2 = event2.identifier;
@@ -89,6 +88,7 @@ public class WireResetTest extends WireTestCommon {
         event2.identifier.permissions.put("uid2", "rw");
         event2.ids.add(new Identifier("id2_2"));
         event2.payload = "payload2";
+        event2.date = LocalDate.now();
 
         assertFalse(event1.isClosed());
         assertSame(identifier1, event1.identifier);
@@ -97,17 +97,7 @@ public class WireResetTest extends WireTestCommon {
         assertNull(event1.identifier.parent.id);
         assertTrue(event1.ids.isEmpty());
         assertNull(event1.payload);
-
-    }
-
-    /**
-     * Reproduction of <a href="https://github.com/OpenHFT/Chronicle-Wire/issues/745">this issue</a>
-     */
-    @Test
-    public void canDeepResetOnDtosContainingLocalDates() {
-        Event e = new Event();
-        e.someDate = LocalDate.now();
-        e.reset();
+        assertNull(event1.date);
     }
 
     public static class Event extends SelfDescribingMarshallable implements Closeable {
@@ -117,7 +107,7 @@ public class WireResetTest extends WireTestCommon {
         Identifier identifier = new Identifier();
         Collection<Identifier> ids = new LinkedList<>();
         String payload;
-        LocalDate someDate;
+        LocalDate date;
 
         @Override
         public void close() {
