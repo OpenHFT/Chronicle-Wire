@@ -54,4 +54,19 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
         final UsesTwoFields simple = Marshallable.fromString(simpleObject);
     }
 
+    /**
+     * Failing to load a class for a field with a type of java.lang.Object should not cause a ClassNotFoundException
+     * if Wires#THROW_CNFRE is set to false
+     */
+    @Test
+    public void suppressClassNotFoundRuntimeExceptionOnMissingClassForFieldNotObject() {
+        WiresTest.wiresThrowCNFRE(false);
+        ignoreException("Cannot find a class for"); // stop superclass failing test on caught exception
+        ClassAliasPool.CLASS_ALIASES.addAlias(TwoFields.class, UsesTwoFields.class);
+        String key = "class.not.found.for.missing.class.alias";
+        String simpleObject = "!UsesTwoFields { name: \"henry\", bothFields: !ThisClassDoesntExist { } }";
+        Jvm.startup().on(CNFREOnMissingClassTest.class, "Value of " + key + ": " + Jvm.getBoolean(key));
+        final UsesTwoFields simple = Marshallable.fromString(simpleObject);
+    }
+
 }
