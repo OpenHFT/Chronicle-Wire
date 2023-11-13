@@ -46,6 +46,7 @@ public class WireTestCommon {
 
     public WireTestCommon() {
         ignoreException("The incubating features are subject to change");
+        ignoreException("NamedThreadFactory created here");
     }
 
     @Before
