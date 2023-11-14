@@ -486,7 +486,7 @@ public enum Wires {
 
     public static void readMarshallable(Class<?> clazz, @NotNull Object marshallable, @NotNull WireIn wire, boolean overwrite) throws InvalidMarshallableException {
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(clazz == null ? marshallable.getClass() : clazz);
-        wm.readMarshallable(marshallable, wire, wm.defaultValue(), overwrite);
+        wm.readMarshallable(marshallable, wire, overwrite);
     }
 
     public static void writeMarshallable(@NotNull Object marshallable, @NotNull WireOut wire) throws InvalidMarshallableException {
@@ -499,13 +499,13 @@ public enum Wires {
         if (writeDefault)
             marshaller.writeMarshallable(marshallable, wire);
         else
-            marshaller.writeMarshallable(marshallable, wire, marshaller.defaultValue(), false);
+            marshaller.writeMarshallable(marshallable, wire, false);
     }
 
     public static void writeMarshallable(@NotNull Object marshallable, @NotNull WireOut wire, @NotNull Object previous, boolean copy) throws InvalidMarshallableException {
         assert marshallable.getClass() == previous.getClass();
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass());
-        wm.writeMarshallable(marshallable, wire, previous, copy);
+        wm.writeMarshallable(marshallable, wire, copy);
     }
 
     public static void writeKey(@NotNull Object marshallable, Bytes<?> bytes) {
@@ -640,7 +640,7 @@ public enum Wires {
                     Wire wire = wireSR.get();
                     WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(aClass);
                     wm.writeMarshallable(e, wire);
-                    wm.readMarshallable(e2, wire, null, false);
+                    wm.readMarshallable(e2, wire, false);
                 }
                 return e2;
             }

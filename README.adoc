@@ -739,7 +739,7 @@ However, more complicated objects with object instance fields may experience und
 In order to `reset` a marshallable object, the process is as follows:
 
 1. create a new instance of the object to be reset
-2. copy all fields from the new instance to the existing instance
+2. copy all fields by reference from the new instance to the existing instance (but see below)
 3. the existing instance is now considered 'reset' back to default values
 
 The object created in step `1` is cached for performance reasons, meaning that both the new and existing instance of the marshallable object could have a reference to the same object.
@@ -780,6 +780,8 @@ true
 ----
 
 showing that the field **b** of each container object is now referencing the same `ByteBuffer` instance.
+
+An exception to this is when the field value implements `Resettable` interface, when the default value of the field is not null, and the current field value is of exactly the same class as the default value. In this case, `value.reset()` will be called instead of overwriting it with default value by reference.
 
 In order to work around this, if necessary, the marshallable class can override `Marshallable.reset`:
 
