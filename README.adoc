@@ -1541,6 +1541,8 @@ $class.name ${field.name}($field.type $paramName) {
 }
 ----
 
+See also <<code-generation-for-marshallable,Marshallable code generation templates>>
+
 == Why use Marshallable objects
 
 Marshallable objects have been designed to allow you to
