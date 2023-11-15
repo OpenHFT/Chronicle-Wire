@@ -768,9 +768,9 @@ public class WireMarshaller<T> {
                     }
                 }
                 if (Collection.class.isAssignableFrom(type))
-                    return CollectionFieldAccess.of(field, defaultObject);
+                    return CollectionFieldAccess.of(field);
                 if (Map.class.isAssignableFrom(type))
-                    return new MapFieldAccess(field, defaultObject);
+                    return new MapFieldAccess(field);
 
                 switch (type.getName()) {
                     case "boolean":
@@ -826,7 +826,12 @@ public class WireMarshaller<T> {
                             isLeaf = WIRE_MARSHALLER_CL.get(type).isLeaf;
                         else if (isCollection(type))
                             isLeaf = false;
-                        return new ObjectFieldAccess(field, isLeaf, defaultObject);
+
+                        Object defaultValue = defaultObject == null ? null : field.get(defaultObject);
+                        if (defaultValue != null && defaultValue instanceof Resettable && !(defaultValue instanceof DynamicEnum))
+                            return new ResettableFieldAccess(field, isLeaf, defaultValue);
+
+                        return new ObjectFieldAccess(field, isLeaf);
                 }
             } catch (IllegalAccessException ex) {
                 throw Jvm.rethrow(ex);
@@ -1090,13 +1095,11 @@ public class WireMarshaller<T> {
     static class ObjectFieldAccess extends FieldAccess {
         private final Class type;
         private final AsMarshallable asMarshallable;
-        private final Object defaultValue;
 
-        ObjectFieldAccess(@NotNull Field field, Boolean isLeaf, Object defaultObject) throws IllegalAccessException {
+        ObjectFieldAccess(@NotNull Field field, Boolean isLeaf) {
             super(field, isLeaf);
             asMarshallable = Jvm.findAnnotation(field, AsMarshallable.class);
             type = field.getType();
-            defaultValue = defaultObject == null ? null : field.get(defaultObject);
         }
 
         @Override
@@ -1153,26 +1156,33 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void setDefaultValue(Object ignored, Object o) {
-            if (defaultValue != null && defaultValue instanceof Resettable && !(defaultValue instanceof DynamicEnum)) {
-                Object existingValue = unsafeGetObject(o, offset);
+        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) throws IllegalAccessException {
+            bytes.writeUtf8(String.valueOf(field.get(o)));
+        }
+    }
 
-                if (existingValue == defaultValue)
-                    return;
+    static class ResettableFieldAccess extends ObjectFieldAccess {
+        private final Object defaultValue;
 
-                if (existingValue != null && existingValue.getClass() == defaultValue.getClass()) {
-                    ((Marshallable) existingValue).reset();
-
-                    return;
-                }
-            }
-
-            unsafePutObject(o, offset, defaultValue);
+        ResettableFieldAccess(@NotNull Field field, Boolean isLeaf, Object defaultValue) {
+            super(field, isLeaf);
+            this.defaultValue = defaultValue;
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) throws IllegalAccessException {
-            bytes.writeUtf8(String.valueOf(field.get(o)));
+        protected void setDefaultValue(Object defaultObject, Object o) throws IllegalAccessException {
+            Object existingValue = unsafeGetObject(o, offset);
+
+            if (existingValue == defaultValue)
+                return;
+
+            if (existingValue != null && existingValue.getClass() == defaultValue.getClass()) {
+                ((Resettable) existingValue).reset();
+
+                return;
+            }
+
+            super.setDefaultValue(defaultObject, o);
         }
     }
 
@@ -1224,9 +1234,9 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void setDefaultValue(Object ignored, Object o) {
+        protected void setDefaultValue(Object defaultObject, Object o) throws IllegalAccessException {
             if (defaultValue == null) {
-                unsafePutObject(o, offset, null);
+                super.setDefaultValue(defaultObject, o);
                 return;
             }
 
@@ -1578,14 +1588,12 @@ public class WireMarshaller<T> {
         private final Class componentType;
         private final Class<?> type;
         private final BiConsumer<Object, ValueOut> sequenceGetter;
-        private final Collection<?> defaultValue;
 
-        public CollectionFieldAccess(@NotNull Field field, Boolean isLeaf, @Nullable Supplier<Collection> collectionSupplier, Class componentType, Class<?> type, @Nullable Object defaultObject) throws IllegalAccessException {
+        public CollectionFieldAccess(@NotNull Field field, Boolean isLeaf, @Nullable Supplier<Collection> collectionSupplier, Class componentType, Class<?> type) {
             super(field, isLeaf);
             this.collectionSupplier = collectionSupplier == null ? newInstance() : collectionSupplier;
             this.componentType = componentType;
             this.type = type;
-            this.defaultValue = defaultObject == null ? null : (Collection<?>) field.get(defaultObject);
             sequenceGetter = (o, out) -> {
                 Collection coll;
                 try {
@@ -1614,7 +1622,7 @@ public class WireMarshaller<T> {
         }
 
         @NotNull
-        static FieldAccess of(@NotNull Field field, @Nullable Object defaultObject) throws IllegalAccessException {
+        static FieldAccess of(@NotNull Field field) {
             @Nullable final Supplier<Collection> collectionSupplier;
             @NotNull final Class componentType;
             final Class<?> type;
@@ -1636,8 +1644,8 @@ public class WireMarshaller<T> {
             }
 
             return componentType == String.class
-                    ? new StringCollectionFieldAccess(field, true, collectionSupplier, type, defaultObject)
-                    : new CollectionFieldAccess(field, isLeaf, collectionSupplier, componentType, type, defaultObject);
+                    ? new StringCollectionFieldAccess(field, true, collectionSupplier, type)
+                    : new CollectionFieldAccess(field, isLeaf, collectionSupplier, componentType, type);
         }
 
         private Supplier<Collection> newInstance() {
@@ -1667,7 +1675,8 @@ public class WireMarshaller<T> {
                 field.set(to, coll);
             }
             coll.clear();
-            coll.addAll(fromColl);
+            if (!fromColl.isEmpty())
+                coll.addAll(fromColl);
         }
 
         @Override
@@ -1700,22 +1709,6 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void setDefaultValue(Object ignored, Object o) {
-            // TODO very limited form of deep reset, check for immutability
-            if (defaultValue != null && defaultValue.isEmpty()) {
-                Collection coll = unsafeGetObject(o, offset);
-                if (coll == null) {
-                    coll = collectionSupplier.get();
-                    unsafePutObject(o, offset, coll);
-                }
-                coll.clear();
-                return;
-            }
-
-            unsafePutObject(o, offset, defaultValue);
-        }
-
-        @Override
         public void getAsBytes(Object o, Bytes<?> bytes) {
             throw new UnsupportedOperationException();
         }
@@ -1730,7 +1723,6 @@ public class WireMarshaller<T> {
         @NotNull
         final Supplier<Collection> collectionSupplier;
         private final Class<?> type;
-        private final Collection<String> defaultValue;
         @NotNull
         private final BiConsumer<Collection, ValueIn> seqConsumer = (c, in2) -> {
             Bytes<?> bytes = in2.wireIn().bytes();
@@ -1745,11 +1737,10 @@ public class WireMarshaller<T> {
             }
         };
 
-        public StringCollectionFieldAccess(@NotNull Field field, Boolean isLeaf, @Nullable Supplier<Collection> collectionSupplier, Class<?> type, @Nullable Object defaultObject) throws IllegalAccessException {
+        public StringCollectionFieldAccess(@NotNull Field field, Boolean isLeaf, @Nullable Supplier<Collection> collectionSupplier, Class<?> type) {
             super(field, isLeaf);
             this.collectionSupplier = collectionSupplier == null ? newInstance() : collectionSupplier;
             this.type = type;
-            this.defaultValue = defaultObject == null ? null : (Collection<String>) field.get(defaultObject);
         }
 
         private Supplier<Collection> newInstance() {
@@ -1778,23 +1769,20 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void copy(Object from, Object to) {
-            Collection fromColl = unsafeGetObject(from, offset);
+        protected void copy(Object from, Object to) throws IllegalAccessException {
+            Collection fromColl = (Collection) field.get(from);
             if (fromColl == null) {
-                unsafePutObject(to, offset, null);
+                field.set(to, null);
                 return;
             }
-            setValue(to, fromColl);
-        }
-
-        private void setValue(Object to, Collection fromColl) {
-            Collection coll = unsafeGetObject(to, offset);
+            Collection coll = (Collection) field.get(to);
             if (coll == null) {
                 coll = collectionSupplier.get();
-                unsafePutObject(to, offset, coll);
+                field.set(to, coll);
             }
             coll.clear();
-            coll.addAll(fromColl);
+            if (!fromColl.isEmpty())
+                coll.addAll(fromColl);
         }
 
         @Override
@@ -1818,19 +1806,6 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void setDefaultValue(Object ignored, Object o) {
-            if (defaultValue == null) {
-                unsafePutObject(o, offset, null);
-                return;
-            }
-
-            Collection<String> coll = unsafeGetObject(o, offset);
-            if (coll == defaultValue)
-                return;
-            setValue(o, coll);
-        }
-
-        @Override
         public void getAsBytes(Object o, Bytes<?> bytes) {
             throw new UnsupportedOperationException();
         }
@@ -1844,9 +1819,8 @@ public class WireMarshaller<T> {
         private final Class keyType;
         @NotNull
         private final Class valueType;
-        private final Map<?, ?> defaultValue;
 
-        MapFieldAccess(@NotNull Field field, @Nullable Object defaultObject) throws IllegalAccessException {
+        MapFieldAccess(@NotNull Field field) {
             super(field);
             type = field.getType();
             if (type == Map.class)
@@ -1859,7 +1833,6 @@ public class WireMarshaller<T> {
             Type[] actualTypeArguments = computeActualTypeArguments(Map.class, field);
             keyType = extractClass(actualTypeArguments[0]);
             valueType = extractClass(actualTypeArguments[1]);
-            defaultValue = defaultObject == null ? null : (Map<?, ?>) field.get(defaultObject);
         }
 
         @NotNull
@@ -1889,7 +1862,8 @@ public class WireMarshaller<T> {
                 map.clear();
             }
             map.clear();
-            map.putAll(fromMap);
+            if (!fromMap.isEmpty())
+                map.putAll(fromMap);
         }
 
         @Override
@@ -1908,22 +1882,6 @@ public class WireMarshaller<T> {
         @Override
         protected void setValue(Object o, ValueIn read, boolean overwrite) {
             throw new UnsupportedOperationException();
-        }
-
-        @Override
-        protected void setDefaultValue(Object ignored, Object o) {
-            // TODO very limited form of deep reset, check for immutability
-            if (defaultValue != null && defaultValue.isEmpty()) {
-                Map<?, ?> map = unsafeGetObject(o, offset);
-                if (map == null) {
-                    map = collectionSupplier.get();
-                    unsafePutObject(o, offset, map);
-                }
-                map.clear();
-                return;
-            }
-
-            unsafePutObject(o, offset, defaultValue);
         }
 
         @Override

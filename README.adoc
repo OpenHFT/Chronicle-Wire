@@ -741,8 +741,9 @@ In order to `reset` a marshallable object, the process is as follows:
 1. create a new instance of the object to be reset (this is done just once per object type, then cached)
 2. reset all fields, so that
   a. when the field value implements `Resettable` interface, and the default value of the field is not `null`, and the current field value is of exactly the same class as the default value, `value.reset()` will be called. This behavior is introduced in Chronicle Wire `2.25`.
-  b. there is specific built-in copy-by-value handling for some types such as `Bytes`
-  c. all other fields will be copied by reference from the new instance to the existing instance
+  b. when the field type is `Collection` or `Map`, and the default value is empty collection, it will be cleared.
+  c. there is specific built-in copy-by-value handling for some types such as `Bytes`
+  d. all other fields will be copied by reference from the new instance to the existing instance
 3. the existing instance is now considered 'reset' back to default values
 
 The object created in step `1` is cached for performance reasons, meaning that both the new and existing instance of the marshallable object could have a reference to the same object.
