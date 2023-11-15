@@ -23,10 +23,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * @author Gadi Eichhorn
+ * Represents a property in a wire format, extending the WireModel.
+ * Contains fields like reference, path, name, and value.
  */
 public class WireProperty extends WireModel {
 
+    // Nullable fields for the wire property
     @Nullable
     private String reference;
     @Nullable
@@ -36,6 +38,17 @@ public class WireProperty extends WireModel {
     @Nullable
     private String value;
 
+    /**
+     * Constructor for WireProperty.
+     *
+     * @param reference The reference of the wire property.
+     * @param path The path of the wire property.
+     * @param name The name of the wire property.
+     * @param value The value of the wire property.
+     * @param id Unique identifier.
+     * @param revision Revision number.
+     * @param key Key associated with the wire property.
+     */
     public WireProperty(@Nullable String reference, @Nullable String path, @Nullable String name, @Nullable String value, long id, int revision, String key) {
         super(id, revision, key);
         this.reference = reference;
@@ -44,6 +57,12 @@ public class WireProperty extends WireModel {
         this.value = value;
     }
 
+    /**
+     * Reads the property fields from a wire.
+     *
+     * @param wire The wire input to read from.
+     * @throws IllegalStateException If reading from the wire fails.
+     */
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IllegalStateException {
         super.readMarshallable(wire);
@@ -53,6 +72,11 @@ public class WireProperty extends WireModel {
         this.value = wire.read(ModelKeys.value).text();
     }
 
+    /**
+     * Writes the property fields to a wire.
+     *
+     * @param wire The wire output to write to.
+     */
     @Override
     public void writeMarshallable(@NotNull WireOut wire) {
         super.writeMarshallable(wire);
@@ -62,6 +86,7 @@ public class WireProperty extends WireModel {
                 .write(ModelKeys.value).text(value);
     }
 
+    // Getter and setter methods for reference, path, name, and value
     @Nullable
     public String getReference() {
         return reference;
@@ -98,4 +123,3 @@ public class WireProperty extends WireModel {
         this.value = value;
     }
 }
-

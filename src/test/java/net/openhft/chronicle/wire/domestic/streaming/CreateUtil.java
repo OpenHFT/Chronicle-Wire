@@ -25,11 +25,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
+// Utility class for creating and manipulating Wire objects
 public final class CreateUtil {
 
+    // Private constructor to prevent instantiation of utility class
     private CreateUtil() {
     }
 
+    // Create a Wire and then apply a series of ValueOut mutators to it
     @SafeVarargs
     @NotNull
     public static Wire createThenValueOuts(@NotNull final Consumer<ValueOut>... mutators) {
@@ -43,6 +46,7 @@ public final class CreateUtil {
         return createThen(queueMutator);
     }
 
+    // Create a Wire and then apply a series of DocumentContext mutators to it
     @SafeVarargs
     @NotNull
     public static Wire createThenWritingDocuments(@NotNull final Consumer<DocumentContext>... mutators) {
@@ -55,8 +59,9 @@ public final class CreateUtil {
         };
         return createThen(wireMutator);
     }
-/*
 
+    // [Commented Out Code: Create a Wire by appending it to a named Chronicle queue]
+/*
     @NotNull
     public static Wire createThenAppending(@NotNull final String name,
                                            @NotNull final Consumer<? super Wire> mutator) {
@@ -68,6 +73,7 @@ public final class CreateUtil {
     }
 */
 
+    // Create a Wire and then apply a single Wire mutator to it
     @NotNull
     public static Wire createThen(@NotNull final Consumer<? super Wire> wireMutator) {
         final Wire wire = create();
@@ -75,6 +81,7 @@ public final class CreateUtil {
         return wire;
     }
 
+    // Create and return a new instance of a Wire with a YAML format stored on the heap
     @NotNull
     public static Wire create() {
         return Wire.newYamlWireOnHeap();

@@ -9,7 +9,14 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * Tests for validating the behavior of field converters with long data types.
+ */
 public class LongConvertorFieldsTest {
+
+    /**
+     * DTO class representing data fields to be serialized using Base16 encoding.
+     */
     static class Base16DTO extends SelfDescribingMarshallable {
         @Base16
         byte b;
@@ -22,6 +29,15 @@ public class LongConvertorFieldsTest {
         @Base16
         long l;
 
+        /**
+         * Constructor to initialize the Base16DTO fields.
+         *
+         * @param b  Byte value.
+         * @param ch Character value.
+         * @param s  Short value.
+         * @param i  Int value.
+         * @param l  Long value.
+         */
         public Base16DTO(byte b, char ch, short s, int i, long l) {
             this.b = b;
             this.ch = ch;
@@ -31,8 +47,12 @@ public class LongConvertorFieldsTest {
         }
     }
 
+    /**
+     * Test for verifying the Base16 encoding functionality.
+     */
     @Test
     public void base16() {
+        // Validate Base16 encoding with a range of positive values
         doTest(new Base16DTO((byte) 1, '2', (short) 3, 4, 5), "" +
                 "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base16DTO {\n" +
                 "  b: 1,\n" +
@@ -41,7 +61,8 @@ public class LongConvertorFieldsTest {
                 "  i: 4,\n" +
                 "  l: 5\n" +
                 "}\n");
-        // note shorter types are shorter strings and not all ffffffffffffffff
+        // Validate Base16 encoding with maximum negative values
+        // Note: shorter types yield shorter strings, not all ffffffffffffffff
         doTest(new Base16DTO((byte) -1, (char) -1, (short) -1, -1, -1), "" +
                 "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base16DTO {\n" +
                 "  b: ff,\n" +
@@ -52,6 +73,9 @@ public class LongConvertorFieldsTest {
                 "}\n");
     }
 
+    /**
+     * DTO class representing data fields to be serialized using Base64 encoding.
+     */
     static class Base64DTO extends SelfDescribingMarshallable {
         @Base64
         byte b;
@@ -64,6 +88,15 @@ public class LongConvertorFieldsTest {
         @Base64
         long l;
 
+        /**
+         * Constructor to initialize the Base64DTO fields.
+         *
+         * @param b  Byte value.
+         * @param ch Character value.
+         * @param s  Short value.
+         * @param i  Int value.
+         * @param l  Long value.
+         */
         public Base64DTO(byte b, char ch, short s, int i, long l) {
             this.b = b;
             this.ch = ch;
@@ -73,8 +106,12 @@ public class LongConvertorFieldsTest {
         }
     }
 
+    /**
+     * Test for verifying the Base64 encoding functionality.
+     */
     @Test
     public void base64() {
+        // Validate Base64 encoding with a range of positive values
         doTest(new Base64DTO((byte) 1, '2', (short) 3, 4, 5), "" +
                 "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base64DTO {\n" +
                 "  b: A,\n" +
@@ -83,7 +120,8 @@ public class LongConvertorFieldsTest {
                 "  i: D,\n" +
                 "  l: E\n" +
                 "}\n");
-        // note shorter types are shorter strings and not all ffffffffffffffff
+        // Validate Base64 encoding with maximum negative values
+        // Note: shorter types yield shorter strings, not all ffffffffffffffff
         doTest(new Base64DTO((byte) -1, (char) -1, (short) -1, -1, -1), "" +
                 "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base64DTO {\n" +
                 "  b: C_,\n" +
@@ -94,6 +132,9 @@ public class LongConvertorFieldsTest {
                 "}\n");
     }
 
+    /**
+     * DTO class representing data fields to be serialized using Base85 encoding.
+     */
     static class Base85DTO extends SelfDescribingMarshallable {
         @Base85
         byte b;
@@ -106,6 +147,15 @@ public class LongConvertorFieldsTest {
         @Base85
         long l;
 
+        /**
+         * Constructor to initialize the Base85DTO fields.
+         *
+         * @param b  Byte value.
+         * @param ch Character value.
+         * @param s  Short value.
+         * @param i  Int value.
+         * @param l  Long value.
+         */
         public Base85DTO(byte b, char ch, short s, int i, long l) {
             this.b = b;
             this.ch = ch;
@@ -115,8 +165,12 @@ public class LongConvertorFieldsTest {
         }
     }
 
+    /**
+     * Test for verifying the Base85 encoding functionality.
+     */
     @Test
     public void base85() {
+        // Validate Base85 encoding with a range of positive values
         doTest(new Base85DTO((byte) 1, '2', (short) 3, 4, 5), "" +
                 "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base85DTO {\n" +
                 "  b: 1,\n" +
@@ -125,7 +179,8 @@ public class LongConvertorFieldsTest {
                 "  i: 4,\n" +
                 "  l: 5\n" +
                 "}\n");
-        // note shorter types are shorter strings and not all ffffffffffffffff
+        // Validate Base85 encoding with maximum negative values
+        // Note: the encoded values for negative numbers are not straightforward like Base16 and Base64
         doTest(new Base85DTO((byte) -1, (char) -1, (short) -1, -1, -1), "" +
                 "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base85DTO {\n" +
                 "  b: 30,\n" +
@@ -136,6 +191,9 @@ public class LongConvertorFieldsTest {
                 "}\n");
     }
 
+    /**
+     * DTO class representing data fields to be serialized using Word encoding.
+     */
     static class WordsDTO extends SelfDescribingMarshallable {
         @Words
         byte b;
@@ -148,6 +206,15 @@ public class LongConvertorFieldsTest {
         @Words
         long l;
 
+        /**
+         * Constructor to initialize the WordsDTO fields.
+         *
+         * @param b  Byte value.
+         * @param ch Character value.
+         * @param s  Short value.
+         * @param i  Int value.
+         * @param l  Long value.
+         */
         public WordsDTO(byte b, char ch, short s, int i, long l) {
             this.b = b;
             this.ch = ch;
@@ -157,8 +224,13 @@ public class LongConvertorFieldsTest {
         }
     }
 
+    /**
+     * Test method for verifying the Words encoding functionality.
+     */
     @Test
     public void words() {
+        // Validate Words encoding with a range of positive values.
+        // The expected results are arbitrary word mappings for demonstration.
         doTest(new WordsDTO((byte) 1, '2', (short) 3, 4, 5), "" +
                 "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$WordsDTO {\n" +
                 "  b: aid,\n" +
@@ -167,7 +239,9 @@ public class LongConvertorFieldsTest {
                 "  i: all,\n" +
                 "  l: and\n" +
                 "}\n");
-        // note shorter types are shorter strings and not all ffffffffffffffff
+
+        // Validate Words encoding with maximum negative values.
+        // Note: shorter types yield different word combinations based on the negative value.
         doTest(new WordsDTO((byte) -1, (char) -1, (short) -1, -1, -1), "" +
                 "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$WordsDTO {\n" +
                 "  b: corn,\n" +
@@ -178,6 +252,13 @@ public class LongConvertorFieldsTest {
                 "}\n");
     }
 
+    /**
+     * Helper method to serialize a DTO object using the YamlWire format,
+     * and validate the result against an expected string representation.
+     *
+     * @param dto      The object to be serialized.
+     * @param expected The expected string representation of the serialized object.
+     */
     private void doTest(Marshallable dto, String expected) {
         Wire wire = new YamlWire(Bytes.allocateElasticOnHeap());
         wire.getValueOut().object(dto);

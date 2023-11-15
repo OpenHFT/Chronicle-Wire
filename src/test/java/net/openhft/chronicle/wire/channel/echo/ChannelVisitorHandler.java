@@ -24,17 +24,55 @@ import net.openhft.chronicle.wire.channel.ChronicleChannel;
 import net.openhft.chronicle.wire.channel.ChronicleChannelCfg;
 import net.openhft.chronicle.wire.channel.ChronicleContext;
 
+/**
+ * 'ChannelVisitorHandler' class extends 'AbstractHandler' and is responsible for
+ * handling events in the context of channels by utilizing ChannelVisitors.
+ *
+ * When 'run' is invoked, it sets up a mechanism to reply to received messages
+ * by performing an operation defined by a ChannelVisitor on the provided channel.
+ * Note that the actual visitor logic is abstract and must be defined elsewhere.
+ *
+ * 'asInternalChannel' is not supported in this implementation.
+ */
 public class ChannelVisitorHandler extends AbstractHandler<ChannelVisitorHandler> {
+
+    /**
+     * Executes logic to handle events on the provided channel within the provided context.
+     *
+     * The 'run' method sets up a 'Replies' instance and assigns to it a lambda function
+     * that takes a 'ChannelVisitor', calls its 'visit' method with the channel as argument,
+     * and sends the resulting message as a reply.
+     *
+     * @param context the ChronicleContext within which the operation is performed.
+     * @param channel the ChronicleChannel on which the event is to be handled.
+     * @throws ClosedIORuntimeException if an I/O error occurs.
+     */
     @Override
     public void run(ChronicleContext context, ChronicleChannel channel) throws ClosedIORuntimeException {
+        // Acquire a method writer for the Replies interface
         Replies replies = channel.methodWriter(Replies.class);
+
+        // Define the visiting logic using a lambda function that uses the visitor to generate replies
         ChannelVisiting visiting = visitor -> replies.reply(visitor.visit(channel));
+
+        // Assign the visiting logic as the event handler for the channel and run it
         channel.eventHandlerAsRunnable(visiting).run();
     }
 
+    /**
+     * Throws UnsupportedOperationException as this functionality is not supported.
+     *
+     * This method is intended to provide an internal channel based on provided
+     * context and channel configuration. However, the functionality is not supported
+     * in this implementation and will throw an exception if called.
+     *
+     * @param context the ChronicleContext within which the channel would be created.
+     * @param channelCfg the configuration for the channel.
+     * @throws UnsupportedOperationException always, as the operation is not supported.
+     */
     @Override
     public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg channelCfg) {
+        // Unsupported operation, throw an exception if this method is called
         throw new UnsupportedOperationException();
     }
-
 }

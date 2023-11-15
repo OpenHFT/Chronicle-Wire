@@ -30,28 +30,50 @@ import java.util.*;
 import static net.openhft.chronicle.core.util.StringUtils.isEqual;
 import static org.junit.Assert.assertEquals;
 
+/**
+ * Test class extending `WireTestCommon` to verify the deserialization of `ChronicleServicesCfg` from YAML.
+ */
 public class Issue609Test extends WireTestCommon {
+
+    /**
+     * Tests the deserialization of services from a YAML file and ensures that the deserialized object
+     * matches the expected configuration.
+     *
+     * @throws IOException if there's an error reading the file.
+     */
     @Test
     public void testServices() throws IOException {
+        // Deserializes the ChronicleServicesCfg from a YAML file
         ChronicleServicesCfg obj = WireType.YAML.fromString(ChronicleServicesCfg.class, BytesUtil.readFile("yaml/services.yaml"));
 
+        // Creates an expected configuration manually
         ChronicleServicesCfg expected = new ChronicleServicesCfg();
 
         ServiceCfg scfg = new ServiceCfg();
         expected.services.put("fix-web-gateway", scfg);
 
+        // Setting up expected service inputs
         scfg.inputs.add(new InputCfg().input("web-gateway-periodic-updates"));
         scfg.inputs.add(new InputCfg().input("session-state-updates"));
         scfg.inputs.add(new InputCfg().input("fix-config-out"));
         scfg.inputs.add(new InputCfg().input("fix-search-out"));
 
+        // Asserts that the deserialized object matches the expected configuration
         assertEquals(expected, obj);
     }
 
+    /**
+     * Configuration class representing a collection of services.
+     */
     public static class ChronicleServicesCfg extends AbstractMarshallableCfg {
         public final Map<String, ServiceCfg> services = new LinkedHashMap<>();
     }
 
+    /**
+     * Configuration class representing a specific service.
+     * This class also includes custom deserialization logic to properly deserialize
+     * the 'inputs' field, which can have different value types.
+     */
     public static class ServiceCfg extends AbstractMarshallableCfg {
         public final List<InputCfg> inputs = new ArrayList<>();
 
@@ -92,9 +114,18 @@ public class Issue609Test extends WireTestCommon {
         }
     }
 
+    /**
+     * Configuration class representing a single input of a service.
+     */
     public static class InputCfg extends AbstractMarshallableCfg {
         private String input;
 
+        /**
+         * Sets the input and returns the instance.
+         *
+         * @param input the name of the input.
+         * @return this instance.
+         */
         public InputCfg input(String input) {
             this.input = input;
             return this;

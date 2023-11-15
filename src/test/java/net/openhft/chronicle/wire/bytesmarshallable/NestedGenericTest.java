@@ -30,32 +30,46 @@ import java.util.Objects;
 import static org.junit.Assert.*;
 
 public class NestedGenericTest extends WireTestCommon {
+
+    // Test to verify generic serialization and deserialization using Chronicle Wire with generic ValueHolder
     @Test
     public void testGeneric() {
+        // Ignore specific warning about possible unmarshalling issues with the A class.
         ignoreException("BytesMarshallable found in field which is not matching exactly, the object may not unmarshall correctly if that type is not specified: " +
                 "net.openhft.chronicle.wire.bytesmarshallable.NestedGenericTest$A. The warning will not repeat so there may be more types affected.");
+
+        // Allocate elastic bytes on heap and create binary wire to handle serialization
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.BINARY.apply(bytes);
 
+        // Initialize an object with generic ValueHolder containing an instance of class A
         ValueHolder<A> object = new ValueHolder<>(new A(2, "b"));
+        // Write the object to the wire
         wire.getValueOut().object(object);
 
+        // Assert conditions to verify write positions and object inequality after serialization/deserialization
         assertFalse(wire.bytes().writePosition() > 150);
         assertNotEquals(object, wire.getValueIn().object());
     }
 
+    // Test to verify serialization and deserialization using Chronicle Wire with a non-generic ValueHolderDef
     @Test
     public void testDefined() {
+        // Allocate elastic bytes on heap and create binary wire to handle serialization
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.BINARY.apply(bytes);
 
+        // Initialize an object with defined ValueHolder containing an instance of class A
         ValueHolderDef object = new ValueHolderDef(new A(2, "b"));
+        // Write the object to the wire
         wire.getValueOut().object(object);
 
+        // Assert conditions to verify write positions and object equality after serialization/deserialization
         assertTrue(wire.bytes().writePosition() < 150);
         assertEquals(object, wire.getValueIn().object());
     }
 
+    // Generic ValueHolder class to hold various types of values for testing
     private static class ValueHolder<V> {
         private final V defaultValue;
 
@@ -63,6 +77,7 @@ public class NestedGenericTest extends WireTestCommon {
             this.defaultValue = defaultValue;
         }
 
+        // Override equals method to handle object comparison in tests
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -72,12 +87,15 @@ public class NestedGenericTest extends WireTestCommon {
         }
     }
 
+    // Defined ValueHolder class to hold values of type A for testing
     private static class ValueHolderDef {
         private final A defaultValue;
 
         public ValueHolderDef(A defaultValue) {
             this.defaultValue = defaultValue;
         }
+
+        // Override equals method to handle object comparison in tests
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -87,6 +105,7 @@ public class NestedGenericTest extends WireTestCommon {
         }
     }
 
+    // Class A implementing BytesMarshallable interface to enable serialization/deserialization using Chronicle Wire
     private static class A implements BytesMarshallable {
         int x;
         String y;
@@ -96,6 +115,7 @@ public class NestedGenericTest extends WireTestCommon {
             this.y = y;
         }
 
+        // Override equals method to handle object comparison in tests
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;

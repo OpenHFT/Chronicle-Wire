@@ -2563,44 +2563,54 @@ public class TextWireTest extends WireTestCommon {
         assertEquals(obj, Arrays.asList("bar", "quux"));
     }
 
+    // Enum to demonstrate serialization of enum types
     public enum OrderLevel implements Marshallable {
         PARENT, CHILD
     }
 
+    // Enum representing potential keys to be used in Wire data structures
     enum BWKey implements WireKey {
         field1, field2, field3
     }
 
+    // Static class representing a Data Transfer Object (DTO)
+    // with a 'Class' type field
     static class DTO extends SelfDescribingMarshallable {
         Class type;
     }
 
+    // Static class holding a Map with RetentionPolicy keys and Double values
     static class MapHolder extends SelfDescribingMarshallable {
         Map<RetentionPolicy, Double> map;
     }
 
+    // Class representing a field having an Enum type and a byte array
     public static final class FieldWithEnum extends SelfDescribingMarshallable {
         private byte[] allowedFoos;
         private final OrderLevel orderLevel = OrderLevel.PARENT;
     }
 
+    // Class containing a field with an associated comment
     static class FieldWithComment extends SelfDescribingMarshallable {
         @Comment("a comment where the value=%s")
         String field;
         // String field2;
     }
 
+    // Class containing two fields, one of which has an associated comment
     static class FieldWithComment2 extends SelfDescribingMarshallable {
         @Comment("a comment where the value=%s")
         String field;
         String field2;
     }
 
+    // Class holding a string and two integer fields,
+    // and a map to manage unexpected fields
     static class TwoFields extends AbstractMarshallableCfg {
         String b;
         int d;
         int notThere;
-
+        // transient Map to hold other unexpected fields
         transient Map<String, Object> others = new LinkedHashMap<>();
 
         @Override
@@ -2609,12 +2619,14 @@ public class TextWireTest extends WireTestCommon {
         }
     }
 
+    // Class with fields of Bytes type initialized with various Byte buffers
     static class ABCD extends SelfDescribingMarshallable {
         Bytes<?> A = Bytes.allocateElasticDirect();
         Bytes<?> B = Bytes.allocateDirect(64);
         Bytes<?> C = Bytes.elasticByteBuffer();
         Bytes<?> D = Bytes.allocateElasticOnHeap(1);
 
+        // Method to release all byte buffers
         void releaseAll() {
             A.releaseLast();
             B.releaseLast();
@@ -2623,25 +2635,30 @@ public class TextWireTest extends WireTestCommon {
         }
     }
 
+    // Class containing three StringBuilder fields
     static class ABC extends SelfDescribingMarshallable {
         StringBuilder A = new StringBuilder();
         StringBuilder B = new StringBuilder();
         StringBuilder C = new StringBuilder();
     }
 
+    // Nested class having another nested class field and a long field
     static class NestedA extends SelfDescribingMarshallable {
         NestedB b;
         long value;
     }
 
+    // Nested class containing a double field
     static class NestedB extends SelfDescribingMarshallable {
         double field1;
     }
 
+    // Class containing a String array field
     static class StringArray implements Marshallable {
         String[] strings;
     }
 
+    // Class wrapping a Bytes field and providing a method to set it
     static class BytesWrapper extends SelfDescribingMarshallable {
         @NotNull
         Bytes<?> bytes = allocateElasticDirect();
@@ -2652,6 +2669,7 @@ public class TextWireTest extends WireTestCommon {
         }
     }
 
+    // Class wrapping two double fields with a constructor to set them
     static class DoubleWrapper extends SelfDescribingMarshallable {
         double d;
         double n;
@@ -2662,6 +2680,7 @@ public class TextWireTest extends WireTestCommon {
         }
     }
 
+    // Class representing a nested list structure, capable of marshallable reading.
     static class NestedList extends SelfDescribingMarshallable {
         String name;
         List<NestedItem> listA = new ArrayList<>();
@@ -2670,8 +2689,10 @@ public class TextWireTest extends WireTestCommon {
         transient List<NestedItem> listB2 = new ArrayList<>();
         int num;
 
+        // Override readMarshallable to define custom deserialization logic from a wire format.
         @Override
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
+            // Assign various fields from the wire format
             name = wire.read("name").text();
             wire.read("listA").sequence(listA, listA2, NestedItem::new);
             wire.read("listB").sequence(listB, listB2, NestedItem::new);
@@ -2679,41 +2700,50 @@ public class TextWireTest extends WireTestCommon {
         }
     }
 
+    // Nested item class to be utilized within NestedList, holding integral and floating-point data.
     static class NestedItem extends SelfDescribingMarshallable {
         int a;
         double b;
     }
 
+    // Class encapsulating a list of WithEnumSet instances, providing a structure for nesting.
     static class NestedWithEnumSet extends SelfDescribingMarshallable {
         List<WithEnumSet> list = new ArrayList<>();
     }
 
+    // Class representing an item that pairs a name with a set of TimeUnit enumeration items.
     static class WithEnumSet extends SelfDescribingMarshallable {
         String name;
         Set<TimeUnit> timeUnits = EnumSet.noneOf(TimeUnit.class);
 
+        // Default constructor, utilized via reflection
         @UsedViaReflection
         WithEnumSet() {
         }
 
+        // Overloaded constructor to initialize name field.
         public WithEnumSet(String name) {
             this.name = name;
         }
 
+        // Overloaded constructor to initialize both name and timeUnits fields.
         public WithEnumSet(String name, Set<TimeUnit> timeUnits) {
             this.name = name;
             this.timeUnits = timeUnits;
         }
 
+        // Define how this object should be written out to the wire format.
         @Override
         public void writeMarshallable(@NotNull WireOut wire) {
             Wires.writeMarshallable(this, wire, false);
         }
     }
 
+    // Class holding a list of strings with customized marshallable reading.
     static class MyDto extends SelfDescribingMarshallable {
         List<String> strings = new ArrayList<>();
 
+        // Define a custom way to read objects of this type from the wire format.
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
 
             // WORKS
@@ -2724,25 +2754,31 @@ public class TextWireTest extends WireTestCommon {
         }
     }
 
+    // Class holding byte storage and a long, with custom serialization logic.
     static class DtoWithBytesField extends SelfDescribingMarshallable {
         BytesStore bytes;
         long another;
 
+        // Implement custom deserialization logic for this object.
         @Override
         public void readMarshallable(@NotNull WireIn wire) {
+            // Initialize bytes field as a native pointer if null and read bytes and long data from the wire.
             if (bytes == null)
                 bytes = BytesStore.nativePointer();
             wire.read(() -> "bytes").bytesSet((PointerBytesStore) bytes);
             another = (wire.read(() -> "another").int64());
         }
 
+        // Implement custom serialization logic for this object.
         @Override
         public void writeMarshallable(@NotNull WireOut wire) {
+            // Write bytes and long data to the wire format.
             wire.write(() -> "bytes").bytes(bytes);
             wire.write(() -> "another").int64(another);
         }
     }
 
+    // Class storing two long integers with hexadecimal conversion, designed for wire transport.
     static class TwoLongs extends SelfDescribingMarshallable {
 
         @LongConversion(HexadecimalLongConverter.class)
@@ -2751,22 +2787,26 @@ public class TextWireTest extends WireTestCommon {
         @LongConversion(HexadecimalLongConverter.class)
         long hexa2;
 
+        // Constructor initializing both long fields.
         public TwoLongs(long hexadecimal, long hexa2) {
             this.hexadecimal = hexadecimal;
             this.hexa2 = hexa2;
         }
     }
 
+    // Class encapsulating an integer and a Duration object, to be serialized/deserialized.
     static class DurationHolder extends SelfDescribingMarshallable {
         int foo;
         Duration duration;
 
+        // Constructor initializing both fields.
         public DurationHolder(int foo, Duration duration) {
             this.foo = foo;
             this.duration = duration;
         }
     }
 
+    // Basic class capable of being serialized/deserialized without field definition.
     class Circle implements Marshallable {
     }
 }

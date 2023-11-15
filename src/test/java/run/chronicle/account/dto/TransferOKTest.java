@@ -9,7 +9,7 @@ import static org.junit.Assert.assertEquals;
 import static run.chronicle.account.dto.TransferTest.getTransfer;
 
 public class TransferOKTest {
-
+    // Expected string representation of TransferOK object
     public static final String EXPECTED = "" +
             "!run.chronicle.account.dto.TransferOK {\n" +
             "  sender: target,\n" +
@@ -27,20 +27,26 @@ public class TransferOKTest {
             "  }\n" +
             "}\n";
 
+    // Test for the string representation of TransferOK object
     @Test
     public void testToString() {
+        // Create a TransferOK object and set its properties then asserting
         assertEquals(EXPECTED,
                 new TransferOK()
                         .target(Base85.INSTANCE.parse("sender"))
                         .sender(Base85.INSTANCE.parse("target"))
                         .sendingTime(NanoTime.INSTANCE.parse("2001/02/03T04:05:06.777888999"))
-                        .transfer(getTransfer())
+                        .transfer(getTransfer()) // Assuming getTransfer() method is defined and returns a Transfer object
                         .toString());
     }
 
+    // Test for creating a TransferOK object from a string representation
     @Test
     public void testFromString() {
+        // Create a TransferOK object from the EXPECTED string
         TransferOK tok = Marshallable.fromString(EXPECTED);
-        assertEquals(TransferTest.getTransfer(), tok.transfer());
+
+        // Assert that the transfer field of the created object matches the transfer returned by getTransfer()
+        assertEquals(TransferTest.getTransfer(), tok.transfer()); // Assuming TransferTest.getTransfer() method is defined
     }
 }

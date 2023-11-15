@@ -129,57 +129,81 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
         bytes.releaseLast();
     }
 
+    // Class representing a Marshallable object with text data.
     public static class MyMarshallable implements Marshallable {
 
+        // Mutable sequence of characters to store textual data.
         @NotNull
         public StringBuilder text = new StringBuilder();
 
+        // Method responsible for deserializing the object from the Wire input.
         @Override
         public void readMarshallable(@NotNull WireIn wire) {
+            // Read the 'text' field from the wire with key "262".
             wire.read(() -> "262").text(text);
         }
 
+        // Method responsible for serializing the object to the Wire output.
         @Override
         public void writeMarshallable(@NotNull WireOut wire) {
+            // Write the 'text' field to the wire with key "262".
             wire.write(() -> "262").text(text);
         }
 
+        // Method to provide a string representation of the object.
         @NotNull
         @Override
         public String toString() {
+            // Construct a string representation with the 'text' field value.
             return "X{" +
                     "text=" + text +
                     '}';
         }
     }
 
+    // Class representing a filter condition for data, defined by a column name and a filter expression.
     static class MarshableFilter extends SelfDescribingMarshallable {
+        // Name of the column to which the filter applies.
         @NotNull
         public final String columnName;
+
+        // Filter expression used to filter data.
         @NotNull
         public final String filter;
 
+        // Constructor to initialize column name and filter expression.
         public MarshableFilter(@NotNull String columnName, @NotNull String filter) {
             this.columnName = columnName;
             this.filter = filter;
         }
     }
 
+    // Class representing an order-by condition for data, defined by a column name and sort direction.
     static class MarshableOrderBy extends SelfDescribingMarshallable {
+        // Name of the column used for ordering data.
         @NotNull
         public final String column;
+
+        // Flag indicating the sort direction: true for ascending, false for descending.
         public final boolean isAscending;
 
+        // Constructor to initialize column name and sort direction.
         public MarshableOrderBy(@NotNull String column, boolean isAscending) {
             this.column = column;
             this.isAscending = isAscending;
         }
     }
 
+    // Class representing a filter with sorting details for processing data.
     static class SortedFilter extends SelfDescribingMarshallable {
+        // Index from which the filtering should start.
         public long fromIndex;
+
+        // List of order-by conditions specifying the columns and their respective sort directions.
         @NotNull
         public List<MarshableOrderBy> marshableOrderBy = new ArrayList<>();
+
+        // List of filter conditions specifying the columns and their respective filter expressions.
         @NotNull
         public List<MarshableFilter> marshableFilters = new ArrayList<>();
     }

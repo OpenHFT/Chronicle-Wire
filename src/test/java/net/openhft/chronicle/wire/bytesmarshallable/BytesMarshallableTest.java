@@ -43,10 +43,12 @@ import static org.junit.Assert.assertEquals;
 public class BytesMarshallableTest extends WireTestCommon {
     private final WireType wireType;
 
+    // Constructor that accepts a wireType as a parameter
     public BytesMarshallableTest(WireType wireType) {
         this.wireType = wireType;
     }
 
+    // This method provides different WireType parameters to be used in the tests
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
         return Arrays.asList(
@@ -55,23 +57,33 @@ public class BytesMarshallableTest extends WireTestCommon {
         );
     }
 
+    // Method to create and return a Wire object with specific configurations
+    // Uses the `wireType` instance variable and applies it to a newly created Bytes object
     private Wire createWire() {
         return wireType.apply(Bytes.elasticHeapByteBuffer(64));
     }
 
+    // Test method to verify the (de)serialization of primitive data transfer objects (DTOs)
+    // with the wire, also validating against expected string representations
     @SuppressWarnings("incomplete-switch")
     @Test
     public void primitiveDto() {
+        // Creating a wire object using the previously defined method
         Wire wire = createWire();
 
+        // Creating and writing two DTO objects (PrimDto and ScalarDto) to the wire
         PrimDto dto1 = PrimDto.init(1);
         wire.write("prim").marshallable(dto1);
 
         ScalarDto sdto1 = ScalarDto.init(1);
         wire.write("scalar").marshallable(sdto1);
 
+        // Initialize a default expected string, then define specific expectations
+        // based on the current `wireType` being tested
         String expected = "Unknown wire type";
         switch (wireType) {
+            // Cases define the expected debug string output of the wire bytes
+            // based on the different wire types
             case TEXT:
                 expected = "[pos: 0, rlim: 159, wlim: 2147483632, cap: 2147483632 ] ǁprim: {⒑  flag: true,⒑  s8: 1,⒑  ch: \"\\x01\",⒑  s16: 1,⒑  s32: 1,⒑  s64: 1,⒑  f32: 1.0,⒑  f64: 1.0⒑}⒑scalar: {⒑  text: Hello1,⒑  buffer: bye 1,⒑  bytes: hi 1⒑}⒑‡٠٠٠٠٠٠٠٠";
                 break;
@@ -79,11 +91,15 @@ public class BytesMarshallableTest extends WireTestCommon {
                 expected = "[pos: 0, rlim: 69, wlim: 2147483632, cap: 2147483632 ] ǁÄprim\\u0082\\u001D٠٠٠Y⒈⒈⒈٠⒈٠٠٠⒈٠٠٠٠٠٠٠٠٠\\u0080?٠٠٠٠٠٠ð?Æscalar\\u0082⒙٠٠٠⒍Hello1⒌bye 1⒋hi 1‡٠٠٠٠٠٠٠٠٠٠٠";
                 break;
         }
+        // Asserting that the expected string equals the debug string output of the wire bytes
         assertEquals(expected, wire.bytes().toDebugString());
 
+        // Creating two new DTOs and populating them by reading from the wire
+        // Then, asserting that they equal the original written DTOs
         PrimDto dto2 = new PrimDto();
         ScalarDto sdto2 = new ScalarDto();
 
+        // Performing the read, populate, and assert equal operations twice
         for (int i = 0; i < 2; i++) {
             wire.bytes().readPosition(0);
 
@@ -95,17 +111,21 @@ public class BytesMarshallableTest extends WireTestCommon {
         }
     }
 
+    // Another test method similar to the above, but using different DTO types (PrimDto2 and ScalarDto2)
     @SuppressWarnings("incomplete-switch")
     @Test
     public void primitiveDto2() {
+        // Creating a wire object using the previously defined method
         Wire wire = createWire();
 
+        // Creating and writing two DTO objects (PrimDto2 and ScalarDto2) to the wire
         PrimDto2 dto1 = PrimDto2.init(1);
         wire.write("prim").marshallable(dto1);
 
         ScalarDto2 sdto1 = ScalarDto2.init(1);
         wire.write("scalar").marshallable(sdto1);
 
+        // Similar string expectation setting and assertion as in the previous test method
         String expected = "Unknown wire type";
         switch (wireType) {
             case TEXT:
@@ -116,8 +136,10 @@ public class BytesMarshallableTest extends WireTestCommon {
                 expected = "[pos: 0, rlim: 50, wlim: 2147483632, cap: 2147483632 ] ǁÄprim\\u0082⒑٠٠٠Y⒈⒈⒈⒈⒈\\u009F|\\u009F|Æscalar\\u0082⒙٠٠٠⒍Hello1⒌bye 1⒋hi 1‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠";
                 break;
         }
+        // Asserting that the expected string equals the debug string output of the wire bytes
         assertEquals(expected, wire.bytes().toDebugString());
 
+        // Creating two new DTOs, reading values from the wire, and asserting they equal originals
         PrimDto2 dto2 = new PrimDto2();
         ScalarDto2 sdto2 = new ScalarDto2();
 
@@ -152,6 +174,7 @@ public class BytesMarshallableTest extends WireTestCommon {
                 "}\n", sdto2.toString());
     }
 
+    // Class encapsulating various primitive data types and providing initialization logic.
     static class PrimDto extends BytesInBinaryMarshallable {
         boolean flag;
         byte s8;
@@ -162,10 +185,12 @@ public class BytesMarshallableTest extends WireTestCommon {
         float f32;
         double f64;
 
+        // Method to initialize an instance of PrimDto with certain derived values based on input integer.
         static PrimDto init(int i) {
             return init(i, new PrimDto());
         }
 
+        // Generic method to initialize a PrimDto or its subtype, using an input integer.
         static <T extends PrimDto> T init(int i, T d) {
             d.flag = i % 2 != 0;
             d.s8 = (byte) i;
@@ -179,11 +204,14 @@ public class BytesMarshallableTest extends WireTestCommon {
         }
     }
 
+    // Class extending PrimDto with custom marshallable reading and writing logic.
     static class PrimDto2 extends PrimDto {
+        // Method to initialize an instance of PrimDto2 with certain derived values based on input integer.
         static PrimDto2 init(int i) {
             return init(i, new PrimDto2());
         }
 
+        // Overridden method defining custom deserialization logic for PrimDto2.
         @Override
         public void readMarshallable(BytesIn<?> bytes) throws IORuntimeException {
             flag = bytes.readBoolean();
@@ -196,6 +224,7 @@ public class BytesMarshallableTest extends WireTestCommon {
             f64 = bytes.readStopBitDouble();
         }
 
+        // Overridden method defining custom serialization logic for PrimDto2.
         @Override
         public void writeMarshallable(BytesOut<?> bytes) {
             bytes.writeBoolean(flag);
@@ -209,15 +238,18 @@ public class BytesMarshallableTest extends WireTestCommon {
         }
     }
 
+    // Class encapsulating scalar values (text, buffer, bytes) with initialization logic.
     static class ScalarDto extends BytesInBinaryMarshallable {
         String text;
         StringBuilder buffer;
         Bytes<?> bytes;
 
+        // Method to initialize an instance of ScalarDto with certain derived values based on input integer.
         static ScalarDto init(int i) {
             return init(i, new ScalarDto());
         }
 
+        // Generic method to initialize a ScalarDto or its subtype, using an input integer.
         static <D extends ScalarDto> D init(int i, D d) {
             d.text = "Hello" + i;
             d.buffer = new StringBuilder("bye " + i);
@@ -226,12 +258,14 @@ public class BytesMarshallableTest extends WireTestCommon {
         }
     }
 
+    // Class extending ScalarDto with custom marshallable reading and writing logic.
     static class ScalarDto2 extends ScalarDto {
-
+        // Method to initialize an instance of ScalarDto2 with certain derived values based on input integer.
         static ScalarDto2 init(int i) {
             return init(i, new ScalarDto2());
         }
 
+        // Overridden method defining custom deserialization logic for ScalarDto2.
         @Override
         public void readMarshallable(BytesIn<?> in) throws IORuntimeException {
             text = in.read8bit();
@@ -241,6 +275,7 @@ public class BytesMarshallableTest extends WireTestCommon {
             in.read8bit(bytes);
         }
 
+        // Overridden method defining custom serialization logic for ScalarDto2.
         @Override
         public void writeMarshallable(BytesOut<?> out) {
             out.write8bit(text);

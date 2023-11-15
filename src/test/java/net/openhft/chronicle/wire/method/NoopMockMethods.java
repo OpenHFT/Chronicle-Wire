@@ -23,36 +23,54 @@ import net.openhft.chronicle.wire.IMid;
 
 import java.util.List;
 
+/**
+ * A no-operation (noop) implementation of the MockMethods interface, intended for use in scenarios
+ * where the actual method implementations are not needed, such as testing or stubbing.
+ * This class also implements the IgnoresEverything interface, indicating that it ignores all method calls.
+ */
 public class NoopMockMethods implements MockMethods, IgnoresEverything {
-    private final MockMethods mockMethods;
+    private final MockMethods mockMethods; // Reference to an instance of MockMethods, potentially for delegation
 
+    // Constructor to initialize with a MockMethods instance
     public NoopMockMethods(MockMethods mockMethods) {
         this.mockMethods = mockMethods;
     }
 
+    // No-operation implementation of method1
     @Override
     public void method1(MockDto dto) {
+        // Intentionally left empty
     }
 
+    // No-operation implementation of method2
     @Override
     public void method2(MockDto dto) {
+        // Intentionally left empty
     }
 
+    // No-operation implementation of method3
     @Override
     public void method3(List<MockDto> dtos) {
+        // Intentionally left empty
     }
 
+    // No-operation implementation of list method
     @Override
     public void list(List<String> strings) {
+        // Intentionally left empty
     }
 
+    // No-operation implementation of throwException
     @Override
     public void throwException(String s) {
+        // Intentionally left empty
     }
 
+    // Returns a lambda for IMid interface, which in turn returns a no-operation lambda for IMid methods
     @Override
     public IMid mid(String text) {
         return x -> t -> {
+            // Intentionally left empty
         };
     }
 }
