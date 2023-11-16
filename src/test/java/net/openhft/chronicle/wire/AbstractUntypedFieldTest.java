@@ -21,14 +21,15 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 class AbstractUntypedFieldTest extends WireTestCommon {
 
@@ -55,11 +56,29 @@ class AbstractUntypedFieldTest extends WireTestCommon {
                 "}");
         final Wire textWire = wireConstruction.apply(bytes);
 
+        assumeFalse(textWire instanceof JSONWire);
+
         final Holder holder = textWire.getValueIn().object(Holder.class);
 
         System.out.println("holder.a = " + holder.a);
 
         assertNotNull(holder.a);
+    }
+
+    @Test
+    void typedFieldsShouldBeNonNullJsonWire() {
+        final Bytes<byte[]> bytes = Bytes.from("" +
+                "{ \"@net.openhft.chronicle.wire.AbstractUntypedFieldTest$Holder\": {" +
+                " \"a\":{ \"@AImpl\": {" +
+                "\"b\":true" +
+                "} }" +
+                "}}");
+        final Wire textWire = new JSONWire(bytes).useTypes(true);
+
+        final Holder holder = textWire.getValueIn().object(Holder.class);
+
+        assertNotNull(holder.a);
+        assertTrue(((AImpl) holder.a).b);
     }
 
     @ParameterizedTest
@@ -95,6 +114,7 @@ class AbstractUntypedFieldTest extends WireTestCommon {
     }
 
     private static final class AImpl extends A {
+        boolean b;
     }
 
     private static final class Holder {

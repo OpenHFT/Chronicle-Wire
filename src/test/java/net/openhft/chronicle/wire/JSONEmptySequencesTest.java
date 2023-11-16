@@ -4,6 +4,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.junit.Assert;
 import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +14,7 @@ public class JSONEmptySequencesTest extends net.openhft.chronicle.wire.WireTestC
         ClassAliasPool.CLASS_ALIASES.addAlias(Foo.class);
 
         final Bytes data = Bytes.allocateElasticOnHeap();
-        data.append("!Foo {\n" +
+        data.append("{\n" +
                 "  field1: 1234,\n" +
                 "  field2: 456,\n" +
                 "  field3: [ ],\n" +

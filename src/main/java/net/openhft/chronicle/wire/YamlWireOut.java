@@ -1364,7 +1364,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             return this;
         }
 
-        private void writeSavedEventName() {
+        protected void writeSavedEventName() {
             if (eventName == null)
                 return;
             prependSeparator();

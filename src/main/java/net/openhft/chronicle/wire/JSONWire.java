@@ -26,6 +26,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
+import net.openhft.chronicle.core.util.UnresolvedType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,10 +37,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+import static net.openhft.chronicle.bytes.StopCharTesters.QUOTES;
+import static net.openhft.chronicle.wire.TextStopCharTesters.END_OF_TYPE;
 
 /**
  * JSON wire format
@@ -570,6 +574,28 @@ public class JSONWire extends TextWire {
 
     class JSONValueOut extends YamlValueOut {
 
+        @NotNull
+        @Override
+        public TextWire typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, Class type) {
+            if (dropDefault) {
+                if (type == null)
+                    return wireOut();
+                writeSavedEventName();
+            }
+            prependSeparator();
+            append("{\"@");
+            typeTranslator.accept(type, bytes);
+            append("\":{}}");
+            elementSeparator();
+            return wireOut();
+        }
+
+        @NotNull
+        @Override
+        public TextWire wireOut() {
+            return JSONWire.this;
+        }
+
         @Override
         protected void trimWhiteSpace() {
             if (bytes.endsWith('\n') || bytes.endsWith(' '))
@@ -785,15 +811,44 @@ public class JSONWire extends TextWire {
         }
 
         @Override
+        @Nullable
+        public Type lenientTypeLiteral() throws IORuntimeException, BufferUnderflowException {
+            consumeQuote();
+            final StringBuilder stringBuilder = acquireStringBuilder();
+            parseUntil(stringBuilder, QUOTES);
+            try {
+                return classLookup().forName(stringBuilder);
+            } catch (ClassNotFoundRuntimeException e) {
+                return UnresolvedType.of(stringBuilder.toString());
+            }
+        }
+
+        @Override
         public Type typeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
             consumePadding();
+            consumeQuote();
+            int code = readCode();
+            if (!peekStringIgnoreCase("\"@"))
+                throw new UnsupportedOperationException(stringForCode(code));
+            bytes.readSkip(2);
             final StringBuilder stringBuilder = acquireStringBuilder();
-            text(stringBuilder);
+            parseUntil(stringBuilder, END_OF_TYPE);
+            consume(':');
             try {
                 return classLookup().forName(stringBuilder);
             } catch (ClassNotFoundRuntimeException e) {
                 return unresolvedHandler.apply(stringBuilder, e.getCause());
             }
+        }
+
+        private void consumeQuote() {
+            consume('"');
+        }
+
+        private void consume(char ch) {
+            int codePoint = peekCode();
+            if (codePoint == ch)
+                readCode();
         }
 
         @Override
@@ -826,12 +881,22 @@ public class JSONWire extends TextWire {
                 final StringBuilder sb = acquireStringBuilder();
                 sb.setLength(0);
                 readTypeDefinition(sb);
+
+                E result = null;
                 final Class<?> overrideClass = classLookup().forName(sb.subSequence(1, sb.length()));
                 if (clazz != null && !clazz.isAssignableFrom(overrideClass))
-                    throw new ClassCastException("Unable to cast " + overrideClass.getName() + " to " + clazz.getName());
+                    if (clazz.isAssignableFrom(Class.class)) {
+                        result = (E) overrideClass;
+                        consumePadding();
+                        consume('{');
+                        consume('}');
+                    } else
+                        throw new ClassCastException("Unable to cast " + overrideClass.getName() + " to " + clazz.getName());
                 if (using != null && !overrideClass.isInstance(using))
                     throw new ClassCastException("Unable to reuse a " + using.getClass().getName() + " as a " + overrideClass.getName());
-                final E result = super.object(using, overrideClass, bestEffort);
+                result = result == null
+                        ? super.object(using, overrideClass, bestEffort)
+                        : result;
 
                 // remove the closing bracket from the type definition
                 consumePadding();

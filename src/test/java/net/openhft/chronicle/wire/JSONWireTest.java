@@ -35,6 +35,7 @@ import java.util.stream.IntStream;
 
 import static junit.framework.TestCase.assertNull;
 import static net.openhft.chronicle.wire.WireType.JSON;
+import static net.openhft.chronicle.wire.WireType.JSON_ONLY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -45,7 +46,7 @@ public class JSONWireTest extends WireTestCommon {
         BinaryWire binary = new BinaryWire(hexDump);
         JSONWire json2 = new JSONWire(Bytes.allocateElasticOnHeap());
         json.copyTo(binary);
-//        System.out.println(binary.bytes().toHexString());
+        //System.out.println(binary.bytes().toHexString());
         binary.copyTo(json2);
         assertEquals(
                 str.toString()
@@ -518,5 +519,22 @@ public class JSONWireTest extends WireTestCommon {
                 data.add(reader.text());
             }
         }
+    }
+
+    @Test
+    public void classReference() {
+        DtoWithClassReference dtoWithClassReference = new DtoWithClassReference();
+        dtoWithClassReference.implClass = this.getClass();
+        String json = JSON_ONLY.asString(dtoWithClassReference);
+        assertEquals("{\"@net.openhft.chronicle.wire.JSONWireTest$DtoWithClassReference\":{" +
+                        "\"implClass\":{\"@net.openhft.chronicle.wire.JSONWireTest\":{}}," +
+                        "\"bool\":false}}",
+                json);
+        assertEquals(dtoWithClassReference, JSON_ONLY.fromString(json));
+    }
+
+    private static class DtoWithClassReference extends SelfDescribingMarshallable {
+        private Class<?> implClass;
+        private boolean bool;
     }
 }

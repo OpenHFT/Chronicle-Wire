@@ -1387,7 +1387,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             }
         }
 
-        private void consumeValue() {
+        protected void consumeValue() {
             consumePadding();
             final StringBuilder stringBuilder = acquireStringBuilder();
             if (peekCode() == '!') {
@@ -1403,7 +1403,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             }
         }
 
-        private void consumeType() {
+        protected void consumeType() {
             parseUntil(acquireStringBuilder(), StopCharTesters.COMMA_SPACE_STOP);
         }
 

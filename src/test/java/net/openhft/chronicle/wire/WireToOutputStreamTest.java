@@ -135,8 +135,15 @@ public class WireToOutputStreamTest extends WireTestCommon {
         ao.text = "Hello";
         //ao.timestamp1 = new Timestamp(1234567890);
         // write the type is needed.
-        wire.getValueOut().typeLiteral(AnObject.class);
-        Wires.writeMarshallable(ao, wire);
+        if (wire instanceof JSONWire) {
+            JSONWire jsonWire = ((JSONWire) wire).useTypes(true);
+            jsonWire.getValueOut().typePrefix(AnObject.class);
+            Wires.writeMarshallable(ao, wire);
+            jsonWire.getValueOut().endTypePrefix();
+        } else {
+            wire.getValueOut().typeLiteral(AnObject.class);
+            Wires.writeMarshallable(ao, wire);
+        }
         return ao;
     }
 }
