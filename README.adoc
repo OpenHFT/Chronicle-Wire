@@ -738,8 +738,12 @@ However, more complicated objects with object instance fields may experience und
 
 In order to `reset` a marshallable object, the process is as follows:
 
-1. create a new instance of the object to be reset
-2. copy all fields from the new instance to the existing instance
+1. create a new instance of the object to be reset (this is done just once per object type, then cached)
+2. reset all fields, so that
+  a. when the field value implements `Resettable` interface, and the default value of the field is not `null`, and the current field value is of exactly the same class as the default value, `value.reset()` will be called. This behavior is introduced in Chronicle Wire `2.25`.
+  b. when the field type is `Collection` or `Map`, and the default value is empty collection, it will be cleared.
+  c. there is specific built-in copy-by-value handling for some types such as `Bytes`
+  d. all other fields will be copied by reference from the new instance to the existing instance
 3. the existing instance is now considered 'reset' back to default values
 
 The object created in step `1` is cached for performance reasons, meaning that both the new and existing instance of the marshallable object could have a reference to the same object.
@@ -749,7 +753,7 @@ Consider the following case:
 
 [source,java]
 ----
-private static final class BufferContainer {
+public class BufferContainer {
     private final ByteBuffer b = ByteBuffer.allocate(16);
 }
 
@@ -781,11 +785,13 @@ true
 
 showing that the field **b** of each container object is now referencing the same `ByteBuffer` instance.
 
+An exception to this is when the field value implements `Resettable` interface, when the default value of the field is not null, and the current field value is of exactly the same class as the default value. In this case, `value.reset()` will be called instead of overwriting it with default value by reference.
+
 In order to work around this, if necessary, the marshallable class can override `Marshallable.reset`:
 
 [source,java]
 ----
-private static final class BufferContainer implements Marshallable {
+public class BufferContainer implements Marshallable {
     private ByteBuffer b = ByteBuffer.allocate(16);
 
     @Override
@@ -794,6 +800,19 @@ private static final class BufferContainer implements Marshallable {
         // be kept to a minimum
         b = ByteBuffer.allocate(16);
     }
+}
+----
+
+If the field type implements `Resettable` (including `Marshallable` classes), and the field has non-`null` default value, the existing value will be reset without creating any extra garbage:
+
+[source,java]
+----
+public class ComplexDto implements SelfDescribingMarshallable {
+    private ContainedDto v = new ContainedDto(); // reset() will be propagated to this value
+}
+
+public class ContainedDto implements SelfDescribingMarshallable {
+    // more fields which would be reset by default reset() implementation
 }
 ----
 
