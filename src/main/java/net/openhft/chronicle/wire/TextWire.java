@@ -3238,7 +3238,7 @@ public class TextWire extends AbstractWire implements Wire {
                     }
                 }
 
-            } else if (GENERATE_TUPLES && tClass.getClassLoader() != null) {
+            } else if (GENERATE_TUPLES && tClass.getClassLoader() != null && tClass.isInterface()) {
                 return Wires.tupleFor(tClass, stringBuilder.toString());
             }
 
