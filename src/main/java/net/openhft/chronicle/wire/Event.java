@@ -7,29 +7,6 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 
 public interface Event<E extends Event<E>> extends Marshallable {
-
-    /**
-     * Returns a unique identifier attached to this event.
-     *
-     * @return a unique identifier attached to this event.
-     */
-    @NotNull
-    @Deprecated(/* to be removed in x.25 */)
-    default CharSequence eventId() {
-        return "";
-    }
-
-    /**
-     * Assigns a unique identifier to this event. The input identifier cannot be {@code null}.
-     *
-     * @param eventId unique identifier to assign to this event.
-     * @return this
-     */
-    @Deprecated(/* to be removed in x.25 */)
-    default E eventId(@NotNull final CharSequence eventId) {
-        return (E) this;
-    }
-
     /**
      * Returns the time at which the event which triggered this was generated (e.g. the time
      * an event generated externally to the system first entered the system).
@@ -69,28 +46,20 @@ public interface Event<E extends Event<E>> extends Marshallable {
     }
 
     /**
-     * Updates event with new event name, updating event time to now if required.
-     *
-     * @param eventName name of the event
+     * Updates event time to now if required.
      */
-    // TODO: x.25 remove eventName parameter
-    default E updateEvent(final String eventName) {
-        if (this.eventId().length() == 0)
-            this.eventId(eventName);
-
+    default E updateEvent() {
         if (this.eventTime() <= 0)
             this.eventTimeNow();
         return (E) this;
     }
 
     /**
-     * Rather than getting/setting from one event to the other directly, please use this method as
-     * this will make removing eventId easier
+     * Rather than getting/setting from one event to the other directly, please use this method
      * @param from from
      * @param to to
      */
     static void copyEventDetails(Event<?> from, Event<?> to) {
-        to.eventId(from.eventId());
         to.eventTime(from.eventTime());
     }
 }
