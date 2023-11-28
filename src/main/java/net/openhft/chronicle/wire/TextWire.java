@@ -3242,7 +3242,7 @@ public class TextWire extends AbstractWire implements Wire {
                 return Wires.tupleFor(tClass, stringBuilder.toString());
             }
 
-            if (THROW_CNFRE || tClass.isInterface())
+            if (THROW_CNFRE)
                 throw e;
             Jvm.warn().on(TextWire.class, "Cannot find a class for " + stringBuilder + " are you missing an alias?");
             return null;

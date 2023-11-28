@@ -136,9 +136,15 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
      * Tests if ClassNotFoundRuntimeException is correctly thrown for an interface field with no fallback,
      * when the class for the interface is missing.
      */
-    @Test(expected = ClassNotFoundRuntimeException.class)
+    @Test
     public void throwClassNotFoundRuntimeExceptionOnMissingClassForInterfaceFieldNoFallback() {
-        testInterfaceFieldTest0(false, false, null);
+        // expect the warnings that will occur due to class not being found
+        expectException("Cannot find a class for ThisListenerClassDoesntExist");
+        expectException("Unable to load ThisListenerClassDoesntExist");
+        expectException("Unable to parse field: engineListener");
+        testInterfaceFieldTest0(false, false, "!UsesInterfaceField {\n" +
+                "  name: henry\n" +
+                "}\n");
     }
 
 
