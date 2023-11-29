@@ -34,7 +34,6 @@ public class AccountsImpl
         implements AccountsIn {
     private long id;
     private transient final AccountsOut out;
-
     public AccountsImpl(AccountsOut out) {
         this.out = out;
     }
