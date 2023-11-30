@@ -18,7 +18,6 @@
 
 package net.openhft.chronicle.wire.channel.book;
 
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.utils.YamlAgitator;
 import net.openhft.chronicle.wire.utils.YamlTester;
@@ -29,7 +28,6 @@ import org.junit.runners.Parameterized;
 
 import java.util.List;
 
-import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(Parameterized.class)
@@ -58,9 +56,6 @@ public class TopOfBookHandlerTest extends WireTestCommon {
 
     @Test
     public void runTester() {
-        // uses trivially copyable objects
-        assumeFalse(Jvm.isAzulZing());
-
         assertEquals(tester.expected(), tester.actual());
     }
 }
