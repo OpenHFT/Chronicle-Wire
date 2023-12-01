@@ -159,8 +159,10 @@ public class WiresTest extends WireTestCommon {
                 "}\n", tv.toString());
     }
 
-    @Test(expected = ClassNotFoundRuntimeException.class)
+    @Test
     public void unknownType2WarnThrows() {
+        expectException("Cannot find a class for FourValues are you missing an alias?");
+
         wiresThrowCNFRE(false);
         Wires.GENERATE_TUPLES = false;
 
@@ -171,24 +173,33 @@ public class WiresTest extends WireTestCommon {
                 "  also: extra\n" +
                 "}\n";
         ThreeValues tv = Marshallable.fromString(ThreeValues.class, text);
-        assertEquals(text, tv.toString());
-        assertEquals("Hello", tv.string());
-        tv.string("Hello World");
-        assertEquals("Hello World", tv.string());
+        assertNull(tv);
+    }
 
-        assertEquals(123, tv.num());
-        tv.num(1234);
-        assertEquals(1234, tv.num());
 
-        assertEquals(1e6, tv.big(), 0.0);
-        tv.big(0.128);
-        assertEquals(0.128, tv.big(), 0.0);
+    @Test
+    public void unknownType3WarnThrows() {
+        expectException("Cannot find a class for FourValues are you missing an alias?");
+        expectException("Found this$0, in class net.openhft.chronicle.wire.WiresTest$ThreeValuesPOJO which will be ignored!");
+        wiresThrowCNFRE(false);
+        Wires.GENERATE_TUPLES = false;
 
-        assertEquals("!FourValues {\n" +
-                "  string: Hello World,\n" +
-                "  num: !int 1234,\n" +
-                "  big: 0.128,\n" +
+        String text = "!FourValues {\n" +
+                "  string: Hello,\n" +
+                "  num: 123,\n" +
+                "  big: 1E6,\n" +
                 "  also: extra\n" +
+                "}\n";
+        ThreeValuesPOJO tv = Marshallable.fromString(ThreeValuesPOJO.class, text);
+        assertEquals("Hello", tv.string);
+        assertEquals(123, tv.num);
+        assertEquals(1e6, tv.big, 0.0);
+
+        ClassAliasPool.CLASS_ALIASES.addAlias(ThreeValuesPOJO.class);
+        assertEquals("!ThreeValuesPOJO {\n" +
+                "  string: Hello,\n" +
+                "  num: 123,\n" +
+                "  big: 1E6\n" +
                 "}\n", tv.toString());
     }
 
@@ -302,6 +313,12 @@ public class WiresTest extends WireTestCommon {
         ThreeValues big(double d);
 
         double big();
+    }
+
+    class ThreeValuesPOJO extends SelfDescribingMarshallable{
+        String string;
+        int num;
+        double big;
     }
 
     private static final class BytesContainer {

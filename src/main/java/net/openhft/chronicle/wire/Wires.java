@@ -592,6 +592,7 @@ public enum Wires {
 
     @Nullable
     public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class clazz) {
+        final Class class0 = clazz;
         if (using instanceof AbstractMarshallableCfg)
             ((AbstractMarshallableCfg) using).reset();
 
@@ -643,7 +644,9 @@ public enum Wires {
 
         switch (brackets) {
             case MAP:
-                return objectMap(in, using, clazz, strategy);
+                E objectMap = objectMap(in, using, clazz, strategy);
+                // was the object created just to consume data
+                return class0 == null || class0.isInstance(objectMap) ? objectMap : null;
 
             case SEQ:
                 return objectSequence(in, using, clazz, strategy);
