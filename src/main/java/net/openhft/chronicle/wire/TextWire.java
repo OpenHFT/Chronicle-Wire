@@ -36,6 +36,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
@@ -3205,7 +3206,7 @@ public class TextWire extends AbstractWire implements Wire {
             }
             if (Wires.dtoInterface(tClass) && GENERATE_TUPLES && ObjectUtils.implementationToUse(tClass) == tClass)
                 return Wires.tupleFor(tClass, null);
-            return null;
+            return tClass == null || Modifier.isAbstract(tClass.getModifiers()) ? null : tClass;
         }
 
         @Nullable

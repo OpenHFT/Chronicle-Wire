@@ -269,8 +269,9 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         assertEquals(text, wire2.toString());
     }
 
-    @Test(expected = ClassNotFoundRuntimeException.class)
-    public void testUnknownClassCNFREInterface() {
+    @Test
+    public void testUnknownClassNoCNFREInterface() {
+        expectException("Cannot find a class for UnknownClass are you missing an alias?");
         WiresTest.wiresThrowCNFRE(false);
         Wires.GENERATE_TUPLES = false;
 
@@ -297,7 +298,11 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         assertTrue(reader.readOne());
         assertTrue(reader.readOne());
         assertFalse(reader.readOne());
-        assertEquals(text, wire2.toString());
+        assertEquals("" +
+                "top: !!null \"\"\n" +
+                "...\n" +
+                "top: !!null \"\"\n" +
+                "...\n", wire2.toString());
     }
 
     @Test
