@@ -24,7 +24,6 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.ScopeConfined;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.VanillaReferenceOwner;
-import net.openhft.chronicle.core.scoped.ScopedResource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;

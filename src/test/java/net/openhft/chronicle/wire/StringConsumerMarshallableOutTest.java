@@ -18,8 +18,6 @@
 
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.wire.MarshallableOut;
-import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.internal.StringConsumerMarshallableOut;
 import org.junit.Test;
 
