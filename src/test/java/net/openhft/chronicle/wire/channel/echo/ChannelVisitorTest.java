@@ -52,15 +52,12 @@ public class ChannelVisitorTest extends net.openhft.chronicle.wire.WireTestCommo
         }
     }
 
-
-
     static class ChannelSessionName extends ChannelVisitor<String> {
         @Override
         public String visit(ChronicleChannel channel) {
             return channel.headerIn().sessionName();
         }
     }
-
 
     static class ChannelHostId extends ChannelVisitor<Integer> {
         @Override

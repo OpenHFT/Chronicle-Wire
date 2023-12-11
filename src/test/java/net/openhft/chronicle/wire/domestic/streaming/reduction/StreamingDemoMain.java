@@ -19,12 +19,12 @@
 package net.openhft.chronicle.wire.domestic.streaming.reduction;
 
 import net.openhft.chronicle.threads.PauserMode;
-import net.openhft.chronicle.wire.domestic.streaming.*;
-import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
 import net.openhft.chronicle.wire.domestic.AutoTailers;
+import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
 import net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors;
 import net.openhft.chronicle.wire.domestic.reduction.Reduction;
 import net.openhft.chronicle.wire.domestic.reduction.Reductions;
+import net.openhft.chronicle.wire.domestic.streaming.CreateUtil;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentMap;
@@ -37,9 +37,9 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingByConcurrent;
 import static java.util.stream.Collectors.summarizingDouble;
-import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.replacingMerger;
 import static net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor.builder;
 import static net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor.extractingIndex;
+import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.replacingMerger;
 
 public class StreamingDemoMain {
 
@@ -85,7 +85,6 @@ public class StreamingDemoMain {
         // This creates a live view of the reduction.
         Map<String, MarketData> liveQueueBackedMap = latest.reduction();
 
-
         // Maintains a protected Map of the latest MarketData message per symbol where the
         // messages were previously written by a MethodWriter of type MarketDataProvider
         Reduction<Map<String, MarketData>> latestProtected = Reduction.of(
@@ -101,7 +100,6 @@ public class StreamingDemoMain {
                         )
                 );
 
-
         // Maintains statistics per symbol on MarketData::last using vanilla Java
         // classes (creates objects).
         Reduction<ConcurrentMap<String, DoubleSummaryStatistics>> stats = Reduction.of(
@@ -115,7 +113,6 @@ public class StreamingDemoMain {
                 );
 
         double averageApplePrice = stats.reduction().get("AAPL").getAverage();
-
 
         // This is a demo of a queue-backed map that is continuously listening to a queue
         // and any change is reflected in the Reduction.
@@ -151,11 +148,9 @@ public class StreamingDemoMain {
         }
         net.openhft.chronicle.threads.Threads.shutdown(executorService);
 
-
         // How to use thread confined objects?
 
     }
-
 
     public interface MarketDataProvider {
 
@@ -168,7 +163,6 @@ public class StreamingDemoMain {
         enum Action {
             OPEN, CLOSE;
         }
-
 
     }
 

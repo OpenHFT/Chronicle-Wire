@@ -72,7 +72,6 @@ public class Issue341Test extends WireTestCommon {
 
     }
 
-
     @Test
     public void testComparableSerializable() {
         // for backward compatibility, this doesn't support types

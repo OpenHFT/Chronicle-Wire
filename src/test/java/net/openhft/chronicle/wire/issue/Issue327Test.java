@@ -122,5 +122,4 @@ public class Issue327Test extends WireTestCommon {
             assertEquals(expected, actual);
     }
 
-
 }

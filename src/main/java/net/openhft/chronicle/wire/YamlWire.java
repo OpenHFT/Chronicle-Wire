@@ -227,7 +227,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         return s;
     }
 
-
     private static boolean leaveUnparsed(char bq, @Nullable StringBuilder s) {
         return s == null
                 || bq != 0

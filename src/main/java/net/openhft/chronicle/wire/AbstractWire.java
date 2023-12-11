@@ -334,7 +334,6 @@ public abstract class AbstractWire implements Wire {
             pos = bytes.writePosition();
         }
 
-
         // clear up to the next 8 bytes to explicitly indicate "no more data" (8 covers int + max padding)
         // if there aren't at least 8 bytes remaining, then clear what we can (any new mapping will be 0 anyway)
         // also clears any dirty bits left by a failed writer/appender

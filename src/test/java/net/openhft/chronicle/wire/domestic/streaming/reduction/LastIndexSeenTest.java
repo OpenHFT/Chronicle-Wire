@@ -25,9 +25,9 @@ import org.junit.Test;
 
 import java.util.function.LongSupplier;
 
-import static net.openhft.chronicle.wire.domestic.streaming.CreateUtil.createThenValueOuts;
-import static net.openhft.chronicle.wire.domestic.reduction.Reductions.reducingLong;
 import static net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor.extractingIndex;
+import static net.openhft.chronicle.wire.domestic.reduction.Reductions.reducingLong;
+import static net.openhft.chronicle.wire.domestic.streaming.CreateUtil.createThenValueOuts;
 import static org.junit.Assert.assertEquals;
 
 public class LastIndexSeenTest extends WireTestCommon {

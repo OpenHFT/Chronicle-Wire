@@ -99,7 +99,6 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
         assertEquals(expected, simple.toString());
     }
 
-
     static class UsesInterfaceField extends AbstractMarshallableCfg {
         private TwoFields bothFields;
         private String name;
@@ -140,7 +139,6 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
     public void throwClassNotFoundRuntimeExceptionOnMissingClassForInterfaceFieldNoFallback() {
         testInterfaceFieldTest0(false, false, null);
     }
-
 
     @Test
     public void useTupleOnMissingClassForInterfaceField2() {

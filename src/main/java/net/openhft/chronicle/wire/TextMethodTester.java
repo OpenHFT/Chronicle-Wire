@@ -48,7 +48,6 @@ public class TextMethodTester<T> implements YamlTester {
 
     public static final boolean SINGLE_THREADED_CHECK_DISABLED = !Jvm.getBoolean("yaml.tester.single.threaded.check.enabled", false);
 
-
     private static final boolean DUMP_TESTS = Jvm.getBoolean("dump.tests");
     public static final Consumer<InvocationTargetRuntimeException> DEFAULT_INVOCATION_TARGET_RUNTIME_EXCEPTION_CONSUMER =
             e -> Jvm.warn().on(TextMethodTester.class, "Exception calling target method. Continuing", e);

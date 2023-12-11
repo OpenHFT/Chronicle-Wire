@@ -21,9 +21,9 @@ package net.openhft.chronicle.wire.domestic.streaming.reduction;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
-import net.openhft.chronicle.wire.domestic.streaming.CreateUtil;
 import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
 import net.openhft.chronicle.wire.domestic.reduction.Reduction;
+import net.openhft.chronicle.wire.domestic.streaming.CreateUtil;
 import org.junit.Test;
 
 import java.util.*;
@@ -80,7 +80,6 @@ public class MinMaxLastMarketDataPerSymbolTest extends WireTestCommon {
                 .collecting(
                         collectingAndThen(toConcurrentMap(MarketData::symbol, Function.identity(), replacingMerger()), Collections::unmodifiableMap)
                 );
-
 
         test(listener);
 

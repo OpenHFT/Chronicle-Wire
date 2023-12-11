@@ -30,7 +30,6 @@ Reduction<Map<String, MarketData>> latest = Reduction.of(
                 replacingMerger())                <5>
         );
 
-
 ChronicleQueue q = SingleChronicleQueueBuilder.builder()
                 .path("market-data-queue")
                 .appenderListener(latest)     <6>

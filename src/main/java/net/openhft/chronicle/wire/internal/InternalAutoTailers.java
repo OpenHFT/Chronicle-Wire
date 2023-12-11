@@ -24,8 +24,8 @@ import net.openhft.chronicle.core.threads.InvalidEventHandlerException;
 import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.wire.ExcerptListener;
 import net.openhft.chronicle.wire.MarshallableIn;
-import net.openhft.chronicle.wire.internal.reduction.ReductionUtil;
 import net.openhft.chronicle.wire.domestic.AutoTailers;
+import net.openhft.chronicle.wire.internal.reduction.ReductionUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;

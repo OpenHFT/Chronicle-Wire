@@ -24,8 +24,8 @@ import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
-import net.openhft.chronicle.wire.domestic.stream.Streams;
 import net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor;
+import net.openhft.chronicle.wire.domestic.stream.Streams;
 import net.openhft.chronicle.wire.domestic.streaming.reduction.MarketData;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Disabled;
@@ -41,8 +41,8 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
-import static net.openhft.chronicle.wire.domestic.streaming.CreateUtil.*;
 import static net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor.builder;
+import static net.openhft.chronicle.wire.domestic.streaming.CreateUtil.*;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -131,7 +131,6 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
         assertEquals(14, last);
     }
 
-
     @Test
     void streamRaw() {
         MarshallableIn in = createThenValueOuts(
@@ -155,7 +154,6 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
                 vo -> vo.object(new MarketData("APPL", 200, 220, 180)),
                 vo -> vo.object(new MarketData("MSFT", 101, 110, 90))
         );
-
 
         Map<String, List<MarketData>> groups = Streams.of(in, builder(MarketData.class).build())
                 .collect(groupingBy(MarketData::symbol));
@@ -186,7 +184,6 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
 
         assertEquals(401.0, adder.doubleValue(), 1e-10);
     }
-
 
     @Test
     void streamType2() {
@@ -252,14 +249,12 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
         assertLongSummaryStatisticsEqual(expectedStat, stat2);
     }
 
-
     @Test
     @Disabled("Parallel is not supported yet")
     void longStreamParallel() {
         final int no = 100_000;
 
         Wire in = create();
-
 
         for (int i = 0; i < no; i++) {
             try (DocumentContext dc = in.writingDocument()) {
@@ -445,7 +440,6 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
         assertEquals(expected, list);
     }
 
-
     public interface Messages {
 
         void shares(Shares shares);
@@ -543,6 +537,5 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
         ((Wire) in).bytes().readPosition(0);
         return in;
     }
-
 
 }

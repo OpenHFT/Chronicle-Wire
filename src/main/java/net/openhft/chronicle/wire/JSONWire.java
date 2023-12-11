@@ -717,7 +717,6 @@ public class JSONWire extends TextWire {
             return (JSONWire) super.marshallable(map, (Class) String.class, vClass, leaf);
         }
 
-
         public @NotNull JSONWire time(final LocalTime localTime) {
             // Todo: fix quoted text
             return (JSONWire) super.time(localTime);
@@ -772,7 +771,6 @@ public class JSONWire extends TextWire {
         public <E> E object(@Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
             return useTypes ? parseType(using, clazz, bestEffort) : super.object(using, clazz, bestEffort);
         }
-
 
         @Override
         public Class typePrefix() {
