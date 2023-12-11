@@ -34,7 +34,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CountAccumulationTest extends WireTestCommon {
 
-
     @Test
     public void countCustom() {
         Reduction<AtomicLong> listener = Reduction.of((wire, index) -> 1L)

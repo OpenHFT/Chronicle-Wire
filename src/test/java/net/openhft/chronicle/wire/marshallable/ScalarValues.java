@@ -99,7 +99,6 @@ public class ScalarValues extends SelfDescribingMarshallable {
     }
 }
 
-
 enum TestDynamicEnum implements DynamicEnum {
     ONE,
     TWO,

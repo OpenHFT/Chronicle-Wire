@@ -66,7 +66,6 @@ public class ListLookup {
 
     }
 
-
     private static final class Data extends SelfDescribingMarshallable {
 
         // Ids can be reused/internalized
@@ -113,7 +112,6 @@ public class ListLookup {
                     '}';
         }
     }
-
 
     public static <T, U> int binarySearch(final List<T> list,
                                           final Function<? super T, ? extends U> extractor,

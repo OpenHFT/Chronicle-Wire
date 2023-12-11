@@ -32,7 +32,6 @@ import java.util.*;
 
 import static net.openhft.chronicle.wire.JsonUtil.assertBalancedBrackets;
 
-
 /**
  * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/324
  */
@@ -200,7 +199,5 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         System.out.println("actual = " + actual);
         assertBalancedBrackets(actual);
     }
-
-
 
 }

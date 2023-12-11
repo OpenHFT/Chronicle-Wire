@@ -71,7 +71,6 @@ public interface ChronicleBitSet extends Marshallable, Closeable {
             clear(fromIndex, toIndex);
     }
 
-
     /**
      * Returns the value of the bit with the specified index. The value is {@code true} if the bit with the index {@code bitIndex} is currently set in
      * this {@code ChronicleBitSet}; otherwise, the result is {@code false}.
@@ -126,7 +125,6 @@ public interface ChronicleBitSet extends Marshallable, Closeable {
                 return false;
         return true;
     }
-
 
     /**
      * Returns the "logical size" of this {@code ChronicleBitSet}: the index of the highest set bit in the {@code ChronicleBitSet} plus one.

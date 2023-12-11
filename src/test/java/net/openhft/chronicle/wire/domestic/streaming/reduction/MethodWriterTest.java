@@ -38,7 +38,6 @@ import static org.junit.Assert.assertEquals;
 
 public class MethodWriterTest extends WireTestCommon {
 
-
     private static final List<MarketData> MARKET_DATA_SET = Arrays.asList(
             new MarketData("MSFT", 10, 11, 9),
             new MarketData("MSFT", 100, 110, 90),
@@ -61,7 +60,6 @@ public class MethodWriterTest extends WireTestCommon {
         MarketData actual = listener.reduction().get();
         assertEquals(expected, actual);
     }
-
 
     @Test
     public void map() {
@@ -95,7 +93,6 @@ public class MethodWriterTest extends WireTestCommon {
         listener.accept(wire);
     }
 
-
     static MarketData createMarketData() {
         return new MarketData("MSFT", 100, 110, 90);
     }
@@ -106,6 +103,5 @@ public class MethodWriterTest extends WireTestCommon {
 
         void greeting(String greeting);
     }
-
 
 }

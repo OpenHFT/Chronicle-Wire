@@ -50,7 +50,6 @@ public class MessageRoutingExample {
         ProductHandler to(String destination);
     }
 
-
     /**
      * Implement this to read the process of the product events.
      */
@@ -75,11 +74,9 @@ public class MessageRoutingExample {
         }
     }
 
-
     // the serialized data gets written to 'wire'
     //  private final Wire wire = new BinaryWire(new HexDumpBytes());
     private final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
-
 
     private void demo() {
 

@@ -81,7 +81,6 @@ public class MinMaxLastMarketDataPerSymbolTest extends WireTestCommon {
                         collectingAndThen(toConcurrentMap(MarketData::symbol, Function.identity(), replacingMerger()), Collections::unmodifiableMap)
                 );
 
-
         test(listener);
 
         final Map<String, MarketData> expected = MARKET_DATA_SET.stream()

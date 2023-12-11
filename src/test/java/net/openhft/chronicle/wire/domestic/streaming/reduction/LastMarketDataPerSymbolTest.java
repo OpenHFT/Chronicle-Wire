@@ -36,7 +36,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LastMarketDataPerSymbolTest extends WireTestCommon {
 
-
     private static final List<MarketData> MARKET_DATA_SET = Arrays.asList(
             new MarketData("MSFT", 100, 110, 90),
             new MarketData("AAPL", 200, 220, 180),

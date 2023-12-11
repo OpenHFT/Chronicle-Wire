@@ -270,7 +270,6 @@ public enum Wires {
         }
     }
 
-
     private static Wire newJsonWire(Bytes bytes) {
         return new JSONWire(bytes).useTypes(true).trimFirstCurly(false).useTextDocuments();
     }
@@ -298,7 +297,6 @@ public enum Wires {
         }
     }
 
-
     /**
      * @deprecated Use {@link #asJson(WireIn, Bytes)} instead
      */
@@ -315,7 +313,6 @@ public enum Wires {
     private static Wire newTextWire(Bytes bytes) {
         return new TextWire(bytes).addTimeStamps(true);
     }
-
 
     /**
      * @deprecated Use {@link #acquireStringBuilderScoped()} instead

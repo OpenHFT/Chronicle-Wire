@@ -112,7 +112,6 @@ public class CollectorTest extends WireTestCommon {
         assertEquals("java.util.Collections$UnmodifiableMap", listener.reduction().getClass().getName());
     }
 
-
     @Test
     public void composite() {
 
@@ -128,7 +127,6 @@ public class CollectorTest extends WireTestCommon {
 
         assertEquals(expected, listener.reduction());
     }
-
 
     private void test(Reduction<?> listener) {
         Wire wire = CreateUtil.create();
@@ -154,6 +152,5 @@ public class CollectorTest extends WireTestCommon {
 
         void greeting(String greeting);
     }
-
 
 }

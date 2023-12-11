@@ -101,5 +101,4 @@ class AbstractUntypedFieldTest extends WireTestCommon {
         A a;
     }
 
-
 }

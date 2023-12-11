@@ -41,7 +41,6 @@ public class EchoHandlerTest extends WireTestCommon {
         super.threadDump();
     }
 
-
     private static void doTest(ChronicleContext context, ChannelHandler handler) {
         ChronicleChannel channel = context.newChannelSupplier(handler).connectionTimeoutSecs(1).get();
         Says says = channel.methodWriter(Says.class);

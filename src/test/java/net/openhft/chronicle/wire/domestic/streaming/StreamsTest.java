@@ -34,7 +34,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
 
-
     @Test
     void streamTextMessage() {
         MarshallableIn tailer = createThenValueOuts(a -> a.writeString("Hello"));
