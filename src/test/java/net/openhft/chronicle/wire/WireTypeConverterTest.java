@@ -7,7 +7,6 @@ import static junit.framework.TestCase.assertEquals;
 
 public class WireTypeConverterTest extends net.openhft.chronicle.wire.WireTestCommon {
 
-
     private final String json = "{\"@net.openhft.chronicle.wire.MyClass\":{\"msg\":\"msg:\\\"hello\\\"\"}}";
 
     private final String yaml = "!net.openhft.chronicle.wire.MyClass {\n" +
@@ -30,7 +29,6 @@ public class WireTypeConverterTest extends net.openhft.chronicle.wire.WireTestCo
         Assert.assertEquals(yaml, new WireTypeConverter().jsonToYaml(json).toString());
         Assert.assertEquals(json, new WireTypeConverter().yamlToJson(yaml).toString());
     }
-
 
     @Test(expected = net.openhft.chronicle.core.util.ClassNotFoundRuntimeException.class)
     public void testYamlToJsonUnknownClass() throws Exception {

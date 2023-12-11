@@ -25,7 +25,6 @@ public class MarshallableCfgResetTest extends net.openhft.chronicle.wire.WireTes
         }
     }
 
-
     /**
      * tests that objects that extends AbstractMarshallableCfg are reset when calling {@link ValueIn#object(Object, Class)}
      */

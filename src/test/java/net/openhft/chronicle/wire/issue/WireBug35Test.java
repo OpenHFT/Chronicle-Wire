@@ -23,7 +23,6 @@ import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.Wires;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 

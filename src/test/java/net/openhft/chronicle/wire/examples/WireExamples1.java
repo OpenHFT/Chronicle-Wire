@@ -27,7 +27,6 @@ import net.openhft.chronicle.wire.YamlWire;
 
 public class WireExamples1 {
 
-
     public static void main(String[] args) {
         example1();
         example2();
@@ -61,6 +60,5 @@ public class WireExamples1 {
             this.number = number;
         }
     }
-
 
 }

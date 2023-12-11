@@ -4,7 +4,7 @@ import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.converter.Base85;
 import org.junit.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static run.chronicle.account.dto.AccountStatusTest.getAccountStatus;
 
 public class AccountStatusFailedTest {

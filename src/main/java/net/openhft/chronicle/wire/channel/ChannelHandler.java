@@ -18,7 +18,6 @@
 
 package net.openhft.chronicle.wire.channel;
 
-
 import net.openhft.chronicle.core.io.ClosedIORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 

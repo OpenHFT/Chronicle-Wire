@@ -865,7 +865,6 @@ public class ChronicleBitSetTest extends WireTestCommon {
         assertEquals(0, failCount);
     }*/
 
-
     @Test
     public void testIntersects() {
         int failCount = 0;

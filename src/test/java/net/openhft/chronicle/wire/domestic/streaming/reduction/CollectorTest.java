@@ -21,9 +21,9 @@ package net.openhft.chronicle.wire.domestic.streaming.reduction;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
-import net.openhft.chronicle.wire.domestic.streaming.CreateUtil;
 import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
 import net.openhft.chronicle.wire.domestic.reduction.Reduction;
+import net.openhft.chronicle.wire.domestic.streaming.CreateUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -112,7 +112,6 @@ public class CollectorTest extends WireTestCommon {
         assertEquals("java.util.Collections$UnmodifiableMap", listener.reduction().getClass().getName());
     }
 
-
     @Test
     public void composite() {
 
@@ -128,7 +127,6 @@ public class CollectorTest extends WireTestCommon {
 
         assertEquals(expected, listener.reduction());
     }
-
 
     private void test(Reduction<?> listener) {
         Wire wire = CreateUtil.create();
@@ -154,6 +152,5 @@ public class CollectorTest extends WireTestCommon {
 
         void greeting(String greeting);
     }
-
 
 }

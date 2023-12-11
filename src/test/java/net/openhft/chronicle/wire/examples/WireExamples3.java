@@ -24,7 +24,6 @@ public class WireExamples3 {
         void print(String message);
     }
 
-
     public static void main(String[] args) {
         final Printer consolePrinter = System.out::println;
         consolePrinter.print("hello world");

@@ -18,6 +18,5 @@
 
 package run.chronicle.account.dto;
 
-
 public class CheckPoint extends AbstractEvent<CheckPoint> {
 }

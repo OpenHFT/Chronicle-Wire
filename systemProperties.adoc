@@ -1,10 +1,7 @@
 == System Properties
 Below, a number of relevant System Properties are listed.
 
-
-
 NOTE: All boolean properties below are read using link:https://javadoc.io/static/net.openhft/chronicle-core/2.23ea13/net/openhft/chronicle/core/Jvm.html#getBoolean-java.lang.String-[net.openhft.chronicle.core.Jvm.getBoolean(java.lang.String)], and so are enabled if either `-Dflag` or `-Dflag=true` or `-Dflag=yes`
-
 
 .System properties
 [cols=4*, options="header"]

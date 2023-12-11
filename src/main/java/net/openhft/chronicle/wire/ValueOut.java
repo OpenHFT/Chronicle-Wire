@@ -582,7 +582,6 @@ public interface ValueOut {
         return sequence(writer);
     }
 
-
     /**
      * Write a {@link WriteMarshallable} value.
      */

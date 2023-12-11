@@ -77,7 +77,6 @@ public class HTTPMarshallableOut implements MarshallableOut {
         }
     };
 
-
     public HTTPMarshallableOut(MarshallableOutBuilder builder, WireType wireType) {
         this.url = builder.url();
 
