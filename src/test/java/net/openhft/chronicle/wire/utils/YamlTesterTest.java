@@ -162,4 +162,10 @@ public class YamlTesterTest extends WireTestCommon {
                 .run();
         assertEquals(yt.expected(), yt.actual());
     }
+
+    @Test
+    public void emptyDocuments() {
+        final YamlTester yt = YamlTester.runTest(newTestImplFunction(), TestOut.class, "yaml-tester/empty-docs");
+        assertEquals(yt.expected(), yt.actual());
+    }
 }
