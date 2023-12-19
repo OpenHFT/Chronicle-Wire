@@ -62,7 +62,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         String serviceName = SERVICE_NAME.get();
 
         // the services name is set by the chronicle services framework
-        if (serviceName == null) throw new IllegalStateException("service name not set");
+
 
         // this was handled to support when multiple services are using the same thread.
         this.tempMessageHistory = TEMP_MESSAGE_HISTORY_BY_SERVICE_NAME.computeIfAbsent(serviceName, x -> new MessageHistoryThreadLocal());
