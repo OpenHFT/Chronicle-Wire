@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -39,9 +40,12 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  */
 public abstract class AbstractGeneratedMethodReader implements MethodReader {
     private static final Consumer<MessageHistory> NO_OP_MH_CONSUMER = Mocker.ignored(Consumer.class);
-    private static final MessageHistoryThreadLocal TEMP_MESSAGE_HISTORY = new MessageHistoryThreadLocal();
+
+    public final static ThreadLocal<String> SERVICE_NAME = new ThreadLocal<>();
+    private final static ConcurrentHashMap<String, MessageHistoryThreadLocal> TEMP_MESSAGE_HISTORY_BY_SERVICE_NAME = new ConcurrentHashMap<>();
     protected final WireParselet debugLoggingParselet;
     private final MarshallableIn in;
+    private final MessageHistoryThreadLocal tempMessageHistory;
     protected MessageHistory messageHistory;
     protected boolean dataEventProcessed;
     private boolean closeIn = false;
@@ -51,10 +55,18 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     private Predicate predicate;
     private boolean scanning;
 
-    protected AbstractGeneratedMethodReader(MarshallableIn in,
-                                            WireParselet debugLoggingParselet) {
+    protected AbstractGeneratedMethodReader(MarshallableIn in, WireParselet debugLoggingParselet) {
         this.in = in;
         this.debugLoggingParselet = debugLoggingParselet;
+
+        // gets the name of the service so we can offer history message caching
+        String serviceName = SERVICE_NAME.get();
+
+        // the services name is set by the chronicle services framework
+        if (serviceName == null) throw new IllegalStateException("service name not set");
+
+        // this was handled to support when multiple services are using the same thread.
+        this.tempMessageHistory = TEMP_MESSAGE_HISTORY_BY_SERVICE_NAME.computeIfAbsent(serviceName, x -> new MessageHistoryThreadLocal());
     }
 
     public AbstractGeneratedMethodReader predicate(Predicate predicate) {
@@ -130,8 +142,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      */
     public MethodReaderStatus readOne0(DocumentContext context) {
         WireIn wireIn = context.wire();
-        if (wireIn == null)
-            return MethodReaderStatus.EMPTY;
+        if (wireIn == null) return MethodReaderStatus.EMPTY;
 
         if (historyConsumer != NO_OP_MH_CONSUMER) {
             writeUnwrittenMessageHistory(context);
@@ -150,13 +161,10 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
             dataEventProcessed = false;
             MethodReaderStatus decoded = MethodReaderStatus.EMPTY; // no message
             while (bytes.readRemaining() > 0) {
-                if (wireIn.isEndEvent())
-                    break;
+                if (wireIn.isEndEvent()) break;
                 long start = bytes.readPosition();
 
-                MethodReaderStatus mrs = context.isData()
-                        ? readOneGenerated(wireIn)
-                        : readOneMetaGenerated(wireIn);
+                MethodReaderStatus mrs = context.isData() ? readOneGenerated(wireIn) : readOneMetaGenerated(wireIn);
                 switch (mrs) {
                     case HISTORY:
                         // unchanged
@@ -165,15 +173,13 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
                         decoded = MethodReaderStatus.KNOWN;
                         break;
                     case UNKNOWN:
-                        if (decoded == MethodReaderStatus.EMPTY)
-                            decoded = MethodReaderStatus.UNKNOWN;
+                        if (decoded == MethodReaderStatus.EMPTY) decoded = MethodReaderStatus.UNKNOWN;
                         break;
                     default:
                         throw new AssertionError(mrs);
                 }
 
-                if (restIgnored())
-                    return decoded;
+                if (restIgnored()) return decoded;
 
                 wireIn.consumePadding();
                 if (bytes.readPosition() == start) {
@@ -187,8 +193,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         } finally {
             // Don't save message history if we are reading non-data event (e.g. another "message history only" message)
             // Infinite loop between services is possible otherwise
-            if (historyConsumer != NO_OP_MH_CONSUMER && dataEventProcessed)
-                swapMessageHistoryIfDirty();
+            if (historyConsumer != NO_OP_MH_CONSUMER && dataEventProcessed) swapMessageHistoryIfDirty();
             messageHistory.reset();
         }
     }
@@ -205,18 +210,19 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      * uses a double buffer technique to swap the current message history with a temp message history ( this is, if it has not already been stored ) .
      */
     private void swapMessageHistoryIfDirty() {
+
         if (messageHistory.isDirty()) {
             // This input event didn't generate an output event.
             // Saving message history - in case next input event will be processed by another method reader,
             // that method reader will cooperatively write saved history.
-            messageHistory = TEMP_MESSAGE_HISTORY.getAndSet(messageHistory);
+            messageHistory = tempMessageHistory.getAndSet(messageHistory);
             MessageHistory.set(messageHistory);
-            assert (messageHistory != TEMP_MESSAGE_HISTORY.get());
+            assert (messageHistory != tempMessageHistory.get());
         } else {
             // This input event generated an output event.
             // In case previous input event was processed by this method reader, TEMP_MESSAGE_HISTORY may contain
             // stale info on event's message history, which is superseded by the message history written now.
-            TEMP_MESSAGE_HISTORY.get().reset();
+            tempMessageHistory.get().reset();
         }
     }
 
@@ -227,15 +233,13 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      * @param context the DocumentContext of the output queue that we are going to write the message history to
      */
     private void writeUnwrittenMessageHistory(DocumentContext context) {
-        final MessageHistory mh = TEMP_MESSAGE_HISTORY.get();
-        if (mh.sources() != 0 && context.sourceId() != mh.lastSourceId() && mh.isDirty())
-            historyConsumer.accept(mh);
+        final MessageHistory mh = tempMessageHistory.get();
+        if (mh.sources() != 0 && context.sourceId() != mh.lastSourceId() && mh.isDirty()) historyConsumer.accept(mh);
     }
 
     @Override
     public boolean readOne() {
-        if (!predicate.test(this))
-            return false;
+        if (!predicate.test(this)) return false;
 
         do {
             throwExceptionIfClosed();
@@ -248,13 +252,11 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
                 MethodReaderStatus mrs = readOne0(context);
                 switch (mrs) {
                     case KNOWN:
-                        if (scanning && context.isMetaData())
-                            break; // continue
+                        if (scanning && context.isMetaData()) break; // continue
                         return true;
                     case EMPTY:
                     case UNKNOWN:
-                        if (scanning)
-                            break; // continue looking
+                        if (scanning) break; // continue looking
                         return true;
                     default:
                         throw new AssertionError(mrs);
@@ -266,8 +268,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     }
 
     public void throwExceptionIfClosed() {
-        if (isClosed())
-            throw new IllegalStateException("Closed");
+        if (isClosed()) throw new IllegalStateException("Closed");
     }
 
     @Override
@@ -277,8 +278,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
 
     @Override
     public void close() {
-        if (closeIn)
-            closeQuietly(in);
+        if (closeIn) closeQuietly(in);
         closed = true;
     }
 
@@ -326,6 +326,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         return o;
     }
 
+
     protected Object actualInvoke(Method method, Object o, Object[] objects) {
         try {
             return method.invoke(o, objects);
@@ -335,8 +336,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     }
 
     private MessageHistory messageHistory() {
-        if (messageHistory == null)
-            messageHistory = MessageHistory.get();
+        if (messageHistory == null) messageHistory = MessageHistory.get();
 
         return messageHistory;
     }
