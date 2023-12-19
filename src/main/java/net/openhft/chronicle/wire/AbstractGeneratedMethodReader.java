@@ -328,7 +328,6 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         return o;
     }
 
-
     protected Object actualInvoke(Method method, Object o, Object[] objects) {
         try {
             return method.invoke(o, objects);

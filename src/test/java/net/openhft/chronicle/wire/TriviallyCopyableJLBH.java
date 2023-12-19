@@ -18,13 +18,13 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.affinity.AffinityLock;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.util.BinaryLengthLength;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.jlbh.JLBH;
 import net.openhft.chronicle.jlbh.JLBHOptions;
 import net.openhft.chronicle.jlbh.JLBHTask;
-import net.openhft.affinity.AffinityLock;
 import org.jetbrains.annotations.NotNull;
 
 import static net.openhft.chronicle.core.io.IOTools.deleteDirWithFiles;
@@ -32,13 +32,11 @@ import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
 public class TriviallyCopyableJLBH implements JLBHTask {
 
-
     enum HouseType {
         TRIVIALLY_COPYABLE, 
         BINARY_WIRE,
         UNKNOWN;
     }
-
 
     // use -Dio.type=binary or trivial to set. Defaults to binary
     HouseType type = HouseType.UNKNOWN;
@@ -79,13 +77,11 @@ public class TriviallyCopyableJLBH implements JLBHTask {
             return this;
         }
 
-
         // reads the bytes and updates 'this' instance, with the data in the bytes.
         @Override
         public void readMarshallable(BytesIn<?> bytes) {
             bytes.unsafeReadObject(this, START, LENGTH);
         }
-
 
         // reads 'this' instance and writes a copy of it to the bytes.
         @Override
@@ -93,18 +89,15 @@ public class TriviallyCopyableJLBH implements JLBHTask {
             bytes.unsafeWriteObject(this, START, LENGTH);
         }
 
-
         // the amount of data data in `this`
         @Override
         public BinaryLengthLength binaryLengthLength() {
             return BinaryLengthLength.LENGTH_8BIT;
         }
 
-
     }
 
     public static class House extends SelfDescribingMarshallable implements BaseHouse {
-
 
         final Bytes address = Bytes.allocateDirect(128);
 
@@ -113,7 +106,6 @@ public class TriviallyCopyableJLBH implements JLBHTask {
             return this;
         }
     }
-
 
     private JLBH lth;
     final BaseHouse originalHouse;
@@ -148,7 +140,6 @@ public class TriviallyCopyableJLBH implements JLBHTask {
         originalHouse = newHouse(type).address("82 St John Street, Clerkenwell");
         targetHouse = newHouse(type);
     }
-
 
     public void test() {
         deleteDirWithFiles("tmp");

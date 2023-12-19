@@ -21,7 +21,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
@@ -30,7 +29,6 @@ import org.junit.Test;
 import java.util.function.BiConsumer;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
 
 public class TriviallyCopyableTest extends WireTestCommon {
 
@@ -46,7 +44,6 @@ public class TriviallyCopyableTest extends WireTestCommon {
 
     @Test
     public void unsafe2() {
-        assumeFalse(Jvm.isAzulZing());
         doTest((b, a) -> a.readMarshallable(b), (b, a) -> a.writeMarshallable(b));
     }
 

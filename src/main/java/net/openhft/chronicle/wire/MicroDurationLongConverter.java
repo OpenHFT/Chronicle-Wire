@@ -39,7 +39,6 @@ public class MicroDurationLongConverter implements LongConverter {
         return parse.getSeconds() * 1000_000 + parse.getNano() / 1000;
     }
 
-
     /**
      * Converts a duration represented in microseconds to a {@link Duration} object.
      *

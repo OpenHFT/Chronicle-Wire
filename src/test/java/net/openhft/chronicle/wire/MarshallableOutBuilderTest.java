@@ -103,8 +103,9 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
 
     @Test
     public void http() throws IOException, InterruptedException {
-        int port = 65432;
-        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
+        InetSocketAddress address = new InetSocketAddress(0);
+        HttpServer server = HttpServer.create(address, 0);
+        int port = server.getAddress().getPort();
         BlockingQueue<String> queue = new LinkedBlockingQueue<>();
         server.createContext("/echo", new Handler(queue));
         server.start();
@@ -126,8 +127,9 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     @Ignore("test was added to work with queue-web-gateway, so work in progress")
     @Test
     public void http2() throws IOException, InterruptedException {
-        int port = 51972;
-        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
+        InetSocketAddress address = new InetSocketAddress(0);
+        HttpServer server = HttpServer.create(address, 0);
+        int port = server.getAddress().getPort();
         BlockingQueue<String> queue = new LinkedBlockingQueue<>();
         server.createContext("/echo", new Handler(queue));
         server.start();
@@ -149,8 +151,9 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     //"Only JSON Wire is currently supported"
     @Test(expected = IllegalArgumentException.class)
     public void httpBinary() throws IOException, InterruptedException {
-        int port = 65432;
-        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
+        InetSocketAddress address = new InetSocketAddress(0);
+        HttpServer server = HttpServer.create(address, 0);
+        int port = server.getAddress().getPort();
         BlockingQueue<String> queue = new LinkedBlockingQueue<>();
         server.createContext("/echo", new Handler(queue));
         server.start();

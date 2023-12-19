@@ -18,7 +18,6 @@
 
 package run.chronicle.account.dto;
 
-
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 
 public class AccountStatusOK extends AbstractEvent<AccountStatusOK> {

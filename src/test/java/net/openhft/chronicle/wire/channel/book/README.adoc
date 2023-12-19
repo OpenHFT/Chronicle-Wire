@@ -139,4 +139,3 @@ In the past, there wasn't a clear advantage in using a newer version of Java, ho
 
 See this article on this package https://blog.vanillajava.blog/2022/09/java-is-very-fast-if-you-dont-create.html
 
-

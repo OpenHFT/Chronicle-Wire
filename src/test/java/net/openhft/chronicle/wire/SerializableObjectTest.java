@@ -83,7 +83,6 @@ final class SerializableObjectTest extends WireTestCommon {
             )
             .collect(Collectors.collectingAndThen(toSet(), Collections::unmodifiableSet));
 
-
     private static final Set<Class<?>> IGNORED_CLASSES = new HashSet<>(Arrays.asList(
             DoubleSummaryStatistics.class,
             DriverPropertyInfo.class,
@@ -101,7 +100,6 @@ final class SerializableObjectTest extends WireTestCommon {
         }
 
     }
-
 
     private static final Predicate<MethodInfo> CONSTRUCTOR_IS_DEFAULT = methodInfo -> methodInfo.isPublic() && methodInfo.getTypeDescriptor().getTypeParameters().isEmpty();
     private static final ClassInfoList.ClassInfoFilter NOT_IGNORED = ci -> IGNORED_PACKAGES.stream().noneMatch(ip -> ci.getPackageName().startsWith(ip));
@@ -282,7 +280,6 @@ final class SerializableObjectTest extends WireTestCommon {
                     .filter(ci -> !ci.isAbstract())
                     .filter(ClassInfo::isPublic)
                     .filter(ci -> !IGNORED_PACKAGES.stream().anyMatch(ip -> ci.getPackageName().startsWith(ip)));
-
 
             widgetClasses.
                     forEach(System.out::println);

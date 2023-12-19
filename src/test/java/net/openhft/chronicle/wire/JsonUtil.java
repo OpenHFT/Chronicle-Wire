@@ -47,7 +47,6 @@ public final class JsonUtil {
                 openingCount,
                 closingCount);
 
-
     }
 
 }

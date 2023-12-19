@@ -68,7 +68,6 @@ public class VanillaMethodReader implements MethodReader {
         this(in, ignoreDefault, defaultParselet, SKIP_READABLE_BYTES, methodReaderInterceptorReturns, metaDataHandler, objects);
     }
 
-
     public VanillaMethodReader(MarshallableIn in,
                                boolean ignoreDefault,
                                WireParselet defaultParselet,

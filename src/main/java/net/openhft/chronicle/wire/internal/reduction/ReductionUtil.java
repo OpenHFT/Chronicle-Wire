@@ -26,9 +26,9 @@ import net.openhft.chronicle.wire.ExcerptListener;
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
-import net.openhft.chronicle.wire.domestic.reduction.Reduction;
 import net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor;
 import net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor;
+import net.openhft.chronicle.wire.domestic.reduction.Reduction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.*;

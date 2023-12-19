@@ -68,6 +68,12 @@ public interface Event<E extends Event<E>> extends Marshallable {
         return eventTime(ServicesTimestampLongConverter.currentTime());
     }
 
+    default E updateEvent() {
+        if (this.eventTime() <= 0)
+            this.eventTimeNow();
+        return (E) this;
+    }
+
     /**
      * Updates event with new event name, updating event time to now if required.
      *

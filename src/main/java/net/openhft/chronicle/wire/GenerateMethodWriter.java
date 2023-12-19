@@ -158,7 +158,6 @@ public class GenerateMethodWriter {
                 .createClass();
     }
 
-
     /**
      * @param interfaces an interface class
      * @return a proxy class from an interface class or null if it can't be created

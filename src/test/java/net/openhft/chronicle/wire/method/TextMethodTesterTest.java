@@ -57,7 +57,6 @@ public class TextMethodTesterTest extends WireTestCommon {
         compareResults(test);
     }
 
-
     @Test
     public void runTestEmptyOut() throws IOException {
         TextMethodTester test = new TextMethodTester<>(

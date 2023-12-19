@@ -1781,7 +1781,6 @@ private static final int MASHALLABLE_VERSION = 1;
 ----
 <1> You will have to remove this line if the class extends `AbstractBytesMarshallable`
 
-
 === JLBH Benchmark Performance
 
 To explore the efficiency of the examples above, this link:https://github.com/OpenHFT/Chronicle-Wire/blob/develop/src/test/java/net/openhft/chronicle/wire/TriviallyCopyableJLBH.java[TrivallyCopyableJLBH.java] test was created.

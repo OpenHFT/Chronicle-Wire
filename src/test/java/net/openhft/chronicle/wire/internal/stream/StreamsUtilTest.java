@@ -2,7 +2,10 @@ package net.openhft.chronicle.wire.internal.stream;
 
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.PrimitiveIterator;
+import java.util.Spliterator;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.DoubleConsumer;
 import java.util.stream.Collectors;
