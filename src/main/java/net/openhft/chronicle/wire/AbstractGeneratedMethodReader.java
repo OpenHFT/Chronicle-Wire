@@ -40,7 +40,6 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  */
 public abstract class AbstractGeneratedMethodReader implements MethodReader {
     private static final Consumer<MessageHistory> NO_OP_MH_CONSUMER = Mocker.ignored(Consumer.class);
-
     public final static ThreadLocal<String> SERVICE_NAME = new ThreadLocal<>();
     private final static ConcurrentHashMap<String, MessageHistoryThreadLocal> TEMP_MESSAGE_HISTORY_BY_SERVICE_NAME = new ConcurrentHashMap<>();
     protected final WireParselet debugLoggingParselet;
