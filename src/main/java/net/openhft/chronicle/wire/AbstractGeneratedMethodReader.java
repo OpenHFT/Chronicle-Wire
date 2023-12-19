@@ -60,10 +60,11 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         this.debugLoggingParselet = debugLoggingParselet;
 
         // gets the name of the service so we can offer history message caching
-        String serviceName = SERVICE_NAME.get();
 
         // the services name is set by the chronicle services framework
-
+        String serviceName = SERVICE_NAME.get();
+        if (serviceName == null)
+            serviceName = "";
 
         // this was handled to support when multiple services are using the same thread.
         this.tempMessageHistory = TEMP_MESSAGE_HISTORY_BY_SERVICE_NAME.computeIfAbsent(serviceName, x -> new MessageHistoryThreadLocal());
