@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -39,7 +40,7 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  */
 public abstract class AbstractGeneratedMethodReader implements MethodReader {
     private static final Consumer<MessageHistory> NO_OP_MH_CONSUMER = Mocker.ignored(Consumer.class);
-    private static final MessageHistoryThreadLocal TEMP_MESSAGE_HISTORY = new MessageHistoryThreadLocal();
+    private final MessageHistoryThreadLocal tempMessageHistory = new MessageHistoryThreadLocal();
     protected final WireParselet debugLoggingParselet;
     private final MarshallableIn in;
     protected MessageHistory messageHistory;
@@ -205,18 +206,19 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      * uses a double buffer technique to swap the current message history with a temp message history ( this is, if it has not already been stored ) .
      */
     private void swapMessageHistoryIfDirty() {
+
         if (messageHistory.isDirty()) {
             // This input event didn't generate an output event.
             // Saving message history - in case next input event will be processed by another method reader,
             // that method reader will cooperatively write saved history.
-            messageHistory = TEMP_MESSAGE_HISTORY.getAndSet(messageHistory);
+            messageHistory = tempMessageHistory.getAndSet(messageHistory);
             MessageHistory.set(messageHistory);
-            assert (messageHistory != TEMP_MESSAGE_HISTORY.get());
+            assert (messageHistory != tempMessageHistory.get());
         } else {
             // This input event generated an output event.
             // In case previous input event was processed by this method reader, TEMP_MESSAGE_HISTORY may contain
             // stale info on event's message history, which is superseded by the message history written now.
-            TEMP_MESSAGE_HISTORY.get().reset();
+            tempMessageHistory.get().reset();
         }
     }
 
@@ -227,7 +229,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      * @param context the DocumentContext of the output queue that we are going to write the message history to
      */
     private void writeUnwrittenMessageHistory(DocumentContext context) {
-        final MessageHistory mh = TEMP_MESSAGE_HISTORY.get();
+        final MessageHistory mh = tempMessageHistory.get();
         if (mh.sources() != 0 && context.sourceId() != mh.lastSourceId() && mh.isDirty())
             historyConsumer.accept(mh);
     }
