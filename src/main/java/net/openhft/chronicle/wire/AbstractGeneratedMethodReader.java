@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -39,9 +40,11 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  */
 public abstract class AbstractGeneratedMethodReader implements MethodReader {
     private static final Consumer<MessageHistory> NO_OP_MH_CONSUMER = Mocker.ignored(Consumer.class);
-    private static final MessageHistoryThreadLocal TEMP_MESSAGE_HISTORY = new MessageHistoryThreadLocal();
+    public final static ThreadLocal<String> SERVICE_NAME = new ThreadLocal<>();
+    private final static ConcurrentHashMap<String, MessageHistoryThreadLocal> TEMP_MESSAGE_HISTORY_BY_SERVICE_NAME = new ConcurrentHashMap<>();
     protected final WireParselet debugLoggingParselet;
     private final MarshallableIn in;
+    private final MessageHistoryThreadLocal tempMessageHistory;
     protected MessageHistory messageHistory;
     protected boolean dataEventProcessed;
     private boolean closeIn = false;
@@ -55,6 +58,16 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
                                             WireParselet debugLoggingParselet) {
         this.in = in;
         this.debugLoggingParselet = debugLoggingParselet;
+
+        // gets the name of the service so we can offer history message caching
+
+        // the services name is set by the chronicle services framework
+        String serviceName = SERVICE_NAME.get();
+        if (serviceName == null)
+            serviceName = "";
+
+        // this was handled to support when multiple services are using the same thread.
+        this.tempMessageHistory = TEMP_MESSAGE_HISTORY_BY_SERVICE_NAME.computeIfAbsent(serviceName, x -> new MessageHistoryThreadLocal());
     }
 
     public AbstractGeneratedMethodReader predicate(Predicate predicate) {
@@ -209,14 +222,14 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
             // This input event didn't generate an output event.
             // Saving message history - in case next input event will be processed by another method reader,
             // that method reader will cooperatively write saved history.
-            messageHistory = TEMP_MESSAGE_HISTORY.getAndSet(messageHistory);
+            messageHistory = tempMessageHistory.getAndSet(messageHistory);
             MessageHistory.set(messageHistory);
-            assert (messageHistory != TEMP_MESSAGE_HISTORY.get());
+            assert (messageHistory != tempMessageHistory.get());
         } else {
             // This input event generated an output event.
             // In case previous input event was processed by this method reader, TEMP_MESSAGE_HISTORY may contain
             // stale info on event's message history, which is superseded by the message history written now.
-            TEMP_MESSAGE_HISTORY.get().reset();
+            tempMessageHistory.get().reset();
         }
     }
 
@@ -227,7 +240,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      * @param context the DocumentContext of the output queue that we are going to write the message history to
      */
     private void writeUnwrittenMessageHistory(DocumentContext context) {
-        final MessageHistory mh = TEMP_MESSAGE_HISTORY.get();
+        final MessageHistory mh = tempMessageHistory.get();
         if (mh.sources() != 0 && context.sourceId() != mh.lastSourceId() && mh.isDirty())
             historyConsumer.accept(mh);
     }
