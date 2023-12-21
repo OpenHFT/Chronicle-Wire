@@ -36,6 +36,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -112,6 +113,7 @@ public class JSONWire extends TextWire {
                 : new JSONWriteDocumentContext(this);
         return this;
     }
+
 
     @NotNull
     @Override
@@ -467,6 +469,7 @@ public class JSONWire extends TextWire {
             }
         }
     }
+
     @Override
     public ValueOut writeEvent(Class expectedType, Object eventKey) throws InvalidMarshallableException {
         return super.writeEvent(String.class, "" + eventKey);
@@ -569,6 +572,17 @@ public class JSONWire extends TextWire {
     }
 
     class JSONValueOut extends YamlValueOut {
+
+        @NotNull
+        @Override
+        public TextWire typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, Class type) {
+            prependSeparator();
+            append("{\"@type\":\"");
+            typeTranslator.accept(type, bytes);
+            append("\"}");
+            elementSeparator();
+            return wireOut();
+        }
 
         @Override
         protected void trimWhiteSpace() {
@@ -725,6 +739,58 @@ public class JSONWire extends TextWire {
     }
 
     class JSONValueIn extends TextValueIn {
+
+
+        private Class consumeTypeLiteral() {
+            long start = bytes.readPosition();
+            consumePadding();
+            StringBuilder sb = Wires.acquireStringBuilderScoped().get();
+
+            int code = readCode();
+            if (code != '{') {
+                bytes.readPosition(start);
+                return null;
+            }
+
+            consumePadding();
+
+
+            text(sb);
+
+            if (!"@type".contentEquals(sb)) {
+                bytes.readPosition(start);
+                return null;
+            }
+
+
+            consumePadding();
+
+            if (readCode() != ':') {
+                bytes.readPosition(start);
+                return null;
+            }
+
+            consumePadding();
+
+            sb.setLength(0);
+            text(sb);
+
+            String clazz = sb.toString().trim();
+            if (clazz.isEmpty()) {
+                bytes.readPosition(start);
+                return null;
+            }
+
+            consumePadding();
+            if (bytes.readRemaining() == 0 || bytes.readChar() != '}') {
+                bytes.readPosition(start);
+                return null;
+            }
+
+            return classLookup.forName(clazz);
+        }
+
+
         /**
          * @return true if !!null "", if {@code true} reads the !!null "" up to the next STOP, if
          * {@code false} no  data is read  ( data is only peaked if {@code false} )
@@ -818,6 +884,11 @@ public class JSONWire extends TextWire {
         }
 
         private <E> E parseType(@Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
+
+            Class aClass = consumeTypeLiteral();
+            if (aClass != null)
+                return (E) aClass;
+
             if (!hasTypeDefinition()) {
                 return super.object(using, clazz, bestEffort);
             } else {
