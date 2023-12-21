@@ -25,7 +25,6 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
-import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -786,6 +785,11 @@ public class JSONWire extends TextWire {
                 bytes.readPosition(start);
                 return null;
             }
+            consumePadding();
+
+            if (bytes.readRemaining() > 0 || peekCode() == ',') {
+                bytes.readSkip(1);
+            }
 
             return classLookup.forName(clazz);
         }
@@ -850,14 +854,7 @@ public class JSONWire extends TextWire {
 
         @Override
         public Type typeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
-            consumePadding();
-            final StringBuilder stringBuilder = acquireStringBuilder();
-            text(stringBuilder);
-            try {
-                return classLookup().forName(stringBuilder);
-            } catch (ClassNotFoundRuntimeException e) {
-                return unresolvedHandler.apply(stringBuilder, e.getCause());
-            }
+            return consumeTypeLiteral();
         }
 
         @Override
