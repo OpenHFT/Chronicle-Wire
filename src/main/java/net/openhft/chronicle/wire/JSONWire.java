@@ -25,6 +25,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
+import net.openhft.chronicle.core.util.UnresolvedType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -740,7 +741,8 @@ public class JSONWire extends TextWire {
     class JSONValueIn extends TextValueIn {
 
 
-        private Class consumeTypeLiteral() {
+        @NotNull
+        private Type consumeTypeLiteral() {
             long start = bytes.readPosition();
             consumePadding();
             StringBuilder sb = Wires.acquireStringBuilderScoped().get();
@@ -748,7 +750,7 @@ public class JSONWire extends TextWire {
             int code = readCode();
             if (code != '{') {
                 bytes.readPosition(start);
-                return null;
+                return UnresolvedType.of("DoesntExist");
             }
 
             consumePadding();
@@ -758,7 +760,7 @@ public class JSONWire extends TextWire {
 
             if (!"@type".contentEquals(sb)) {
                 bytes.readPosition(start);
-                return null;
+                return UnresolvedType.of("DoesntExist");
             }
 
 
@@ -766,7 +768,7 @@ public class JSONWire extends TextWire {
 
             if (readCode() != ':') {
                 bytes.readPosition(start);
-                return null;
+                return UnresolvedType.of("DoesntExist");
             }
 
             consumePadding();
@@ -777,7 +779,7 @@ public class JSONWire extends TextWire {
             String clazz = sb.toString().trim();
             if (clazz.isEmpty()) {
                 bytes.readPosition(start);
-                return null;
+                return UnresolvedType.of("DoesntExist");
             }
 
             consumePadding();
@@ -790,8 +792,11 @@ public class JSONWire extends TextWire {
             if (bytes.readRemaining() > 0 || peekCode() == ',') {
                 bytes.readSkip(1);
             }
-
-            return classLookup.forName(clazz);
+            try {
+                return classLookup.forName(clazz);
+            } catch (Exception e) {
+                return UnresolvedType.of(clazz);
+            }
         }
 
 
@@ -882,8 +887,8 @@ public class JSONWire extends TextWire {
 
         private <E> E parseType(@Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
 
-            Class aClass = consumeTypeLiteral();
-            if (aClass != null)
+            Type aClass = consumeTypeLiteral();
+            if (aClass != null && !(aClass instanceof UnresolvedType))
                 return (E) aClass;
 
             if (!hasTypeDefinition()) {
