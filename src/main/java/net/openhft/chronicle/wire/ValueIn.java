@@ -1,6 +1,14 @@
-/**
- * Reads a LocalTime from the wire and applies it to a given object using the provided BiConsumer.
- * <p>
+/*
+ * Copyright 2016-2020 chronicle.software
+ *
+ *       https://chronicle.software
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -746,7 +754,7 @@ public interface ValueIn {
  *
  * @param <T> The type of the object to apply the type literal to.
  * @param t The object to apply the type literal to.
- * @param classNameConsumer The BiConsumer that accepts the object and the type literal.
+ * @param classConsumer The BiConsumer that accepts the object and the type literal.
  * @return The WireIn instance for method chaining.
  * @throws IORuntimeException if an I/O error occurs
  * @throws BufferUnderflowException if the buffer underflows while reading
@@ -1003,16 +1011,7 @@ public interface ValueIn {
         return Wires.object0(this, null, clazz);
     }
 
-/**
- * Reads an object from the wire.
- *
- * @param <E> The type of the object to read.
- * @param using An instance of the object to reuse, or null to create a new instance.
- * @param clazz The class of the object to read.
- * @param bestEffort Set to true for best effort reading, which may not throw exceptions for some errors.
- * @return The object read from the wire, or null if it cannot be read.
- * @throws InvalidMarshallableException if the object is invalid
- */
+
     @Nullable
     default Object object() throws InvalidMarshallableException {
         @Nullable final Object o = objectWithInferredType(null, SerializationStrategies.ANY_OBJECT, null);
@@ -1040,6 +1039,16 @@ public interface ValueIn {
         return object(using, clazz, true);
     }
 
+    /**
+     * Reads an object from the wire.
+     *
+     * @param <E> The type of the object to read.
+     * @param using An instance of the object to reuse, or null to create a new instance.
+     * @param clazz The class of the object to read.
+     * @param bestEffort Set to true for best effort reading, which may not throw exceptions for some errors.
+     * @return The object read from the wire, or null if it cannot be read.
+     * @throws InvalidMarshallableException if the object is invalid
+     */
     default <E> E object(@Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
         return Wires.object0(this, using, clazz, bestEffort);
     }
