@@ -26,6 +26,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
+import net.openhft.chronicle.core.util.UnresolvedType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,6 +37,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -112,6 +114,7 @@ public class JSONWire extends TextWire {
                 : new JSONWriteDocumentContext(this);
         return this;
     }
+
 
     @NotNull
     @Override
@@ -467,6 +470,7 @@ public class JSONWire extends TextWire {
             }
         }
     }
+
     @Override
     public ValueOut writeEvent(Class expectedType, Object eventKey) throws InvalidMarshallableException {
         return super.writeEvent(String.class, "" + eventKey);
@@ -570,6 +574,17 @@ public class JSONWire extends TextWire {
 
     class JSONValueOut extends YamlValueOut {
 
+        @NotNull
+        @Override
+        public TextWire typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, Class type) {
+            prependSeparator();
+            append("{\"@type\":\"");
+            typeTranslator.accept(type, bytes);
+            append("\"}");
+            elementSeparator();
+            return wireOut();
+        }
+
         @Override
         protected void trimWhiteSpace() {
             if (bytes.endsWith('\n') || bytes.endsWith(' '))
@@ -590,7 +605,12 @@ public class JSONWire extends TextWire {
         @NotNull
         @Override
         public JSONWire typeLiteral(@Nullable CharSequence type) {
-            return (JSONWire) text(type);
+
+            startBlock('{');
+            bytes.append("\"@type\":\"" + type + "\"");
+            endBlock('}');
+
+            return (JSONWire) wireOut();
         }
 
         @NotNull
@@ -725,6 +745,68 @@ public class JSONWire extends TextWire {
     }
 
     class JSONValueIn extends TextValueIn {
+
+
+        @Nullable
+        private Type consumeTypeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
+            long start = bytes.readPosition();
+            consumePadding();
+            StringBuilder sb = Wires.acquireStringBuilderScoped().get();
+
+            int code = readCode();
+            if (code != '{') {
+                bytes.readPosition(start);
+                return null;
+            }
+
+            consumePadding();
+
+            sb.setLength(0);
+            text(sb);
+
+            if (!"@type".contentEquals(sb)) {
+                bytes.readPosition(start);
+                return null;
+            }
+
+            consumePadding();
+
+            if (readCode() != ':') {
+                bytes.readPosition(start);
+                return null;
+            }
+
+            consumePadding();
+
+            sb.setLength(0);
+            text(sb);
+
+            String clazz = sb.toString().trim();
+            if (clazz.isEmpty()) {
+                bytes.readPosition(start);
+                return null;
+            }
+
+            consumePadding();
+            if (bytes.readRemaining() == 0 || bytes.readChar() != '}') {
+                bytes.readPosition(start);
+                return null;
+            }
+            consumePadding();
+
+            if (bytes.readRemaining() > 0 || peekCode() == ',') {
+                bytes.readSkip(1);
+            }
+            try {
+                return classLookup.forName(clazz);
+            } catch (ClassNotFoundRuntimeException e1) {
+                if (unresolvedHandler != null)
+                    unresolvedHandler.apply(clazz, e1.getCause());
+                return UnresolvedType.of(clazz);
+            }
+        }
+
+
         /**
          * @return true if !!null "", if {@code true} reads the !!null "" up to the next STOP, if
          * {@code false} no  data is read  ( data is only peaked if {@code false} )
@@ -784,14 +866,7 @@ public class JSONWire extends TextWire {
 
         @Override
         public Type typeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
-            consumePadding();
-            final StringBuilder stringBuilder = acquireStringBuilder();
-            text(stringBuilder);
-            try {
-                return classLookup().forName(stringBuilder);
-            } catch (ClassNotFoundRuntimeException e) {
-                return unresolvedHandler.apply(stringBuilder, e.getCause());
-            }
+            return consumeTypeLiteral(unresolvedHandler);
         }
 
         @Override
@@ -818,6 +893,11 @@ public class JSONWire extends TextWire {
         }
 
         private <E> E parseType(@Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
+
+            Type aClass = consumeTypeLiteral(null);
+            if (aClass != null)
+                return (E) aClass;
+
             if (!hasTypeDefinition()) {
                 return super.object(using, clazz, bestEffort);
             } else {
