@@ -26,12 +26,13 @@ import static net.openhft.chronicle.wire.Wires.toIntU30;
 
 public class BinaryWriteDocumentContext implements WriteDocumentContext {
     protected Wire wire;
-    protected long position = -1;
+    protected long position = 0;
     protected int tmpHeader;
     protected int count = 0;
     private int metaDataBit;
     private volatile boolean notComplete;
     private boolean chainedElement;
+    private boolean rollback;
 
     public BinaryWriteDocumentContext(Wire wire) {
         this.wire = wire;
@@ -50,6 +51,7 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         metaDataBit = metaData ? Wires.META_DATA : 0;
         tmpHeader = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
         bytes.writeInt(tmpHeader);
+        rollback = false;
         notComplete = true;
         chainedElement = false;
     }
@@ -57,18 +59,6 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
     @Override
     public boolean isEmpty() {
         return notComplete && wire().bytes().writePosition() == position + 4;
-    }
-
-    @Override
-    public void reset() {
-        if (count > 0)
-            close();
-        count = 0;
-        position = 0;
-        metaDataBit = 0;
-        tmpHeader = 0;
-        notComplete = false;
-        chainedElement = false;
     }
 
     @Override
@@ -87,12 +77,15 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         count--;
         if (count > 0)
             return;
-        if (checkResetOpened())
-            return;
+        notComplete = false;
         @NotNull Bytes<?> bytes = wire().bytes();
+        if (rollback) {
+            bytes.zeroOut(bytes.readPosition(), bytes.writePosition());
+            bytes.writePosition(bytes.readPosition());
+            return;
+        }
+
         long position1 = bytes.writePosition();
-//        if (position1 < position)
-//            System.out.println("Message truncated from " + position + " to " + position1);
         long length0 = position1 - position - 4;
         if (length0 > Integer.MAX_VALUE && bytes instanceof HexDumpBytes)
             length0 = (int) length0;
@@ -102,15 +95,33 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         else
             bytes.writeInt(position, length);
         wire().getValueOut().resetBetweenDocuments();
-        notComplete = false;
     }
 
-    protected boolean checkResetOpened() {
-        if (!notComplete)
-            Jvm.warn().on(getClass(), "Closing but not opened");
-        boolean wasOpened = notComplete;
+    @Override
+    public void rollbackIfNotComplete() {
+        if (!notComplete) return;
+        chainedElement = false;
+        count = 1;
+        rollback = true;
+        close();
+    }
+
+    @Override
+    public void rollbackOnClose() {
+        rollback = true;
+    }
+
+    @Override
+    public void reset() {
+        chainedElement = false;
+        if (count > 0)
+            close();
+        count = 0;
+        position = 0;
+        metaDataBit = 0;
+        tmpHeader = 0;
+        rollback = false;
         notComplete = false;
-        return !wasOpened;
     }
 
     @Override
