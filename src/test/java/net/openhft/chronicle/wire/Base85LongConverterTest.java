@@ -22,8 +22,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Random;
-
 import static org.junit.Assert.assertEquals;
 
 public class Base85LongConverterTest extends WireTestCommon {
@@ -43,9 +41,17 @@ public class Base85LongConverterTest extends WireTestCommon {
     }
 
     @Test
+    public void test0() {
+        assertEquals(Base85LongConverter.INSTANCE.asText(Base85LongConverter.INSTANCE.parse("0")).toString(), "0");
+        assertEquals(Base85LongConverter.INSTANCE.asText(Base85LongConverter.INSTANCE.parse("000")).toString(), "000");
+        assertEquals(Base85LongConverter.INSTANCE.asText(Base85LongConverter.INSTANCE.parse("012")).toString(), "012");
+        assertEquals(Base85LongConverter.INSTANCE.asText(Base85LongConverter.INSTANCE.parse("0LMO")).toString(), "0LMO");
+        assertEquals("012345678", Base85LongConverter.INSTANCE.asText(Base85LongConverter.INSTANCE.parse("012345678")).toString());
+    }
+
+    @Test
     public void asString() {
         LongConverter c = Base85LongConverter.INSTANCE;
-        Random rand = new Random();
         for (int i = 0; i < 100000; i++) {
             long l = (long) Math.random() * Base85LongConverter.MAX_LENGTH;
             String s = c.asString(l);

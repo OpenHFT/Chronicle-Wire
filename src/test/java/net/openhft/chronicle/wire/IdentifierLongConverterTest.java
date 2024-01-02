@@ -31,11 +31,12 @@ public class IdentifierLongConverterTest extends net.openhft.chronicle.wire.Wire
     @Test
     public void parseMin() {
         assertEquals(0, INSTANCE.parse(""));
-        assertEquals(0, INSTANCE.parse("0"));
+        assertEquals(66, INSTANCE.parse("0"));
     }
 
     @Test
     public void parseMaxSmallPositive() {
+        assertEquals(MAX_SMALL_POSITIVE_STR, INSTANCE.asText(INSTANCE.parse(MAX_SMALL_POSITIVE_STR)).toString());
         assertEquals(MAX_SMALL_ID,
                 INSTANCE.parse(MAX_SMALL_POSITIVE_STR));
     }
@@ -54,7 +55,7 @@ public class IdentifierLongConverterTest extends net.openhft.chronicle.wire.Wire
 
     @Test
     public void asStringMaxSmall() {
-        assertEquals(MAX_SMALL_POSITIVE_STR,
+        assertEquals(MAX_SMALL_POSITIVE_STR.substring(0, 9),
                 INSTANCE.asString(MAX_SMALL_ID));
     }
 

@@ -62,7 +62,7 @@ public class SymbolsLongConverter implements LongConverter {
         for (int i = 0; i < decode.length; i++)
             encode[decode[i]] = (short) i;
 
-        maxParseLength = LongConverter.maxParseLength(length);
+        maxParseLength = LongConverter.maxParseLength(length) - 1;
     }
 
     @Override
@@ -82,6 +82,7 @@ public class SymbolsLongConverter implements LongConverter {
         lengthCheck(text);
 
         long v = 0;
+        v += text.length();
         for (int i = 0; i < text.length(); i++) {
             final char ch = text.charAt(i);
 
@@ -118,6 +119,10 @@ public class SymbolsLongConverter implements LongConverter {
             text.append(decode[v]);
         }
 
+        if (text.length() > 1) {
+            text.deleteCharAt(text.length() - 1);//remove optional (backward compatible) length
+        }
+
         StringUtils.reverse(text, start); // Reverse the result since it's constructed backward.
 
         if (text.length() > start + maxParseLength()) {
@@ -148,6 +153,9 @@ public class SymbolsLongConverter implements LongConverter {
             value /= factor;
             text.append(decode[v]);
         }
+
+        if (!text.isEmpty())
+            text.unwrite(text.writePosition() - 1, 1);
 
         BytesUtil.reverse(text, start); // Reverse the result for bytes.
 
