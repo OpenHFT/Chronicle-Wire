@@ -125,6 +125,7 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
 
     // TODO remove asap
     protected boolean checkResetOpened() {
+        notComplete = false;
         return false;
     }
 
