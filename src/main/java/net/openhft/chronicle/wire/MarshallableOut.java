@@ -34,7 +34,7 @@ import java.util.stream.Stream;
  * Anything you can write Marshallable objects to.
  */
 @DontChain
-public interface MarshallableOut extends DocumentWritten {
+public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteNotifier {
 
     static MarshallableOutBuilder builder(URL url) {
         return new MarshallableOutBuilder(url);

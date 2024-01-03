@@ -2045,4 +2045,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     public boolean writingIsComplete() {
         return !writeContext.isNotComplete();
     }
+
+    @Override
+    public void rollbackIfNotComplete() {
+        writeContext.rollbackIfNotComplete();
+    }
 }

@@ -2438,4 +2438,9 @@ public class TextWire extends YamlWireOut<TextWire> {
     public boolean writingIsComplete() {
         return !writeContext.isNotComplete();
     }
+
+    @Override
+    public void rollbackIfNotComplete() {
+        writeContext.rollbackIfNotComplete();
+    }
 }

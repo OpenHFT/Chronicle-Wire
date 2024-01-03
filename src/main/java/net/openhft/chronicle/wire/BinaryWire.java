@@ -171,6 +171,11 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     @Override
+    public void rollbackIfNotComplete() {
+        writeContext.rollbackIfNotComplete();
+    }
+
+    @Override
     public boolean isBinary() {
         return true;
     }
