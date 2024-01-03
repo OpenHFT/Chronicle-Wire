@@ -19,7 +19,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
-import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
 import static net.openhft.chronicle.wire.Wires.toIntU30;
@@ -122,6 +121,11 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         tmpHeader = 0;
         rollback = false;
         notComplete = false;
+    }
+
+    // TODO remove asap
+    protected boolean checkResetOpened() {
+        return false;
     }
 
     @Override
