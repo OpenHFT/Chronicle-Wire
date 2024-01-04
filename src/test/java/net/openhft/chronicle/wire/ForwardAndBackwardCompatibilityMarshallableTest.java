@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.pool.ClassLookup;
-import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Assume;
@@ -179,8 +178,8 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
         public MDTO2(int one, int two, @NotNull Object three) {
             this.one = one;
             this.two = two;
-            StringUtils.setCount(this.three, 0);
-            this.three.append(three.toString());
+            this.three.setLength(0);
+            this.three.append(three);
         }
 
         public MDTO2() {
@@ -194,8 +193,8 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
 
         @NotNull
         public MDTO2 three(@NotNull Object three) {
-            StringUtils.setCount(this.three, 0);
-            this.three.append(three.toString());
+            this.three.setLength(0);
+            this.three.append(three);
             return this;
         }
 
