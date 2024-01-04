@@ -32,7 +32,6 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.ClassLookup;
-import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -106,7 +105,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
     @NotNull
     protected StringBuilder acquireStringBuilder() {
-        StringUtils.setCount(sb, 0);
+        sb.setLength(0);
         return sb;
     }
 
