@@ -36,6 +36,7 @@ public class ChannelClient {
             Jvm.startup().on(ChannelClient.class, "Channel set up on port: " + channel.channelCfg().port());
             Says says = channel.methodWriter(Says.class);
             says.say("Well hello there");
+            says.say("http://localhost:4441/commands/add/1/3");
 
             StringBuilder eventType = new StringBuilder();
             String text = channel.readOne(eventType, String.class);

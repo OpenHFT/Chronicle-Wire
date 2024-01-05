@@ -24,24 +24,24 @@ import net.openhft.chronicle.wire.channel.ChronicleContext;
 import net.openhft.chronicle.wire.channel.echo.EchoHandler;
 import net.openhft.chronicle.wire.channel.echo.Says;
 
-public class Channel1 {
+    public class Channel1 {
 
-    private static final String URL = System.getProperty("url", "tcp://:3334");
+        private static final String URL = System.getProperty("url", "tcp://:3334");
 
-    public static void main(String[] args) {
+        public static void main(String[] args) {
 
-        try (ChronicleContext context = ChronicleContext.newContext(URL).name("Channel1");
-             ChronicleChannel channel = context.newChannelSupplier(new EchoHandler()).get()) {
+            try (ChronicleContext context = ChronicleContext.newContext(URL).name("Channel1");
+                 ChronicleChannel channel = context.newChannelSupplier(new EchoHandler()).get()) {
 
-            Jvm.startup().on(Channel1.class, "Channel set up on port: " + channel.channelCfg().port());
+                Jvm.startup().on(Channel1.class, "Channel set up on port: " + channel.channelCfg().port());
 
-            Says says = channel.methodWriter(Says.class);
-            says.say("Well hello there");
+                Says says = channel.methodWriter(Says.class);
+                says.say("Well hello there");
 
-            StringBuilder eventType = new StringBuilder();
-            String text = channel.readOne(eventType, String.class);
-            Jvm.startup().on(Channel1.class, ">>>> " + eventType + ": " + text);
+                StringBuilder eventType = new StringBuilder();
+                String text = channel.readOne(eventType, String.class);
+                Jvm.startup().on(Channel1.class, ">>>> " + eventType + ": " + text);
 
+            }
         }
     }
-}

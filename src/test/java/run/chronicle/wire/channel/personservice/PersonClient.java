@@ -5,6 +5,9 @@ import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.wire.channel.ChronicleChannel;
 import net.openhft.chronicle.wire.channel.ChronicleContext;
 import run.chronicle.wire.channel.channelArith.*;
+import run.chronicle.wire.channel.personservice.api.AddPerson;
+import run.chronicle.wire.channel.personservice.api.OnAddPerson;
+import run.chronicle.wire.channel.personservice.api.PersonManagerIn;
 
 public class PersonClient {
 
@@ -14,18 +17,18 @@ public class PersonClient {
 
         try (ChronicleContext context = ChronicleContext.newContext(URL)) {
 
-            ChronicleChannel channel = context.newChannelSupplier(new PersonSvcHandler(new PersonOpsProcessor())).get();
+            ChronicleChannel channel = context.newChannelSupplier(new PersonSvcHandler()).get();
 
             Jvm.startup().on(ArithClient.class, "Channel connected to: " + channel.channelCfg().hostname() + "[" + channel.channelCfg().port() + "]");
 
-            final PersonOps personOps = channel.methodWriter(PersonOps.class);
+            final PersonManagerIn personOps = channel.methodWriter(PersonManagerIn.class);
 
-            Person thePerson = new Person().name("George").timestampNS(SystemTimeProvider.CLOCK.currentTimeNanos());
-            Jvm.startup().on(PersonClient.class, "adding " + thePerson.toString());
-            personOps.addPerson(thePerson);
+            AddPerson addPerson = new AddPerson().name("George").time(SystemTimeProvider.CLOCK.currentTimeNanos());
+            Jvm.startup().on(PersonClient.class, "adding " + addPerson.toString());
+            personOps.addPerson(addPerson);
 
             StringBuilder evtType = new StringBuilder();
-            ReqStatus response = channel.readOne(evtType, ReqStatus.class);
+            OnAddPerson response = channel.readOne(evtType, OnAddPerson.class);
 
             Jvm.startup().on(PersonClient.class, " >>> " + evtType + ": " + response);
         }
