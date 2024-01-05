@@ -83,44 +83,14 @@ public class LongConversionTest extends WireTestCommon {
         assertEquals("to[74565]\n", sw.toString().replaceAll("\r", ""));
     }
 
-
-    // Test case to check the method using OxHexadecimalLongConverter
-    @Test
-    public void oxmethod() {
-
-        // Initializing a new Wire instance with an elastic heap-allocated buffer
-        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(64))
-                .useTextDocuments();
-
-        // Creating a method writer for the OxWriteWithLong interface
-        LongConversionTest.OxWriteWithLong write = wire.methodWriter(LongConversionTest.OxWriteWithLong.class);
-        assertSame(write, write.to(0x12345));
-
-        // Asserting the wire's string representation
-        assertEquals("to: 0x12345\n", wire.toString());
-
-        // Setting up a StringWriter to capture logging output
-        StringWriter sw = new StringWriter();
-        LongConversionTest.OxWriteWithLong read = Mocker.logging(LongConversionTest.OxWriteWithLong.class, "", sw);
-        wire.methodReader(read).readOne();
-
-        // NOTE: Mocker which is in Core, ignores the LongConverter
-        assertEquals("to[74565]\n", sw.toString().replaceAll("\r", ""));
-    }
-
     // Interface for method writers that use HexadecimalLongConverter
     interface WriteWithLong {
         LongConversionTest.WriteWithLong to(@LongConversion(HexadecimalLongConverter.class) int x);
     }
 
-    // Interface for method writers that use OxHexadecimalLongConverter
-    interface OxWriteWithLong {
-        LongConversionTest.OxWriteWithLong to(@LongConversion(OxHexadecimalLongConverter.class) int x);
-    }
-
     // Static class representing a holder for various types of Long values
     static class LongHolder extends SelfDescribingMarshallable {
-        @LongConversion(UnsignedLongConverter.class)
+        @LongConversion(Base32LongConverter.class)
         long unsigned;  // Represents unsigned long value
         @LongConversion(HexadecimalLongConverter.class)
         long hex;       // Represents a hexadecimal long value
