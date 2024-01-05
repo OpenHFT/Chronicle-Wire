@@ -29,7 +29,6 @@ package net.openhft.chronicle.wire;
  * </p>
  *
  * @param <T> The type of object being read and populated.
- * @since 2023-09-11
  */
 @FunctionalInterface
 public interface ReadingMarshaller<T> {

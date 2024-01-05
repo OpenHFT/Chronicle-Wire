@@ -37,7 +37,6 @@ import java.util.regex.Pattern;
  * </p>
  *
  * @see YamlAgitator
- * @since 2023-09-16
  */
 public class DuplicateMessageAgitator implements YamlAgitator {
 

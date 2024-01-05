@@ -195,8 +195,7 @@ public class CSVWire extends TextWire {
      * writing values in CSV. This includes certain restrictions, such as not supporting
      * type literals and serializable objects in CSV format.
      *
-     * @since 2023-09-14
-     */
+         */
     class CSVValueOut extends YamlValueOut {
         @NotNull
         @Override

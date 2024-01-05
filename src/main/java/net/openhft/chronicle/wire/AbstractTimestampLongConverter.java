@@ -48,7 +48,6 @@ import java.util.concurrent.TimeUnit;
  * Consequently, UTC dates will consistently be depicted with a 'Z' suffix.
  *
  * @see LongConverter The interface this abstract class adheres to.
- * @since 2023-09-15
  */
 public abstract class AbstractTimestampLongConverter implements LongConverter {
 

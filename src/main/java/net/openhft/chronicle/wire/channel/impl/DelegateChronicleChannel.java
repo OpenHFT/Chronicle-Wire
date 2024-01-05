@@ -31,7 +31,6 @@ import net.openhft.chronicle.wire.channel.*;
  * This design allows for modification, monitoring, or extension of the behavior of the internal channel without altering its code.
  *
  * @see InternalChronicleChannel
- * @since 2023-09-16
  */
 public class DelegateChronicleChannel implements InternalChronicleChannel, Closeable {
 

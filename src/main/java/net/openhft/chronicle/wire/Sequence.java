@@ -24,7 +24,6 @@ package net.openhft.chronicle.wire;
  * This interface is crucial when dealing with data structures where sequentiality and write positions matter,
  * such as in a message queue.
  * </p>
- * @since 2023-09-11
  */
 public interface Sequence {
 

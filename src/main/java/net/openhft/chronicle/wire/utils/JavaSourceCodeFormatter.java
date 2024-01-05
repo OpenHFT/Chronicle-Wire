@@ -37,7 +37,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * </p>
  *
  * @see SourceCodeFormatter
- * @since 2023-09-16
  */
 public class JavaSourceCodeFormatter extends SourceCodeFormatter {
 

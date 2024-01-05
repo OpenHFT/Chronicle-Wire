@@ -37,7 +37,6 @@ import java.util.stream.Stream;
  * Use the {@link #builder(URL)} method to create an instance of {@link MarshallableOutBuilder} to help construct
  * appropriate implementations based on provided URLs.
  * </p>
- * @since 2023-09-12
  */
 @DontChain
 public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteNotifier {

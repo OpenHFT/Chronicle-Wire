@@ -27,7 +27,6 @@ import org.jetbrains.annotations.Nullable;
  * and providing metadata about the serialized format.
  *
  * @param <T> the type of objects this strategy can handle.
- * @since 2023-09-11
  */
 public interface SerializationStrategy<T> {
 

@@ -51,7 +51,6 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
  * The core capability of this class is to handle JSON data structures as {@code Bytes}
  * objects, allowing for efficient manipulation and parsing.
  * </p>
- * @since 2023-09-12
  */
 public class JSONWire extends TextWire {
 
@@ -756,8 +755,7 @@ public class JSONWire extends TextWire {
      * It provides a specialized context for writing JSON data, adjusting writing positions
      * and handling JSON-specific syntax such as curly braces.
      *
-     * @since 2023-09-12
-     */
+         */
     class JSONWriteDocumentContext extends TextWriteDocumentContext {
         // Position marker to track the start of a JSON object
         private long start;

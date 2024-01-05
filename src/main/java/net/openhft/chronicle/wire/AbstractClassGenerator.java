@@ -39,7 +39,6 @@ import java.util.stream.Collectors;
  * This class leverages the CachedCompiler to dynamically compile and load classes.
  *
  * @param <M> Represents the meta-data associated with the class being generated.
- * @since 2023-09-15
  */
 public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.MetaData<M>> {
 

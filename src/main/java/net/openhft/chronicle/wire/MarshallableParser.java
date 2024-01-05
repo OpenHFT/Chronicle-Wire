@@ -25,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
  * Designed to be used in scenarios where marshalling is required to transform input values into desired data types.
  *
  * @param <T> the type of the object that will be produced after parsing the input value.
- * @since 2023-09-12
  */
 @FunctionalInterface
 public interface MarshallableParser<T> {

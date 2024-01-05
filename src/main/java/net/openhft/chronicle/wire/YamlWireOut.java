@@ -53,7 +53,6 @@ import static net.openhft.chronicle.bytes.BytesStore.empty;
  * This class encapsulates methods and attributes to handle data serialization into YAML format.
  *
  * @param <T> The type that extends YamlWireOut
- * @since 2023-09-13
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire {

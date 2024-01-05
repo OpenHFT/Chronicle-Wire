@@ -49,7 +49,6 @@ import java.util.function.*;
  * update interceptors, and other components.
  *
  * @param <T> The type of the output class.
- * @since 2023-09-11
  */
 public class TextMethodTester<T> implements YamlTester {
 

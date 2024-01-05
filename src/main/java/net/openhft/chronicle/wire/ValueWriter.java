@@ -21,7 +21,6 @@ package net.openhft.chronicle.wire;
  * A functional interface for writing values to a specific output.
  *
  * @param <T> The type of value to be written.
- * @since 2023-09-09
  */
 @FunctionalInterface
 public interface ValueWriter<T> {

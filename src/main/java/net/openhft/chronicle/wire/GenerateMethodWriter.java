@@ -586,8 +586,7 @@ public class GenerateMethodWriter {
      * @param dm            The method whose return type needs to be determined.
      * @param interfaceClazz The interface class relative to which the method's return type is evaluated.
      * @return The class type of the method's return type.
-     * @since 2023-09-13
-     */
+         */
     private Class<?> returnType(Method dm, Class interfaceClazz) {
         Type returnType = GenericReflection.getReturnType(dm, interfaceClazz);
         if (!(returnType instanceof Class))

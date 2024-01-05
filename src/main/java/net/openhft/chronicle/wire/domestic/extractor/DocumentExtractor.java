@@ -36,7 +36,6 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * wire and index.
  *
  * @param <T> The type of data to be extracted from the document.
- * @since 2023-09-16
  */
 @FunctionalInterface
 public interface DocumentExtractor<T> {

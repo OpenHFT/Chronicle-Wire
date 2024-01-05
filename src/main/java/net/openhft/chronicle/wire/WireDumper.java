@@ -186,8 +186,7 @@ public class WireDumper {
      * @param buffer Temporary buffer to assist in dumping the wire entry
      * @param abbrev Boolean value indicating whether to use abbreviated format
      * @return Boolean value indicating whether the dump was successful
-     * @since 2023-08-22
-     */
+         */
     public boolean dumpOne(@NotNull StringBuilder sb, @Nullable Bytes<?> buffer, boolean abbrev) {
         // Read position in the byte buffer for extracting the header
         bytes.readPositionForHeader(wireIn.usePadding());

@@ -49,7 +49,6 @@ import static net.openhft.chronicle.core.UnsafeMemory.*;
  * It utilizes field accessors to read and write values directly to and from the fields of the object.
  *
  * @param <T> The type of the object to be marshalled/unmarshalled.
- * @since 2023-09-08
  */
 public class WireMarshaller<T> {
     private static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};

@@ -26,7 +26,6 @@ package net.openhft.chronicle.wire;
  * offers flexibility and allows users to have granular control over which methods are
  * to be handled under different circumstances.
  * </p>
- * @since 2023-09-12
  */
 @FunctionalInterface
 public interface MethodFilter {

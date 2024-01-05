@@ -27,7 +27,6 @@ import org.jetbrains.annotations.NotNull;
  * It also follows the builder pattern, allowing chained method calls.
  *
  * @param <E> The type parameter extending AbstractEventCfg
- * @since 2023-09-15
  */
 public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMarshallableCfg implements Event<E> {
 

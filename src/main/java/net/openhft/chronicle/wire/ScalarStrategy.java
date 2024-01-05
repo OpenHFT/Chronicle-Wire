@@ -30,7 +30,6 @@ import java.util.function.Function;
  * them using provided functions.
  *
  * @param <T> The type of the scalar value that this strategy handles.
- * @since 2023-09-11
  */
 class ScalarStrategy<T> implements SerializationStrategy<T> {
 

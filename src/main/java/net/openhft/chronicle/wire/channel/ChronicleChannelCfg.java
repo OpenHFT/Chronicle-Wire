@@ -33,7 +33,6 @@ import java.util.Set;
  * specific host configurations, pauser mode, and the length of connection timeout intervals.
  *
  * @param <C> a generic type which extends the ChronicleChannelCfg, enabling fluent method chaining
- * @since 2023-09-15
  */
 public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfDescribingMarshallable {
 

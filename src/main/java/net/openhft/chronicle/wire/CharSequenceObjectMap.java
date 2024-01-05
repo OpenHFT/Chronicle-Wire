@@ -26,7 +26,6 @@ import net.openhft.chronicle.core.util.StringUtils;
  * memory-efficient and performant solution in specific use-cases.
  *
  * @param <T> the type of values to be stored in the map.
- * @since 2023-09-14
  */
 public class CharSequenceObjectMap<T> {
 
