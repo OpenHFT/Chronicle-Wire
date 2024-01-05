@@ -29,8 +29,6 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
  * it's primarily intended for lambda expressions and method references.
  * The {@code @DontChain} annotation indicates a recommendation against chaining
  * methods for implementations of this interface.
- *
- * @since 2023-08-29
  */
 @FunctionalInterface
 @DontChain

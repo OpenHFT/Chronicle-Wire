@@ -21,8 +21,6 @@ package net.openhft.chronicle.wire;
  * Enumerates the different types of tokens that can be found in a YAML document.
  * Each token represents a distinct construct or symbol in YAML, which can be used
  * for tasks such as parsing or tokenization of YAML documents.
- *
- * @since 2023-08-29
  */
 public enum YamlToken {
     NONE,

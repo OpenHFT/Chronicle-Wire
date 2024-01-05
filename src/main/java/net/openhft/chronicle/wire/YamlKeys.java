@@ -26,8 +26,6 @@ import java.util.Arrays;
  *
  * <p>Internally, this class employs a dynamic array resizing strategy to accommodate
  * varying numbers of offsets without a significant overhead in space.
- *
- * @since 2023-08-29
  */
 public class YamlKeys {
     private static final long[] NO_OFFSETS = {};

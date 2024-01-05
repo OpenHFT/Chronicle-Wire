@@ -34,8 +34,6 @@ import java.util.Set;
  * converting a raw YAML input into individual tokens, each representing
  * a distinct construct or symbol in YAML. This class is integral to
  * processes such as parsing or tokenization of YAML documents.
- *
- * @since 2023-08-29
  */
 public class YamlTokeniser {
 

@@ -21,8 +21,6 @@ package net.openhft.chronicle.wire;
  * This is the WriteAfterEOFException class extending IllegalStateException.
  * The exception is thrown when there's an attempt to write data after the End-Of-File (EOF) marker.
  * This is typically used to safeguard against improper file manipulation and to maintain data integrity.
- *
- * @since 2023-08-29
  */
 public class WriteAfterEOFException extends IllegalStateException {
 
