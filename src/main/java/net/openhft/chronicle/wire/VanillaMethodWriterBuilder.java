@@ -40,8 +40,6 @@ import java.util.function.Supplier;
  * It is responsible for constructing method writers based on specified configurations and properties.
  * The class has been designed to support a variety of functionalities like code generation disabling, proxy generation,
  * and method invocation handling among others.
- *
- * @since 2023-09-08
  */
 public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBuilder<T> {
     // Flag name to check whether proxy code generation is disabled

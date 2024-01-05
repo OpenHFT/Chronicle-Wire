@@ -27,8 +27,6 @@ import java.lang.annotation.Target;
  * This annotation indicates that the associated field or parameter should be treated as
  * a {@code Marshallable} type, implying it should be serialized or deserialized accordingly.
  * It can be applied to fields or method parameters to provide metadata about their marshalling behavior.
- *
- * @since 2023-09-15
  */
 @Retention(RetentionPolicy.RUNTIME)  // Indicates that this annotation should be retained at runtime.
 @Target({ElementType.FIELD, ElementType.PARAMETER})  // Specifies that this annotation can be applied to fields and method parameters.

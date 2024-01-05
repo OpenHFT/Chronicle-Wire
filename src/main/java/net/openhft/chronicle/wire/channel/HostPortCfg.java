@@ -7,8 +7,6 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
  *
  * <p>The `HostPortCfg` class is designed to encapsulate the details of a network host's name and its associated port.
  * By default, if the hostname is not provided, it defaults to "localhost".
- *
- * @since 2023-09-15
  */
 public class HostPortCfg extends SelfDescribingMarshallable {
 

@@ -26,8 +26,6 @@ import net.openhft.chronicle.wire.converter.SymbolsLongConverter;
  * It facilitates the transformation between base 66 encoded strings and their corresponding long representations.
  * Specifically, the class can handle either short base 66 encoded strings (of up to 10 characters) or nanosecond timestamps
  * within a specified date range. Note that negative IDs are reserved for application-specific encodings.
- *
- * @since 2023-09-12
  */
 public class IdentifierLongConverter implements LongConverter {
 

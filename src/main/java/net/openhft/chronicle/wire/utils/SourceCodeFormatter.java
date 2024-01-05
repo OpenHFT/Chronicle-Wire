@@ -27,8 +27,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * The formatter aims to enhance code readability by managing indentation for block-level code scopes.
  * It increases the indent on encountering a '{' and decreases on a '}'.
  * All trailing spaces before a newline character are removed to maintain a consistent format.
- *
- * @since 2023-09-16
  */
 public class SourceCodeFormatter implements Appendable, CharSequence {
     private final String indentSpaces;

@@ -32,8 +32,6 @@ import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
 /**
  * Represents an abstraction for the meta-information of a field within a class or interface.
  * Implementations should provide more specific details about the type, nature, and characteristics of the field.
- *
- * @since 2023-09-14
  */
 public interface FieldInfo {
 

@@ -44,8 +44,6 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
  * This interface also provides a set of static utility methods to aid in the manipulation
  * and interpretation of marshallable data, allowing for data comparison, hashing,
  * and serialization to and from string and file representations.
- *
- * @since 2023-09-12
  */
 @DontChain
 public interface Marshallable extends WriteMarshallable, ReadMarshallable, Resettable {

@@ -21,8 +21,6 @@ package net.openhft.chronicle.wire;
  * Enumerates the types of quotation marks.
  * This enum represents the most common quotation marks: none, single, and double.
  * Each enumeration value is associated with its corresponding character representation.
- *
- * @since 2023-09-11
  */
 enum Quotes {
 

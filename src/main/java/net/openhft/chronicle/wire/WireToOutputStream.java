@@ -31,8 +31,6 @@ import java.nio.ByteBuffer;
  * an intermediate {@link Bytes} buffer to temporarily hold data in the Wire format
  * before flushing it to the actual OutputStream.
  * </p>
- *
- * @since 2023-08-22
  */
 public class WireToOutputStream {
 

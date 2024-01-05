@@ -23,8 +23,6 @@ package net.openhft.chronicle.wire;
  * output their data in a marshallable format using the {@link MarshallableOut} interface.
  * Implementers of this interface are expected to provide the logic to transform or serialize their internal
  * state to a format supported by the {@link MarshallableOut} instance provided.
- *
- * @since 2023-09-12
  */
 public interface MethodWriter {
 

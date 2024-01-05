@@ -30,8 +30,6 @@ import java.util.List;
  * name generation, especially concerning interfaces and package names.
  * <p>
  * Note: This class is not intended for instantiation.
- *
- * @since 2023-09-11
  */
 public final class ReflectionUtil {
 

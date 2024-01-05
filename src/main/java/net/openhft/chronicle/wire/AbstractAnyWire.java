@@ -35,8 +35,6 @@ import java.util.function.Supplier;
  * based on the underlying acquisition logic.
  *
  * <p>Note: This class assumes the underlying wire type can be determined dynamically at runtime.</p>
- *
- * @since 2023-09-15
  */
 @SuppressWarnings("rawtypes")
 public abstract class AbstractAnyWire extends AbstractWire implements Wire {

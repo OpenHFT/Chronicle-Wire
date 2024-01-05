@@ -29,8 +29,6 @@ import java.util.Map;
  *
  * A primary use-case for this agitator is in testing scenarios to verify that the overridden values
  * are correctly recognized and processed by YAML consumers.
- *
- * @since 2023-09-16
  */
 public class OverrideFieldAgitator implements YamlAgitator {
 

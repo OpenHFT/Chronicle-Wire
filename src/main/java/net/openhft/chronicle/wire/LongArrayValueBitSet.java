@@ -37,8 +37,6 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 /**
  * Represents a {@code ChronicleBitSet} which is designed to be shared among multiple processes.
  * This implementation aims to minimize locking constraints by being lock-free and avoids resizing support.
- *
- * @since 2023-09-12
  */
 public class LongArrayValueBitSet extends AbstractCloseable implements Marshallable, ChronicleBitSet {
 

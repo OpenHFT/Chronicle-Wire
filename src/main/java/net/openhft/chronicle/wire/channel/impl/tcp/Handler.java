@@ -26,8 +26,6 @@ import java.net.URLStreamHandler;
  * An extension of {@link URLStreamHandler} designed to provide custom handling for specific URL protocols.
  * Currently, this class does not support opening connections and will throw an {@link UnsupportedOperationException}
  * if an attempt is made to open a connection.
- *
- * @since 2023-09-16
  */
 public class Handler extends URLStreamHandler {
 

@@ -27,8 +27,6 @@ import java.util.Objects;
  * This class represents the context for reading a document in textual format.
  * It provides methods and utilities for understanding the structure and boundaries
  * of the document within a given wire format.
- *
- * @since 2023-09-11
  */
 public class TextReadDocumentContext implements ReadDocumentContext {
 

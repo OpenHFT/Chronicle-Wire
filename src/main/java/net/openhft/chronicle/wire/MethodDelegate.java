@@ -25,8 +25,6 @@ package net.openhft.chronicle.wire;
  * augmentation, or decoration of method calls by setting appropriate delegates.
  *
  * @param <OUT> The type of the delegate to which method calls will be forwarded.
- *
- * @since 2023-09-12
  */
 public interface MethodDelegate<OUT> {
 

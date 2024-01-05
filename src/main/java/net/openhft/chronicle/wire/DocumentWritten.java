@@ -23,8 +23,6 @@ package net.openhft.chronicle.wire;
  * to initiate and manage the context in which documents are written. It is crucial
  * to manage the lifecycle of the {@link DocumentContext} correctly, either by using
  * try-with-resources or explicitly invoking the close() method.
- *
- * @since 2023-09-14
  */
 public interface DocumentWritten {
     /**

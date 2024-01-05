@@ -29,8 +29,6 @@ import java.util.stream.Collectors;
 /**
  * This is the GenerateMethodBridge class, extending AbstractClassGenerator with MethodBridgeMetaData.
  * The primary purpose of this class is to generate a bridge for a given method, helping in the dynamic creation of objects.
- *
- * @since 2023-09-14
  */
 public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodBridge.MethodBridgeMetaData> {
 

@@ -31,8 +31,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * An abstract handler for method writer invocations that provides a base implementation.
  * It manages the invocation by mapping methods to their respective parameter holders and writing them to wires.
  * This class can handle both regular and generic events and supports method IDs for binary output.
- *
- * @since 2023-09-15
  */
 public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvocationHandler implements MethodWriterInvocationHandler {
 

@@ -25,8 +25,6 @@ import net.openhft.chronicle.core.io.IORuntimeException;
  * It signifies that there has been a protocol-related issue, especially when the expected protocol requirements
  * aren't met during data exchange or processing. This exception extends {@link IORuntimeException}, indicating
  * that the exception is related to I/O operations, but specifically points to protocol-related problems.
- *
- * @since 2023-09-16
  */
 public class InvalidProtocolException extends IORuntimeException {
 

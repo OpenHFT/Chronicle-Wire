@@ -20,8 +20,6 @@ package net.openhft.chronicle.wire;
 /**
  * Represents a context for reading documents. This interface extends {@code DocumentContext}
  * and provides methods to manipulate the reading limits and positions within a document.
- *
- * @since 2023-09-11
  */
 public interface ReadDocumentContext extends DocumentContext {
 

@@ -28,8 +28,6 @@ import java.util.BitSet;
  * <p>
  * This enum primarily caters to text parsing scenarios, especially when
  * determining the end of specific types or textual blocks.
- *
- * @since 2023-09-11
  */
 enum TextStopCharTesters implements StopCharTester {
 

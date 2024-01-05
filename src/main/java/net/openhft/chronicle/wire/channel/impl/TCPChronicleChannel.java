@@ -47,8 +47,6 @@ import static net.openhft.chronicle.core.io.ClosedIORuntimeException.newIORuntim
  * It provides a channel that communicates over TCP and encapsulates the Chronicle logic for networking, with a focus on
  * initialization, input-output buffer management, and header parsing.
  * The class is designed to work both as an initiator and as an acceptor.
- *
- * @since 2023-09-16
  */
 public class TCPChronicleChannel extends AbstractCloseable implements InternalChronicleChannel {
 

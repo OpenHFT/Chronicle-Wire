@@ -32,8 +32,6 @@ import java.util.Objects;
  * @param <T> the type of the first argument to the operation
  * @param <U> the type of the second argument to the operation
  * @param <V> the type of the third argument to the operation
- *
- * @since 2023-09-11
  */
 @FunctionalInterface
 public interface TriConsumer<T, U, V> {

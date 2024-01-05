@@ -29,8 +29,6 @@ import java.util.Map;
  * <p>
  * A primary use-case for this agitator would be in testing parsers or consumers of the YAML content
  * to ensure they handle and react correctly to missing fields.
- *
- * @since 2023-09-16
  */
 public class MissingFieldAgitator implements YamlAgitator {
 

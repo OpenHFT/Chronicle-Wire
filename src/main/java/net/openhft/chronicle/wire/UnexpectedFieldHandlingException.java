@@ -22,8 +22,6 @@ package net.openhft.chronicle.wire;
  * that arise from {@link ReadMarshallable#unexpectedField(Object, ValueIn)}.
  * Typically, this is thrown when an unexpected field is encountered during marshalling or
  * unmarshalling processes.
- *
- * @since 2023-09-11
  */
 public class UnexpectedFieldHandlingException extends RuntimeException {
 

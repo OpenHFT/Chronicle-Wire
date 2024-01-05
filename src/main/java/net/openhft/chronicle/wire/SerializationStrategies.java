@@ -44,8 +44,6 @@ import static net.openhft.chronicle.wire.BracketType.UNKNOWN;
 /**
  * Enumerates the available serialization strategies, each implementing the {@link SerializationStrategy} interface.
  * These strategies cater to different serialization requirements and support specific object types.
- *
- * @since 2023-09-11
  */
 public enum SerializationStrategies implements SerializationStrategy {
 

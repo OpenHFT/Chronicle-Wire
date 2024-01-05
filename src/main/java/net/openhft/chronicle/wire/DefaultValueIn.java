@@ -42,8 +42,6 @@ import java.util.function.*;
  * This class provides the default implementation for the {@link ValueIn} interface. It's primarily designed
  * to handle default values, converting them into various formats such as text and bytes.
  * The default value is retrieved from an underlying {@link WireIn} source.
- *
- * @since 2023-09-14
  */
 @SuppressWarnings("rawtypes")
 public class DefaultValueIn implements ValueIn {

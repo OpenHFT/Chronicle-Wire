@@ -36,8 +36,6 @@ import static net.openhft.chronicle.wire.WireParser.SKIP_READABLE_BYTES;
 /**
  * The {@code VanillaMethodReaderBuilder} class implements the {@link MethodReaderBuilder} interface.
  * It provides a mechanism to create a method reader for deserializing method calls from a wire input.
- *
- * @since 2023-09-08
  */
 public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 

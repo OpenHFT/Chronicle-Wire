@@ -37,8 +37,6 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 /**
  * A utility class to provide additional functionality and support for streams.
  * This class is not meant to be instantiated.
- *
- * @since 2023-09-15
  */
 public final class StreamsUtil {
 

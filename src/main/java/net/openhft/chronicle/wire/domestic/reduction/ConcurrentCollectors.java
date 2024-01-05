@@ -37,8 +37,6 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * Provides utility methods to obtain concurrent {@code Collector}s that can be used
  * in conjunction with the Java Stream API. These collectors allow for thread-safe
  * accumulation of elements into collections or other aggregate results.
- *
- * @since 2023-09-15
  */
 public final class ConcurrentCollectors {
 

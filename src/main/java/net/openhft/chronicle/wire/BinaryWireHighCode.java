@@ -35,8 +35,6 @@ package net.openhft.chronicle.wire;
  *     <li>{@code FIELD0} and {@code FIELD1} (0xC, 0xD): Represent fields.</li>
  *     <li>{@code STR0} and {@code STR1} (0xE, 0xF): Represent string types.</li>
  * </ul>
- *
- * @since 2023-09-14
  */
 public enum BinaryWireHighCode {
     ; // none

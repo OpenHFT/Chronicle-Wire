@@ -32,8 +32,6 @@ import org.jetbrains.annotations.NotNull;
  * intended to be used primarily for lambda expressions and method references.
  * Furthermore, the {@code @DontChain} annotation suggests that implementations should
  * not be chained for certain operations.
- *
- * @since 2023-08-29
  */
 @FunctionalInterface
 @DontChain

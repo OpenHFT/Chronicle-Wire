@@ -22,8 +22,6 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 /**
  * Represents a parselet to process field numbers in a wire format.
  * Implementations should provide logic to read data based on the field number from a wire input source.
- *
- * @since 2023-09-14
  */
 public interface FieldNumberParselet {
 

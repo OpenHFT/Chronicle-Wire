@@ -33,8 +33,6 @@ import java.util.stream.Stream;
  * This is the GenerateJsonSchemaMain class.
  * Its primary function is to generate a JSON schema based on the provided set of classes.
  * The generated JSON schema represents the structure and types of the specified classes.
- *
- * @since 2023-09-14
  */
 public class GenerateJsonSchemaMain {
 

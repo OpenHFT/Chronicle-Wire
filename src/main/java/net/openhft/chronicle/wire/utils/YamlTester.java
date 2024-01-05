@@ -39,8 +39,6 @@ import java.util.function.Function;
  *         of the output changes while committing.</li>
  *     <li><b>base.tests</b>: If set to true, only the base tests are executed, skipping the generated tests.</li>
  * </ul>
- *
- * @since 2023-09-16
  */
 public interface YamlTester {
     /**

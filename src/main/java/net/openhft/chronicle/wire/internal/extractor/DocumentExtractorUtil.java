@@ -35,8 +35,6 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * A utility class offering static methods to assist in the process of extracting documents.
  * The class serves as a hub for constructing specific types of document extractors using
  * various parameters such as method references, suppliers, and type specifications.
- *
- * @since 2023-09-15
  */
 public final class DocumentExtractorUtil {
 

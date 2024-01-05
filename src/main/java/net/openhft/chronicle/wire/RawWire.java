@@ -50,8 +50,6 @@ import java.util.function.*;
  * Represents a wire type that focuses on writing pure data, omitting any metadata.
  * The {@code RawWire} class is specifically designed for efficient binary serialization
  * where headers and other metadata might not be necessary.
- *
- * @since 2023-09-11
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class RawWire extends AbstractWire implements Wire {

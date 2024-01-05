@@ -44,8 +44,6 @@ import java.util.function.Function;
  * By extending {@link ChronicleContext} and implementing {@link Closeable} and {@link Runnable}, instances of this class
  * have the ability to manage their lifecycle autonomously and can operate in individual threads. Configuration of the Gateway
  * can be done utilizing system properties.
- *
- * @since 2023-09-15
  */
 public class ChronicleGatewayMain extends ChronicleContext implements Closeable, Runnable {
 

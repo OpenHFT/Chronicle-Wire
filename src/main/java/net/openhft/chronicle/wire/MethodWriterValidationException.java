@@ -23,8 +23,6 @@ package net.openhft.chronicle.wire;
  * in generating a {@link MethodWriter}. This exception type prevents falling back to the default proxy
  * implementation. It is typically thrown when there are invalid conditions or configurations related to
  * {@link MethodWriter} creation.
- *
- * @since 2023-09-12
  */
 public class MethodWriterValidationException extends IllegalArgumentException {
 

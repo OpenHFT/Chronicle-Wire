@@ -22,8 +22,6 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
  * The AbstractFieldInfo class serves as an abstract foundation for field information.
  * It implements the FieldInfo interface and provides basic implementations for some of the interface's methods.
  * This class contains the core properties of a field, including its name, type, and bracket type.
- *
- * @since 2023-09-15
  */
 @SuppressWarnings("rawtypes")
 public abstract class AbstractFieldInfo implements FieldInfo {

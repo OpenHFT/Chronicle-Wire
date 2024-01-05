@@ -23,8 +23,6 @@ package net.openhft.chronicle.wire;
  * <p>This class is an extension of the {@link AbstractLongConverter} and leverages its methods
  * to perform the conversion tasks. Designed as a singleton, this class ensures a single instance
  * is used throughout the application, ensuring both consistency and thread-safety.
- *
- * @since 2023-09-12
  * @see AbstractLongConverter
  */
 public class HexadecimalLongConverter extends AbstractLongConverter {

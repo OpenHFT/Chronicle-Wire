@@ -24,8 +24,6 @@ import net.openhft.chronicle.core.io.IORuntimeException;
  * It defines methods to interact with the underlying source context, particularly in terms of accessing its source ID
  * and the last read index. Implementations of this interface are expected to handle source contexts which could be used
  * in various scenarios like I/O operations, data streaming, or context management.
- *
- * @since 2023-09-11
  */
 public interface SourceContext {
 

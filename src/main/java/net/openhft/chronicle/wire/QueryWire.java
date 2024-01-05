@@ -43,8 +43,6 @@ import java.util.function.BiFunction;
  * It extends the TextWire class and provides custom implementations for reading fields and consuming padding
  * in the context of URL query strings. Specialized value input and output handlers, namely {@code QueryValueIn}
  * and {@code QueryValueOut}, are used to manage the specific intricacies of the query string format.
- *
- * @since 2023-09-11
  */
 @SuppressWarnings("rawtypes")
 public class QueryWire extends TextWire {

@@ -32,8 +32,6 @@ import java.util.Objects;
  * Represents field information for object fields, extending the generic field information capabilities
  * provided by {@link UnsafeFieldInfo}. This class offers direct memory access functionality to get and set
  * object values in objects, leveraging unsafe operations for performance enhancement.
- *
- * @since 2023-09-15
  */
 public final class ObjectFieldInfo extends UnsafeFieldInfo {
 

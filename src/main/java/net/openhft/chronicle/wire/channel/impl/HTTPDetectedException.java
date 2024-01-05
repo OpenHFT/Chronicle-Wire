@@ -23,8 +23,6 @@ package net.openhft.chronicle.wire.channel.impl;
  * It represents an exception condition where HTTP-related data or structures are encountered unexpectedly.
  * Given that this exception extends {@link InvalidProtocolException}, it denotes an issue where the HTTP protocol
  * was detected when it shouldn't have been or in a context where it was not expected.
- *
- * @since 2023-09-16
  */
 public class HTTPDetectedException extends InvalidProtocolException {
 

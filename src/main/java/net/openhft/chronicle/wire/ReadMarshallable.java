@@ -39,8 +39,6 @@ import org.jetbrains.annotations.NotNull;
  *
  * @apiNote This interface is marked as a functional interface, which means it is intended
  * primarily to be used as a lambda or method reference.
- *
- * @since 2023-09-11
  */
 @FunctionalInterface
 @DontChain

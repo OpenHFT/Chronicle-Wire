@@ -24,8 +24,6 @@ import org.jetbrains.annotations.NotNull;
  * Provides utility functions to control the logging of Yaml messages, which can be
  * useful for debugging or generating documentation. The logging settings can be toggled
  * using system properties or programmatically through this class's static methods.
- *
- * @since 2023-08-29
  */
 // TODO Add tests
 public enum YamlLogging {

@@ -44,8 +44,6 @@ import static net.openhft.chronicle.wire.channel.impl.TCPChronicleChannel.valida
  * <p>
  * The class utilizes a background writer thread, which is responsible for asynchronously handling
  * data operations to improve the overall performance and responsiveness of the channel.
- *
- * @since 2023-09-16
  */
 public class BufferedChronicleChannel extends DelegateChronicleChannel {
     private static final boolean ALLOW_AFFINITY = Jvm.getBoolean("useAffinity", true);

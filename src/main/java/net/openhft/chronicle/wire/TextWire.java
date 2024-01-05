@@ -59,8 +59,6 @@ import static net.openhft.chronicle.wire.Wires.THROW_CNFRE;
  *
  * <p><b>Important:</b> Some configurations and methods in this class are marked as deprecated
  * and are slated for removal in future versions, suggesting that its behavior might evolve in future releases.</p>
- *
- * @since 2023-09-11
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TextWire extends YamlWireOut<TextWire> {

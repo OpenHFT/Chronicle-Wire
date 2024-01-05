@@ -27,8 +27,6 @@ import java.util.BitSet;
  * This class provides methods to directly interact with the underlying word storage
  * and related metadata of a BitSet. It leverages reflection to access private fields
  * and therefore, should be used with caution.
- *
- * @since 2023-09-14
  */
 final class BitSetUtil {
 

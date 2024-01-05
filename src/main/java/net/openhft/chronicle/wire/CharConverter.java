@@ -24,8 +24,6 @@ package net.openhft.chronicle.wire;
  * <p>
  * Implementations can use this interface to create custom representations or transformations
  * for characters as needed.
- *
- * @since 2023-09-14
  */
 public interface CharConverter {
 

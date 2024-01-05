@@ -29,8 +29,6 @@ import java.util.regex.Pattern;
  * <p>
  * A typical use-case might involve testing the resilience of parsers or consumers of the YAML content against
  * missing data.
- *
- * @since 2023-09-16
  */
 public class MessageMissingAgitator implements YamlAgitator {
 

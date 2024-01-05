@@ -50,8 +50,6 @@ import static net.openhft.chronicle.core.util.GenericReflection.getParameterType
 /**
  * This is the GenerateMethodWriter class responsible for generating method writer code.
  * It provides utility methods and configurations to facilitate the dynamic generation of method writers.
- *
- * @since 2023-09-13
  */
 @SuppressWarnings("StringBufferReplaceableByString")
 public class GenerateMethodWriter {

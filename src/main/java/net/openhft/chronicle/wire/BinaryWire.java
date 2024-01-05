@@ -67,8 +67,6 @@ import static net.openhft.chronicle.wire.Wires.THROW_CNFRE;
  * various configurations such as field representation, delta support, and compression settings.
  * Extends the `AbstractWire` and implements the `Wire` interface to ensure compatibility and a common API
  * with other wire formats.
- *
- * @since 2023-09-14
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class BinaryWire extends AbstractWire implements Wire {

@@ -29,8 +29,6 @@ import java.util.regex.Pattern;
  * The agitator applies the specified regex pattern to identify and replace matching segments
  * within the YAML content. This class is useful for scenarios where you need to modify
  * or sanitize certain patterns within YAML strings, especially in testing and validation contexts.
- *
- * @since 2023-09-16
  */
 public class RegexFieldAgitator implements YamlAgitator {
 

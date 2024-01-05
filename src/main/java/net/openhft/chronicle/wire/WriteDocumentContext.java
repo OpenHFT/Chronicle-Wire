@@ -22,8 +22,6 @@ package net.openhft.chronicle.wire;
  * It defines methods related to the writing context of a document.
  * The interface offers features to determine metadata status, check if elements are chained,
  * and discern if the document context is empty or not.
- *
- * @since 2023-08-29
  */
 public interface WriteDocumentContext extends DocumentContext {
 

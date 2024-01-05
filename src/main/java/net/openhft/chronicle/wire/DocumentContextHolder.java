@@ -25,8 +25,6 @@ import org.jetbrains.annotations.Nullable;
  * This is the DocumentContextHolder class which implements both {@link DocumentContext}
  * and {@link WriteDocumentContext}. It acts as a wrapper or a delegate around an instance of
  * {@link DocumentContext}, providing methods to interact with the encapsulated context.
- *
- * @since 2023-09-14
  */
 public class DocumentContextHolder implements DocumentContext, WriteDocumentContext {
 

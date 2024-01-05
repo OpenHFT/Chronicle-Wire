@@ -28,8 +28,6 @@ import java.lang.annotation.Target;
  * relevant information about the annotated element at runtime.
  * <p>
  * Being retained at runtime, it can be inspected via reflection to influence behavior based on the comment's content.
- *
- * @since 2023-09-14
  */
 @Retention(RetentionPolicy.RUNTIME)  // This annotation is available at runtime.
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})  // Specifies the kinds of elements this annotation can be applied to.

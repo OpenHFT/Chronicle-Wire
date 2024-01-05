@@ -24,8 +24,6 @@ import java.util.List;
  * Represents a stack structure specifically designed to manage {@link ValueInState} instances.
  * The primary purpose of this class is to provide an organized way to manage and retrieve states
  * at different levels, and efficiently reuse them without constant instantiation.
- *
- * @since 2023-09-09
  */
 class ValueInStack {
 

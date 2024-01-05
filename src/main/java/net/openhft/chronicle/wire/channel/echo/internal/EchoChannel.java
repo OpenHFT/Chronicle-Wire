@@ -35,8 +35,6 @@ import net.openhft.chronicle.wire.converter.NanoTime;
  * implements the {@link ChronicleChannel} interface. The primary responsibility of this class is
  * to manage the reading and writing of documents to a {@link Wire} while keeping track of test messages
  * and headers.
- *
- * @since 2023-09-16
  */
 public class EchoChannel extends SimpleCloseable implements ChronicleChannel {
 

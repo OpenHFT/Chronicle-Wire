@@ -21,8 +21,6 @@ package net.openhft.chronicle.wire;
  * Represents a container for raw textual data.
  * The primary purpose of this class is to encapsulate a text
  * while providing a simple structure for raw text handling.
- *
- * @since 2023-09-11
  */
 class RawText {
     // The encapsulated raw textual data

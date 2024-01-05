@@ -31,8 +31,6 @@ import java.util.function.Supplier;
  * Represents a wire type that can be either {@code TextWire} or {@code BinaryWire}.
  * The specific wire type is determined dynamically based on the provided bytes.
  * This class provides flexibility in reading from wires that could be in either format.
- *
- * @since 2023-09-11
  */
 @SuppressWarnings("rawtypes")
 public class ReadAnyWire extends AbstractAnyWire implements Wire {

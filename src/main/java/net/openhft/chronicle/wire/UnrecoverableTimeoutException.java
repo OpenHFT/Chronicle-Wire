@@ -25,8 +25,6 @@ import org.jetbrains.annotations.NotNull;
  * This exception extends the {@link IllegalStateException} to represent that the
  * system or application is in a state where the timeout cannot be handled in a
  * conventional manner.
- *
- * @since 2023-09-11
  */
 public class UnrecoverableTimeoutException extends IllegalStateException {
 

@@ -36,8 +36,6 @@ import java.nio.file.StandardCopyOption;
  * of options and configurations set during instantiation.
  * The class is designed to handle output operations to a file represented by a URL and manages
  * the lifecycle of the associated Wire data structure.
- *
- * @since 2023-09-16
  */
 public class FileMarshallableOut implements MarshallableOut {
 

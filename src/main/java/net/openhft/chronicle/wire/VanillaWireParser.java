@@ -35,8 +35,6 @@ import java.util.TreeMap;
  * <p>
  * This parser uses a default consumer to handle unmatched entries and a field number parselet for numbered fields.
  * </p>
- *
- * @since 2023-09-08
  */
 public class VanillaWireParser implements WireParser {
 

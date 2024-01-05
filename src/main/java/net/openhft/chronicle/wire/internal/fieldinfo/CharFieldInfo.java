@@ -29,8 +29,6 @@ import java.lang.reflect.Field;
  * Represents field information for character fields, extending the generic field information capabilities
  * provided by {@link UnsafeFieldInfo}. It offers direct memory access functionality to get and set
  * character values in objects, leveraging unsafe operations for performance.
- *
- * @since 2023-09-15
  */
 public final class CharFieldInfo extends UnsafeFieldInfo {
 

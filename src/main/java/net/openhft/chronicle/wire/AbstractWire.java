@@ -44,8 +44,6 @@ import static net.openhft.chronicle.wire.Wires.*;
 /**
  * Represents the AbstractWire class which serves as a base for all Wire implementations.
  * This class provides fundamental shared behaviors, configurations, and initializations for Wire types.
- *
- * @since 2023-08-22
  */
 public abstract class AbstractWire implements Wire {
 

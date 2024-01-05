@@ -27,8 +27,6 @@ import org.jetbrains.annotations.NotNull;
  * It maps fields by their name (both in their original form and lower-cased) for easy access.
  * It overrides the method to read marshallable objects and provides specialized logic to
  * handle unexpected fields that might be present in the data source.
- *
- * @since 2023-09-07
  */
 public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
     // Map for storing fields based on their names.

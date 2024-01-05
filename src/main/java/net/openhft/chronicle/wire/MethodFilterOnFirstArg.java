@@ -28,8 +28,6 @@ package net.openhft.chronicle.wire;
  * where performance is crucial, and not every method needs to be processed.
  * </p>
  * @param <T> the type of the first argument that the method receives
- *
- * @since 2023-09-12
  */
 @FunctionalInterface
 public interface MethodFilterOnFirstArg<T> {

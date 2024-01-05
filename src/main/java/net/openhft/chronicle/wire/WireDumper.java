@@ -26,8 +26,6 @@ import org.jetbrains.annotations.Nullable;
 /**
  * The WireDumper class provides utility methods to obtain a human-readable dump representation of {@link WireIn} content.
  * This class can operate on different WireIn or Bytes inputs and is designed to facilitate debugging and logging.
- *
- * @since 2023-09-08
  */
 public class WireDumper {
 

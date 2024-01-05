@@ -29,8 +29,6 @@ import java.lang.reflect.Field;
  * Represents field information for long fields, extending the generic field information capabilities
  * provided by {@link UnsafeFieldInfo}. This class offers direct memory access functionality to get and set
  * long values in objects, leveraging unsafe operations for performance enhancement.
- *
- * @since 2023-09-15
  */
 public final class LongFieldInfo extends UnsafeFieldInfo {
 

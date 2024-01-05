@@ -46,8 +46,6 @@ import java.util.function.BiConsumer;
  * This class provides a consistent hashing mechanism by leveraging a predefined set of constants and algorithms.
  * Instances are stored in a {@code ThreadLocal} to ensure thread-safety and optimized access across the application.
  * </p>
- *
- * @since 2023-09-12
  * @see WriteMarshallable
  */
 @SuppressWarnings("rawtypes")

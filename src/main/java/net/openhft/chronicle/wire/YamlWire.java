@@ -50,8 +50,6 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
  * Represents a YAML-based wire format designed for efficient parsing and serialization of data.
  * The YamlWire class extends YamlWireOut and utilizes a custom tokenizer to convert YAML tokens into byte sequences.
  * It provides utility methods to read from and write to both byte buffers and files.
- *
- * @since 2023-09-13
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class YamlWire extends YamlWireOut<YamlWire> {

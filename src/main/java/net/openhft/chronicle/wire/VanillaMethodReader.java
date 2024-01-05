@@ -46,8 +46,6 @@ import static net.openhft.chronicle.wire.VanillaWireParser.SKIP_READABLE_BYTES;
  * This is the VanillaMethodReader class implementing the MethodReader interface.
  * The class primarily handles reading methods from a MarshallableIn source and provides related utilities.
  * It works with WireParselet, MethodReaderInterceptorReturns, and other constructs to facilitate the reading process.
- *
- * @since 2023-08-22
  */
 public class VanillaMethodReader implements MethodReader {
 

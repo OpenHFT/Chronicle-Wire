@@ -25,8 +25,6 @@ package net.openhft.chronicle.wire;
  * <p>This can be useful as a sentinel value or placeholder to avoid null checks in code
  * that works with document contexts. Using `NoDocumentContext.INSTANCE` denotes
  * a guaranteed uninitialized state for a document context.
- *
- * @since 2023-09-11
  */
 public enum NoDocumentContext implements DocumentContext {
     /** The singleton instance of the NoDocumentContext */

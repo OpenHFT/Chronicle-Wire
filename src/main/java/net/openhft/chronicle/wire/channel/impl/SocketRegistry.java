@@ -39,8 +39,6 @@ import java.util.concurrent.ConcurrentSkipListMap;
  * It provides a simplified representation of the net.openhft.chronicle.network.TCPRegistry, designed specifically for the tested use cases.
  * The primary functions of this class are to manage and provide server and client socket channels based on the given inputs.
  * It also maintains a collection of all opened closeable resources, ensuring they are closed properly upon shutting down the registry.
- *
- * @since 2023-09-16
  */
 public class SocketRegistry extends AbstractCloseable {
 

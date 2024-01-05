@@ -29,8 +29,6 @@ import java.nio.ByteBuffer;
  * The InputStreamToWire class provides functionality to read data from an InputStream and convert it to a Wire representation.
  * This class encapsulates Bytes, Wire, and DataInputStream instances to achieve this conversion, ensuring the data
  * integrity and readability in the wire format.
- *
- * @since 2023-09-12
  */
 public class InputStreamToWire {
 

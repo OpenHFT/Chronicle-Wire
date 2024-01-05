@@ -32,8 +32,6 @@ import java.util.List;
  * It extends the generic TextWire format to specifically handle the parsing and representation
  * of data in the CSV format. This class provides functionalities for reading from a CSV
  * formatted byte source and handling the common aspects of this format like escaping, headers, etc.
- *
- * @since 2023-09-14
  */
 public class CSVWire extends TextWire {
 

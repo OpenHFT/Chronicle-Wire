@@ -24,8 +24,6 @@ import org.jetbrains.annotations.NotNull;
  * This is the KeyedMarshallable interface.
  * Implementations of this interface can marshal their keys into {@code Bytes} objects.
  * The default method provided allows for writing the key of the current instance into the provided {@code Bytes} object by leveraging the {@code Wires.writeKey} method.
- *
- * @since 2023-09-12
  */
 public interface KeyedMarshallable {
 

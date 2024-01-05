@@ -34,8 +34,6 @@ import java.util.function.Supplier;
  * This class represents an invocation handler specifically for text method writers. It extends the
  * AbstractMethodWriterInvocationHandler to implement method call behavior for text-based method writers.
  * It mainly converts method calls to textual data using the provided MarshallableOut.
- *
- * @since 2023-09-11
  */
 public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvocationHandler {
     @NotNull

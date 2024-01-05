@@ -6,8 +6,6 @@ package net.openhft.chronicle.wire;
  * based on specific criteria or conditions.
  * The purpose of the validate method is to ensure the correctness or suitability
  * of the object in question.
- *
- * @since 2023-09-11
  */
 public interface Validate {
 

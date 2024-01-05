@@ -37,8 +37,6 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  * This is the LongValueBitSet class extending AbstractCloseable.
  * This class represents a BitSet designed to be shared across processes without requiring locks.
  * It has been implemented as a lock-free solution and does not support resizing.
- *
- * @since 2023-09-12
  */
 public class LongValueBitSet extends AbstractCloseable implements Marshallable, ChronicleBitSet {
 

@@ -26,8 +26,6 @@ import java.util.function.Supplier;
 /**
  * This is the BinaryMethodWriterInvocationHandler class which extends the AbstractMethodWriterInvocationHandler.
  * It handles method invocations specific to binary writing scenarios with optional metadata support.
- *
- * @since 2023-09-15
  */
 public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInvocationHandler {
     @NotNull

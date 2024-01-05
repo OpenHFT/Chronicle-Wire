@@ -30,8 +30,6 @@ import java.io.Closeable;
  * lifecycle such as open, close, and reset.
  * <p>
  * Implementations must ensure proper handling of resources and consistency of the document state.
- *
- * @since 2023-09-14
  */
 public interface DocumentContext extends Closeable, SourceContext {
     DocumentContext NOOP = Mocker.ignored(DocumentContext.class);

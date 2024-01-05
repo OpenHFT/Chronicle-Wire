@@ -28,8 +28,6 @@ import static net.openhft.chronicle.wire.Wires.toIntU30;
  * This class provides facilities to start, query, and manage the state of binary
  * documents that are currently being written. The binary format uses headers to
  * denote meta data, data length, and completion status.
- *
- * @since 2023-09-14
  */
 public class BinaryWriteDocumentContext implements WriteDocumentContext {
 

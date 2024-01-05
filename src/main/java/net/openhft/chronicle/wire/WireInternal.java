@@ -49,8 +49,6 @@ import static net.openhft.chronicle.wire.Wires.toIntU30;
  * and internal configurations to support wire operations. This enum does not have any
  * direct instances (as signified by the empty enum declaration). Instead, it serves as
  * a container for static members.
- *
- * @since 2023-09-08
  */
 public enum WireInternal {
     ; // none

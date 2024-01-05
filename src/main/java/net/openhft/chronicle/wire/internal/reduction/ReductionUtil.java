@@ -40,8 +40,6 @@ import static java.util.Objects.requireNonNull;
  * The ReductionUtil class provides utility methods and inner classes related to the reduction process.
  * It offers functionalities to work with marshallable objects and listeners to read excerpts
  * from documents and perform various reduction operations on them.
- *
- * @since 2023-09-15
  */
 public final class ReductionUtil {
 

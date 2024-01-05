@@ -21,8 +21,6 @@ package net.openhft.chronicle.wire;
  * Represents the type of bracketing used, especially useful for indicating structures
  * like maps and sequences. This enumeration can be leveraged to denote the type or absence
  * of bracketing in specific contexts.
- *
- * @since 2023-09-14
  */
 public enum BracketType {
 

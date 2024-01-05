@@ -23,8 +23,6 @@ package net.openhft.chronicle.wire;
  *
  * This class extends the {@link AbstractCommonMarshallable} to provide common functionalities
  * shared among marshallables.
- *
- * @since 2023-09-14
  */
 public abstract class BytesInBinaryMarshallable extends AbstractCommonMarshallable {
 

@@ -17,8 +17,6 @@ import java.util.function.BooleanSupplier;
  * This is the ChronicleChannelUtils class.
  * The class provides utility methods related to operations and handling of the {@link ChronicleChannel}.
  * Designed as a purely static utility class, it should not be instantiated.
- *
- * @since 2023-09-16
  */
 public final class ChronicleChannelUtils {
 

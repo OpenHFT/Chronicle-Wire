@@ -33,8 +33,6 @@ import java.lang.reflect.InvocationTargetException;
  * This approach ensures a clear mechanism to obtain a new object instance from the serialized data.
  * The interface also provides a utility to instantiate objects of implementing classes using the
  * appropriate constructor.
- *
- * @since 2023-09-14
  */
 public interface Demarshallable {
 

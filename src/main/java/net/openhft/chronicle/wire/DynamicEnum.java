@@ -27,8 +27,6 @@ import java.util.List;
  * Represents a dynamic enumeration which can either be a traditional {@code Enum} or a class
  * possessing a {@code String name} field. The interface extends both {@link CoreDynamicEnum} and
  * {@link Marshallable}, facilitating serialization and specific dynamic enumeration operations.
- *
- * @since 2023-09-14
  */
 public interface DynamicEnum extends CoreDynamicEnum, Marshallable {
 

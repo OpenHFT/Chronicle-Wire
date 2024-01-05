@@ -22,8 +22,6 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Represents the state associated with a particular input value.
  * This class is primarily designed to manage unexpected inputs and the position of these unexpected values.
- *
- * @since 2023-09-09
  */
 class ValueInState {
 

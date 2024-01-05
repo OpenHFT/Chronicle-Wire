@@ -34,8 +34,6 @@ import java.nio.BufferUnderflowException;
  * <p>
  * Note: While it's not strictly thread-safe, it's expected to still produce correct results.
  * </p>
- *
- * @since 2023-09-16
  * @author peter.lawrey
  */
 @SuppressWarnings({"rawtypes", "unchecked"})

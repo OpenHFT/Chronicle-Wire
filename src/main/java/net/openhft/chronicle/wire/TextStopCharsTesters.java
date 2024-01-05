@@ -25,8 +25,6 @@ import net.openhft.chronicle.bytes.StopCharsTester;
  * <p>
  * Each tester in this enum can take into account the current character as well as a peek
  * at the next character to decide if it should signal a stop.
- *
- * @since 2023-09-11
  */
 enum TextStopCharsTesters implements StopCharsTester {
     STRICT_END_OF_TEXT {

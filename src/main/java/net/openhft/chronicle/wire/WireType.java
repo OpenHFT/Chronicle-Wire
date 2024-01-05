@@ -56,8 +56,6 @@ import static net.openhft.chronicle.core.io.IOTools.*;
  * such as DeltaWire and DefaultZeroWire. It also provides methods to acquire bytes,
  * useful in serialization operations.
  * </p>
- *
- * @since 2023-08-29
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {

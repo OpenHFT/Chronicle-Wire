@@ -66,8 +66,6 @@ import static net.openhft.chronicle.wire.WireType.YAML_ONLY;
  * It defines flags, masks, and utility methods that facilitate operations on wires.
  * For example, it provides constants like {@code NOT_COMPLETE} to indicate a wire message's completeness status.
  * This enum doesn't have any specific enumeration values but provides a utility-based structure.
- *
- * @since 2023-08-22
  */
 public enum Wires {
     ; // No specific enumeration values

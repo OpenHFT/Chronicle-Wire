@@ -34,8 +34,6 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * The ToDoubleDocumentExtractor functional interface is designed for extracting
  * double values from documents based on a given wire and index. This interface provides
  * methods for transformations and mapping to different object types after extraction.
- *
- * @since 2023-09-16
  */
 @FunctionalInterface
 public interface ToDoubleDocumentExtractor {

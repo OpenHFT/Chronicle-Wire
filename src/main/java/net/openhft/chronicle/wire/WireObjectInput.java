@@ -30,8 +30,6 @@ import java.io.ObjectInput;
  * It is designed to read objects and data from a WireIn instance. The class provides
  * methods to read an object, bytes, and other basic data types, ensuring that the data is
  * retrieved correctly from the underlying wire instance.
- *
- * @since 2023-09-07
  */
 class WireObjectInput implements ObjectInput {
     private final WireIn wire;

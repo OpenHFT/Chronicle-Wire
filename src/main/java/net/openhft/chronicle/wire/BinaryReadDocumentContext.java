@@ -32,8 +32,6 @@ import static net.openhft.chronicle.wire.Wires.lengthOf;
  * This is the BinaryReadDocumentContext class which implements the ReadDocumentContext interface.
  * It provides an implementation tailored for reading from binary document contexts and ensures
  * full read capability if required.
- *
- * @since 2023-09-15
  */
 public class BinaryReadDocumentContext implements ReadDocumentContext {
 

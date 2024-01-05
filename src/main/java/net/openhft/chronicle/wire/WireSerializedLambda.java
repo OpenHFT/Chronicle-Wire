@@ -34,8 +34,6 @@ import java.util.List;
  * serialize it using the Wire format. It uses Java's {@link SerializedLambda} mechanism
  * to capture details about the lambda and then writes those details to a Wire format.
  * </p>
- *
- * @since 2023-08-29
  */
 @SuppressWarnings("rawtypes")
 public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {

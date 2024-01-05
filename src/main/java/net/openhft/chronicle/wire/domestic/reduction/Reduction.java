@@ -38,8 +38,6 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * This is the Reduction interface which extends ExcerptListener.
  * It provides a means to consume excerpts from a given wire and apply reductions on them.
  * The implementations of this interface should be thread-safe, especially if they are referenced as an {@link ExcerptListener}.
- *
- * @since 2023-09-16
  */
 public interface Reduction<T> extends ExcerptListener {
 

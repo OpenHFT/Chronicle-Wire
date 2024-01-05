@@ -51,8 +51,6 @@ import java.util.function.Function;
  * This class is a type of {@link SelfDescribingMarshallable} and implements the {@link Closeable}
  * interface. As a result, instances of this class can manage their own lifecycle.
  * It allows configuration through marshalling and can be controlled via system properties.
- *
- * @since 2023-09-15
  */
 public class ChronicleServiceMain extends SelfDescribingMarshallable implements Closeable {
     int port;  // The port on which the server listens for incoming connections

@@ -29,8 +29,6 @@ import java.lang.reflect.Field;
  * Represents field information for integer fields, extending the generic field information capabilities
  * provided by {@link UnsafeFieldInfo}. It offers direct memory access functionality to get and set
  * integer values in objects, leveraging unsafe operations for enhanced performance.
- *
- * @since 2023-09-15
  */
 public final class IntFieldInfo extends UnsafeFieldInfo {
 

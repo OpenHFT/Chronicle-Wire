@@ -38,8 +38,6 @@ import java.util.function.Predicate;
  * This class leverages the builder pattern, enabling a fluent and intuitive setup of testing parameters.
  * Each method within this class is designed to either set a specific configuration or retrieve a particular value,
  * enhancing clarity and simplifying the process of parameter setup.
- *
- * @since 2023-09-16
  */
 public class YamlTesterParametersBuilder<T> {
 

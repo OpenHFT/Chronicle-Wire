@@ -39,8 +39,6 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  * This is the AbstractGeneratedMethodReader class implementing the MethodReader interface.
  * It serves as a base class for generated method readers, providing foundational functionality
  * and utility methods to facilitate method reading.
- *
- * @since 2023-09-15
  */
 public abstract class AbstractGeneratedMethodReader implements MethodReader {
 

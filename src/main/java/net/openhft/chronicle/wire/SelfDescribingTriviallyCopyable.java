@@ -32,8 +32,6 @@ import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
  * Represents a self-describing object that is trivially copyable, extending the functionality of {@link SelfDescribingMarshallable}.
  * The class provides mechanisms to efficiently manage the internal data layout of an instance based on various data types
  * such as longs, ints, shorts, and bytes. The layout is determined using a description integer.
- *
- * @since 2023-09-11
  */
 public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMarshallable {
 

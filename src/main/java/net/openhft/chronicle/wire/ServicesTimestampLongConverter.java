@@ -33,8 +33,6 @@ import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
  * units: nanoseconds (ns), microseconds (us), and milliseconds (ms). The preferred time unit can be
  * specified system-wide using the 'service.time.unit' system property. If not explicitly set, the default
  * unit will be nanoseconds.
- *
- * @since 2023-09-11
  */
 public class ServicesTimestampLongConverter implements LongConverter {
 

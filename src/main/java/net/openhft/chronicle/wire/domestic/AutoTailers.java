@@ -38,8 +38,6 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * <p>
  * The {@code AutoTailers} class provides static methods and inner interfaces to aid in the creation
  * and management of tailers and related event handlers.
- *
- * @since 2023-09-15
  */
 public final class AutoTailers {
 

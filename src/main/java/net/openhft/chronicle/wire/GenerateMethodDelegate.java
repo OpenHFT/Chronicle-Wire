@@ -27,8 +27,6 @@ import java.util.stream.Collectors;
 /**
  * This is the GenerateMethodDelegate class, extending AbstractClassGenerator with GMDMetaData.
  * The class is responsible for generating method delegates using the provided metadata.
- *
- * @since 2023-09-14
  */
 public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMethodDelegate.GMDMetaData> {
 

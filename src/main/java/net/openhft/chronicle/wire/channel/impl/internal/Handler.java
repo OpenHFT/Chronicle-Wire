@@ -26,8 +26,6 @@ import java.net.URLStreamHandler;
  * An extension of {@link URLStreamHandler} that facilitates custom handling for specific URL protocols.
  * This class ensures that its package is registered as a URL protocol handler, specifically for handling
  * URLs with the pattern "JavaFxCss:/path".
- *
- * @since 2023-09-16
  */
 public class Handler extends URLStreamHandler {
 

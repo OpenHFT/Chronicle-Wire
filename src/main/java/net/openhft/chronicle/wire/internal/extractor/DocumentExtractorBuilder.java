@@ -30,8 +30,6 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 /**
  * Responsible for building and configuring document extractors for a specified type {@code E}.
  * This class provides flexibility in the extraction process, enabling efficient document extraction.
- *
- * @since 2023-09-15
  */
 public final class DocumentExtractorBuilder<E> implements DocumentExtractor.Builder<E> {
 

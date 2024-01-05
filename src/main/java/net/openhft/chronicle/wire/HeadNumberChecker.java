@@ -23,8 +23,6 @@ package net.openhft.chronicle.wire;
  * This interface provides a contract for checking a given header number and its position.
  * Typically, implementations of this interface will contain logic to determine whether
  * the provided header number, in the context of its position, meets specific conditions.
- *
- * @since 2023-09-12
  */
 @FunctionalInterface
 public interface HeadNumberChecker {

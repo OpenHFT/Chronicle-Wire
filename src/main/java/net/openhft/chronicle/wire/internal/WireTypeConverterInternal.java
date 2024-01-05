@@ -15,8 +15,6 @@ import org.jetbrains.annotations.NotNull;
  * This class encapsulates both JSON and YAML wire types to facilitate the conversion.
  * In addition to conversion, it supports validation mechanisms to ensure correctness and integrity of
  * the transformed data.
- *
- * @since 2023-09-16
  */
 public class WireTypeConverterInternal {
 

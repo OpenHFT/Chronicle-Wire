@@ -32,8 +32,6 @@ import java.util.Set;
  * Its primary purpose is to generate a proxy class that will re-use the arg[] of the invoked method.
  * This generation is specifically designed around the given interfaces and constructs the Java code in string
  * format for the proxy class. Furthermore, it provides an option to dump the generated code for debugging purposes.
- *
- * @since 2023-09-14
  */
 @SuppressWarnings("restriction")
 public enum GeneratedProxyClass {

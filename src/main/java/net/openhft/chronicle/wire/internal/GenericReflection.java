@@ -28,8 +28,6 @@ import java.util.stream.Stream;
  * The GenericReflection utility class offers methods to extract and process type information
  * from Java's reflection API, especially focusing on generic types.
  * The enum design ensures utility behavior by not allowing instantiation.
- *
- * @since 2023-09-16
  */
 public enum GenericReflection {
     ;  // Ensures no instances of the enum

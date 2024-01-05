@@ -33,8 +33,6 @@ package net.openhft.chronicle.wire;
  *
  * @param <T> The type of the first object to be consumed.
  * @param <V> The type of the second object to be consumed.
- *
- * @since 2023-09-11
  */
 @FunctionalInterface
 public interface ObjectIntObjectConsumer<T, V> {
