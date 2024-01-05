@@ -27,14 +27,27 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The OuterClass class implements the Marshallable interface to allow serialization
+ * and deserialization using Chronicle Wire. It contains lists of NestedClass objects
+ * and some basic properties.
+ */
 public class OuterClass implements Marshallable {
+    // Lists for storing NestedClass instances. Separate lists are maintained
+    // for free and used instances to optimize object reuse.
     final List<NestedClass> listAFree = new ArrayList<>();
     final List<NestedClass> listA = new ArrayList<>();
     final List<NestedClass> listBFree = new ArrayList<>();
     final List<NestedClass> listB = new ArrayList<>();
-    String text;
-    WireType wireType;
+    String text; // Text property of the class.
+    WireType wireType; // The type of Wire (serialization format) used.
 
+    /**
+     * Deserializes data from Wire format into an OuterClass instance.
+     *
+     * @param wire The wire input to read data from.
+     * @throws IORuntimeException If an I/O error occurs.
+     */
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
         wire.read(() -> "text").text(this, (t, v) -> t.text = v)
@@ -51,6 +64,11 @@ public class OuterClass implements Marshallable {
         });
     }
 
+    /**
+     * Serializes an OuterClass instance into Wire format.
+     *
+     * @param wire The wire output to write data to.
+     */
     @Override
     public void writeMarshallable(@NotNull WireOut wire) {
         wire.write(() -> "text").text(text)
@@ -68,6 +86,7 @@ public class OuterClass implements Marshallable {
 
     }
 
+    // Getter and setter methods for the text property.
     public String getText() {
         return text;
     }
@@ -76,23 +95,47 @@ public class OuterClass implements Marshallable {
         this.text = text;
     }
 
+    /**
+     * Gets the WireType of this instance.
+     *
+     * @return The WireType.
+     */
     public WireType getWireType() {
         return wireType;
     }
 
+    /**
+     * Sets the WireType of this instance.
+     *
+     * @param wireType The new WireType.
+     */
     public void setWireType(WireType wireType) {
         this.wireType = wireType;
     }
 
+    /**
+     * Gets the list of NestedClass instances in listA.
+     *
+     * @return A list of NestedClass instances.
+     */
     @NotNull
     public List<NestedClass> getListA() {
         return listA;
     }
 
+    /**
+     * Clears the listA of NestedClass instances.
+     */
     public void clearListA() {
         listA.clear();
     }
 
+    /**
+     * Adds a new NestedClass instance to listA and returns it.
+     * Reuses instances from a free list to optimize object creation.
+     *
+     * @return The newly added NestedClass instance.
+     */
     public NestedClass addListA() {
         if (listAFree.size() <= listA.size())
             listAFree.add(new NestedClass());
@@ -101,15 +144,29 @@ public class OuterClass implements Marshallable {
         return nc;
     }
 
+    /**
+     * Gets the list of NestedClass instances in listB.
+     *
+     * @return A list of NestedClass instances.
+     */
     @NotNull
     public List<NestedClass> getListB() {
         return listB;
     }
 
+    /**
+     * Clears the listB of NestedClass instances.
+     */
     public void clearListB() {
         listB.clear();
     }
 
+    /**
+     * Adds a new NestedClass instance to listB and returns it.
+     * Reuses instances from a free list to optimize object creation.
+     *
+     * @return The newly added NestedClass instance.
+     */
     public NestedClass addListB() {
         if (listBFree.size() <= listB.size())
             listBFree.add(new NestedClass());
@@ -118,6 +175,11 @@ public class OuterClass implements Marshallable {
         return nc;
     }
 
+    /**
+     * Provides a string representation of the OuterClass instance.
+     *
+     * @return A string describing the OuterClass instance.
+     */
     @NotNull
     @Override
     public String toString() {

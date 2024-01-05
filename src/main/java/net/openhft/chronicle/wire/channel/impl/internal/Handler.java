@@ -22,23 +22,43 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
+/**
+ * An extension of {@link URLStreamHandler} that facilitates custom handling for specific URL protocols.
+ * This class ensures that its package is registered as a URL protocol handler, specifically for handling
+ * URLs with the pattern "JavaFxCss:/path".
+ */
 public class Handler extends URLStreamHandler {
+
+    // Static block that initializes the package as an URL protocol handler.
     static {
         addMyPackage();
     }
 
+    /**
+     * Initiates the static initializer for this class. Though the method body is empty, invoking this method ensures
+     * that the static block is executed.
+     */
     @SuppressWarnings("EmptyMethod")
     public static void init() {
         // call static initialiser
     }
 
+    /**
+     * Adds the package containing this class as a URL protocol handler.
+     * Ensures that "JavaFxCss:/path" styled CSS files are recognized and handled by this package.
+     */
     private static void addMyPackage() {
         // Ensure that we are registered as an url protocol handler for JavaFxCss:/path css files.
         String was = System.getProperty("java.protocol.handler.pkgs", "");
+
+        // Get the package name for this class
         String pkg = Handler.class.getPackage().getName();
         int ind = pkg.lastIndexOf('.');
+
+        // Ensure that the package isn't the base package
         assert ind != -1 : "You can't add url handlers in the base package";
 
+        // Register the package as an URL protocol handler
         System.setProperty("java.protocol.handler.pkgs",
                 pkg.substring(0, ind) + (was.isEmpty() ? "" : "|" + was));
     }

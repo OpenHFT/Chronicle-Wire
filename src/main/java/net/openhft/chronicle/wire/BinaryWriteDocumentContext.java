@@ -23,22 +23,46 @@ import org.jetbrains.annotations.NotNull;
 
 import static net.openhft.chronicle.wire.Wires.toIntU30;
 
+/**
+ * A context used for writing documents in a binary format.
+ * This class provides facilities to start, query, and manage the state of binary
+ * documents that are currently being written. The binary format uses headers to
+ * denote meta data, data length, and completion status.
+ */
 public class BinaryWriteDocumentContext implements WriteDocumentContext {
+
+    // The wire instance used for the binary writing process
     protected Wire wire;
     protected long position = 0;
     protected int tmpHeader;
+    // Count of how many times the start() method was invoked
     protected int count = 0;
+    // Bit representing whether meta data is present
     private int metaDataBit;
+    // Flag to indicate if the document write is complete
     private volatile boolean notComplete;
+    // Flag to check if the current element is chained
     private boolean chainedElement;
     private boolean rollback;
 
+    /**
+     * Constructs a new context for writing binary documents using the specified wire.
+     *
+     * @param wire The wire instance to be used for the writing process.
+     */
     public BinaryWriteDocumentContext(Wire wire) {
         this.wire = wire;
     }
 
+    /**
+     * Initializes the context for starting a new binary write.
+     * This will setup necessary headers and markers to facilitate the write.
+     *
+     * @param metaData A flag indicating whether the write includes metadata.
+     */
     public void start(boolean metaData) {
         count++;
+        // If start() was called more than once, validate the metadata flag.
         if (count > 1) {
             assert metaData == isMetaData();
             return;
@@ -149,6 +173,11 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         return wire;
     }
 
+    /**
+     * Retrieves the current position in the wire where the document starts.
+     *
+     * @return The position in the wire where the current document starts.
+     */
     protected long position() {
         return position;
     }

@@ -35,6 +35,7 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 
 @SuppressWarnings("rawtypes")
 public class ScalarValues implements Serializable, Validatable {
+    // Primitive data type fields
     boolean flag;
     byte b;
     short s;
@@ -43,6 +44,8 @@ public class ScalarValues implements Serializable, Validatable {
     float f;
     long l;
     double d;
+
+    // Wrapper class fields for primitive types
     Boolean flag2;
     Byte b2;
     Short s2;
@@ -52,6 +55,7 @@ public class ScalarValues implements Serializable, Validatable {
     Long l2;
     Double d2;
 
+    // Fields of various Java standard library classes
     Class aClass;
     RetentionPolicy policy;
     String text;
@@ -63,11 +67,13 @@ public class ScalarValues implements Serializable, Validatable {
     BigInteger bi;
     BigDecimal bd;
     File file;
-    // Path path;
+    // Path path; // commented out
 
+    // Default constructor
     public ScalarValues() {
     }
 
+    // Constructor that initializes fields based on an integer value
     public ScalarValues(int i) {
         flag = i == 0;
         b = (byte) i;
@@ -99,18 +105,24 @@ public class ScalarValues implements Serializable, Validatable {
         file = new File("/tmp/" + i);
     }
 
+    // Overriding equals method for custom comparison logic
     @Override
     public boolean equals(Object obj) {
+        // Check for instance equality and delegate to Wires utility for deep comparison
         return obj instanceof ScalarValues && Wires.isEquals(this, obj);
     }
 
+    // Overriding toString method to provide a string representation of the object
     @Override
     public String toString() {
+        // Utilize TEXT Wire format for string representation
         return TEXT.asString(this);
     }
 
+    // Implementing validate method from Validatable interface
     @Override
     public void validate() throws InvalidMarshallableException {
+        // Validate all non-primitive fields to ensure they are not null
         for (FieldInfo fieldInfo : Wires.fieldInfos(getClass())) {
             if (!fieldInfo.type().isPrimitive()) {
                 String name = fieldInfo.name();

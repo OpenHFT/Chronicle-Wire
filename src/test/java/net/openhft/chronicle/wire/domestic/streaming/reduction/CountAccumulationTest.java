@@ -36,20 +36,30 @@ public class CountAccumulationTest extends WireTestCommon {
 
     @Test
     public void countCustom() {
+        // Define a reduction that counts occurrences using a custom collector with AtomicLong
         Reduction<AtomicLong> listener = Reduction.of((wire, index) -> 1L)
                 .collecting(Collector.of(AtomicLong::new, AtomicLong::addAndGet, throwingMerger(), Collector.Characteristics.CONCURRENT));
 
+        // Execute the listener with test data
         count(listener);
+
+        // Assert that the counted occurrences match the expected number (3)
         assertEquals(3, listener.reduction().get());
     }
 
     @Test
     public void countBuiltIn() {
+        // Define a reduction that counts occurrences using a built-in counting method
         Reduction<LongSupplier> listener = Reductions.counting();
+
+        // Execute the listener with test data
         count(listener);
+
+        // Assert that the counted occurrences match the expected number (3)
         assertEquals(3, listener.reduction().getAsLong());
     }
 
+    // Helper method to simulate a test scenario, writing text to a wire and processing it with the provided listener
     private void count(Reduction<?> listener) {
         Wire wire = CreateUtil.create();
 

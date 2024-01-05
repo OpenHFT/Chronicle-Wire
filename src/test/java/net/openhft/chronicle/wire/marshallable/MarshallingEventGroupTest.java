@@ -30,11 +30,20 @@ import org.junit.Test;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Test class to validate the behavior of the marshalling process within an EventGroup context.
+ */
 public class MarshallingEventGroupTest extends WireTestCommon {
+
+    /**
+     * Test method to evaluate the serialization of the EventGroup object.
+     */
     @Test
     public void test() {
-        // produced longer timeout in debug
+        // Skip this test if JVM is running in debug mode, as it could lead to longer timeouts
         assumeFalse(Jvm.isDebug());
+
+        // Using the EventGroupBuilder, create an instance of EventGroup and use try-with-resources to ensure it's closed
         try (final EventGroup eg =
                      EventGroupBuilder.builder()
                              .withName("test")
@@ -44,8 +53,11 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                              .withBlockingPauserSupplier(PauserMode.sleepy)
                              .withConcurrentThreadsNum(1)
                              .build()) {
+
+            // Convert the EventGroup object to its TEXT representation
             final String actual = WireType.TEXT.asString(eg);
 
+            // A previously expected serialized string for the EventGroup object (omitted parts for brevity)
             String oldExpected = "" +
                     "!net.openhft.chronicle.threads.EventGroup {\n" +
                     "  referenceId: 0,\n" +
@@ -137,9 +149,12 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "  replicationPauser: !!null \"\",\n" +
                     "  replication: !!null \"\"\n" +
                     "}\n";
+
+            // Return if the actual serialized string matches the old expected string
             if (oldExpected.equals(actual))
                 return;
 
+            // An updated expected serialized string for the EventGroup object
             String expected = "" +
                     "!net.openhft.chronicle.threads.EventGroup {\n" +
                     "  referenceId: 0,\n" +
@@ -228,6 +243,7 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "  replication: !!null \"\"\n" +
                     "}\n";
 
+            // Assert that the actual serialized string matches the updated expected string
             assertEquals(expected, actual);
         }
     }

@@ -34,73 +34,55 @@ import java.time.temporal.TemporalQueries;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This abstract class serves as the base for LongConverters that handle timestamp values.
- * The timezone can be set for the subclasses of this converter, and this will be applied to
- * the timestamp values when they are output. When no timezone is specified, the system will
- * default to the one specified by the `timestampLongConverters.zoneId` system property. If this
- * system property is not set, the default will be UTC.
+ * This abstract class serves as the foundation for LongConverters specifically tailored for handling timestamp values.
+ * By setting the timezone for subclasses of this converter, it can be applied to the timestamp values during output.
+ * If no timezone is explicitly set, the system defaults to the one defined by the `timestampLongConverters.zoneId` system property.
+ * If this system property remains unset, the default will be UTC.
  * <p>
- * All long values that are handled by this converter are assumed to be timestamps in UTC.
+ * It's crucial to note that all long values managed by this converter are treated as timestamps in UTC.
  * <p>
- * Parsing of ISO dates, with or without timestamps, is supported. If an ISO date is read with no
- * timezone, it is assumed to be in the converter's zone.
+ * The capability to parse ISO dates, with or without timestamps, is embedded. If an ISO date is read devoid of a
+ * timezone, it's inherently considered to be within the converter's zone.
  * <p>
- * As of x.26, the property `timestampLongConverters.includeZoneSuffixWhenZoneIsUTC` will be deprecated
- * and UTC dates will always be written with a 'Z' suffix.
+ * As of version x.26, the `timestampLongConverters.includeZoneSuffixWhenZoneIsUTC` property is deemed obsolete.
+ * Consequently, UTC dates will consistently be depicted with a 'Z' suffix.
  *
- * @see LongConverter for the interface this abstract class implements.
+ * @see LongConverter The interface this abstract class adheres to.
  */
 public abstract class AbstractTimestampLongConverter implements LongConverter {
-    /**
-     * Universal Time Coordinated (UTC) timezone
-     */
+
+    /** Universal Time Coordinated (UTC) timezone. */
     public static final ZoneId UTC = ZoneId.of("UTC");
 
-    /**
-     * System property to specify the ZoneId for timestamp conversion.
-     */
+    /** System property responsible for stipulating the ZoneId for timestamp conversion. */
     public static final String TIMESTAMP_LONG_CONVERTERS_ZONE_ID_SYSTEM_PROPERTY = "timestampLongConverters.zoneId";
 
-    /**
-     * System property to specify whether to include the 'Z' suffix for UTC zone timestamps. To be deprecated in x.26 version.
-     */
+    /** System property dictating the inclusion of the 'Z' suffix for UTC zone timestamps. To be deprecated in x.26 version. */
     public static final String INCLUDE_ZONE_SUFFIX_WHEN_ZONE_IS_UTC_SYSTEM_PROPERTY = "timestampLongConverters.includeZoneSuffixWhenZoneIsUTC";
 
-    /**
-     * The specific timezone used by this converter.
-     */
+    /** The distinct timezone assigned to this converter. */
     private final ZoneId zoneId;
 
-    /**
-     * Formatter used for parsing timestamps.
-     */
+    /** Formatter wielded for parsing timestamps. */
     private final DateTimeFormatter formatterForParsing;
 
-    /**
-     * Formatter used for formatting timestamps.
-     */
+    /** Formatter employed for the presentation of timestamps. */
     private final DateTimeFormatter formatterForFormatting;
 
-    /**
-     * Flag to indicate if UTC dates are written without a suffix.
-     */
+    /** Indicator flag determining if UTC dates are penned without a suffix. */
     private final boolean writingUtcDatesWithNoSuffix;
 
-    /**
-     * The amount of timestamps that fits in a second.
-     */
+    /** Specifies the count of timestamps equivalent to one second. */
     private final long amountPerSecond;
 
-    /**
-     * The equivalent nanoseconds for a timestamp.
-     */
+    /** Relays the nanoseconds equivalent for a single timestamp. */
     private final long nanosPerAmount;
 
     /**
-     * Constructs a new {@code AbstractTimestampLongConverter} with the specified time unit.
-     * The zone ID is fetched from the system property. If the system property is not set, UTC is used.
+     * Constructs a new instance of {@code AbstractTimestampLongConverter} utilizing the designated time unit.
+     * The chosen zone ID is acquired from the system property, but if the property remains unset, UTC is adopted.
      *
-     * @param timeUnit the time unit for the conversion of long values
+     * @param timeUnit The time unit designated for the conversion of long values.
      */
     protected AbstractTimestampLongConverter(TimeUnit timeUnit) {
         this(System.getProperty(TIMESTAMP_LONG_CONVERTERS_ZONE_ID_SYSTEM_PROPERTY, UTC.toString()), timeUnit);

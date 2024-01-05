@@ -25,20 +25,30 @@ import java.nio.ByteBuffer;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+// This class provides tests for checking the default zero licence.
 public class DefaultZeroLicenceTest extends WireTestCommon {
 
+    // Test the default zero licence check to ensure correct behaviour.
     @Test
     public void testLicenceCheck() {
-        expectException(e -> e.throwable != null && e.throwable.getMessage().contains("Please contact sales@chronicle.software"), "license check");
+        // Expect an exception with a specific message pointing to a license issue
+        expectException(
+            e -> e.throwable != null && e.throwable.getMessage().contains("Please contact sales@chronicle.software"),
+            "license check"
+        );
 
+        // Allocating elastic byte buffer
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         try {
+            // Applying the DEFAULT_ZERO_BINARY wire type to bytes, expecting it to fail due to license restrictions
             WireType.DEFAULT_ZERO_BINARY.apply(bytes);
             fail();
         } catch (IllegalStateException e) {
+            // Checking the exception message for the expected licensing message
             assertTrue(e.getMessage().contains(
                     "A Chronicle Wire Enterprise licence is required to run this code"));
         } finally {
+            // Releasing the byte buffer to free up resources
             bytes.releaseLast();
         }
     }

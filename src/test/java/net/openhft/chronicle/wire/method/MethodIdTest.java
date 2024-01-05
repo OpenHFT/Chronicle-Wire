@@ -29,24 +29,32 @@ import org.junit.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+// Test class extending WireTestCommon to test method identification in binary wire format
 public class MethodIdTest extends WireTestCommon {
 
+    // Test method to verify serialization and deserialization of methods with various IDs
     @Test
     public void methodIdInBinary() {
+        // Create a new BinaryWire instance with specified configurations
         Wire wire = new BinaryWire(new HexDumpBytes(), true, true, false, 128, "", false);
+
+        // Generate a proxy instance for the Methods interface
         final Methods methods = wire.methodWriter(Methods.class);
+
+        // Call different methods with various argument types and values
         methods.methodAt('@');
         methods.method_z('z');
         methods.methodByteMax(Byte.MAX_VALUE);
         methods.methodShortMax(Short.MAX_VALUE);
         methods.methodIntMax(Integer.MAX_VALUE);
-//        methods.methodLongMax(Long.MAX_VALUE);
+        // methods.methodLongMax(Long.MAX_VALUE); // Not supported yet
 
         methods.methodByteMin(Byte.MIN_VALUE);
         methods.methodShortMin(Short.MIN_VALUE);
         methods.methodIntMin(Integer.MIN_VALUE);
-//        methods.methodLongMin(Long.MIN_VALUE);
+        // methods.methodLongMin(Long.MIN_VALUE); // Not supported yet
 
+        // Asserts the binary representation of the method calls
         assertEquals("" +
                         "04 00 00 00                                     # msg-length\n" +
                         "ba 40                                           # methodAt ('@')\n" +
@@ -74,8 +82,13 @@ public class MethodIdTest extends WireTestCommon {
                         "a7 00 00 00 80 ff ff ff ff                      # -2147483648\n",
                 wire.bytes().toHexString());
 
+        // Create a new YAML based Wire for reading
         Wire wire2 = Wire.newYamlWireOnHeap();
+
+        // Create a method reader and a writer for the Methods interface
         final MethodReader reader = wire.methodReader(wire2.methodWriter(Methods.class));
+
+        // Read each method call and verify the output
         for (int i = 0; i < 8; i++)
             reader.readOne();
         assertEquals("" +
@@ -99,6 +112,7 @@ public class MethodIdTest extends WireTestCommon {
         assertFalse(reader.readOne());
     }
 
+    // Interface defining various methods with specific method IDs using annotations
     interface Methods {
 // not supported yet
 //        @MethodId(Long.MIN_VALUE)

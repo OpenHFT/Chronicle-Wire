@@ -28,8 +28,21 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.util.Objects;
 
+/**
+ * Represents field information for object fields, extending the generic field information capabilities
+ * provided by {@link UnsafeFieldInfo}. This class offers direct memory access functionality to get and set
+ * object values in objects, leveraging unsafe operations for performance enhancement.
+ */
 public final class ObjectFieldInfo extends UnsafeFieldInfo {
 
+    /**
+     * Constructs an instance of ObjectFieldInfo with the provided details about an object field.
+     *
+     * @param name        The name of the field.
+     * @param type        The type of the field.
+     * @param bracketType The bracket type associated with the field.
+     * @param field       The actual field representation.
+     */
     public ObjectFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         super(name, type, bracketType, field);
     }

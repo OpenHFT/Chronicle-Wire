@@ -28,15 +28,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * YAML Based wire format
+ * Represents a CSV (Comma Separated Values) based wire format.
+ * It extends the generic TextWire format to specifically handle the parsing and representation
+ * of data in the CSV format. This class provides functionalities for reading from a CSV
+ * formatted byte source and handling the common aspects of this format like escaping, headers, etc.
  */
 public class CSVWire extends TextWire {
 
+    // A thread-local definition to manage stopping characters that handle escaping in CSV.
     private static final ThreadLocal<StopCharTester> ESCAPED_END_OF_TEXT = ThreadLocal.withInitial(
             StopCharTesters.COMMA_STOP::escaping);
 
+    // A list to manage headers in the CSV file.
     private final List<String> header = new ArrayList<>();
 
+    /**
+     * Constructs a new CSVWire instance from a given byte source and a flag indicating
+     * the use of 8-bit characters. Also, reads and initializes the CSV headers.
+     *
+     * @param bytes The byte source containing CSV data.
+     * @param use8bit A flag indicating whether to use 8-bit characters or not.
+     */
     @SuppressWarnings("rawtypes")
     public CSVWire(@NotNull Bytes<?> bytes, boolean use8bit) {
         super(bytes, use8bit);
@@ -48,25 +60,50 @@ public class CSVWire extends TextWire {
         }
     }
 
+    /**
+     * Constructs a new CSVWire instance from a given byte source with default character set.
+     *
+     * @param bytes The byte source containing CSV data.
+     */
     @SuppressWarnings("rawtypes")
     public CSVWire(@NotNull Bytes<?> bytes) {
         this(bytes, false);
     }
 
+    /**
+     * Constructs a new CSVWire instance by reading data from a specified file.
+     * Uses 8-bit characters by default.
+     *
+     * @param name The name of the file to read CSV data from.
+     * @return A new instance of CSVWire populated with data from the specified file.
+     * @throws IOException If any I/O error occurs while reading the file.
+     */
     @NotNull
     public static CSVWire fromFile(String name) throws IOException {
         return new CSVWire(BytesUtil.readFile(name), true);
     }
 
+    /**
+     * Constructs a new CSVWire instance from a provided string text.
+     *
+     * @param text The string containing CSV data.
+     * @return A new instance of CSVWire populated with data from the provided text.
+     */
     @NotNull
     public static CSVWire from(@NotNull String text) {
         return new CSVWire(Bytes.from(text));
     }
 
+    /**
+     * Retrieves and resets the CSV escaping mechanism that dictates
+     * when to stop during text extraction.
+     *
+     * @return An instance of StopCharTester adjusted for CSV escaping rules.
+     */
     @NotNull
     static StopCharTester getEscapingCSVEndOfText() {
         StopCharTester escaping = ESCAPED_END_OF_TEXT.get();
-        // reset it.
+        // reset the tester.
         escaping.isStopChar(' ');
         return escaping;
     }
@@ -90,18 +127,30 @@ public class CSVWire extends TextWire {
         return sb;
     }
 
+    /**
+     * Consumes padding and whitespace at the beginning of the data source. This method is
+     * essential to handle any comments (lines starting with '#') and whitespace before
+     * the actual data starts in the CSV content.
+     */
     public void consumePaddingStart() {
         for (; ; ) {
+            // Peeks at the next character without actually consuming it.
             int codePoint = peekCode();
+            // Checks if the code point represents a comment.
             if (codePoint == '#') {
+                // If so, skip characters until the end of the line.
                 while (readCode() >= ' ') ;
                 continue;
             }
+            // Checks if the code point is whitespace.
             if (Character.isWhitespace(codePoint)) {
+                // Handle newline or carriage return; set lineStart to the next position.
                 if (codePoint == '\n' || codePoint == '\r')
                     this.lineStart = bytes.readPosition() + 1;
+                // Skips the current whitespace character.
                 bytes.readSkip(1);
             } else {
+                // If the code point is neither a comment nor whitespace, exit the loop.
                 break;
             }
         }
@@ -140,6 +189,13 @@ public class CSVWire extends TextWire {
         return this;
     }
 
+    /**
+     * Represents the value output functionality specific to the CSV format.
+     * It extends the YamlValueOut class to handle specific behaviors associated with
+     * writing values in CSV. This includes certain restrictions, such as not supporting
+     * type literals and serializable objects in CSV format.
+     *
+         */
     class CSVValueOut extends YamlValueOut {
         @NotNull
         @Override
@@ -156,6 +212,11 @@ public class CSVWire extends TextWire {
         }
     }
 
+    /**
+     * Represents the value input functionality specific to the CSV format.
+     * It extends the TextValueIn class to handle specific behaviors associated with
+     * reading values from CSV. This includes handling CSV specific escape sequences and delimiters.
+     */
     class CSVValueIn extends TextValueIn {
 
         @Override

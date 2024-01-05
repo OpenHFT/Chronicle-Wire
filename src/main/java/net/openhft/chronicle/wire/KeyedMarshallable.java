@@ -20,7 +20,19 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * This is the KeyedMarshallable interface.
+ * Implementations of this interface can marshal their keys into {@code Bytes} objects.
+ * The default method provided allows for writing the key of the current instance into the provided {@code Bytes} object by leveraging the {@code Wires.writeKey} method.
+ */
 public interface KeyedMarshallable {
+
+    /**
+     * Writes the key of the current instance into the provided {@code Bytes} object.
+     * This default implementation utilizes the {@code Wires.writeKey} method.
+     *
+     * @param bytes The {@code Bytes} object into which the key of the current instance is written.
+     */
     @SuppressWarnings("rawtypes")
     default void writeKey(@NotNull Bytes<?> bytes) {
         Wires.writeKey(this, bytes);

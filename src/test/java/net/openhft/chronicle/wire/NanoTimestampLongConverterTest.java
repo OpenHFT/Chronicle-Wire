@@ -26,27 +26,36 @@ import static org.junit.Assert.assertEquals;
 
 public class NanoTimestampLongConverterTest extends WireTestCommon {
 
+    // Static constants for test cases.
     private static final String TIMESTAMP_STRING_UTC = "2023-02-15T05:31:49.856123456Z";
     private static final String TIMESTAMP_STRING_UTC_NO_SUFFIX = "2023-02-15T05:31:49.856123456";
     private static final long TIMESTAMP = 1676439109856123456L;
     private static final String TIMESTAMP_STRING_MELBOURNE = "2023-02-15T16:31:49.856123456+11:00";
 
+    // Testing parsing of nanosecond timestamps.
     @Test
     public void parse() {
+        // Getting current nanosecond timestamp.
         long now = CLOCK.currentTimeNanos();
+
+        // Testing conversion of the nanosecond timestamp to string and back to long.
         long parse2 = INSTANCE.parse(Long.toString(now));
         assertEquals(now, parse2);
+
+        // Testing conversion from long to string representation of timestamp and then parsing it back to long.
         String text = INSTANCE.asString(now);
         long parse3 = INSTANCE.parse(text);
         assertEquals(now, parse3);
     }
 
+    // Testing parsing of different string formats for nanosecond timestamps.
     @Test
     public void parse2() {
         assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456789"),
                 INSTANCE.parse("2020-09-18T01:02:03.456789"));
     }
 
+    // Testing assumption of default timezone (local) if no timezone is provided.
     @Test
     public void datesWithNoTimezoneAreAssumedToBeLocal() {
         NanoTimestampLongConverter mtlc = new NanoTimestampLongConverter("America/New_York");
@@ -54,6 +63,7 @@ public class NanoTimestampLongConverterTest extends WireTestCommon {
                 mtlc.parse("2020-09-17T21:02:03.123456789"));
     }
 
+    // Testing conversion of nanosecond timestamp to Melbourne timezone.
     @Test
     public void appendTest() {
         final NanoTimestampLongConverter converter = new NanoTimestampLongConverter("Australia/Melbourne");
@@ -62,6 +72,7 @@ public class NanoTimestampLongConverterTest extends WireTestCommon {
         assertEquals(TIMESTAMP_STRING_MELBOURNE, builder.toString());
     }
 
+    // Testing conversion of nanosecond timestamp to UTC.
     @Test
     public void appendTestUTC() {
         final NanoTimestampLongConverter converter = new NanoTimestampLongConverter("UTC");
@@ -70,6 +81,7 @@ public class NanoTimestampLongConverterTest extends WireTestCommon {
         assertEquals(TIMESTAMP_STRING_UTC_NO_SUFFIX, builder.toString());
     }
 
+    // Testing round-trip conversions (from string to long and back) for different timezones and formats.
     @SuppressWarnings("deprecation")
     @Test
     public void roundTripTest() {
@@ -78,6 +90,7 @@ public class NanoTimestampLongConverterTest extends WireTestCommon {
         roundTrip(TIMESTAMP_STRING_UTC, TIMESTAMP, new NanoTimestampLongConverter("UTC", true));
     }
 
+    // Helper method for the round-trip conversions.
     private void roundTrip(String timestampString, long timestamp, LongConverter longConverter) {
         assertEquals(timestamp, longConverter.parse(longConverter.asString(timestamp)));
         assertEquals(timestampString, longConverter.asString(longConverter.parse(timestampString)));

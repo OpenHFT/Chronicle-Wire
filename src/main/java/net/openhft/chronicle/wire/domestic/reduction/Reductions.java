@@ -35,6 +35,11 @@ import java.util.function.LongSupplier;
 
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
+/**
+ * This is the Reductions utility class.
+ * It provides static methods to create various types of Reductions, offering functionalities
+ * related to longs, doubles, and counting excerpts.
+ */
 public final class Reductions {
 
     // Suppresses default constructor, ensuring non-instantiability.
@@ -44,24 +49,24 @@ public final class Reductions {
     // Specialized Reductions
 
     /**
-     * Creates and returns a new Reduction that will extract elements of type {@code long} using
-     * the provided {@code extractor} and will accumulate values using the provided {@code accumulator}.
-     * The initial state of the reduction will be the provided {@code identity}.
-     * <p>
-     * The returned Reduction is guaranteed to not create any internal objects.
+     * Generates a specialized Reduction tailored for long values.
+     * This method utilizes the provided extractor for retrieving long values,
+     * then aggregates those values using the specified accumulator.
+     * The aggregation starts with an initial value, denoted by the identity parameter.
      *
-     * @param extractor   to apply on each document (non-null)
-     * @param identity    initial start value
-     * @param accumulator to apply for each element (non-null)
-     * @return a new Reduction reducing long values
-     * @throws NullPointerException if any objects provided are {@code null}.
+     * @param extractor   A function to extract long values from documents (must not be null)
+     * @param identity    The initial value for the aggregation
+     * @param accumulator A binary operator used for aggregation (must not be null)
+     * @return A Reduction optimized for aggregating long values
+     * @throws NullPointerException if either extractor or accumulator is null.
      */
     public static Reduction<LongSupplier> reducingLong(@NotNull final ToLongDocumentExtractor extractor,
                                                        final long identity,
                                                        @NotNull final LongBinaryOperator accumulator) {
-        requireNonNull(extractor);
-        requireNonNull(accumulator);
+        requireNonNull(extractor); // Ensure the extractor is not null
+        requireNonNull(accumulator); // Ensure the accumulator is not null
 
+        // Construct and return the Reduction
         return Reduction.ofLong(extractor)
                 .reducing(
                         () -> new LongAccumulator(accumulator, identity),
@@ -71,24 +76,24 @@ public final class Reductions {
     }
 
     /**
-     * Creates and returns a new Reduction that will extract elements of type {@code double} using
-     * the provided {@code extractor} and will accumulate values using the provided {@code accumulator}.
-     * The initial state of the reduction will be the provided {@code identity}.
-     * <p>
-     * The returned Reduction is guaranteed to not create any internal objects.
+     * Generates a specialized Reduction tailored for double values.
+     * This method employs the given extractor to obtain double values,
+     * and subsequently aggregates those values using the accumulator provided.
+     * The aggregation process commences with the identity as its initial value.
      *
-     * @param extractor   to apply on each document (non-null)
-     * @param identity    initial start value
-     * @param accumulator to apply for each element (non-null)
-     * @return a new Reduction reducing double values
-     * @throws NullPointerException if any objects provided are {@code null}.
+     * @param extractor   A function to extract double values from documents (must not be null)
+     * @param identity    The starting value for the aggregation
+     * @param accumulator A binary operator designed for aggregating double values (must not be null)
+     * @return A Reduction optimized for aggregating double values
+     * @throws NullPointerException if either extractor or accumulator is null.
      */
     public static Reduction<DoubleSupplier> reducingDouble(@NotNull final ToDoubleDocumentExtractor extractor,
                                                            final double identity,
                                                            @NotNull final DoubleBinaryOperator accumulator) {
-        requireNonNull(extractor);
-        requireNonNull(accumulator);
+        requireNonNull(extractor); // Ensure the extractor is not null
+        requireNonNull(accumulator); // Ensure the accumulator is not null
 
+        // Construct and return the Reduction
         return Reduction.ofDouble(extractor)
                 .reducing(
                         () -> new DoubleAccumulator(accumulator, identity),
@@ -98,13 +103,13 @@ public final class Reductions {
     }
 
     /**
-     * Creates and returns a new Reduction that will count the number of excerpts.
-     * <p>
-     * The returned Reduction is guaranteed to not create any internal objects.
+     * Constructs a Reduction geared towards counting the number of excerpts.
+     * This Reduction is optimized to avoid creating any internal objects during its operation.
      *
-     * @return a new Reduction counting excerpts
+     * @return A Reduction that counts the number of excerpts processed
      */
     public static Reduction<LongSupplier> counting() {
+        // Create and return the counting Reduction
         return Reduction.ofLong(
                         (wire, index) -> 1L)
                 .reducing(
@@ -115,16 +120,17 @@ public final class Reductions {
     }
 
     /**
-     * A Reduction class that counts the number of excerpts that have been processed.
-     * <p>
-     * This is an example of a public class with configurable properties that can be
-     * referenced in a YAML configuration file.
+     * The Counting class is a Reduction implementation designed to count the number of excerpts processed.
+     * It possesses configurable properties, making it adaptable for various configurations,
+     * including those specified in YAML files.
      */
     public static final class Counting extends SelfDescribingMarshallable implements Reduction<LongSupplier> {
 
+        // An atomic field updater to provide thread-safe updates to the counter
         private static final AtomicLongFieldUpdater<Counting> UPDATER =
                 AtomicLongFieldUpdater.newUpdater(Counting.class, "counter");
 
+        // A volatile counter to ensure atomic read/write operations across multiple threads
         private volatile long counter;
 
         @Override

@@ -22,11 +22,30 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+/**
+ * The MessageMissingAgitator class is an implementation of the YamlAgitator interface.
+ * This agitator is designed to create altered YAML content by omitting specific messages based on a limit.
+ * The purpose is to simulate scenarios where a certain message in the YAML content is missing.
+ * <p>
+ * A typical use-case might involve testing the resilience of parsers or consumers of the YAML content against
+ * missing data.
+ */
 public class MessageMissingAgitator implements YamlAgitator {
+
+    // Pattern to identify YAML message separators
     static final Pattern SEP = Pattern.compile("[.][.][.]\\s*");
+
+    // Default instance of MessageMissingAgitator with a limit of 4 messages
     static final YamlAgitator INSTANCE = new MessageMissingAgitator(4);
+
+    // The limit on the number of messages that can be made "missing"
     private int limit;
 
+    /**
+     * Constructs a new MessageMissingAgitator with the specified limit on missing messages.
+     *
+     * @param limit The maximum number of messages that can be omitted from the original YAML content.
+     */
     public MessageMissingAgitator(int limit) {
         this.limit = limit;
     }

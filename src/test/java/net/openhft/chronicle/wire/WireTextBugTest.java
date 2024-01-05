@@ -46,36 +46,57 @@ import static org.junit.Assert.assertEquals;
 public class WireTextBugTest extends WireTestCommon {
 
     @org.junit.Test
+    // Test for handling text within the Wire framework
     public void testText() {
+        // Adding alias for the Bug class
         ClassAliasPool.CLASS_ALIASES.addAlias(Bug.class);
+
+        // Create a BinaryWire object with specific settings
         @NotNull Wire encodeWire = new BinaryWire(Bytes.elasticByteBuffer(), false, true, false, Integer.MAX_VALUE, "lzw", true);
+
+        // Create a Bug object and set its clOrdID field
         @NotNull Bug b = new Bug();
         b.setClOrdID("FIX.4.4:12345678_client1->FOO/MINI1-1234567891234-12");
+
+        // Check the Bug object's string representation
         assertEquals("!Bug {\n" +
                 "  clOrdID: \"FIX.4.4:12345678_client1->FOO/MINI1-1234567891234-12\"\n" +
                 "}\n", b.toString());
+
+        // Write the Bug object to the wire
         encodeWire.getValueOut().object(b);
+
+        // Convert the wire data to a byte array
         byte[] bytes = encodeWire.bytes().toByteArray();
 
+        // Create a new BinaryWire for decoding, using the byte array
         @NotNull Wire decodeWire = new BinaryWire(Bytes.wrapForRead(bytes));
+
+        // Read the Bug object from the wire
         @Nullable Object o = decodeWire.getValueIn()
                 .object(Object.class);
         @Nullable Bug b2 = (Bug) o;
+
+        // Check the deserialized Bug object's string representation
         assertEquals("!Bug {\n" +
                 "  clOrdID: \"FIX.4.4:12345678_client1->FOO/MINI1-1234567891234-12\"\n" +
                 "}\n", b2.toString());
 
+        // Release resources
         encodeWire.bytes().releaseLast();
         decodeWire.bytes().releaseLast();
     }
 
+    // Inner class to represent a Bug with a single field clOrdID
     static class Bug extends SelfDescribingMarshallable {
-        private String clOrdID;
+        private String clOrdID; // Field to hold some string identifier
 
+        // Getter for clOrdID
         public String getClOrdID() {
             return clOrdID;
         }
 
+        // Setter for clOrdID
         public void setClOrdID(String aClOrdID) {
             clOrdID = aClOrdID;
         }

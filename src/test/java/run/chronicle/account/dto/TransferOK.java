@@ -21,20 +21,26 @@ package run.chronicle.account.dto;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 
 public class TransferOK extends AbstractEvent<TransferOK> {
+    // Field to store transfer details
     private Transfer transfer;
 
+    // Getter for transfer details
     public Transfer transfer() {
         return transfer;
     }
 
+    // Setter for transfer details, returns the updated object for method chaining
     public TransferOK transfer(Transfer transfer) {
         this.transfer = transfer;
         return this;
     }
 
+    // Override the validate method to ensure the transfer details are properly set
     @Override
     public void validate() throws InvalidMarshallableException {
-        super.validate();
-        if (transfer == null) throw new InvalidMarshallableException("transfer must be set");
+        super.validate(); // Calling validate method of the parent class
+        if (transfer == null)
+            // Throw exception if transfer details are not set
+            throw new InvalidMarshallableException("transfer must be set");
     }
 }

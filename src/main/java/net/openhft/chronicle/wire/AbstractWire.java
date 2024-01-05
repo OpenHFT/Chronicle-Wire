@@ -41,24 +41,44 @@ import java.util.function.Consumer;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.wire.Wires.*;
 
+/**
+ * Represents the AbstractWire class which serves as a base for all Wire implementations.
+ * This class provides fundamental shared behaviors, configurations, and initializations for Wire types.
+ */
 public abstract class AbstractWire implements Wire {
+
+    // Default padding configuration loaded from the system properties.
     public static final boolean DEFAULT_USE_PADDING = Jvm.getBoolean("wire.usePadding", false);
+
+    // Message used when a header is detected inside another header.
     private static final String INSIDE_HEADER_MESSAGE = "you cant put a header inside a header, check that " +
             "you have not nested the documents. If you are using Chronicle-Queue please " +
             "ensure that you have a unique instance of the Appender per thread, in " +
             "other-words you can not share appenders across threads.";
 
+
+    // Static block to initialize aliases for WireInternal.
     static {
         WireInternal.addAliases();
     }
 
+    // The underlying bytes representation used by the Wire.
     @NotNull
     protected final Bytes<?> bytes;
+
+    // Determines if the Wire uses 8-bit encoding.
     protected final boolean use8bit;
+
+    // Provides class lookup functionalities.
     protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
+
+    // Parent object for context reference.
     protected Object parent;
+
+    // A listener to handle comments within the Wire.
     protected Consumer<CharSequence> commentListener = IgnoringConsumer.IGNORING_CONSUMER;
 
+    // Various internal configurations and states.
     private Pauser pauser;
     private TimingPauser timedParser;
     private long headerNumber = Long.MIN_VALUE;
@@ -69,6 +89,12 @@ public abstract class AbstractWire implements Wire {
     private HeadNumberChecker headNumberChecker;
     private boolean usePadding = DEFAULT_USE_PADDING;
 
+    /**
+     * Constructor for AbstractWire.
+     *
+     * @param bytes   The underlying bytes representation.
+     * @param use8bit Indicates if 8-bit encoding should be used.
+     */
     @SuppressWarnings("rawtypes")
     protected AbstractWire(@NotNull Bytes<?> bytes, boolean use8bit) {
         this.bytes = bytes;
@@ -76,10 +102,23 @@ public abstract class AbstractWire implements Wire {
         notCompleteIsNotPresent = bytes.sharedMemory();
     }
 
+    /**
+     * Throws an IllegalStateException when there's insufficient space for writing.
+     *
+     * @param maxlen The maximum length required.
+     * @param bytes  The underlying bytes representation.
+     * @return Never returns, always throws.
+     * @throws IllegalStateException If there's not enough space.
+     */
     private static long throwNotEnoughSpace(long maxlen, @NotNull Bytes<?> bytes) {
         throw new IllegalStateException("not enough space to write " + maxlen + " was " + bytes.writeRemaining() + " limit " + bytes.writeLimit() + " type " + bytes.getClass());
     }
 
+    /**
+     * Acquires or initializes a timed parser.
+     *
+     * @return The current instance of TimingPauser.
+     */
     @NotNull
     private TimingPauser acquireTimedParser() {
         if (timedParser == null)
@@ -87,6 +126,11 @@ public abstract class AbstractWire implements Wire {
         return timedParser;
     }
 
+    /**
+     * Checks if the current Wire is inside a header.
+     *
+     * @return True if inside a header, false otherwise.
+     */
     public boolean isInsideHeader() {
         return this.insideHeader;
     }
@@ -111,12 +155,26 @@ public abstract class AbstractWire implements Wire {
         headerNumber(Long.MIN_VALUE);
     }
 
+    /**
+     * Internal method to set the header number at a specific position.
+     *
+     * @param position      The position in the bytes representation.
+     * @param headerNumber  The header number to set.
+     * @return The current Wire instance.
+     */
     @NotNull
     private Wire headerNumber(long position, long headerNumber) {
         assert checkHeader(position, headerNumber);
         return headerNumber0(headerNumber);
     }
 
+    /**
+     * Checks if the header at the given position and header number is valid.
+     *
+     * @param position      The position in the bytes representation.
+     * @param headerNumber  The header number to check.
+     * @return True if the header is valid, false otherwise.
+     */
     private boolean checkHeader(long position, long headerNumber) {
         return headNumberChecker == null
                 || headNumberChecker.checkHeaderNumber(headerNumber, position);
@@ -128,12 +186,23 @@ public abstract class AbstractWire implements Wire {
         return headerNumber(bytes().writePosition(), headerNumber);
     }
 
+    /**
+     * Internal method to directly set the header number.
+     *
+     * @param headerNumber The header number to set.
+     * @return The current Wire instance.
+     */
     @NotNull
     private Wire headerNumber0(long headerNumber) {
         this.headerNumber = headerNumber;
         return this;
     }
 
+    /**
+     * Sets the HeadNumberChecker instance for this Wire.
+     *
+     * @param headNumberChecker The HeadNumberChecker instance to set.
+     */
     public void headNumberCheck(HeadNumberChecker headNumberChecker) {
         this.headNumberChecker = headNumberChecker;
     }
@@ -367,6 +436,13 @@ public abstract class AbstractWire implements Wire {
             incrementHeaderNumber(position);
     }
 
+    /**
+     * Throws an exception if an invalid position is encountered in the Wire. This method should only be called
+     * if there's an unexpected attempt to write to a particular position.
+     *
+     * @param position The position in the bytes representation that is considered invalid.
+     * @throws IllegalStateException If an attempt to write to an invalid position is detected.
+     */
     private void invalidPosition(long position) {
         // this should never happen so blow up
         IllegalStateException ex = new IllegalStateException("Attempt to write to position=" + position);
@@ -374,11 +450,26 @@ public abstract class AbstractWire implements Wire {
         throw ex;
     }
 
+    /**
+     * Throws a StreamCorruptedException if the current header value doesn't match the expected value.
+     *
+     * @param position       The position in the bytes representation.
+     * @param expectedHeader The expected header value.
+     * @throws StreamCorruptedException If the current and expected headers don't match.
+     */
     private void unexpectedValue(long position, int expectedHeader) throws StreamCorruptedException {
         int currentHeader = bytes.readVolatileInt(position);
         throw new StreamCorruptedException("Data at " + position + " overwritten? Expected: " + Integer.toHexString(expectedHeader) + " was " + Integer.toHexString(currentHeader));
     }
 
+    /**
+     * Checks that no data is written after the end of the message. If data is found, an exception is thrown.
+     * This method returns true if no extra data is found after the end or if the check isn't feasible.
+     *
+     * @param pos The position to start the check from.
+     * @return True if there's no data after the end or if the check isn't feasible.
+     * @throws IllegalStateException If data is written after the end of the message.
+     */
     private boolean checkNoDataAfterEnd(long pos) {
         // can't do this check without jumping back.
         if (!bytes.inside(pos, 4L))
@@ -400,6 +491,11 @@ public abstract class AbstractWire implements Wire {
         return true;
     }
 
+    /**
+     * Increments the header number by 1 if the current header number is not the minimum long value.
+     *
+     * @param pos The position in the bytes representation to update.
+     */
     private void incrementHeaderNumber(long pos) {
         if (headerNumber != Long.MIN_VALUE)
             headerNumber(pos, headerNumber + 1);
@@ -509,6 +605,9 @@ public abstract class AbstractWire implements Wire {
 
     }
 
+    /**
+     * Resets the timed pauser if it has been initialized.
+     */
     private void resetTimedPauser() {
         if (timedParser != null)
             timedParser.reset();
@@ -556,19 +655,36 @@ public abstract class AbstractWire implements Wire {
     /**
      * used by write bytes when doing a rollback
      */
+
+    /**
+     * Forces the internal flag 'insideHeader' to false, indicating that the current Wire is no longer inside a header.
+     */
     public void forceNotInsideHeader() {
         insideHeader = false;
     }
 
-    // @Deprecated(/* to be removed in x.24 */)
+    /**
+     * Sets the usePadding property of the Wire. Note: This method might be deprecated in future releases.
+     *
+     * @param usePadding A boolean indicating if padding should be used.
+     */
     public void usePadding(boolean usePadding) {
         this.usePadding = usePadding;
     }
 
+    /**
+     * Gets the current state of the usePadding property.
+     *
+     * @return True if padding is used, false otherwise.
+     */
     public boolean usePadding() {
         return usePadding;
     }
 
+    /**
+     * An enumeration of consumers that ignore all calls.
+     * Primarily used for scenarios where a no-op implementation is needed.
+     */
     private enum IgnoringConsumer implements Consumer<CharSequence>, IgnoresEverything {
         IGNORING_CONSUMER {
             @Override

@@ -24,7 +24,15 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * This is the GenerateMethodDelegate class, extending AbstractClassGenerator with GMDMetaData.
+ * The class is responsible for generating method delegates using the provided metadata.
+ */
 public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMethodDelegate.GMDMetaData> {
+
+    /**
+     * Default constructor initializing with new GMDMetaData.
+     */
     public GenerateMethodDelegate() {
         super(new GMDMetaData());
     }
@@ -48,6 +56,11 @@ public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMetho
         mainCode.append("private ").append(getDelegateType()).append(" delegate;\n");
     }
 
+    /**
+     * Returns the delegate type, in this case, "OUT".
+     *
+     * @return Delegate type as a string.
+     */
     protected String getDelegateType() {
         return "OUT";
     }
@@ -77,11 +90,21 @@ public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMetho
                 .append(".").append(method.getName()).append("(").append(params).append(");\n");
     }
 
+    /**
+     * Appends the delegate to the main code.
+     *
+     * @param mainCode The SourceCodeFormatter to append the delegate.
+     * @param method The associated method.
+     * @return Updated SourceCodeFormatter with delegate appended.
+     */
     protected SourceCodeFormatter getDelegate(SourceCodeFormatter mainCode, Method method) {
         return mainCode.append("this.delegate");
     }
 
+    /**
+     * This is an inner static class representing metadata for GenerateMethodDelegate.
+     */
     public static class GMDMetaData extends AbstractClassGenerator.MetaData<GMDMetaData> {
-
+        // This class serves as a metadata container with no additional methods or attributes.
     }
 }

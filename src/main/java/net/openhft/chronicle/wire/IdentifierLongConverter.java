@@ -22,35 +22,42 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.converter.SymbolsLongConverter;
 
 /**
- * An identifier that acts as a base 66 string of up to 10 characters, or a nanosecond timestamp for dates from 2019-09-14.
- * <p>
- * The base 66 encoding support 0-9, A-Z, a-z, period, underscore, tilde and caret. Leading zeros are truncated.
- * <p>
- * As this is intended for timestamps based on the wall clock, these shouldn't conflict.
- * <p>
- * Negative ids are reserved for application specific encodings.
+ * This is the IdentifierLongConverter class implementing the LongConverter interface.
+ * It facilitates the transformation between base 66 encoded strings and their corresponding long representations.
+ * Specifically, the class can handle either short base 66 encoded strings (of up to 10 characters) or nanosecond timestamps
+ * within a specified date range. Note that negative IDs are reserved for application-specific encodings.
  */
 public class IdentifierLongConverter implements LongConverter {
+
+    // Singleton instance for the IdentifierLongConverter
     public static final IdentifierLongConverter INSTANCE = new IdentifierLongConverter();
 
+    // Converter for short base 66 encoded strings
     protected static final SymbolsLongConverter SMALL_POSITIVE = new SymbolsLongConverter(
             "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz._~^");
-    protected static final long MAX_SMALL_ID = 1568336880910795775L; // 66^10-1
+    // Maximum possible id for base 66 encoded strings of length up to 10
+    protected static final long MAX_SMALL_ID = 1568336880910795775L;
+
+    // The specified start and end timestamps for which the converter can operate
     static final String MIN_DATE = "2019-09-13T01:08:00.910795776";
     static final String MAX_DATE = "2262-04-11T23:47:16.854775807";
 
     /**
-     * Default constructor that's protected to prevent direct instantiation.
+     * Default constructor, which is protected to ensure that the class follows a singleton pattern.
+     * This prevents unnecessary multiple instances of the converter.
      */
     protected IdentifierLongConverter() {
     }
 
     /**
-     * Parses the provided {@link CharSequence} into a long identifier.
-     * The parsing behavior changes depending on the length of the CharSequence.
-     *
-     * @param text the CharSequence to parse
-     * @return the parsed long identifier
+     * Parses a given CharSequence into a long identifier. The conversion behavior varies based on the
+     * length of the input text.
+     * <p>
+     * If the text length is less than or equal to 10, it is treated as a base 66 encoded string. Otherwise,
+     * it is treated as a nanosecond timestamp.
+     * </p>
+     * @param text The CharSequence to be parsed.
+     * @return The parsed long identifier representation.
      */
     @Override
     public long parse(CharSequence text) {

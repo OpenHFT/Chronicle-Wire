@@ -37,13 +37,35 @@ import java.util.concurrent.ThreadFactory;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 import static net.openhft.chronicle.wire.channel.impl.TCPChronicleChannel.validateHeader;
 
+/**
+ * The {@code BufferedChronicleChannel} is an extension of {@link DelegateChronicleChannel} designed
+ * to provide buffered interactions with a given {@link TCPChronicleChannel}. This buffering allows
+ * for more efficient data handling, especially in high-throughput scenarios.
+ * <p>
+ * The class utilizes a background writer thread, which is responsible for asynchronously handling
+ * data operations to improve the overall performance and responsiveness of the channel.
+ */
 public class BufferedChronicleChannel extends DelegateChronicleChannel {
     private static final boolean ALLOW_AFFINITY = Jvm.getBoolean("useAffinity", true);
+
+    // Handles pausing operations for efficient event polling
     private final Pauser pauser;
+
+    // Exchanger for wire objects, facilitating producer-consumer interactions
     private final WireExchanger exchanger = new WireExchanger();
+
+    // ExecutorService to manage the background writer thread
     private final ExecutorService bgWriter;
+
+    // Volatile reference to an EventPoller, ensuring visibility across threads
     private volatile EventPoller eventPoller;
 
+    /**
+     * Constructs a {@code BufferedChronicleChannel} with the specified channel and pauser.
+     *
+     * @param channel The {@link TCPChronicleChannel} to be buffered
+     * @param pauser  The {@link Pauser} to handle efficient event polling
+     */
     public BufferedChronicleChannel(TCPChronicleChannel channel, Pauser pauser) {
         super(channel);
         this.pauser = pauser;
@@ -70,6 +92,9 @@ public class BufferedChronicleChannel extends DelegateChronicleChannel {
         return this;
     }
 
+    /**
+     * Background write operation for asynchronously handling data in the channel.
+     */
     private void bgWrite() {
         try {
             final TCPChronicleChannel channel = (TCPChronicleChannel) this.channel;

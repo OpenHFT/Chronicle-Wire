@@ -28,47 +28,64 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * The ChronicleChannelCfg class is a configuration object for creating and configuring ChronicleChannel instances.
- * It offers a fluent API to customize parameters including the initiator flag, buffering mode, host parameters,
- * pauser mode and connection timeout settings.
+ * The ChronicleChannelCfg class serves as a comprehensive configuration utility for constructing and tailoring ChronicleChannel instances.
+ * Built with a fluent design, this class offers means to adjust a variety of parameters, namely the initiator status, buffering modality,
+ * specific host configurations, pauser mode, and the length of connection timeout intervals.
  *
- * @param <C> the type of the implementing class that is derived from ChronicleChannelCfg
+ * @param <C> a generic type which extends the ChronicleChannelCfg, enabling fluent method chaining
  */
 public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfDescribingMarshallable {
+
+    // Static block to initialize the Handler
     static {
         Handler.init();
     }
 
+    // A flag indicating if the current configuration is set as the initiator
     private boolean initiator;
+
+    // A flag indicating if buffering is enabled or disabled
     private boolean buffered;
+
+    // Determines the mode of pausing; defaults to yielding mode
     private PauserMode pauser = PauserMode.yielding;
+
+    // Deprecated; Represents the hostname for the configuration
     @Deprecated
     private String hostname;
+
+    // Deprecated; Represents the port number for the configuration
     @Deprecated
     private int port;
+
+    // Specifies the maximum time in seconds that the system will wait while trying to establish a connection
     private double connectionTimeoutSecs = 1.0;
+
+    // A set of HostPort configurations for the ChronicleChannel
     private final Set<HostPortCfg> hostports = new LinkedHashSet<>();
 
     /**
-     * Returns the set of host ports configured for the ChronicleChannel.
-     * If hostname and port are set, they will be included in the set.
+     * Retrieves the set of host and port configurations set for the ChronicleChannel. It will also incorporate
+     * any specified hostname and port if they are initialized.
      *
-     * @return the set of host ports
+     * @return a read-only set of host and port configurations
      */
     public Set<HostPortCfg> hostPorts() {
         LinkedHashSet<HostPortCfg> result = new LinkedHashSet<>();
+        // Check if the deprecated hostname is initialized and add to the set
         if (hostname != null)
             result.add(new HostPortCfg(hostname, port));
+        // Incorporate the existing hostport configurations
         result.addAll(hostports);
         return Collections.unmodifiableSet(result);
     }
 
     /**
-     * Adds a hostname and port to the set of host ports.
+     * Introduces a new hostname and port pair to the set of configurations.
      *
-     * @param hostname the hostname
-     * @param port     the port number
-     * @return this configuration instance
+     * @param hostname the target hostname
+     * @param port     the designated port number
+     * @return the current configuration instance, supporting chained method calls
      */
     public ChronicleChannelCfg<C> addHostnamePort(String hostname, int port) {
         hostports.add(new HostPortCfg(hostname, port));
@@ -76,20 +93,20 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
     }
 
     /**
-     * Removes a hostname and port from the set of host ports.
+     * Excludes a specific hostname and port pair from the set of configurations.
      *
-     * @param hostname the hostname
-     * @param port     the port number
+     * @param hostname the target hostname
+     * @param port     the designated port number
      */
     public void removeHostnamePort(String hostname, int port) {
         hostports.remove(new HostPortCfg(hostname, port));
     }
 
     /**
-     * Sets the initiator flag.
+     * Modifies the initiator flag for the current configuration.
      *
-     * @param initiator the initiator flag
-     * @return this configuration instance
+     * @param initiator the desired state for the initiator flag
+     * @return the current configuration instance, supporting chained method calls
      */
     public ChronicleChannelCfg<C> initiator(boolean initiator) {
         this.initiator = initiator;
@@ -97,9 +114,9 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
     }
 
     /**
-     * Returns the initiator flag.
+     * Provides the current status of the initiator flag.
      *
-     * @return the initiator flag
+     * @return the present state of the initiator flag
      */
     public boolean initiator() {
         return initiator;
@@ -154,19 +171,20 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
     }
 
     /**
-     * Returns the buffered flag.
+     * Retrieves the status of the buffered flag.
      *
-     * @return the buffered flag
+     * @return the current status of the buffered flag.
      */
     public boolean buffered() {
         return buffered;
     }
 
     /**
-     * Sets the buffering mode for the connection.
+     * Modifies the buffering mode for the connection.
+     * If set to true, buffering will be enabled; otherwise, it will be disabled.
      *
-     * @param buffered if true, enables buffering
-     * @return this configuration instance for chaining method calls
+     * @param buffered a flag indicating whether buffering should be enabled
+     * @return the current configuration instance, supporting chained method calls
      */
     public C buffered(boolean buffered) {
         this.buffered = buffered;
@@ -174,19 +192,19 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
     }
 
     /**
-     * Returns the PauserMode.
+     * Provides the currently set PauserMode.
      *
-     * @return the PauserMode
+     * @return the active PauserMode.
      */
     public PauserMode pauserMode() {
         return pauser;
     }
 
     /**
-     * Sets the PauserMode to be used by the connection.
+     * Adjusts the PauserMode to be adopted by the connection.
      *
-     * @param pauser the PauserMode
-     * @return this configuration instance for chaining method calls
+     * @param pauser the desired PauserMode
+     * @return the current configuration instance, supporting chained method calls
      */
     public C pauserMode(PauserMode pauser) {
         this.pauser = pauser;
@@ -194,23 +212,24 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
     }
 
     /**
-     * Returns the connection timeout in seconds.
-     * If not set or is set to a non-positive value,
-     * it will return a default value based on the debug mode.
+     * Fetches the connection timeout duration, measured in seconds.
+     * If the connectionTimeoutSecs is not explicitly set or holds a non-positive value,
+     * the method will return a default value, the choice of which is influenced by the debug mode.
      *
-     * @return the connection timeout in seconds
+     * @return the connection timeout duration in seconds
      */
     public double connectionTimeoutSecs() {
+        // Default values based on the debug mode
         if (connectionTimeoutSecs <= 0)
             return Jvm.isDebug() ? 120 : 10;
         return connectionTimeoutSecs;
     }
 
     /**
-     * Sets the connection timeout in seconds.
+     * Defines the connection timeout duration, measured in seconds.
      *
-     * @param connectionTimeoutSecs the connection timeout in seconds
-     * @return this configuration instance for chaining method calls
+     * @param connectionTimeoutSecs the desired timeout duration in seconds
+     * @return the current configuration instance, supporting chained method calls
      */
     public C connectionTimeoutSecs(double connectionTimeoutSecs) {
         this.connectionTimeoutSecs = connectionTimeoutSecs;
@@ -218,7 +237,8 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
     }
 
     /**
-     * Clears all the host ports you have set up.
+     * Purges all the hostname and port configurations.
+     * After invoking this method, the set of host and port configurations will be empty.
      */
     public void clearHostnamePort() {
         hostports.clear();

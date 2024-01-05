@@ -18,6 +18,17 @@
 
 package net.openhft.chronicle.wire.channel.echo;
 
+/**
+ * The {@code Replies} interface defines a contract for entities
+ * capable of providing replies or responses in the system.
+ */
 public interface Replies {
+    /**
+     * Replies or responds with the provided object. The nature of
+     * the reply (e.g., whether it is sent to a specific destination)
+     * may depend on the implementing class.
+     *
+     * @param o The object to be sent as a reply.
+     */
     void reply(Object o);
 }

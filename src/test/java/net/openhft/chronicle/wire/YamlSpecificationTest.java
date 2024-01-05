@@ -37,6 +37,8 @@ import static org.junit.Assert.assertEquals;
 @SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
 public class YamlSpecificationTest extends WireTestCommon {
+
+    // Register class aliases for String, Circle, Shape, Line, and Label
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(String.class, "something");
         /*ClassAliasPool.CLASS_ALIASES.addAlias(Circle.class, "circle");
@@ -45,12 +47,15 @@ public class YamlSpecificationTest extends WireTestCommon {
         ClassAliasPool.CLASS_ALIASES.addAlias(Label.class, "label");*/
     }
 
+    // Input string used for tests
     private final String input;
 
+    // Parameterized constructor
     public YamlSpecificationTest(String input) {
         this.input = input;
     }
 
+    // Defining parameterized test cases
     @Parameterized.Parameters(name = "case={0}")
     public static Collection<Object[]> tests() {
         return Arrays.asList(new String[][]{
@@ -85,6 +90,7 @@ public class YamlSpecificationTest extends WireTestCommon {
         });
     }
 
+    // Test to decode YAML snippets based on various specifications
     @Test
     public void decodeAs() throws IOException {
         String snippet = new String(getBytes(input + ".yaml"), StandardCharsets.UTF_8)
@@ -108,6 +114,7 @@ public class YamlSpecificationTest extends WireTestCommon {
                 actual);
     }
 
+    // Helper method to parse input string using YamlWire
     @NotNull
     private String parseWithYaml(String snippet) {
         Object o = YAML.fromString(snippet);
@@ -118,6 +125,7 @@ public class YamlSpecificationTest extends WireTestCommon {
         return tw.toString();
     }
 
+    // Helper method to get bytes from a given file
     @Nullable
     public byte[] getBytes(String file) throws IOException {
         InputStream is = getClass().getResourceAsStream("/yaml/spec/" + file);
@@ -128,6 +136,8 @@ public class YamlSpecificationTest extends WireTestCommon {
         return byteArr;
     }
 }
+
+// Commented-out example YAML and classes
 /*
 --- !shape
   # Use the ! handle for presenting

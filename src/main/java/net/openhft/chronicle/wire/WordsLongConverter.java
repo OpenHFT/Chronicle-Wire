@@ -27,24 +27,27 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * Converts long values to a sequence of words and vice-versa. The conversion uses a predefined list of common words,
- * and each word is mapped to a unique segment of the long value.
+ * The {@code WordsLongConverter} class implements the LongConverter interface.
+ * Its primary purpose is to convert long numbers into their equivalent word representation using a predefined word list.
+ * <p>
+ * The word list is sourced from the 'common-words.txt' file associated with this class.
+ * </p>
+ * <p>
+ * For example, a long value might be represented by a sequence of words from this list.
+ * </p>
  */
 public class WordsLongConverter implements LongConverter {
 
-    /** A regex pattern to match non-letter characters. */
+    // A pattern to match non-letter characters.
     static final Pattern NON_LETTER = Pattern.compile("\\W");
 
-    /** An array of words loaded from a file, used for conversions. */
+    // A static array of words loaded from the 'common-words.txt' file.
     static final String[] WORDS;
 
-    /**
-     * A mapping of words to their respective indexes. Used to quickly find
-     * a word's index, which is crucial for the conversion to long.
-     */
+    // A static map to associate each word with a unique identifier.
     static final Map<String, Integer> WORD_ID = new HashMap<>();
 
-    // Static block to initialize the WORDS array and the WORD_ID map.
+    // Static block to load words from the 'common-words.txt' file into the WORDS array and the WORD_ID map.
     static {
         try {
             // Load the words from a resource file.
@@ -62,20 +65,20 @@ public class WordsLongConverter implements LongConverter {
         }
     }
 
-    /** The character used to separate words in the string representation. */
+    // The separator used between words in the word representation of long numbers.
     private final String sep;
 
     /**
-     * Default constructor. Uses a period as the default word separator.
+     * Default constructor that initializes the WordsLongConverter with a dot ('.') as the default separator.
      */
     public WordsLongConverter() {
         this('.');
     }
 
     /**
-     * Constructor with a specified word separator.
+     * Constructor that initializes the WordsLongConverter with a specified separator character.
      *
-     * @param sep The character used to separate words.
+     * @param sep The separator character to use between words in the word representation.
      */
     public WordsLongConverter(char sep) {
         this.sep = Character.toString(sep);

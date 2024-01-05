@@ -26,7 +26,8 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 
-// Test created as a result of agitator tests i.e. random character changes
+// This test suite is designed to test behaviors of the TextWire class
+// based on random character changes, a method called "agitator testing".
 public class TextWireAgitatorTest extends WireTestCommon {
 
     @Test
@@ -64,6 +65,8 @@ public class TextWireAgitatorTest extends WireTestCommon {
         assertEquals("[hello]", md.toString());
     }
 
+    // Test to validate if an unexpected string value (i.e., not a boolean) assigned to a boolean field
+    // will still be parsed without throwing an exception. The test is designed to produce a warning.
     @Test
     public void notBoolean() {
         // produces a warning.
@@ -73,6 +76,7 @@ public class TextWireAgitatorTest extends WireTestCommon {
         assertNotNull(mf);
     }
 
+    // An inner static class designed to be marshallable, with a single boolean field named "flag".
     static class MyFlagged extends SelfDescribingMarshallable {
         boolean flag;
     }

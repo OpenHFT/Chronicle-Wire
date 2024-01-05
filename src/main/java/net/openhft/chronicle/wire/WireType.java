@@ -49,7 +49,13 @@ import java.util.stream.StreamSupport;
 import static net.openhft.chronicle.core.io.IOTools.*;
 
 /**
- * A selection of prebuilt wire types.
+ * Enumerates a selection of prebuilt wire types. These wire types define specific ways
+ * data can be serialized and deserialized.
+ * <p>
+ * This enumeration provides utilities to check for the availability of certain wire types
+ * such as DeltaWire and DefaultZeroWire. It also provides methods to acquire bytes,
+ * useful in serialization operations.
+ * </p>
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
@@ -371,10 +377,18 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
     };
 
+    // Size after which data is compressed.
     private static final int COMPRESSED_SIZE = Integer.getInteger("WireType.compressedSize", 128);
+
+    // Flags to check the availability of certain wire types.
     private static final boolean IS_DELTA_AVAILABLE = isDeltaAvailable();
     private static final boolean IS_DEFAULT_ZERO_AVAILABLE = isDefaultZeroAvailable();
 
+    /**
+     * Checks if the DeltaWire type is available in the current environment.
+     *
+     * @return true if DeltaWire is available, false otherwise.
+     */
     private static boolean isDeltaAvailable() {
         try {
             Class.forName("software.chronicle.wire.DeltaWire").getDeclaredConstructor(Bytes.class);
@@ -384,6 +398,11 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
     }
 
+    /**
+     * Checks if the DefaultZeroWire type is available in the current environment.
+     *
+     * @return true if DefaultZeroWire is available, false otherwise.
+     */
     private static boolean isDefaultZeroAvailable() {
         try {
             Class.forName("software.chronicle.wire.DefaultZeroWire").getDeclaredConstructor(Bytes.class);
@@ -408,12 +427,21 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     @Deprecated(/* To be removed in x.26 */)
     @NotNull
     static Bytes<?> getBytes2() {
-        // when in debug, the output becomes confused if you reuse the buffer.
+        // When in debug, the output becomes confused if you reuse the buffer.
         if (Jvm.isDebug())
             return Bytes.allocateElasticOnHeap();
         return Wires.acquireAnotherBytes();
     }
 
+    /**
+     * Determines the {@link WireType} of a given {@link Wire} instance. This method inspects
+     * the underlying type of the provided wire instance and maps it to its corresponding
+     * WireType.
+     *
+     * @param wire The wire instance whose type needs to be determined.
+     * @return The corresponding WireType of the given wire, or null if the input wire is null.
+     * @throws IllegalStateException If the wire type is unrecognized.
+     */
     @Nullable
     public static WireType valueOf(@Nullable Wire wire) {
 
@@ -453,26 +481,59 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         throw new IllegalStateException("unknown type");
     }
 
+    /**
+     * Provides a supplier for a new {@link IntValue} reference using {@link BinaryIntReference}.
+     *
+     * @return A supplier that creates a new BinaryIntReference.
+     */
     public Supplier<IntValue> newIntReference() {
         return BinaryIntReference::new;
     }
 
+    /**
+     * Provides a supplier for a new {@link BooleanValue} reference using {@link BinaryBooleanReference}.
+     *
+     * @return A supplier that creates a new BinaryBooleanReference.
+     */
     public Supplier<BooleanValue> newBooleanReference() {
         return BinaryBooleanReference::new;
     }
 
+    /**
+     * Provides a supplier for a new {@link LongValue} reference using {@link BinaryLongReference}.
+     *
+     * @return A supplier that creates a new BinaryLongReference.
+     */
     public Supplier<LongValue> newLongReference() {
         return BinaryLongReference::new;
     }
 
+    /**
+     * Provides a supplier for a new {@link TwoLongValue} reference using {@link BinaryTwoLongReference}.
+     *
+     * @return A supplier that creates a new BinaryTwoLongReference.
+     */
     public Supplier<TwoLongValue> newTwoLongReference() {
         return BinaryTwoLongReference::new;
     }
 
+    /**
+     * Provides a supplier for a new {@link LongArrayValues} reference using {@link BinaryLongArrayReference}.
+     *
+     * @return A supplier that creates a new BinaryLongArrayReference.
+     */
     public Supplier<LongArrayValues> newLongArrayReference() {
         return BinaryLongArrayReference::new;
     }
 
+    /**
+     * Converts a given marshallable object to its string representation.
+     * This method ensures the object is first converted to a byte buffer,
+     * and then the buffer's contents are returned as a string.
+     *
+     * @param marshallable The object to be converted to string.
+     * @return The string representation of the object.
+     */
     public String asString(Object marshallable) {
         ValidatableUtil.startValidateDisabled();
         try (ScopedResource<Bytes<?>> stlBytes = Wires.acquireBytesScoped()) {
@@ -484,6 +545,16 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
     }
 
+    /**
+     * Converts the given marshallable object to a {@link Bytes} buffer.
+     * This method uses various strategies to serialize different types of
+     * objects to a byte buffer, e.g., WriteMarshallable, Map, Iterable, etc.
+     *
+     * @param marshallable The object to be converted to bytes.
+     * @return A Bytes buffer containing the serialized form of the object.
+     * @throws InvalidMarshallableException If the object cannot be serialized properly.
+     */
+    @NotNull
     private void asBytes(Object marshallable, Bytes<?> bytes) throws InvalidMarshallableException {
         Wire wire = apply(bytes);
         wire.usePadding(wire.isBinary() && AbstractWire.DEFAULT_USE_PADDING);
@@ -534,11 +605,30 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
     }
 
+    /**
+     * Deserializes an object of generic type from a file.
+     *
+     * @param filename The path to the file containing the serialized object.
+     * @param <T> The type of the object to be deserialized.
+     * @return The deserialized object.
+     * @throws IOException If there's an error reading the file.
+     * @throws InvalidMarshallableException If the object cannot be properly deserialized.
+     */
     @NotNull
     public <T> T fromFile(String filename) throws IOException, InvalidMarshallableException {
         return (T) fromFile(Marshallable.class, filename);
     }
 
+    /**
+     * Deserializes an object of a specified type from a file.
+     *
+     * @param expectedType The expected type of the object to be deserialized.
+     * @param filename The path to the file containing the serialized object.
+     * @param <T> The type of the object to be deserialized.
+     * @return The deserialized object, or null if the object could not be deserialized.
+     * @throws IOException If there's an error reading the file.
+     * @throws InvalidMarshallableException If the object cannot be properly deserialized.
+     */
     @Nullable
     public <T> T fromFile(@NotNull Class<T> expectedType, String filename) throws IOException, InvalidMarshallableException {
         File file = new File(filename);
@@ -559,17 +649,42 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
     }
 
+    /**
+     * Streams objects of generic type from a file.
+     *
+     * @param filename The path to the file containing the serialized objects.
+     * @param <T> The type of the objects to be streamed.
+     * @return A stream of the deserialized objects.
+     * @throws IOException If there's an error reading the file.
+     */
     @NotNull
     public <T> Stream<T> streamFromFile(String filename) throws IOException {
         return streamFromFile((Class) Marshallable.class, filename);
     }
 
+    /**
+     * Streams objects of a specified type from a file.
+     *
+     * @param expectedType The expected type of the objects to be streamed.
+     * @param filename The path to the file containing the serialized objects.
+     * @param <T> The type of the objects to be streamed.
+     * @return A stream of the deserialized objects.
+     * @throws IOException If there's an error reading the file.
+     */
     @NotNull
     public <T> Stream<T> streamFromFile(@NotNull Class<T> expectedType, String filename) throws IOException {
         Bytes<?> b = BytesUtil.readFile(filename);
         return streamFromBytes(expectedType, b);
     }
 
+    /**
+     * Streams objects of a specified type from a {@link Bytes} instance.
+     *
+     * @param expectedType The expected type of the objects to be streamed.
+     * @param b The {@link Bytes} instance containing the serialized objects.
+     * @param <T> The type of the objects to be streamed.
+     * @return A stream of the deserialized objects.
+     */
     @NotNull
     public <T> Stream<T> streamFromBytes(@NotNull Class<T> expectedType, Bytes<?> b) {
         Wire wire = apply(b);
@@ -600,6 +715,16 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
                 }, false);
     }
 
+    /**
+     * Deserializes a map from a file, with string keys and values of a specified type.
+     *
+     * @param filename The path to the file containing the serialized map.
+     * @param tClass The class of the values in the map.
+     * @param <T> The type of the values in the map.
+     * @return The deserialized map.
+     * @throws IOException If there's an error reading the file.
+     * @throws InvalidMarshallableException If the map cannot be properly deserialized.
+     */
     @NotNull
     public <T> Map<String, T> fromFileAsMap(String filename, @NotNull Class<T> tClass) throws IOException, InvalidMarshallableException {
         @NotNull Map<String, T> map = new LinkedHashMap<>();
@@ -612,11 +737,30 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         return map;
     }
 
+    /**
+     * Serializes a map to a file, with string keys and values of a specified type.
+     *
+     * @param filename The path to the file where the map should be serialized.
+     * @param map The map to serialize.
+     * @param <T> The type of the values in the map.
+     * @throws IOException If there's an error writing to the file.
+     * @throws InvalidMarshallableException If the map cannot be properly serialized.
+     */
     public <T extends Marshallable> void toFileAsMap(@NotNull String filename, @NotNull Map<String, T> map)
             throws IOException, InvalidMarshallableException {
         toFileAsMap(filename, map, false);
     }
 
+    /**
+     * Writes a map of string keys and Marshallable values to a file.
+     *
+     * @param filename The name of the file to write to.
+     * @param map The map to write.
+     * @param compact A flag indicating whether the serialized form should be compacted.
+     * @param <T> The type of values in the map, which should extend {@link Marshallable}.
+     * @throws IOException If there's an error writing to the file.
+     * @throws InvalidMarshallableException If the map cannot be properly serialized.
+     */
     public <T extends Marshallable> void toFileAsMap(@NotNull String filename, @NotNull Map<String, T> map, boolean compact)
             throws IOException, InvalidMarshallableException {
         String tempFilename = IOTools.tempName(filename);
@@ -641,6 +785,14 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
     }
 
+    /**
+     * Writes a {@link WriteMarshallable} object to a file.
+     *
+     * @param filename The name of the file to write to.
+     * @param marshallable The object to write.
+     * @throws IOException If there's an error writing to the file.
+     * @throws InvalidMarshallableException If the object cannot be properly serialized.
+     */
     public void toFile(@NotNull String filename, WriteMarshallable marshallable) throws IOException, InvalidMarshallableException {
         String tempFilename = IOTools.tempName(filename);
         try (ScopedResource<Bytes<?>> stlBytes = Wires.acquireBytesScoped()) {
@@ -656,6 +808,12 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
     }
 
+    /**
+     * Converts a Marshallable object to its HexString representation.
+     *
+     * @param marshallable The object to convert.
+     * @return A HexString representation of the object.
+     */
     @NotNull
     String asHexString(Object marshallable) {
         ValidatableUtil.startValidateDisabled();
@@ -668,6 +826,14 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
     }
 
+    /**
+     * Deserializes an object from its HexString representation.
+     *
+     * @param s The HexString to deserialize from.
+     * @param <T> The type of the deserialized object.
+     * @return The deserialized object.
+     * @throws InvalidMarshallableException If the HexString cannot be properly deserialized.
+     */
     @Nullable <T> T fromHexString(@NotNull CharSequence s) throws InvalidMarshallableException {
         Bytes<?> bytes = Bytes.fromHexString(s.toString());
         try {
@@ -678,6 +844,13 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
     }
 
+    /**
+     * Converts the provided CharSequence into a Map<String, Object> representation using Wire.
+     *
+     * @param cs The CharSequence to be converted.
+     * @return A Map with String keys and Object values.
+     * @throws InvalidMarshallableException If the CharSequence cannot be properly deserialized.
+     */
     @Nullable
     public Map<String, Object> asMap(@NotNull CharSequence cs) throws InvalidMarshallableException {
         try (ScopedResource<Bytes<?>> stlBytes = Wires.acquireBytesScoped()) {
@@ -697,6 +870,12 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         return true;
     }
 
+    /**
+     * Indicates if this WireType is of a textual nature.
+     * This implementation returns false, indicating it's not textual.
+     *
+     * @return true if the WireType is textual; false otherwise.
+     */
     public boolean isText() {
         return false;
     }

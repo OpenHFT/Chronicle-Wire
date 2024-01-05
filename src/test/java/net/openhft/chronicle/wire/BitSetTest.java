@@ -27,6 +27,7 @@ import java.util.BitSet;
 @SuppressWarnings("rawtypes")
 public class BitSetTest extends WireTestCommon {
 
+    // Test the equality of a BitSet after being written and read from a wire
     @Test
     public void testBitSetEquals() {
         Bytes<?> b = Bytes.elasticByteBuffer();
@@ -44,6 +45,7 @@ public class BitSetTest extends WireTestCommon {
         }
     }
 
+    // Test the equality of a BitSet with multiple bits set after being written and read from a wire
     @Test
     public void testBitSetEquals2() {
         Bytes<?> b = Bytes.elasticByteBuffer();
@@ -62,6 +64,7 @@ public class BitSetTest extends WireTestCommon {
         }
     }
 
+    // Test the conversion of a BitSet to text format after being written to a wire
     @Test
     public void testBitSetToText() {
         Bytes<?> b = Bytes.elasticByteBuffer();
@@ -81,6 +84,7 @@ public class BitSetTest extends WireTestCommon {
         }
     }
 
+    // Test the conversion of a BitSet with multiple bits set to text format after being written to a wire
     @Test
     public void testBitSet2ToText() {
         Bytes<?> b = Bytes.elasticByteBuffer();
@@ -102,6 +106,7 @@ public class BitSetTest extends WireTestCommon {
         }
     }
 
+    // Test reading a BitSet into an existing BitSet instance using 'using' from a wire
     @Test
     public void testBitSetUsing() {
 

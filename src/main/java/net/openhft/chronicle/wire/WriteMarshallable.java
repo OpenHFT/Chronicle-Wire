@@ -23,27 +23,54 @@ import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Represents a marshallable entity capable of writing its state to a given wire format.
+ * Implementations of this interface can describe their serialization logic by defining
+ * the {@link #writeMarshallable(WireOut)} method.
+ * <p>
+ * This interface is annotated with {@code @FunctionalInterface}, indicating that it is
+ * intended to be used primarily for lambda expressions and method references.
+ * Furthermore, the {@code @DontChain} annotation suggests that implementations should
+ * not be chained for certain operations.
+ */
 @FunctionalInterface
 @DontChain
 public interface WriteMarshallable extends WriteValue, CommonMarshallable {
+
+    /**
+     * Represents an empty marshallable entity that performs no actions
+     * when its {@code writeMarshallable} method is invoked.
+     */
     WriteMarshallable EMPTY = wire -> {
         // nothing
     };
 
     /**
-     * Write data to the wire
+     * Write the current state of the marshallable entity to the provided wire.
      *
-     * @param wire to write to.
+     * @param wire The wire format to write to.
+     * @throws InvalidMarshallableException if any serialization error occurs.
      */
     void writeMarshallable(@NotNull WireOut wire) throws InvalidMarshallableException;
 
+    /**
+     * Writes the current state of the marshallable entity as a value
+     * to the provided output.
+     *
+     * @param out The output to write to.
+     * @throws InvalidMarshallableException if any serialization error occurs.
+     */
     @Override
     default void writeValue(@NotNull ValueOut out) throws InvalidMarshallableException {
         out.marshallable(this);
     }
 
     /**
-     * @return the size in bytes to assume the length will be
+     * Provides an assumed length in bytes for the serialized form of this entity.
+     * This is useful for pre-allocating resources or optimizing serialization
+     * and deserialization processes.
+     *
+     * @return The binary length length indicating the size in bytes.
      */
     default BinaryLengthLength binaryLengthLength() {
         return BinaryLengthLength.LENGTH_32BIT;

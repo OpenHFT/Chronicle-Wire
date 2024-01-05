@@ -22,38 +22,49 @@ import net.openhft.chronicle.wire.IMid;
 
 import java.util.List;
 
+/**
+ * Implementation of the MockMethods interface, primarily used to delegate method calls
+ * to another instance of MockMethods, potentially for mocking or proxying behaviors.
+ */
 class MockMethodsImpl implements MockMethods {
-    private final MockMethods out;
+    private final MockMethods out; // Target instance to which method calls are delegated
 
+    // Constructor to initialize with an instance of MockMethods
     public MockMethodsImpl(MockMethods out) {
         this.out = out;
     }
 
+    // Delegate the call of method1 to the 'out' instance
     @Override
     public void method1(MockDto dto) {
         out.method1(dto);
     }
 
+    // Delegate the call of method2 to the 'out' instance
     @Override
     public void method2(MockDto dto) {
         out.method2(dto);
     }
 
+    // Delegate the call of method3 to the 'out' instance
     @Override
     public void method3(List<MockDto> dtos) {
         out.method3(dtos);
     }
 
+    // Delegate the call of list method to the 'out' instance
     @Override
     public void list(List<String> strings) {
         out.list(strings);
     }
 
+    // Implementation of throwException that throws a runtime exception
     @Override
     public void throwException(String s) {
         throw new RuntimeException(s);
     }
 
+    // Delegate the call of mid method to the 'out' instance and return the result
     @Override
     public IMid mid(String text) {
         return out.mid(text);

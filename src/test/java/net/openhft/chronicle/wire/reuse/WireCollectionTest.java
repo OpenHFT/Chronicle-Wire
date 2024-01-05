@@ -36,10 +36,15 @@ import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * Test class for WireCollection, using various wire types.
+ */
 @Ignore("TODO FIX")
 @SuppressWarnings("rawtypes")
 @RunWith(value = Parameterized.class)
 public class WireCollectionTest extends WireTestCommon {
+
+    // Registering WireProperty class with the ClassAliasPool for serialization/deserialization
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(WireProperty.class);
     }
@@ -47,13 +52,24 @@ public class WireCollectionTest extends WireTestCommon {
     private final Function<Bytes<?>, Wire> wireType;
     private WireCollection collection;// = new WireModel();
 
+    /**
+     * Constructor for WireCollectionTest.
+     *
+     * @param wireType A function that defines the type of Wire to be tested.
+     */
     public WireCollectionTest(Function<Bytes<?>, Wire> wireType) {
         this.wireType = wireType;
     }
 
+    /**
+     * Parameterized test data generator.
+     *
+     * @return A collection of wire type configurations to be tested.
+     */
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
         return Arrays.asList(
+                // Test with various wire types
                 new Object[]{WireType.TEXT},
                 new Object[]{WireType.YAML_ONLY},
                 new Object[]{(Function<Bytes<?>, Wire>) bytes -> new BinaryWire(bytes, false, true, false, 128, "binary", false)},
@@ -64,22 +80,31 @@ public class WireCollectionTest extends WireTestCommon {
         );
     }
 
+    /**
+     * Sets up the test environment before each test.
+     */
     @Before
     public void setUp() {
         collection = WireUtils.randomWireCollection();
     }
 
+    /**
+     * Tests multiple reads of WireCollection using various wire types.
+     */
     @Test
     public void testMultipleReads() {
         Bytes<?> bytes = Bytes.elasticByteBuffer();
         Wire wire = wireType.apply(bytes);
 
+        // Writing the collection to the wire
         wire.writeDocument(true, collection);
        // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
 
         @NotNull WireCollection results = new WireCollection();
+        // Reading the collection from the wire
         wire.readDocument(results, null);
 
+        // Asserting the collections are equal after the write-read process
         assertEquals(collection.toString(), results.toString());
         WireUtils.compareWireCollection(collection, results);
     }

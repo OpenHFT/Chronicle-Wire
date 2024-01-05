@@ -30,13 +30,31 @@ import net.openhft.chronicle.wire.channel.ChronicleChannelCfg;
 import net.openhft.chronicle.wire.channel.OkHeader;
 import net.openhft.chronicle.wire.converter.NanoTime;
 
+/**
+ * Represents an echo channel that extends the capabilities of a {@link SimpleCloseable} and
+ * implements the {@link ChronicleChannel} interface. The primary responsibility of this class is
+ * to manage the reading and writing of documents to a {@link Wire} while keeping track of test messages
+ * and headers.
+ */
 public class EchoChannel extends SimpleCloseable implements ChronicleChannel {
 
+    // A default OK header that signifies a successful operation or message
     private static final OkHeader OK = new OkHeader();
+
+    // The wire used for reading and writing documents
     private final Wire wire = WireType.BINARY_LIGHT.apply(Bytes.allocateElasticOnHeap());
+
+    // Configuration associated with the channel
     private final ChronicleChannelCfg channelCfg;
+
+    // Keeps track of the last test message's timestamp
     private long lastTestMessage;
 
+    /**
+     * Constructs an EchoChannel with the provided channel configuration.
+     *
+     * @param channelCfg The configuration for this channel.
+     */
     public EchoChannel(ChronicleChannelCfg channelCfg) {
         this.channelCfg = channelCfg;
     }

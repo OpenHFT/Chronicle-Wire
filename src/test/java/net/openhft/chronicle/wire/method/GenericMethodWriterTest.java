@@ -26,16 +26,28 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Test class for verifying the behavior of generic method writers in Chronicle Wire.
+ */
 public class GenericMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon {
+
+    /**
+     * Test the functionality of method writers with generic parameters.
+     */
     @Test
     public void genericParameter() {
+        // Create a new YAML wire in memory
         Wire wire = Wire.newYamlWireOnHeap();
+
+        // Create a method writer for the ChronicleEventHandler interface
         final ChronicleEventHandler writer = wire.methodWriter(ChronicleEventHandler.class);
+
+        // Create an instance of ChronicleEvent and set its sending time
         final ChronicleEvent event = new ChronicleEvent();
-        event.sendingTimeNS((long) 1e9);
-        writer.event(event);
-        event.sendingTimeNS((long) 2e9);
-        writer.onEvent(event);
+        event.sendingTimeNS((long) 1e9); // Set sending time to 1 billion nanoseconds (1 second)
+        writer.event(event); // Write the event to the wire
+        event.sendingTimeNS((long) 2e9); // Set sending time to 2 billion nanoseconds (2 second)
+        writer.onEvent(event); // Write the event to the wire
 
         assertEquals("" +
                 "event: {\n" +
@@ -53,13 +65,17 @@ public class GenericMethodWriterTest extends net.openhft.chronicle.wire.WireTest
                 "}\n" +
                 "...\n", wire.toString());
 
+        // Repeat the process with a new wire to verify the reader functionality
         Wire wire2 = Wire.newYamlWireOnHeap();
         final ChronicleEventHandler writer2 = wire2.methodWriter(ChronicleEventHandler.class);
-        final MethodReader reader = wire.methodReader(writer2);
-        assertTrue(reader.readOne());
-        assertTrue(reader.readOne());
-        assertFalse(reader.readOne());
 
+        // Read from the first wire and write to the second wire
+        final MethodReader reader = wire.methodReader(writer2);
+        assertTrue(reader.readOne()); // Expect to read the first event
+        assertTrue(reader.readOne()); // Expect to read the second event
+        assertFalse(reader.readOne()); // No more events to read
+
+        // Assert the second wire's content matches the first wire's
         assertEquals("" +
                 "event: {\n" +
                 "  sendingTimeNS: 1970-01-01T00:00:01,\n" +
