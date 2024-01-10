@@ -4,11 +4,13 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.internal.UnknownClassLookup;
 import org.junit.Test;
 
-public class WireTypeConverterWithUnknownClassesLookupTest extends WireTestCommon {
-
+public class WireTypeConverterWithUnknownClassesLookupTest { //extends WireTestCommon {
     @Test
     public void fromYamlToJsonAndBackToYaml() {
-        WireTypeConverter wireTypeConverter = new WireTypeConverter(new UnknownClassLookup(ClassAliasPool.CLASS_ALIASES));
+        //WireTypeConverter wireTypeConverter = new WireTypeConverter(new UnknownClassLookup(ClassAliasPool.CLASS_ALIASES));
+        WireTypeConverter wireTypeConverter = new WireTypeConverter();
+        Wires.GENERATE_TUPLES = true;
+        Wires.THROW_CNFRE = false;
         String yaml = "!ChronicleServicesCfg {\n" +
             "  queues: {\n" +
             "    in: { path: tmp/benchmark/in },\n" +
@@ -21,7 +23,7 @@ public class WireTypeConverterWithUnknownClassesLookupTest extends WireTestCommo
             "    sender-one: {\n" +
             "      inputs: [ in ],\n" +
             "      output: sender-one-out,\n" +
-            "      startFromStrategy: START,\n" +
+            "      startFromStrategy: ${property.name},\n" +
             "      affinityCpu: any,\n" +
             "      pretouchMS: 100,\n" +
             "      serviceConfig: {\n" +
@@ -40,7 +42,10 @@ public class WireTypeConverterWithUnknownClassesLookupTest extends WireTestCommo
 
     @Test
     public void typeReference() {
-        WireTypeConverter wireTypeConverter = new WireTypeConverter(new UnknownClassLookup(ClassAliasPool.CLASS_ALIASES));
+        //WireTypeConverter wireTypeConverter = new WireTypeConverter(new UnknownClassLookup(ClassAliasPool.CLASS_ALIASES));
+        WireTypeConverter wireTypeConverter = new WireTypeConverter();
+        Wires.GENERATE_TUPLES = true;
+        Wires.THROW_CNFRE = false;
         String yaml = "!ChronicleServicesCfg {\n" +
             "  queues: {\n" +
             "    in: { path: tmp/benchmark/in },\n" +
