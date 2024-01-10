@@ -6,12 +6,21 @@ package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
 
-public interface Event<E extends Event<E>> extends TimedEvent<E> {
+/**
+ * This interface defines the structure and behavior of an event within a system.
+ * It extends {@link BaseEvent}, thereby inheriting methods related to time management,
+ * and adds methods specific to event identification and manipulation.
+ * <p>
+ * NOTE: Only use this interface if the eventId is required as the eventTime is sufficient in most cases
+ *
+ * @param <E> The type of the implementing event class, following the self-referential generic pattern.
+ */
+public interface Event<E extends Event<E>> extends BaseEvent<E> {
 
     /**
-     * Returns a unique identifier attached to this event.
+     * Returns an identifier attached to this event.
      *
-     * @return a unique identifier attached to this event.
+     * @return an identifier attached to this event.
      */
     @NotNull
     default CharSequence eventId() {
@@ -19,9 +28,10 @@ public interface Event<E extends Event<E>> extends TimedEvent<E> {
     }
 
     /**
-     * Assigns a unique identifier to this event. The input identifier cannot be {@code null}.
+     * Assigns an identifier to this event. The provided identifier must not be null.
+     * This method can be used to explicitly set or change the event's identifier.
      *
-     * @param eventId unique identifier to assign to this event.
+     * @param eventId identifier to assign to this event.
      * @return this
      */
     default E eventId(@NotNull final CharSequence eventId) {
@@ -29,9 +39,12 @@ public interface Event<E extends Event<E>> extends TimedEvent<E> {
     }
 
     /**
-     * Updates event with new event name, updating event time to now if required.
+     * Updates the event with a new name, and if the event time is not already set,
+     * updates the event time to the current system time. This method is useful for renaming
+     * events and ensuring they have a valid timestamp.
      *
-     * @param eventName name of the event
+     * @param eventName The new name to be assigned to the event.
+     * @return The current instance of the implementing class, with any necessary updates applied.
      */
     default E updateEvent(final String eventName) {
         if (this.eventId().length() == 0)
@@ -43,10 +56,12 @@ public interface Event<E extends Event<E>> extends TimedEvent<E> {
     }
 
     /**
-     * Rather than getting/setting from one event to the other directly, please use this method as
-     * this will make removing eventId easier
-     * @param from from
-     * @param to to
+     * Copies essential details from one event to another. This method is preferred over direct
+     * field access as it provides a more controlled way of transferring details between events,
+     * and facilitates future changes to the event structure.
+     *
+     * @param from The source event from which details are copied.
+     * @param to The target event to which details are copied.
      */
     static void copyEventDetails(Event<?> from, Event<?> to) {
         to.eventId(from.eventId());
