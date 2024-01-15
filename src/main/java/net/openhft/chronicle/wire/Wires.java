@@ -55,6 +55,7 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
+import static java.util.Arrays.asList;
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.SerializationStrategies.*;
 import static net.openhft.chronicle.wire.WireType.TEXT;
@@ -827,10 +828,21 @@ public enum Wires {
     static synchronized Class loadFromJava(ClassLoader classLoader, String className, String code) throws ClassNotFoundException {
         if (CACHED_COMPILER == null) {
             final String target = OS.getTarget();
-            CACHED_COMPILER =
-                    new File(target).exists() && DUMP_CODE_TO_TARGET
-                            ? new CachedCompiler(new File(target, "generated-test-sources"), new File(target, "test-classes"))
-                            : new CachedCompiler(null, null);
+            File sourceDir = null;
+            File classDir = null;
+
+            if (new File(target).exists() && DUMP_CODE_TO_TARGET) {
+                sourceDir = new File(target, "generated-test-sources");
+                classDir = new File(target, "test-classes");
+            }
+
+            String compilerOptions = Jvm.getProperty("compiler.options");
+
+            if (compilerOptions == null || compilerOptions.trim().isEmpty()) {
+                CACHED_COMPILER = new CachedCompiler(sourceDir, classDir);
+            } else {
+                CACHED_COMPILER = new CachedCompiler(sourceDir, classDir, asList(compilerOptions.split("\\s")));
+            }
         }
         try {
             return CACHED_COMPILER.loadFromJava(classLoader, className, code);
@@ -1025,7 +1037,7 @@ public enum Wires {
                     return ScalarStrategy.of(ZonedDateTime.class, (o, in) -> in.zonedDateTime());
 
                 case "java.sql.Time":
-                    return ScalarStrategy.of(java.sql.Time.class, (o, in) -> new Time(parseDate(in).getTime()));
+                    return ScalarStrategy.of(Time.class, (o, in) -> new Time(parseDate(in).getTime()));
 
                 case "java.sql.Date":
                     return ScalarStrategy.of(java.sql.Date.class, (o, in) -> new java.sql.Date(parseDate(in).getTime()));
