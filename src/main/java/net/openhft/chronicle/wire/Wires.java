@@ -55,6 +55,7 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
+import static java.util.Arrays.asList;
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.SerializationStrategies.*;
 import static net.openhft.chronicle.wire.WireType.TEXT;
@@ -1657,7 +1658,7 @@ public enum Wires {
                     return ScalarStrategy.of(ZonedDateTime.class, (o, in) -> in.zonedDateTime());
 
                 case "java.sql.Time":
-                    return ScalarStrategy.of(java.sql.Time.class, (o, in) -> new Time(parseDate(in).getTime()));
+                    return ScalarStrategy.of(Time.class, (o, in) -> new Time(parseDate(in).getTime()));
 
                 case "java.sql.Date":
                     return ScalarStrategy.of(java.sql.Date.class, (o, in) -> new java.sql.Date(parseDate(in).getTime()));
