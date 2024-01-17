@@ -19,11 +19,7 @@ package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -49,7 +45,6 @@ public class CSVWireTest extends WireTestCommon {
             wire.read(() -> "heading2").text(this, (o, s) -> assertEquals("data2", s))
                     .read(() -> "heading3").text(this, (o, s) -> assertEquals("data three", s));
         });
-        // Ensure there's still more data to read.
         assertTrue(wire.hasMore());
 
         // Read and validate the second row of data.
@@ -119,6 +114,7 @@ public class CSVWireTest extends WireTestCommon {
                     .read(() -> "changePercent").float64(this, (o, d) -> assertEquals(2.44, d, 0.0))
                     .read(() -> "daysVolume").int64(this, (o, d) -> assertEquals(2387043, d));
         });
+        wire.readEventName(row);
         assertTrue(wire.hasMore());
         wire.readEventName(row).marshallable(w -> {
             assertEquals("3IN", row.toString());
@@ -126,8 +122,10 @@ public class CSVWireTest extends WireTestCommon {
                     .read(() -> "price").float64(this, (o, d) -> assertEquals(164.7, d, 0.0))
                     .read(() -> "change").float64(this, (o, d) -> assertEquals(0.1, d, 0.0))
                     .read(() -> "changePercent").float64(this, (o, d) -> assertEquals(0.06, d, 0.0))
-                    .read(() -> "daysVolume").int64(this, (o, d) -> assertEquals(429433, d));
+                    .read(() -> "daysVolume").int64(this, (o, d) -> assertEquals(429433, d))
+                    .read();
         });
+        wire.readEventName(row);
         assertTrue(wire.hasMore());
         wire.readEventName(row).marshallable(w -> {
             assertEquals("AA", row.toString());
@@ -137,6 +135,7 @@ public class CSVWireTest extends WireTestCommon {
                     .read(() -> "changePercent").float64(this, (o, d) -> assertEquals(1.72, d, 0.0))
                     .read(() -> "daysVolume").int64(this, (o, d) -> assertEquals(1469834, d));
         });
+        wire.readEventName(row);
         assertFalse(wire.hasMore());
     }
 }
