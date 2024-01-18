@@ -25,17 +25,17 @@ import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.threads.PauserMode;
 import net.openhft.chronicle.wire.*;
 import net.openhft.chronicle.wire.channel.*;
-import net.openhft.chronicle.wire.channel.impl.tcp.Handler;
 import net.openhft.chronicle.wire.converter.NanoTime;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channel;
 import java.nio.channels.SocketChannel;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
@@ -68,11 +68,12 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
     private boolean endOfData = false;
     private boolean unsentTestMessage = false;
     private int bufferSize = CAPACITY * 2;
+    private  BiConsumer<ChannelHeader,ChronicleChannelCfg<?>> closeCallback;
 
     /**
      * Initiator constructor
      */
-    public TCPChronicleChannel(ChronicleChannelCfg channelCfg,
+    public TCPChronicleChannel(ChronicleChannelCfg<?> channelCfg,
                                ChannelHeader headerOut,
                                SocketRegistry socketRegistry) throws InvalidMarshallableException {
         try {
@@ -302,8 +303,20 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
                 socket.getSendBufferSize();
     }
 
+    public void closeCallback( BiConsumer<ChannelHeader,ChronicleChannelCfg<?>> closeCallback) {
+        this.closeCallback = closeCallback;
+    }
+
     @Override
     protected void performClose() {
+        BiConsumer<ChannelHeader,ChronicleChannelCfg<?>> callback = closeCallback;
+        if (callback != null) {
+            ChannelHeader h1 = headerInToUse;
+            if (h1 != null)
+                callback.accept(h1,channelCfg);
+            else
+                callback.accept(headerIn,channelCfg);
+        }
         Closeable.closeQuietly(sc);
         if (privateSocketRegistry)
             Closeable.closeQuietly(socketRegistry);
