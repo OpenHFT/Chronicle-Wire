@@ -34,7 +34,6 @@ import java.nio.channels.SocketChannel;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -68,7 +67,7 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
     private boolean endOfData = false;
     private boolean unsentTestMessage = false;
     private int bufferSize = CAPACITY * 2;
-    private  BiConsumer<ChannelHeader,ChronicleChannelCfg<?>> closeCallback;
+    private Consumer<ChronicleChannel> closeCallback;
 
     /**
      * Initiator constructor
@@ -303,19 +302,18 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
                 socket.getSendBufferSize();
     }
 
-    public void closeCallback( BiConsumer<ChannelHeader,ChronicleChannelCfg<?>> closeCallback) {
+    public void closeCallback(Consumer<ChronicleChannel> closeCallback) {
         this.closeCallback = closeCallback;
     }
 
     @Override
     protected void performClose() {
-        BiConsumer<ChannelHeader,ChronicleChannelCfg<?>> callback = closeCallback;
-        if (callback != null) {
-            ChannelHeader h1 = headerInToUse;
-            if (h1 != null)
-                callback.accept(h1,channelCfg);
-            else
-                callback.accept(headerIn,channelCfg);
+        try {
+            Consumer<ChronicleChannel> c = closeCallback;
+            if (c != null)
+                c.accept(this);
+        } catch (Exception e) {
+            Jvm.warn().on(getClass(), e);
         }
         Closeable.closeQuietly(sc);
         if (privateSocketRegistry)

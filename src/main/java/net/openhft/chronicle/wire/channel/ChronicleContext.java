@@ -87,7 +87,7 @@ public class ChronicleContext extends SimpleCloseable {
     private ChronicleGatewayMain gateway;
     private SystemContext systemContext;
     private boolean privateSocketRegistry;
-    private BiConsumer<ChannelHeader, ChronicleChannelCfg<?>> closeCallback;
+    private Consumer<ChronicleChannel> closeCallback;
 
     /**
      * Protected constructor for creating a Chronicle context with the specified URL.
@@ -379,14 +379,14 @@ public class ChronicleContext extends SimpleCloseable {
     /**
      * @param closeCallback a callback that you can provide with will be called in the TCP Channel is closed
      */
-    public void closeCallback(BiConsumer<ChannelHeader, ChronicleChannelCfg<?>> closeCallback) {
+    public void closeCallback(Consumer<ChronicleChannel> closeCallback) {
         this.closeCallback = closeCallback;
     }
 
     /**
      * @return this callback will be called in the TCP Channel is closed
      */
-    public  BiConsumer<ChannelHeader,ChronicleChannelCfg<?>> closeCallback() {
+    public  Consumer<ChronicleChannel> closeCallback() {
         return this.closeCallback;
     }
 }

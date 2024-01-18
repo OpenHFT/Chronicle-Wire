@@ -50,7 +50,7 @@ public interface ChronicleChannel extends Closeable, MarshallableOut, Marshallab
         return ChronicleChannelUtils.newChannel(socketRegistry, channelCfg, headerOut, null);
     }
 
-    static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg channelCfg, ChannelHeader headerOut,  BiConsumer<ChannelHeader,ChronicleChannelCfg<?>> closeCallback) throws InvalidMarshallableException {
+    static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg channelCfg, ChannelHeader headerOut,  Consumer<ChronicleChannel> closeCallback) throws InvalidMarshallableException {
         return ChronicleChannelUtils.newChannel(socketRegistry, channelCfg, headerOut, closeCallback);
     }
 

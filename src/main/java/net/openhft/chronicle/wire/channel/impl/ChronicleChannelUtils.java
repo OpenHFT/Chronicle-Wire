@@ -22,9 +22,9 @@ public final class ChronicleChannelUtils {
 
 
     public static ChronicleChannel newChannel(SocketRegistry socketRegistry,
-                                              ChronicleChannelCfg channelCfg,
+                                              ChronicleChannelCfg<?> channelCfg,
                                               ChannelHeader headerOut,
-                                              @Nullable BiConsumer<ChannelHeader,ChronicleChannelCfg<?>> closeCallback) throws InvalidMarshallableException {
+                                              @Nullable Consumer<ChronicleChannel> closeCallback) throws InvalidMarshallableException {
         TCPChronicleChannel simpleConnection = new TCPChronicleChannel(channelCfg, headerOut, socketRegistry);
 
         if (closeCallback != null)
@@ -40,7 +40,7 @@ public final class ChronicleChannelUtils {
                     URL url = ChronicleContext.urlFor(location);
                     channelCfg.hostname(url.getHost());
                     channelCfg.port(url.getPort());
-                    return newChannel(socketRegistry, channelCfg, headerOut);
+                    return newChannel(socketRegistry, channelCfg, headerOut,null);
 
                 } catch (IORuntimeException e) {
                     Jvm.debug().on(ChronicleChannel.class, e);
@@ -53,7 +53,7 @@ public final class ChronicleChannelUtils {
                 : simpleConnection;
     }
 
-    @Deprecated
+    @Deprecated(/* To be removed in x.27 */)
     public static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg channelCfg, ChannelHeader headerOut) throws InvalidMarshallableException {
         return newChannel(socketRegistry, channelCfg, headerOut, null);
     }
