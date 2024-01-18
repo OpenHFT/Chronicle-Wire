@@ -19,12 +19,9 @@
 package net.openhft.chronicle.wire.issue;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.*;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;

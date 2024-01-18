@@ -180,6 +180,7 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable,
                 final SocketChannel sc = ssc.accept();
                 sc.socket().setTcpNoDelay(true);
                 final TCPChronicleChannel channel = new TCPChronicleChannel(systemContext(), channelCfg, sc, this::replaceInHeader, this::replaceOutHeader);
+                channel.closeCallback(closeCallback());
                 service.submit(() -> handle(channel));
             }
         } catch (Throwable e) {
