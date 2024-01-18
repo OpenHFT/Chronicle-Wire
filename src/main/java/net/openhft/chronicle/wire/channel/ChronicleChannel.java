@@ -28,7 +28,6 @@ import net.openhft.chronicle.wire.channel.impl.ChronicleChannelUtils;
 import net.openhft.chronicle.wire.channel.impl.SocketRegistry;
 import net.openhft.chronicle.wire.converter.NanoTime;
 
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
