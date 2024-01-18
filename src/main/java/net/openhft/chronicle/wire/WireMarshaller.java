@@ -1023,6 +1023,8 @@ public class WireMarshaller<T> {
                     case "net.openhft.chronicle.bytes.Bytes":
                         return new BytesFieldAccess(field);
                     default:
+                        if (isRecord != null && (boolean) isRecord.invoke(type))
+                            throw new UnsupportedOperationException("Record classes are not supported");
                         @Nullable Boolean isLeaf = null;
                         if (IntValue.class.isAssignableFrom(type))
                             return new IntValueAccess(field);
@@ -1039,7 +1041,7 @@ public class WireMarshaller<T> {
 
                         return new ObjectFieldAccess(field, isLeaf);
                 }
-            } catch (IllegalAccessException ex) {
+            } catch (IllegalAccessException | InvocationTargetException ex) {
                 throw Jvm.rethrow(ex);
             }
         }
