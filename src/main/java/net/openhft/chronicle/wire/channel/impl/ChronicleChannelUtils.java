@@ -9,9 +9,11 @@ import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.threads.PauserMode;
 import net.openhft.chronicle.wire.channel.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.URL;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 /**
  * This is the ChronicleChannelUtils class.
@@ -51,7 +53,7 @@ public final class ChronicleChannelUtils {
                     URL url = ChronicleContext.urlFor(location);
                     channelCfg.hostname(url.getHost());
                     channelCfg.port(url.getPort());
-                    return newChannel(socketRegistry, channelCfg, headerOut);
+                    return newChannel(socketRegistry, channelCfg, headerOut,null);
 
                 } catch (IORuntimeException e) {
                     Jvm.debug().on(ChronicleChannel.class, e);

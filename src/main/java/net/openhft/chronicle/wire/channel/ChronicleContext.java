@@ -35,6 +35,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static net.openhft.chronicle.wire.WireType.YAML;
 
@@ -85,6 +86,7 @@ public class ChronicleContext extends SimpleCloseable {
     private ChronicleGatewayMain gateway;
     private SystemContext systemContext;
     private boolean privateSocketRegistry;
+    private Consumer<ChronicleChannel> closeCallback;
 
     /**
      * Protected constructor for creating a Chronicle context with the specified URL.
@@ -145,7 +147,6 @@ public class ChronicleContext extends SimpleCloseable {
      * @return an AffinityLock appropriate for this context
      * Acquires an AffinityLock instance based on the affinity usage status of the context. If affinity usage is enabled,
      * a lock is acquired without a specific tag. If affinity usage is disabled, a lock is acquired with a null tag.
-     *
      * @return an AffinityLock instance suitable for the context's affinity usage settings.
      */
     public AffinityLock affinityLock() {
@@ -372,5 +373,19 @@ public class ChronicleContext extends SimpleCloseable {
      */
     public int port() {
         return gateway == null ? url().getPort() : gateway.port();
+    }
+
+    /**
+     * @param closeCallback a callback that you can provide with will be called in the TCP Channel is closed
+     */
+    public void closeCallback(Consumer<ChronicleChannel> closeCallback) {
+        this.closeCallback = closeCallback;
+    }
+
+    /**
+     * @return this callback will be called in the TCP Channel is closed
+     */
+    public  Consumer<ChronicleChannel> closeCallback() {
+        return this.closeCallback;
     }
 }
