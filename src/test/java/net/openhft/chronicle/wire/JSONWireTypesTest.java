@@ -19,7 +19,11 @@ public class JSONWireTypesTest extends WireTestCommon {
 
         String dtoAsJson = JSON_ONLY.asString(dto);
         assertEquals(
-            "{\"@net.openhft.chronicle.wire.JSONWireTypesTest$DtoWithNestedSets\":{\"setOfSets\":[ {\"@!set\":[ {\"@net.openhft.chronicle.wire.JSONWireTypesTest$Dto\":{\"field\":\"234\"}} ]},{\"@!set\":[ {\"@net.openhft.chronicle.wire.JSONWireTypesTest$Dto\":{\"field\":\"123\"}} ]} ]}}{\"@net.openhft.chronicle.wire.JSONWireTypesTest$DtoWithNestedSets\":{\"setOfSets\":[ {\"@!set\":[ {\"@net.openhft.chronicle.wire.JSONWireTypesTest$Dto\":{\"field\":\"234\"}} ]},{\"@!set\":[ {\"@net.openhft.chronicle.wire.JSONWireTypesTest$Dto\":{\"field\":\"123\"}} ]} ]}}",
+                "{\"@net.openhft.chronicle.wire.JSONWireTypesTest$DtoWithNestedSets\":{" +
+                        "\"setOfSets\":[ " +
+                        "{\"@!set\":[ {\"@net.openhft.chronicle.wire.JSONWireTypesTest$Dto\":{\"field\":\"234\"}} ]}," +
+                        "{\"@!set\":[ {\"@net.openhft.chronicle.wire.JSONWireTypesTest$Dto\":{\"field\":\"123\"}} ]}" +
+                        " ]}}",
             dtoAsJson
         );
 
