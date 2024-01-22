@@ -811,10 +811,19 @@ public class JSONWire extends TextWire {
             } else {
                 final StringBuilder sb = acquireStringBuilder();
                 sb.setLength(0);
+                consume('{');
                 this.wireIn().read(sb);
                 final Class<?> clazz = classLookup().forName(sb.subSequence(1, sb.length()));
-                return parseType(null, clazz, true);
+                Object object = parseType(null, clazz, true);
+                consume('}');
+                return object;
             }
+        }
+
+        private void consume(char c) {
+            consumePadding();
+            if (bytes.peekUnsignedByte() == c)
+                bytes.readByte();
         }
 
         private <E> E parseType(@Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {

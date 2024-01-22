@@ -75,7 +75,7 @@ public class WireTypeConverterTest extends net.openhft.chronicle.wire.WireTestCo
         converter.addAlias(MyClass3.class, "MyOldClass");
         final CharSequence yaml = converter.jsonToYaml("" +
                 "{\"@net.openhft.chronicle.wire.MyClass2\": {\n" +
-                "  myClass: {\"@MyOldClass\": { x: abcd } }\n" +
+                "  myClass: {\"@MyOldClass\": { \"x\": \"abcd\" } }\n" +
                 "}\n");
         assertEquals("" +
                 "!net.openhft.chronicle.wire.MyClass2 {\n" +
