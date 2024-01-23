@@ -47,12 +47,22 @@ import static net.openhft.chronicle.core.UnsafeMemory.*;
 public class WireMarshaller<T> {
     private static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
     private static final FieldAccess[] NO_FIELDS = {};
+    private static Method isRecord;
     @NotNull
     final FieldAccess[] fields;
     final TreeMap<CharSequence, FieldAccess> fieldMap = new TreeMap<>(WireMarshaller::compare);
     private final boolean isLeaf;
     @Nullable
     private final T defaultValue;
+
+    static {
+        if (Jvm.isJava14Plus()) {
+            try {
+                isRecord = Jvm.getMethod(Class.class, "isRecord");
+            } catch (Exception ignored) {
+            }
+        }
+    }
 
     protected WireMarshaller(@NotNull Class<T> tClass, @NotNull FieldAccess[] fields, boolean isLeaf) {
         this(fields, isLeaf, defaultValueForType(tClass));
@@ -817,6 +827,8 @@ public class WireMarshaller<T> {
                     case "net.openhft.chronicle.bytes.Bytes":
                         return new BytesFieldAccess(field);
                     default:
+                        if (isRecord != null && (boolean) isRecord.invoke(type))
+                            throw new UnsupportedOperationException("Record classes are not supported");
                         @Nullable Boolean isLeaf = null;
                         if (IntValue.class.isAssignableFrom(type))
                             return new IntValueAccess(field);
@@ -833,7 +845,7 @@ public class WireMarshaller<T> {
 
                         return new ObjectFieldAccess(field, isLeaf);
                 }
-            } catch (IllegalAccessException ex) {
+            } catch (IllegalAccessException | InvocationTargetException ex) {
                 throw Jvm.rethrow(ex);
             }
         }

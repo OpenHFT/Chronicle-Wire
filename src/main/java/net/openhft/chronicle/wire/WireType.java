@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.net.URL;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -600,23 +599,13 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
                 }, false);
     }
 
-    @NotNull
-    public <T> Map<String, T> fromFileAsMap(String filename, @NotNull Class<T> tClass) throws IOException, InvalidMarshallableException {
-        @NotNull Map<String, T> map = new LinkedHashMap<>();
-        Wire wire = apply(BytesUtil.readFile(filename));
-        @NotNull StringBuilder sb = new StringBuilder();
-        while (wire.hasMore()) {
-            wire.readEventName(sb)
-                    .object(tClass, map, (m, o) -> m.put(sb.toString(), o));
-        }
-        return map;
-    }
-
+    @Deprecated(/* for removal in x.27*/)
     public <T extends Marshallable> void toFileAsMap(@NotNull String filename, @NotNull Map<String, T> map)
             throws IOException, InvalidMarshallableException {
         toFileAsMap(filename, map, false);
     }
 
+    @Deprecated(/* for removal in x.27*/)
     public <T extends Marshallable> void toFileAsMap(@NotNull String filename, @NotNull Map<String, T> map, boolean compact)
             throws IOException, InvalidMarshallableException {
         String tempFilename = IOTools.tempName(filename);
