@@ -38,6 +38,12 @@
         <compiler.argument>-Xlint:deprecation</compiler.argument>
         <sonar.organization>openhft</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <!-- The parent POM defines this plugin and activates it in a profile. Unfortunately this plugin will generate
+        code at @NotNull call-sites that throws IllegalArgumentException rather than NullPointerException. This will
+        break various core tests. Chronicle have raised this issue before with the maintainers of the plugin. See:
+        https://github.com/osundblad/intellij-annotations-instrumenter-maven-plugin/issues/53
+        -->
+        <se.eris.notnull.instrument>false</se.eris.notnull.instrument>
     </properties>
 
     <dependencyManagement>
