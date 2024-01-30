@@ -23,7 +23,8 @@ public class UnknownClassLookup implements ClassLookup {
         try {
             return delegate.forName(name);
         } catch (Exception e) {
-            String className = name.toString();
+            String[] parts = name.toString().split("\\.");
+            String className = parts[parts.length - 1];
             Class<?> unknownClass;
             try {
                 unknownClass = CACHED_COMPILER.loadFromJava(className,
