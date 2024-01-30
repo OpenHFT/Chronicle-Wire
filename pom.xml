@@ -217,7 +217,7 @@
                     <systemPropertyVariables>
                         <user.timezone>UTC</user.timezone>
                     </systemPropertyVariables>
-                    <forkCount>1</forkCount>
+                    <forkCount>8</forkCount>
                     <reuseForks>true</reuseForks>
                     <runOrder>hourly</runOrder>
                 </configuration>
