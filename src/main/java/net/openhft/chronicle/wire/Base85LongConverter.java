@@ -18,35 +18,41 @@
 package net.openhft.chronicle.wire;
 
 /**
- * Provides a Base85 encoding scheme for converting long values into a string representation.
+ * Provides a Base85 encoding scheme, converting long values to a string representation.
+ * NOTE: This is intended for encoding numbers into text so that small non-negative numbers produce short strings.
+ * Notably, leading zero are truncated. In particular, 0 is encoded as an empty string.
+ * <p>
+ * If you need to encode text as a long value, refer to {@link ShortTextLongConverter}.
  * <p>
  * Base85 is a binary-to-text encoding scheme that represents binary data in an ASCII string format.
- * It uses a set of 85 characters to represent the data, which can result in a more compact
+ * It uses a set of 85 printable characters to represent the data, which can result in a more compact
  * representation compared to Base64, especially for larger data sizes.
- * </p>
- *
  * <p>
  * This implementation uses a custom character set that includes punctuation, numbers,
  * uppercase letters, lowercase letters, and special characters, ensuring a wider range of
  * encoded values.
- * </p>
  *
  * @see AbstractLongConverter
+ * @see ShortTextLongConverter
  */
 public class Base85LongConverter extends AbstractLongConverter {
 
     /**
-     * Maximum length of the parsed string.
+     * Defines the maximum length of strings that can be parsed by this converter.
+     * The value is set to 10, considering the encoding efficiency of Base85.
      */
     public static final int MAX_LENGTH = 10;
 
     /**
-     * Shared instance of Base85LongConverter for ease of use.
+     * Provides a readily available instance of Base85LongConverter for ease of use.
+     * This shared instance simplifies the usage pattern by avoiding repeated instantiation.
      */
     public static final Base85LongConverter INSTANCE = new Base85LongConverter();
 
     /**
-     * Custom set of characters used for the Base85 encoding.
+     * Specifies the custom character set used for Base85 encoding in this implementation.
+     * The character set includes a mix of digits, uppercase and lowercase letters, punctuation,
+     * and special symbols, enabling a broad range of encoded outputs.
      */
     private static final String CHARS = "" +
             "0123456789" +
@@ -57,7 +63,7 @@ public class Base85LongConverter extends AbstractLongConverter {
 
     /**
      * Private constructor to prevent external instantiation.
-     * Initializes the converter with the custom Base85 character set.
+     * Initializes the converter with the defined custom Base85 character set.
      */
     private Base85LongConverter() {
         super(CHARS);
@@ -74,13 +80,13 @@ public class Base85LongConverter extends AbstractLongConverter {
     }
 
     /**
-     * Specifies that not all characters are safe for the given {@code wireOut}.
+     * Indicates whether all characters in the custom Base85 character set are safe for the given output context.
+     * In this implementation, not all characters are considered safe.
      *
-     * @param wireOut the output for which the safety of characters is checked.
-     * @return always returns {@code false} indicating not all characters are safe.
+     * @return always {@code false}, denoting that not all characters are safe for all contexts.
      */
     @Override
-    public boolean allSafeChars(WireOut wireOut) {
+    public boolean allSafeChars() {
         return false;
     }
 }

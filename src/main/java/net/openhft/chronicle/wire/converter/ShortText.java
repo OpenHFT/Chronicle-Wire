@@ -18,9 +18,9 @@
 
 package net.openhft.chronicle.wire.converter;
 
-import net.openhft.chronicle.wire.Base85LongConverter;
 import net.openhft.chronicle.wire.LongConversion;
 import net.openhft.chronicle.wire.LongConverter;
+import net.openhft.chronicle.wire.ShortTextLongConverter;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -29,11 +29,10 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation to indicate that a given field or parameter, represented as a long value,
- * should be treated as a string containing 0 to 10 characters in Base85 format.
+ * should be treated as a string containing 0 to 10 characters in Base85 format. This truncated leading spaces, but preserves leading zero c.f. {@link Base85}
  * <p>
- * Base85, also known as Ascii85, is a binary-to-ASCII encoding scheme optimized for
- * encoding binary data in a compact ASCII string format. It's particularly useful for
- * transporting binary data over text-based protocols where binary formats are not supported.
+ * Base85, also known as Ascii85, is a binary-to-ASCII encoding scheme that provides
+ * an efficient way to encode binary data for transport over text-based protocols.
  * </p>
  * <p>
  * When this annotation is applied to a field or parameter, it provides a hint about the expected format
@@ -43,27 +42,28 @@ import java.lang.annotation.Target;
  * The provided {@link #INSTANCE} is a default converter that can be used for operations relevant to the Base85 format.
  * </p>
  *
- * <b>Example:</b>
+ * <b>Usage Example:</b>
  * <pre>
  * {@code
- * @Base85
- * private long encodedData;
+ * @ShortText
+ * private long encodedText;
  * }
  * </pre>
  *
  * @see LongConverter
- * @see Base85LongConverter
+ * @see Base85
+ * @see ShortTextLongConverter
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
-@LongConversion(Base85.class)
-public @interface Base85 {
+@LongConversion(ShortText.class)
+public @interface ShortText {
 
     /**
-     * An instance of {@link Base85LongConverter} specifically configured for Base85 conversions.
-     * This converter uses a character set defined by the {@link Base85LongConverter} to represent Base85 encoded data.
+     * An instance of {@link ShortTextLongConverter} specifically configured for Base85 conversions.
+     * This converter uses a character set defined by the {@link ShortTextLongConverter} to represent Base85 encoded data.
      *
-     * @return the Base85 long converter instance.
+     * @return the specialized Base85 long converter instance for ShortText.
      */
-    LongConverter INSTANCE = Base85LongConverter.INSTANCE;
+    LongConverter INSTANCE = ShortTextLongConverter.INSTANCE;
 }

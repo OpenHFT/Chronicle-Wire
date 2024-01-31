@@ -1,8 +1,8 @@
 package run.chronicle.account.dto;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.wire.converter.Base85;
 import net.openhft.chronicle.wire.converter.NanoTime;
+import net.openhft.chronicle.wire.converter.ShortText;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -10,11 +10,11 @@ import static org.junit.Assert.assertEquals;
 public class TransferTest {
     static Transfer getTransfer() {
         return new Transfer()
-                .sender(Base85.INSTANCE.parse("sender"))
-                .target(Base85.INSTANCE.parse("target"))
+                .sender(ShortText.INSTANCE.parse("sender"))
+                .target(ShortText.INSTANCE.parse("target"))
                 .sendingTime(NanoTime.INSTANCE.parse("2001/02/03T04:05:06.007008009"))
                 .amount(1)
-                .currency((int) Base85.INSTANCE.parse("CURR"))
+                .currency((int) ShortText.INSTANCE.parse("CURR"))
                 .from(12345)
                 .to(67890)
                 .reference(Bytes.from("reference"));

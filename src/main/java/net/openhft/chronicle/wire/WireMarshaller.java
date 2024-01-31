@@ -604,10 +604,23 @@ public class WireMarshaller<T> {
                     longConverter.append(sb, aLong);
                     if (!write.isBinary() && sb.length() == 0)
                         write.text("");
-                    else
+                    else if (longConverter.allSafeChars() || noUnsafeChars(sb))
                         write.rawText(sb);
+                    else
+                        write.text(sb);
                 }
             }
+        }
+
+        private boolean noUnsafeChars(StringBuilder sb) {
+            int index = sb.length() - 1;
+            if (sb.charAt(0) == ' ' || sb.charAt(index) == ' ')
+                return false;
+            for (int i = 0; i < sb.length(); i++) {
+                if (":'\"#,".indexOf(sb.charAt(i)) >= 0)
+                    return false;
+            }
+            return true;
         }
 
         /**
@@ -1017,7 +1030,7 @@ public class WireMarshaller<T> {
          * Where possible, existing data structures should be preserved without reallocation to avoid garbage.
          *
          * @param defaultObject A reference unmodified instance of this class.
-         * @param o Object to reset the value in.
+         * @param o             Object to reset the value in.
          */
         protected void setDefaultValue(Object defaultObject, Object o) throws IllegalAccessException {
             copy(defaultObject, o);

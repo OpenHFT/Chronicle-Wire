@@ -1,14 +1,14 @@
 package net.openhft.chronicle.wire.examples;
 
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
-import net.openhft.chronicle.wire.converter.Base85;
 import net.openhft.chronicle.wire.converter.NanoTime;
+import net.openhft.chronicle.wire.converter.ShortText;
 
 public class Person extends SelfDescribingMarshallable {
     private String name;
     @NanoTime
     private long timestampNS;
-    @Base85
+    @ShortText
     private long userName;
 
     public String name() {
