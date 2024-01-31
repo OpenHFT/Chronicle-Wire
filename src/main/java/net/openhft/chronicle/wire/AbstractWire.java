@@ -41,8 +41,16 @@ import java.util.function.Consumer;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.wire.Wires.*;
 
+/**
+ * Represents the AbstractWire class which serves as a base for all Wire implementations.
+ * This class provides fundamental shared behaviors, configurations, and initializations for Wire types.
+ */
 public abstract class AbstractWire implements Wire {
+
+    // Default padding configuration loaded from the system properties.
     public static final boolean DEFAULT_USE_PADDING = Jvm.getBoolean("wire.usePadding", false);
+
+    // Message used when a header is detected inside another header.
     private static final String INSIDE_HEADER_MESSAGE = "you cant put a header inside a header, check that " +
             "you have not nested the documents. If you are using Chronicle-Queue please " +
             "ensure that you have a unique instance of the Appender per thread, in " +
@@ -77,11 +85,33 @@ public abstract class AbstractWire implements Wire {
         notCompleteIsNotPresent = bytes.sharedMemory();
     }
 
+    /**
+     * Sets the flag to determine whether this Wire should generate tuples. When enabled,
+     * this feature allows the Wire to create and handle tuple data structures dynamically.
+     * <p>
+     * Usage of this feature should be aligned with the specific requirements of the Wire's
+     * operational context. Enabling tuple generation may impact how data is processed and
+     * represented within the Wire.
+     *
+     * @param generateTuples A boolean value indicating whether to enable or disable
+     *                       tuple generation.
+     */
     @Override
     public void generateTuples(boolean generateTuples) {
         this.generateTuples = generateTuples;
     }
 
+    /**
+     * Retrieves the current status of the tuple generation feature within this Wire.
+     * When enabled, this feature allows for the dynamic creation and handling of tuple
+     * data structures within the Wire.
+     * <p>
+     * The return value of this method indicates whether the Wire is currently configured
+     * to generate and handle tuples, which can be crucial for understanding the Wire's
+     * current data processing behavior.
+     *
+     * @return A boolean value indicating whether tuple generation is currently enabled.
+     */
     @Override
     public boolean generateTuples() {
         return generateTuples;
