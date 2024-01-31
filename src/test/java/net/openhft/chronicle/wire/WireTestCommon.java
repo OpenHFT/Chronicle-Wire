@@ -44,8 +44,6 @@ public class WireTestCommon {
     private final Map<Predicate<ExceptionKey>, String> ignoredExceptions = new LinkedHashMap<>();
     private final Map<Predicate<ExceptionKey>, String> expectedExceptions = new LinkedHashMap<>();
 
-    private boolean gt;
-
     public WireTestCommon() {
         ignoreException("The incubating features are subject to change");
         ignoreException("NamedThreadFactory created here");
@@ -157,14 +155,9 @@ public class WireTestCommon {
     protected void preAfter() {
     }
 
-    @Before
-    public void rememberGenerateTuples() {
-        gt = Wires.GENERATE_TUPLES;
-    }
-
     @After
     public void restoreGenerateTuples() {
-        Wires.GENERATE_TUPLES = gt;
+        Wires.GENERATE_TUPLES = false;
     }
 
     @Before

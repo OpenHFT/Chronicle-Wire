@@ -235,6 +235,15 @@ public interface WireIn extends WireCommon, MarshallableIn {
         return false;
     }
 
+    default void generateTuples(boolean generateTuples) {
+        if (generateTuples)
+            throw new UnsupportedOperationException();
+    }
+
+    default boolean generateTuples() {
+        return false;
+    }
+
     enum HeaderType {
         NONE, DATA, META_DATA, EOF
     }

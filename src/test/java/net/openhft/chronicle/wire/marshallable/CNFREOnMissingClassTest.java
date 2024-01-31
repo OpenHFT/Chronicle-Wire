@@ -19,9 +19,9 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
     @Test(expected = ClassNotFoundRuntimeException.class)
     public void throwClassNotFoundRuntimeExceptionOnMissingClassAlias() {
         WiresTest.wiresThrowCNFRE(true);
-        Wires.GENERATE_TUPLES = false;
         Wire wire = new TextWire(Bytes.from("" +
                 "a: !Aaa { hi: bye }"));
+        wire.generateTuples(false);
         Object object = wire.read("a").object();
         System.out.println(object);
         assertNotNull(object);

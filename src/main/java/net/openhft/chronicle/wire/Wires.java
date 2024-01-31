@@ -805,11 +805,6 @@ public enum Wires {
 
     @Nullable
     public static <T> T tupleFor(Class<T> tClass, String typeName) {
-        if (!GENERATE_TUPLES) {
-            Jvm.warn().on(Wires.class, "Cannot find a class for " + typeName + " are you missing an alias?");
-            return null;
-        }
-
         if (tClass == null || tClass == Object.class)
             tClass = (Class<T>) Marshallable.class;
         if (!tClass.isInterface()) {

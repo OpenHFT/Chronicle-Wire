@@ -68,12 +68,23 @@ public abstract class AbstractWire implements Wire {
     private boolean insideHeader;
     private HeadNumberChecker headNumberChecker;
     private boolean usePadding = DEFAULT_USE_PADDING;
+    private boolean generateTuples = GENERATE_TUPLES;
 
     @SuppressWarnings("rawtypes")
     protected AbstractWire(@NotNull Bytes<?> bytes, boolean use8bit) {
         this.bytes = bytes;
         this.use8bit = use8bit;
         notCompleteIsNotPresent = bytes.sharedMemory();
+    }
+
+    @Override
+    public void generateTuples(boolean generateTuples) {
+        this.generateTuples = generateTuples;
+    }
+
+    @Override
+    public boolean generateTuples() {
+        return generateTuples;
     }
 
     private static long throwNotEnoughSpace(long maxlen, @NotNull Bytes<?> bytes) {
