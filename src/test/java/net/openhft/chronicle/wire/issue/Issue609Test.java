@@ -48,6 +48,22 @@ public class Issue609Test extends WireTestCommon {
         assertEquals(expected, obj);
     }
 
+    @Test
+    public void toYamlAndBackIssue824() {
+        ChronicleServicesCfg expected = new ChronicleServicesCfg();
+
+        ServiceCfg scfg = new ServiceCfg();
+        expected.services.put("fix-web-gateway", scfg);
+
+        scfg.inputs.add(new InputCfg().input("web-gateway-periodic-updates"));
+
+        System.out.println(expected);
+
+        String yaml = WireType.YAML_ONLY.asString(expected);
+
+        assertEquals(expected, WireType.YAML_ONLY.fromString(yaml));
+    }
+
     public static class ChronicleServicesCfg extends AbstractMarshallableCfg {
         public final Map<String, ServiceCfg> services = new LinkedHashMap<>();
     }
