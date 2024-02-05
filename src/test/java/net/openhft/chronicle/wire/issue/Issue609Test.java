@@ -48,6 +48,38 @@ public class Issue609Test extends WireTestCommon {
         assertEquals(expected, obj);
     }
 
+    @Test
+    public void toYamlAndBackIssue824() {
+        ChronicleServicesCfg expected = new ChronicleServicesCfg();
+
+        ServiceCfg scfg = new ServiceCfg();
+        expected.services.put("fix-web-gateway", scfg);
+
+        scfg.inputs.add(new InputCfg().input("web-gateway-periodic-updates"));
+
+        String yaml = WireType.YAML_ONLY.asString(expected);
+
+        System.out.println(yaml);
+
+        assertEquals(expected, WireType.TEXT.fromString(yaml));
+
+        assertEquals(expected, WireType.YAML_ONLY.fromString(yaml));
+
+        String withString = "" +
+                "!net.openhft.chronicle.wire.issue.Issue609Test$ChronicleServicesCfg {\n" +
+                "  services: {\n" +
+                "    fix-web-gateway: { inputs: [ 'web-gateway-periodic-updates' ] }\n" +
+                "  }\n" +
+                "}";
+
+        assertEquals(expected, WireType.YAML_ONLY.fromString(withString));
+        assertEquals(expected, WireType.TEXT.fromString(withString));
+
+        String withString2 = withString.replace("'", "");
+        assertEquals(expected, WireType.YAML_ONLY.fromString(withString2));
+        assertEquals(expected, WireType.TEXT.fromString(withString2));
+    }
+
     public static class ChronicleServicesCfg extends AbstractMarshallableCfg {
         public final Map<String, ServiceCfg> services = new LinkedHashMap<>();
     }
@@ -64,21 +96,7 @@ public class Issue609Test extends WireTestCommon {
                 if (isEqual(name, "inputs")) {
                     in.sequence(inputs, Object.class, (inputCfgs, inputCfgClass, valueIn) -> {
                         while (valueIn.hasNextSequenceItem()) {
-                            Bytes<?> bytes = wire.bytes();
-                            long pos = bytes.readPosition();
-                            Object cfg0 = valueIn.typedMarshallable();
-                            InputCfg cfg;
-                            if (cfg0 instanceof InputCfg) {
-                                cfg = (InputCfg) cfg0;
-                            } else if (cfg0 instanceof Map) {
-                                bytes.readPosition(pos);
-                                valueIn.marshallable(cfg = new InputCfg());
-                            } else if (cfg0 instanceof String) {
-                                cfg = new InputCfg().input((String) cfg0);
-                            } else {
-                                bytes.readPosition(pos);
-                                cfg = new InputCfg().input(valueIn.text());
-                            }
+                            InputCfg cfg = valueIn.object(InputCfg.class);
                             inputCfgs.add(cfg);
                         }
                     });
@@ -94,6 +112,14 @@ public class Issue609Test extends WireTestCommon {
 
     public static class InputCfg extends AbstractMarshallableCfg {
         private String input;
+
+        public InputCfg() {
+            this(null);
+        }
+
+        public InputCfg(String in) {
+            this.input = in;
+        }
 
         public InputCfg input(String input) {
             this.input = input;
