@@ -1788,6 +1788,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             yt.next(Integer.MIN_VALUE);
             while (true) {
                 switch (yt.current()) {
+                    case TEXT:
                     case SEQUENCE_ENTRY:
                         tReader.accept(t, kls, YamlWire.this.valueIn);
                         continue;
@@ -2002,6 +2003,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                         );
                     }
                     return object;
+
+                case TEXT:
+                    return ObjectUtils.convertTo(object.getClass(), text());
 
                 default:
                     break;
