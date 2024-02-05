@@ -21,7 +21,7 @@ package run.chronicle.account;
 import net.openhft.chronicle.core.time.SetTimeProvider;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.wire.WireTestCommon;
-import net.openhft.chronicle.wire.converter.Base85;
+import net.openhft.chronicle.wire.converter.ShortText;
 import net.openhft.chronicle.wire.utils.YamlAgitator;
 import net.openhft.chronicle.wire.utils.YamlTester;
 import net.openhft.chronicle.wire.utils.YamlTesterParametersBuilder;
@@ -39,30 +39,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(Parameterized.class)
 public class AccountsTest extends WireTestCommon {
-    // Test scenarios located in the following paths
     static final String[] paths = {
             "account/simple",
             "account/mixed",
             "account/waterfall"
     };
+    static final long VAULT = ShortText.INSTANCE.parse("vault");
 
-    // Identifier for the 'vault' in Base85 encoding
-    static final long VAULT = Base85.INSTANCE.parse("vault");
-
-    // Name of the test case and the YamlTester instance
     final String name;
     final YamlTester tester;
 
-    // Constructor initializing test name and tester
     public AccountsTest(String name, YamlTester tester) {
         this.name = name;
         this.tester = tester;
     }
 
-    // Parameters for the test cases
     @Parameterized.Parameters(name = "{0}")
     public static List<Object[]> parameters() {
-        // Building parameters for the YamlTester
         return new YamlTesterParametersBuilder<>(out -> new AccountsImpl(out).id(VAULT), AccountsOut.class, Arrays.asList(paths))
                 .agitators(
                         YamlAgitator.messageMissing(),
@@ -74,20 +67,15 @@ public class AccountsTest extends WireTestCommon {
                 .get();
     }
 
-    // Method to reset the clock after each test
     @After
     public void tearDown() {
         SystemTimeProvider.CLOCK = SystemTimeProvider.INSTANCE;
     }
 
-    // Test method to run the YamlTester
     @Test
     public void runTester() {
-        // Setting the clock with a specific time and auto increment
         SystemTimeProvider.CLOCK = new SetTimeProvider("2023-01-20T10:10:00")
                 .autoIncrement(1, TimeUnit.MILLISECONDS);
-
-        // Asserting that the expected output matches the actual output
         assertEquals(tester.expected(), tester.actual());
     }
 }

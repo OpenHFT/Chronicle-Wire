@@ -4,7 +4,7 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.Wire;
-import net.openhft.chronicle.wire.converter.Base85;
+import net.openhft.chronicle.wire.converter.ShortText;
 
 import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
 
@@ -17,7 +17,7 @@ public class PersonWireMain {
         Person p1 = new Person()
                 .name("George Ball")
                 .timestampNS(CLOCK.currentTimeNanos())
-                .userName(Base85.INSTANCE.parse("georgeb"));
+                .userName(ShortText.INSTANCE.parse("georgeb"));
         System.out.println("p1: " + p1);
 
         // Create a new YAML wire on heap for serialization
@@ -52,7 +52,7 @@ public class PersonWireMain {
         personOps.addPerson(new Person()
                 .name("Bob Singh")
                 .timestampNS(CLOCK.currentTimeNanos())
-                .userName(Base85.INSTANCE.parse("bobs")));
+                .userName(ShortText.INSTANCE.parse("bobs")));
 
         // Print the wire content after adding all persons
         System.out.println(yWire);

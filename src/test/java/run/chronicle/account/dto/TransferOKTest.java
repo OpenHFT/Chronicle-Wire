@@ -1,8 +1,8 @@
 package run.chronicle.account.dto;
 
 import net.openhft.chronicle.wire.Marshallable;
-import net.openhft.chronicle.wire.converter.Base85;
 import net.openhft.chronicle.wire.converter.NanoTime;
+import net.openhft.chronicle.wire.converter.ShortText;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -33,8 +33,8 @@ public class TransferOKTest {
         // Create a TransferOK object and set its properties then asserting
         assertEquals(EXPECTED,
                 new TransferOK()
-                        .target(Base85.INSTANCE.parse("sender"))
-                        .sender(Base85.INSTANCE.parse("target"))
+                        .target(ShortText.INSTANCE.parse("sender"))
+                        .sender(ShortText.INSTANCE.parse("target"))
                         .sendingTime(NanoTime.INSTANCE.parse("2001/02/03T04:05:06.777888999"))
                         .transfer(getTransfer()) // Assuming getTransfer() method is defined and returns a Transfer object
                         .toString());

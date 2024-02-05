@@ -5,8 +5,8 @@
 package net.openhft.chronicle.wire.utils.dto;
 
 import net.openhft.chronicle.wire.*;
-import net.openhft.chronicle.wire.converter.Base85;
 import net.openhft.chronicle.wire.converter.NanoTime;
+import net.openhft.chronicle.wire.converter.ShortText;
 
 /**
  * Abstract base class for events, providing common fields and methods for event-related data.
@@ -15,9 +15,9 @@ import net.openhft.chronicle.wire.converter.NanoTime;
  * @param <E> The type of the event extending this class, used for fluent interface pattern.
  */
 public class AbstractEvent<E extends AbstractEvent<E>> extends SelfDescribingMarshallable {
-    @Base85
+    @ShortText
     private long sender;
-    @Base85
+    @ShortText
     private long target;
     // Client sending time
     @NanoTime
