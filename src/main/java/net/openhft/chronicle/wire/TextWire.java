@@ -1998,12 +1998,17 @@ public class TextWire extends YamlWireOut<TextWire> {
                 readCode();
                 return object;
 
-            } else if (code != '{') {
+            } else if (code == '[' || code == ']' || code == '?') {
                 consumeValue();
                 long position00 = bytes.readPosition();
                 final String s = bytes.readPosition(position0).toDebugString(128);
                 bytes.readPosition(position00);
                 throw new IORuntimeException("Trying to read marshallable " + object.getClass() + " at " + s + " expected to find a {");
+
+            } else if (code != '{' && ObjectUtils.canConvertText(object.getClass())) {
+                Object o = ObjectUtils.convertTo(object.getClass(), text());
+                consumePadding(1);
+                return o;
             }
 
             final long len = readLengthMarshallable();
