@@ -19,12 +19,12 @@
 package run.chronicle.account.dto;
 
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
-import net.openhft.chronicle.wire.converter.Base85;
+import net.openhft.chronicle.wire.converter.ShortText;
 
 public class AccountStatus extends AbstractEvent<AccountStatus> {
     private String name;
     private long account;
-    @Base85
+    @ShortText
     private int currency;
     private double amount;
 

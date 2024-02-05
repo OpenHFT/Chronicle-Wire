@@ -20,11 +20,11 @@ package run.chronicle.account.dto;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
-import net.openhft.chronicle.wire.converter.Base85;
+import net.openhft.chronicle.wire.converter.ShortText;
 
 public class Transfer extends AbstractEvent<Transfer> {
     private long from, to;
-    @Base85
+    @ShortText
     private int currency;
     private double amount;
     private Bytes reference = Bytes.allocateElasticOnHeap();

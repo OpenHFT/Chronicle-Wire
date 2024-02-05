@@ -21,13 +21,13 @@ package run.chronicle.account.dto;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.Validatable;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
-import net.openhft.chronicle.wire.converter.Base85;
 import net.openhft.chronicle.wire.converter.NanoTime;
+import net.openhft.chronicle.wire.converter.ShortText;
 
 public class AbstractEvent<E extends AbstractEvent<E>> extends SelfDescribingMarshallable implements Validatable {
-    @Base85
+    @ShortText
     private long sender;
-    @Base85
+    @ShortText
     private long target;
     // time sent
     @NanoTime

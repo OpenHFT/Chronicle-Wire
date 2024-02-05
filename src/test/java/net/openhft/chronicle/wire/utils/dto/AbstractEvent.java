@@ -5,13 +5,13 @@
 package net.openhft.chronicle.wire.utils.dto;
 
 import net.openhft.chronicle.wire.*;
-import net.openhft.chronicle.wire.converter.Base85;
 import net.openhft.chronicle.wire.converter.NanoTime;
+import net.openhft.chronicle.wire.converter.ShortText;
 
 public class AbstractEvent<E extends AbstractEvent<E>> extends SelfDescribingMarshallable {
-    @Base85
+    @ShortText
     private long sender;
-    @Base85
+    @ShortText
     private long target;
     // client sending time
     @NanoTime

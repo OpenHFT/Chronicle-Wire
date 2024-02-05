@@ -21,37 +21,41 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.junit.Test;
 
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
-public class Base85LongConverterTest extends WireTestCommon {
+public class ShortTextLongConverterTest extends WireTestCommon {
 
     private static final CharSequence TEST_STRING = "world";
 
     @Test
     public void parseLeadingZero() {
-        LongConverter c = Base85LongConverter.INSTANCE;
-        assertEquals(0L, c.parse("0"));
-        assertEquals(0L, c.parse("00"));
-        assertEquals(0L, c.parse("000"));
-        assertEquals(0L, c.parse("0000"));
-        assertEquals(0L, c.parse("00000"));
-        assertEquals(0L, c.parse("000000"));
-        assertEquals(0L, c.parse("0000000"));
-        assertEquals(0L, c.parse("00000000"));
-        assertEquals(0L, c.parse("000000000"));
-        assertEquals(0L, c.parse("0000000000"));
+        LongConverter c = ShortTextLongConverter.INSTANCE;
+        assertEquals(0L, c.parse(""));
+        assertEquals(0L, c.parse(" "));
+        assertEquals(0L, c.parse("  "));
+        assertEquals(84L, c.parse("0"));
+        assertEquals(84L, c.parse(" 0"));
+        assertEquals(7224, c.parse("00"));
+        assertEquals(7224, c.parse("  00"));
+        assertEquals(614124, c.parse("000"));
+        assertEquals(52200624, c.parse("0000"));
+        assertEquals(4437053124L, c.parse("00000"));
+        assertEquals(377149515624L, c.parse("000000"));
+        assertEquals(32057708828124L, c.parse("0000000"));
+        assertEquals(2724905250390624L, c.parse("00000000"));
+        assertEquals(231616946283203124L, c.parse("000000000"));
+        assertEquals(1240696360362714008L, c.parse("0000000000"));
         assertThrows(IllegalArgumentException.class, () -> c.parse("00000000000"));
         assertEquals("", c.asString(0L));
     }
 
     @Test
     public void parse() {
-        LongConverter c = Base85LongConverter.INSTANCE;
+        LongConverter c = ShortTextLongConverter.INSTANCE;
         // System.out.println(c.asString(-1L));
         for (String s : ",a,ab,abc,abcd,ab.de,123=56,1234567,12345678,zzzzzzzzz,+ko2&)z.0".split(",")) {
             long v = c.parse(s);
@@ -63,7 +67,7 @@ public class Base85LongConverterTest extends WireTestCommon {
 
     @Test
     public void asString() {
-        LongConverter c = Base85LongConverter.INSTANCE;
+        LongConverter c = ShortTextLongConverter.INSTANCE;
         IntStream.range(0, 10_000_000)
                 .parallel()
                 .mapToLong(i -> ThreadLocalRandom.current().nextLong())
@@ -77,7 +81,7 @@ public class Base85LongConverterTest extends WireTestCommon {
     public void testAppend() {
         final Bytes<?> b = Bytes.elasticByteBuffer();
         try {
-            final Base85LongConverter idLongConverter = Base85LongConverter.INSTANCE;
+            final LongConverter idLongConverter = ShortTextLongConverter.INSTANCE;
             final long helloWorld = idLongConverter.parse(TEST_STRING);
             idLongConverter.append(b, helloWorld);
             assertEquals(TEST_STRING, b.toString());
@@ -90,7 +94,7 @@ public class Base85LongConverterTest extends WireTestCommon {
     public void testAppendWithExistingData() {
         final Bytes<?> b = Bytes.elasticByteBuffer().append("hello");
         try {
-            final Base85LongConverter idLongConverter = Base85LongConverter.INSTANCE;
+            final LongConverter idLongConverter = ShortTextLongConverter.INSTANCE;
             final long helloWorld = idLongConverter.parse(TEST_STRING);
             idLongConverter.append(b, helloWorld);
             assertEquals("hello" + TEST_STRING, b.toString());
@@ -112,7 +116,7 @@ public class Base85LongConverterTest extends WireTestCommon {
     }
 
     private void allSafeChars(Wire wire) {
-        final Base85LongConverter converter = Base85LongConverter.INSTANCE;
+        final LongConverter converter = ShortTextLongConverter.INSTANCE;
         for (long i = 0; i <= 85 * 85; i++) {
             wire.clear();
             wire.write("a").writeLong(converter, i);
