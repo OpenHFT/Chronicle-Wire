@@ -35,7 +35,7 @@ import static org.junit.Assert.assertTrue;
  * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/324
  */
 @RunWith(value = Parameterized.class)
-public class JSONTypesWithMaps {
+public class JSONTypesWithMapsTest {
 
     private final boolean useTypes;
 
@@ -47,7 +47,7 @@ public class JSONTypesWithMaps {
         );
     }
 
-    public JSONTypesWithMaps(boolean useTypes) {
+    public JSONTypesWithMapsTest(boolean useTypes) {
         this.useTypes = useTypes;
     }
 

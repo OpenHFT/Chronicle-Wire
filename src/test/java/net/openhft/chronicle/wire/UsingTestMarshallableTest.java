@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class UsingTestMarshallable {
+public class UsingTestMarshallableTest {
 
     @Test
     public void testConverMarshallableToTextName() {
