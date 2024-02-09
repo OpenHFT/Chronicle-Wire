@@ -7,7 +7,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JSONEmptySequences {
+public class JSONEmptySequencesTest {
     @Test
     public void emptySequence() {
         ClassAliasPool.CLASS_ALIASES.addAlias(Foo.class);
