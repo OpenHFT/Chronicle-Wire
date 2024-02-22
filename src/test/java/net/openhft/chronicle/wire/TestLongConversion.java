@@ -67,8 +67,8 @@ public class TestLongConversion {
         final StringBuilder builder = new StringBuilder();
 
         final long value1 = longConverter.parse("VAL2");
-        final long value2 = longConverter.parse("VAL3");
-        final long value3 = longConverter.parse("VAL4");
+        final long value2 = longConverter.parse("VVAL3", 1, 5);
+        final long value3 = longConverter.parse("VAL45", 0, 4);
 
         final StringBuilder buffer = new StringBuilder();
 

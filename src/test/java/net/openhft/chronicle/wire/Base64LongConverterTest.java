@@ -39,6 +39,25 @@ public class Base64LongConverterTest extends WireTestCommon {
     }
 
     @Test
+    public void parse2() {
+        LongConverter c = Base64LongConverter.INSTANCE;
+        // System.out.println(c.asString(-1L));
+        String s = ",a,ab,abc,abcd,ab.de,123_56,1234567,12345678,123456789,z23456789,z234567890,O_________,";
+        int oldPos = 0;
+        int newPos;
+        int comparsions = 13;
+        while ((newPos = s.indexOf(',', oldPos)) >= 0) {
+            long v = c.parse(s, oldPos, newPos);
+            StringBuilder sb = new StringBuilder();
+            c.append(sb, v);
+            assertEquals(s.substring(oldPos, newPos), sb.toString());
+            oldPos = newPos + 1;
+            comparsions--;
+        }
+        assertEquals(0, comparsions);
+    }
+
+    @Test
     public void asString() {
         LongConverter c = Base64LongConverter.INSTANCE;
         Random rand = new Random();

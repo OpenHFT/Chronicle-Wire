@@ -49,6 +49,12 @@ public class MilliTimestampLongConverterTest extends WireTestCommon {
     }
 
     @Test
+    public void parse3() {
+        assertEquals(INSTANCE.parse("202020/09/18T01:02:03.456", 2, 25),
+                INSTANCE.parse("2020-09-18T01:02:03.4567890", 0, 23));
+    }
+
+    @Test
     public void testTrailingZ() {
         final String text = "2020-09-18T01:02:03.456";
         assertEquals(INSTANCE.parse(text), INSTANCE.parse(text + "Z"));

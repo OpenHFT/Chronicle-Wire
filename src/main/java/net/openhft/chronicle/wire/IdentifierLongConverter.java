@@ -54,10 +54,25 @@ public class IdentifierLongConverter implements LongConverter {
      */
     @Override
     public long parse(CharSequence text) {
-        return text.length() <= 10
-                ? SMALL_POSITIVE.parse(text)
-                : NanoTimestampLongConverter.INSTANCE.parse(text);
+        return parse(text, 0, text.length());
     }
+
+    /**
+     * Parses a part of the provided {@link CharSequence} into a long identifier.
+     * The parsing behavior changes depending on the length of the CharSequence.
+     *
+     * @param text the CharSequence to parse.
+     * @param beginIndex the beginning index, inclusive.
+     * @param endIndex the ending index, exclusive.
+     * @return the parsed long identifier
+     */
+    @Override
+    public long parse(CharSequence text, int beginIndex, int endIndex) {
+        return (endIndex - beginIndex) <= 10
+                ? SMALL_POSITIVE.parse(text, beginIndex, endIndex)
+                : NanoTimestampLongConverter.INSTANCE.parse(text, beginIndex, endIndex);
+    }
+
 
     /**
      * Appends a long identifier to a provided {@link StringBuilder} instance.

@@ -62,6 +62,25 @@ public class Base85LongConverterTest extends WireTestCommon {
     }
 
     @Test
+    public void parse2() {
+        LongConverter c = Base85LongConverter.INSTANCE;
+        // System.out.println(c.asString(-1L));
+        String s = ",a,ab,abc,abcd,ab.de,123=56,1234567,12345678,zzzzzzzzz,+ko2&)z.0,";
+        int oldPos = 0;
+        int newPos;
+        int comparsions = 11;
+        while ((newPos = s.indexOf(',', oldPos)) >= 0) {
+            long v = c.parse(s, oldPos, newPos);
+            StringBuilder sb = new StringBuilder();
+            c.append(sb, v);
+            assertEquals(s.substring(oldPos, newPos), sb.toString());
+            oldPos = newPos + 1;
+            comparsions--;
+        }
+        assertEquals(0, comparsions);
+    }
+
+    @Test
     public void asString() {
         LongConverter c = Base85LongConverter.INSTANCE;
         IntStream.range(0, 10_000_000)
