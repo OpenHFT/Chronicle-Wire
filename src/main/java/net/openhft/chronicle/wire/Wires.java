@@ -840,11 +840,14 @@ public enum Wires {
     @NotNull
     public static <T> T copyTo(Object source, @NotNull T target) throws InvalidMarshallableException {
         try (ScopedResource<Wire> wireSR = acquireBinaryWireScoped()) {
+            ValidatableUtil.startValidateDisabled();
             Wire wire = wireSR.get();
             wire.getValueOut().object(source);
             wire.getValueIn().typePrefix(); // drop the type prefix.
             wire.getValueIn().object(target, target.getClass());
             return target;
+        } finally {
+            ValidatableUtil.endValidateDisabled();
         }
     }
 
