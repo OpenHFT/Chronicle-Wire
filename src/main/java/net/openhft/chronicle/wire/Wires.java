@@ -531,14 +531,26 @@ public enum Wires {
         }
     }
 
+    /**
+     * Copy fields from source to target by marshalling out and then in. Allows copying of fields by name
+     * even if there is no type relationship between the source and target
+     *
+     * @param source source
+     * @param target dest
+     * @return target
+     * @param <T> target type
+     */
     @NotNull
     public static <T> T copyTo(Object source, @NotNull T target) throws InvalidMarshallableException {
         try (ScopedResource<Wire> wireSR = acquireBinaryWireScoped()) {
+            ValidatableUtil.startValidateDisabled();
             Wire wire = wireSR.get();
             wire.getValueOut().object(source);
             wire.getValueIn().typePrefix(); // drop the type prefix.
             wire.getValueIn().object(target, target.getClass());
             return target;
+        } finally {
+            ValidatableUtil.endValidateDisabled();
         }
     }
 
