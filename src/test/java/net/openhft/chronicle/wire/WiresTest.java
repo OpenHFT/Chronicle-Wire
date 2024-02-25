@@ -21,6 +21,8 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesMarshallable;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.Validatable;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import org.junit.Assert;
@@ -330,6 +332,15 @@ public class WiresTest extends WireTestCommon {
     }
 
     @Test
+    public void copyToIncompleteValidation() {
+        OneTwoFour o124 = new OneTwoFour(11, 222, 44444);
+        TwoFourThreeValidatable o243 = new TwoFourThreeValidatable(2, 4, 3);
+        // o243's validate method used to be called and would blow up as o243 was incomplete.
+        // Using copyTo to partially hydrate an object is perfectly valid
+        Wires.copyTo(o124, o243);
+    }
+
+    @Test
     public void copyToContainsBytesMarshallable() {
         ContainsBM containsBM = new ContainsBM(new BasicBytesMarshallable("Harold"));
         ContainsBM containsBM2 = new ContainsBM(null);
@@ -381,6 +392,19 @@ public class WiresTest extends WireTestCommon {
             this.two = two;
             this.four = four;
             this.three = three;
+        }
+    }
+
+    static class TwoFourThreeValidatable extends TwoFourThree implements Validatable {
+        TwoFourThreeValidatable(long two, long four, long three) {
+            super(two, four, three);
+        }
+
+        @Override
+        public void validate() throws InvalidMarshallableException {
+            if (three == 0) {
+                throw new InvalidMarshallableException("three is 0");
+            }
         }
     }
 
