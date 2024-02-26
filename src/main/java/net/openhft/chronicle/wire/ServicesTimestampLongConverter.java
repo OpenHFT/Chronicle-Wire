@@ -117,6 +117,7 @@ public class ServicesTimestampLongConverter implements LongConverter {
     public static TimeUnit timeUnit() {
         return timeUnit;
     }
+
     /**
      * Parses the provided {@link CharSequence} into a timestamp in the configured time unit.
      * @param text The text to parse.
@@ -125,6 +126,19 @@ public class ServicesTimestampLongConverter implements LongConverter {
     @Override
     public long parse(CharSequence text) {
         return underlying.parse(text);
+    }
+
+    /**
+     * Parses a part of the provided {@link CharSequence} using the underlying converter.
+     *
+     * @param text the text to parse.
+     * @param beginIndex the beginning index, inclusive.
+     * @param endIndex the ending index, exclusive.
+     * @return the parsed timestamp as a long value in the configured time unit.
+     */
+    @Override
+    public long parse(CharSequence text, int beginIndex, int endIndex) {
+        return underlying.parse(text, beginIndex, endIndex);
     }
 
     /**

@@ -33,7 +33,7 @@ public class IdentifierLongConverterTest extends net.openhft.chronicle.wire.Wire
     @Test
     public void parseMin() {
         assertEquals(0, INSTANCE.parse(""));
-        assertEquals(0, INSTANCE.parse("0"));
+        assertEquals(0, INSTANCE.parse("000", 1, 2));
     }
 
     // Test parsing functionality for the maximum small positive value

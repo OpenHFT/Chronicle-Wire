@@ -36,6 +36,8 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static org.junit.Assert.assertEquals;
+
 public class WireTestCommon {
 
     // A thread dump to monitor thread states and detect unwanted thread creation
@@ -149,7 +151,23 @@ public class WireTestCommon {
         }
     }
 
-    // Post-test checks: Cleanup operations and validation checks
+    /**
+     * Parses and round-trips each of provided strings delimited and trailed by comma with a specified converter.
+     */
+    protected static void subStringParseLoop(String s, LongConverter c, int comparisons) {
+        int oldPos = 0;
+        int newPos;
+        while ((newPos = s.indexOf(',', oldPos)) >= 0) {
+            long v = c.parse(s, oldPos, newPos);
+            StringBuilder sb = new StringBuilder();
+            c.append(sb, v);
+            assertEquals(s.substring(oldPos, newPos), sb.toString());
+            oldPos = newPos + 1;
+            comparisons--;
+        }
+        assertEquals(0, comparisons);
+    }
+
     @After
     public void afterChecks() {
         preAfter(); // Any custom operations before the default cleanup

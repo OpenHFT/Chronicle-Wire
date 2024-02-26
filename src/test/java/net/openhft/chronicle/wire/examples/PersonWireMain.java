@@ -17,7 +17,7 @@ public class PersonWireMain {
         Person p1 = new Person()
                 .name("George Ball")
                 .timestampNS(CLOCK.currentTimeNanos())
-                .userName(ShortText.INSTANCE.parse("georgeb"));
+                .userName(ShortText.INSTANCE.parse("georgeball", 0, 7));
         System.out.println("p1: " + p1);
 
         // Create a new YAML wire on heap for serialization

@@ -66,6 +66,24 @@ public class ShortTextLongConverterTest extends WireTestCommon {
     }
 
     @Test
+    public void parseSubsequence() {
+        LongConverter c = ShortTextLongConverter.INSTANCE;
+        String s = ",a,ab,abc,abcd,ab.de,123=56,1234567,12345678,zzzzzzzzz,+ko2&)z.0,";
+        int comparisons = 11;
+        subStringParseLoop(s, c, comparisons);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseLengthCheck() {
+        ShortTextLongConverter.INSTANCE.parse(getClass().getCanonicalName());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseSubstringLengthCheck() {
+        ShortTextLongConverter.INSTANCE.parse("abcd", 3, -2);
+    }
+
+    @Test
     public void asString() {
         LongConverter c = ShortTextLongConverter.INSTANCE;
         IntStream.range(0, 10_000_000)

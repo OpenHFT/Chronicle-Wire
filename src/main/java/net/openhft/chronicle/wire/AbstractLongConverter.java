@@ -73,6 +73,19 @@ public abstract class AbstractLongConverter implements LongConverter {
     }
 
     /**
+     * Parses a part of the provided text using the underlying converter.
+     *
+     * @param text the text to parse.
+     * @param beginIndex the beginning index, inclusive.
+     * @param endIndex the ending index, exclusive.
+     * @return the parsed long value.
+     */
+    @Override
+    public long parse(CharSequence text, int beginIndex, int endIndex) {
+        return converter.parse(text, beginIndex, endIndex);
+    }
+
+    /**
      * Appends the provided long value to the provided {@code StringBuilder} text.
      *
      * @param text the StringBuilder to append to.
