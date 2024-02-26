@@ -37,8 +37,8 @@ public class Base32LongConverterTest extends WireTestCommon {
     public void parseSubsequence() {
         LongConverter c = Base32LongConverter.INSTANCE;
         String s = ",O,A,L,ZZ,QQ,ABCDEGHIJKLM,5OPQRSTVWXYZ,JZZZZZZZZZZZ,";
-        int comparsions = 9;
-        subStringParseLoop(s, c, comparsions);
+        int comparisons = 9;
+        subStringParseLoop(s, c, comparisons);
     }
 
     @Test(expected = IllegalArgumentException.class)

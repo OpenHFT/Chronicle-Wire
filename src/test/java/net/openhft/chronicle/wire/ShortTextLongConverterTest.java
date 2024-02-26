@@ -69,8 +69,8 @@ public class ShortTextLongConverterTest extends WireTestCommon {
     public void parseSubsequence() {
         LongConverter c = ShortTextLongConverter.INSTANCE;
         String s = ",a,ab,abc,abcd,ab.de,123=56,1234567,12345678,zzzzzzzzz,+ko2&)z.0,";
-        int comparsions = 11;
-        subStringParseLoop(s, c, comparsions);
+        int comparisons = 11;
+        subStringParseLoop(s, c, comparisons);
     }
 
     @Test(expected = IllegalArgumentException.class)

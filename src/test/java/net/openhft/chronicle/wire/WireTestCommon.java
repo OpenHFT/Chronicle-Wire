@@ -126,7 +126,7 @@ public class WireTestCommon {
     /**
      * Parses and round-trips each of provided strings delimited and trailed by comma with a specified converter.
      */
-    protected static void subStringParseLoop(String s, LongConverter c, int comparsions) {
+    protected static void subStringParseLoop(String s, LongConverter c, int comparisons) {
         int oldPos = 0;
         int newPos;
         while ((newPos = s.indexOf(',', oldPos)) >= 0) {
@@ -135,9 +135,9 @@ public class WireTestCommon {
             c.append(sb, v);
             assertEquals(s.substring(oldPos, newPos), sb.toString());
             oldPos = newPos + 1;
-            comparsions--;
+            comparisons--;
         }
-        assertEquals(0, comparsions);
+        assertEquals(0, comparisons);
     }
 
     @After
