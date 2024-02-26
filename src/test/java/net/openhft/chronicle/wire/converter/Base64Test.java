@@ -31,7 +31,7 @@ public class Base64Test extends net.openhft.chronicle.wire.WireTestCommon {
         Wire wire = Wire.newYamlWireOnHeap();
         final UsesBase64 writer = wire.methodWriter(UsesBase64.class);
         final long helloWorld = Base64.INSTANCE.parse("HelloWorld");
-        final long byeNow = Base64.INSTANCE.parse("Bye_Now");
+        final long byeNow = Base64.INSTANCE.parse("GoodBye_Now", 4, 11);
         writer.asByte(Byte.MAX_VALUE);
         writer.asShort(Short.MAX_VALUE);
         writer.asInt(Integer.MAX_VALUE);

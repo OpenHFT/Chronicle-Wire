@@ -62,6 +62,24 @@ public class Base85LongConverterTest extends WireTestCommon {
     }
 
     @Test
+    public void parseSubsequence() {
+        LongConverter c = Base85LongConverter.INSTANCE;
+        String s = ",a,ab,abc,abcd,ab.de,123=56,1234567,12345678,zzzzzzzzz,+ko2&)z.0,";
+        int comparisons = 11;
+        subStringParseLoop(s, c, comparisons);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseLengthCheck() {
+        Base85LongConverter.INSTANCE.parse(getClass().getCanonicalName());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseSubstringLengthCheck() {
+        Base85LongConverter.INSTANCE.parse("ABCD", -1, 3);
+    }
+
+    @Test
     public void asString() {
         LongConverter c = Base85LongConverter.INSTANCE;
         IntStream.range(0, 10_000_000)

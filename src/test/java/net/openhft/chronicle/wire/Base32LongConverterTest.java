@@ -34,6 +34,24 @@ public class Base32LongConverterTest extends WireTestCommon {
     }
 
     @Test
+    public void parseSubsequence() {
+        LongConverter c = Base32LongConverter.INSTANCE;
+        String s = ",O,A,L,ZZ,QQ,ABCDEGHIJKLM,5OPQRSTVWXYZ,JZZZZZZZZZZZ,";
+        int comparisons = 9;
+        subStringParseLoop(s, c, comparisons);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseLengthCheck() {
+        Base32LongConverter.INSTANCE.parse(getClass().getCanonicalName());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseSubstringLengthCheck() {
+        Base32LongConverter.INSTANCE.parse("ABCD", 3, 0);
+    }
+
+    @Test
     public void allSafeCharsTextWire() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
         allSafeChars(wire);

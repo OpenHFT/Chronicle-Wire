@@ -73,16 +73,38 @@ public class SymbolsLongConverter implements LongConverter {
     /**
      * Parses a sequence of characters into a long value.
      *
-     * @param text the character sequence to parse
-     * @return the parsed long value
-     * @throws IllegalArgumentException if the character sequence contains unexpected characters
+     * @param text the character sequence to parse.
+     * @return the parsed long value.
+     * @throws IllegalArgumentException if the character sequence contains unexpected characters or
+     *      its length exceeds the maximum allowable length.
      */
     @Override
     public long parse(CharSequence text) {
         lengthCheck(text);
 
+        return parse0(text, 0, text.length());
+    }
+
+    /**
+     * Parses a part of a sequence of characters into a long value.
+     *
+     * @param text the character sequence to parse.
+     * @param beginIndex the beginning index, inclusive.
+     * @param endIndex the ending index, exclusive.
+     * @return the parsed long value.
+     * @throws IllegalArgumentException if the character sequence contains unexpected characters, or if any of the
+     *      indices are invalid or the sub-sequence length exceeds the maximum allowable length.
+     */
+    @Override
+    public long parse(CharSequence text, int beginIndex, int endIndex) {
+        lengthCheck(text, beginIndex, endIndex);
+
+        return parse0(text, beginIndex, endIndex);
+    }
+
+    private long parse0(CharSequence text, int beginIndex, int endIndex) {
         long v = 0;
-        for (int i = 0; i < text.length(); i++) {
+        for (int i = beginIndex; i < endIndex; i++) {
             final char ch = text.charAt(i);
 
             // Check for characters outside of the encoding range or not present in the encoding map.

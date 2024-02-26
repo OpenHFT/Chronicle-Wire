@@ -61,7 +61,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     public void ebm() {
         ClassAliasPool.CLASS_ALIASES.addAlias(EBM.class);
         EBM e1 = new EBM();
-        e1.number = Base85LongConverter.INSTANCE.parse("Hello");
+        e1.number = Base85LongConverter.INSTANCE.parse("Hello!", 0, 5);
         e1.a.append("a12345678901234567890123456789");
         e1.b.append("a1234567890123456789abc");
         e1.c.append("a1234567890");
