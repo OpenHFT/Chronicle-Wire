@@ -36,6 +36,8 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static org.junit.Assert.assertEquals;
+
 public class WireTestCommon {
     protected ThreadDump threadDump;
     protected Map<ExceptionKey, Integer> exceptions;
@@ -119,6 +121,23 @@ public class WireTestCommon {
             Jvm.resetExceptionHandlers();
             Assert.fail(msg);
         }
+    }
+
+    /**
+     * Parses and round-trips each of provided strings delimited and trailed by comma with a specified converter.
+     */
+    protected static void subStringParseLoop(String s, LongConverter c, int comparsions) {
+        int oldPos = 0;
+        int newPos;
+        while ((newPos = s.indexOf(',', oldPos)) >= 0) {
+            long v = c.parse(s, oldPos, newPos);
+            StringBuilder sb = new StringBuilder();
+            c.append(sb, v);
+            assertEquals(s.substring(oldPos, newPos), sb.toString());
+            oldPos = newPos + 1;
+            comparsions--;
+        }
+        assertEquals(0, comparsions);
     }
 
     @After

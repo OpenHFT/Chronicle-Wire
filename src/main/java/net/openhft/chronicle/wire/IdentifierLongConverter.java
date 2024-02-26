@@ -51,6 +51,7 @@ public class IdentifierLongConverter implements LongConverter {
      *
      * @param text the CharSequence to parse
      * @return the parsed long identifier
+     * @throws IllegalArgumentException if the text length is outside of range accepted by the converter.
      */
     @Override
     public long parse(CharSequence text) {
@@ -59,12 +60,14 @@ public class IdentifierLongConverter implements LongConverter {
 
     /**
      * Parses a part of the provided {@link CharSequence} into a long identifier.
-     * The parsing behavior changes depending on the length of the CharSequence.
+     * The parsing behavior changes depending on the difference between indices.
      *
      * @param text the CharSequence to parse.
      * @param beginIndex the beginning index, inclusive.
      * @param endIndex the ending index, exclusive.
      * @return the parsed long identifier
+     * @throws IllegalArgumentException if any of the indices are invalid or the sub-sequence length is
+     *      outside of range accepted by the converter.
      */
     @Override
     public long parse(CharSequence text, int beginIndex, int endIndex) {
@@ -72,7 +75,6 @@ public class IdentifierLongConverter implements LongConverter {
                 ? SMALL_POSITIVE.parse(text, beginIndex, endIndex)
                 : NanoTimestampLongConverter.INSTANCE.parse(text, beginIndex, endIndex);
     }
-
 
     /**
      * Appends a long identifier to a provided {@link StringBuilder} instance.

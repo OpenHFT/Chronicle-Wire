@@ -34,22 +34,11 @@ public class Base32LongConverterTest extends WireTestCommon {
     }
 
     @Test
-    public void parse2() {
+    public void parseSubsequence() {
         LongConverter c = Base32LongConverter.INSTANCE;
-        // System.out.println(c.asString(-1L));
         String s = ",O,A,L,ZZ,QQ,ABCDEGHIJKLM,5OPQRSTVWXYZ,JZZZZZZZZZZZ,";
-        int oldPos = 0;
-        int newPos;
         int comparsions = 9;
-        while ((newPos = s.indexOf(',', oldPos)) >= 0) {
-            long v = c.parse(s, oldPos, newPos);
-            StringBuilder sb = new StringBuilder();
-            c.append(sb, v);
-            assertEquals(s.substring(oldPos, newPos), sb.toString());
-            oldPos = newPos + 1;
-            comparsions--;
-        }
-        assertEquals(0, comparsions);
+        subStringParseLoop(s, c, comparsions);
     }
 
     @Test

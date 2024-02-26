@@ -82,9 +82,10 @@ public class PowerOfTwoLongConverter implements LongConverter {
     /**
      * Parses a sequence of characters into a long value.
      *
-     * @param text the character sequence to parse
-     * @return the parsed long value
-     * @throws IllegalArgumentException if the character sequence contains unexpected characters
+     * @param text the character sequence to parse.
+     * @return the parsed long value.
+     * @throws IllegalArgumentException if the character sequence contains unexpected characters or its length
+     *      exceeds the maximum allowable length.
      */
     @Override
     public long parse(CharSequence text) {
@@ -99,8 +100,9 @@ public class PowerOfTwoLongConverter implements LongConverter {
      * @param text the character sequence to parse.
      * @param beginIndex the beginning index, inclusive.
      * @param endIndex the ending index, exclusive.
-     * @return the parsed long value
-     * @throws IllegalArgumentException if the character sequence contains unexpected characters
+     * @return the parsed long value.
+     * @throws IllegalArgumentException if any of the indices are invalid or the sub-sequence length
+     *      exceeds the maximum allowable length.
      */
     @Override
     public long parse(CharSequence text, int beginIndex, int endIndex) {

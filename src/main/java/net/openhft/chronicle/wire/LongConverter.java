@@ -64,18 +64,23 @@ public interface LongConverter {
      * {@code long} primitive.
      *
      * @return the parsed {@code text} as an {@code long} primitive.
+     * @throws IllegalArgumentException if the text length is outside of range accepted by a specific converter.
      */
     long parse(CharSequence text);
 
     /**
      * Parses a part of the provided {@link CharSequence} and returns the parsed results as a
      * {@code long} primitive.
+     * <p>
+     * The default implementation is garbage-producing and an implementing class is supposed to reimplement this method.
      *
      * @param text character sequence containing the string representation of the value.
      * @param beginIndex the beginning index, inclusive.
      * @param endIndex the ending index, exclusive.
      *
      * @return the parsed {@code text} as an {@code long} primitive.
+     * @throws IllegalArgumentException if any of the indices are invalid or the sub-sequence length is
+     *      outside of range accepted by a specific converter.
      */
     default long parse(CharSequence text, int beginIndex, int endIndex) {
         return parse(text.toString().substring(beginIndex, endIndex));

@@ -42,13 +42,13 @@ public class NanoTimestampLongConverterTest extends WireTestCommon {
     }
 
     @Test
-    public void parse2() {
+    public void parseString() {
         assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456789012"),
                 INSTANCE.parse("2020-09-18T01:02:03.456789012"));
     }
 
     @Test
-    public void parse3() {
+    public void parseSubsequence() {
         assertEquals(INSTANCE.parse("202020/09/18T01:02:03.456789012", 2, 31),
                 INSTANCE.parse("2020-09-18T01:02:03.4567890123", 0, 29));
     }
