@@ -69,6 +69,16 @@ public class Base85LongConverterTest extends WireTestCommon {
         subStringParseLoop(s, c, comparsions);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void parseLengthCheck() {
+        Base85LongConverter.INSTANCE.parse(getClass().getCanonicalName());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseSubstringLengthCheck() {
+        Base85LongConverter.INSTANCE.parse("ABCD", -1, 3);
+    }
+
     @Test
     public void asString() {
         LongConverter c = Base85LongConverter.INSTANCE;

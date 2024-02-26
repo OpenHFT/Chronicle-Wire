@@ -163,12 +163,13 @@ public interface LongConverter {
     /**
      * Checks that the length of the provided text does not exceed the allowable maximum.
      *
+     * @param text
      * @param beginIndex the beginning index, inclusive.
-     * @param endIndex the ending index, exclusive.
+     * @param endIndex   the ending index, exclusive.
      * @throws IllegalArgumentException if the text length exceeds the maximum allowable length.
      */
-    default void lengthCheck(int beginIndex, int endIndex) {
-        if ((beginIndex | endIndex | (endIndex - beginIndex) | (maxParseLength() - endIndex + beginIndex)) < 0)
+    default void lengthCheck(CharSequence text, int beginIndex, int endIndex) {
+        if ((beginIndex | endIndex | (endIndex - beginIndex) | (text.length() - endIndex + beginIndex) | (maxParseLength() - endIndex + beginIndex)) < 0)
             throw new IllegalArgumentException(format("range [{0}, {1}) exceeds the maximum allowable length of {2}",
                     beginIndex, endIndex, maxParseLength()));
     }

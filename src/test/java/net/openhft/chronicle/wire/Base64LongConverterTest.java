@@ -46,6 +46,16 @@ public class Base64LongConverterTest extends WireTestCommon {
         subStringParseLoop(s, c, comparsions);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void parseLengthCheck() {
+        Base64LongConverter.INSTANCE.parse(getClass().getCanonicalName());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseSubstringLengthCheck() {
+        Base64LongConverter.INSTANCE.parse("abcd", 0, 5);
+    }
+
     @Test
     public void asString() {
         LongConverter c = Base64LongConverter.INSTANCE;

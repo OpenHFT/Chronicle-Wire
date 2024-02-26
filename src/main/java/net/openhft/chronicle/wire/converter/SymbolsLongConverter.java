@@ -97,7 +97,7 @@ public class SymbolsLongConverter implements LongConverter {
      */
     @Override
     public long parse(CharSequence text, int beginIndex, int endIndex) {
-        lengthCheck(beginIndex, endIndex);
+        lengthCheck(text, beginIndex, endIndex);
 
         return parse0(text, beginIndex, endIndex);
     }
