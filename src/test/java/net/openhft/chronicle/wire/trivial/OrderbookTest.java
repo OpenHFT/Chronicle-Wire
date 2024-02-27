@@ -33,7 +33,9 @@ public class OrderbookTest {
                 "    { price: 93.0, qty: 1.0 }\n" +
                 "  ]\n" +
                 "}\n";
-        Object o = Marshallable.fromString(expected);
+        Orderbook o = Marshallable.fromString(expected);
+
+        System.out.println("o.eventTime=" + o.eventTime());
 
         Assert.assertEquals(expected, o.toString());
     }
