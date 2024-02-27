@@ -592,6 +592,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     protected void consumeDocumentStart() {
+        System.out.println("consumeDocumentStart[before]. readpos=" + bytes.readPosition());
         if (bytes.readRemaining() > 4) {
             long pos = bytes.readPosition();
             if (bytes.readByte(pos) == '-' && bytes.readByte(pos + 1) == '-' && bytes.readByte(pos + 2) == '-') {
@@ -612,6 +613,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                 }
             }
         }
+        System.out.println("consumeDocumentStart[after]. readpos=" + bytes.readPosition());
     }
 
     int peekCode() {
