@@ -2041,6 +2041,10 @@ public class TextWire extends YamlWireOut<TextWire> {
                         object + ",code='" + (char) code + "', bytes=" + Bytes.toString(bytes, 1024)
                 );
             consumePadding(1);
+
+
+            System.out.println("TextWire#marshallable bytes.readPos=" + bytes.readPosition());
+
             return object;
         }
 

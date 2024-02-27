@@ -82,6 +82,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
             Bytes<?> bytes = Bytes.allocateElasticDirect(cs.length());
             try {
                 bytes.appendUtf8(cs);
+                System.out.println("WireType#fromString - bytes.toString=" + bytes.toString());
                 @NotNull Wire wire = apply(bytes);
 
                 // Consume padding is probably incorrect
