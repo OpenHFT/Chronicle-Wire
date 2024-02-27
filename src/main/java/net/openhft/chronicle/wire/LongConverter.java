@@ -115,6 +115,7 @@ public interface LongConverter {
      * @return The string representation of the value.
      */
     default String asString(long value) {
+        System.out.printf("DEBUG LongConverter#asString(%s)%n", value);
         return asText(value).toString();
     }
 
@@ -135,6 +136,7 @@ public interface LongConverter {
      * @return The CharSequence representation of the value.
      */
     default CharSequence asText(long value) {
+        System.out.printf("DEBUG LongConverter#asText(%s)%n", value);
         StringBuilder sb = new StringBuilder();
         append(sb, value);
         return sb;
