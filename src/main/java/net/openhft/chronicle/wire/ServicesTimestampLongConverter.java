@@ -96,6 +96,7 @@ public class ServicesTimestampLongConverter implements LongConverter {
      */
     @Override
     public long parse(CharSequence text) {
+        System.out.printf("DEBUG parse(%s)%n", text);
         return underlying.parse(text);
     }
 
@@ -109,6 +110,7 @@ public class ServicesTimestampLongConverter implements LongConverter {
      */
     @Override
     public long parse(CharSequence text, int beginIndex, int endIndex) {
+        System.out.printf("DEBUG parse(%s, %s, %s)%n", text, beginIndex, endIndex);
         return underlying.parse(text, beginIndex, endIndex);
     }
 
@@ -119,6 +121,7 @@ public class ServicesTimestampLongConverter implements LongConverter {
      */
     @Override
     public void append(StringBuilder text, long value) {
+        System.out.printf("DEBUG append(%s, %s)%n", text, value);
         underlying.append(text, value);
     }
 
