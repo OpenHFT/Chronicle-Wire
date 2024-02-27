@@ -1,10 +1,20 @@
 package net.openhft.chronicle.wire.trivial;
 
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.wire.Marshallable;
+import net.openhft.chronicle.wire.marshallable.TriviallyCopyableMarketData;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Arrays;
+
 public class OrderbookTest {
+
+    @Test
+    public void debug() {
+        System.out.println("DEBUG ******");
+        System.out.println(Arrays.toString(BytesUtil.triviallyCopyableRange(TriviallyCopyableMarketData.class)));
+    }
 
     @Test
     public void test() {
