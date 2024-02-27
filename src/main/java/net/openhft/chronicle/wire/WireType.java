@@ -83,7 +83,13 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
             try {
                 bytes.appendUtf8(cs);
                 @NotNull Wire wire = apply(bytes);
+
+                // Consume padding is probably incorrect
+                System.out.println("WireType#fromString consumePadding. before. writePosition=" + bytes.writePosition());
                 wire.consumePadding();
+                System.out.println("WireType#fromString consumePadding. before. writePosition=" + bytes.writePosition());
+
+
                 if (!TEXT_AS_YAML)
                     ((TextWire) wire).consumeDocumentStart();
                 return wire.getValueIn().object(tClass);
@@ -528,6 +534,9 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         try (ScopedResource<Bytes<?>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
             bytes.appendUtf8(cs);
+
+            System.out.printf("WireType#fromString bytes=%s%n", bytes.toHexString());
+
             Wire wire = apply(bytes);
             return wire.getValueIn().object(tClass);
         }
