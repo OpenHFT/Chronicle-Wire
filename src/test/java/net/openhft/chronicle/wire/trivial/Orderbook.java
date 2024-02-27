@@ -93,7 +93,9 @@ public class Orderbook extends BytesInBinaryMarshallable {
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
 
-        eventTime(INSTANCE.parse(wire.read("eventTime").text()));
+        String ev = wire.read("eventTime").text();
+        System.out.printf("Orderbook#readMarshallable ev=%s%n", ev);
+        eventTime(INSTANCE.parse(ev));
         symbol = readAsLong(wire, "symbol");
         exchange = readAsLong(wire, "exchange");
 
@@ -103,6 +105,7 @@ public class Orderbook extends BytesInBinaryMarshallable {
     }
 
     public void eventTime(long eventTime) {
+        System.out.printf("Orderbook#eventTime(%s)%n", eventTime);
         this.eventTime = eventTime;
     }
 
@@ -215,7 +218,9 @@ public class Orderbook extends BytesInBinaryMarshallable {
 
     @Override
     public void writeMarshallable(@NotNull WireOut wire) {
-        wire.write("eventTime").text(INSTANCE.asString(eventTime));
+        String string = INSTANCE.asString(eventTime);
+        System.out.printf("DEBUG Orderbook#writeMarshallable eventTime=%s, string=%s%n",eventTime, string);
+        wire.write("eventTime").text(string);
         wire.write("symbol").text(ShortText.INSTANCE.asText(symbol));
         wire.write("exchange").text(ShortText.INSTANCE.asText(exchange));
         wire.write("bid").list(addBidRungs(bidCount), Rung.class);

@@ -219,6 +219,7 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
     protected abstract void appendFraction(DateTimeFormatterBuilder builder);
 
     public void append(Appendable text, long value) {
+        System.out.printf("DEBUG AbstractTimestampLongConverter#append(%s, %s)%n", text, value);
         if (value <= 0) {
             AppendableUtil.append(text, value);
             return;
