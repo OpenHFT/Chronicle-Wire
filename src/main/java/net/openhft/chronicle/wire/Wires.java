@@ -686,10 +686,17 @@ public enum Wires {
 
     public static <E> E object1(ValueIn in, @Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
         Object o = in.typePrefixOrObject(clazz);
+        if (o == null && using instanceof ReadMarshallable)
+            o = using;
         if (o != null && !(o instanceof Class)) {
             return (E) in.marshallable(o, MARSHALLABLE);
         }
-        @Nullable final Class clazz2 = (Class) o;
+        return object2(in, using, clazz, bestEffort, (Class) o);
+    }
+
+    @Nullable
+    static <E> E object2(ValueIn in, @Nullable E using, @Nullable Class clazz, boolean bestEffort, Class o) {
+        @Nullable final Class clazz2 = o;
         if (clazz2 == void.class) {
             in.text();
             return null;
