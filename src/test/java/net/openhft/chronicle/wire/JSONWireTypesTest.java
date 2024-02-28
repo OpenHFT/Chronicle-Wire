@@ -59,4 +59,35 @@ public class JSONWireTypesTest extends WireTestCommon {
             return this;
         }
     }
+
+    @Test
+    public void nestedMapsJson() {
+        Object o = WireType.JSON_ONLY.fromString("\"serviceConfig\": {\n" +
+            "  \"flow\": {\n" +
+            "    \"@net.openhft.chronicle.wire.JSONWireTypesTest$Dto\": {}\n" +
+            "  },\n" +
+            "  \"db\": {\n" +
+            "    \"mongodb\": {\n" +
+            "      \"@net.openhft.chronicle.wire.JSONWireTypesTest$Enum\": \"INSTANCE\"\n" +
+            "    },\n" +
+            "    \"collection\": \"ladder\"\n" +
+            "  }\n" +
+            "}");
+        assertEquals(
+            "serviceConfig: {\n" +
+                "  flow: !net.openhft.chronicle.wire.JSONWireTypesTest$Dto {\n" +
+                "    field: !!null \"\"\n" +
+                "  },\n" +
+                "  db: {\n" +
+                "    mongodb: !net.openhft.chronicle.wire.JSONWireTypesTest$Enum INSTANCE,\n" +
+                "    collection: ladder\n" +
+                "  }\n" +
+                "}\n",
+            WireType.YAML_ONLY.asString(o)
+        );
+    }
+
+    public enum Enum {
+        INSTANCE
+    }
 }
