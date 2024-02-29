@@ -297,8 +297,11 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                 // Attempt to create an instance from an already loaded class
                 return (T) newInstance(Class.forName(fullClassName));
             } catch (ClassNotFoundException e) {
-                // If class not found, attempt to generate a new one
-                Class clazz = classCache.computeIfAbsent(fullClassName, this::newClass);
+                Class clazz;
+                // only one thread at a time so two threads don't try to generate the same class.
+                synchronized (classCache) {
+                    clazz = classCache.computeIfAbsent(fullClassName, this::newClass);
+                }
                 if (clazz != null && clazz != COMPILE_FAILED) {
                     return (T) newInstance(clazz);
                 }
