@@ -891,6 +891,7 @@ public class JSONWire extends TextWire {
                 final Class<?> clazz = classLookup().forName(sb.subSequence(1, sb.length()));
                 Object object = parseType(null, clazz, true);
                 consume('}');
+                consumePadding(1);
                 return object;
             }
         }
