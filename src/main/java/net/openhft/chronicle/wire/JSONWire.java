@@ -24,6 +24,7 @@ import net.openhft.chronicle.bytes.StopCharsTester;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import net.openhft.chronicle.core.util.UnresolvedType;
@@ -207,6 +208,7 @@ public class JSONWire extends TextWire {
     }
 
     public void copyOne(@NotNull WireOut wire, boolean inMap, boolean topLevel) throws InvalidMarshallableException {
+        consumePadding();
         int ch = bytes.readUnsignedByte();
         switch (ch) {
             case '\'':
@@ -619,10 +621,19 @@ public class JSONWire extends TextWire {
             if (useTypes) {
                 startBlock('{');
                 bytes.append("\"@");
-                bytes.append(typeName);
+                bytes.append(applyAsAlias(classLookup, typeName));
                 bytes.append("\":");
             }
             return this;
+        }
+
+        private CharSequence applyAsAlias(ClassLookup classLookup, CharSequence typeName) {
+            // TODO use classLookup.applyAsAlias(typeName);
+            try {
+                return classLookup.nameFor(classLookup.forName(typeName));
+            } catch (Exception e) {
+                return typeName;
+            }
         }
 
         @Override

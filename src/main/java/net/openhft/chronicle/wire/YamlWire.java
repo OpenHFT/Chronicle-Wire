@@ -376,7 +376,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
     @Override
     public void copyTo(@NotNull WireOut wire) throws InvalidMarshallableException {
-        if (wire instanceof TextWire || wire instanceof YamlWire) {
+        if (wire.getClass() == TextWire.class || wire.getClass() == YamlWire.class) {
             final Bytes<?> bytes0 = bytes();
             wire.bytes().write(this.bytes, yt.blockStart(), bytes0.readLimit() - yt.blockStart);
             this.bytes.readPosition(this.bytes.readLimit());
@@ -400,6 +400,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 wireValueOut.typePrefix(yt.text());
                 yt.next();
                 copyOne(wire, true);
+                wireValueOut.endTypePrefix();
                 yt.next();
                 break;
             case DIRECTIVE:

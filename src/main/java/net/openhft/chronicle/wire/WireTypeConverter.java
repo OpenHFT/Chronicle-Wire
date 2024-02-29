@@ -5,19 +5,16 @@ import net.openhft.chronicle.wire.internal.WireTypeConverterInternal;
 public class WireTypeConverter {
     private final WireTypeConverterInternal delegate;
 
-    public WireTypeConverter(Validate validate) {
-        delegate = new WireTypeConverterInternal(validate);
-    }
 
     public WireTypeConverter() {
         delegate = new WireTypeConverterInternal();
     }
 
-    public CharSequence jsonToYaml(CharSequence json) throws Exception {
+    public CharSequence jsonToYaml(CharSequence json) {
         return delegate.jsonToYaml(json);
     }
 
-    public CharSequence yamlToJson(CharSequence yaml) throws Exception {
+    public CharSequence yamlToJson(CharSequence yaml) {
         return delegate.yamlToJson(yaml);
     }
 
