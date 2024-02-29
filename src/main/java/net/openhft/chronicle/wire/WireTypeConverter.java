@@ -11,12 +11,6 @@ public class WireTypeConverter {
     // The internal delegate responsible for the actual conversions.
     private final WireTypeConverterInternal delegate;
 
-    /**
-     * Constructor initializing the WireTypeConverter with a given Validate instance.
-     * The validation mechanism allows for additional checks or constraints during the conversion processes.
-     *
-     * @param validate The Validate instance to guide conversion operations.
-     */
     public WireTypeConverter(Validate validate) {
         delegate = new WireTypeConverterInternal(validate);
     }
@@ -28,25 +22,11 @@ public class WireTypeConverter {
         delegate = new WireTypeConverterInternal();
     }
 
-    /**
-     * Converts the given JSON formatted input to its equivalent YAML representation.
-     *
-     * @param json The JSON input to be converted.
-     * @return The converted YAML representation.
-     * @throws Exception If any error occurs during conversion.
-     */
-    public CharSequence jsonToYaml(CharSequence json) throws Exception {
+    public CharSequence jsonToYaml(CharSequence json) {
         return delegate.jsonToYaml(json);
     }
 
-    /**
-     * Converts the given YAML formatted input to its equivalent JSON representation.
-     *
-     * @param yaml The YAML input to be converted.
-     * @return The converted JSON representation.
-     * @throws Exception If any error occurs during conversion.
-     */
-    public CharSequence yamlToJson(CharSequence yaml) throws Exception {
+    public CharSequence yamlToJson(CharSequence yaml) {
         return delegate.yamlToJson(yaml);
     }
 
