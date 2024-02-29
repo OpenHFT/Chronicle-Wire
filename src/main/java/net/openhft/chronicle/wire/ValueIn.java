@@ -40,6 +40,8 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.function.*;
 
+import static net.openhft.chronicle.wire.SerializationStrategies.MARSHALLABLE;
+
 /**
  * Represents an interface for reading values in various formats from a serialized data source.
  * This interface is part of the Chronicle Wire library, which is designed for high-performance
@@ -1255,7 +1257,16 @@ public interface ValueIn {
      */
     @Nullable
     default <E> E object(@Nullable E using, @Nullable Class clazz) throws InvalidMarshallableException {
-        return object(using, clazz, true);
+        E t;
+        Object o = typePrefixOrObject(clazz);
+        if (o == null && using instanceof ReadMarshallable)
+            o = using;
+        if (o != null && !(o instanceof Class)) {
+            t = (@Nullable E) marshallable(o, MARSHALLABLE);
+        } else {
+            t = Wires.object2(this, using, clazz, true, (Class) o);
+        }
+        return ValidatableUtil.validate(t);
     }
 
     /**
@@ -1269,7 +1280,8 @@ public interface ValueIn {
      * @throws InvalidMarshallableException if the object is invalid
      */
     default <E> E object(@Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
-        return Wires.object0(this, using, clazz, bestEffort);
+        E t = Wires.object1(this, using, clazz, bestEffort);
+        return ValidatableUtil.validate(t);
     }
 
 /**
