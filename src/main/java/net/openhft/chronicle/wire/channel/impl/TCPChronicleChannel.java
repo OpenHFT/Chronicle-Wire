@@ -29,6 +29,7 @@ import net.openhft.chronicle.wire.converter.NanoTime;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Collections;
@@ -139,7 +140,7 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
             return;
         ByteBuffer bb = bytes.underlyingObject();
         assert bb != null;
-        bb.position(Math.toIntExact(bytes.readPosition()));
+        ((Buffer)bb).position(Math.toIntExact(bytes.readPosition()));
         bb.limit(Math.toIntExact(bytes.readLimit()));
         while (bb.remaining() > 0) {
             int len;
