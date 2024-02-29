@@ -1935,6 +1935,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     yt.next();
                     if (o instanceof StringBuilder)
                         o = o.toString();
+                    if (type == Class.class)
+                        return classLookup.forName(o.toString());
                     return ObjectUtils.convertTo(type, o);
 
                 case ANCHOR:
