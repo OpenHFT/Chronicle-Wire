@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.UnsafeMemory;
+import net.openhft.posix.internal.core.Jvm;
 import org.junit.Test;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.vm.VM;
@@ -30,10 +31,14 @@ public class UnsafeGetLongTest {
 
     private static void dumpClassLayout(Class<?> klass) {
         System.out.println("============= Class layout start =============");
-        System.out.println("Class: " + klass.getSimpleName());
-        System.out.println("VM details: " + VM.current().details());
-        System.out.println("Class layout: ");
-        System.out.println(ClassLayout.parseClass(klass).toPrintable());
+        if (Jvm.isAzul()) {
+            System.out.println("JOL is not supported on non Hotspot JVMs so no class layout can be dumped");
+        } else {
+            System.out.println("Class: " + klass.getSimpleName());
+            System.out.println("VM details: " + VM.current().details());
+            System.out.println("Class layout: ");
+            System.out.println(ClassLayout.parseClass(klass).toPrintable());
+        }
         System.out.println("============= Class layout end ===============");
     }
 
