@@ -35,6 +35,7 @@ public class UnsafeGetLongTest {
             System.out.println("JOL is not supported on non Hotspot JVMs so no class layout can be dumped");
         } else {
             System.out.println("Class: " + klass.getSimpleName());
+            System.out.println("JVM major version: " + net.openhft.chronicle.core.Jvm.majorVersion());
             System.out.println("VM details: " + VM.current().details());
             System.out.println("Class layout: ");
             System.out.println(ClassLayout.parseClass(klass).toPrintable());
