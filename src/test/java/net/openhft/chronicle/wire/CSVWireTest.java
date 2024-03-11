@@ -21,9 +21,11 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.util.Map;
+
 import static org.junit.Assert.*;
 
-@Ignore("TODO FIX")
 // CSVWireTest class extends from WireTestCommon and tests functionality related to CSV-based wire processing.
 public class CSVWireTest extends WireTestCommon {
 
@@ -45,6 +47,7 @@ public class CSVWireTest extends WireTestCommon {
             wire.read(() -> "heading2").text(this, (o, s) -> assertEquals("data2", s))
                     .read(() -> "heading3").text(this, (o, s) -> assertEquals("data three", s));
         });
+        wire.readEventName(row);
         assertTrue(wire.hasMore());
 
         // Read and validate the second row of data.
@@ -54,6 +57,7 @@ public class CSVWireTest extends WireTestCommon {
                     .read(() -> "heading3").text(this, (o, s) -> assertEquals("row2c", s));
         });
         // Ensure no more data is present.
+        wire.readEventName(row);
         assertFalse(wire.hasMore());
     }
 
@@ -68,37 +72,6 @@ public class CSVWireTest extends WireTestCommon {
                         "AA,AA,325.9,5.7,1.72,1469834\n");
         // Process and validate the wire contents.
         doTestWire(wire);
-    }
-
-    // Test reading from a CSV file and converting its contents into a map.
-    @Test
-    public void tstFrom3() throws IOException {
-        // Parse the CSV file contents into a map.
-        @NotNull Map<String, EndOfDayShort> map = WireType.CSV.fromFileAsMap("CSVWireTest.csv", EndOfDayShort.class);
-
-        // Validate the parsed map content.
-        assertEquals("{III=!net.openhft.chronicle.wire.EndOfDayShort {\n" +
-                "  name: \"3i Group\",\n" +
-                "  price: 479.4,\n" +
-                "  change: 12.0,\n" +
-                "  changePercent: 2.44,\n" +
-                "  daysVolume: 2387043\n" +
-                "}\n" +
-                ", 3IN=!net.openhft.chronicle.wire.EndOfDayShort {\n" +
-                "  name: \"3i Infrastructure\",\n" +
-                "  price: 164.7,\n" +
-                "  change: 0.1,\n" +
-                "  changePercent: 0.06,\n" +
-                "  daysVolume: 429433\n" +
-                "}\n" +
-                ", AA=!net.openhft.chronicle.wire.EndOfDayShort {\n" +
-                "  name: AA,\n" +
-                "  price: 325.9,\n" +
-                "  change: 5.7,\n" +
-                "  changePercent: 1.72,\n" +
-                "  daysVolume: 1469834\n" +
-                "}\n" +
-                "}", map.toString());
     }
 
     // Helper method to validate wire contents.

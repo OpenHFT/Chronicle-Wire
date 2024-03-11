@@ -13,8 +13,6 @@ public class OrderCancelReject extends AbstractEvent<OrderCancelReject> {
     private static final int MASHALLABLE_VERSION = 1;
     @ShortText
     private long symbol;
-    private String clOrdID = "";
-    private String reason = "";
 
     private String clOrdID = ""; // Client order ID.
     private String reason = ""; // Reason for the cancellation rejection.

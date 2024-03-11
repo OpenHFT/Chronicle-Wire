@@ -138,12 +138,14 @@ public class Issue609Test extends WireTestCommon {
     public static class InputCfg extends AbstractMarshallableCfg {
         private String input;
 
-        /**
-         * Sets the input and returns the instance.
-         *
-         * @param input the name of the input.
-         * @return this instance.
-         */
+        public InputCfg() {
+            this(null);
+        }
+
+        public InputCfg(String in) {
+            this.input = in;
+        }
+
         public InputCfg input(String input) {
             this.input = input;
             return this;

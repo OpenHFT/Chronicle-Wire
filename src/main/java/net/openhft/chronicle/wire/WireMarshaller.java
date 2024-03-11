@@ -53,6 +53,7 @@ import static net.openhft.chronicle.core.UnsafeMemory.*;
 public class WireMarshaller<T> {
     private static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
     private static final FieldAccess[] NO_FIELDS = {};
+    private static Method isRecord;
     @NotNull
     final FieldAccess[] fields;
 
@@ -65,6 +66,15 @@ public class WireMarshaller<T> {
     // Default value for the type T.
     @Nullable
     private final T defaultValue;
+
+    static {
+        if (Jvm.isJava14Plus()) {
+            try {
+                isRecord = Jvm.getMethod(Class.class, "isRecord");
+            } catch (Exception ignored) {
+            }
+        }
+    }
 
     /**
      * Constructs a new instance of the WireMarshaller with the specified parameters.
