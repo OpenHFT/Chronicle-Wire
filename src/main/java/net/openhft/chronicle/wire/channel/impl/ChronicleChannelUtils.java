@@ -37,9 +37,16 @@ public final class ChronicleChannelUtils {
      * @return A new instance of {@link ChronicleChannel}, either buffered or a simple connection based on configurations.
      * @throws InvalidMarshallableException if there's an error while marshalling.
      */
-    public static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg channelCfg, ChannelHeader headerOut) throws InvalidMarshallableException {
+    public static ChronicleChannel newChannel(SocketRegistry socketRegistry,
+                                              ChronicleChannelCfg<?> channelCfg,
+                                              ChannelHeader headerOut,
+                                              @Nullable Consumer<ChronicleChannel> closeCallback) throws InvalidMarshallableException {
         // Creation of the initial TCP connection
         TCPChronicleChannel simpleConnection = new TCPChronicleChannel(channelCfg, headerOut, socketRegistry);
+
+        if (closeCallback != null)
+            simpleConnection.closeCallback(closeCallback);
+
         // Retrieval of the header from the established connection
         final ChannelHeader marshallable = simpleConnection.headerIn();
         Jvm.debug().on(ChronicleChannel.class, "Client got " + marshallable);
@@ -53,7 +60,7 @@ public final class ChronicleChannelUtils {
                     URL url = ChronicleContext.urlFor(location);
                     channelCfg.hostname(url.getHost());
                     channelCfg.port(url.getPort());
-                    return newChannel(socketRegistry, channelCfg, headerOut,null);
+                    return newChannel(socketRegistry, channelCfg, headerOut, null);
 
                 } catch (IORuntimeException e) {
                     Jvm.debug().on(ChronicleChannel.class, e);

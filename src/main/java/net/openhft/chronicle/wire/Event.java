@@ -24,7 +24,6 @@ public interface Event<E extends Event<E>> extends Marshallable {
      * @deprecated This method is slated for removal in version x.25.
      */
     @NotNull
-    @Deprecated(/* to be removed in x.25 */)
     default CharSequence eventId() {
         // Return an empty string as the default event ID
         return "";
@@ -36,7 +35,6 @@ public interface Event<E extends Event<E>> extends Marshallable {
      * @param eventId The unique identifier to assign to this event.
      * @return The current instance of the event, facilitating method chaining.
      */
-    @Deprecated(/* to be removed in x.25 */)
     default E eventId(@NotNull final CharSequence eventId) {
         // By default, the event identifier is unchanged and the current instance is returned.
         return (E) this;
