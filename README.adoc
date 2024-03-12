@@ -119,6 +119,26 @@ Note: Chronicle Wire supports debug/transparent combinations like self-describin
 
 To support wire format discovery, the first bytes should have the top bit set.
 
+== WireType Overview
+
+|===============
+|WireType |Enum |Human Readable |Self Describing |Size/ Latency |NOTE
+|TextWire |TEXT |YES |NO |More compact than JSON |YAML based
+|BinaryWire |BINARY |NO |YES |Better performance than YAML (half the latency) |Use this only if using Delta and Binary. Otherwise use BINARY_LIGHT
+|BinaryWire |BINARY_LIGHT |NO |YES |Better performance than YAML (half the latency) |Use this when only using Binary (does not support DeltaWire)
+|DefaultZeroWire |DEFAULT_ZERO_BINARY |NO |YES |Better performance than YAML (half the latency) |
+|DeltaWire |DELTA_BINARY |NO |YES |Better performance than YAML (half the latency) |Licenced product
+|BinaryWire |FIELDLESS_BINARY |NO |YES |Better performance than YAML (half the latency) |
+|BinaryWire |COMPRESSED_BINARY |NO |YES |Better performance than YAML (half the latency) |
+|JSONWire |JSON |YES |NO |Microsecond latencies |
+|JSONWire |JSON_ONLY |YES |NO |Microsecond latencies |
+|YamlWire |YAML |YES |NO |More compact than JSON |YAML based
+|YamlWire |YAML_ONLY |YES |NO |More compact than JSON |YAML based
+|RawWire |RAW |NO |YES |More compact than BinaryWire |Writes just the data without the metadata
+|CSVWire |CSV |YES |NO |More compact than JSON |YAML based
+|ReadAnyWire |READ_ANY |- |- |Can be either
+|===============
+
 == Using Wire
 
 === link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Example1.java[Simple use case]
