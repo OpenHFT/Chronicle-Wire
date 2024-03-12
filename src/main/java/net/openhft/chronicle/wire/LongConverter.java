@@ -56,7 +56,7 @@ public interface LongConverter {
      * @return The maximum length a string can have to represent a long value.
      */
     static int maxParseLength(int based) {
-        return (int) Math.ceil(64 / log(based) * log(2));
+        return (int) Math.floor(64 / log(based) * log(2));
     }
 
     /**
