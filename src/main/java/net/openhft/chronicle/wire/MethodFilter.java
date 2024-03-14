@@ -17,27 +17,8 @@
  */
 package net.openhft.chronicle.wire;
 
-/**
- * Represents a functional interface designed to determine if a specific method should be
- * handled based on its name and its first argument.
- * <p>
- * Implementors of this interface can define custom logic to decide whether a particular
- * method, given its name and first argument, should be processed or ignored. This mechanism
- * offers flexibility and allows users to have granular control over which methods are
- * to be handled under different circumstances.
- * </p>
- */
+@Deprecated(/* to be removed in x.27, use MethodFilterOnFirstArg */)
 @FunctionalInterface
 public interface MethodFilter {
-
-    /**
-     * Determines whether a specific method should be handled based on its name and its
-     * first argument.
-     *
-     * @param method   The name of the method being evaluated.
-     * @param firstArg The first argument passed to the method.
-     *
-     * @return true if the method should be handled, otherwise false.
-     */
     boolean shouldHandleMessage(String method, Object firstArg);
 }

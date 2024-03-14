@@ -17,56 +17,34 @@
  */
 package net.openhft.chronicle.wire;
 
-/**
- * This is the Sequence interface.
- * <p>
- * It defines a contract for managing sequences in conjunction with write positions.
- * This interface is crucial when dealing with data structures where sequentiality and write positions matter,
- * such as in a message queue.
- * </p>
- */
+@Deprecated(/* to be removed in x.27, not in used */)
 public interface Sequence {
-
-    // Constant representing that a sequence for a given write position is not found and the client can retry.
     long NOT_FOUND_RETRY = Long.MIN_VALUE;
-
-    // Constant representing that a sequence for a given write position is not found and the client should not retry.
     long NOT_FOUND = -1;
 
     /**
-     * Retrieves the sequence for a given write position.
+     * gets the sequence for a writePosition
+     * <p>
+     * This method will only return a valid sequence number of the write position if the write position is the
+     * last write position in the queue. YOU CAN NOT USE THIS METHOD TO LOOK UP RANDOM SEQUENCES FOR ANY WRITE POSITION.
+     * NOT_FOUND_RETRY will be return if a sequence number can not be found  ( so retry )
+     * or NOT_FOUND if you should not retry
      *
-     * Note: This method is specifically designed to fetch the sequence for the last write position
-     * in the queue. It is not suitable for obtaining sequences for arbitrary write positions.
-     *
-     * @param forWritePosition the last write position, typically representing the end of a queue.
-     * @return NOT_FOUND_RETRY if the sequence for this write position cannot be found and retrying might succeed later;
-     *         NOT_FOUND if the sequence is not present and retrying will not help.
+     * @param forWritePosition the last write position, expected to be the end of queue
+     * @return NOT_FOUND_RETRY if the sequence for this write position can not be found (you can retry), or
+     * NOT_FOUND if it can't be found and there is no point in retrying
      */
     long getSequence(long forWritePosition);
 
     /**
-     * Assigns a sequence number to a particular write position.
+     * sets the sequence number for a writePosition
      *
-     * @param sequence the sequence number to be set.
-     * @param position the write position with which the sequence number is associated.
+     * @param sequence the sequence number
+     * @param position the write position
      */
     void setSequence(long sequence, long position);
 
-    /**
-     * Translates a given header number and sequence to its index representation.
-     *
-     * @param headerNumber the header number.
-     * @param sequence the sequence number.
-     * @return The index corresponding to the provided header number and sequence.
-     */
     long toIndex(long headerNumber, long sequence);
 
-    /**
-     * Converts an index to its corresponding sequence number.
-     *
-     * @param index the index to be converted.
-     * @return The sequence number corresponding to the given index.
-     */
     long toSequenceNumber(long index);
 }

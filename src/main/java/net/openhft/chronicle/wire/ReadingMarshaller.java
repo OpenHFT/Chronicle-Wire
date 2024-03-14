@@ -17,29 +17,8 @@
  */
 package net.openhft.chronicle.wire;
 
-/**
- * Functional interface representing a marshaller that populates an instance of type {@code T}
- * with data read from a {@code WireIn} source. This interface allows decoupling the
- * deserialization logic from the object's representation, which can be especially useful
- * for reusing an existing instance rather than creating a new object every time data is read.
- *
- * <p>
- * Example usage might involve reading an object's state from a network stream or file and
- * updating the existing object's fields based on the stream content.
- * </p>
- *
- * @param <T> The type of object being read and populated.
- */
 @FunctionalInterface
+@Deprecated(/* to be removed in x.27, not in use */)
 public interface ReadingMarshaller<T> {
-
-    /**
-     * Reads data from the provided {@code WireIn} and updates the state of the given object
-     * of type {@code T}. Implementations of this method should ensure that the state of
-     * the object {@code t} reflects the content of the wire input.
-     *
-     * @param t  The object of type {@code T} whose state should be updated based on the wire content.
-     * @param in The wire input source from which data should be read.
-     */
     void readFromWire(T t, WireIn in);
 }

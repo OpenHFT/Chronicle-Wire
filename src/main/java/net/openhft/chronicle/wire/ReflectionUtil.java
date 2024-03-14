@@ -43,8 +43,8 @@ public final class ReflectionUtil {
     }
 
     /**
-     * Creates and returns a list of all interfaces implemented by the
-     * provided {@code oClass} and all its superclasses.
+     * Creates and returns a new List of all interfaces implemented by
+     * the provided {@code oClass} and all its super classes.
      *
      * @param oClass The class to inspect.
      * @return A list of interfaces implemented by the given class and its ancestors.
