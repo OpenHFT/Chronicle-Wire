@@ -32,9 +32,9 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
     private final String indentSpaces;
     private final AtomicInteger indent;
     // StringBuilder to accumulate and store the formatted code.
-    private final StringBuilder sb = new StringBuilder();
+    private final StringBuilder formattedCode = new StringBuilder();
     private int lastNewlineIndex = 0;
-    private boolean lastChargeWasNewLine = false;
+    private boolean lastCharWasNewLine = false;
 
     /**
      * Constructor to initialize the formatter with given indent spaces and an atomic integer value.
@@ -73,7 +73,7 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
      */
     @NotNull
     public String toString() {
-        return sb.toString();
+        return formattedCode.toString();
     }
 
     @Override
@@ -92,11 +92,11 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
 
     @Override
     public SourceCodeFormatter append(char c) {
-        sb.append(c);
+        formattedCode.append(c);
         switch (c) {
             case '\n':
-                lastNewlineIndex = sb.length();
-                lastChargeWasNewLine = true;
+                lastNewlineIndex = formattedCode.length();
+                lastCharWasNewLine = true;
                 padding(indent.get());
                 break;
             case '{':
@@ -105,19 +105,19 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
             case '}':
                 indent.decrementAndGet();
                 if (lastNewlineIndex >= 0) {
-                    sb.setLength(lastNewlineIndex);
+                    formattedCode.setLength(lastNewlineIndex);
                     padding(indent.get());
-                    sb.append(c);
+                    formattedCode.append(c);
                 }
                 break;
             case ' ':
-                if (lastChargeWasNewLine) {
+                if (lastCharWasNewLine) {
                     // ignore whitespace after newline
-                    sb.setLength(sb.length() - 1);
+                    formattedCode.setLength(formattedCode.length() - 1);
                 }
                 break;
             default:
-                lastChargeWasNewLine = false;
+                lastCharWasNewLine = false;
                 break;
         }
         return this;
@@ -130,7 +130,7 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
      * @param len The new length for the formatted string.
      */
     public void setLength(int len) {
-        sb.setLength(len);
+        formattedCode.setLength(len);
     }
 
     /**
@@ -141,7 +141,7 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
      */
     private void padding(final int indent) {
         for (int i = 0; i < indent; i++) {
-            sb.append(indentSpaces);
+            formattedCode.append(indentSpaces);
         }
     }
 
@@ -151,17 +151,17 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
      * @return The length of the formatted string.
      */
     public int length() {
-        return sb.length();
+        return formattedCode.length();
     }
 
     @Override
     public char charAt(final int index) {
-        return sb.charAt(index);
+        return formattedCode.charAt(index);
     }
 
     @Override
     public CharSequence subSequence(final int start, final int end) {
-        return sb.subSequence(start, end);
+        return formattedCode.subSequence(start, end);
     }
 
     /**
@@ -171,7 +171,7 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
      * @return The current SourceCodeFormatter instance.
      */
     public SourceCodeFormatter append(long i) {
-        sb.append(i);
+        formattedCode.append(i);
         return this;
     }
 
@@ -182,7 +182,7 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
      * @return The current SourceCodeFormatter instance.
      */
     public SourceCodeFormatter append(double d) {
-        sb.append(d);
+        formattedCode.append(d);
         return this;
     }
 
@@ -193,7 +193,7 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
      * @return The current SourceCodeFormatter instance.
      */
     public SourceCodeFormatter append(boolean flag) {
-        sb.append(flag);
+        formattedCode.append(flag);
         return this;
     }
 
@@ -206,7 +206,7 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
      * @return The current SourceCodeFormatter instance.
      */
     public <Stringable> SourceCodeFormatter append(Stringable stringable) {
-        sb.append(stringable);
+        formattedCode.append(stringable);
         return this;
     }
 
@@ -217,6 +217,6 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
      * @return True if the text exists within the formatted string, otherwise false.
      */
     public boolean contains(String text) {
-        return sb.indexOf(text) >= 0;
+        return formattedCode.indexOf(text) >= 0;
     }
 }

@@ -66,12 +66,10 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     public void customCompilerOptions() throws Exception {
-        Field compiler = Jvm.getField(Wires.class, "CACHED_COMPILER");
-        compiler.set(null, null);
+        Wires.CACHED_COMPILER = null;
         System.setProperty("compiler.options", "-g -parameters");
         Wires.loadFromJava(this.getClass().getClassLoader(), this.getClass().getName(), "");
-        assertNotNull(compiler.get(null));
-        List<String> options = Jvm.getValue(compiler.get(null), "options");
+        List<String> options = Jvm.getValue(Wires.CACHED_COMPILER, "options");
 
         assertTrue(options.containsAll(asList("-g", "-parameters")));
         assertEquals(2, options.size());

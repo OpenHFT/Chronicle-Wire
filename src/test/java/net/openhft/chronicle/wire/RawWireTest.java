@@ -386,7 +386,6 @@ public class RawWireTest extends WireTestCommon {
         wire.write().text("Hello");
         wire.write(BWKey.field1).text("world");
         @NotNull String name1 = "Long field name which is more than 32 characters, \\ \nBye";
-        wire.write(() -> "Test").text(name1);
 
         wire.write(() -> "Test")
                 .text(name1);
@@ -516,7 +515,9 @@ public class RawWireTest extends WireTestCommon {
         LocalDate now = LocalDate.now();
 
         // Writing LocalDate objects to the wire
-        wire.write().date(now).write().date(LocalDate.MAX).write().date(LocalDate.MIN);
+        wire.write().date(now)
+                .write().date(LocalDate.MAX)
+                .write().date(LocalDate.MIN);
 
         // Reading and validating LocalDate objects from the wire
         wire.read().date(now, Assert::assertEquals)
@@ -532,8 +533,8 @@ public class RawWireTest extends WireTestCommon {
 
         // Writing UUID objects to the wire
         wire.write().uuid(uuid)
-             .write().uuid(new UUID(0, 0))
-             .write().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE));
+                .write().uuid(new UUID(0, 0))
+                .write().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE));
 
         // Reading and validating UUID objects from the wire
         wire.read().uuid(uuid, Assert::assertEquals)

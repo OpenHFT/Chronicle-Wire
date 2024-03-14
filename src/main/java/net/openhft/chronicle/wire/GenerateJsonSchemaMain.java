@@ -140,15 +140,10 @@ public class GenerateJsonSchemaMain {
      * @param type The class type for which the event schema is to be generated.
      */
     void generateEventSchemaFor(Class<?> type) {
-        // Checks if the type is an array and returns if true.
         if (type.isArray())
             return;
-
-        // Adds the type to eventClasses and returns if it's already present.
         if (!eventClasses.add(type))
             return;
-
-        // Iterates through the methods of the type.
         for (Method method : type.getMethods()) {
             generateEventSchemaFor(method.getReturnType());
             Stream.of(method.getParameterTypes())
@@ -206,15 +201,10 @@ public class GenerateJsonSchemaMain {
      * @param type The class type for which the object schema is to be generated.
      */
     void generateObjectSchemaFor(Class<?> type) {
-        // Return if the type is an array.
         if (type.isArray())
             return;
-
-        // Return if the type already has an alias.
         if (aliases.containsKey(type))
             return;
-
-        // Add the type to the 'aliases' map.
         aliases.put(type, "#/definitions/" + type.getSimpleName());
         Set<String> required = new LinkedHashSet<>();
         Map<String, String> properties = new LinkedHashMap<>();

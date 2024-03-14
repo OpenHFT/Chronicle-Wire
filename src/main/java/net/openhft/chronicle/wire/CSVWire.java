@@ -134,7 +134,6 @@ public class CSVWire extends TextWire {
      */
     public void consumePaddingStart() {
         for (; ; ) {
-            // Peeks at the next character without actually consuming it.
             int codePoint = peekCode();
             // Checks if the code point represents a comment.
             if (codePoint == '#') {
@@ -142,7 +141,6 @@ public class CSVWire extends TextWire {
                 while (readCode() >= ' ') ;
                 continue;
             }
-            // Checks if the code point is whitespace.
             if (Character.isWhitespace(codePoint)) {
                 // Handle newline or carriage return; set lineStart to the next position.
                 if (codePoint == '\n' || codePoint == '\r')

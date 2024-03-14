@@ -21,7 +21,7 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * The AbstractEventCfg class represents a generic configuration for events.
+ * The AbstractEventCfg class represents a generic configuration as an event.
  * It extends the AbstractMarshallableCfg and implements the Event interface.
  * This class provides methods to retrieve and set event properties such as ID, time, and service ID.
  * It also follows the builder pattern, allowing chained method calls.

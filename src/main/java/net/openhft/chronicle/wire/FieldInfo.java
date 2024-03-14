@@ -62,10 +62,7 @@ public interface FieldInfo {
      */
     @NotNull
     static Wires.FieldInfoPair lookupClass(@NotNull Class<?> aClass) {
-        // Acquire the serialization strategy for the provided class.
         final SerializationStrategy<?> ss = Wires.CLASS_STRATEGY.get(aClass);
-
-        // Determine the bracket type for the class.
         switch (ss.bracketType()) {
             case NONE:
             case SEQ:
@@ -77,10 +74,7 @@ public interface FieldInfo {
                 break;
         }
 
-        // List to hold the FieldInfo for fields of the class.
         @NotNull List<FieldInfo> fields = new ArrayList<>();
-
-        // Acquire the wire marshaller for the provided class.
         final WireMarshaller<?> marshaller = WIRE_MARSHALLER_CL.get(aClass);
 
         // Process each field of the class to create its FieldInfo.

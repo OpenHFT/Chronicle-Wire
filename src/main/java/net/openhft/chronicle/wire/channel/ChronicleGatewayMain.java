@@ -75,11 +75,11 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable,
     private ExecutorService service;
 
     /**
-     * Creates a ChronicleGatewayMain instance with a specified URL. The gateway is initialized with
-     * the default system context and a fresh socket registry.
+     * Constructs a new ChronicleGatewayMain instance with a specific URL.
+     * The gateway will use the default system context and a new socket registry.
      *
-     * @param url The URL for the Gateway's operations.
-     * @throws InvalidMarshallableException if there are issues initializing the gateway.
+     * @param url the URL for the Gateway
+     * @throws InvalidMarshallableException if there's an issue while creating the gateway
      */
     public ChronicleGatewayMain(String url) throws InvalidMarshallableException {
         this(url, new SocketRegistry(), SystemContext.INSTANCE);
@@ -87,13 +87,13 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable,
     }
 
     /**
-     * Constructs a ChronicleGatewayMain with specified parameters: URL, socket registry, and system context.
-     * This allows more precise configuration for advanced use cases.
+     * Constructs a new ChronicleGatewayMain instance with a specific URL,
+     * socket registry, and system context.
      *
-     * @param url            The URL for the Gateway's operations.
-     * @param socketRegistry Manages socket connections for the gateway.
-     * @param systemContext  Sets the system-level configurations for the gateway.
-     * @throws InvalidMarshallableException if issues arise during gateway initialization.
+     * @param url            the URL for the Gateway
+     * @param socketRegistry the SocketRegistry used by the gateway for managing socket connections
+     * @param systemContext  the SystemContext that defines system-level configuration for the gateway
+     * @throws InvalidMarshallableException if there's an issue while creating the gateway
      */
     public ChronicleGatewayMain(String url, SocketRegistry socketRegistry, SystemContext systemContext) throws InvalidMarshallableException {
         super(url, socketRegistry);
@@ -101,13 +101,13 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable,
     }
 
     /**
-     * Serves as the initiation point for the {@code ChronicleGatewayMain}. A new class instance is created
-     * and set into action. If a command-line argument provides the URL for the gateway, it's used.
-     * Otherwise, a default is taken.
+     * The main method acts as the entry point to start the ChronicleGatewayMain.
+     * It creates a new instance of the class and runs it.
+     * The URL for the gateway can be optionally specified as a command-line argument.
      *
-     * @param args Command line arguments. The first argument, if given, sets the gateway's URL.
-     * @throws IOException                  Potential I/O problems during gateway startup.
-     * @throws InvalidMarshallableException Issues that might arise during gateway creation.
+     * @param args Command line arguments. If the first argument is provided, it will be used as the URL for the gateway.
+     * @throws IOException                  if there is an I/O issue while starting the gateway
+     * @throws InvalidMarshallableException if there's an issue while creating the gateway
      */
     public static void main(String... args) throws IOException, InvalidMarshallableException {
         main(ChronicleGatewayMain.class, ChronicleGatewayMain::new, args.length == 0 ? "" : args[0]).run();
@@ -142,7 +142,7 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable,
     }
 
     /**
-     * Configures the {@code PauserMode} for the gateway to find the right balance between CPU consumption and latency minimization.
+     * Sets the PauserMode to control the balance between CPU usage and minimising latency
      *
      * @param pauserMode The pauser mode to be set.
      * @return The current instance of {@code ChronicleGatewayMain} for chained calls.
@@ -162,8 +162,7 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable,
     }
 
     /**
-     * Specifies whether new connections will use buffering. If a client doesn't indicate the buffering preference,
-     * this setting determines the buffering state.
+     * Sets whether new connections will be buffered if the client doesn't specify whether buffering should be used.
      *
      * @param buffered Set to {@code true} if buffering should be enabled.
      * @return The current instance of {@code ChronicleGatewayMain} for chained calls.
@@ -174,8 +173,7 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable,
     }
 
     /**
-     * Activates the gateway. This involves establishing the server socket channel and, if not already operational,
-     * firing up the acceptor thread.
+     * Starts the gateway, binding the server socket channel and starting the acceptor thread if not already running.
      *
      * @throws IOException If there's a hiccup during the gateway's startup.
      */
@@ -294,65 +292,65 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable,
      * @param channel The incoming TCP channel to be managed.
      */
     void handle(TCPChronicleChannel channel) {
-        // Default to closing the channel when done handling
+        // Indicate whether the channel should be closed when done handling
         boolean close = true;
         ChronicleChannel channel2 = null;
         try {
-            // Fetching the inbound channel header
+            // Retrieve the inbound channel header
             final ChannelHeader channelHeader = channel.headerInToUse();
 
-            // Validate the channel header to determine the correct handler
+            // Validate the channel header and retrieve the handler
             ChannelHandler bh = validateHandler(channelHeader);
             if (bh == null) return;
 
-            // Check if buffering is enabled by default or as specified by the handler
+            // Determine whether buffering is enabled
             boolean buffered = this.buffered;
             if (bh.buffered() != null)
                 buffered = bh.buffered();
             Jvm.debug().on(ChronicleGatewayMain.class, "Server got " + bh);
 
-            // Obtain the outbound channel header
+            // Retrieve the outbound channel header
             final ChannelHeader headerOut = channel.headerOut();
 
-            // Handling the scenario where the outbound header indicates a redirect
+            // If the outbound channel header is a redirect, print a message and return
             if (headerOut instanceof RedirectHeader) {
                 System.out.println("Server redirected  " + headerOut);
                 return;
             }
 
-            // Depending on buffering, either wrap the channel or use it as is
+            // Instantiate the secondary channel based on whether buffering is enabled
             channel2 = buffered
                     ? new BufferedChronicleChannel(channel, pauserMode.get())
                     : channel;
 
             Jvm.debug().on(ChronicleGatewayMain.class, "Running " + channel2);
 
-            // Execute the determined handler on the channel
+            // Run the channel handler
             bh.run(this, channel2);
 
-            // Decide if the channel should be closed after handling
+            // Determine whether to close the channel when done
             close = bh.closeWhenRunEnds();
 
         } catch (HTTPDetectedException e) {
-            // Special logging for when an HTTP GET request is encountered
+            // Handle the exception case where an HTTP GET request is detected
             Jvm.warn().on(getClass(), "HTTP GET Detected", e);
 
         } catch (InvalidProtocolException e) {
-            // Special logging for when an invalid protocol is used
+            // Handle the exception case where an invalid protocol is detected
             Jvm.warn().on(getClass(), "Invalid Protocol", e);
 
         } catch (Throwable t) {
-            // A short pause before checking the closing status of the resources
+            // Pause for a moment before checking if the resource is closing
             Jvm.pause(1);
 
-            // If neither the main object nor the channel are closing, log the exception
+            // Log any other exceptions if not closing
             if (!isClosing() && !channel.isClosing())
                 if (t instanceof ClosedIORuntimeException)
                     Jvm.warn().on(getClass(), t.toString());
                 else
                     Jvm.error().on(getClass(), t);
         } finally {
-            // Clean up channels if they need to be closed
+            // Close the channels if the close flag is set
             if (close)
                 Closeable.closeQuietly(channel2, channel);
         }

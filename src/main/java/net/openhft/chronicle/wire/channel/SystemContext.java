@@ -27,13 +27,12 @@ import net.openhft.chronicle.wire.NanoTimestampLongConverter;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
 /**
- * Represents the system context by encapsulating system-specific information such as:
+ * Encapsulates system-related information into a singleton object, such as:
  * the number of available processors, host ID, host name, system up time,
  * user's country and name, and the Java vendor and version.
  * <p>
- * The {@code SystemContext} acts as a singleton, initialized with the current system's state.
- * When deserialized from another host, the {@code SystemContext} reflects the state of that host
- * at the time of serialization.
+ * The singleton instance is initialized with the system's current state.
+ * If deserialized from another host, the SystemContext object would contain the information of that host at the moment of serialization.
  */
 @SuppressWarnings("unused")
 public class SystemContext extends SelfDescribingMarshallable {

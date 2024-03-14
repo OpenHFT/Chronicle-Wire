@@ -24,12 +24,11 @@ import java.lang.reflect.Method;
 import java.util.function.Supplier;
 
 /**
- * This is the BinaryMethodWriterInvocationHandler class which extends the AbstractMethodWriterInvocationHandler.
- * It handles method invocations specific to binary writing scenarios with optional metadata support.
+ * The BinaryMethodWriterInvocationHandler handles method invocations specific to binary writing scenarios with optional metadata support.
  */
 public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInvocationHandler {
     @NotNull
-    private final Supplier<MarshallableOut> marshallableOutSupplier; // Supplier to provide instances of MarshallableOut.
+    private final Supplier<MarshallableOut> marshallableOutSupplier;
     private final boolean metaData;  // Flag to determine if metadata should be written.
 
     /**

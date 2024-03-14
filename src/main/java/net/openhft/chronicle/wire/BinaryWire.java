@@ -410,7 +410,6 @@ public class BinaryWire extends AbstractWire implements Wire {
      * @param first A flag indicating if the data point being copied is the first one.
      */
     void copyTo(@NotNull WireOut wire, boolean first) {
-        // Continue copying as long as there's data left in the source wire.
         while (bytes.readRemaining() > 0) {
             copyOne(wire, first);
             first = false; // Subsequent data points aren't the first ones.
@@ -632,7 +631,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         if (newLimit > limit)
             throw new IORuntimeException("Can't extend the limit");
         try {
-            bytes.readLimit(newLimit);  // Set new limit for reading.
+            bytes.readLimit(newLimit);
             @NotNull final ValueOut wireValueOut = wire.getValueOut();
             switch (getBracketTypeNext()) {
                 case MAP:
@@ -828,7 +827,6 @@ public class BinaryWire extends AbstractWire implements Wire {
      * @return The acquired or newly created DefaultValueIn instance.
      */
     private DefaultValueIn acquireDefaultValueIn() {
-        // Check if a DefaultValueIn instance already exists.
         if (defaultValueIn == null)
             defaultValueIn = new DefaultValueIn(this);
         // Reset the default value to null.
@@ -1517,18 +1515,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             case FLOAT64:
                 // 64-bit floating point representation.
                 return bytes.readDouble();
-/*            case FIXED1:
-                return bytes.readStopBit() / 1e1;
-            case FIXED2:
-                return bytes.readStopBit() / 1e2;
-            case FIXED3:
-                return bytes.readStopBit() / 1e3;
-            case FIXED4:
-                return bytes.readStopBit() / 1e4;
-            case FIXED5:
-                return bytes.readStopBit() / 1e5;
-            case FIXED6:
-                return bytes.readStopBit() / 1e6;*/
         }
 
         // If we can't decode, throw an exception.
@@ -1705,15 +1691,15 @@ public class BinaryWire extends AbstractWire implements Wire {
             final StringBuilder sb = sbTl.get();
             sb.append(name).append(" (");
 
-        // Check if the methodId falls within the printable ASCII character range.
+            // Check if the methodId falls within the printable ASCII character range.
             if (' ' < methodId && methodId <= '~')
-            sb.append('\'').append((char) methodId).append('\''); // Represent methodId as a character.
+                sb.append('\'').append((char) methodId).append('\''); // Represent methodId as a character.
             else
-            sb.append(methodId); // Use the integer representation.
+                sb.append(methodId); // Use the integer representation.
 
             sb.append(')');
 
-        // Write the description to bytes in hexadecimal format.
+            // Write the description to bytes in hexadecimal format.
             bytes.writeHexDumpDescription(sb);
         }
     }
@@ -4284,7 +4270,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             // Find the class by name from the string builder content
             final Class clazz = classLookup().forName(sb);
 
-            // Check if the class is of type Demarshallable
             if (Demarshallable.class.isAssignableFrom(clazz)) {
                 return (T) demarshallable(clazz);
             }
@@ -4296,7 +4281,6 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             ReadMarshallable m = ObjectUtils.newInstance((Class<ReadMarshallable>) clazz);
 
-            // Marshall the object
             marshallable(m, true);
             return readResolve(m);
         }

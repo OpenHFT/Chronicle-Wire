@@ -47,25 +47,19 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     public final static ThreadLocal<String> SERVICE_NAME = new ThreadLocal<>();
     private final static ConcurrentHashMap<String, MessageHistoryThreadLocal> TEMP_MESSAGE_HISTORY_BY_SERVICE_NAME = new ConcurrentHashMap<>();
     protected final WireParselet debugLoggingParselet;
-
-    // Input interface for marshallable data.
     private final MarshallableIn in;
     private final MessageHistoryThreadLocal tempMessageHistory;
     protected MessageHistory messageHistory;
-
-    // Flag to determine if a data event has been processed.
     protected boolean dataEventProcessed;
 
     // Flag to determine if the input should be closed.
     private boolean closeIn = false;
-
     // Flag to determine if the reader is closed.
     private boolean closed;
 
     // Consumer for processing message history.
     private Consumer<MessageHistory> historyConsumer = NO_OP_MH_CONSUMER;
 
-    // Predicate used for filtering.
     private Predicate predicate;
 
     // Flag to determine if scanning is active.
@@ -118,7 +112,6 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         try {
             final Method method = clazz.getMethod(name, parameterTypes);
 
-            // Making the method accessible if it's private or protected.
             Jvm.setAccessible(method);
 
             return method;

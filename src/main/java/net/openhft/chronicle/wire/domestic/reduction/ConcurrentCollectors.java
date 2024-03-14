@@ -40,9 +40,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  */
 public final class ConcurrentCollectors {
 
-    /**
-     * Private constructor to prevent instantiation of this utility class.
-     */
+    // Suppresses default constructor, ensuring non-instantiability.
     private ConcurrentCollectors() {
     }
 

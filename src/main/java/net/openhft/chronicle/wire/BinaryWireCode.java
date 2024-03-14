@@ -65,7 +65,6 @@ public enum BinaryWireCode {
     public static final int PADDING = 0x8F;
 
     // Floating point number representations:
-
     public static final int FLOAT32 = 0x90;
     public static final int FLOAT64 = 0x91;
     public static final int FLOAT_STOP_2 = 0x92;
@@ -80,7 +79,6 @@ public enum BinaryWireCode {
     public static final int UUID = 0xA0;
 
     // Different integer representations.
-
     public static final int UINT8 = 0xA1;
     public static final int UINT16 = 0xA2;
     public static final int UINT32 = 0xA3;
@@ -98,28 +96,20 @@ public enum BinaryWireCode {
     public static final int INT64_0x = 0xAF;
 
     // Representation for boolean values:
-
     // Represents the boolean value 'false'.
     public static final int FALSE = 0xB0;
-
     // Represents the boolean value 'true'.
     public static final int TRUE = 0xB1;
 
     // Different date and time representations:
-
     // Represents a time value.
     public static final int TIME = 0xB2;
-
     // Represents a date value.
     public static final int DATE = 0xB3;
-
     // Represents a date-time value.
     public static final int DATE_TIME = 0xB4;
-
     // Represents a zoned date-time value.
     public static final int ZONED_DATE_TIME = 0xB5;
-
-    // Miscellaneous representations:
 
     // Represents a type prefix.
     public static final int TYPE_PREFIX = 0xB6;
@@ -152,7 +142,6 @@ public enum BinaryWireCode {
     public static final int HINT = 0xBF;
 
     // Definitions for field names:
-
     // Represents the starting field name code.
     public static final int FIELD_NAME0 = 0xC0;
     // ...
@@ -160,7 +149,6 @@ public enum BinaryWireCode {
     public static final int FIELD_NAME31 = 0xDF;
 
     // Definitions for strings:
-
     // Represents the starting string code.
     public static final int STRING_0 = 0xE0;
     // ...

@@ -99,7 +99,6 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
         try {
             // If source code hasn't been generated yet, generate it.
             if (sourceCode.length() == 0) {
-                // Main code for the generated class.
                 SourceCodeFormatter mainCode = new JavaSourceCodeFormatter();
                 generateMainCode(mainCode);
 
@@ -226,7 +225,6 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
      */
     @NotNull
     protected String className() {
-        // If maxCode is 0, use the base class name from the meta-data.
         if (maxCode() == 0)
             return metaData.baseClassName();
 
@@ -251,19 +249,15 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
 
         // Add an UpdateInterceptor field if required by the metadata.
         if (metaData.useUpdateInterceptor())
-            mainCode.append("private transient final " + nameForClass(UpdateInterceptor.class) + " updateInterceptor;\n");
+            mainCode.append("private transient final ").append(nameForClass(UpdateInterceptor.class)).append(" updateInterceptor;\n");
 
-        // Generate fields for the class.
         generateFields(mainCode);
         mainCode.append('\n');
 
-        // Generate constructors for the class.
         generateConstructors(mainCode);
 
-        // Generate methods for the class.
         generateMethods(mainCode);
 
-        // Generate any final code for the class.
         generateEnd(mainCode);
     }
 

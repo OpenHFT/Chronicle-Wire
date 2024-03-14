@@ -504,31 +504,35 @@ public class GenerateMethodReader {
     }
 
     /**
-     * This is the handleMethod function tailored for dynamic method invocation code generation.
-     * It creates necessary structures, sets up fields, prepares method parameters, and crafts a switch block for method calls.
-     * The method considers various method properties such as return type, parameters, and annotations to generate the code.
+     * This method generates code for handling the call of a specific method. It sets up necessary fields and structures,
+     * prepares parameters, and constructs a switch block for method calls.
      *
-     * <p>Key functionalities:
-     * - Determines method accessibility, ensuring the target method is available for invocation.
-     * - Retrieves method information like its parameter types and return type to decide how to facilitate its call.
-     * - Generates fields dynamically in the source code to store method parameters' values.
-     * - Handles method annotations, specifically `@MethodId`, and generates code accordingly in the `eventIdSwitchBlock`.
-     * - Creates code blocks for method invocation in the `eventNameSwitchBlock` based on its parameters and return type.
-     * - Handles chainable return types by further invoking the `handleInterface` function.
+     * <p>Initially, it ensures that the method is accessible and obtains its parameter types and return type.
+     * It processes the method parameters and creates fields for storing them. It also checks if the return type of the method
+     * is chainable and updates the state accordingly.
+     *
+     * <p>If a real interceptor is returned by the method, it creates an array field to store the interceptor's arguments
+     * and also adds a static field to hold a reference to the method itself.
+     *
+     * <p>Furthermore, if the method is annotated with {@code MethodId}, it extracts the method ID from the annotation
+     * and adds a switch case for this ID to the {@code eventIdSwitchBlock}.
+     *
+     * <p>Then, it builds a case for the method in the {@code eventNameSwitchBlock}. The structure of this case varies
+     * depending on the number of parameters the method has and if it's marked with {@code MethodFilterOnFirstArg}.
+     *
+     * <p>If the method's return type is {@code DocumentContext}, it also adds code to copy the method's result to the wire
+     * and close it.
      *
      * <p>Finally, if the method's return type is chainable, it calls {@code handleInterface()} on it.
      *
      * @param m                  The method for which code is generated.
      * @param anInterface        The interface containing the method.
-     * @param instanceFieldName  The field name upon which the method is executed in the generated code.
-     * @param methodFilter       Indicator if the interface is annotated with {@link MethodFilterOnFirstArg}.
-     *                           If true, specific methods are processed based on the first argument.
-     * @param eventIdSwitchBlock Code block that manages switching based on event IDs.
-     * @param eventNameSwitchBlock Code block that manages switching based on event names.
+     * @param instanceFieldName  In the generated code, this method is executed on a field with this name.
+     * @param methodFilter       Indicates if the passed interface is marked with {@link MethodFilterOnFirstArg}. If true, only certain methods are processed.
+     * @param eventIdSwitchBlock The block of code that handles the switching of event IDs.
+     * @param eventNameSwitchBlock The block of code that handles the switching of event names.
      */
     private void handleMethod(Method m, Class<?> anInterface, String instanceFieldName, boolean methodFilter, SourceCodeFormatter eventNameSwitchBlock, SourceCodeFormatter eventIdSwitchBlock) {
-
-        // Ensuring method accessibility
         Jvm.setAccessible(m);
 
         // Retrieving parameter and return type information of the method
@@ -672,15 +676,13 @@ public class GenerateMethodReader {
     }
 
     /**
-     * Constructs the method invocation code for a specified method, considering chained calls and
-     * the presence of {@link MethodReaderInterceptorReturns}. The generated code facilitates dynamic method
-     * invocation while also seamlessly integrating with interceptors and handling chained calls.
+     * Generates code that invokes passed method, saves method return value (in case it's a chained call)
+     * and handles {@link MethodReaderInterceptorReturns} if it's specified.
      *
-     * @param m                  Method that is being processed.
-     * @param instanceFieldName  In generated code, method is executed on a field with this name.
-     * @param chainedCallPrefix  Prefix for the method call statement, provided to save the method result for chaining.
-     * @param returnType         Expected return type of the method.
-     * @return                   Generated code that performs the specified method call.
+     * @param m                 Method that is being processed.
+     * @param instanceFieldName In generated code, method is executed on field with this name.
+     * @param chainedCallPrefix Prefix for method call statement, passed in order to save method result for chaining.
+     * @return Code that performs a method call.
      */
     private String methodCall(Method m, String instanceFieldName, String chainedCallPrefix, @Nullable Class<?> returnType) {
         StringBuilder res = new StringBuilder();
@@ -697,7 +699,7 @@ public class GenerateMethodReader {
         // Flag indicating a data event has been processed
         res.append("dataEventProcessed = true;\n");
 
-        // Check for no interceptor and a generating interceptor
+        // called for no interceptor and a generating interceptor
         if (!hasRealInterceptorReturns()) {
             // Potential cast to the generating interceptor type
             GeneratingMethodReaderInterceptorReturns generatingInterceptor = interceptor != null ?
@@ -724,9 +726,7 @@ public class GenerateMethodReader {
                     res.append(codeAfter).append("\n");
             }
         } else {
-            // Process for non generating interceptors
-
-            // Store method arguments in interceptor args array
+            // called for non generating interceptor
             for (int i = 0; i < parameterTypes.length; i++) {
                 res.append(format("interceptor%sArgs[%d] = %sarg%d;\n", m.getName(), i, m.getName(), i));
             }
@@ -769,7 +769,7 @@ public class GenerateMethodReader {
     private String argumentRead(Method m, int argIndex, boolean inLambda, Type[] parameterTypes) {
         Class<?> numericConversionClass = null;
 
-        // Check wire types to determine support for numeric conversion.
+        // Numeric conversion is not supported for binary wire
         if (wireType == WireType.TEXT || wireType == WireType.YAML) {
             Annotation[] annotations = m.getParameterAnnotations()[argIndex];
 

@@ -27,16 +27,6 @@ import org.jetbrains.annotations.NotNull;
 
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
-/**
- * Represents a mechanism to exchange data between two wires, ensuring that data is accessed
- * in a thread-safe and efficient manner. This class extends the SimpleCloseable class,
- * inheriting its closeable functionalities, and implements the MarshallableOut interface,
- * providing serialization capabilities.
- *
- * <p>The class utilizes two wires for data exchange and manages their state using various
- * constants indicating whether a wire is free, locked, or dirty. An atomic operation is
- * used to ensure thread safety while manipulating the state of wires.</p>
- */
 public class WireExchanger extends SimpleCloseable implements MarshallableOut {
 
     // State constants representing the status of the wires.

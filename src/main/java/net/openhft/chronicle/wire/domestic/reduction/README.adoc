@@ -134,8 +134,7 @@ Reduction<LongSupplier> minListener =
 
 ==== List of Elements
 
-Maintains a List of all MarketData elements encountered in a List.
-This should be used with caution as a queue can contain many elements requiring a lot of heap memory.
+Maintains a List of all MarketData elements encountered in a List. This should be used with caution as a queue can contain many elements requiring a lot of heap memory.
 
 [source,java]
 ----
@@ -188,8 +187,7 @@ NOTE: The reuse of object is safe in this case as immutable values are derived d
 
 ==== Merging entries in a Map
 
-Maintains a Map of the latest MarketData message per symbol where the messages were previously written by a MethodWriter of type MarketDataProvider.
-This is effectively a queue backed Map that will always reflect a state of the underlying queue.
+Maintains a Map of the latest MarketData message per symbol where the messages were previously written by a MethodWriter of type MarketDataProvider. This is effectively a queue backed Map that will always reflect a state of the underlying queue.
 
 [source,java]
 ----
@@ -213,8 +211,7 @@ Map<String, MarketData> liveQueueBackedMap = latest.reduction(); <1>
 
 ==== Using a protected Reduction
 
-Many collectors can be used in combination with a "protective coat" around the actual reduction.
-Here is an example of providing an unmodifiable view of a map using standard Java Collector constructs:
+Many collectors can be used in combination with a "protective coat" around the actual reduction. Here is an example of providing an unmodifiable view of a map using standard Java Collector constructs:
 
 [source,java]
 ----
@@ -278,8 +275,7 @@ reduction.accept(queue.createTailer());
 
 ==== Automatically Tail a Queue Maintaining a Reduction
 
-This example shows how a Thread can be setup to automatically tail a queue while maintaining a Reduction.
-Any data added to the queue will be consumed by the Thread and might contribute to the Reduction.
+This example shows how a Thread can be setup to automatically tail a queue while maintaining a Reduction. Any data added to the queue will be consumed by the Thread and might contribute to the Reduction.
 
 [source,java]
 ----

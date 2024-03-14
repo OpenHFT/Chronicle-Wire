@@ -26,9 +26,6 @@ import java.util.regex.Pattern;
  * The MessageMissingAgitator class is an implementation of the YamlAgitator interface.
  * This agitator is designed to create altered YAML content by omitting specific messages based on a limit.
  * The purpose is to simulate scenarios where a certain message in the YAML content is missing.
- * <p>
- * A typical use-case might involve testing the resilience of parsers or consumers of the YAML content against
- * missing data.
  */
 public class MessageMissingAgitator implements YamlAgitator {
 

@@ -140,10 +140,6 @@ public interface ToLongDocumentExtractor {
         };
     }
 
-    // skip
-
-    // peek
-
     /**
      * A static method that extracts and returns the index itself.
      * This is useful in cases where the index has its own significance.

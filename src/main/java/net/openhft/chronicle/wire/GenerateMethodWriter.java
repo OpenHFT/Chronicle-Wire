@@ -78,8 +78,6 @@ public class GenerateMethodWriter {
     // Constant field name for the UpdateInterceptor class
     private static final String UPDATE_INTERCEPTOR_FIELD = "updateInterceptor";
 
-    // Add methods and other code here, and I'll continue to provide inline and javadoc comments accordingly.
-
     // Indicates whether to dump the generated code or not
     static final boolean DUMP_CODE = Jvm.getBoolean("dumpCode");
 

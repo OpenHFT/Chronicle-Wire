@@ -36,11 +36,9 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
 
     // Map to cache the parameter holders for method invocations
     private final Map<Method, ParameterHolderSequenceWriter> parameterMap = new ConcurrentHashMap<>();
-
-    // Flag to indicate if history should be recorded
     protected boolean recordHistory;
 
-    // Name for the generic event, if any
+    // Name for the generic event, if any. A generic event take the event name as the first argument
     protected String genericEvent = "";
 
     // Flag to determine if method IDs should be used in binary output
@@ -85,7 +83,6 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
      * @throws InvalidMarshallableException If there's an error during marshalling.
      */
     protected void handleInvoke(@NotNull Method method, Object[] args, Wire wire) throws InvalidMarshallableException {
-        // Check and write the history if required
         if (recordHistory) {
             wire.writeEventName(MethodReader.HISTORY)
                     .marshallable(MessageHistory.get());
@@ -116,8 +113,6 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
     private void writeEvent0(Wire wire, @NotNull Method method, Object[] args, String methodName, int oneParam) throws InvalidMarshallableException {
         // Fetch or compute the parameter holder for the method
         final ParameterHolderSequenceWriter phsw = parameterMap.computeIfAbsent(method, ParameterHolderSequenceWriter::new);
-
-        // Decide whether to use method ID based on conditions
         boolean useMethodId = useMethodIds && phsw.methodId >= 0 && wire.getValueOut().isBinary();
         ValueOut valueOut = useMethodId
                 ? wire.writeEventId((int) phsw.methodId)

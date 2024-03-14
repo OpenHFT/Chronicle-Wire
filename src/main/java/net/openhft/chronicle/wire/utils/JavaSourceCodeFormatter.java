@@ -22,19 +22,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A formatter specifically tailored for formatting Java source code.
- *
- * <p>
- * This formatter extends the generic {@link SourceCodeFormatter} to provide specific
- * formatting capabilities for Java source code. It ensures that long literals are
- * appropriately suffixed with an 'L' and also provides multiple constructors
- * to initialize and control the indentation level.
- * </p>
- *
  * <p>
  * By default, the formatter uses an indentation of 4 spaces for Java code,
  * in line with common Java coding conventions. However, this can be customized
  * if needed.
- * </p>
  *
  * @see SourceCodeFormatter
  */

@@ -23,7 +23,7 @@ public class JSONWireTypesTest extends WireTestCommon {
                         "\"setOfSets\":[ " +
                         "{\"@!set\":[ {\"@net.openhft.chronicle.wire.JSONWireTypesTest$Dto\":{\"field\":\"234\"}} ]}," +
                         "{\"@!set\":[ {\"@net.openhft.chronicle.wire.JSONWireTypesTest$Dto\":{\"field\":\"123\"}} ]}" +
-                        " ] }}",
+                        " ]}}",
             dtoAsJson
         );
 

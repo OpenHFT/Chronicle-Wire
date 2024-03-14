@@ -34,7 +34,7 @@ import java.util.function.Supplier;
  * This class provides a generic foundation for wire types that could shift between the two mentioned types
  * based on the underlying acquisition logic.
  *
- * <p>Note: This class assumes the underlying wire type can be determined dynamically at runtime.</p>
+ * @author Rob Austin.
  */
 @SuppressWarnings("rawtypes")
 public abstract class AbstractAnyWire extends AbstractWire implements Wire {
@@ -148,9 +148,6 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
         return wireAcquisition.acquireWire().newIntArrayReference();
     }
 
-    /**
-     * Validates and ensures the underlying wire type is correctly set.
-     */
     void checkWire() {
         wireAcquisition.acquireWire();
     }

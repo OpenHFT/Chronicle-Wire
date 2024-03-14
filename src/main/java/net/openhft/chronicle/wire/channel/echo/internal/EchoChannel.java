@@ -31,8 +31,7 @@ import net.openhft.chronicle.wire.channel.OkHeader;
 import net.openhft.chronicle.wire.converter.NanoTime;
 
 /**
- * Represents an echo channel that extends the capabilities of a {@link SimpleCloseable} and
- * implements the {@link ChronicleChannel} interface. The primary responsibility of this class is
+ * Represents an echo channel that implements the {@link ChronicleChannel} interface. The primary responsibility of this class is
  * to manage the reading and writing of documents to a {@link Wire} while keeping track of test messages
  * and headers.
  */

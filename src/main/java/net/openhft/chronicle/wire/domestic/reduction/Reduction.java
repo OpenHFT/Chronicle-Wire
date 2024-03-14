@@ -42,36 +42,38 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 public interface Reduction<T> extends ExcerptListener {
 
     /**
-     * Consumes an excerpt from the provided {@code wire} at the specified {@code index}.
-     * Care should be taken to minimize the probability of throwing Exceptions as they are relayed to the call site.
-     * It's essential that implementations of this method remain thread-safe, especially when used as an {@link ExcerptListener}.
-     *
-     * @param wire  the wire containing the excerpt
-     * @param index the index of the excerpt
-     * @throws InvalidMarshallableException if there's an issue marshalling the provided wire
-     */
+     * Consumes an excerpt from the provided {@code wire} at the index at the provided {@code index}.
+     * <p>
+     * If this method throws an Exception, it is relayed to the call site.
+     * Therefore, care should be taken to minimise the probability of throwing Exceptions.
+     * <p>
+     * If this method is referenced as an {@link ExcerptListener} then the Reduction must be
+     * thread-safe.
+     **/
     void onExcerpt(@NotNull Wire wire, @NonNegative long index) throws InvalidMarshallableException;
 
     /**
-     * Provides a view of the underlying reduction. Implementations might return a snapshot
-     * or a mutable view depending on the design.
+     * Returns a view of the underlying reduction.
      *
-     * @return the current state or view of the reduction
+     * @return Reduction view.
      */
     @NotNull
     T reduction();
 
     /**
-     * Processes and reduces the contents provided by the {@code tailer}.
-     * The method can be used to initialize the reduction before appending new values.
-     * It's the caller's responsibility to ensure no simultaneous appenders are accessing this reduction during the operation.
+     * Accepts the input of the provided {@code tailer } and reduces (folds) the contents of it
+     * into this Reduction returning the last seen index or -1 if no index was seen.
+     * <p>
+     * This method can be used to initialise a Reduction before appending new values.
+     * <p>
+     * It is the responsibility of the caller to make sure no simultaneous appenders are using
+     * this Reduction during the entire fold operation.
      *
-     * @param tailer the source of the content to be reduced
+     * @param tailer to reduce (fold) from
      * @return the last index seen or -1 if no index was seen
-     * @throws InvalidMarshallableException if there's an issue marshalling the tailer's content
+     * @throws NullPointerException if the provided {@code tailer} is {@code null}
      */
     default long accept(@NotNull final MarshallableIn tailer) throws InvalidMarshallableException {
-        // Ensure the tailer is not null
         requireNonNull(tailer);
         return ReductionUtil.accept(tailer, this);
     }
@@ -79,38 +81,41 @@ public interface Reduction<T> extends ExcerptListener {
     // Basic static constructors
 
     /**
-     * Returns a ReductionBuilder for the given extractor which will extract elements of type E.
-     *
-     * @param extractor the extractor responsible for fetching elements of type E
-     * @param <E>       the type of elements to be extracted
-     * @return a ReductionBuilder designed for elements of type E
+     * Creates and returns a new ReductionBuilder that will use the provided
+     * {@code extractor) to extract elements of type E.
+     * <p>
+     * @param extractor (non-null)
+     * @param <E>       element type
+     * @return a new ReductionBuilder
+     * @see LongReductionBuilder, DoubleReductionBuilder
      */
     static <E> ReductionBuilder<E> of(@NotNull final DocumentExtractor<E> extractor) {
-        // Ensure the extractor is not null
         requireNonNull(extractor);
         return new ReductionUtil.VanillaReductionBuilder<>(extractor);
     }
 
     /**
-     * Returns a LongReductionBuilder for the given extractor which will extract elements of type long.
-     *
-     * @param extractor the extractor responsible for fetching elements of type long
-     * @return a LongReductionBuilder designed for elements of type long
+     * Creates and returns a new LongReductionBuilder that will use the provided
+     * {@code extractor) to extract elements of type {@code long}.
+     * <p>
+     * @param extractor (non-null)
+     * @return a new LongReductionBuilder
+     * @see {@link #ofLong(ToLongDocumentExtractor)} and {@link #ofDouble(ToDoubleDocumentExtractor)}
      */
     static LongReductionBuilder ofLong(@NotNull final ToLongDocumentExtractor extractor) {
-        // Ensure the extractor is not null
         requireNonNull(extractor);
         return new ReductionUtil.VanillaLongReductionBuilder(extractor);
     }
 
     /**
-     * Returns a DoubleReductionBuilder for the given extractor which will extract elements of type double.
-     *
-     * @param extractor the extractor responsible for fetching elements of type double
-     * @return a DoubleReductionBuilder designed for elements of type double
+     * Creates and returns a new DoubleReductionBuilder that will use the provided
+     * {@code extractor) to extract elements of type {@code double}.
+     * <p>
+     * @param extractor (non-null)
+     * @return a new DoubleReductionBuilder
+     * @see {@link #of(DocumentExtractor)} and {@link #ofLong(ToLongDocumentExtractor)}
      */
     static DoubleReductionBuilder ofDouble(@NotNull final ToDoubleDocumentExtractor extractor) {
-        // Ensure the extractor is not null
         requireNonNull(extractor);
         return new ReductionUtil.VanillaDoubleReductionBuilder(extractor);
     }
@@ -141,8 +146,8 @@ public interface Reduction<T> extends ExcerptListener {
     interface LongReductionBuilder {
 
         /**
-         * Creates and returns a new Reduction of type LongSupplier.
-         * It uses the provided parameters to establish the reduction behavior, particularly the internal state and accumulation.
+         * Creates and returns a new Reduction of type LongSupplier using the provided
+         * parameters.
          *
          * @param supplier    to use (non-null) to create the internal state
          * @param accumulator to use when merging long elements into the internal state

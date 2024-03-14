@@ -56,8 +56,6 @@ public abstract class AbstractWire implements Wire {
             "ensure that you have a unique instance of the Appender per thread, in " +
             "other-words you can not share appenders across threads.";
 
-
-    // Static block to initialize aliases for WireInternal.
     static {
         WireInternal.addAliases();
     }
@@ -65,20 +63,10 @@ public abstract class AbstractWire implements Wire {
     // The underlying bytes representation used by the Wire.
     @NotNull
     protected final Bytes<?> bytes;
-
-    // Determines if the Wire uses 8-bit encoding.
     protected final boolean use8bit;
-
-    // Provides class lookup functionalities.
     protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
-
-    // Parent object for context reference.
     protected Object parent;
-
-    // A listener to handle comments within the Wire.
     protected Consumer<CharSequence> commentListener = IgnoringConsumer.IGNORING_CONSUMER;
-
-    // Various internal configurations and states.
     private Pauser pauser;
     private TimingPauser timedParser;
     private long headerNumber = Long.MIN_VALUE;
@@ -655,19 +643,11 @@ public abstract class AbstractWire implements Wire {
     /**
      * used by write bytes when doing a rollback
      */
-
-    /**
-     * Forces the internal flag 'insideHeader' to false, indicating that the current Wire is no longer inside a header.
-     */
     public void forceNotInsideHeader() {
         insideHeader = false;
     }
 
-    /**
-     * Sets the usePadding property of the Wire. Note: This method might be deprecated in future releases.
-     *
-     * @param usePadding A boolean indicating if padding should be used.
-     */
+    @Deprecated(/* to be removed as soon as is practical */)
     public void usePadding(boolean usePadding) {
         this.usePadding = usePadding;
     }

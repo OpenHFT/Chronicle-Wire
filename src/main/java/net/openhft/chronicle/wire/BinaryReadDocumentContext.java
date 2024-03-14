@@ -35,17 +35,17 @@ import static net.openhft.chronicle.wire.Wires.lengthOf;
  */
 public class BinaryReadDocumentContext implements ReadDocumentContext {
 
-    private final boolean ensureFullRead; // Determines if the context ensures full reading.
+    private final boolean ensureFullRead;
     public long start = -1;
     public long lastStart = -1;
     @Nullable
-    protected AbstractWire wire;  // The underlying wire representation of the document.
-    protected boolean present;    // Indicates if the context is currently present.
+    protected AbstractWire wire;
+    protected boolean present;
     protected boolean notComplete;
-    protected long readPosition;  // The current read position within the document.
-    protected long readLimit;     // The boundary up to which reading should occur in the document.
-    protected boolean metaData;   // Flag to indicate if the current reading involves metadata.
-    protected boolean rollback;   // Determines if the context should roll back.
+    protected long readPosition;
+    protected long readLimit;
+    protected boolean metaData;
+    protected boolean rollback;
 
     /**
      * Constructor that initializes the BinaryReadDocumentContext using the provided wire.
@@ -116,7 +116,8 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     private static void fullReadForDeltaWire(AbstractWire wire0, long start) {
         long readPosition1 = wire0.bytes().readPosition();
         try {
-            // We reset the position to start as close might have been called during reading.
+            // we have to read back from the start, as close may have been called in
+            // the middle of reading a value
             wire0.bytes().readPosition(start);
             wire0.bytes().readSkip(4);
             while (wire0.hasMore()) {

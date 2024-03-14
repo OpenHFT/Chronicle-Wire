@@ -135,7 +135,7 @@ public enum Wires {
     // Thread local storage for string builders
     static ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
     // Compiler cache for dynamic code generation
-    private static CachedCompiler CACHED_COMPILER = null;
+    static CachedCompiler CACHED_COMPILER = null;
 
     /**
      * Static initializer block for the Wires enum. It populates the list of
@@ -1411,12 +1411,21 @@ public enum Wires {
         // Check if the CACHED_COMPILER instance is initialized.
         if (CACHED_COMPILER == null) {
             final String target = OS.getTarget();
+            File sourceDir = null;
+            File classDir = null;
 
-            // Determine the directories for CachedCompiler based on the environment.
-            CACHED_COMPILER =
-                    new File(target).exists() && DUMP_CODE_TO_TARGET
-                            ? new CachedCompiler(new File(target, "generated-test-sources"), new File(target, "test-classes"))
-                            : new CachedCompiler(null, null);
+            if (new File(target).exists() && DUMP_CODE_TO_TARGET) {
+                sourceDir = new File(target, "generated-test-sources");
+                classDir = new File(target, "test-classes");
+            }
+
+            String compilerOptions = Jvm.getProperty("compiler.options");
+
+            if (compilerOptions == null || compilerOptions.trim().isEmpty()) {
+                CACHED_COMPILER = new CachedCompiler(sourceDir, classDir);
+            } else {
+                CACHED_COMPILER = new CachedCompiler(sourceDir, classDir, asList(compilerOptions.split("\\s")));
+            }
         }
         try {
             // Use the CachedCompiler to load the class from the provided Java source code.

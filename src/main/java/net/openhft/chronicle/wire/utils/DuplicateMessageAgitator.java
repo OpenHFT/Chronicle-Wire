@@ -26,15 +26,8 @@ import java.util.regex.Pattern;
  * A YAML agitator that generates various permutations of a given YAML content by duplicating specific messages.
  *
  * <p>
- * This agitator uses regular expressions to identify distinct YAML messages within a given input and
- * then duplicates certain messages based on a predefined limit. This can be useful for testing how systems
- * handle duplicated YAML messages or simulating specific scenarios.
- * </p>
- *
- * <p>
  * An example of its usage might be to generate inputs for fuzz testing or to validate how a YAML parser
  * deals with redundant information.
- * </p>
  *
  * @see YamlAgitator
  */

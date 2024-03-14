@@ -43,8 +43,8 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 import static net.openhft.chronicle.core.io.ClosedIORuntimeException.newIORuntimeException;
 
 /**
- * This is the TCPChronicleChannel class, extending AbstractCloseable and implementing the InternalChronicleChannel.
- * It provides a channel that communicates over TCP and encapsulates the Chronicle logic for networking, with a focus on
+ * This is the TCPChronicleChannel class which provides a channel that communicates
+ * over TCP and encapsulates the Chronicle logic for networking, with a focus on
  * initialization, input-output buffer management, and header parsing.
  * The class is designed to work both as an initiator and as an acceptor.
  */
@@ -636,8 +636,6 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
      * </p>
      */
     private class ConnectionDocumentContextHolder extends DocumentContextHolder implements WriteDocumentContext {
-
-        // Indicates if the current element in the document context is chained with other elements
         private boolean chainedElement;
 
         @Override

@@ -27,7 +27,7 @@ import static net.openhft.chronicle.wire.Wires.toIntU30;
  * A context used for writing documents in a binary format.
  * This class provides facilities to start, query, and manage the state of binary
  * documents that are currently being written. The binary format uses headers to
- * denote meta data, data length, and completion status.
+ * denote metadata, data length, and completion status.
  */
 public class BinaryWriteDocumentContext implements WriteDocumentContext {
 

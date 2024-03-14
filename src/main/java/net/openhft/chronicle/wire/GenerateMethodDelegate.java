@@ -29,10 +29,6 @@ import java.util.stream.Collectors;
  * The class is responsible for generating method delegates using the provided metadata.
  */
 public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMethodDelegate.GMDMetaData> {
-
-    /**
-     * Default constructor initializing with new GMDMetaData.
-     */
     public GenerateMethodDelegate() {
         super(new GMDMetaData());
     }
@@ -56,11 +52,6 @@ public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMetho
         mainCode.append("private ").append(getDelegateType()).append(" delegate;\n");
     }
 
-    /**
-     * Returns the delegate type, in this case, "OUT".
-     *
-     * @return Delegate type as a string.
-     */
     protected String getDelegateType() {
         return "OUT";
     }
