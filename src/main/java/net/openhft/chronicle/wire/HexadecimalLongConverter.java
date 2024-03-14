@@ -17,30 +17,29 @@
  */
 package net.openhft.chronicle.wire;
 /**
- * The {@code HexadecimalLongConverter} class provides functionality to convert 64-bit unsigned
- * numbers into their hexadecimal string representation.
+ * The {@code HexadecimalLongConverter} class is responsible for converting 64-bit unsigned
+ * numbers into a hexadecimal representation.
  *
- * <p>This class is an extension of the {@link AbstractLongConverter} and leverages its methods
- * to perform the conversion tasks. Designed as a singleton, this class ensures a single instance
- * is used throughout the application, ensuring both consistency and thread-safety.
+ * <p>This class extends the {@link AbstractLongConverter} class, and inherits its methods
+ * to perform the conversions. The class is a singleton, accessed via the {@code INSTANCE}
+ * constant. It's thread-safe and can be used across the application.
+ *
  * @see AbstractLongConverter
  */
 public class HexadecimalLongConverter extends AbstractLongConverter {
 
     /**
-     * The singleton instance of {@code HexadecimalLongConverter}, ensuring a single
-     * point of access for this converter across the application.
+     * The singleton instance of {@code HexadecimalLongConverter}.
      */
     public static final LongConverter INSTANCE = new HexadecimalLongConverter();
 
     /**
-     * The character set utilized for converting numbers into hexadecimal format.
+     * The character set used for hexadecimal encoding.
      */
     private static final String CHARS = "0123456789abcdef";
 
     /**
-     * Private constructor initializing the hexadecimal converter with the appropriate character set.
-     * As this class follows the singleton pattern, this constructor is kept private to prevent direct instantiation.
+     * Default constructor that sets up the hexadecimal character set.
      */
     private HexadecimalLongConverter() {
         super(CHARS);

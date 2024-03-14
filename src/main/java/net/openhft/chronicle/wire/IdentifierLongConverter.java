@@ -22,14 +22,15 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.converter.SymbolsLongConverter;
 
 /**
- * This is the IdentifierLongConverter class implementing the LongConverter interface.
- * It facilitates the transformation between base 66 encoded strings and their corresponding long representations.
- * Specifically, the class can handle either short base 66 encoded strings (of up to 10 characters) or nanosecond timestamps
- * within a specified date range. Note that negative IDs are reserved for application-specific encodings.
+ * An identifier that acts as a base 66 string of up to 10 characters, or a nanosecond timestamp for dates from 2019-09-14.
+ * <p>
+ * The base 66 encoding support 0-9, A-Z, a-z, period, underscore, tilde and caret. Leading zeros are truncated.
+ * <p>
+ * As this is intended for timestamps based on the wall clock, these shouldn't conflict.
+ * <p>
+ * Negative ids are reserved for application specific encodings.
  */
 public class IdentifierLongConverter implements LongConverter {
-
-    // Singleton instance for the IdentifierLongConverter
     public static final IdentifierLongConverter INSTANCE = new IdentifierLongConverter();
 
     // Converter for short base 66 encoded strings

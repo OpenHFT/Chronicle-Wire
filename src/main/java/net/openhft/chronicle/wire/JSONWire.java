@@ -253,10 +253,6 @@ public class JSONWire extends TextWire {
         }
     }
 
-    /**
-     * Trims curly brackets (both opening and closing) from the bytes.
-     * The method primarily focuses on the end of the byte sequence, aiming to clean up any extraneous padding or unmatched curly brackets.
-     */
     private void trimCurlyBrackets() {
         // If the next byte is a closing curly bracket
         if (peekNextByte() == '}') {
@@ -458,7 +454,6 @@ public class JSONWire extends TextWire {
      */
     private void copyMap(WireOut wire) throws InvalidMarshallableException {
         wire.getValueOut().marshallable(out -> {
-            // Consume any padding characters (e.g., whitespace) before the map content
             consumePadding();
 
             // Process each key-value pair within the map until the end is reached or the buffer is exhausted
@@ -486,7 +481,6 @@ public class JSONWire extends TextWire {
      * @param end The expected end character (e.g., '}' for maps or ']' for sequences).
      */
     private void expectComma(char end) {
-        // Consume any padding characters (e.g., whitespace)
         consumePadding();
         final int ch = peekNextByte();
 

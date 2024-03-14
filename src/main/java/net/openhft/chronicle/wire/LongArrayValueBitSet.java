@@ -35,19 +35,19 @@ import java.util.stream.StreamSupport;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
 /**
- * Represents a {@code ChronicleBitSet} which is designed to be shared among multiple processes.
- * This implementation aims to minimize locking constraints by being lock-free and avoids resizing support.
+ * This {@code ChronicleBitSet} is intended to be shared between processes. To minimize locking constraints, it is implemented as a lock-free solution
+ * without support for resizing.
  */
 public class LongArrayValueBitSet extends AbstractCloseable implements Marshallable, ChronicleBitSet {
 
-    // Used to shift left or right for a partial word mask
+    /* Used to shift left or right for a partial word mask */
     private static final long WORD_MASK = ~0L;
 
     // Pauser object used for managing concurrent access (assuming based on its name, actual use needs context)
     private transient Pauser pauser;
 
     /**
-     * Internal representation of bits. Corresponds to the serialized field "bits".
+     * The internal field corresponding to the serialField "bits".
      */
     private LongArrayValues words;
 
@@ -98,19 +98,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Ensures that the range specified by fromIndex and toIndex is valid.
-     *
-     * Specifically, this method checks:
-     * <ul>
-     *   <li>Both fromIndex and toIndex are non-negative.</li>
-     *   <li>fromIndex is not greater than toIndex.</li>
-     * </ul>
-     *
-     * If any of these conditions are not met, the method throws an IndexOutOfBoundsException with an appropriate message.
-     *
-     * @param fromIndex the starting index (inclusive).
-     * @param toIndex the ending index (inclusive).
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is negative, or fromIndex is greater than toIndex.
+     * Checks that fromIndex ... toIndex is a valid range of bit indices.
      */
     private static void checkRange(int fromIndex, int toIndex) {
         if (fromIndex < 0)
@@ -293,17 +281,19 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
         long firstWordMask = WORD_MASK << fromIndex;
         long lastWordMask = WORD_MASK >>> -toIndex;
         if (startWordIndex == endWordIndex) {
-            // Case where only one word is affected
+            // Case 1: One word
             caret(startWordIndex, firstWordMask & lastWordMask);
         } else {
-            // Multiple words affected
-            caret(startWordIndex, firstWordMask);  // Handle first word
+            // Case 2: Multiple words
+            // Handle first word
+            caret(startWordIndex, firstWordMask);
 
             // Handle intermediate words, if any
             for (int i = startWordIndex + 1; i < endWordIndex; i++)
                 caret(i, WORD_MASK);
 
-            caret(endWordIndex, lastWordMask);  // Handle last word
+            // Handle last word
+            caret(endWordIndex, lastWordMask);
         }
     }
 
@@ -368,17 +358,18 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
         long firstWordMask = WORD_MASK << fromIndex;
         long lastWordMask = WORD_MASK >>> -toIndex;
         if (startWordIndex == endWordIndex) {
-            // Case where only one word is affected
+            // Case 1: One word
             pipe(startWordIndex, firstWordMask & lastWordMask);
         } else {
-            // Multiple words affected
-            pipe(startWordIndex, firstWordMask);  // Handle first word
+            // Case 2: Multiple words
+            // Handle first word
+            pipe(startWordIndex, firstWordMask);
 
             // Handle intermediate words, if any
             for (int i = startWordIndex + 1; i < endWordIndex; i++)
                 setWord(i, WORD_MASK);
 
-            // Handle last word and ensure proper bit values are set
+            // Handle last word (restores invariants)
             pipe(endWordIndex, lastWordMask);
         }
     }
@@ -437,12 +428,11 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
         long lastWordMask = WORD_MASK >>> -toIndex;
         if (startWordIndex == endWordIndex) {
             // Case 1: One word
-            // Use AND operation with the complement of the range to clear the bits
-            and(startWordIndex, ~(firstWordMask & lastWordMask));
+            and(startWordIndex, ~(firstWordMask &
+                    lastWordMask));
         } else {
             // Case 2: Multiple words
-
-            // Clear bits in the first word
+            // Handle first word
             and(startWordIndex, ~firstWordMask);
 
             // Set all bits to false for intermediate words
@@ -472,12 +462,12 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Retrieves the value of the bit at a specified index.
-     * Indicates whether the bit at the given index is set or not.
+     * Returns the value of the bit with the specified index. The value is {@code true} if the bit with the index {@code bitIndex} is currently set in
+     * this {@code ChronicleBitSet}; otherwise, the result is {@code false}.
      *
-     * @param bitIndex Index of the bit to be checked.
-     * @return {@code true} if the bit is set, {@code false} otherwise.
-     * @throws IndexOutOfBoundsException If the provided bitIndex is negative.
+     * @param bitIndex the bit index
+     * @return the value of the bit with the specified index
+     * @throws IndexOutOfBoundsException if the specified index is negative
      */
     public boolean get(int bitIndex) {
         throwExceptionIfClosed();
@@ -512,8 +502,8 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
             if (word != 0)
                 // Use Long's numberOfTrailingZeros to quickly find the next set bit in the current word
                 return Math.toIntExact((u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word));
-            if (++u == getWordsInUse()) // Move to the next word
-                return -1; // If no more words are left, return -1
+            if (++u == getWordsInUse())
+                return -1;
             word = words.getValueAt(u);
         }
     }
@@ -544,7 +534,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
                 return Math.toIntExact((u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word));
             if (++u == getWordsInUse())
                 return -1;
-            if (u * BITS_PER_WORD > toIndex) // Check the end of range
+            if (u * BITS_PER_WORD > toIndex)
                 return -1;
             word = words.getValueAt(u);
         }
@@ -573,7 +563,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
             if (word != 0)
                 // Use Long's numberOfTrailingZeros to quickly find the next clear bit in the current word
                 return Math.toIntExact((u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word));
-            if (++u == getWordsInUse()) // If no more words are left, return the total length
+            if (++u == getWordsInUse())
                 // TODO Overflows to MIN_VALUE
                 return (int) (getWordsInUse() * BITS_PER_WORD);
             word = ~words.getValueAt(u);
@@ -611,7 +601,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
             if (word != 0)
                 // Utilize Long's numberOfLeadingZeros to swiftly identify the previous set bit in the current word
                 return Math.toIntExact((u + 1) * BITS_PER_WORD - 1 - Long.numberOfLeadingZeros(word));
-            if (u-- == 0) // Continue the search in the previous word
+            if (u-- == 0)
                 return -1;
             word = words.getValueAt(u);
         }
@@ -648,7 +638,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
             if (word != 0)
                 // Utilize Long's numberOfLeadingZeros to swiftly identify the previous clear bit in the current word
                 return Math.toIntExact((u + 1) * BITS_PER_WORD - 1 - Long.numberOfLeadingZeros(word));
-            if (u-- == 0) // Continue the search in the previous word
+            if (u-- == 0)
                 return -1;
             word = ~words.getValueAt(u);
         }
