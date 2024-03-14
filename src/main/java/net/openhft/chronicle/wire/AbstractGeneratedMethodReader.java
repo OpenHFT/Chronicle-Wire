@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.utils.MethodReaderStatus;
 import org.jetbrains.annotations.NotNull;
@@ -278,9 +279,17 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         return false;
     }
 
-    public void throwExceptionIfClosed() {
+    /**
+     * Checks if the method reader instance has been closed and throws a {@link ClosedIllegalStateException} if it is.
+     * This method is intended to guard against operations on a closed instance, ensuring that no further
+     * operations can be performed once the instance has been closed. This is particularly useful for
+     * methods that modify the state of the instance or rely on its open state to function correctly.
+     *
+     * @throws ClosedIllegalStateException if this instance has already been closed.
+     */
+    public void throwExceptionIfClosed() throws ClosedIllegalStateException{
         if (isClosed())
-            throw new IllegalStateException("Closed");
+            throw new ClosedIllegalStateException("Closed");
     }
 
     @Override
