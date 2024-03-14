@@ -189,7 +189,11 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         Bytes<?> bytes = wire.bytes();
         if (bytes.peekUnsignedByte() == BinaryWireCode.BYTES_MARSHALLABLE) {
             bytes.readSkip(1);
-            readMarshallable(bytes);
+            if (bytes.canReadDirect(MAX_LENGTH)) {
+                readMarshallableDirect(bytes);
+            } else {
+                readMarshallable0(bytes);
+            }
         } else {
             sources = 0;
             wire.read("sources").sequence(this, VanillaMessageHistory::acceptSourcesRead);
