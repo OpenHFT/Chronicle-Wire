@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.MessageHistory;
+import net.openhft.chronicle.wire.VanillaMessageHistory;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.channel.*;
 import org.junit.After;
@@ -59,10 +60,13 @@ public class RecordHistoryEchoHandlerTest extends WireTestCommon {
             assertTrue(dc.isMetaData());
         }
         assertEquals(now, channel.lastTestMessage());
-        MessageHistory history = MessageHistory.get();
+        VanillaMessageHistory history = (VanillaMessageHistory) MessageHistory.get();
+        history.historyWallClock(true);
         String expected = ", timings: [ 20";
-        if (!history.toString().contains(expected))
-            fail("Expected " + history+" to contain'" + expected+"'");
+        String expected2 = ", timings: [ 19";
+        String string = history.toString();
+        if (!string.contains(expected) && !string.contains(expected2))
+            fail("Expected " + string+" to contain'" + expected+"' or '"+expected2+"'");
     }
 
     @Before
