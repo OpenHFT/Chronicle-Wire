@@ -35,6 +35,11 @@ import java.util.function.LongSupplier;
 
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
+/**
+ * This is the Reductions utility class.
+ * It provides static methods to create various types of Reductions, offering functionalities
+ * related to longs, doubles, and counting excerpts.
+ */
 public final class Reductions {
 
     // Suppresses default constructor, ensuring non-instantiability.
@@ -122,9 +127,11 @@ public final class Reductions {
      */
     public static final class Counting extends SelfDescribingMarshallable implements Reduction<LongSupplier> {
 
+        // An atomic field updater to provide thread-safe updates to the counter
         private static final AtomicLongFieldUpdater<Counting> UPDATER =
                 AtomicLongFieldUpdater.newUpdater(Counting.class, "counter");
 
+        // A volatile counter to ensure atomic read/write operations across multiple threads
         private volatile long counter;
 
         @Override
@@ -152,5 +159,4 @@ public final class Reductions {
             return Long.hashCode(counter);
         }
     }
-
 }

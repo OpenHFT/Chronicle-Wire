@@ -25,16 +25,20 @@ import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
+// Test class focusing on the functionality of elastic byte buffers with wire operations.
 public class ElasticByteBufferTest extends WireTestCommon {
 
     @Test
     public void testElasticByteBufferWithWire() {
 
+        // Initialize an elastic byte buffer with initial size of 10.
         Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer(10);
 
+        // Use binary wire type with padding enabled.
         Wire wire = WireType.BINARY.apply(byteBufferBytes);
         wire.usePadding(true);
 
+        // Write a key-value pair into the wire document.
         try (DocumentContext documentContext = wire.writingDocument(false)) {
             documentContext.wire().write("some key").text("some value of more than ten characters");
         }
@@ -45,6 +49,7 @@ public class ElasticByteBufferTest extends WireTestCommon {
             stringBuilder.append((char) byteBuffer.get());
         }
 
+        // Assert that the text was written correctly.
         @NotNull String s = stringBuilder.toString();
         Assert.assertTrue(s.contains("some value of more than ten characters"));
 

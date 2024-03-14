@@ -17,7 +17,12 @@
  */
 package net.openhft.chronicle.wire;
 
+/**
+ * Enumeration representing fields from the FIX 4.2 protocol.
+ * Each constant is associated with a specific tag number used in FIX 4.2 messages.
+ */
 public enum FIX42 implements WireKey {
+    // Definition of fields with their corresponding tag numbers
     Account(1),
     AdvId(2),
     AdvRefID(3),
@@ -424,12 +429,23 @@ public enum FIX42 implements WireKey {
     EncodedListStatusTextLen(445),
     EncodedListStatusText(446);
 
+    // Instance variable to hold the tag number for each constant
     private final int code;
 
+    /**
+     * Constructor to initialize each constant with its respective tag number.
+     *
+     * @param code the tag number associated with the FIX 4.2 field
+     */
     FIX42(int code) {
         this.code = code;
     }
 
+    /**
+     * Retrieve the tag number associated with the FIX 4.2 field.
+     *
+     * @return the tag number
+     */
     @Override
     public int code() {
         return code;

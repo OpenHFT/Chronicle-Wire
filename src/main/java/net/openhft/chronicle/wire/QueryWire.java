@@ -39,13 +39,25 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 /**
- * This wire decodes URL query strings.
+ * This class represents a wire format designed to decode URL query strings.
+ * It extends the TextWire class and provides custom implementations for reading fields and consuming padding
+ * in the context of URL query strings. Specialized value input and output handlers, namely {@code QueryValueIn}
+ * and {@code QueryValueOut}, are used to manage the specific intricacies of the query string format.
  */
 @SuppressWarnings("rawtypes")
 public class QueryWire extends TextWire {
+
+    // The specialized output handler for query string values.
     final QueryValueOut valueOut = new QueryValueOut();
+
+    // The specialized input handler for query string values.
     final QueryValueIn valueIn = new QueryValueIn();
 
+    /**
+     * Constructs a new instance of {@code QueryWire} using the provided bytes.
+     *
+     * @param bytes The bytes that represent the query string to be processed.
+     */
     public QueryWire(@NotNull Bytes<?> bytes) {
         super(bytes);
     }
@@ -123,6 +135,11 @@ public class QueryWire extends TextWire {
         return this;
     }
 
+    /**
+     * Reads an unsigned byte at the current position minus one.
+     *
+     * @return The unsigned byte value at the position one byte before the current read position.
+     */
     int rewindAndRead() {
         return bytes.readUnsignedByte(bytes.readPosition() - 1);
     }
@@ -150,13 +167,29 @@ public class QueryWire extends TextWire {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * An enumeration defining testers for stopping characters when parsing fields and values
+     * in the context of URL query strings.
+     */
     enum QueryStopCharTesters implements StopCharTester {
+
+        /**
+         * Tester for identifying stopping characters when parsing a field name in a query string.
+         * The method returns true if the character represents an '&' (delimiter) or '=' (assignment)
+         * or if the character is a negative value (end of input).
+         */
         QUERY_FIELD_NAME {
             @Override
             public boolean isStopChar(int ch) throws IllegalStateException {
                 return ch == '&' || ch == '=' || ch < 0;
             }
         },
+
+        /**
+         * Tester for identifying stopping characters when parsing a value in a query string.
+         * The method returns true if the character represents an '&' (delimiter)
+         * or if the character is a negative value (end of input).
+         */
         QUERY_VALUE {
             @Override
             public boolean isStopChar(int ch) throws IllegalStateException {
@@ -165,9 +198,18 @@ public class QueryWire extends TextWire {
         }
     }
 
+    /**
+     * Represents an output handler specialized for writing values in the context of URL query strings.
+     * This class extends the {@code YamlValueOut} and provides custom implementations for
+     * appending values to the wire with appropriate separators and field assignments.
+     */
     class QueryValueOut extends YamlValueOut {
+
+        // The separator to prepend before writing the next value.
         @NotNull
         String sep = "";
+
+        // The field name to prepend before writing the next value.
         @Nullable
         CharSequence fieldName = null;
 
@@ -390,6 +432,11 @@ public class QueryWire extends TextWire {
         }
     }
 
+    /**
+     * Represents an input handler specialized for reading values in the context of URL query strings.
+     * This class extends the {@code TextValueIn} and provides custom implementations for
+     * extracting text values from the wire with appropriate handling of separators and encodings.
+     */
     class QueryValueIn extends TextValueIn {
         @Override
         public String text() {

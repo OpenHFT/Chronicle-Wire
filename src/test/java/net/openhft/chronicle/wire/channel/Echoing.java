@@ -21,7 +21,10 @@ package net.openhft.chronicle.wire.channel;
 import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.wire.channel.echo.DummyData;
 
+// Define the `Echoing` interface, acting as a contract for initial data echoing.
 interface Echoing {
+    // Define a method that will handle echoing a `DummyData` object.
+    // The method will be identifiable with the method ID 'e'.
     @MethodId('e')
     void echo(DummyData data);
 }

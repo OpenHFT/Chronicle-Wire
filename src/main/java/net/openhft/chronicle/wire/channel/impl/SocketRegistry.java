@@ -34,20 +34,47 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 // TODO This is a simplified net.openhft.chronicle.network.TCPRegistry to cover the use cases tested
+/**
+ * This is the SocketRegistry class.
+ * It provides a simplified representation of the net.openhft.chronicle.network.TCPRegistry, designed specifically for the tested use cases.
+ * The primary functions of this class are to manage and provide server and client socket channels based on the given inputs.
+ * It also maintains a collection of all opened closeable resources, ensuring they are closed properly upon shutting down the registry.
+ */
 public class SocketRegistry extends AbstractCloseable {
+
+    // Mapping from a description to the corresponding server socket channel
     private final Map<String, ServerSocketChannel> descToServerSocketChannelMap = new ConcurrentSkipListMap<>();
+
+    // A set of closeable resources, maintained to ensure proper cleanup
     private final Set<Closeable> closeableSet =
             Collections.synchronizedSet(
                     Collections.newSetFromMap(
                             new WeakIdentityHashMap<>()));
-    // not thread safe but it doesn't matter
+
+    // Not thread-safe but deemed acceptable for the current use case
     int lastHost = 0;
 
+    /**
+     * Acquires a server socket channel using the provided URL.
+     *
+     * @param url The URL containing the hostname and port details.
+     * @return An opened {@link ServerSocketChannel}.
+     * @throws IOException If there's an error while opening the server socket channel.
+     */
     public ServerSocketChannel acquireServerSocketChannel(URL url) throws IOException {
         return acquireServerSocketChannel(url.getHost(), url.getPort());
     }
 
+    /**
+     * Acquires or reuses an existing server socket channel based on the provided hostname and port.
+     *
+     * @param hostname The hostname for the server socket channel.
+     * @param port The port for the server socket channel.
+     * @return An opened {@link ServerSocketChannel}.
+     * @throws IOException If there's an error while opening the server socket channel.
+     */
     private synchronized ServerSocketChannel acquireServerSocketChannel(String hostname, int port) throws IOException {
+        // Generate the description
         String description = hostname == null || hostname.isEmpty()
                 ? "port" + port
                 : port > 0
@@ -63,7 +90,17 @@ public class SocketRegistry extends AbstractCloseable {
         return ssc;
     }
 
+    /**
+     * Creates and opens a client socket channel based on the provided hostname and port.
+     * If the hostname contains multiple comma-separated entries, it rotates between them.
+     *
+     * @param hostname The hostname for the client socket channel.
+     * @param port The port for the client socket channel.
+     * @return An opened {@link SocketChannel}.
+     * @throws IOException If there's an error while opening the socket channel.
+     */
     public synchronized SocketChannel createSocketChannel(String hostname, int port) throws IOException {
+        // Handle multiple hostnames scenario
         if (hostname.contains(",")) {
             String[] hostnames = hostname.split(",");
             int lastHost = this.lastHost;
@@ -77,6 +114,11 @@ public class SocketRegistry extends AbstractCloseable {
         return open;
     }
 
+    /**
+     * Adds a closeable resource to the registry's collection for tracking and proper cleanup.
+     *
+     * @param closeable The closeable resource to be tracked.
+     */
     private void addCloseable(Closeable closeable) {
         closeableSet.add(closeable);
     }

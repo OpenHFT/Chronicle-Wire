@@ -45,4 +45,3 @@ public class HexadecimalLongConverter extends AbstractLongConverter {
         super(CHARS);
     }
 }
-

@@ -19,7 +19,21 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 
+/**
+ * Represents a functional interface that can process wire input based on a given
+ * character sequence key and a value input. The `WireParselet` can be seen as a
+ * specific action or handler for a particular key found in the wire input.
+ */
 @FunctionalInterface
 public interface WireParselet {
+
+    /**
+     * Consumes and processes a wire input based on a given character sequence
+     * and a value input.
+     *
+     * @param s The character sequence (usually representing a key) from the wire input.
+     * @param in The value associated with the key in the wire input.
+     * @throws InvalidMarshallableException If there's an issue with processing the data.
+     */
     void accept(CharSequence s, ValueIn in) throws InvalidMarshallableException;
 }

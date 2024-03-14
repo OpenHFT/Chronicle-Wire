@@ -20,6 +20,10 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 
+/**
+ * This is the {@code MessageHistory} interface, which extends {@link Marshallable}.
+ * It provides functionalities related to managing the history of messages.
+ */
 public interface MessageHistory extends Marshallable {
 
     /**

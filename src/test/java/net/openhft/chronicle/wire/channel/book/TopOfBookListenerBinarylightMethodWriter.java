@@ -27,27 +27,63 @@ import net.openhft.chronicle.wire.WriteDocumentContext;
 
 import java.util.function.Supplier;
 
+/**
+ * Implementation of the {@link net.openhft.chronicle.wire.channel.book.TopOfBookListener}
+ * interface which writes method calls as binary messages using Chronicle Wire's binary light
+ * wire format.
+ * This class also implements {@link MethodWriter} to facilitate the generation and writing
+ * of method calls into binary messages.
+ */
 public final class TopOfBookListenerBinarylightMethodWriter implements net.openhft.chronicle.wire.channel.book.TopOfBookListener, MethodWriter {
 
-    // result
+    // A closeable resource related to this method writer instance.
     private transient final Closeable closeable;
+    // Output sink for marshallable data.
     private transient MarshallableOut out;
 
-    // constructor
+    /**
+     * Constructor for initializing the method writer with output,
+     * closeable resource, and an optional update interceptor.
+     *
+     * @param out               A supplier providing the output object for marshallable data.
+     * @param closeable         A closeable resource associated with this method writer.
+     * @param updateInterceptor An interceptor for updates (Not used in this implementation,
+     *                          included in case of future use).
+     */
     public TopOfBookListenerBinarylightMethodWriter(Supplier<MarshallableOut> out, Closeable closeable, UpdateInterceptor updateInterceptor) {
+        // Assign the output source and the closeable resource.
         this.out = out.get();
         this.closeable = closeable;
     }
 
+    /**
+     * Set the {@link MarshallableOut} instance which is the destination for the written data.
+     *
+     * @param out The {@link MarshallableOut} instance.
+     */
     @Override
     public void marshallableOut(MarshallableOut out) {
         this.out = out;
     }
 
+    /**
+     * Writes the 'topOfBook' method call data to the output as a binary message.
+     * Uses a method ID (116) for optimized message identification.
+     *
+     * @param topOfBook The {@link net.openhft.chronicle.wire.channel.book.TopOfBook}
+     *                  instance to be written to the output.
+     */
     @MethodId(116)
     public void topOfBook(final net.openhft.chronicle.wire.channel.book.TopOfBook topOfBook) {
+        // Get the current output source.
         MarshallableOut out = this.out;
-        try (final WriteDocumentContext dc = (WriteDocumentContext) out.acquireWritingDocument(false)) {
+        try (
+            // Acquire a context for writing the document to the wire,
+            // utilizing Chronicle Wire’s ability to handle the underlying bytes.
+            final WriteDocumentContext dc = (WriteDocumentContext) out.acquireWritingDocument(false)
+        ) {
+            // Write the method name ("topOfBook") and its associated ID (116) to the wire,
+            // followed by the marshallable 'topOfBook' data.
             dc.wire()
                     .writeEventId("topOfBook", 116)
                     .marshallable(topOfBook);

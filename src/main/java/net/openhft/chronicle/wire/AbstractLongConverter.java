@@ -28,13 +28,12 @@ import net.openhft.chronicle.bytes.Bytes;
  */
 public abstract class AbstractLongConverter implements LongConverter {
 
-    /**
-     * Encapsulated instance of {@link LongConverter} that provides core conversion logic.
-     */
+    // Encapsulated instance of LongConverter that provides core conversion functionality.
     protected final LongConverter converter;
 
     /**
      * Constructs an {@code AbstractLongConverter} using a given set of characters.
+     * Internally, it uses the LongConverter's forSymbols method to create an instance of LongConverter with the provided characters.
      *
      * @param chars set of characters to use for conversion.
      */
@@ -44,6 +43,7 @@ public abstract class AbstractLongConverter implements LongConverter {
 
     /**
      * Constructs an {@code AbstractLongConverter} with a specified converter.
+     * This constructor allows subclasses to provide a custom implementation of LongConverter.
      *
      * @param converter the underlying {@link LongConverter} to be used for conversions.
      */

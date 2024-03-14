@@ -17,10 +17,16 @@
  */
 package net.openhft.chronicle.wire;
 
+/**
+ * The {@code MethodWriterWithContext} interface extends both {@code DocumentWritten} and {@code MethodWriter}.
+ * Implementations of this interface provide functionality to write methods with an added context.
+ * This interface specifically offers a capability to ascertain if the history of the message is expected to be recorded.
+ */
 public interface MethodWriterWithContext extends DocumentWritten, MethodWriter {
     /**
-     * @return true if this output is configured to expect the history of the message to be written
-     * to.
+     * Determines whether the output is set up to record the history of the message it writes.
+     *
+     * @return {@code true} if the output expects the message's history to be written; {@code false} otherwise.
      */
     boolean recordHistory();
 }

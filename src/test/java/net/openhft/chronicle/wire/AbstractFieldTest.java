@@ -31,12 +31,15 @@ import static org.junit.Assert.assertEquals;
 @RunWith(value = Parameterized.class)
 public class AbstractFieldTest extends WireTestCommon {
 
+    // The specific WireType configuration to be used for each test.
     private final WireType wireType;
 
+    // Constructor that sets the wireType for this test iteration.
     public AbstractFieldTest(WireType wireType) {
         this.wireType = wireType;
     }
 
+    // Provide a collection of WireTypes for parameterized testing.
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
@@ -49,6 +52,7 @@ public class AbstractFieldTest extends WireTestCommon {
         );
     }
 
+    // Test serialization and deserialization of the abstract field in MSDMHolder class.
     @Test
     public void abstractField() {
         MSDMHolder holder = new MSDMHolder();
@@ -61,6 +65,7 @@ public class AbstractFieldTest extends WireTestCommon {
         assertEquals(holder, result);
     }
 
+    // Test serialization and deserialization of the abstract field in MSDMHolder2 class.
     @Test
     public void abstractField2() {
         MSDMHolder2 holder = new MSDMHolder2();
@@ -73,14 +78,17 @@ public class AbstractFieldTest extends WireTestCommon {
         assertEquals(holder, result);
     }
 
+    // Holder class to test serialization and deserialization with an abstract field.
     static class MSDMHolder extends SelfDescribingMarshallable {
         SelfDescribingMarshallable marshallable;
     }
 
+    // Second holder class to test serialization and deserialization with a specific MySelfDescribingMarshallable field.
     static class MSDMHolder2 extends SelfDescribingMarshallable {
         MySelfDescribingMarshallable marshallable;
     }
 
+    // Custom Marshallable class for testing purposes.
     static class MySelfDescribingMarshallable extends SelfDescribingMarshallable {
         String text;
 

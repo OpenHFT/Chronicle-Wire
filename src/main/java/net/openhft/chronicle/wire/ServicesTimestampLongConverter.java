@@ -28,22 +28,34 @@ import java.util.function.ToLongFunction;
 
 import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
 /**
- * Implementation of {@link LongConverter} for converting timestamps that represent service times.
- * This class allows for system-wide time unit configuration using a system property: 'service.time.unit'.
- * The supported time units are nanoseconds (ns), microseconds (us), and milliseconds (ms). If the system property
- * is not set, it defaults to nanoseconds.
+ * This is the ServicesTimestampLongConverter class implementing the {@link LongConverter} interface.
+ * The class is specifically designed to convert timestamps representing service times across different
+ * units: nanoseconds (ns), microseconds (us), and milliseconds (ms). The preferred time unit can be
+ * specified system-wide using the 'service.time.unit' system property. If not explicitly set, the default
+ * unit will be nanoseconds.
  */
 public class ServicesTimestampLongConverter implements LongConverter {
-    // The single instance of this class, accessible via reflection.
+
+    // A singleton instance of this class, primarily for access via reflection.
     @UsedViaReflection
     public static final ServicesTimestampLongConverter INSTANCE = new ServicesTimestampLongConverter();
 
+    // System property to fetch the desired time unit for the service timestamp.
     private static final String SERVICES_TIME_UNIT = System.getProperty("service.time.unit", "ns");
+
+    // Functional interface to convert the time.
     private static final longFunction toTime;
+
+    // Functional interface to fetch the current time.
     private static final ToLongFunction<TimeProvider> currentTime;
+
+    // The underlying LongConverter based on the specified or default time unit.
     private static final LongConverter underlying;
+
+    // The TimeUnit representing the time unit in use.
     private static final TimeUnit timeUnit;
 
+    // Static block to initialize the functions and time unit converters.
     static {
         switch (SERVICES_TIME_UNIT) {
             case "ms":
@@ -70,21 +82,38 @@ public class ServicesTimestampLongConverter implements LongConverter {
 
     /**
      * Converts the given long value to the configured time unit.
+     *
      * @param arg The long value to convert.
-     * @return The converted long value.
+     * @return The converted long value based on the system-configured time unit.
      */
     public static long toTime(long arg) {
         return toTime.apply(arg);
     }
 
+    /**
+     * Fetches the current time in the system-configured time unit using the default CLOCK.
+     *
+     * @return The current time in the system-configured time unit.
+     */
     public static long currentTime() {
         return currentTime(CLOCK);
     }
 
+    /**
+     * Fetches the current time in the system-configured time unit using the provided TimeProvider.
+     *
+     * @param clock The TimeProvider to fetch the current time.
+     * @return The current time in the system-configured time unit.
+     */
     public static long currentTime(TimeProvider clock) {
         return currentTime.applyAsLong(clock);
     }
 
+    /**
+     * Returns the current system-configured time unit.
+     *
+     * @return The time unit as an instance of {@link TimeUnit}.
+     */
     public static TimeUnit timeUnit() {
         return timeUnit;
     }
@@ -113,9 +142,10 @@ public class ServicesTimestampLongConverter implements LongConverter {
     }
 
     /**
-     * Appends a representation of the provided long timestamp (in the configured time unit) to the provided {@link StringBuilder}.
-     * @param text The StringBuilder to append to.
-     * @param value The timestamp as a long value in the configured time unit.
+     * Appends a representation of the provided long timestamp (in the system-configured time unit) to the provided {@link StringBuilder}.
+     *
+     * @param text  The StringBuilder to which the timestamp representation will be appended.
+     * @param value The timestamp as a long value in the system-configured time unit.
      */
     @Override
     public void append(StringBuilder text, long value) {
@@ -123,9 +153,10 @@ public class ServicesTimestampLongConverter implements LongConverter {
     }
 
     /**
-     * Appends a representation of the provided long timestamp (in the configured time unit) to the provided {@link Bytes}.
-     * @param bytes The Bytes to append to.
-     * @param value The timestamp as a long value in the configured time unit.
+     * Appends a representation of the provided long timestamp (in the system-configured time unit) to the provided {@link Bytes}.
+     *
+     * @param bytes The Bytes object to which the timestamp representation will be appended.
+     * @param value The timestamp as a long value in the system-configured time unit.
      */
     @Override
     public void append(Bytes<?> bytes, long value) {
@@ -133,7 +164,9 @@ public class ServicesTimestampLongConverter implements LongConverter {
     }
 
     /**
-     * Functional interface for long conversion operations.
+     * This is the longFunction interface. It's a functional interface designed to perform operations
+     * on long values and return a long result. It is used internally in ServicesTimestampLongConverter
+     * to abstract the conversion logic based on the system-configured time unit.
      */
     interface longFunction {
         long apply(long value);

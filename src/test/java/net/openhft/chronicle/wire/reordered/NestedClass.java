@@ -23,6 +23,10 @@ import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Class representing a nested structure for testing serialization and deserialization in Chronicle Wire.
+ * It demonstrates custom read and write logic for marshalling, handling nested objects and different data types.
+ */
 public class NestedClass implements Marshallable {
     String text;
     String text2;
@@ -31,6 +35,13 @@ public class NestedClass implements Marshallable {
     double number4; // out of order
     NestedClass doublyNested;
 
+    /**
+     * Custom read logic for marshalling from Wire. It specifies how each field of the class
+     * is read from the wire in a defined order and format.
+     *
+     * @param wire The WireIn instance to read the data from.
+     * @throws IORuntimeException If an IO error occurs during reading.
+     */
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
         wire.read(() -> "text").text(this, (t, v) -> t.text = v)
@@ -41,6 +52,12 @@ public class NestedClass implements Marshallable {
                 .read(() -> "number4").float64(this, (t, v) -> t.number4 = v);
     }
 
+    /**
+     * Custom write logic for marshalling to Wire. It specifies how each field of the class
+     * is written to the wire in a defined order and format. Note that it includes fields not present in the read logic.
+     *
+     * @param wire The WireOut instance to write the data to.
+     */
     @Override
     public void writeMarshallable(@NotNull WireOut wire) {
         // write version has 2 extra fields but is missing two fields
@@ -52,6 +69,13 @@ public class NestedClass implements Marshallable {
                 .write(() -> "number3").float64(333.3);
     }
 
+    /**
+     * Sets the text and number fields and calculates number4.
+     *
+     * @param text   The text to set.
+     * @param number The number to set.
+     * @return This NestedClass instance for method chaining.
+     */
     public NestedClass setTextNumber(String text, double number) {
         this.text = text;
         this.number = number;
@@ -59,10 +83,21 @@ public class NestedClass implements Marshallable {
         return this;
     }
 
+    /**
+     * Creates and nests a new NestedClass instance with the given text and number.
+     *
+     * @param text   The text for the nested instance.
+     * @param number The number for the nested instance.
+     */
     public void nest(String text, double number) {
         this.doublyNested = new NestedClass().setTextNumber(text, number);
     }
 
+    /**
+     * Provides a string representation of this class, including all its fields.
+     *
+     * @return String representation of this class.
+     */
     @NotNull
     @Override
     public String toString() {

@@ -27,36 +27,40 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+// Test class for testing JSON wire DTO functionalities.
 public class JSONWireDTOTest extends WireTestCommon {
+
+    // Test to verify serialization and deserialization of DTO using JSONWire.
     @Test
     public void dto() {
         expectException("Found this$0, in class");
-        // underlying bytes
+
+        // Allocate bytes for storing the serialized DTO.
         Bytes<?> bytes = Bytes.allocateElasticDirect();
 
-        // Use the JSON serialization
+        // Instantiate JSONWire for serialization and deserialization.
         JSONWire wire = new JSONWire(bytes);
 
-        // test object
+        // Create a test object.
         JSOuterClass dto = new JSOuterClass();
         dto.text = "hi";
         dto.d = 3.1415;
         dto.nested.add(new JSNestedClass("there", 1));
 
-        // write the DTO to the JSONWire
+        // Serialize the DTO object to JSON format.
         wire.getValueOut().marshallable(dto);
 
-        // check the bytes
+        // Check the serialized output.
         assertEquals("{\"text\":\"hi\",\"nested\":[ {\"str\":\"there\",\"num\":1} ],\"b\":false,\"bb\":0,\"s\":0,\"f\":0.0,\"d\":3.1415,\"l\":0,\"i\":0}",
                 bytes.toString());
 
-        // create another instance to deserialize into
+        // Create another DTO instance for deserialization.
         JSOuterClass dto2 = new JSOuterClass();
 
-        // read the data.
+        // Deserialize the JSON data into DTO object.
         wire.getValueIn().marshallable(dto2);
 
-        // dump using YAML
+        // Check the deserialized object's string representation.
         assertEquals("!net.openhft.chronicle.wire.JSONWireDTOTest$JSOuterClass {\n" +
                 "  text: hi,\n" +
                 "  nested: [\n" +
@@ -70,9 +74,12 @@ public class JSONWireDTOTest extends WireTestCommon {
                 "  l: 0,\n" +
                 "  i: 0\n" +
                 "}\n", dto2.toString());
+
+        // Release the allocated bytes.
         bytes.releaseLast();
     }
 
+    // Class representing the outer structure of the DTO.
     static class JSOuterClass extends SelfDescribingMarshallable {
         String text;
         @NotNull
@@ -85,14 +92,17 @@ public class JSONWireDTOTest extends WireTestCommon {
         long l;
         int i;
 
+        // Default constructor.
         JSOuterClass() {
         }
     }
 
+    // Nested class representing a part of the DTO.
     class JSNestedClass extends SelfDescribingMarshallable {
         String str;
         int num;
 
+        // Constructor to initialize the nested class.
         public JSNestedClass(String str, int num) {
             this.str = str;
             this.num = num;

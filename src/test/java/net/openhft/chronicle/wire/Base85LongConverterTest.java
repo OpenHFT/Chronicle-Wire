@@ -30,6 +30,7 @@ import static org.junit.Assert.assertThrows;
 
 public class Base85LongConverterTest extends WireTestCommon {
 
+    // A sample string to test the parsing functionality.
     private static final CharSequence TEST_STRING = "world";
 
     @Test
@@ -51,10 +52,14 @@ public class Base85LongConverterTest extends WireTestCommon {
 
     @Test
     public void parse() {
+        // Obtain the singleton instance of Base85LongConverter
         LongConverter c = Base85LongConverter.INSTANCE;
         // System.out.println(c.asString(-1L));
+        // Iterate through predefined strings, validate parsing and string reconstruction
         for (String s : ",a,ab,abc,abcd,ab.de,123=56,1234567,12345678,zzzzzzzzz,+ko2&)z.0".split(",")) {
+            // Parse the string into a long value
             long v = c.parse(s);
+            // Convert the parsed long value back into a string and validate against the original string
             StringBuilder sb = new StringBuilder();
             c.append(sb, v);
             assertEquals(s, sb.toString());
@@ -81,6 +86,7 @@ public class Base85LongConverterTest extends WireTestCommon {
 
     @Test
     public void asString() {
+        // Obtain the singleton instance of Base85LongConverter
         LongConverter c = Base85LongConverter.INSTANCE;
         IntStream.range(0, 10_000_000)
                 .parallel()
@@ -91,55 +97,83 @@ public class Base85LongConverterTest extends WireTestCommon {
                 });
     }
 
+    // Validate the append operation for a known input string
     @Test
     public void testAppend() {
+        // Create an elastic byte buffer
         final Bytes<?> b = Bytes.elasticByteBuffer();
         try {
+            // Obtain the singleton instance of Base85LongConverter
             final Base85LongConverter idLongConverter = Base85LongConverter.INSTANCE;
+            // Parse the TEST_STRING into a long value
             final long helloWorld = idLongConverter.parse(TEST_STRING);
+            // Append the parsed value back into a byte buffer
             idLongConverter.append(b, helloWorld);
+            // Validate the byte buffer content against the TEST_STRING
             assertEquals(TEST_STRING, b.toString());
         } finally {
+            // Release the allocated buffer
             b.releaseLast();
         }
     }
 
+    // Validate appending data with pre-existing content in the buffer
     @Test
     public void testAppendWithExistingData() {
+        // Create an elastic byte buffer and append "hello" to it
         final Bytes<?> b = Bytes.elasticByteBuffer().append("hello");
         try {
+            // Obtain the singleton instance of Base85LongConverter
             final Base85LongConverter idLongConverter = Base85LongConverter.INSTANCE;
+            // Parse the TEST_STRING into a long value
             final long helloWorld = idLongConverter.parse(TEST_STRING);
+            // Append the parsed value to the already partially filled byte buffer
             idLongConverter.append(b, helloWorld);
+            // Validate the byte buffer content against the concatenated string "hello" + TEST_STRING
             assertEquals("hello" + TEST_STRING, b.toString());
         } finally {
+            // Release the allocated buffer
             b.releaseLast();
         }
     }
 
+    // Ensure safe character conversion using TextWire
     @Test
     public void allSafeCharsTextWire() {
+        // Create a TextWire instance with elastic on heap bytes and configure it to use text documents
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
+        // Execute the generic safe character check
         allSafeChars(wire);
     }
 
+    // Ensure safe character conversion using YamlWire
     @Test
     public void allSafeCharsYamlWire() {
+        // Create a YamlWire instance with elastic on heap bytes and configure it to use text documents
         Wire wire = new YamlWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
+        // Execute the generic safe character check
         allSafeChars(wire);
     }
 
+    // Validate all safe characters within the provided Wire instance
     private void allSafeChars(Wire wire) {
+        // Obtain the singleton instance of Base85LongConverter
         final Base85LongConverter converter = Base85LongConverter.INSTANCE;
+        // Iterate through long numbers, validating their conversion and sequencing in the Wire
         for (long i = 0; i <= 85 * 85; i++) {
+            // Clear the wire data
             wire.clear();
+            // Write the long number i into the wire with a tag "a" using the converter
             wire.write("a").writeLong(converter, i);
+            // Write a sequence of the same number tagged as "b"
             wire.write("b").sequence(i, (i2, v) -> {
                 v.writeLong(converter, i2);
                 v.writeLong(converter, i2);
             });
+            // Validate that the wire representation is accurate
             assertEquals(wire.toString(),
                     i, wire.read("a").readLong(converter));
+            // Check the sequence integrity and correctness in the wire
             wire.read("b").sequence(i, (i2, v) -> {
                 assertEquals((long) i2, v.readLong(converter));
                 assertEquals((long) i2, v.readLong(converter));

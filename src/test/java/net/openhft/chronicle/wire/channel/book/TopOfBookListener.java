@@ -20,7 +20,16 @@ package net.openhft.chronicle.wire.channel.book;
 
 import net.openhft.chronicle.bytes.MethodId;
 
+/**
+ * A listener interface defining contract for receiving top of book updates.
+ */
 public interface TopOfBookListener {
+
+    /**
+     * Method to receive a top-of-book update.
+     *
+     * @param topOfBook The updated top of book object. This contains the latest market data related to the top of book.
+     */
     @MethodId('t')
     void topOfBook(TopOfBook topOfBook);
 }

@@ -21,7 +21,10 @@ package net.openhft.chronicle.wire.channel;
 import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.wire.channel.echo.DummyDataSmall;
 
+// Define the `EchoingSmall` interface, designed to handle echoing of smaller data sets.
 interface EchoingSmall {
+    // Define a method to handle echoing of a `DummyDataSmall` object.
+    // The method will be identifiable with the method ID 'e'.
     @MethodId('e')
     void echo(DummyDataSmall data);
 }

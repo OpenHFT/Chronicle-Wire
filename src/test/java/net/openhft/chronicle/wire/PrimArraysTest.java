@@ -31,19 +31,23 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+// Use the Parameterized runner for JUnit to execute tests with different combinations of parameters
 @RunWith(value = Parameterized.class)
 public class PrimArraysTest extends WireTestCommon {
 
+    // Class variables to hold the parameters
     private final WireType wireType;
     private final Object array;
     private final String asText;
 
+    // Constructor that initializes the class variables
     public PrimArraysTest(WireType wireType, Object array, String asText) {
         this.wireType = wireType;
         this.array = array;
         this.asText = asText;
     }
 
+    // Define the combinations of parameters with which the test method will be executed
     @NotNull
     @Parameterized.Parameters(name = "wt={0}, asText={2}")
     public static Collection<Object[]> combinations() {
@@ -53,6 +57,7 @@ public class PrimArraysTest extends WireTestCommon {
                 WireType.BINARY,
                 WireType.YAML
         }) {
+            // Define array primitives and their textual representations
             @NotNull final Object[] objects = {
                     new boolean[]{true, false},
                     "test: !boolean[] [ true, false ]",
@@ -79,6 +84,7 @@ public class PrimArraysTest extends WireTestCommon {
                     "test: !double[] [ 4.9E-324, -1.0, 0.0, 1.0, 1.7976931348623157E308 ]",
                     "test: !double[] [ ]"
             };
+            // Generate combinations based on the array and its representation
             for (int i = 0; i < objects.length; i += 3) {
                 Object array = objects[i];
                 list.add(new Object[]{wt, array, objects[i + 1]});
@@ -86,29 +92,34 @@ public class PrimArraysTest extends WireTestCommon {
                 list.add(new Object[]{wt, emptyArray, objects[i + 2]});
             }
         }
-        return list;
+        return list;  // Return the combinations
     }
 
+    // The test method that will be executed for each combination of parameters
     @Test
     public void testPrimArray() {
-        Wire wire = createWire();
+        Wire wire = createWire();  // Create a wire instance based on the wireType
         try {
+            // Write the test array to the wire
             wire.write("test")
                     .object(array);
            // System.out.println(wire);
+            // Assert that the textual representation matches when using WireType.TEXT
             if (wireType == WireType.TEXT)
                 assertEquals(asText.trim(), wire.toString().trim());
 
+            // Read the array from the wire and assert it matches the original
             @Nullable Object array2 = wire.read().object();
             assertEquals(array.getClass(), array2.getClass());
             assertEquals(Array.getLength(array), Array.getLength(array));
             for (int i = 0, len = Array.getLength(array); i < len; i++)
                 assertEquals(Array.get(array, i), Array.get(array2, i));
         } finally {
-            wire.bytes().releaseLast();
+            wire.bytes().releaseLast();  // Clean up resources
         }
     }
 
+    // Helper method to create a wire instance
     private Wire createWire() {
         return wireType.apply(Bytes.elasticByteBuffer());
     }

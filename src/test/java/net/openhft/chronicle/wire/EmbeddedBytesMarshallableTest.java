@@ -33,33 +33,47 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
+// Test class focusing on the serialization and deserialization of Marshallables with embedded bytes.
 public class EmbeddedBytesMarshallableTest extends WireTestCommon {
+
+    // Before each test, check the current architecture and skip if it's ARM or Azul Zing.
     @Before
     public void checkArch() {
         assumeFalse(Jvm.isArm() || Jvm.isAzulZing());
     }
 
+    // Test clearing and appending new data to the embedded bytes.
     @Test
     public void testClear() {
+        // Register the alias for the class.
         ClassAliasPool.CLASS_ALIASES.addAlias(EBM.class);
+
+        // Initialize and set the value for embedded bytes.
         EBM e1 = new EBM();
         e1.a.append("a12345678");
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         e1.writeMarshallable(bytes);
 
+        // Deserialize the data, clear and append new values.
         EBM e2 = new EBM();
         e2.readMarshallable(bytes);
         e2.a.clear();
         e2.a.append("b0000000");
 
+        // Ensure the deserialized and modified data is as expected.
         Assert.assertEquals("b0000000", e2.a.toString());
 
+        // Release the bytes.
         bytes.releaseLast();
     }
 
+    // Test serialization and deserialization with certain expected output.
     @Test
     public void ebm() {
+        // Register the alias for the class.
         ClassAliasPool.CLASS_ALIASES.addAlias(EBM.class);
+
+        // Initialize the embedded bytes object and set its values.
         EBM e1 = new EBM();
         e1.number = Base85LongConverter.INSTANCE.parse("Hello!", 0, 5);
         e1.a.append("a12345678901234567890123456789");
@@ -85,8 +99,10 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         bytes.releaseLast();
     }
 
+    // Test potential schema changes and their effect on serialization and deserialization.
     @Test
     public void schemaChanges() {
+        // Register the alias for the classes.
         ClassAliasPool.CLASS_ALIASES.addAlias(EBM1.class, EBM2.class, EBM3.class);
         EBM3 e3 = Marshallable.fromString("!EBM3 {\n" +
                 "  l0: 80,\n" +
@@ -165,6 +181,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         bytes.releaseLast();
     }
 
+    // Test deserialization with no data. Expected to throw a DecoratedBufferUnderflowException.
     @Test(expected = DecoratedBufferUnderflowException.class)
     public void noData() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
@@ -172,6 +189,8 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         ebm.readMarshallable(bytes);
     }
 
+    // Test deserialization with invalid description (even bit count = 0).
+    // Expected to throw an IllegalStateException.
     @Test(expected = IllegalStateException.class)
     public void invalidDescription() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
@@ -180,6 +199,8 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         ebm.readMarshallable(bytes);
     }
 
+    // Test deserialization with another invalid description scenario where it tries to read more data than available.
+    // Expected to throw an IllegalStateException.
     @Test(expected = IllegalStateException.class)
     public void invalidDescription2() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
@@ -189,6 +210,8 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         ebm.readMarshallable(bytes);
     }
 
+    // Test deserialization with yet another invalid description, characterized by both an even bit count
+    // and an attempt to read more data than available. Expected to throw an IllegalStateException.
     @Test(expected = IllegalStateException.class)
     public void invalidDescription3() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
@@ -198,6 +221,8 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         ebm.readMarshallable(bytes);
     }
 
+    // Test deserialization with an even bit count description.
+    // Expected to throw an IllegalStateException.
     @Test(expected = IllegalStateException.class)
     public void invalidDescription4() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
@@ -207,6 +232,8 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         ebm.readMarshallable(bytes);
     }
 
+    // A class representing a Marshallable object with fields grouped into embedded Bytes.
+    // This class extends SelfDescribingTriviallyCopyable, indicating that it can describe its own serialization format.
     static class EBM extends SelfDescribingTriviallyCopyable {
         static final int DESCRIPTION = BytesFieldInfo.lookup(EBM.class).description();
         static final int LENGTH, START;
@@ -229,6 +256,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         Bytes<?> b = Bytes.forFieldGroup(this, "b");
         Bytes<?> c = Bytes.forFieldGroup(this, "c");
 
+        // Required overrides for the SelfDescribingTriviallyCopyable class to describe its serialization format.
         @Override
         protected int $description() {
             return DESCRIPTION;
@@ -245,93 +273,121 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         }
     }
 
+    // EBM1 class represents a marshallable object with fields of various data types.
+    // It extends the SelfDescribingTriviallyCopyable class, indicating its self-descriptive serialization capability.
     static class EBM1 extends SelfDescribingTriviallyCopyable {
+
+        // Retrieve and store the description of the EBM1 class from the BytesFieldInfo utility.
         static final int DESCRIPTION = BytesFieldInfo.lookup(EBM1.class).description();
+        // Define LENGTH and START constants that describe the start position and length of serializable data.
         static final int LENGTH, START;
 
         static {
+            // Calculate the range of trivially copyable bytes for the EBM1 class.
             final int[] range = BytesUtil.triviallyCopyableRange(EBM1.class);
             LENGTH = range[1] - range[0];
             START = range[0];
         }
 
+        // Fields of the EBM1 class.
         long l0;
         int i0;
         short s0;
         byte b0;
 
+        // Mandatory override that returns the stored description of the EBM1 class.
         @Override
         protected int $description() {
             return DESCRIPTION;
         }
 
+        // Mandatory override that returns the starting byte position for serialization.
         @Override
         protected int $start() {
             return START;
         }
 
+        // Mandatory override that returns the length of the serializable data.
         @Override
         protected int $length() {
             return LENGTH;
         }
     }
 
+    // EBM2 is similar to EBM1 but includes a second set of fields.
     static class EBM2 extends SelfDescribingTriviallyCopyable {
+
+        // Retrieve and store the description of the EBM2 class from the BytesFieldInfo utility.
         static final int DESCRIPTION = BytesFieldInfo.lookup(EBM2.class).description();
+        // Define LENGTH and START constants that describe the start position and length of serializable data.
         static final int LENGTH, START;
 
         static {
+            // Calculate the range of trivially copyable bytes for the EBM2 class.
             final int[] range = BytesUtil.triviallyCopyableRange(EBM2.class);
             LENGTH = range[1] - range[0];
             START = range[0];
         }
 
+        // Additional fields for the EBM2 class.
         long l0, l1;
         int i0, i1;
         short s0, s1;
         byte b0, b1;
 
+        // Mandatory override that returns the stored description of the EBM2 class.
         @Override
         protected int $description() {
             return DESCRIPTION;
         }
 
+        // Mandatory override that returns the starting byte position for serialization.
         @Override
         protected int $start() {
             return START;
         }
 
+        // Mandatory override that returns the length of the serializable data.
         @Override
         protected int $length() {
             return LENGTH;
         }
     }
 
+    // EBM3 builds upon EBM2 by adding a third set of fields.
     static class EBM3 extends SelfDescribingTriviallyCopyable {
+
+        // Retrieve and store the description of the EBM3 class from the BytesFieldInfo utility.
         static final int DESCRIPTION = BytesFieldInfo.lookup(EBM3.class).description();
+        // Define LENGTH and START constants that describe the start position and length of serializable data.
         static final int LENGTH, START;
 
         static {
+            // Calculate the range of trivially copyable bytes for the EBM3 class.
             final int[] range = BytesUtil.triviallyCopyableRange(EBM3.class);
             LENGTH = range[1] - range[0];
             START = range[0];
         }
 
+        // Additional fields for the EBM3 class.
         long l0, l1, l2;
         int i0, i1, i2;
         short s0, s1, s2;
         byte b0, b1, b2;
 
+        // Mandatory override that returns the stored description of the EBM3 class.
         @Override
         protected int $description() {
             return DESCRIPTION;
         }
 
+        // Mandatory override that returns the starting byte position for serialization.
         @Override
         protected int $start() {
             return START;
         }
 
+        // Mandatory override that returns the length of the serializable data.
         @Override
         protected int $length() {
             return LENGTH;

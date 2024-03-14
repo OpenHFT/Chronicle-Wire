@@ -24,15 +24,32 @@ import net.openhft.chronicle.wire.NanoTimestampLongConverter;
 
 import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
 
-// Components are not required to be Closeable, but if they are they should be closed when finished
+/**
+ * The TestImpl class extends SimpleCloseable and implements the TestIn interface.
+ * It is designed to handle various events, ensuring time consistency and processing of event data.
+ */
 public class TestImpl extends SimpleCloseable implements TestIn {
+
+    // Reference to an instance of TestOut for output operations.
     private final TestOut out;
+
+    // Stores the latest time provided, ensuring chronological order of events.
     private long time, prevEventTime;
 
+    /**
+     * Constructor that initializes the TestImpl instance with a given TestOut instance.
+     *
+     * @param out Instance of TestOut to send outputs or responses to.
+     */
     public TestImpl(TestOut out) {
         this.out = out;
     }
 
+    /**
+     * Processes a time value with nanosecond precision, ensuring it is not set to a past value.
+     *
+     * @param time The time value to be processed, represented in nanoseconds.
+     */
     @Override
     public void time(@LongConversion(NanoTimestampLongConverter.class) long time) {
         if (time < this.time)
@@ -40,6 +57,12 @@ public class TestImpl extends SimpleCloseable implements TestIn {
         this.time = time;
     }
 
+    /**
+     * Processes a TestEvent, checks for chronological order, and sets processed and current times.
+     * If the event time is older than the previous, an error is outputted.
+     *
+     * @param dto The TestEvent data transfer object containing event details.
+     */
     @Override
     public void testEvent(TestEvent dto) {
         if (dto.eventTime < prevEventTime)
@@ -51,6 +74,11 @@ public class TestImpl extends SimpleCloseable implements TestIn {
         out.testEvent(dto);
     }
 
+    /**
+     * Processes a TestAbstractMarshallableCfgEvent and forwards it through the TestOut interface.
+     *
+     * @param dto The TestAbstractMarshallableCfgEvent data transfer object to be processed.
+     */
     @Override
     public void testAbstractMarshallableCfgEvent(TestAbstractMarshallableCfgEvent dto) {
         out.testAbstractMarshallableCfgEvent(dto);

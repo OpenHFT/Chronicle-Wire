@@ -24,9 +24,13 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 public class YamlTesterAbstractMarshallableCfgTest extends WireTestCommon {
+    // Test method for AbstractMarshallableCfg reset behavior
     @Test
     public void testAbstractMarshallableCfgResetTest() {
+        // Running the YAML tester with specific implementation and output class
         final YamlTester yt = YamlTester.runTest(TestImpl::new, TestOut.class, "yaml-tester/tamc");
+
+        // Asserting that the expected output from the YAML file matches the actual output
         assertEquals(yt.expected(), yt.actual());
     }
 }

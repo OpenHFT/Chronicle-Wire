@@ -31,25 +31,37 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-
+// Runner to enable parameterized tests for the FieldInfoTest class
 @RunWith(value = Parameterized.class)
 public class FieldInfoTest extends WireTestCommon {
+
+    // Marshallable object for test scenarios
     private final Marshallable m;
+
+    // Expected field information as string
     private final String fieldInfos;
 
+    // Constructor initializes the Marshallable object and expected field information
     public FieldInfoTest(Marshallable m, String fieldInfos) {
         this.fieldInfos = fieldInfos;
         this.m = m;
     }
 
+    // Provide test data combinations for the parameterized test
     @NotNull
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
+
+        // Collection to store different test combinations
         @NotNull List<Object[]> list = new ArrayList<>();
+
+        // Sample Marshallable objects for the test scenarios
         @NotNull Marshallable[] objects = {
                 new Nested(new ScalarValues(), Collections.emptyList(), Collections.emptySet(), Collections.emptyMap(), "".split("")),
                 new ScalarValues(1),
         };
+
+        // Corresponding field information for the above objects
         @NotNull String[] fields = {
                 "[!net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: values,\n" +
@@ -252,15 +264,19 @@ public class FieldInfoTest extends WireTestCommon {
                         "}\n" +
                         "]",
         };
+
+        // Populate the test combinations list
         for (int i = 0; i < objects.length; i++) {
             Marshallable object = objects[i];
             String fi = fields[i];
             @NotNull Object[] test = {object, fi};
             list.add(test);
         }
+
         return list;
     }
 
+    // Test method to ensure the field information from the Marshallable object matches the expected value
     @Test
     public void fieldInfo() {
         @NotNull List<FieldInfo> infos = m.$fieldInfos();

@@ -22,7 +22,21 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
+/**
+ * An extension of {@link URLStreamHandler} designed to provide custom handling for specific URL protocols.
+ * Currently, this class does not support opening connections and will throw an {@link UnsupportedOperationException}
+ * if an attempt is made to open a connection.
+ */
 public class Handler extends URLStreamHandler {
+
+    /**
+     * Attempts to open a connection to the provided URL. In the current implementation, this operation
+     * is unsupported and will always throw an exception.
+     *
+     * @param u The URL to which a connection should be opened.
+     * @return This method does not return a value; instead, it throws an exception.
+     * @throws UnsupportedOperationException always, as this operation isn't supported.
+     */
     @Override
     protected URLConnection openConnection(URL u) {
         throw new UnsupportedOperationException();

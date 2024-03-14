@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+@Deprecated(/* for removal in x.27, use LongConverter */)
 public interface CharConverter {
 
     /**

@@ -8,6 +8,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 public class TransferTest {
+    // Factory method to create a pre-configured Transfer object
     static Transfer getTransfer() {
         return new Transfer()
                 .sender(ShortText.INSTANCE.parse("sender"))
@@ -20,8 +21,10 @@ public class TransferTest {
                 .reference(Bytes.from("reference"));
     }
 
+    // Test to validate the string representation of a Transfer object
     @Test
     public void testToString() {
+        // Expected string representation of Transfer object and assert
         assertEquals("" +
                         "!run.chronicle.account.dto.Transfer {\n" +
                         "  sender: sender,\n" +

@@ -20,8 +20,18 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * This WireKey expects paramaters to follow in a marshallable.
+ * Represents a specialized {@code WireKey} that expects parameters to follow in a marshallable format.
+ * Implementations of this interface are designed to handle parameterized wire keys, allowing for more
+ * complex data representations on the wire.
  */
 public interface ParameterizeWireKey extends WireKey {
+
+    /**
+     * Retrieves the parameters associated with this wire key. These parameters are expected
+     * to be of type {@code WireKey} or its subtypes, ensuring compatibility with the wire format.
+     *
+     * @param <P> The type of the parameter, which extends {@code WireKey}.
+     * @return An array of parameters associated with this wire key.
+     */
     @NotNull <P extends WireKey> P[] params();
 }

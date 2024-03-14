@@ -32,23 +32,41 @@ import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * Parameterized test class extending WireTestCommon to validate the consistency
+ * between YamlWire and TextWire in processing YAML formatted text.
+ */
 @RunWith(value = Parameterized.class)
 public class YamlTextWireTest extends WireTestCommon {
 
+    // Static block to register class alias for Fields
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(Fields.class);
     }
 
-    final String name;
-    final String s;
+    final String name;  // Name of the test scenario
+    final String s;     // YAML formatted text to be tested
 
+    /**
+     * Constructor for parameterized test instances.
+     *
+     * @param name Name of the test scenario.
+     * @param text YAML formatted text to be used in the test.
+     */
     public YamlTextWireTest(String name, String text) {
         this.name = name;
         this.s = text;
     }
 
+    /**
+     * Provides the parameters for the parameterized test.
+     * Each parameter set includes a scenario name and corresponding YAML formatted text.
+     *
+     * @return Collection of Object arrays, each containing a scenario name and YAML text.
+     */
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
+        // Stream of various YAML formatted texts to be tested
         return Stream.of(
                 "{}",
                 "a: hi",
@@ -91,15 +109,24 @@ public class YamlTextWireTest extends WireTestCommon {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Tests the order and structure of fields processed by YamlWire and TextWire to ensure they are consistent.
+     * The test verifies that both wires produce the same object representation from the given YAML text.
+     */
     @Test
     public void orderTest() {
-        Fields yw = YamlWire.from(s).getValueIn()
-                .object(Fields.class);
-        Fields tw = TextWire.from(s).getValueIn()
-                .object(Fields.class);
+        // Parse the text using YamlWire and TextWire, and create Fields objects
+        Fields yw = YamlWire.from(s).getValueIn().object(Fields.class);
+        Fields tw = TextWire.from(s).getValueIn().object(Fields.class);
+
+        // Assert that the objects created from both wires are equal
         assertEquals(tw, yw);
     }
 
+    /**
+     * Class representing a data structure with various fields.
+     * Used for testing serialization and deserialization in YamlWire and TextWire.
+     */
     @SuppressWarnings("unused")
     static class Fields extends SelfDescribingMarshallable {
         String a;

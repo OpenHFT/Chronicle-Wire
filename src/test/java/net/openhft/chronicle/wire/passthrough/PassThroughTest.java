@@ -28,10 +28,16 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
-/*
- * Test that a flow style method writer can return a DocumentWritten
+/**
+ * Test class extending WireTestCommon to validate the pass-through functionality of method writers
+ * and readers in Chronicle Wire using different wire formats.
  */
 public class PassThroughTest extends WireTestCommon {
+
+    /**
+     * Tests the pass-through functionality using TextWire, ensuring that the method reader can
+     * read and pass through the input text correctly.
+     */
     @Test
     public void testPassThroughputText() {
         String input = "" +
@@ -48,11 +54,15 @@ public class PassThroughTest extends WireTestCommon {
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
         final DestinationSpecific destinationSpecific = wire2.methodWriter(DestinationSpecific.class);
         final MethodReader reader = wire.methodReader(destinationSpecific);
+
+        // Read and assert each document in the wire
         for (int i = 2; i >= 0; i--)
             assertEquals(i > 0, reader.readOne());
 
+        // Assert the output of wire2 matches the input
         assertEquals(input, wire2.toString());
 
+        // Setup another wire for reading the output of wire2 and assert the result
         Bytes<?> bytes3 = new HexDumpBytes();
         Wire wire3 = new TextWire(bytes3).useTextDocuments();
 
@@ -69,6 +79,10 @@ public class PassThroughTest extends WireTestCommon {
         assertEquals(input, wire3.toString());
     }
 
+    /**
+     * Tests the method writer functionality using TextWire, ensuring that the written document
+     * matches the expected format.
+     */
     @Test
     public void methodWriterText() {
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
@@ -76,6 +90,8 @@ public class PassThroughTest extends WireTestCommon {
         try (DocumentContext dc = destination.to("dest")) {
             dc.wire().write("send").text("message");
         }
+
+        // Assert the content written to wire2
         assertEquals("" +
                         "to: dest\n" +
                         "send: message\n" +
@@ -83,6 +99,10 @@ public class PassThroughTest extends WireTestCommon {
                 wire2.toString());
     }
 
+    /**
+     * Tests the pass-through functionality using YamlWire, ensuring that the method reader can
+     * read and pass through the input YAML text correctly.
+     */
     @Test
     public void testPassThroughputYaml() {
         String input = "" +
@@ -99,11 +119,15 @@ public class PassThroughTest extends WireTestCommon {
         Wire wire2 = Wire.newYamlWireOnHeap();
         final DestinationSpecific destinationSpecific = wire2.methodWriter(DestinationSpecific.class);
         final MethodReader reader = wire.methodReader(destinationSpecific);
+
+        // Read and assert each document in the wire
         for (int i = 2; i >= 0; i--)
             assertEquals(i > 0, reader.readOne());
 
+        // Assert the output of wire2 matches the input
         assertEquals(input, wire2.toString());
 
+        // Setup another wire for reading the output of wire2 and assert the result
         Bytes<?> bytes3 = new HexDumpBytes();
         Wire wire3 = new YamlWire(bytes3).useTextDocuments();
 
@@ -120,13 +144,22 @@ public class PassThroughTest extends WireTestCommon {
         assertEquals(input, wire3.toString());
     }
 
+    /**
+     * Tests the method writer functionality using YamlWire, ensuring that the written document
+     * matches the expected YAML format.
+     */
     @Test
     public void methodWriterYaml() {
+        // Create a YAML wire for writing
         Wire wire2 = Wire.newYamlWireOnHeap();
         final Destination destination = wire2.methodWriter(Destination.class);
+
+        // Write to the wire using the Destination interface
         try (DocumentContext dc = destination.to("dest")) {
             dc.wire().write("send").text("message");
         }
+
+        // Assert the content written to wire2
         assertEquals("" +
                         "to: dest\n" +
                         "send: message\n" +
@@ -134,6 +167,10 @@ public class PassThroughTest extends WireTestCommon {
                 wire2.toString());
     }
 
+    /**
+     * Tests the pass-through functionality using BinaryWire, ensuring that the method reader can
+     * read and pass through binary formatted messages correctly.
+     */
     @Test
     public void testPassThroughputBinary() {
         String input = "" +
@@ -146,14 +183,19 @@ public class PassThroughTest extends WireTestCommon {
                 "  two: 2\n" +
                 "}\n" +
                 "...\n";
+        // Create a YAML wire from the input string
         Wire wire = new YamlWire(Bytes.from(input)).useTextDocuments();
+        // Create a binary wire for pass-through
         final HexDumpBytes hdb = new HexDumpBytes();
         Wire wire2 = WireType.BINARY_LIGHT.apply(hdb);
         final DestinationSpecific destinationSpecific = wire2.methodWriter(DestinationSpecific.class);
+
+        // Read from the YAML wire and write to the binary wire
         final MethodReader reader = wire.methodReader(destinationSpecific);
         for (int i = 2; i >= 0; i--)
             assertEquals(i > 0, reader.readOne());
 
+        // Assert the binary output
         assertEquals("" +
                         "18 00 00 00                                     # msg-length\n" +
                         "b9 02 74 6f                                     # to: (event)\n" +
@@ -171,6 +213,7 @@ public class PassThroughTest extends WireTestCommon {
                         "a7 02 00 00 00 00 00 00 00                      # 2\n",
                 wire2.bytes().toHexString());
 
+        // Setup another binary wire for reading the output of wire2 and assert the result
         Bytes<?> bytes3 = new HexDumpBytes();
         Wire wire3 = WireType.BINARY_LIGHT.apply(bytes3);
         wire3.usePadding(false);
@@ -198,6 +241,7 @@ public class PassThroughTest extends WireTestCommon {
                         "02 00 00 00 00 00 00 00\n",
                 wire3.bytes().toHexString().replaceAll("Lambda.*", "Lambda"));
 
+        // Setup a text wire for reading the output of wire3 and compare it to the original input
         Wire wire4 = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
         final DestinationSpecific destinationSpecific4 = wire4.methodWriter(DestinationSpecific.class);
         final MethodReader reader3 = wire3.methodReader(destinationSpecific4);
@@ -205,17 +249,28 @@ public class PassThroughTest extends WireTestCommon {
             assertEquals(i > 0, reader3.readOne());
 
         assertEquals(input, wire4.toString());
+
+        // Release resources
         bytes3.releaseLast();
         hdb.releaseLast();
     }
 
+    /**
+     * Tests the method writer functionality using BinaryWire, ensuring that the written document
+     * matches the expected binary format.
+     */
     @Test
     public void methodWriterBinary() {
+        // Create a binary wire for writing
         Wire wire2 = WireType.BINARY_LIGHT.apply(new HexDumpBytes());
         final Destination destination = wire2.methodWriter(Destination.class);
+
+        // Write to the wire using the Destination interface
         try (DocumentContext dc = destination.to("dest")) {
             dc.wire().write("send").text("message");
         }
+
+        // Assert the content written to wire2 in binary format
         assertEquals("" +
                         "16 00 00 00                                     # msg-length\n" +
                         "b9 02 74 6f                                     # to: (event)\n" +
@@ -225,17 +280,48 @@ public class PassThroughTest extends WireTestCommon {
                 wire2.bytes().toHexString());
     }
 
+    /**
+     * Interface representing a destination with a method to route actions to a specific destination.
+     */
     interface Destination {
+        /**
+         * Routes the action to the specified destination.
+         *
+         * @param dest The destination name.
+         * @return DocumentContext representing the context of the document being written.
+         */
         DocumentContext to(String dest);
     }
 
+    /**
+     * Interface for sending messages in different formats.
+     */
     interface Sending {
+        /**
+         * Sends a simple text message.
+         *
+         * @param msg The message to be sent.
+         */
         void send(String msg);
 
+        /**
+         * Sends a message with a map of string to integer values.
+         *
+         * @param map The map to be sent as a message.
+         */
         void sends(Map<String, Integer> map);
     }
 
+    /**
+     * Interface combining the functionality of sending messages to a specific destination.
+     */
     interface DestinationSpecific {
+        /**
+         * Routes the action of sending to the specified destination.
+         *
+         * @param dest The destination name.
+         * @return Sending interface for further action.
+         */
         Sending to(String dest);
     }
 }

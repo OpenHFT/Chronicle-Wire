@@ -37,9 +37,13 @@ import static java.lang.ThreadLocal.withInitial;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
 /**
- * Base class for generated method readers.
+ * This is the AbstractGeneratedMethodReader class implementing the MethodReader interface.
+ * It serves as a base class for generated method readers, providing foundational functionality
+ * and utility methods to facilitate method reading.
  */
 public abstract class AbstractGeneratedMethodReader implements MethodReader {
+
+    // A no-operation message history consumer.
     private static final Consumer<MessageHistory> NO_OP_MH_CONSUMER = Mocker.ignored(Consumer.class);
     public final static ThreadLocal<String> SERVICE_NAME = new ThreadLocal<>();
     private final static ConcurrentHashMap<String, MessageHistoryThreadLocal> TEMP_MESSAGE_HISTORY_BY_SERVICE_NAME = new ConcurrentHashMap<>();
@@ -48,13 +52,27 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     private final MessageHistoryThreadLocal tempMessageHistory;
     protected MessageHistory messageHistory;
     protected boolean dataEventProcessed;
+
+    // Flag to determine if the input should be closed.
     private boolean closeIn = false;
+    // Flag to determine if the reader is closed.
     private boolean closed;
+
+    // Consumer for processing message history.
     private Consumer<MessageHistory> historyConsumer = NO_OP_MH_CONSUMER;
 
     private Predicate predicate;
+
+    // Flag to determine if scanning is active.
     private boolean scanning;
 
+    /**
+     * Constructs a new AbstractGeneratedMethodReader with the provided input interface
+     * and a debug logging parselet.
+     *
+     * @param in                    The input interface for marshallable data
+     * @param debugLoggingParselet  The parselet used for debugging and logging
+     */
     protected AbstractGeneratedMethodReader(MarshallableIn in,
                                             WireParselet debugLoggingParselet) {
         this.in = in;
@@ -71,13 +89,25 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         this.tempMessageHistory = TEMP_MESSAGE_HISTORY_BY_SERVICE_NAME.computeIfAbsent(serviceName, x -> new MessageHistoryThreadLocal());
     }
 
+    /**
+     * Sets a predicate to be used by the method reader.
+     *
+     * @param predicate The predicate for filtering
+     * @return The current instance of the AbstractGeneratedMethodReader class
+     */
     public AbstractGeneratedMethodReader predicate(Predicate predicate) {
         this.predicate = predicate;
         return this;
     }
 
     /**
-     * Helper method used by implementations to get a Method
+     * A utility method that assists implementations in retrieving a method from a class.
+     * It looks up the method by its name and parameter types, making it accessible if it's private or protected.
+     *
+     * @param clazz          The class containing the method
+     * @param name           The name of the method
+     * @param parameterTypes The parameter types of the method
+     * @return The method if found, otherwise throws an AssertionError
      */
     protected static Method lookupMethod(Class<?> clazz, String name, Class<?>... parameterTypes) {
         try {
@@ -92,9 +122,12 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     }
 
     /**
-     * @param historyConsumer sets a history consumer, which will be called the next message if for a different queue
-     *                        and the history message is not written to the output queue.
-     *                        This allows LAST_WRITTEN to still work when there is no output for a give message
+     * Sets a consumer for processing message history.
+     * This consumer is invoked if the next message is for a different queue and the history
+     * message isn't written to the output queue. It ensures that the LAST_WRITTEN mechanism
+     * works even when no output is present for a given message.
+     *
+     * @param historyConsumer The consumer for processing message history
      */
     public void historyConsumer(Consumer<MessageHistory> historyConsumer) {
         this.historyConsumer = historyConsumer;
@@ -102,7 +135,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
 
     /**
      * Reads call name and arguments from the wire and performs invocation on a target object instance.
-     * Implementation of this method is generated in runtime, see {@link GenerateMethodReader}.
+     * The implementation of this method is generated at runtime, see {@link GenerateMethodReader}.
      *
      * @param wireIn Data input.
      * @return MethodReaderStatus.
@@ -114,14 +147,14 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
 
     /**
      * Reads call name and arguments from the wire and performs invocation on a target object instance.
-     * Implementation of this method is generated in runtime, see {@link GenerateMethodReader}.
+     * The implementation of this method is generated at runtime, see {@link GenerateMethodReader}.
      *
      * @param wireIn Data input.
-     * @return {@code true} read a known event, <code>false</code> if reading should be delegated.
+     * @return {@code true} read a known event, {@code false} if reading should be delegated.
      */
     @Deprecated(/* for removal in x.26*/)
     protected boolean readOneCall(WireIn wireIn) {
-        // one of these methods must be overridden
+        // At least one of these methods must be overridden.
         readOneGenerated(wireIn);
         return true;
     }
@@ -133,20 +166,25 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
 
     @Deprecated(/* for removal in x.26*/)
     protected boolean readOneCallMeta(WireIn wireIn) {
-        // one of these methods must be overridden
+        // At least one of these methods must be overridden.
         readOneMetaGenerated(wireIn);
         return true;
     }
 
     /**
+     * Reads the content based on the provided document context.
+     *
      * @param context Reading document context.
-     * @return KNOWN, UNKNOWN, or EMPTY (no content)
+     * @return KNOWN if the read event is known, UNKNOWN if the event is not recognized, or EMPTY if no content is present.
      */
     public MethodReaderStatus readOne0(DocumentContext context) {
         WireIn wireIn = context.wire();
+
+        // Return EMPTY status if no content.
         if (wireIn == null)
             return MethodReaderStatus.EMPTY;
 
+        // Check if we need to write the unwritten message history.
         if (historyConsumer != NO_OP_MH_CONSUMER) {
             writeUnwrittenMessageHistory(context);
 
@@ -162,18 +200,23 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
             wireIn.consumePadding();
             Bytes<?> bytes = wireIn.bytes();
             dataEventProcessed = false;
-            MethodReaderStatus decoded = MethodReaderStatus.EMPTY; // no message
+            MethodReaderStatus decoded = MethodReaderStatus.EMPTY; // Initialize status as no message.
+
+            // Read and process all remaining bytes.
             while (bytes.readRemaining() > 0) {
                 if (wireIn.isEndEvent())
                     break;
                 long start = bytes.readPosition();
 
+                // Read the wire based on whether it's data or metadata.
                 MethodReaderStatus mrs = context.isData()
                         ? readOneGenerated(wireIn)
                         : readOneMetaGenerated(wireIn);
+
+                // Update the decoding status based on the current read status.
                 switch (mrs) {
                     case HISTORY:
-                        // unchanged
+                        // Status remains unchanged.
                         break;
                     case KNOWN:
                         decoded = MethodReaderStatus.KNOWN;
@@ -186,6 +229,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
                         throw new AssertionError(mrs);
                 }
 
+                // If any bytes are ignored, return the decoding status.
                 if (restIgnored())
                     return decoded;
 
@@ -207,18 +251,34 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         }
     }
 
+    /**
+     * Logs a warning message indicating that there has been no progress in reading the wire data.
+     * The warning provides information about the number of bytes that are left unread.
+     *
+     * @param bytes The number of bytes that are left unread.
+     */
     private void logNonProgressWarning(long bytes) {
         Jvm.warn().on(getClass(), "Failed to progress reading " + bytes + " bytes left.");
     }
 
+    /**
+     * Determines if the rest of the wire data should be ignored.
+     *
+     * @return {@code true} if the rest should be ignored, {@code false} otherwise. Default implementation returns false.
+     */
     protected boolean restIgnored() {
         return false;
     }
 
     /**
-     * uses a double buffer technique to swap the current message history with a temp message history ( this is, if it has not already been stored ) .
+     * Swaps the current message history with a temporary message history using a double buffer technique.
+     * The method ensures that if an input event did not generate an output event, its message history
+     * will be saved, potentially to be written by another method reader in the future.
+     * If an input event did generate an output, stale information from a previous input event is cleared.
      */
     private void swapMessageHistoryIfDirty() {
+        // This input event didn't generate an output event.
+        // Save the message history for potential future use by another method reader.
         if (messageHistory.isDirty()) {
             // This input event didn't generate an output event.
             // Saving message history - in case next input event will be processed by another method reader,
@@ -235,10 +295,10 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     }
 
     /**
-     * writes the history message for the last message ( if required ), that is, if the last input,
-     * has not yet written its message history yet to the output queue.
+     * Writes the message history of the last message to the output queue, but only if required.
+     * This is determined by checking if the message history has not yet been written to the output queue.
      *
-     * @param context the DocumentContext of the output queue that we are going to write the message history to
+     * @param context The {@link DocumentContext} of the output queue where the message history might be written.
      */
     private void writeUnwrittenMessageHistory(DocumentContext context) {
         final MessageHistory mh = tempMessageHistory.get();
@@ -348,6 +408,16 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         return o;
     }
 
+
+    /**
+     * Invokes a given method on the provided object with the specified arguments.
+     *
+     * @param method The method to be invoked.
+     * @param o The target object on which the method is to be invoked.
+     * @param objects The arguments to the method.
+     * @return Returns the result of the method invocation.
+     * @throws RuntimeException if the method invocation throws an exception.
+     */
     protected Object actualInvoke(Method method, Object o, Object[] objects) {
         try {
             return method.invoke(o, objects);
@@ -356,6 +426,12 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         }
     }
 
+    /**
+     * Retrieves the current message history.
+     * If the message history is not initialized, fetches it from the MessageHistory class.
+     *
+     * @return The current message history.
+     */
     private MessageHistory messageHistory() {
         if (messageHistory == null)
             messageHistory = MessageHistory.get();
@@ -363,10 +439,19 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         return messageHistory;
     }
 
+    /**
+     * Sets the scanning state.
+     *
+     * @param scanning The desired state of scanning. True to indicate scanning, false otherwise.
+     */
     public void scanning(boolean scanning) {
         this.scanning = scanning;
     }
 
+    /**
+     * This is a helper class that manages thread-local instances of MessageHistory.
+     * It provides methods to get and set the current thread's message history using a {@link ThreadLocal}.
+     */
     private static final class MessageHistoryThreadLocal {
 
         private final ThreadLocal<MessageHistory> messageHistoryTL = withInitial(() -> {
@@ -375,12 +460,24 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
             return veh;
         });
 
+        /**
+         * Replaces the current thread's message history with the provided one
+         * and returns the replaced message history.
+         *
+         * @param mh The new message history to set for the current thread.
+         * @return The replaced message history.
+         */
         private MessageHistory getAndSet(MessageHistory mh) {
             final MessageHistory result = messageHistoryTL.get();
             messageHistoryTL.set(mh);
             return result;
         }
 
+        /**
+         * Retrieves the current thread's message history.
+         *
+         * @return The current thread's message history.
+         */
         public MessageHistory get() {
             return messageHistoryTL.get();
         }

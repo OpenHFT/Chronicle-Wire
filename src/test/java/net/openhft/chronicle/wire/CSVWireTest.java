@@ -23,15 +23,21 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+// CSVWireTest class extends from WireTestCommon and tests functionality related to CSV-based wire processing.
 public class CSVWireTest extends WireTestCommon {
 
+    // Test parsing a CSV string into a wire and reading its contents.
     @Test
     public void testFrom() {
+        // Create a Wire object from the given CSV string.
         @NotNull Wire wire = CSVWire.from(
                 "heading1, heading2,heading3\n" +
                         "data1, data2, \"data three\"\n" +
                         "row2, row2b, row2c\n");
+        // Ensure wire has content to read.
         assertTrue(wire.hasMore());
+
+        // Read and validate the first row of data.
         @NotNull StringBuilder row = new StringBuilder();
         wire.readEventName(row).marshallable(w -> {
             assertEquals("data1", row.toString());
@@ -40,26 +46,34 @@ public class CSVWireTest extends WireTestCommon {
         });
         wire.readEventName(row);
         assertTrue(wire.hasMore());
+
+        // Read and validate the second row of data.
         wire.readEventName(row).marshallable(w -> {
             assertEquals("row2", row.toString());
             wire.read(() -> "heading2").text(this, (o, s) -> assertEquals("row2b", s))
                     .read(() -> "heading3").text(this, (o, s) -> assertEquals("row2c", s));
         });
+        // Ensure no more data is present.
         wire.readEventName(row);
         assertFalse(wire.hasMore());
     }
 
+    // Test reading from another CSV formatted string.
     @Test
     public void tstFrom2() {
+        // Create a Wire object from another CSV string.
         @NotNull Wire wire = CSVWire.from(
                 "Symbol,Company,Price,Change,ChangePercent,Day's Volume\n" +
                         "III,3i Group,479.4,12,2.44,2387043\n" +
                         "3IN,3i Infrastructure,164.7,0.1,0.06,429433\n" +
                         "AA,AA,325.9,5.7,1.72,1469834\n");
+        // Process and validate the wire contents.
         doTestWire(wire);
     }
 
+    // Helper method to validate wire contents.
     public void doTestWire(@NotNull Wire wire) {
+        // Read and validate wire contents one row at a time.
         @NotNull StringBuilder row = new StringBuilder();
         assertTrue(wire.hasMore());
         wire.readEventName(row).marshallable(w -> {

@@ -38,87 +38,121 @@ import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
 public class YamlTesterTest extends WireTestCommon {
+    // Test implementation instance
     private static TestImpl testImpl;
 
+    // Setup method for each test, initializes a time provider
     @Before
     public void setUp() {
+        // Set a custom time provider with a fixed start time and auto-increment
         CLOCK = new SetTimeProvider("2022-05-17T20:26:00")
                 .autoIncrement(1, TimeUnit.MICROSECONDS);
     }
 
+    // Additional checks to run before each test
     @Override
     protected void preAfter() {
         super.preAfter();
+        // Ensure that the test implementation instance is closed after the test
         if (testImpl != null)
             assertTrue(testImpl.isClosed());
     }
 
+    // Teardown method for each test, resets the time provider
     @After
     public void tearDown() {
+        // Reset the CLOCK to its original system time provider
         CLOCK = SystemTimeProvider.INSTANCE;
     }
 
+    // Test method for scenario t1
     @Test
     public void t1() {
+        // Create a YamlTester instance for the t1 test
         YamlTester yt = new YamlMethodTester<>(
-                "yaml-tester/t1/in.yaml",
-                newTestImplFunction(),
-                TestOut.class,
-                "yaml-tester/t1/out.yaml")
-                .setup("yaml-tester/t1/setup.yaml")
+                "yaml-tester/t1/in.yaml", // Input YAML file
+                newTestImplFunction(),    // Test implementation function
+                TestOut.class,            // Test output class
+                "yaml-tester/t1/out.yaml")// Expected output YAML file
+                .setup("yaml-tester/t1/setup.yaml") // Setup YAML file
                 .inputFunction(s -> s.replace("# Replace comment", ""));
+        // Assert that the actual output matches the expected output
         assertEquals(yt.expected(), yt.actual());
     }
 
+    // Test method for scenario t2
     @Test
     public void t2() {
+        // Run the t2 test using the YamlTester utility
         final YamlTester yt = YamlTester.runTest(newTestImplFunction(), TestOut.class, "yaml-tester/t2");
+        // Assert that the actual output matches the expected output
         assertEquals(yt.expected(), yt.actual());
     }
 
+    // Test method for scenario t3
     @Test
     public void t3() {
+        // Run the t3 test using the YamlTester utility
         final YamlTester yt = YamlTester.runTest(newTestImplFunction(), TestOut.class, "yaml-tester/t3");
+        // Assert that the actual output matches the expected output
         assertEquals(yt.expected(), yt.actual());
     }
 
+    // Factory method to create a new test implementation function
     @NotNull
     private static Function<TestOut, Object> newTestImplFunction() {
         return out -> testImpl = new TestImpl(out);
     }
 
+    // Test method for scenario t2 with an error case
     @Test
     public void t2error() {
+        // Print message indicating expected NullPointerException
         System.err.println("### The Following NullPointerException Are Expected ###");
+        // Expect a specific exception to be thrown during the test
         expectException("java.lang.NullPointerException");
+        // Set CLOCK to null to trigger the NullPointerException
         CLOCK = null;
+        // Run the t2 test with an expected error using the YamlTester utility
         final YamlTester yt = YamlTester.runTest(newTestImplFunction(), TestOut.class, "yaml-tester/t2");
+        // Assert that the actual output matches the expected output
         assertEquals("" +
                         "---\n" +
                         "---\n" +
                         "---",
                 yt.actual());
+        // Check that the test implementation is closed
         assertTrue(testImpl.isClosed());
     }
 
+    // Test for mismatched scenarios
     @Test
     public void mismatched() {
+        // Skip if REGRESS_TESTS is true
         assumeFalse(YamlTester.REGRESS_TESTS);
+        // Expect an exception for a missing setup file
         expectException("setup.yaml not found");
+        // Run the test with an expected mismatch in YAML files
         final YamlTester yt = YamlTester.runTest(TestImpl.class, "yaml-tester/mismatch");
+        // Assert that the expected and actual outputs are not the same
         assertNotEquals("This tests an inconsistency was found, so they shouldn't be the same", yt.expected(), yt.actual());
     }
 
+    // Test for handling comments in YAML files
     @Test
     public void comments() {
         // Note using YamlWire instead of TextWire moves comment 8
         final YamlTester yt = YamlTester.runTest(newTestImplFunction(), TestOut.class, "yaml-tester/comments");
+        // Assert that the expected and actual outputs match
         assertEquals(yt.expected(), yt.actual());
     }
 
+    // Test for direct text input and output
     @Test
     public void direct() throws IOException {
+        // Skip if regress.tests property is set to true
         assumeFalse(Jvm.getBoolean("regress.tests"));
+        // Create a TextMethodTester with direct string inputs and outputs
         YamlTester yt = new TextMethodTester<>(
                 "=" +
                         "# comment 1\n" +
@@ -159,6 +193,7 @@ public class YamlTesterTest extends WireTestCommon {
                         "...\n" +
                         "# comment 9\n")
                 .run();
+        // Assert that the expected and actual outputs match
         assertEquals(yt.expected(), yt.actual());
     }
 
