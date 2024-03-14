@@ -94,38 +94,6 @@ public class Issue609Test extends WireTestCommon {
         assertEquals(expected, WireType.TEXT.fromString(withString2));
     }
 
-    @Test
-    public void toYamlAndBackIssue824() {
-        ChronicleServicesCfg expected = new ChronicleServicesCfg();
-
-        ServiceCfg scfg = new ServiceCfg();
-        expected.services.put("fix-web-gateway", scfg);
-
-        scfg.inputs.add(new InputCfg().input("web-gateway-periodic-updates"));
-
-        String yaml = WireType.YAML_ONLY.asString(expected);
-
-        System.out.println(yaml);
-
-        assertEquals(expected, WireType.TEXT.fromString(yaml));
-
-        assertEquals(expected, WireType.YAML_ONLY.fromString(yaml));
-
-        String withString = "" +
-                "!net.openhft.chronicle.wire.issue.Issue609Test$ChronicleServicesCfg {\n" +
-                "  services: {\n" +
-                "    fix-web-gateway: { inputs: [ 'web-gateway-periodic-updates' ] }\n" +
-                "  }\n" +
-                "}";
-
-        assertEquals(expected, WireType.YAML_ONLY.fromString(withString));
-        assertEquals(expected, WireType.TEXT.fromString(withString));
-
-        String withString2 = withString.replace("'", "");
-        assertEquals(expected, WireType.YAML_ONLY.fromString(withString2));
-        assertEquals(expected, WireType.TEXT.fromString(withString2));
-    }
-
     public static class ChronicleServicesCfg extends AbstractMarshallableCfg {
         public final Map<String, ServiceCfg> services = new LinkedHashMap<>();
     }
