@@ -822,7 +822,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                     case "!!meta-data-not-ready":
                         break;
                     default:
-                        bytes.readPosition(pos); // Reset the position if the word doesn't match.
+                        bytes.readPosition(pos);
                 }
             }
         }
@@ -953,19 +953,17 @@ public class TextWire extends YamlWireOut<TextWire> {
     protected ValueIn read2(CharSequence keyName, int keyCode, Object defaultValue, @NotNull ValueInState curr, @NotNull StringBuilder sb, @NotNull CharSequence name) {
         final long position2 = bytes.readPosition();
 
-        // If the current field doesn't match, backtrack and check older fields.
+        // if not a match go back and look at old fields.
         for (int i = 0; i < curr.unexpectedSize(); i++) {
             bytes.readPosition(curr.unexpected(i));
             readField(sb);
             if (sb.length() == 0 || StringUtils.equalsCaseIgnore(sb, name)) {
-                // If an older field matches, remove it from the unexpected list and save the current position for later.
+                // if an old field matches, remove it, save the current position
                 curr.removeUnexpected(i);
                 curr.savedPosition(position2 + 1);
                 return valueIn;
             }
         }
-
-        // Restore the original position since no matching field was found.
         bytes.readPosition(position2);
 
         // If no matching field is found, return the default value.
@@ -1382,20 +1380,15 @@ public class TextWire extends YamlWireOut<TextWire> {
 
         @Nullable
         <ACS extends Appendable & CharSequence> CharSequence textTo0(@NotNull ACS a) {
-            // Remove padding characters (e.g. whitespace)
             consumePadding();
-            // Peek the next character code without advancing the position
             int ch = peekCode();
             @Nullable CharSequence ret = a;
 
             switch (ch) {
                 case '{': {
                     // For map-like structures: read the length of the content and append to the target appendable
-
-                    // Retrieve length of the content enclosed in curly braces
                     final long len = readLength();
                     try {
-                        // Append the content string to the target appendable
                         a.append(Bytes.toString(bytes, bytes.readPosition(), len));
                     } catch (IOException e) {
                         throw new AssertionError(e);
@@ -1410,29 +1403,24 @@ public class TextWire extends YamlWireOut<TextWire> {
 
                 }
                 case '"':
-                    // Handle double-quoted strings
                     readText(a, getEscapingQuotes());
                     break;
 
                 case '\'':
-                    // Handle single-quoted strings
                     readText(a, getEscapingSingleQuotes());
                     break;
 
                 case '!': {
                     // Handle explicit typing (e.g. "!null" or "!type")
 
-                    // Skip the '!' character
                     bytes.readSkip(1);
                     final StringBuilder stringBuilder = acquireStringBuilder();
-                    // Parse the next word (type indicator)
                     parseWord(stringBuilder);
                     if (StringUtils.isEqual(stringBuilder, "!null")) {
-                        // If it's a null object, read the next content into the string builder
                         textTo(stringBuilder);
-                        ret = null;  // Return null if the type is "!null"
+                        ret = null;
                     } else {
-                        // Otherwise, read the typed content
+                        // ignore the type.
                         if (a instanceof StringBuilder) {
                             textTo((StringBuilder) a);
                         } else {
@@ -1474,7 +1462,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                         // Clear the target appendable if no remaining content
                         AppendableUtil.setLength(a, 0);
                     }
-                    // Trim trailing spaces from the target appendable
+                    // trim trailing spaces.
                     while (a.length() > 0) {
                         if (Character.isWhitespace(a.charAt(a.length() - 1)))
                             AppendableUtil.setLength(a, a.length() - 1);
@@ -1493,7 +1481,6 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         private <ACS extends Appendable & CharSequence> void unsubstitutedString(@NotNull ACS a) {
-            // Convert the content of the bytes to a string for logging
             String text = bytes.toString();
             // Limit the log output to 32 characters for brevity
             if (text.length() > 32)
@@ -1668,9 +1655,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         protected long readLengthMarshallable() {
-            // Save the current reading position
             long start = bytes.readPosition();
-            // Enable consumption of any type of data
             this.consumeAny = true;
             try {
                 // Consume all data until a meaningful stopping point
@@ -1685,9 +1670,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         protected void consumeAny() {
-            // Consume any leading whitespace or padding
             consumePadding();
-            // Peek at the next code without advancing the reading position
             int code = peekCode();
             switch (code) {
                 case '$': {
@@ -1854,8 +1837,6 @@ public class TextWire extends YamlWireOut<TextWire> {
                 if (bytes.readPosition() == pos)
                     throw new IllegalStateException("Stuck at pos " + pos + " " + bytes);
             }
-
-            // Consume any leading whitespace or padding
             consumePadding();
 
             // Read the next character to ensure the map is closed properly
@@ -1870,7 +1851,7 @@ public class TextWire extends YamlWireOut<TextWire> {
          * Consumes a value, which can be a primitive, type-annotated value, or another structure.
          */
         private void consumeValue() {
-            consumePadding(); // Consume leading spaces or padding
+            consumePadding();
             final StringBuilder stringBuilder = acquireStringBuilder();
 
             // If the value has a type annotation, handle it
@@ -2646,7 +2627,6 @@ public class TextWire extends YamlWireOut<TextWire> {
         @Nullable <K, V> Map<K, V> map(@NotNull final Class<K> kClass,
                                        @NotNull final Class<V> vClass,
                                        @Nullable Map<K, V> usingMap) throws InvalidMarshallableException {
-            // Consume any whitespace or padding.
             consumePadding();
 
             // If no map is provided, initialize a new one.

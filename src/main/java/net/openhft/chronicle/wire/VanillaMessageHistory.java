@@ -20,7 +20,6 @@ import net.openhft.chronicle.bytes.util.BinaryLengthLength;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
-import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.wire.converter.NanoTime;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

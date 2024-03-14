@@ -880,7 +880,7 @@ public class TextMethodTester<T> implements YamlTester {
      *
      * @deprecated This class is deprecated and is used by a specific client. New implementations should avoid using it.
      */
-    @Deprecated
+    @Deprecated(/* used by one client*/)
     static class Invocation {
         Method method;
         Object[] args;
@@ -904,7 +904,7 @@ public class TextMethodTester<T> implements YamlTester {
      *
      * @deprecated This class is deprecated and is used by a specific client. New implementations should avoid using it.
      */
-    @Deprecated
+    @Deprecated(/* used by one client*/)
     class CachedInvocationHandler implements InvocationHandler {
         // Cache to store the method invocations, where the key is a combination of method name and arguments.
         private final Map<String, Invocation> cache = new TreeMap<>();

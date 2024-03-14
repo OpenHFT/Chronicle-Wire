@@ -76,18 +76,7 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
             Method writeReplace = lambda.getClass().getDeclaredMethod("writeReplace");
             Jvm.setAccessible(writeReplace);
             @NotNull SerializedLambda sl = (SerializedLambda) writeReplace.invoke(lambda);
-/*
-                public SerializedLambda(Class<?> capturingClass,
-                            String functionalInterfaceClass,
-                            String functionalInterfaceMethodName,
-                            String functionalInterfaceMethodSignature,
-                            int implMethodKind,
-                            String implClass,
-                            String implMethodName,
-                            String implMethodSignature,
-                            String instantiatedMethodType,
-                            Object[] capturedArgs) {
-             */
+
             valueOut.typePrefix("SerializedLambda");
             valueOut.marshallable(v ->
                     v.write(() -> "cc").typeLiteral(sl.getCapturingClass().replace('/', '.'))

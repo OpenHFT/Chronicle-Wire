@@ -409,7 +409,6 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * @return The current instance of the {@link MethodWriterBuilder}, allowing chained method calls.
      */
     public MethodWriterBuilder<T> marshallableOut(@NotNull final MarshallableOut out) {
-        // Set a supplier that always returns the given MarshallableOut instance.
         this.outSupplier = () -> out;
         return this;
     }

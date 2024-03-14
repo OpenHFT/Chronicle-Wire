@@ -84,7 +84,6 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         WireInternal.INTERNER.valueCount();
     }
 
-    // Instance attributes
     protected final YamlValueOut valueOut = createValueOut();
     protected final StringBuilder sb = new StringBuilder();
     private boolean addTimeStamps = false;
@@ -293,9 +292,6 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 case '\\':
                     bytes.writeUnsignedByte('\\').writeUnsignedByte(ch);  // Escape backslash itself
                     break;
-//                case '/':
-//                    bytes.writeUnsignedByte('\\').writeUnsignedByte(ch);
-//                    break;
                 case 0x85:
                     bytes.appendUtf8("\\N");  // Next line
                     break;
@@ -513,8 +509,6 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
      * to appending separators, handling whitespace, and maintaining indentation among others.
      */
     class YamlValueOut implements ValueOut, CommentAnnotationNotifier {
-
-        // Flag indicating if a comment annotation exists for the value.
         protected boolean hasCommentAnnotation = false;
 
         // The current indentation level for the value.
@@ -1589,7 +1583,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
          * Sets the separator to denote the end of a field.
          */
         protected void endField() {
-            sep = END_FIELD;  // Set the separator to end field
+            sep = END_FIELD;
         }
 
         /**
@@ -1610,9 +1604,9 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             if (dropDefault) {
                 eventName = "";
             } else {
-                append(sep);         // Append the current separator
-                writeTwo('"', '"');  // Write an empty value
-                endEvent();          // End the current event
+                append(sep);
+                writeTwo('"', '"');
+                endEvent();
             }
             return this;
         }
@@ -1629,7 +1623,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             if (dropDefault) {
                 eventName = key.name().toString();
             } else {
-                write(key.name());  // Write the name of the WireKey
+                write(key.name());
             }
             return this;
         }
@@ -1646,9 +1640,9 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             if (dropDefault) {
                 eventName = name.toString();
             } else {
-                prependSeparator();   // Add separator before the name
-                escape(name);         // Escape and write the name
-                fieldValueSeperator(); // Add field value separator
+                prependSeparator();
+                escape(name);
+                fieldValueSeperator();
             }
             return this;
         }
@@ -1667,13 +1661,13 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         public YamlValueOut write(Class expectedType, @NotNull Object objectKey) throws InvalidMarshallableException {
             if (dropDefault) {
                 if (expectedType != String.class)
-                    throw new UnsupportedOperationException("todo"); // TODO: Implement this operation
+                    throw new UnsupportedOperationException("todo");
                 eventName = objectKey.toString();
             } else {
-                prependSeparator();   // Add separator before the objectKey
-                writeStartEvent();    // Begin writing the event
-                object(expectedType, objectKey); // Serialize and write the objectKey
-                endEvent();           // End the current event
+                prependSeparator();
+                writeStartEvent();
+                object(expectedType, objectKey);
+                endEvent();
             }
             return this;
         }
@@ -1685,11 +1679,10 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         private void writeSavedEventName() {
             if (eventName == null)
                 return;
-
-            prependSeparator();     // Add separator before the event name
-            escape(eventName);      // Escape and write the event name
-            fieldValueSeperator();  // Add field value separator
-            eventName = null;       // Reset the event name
+            prependSeparator();
+            escape(eventName);
+            fieldValueSeperator();
+            eventName = null;
         }
 
         /**
@@ -1729,11 +1722,11 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             if (hasCommentAnnotation)
                 writeTwo('\t', '\t');
 
-            writeTwo('#', ' ');      // Start the comment line
+            writeTwo('#', ' ');
 
-            append(s);                // Write the comment text
-            bytes.writeUnsignedByte('\n');  // Add a newline at the end of the comment
-            sep = EMPTY_AFTER_COMMENT;      // Update the separator after the comment
+            append(s);
+            bytes.writeUnsignedByte('\n');
+            sep = EMPTY_AFTER_COMMENT;
         }
     }
 }

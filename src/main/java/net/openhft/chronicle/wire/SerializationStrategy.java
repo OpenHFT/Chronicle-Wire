@@ -68,7 +68,7 @@ public interface SerializationStrategy<T> {
      * Provides the bracket type used in the serialized format, which might
      * give hints or constraints on how the data is structured.
      *
-     * @return The {@link BracketType} representing the type of bracket used in the serialized format.
+     * @return the {@link BracketType} used by this serialization strategy.
      */
     @NotNull
     BracketType bracketType();

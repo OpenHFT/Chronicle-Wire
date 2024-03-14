@@ -23,6 +23,7 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
@@ -80,6 +81,7 @@ public class VanillaMethodReader implements MethodReader {
      * @param metaDataHandler Metadata handler array.
      * @param objects Varargs for additional parameters.
      */
+    @UsedViaReflection
     public VanillaMethodReader(MarshallableIn in,
                                boolean ignoreDefault,
                                WireParselet defaultParselet,
@@ -89,6 +91,7 @@ public class VanillaMethodReader implements MethodReader {
         this(in, ignoreDefault, defaultParselet, SKIP_READABLE_BYTES, methodReaderInterceptorReturns, metaDataHandler, objects);
     }
 
+    @UsedViaReflection
     public VanillaMethodReader(MarshallableIn in,
                                boolean ignoreDefault,
                                WireParselet defaultParselet,
@@ -181,7 +184,7 @@ public class VanillaMethodReader implements MethodReader {
     private static LongConversion longConversionForFirstParam(Method m) {
         Annotation[][] annotations = m.getParameterAnnotations();
         // Check if there are any annotations for the first parameter
-        if (annotations == null || annotations.length < 1 || annotations[0].length < 1)
+        if (annotations.length < 1 || annotations[0].length < 1)
             return null;
         // Loop through all annotations of the first parameter
         for (Annotation annotation : annotations[0]) {
@@ -306,13 +309,13 @@ public class VanillaMethodReader implements MethodReader {
 
     /**
      * Constructs a log message based on the provided CharSequence and ValueIn.
-     * Converts binary messages to text for better logging. This method is designed
-     * with package-level visibility for testing purposes.
+     * Converts binary messages to text for better logging.
      *
      * @param s A CharSequence representing part of the message.
      * @param v The ValueIn associated with the message.
      * @return A constructed log message.
      */
+    // package local for testing
     static @NotNull String logMessage0(@NotNull CharSequence s, @NotNull ValueIn v) {
         try {
             String rest;
@@ -675,9 +678,7 @@ public class VanillaMethodReader implements MethodReader {
      * @return The original object if it can be recycled, otherwise null
      */
     private <T> T checkRecycle(T o) {
-        // Check if the object is a collection
         if (o instanceof Collection<?>) {
-            // Clear the collection
             ((Collection<?>) o).clear();
             return o;
         }
@@ -704,7 +705,6 @@ public class VanillaMethodReader implements MethodReader {
         // Ensure the reader is not closed
         throwExceptionIfClosed();
 
-        // Make the method accessible (useful for private methods)
         Jvm.setAccessible(m);
 
         // Create an array to store the arguments
@@ -819,7 +819,6 @@ public class VanillaMethodReader implements MethodReader {
      * @return true if a message was read; false otherwise
      */
     private boolean readOne0() {
-        // Open a reading context for the document
         try (DocumentContext context = in.readingDocument()) {
 
             // If the document context isn't present, return false indicating no message was read
@@ -832,8 +831,6 @@ public class VanillaMethodReader implements MethodReader {
                 metaWireParser.accept(context.wire());
                 return true;
             }
-
-            // Ensure the context contains data
             assert context.isData();
 
             // Reset the message history with the current context's source ID and index
@@ -842,7 +839,6 @@ public class VanillaMethodReader implements MethodReader {
             // Parse the data message
             dataWireParser.accept(context.wire());
         } finally {
-            // Reset the message history once done
             messageHistory().reset();
         }
         return true;
@@ -855,7 +851,6 @@ public class VanillaMethodReader implements MethodReader {
      * @return The current message history instance
      */
     private MessageHistory messageHistory() {
-        // If the messageHistory instance is null, initialize it from the global MessageHistory
         if (messageHistory == null) messageHistory = MessageHistory.get();
         return messageHistory;
     }
@@ -880,10 +875,8 @@ public class VanillaMethodReader implements MethodReader {
      * @throws IllegalStateException if the method reader is closed.
      */
     public MethodReaderInterceptorReturns methodReaderInterceptorReturns() {
-        // Ensure the method reader is still open before proceeding
         throwExceptionIfClosed();
 
-        // Return the current interceptor
         return methodReaderInterceptorReturns;
     }
 }

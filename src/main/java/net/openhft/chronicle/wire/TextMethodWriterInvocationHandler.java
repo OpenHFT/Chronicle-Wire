@@ -102,7 +102,7 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
 
         // If there are no annotations, return a no-operation consumer.
-        if (parameterAnnotations.length <= 0)
+        if (parameterAnnotations.length == 0)
             return NOOP_CONSUMER;
         for (Annotation anno : parameterAnnotations[0]) {
             if (anno instanceof LongConversion) {

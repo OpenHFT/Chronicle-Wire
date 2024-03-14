@@ -25,7 +25,6 @@ import java.util.function.Function;
  * Extends the {@link TextMethodTester} for testing methods with YAML-based wire format.
  *
  * @param <T> The type parameter for the tested method's output.
- * @since 2023-08-29
  */
 public class YamlMethodTester<T> extends TextMethodTester<T> {
 

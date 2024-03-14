@@ -32,7 +32,6 @@ import java.util.concurrent.TimeUnit;
  */
 @DontChain
 public interface WireOut extends WireCommon, MarshallableOut {
-
     /**
      * Writes an empty field marker to the stream.
      *

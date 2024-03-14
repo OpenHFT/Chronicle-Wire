@@ -977,7 +977,6 @@ public interface ValueOut {
             } else if (object instanceof Enum) {
                 return asEnum((Enum) object);
             } else if (isScalar(object)) {
-                // Handling LocalDate
                 if (object instanceof LocalDate) {
                     LocalDate d = (LocalDate) object;
                     try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
@@ -993,7 +992,6 @@ public interface ValueOut {
                 }
                 return text(object.toString());
             } else if (object instanceof Locale) {
-                // Convert Locale to its language tag representation
                 return text(((Locale) object).toLanguageTag());
             } else {
                 return marshallable(object);
@@ -1329,7 +1327,7 @@ public interface ValueOut {
                 return result;
             }
         }
- // Check if the value is an instance of WriteMarshallable interface
+        // Check if the value is an instance of WriteMarshallable interface
         if (value instanceof WriteMarshallable) {
             // Handle the case where the value is an enum type
             if (isAnEnum(value)) {
@@ -1382,39 +1380,24 @@ public interface ValueOut {
         } else if (WireSerializedLambda.isSerializableLambda(valueClass)) {
             WireSerializedLambda.write(value, this);
             return wireOut();
-        }
-        // Handle arrays
-        else if (Object[].class.isAssignableFrom(valueClass)) {
+        } else if (Object[].class.isAssignableFrom(valueClass)) {
             @NotNull Class type = valueClass.getComponentType();
             return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), valueClass);
-        }
-        // Handle Thread types by their name
-        else if (value instanceof Thread) {
+        } else if (value instanceof Thread) {
             return text(((Thread) value).getName());
-        }
-        // Handle Java's Serializable interface
-        else if (value instanceof Serializable) {
+        } else if (value instanceof Serializable) {
             return typedMarshallable((Serializable) value);
-        }
-        // Handle ByteBuffer by wrapping it
-        else if (value instanceof ByteBuffer) {
+        } else if (value instanceof ByteBuffer) {
             return object(BytesStore.wrap((ByteBuffer) value));
-        }
-        // Handle LongValue and IntValue instances
-        else if (value instanceof LongValue) {
+        } else if (value instanceof LongValue) {
             LongValue value2 = (LongValue) value;
             return int64forBinding(value2.getValue(), value2);
-        }
-        else if (value instanceof IntValue) {
+        } else if (value instanceof IntValue) {
             IntValue value2 = (IntValue) value;
             return int32forBinding(value2.getValue(), value2);
-        }
-        // Handle Java Reference types
-        else if (value instanceof Reference) {
+        } else if (value instanceof Reference) {
             return object(((Reference) value).get());
-        }
-        // Default case when the type is unsupported
-        else {
+        } else {
             if ((Wires.isInternal(value)))
                 throw new IllegalArgumentException("type=" + valueClass +
                         " is unsupported, it must either be of type Marshallable, String or " +
@@ -1781,7 +1764,7 @@ public interface ValueOut {
      * Writes an int value to the wire using a specified converter.
      * The converter helps in changing the format or representation of the integer.
      *
-     * @param intConverter Converter to use.
+     * @param converter Converter to use.
      * @param i The integer to be converted and written.
      * @return The WireOut instance after the operation.
      */

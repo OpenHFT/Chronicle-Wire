@@ -36,7 +36,7 @@ public interface Wire extends WireIn, WireOut {
 
     /**
      * Factory method to create a Wire instance based on the file extension provided in the file name.
-     * Currently supports "csv" and "yaml" extensions.
+     * Currently, supports "csv" and "yaml" extensions.
      *
      * @param name The name of the file, including its extension.
      * @return A Wire implementation corresponding to the file extension.

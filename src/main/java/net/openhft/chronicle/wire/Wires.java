@@ -81,7 +81,6 @@ public enum Wires {
     // value to use when no more data is possible e.g. on a roll.
     public static final int END_OF_DATA = NOT_COMPLETE | META_DATA;
     public static final int NOT_INITIALIZED = 0x0;
-    // An empty Bytes object
     public static final Bytes<?> NO_BYTES = BytesStore.empty().bytesForRead();
     // Size of the SPB header
     public static final int SPB_HEADER_SIZE = 4;
@@ -284,12 +283,8 @@ public enum Wires {
      * @return the readable string representation of the blobs
      */
     public static String fromSizePrefixedBlobs(@NotNull DocumentContext dc) {
-        // Get the wire object from the document context
         Wire wire = dc.wire();
-        // Extract bytes from the wire
         Bytes<?> bytes = wire.bytes();
-
-        // Check if the wire is of TextWire type
         if (wire instanceof TextWire) {
             // Return the direct string representation for TextWire
             return bytes.toString();

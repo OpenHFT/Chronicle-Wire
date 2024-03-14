@@ -25,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
  * useful for debugging or generating documentation. The logging settings can be toggled
  * using system properties or programmatically through this class's static methods.
  */
-// TODO Add tests
+// Used in Chronicle Services
 public enum YamlLogging {
     ; // No enum instances are intended for this utility enum.
 

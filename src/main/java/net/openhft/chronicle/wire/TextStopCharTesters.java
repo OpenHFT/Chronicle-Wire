@@ -84,11 +84,9 @@ enum TextStopCharTesters implements StopCharTester {
                 eow.set(i);
         }
 
-        // Clearing specific characters from the default set
-        // as they aren't considered stop chars for a type context.
-        eow.clear('[');
-        eow.clear(']');
-        eow.clear('-');
+        eow.clear('['); // not in spec
+        eow.clear(']'); // not in spec
+        eow.clear('-'); // not in spec
         eow.clear('!');
         eow.clear('.');
         eow.clear('$');

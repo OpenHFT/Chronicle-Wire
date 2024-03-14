@@ -272,11 +272,9 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
      */
     @NotNull
     public MethodReader build(Object... impls) {
-        // If a default parselet has not been set, create one using the exception handler for unknown methods.
         if (this.defaultParselet == null)
             this.defaultParselet = createDefaultParselet(exceptionHandlerOnUnknownMethod);
 
-        // Attempt to create an instance of the generated method reader.
         final MethodReader generatedInstance = createGeneratedInstance(impls);
 
         // If the generated instance isn't available, use the default vanilla method reader.

@@ -182,25 +182,22 @@ public interface WireIn extends WireCommon, MarshallableIn {
     void clear();
 
     /**
-     * Determines if there's more data available in the current document.
-     * Consumes any padding before checking if readRemaining() > 0.
-     * <p>
-     * NOTE: This method only works inside a document. If called just before a document,
-     * it might read the lead in case of padding.
+     * This consumes any padding before checking if readRemaining() &gt; 0 <p> NOTE: This method
+     * only works inside a document. Call it just before a document and it won't know not to read
+     * the read in case there is padding.
      *
-     * @return true if there's more data to read in the current document, otherwise false.
+     * @return if there is more data to be read in this document.
      */
     default boolean hasMore() {
         return isNotEmptyAfterPadding();
     }
 
     /**
-     * Determines if there's more data available in the current document after consuming any padding.
-     * <p>
-     * NOTE: This method should only be used within the confines of a document. Otherwise, it might
-     * not behave as expected.
+     * This consumes any padding before checking if readRemaining() &gt; 0 <p> NOTE: This method
+     * only works inside a document. Call it just before a document and it won't know not to read
+     * the read in case there is padding.
      *
-     * @return true if there's more data to read in the current document after consuming padding, otherwise false.
+     * @return if there is more data to be read in this document.
      */
     default boolean isNotEmptyAfterPadding() {
         consumePadding();
@@ -269,10 +266,10 @@ public interface WireIn extends WireCommon, MarshallableIn {
     }
 
     /**
-     * Provides a context for reading a document without using a lambda expression.
-     * Equivalent to calling {@link WireIn#readDocument}.
+     * equivalent to {@link  WireIn#readDocument(net.openhft.chronicle.wire.ReadMarshallable,
+     * net.openhft.chronicle.wire.ReadMarshallable)} but with out the use of a lambda expression
      *
-     * @return the document context which provides control over the reading process.
+     * @return the document context
      */
     @Override
     @NotNull
@@ -299,11 +296,11 @@ public interface WireIn extends WireCommon, MarshallableIn {
     void commentListener(Consumer<CharSequence> commentListener);
 
     /**
-     * Attempts to read a header for data. If successful, it adjusts the read position to the start of the data.
+     * Consume a header if one is available.
      *
-     * @return true if a data header was successfully read and data can be read between readPosition and readLimit.
-     * Returns false if no header is ready.
-     * @throws EOFException if an end-of-file marker is encountered.
+     * @return true, if a message can be read between readPosition and readLimit, else false if no
+     * header is ready.
+     * @throws EOFException if the end of wire marker is reached.
      */
     default boolean readDataHeader() throws EOFException {
         return readDataHeader(false) == HeaderType.DATA;

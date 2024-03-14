@@ -1396,13 +1396,12 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          * @return The length of the marshallable.
          */
         protected long readLengthMarshallable() {
-            long start = bytes.readPosition(); // store the initial read position
+            long start = bytes.readPosition();
             try {
-                // consume any content up to the specified indentation level
                 consumeAny(yt.topContext().indent);
-                return bytes.readPosition() - start; // return the difference to get the length
+                return bytes.readPosition() - start;
             } finally {
-                bytes.readPosition(start); // reset the read position in the finally block
+                bytes.readPosition(start);
             }
         }
 
@@ -1411,43 +1410,38 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          * @param minIndent Minimum indentation level to consume.
          */
         protected void consumeAny(int minIndent) {
-            consumePadding(); // consume any padding
-            int indent2 = Math.max(yt.topContext().indent, minIndent); // find the greater indentation level
-
-            switch (yt.current()) { // switch on the current token type
+            consumePadding();
+            int indent2 = Math.max(yt.topContext().indent, minIndent);
+            switch (yt.current()) {
                 case SEQUENCE_ENTRY:
                 case TAG:
-                    yt.next(minIndent); // move to the next token based on indentation
-                    consumeAny(minIndent); // recursively consume any token
+                    yt.next(minIndent);
+                    consumeAny(minIndent);
                     break;
                 case MAPPING_START:
-                    consumeMap(indent2); // consume the whole map structure
+                    consumeMap(indent2);
                     break;
                 case SEQUENCE_START:
-                    consumeSeq(indent2); // consume the whole sequence structure
+                    consumeSeq(indent2);
                     break;
                 case MAPPING_KEY:
-                    yt.next(minIndent); // move to the next token based on indentation
-                    consumeAny(minIndent); // recursively consume any token
-
-                    // if the current token is neither a key nor the end of a map, consume any
+                    yt.next(minIndent);
+                    consumeAny(minIndent);
                     if (yt.current() != YamlToken.MAPPING_KEY && yt.current() != YamlToken.MAPPING_END)
                         consumeAny(minIndent);
                     break;
                 case SEQUENCE_END:
-                    yt.next(minIndent); // move to the next token based on indentation
+                    yt.next(minIndent);
                     break;
                 case TEXT:
-                    yt.next(minIndent); // move to the next token based on indentation
+                    yt.next(minIndent);
                     break;
                 case MAPPING_END:
                 case STREAM_START:
                 case DOCUMENT_END:
                 case NONE:
-                    // For these tokens, no specific action is taken, just pass through.
                     break;
                 default:
-                    // If an unsupported token type is encountered, throw an exception.
                     throw new UnsupportedOperationException(yt.toString());
             }
         }
@@ -1458,22 +1452,20 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          * @param minIndent The minimum indentation level to consider.
          */
         private void consumeSeq(int minIndent) {
-            assert yt.current() == YamlToken.SEQUENCE_START; // Assert that we are indeed starting with a sequence.
-            yt.next(minIndent); // Move to the next token in the sequence.
-
-            while (true) { // Infinitely loop until a breaking condition is met.
+            assert yt.current() == YamlToken.SEQUENCE_START;
+            yt.next(minIndent);
+            while (true) {
                 switch (yt.current()) {
                     case SEQUENCE_ENTRY:
-                        yt.next(minIndent); // Consume the sequence entry token.
-                        consumeAny(minIndent); // Consume the contents of the sequence entry.
+                        yt.next(minIndent);
+                        consumeAny(minIndent);
                         break;
 
                     case SEQUENCE_END:
-                        yt.next(minIndent); // Consume the sequence end token.
-                        return; // Break out of the infinite loop.
+                        yt.next(minIndent);
+                        return;
 
                     default:
-                        // If the current token is neither a sequence entry nor a sequence end, raise an error.
                         throw new IllegalStateException(yt.toString());
                 }
             }
@@ -1489,16 +1481,12 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
             // While the current token signifies a key in the map:
             while (yt.current() == YamlToken.MAPPING_KEY) {
-                yt.next(minIndent); // Consume the key token.
-                consumeAny(minIndent); // Consume the key's contents.
-                consumeAny(minIndent); // Consume the corresponding value.
+                yt.next(minIndent); // consume KEY
+                consumeAny(minIndent); // consume the key
+                consumeAny(minIndent); // consume the value
             }
-
-            // If the current token is NONE, move to the next token.
             if (yt.current() == YamlToken.NONE)
                 yt.next(Integer.MIN_VALUE);
-
-            // If the current token signifies the end of the map, consume it.
             if (yt.current() == YamlToken.MAPPING_END)
                 yt.next(minIndent);
         }
@@ -1566,13 +1554,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          * @throws UnsupportedOperationException If the current token is not of type TEXT.
          */
         long getALong() {
-            // Check if the current token is of TEXT type.
             if (yt.current() == YamlToken.TEXT) {
-                long l = yt.parseLong(); // Parse the text token as a long.
-                yt.next(); // Move to the next token.
+                long l = yt.parseLong();
+                yt.next();
                 return l;
             }
-            // Throw an exception if the current token isn't TEXT.
             throw new UnsupportedOperationException(yt.toString());
         }
 
@@ -1607,13 +1593,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          * @throws UnsupportedOperationException If the current token is not of type TEXT.
          */
         public double getADouble() {
-            // Check if the current token is of TEXT type.
             if (yt.current() == YamlToken.TEXT) {
-                double v = yt.parseDouble(); // Parse the text token as a double.
-                yt.next(); // Move to the next token.
+                double v = yt.parseDouble();
+                yt.next();
                 return v;
             } else {
-                // Throw an exception if the current token isn't TEXT.
                 throw new UnsupportedOperationException("yt:" + yt.current());
             }
         }
@@ -1913,19 +1897,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             return code == '!';
         }
 
-        /**
-         * Provides a human-readable representation for a character code.
-         *
-         * @param code The character code.
-         * @return A string representation for the character code.
-         */
-        @NotNull
-        String stringForCode(int code) {
-            // Return an error message if the code is negative.
-            // Else, return the character representation of the code.
-            return code < 0 ? "Unexpected end of input" : "'" + (char) code + "'";
-        }
-
         @NotNull
         @Override
         public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer)
@@ -2121,8 +2092,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             // Read the next YAML token into the provided StringBuilder.
             yt.text(sb);
             yt.next();
-
-            // If the current token represents a null tag...
             if (NULL_TAG.contentEquals(sb)) {
                 text();
                 return null; // Return null to indicate absence of a value.
@@ -2291,7 +2260,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          */
         @Nullable
         Object objectWithInferredType0(Object using, @NotNull SerializationStrategy strategy, Class type) throws InvalidMarshallableException {
-            // Determines whether a type is provided or not
             boolean bestEffort = type != null;
 
             // Handle type declaration, if present
