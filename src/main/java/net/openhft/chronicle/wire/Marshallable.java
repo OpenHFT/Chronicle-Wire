@@ -258,13 +258,15 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /**
-     * Copies the content of the current marshallable object to another instance.
+     * Copy fields from this to dest by marshalling out and then in. Allows copying of fields by name
+     * even if there is no type relationship between this and dest
      *
-     * @param t The instance to copy to.
-     * @return The updated instance with the content from the current object.
+     * @param dest destination
+     * @return t
+     * @param <T> destination type
      */
-    default <T extends Marshallable> T copyTo(@NotNull T t) throws InvalidMarshallableException {
-        return Wires.copyTo(this, t);
+    default <T extends Marshallable> T copyTo(@NotNull T dest) throws InvalidMarshallableException {
+        return Wires.copyTo(this, dest);
     }
 
     /**

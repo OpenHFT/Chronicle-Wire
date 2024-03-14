@@ -79,6 +79,19 @@ public class TextWireTest extends WireTestCommon {
         }
     }
     @Test
+    public void fromList() {
+        for (String text : new String[]{
+                "[a, b, c]",
+                "[ 'a', 'b', 'c' ]",
+                "[ \"a\", \"b\", \"c\" ]"
+        }) {
+            @NotNull Wire wire = createWire();
+            wire.bytes().append(text);
+            @Nullable List<String> list = wire.read().object(List.class);
+            assertEquals(Arrays.asList("a", "b", "c"), list);
+        }
+    }
+    @Test
     public void testWhiteSpaceInType() {
         try {
             // Deserialize from string and check if the object is correctly formed

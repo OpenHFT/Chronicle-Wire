@@ -47,7 +47,6 @@ public final class ChronicleChannelUtils {
         if (closeCallback != null)
             simpleConnection.closeCallback(closeCallback);
 
-        // Retrieval of the header from the established connection
         final ChannelHeader marshallable = simpleConnection.headerIn();
         Jvm.debug().on(ChronicleChannel.class, "Client got " + marshallable);
 
@@ -60,7 +59,7 @@ public final class ChronicleChannelUtils {
                     URL url = ChronicleContext.urlFor(location);
                     channelCfg.hostname(url.getHost());
                     channelCfg.port(url.getPort());
-                    return newChannel(socketRegistry, channelCfg, headerOut, null);
+                    return newChannel(socketRegistry, channelCfg, headerOut,null);
 
                 } catch (IORuntimeException e) {
                     Jvm.debug().on(ChronicleChannel.class, e);
@@ -73,6 +72,11 @@ public final class ChronicleChannelUtils {
         return channelCfg.buffered()
                 ? new BufferedChronicleChannel(simpleConnection, channelCfg.pauserMode().get())
                 : simpleConnection;
+    }
+
+    @Deprecated(/* To be removed in x.27 */)
+    public static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg channelCfg, ChannelHeader headerOut) throws InvalidMarshallableException {
+        return newChannel(socketRegistry, channelCfg, headerOut, null);
     }
 
     /**

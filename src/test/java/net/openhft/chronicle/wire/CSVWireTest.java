@@ -21,9 +21,6 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.util.Map;
-
 import static org.junit.Assert.*;
 
 // CSVWireTest class extends from WireTestCommon and tests functionality related to CSV-based wire processing.

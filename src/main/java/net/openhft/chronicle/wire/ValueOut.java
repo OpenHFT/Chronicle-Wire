@@ -1379,9 +1379,7 @@ public interface ValueOut {
             if (value instanceof Set)
                 endTypePrefix();
             return wireOut;
-        }
-        // Handle serializable lambda types
-        else if (WireSerializedLambda.isSerializableLambda(valueClass)) {
+        } else if (WireSerializedLambda.isSerializableLambda(valueClass)) {
             WireSerializedLambda.write(value, this);
             return wireOut();
         }

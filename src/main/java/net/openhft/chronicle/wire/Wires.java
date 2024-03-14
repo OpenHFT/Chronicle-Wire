@@ -829,13 +829,13 @@ public enum Wires {
     }
 
     /**
-     * Copies the fields from the source object to the target object using wire serialization.
+     * Copy fields from source to target by marshalling out and then in. Allows copying of fields by name
+     * even if there is no type relationship between the source and target
      *
-     * @param source Source object to copy from
-     * @param target Target object to copy to
-     * @param <T>    Type of the target object
-     * @return Target object after copying
-     * @throws InvalidMarshallableException if there's an error during the copy process
+     * @param source source
+     * @param target dest
+     * @return target
+     * @param <T> target type
      */
     @NotNull
     public static <T> T copyTo(Object source, @NotNull T target) throws InvalidMarshallableException {

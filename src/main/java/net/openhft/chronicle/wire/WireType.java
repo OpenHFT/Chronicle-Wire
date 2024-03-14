@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.net.URL;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -715,52 +714,13 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
                 }, false);
     }
 
-    /**
-     * Deserializes a map from a file, with string keys and values of a specified type.
-     *
-     * @param filename The path to the file containing the serialized map.
-     * @param tClass The class of the values in the map.
-     * @param <T> The type of the values in the map.
-     * @return The deserialized map.
-     * @throws IOException If there's an error reading the file.
-     * @throws InvalidMarshallableException If the map cannot be properly deserialized.
-     */
-    @NotNull
-    public <T> Map<String, T> fromFileAsMap(String filename, @NotNull Class<T> tClass) throws IOException, InvalidMarshallableException {
-        @NotNull Map<String, T> map = new LinkedHashMap<>();
-        Wire wire = apply(BytesUtil.readFile(filename));
-        @NotNull StringBuilder sb = new StringBuilder();
-        while (wire.hasMore()) {
-            wire.readEventName(sb)
-                    .object(tClass, map, (m, o) -> m.put(sb.toString(), o));
-        }
-        return map;
-    }
-
-    /**
-     * Serializes a map to a file, with string keys and values of a specified type.
-     *
-     * @param filename The path to the file where the map should be serialized.
-     * @param map The map to serialize.
-     * @param <T> The type of the values in the map.
-     * @throws IOException If there's an error writing to the file.
-     * @throws InvalidMarshallableException If the map cannot be properly serialized.
-     */
+    @Deprecated(/* for removal in x.27*/)
     public <T extends Marshallable> void toFileAsMap(@NotNull String filename, @NotNull Map<String, T> map)
             throws IOException, InvalidMarshallableException {
         toFileAsMap(filename, map, false);
     }
 
-    /**
-     * Writes a map of string keys and Marshallable values to a file.
-     *
-     * @param filename The name of the file to write to.
-     * @param map The map to write.
-     * @param compact A flag indicating whether the serialized form should be compacted.
-     * @param <T> The type of values in the map, which should extend {@link Marshallable}.
-     * @throws IOException If there's an error writing to the file.
-     * @throws InvalidMarshallableException If the map cannot be properly serialized.
-     */
+    @Deprecated(/* for removal in x.27*/)
     public <T extends Marshallable> void toFileAsMap(@NotNull String filename, @NotNull Map<String, T> map, boolean compact)
             throws IOException, InvalidMarshallableException {
         String tempFilename = IOTools.tempName(filename);

@@ -41,12 +41,6 @@ public interface Event<E extends Event<E>> extends BaseEvent<E> {
         return (E) this;
     }
 
-    default E updateEvent() {
-        if (this.eventTime() <= 0)
-            this.eventTimeNow();
-        return (E) this;
-    }
-
     /**
      * Updates the event with a new name, and if the event time is not already set,
      * updates the event time to the current system time. This method is useful for renaming

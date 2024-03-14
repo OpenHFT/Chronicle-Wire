@@ -142,6 +142,19 @@ public class ServicesTimestampLongConverter implements LongConverter {
     }
 
     /**
+     * Parses a part of the provided {@link CharSequence} using the underlying converter.
+     *
+     * @param text the text to parse.
+     * @param beginIndex the beginning index, inclusive.
+     * @param endIndex the ending index, exclusive.
+     * @return the parsed timestamp as a long value in the configured time unit.
+     */
+    @Override
+    public long parse(CharSequence text, int beginIndex, int endIndex) {
+        return underlying.parse(text, beginIndex, endIndex);
+    }
+
+    /**
      * Appends a representation of the provided long timestamp (in the system-configured time unit) to the provided {@link StringBuilder}.
      *
      * @param text  The StringBuilder to which the timestamp representation will be appended.

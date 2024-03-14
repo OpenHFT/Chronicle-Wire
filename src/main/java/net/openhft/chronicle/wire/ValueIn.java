@@ -1246,14 +1246,13 @@ public interface ValueIn {
     }
 
     /**
-     * Attempts to deserialize an object from the current data stream of the specified type,
-     * optionally reusing a provided object instance.
+     * Reads an object from the wire.
      *
-     * @param <E> The expected type of the deserialized object.
-     * @param using Object instance to possibly reuse during deserialization.
-     * @param clazz Expected object type.
-     * @return The deserialized object or null if not present.
-     * @throws InvalidMarshallableException If the deserialization process encounters an error.
+     * @param <E>   The type of the object to read.
+     * @param using An instance of the object to reuse, or null to create a new instance.
+     * @param clazz The class of the object to read.
+     * @return The object read from the wire, or null if it cannot be read.
+     * @throws InvalidMarshallableException if the object is invalid
      */
     @Nullable
     default <E> E object(@Nullable E using, @Nullable Class clazz) throws InvalidMarshallableException {

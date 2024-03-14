@@ -94,9 +94,6 @@ public class Issue609Test extends WireTestCommon {
         assertEquals(expected, WireType.TEXT.fromString(withString2));
     }
 
-    /**
-     * Configuration class representing a collection of services.
-     */
     public static class ChronicleServicesCfg extends AbstractMarshallableCfg {
         public final Map<String, ServiceCfg> services = new LinkedHashMap<>();
     }
