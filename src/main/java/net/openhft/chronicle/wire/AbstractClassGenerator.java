@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.MetaData<M>> {
 
-    // Static compiler to cache and compile generated code.
+    // TODO Use Wires.loadFromJava() instead of a public static final
     public static final CachedCompiler CACHED_COMPILER = new CachedCompiler(Jvm.isDebug() ? new File(OS.getTarget(), "generated-test-sources") : null, null);
 
     // Flag to determine if the generated source code should be displayed.

@@ -277,8 +277,6 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      * If an input event did generate an output, stale information from a previous input event is cleared.
      */
     private void swapMessageHistoryIfDirty() {
-        // This input event didn't generate an output event.
-        // Save the message history for potential future use by another method reader.
         if (messageHistory.isDirty()) {
             // This input event didn't generate an output event.
             // Saving message history - in case next input event will be processed by another method reader,
