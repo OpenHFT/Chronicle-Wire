@@ -48,7 +48,10 @@ public interface MessageHistory extends Marshallable {
         }
     }
 
-    void doWriteHistory(DocumentContext dc);
+    // needed by NoMessageHistory in Queue
+    default void doWriteHistory(DocumentContext dc) {
+        dc.wire().writeEventName(MethodReader.HISTORY).marshallable(get());
+    }
 
     /**
      * Returns the number of timings contained in this {@code MessageHistory}.
