@@ -240,7 +240,7 @@ public class MessageHistoryTest extends WireTestCommon {
                 MessageHistory.writeHistory(dc);
             }
 
-            assertEquals("00000000 51 00 00 00 ba 80 00 81  4b 00 c7 73 6f 75 72 63 Q······· K··sourc",
+            assertEquals("00000000 57 00 00 00 b9 07 68 69  73 74 6f 72 79 81 4b 00 W·····hi story·K·",
                     bytes.toHexString().split("\n")[0]);
         }
     }
