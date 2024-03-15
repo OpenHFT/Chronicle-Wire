@@ -60,7 +60,7 @@ public class MessageHistoryTest extends WireTestCommon {
         try {
             Wires.copyTo(container1, container2);
             fail();
-        } catch (IllegalStateException e) {
+        } catch (IllegalStateException | ArithmeticException e) {
             // all good
         }
     }
@@ -103,9 +103,10 @@ public class MessageHistoryTest extends WireTestCommon {
 
     @Test
     public void checkToString() {
-        try {
-            System.setProperty("history.wall.clock", "true");
+        {
             VanillaMessageHistory history = new SetTimeMessageHistory();
+            history.historyWallClock(true);
+            history.useBytesMarshallable(false);
             history.addSourceDetails(true);
             history.historyWallClock(true);
             initExampleMessageHistory(history);
@@ -170,16 +171,14 @@ public class MessageHistoryTest extends WireTestCommon {
             mh2.addSourceDetails(false);
             mh2.readMarshallable(wire2);
             assertTrue(mh2.toString().startsWith("VanillaMessageHistory { sources: [1=0xff,2=0xfff], timings: [ 2001-09-09T01:46:40, 2001-09-09T01:46:40.00001,"));
-        } finally {
-            System.clearProperty("history.wall.clock");
         }
     }
 
     @Test
     public void testReadMarshallable() {
-        try {
-            System.setProperty("history.wall.clock", "true");
+        {
             SetTimeMessageHistory vmh = new SetTimeMessageHistory();
+            vmh.historyWallClock(true);
             vmh.addSource(1, 2);
             vmh.addTiming(1111);
             vmh.addTiming(2222);
@@ -214,21 +213,23 @@ public class MessageHistoryTest extends WireTestCommon {
             vmh.addTiming(120962203520100L);
 
             VanillaMessageHistory vmh2 = new VanillaMessageHistory();
+            vmh2.historyWallClock(true);
             wire.read().object(vmh2, VanillaMessageHistory.class);
             assertEquals(vmh.toString(), vmh2.toString());
 
             VanillaMessageHistory vmh3 = new VanillaMessageHistory();
+            vmh3.historyWallClock(true);
             wire.read().object(vmh3, VanillaMessageHistory.class);
             assertEquals(vmh.toString(), vmh3.toString());
-        } finally {
-            System.clearProperty("history.wall.clock");
         }
     }
 
     @Test
-    public void testWriteHistory() {
+    public void testWriteHistorySelfDescribing() {
         try {
             final SetTimeMessageHistory history = new SetTimeMessageHistory();
+            history.historyMethodId(false);
+            history.useBytesMarshallable(false);
             initExampleMessageHistory(history);
             MessageHistory.set(history);
 
@@ -239,6 +240,42 @@ public class MessageHistoryTest extends WireTestCommon {
             }
 
             assertEquals("00000000 57 00 00 00 b9 07 68 69  73 74 6f 72 79 81 4b 00 W·····hi story·K·",
+                    bytes.toHexString().split("\n")[0]);
+
+            final SetTimeMessageHistory history2 = new SetTimeMessageHistory();
+            history2.historyMethodId(true);
+            history2.useBytesMarshallable(false);
+            initExampleMessageHistory(history2);
+            MessageHistory.set(history2);
+
+            wire.reset();
+            try (DocumentContext dc = wire.writingDocument()) {
+                MessageHistory.writeHistory(dc);
+            }
+
+            assertEquals("00000000 51 00 00 00 ba 80 00 81  4b 00 c7 73 6f 75 72 63 Q······· K··sourc",
+                    bytes.toHexString().split("\n")[0]);
+
+        } finally {
+            MessageHistory.set(null);
+        }
+    }
+
+    @Test
+    public void testWriteHistoryAsBytes() {
+        try {
+            final SetTimeMessageHistory history = new SetTimeMessageHistory();
+            history.useBytesMarshallable(true);
+            initExampleMessageHistory(history);
+            MessageHistory.set(history);
+
+            final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+            final Wire wire = new BinaryWire(bytes);
+            try (DocumentContext dc = wire.writingDocument()) {
+                MessageHistory.writeHistory(dc);
+            }
+
+            assertEquals("00000000 39 00 00 00 ba 80 00 81  33 00 86 02 01 00 00 00 9······· 3·······",
                     bytes.toHexString().split("\n")[0]);
 
             System.setProperty("history.as.method_id", "true");
@@ -252,11 +289,10 @@ public class MessageHistoryTest extends WireTestCommon {
                 MessageHistory.writeHistory(dc);
             }
 
-            assertEquals("00000000 51 00 00 00 ba 80 00 81  4b 00 c7 73 6f 75 72 63 Q······· K··sourc",
+            assertEquals("00000000 39 00 00 00 ba 80 00 81  33 00 86 02 01 00 00 00 9······· 3·······",
                     bytes.toHexString().split("\n")[0]);
 
         } finally {
-            System.clearProperty("history.as.method_id");
             MessageHistory.set(null);
         }
     }
