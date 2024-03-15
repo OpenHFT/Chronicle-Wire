@@ -53,7 +53,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     private static final boolean HISTORY_AS_METHOD_ID = Jvm.getBoolean("history.as.method_id", !HISTORY_SELF_DESCRIBING);
     private boolean useBytesMarshallable = HISTORY_AS_BYTES;
     private boolean historyWallClock = HISTORY_WALL_CLOCK;
-    private boolean historyMethodId = HISTORY_AS_METHOD_ID;
     @NotNull
     private final int[] sourceIdArray = new int[MESSAGE_HISTORY_LENGTH];
     @NotNull
@@ -189,7 +188,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException, InvalidMarshallableException {
         Bytes<?> bytes = wire.bytes();
-        if (bytes.peekUnsignedByte() == BinaryWireCode.BYTES_MARSHALLABLE) {
+        if (bytes.peekUnsignedByte() == BinaryWireCode.HISTORY_MESSAGE) {
             bytes.readSkip(1);
             if (bytes.canReadDirect(MAX_LENGTH)) {
                 readMarshallableDirect(bytes);
@@ -216,7 +215,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     @Override
     public void writeMarshallable(@NotNull WireOut wire) {
         if (useBytesMarshallable && wire.isBinary()) {
-            wire.bytes().writeUnsignedByte(BinaryWireCode.BYTES_MARSHALLABLE);
+            wire.bytes().writeUnsignedByte(BinaryWireCode.HISTORY_MESSAGE);
             writeMarshallable(wire.bytes());
         } else {
             wire.write("sources").sequence(this, acceptSourcesConsumer);
@@ -339,7 +338,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
                 b.writeHexDumpDescription("timing in nanos");
             out.int64(t.timingsArray[i]);
         }
-        if (!(out.wireOut() instanceof HashWire))
+        if (!(out.wireOut() instanceof HashWire) && addSourceDetails)
             out.int64(nanoTime());
     }
 
@@ -448,7 +447,9 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     @Override
     public void doWriteHistory(DocumentContext dc) {
         final WireOut wire = dc.wire();
-        final ValueOut valueOut = historyMethodId ? wire.writeEventId(MethodReader.MESSAGE_HISTORY_METHOD_ID) : wire.writeEventName(MethodReader.HISTORY);
+        final ValueOut valueOut = useBytesMarshallable
+                ? wire.writeEventId(MethodReader.MESSAGE_HISTORY_METHOD_ID)
+                : wire.writeEventName(MethodReader.HISTORY);
         valueOut.marshallable(this);
     }
 
@@ -458,9 +459,5 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
 
     public void historyWallClock(boolean historyWallClock) {
         this.historyWallClock = historyWallClock;
-    }
-
-    public void historyMethodId(boolean historyMethodId) {
-        this.historyMethodId = historyMethodId;
     }
 }
