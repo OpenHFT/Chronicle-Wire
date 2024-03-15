@@ -803,19 +803,38 @@ public enum Wires {
         }
     }
 
+    /**
+     * Generates and returns a tuple instance for the specified class and type name.
+     * This method is particularly useful for creating tuples for data types or classes
+     * that are not available locally, enabling data to be read from a WireIn and passed on.
+     * <p>
+     * This method ensures the class type specified is an interface and leverages the
+     * Marshallable function to generate the tuple. If the specified class is null or
+     * is the Object class, it defaults to using the Marshallable class.
+     * <p>
+     * Note: If the provided class type is not an interface or if the required tuple
+     * cannot be generated for the given type name, the method returns null and logs a
+     * warning.
+     *
+     * @param <T>      The type parameter representing the parent type of tuple to be returned.
+     * @param tClass   The class type for which the tuple is required. Must be an interface.
+     *                 If null or Object.class, defaults to Marshallable.class.
+     * @param typeName The type name used in tuple generation.
+     *                 It's used to identify the specific tuple type to be created.
+     * @return A tuple of type T, or null if it's not possible to create a tuple
+     * for the given class type and type name.
+     */
     @Nullable
     public static <T> T tupleFor(Class<T> tClass, String typeName) {
-        if (!GENERATE_TUPLES) {
-            Jvm.warn().on(Wires.class, "Cannot find a class for " + typeName + " are you missing an alias?");
-            return null;
-        }
-
         if (tClass == null || tClass == Object.class)
             tClass = (Class<T>) Marshallable.class;
+        // Ensure the provided class is an interface.
         if (!tClass.isInterface()) {
             Jvm.warn().on(Wires.class, "Cannot generate a class for " + typeName + " are you missing an alias?");
             return null;
         }
+
+        // Use the appropriate function to generate the tuple.
         return (T) MARSHALLABLE_FUNCTION.get(tClass).apply(typeName);
     }
 

@@ -235,6 +235,35 @@ public interface WireIn extends WireCommon, MarshallableIn {
         return false;
     }
 
+    /**
+     * Sets the state of tuple generation for the implementing class.
+     * <p>
+     * Implementing classes are expected to override this method to provide meaningful functionality
+     * if they support dynamic tuple generation.
+     *
+     * @param generateTuples A boolean value indicating the desired state of tuple generation.
+     *                       Setting this to true in the default implementation will result in an exception.
+     * @throws UnsupportedOperationException if the method is invoked with true in its default implementation,
+     *                                       indicating that tuple generation is not supported.
+     */
+    default void generateTuples(boolean generateTuples) {
+        if (generateTuples)
+            throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Retrieves the current state of tuple generation in the implementing class.
+     * <p>
+     * Implementing classes should override this method to return the actual state of tuple generation
+     * if they support this feature.
+     *
+     * @return A boolean value indicating whether tuple generation is currently enabled. The default
+     * implementation always returns false.
+     */
+    default boolean generateTuples() {
+        return false;
+    }
+
     enum HeaderType {
         NONE, DATA, META_DATA, EOF
     }

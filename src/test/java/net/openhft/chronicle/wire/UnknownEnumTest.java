@@ -91,7 +91,6 @@ public class UnknownEnumTest extends WireTestCommon {
 
     @Test
     public void shouldGenerateFriendlyErrorMessageWhenTypeIsNotKnownInTextWire() {
-        Wires.GENERATE_TUPLES = true;
         try {
             final TextWire textWire = TextWire.from("enumField: !UnknownEnum QUX");
             textWire.valueIn.wireIn().read("enumField").object();
@@ -100,9 +99,7 @@ public class UnknownEnumTest extends WireTestCommon {
         } catch (Exception e) {
             String message = e.getMessage().replaceAll(" [a-z0-9.]+.Proxy\\d+", " ProxyXX");
             assertThat(message,
-                    is(equalTo("Trying to read marshallable class ProxyXX at [pos: 23, rlim: 27, wlim: 27, cap: 27 ]  QUX expected to find a {")));
-        } finally {
-            Wires.GENERATE_TUPLES = false;
+                    is(equalTo("java.lang.ClassNotFoundException: Unable to load UnknownEnum, is a class alias missing.")));
         }
     }
 

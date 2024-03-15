@@ -1881,7 +1881,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                         return o;
                 }
             }
-            if (Wires.dtoInterface(tClass) && GENERATE_TUPLES && ObjectUtils.implementationToUse(tClass) == tClass)
+            if (Wires.dtoInterface(tClass) && generateTuples() && ObjectUtils.implementationToUse(tClass) == tClass)
                 return Wires.tupleFor(tClass, null);
             return null;
         }
@@ -1889,7 +1889,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         @Nullable
         private Object handleCNFE(Class tClass, ClassNotFoundRuntimeException e, StringBuilder stringBuilder) {
             if (tClass == null) {
-                if (GENERATE_TUPLES) {
+                if (generateTuples()) {
                     return Wires.tupleFor(null, stringBuilder.toString());
                 }
                 String message = "Unable to load " + stringBuilder + ", is a class alias missing.";
@@ -1916,7 +1916,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                     }
                 }
 
-            } else if (GENERATE_TUPLES && tClass.getClassLoader() != null && tClass.isInterface()) {
+            } else if (generateTuples() && tClass.getClassLoader() != null && tClass.isInterface()) {
                 return Wires.tupleFor(tClass, stringBuilder.toString());
             }
 
