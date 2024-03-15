@@ -474,12 +474,12 @@ public class BinaryWire extends AbstractWire implements Wire {
             bytes.readLimit(newLimit);
             @NotNull final ValueOut wireValueOut = wire.getValueOut();
             BracketType bracketType = getBracketTypeNext();
-            if (bracketType == null) {
-                bytes.uncheckedReadSkipOne();
-                copyHistoryMessage(wire);
-                return;
-            }
             switch (bracketType) {
+                case UNKNOWN:
+                    bytes.uncheckedReadSkipOne();
+                    copyHistoryMessage(wire);
+                    return;
+
                 case MAP:
                     wireValueOut.marshallable(this::copyTo);
                     break;
@@ -508,15 +508,19 @@ public class BinaryWire extends AbstractWire implements Wire {
         throw new IllegalArgumentException(stringForCode(bytes.readUnsignedByte()));
     }
 
+    @NotNull
     private BracketType getBracketTypeNext() {
         int peekCode = peekCode();
         return getBracketTypeFor(peekCode);
     }
 
+    @NotNull
     BracketType getBracketTypeFor(int peekCode) {
         if (peekCode >= FIELD_NAME0 && peekCode <= FIELD_NAME31)
             return BracketType.MAP;
         switch (peekCode) {
+            case HISTORY_MESSAGE:
+                return BracketType.UNKNOWN;
             case FIELD_NUMBER:
             case FIELD_NAME_ANY:
             case EVENT_NAME:
@@ -527,8 +531,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                 return BracketType.NONE;
             default:
                 return BracketType.SEQ;
-            case HISTORY_MESSAGE:
-                return null;
         }
     }
 
