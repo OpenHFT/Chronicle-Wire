@@ -28,6 +28,9 @@ import net.openhft.chronicle.wire.LongConverter;
  * into its string representation with the appropriate size suffix.
  */
 public class SizeLongConverter implements LongConverter {
+    /**
+     * The singleton instance of this class.
+     */
     public static final SizeLongConverter INSTANCE = new SizeLongConverter();
 
     /**
@@ -46,27 +49,32 @@ public class SizeLongConverter implements LongConverter {
      */
     @Override
     public long parse(CharSequence text) throws NumberFormatException {
-        int shift = 0;
         int length = text.length();
-        if (length > 1)
-            switch (text.charAt(length - 1)) {
-                case 't':
-                case 'T':
-                    shift = 40;
-                    break;
-                case 'g':
-                case 'G':
-                    shift = 30;
-                    break;
-                case 'm':
-                case 'M':
-                    shift = 20;
-                    break;
-                case 'k':
-                case 'K':
-                    shift = 10;
-                    break;
-            }
+        if (length < 1)
+            return 0;
+
+        int shift;
+        switch (text.charAt(length - 1)) {
+            case 't':
+            case 'T':
+                shift = 40;
+                break;
+            case 'g':
+            case 'G':
+                shift = 30;
+                break;
+            case 'm':
+            case 'M':
+                shift = 20;
+                break;
+            case 'k':
+            case 'K':
+                shift = 10;
+                break;
+            default:
+                shift = 0;
+                break;
+        }
         if (shift != 0)
             text = text.subSequence(0, length - 1);
 
