@@ -51,7 +51,7 @@ public class SizeLongConverter implements LongConverter {
     public long parse(CharSequence text) throws NumberFormatException {
         int length = text.length();
         if (length < 1)
-            return 0;
+            throw new NumberFormatException("Empty string");
 
         int shift;
         switch (text.charAt(length - 1)) {
@@ -75,8 +75,11 @@ public class SizeLongConverter implements LongConverter {
                 shift = 0;
                 break;
         }
-        if (shift != 0)
+        if (shift != 0) {
+            if (length < 2)
+                throw new NumberFormatException("No number for prefix '" + text + "'");
             text = text.subSequence(0, length - 1);
+        }
 
         return Long.parseLong(text.toString()) << shift;
     }

@@ -52,6 +52,11 @@ public class SizeLongConverterTest {
         converter.parse("");
     }
 
+    @Test(expected = NumberFormatException.class)
+    public void testParseNoDigit() {
+        converter.parse("g");
+    }
+
     @Test
     public void testAppend() {
         Assert.assertEquals("0", converter.asString(0));
