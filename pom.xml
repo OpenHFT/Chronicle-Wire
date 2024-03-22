@@ -239,7 +239,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <compilerArgs>
-                        <arg>-Xlint:deprecation</arg>
+                        <arg>-Xlint:deprecation,-options</arg>
                         <arg>-parameters</arg>
                     </compilerArgs>
                     <release>8</release>
