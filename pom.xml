@@ -15,7 +15,8 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -23,7 +24,7 @@
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
         <version>1.25.4</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <artifactId>chronicle-wire</artifactId>
@@ -242,7 +243,6 @@
                         <arg>-Xlint:deprecation,-options</arg>
                         <arg>-parameters</arg>
                     </compilerArgs>
-                    <release>8</release>
                     <source>8</source>
                     <target>8</target>
                     <encoding>UTF-8</encoding>
@@ -449,6 +449,15 @@
 
     <profiles>
         <profile>
+            <id>java11-release8</id>
+            <activation>
+                <jdk>[11,</jdk>
+            </activation>
+            <properties>
+                <maven.compiler.release>8</maven.compiler.release>
+            </properties>
+        </profile>
+        <profile>
             <id>sonar</id>
             <build>
                 <plugins>
@@ -517,7 +526,9 @@
                                 </goals>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
-                                    <commandlineArgs>${jvm.requiredArgs} -classpath %classpath net.openhft.chronicle.wire.AbstractTimestampLongConverterJLBHBenchmark</commandlineArgs>
+                                    <commandlineArgs>${jvm.requiredArgs} -classpath %classpath
+                                        net.openhft.chronicle.wire.AbstractTimestampLongConverterJLBHBenchmark
+                                    </commandlineArgs>
                                 </configuration>
                             </execution>
                         </executions>
