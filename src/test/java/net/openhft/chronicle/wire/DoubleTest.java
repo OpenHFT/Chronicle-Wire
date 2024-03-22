@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.bytes.internal.UnsafeText;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -29,7 +28,6 @@ import static net.openhft.chronicle.wire.Marshallable.fromString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-// see also UnsafeTextBytesTest
 public class DoubleTest extends WireTestCommon {
 
     static class TwoDoubleDto extends SelfDescribingMarshallable {
