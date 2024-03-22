@@ -55,15 +55,13 @@ public class DoubleTest extends WireTestCommon {
     @Test
     public void testManyDoubles() {
         final Bytes<?> bytes = Bytes.elasticByteBuffer();
-        final long address = bytes.clear().addressForRead(0);
 
         for (double aDouble = -1; aDouble < 1; aDouble += 0.00001) {
             bytes.clear();
             aDouble = Maths.round6(aDouble);
-            final long end = UnsafeText.appendDouble(address, aDouble);
-            bytes.readLimit(end - address);
+            bytes.append(aDouble);
             double d2 = bytes.parseDouble();
-            assertEquals(aDouble, d2, Math.ulp(aDouble));
+            assertEquals(aDouble, d2, 0);
             final String message = bytes.toString();
             assertFalse(message + " has trailing 0", message.endsWith("0"));
         }
