@@ -310,7 +310,6 @@ final class SerializableObjectTest extends WireTestCommon {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @SafeVarargs
     private static <T> T compose(final T original,
                                  final Consumer<T>... operations) {

@@ -56,7 +56,6 @@ public class BinaryWireTest extends WireTestCommon {
     final boolean numericField;
     final boolean fieldLess;
     final int compressedSize;
-    @SuppressWarnings("rawtypes")
     @NotNull
     Bytes<?> bytes = new HexDumpBytes();
 

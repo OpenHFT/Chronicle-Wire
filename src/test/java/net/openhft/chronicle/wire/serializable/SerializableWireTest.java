@@ -73,7 +73,6 @@ public class SerializableWireTest extends WireTestCommon {
         return list;
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
     public void writeMarshallable() {
         if (ime) // TODO Fix to be expected

@@ -56,7 +56,6 @@ public class MarshallableTest extends WireTestCommon {
         assertNotNull(o);
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
     public void testBytesMarshallable() {
         @NotNull Marshallable m = new MyTypes();
@@ -69,7 +68,6 @@ public class MarshallableTest extends WireTestCommon {
         m.readMarshallable(wire);
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
     public void testEquals() {
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();

@@ -40,7 +40,6 @@ import static net.openhft.chronicle.wire.BinaryWireCode.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-@SuppressWarnings("rawtypes")
 @RunWith(value = Parameterized.class)
 public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
 

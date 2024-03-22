@@ -55,15 +55,12 @@ public class NestedClassTest extends WireTestCommon {
         outerClass2.addListB().setTextNumber("num2B", 22);
     }
 
-    @SuppressWarnings("rawtypes")
     private final Function<Bytes<?>, Wire> wireType;
 
-    @SuppressWarnings("rawtypes")
     public NestedClassTest(Function<Bytes<?>, Wire> wireType) {
         this.wireType = wireType;
     }
 
-    @SuppressWarnings("rawtypes")
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
         return Arrays.asList(
@@ -77,7 +74,6 @@ public class NestedClassTest extends WireTestCommon {
         );
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
     public void testMultipleReads() {
         Bytes<?> bytes = Bytes.elasticByteBuffer();

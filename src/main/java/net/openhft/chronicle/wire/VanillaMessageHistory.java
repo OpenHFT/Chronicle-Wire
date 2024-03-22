@@ -34,7 +34,6 @@ import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
  * The {@code VanillaMessageHistory} class is an implementation of {@link MessageHistory} that
  * provides an array-backed history of messages.
  */
-@SuppressWarnings("rawtypes")
 public class VanillaMessageHistory extends SelfDescribingMarshallable implements MessageHistory {
 
     // Maximum length for storing message history

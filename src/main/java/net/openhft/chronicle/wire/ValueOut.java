@@ -1292,7 +1292,7 @@ public interface ValueOut {
         try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
             StringBuilder sb = stlSb.get();
             longConverter.append(sb, l);
-            if (longConverter.allSafeChars(wireOut()) && sb.length() > 0)
+            if (longConverter.allSafeChars() && sb.length() > 0)
                 return rawText(sb);
             else
                 return text(sb);

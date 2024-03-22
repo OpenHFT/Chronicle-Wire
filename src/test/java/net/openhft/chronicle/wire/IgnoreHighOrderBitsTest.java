@@ -35,7 +35,7 @@ public class IgnoreHighOrderBitsTest extends WireTestCommon {
      */
     @Test
     public void testWriteByte() throws IOException {
-        @SuppressWarnings("rawtypes") final Bytes<?> bytes = new HexDumpBytes();
+        final Bytes<?> bytes = new HexDumpBytes();
         try {
             final Wire wire = new BinaryWire(bytes);
             @SuppressWarnings("resource")

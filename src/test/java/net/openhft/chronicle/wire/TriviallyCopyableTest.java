@@ -18,9 +18,7 @@
 
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesIn;
-import net.openhft.chronicle.bytes.BytesOut;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
@@ -49,6 +47,7 @@ public class TriviallyCopyableTest extends WireTestCommon {
 
     static class AA extends BytesInBinaryMarshallable {
         static final int FORMAT = 1;
+        static final int OFFSET = BytesUtil.triviallyCopyableStart(AA.class);
 
         // natural order on a 64-bit JVM.
         int i;
@@ -79,7 +78,7 @@ public class TriviallyCopyableTest extends WireTestCommon {
             switch (id) {
                 case FORMAT:
                     if (OS.is64Bit())
-                        bytes.unsafeReadObject(this, 32);
+                        bytes.unsafeReadObject(this, OFFSET, 32);
                     else
                         readMarshallable1(bytes);
                     return;
@@ -105,7 +104,7 @@ public class TriviallyCopyableTest extends WireTestCommon {
         public void writeMarshallable(BytesOut<?> bytes) {
             bytes.writeStopBit(FORMAT);
             if (OS.is64Bit())
-                bytes.unsafeWriteObject(this, 32);
+                bytes.unsafeWriteObject(this, OFFSET, 32);
             else
                 writeMarshallable1(bytes);
         }

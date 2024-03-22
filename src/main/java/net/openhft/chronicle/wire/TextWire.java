@@ -46,8 +46,7 @@ import java.util.regex.Pattern;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.wire.TextStopCharTesters.END_OF_TYPE;
-import static net.openhft.chronicle.wire.Wires.GENERATE_TUPLES;
-import static net.openhft.chronicle.wire.Wires.THROW_CNFRE;
+import static net.openhft.chronicle.wire.Wires.*;
 
 /**
  * YAML Based wire format

@@ -20,7 +20,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.io.UnsafeText;
+import net.openhft.chronicle.bytes.internal.UnsafeText;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -69,7 +69,6 @@ public abstract class AbstractWire implements Wire {
     private HeadNumberChecker headNumberChecker;
     private boolean usePadding = DEFAULT_USE_PADDING;
 
-    @SuppressWarnings("rawtypes")
     protected AbstractWire(@NotNull Bytes<?> bytes, boolean use8bit) {
         this.bytes = bytes;
         this.use8bit = use8bit;

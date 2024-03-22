@@ -92,7 +92,6 @@ public interface FieldInfo {
      * @return a {@link Class} identifying the declared type of the field
      * represented by this {@code FieldInfo} object.
      */
-    @SuppressWarnings("rawtypes")
     Class<?> type();
 
     /**

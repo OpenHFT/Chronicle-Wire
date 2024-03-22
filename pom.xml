@@ -32,10 +32,6 @@
     <description>Chronicle-Wire</description>
     <packaging>bundle</packaging>
     <properties>
-        <argLine />
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <compiler.argument>-Xlint:deprecation</compiler.argument>
         <sonar.organization>openhft</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <!-- The parent POM defines this plugin and activates it in a profile. Unfortunately this plugin will generate
@@ -249,6 +245,7 @@
                     <source>1.8</source>
                     <target>1.8</target>
                     <encoding>UTF-8</encoding>
+                    <failOnWarning>true</failOnWarning>
                 </configuration>
             </plugin>
             <!--

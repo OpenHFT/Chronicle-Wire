@@ -175,7 +175,7 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable,
         Throwable thrown = null;
         try {
             bindSSC();
-            ChronicleChannelCfg channelCfg = new ChronicleChannelCfg().port(url().getPort()).pauserMode(pauserMode).buffered(buffered);
+            ChronicleChannelCfg channelCfg = new ChronicleChannelCfg().addHostnamePort(null, url().getPort()).pauserMode(pauserMode).buffered(buffered);
             while (!isClosed()) {
                 final SocketChannel sc = ssc.accept();
                 sc.socket().setTcpNoDelay(true);

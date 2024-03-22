@@ -35,7 +35,6 @@ public class RFCExamplesTest extends WireTestCommon {
     map.put(2, "world");
     map.put(3, "bye");
      */
-    @SuppressWarnings("rawtypes")
     @Test
     public void testPuts() {
         @NotNull Bytes<?> bytes = Bytes.allocateElasticOnHeap();
@@ -142,7 +141,6 @@ put: [ 3, bye ]
                 bytes.toDebugString());
     }
 
-    @SuppressWarnings("rawtypes")
     public void clear(@NotNull Bytes<?> bytes) {
         bytes.clear();
         bytes.zeroOut(0, bytes.realCapacity());

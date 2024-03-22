@@ -35,7 +35,6 @@ import static org.junit.Assert.assertSame;
 /**
  * @author greg allen
  */
-@SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
 public class EnumWireTest extends WireTestCommon {
     private final Function<Bytes<?>, Wire> createWire;

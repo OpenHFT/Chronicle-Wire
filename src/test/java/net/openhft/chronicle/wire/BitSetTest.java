@@ -24,7 +24,6 @@ import org.junit.Test;
 
 import java.util.BitSet;
 
-@SuppressWarnings("rawtypes")
 public class BitSetTest extends WireTestCommon {
 
     @Test

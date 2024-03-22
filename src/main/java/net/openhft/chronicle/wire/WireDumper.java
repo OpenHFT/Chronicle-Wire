@@ -22,7 +22,6 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@SuppressWarnings("rawtypes")
 public class WireDumper {
     @NotNull
     private final WireIn wireIn;

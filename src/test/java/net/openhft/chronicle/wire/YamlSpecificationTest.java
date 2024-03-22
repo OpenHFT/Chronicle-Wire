@@ -34,7 +34,6 @@ import java.util.Collection;
 import static net.openhft.chronicle.wire.WireType.YAML;
 import static org.junit.Assert.assertEquals;
 
-@SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
 public class YamlSpecificationTest extends WireTestCommon {
     static {
@@ -53,7 +52,7 @@ public class YamlSpecificationTest extends WireTestCommon {
 
     @Parameterized.Parameters(name = "case={0}")
     public static Collection<Object[]> tests() {
-        return Arrays.asList(new String[][]{
+        return Arrays.asList((Object[][]) new String[][]{
                 {"2_1_SequenceOfScalars"},
                 {"2_2_MappingScalarsToScalars"},
                 {"2_3_MappingScalarsToSequences"},

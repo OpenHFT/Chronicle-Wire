@@ -67,7 +67,7 @@ public class ChronicleServiceMain extends SelfDescribingMarshallable implements 
         try {
             ssc = ServerSocketChannel.open();
             ssc.bind(new InetSocketAddress(port));
-            ChronicleChannelCfg channelCfg = new ChronicleChannelCfg().port(port);
+            ChronicleChannelCfg channelCfg = new ChronicleChannelCfg().addHostnamePort(null, port);
             Function<ChannelHeader, ChannelHeader> redirectFunction = this::replaceOutHeader;
             while (!isClosed()) {
                 final SocketChannel sc = ssc.accept();

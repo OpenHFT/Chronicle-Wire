@@ -37,8 +37,7 @@ public final class ChronicleChannelUtils {
             for (String location : rh.locations()) {
                 try {
                     URL url = ChronicleContext.urlFor(location);
-                    channelCfg.hostname(url.getHost());
-                    channelCfg.port(url.getPort());
+                    channelCfg.addHostnamePort(url.getHost(), url.getPort());
                     return newChannel(socketRegistry, channelCfg, headerOut,null);
 
                 } catch (IORuntimeException e) {
@@ -60,7 +59,7 @@ public final class ChronicleChannelUtils {
 
     @NotNull
     public static Runnable eventHandlerAsRunnable(ChronicleChannel chronicleChannel, Object eventHandler) {
-        @SuppressWarnings("resource") final MethodReader reader = chronicleChannel.methodReader(eventHandler);
+        final MethodReader reader = chronicleChannel.methodReader(eventHandler);
         final BooleanSupplier handlerClosed;
         if (eventHandler instanceof Closeable) {
             Closeable sh = (Closeable) eventHandler;

@@ -66,7 +66,6 @@ public class MarshallableWireTest extends WireTestCommon {
         return list;
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
     public void writeMarshallable() {
         Bytes<?> bytes = Bytes.elasticByteBuffer();

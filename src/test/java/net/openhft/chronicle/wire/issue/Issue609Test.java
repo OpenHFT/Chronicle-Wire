@@ -87,7 +87,6 @@ public class Issue609Test extends WireTestCommon {
     public static class ServiceCfg extends AbstractMarshallableCfg {
         public final List<InputCfg> inputs = new ArrayList<>();
 
-        @SuppressWarnings("unchecked")
         @Override
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
             @NotNull StringBuilder name = new StringBuilder();
