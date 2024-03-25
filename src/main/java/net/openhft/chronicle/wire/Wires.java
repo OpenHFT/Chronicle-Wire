@@ -77,6 +77,7 @@ public enum Wires {
     public static final int SPB_HEADER_SIZE = 4;
     public static final List<Function<Class, SerializationStrategy>> CLASS_STRATEGY_FUNCTIONS = new CopyOnWriteArrayList<>();
 
+    // Adding SuppressWarnings on ever usage could have too many side effects, so make it a comment for now, but still remove it.
     // @Deprecated(/* for removal in x.26 */)
     static boolean THROW_CNFRE = Jvm.getBoolean("class.not.found.for.missing.class.alias", true);
 
