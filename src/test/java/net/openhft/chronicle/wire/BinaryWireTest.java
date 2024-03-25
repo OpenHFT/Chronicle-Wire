@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.internal.NoBytesStore;
 import net.openhft.chronicle.bytes.internal.SingleMappedFile;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.ScopeConfined;
+import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.VanillaReferenceOwner;
 import org.jetbrains.annotations.NotNull;
@@ -1397,6 +1398,9 @@ public class BinaryWireTest extends WireTestCommon {
             endOfWirePosition.set(wire.bytes().writePosition());
             assertTrue(wire.writeEndOfWire(100, TimeUnit.MILLISECONDS, endOfWirePosition.get()));
         });
+
+        // this will wait until any pending resources have been closed
+        BackgroundResourceReleaser.releasePendingResources();
 
         long lastModified = tempFile.lastModified();
         Jvm.pause(10);
