@@ -73,11 +73,11 @@ public class BinaryWireTest extends WireTestCommon {
         return Arrays.asList(
                 new Object[]{0, false, false, false, 128},
                 new Object[]{1, false, false, false, 32},
-                new Object[]{2, true, false, false, 128},
+                new Object[]{2, true, false, false, 128}, // this fails on mac
                 new Object[]{3, false, true, false, 128},
                 new Object[]{4, true, true, false, 128},
-                new Object[]{5, false, false, true, 128},
-                new Object[]{6, true, false, true, 128}
+                new Object[]{5, false, false, true, 128}, // this fails on mac
+                new Object[]{6, true, false, true, 128}  // this fails on mac
         );
     }
 
@@ -1397,12 +1397,14 @@ public class BinaryWireTest extends WireTestCommon {
             endOfWirePosition.set(wire.bytes().writePosition());
             assertTrue(wire.writeEndOfWire(100, TimeUnit.MILLISECONDS, endOfWirePosition.get()));
         });
+
         long lastModified = tempFile.lastModified();
         Jvm.pause(10);
         createWireFromFileAnd(tempFile, wire -> {
             // This should be a no-op and not result in an update to lastModifiedTime
             assertFalse(wire.writeEndOfWire(100, TimeUnit.MILLISECONDS, endOfWirePosition.get()));
         });
+
         assertEquals(lastModified, tempFile.lastModified());
     }
 
@@ -1412,6 +1414,7 @@ public class BinaryWireTest extends WireTestCommon {
             final Bytes<?> bytes = mappedFile.acquireBytesForWrite(owner, 0);
             Wire wire = WireType.BINARY.apply(bytes);
             wireConsumer.accept(wire);
+            ((MappedBytesStore) bytes.bytesStore()).syncUpTo(8192);
             bytes.releaseLast(owner);
         }
     }
