@@ -388,7 +388,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                     case HISTORY_MESSAGE: {
                         bytes.uncheckedReadSkipOne();
-                        copyHistoryMessage(wire);
+                        copyHistoryMessage(bytes(), wire);
                         break outerSwitch;
                     }
                     case U8_ARRAY:
@@ -445,11 +445,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
     }
 
-    private void copyHistoryMessage(@NotNull WireOut wire) {
+    private static void copyHistoryMessage(Bytes<?> bytes, @NotNull WireOut wire) {
         VanillaMessageHistory vmh = VANILLA_MESSAGE_HISTORY_TL.get();
         vmh.useBytesMarshallable(true);
         vmh.addSourceDetails(false);
-        vmh.readMarshallable(bytes());
+        vmh.readMarshallable(bytes);
         wire.getValueOut().object(VanillaMessageHistory.class, vmh);
     }
 
@@ -476,11 +476,10 @@ public class BinaryWire extends AbstractWire implements Wire {
             @NotNull final ValueOut wireValueOut = wire.getValueOut();
             BracketType bracketType = getBracketTypeNext();
             switch (bracketType) {
-                case UNKNOWN:
+                case HISTORY_MESSAGE:
                     bytes.uncheckedReadSkipOne();
-                    copyHistoryMessage(wire);
+                    copyHistoryMessage(bytes(), wire);
                     return;
-
                 case MAP:
                     wireValueOut.marshallable(this::copyTo);
                     break;
@@ -521,7 +520,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BracketType.MAP;
         switch (peekCode) {
             case HISTORY_MESSAGE:
-                return BracketType.UNKNOWN;
+                return BracketType.HISTORY_MESSAGE;
             case FIELD_NUMBER:
             case FIELD_NAME_ANY:
             case EVENT_NAME:
