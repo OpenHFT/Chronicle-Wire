@@ -31,6 +31,7 @@ import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_PROXY_REFLECTION;
 import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
@@ -48,11 +49,7 @@ public class ChainedMethodsTest extends WireTestCommon {
     @Before
     public void setUp() {
         System.setProperty(DISABLE_WRITER_PROXY_CODEGEN, String.valueOf(disableProxyCodegen));
-    }
-
-    @After
-    public void cleanUp() {
-        System.clearProperty(DISABLE_WRITER_PROXY_CODEGEN);
+        System.setProperty(DISABLE_PROXY_REFLECTION, String.valueOf(!disableProxyCodegen));
     }
 
     @Test

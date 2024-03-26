@@ -19,6 +19,7 @@
 package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.wire.VanillaMethodWriterBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -32,7 +33,8 @@ import static org.junit.Assume.assumeFalse;
 public class MethodWriterProxyTest extends MethodWriterTest {
     @Before
     public void before() {
-        System.setProperty("disableProxyCodegen", "true");
+        System.setProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN, "true");
+        System.setProperty(VanillaMethodWriterBuilder.DISABLE_PROXY_REFLECTION, "false");
         expectException("Falling back to proxy method writer");
     }
 
