@@ -49,7 +49,7 @@ public interface ChronicleChannel extends Closeable, MarshallableOut, Marshallab
         return ChronicleChannelUtils.newChannel(socketRegistry, channelCfg, headerOut, null);
     }
 
-    static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg channelCfg, ChannelHeader headerOut,  Consumer<ChronicleChannel> closeCallback) throws InvalidMarshallableException {
+    static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg channelCfg, ChannelHeader headerOut, Consumer<ChronicleChannel> closeCallback) throws InvalidMarshallableException {
         return ChronicleChannelUtils.newChannel(socketRegistry, channelCfg, headerOut, closeCallback);
     }
 
@@ -88,7 +88,8 @@ public interface ChronicleChannel extends Closeable, MarshallableOut, Marshallab
             try (DocumentContext dc = readingDocument()) {
                 if (dc.isPresent()) {
                     ValueIn in = dc.wire().read(eventType);
-                    if (StringUtils.isEqual(eventType, MethodReader.HISTORY)) {
+                    if (StringUtils.isEqual(eventType, MethodReader.HISTORY) ||
+                            StringUtils.isEqual(eventType, "" + MethodReader.MESSAGE_HISTORY_METHOD_ID)) {
                         in.object(MessageHistory.get(), VanillaMessageHistory.class);
                         in = dc.wire().read(eventType);
                     }

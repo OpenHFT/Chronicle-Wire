@@ -41,6 +41,9 @@ public class RecordHistoryEchoHandlerTest extends WireTestCommon {
     private static void doTest(ChronicleContext context, ChannelHandler handler) {
         ChronicleChannel channel = context.newChannelSupplier(handler).connectionTimeoutSecs(1).get();
         assertTrue(channel.recordHistory());
+        VanillaMessageHistory history = (VanillaMessageHistory) MessageHistory.get();
+        history.reset(1, 128);
+
         Says says = channel.methodWriter(Says.class);
         says.say("Hello World");
 
@@ -60,13 +63,12 @@ public class RecordHistoryEchoHandlerTest extends WireTestCommon {
             assertTrue(dc.isMetaData());
         }
         assertEquals(now, channel.lastTestMessage());
-        VanillaMessageHistory history = (VanillaMessageHistory) MessageHistory.get();
         history.historyWallClock(true);
         String expected = ", timings: [ 20";
         String expected2 = ", timings: [ 19";
         String string = history.toString();
         if (!string.contains(expected) && !string.contains(expected2))
-            fail("Expected " + string+" to contain'" + expected+"' or '"+expected2+"'");
+            fail("Expected " + string + " to contain'" + expected + "' or '" + expected2 + "'");
     }
 
     @Before

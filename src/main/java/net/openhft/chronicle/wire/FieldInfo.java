@@ -59,6 +59,8 @@ public interface FieldInfo {
                 return Wires.FieldInfoPair.EMPTY;
             case MAP:
                 break;
+            case HISTORY_MESSAGE:
+                throw new AssertionError();
             default:
                 // assume it could be a map
                 break;

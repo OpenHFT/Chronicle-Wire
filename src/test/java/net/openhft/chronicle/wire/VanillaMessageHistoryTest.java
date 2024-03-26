@@ -30,6 +30,8 @@ public class VanillaMessageHistoryTest extends net.openhft.chronicle.wire.WireTe
     @Test
     public void equalsHashCode() {
         VanillaMessageHistory vmh = new VanillaMessageHistory();
+        vmh.addSourceDetails(true);
+        vmh.useBytesMarshallable(false);
         vmh.addSource(1, 128);
         vmh.addTiming(12121212);
         final ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES.wrap();
@@ -53,13 +55,16 @@ public class VanillaMessageHistoryTest extends net.openhft.chronicle.wire.WireTe
                 wire.bytes().toHexString().replaceAll("\na7.*\n", "\na7 timestamp\n"));
 
         VanillaMessageHistory vmh2 = new VanillaMessageHistory();
+        vmh2.useBytesMarshallable(false);
         VanillaMessageHistory vmh3 = new VanillaMessageHistory();
+        vmh3.useBytesMarshallable(false);
         assertEquals(vmh3.hashCode(),
                 vmh2.hashCode());
         Object o = wire.read("vmh").object(vmh2, VanillaMessageHistory.class);
         assertNotNull(o);
         // add the last timing which is added on read
         vmh.addTiming(vmh2.timing(1));
+        vmh2.addSourceDetails(true);
         assertEquals(vmh.toString(), vmh2.toString());
         assertEquals(vmh, vmh2);
         assertEquals(vmh.hashCode(),

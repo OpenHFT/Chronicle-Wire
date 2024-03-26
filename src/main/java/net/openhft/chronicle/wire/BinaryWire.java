@@ -78,6 +78,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         return true;
     });
     private static final AtomicBoolean FIRST_WARN_MISSING_CLASS = new AtomicBoolean();
+    private static final ThreadLocal<VanillaMessageHistory> VANILLA_MESSAGE_HISTORY_TL = ThreadLocal.withInitial(VanillaMessageHistory::new);
     private final FixedBinaryValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
     private final FixedBinaryValueOut valueOut;
@@ -385,6 +386,11 @@ public class BinaryWire extends AbstractWire implements Wire {
                         break outerSwitch;
                     }
 
+                    case HISTORY_MESSAGE: {
+                        bytes.uncheckedReadSkipOne();
+                        copyHistoryMessage(bytes(), wire);
+                        break outerSwitch;
+                    }
                     case U8_ARRAY:
                         unexpectedCode();
                 }
@@ -439,6 +445,14 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
     }
 
+    private static void copyHistoryMessage(Bytes<?> bytes, @NotNull WireOut wire) {
+        VanillaMessageHistory vmh = VANILLA_MESSAGE_HISTORY_TL.get();
+        vmh.useBytesMarshallable(true);
+        vmh.addSourceDetails(false);
+        vmh.readMarshallable(bytes);
+        wire.getValueOut().object(VanillaMessageHistory.class, vmh);
+    }
+
     protected static void unexpectedCode() {
         throw new IORuntimeException("Unexpected code in this context");
     }
@@ -460,7 +474,12 @@ public class BinaryWire extends AbstractWire implements Wire {
         try {
             bytes.readLimit(newLimit);
             @NotNull final ValueOut wireValueOut = wire.getValueOut();
-            switch (getBracketTypeNext()) {
+            BracketType bracketType = getBracketTypeNext();
+            switch (bracketType) {
+                case HISTORY_MESSAGE:
+                    bytes.uncheckedReadSkipOne();
+                    copyHistoryMessage(bytes(), wire);
+                    return;
                 case MAP:
                     wireValueOut.marshallable(this::copyTo);
                     break;
@@ -500,6 +519,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         if (peekCode >= FIELD_NAME0 && peekCode <= FIELD_NAME31)
             return BracketType.MAP;
         switch (peekCode) {
+            case HISTORY_MESSAGE:
+                return BracketType.HISTORY_MESSAGE;
             case FIELD_NUMBER:
             case FIELD_NAME_ANY:
             case EVENT_NAME:
@@ -810,6 +831,11 @@ public class BinaryWire extends AbstractWire implements Wire {
             case FIELD_NUMBER:
                 bytes.uncheckedReadSkipOne();
                 long fieldId = bytes.readStopBit();
+                if (fieldId == MethodReader.MESSAGE_HISTORY_METHOD_ID) {
+                    sb.setLength(0);
+                    sb.append(MethodReader.HISTORY);
+                    return sb;
+                }
                 return readFieldNumber(keyName, keyCode, sb, fieldId);
             case FIELD_NAME_ANY:
             case EVENT_NAME:
@@ -974,6 +1000,9 @@ public class BinaryWire extends AbstractWire implements Wire {
                             break;
                         }
                     }
+                } else if (code2 == MethodReader.MESSAGE_HISTORY_METHOD_ID && !wire.isBinary()) {
+                    wire.write(MethodReader.HISTORY);
+                    break;
                 }
                 wire.write(new WireKey() {
                     @NotNull
