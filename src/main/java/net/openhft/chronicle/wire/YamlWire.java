@@ -227,7 +227,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         return s;
     }
 
-
     private static boolean leaveUnparsed(char bq, @Nullable StringBuilder s) {
         return s == null
                 || bq != 0
@@ -377,7 +376,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
     @Override
     public void copyTo(@NotNull WireOut wire) throws InvalidMarshallableException {
-        if (wire instanceof TextWire || wire instanceof YamlWire) {
+        if (wire.getClass() == TextWire.class || wire.getClass() == YamlWire.class) {
             final Bytes<?> bytes0 = bytes();
             wire.bytes().write(this.bytes, yt.blockStart(), bytes0.readLimit() - yt.blockStart);
             this.bytes.readPosition(this.bytes.readLimit());
@@ -401,6 +400,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 wireValueOut.typePrefix(yt.text());
                 yt.next();
                 copyOne(wire, true);
+                wireValueOut.endTypePrefix();
                 yt.next();
                 break;
             case DIRECTIVE:
@@ -1471,6 +1471,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             yt.next(Integer.MIN_VALUE);
             while (true) {
                 switch (yt.current()) {
+                    case TEXT:
                     case SEQUENCE_ENTRY:
                         tReader.accept(t, kls, YamlWire.this.valueIn);
                         continue;
@@ -1677,6 +1678,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                         );
                     }
                     return object;
+
+                case TEXT:
+                    return ObjectUtils.convertTo(object.getClass(), text());
 
                 default:
                     break;
@@ -1932,6 +1936,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     yt.next();
                     if (o instanceof StringBuilder)
                         o = o.toString();
+                    if (type == Class.class)
+                        return classLookup.forName(o.toString());
                     return ObjectUtils.convertTo(type, o);
 
                 case ANCHOR:
@@ -2045,5 +2051,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @Override
     public boolean writingIsComplete() {
         return !writeContext.isNotComplete();
+    }
+
+    @Override
+    public void rollbackIfNotComplete() {
+        writeContext.rollbackIfNotComplete();
     }
 }

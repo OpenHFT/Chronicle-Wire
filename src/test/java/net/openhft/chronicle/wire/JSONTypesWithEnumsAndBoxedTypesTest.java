@@ -77,7 +77,6 @@ public class JSONTypesWithEnumsAndBoxedTypesTest extends net.openhft.chronicle.w
 
          System.out.println(jsonWire.bytes());
 
-
         final String actual = jsonWire.getValueIn().object().toString();
         Assert.assertTrue(actual.contains("TRACK"));
     }

@@ -55,6 +55,7 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
+import static java.util.Arrays.asList;
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.SerializationStrategies.*;
 import static net.openhft.chronicle.wire.WireType.TEXT;
@@ -270,7 +271,6 @@ public enum Wires {
         }
     }
 
-
     private static Wire newJsonWire(Bytes bytes) {
         return new JSONWire(bytes).useTypes(true).trimFirstCurly(false).useTextDocuments();
     }
@@ -298,7 +298,6 @@ public enum Wires {
         }
     }
 
-
     /**
      * @deprecated Use {@link #asJson(WireIn, Bytes)} instead
      */
@@ -315,7 +314,6 @@ public enum Wires {
     private static Wire newTextWire(Bytes bytes) {
         return new TextWire(bytes).addTimeStamps(true);
     }
-
 
     /**
      * @deprecated Use {@link #acquireStringBuilderScoped()} instead
@@ -486,7 +484,7 @@ public enum Wires {
 
     public static void readMarshallable(Class<?> clazz, @NotNull Object marshallable, @NotNull WireIn wire, boolean overwrite) throws InvalidMarshallableException {
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(clazz == null ? marshallable.getClass() : clazz);
-        wm.readMarshallable(marshallable, wire, wm.defaultValue(), overwrite);
+        wm.readMarshallable(marshallable, wire, overwrite);
     }
 
     public static void writeMarshallable(@NotNull Object marshallable, @NotNull WireOut wire) throws InvalidMarshallableException {
@@ -499,13 +497,13 @@ public enum Wires {
         if (writeDefault)
             marshaller.writeMarshallable(marshallable, wire);
         else
-            marshaller.writeMarshallable(marshallable, wire, marshaller.defaultValue(), false);
+            marshaller.writeMarshallable(marshallable, wire, false);
     }
 
     public static void writeMarshallable(@NotNull Object marshallable, @NotNull WireOut wire, @NotNull Object previous, boolean copy) throws InvalidMarshallableException {
         assert marshallable.getClass() == previous.getClass();
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass());
-        wm.writeMarshallable(marshallable, wire, previous, copy);
+        wm.writeMarshallable(marshallable, wire, copy);
     }
 
     public static void writeKey(@NotNull Object marshallable, Bytes<?> bytes) {
@@ -533,14 +531,26 @@ public enum Wires {
         }
     }
 
+    /**
+     * Copy fields from source to target by marshalling out and then in. Allows copying of fields by name
+     * even if there is no type relationship between the source and target
+     *
+     * @param source source
+     * @param target dest
+     * @return target
+     * @param <T> target type
+     */
     @NotNull
     public static <T> T copyTo(Object source, @NotNull T target) throws InvalidMarshallableException {
         try (ScopedResource<Wire> wireSR = acquireBinaryWireScoped()) {
+            ValidatableUtil.startValidateDisabled();
             Wire wire = wireSR.get();
             wire.getValueOut().object(source);
             wire.getValueIn().typePrefix(); // drop the type prefix.
             wire.getValueIn().object(target, target.getClass());
             return target;
+        } finally {
+            ValidatableUtil.endValidateDisabled();
         }
     }
 
@@ -640,7 +650,7 @@ public enum Wires {
                     Wire wire = wireSR.get();
                     WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(aClass);
                     wm.writeMarshallable(e, wire);
-                    wm.readMarshallable(e2, wire, null, false);
+                    wm.readMarshallable(e2, wire, false);
                 }
                 return e2;
             }
@@ -676,10 +686,17 @@ public enum Wires {
 
     public static <E> E object1(ValueIn in, @Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
         Object o = in.typePrefixOrObject(clazz);
+        if (o == null && using instanceof ReadMarshallable)
+            o = using;
         if (o != null && !(o instanceof Class)) {
             return (E) in.marshallable(o, MARSHALLABLE);
         }
-        @Nullable final Class clazz2 = (Class) o;
+        return object2(in, using, clazz, bestEffort, (Class) o);
+    }
+
+    @Nullable
+    static <E> E object2(ValueIn in, @Nullable E using, @Nullable Class clazz, boolean bestEffort, Class o) {
+        @Nullable final Class clazz2 = o;
         if (clazz2 == void.class) {
             in.text();
             return null;
@@ -830,10 +847,21 @@ public enum Wires {
     static synchronized Class loadFromJava(ClassLoader classLoader, String className, String code) throws ClassNotFoundException {
         if (CACHED_COMPILER == null) {
             final String target = OS.getTarget();
-            CACHED_COMPILER =
-                    new File(target).exists() && DUMP_CODE_TO_TARGET
-                            ? new CachedCompiler(new File(target, "generated-test-sources"), new File(target, "test-classes"))
-                            : new CachedCompiler(null, null);
+            File sourceDir = null;
+            File classDir = null;
+
+            if (new File(target).exists() && DUMP_CODE_TO_TARGET) {
+                sourceDir = new File(target, "generated-test-sources");
+                classDir = new File(target, "test-classes");
+            }
+
+            String compilerOptions = Jvm.getProperty("compiler.options");
+
+            if (compilerOptions == null || compilerOptions.trim().isEmpty()) {
+                CACHED_COMPILER = new CachedCompiler(sourceDir, classDir);
+            } else {
+                CACHED_COMPILER = new CachedCompiler(sourceDir, classDir, asList(compilerOptions.split("\\s")));
+            }
         }
         try {
             return CACHED_COMPILER.loadFromJava(classLoader, className, code);
@@ -1028,7 +1056,7 @@ public enum Wires {
                     return ScalarStrategy.of(ZonedDateTime.class, (o, in) -> in.zonedDateTime());
 
                 case "java.sql.Time":
-                    return ScalarStrategy.of(java.sql.Time.class, (o, in) -> new Time(parseDate(in).getTime()));
+                    return ScalarStrategy.of(Time.class, (o, in) -> new Time(parseDate(in).getTime()));
 
                 case "java.sql.Date":
                     return ScalarStrategy.of(java.sql.Date.class, (o, in) -> new java.sql.Date(parseDate(in).getTime()));

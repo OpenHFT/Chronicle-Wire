@@ -106,7 +106,7 @@ public class WordsLongConverterTest extends WireTestCommon {
             String text = bic.asString(l);
             if (text.equals("eagle.eagle.bedroom.again.dealer.bids"))
                 System.out.println(text);
-            long parse = bic.parse(text);
+            long parse = bic.parse("glue." + text + ".apply", 5, 5 + text.length());
             assertEquals(l, parse);
 
         }

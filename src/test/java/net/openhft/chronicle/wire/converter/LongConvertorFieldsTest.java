@@ -1,10 +1,7 @@
 package net.openhft.chronicle.wire.converter;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.wire.Marshallable;
-import net.openhft.chronicle.wire.SelfDescribingMarshallable;
-import net.openhft.chronicle.wire.Wire;
-import net.openhft.chronicle.wire.YamlWire;
+import net.openhft.chronicle.wire.*;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -134,6 +131,80 @@ public class LongConvertorFieldsTest {
                 "  i: .Gk<0,\n" +
                 "  l: +ko2&)z.H0\n" +
                 "}\n");
+    }
+
+    @Test
+    public void detectSpecialCharBase85() {
+        final String CHARS = "" +
+                "0123456789" +
+                ":;<=>?@" +
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ_" +
+                "abcdefghijklmnopqrstuvwxyz" +
+                "\"#$%&'()*+,-./ ";
+        LongConverter c = Base85LongConverter.INSTANCE;
+        for (int i = 0; i < 85; i++) {
+            char ch = CHARS.charAt(i);
+            Base85DTO dto = new Base85DTO((byte) i, (char) i, (short) c.parse("0" + ch), (int) c.parse(ch + "a"), c.parse(ch + " "));
+            assertEquals(dto, Marshallable.fromString(dto.toString()));
+        }
+    }
+
+    static class ShortTextDTO extends SelfDescribingMarshallable {
+        @ShortText
+        byte b;
+        @ShortText
+        char ch;
+        @ShortText
+        short s;
+        @ShortText
+        int i;
+        @ShortText
+        long l;
+
+        public ShortTextDTO(byte b, char ch, short s, int i, long l) {
+            this.b = b;
+            this.ch = ch;
+            this.s = s;
+            this.i = i;
+            this.l = l;
+        }
+    }
+
+    @Test
+    public void shortText() {
+        doTest(new ShortTextDTO((byte) 1, '2', (short) 3, 4, 5), "" +
+                "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$ShortTextDTO {\n" +
+                "  b: 1,\n" +
+                "  ch: g,\n" +
+                "  s: 3,\n" +
+                "  i: 4,\n" +
+                "  l: 5\n" +
+                "}\n");
+        // note shorter types are shorter strings and not all ffffffffffffffff
+        doTest(new ShortTextDTO((byte) -1, (char) -1, (short) -1, -1, -1), "" +
+                "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$ShortTextDTO {\n" +
+                "  b: \"3 \",\n" +
+                "  ch: \"96 \",\n" +
+                "  s: \"96 \",\n" +
+                "  i: \".Gk< \",\n" +
+                "  l: \"+ko2&)z.H \"\n" +
+                "}\n");
+    }
+
+    @Test
+    public void detectSpecialChar() {
+        final String CHARS = " " +
+                "123456789" +
+                ":;<=>?@" +
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ_" +
+                "abcdefghijklmnopqrstuvwxyz" +
+                "\"#$%&'()*+,-./0";
+        LongConverter c = ShortTextLongConverter.INSTANCE;
+        for (int i = 0; i < 85; i++) {
+            char ch = CHARS.charAt(i);
+            ShortTextDTO dto = new ShortTextDTO((byte) i, (char) i, (short) c.parse("0" + ch), (int) c.parse(ch + "a"), c.parse(ch + " "));
+            assertEquals(dto, Marshallable.fromString(dto.toString()));
+        }
     }
 
     static class WordsDTO extends SelfDescribingMarshallable {

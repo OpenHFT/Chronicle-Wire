@@ -19,15 +19,10 @@ package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.util.Map;
 
 import static org.junit.Assert.*;
 
-@Ignore("TODO FIX")
 public class CSVWireTest extends WireTestCommon {
 
     @Test
@@ -43,12 +38,14 @@ public class CSVWireTest extends WireTestCommon {
             wire.read(() -> "heading2").text(this, (o, s) -> assertEquals("data2", s))
                     .read(() -> "heading3").text(this, (o, s) -> assertEquals("data three", s));
         });
+        wire.readEventName(row);
         assertTrue(wire.hasMore());
         wire.readEventName(row).marshallable(w -> {
             assertEquals("row2", row.toString());
             wire.read(() -> "heading2").text(this, (o, s) -> assertEquals("row2b", s))
                     .read(() -> "heading3").text(this, (o, s) -> assertEquals("row2c", s));
         });
+        wire.readEventName(row);
         assertFalse(wire.hasMore());
     }
 
@@ -62,33 +59,6 @@ public class CSVWireTest extends WireTestCommon {
         doTestWire(wire);
     }
 
-    @Test
-    public void tstFrom3() throws IOException {
-        @NotNull Map<String, EndOfDayShort> map = WireType.CSV.fromFileAsMap("CSVWireTest.csv", EndOfDayShort.class);
-        assertEquals("{III=!net.openhft.chronicle.wire.EndOfDayShort {\n" +
-                "  name: \"3i Group\",\n" +
-                "  price: 479.4,\n" +
-                "  change: 12.0,\n" +
-                "  changePercent: 2.44,\n" +
-                "  daysVolume: 2387043\n" +
-                "}\n" +
-                ", 3IN=!net.openhft.chronicle.wire.EndOfDayShort {\n" +
-                "  name: \"3i Infrastructure\",\n" +
-                "  price: 164.7,\n" +
-                "  change: 0.1,\n" +
-                "  changePercent: 0.06,\n" +
-                "  daysVolume: 429433\n" +
-                "}\n" +
-                ", AA=!net.openhft.chronicle.wire.EndOfDayShort {\n" +
-                "  name: AA,\n" +
-                "  price: 325.9,\n" +
-                "  change: 5.7,\n" +
-                "  changePercent: 1.72,\n" +
-                "  daysVolume: 1469834\n" +
-                "}\n" +
-                "}", map.toString());
-    }
-
     public void doTestWire(@NotNull Wire wire) {
         @NotNull StringBuilder row = new StringBuilder();
         assertTrue(wire.hasMore());
@@ -100,6 +70,7 @@ public class CSVWireTest extends WireTestCommon {
                     .read(() -> "changePercent").float64(this, (o, d) -> assertEquals(2.44, d, 0.0))
                     .read(() -> "daysVolume").int64(this, (o, d) -> assertEquals(2387043, d));
         });
+        wire.readEventName(row);
         assertTrue(wire.hasMore());
         wire.readEventName(row).marshallable(w -> {
             assertEquals("3IN", row.toString());
@@ -107,8 +78,10 @@ public class CSVWireTest extends WireTestCommon {
                     .read(() -> "price").float64(this, (o, d) -> assertEquals(164.7, d, 0.0))
                     .read(() -> "change").float64(this, (o, d) -> assertEquals(0.1, d, 0.0))
                     .read(() -> "changePercent").float64(this, (o, d) -> assertEquals(0.06, d, 0.0))
-                    .read(() -> "daysVolume").int64(this, (o, d) -> assertEquals(429433, d));
+                    .read(() -> "daysVolume").int64(this, (o, d) -> assertEquals(429433, d))
+                    .read();
         });
+        wire.readEventName(row);
         assertTrue(wire.hasMore());
         wire.readEventName(row).marshallable(w -> {
             assertEquals("AA", row.toString());
@@ -118,6 +91,7 @@ public class CSVWireTest extends WireTestCommon {
                     .read(() -> "changePercent").float64(this, (o, d) -> assertEquals(1.72, d, 0.0))
                     .read(() -> "daysVolume").int64(this, (o, d) -> assertEquals(1469834, d));
         });
+        wire.readEventName(row);
         assertFalse(wire.hasMore());
     }
 }

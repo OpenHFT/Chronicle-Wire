@@ -64,8 +64,27 @@ public interface LongConverter {
      * {@code long} primitive.
      *
      * @return the parsed {@code text} as an {@code long} primitive.
+     * @throws IllegalArgumentException if the text length is outside of range accepted by a specific converter.
      */
     long parse(CharSequence text);
+
+    /**
+     * Parses a part of the provided {@link CharSequence} and returns the parsed results as a
+     * {@code long} primitive.
+     * <p>
+     * The default implementation is garbage-producing and an implementing class is supposed to reimplement this method.
+     *
+     * @param text character sequence containing the string representation of the value.
+     * @param beginIndex the beginning index, inclusive.
+     * @param endIndex the ending index, exclusive.
+     *
+     * @return the parsed {@code text} as an {@code long} primitive.
+     * @throws IllegalArgumentException if any of the indices are invalid or the sub-sequence length is
+     *      outside of range accepted by a specific converter.
+     */
+    default long parse(CharSequence text, int beginIndex, int endIndex) {
+        return parse(text.toString().substring(beginIndex, endIndex));
+    }
 
     /**
      * Converts the given long value to a string and appends it to the provided StringBuilder.
@@ -142,6 +161,20 @@ public interface LongConverter {
     }
 
     /**
+     * Checks that the length of the provided text does not exceed the allowable maximum.
+     *
+     * @param text
+     * @param beginIndex the beginning index, inclusive.
+     * @param endIndex   the ending index, exclusive.
+     * @throws IllegalArgumentException if the text length exceeds the maximum allowable length.
+     */
+    default void lengthCheck(CharSequence text, int beginIndex, int endIndex) {
+        if ((beginIndex | endIndex | (endIndex - beginIndex) | (text.length() - endIndex + beginIndex) | (maxParseLength() - endIndex + beginIndex)) < 0)
+            throw new IllegalArgumentException(format("range [{0}, {1}) exceeds the maximum allowable length of {2}",
+                    beginIndex, endIndex, maxParseLength()));
+    }
+
+    /**
      * Checks if the characters in the provided {@link WireOut} object are "safe",
      * meaning they don't require additional quoting or escaping, especially in contexts
      * like YAML serialization.
@@ -149,7 +182,19 @@ public interface LongConverter {
      * @param wireOut The WireOut instance to check.
      * @return {@code true} if no characters need escaping or additional quoting for YAML, {@code false} otherwise.
      */
+    @Deprecated(/* to be removed in x.27 */)
     default boolean allSafeChars(WireOut wireOut) {
+        return allSafeChars();
+    }
+
+    /**
+     * Checks if the characters used are "safe",
+     * meaning they don't require additional quoting or escaping, especially in contexts
+     * like YAML serialization.
+     *
+     * @return {@code true} if no characters need escaping or additional quoting for JSON or YAML, {@code false} otherwise.
+     */
+    default boolean allSafeChars() {
         return true;
     }
 

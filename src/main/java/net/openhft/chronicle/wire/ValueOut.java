@@ -582,7 +582,6 @@ public interface ValueOut {
         return sequence(writer);
     }
 
-
     /**
      * Write a {@link WriteMarshallable} value.
      */
@@ -970,7 +969,10 @@ public interface ValueOut {
                 typePrefix(SortedSet.class);
             else if (value instanceof Set)
                 typePrefix(Set.class);
-            return sequence(v -> ((Collection) value).forEach(v::object));
+            WireOut wireOut = sequence(v -> ((Collection) value).forEach(v::object));
+            if (value instanceof Set)
+                endTypePrefix();
+            return wireOut;
         } else if (WireSerializedLambda.isSerializableLambda(valueClass)) {
             WireSerializedLambda.write(value, this);
             return wireOut();

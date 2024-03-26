@@ -37,7 +37,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-
 /**
  * Represents the entry point for a Chronicle Gateway, which is responsible for accepting
  * incoming connections and handling requests according to a defined protocol.
@@ -181,6 +180,7 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable,
                 final SocketChannel sc = ssc.accept();
                 sc.socket().setTcpNoDelay(true);
                 final TCPChronicleChannel channel = new TCPChronicleChannel(systemContext(), channelCfg, sc, this::replaceInHeader, this::replaceOutHeader);
+                channel.closeCallback(closeCallback());
                 service.submit(() -> handle(channel));
             }
         } catch (Throwable e) {

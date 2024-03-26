@@ -119,5 +119,3 @@ public class JSONWithAMapTest extends net.openhft.chronicle.wire.WireTestCommon 
     }
 }
 
-
-

@@ -4,12 +4,12 @@
 
 package net.openhft.chronicle.wire.utils.dto;
 
-import net.openhft.chronicle.wire.converter.Base85;
 import net.openhft.chronicle.wire.converter.NanoTime;
+import net.openhft.chronicle.wire.converter.ShortText;
 
 public class NewOrderSingle extends AbstractEvent<NewOrderSingle> {
     private static final int MASHALLABLE_VERSION = 1;
-    @Base85
+    @ShortText
     private long symbol;
     @NanoTime
     private long transactTime;

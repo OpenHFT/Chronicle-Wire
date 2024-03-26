@@ -18,6 +18,8 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.util.BinaryLengthLength;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.Memory;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.converter.NanoTime;
@@ -28,18 +30,28 @@ import java.util.function.BiConsumer;
 
 import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
 
+/**
+ * The {@code VanillaMessageHistory} class is an implementation of {@link MessageHistory} that
+ * provides an array-backed history of messages.
+ */
 @SuppressWarnings("rawtypes")
 public class VanillaMessageHistory extends SelfDescribingMarshallable implements MessageHistory {
+
+    // Maximum length for storing message history
     public static final int MESSAGE_HISTORY_LENGTH = 128;
+    public static final int MAX_LENGTH = 2 + MESSAGE_HISTORY_LENGTH * 8 * 4;
     private static final ThreadLocal<MessageHistory> THREAD_LOCAL =
             ThreadLocal.withInitial(() -> {
                 @NotNull VanillaMessageHistory veh = new VanillaMessageHistory();
                 veh.addSourceDetails(true);
                 return veh;
             });
-    static boolean USE_BYTES_MARSHALLABLE = Boolean.getBoolean("history.as.bytes");
-    private final boolean HISTORY_WALL_CLOCK = Jvm.getBoolean("history.wall.clock");
-    private final boolean HISTORY_METHOD_ID = Boolean.getBoolean("history.as.method_id");
+    private static final boolean HISTORY_AS_BYTES = Jvm.getBoolean("history.as.bytes");
+    private static final boolean HISTORY_WALL_CLOCK = Jvm.getBoolean("history.wall.clock");
+    private static final boolean HISTORY_AS_METHOD_ID = Jvm.getBoolean("history.as.method_id");
+    private boolean useBytesMarshallable = HISTORY_AS_BYTES;
+    private boolean historyWallClock = HISTORY_WALL_CLOCK;
+    private boolean historyMethodId = HISTORY_AS_METHOD_ID;
     @NotNull
     private final int[] sourceIdArray = new int[MESSAGE_HISTORY_LENGTH];
     @NotNull
@@ -57,10 +69,20 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     private int timings;
     private boolean addSourceDetails = false;
 
+    /**
+     * Returns the thread-local instance of {@link MessageHistory}.
+     *
+     * @return Current thread's {@code MessageHistory} instance.
+     */
     static MessageHistory getThreadLocal() {
         return THREAD_LOCAL.get();
     }
 
+    /**
+     * Sets the thread-local instance of {@link MessageHistory}.
+     *
+     * @param md The {@code MessageHistory} instance to be set for the current thread.
+     */
     static void setThreadLocal(MessageHistory md) {
         if (md == null)
             THREAD_LOCAL.remove();
@@ -84,7 +106,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
      * Whether to automatically add timestamp on read. Set this {@code false} for utilities that expect to
      * read MessageHistory without mutation
      *
-     * @param addSourceDetails addSourceDetails
+     * @param addSourceDetails True if source details should be added, false otherwise.
      */
     public void addSourceDetails(boolean addSourceDetails) {
         this.addSourceDetails = addSourceDetails;
@@ -95,6 +117,12 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         sources = timings = 0;
     }
 
+    /**
+     * Gets the flag that determines whether the MessageHistory should automatically
+     * add a timestamp on read.
+     *
+     * @return True if source details are being added, false otherwise.
+     */
     public boolean addSourceDetails() {
         return addSourceDetails;
     }
@@ -161,7 +189,11 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         Bytes<?> bytes = wire.bytes();
         if (bytes.peekUnsignedByte() == BinaryWireCode.BYTES_MARSHALLABLE) {
             bytes.readSkip(1);
-            readMarshallable0(bytes);
+            if (bytes.canReadDirect(MAX_LENGTH)) {
+                readMarshallableDirect(bytes);
+            } else {
+                readMarshallable0(bytes);
+            }
         } else {
             sources = 0;
             wire.read("sources").sequence(this, VanillaMessageHistory::acceptSourcesRead);
@@ -181,8 +213,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
 
     @Override
     public void writeMarshallable(@NotNull WireOut wire) {
-        if (USE_BYTES_MARSHALLABLE) {
-            assert !(wire instanceof TextWire);
+        if (useBytesMarshallable && wire.isBinary()) {
             wire.bytes().writeUnsignedByte(BinaryWireCode.BYTES_MARSHALLABLE);
             writeMarshallable(wire.bytes());
         } else {
@@ -194,8 +225,33 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
 
     @Override
     public void readMarshallable(@NotNull BytesIn<?> bytes) throws IORuntimeException {
-        readMarshallable0(bytes);
+        if (bytes.canReadDirect(MAX_LENGTH)) {
+            readMarshallableDirect(bytes);
+        } else {
+            readMarshallable0(bytes);
+        }
         assert !addSourceDetails : "Bytes marshalling does not yet support addSourceDetails";
+    }
+
+    private void readMarshallableDirect(@NotNull BytesIn<?> bytes) {
+        long addr = bytes.addressForRead(bytes.readPosition());
+        long start = addr;
+        Memory memory = OS.memory();
+        sources = memory.readByte(addr++);
+        for (int i = 0; i < sources; i++) {
+            sourceIdArray[i] = memory.readInt(addr);
+            addr += 4;
+        }
+        for (int i = 0; i < sources; i++) {
+            sourceIndexArray[i] = memory.readLong(addr);
+            addr += 8;
+        }
+        timings = memory.readByte(addr++);
+        for (int i = 0; i < timings; i++) {
+            timingsArray[i] = memory.readLong(addr);
+            addr += 8;
+        }
+        bytes.readSkip(addr - start);
     }
 
     private void readMarshallable0(@NotNull BytesIn<?> bytes) {
@@ -211,6 +267,37 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
 
     @Override
     public void writeMarshallable(@NotNull BytesOut<?> b) {
+        if (b.canWriteDirect(MAX_LENGTH)) {
+            writeMarshallableDirect(b);
+        } else {
+            writeMarshallable0(b);
+        }
+    }
+
+    private void writeMarshallableDirect(BytesOut<?> b) {
+        long addr = b.addressForWritePosition();
+        long start = addr;
+        Memory memory = OS.memory();
+        memory.writeByte(addr++, (byte) sources);
+        for (int i = 0; i < sources; i++) {
+            memory.writeInt(addr, sourceIdArray[i]);
+            addr += 4;
+        }
+        for (int i = 0; i < sources; i++) {
+            memory.writeLong(addr, sourceIndexArray[i]);
+            addr += 8;
+        }
+        memory.writeByte(addr++, (byte) (timings + 1));
+        for (int i = 0; i < timings; i++) {
+            memory.writeLong(addr, timingsArray[i]);
+            addr += 8;
+        }
+        memory.writeLong(addr, nanoTime()); // add time for this output
+        addr += 8;
+        b.writeSkip(addr - start);
+    }
+
+    public void writeMarshallable0(@NotNull BytesOut<?> b) {
         BytesOut<?> bytes = b;
         bytes.writeHexDumpDescription("sources")
                 .writeUnsignedByte(sources);
@@ -229,7 +316,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     }
 
     protected long nanoTime() {
-        return HISTORY_WALL_CLOCK ? CLOCK.currentTimeNanos() : System.nanoTime();
+        return historyWallClock ? CLOCK.currentTimeNanos() : System.nanoTime();
     }
 
     private void acceptSources(VanillaMessageHistory t, ValueOut out) {
@@ -266,6 +353,12 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         return b;
     }
 
+    /**
+     * Adds a new source with the given ID and index to the message history.
+     *
+     * @param id    The ID of the source.
+     * @param index The index of the source.
+     */
     public void addSource(int id, long index) {
         sourceIdArray[sources] = id;
         sourceIndexArray[sources++] = index;
@@ -277,10 +370,17 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         return dirty;
     }
 
+    /**
+     * Adds a timing value to the message history. Throws an exception if the maximum capacity is reached.
+     *
+     * @param l The timing value to be added.
+     */
     public void addTiming(long l) {
+        // Check if the timings array is full
         if (timings >= timingsArray.length) {
             throw new IllegalStateException("Have exceeded message history size: " + this);
         }
+        // Append the provided timing value to the array and increment the count
         timingsArray[timings++] = l;
     }
 
@@ -328,12 +428,12 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         for (int i = 0; i < timings; i++) {
             if (i > 0)
                 sb.append(',');
-            if (HISTORY_WALL_CLOCK)
+            if (historyWallClock)
                 sb.append(' ').append(NanoTime.INSTANCE.asString(timingsArray[i]));
             else
                 sb.append(timingsArray[i]);
         }
-        if (HISTORY_WALL_CLOCK)
+        if (historyWallClock)
             sb.append(' ');
         return sb;
     }
@@ -346,7 +446,19 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     @Override
     public void doWriteHistory(DocumentContext dc) {
         final WireOut wire = dc.wire();
-        final ValueOut valueOut = HISTORY_METHOD_ID ? wire.writeEventId(MethodReader.MESSAGE_HISTORY_METHOD_ID) : wire.writeEventName(MethodReader.HISTORY);
+        final ValueOut valueOut = historyMethodId ? wire.writeEventId(MethodReader.MESSAGE_HISTORY_METHOD_ID) : wire.writeEventName(MethodReader.HISTORY);
         valueOut.marshallable(this);
+    }
+
+    public void useBytesMarshallable(boolean useBytesMarshallable) {
+        this.useBytesMarshallable = useBytesMarshallable;
+    }
+
+    public void historyWallClock(boolean historyWallClock) {
+        this.historyWallClock = historyWallClock;
+    }
+
+    public void historyMethodId(boolean historyMethodId) {
+        this.historyMethodId = historyMethodId;
     }
 }

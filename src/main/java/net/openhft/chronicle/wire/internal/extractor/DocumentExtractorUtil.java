@@ -76,7 +76,6 @@ public final class DocumentExtractorUtil {
 
     }
 
-
     public static <I, M>
     MethodNameAndMessageType<M> methodOf(@NotNull final Class<I> type,
                                          @NotNull final BiConsumer<? super I, ? super M> methodReference) {

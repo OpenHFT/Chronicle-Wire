@@ -37,7 +37,6 @@ import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
-
 public class YamlTesterTest extends WireTestCommon {
     private static TestImpl testImpl;
 
@@ -160,6 +159,12 @@ public class YamlTesterTest extends WireTestCommon {
                         "...\n" +
                         "# comment 9\n")
                 .run();
+        assertEquals(yt.expected(), yt.actual());
+    }
+
+    @Test
+    public void emptyDocuments() {
+        final YamlTester yt = YamlTester.runTest(newTestImplFunction(), TestOut.class, "yaml-tester/empty-docs");
         assertEquals(yt.expected(), yt.actual());
     }
 }

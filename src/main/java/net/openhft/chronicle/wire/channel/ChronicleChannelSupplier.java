@@ -67,7 +67,7 @@ public class ChronicleChannelSupplier extends ChronicleChannelCfg<ChronicleChann
         switch (protocol) {
             case "tcp":
                 // Create a new TCP ChronicleChannel.
-                channel = ChronicleChannel.newChannel(context.socketRegistry(), this, handler);
+                channel = ChronicleChannel.newChannel(context.socketRegistry(), this, handler,context.closeCallback());
                 break;
             case "internal":
                 // Create a new internal ChronicleChannel.

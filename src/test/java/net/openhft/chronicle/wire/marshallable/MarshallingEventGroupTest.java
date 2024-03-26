@@ -168,7 +168,6 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "    highHandler: !net.openhft.chronicle.threads.EventHandlers NOOP,\n" +
                     "    loopStartNS: 9223372036854775807,\n" +
                     "    thread: !!null \"\",\n" +
-                    "    exceptionThrownByHandler: !net.openhft.chronicle.threads.ExceptionHandlerStrategy$LogDontRemove { },\n" +
                     "    timerHandlers: [    ],\n" +
                     "    daemonHandlers: [    ],\n" +
                     "    timerIntervalMS: 1,\n" +

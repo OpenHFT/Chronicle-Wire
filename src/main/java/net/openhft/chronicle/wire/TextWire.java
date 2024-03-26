@@ -1916,7 +1916,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                     }
                 }
 
-            } else if (GENERATE_TUPLES && tClass.getClassLoader() != null) {
+            } else if (GENERATE_TUPLES && tClass.getClassLoader() != null && tClass.isInterface()) {
                 return Wires.tupleFor(tClass, stringBuilder.toString());
             }
 
@@ -1999,11 +1999,17 @@ public class TextWire extends YamlWireOut<TextWire> {
                 return object;
 
             } else if (code != '{') {
+                if ("[]?}&".indexOf(code) < 0 && ObjectUtils.canConvertText(object.getClass())) {
+                    Object o = ObjectUtils.convertTo(object.getClass(), text());
+                    consumePadding(1);
+                    return o;
+                }
                 consumeValue();
                 long position00 = bytes.readPosition();
                 final String s = bytes.readPosition(position0).toDebugString(128);
                 bytes.readPosition(position00);
                 throw new IORuntimeException("Trying to read marshallable " + object.getClass() + " at " + s + " expected to find a {");
+
             }
 
             final long len = readLengthMarshallable();
@@ -2437,5 +2443,10 @@ public class TextWire extends YamlWireOut<TextWire> {
     @Override
     public boolean writingIsComplete() {
         return !writeContext.isNotComplete();
+    }
+
+    @Override
+    public void rollbackIfNotComplete() {
+        writeContext.rollbackIfNotComplete();
     }
 }

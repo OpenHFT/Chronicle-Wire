@@ -64,9 +64,13 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
     public void close() {
         if (chainedElement)
             return;
+        // redundant close
+        if (count == 0)
+            return;
         count--;
         if (count > 0)
             return;
+        notComplete = false;
         @NotNull Bytes<?> bytes = wire().bytes();
         if (rollback) {
             bytes.writePosition(bytes.readPosition());
@@ -80,7 +84,20 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
             bytes.append("...\n");
         }
         wire().getValueOut().resetBetweenDocuments();
-        notComplete = false;
+    }
+
+    @Override
+    public void rollbackIfNotComplete() {
+        if (!notComplete) return;
+        chainedElement = false;
+        count = 1;
+        rollback = true;
+        close();
+    }
+
+    @Override
+    public void rollbackOnClose() {
+        rollback = true;
     }
 
     @Override
@@ -89,13 +106,10 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         if (count > 0)
             close();
         count = 0;
+        position = 0;
+        metaData = false;
         rollback = false;
         notComplete = false;
-    }
-
-    @Override
-    public void rollbackOnClose() {
-        rollback = true;
     }
 
     @Override

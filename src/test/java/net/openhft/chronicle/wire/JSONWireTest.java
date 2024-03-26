@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.annotation.RetentionPolicy;
@@ -519,4 +520,30 @@ public class JSONWireTest extends WireTestCommon {
             }
         }
     }
+
+    @Test
+    public void typeLiteral1() {
+        String expected = "{\"@net.openhft.chronicle.wire.JSONWireTest$DtoWithClassReference\":{\"implClass\":{\"@type\":\"net.openhft.chronicle.wire.JSONWireTest\"},\"bool\":false}}";
+        Object o = WireType.JSON_ONLY.fromString(expected);
+        String json = WireType.JSON_ONLY.asString(o);
+        Assert.assertEquals(expected, json);
+    }
+
+    @Test
+    public void typeLiteralTest2() {
+        DtoWithClassReference dtoWithClassReference = new DtoWithClassReference();
+        dtoWithClassReference.implClass = this.getClass();
+        String json = WireType.JSON_ONLY.asString(dtoWithClassReference);
+        assertEquals("{\"@net.openhft.chronicle.wire.JSONWireTest$DtoWithClassReference\"" +
+                        ":{\"implClass\":{\"@type\":\"net.openhft.chronicle.wire.JSONWireTest\"},\"bool\":false}}",
+                json);
+        assertEquals(dtoWithClassReference, WireType.JSON_ONLY.fromString(json));
+    }
+
+    private static class DtoWithClassReference extends SelfDescribingMarshallable {
+        private Class<?> implClass;
+        private boolean bool;
+    }
+
+
 }

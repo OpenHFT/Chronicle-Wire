@@ -1,10 +1,10 @@
 package run.chronicle.account.dto;
 
 import net.openhft.chronicle.wire.Marshallable;
-import net.openhft.chronicle.wire.converter.Base85;
+import net.openhft.chronicle.wire.converter.ShortText;
 import org.junit.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static run.chronicle.account.dto.AccountStatusTest.getAccountStatus;
 
 public class AccountStatusFailedTest {
@@ -26,8 +26,8 @@ public class AccountStatusFailedTest {
                 "  },\n" +
                 "  reason: reasons\n" +
                 "}");
-        assertEquals("sender", Base85.INSTANCE.asString(asf.sender()));
-        assertEquals("target", Base85.INSTANCE.asString(asf.target()));
+        assertEquals("sender", ShortText.INSTANCE.asString(asf.sender()));
+        assertEquals("target", ShortText.INSTANCE.asString(asf.target()));
         assertEquals("reasons", asf.reason());
         assertEquals(getAccountStatus(), asf.accountStatus());
     }

@@ -136,7 +136,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
         WireMarshaller<Object> wm = WIRE_MARSHALLER_CL.get(this.getClass());
 
         // Delegate the reading process to the obtained WireMarshaller
-        wm.readMarshallable(this, wire, wm.defaultValue(), true);
+        wm.readMarshallable(this, wire, true);
     }
 
     /**
@@ -164,8 +164,16 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
         return (T) Wires.deepCopy(this);
     }
 
-    default <T extends Marshallable> T copyTo(@NotNull T t) throws InvalidMarshallableException {
-        return Wires.copyTo(this, t);
+    /**
+     * Copy fields from this to dest by marshalling out and then in. Allows copying of fields by name
+     * even if there is no type relationship between this and dest
+     *
+     * @param dest destination
+     * @return t
+     * @param <T> destination type
+     */
+    default <T extends Marshallable> T copyTo(@NotNull T dest) throws InvalidMarshallableException {
+        return Wires.copyTo(this, dest);
     }
 
     default <K, T extends Marshallable> T mergeToMap(@NotNull Map<K, T> map, @NotNull Function<T, K> getKey) {

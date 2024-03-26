@@ -42,10 +42,14 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
     private boolean initiator;
     private boolean buffered;
     private PauserMode pauser = PauserMode.yielding;
-    @Deprecated
+
+    @Deprecated(/* to be removed in x.27  - use net.openhft.chronicle.wire.channel.ChronicleChannelCfg.hostports instead */)
     private String hostname;
-    @Deprecated
+
+
+    @Deprecated(/* to be removed in x.27 - use net.openhft.chronicle.wire.channel.ChronicleChannelCfg.hostports instead */)
     private int port;
+
     private double connectionTimeoutSecs = 1.0;
     private final Set<HostPortCfg> hostports = new LinkedHashSet<>();
 
@@ -111,7 +115,7 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
      * @return the hostname
      * @deprecated use {@link ChronicleChannelCfg#hostPorts()}
      */
-    @Deprecated
+    @Deprecated(/* to be removed in x.27 */)
     public String hostname() {
         return hostname;
     }
@@ -123,7 +127,7 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
      * @return this configuration instance
      * @deprecated use {@link ChronicleChannelCfg#addHostnamePort(String, int)}
      */
-    @Deprecated
+    @Deprecated(/* to be removed in x.27 */)
     public C hostname(String hostname) {
         this.hostname = hostname;
         return (C) this;
@@ -135,7 +139,7 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
      * @return the port number
      * @deprecated use {@link ChronicleChannelCfg#hostPorts()}
      */
-    @Deprecated
+    @Deprecated(/* to be removed in x.27 */)
     public int port() {
         return port;
     }
@@ -147,7 +151,7 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
      * @return this configuration instance
      * @deprecated use {@link ChronicleChannelCfg#addHostnamePort(String, int)}
      */
-    @Deprecated
+    @Deprecated(/* to be removed in x.27 */)
     public C port(int port) {
         this.port = port;
         return (C) this;

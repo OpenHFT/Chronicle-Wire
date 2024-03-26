@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.Closeable;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.time.LocalDate;
@@ -53,7 +52,6 @@ public class WireResetTest extends WireTestCommon {
         }
     }
 
-    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/745")
     @Test
     //https://github.com/OpenHFT/Chronicle-Wire/issues/732
     public void testDeepReset() {
@@ -72,7 +70,7 @@ public class WireResetTest extends WireTestCommon {
         assertSame(identifier1, event1.identifier);
         assertNull(event1.identifier.id);
         assertTrue(event1.identifier.permissions.isEmpty());
-        assertNull(event1.identifier.parent.id);
+        assertNull(event1.identifier.parent);
         assertTrue(event1.ids.isEmpty());
         assertNull(event1.payload);
 
@@ -94,7 +92,7 @@ public class WireResetTest extends WireTestCommon {
         assertSame(identifier1, event1.identifier);
         assertNull(event1.identifier.id);
         assertTrue(event1.identifier.permissions.isEmpty());
-        assertNull(event1.identifier.parent.id);
+        assertNull(event1.identifier.parent);
         assertTrue(event1.ids.isEmpty());
         assertNull(event1.payload);
 

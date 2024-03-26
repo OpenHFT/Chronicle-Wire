@@ -21,7 +21,7 @@ package run.chronicle.account;
 import net.openhft.chronicle.core.time.SetTimeProvider;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.wire.WireTestCommon;
-import net.openhft.chronicle.wire.converter.Base85;
+import net.openhft.chronicle.wire.converter.ShortText;
 import net.openhft.chronicle.wire.utils.YamlAgitator;
 import net.openhft.chronicle.wire.utils.YamlTester;
 import net.openhft.chronicle.wire.utils.YamlTesterParametersBuilder;
@@ -44,7 +44,7 @@ public class AccountsTest extends WireTestCommon {
             "account/mixed",
             "account/waterfall"
     };
-    static final long VAULT = Base85.INSTANCE.parse("vault");
+    static final long VAULT = ShortText.INSTANCE.parse("vault");
 
     final String name;
     final YamlTester tester;

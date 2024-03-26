@@ -49,7 +49,7 @@ public abstract class AbstractMarshallableCfg extends SelfDescribingMarshallable
 
         // Use the WireMarshaller to read the configuration
         // Field that are not present in the input are not touched.
-        wm.readMarshallable(this, wire, wm.defaultValue(), false);
+        wm.readMarshallable(this, wire, false);
     }
 
     /**
@@ -69,7 +69,7 @@ public abstract class AbstractMarshallableCfg extends SelfDescribingMarshallable
 
         // Use the WireMarshaller to write the configuration
         // Fields with a default value are not written
-        marshaller.writeMarshallable(this, wire, marshaller.defaultValue(), false);
+        marshaller.writeMarshallable(this, wire, false);
     }
 
     /**

@@ -84,6 +84,13 @@ public class FileMarshallableOut implements MarshallableOut {
         return dcHolder;
     }
 
+    @Override
+    public void rollbackIfNotComplete() {
+        DocumentContext dc = dcHolder.documentContext();
+        if (dc != null)
+            dc.rollbackIfNotComplete();
+    }
+
     static class FMOOptions extends SelfDescribingMarshallable {
         boolean append;
     }

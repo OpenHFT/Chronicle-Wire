@@ -28,6 +28,8 @@ import net.openhft.chronicle.wire.channel.impl.ChronicleChannelUtils;
 import net.openhft.chronicle.wire.channel.impl.SocketRegistry;
 import net.openhft.chronicle.wire.converter.NanoTime;
 
+import java.util.function.Consumer;
+
 /**
  * The ChronicleChannel interface encapsulates a communication channel that can process various data types.
  * It extends the Closeable, MarshallableOut, and MarshallableIn interfaces, thereby supporting a wide range of I/O operations.
@@ -44,7 +46,11 @@ public interface ChronicleChannel extends Closeable, MarshallableOut, Marshallab
      * @throws InvalidMarshallableException if there's an error marshalling the objects for communication
      */
     static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg channelCfg, ChannelHeader headerOut) throws InvalidMarshallableException {
-        return ChronicleChannelUtils.newChannel(socketRegistry, channelCfg, headerOut);
+        return ChronicleChannelUtils.newChannel(socketRegistry, channelCfg, headerOut, null);
+    }
+
+    static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg channelCfg, ChannelHeader headerOut,  Consumer<ChronicleChannel> closeCallback) throws InvalidMarshallableException {
+        return ChronicleChannelUtils.newChannel(socketRegistry, channelCfg, headerOut, closeCallback);
     }
 
     /**

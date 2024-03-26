@@ -47,7 +47,6 @@ public class JSONWireWithListsTest extends net.openhft.chronicle.wire.WireTestCo
         this.useTypes = useTypes;
     }
 
-
     static class F1 {
         private String surname;
         private int car;

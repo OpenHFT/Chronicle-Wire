@@ -4,11 +4,11 @@
 
 package net.openhft.chronicle.wire.utils.dto;
 
-import net.openhft.chronicle.wire.converter.Base85;
+import net.openhft.chronicle.wire.converter.ShortText;
 
 public class CancelOrderRequest extends AbstractEvent<CancelOrderRequest> {
     private static final int MASHALLABLE_VERSION = 1;
-    @Base85
+    @ShortText
     private long symbol;
     private String clOrdID = "";
 

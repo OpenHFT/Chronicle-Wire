@@ -76,6 +76,13 @@ public interface DocumentContext extends Closeable, SourceContext {
     default void rollbackOnClose() {
     }
 
+    /**
+     * Call this if any incomplete message should be rolled back at this point, it it wasn't complete by now.
+     */
+    default void rollbackIfNotComplete() {
+        throw new UnsupportedOperationException(getClass().getName());
+    }
+
     @Override
     void close();
 

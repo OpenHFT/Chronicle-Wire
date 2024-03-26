@@ -9,16 +9,26 @@ import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.threads.PauserMode;
 import net.openhft.chronicle.wire.channel.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.URL;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 public final class ChronicleChannelUtils {
     private ChronicleChannelUtils() {
     }
 
-    public static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg channelCfg, ChannelHeader headerOut) throws InvalidMarshallableException {
+
+    public static ChronicleChannel newChannel(SocketRegistry socketRegistry,
+                                              ChronicleChannelCfg<?> channelCfg,
+                                              ChannelHeader headerOut,
+                                              @Nullable Consumer<ChronicleChannel> closeCallback) throws InvalidMarshallableException {
         TCPChronicleChannel simpleConnection = new TCPChronicleChannel(channelCfg, headerOut, socketRegistry);
+
+        if (closeCallback != null)
+            simpleConnection.closeCallback(closeCallback);
+
         final ChannelHeader marshallable = simpleConnection.headerIn();
         Jvm.debug().on(ChronicleChannel.class, "Client got " + marshallable);
         if (marshallable instanceof RedirectHeader) {
@@ -29,7 +39,7 @@ public final class ChronicleChannelUtils {
                     URL url = ChronicleContext.urlFor(location);
                     channelCfg.hostname(url.getHost());
                     channelCfg.port(url.getPort());
-                    return newChannel(socketRegistry, channelCfg, headerOut);
+                    return newChannel(socketRegistry, channelCfg, headerOut,null);
 
                 } catch (IORuntimeException e) {
                     Jvm.debug().on(ChronicleChannel.class, e);
@@ -41,6 +51,12 @@ public final class ChronicleChannelUtils {
                 ? new BufferedChronicleChannel(simpleConnection, channelCfg.pauserMode().get())
                 : simpleConnection;
     }
+
+    @Deprecated(/* To be removed in x.27 */)
+    public static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg channelCfg, ChannelHeader headerOut) throws InvalidMarshallableException {
+        return newChannel(socketRegistry, channelCfg, headerOut, null);
+    }
+
 
     @NotNull
     public static Runnable eventHandlerAsRunnable(ChronicleChannel chronicleChannel, Object eventHandler) {

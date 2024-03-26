@@ -21,6 +21,8 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesMarshallable;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.Validatable;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import org.junit.Assert;
@@ -29,11 +31,13 @@ import org.junit.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
+import static java.util.Arrays.asList;
 import static net.openhft.chronicle.wire.WireType.TEXT;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("rawtypes")
@@ -46,6 +50,33 @@ public class WiresTest extends WireTestCommon {
     public void preAfter() {
         container1.bytesField.releaseLast();
         container2.bytesField.releaseLast();
+    }
+
+    @Test
+    public void defaultCompilerOptions() throws Exception {
+        Field compiler = Jvm.getField(Wires.class, "CACHED_COMPILER");
+        compiler.set(null, null);
+        Wires.loadFromJava(this.getClass().getClassLoader(), this.getClass().getName(), "");
+        assertNotNull(compiler.get(null));
+        List<String> options = Jvm.getValue(compiler.get(null), "options");
+
+        assertTrue(options.containsAll(asList("-g", "-nowarn")));
+        assertEquals(2, options.size());
+    }
+
+    @Test
+    public void customCompilerOptions() throws Exception {
+        Field compiler = Jvm.getField(Wires.class, "CACHED_COMPILER");
+        compiler.set(null, null);
+        System.setProperty("compiler.options", "-g -parameters");
+        Wires.loadFromJava(this.getClass().getClassLoader(), this.getClass().getName(), "");
+        assertNotNull(compiler.get(null));
+        List<String> options = Jvm.getValue(compiler.get(null), "options");
+
+        assertTrue(options.containsAll(asList("-g", "-parameters")));
+        assertEquals(2, options.size());
+
+        System.clearProperty("compiler.options");
     }
 
     @Test
@@ -330,6 +361,15 @@ public class WiresTest extends WireTestCommon {
     }
 
     @Test
+    public void copyToIncompleteValidation() {
+        OneTwoFour o124 = new OneTwoFour(11, 222, 44444);
+        TwoFourThreeValidatable o243 = new TwoFourThreeValidatable(2, 4, 3);
+        // o243's validate method used to be called and would blow up as o243 was incomplete.
+        // Using copyTo to partially hydrate an object is perfectly valid
+        Wires.copyTo(o124, o243);
+    }
+
+    @Test
     public void copyToContainsBytesMarshallable() {
         ContainsBM containsBM = new ContainsBM(new BasicBytesMarshallable("Harold"));
         ContainsBM containsBM2 = new ContainsBM(null);
@@ -381,6 +421,19 @@ public class WiresTest extends WireTestCommon {
             this.two = two;
             this.four = four;
             this.three = three;
+        }
+    }
+
+    static class TwoFourThreeValidatable extends TwoFourThree implements Validatable {
+        TwoFourThreeValidatable(long two, long four, long three) {
+            super(two, four, three);
+        }
+
+        @Override
+        public void validate() throws InvalidMarshallableException {
+            if (three == 0) {
+                throw new InvalidMarshallableException("three is 0");
+            }
         }
     }
 

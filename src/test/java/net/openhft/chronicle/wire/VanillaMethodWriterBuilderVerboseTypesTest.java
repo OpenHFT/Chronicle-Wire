@@ -58,7 +58,6 @@ public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chro
 
         private final ArrayList<MyObject2> list = new ArrayList<>();
 
-
         public MyObject(String str, int value) {
             list.add(new MyObject2(str, value));
         }

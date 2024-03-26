@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 import static net.openhft.chronicle.wire.VanillaMethodReaderBuilder.DISABLE_READER_PROXY_CODEGEN;
 import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_PROXY_REFLECTION;
 import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN;
+import static org.junit.Assert.assertEquals;
 
 public class WireTestCommon {
     protected ThreadDump threadDump;
@@ -50,6 +51,7 @@ public class WireTestCommon {
 
     public WireTestCommon() {
         ignoreException("The incubating features are subject to change");
+        ignoreException("NamedThreadFactory created here");
     }
 
     @Before
@@ -122,6 +124,23 @@ public class WireTestCommon {
             Jvm.resetExceptionHandlers();
             Assert.fail(msg);
         }
+    }
+
+    /**
+     * Parses and round-trips each of provided strings delimited and trailed by comma with a specified converter.
+     */
+    protected static void subStringParseLoop(String s, LongConverter c, int comparisons) {
+        int oldPos = 0;
+        int newPos;
+        while ((newPos = s.indexOf(',', oldPos)) >= 0) {
+            long v = c.parse(s, oldPos, newPos);
+            StringBuilder sb = new StringBuilder();
+            c.append(sb, v);
+            assertEquals(s.substring(oldPos, newPos), sb.toString());
+            oldPos = newPos + 1;
+            comparisons--;
+        }
+        assertEquals(0, comparisons);
     }
 
     @After

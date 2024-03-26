@@ -52,7 +52,6 @@ public class JSON322Test extends WireTestCommon {
         }
     }
 
-
     public static class Four extends Two {
         String text;
 
@@ -61,7 +60,6 @@ public class JSON322Test extends WireTestCommon {
             this.text = text;
         }
     }
-
 
     public static class Three extends SelfDescribingMarshallable {
         private One one;

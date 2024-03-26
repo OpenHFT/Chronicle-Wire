@@ -35,7 +35,6 @@ public class TestJsonIssue467 {
         private Object payload;
     }
 
-
     @Ignore
     @org.junit.Test
     public void test() {

@@ -60,8 +60,8 @@ public final class ReflectionUtil {
         if (lastDot != -1) {
             String packageName = classFullName.substring(0, lastDot);
 
-            if (PREPEND_PACKAGE || classFullName.startsWith("java.") || classFullName.startsWith("javax.") ||
-                    classFullName.startsWith("com.sun.")) {
+            if (PREPEND_PACKAGE || classFullName.startsWith("java.") || classFullName.startsWith("javax.")
+                    || classFullName.startsWith("com.sun.") || classFullName.startsWith("jdk.")) {
                 return PACKAGE_PREFIX + "." + packageName;
             }
             return packageName;

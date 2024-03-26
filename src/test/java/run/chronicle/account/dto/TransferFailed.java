@@ -18,7 +18,6 @@
 
 package run.chronicle.account.dto;
 
-
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 
 public class TransferFailed extends AbstractEvent<TransferFailed> {

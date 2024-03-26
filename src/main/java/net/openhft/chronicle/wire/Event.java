@@ -6,74 +6,46 @@ package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
 
-public interface Event<E extends Event<E>> extends Marshallable {
+/**
+ * This interface defines the structure and behavior of an event within a system.
+ * It extends {@link BaseEvent}, thereby inheriting methods related to time management,
+ * and adds methods specific to event identification and manipulation.
+ * <p>
+ * NOTE: Only use this interface if the eventId is required as the eventTime is sufficient in most cases
+ *
+ * @param <E> The type of the implementing event class, following the self-referential generic pattern.
+ */
+public interface Event<E extends Event<E>> extends BaseEvent<E> {
 
     /**
-     * Returns a unique identifier attached to this event.
+     * Returns an identifier attached to this event.
      *
-     * @return a unique identifier attached to this event.
+     * @return an identifier attached to this event.
      */
     @NotNull
-    @Deprecated(/* to be removed in x.25 */)
     default CharSequence eventId() {
         return "";
     }
 
     /**
-     * Assigns a unique identifier to this event. The input identifier cannot be {@code null}.
+     * Assigns an identifier to this event. The provided identifier must not be null.
+     * This method can be used to explicitly set or change the event's identifier.
      *
-     * @param eventId unique identifier to assign to this event.
+     * @param eventId identifier to assign to this event.
      * @return this
      */
-    @Deprecated(/* to be removed in x.25 */)
     default E eventId(@NotNull final CharSequence eventId) {
         return (E) this;
     }
 
     /**
-     * Returns the time at which the event which triggered this was generated (e.g. the time
-     * an event generated externally to the system first entered the system).
-     * <p>
-     * By default, the time is represented in nanoseconds. System property 'service.time.unit'
-     * can be changed in order to represent time in different units.
+     * Updates the event with a new name, and if the event time is not already set,
+     * updates the event time to the current system time. This method is useful for renaming
+     * events and ensuring they have a valid timestamp.
      *
-     * @return the time at which the event which triggered this was generated.
+     * @param eventName The new name to be assigned to the event.
+     * @return The current instance of the implementing class, with any necessary updates applied.
      */
-    long eventTime();
-
-    /**
-     * Sets the time at which the event which triggered this was generated (e.g. the time
-     * an event generated externally to the system first entered the system).
-     * <p>
-     * By default, the time is represented in nanoseconds. System property 'service.time.unit'
-     * can be changed in order to represent time in different units.
-     *
-     * @return this
-     */
-    default E eventTime(final long eventTime) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Sets the time at which the event which triggered this was generated (e.g. the time
-     * an event generated externally to the system first entered the system) to the
-     * current time.
-     * <p>
-     * By default, the time is represented in nanoseconds. System property 'service.time.unit'
-     * can be changed in order to represent time in different units.
-     *
-     * @return this
-     */
-    default E eventTimeNow() {
-        return eventTime(ServicesTimestampLongConverter.currentTime());
-    }
-
-    /**
-     * Updates event with new event name, updating event time to now if required.
-     *
-     * @param eventName name of the event
-     */
-    // TODO: x.25 remove eventName parameter
     default E updateEvent(final String eventName) {
         if (this.eventId().length() == 0)
             this.eventId(eventName);
@@ -84,10 +56,12 @@ public interface Event<E extends Event<E>> extends Marshallable {
     }
 
     /**
-     * Rather than getting/setting from one event to the other directly, please use this method as
-     * this will make removing eventId easier
-     * @param from from
-     * @param to to
+     * Copies essential details from one event to another. This method is preferred over direct
+     * field access as it provides a more controlled way of transferring details between events,
+     * and facilitates future changes to the event structure.
+     *
+     * @param from The source event from which details are copied.
+     * @param to The target event to which details are copied.
      */
     static void copyEventDetails(Event<?> from, Event<?> to) {
         to.eventId(from.eventId());

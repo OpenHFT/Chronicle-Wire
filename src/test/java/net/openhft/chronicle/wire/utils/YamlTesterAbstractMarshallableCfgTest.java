@@ -23,7 +23,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-
 public class YamlTesterAbstractMarshallableCfgTest extends WireTestCommon {
     @Test
     public void testAbstractMarshallableCfgResetTest() {

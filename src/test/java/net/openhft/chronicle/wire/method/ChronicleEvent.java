@@ -33,7 +33,6 @@ public class ChronicleEvent extends BytesInBinaryMarshallable implements Event {
     private long text1;
     private String text3;
 
-
     @Override
     public void sendingTimeNS(long sendingTimeNS) {
         this.sendingTimeNS = sendingTimeNS;
