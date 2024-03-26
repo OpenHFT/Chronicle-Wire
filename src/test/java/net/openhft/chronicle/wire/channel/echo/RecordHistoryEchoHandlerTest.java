@@ -43,7 +43,7 @@ public class RecordHistoryEchoHandlerTest extends WireTestCommon {
         assertTrue(channel.recordHistory());
         VanillaMessageHistory history = (VanillaMessageHistory) MessageHistory.get();
         history.reset(1, 128);
-//        history.historyMethodId(false);
+
         Says says = channel.methodWriter(Says.class);
         says.say("Hello World");
 
