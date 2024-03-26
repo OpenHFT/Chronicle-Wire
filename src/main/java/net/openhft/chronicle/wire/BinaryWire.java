@@ -78,6 +78,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         return true;
     });
     private static final AtomicBoolean FIRST_WARN_MISSING_CLASS = new AtomicBoolean();
+    private static final ThreadLocal<VanillaMessageHistory> VANILLA_MESSAGE_HISTORY_TL = ThreadLocal.withInitial(VanillaMessageHistory::new);
     private final FixedBinaryValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
     private final FixedBinaryValueOut valueOut;
@@ -445,7 +446,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     private void copyHistoryMessage(@NotNull WireOut wire) {
-        VanillaMessageHistory vmh = new VanillaMessageHistory();
+        VanillaMessageHistory vmh = VANILLA_MESSAGE_HISTORY_TL.get();
         vmh.useBytesMarshallable(true);
         vmh.addSourceDetails(false);
         vmh.readMarshallable(bytes());
