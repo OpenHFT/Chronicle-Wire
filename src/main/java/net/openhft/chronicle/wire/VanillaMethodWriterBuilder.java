@@ -192,7 +192,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                 throw new IllegalStateException("Reflection based proxy disabled, set -D" + DISABLE_PROXY_REFLECTION + " to enable");
 
             Jvm.warn().on(getClass(), "Falling back to proxy method writer. Support for " +
-                    "proxy method writers will be removed in x.26.");
+                    "proxy method writers will be removed in x.27.");
         }
 
         @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
@@ -221,7 +221,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
             classCache.put(fullClassName, COMPILE_FAILED);
             Jvm.warn().on(getClass(), "Failed to compile generated method writer - " +
                     "falling back to proxy method writer. Please report this failure as support for " +
-                    "proxy method writers will be removed in x.26.", e);
+                    "proxy method writers will be removed in x.27.", e);
         }
         return null;
     }
