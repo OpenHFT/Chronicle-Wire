@@ -50,25 +50,20 @@ import static net.openhft.chronicle.wire.VanillaWireParser.SKIP_READABLE_BYTES;
  */
 public class VanillaMethodReader implements MethodReader {
 
-    // Warning related to enabling the DEBUG_ENABLED. Enabling it may lead to issues with logMessage unless Wire marshalling is used.
-    // Refer: https://github.com/ChronicleEnterprise/Chronicle-Services/issues/240
+    // beware enabling DEBUG_ENABLED as logMessage will not work unless Wire marshalling used - https://github.com/ChronicleEnterprise/Chronicle-Services/issues/240
     public static final boolean DEBUG_ENABLED = Jvm.isDebugEnabled(VanillaMethodReader.class) && Jvm.getBoolean("wire.mr.debug");
-
-    // Constants used within the class.
     static final Object[] NO_ARGS = {};
-    static final Object IGNORED = new Object(); // This object signifies that a call should be ignored.
-
-    // Instance variables.
-    private final MarshallableIn in; // The input source.
+    static final Object IGNORED = new Object(); // object used to flag that the call should be ignored.
+    private final MarshallableIn in;
     @NotNull
-    private final WireParser metaWireParser; // The parser for meta data.
-    private final WireParser dataWireParser; // The parser for actual data.
-    private final MethodReaderInterceptorReturns methodReaderInterceptorReturns; // Interceptor for reading methods.
-    private final Predicate predicate; // Predicate for filtering.
+    private final WireParser metaWireParser;
+    private final WireParser dataWireParser;
+    private final MethodReaderInterceptorReturns methodReaderInterceptorReturns;
+    private final Predicate predicate;
 
-    private MessageHistory messageHistory; // Keeps a track of the messages read.
-    private boolean closeIn = false; // Indicator if input source should be closed.
-    private boolean closed; // Indicator if reader is closed.
+    private MessageHistory messageHistory;
+    private boolean closeIn = false;
+    private boolean closed;
 
     /**
      * Constructor for creating an instance of VanillaMethodReader with specified parameters.
