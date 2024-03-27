@@ -29,7 +29,6 @@ import java.util.stream.Stream;
 import static net.openhft.chronicle.wire.WireType.YAML;
 import static org.junit.Assert.assertEquals;
 
-@SuppressWarnings("rawtypes")
 @RequiredForClient
 public class KubernetesYamlTest extends WireTestCommon {
 

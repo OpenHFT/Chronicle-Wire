@@ -36,7 +36,6 @@ enum CcyPair {
     static final EnumInterner<CcyPair> INTERNER = new EnumInterner<>(CcyPair.class);
 }
 
-@SuppressWarnings("rawtypes")
 public class CSVBytesMarshallableTest extends WireTestCommon {
 
     // Bytes representing raw data for the tests

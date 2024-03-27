@@ -37,7 +37,6 @@ public class RFCExamplesTest extends WireTestCommon {
     map.put(2, "world");
     map.put(3, "bye");
      */
-    @SuppressWarnings("rawtypes")
     @Test
     public void testPuts() {
         // Allocate an elastic buffer on heap.

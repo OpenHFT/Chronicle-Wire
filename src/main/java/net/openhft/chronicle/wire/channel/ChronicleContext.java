@@ -206,8 +206,7 @@ public class ChronicleContext extends SimpleCloseable {
 
         connectionSupplier
                 .protocol(url().getProtocol())
-                .hostname(hostname == null || hostname.isEmpty() ? "localhost" : hostname)
-                .port(port)
+                .addHostnamePort(hostname == null || hostname.isEmpty() ? "localhost" : hostname, port)
                 .connectionId(connectionId)
                 .buffered(buffered())
                 .initiator(true);

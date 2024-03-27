@@ -40,7 +40,6 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@SuppressWarnings("rawtypes")
 public class WiresTest extends WireTestCommon {
 
     private final BytesContainer container1 = new BytesContainer();

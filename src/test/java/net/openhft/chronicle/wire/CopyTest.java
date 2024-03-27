@@ -75,7 +75,6 @@ public class CopyTest extends WireTestCommon {
         );
     }
 
-    // This test ensures that data can be copied from one wire to another, preserving integrity
     @SuppressWarnings("rawtypes")
     @Test
     public void testCopy() {

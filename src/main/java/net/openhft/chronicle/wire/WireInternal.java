@@ -452,7 +452,6 @@ public enum WireInternal {
 
         // Set the final stack trace to the throwable
         try {
-            //noinspection ToArrayCallWithZeroLengthArrayArgument
             STACK_TRACE.set(finalThrowable, stes.toArray(NO_STE));
         } catch (IllegalAccessException e) {
             throw Jvm.rethrow(e);

@@ -23,7 +23,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-@SuppressWarnings("rawtypes")
 public class WireInternalTest extends WireTestCommon {
 
     // Test the serialization and deserialization of a Throwable object using Wire's object method.

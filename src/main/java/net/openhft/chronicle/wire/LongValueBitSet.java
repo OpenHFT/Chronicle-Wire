@@ -144,7 +144,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
 
     @Override
     protected void performClose() {
-        closeQuietly(words);
+        closeQuietly((Object[]) words);
     }
 
     /**
@@ -1026,7 +1026,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         singleThreadedCheckDisabled(true);
         throwExceptionIfClosed();
 
-        closeQuietly(words);
+        closeQuietly((Object[]) words);
 
         int numberOfLongValues = wire.read("numberOfLongValues").int32();
         words = new LongReference[numberOfLongValues];

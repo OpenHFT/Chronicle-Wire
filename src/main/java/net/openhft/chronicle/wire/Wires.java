@@ -87,7 +87,8 @@ public enum Wires {
     // Dynamic list of class strategy functions
     public static final List<Function<Class, SerializationStrategy>> CLASS_STRATEGY_FUNCTIONS = new CopyOnWriteArrayList<>();
 
-    @Deprecated(/* for removal in x.26 */)
+    // Adding SuppressWarnings on every usage could have too many side effects, so make it a comment for now, but still remove it.
+    // @Deprecated(/* for removal in x.26 */)
     static boolean THROW_CNFRE = Jvm.getBoolean("class.not.found.for.missing.class.alias", true);
     // Class local storage for serialization strategies based on the class type
     static final ClassLocal<SerializationStrategy> CLASS_STRATEGY = ClassLocal.withInitial(c -> {
@@ -1639,7 +1640,6 @@ public enum Wires {
 
                 case "java.lang.Character":
                     return ScalarStrategy.of(Character.class, (o, in) -> {
-                        //noinspection unchecked
                         @Nullable final String text = in.text();
                         if (text == null || text.length() == 0)
                             return null;

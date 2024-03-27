@@ -34,7 +34,7 @@ import java.nio.BufferUnderflowException;
  * Note: While it's not strictly thread-safe, it's expected to still produce correct results.
  * @author peter.lawrey
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"unchecked"})
 public abstract class FromStringInterner<T> {
 
     // Array of interned entries

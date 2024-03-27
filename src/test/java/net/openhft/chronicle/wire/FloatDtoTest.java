@@ -24,7 +24,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-@SuppressWarnings("rawtypes")
 public class FloatDtoTest extends WireTestCommon {
 
     // Test method to serialize and deserialize a 'Value' object using a wire

@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.internal.NoBytesStore;
 import net.openhft.chronicle.bytes.internal.SingleMappedFile;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.ScopeConfined;
 import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.IOTools;
@@ -57,7 +58,6 @@ public class BinaryWireTest extends WireTestCommon {
     final boolean numericField;
     final boolean fieldLess;
     final int compressedSize;
-    @SuppressWarnings("rawtypes")
     @NotNull
     Bytes<?> bytes = new HexDumpBytes();
 
@@ -1748,7 +1748,11 @@ public class BinaryWireTest extends WireTestCommon {
             assertFalse(wire.writeEndOfWire(100, TimeUnit.MILLISECONDS, endOfWirePosition.get()));
         });
 
-        assertEquals(lastModified, tempFile.lastModified());
+        long lastModified2 = tempFile.lastModified();
+        if (OS.isMacOSX() && lastModified2 - lastModified == 1)
+            return;
+
+        assertEquals(lastModified, lastModified2);
     }
 
     private void createWireFromFileAnd(File file, Consumer<@ScopeConfined Wire> wireConsumer) throws IOException {

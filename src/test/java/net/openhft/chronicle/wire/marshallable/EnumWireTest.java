@@ -38,7 +38,6 @@ import static org.junit.Assert.assertSame;
  *
  * @author greg allen
  */
-@SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
 public class EnumWireTest extends WireTestCommon {
 

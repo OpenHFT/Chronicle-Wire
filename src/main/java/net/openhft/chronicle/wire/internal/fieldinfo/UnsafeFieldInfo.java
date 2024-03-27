@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire.internal.fieldinfo;
 
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.wire.BracketType;
-import net.openhft.chronicle.wire.VanillaFieldInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;

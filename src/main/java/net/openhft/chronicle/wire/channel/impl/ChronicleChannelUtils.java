@@ -57,8 +57,7 @@ public final class ChronicleChannelUtils {
             for (String location : rh.locations()) {
                 try {
                     URL url = ChronicleContext.urlFor(location);
-                    channelCfg.hostname(url.getHost());
-                    channelCfg.port(url.getPort());
+                    channelCfg.addHostnamePort(url.getHost(), url.getPort());
                     return newChannel(socketRegistry, channelCfg, headerOut,null);
 
                 } catch (IORuntimeException e) {
