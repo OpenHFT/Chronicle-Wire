@@ -82,12 +82,10 @@ public class ChronicleServiceMain extends SelfDescribingMarshallable implements 
         Thread.currentThread().setName("acceptor");
         ExecutorService service = Executors.newCachedThreadPool(new NamedThreadFactory("connections"));  // Thread pool to manage incoming connections
         try {
-            ssc = ServerSocketChannel.open();  // Open the server socket channel
-            ssc.bind(new InetSocketAddress(port));  // Bind it to the specified port
-            ChronicleChannelCfg channelCfg = new ChronicleChannelCfg().port(port);  // Configuration for the channel with the specified port
-            Function<ChannelHeader, ChannelHeader> redirectFunction = this::replaceOutHeader;  // Function to redirect channel headers (method not provided in the code)
-
-            // Continuously accept incoming connections until the service is closed
+            ssc = ServerSocketChannel.open();
+            ssc.bind(new InetSocketAddress(port));
+            ChronicleChannelCfg channelCfg = new ChronicleChannelCfg().addHostnamePort(null, port);
+            Function<ChannelHeader, ChannelHeader> redirectFunction = this::replaceOutHeader;
             while (!isClosed()) {
                 final SocketChannel sc = ssc.accept();
                 sc.socket().setTcpNoDelay(true);

@@ -36,7 +36,7 @@ import java.nio.BufferUnderflowException;
  * </p>
  * @author peter.lawrey
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"unchecked"})
 public abstract class FromStringInterner<T> {
 
     // Array of interned entries

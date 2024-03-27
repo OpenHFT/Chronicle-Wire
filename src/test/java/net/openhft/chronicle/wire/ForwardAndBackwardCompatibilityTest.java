@@ -122,7 +122,6 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     @Test
     public void testCheckThatNewDataAddedToADocumentDoesNotEffectOldReads() {
 
-        @SuppressWarnings("rawtypes")
         Bytes<?> b = Bytes.elasticByteBuffer();
         try {
             // Creating a Wire instance

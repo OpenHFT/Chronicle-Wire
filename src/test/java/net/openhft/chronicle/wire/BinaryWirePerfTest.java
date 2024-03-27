@@ -39,7 +39,6 @@ public class BinaryWirePerfTest extends WireTestCommon {
     final boolean fixed;
     final boolean numericField;
     final boolean fieldLess;
-    @SuppressWarnings("rawtypes")
     @NotNull
     Bytes<?> bytes = allocateElasticOnHeap();
 

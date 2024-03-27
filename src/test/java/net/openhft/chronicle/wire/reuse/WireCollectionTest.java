@@ -40,7 +40,6 @@ import static org.junit.Assert.assertEquals;
  * Test class for WireCollection, using various wire types.
  */
 @Ignore("TODO FIX")
-@SuppressWarnings("rawtypes")
 @RunWith(value = Parameterized.class)
 public class WireCollectionTest extends WireTestCommon {
 

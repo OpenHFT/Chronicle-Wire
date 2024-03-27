@@ -24,7 +24,6 @@ import org.junit.Test;
 
 import java.io.InputStream;
 
-@SuppressWarnings("rawtypes")
 @Deprecated(/* Should be fully covered by YamlSpecificationTest */)
 public class YamlSpecTest extends WireTestCommon {
     static String DIR = "/yaml/spec/";

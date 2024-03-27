@@ -100,7 +100,6 @@ public class BinaryWireNumbersTest extends WireTestCommon {
 
     // Compares the serialized values from expected and perform operations
     public void test(@NotNull WriteValue expected, @NotNull WriteValue perform) {
-        // Create Bytes and Wire objects for the expected serialization
         @SuppressWarnings("rawtypes")
         @NotNull Bytes<?> bytes1 = allocateElasticOnHeap();
         @NotNull Wire wire1 = new BinaryWire(bytes1, true, false, false, Integer.MAX_VALUE, "binary", false);
@@ -111,7 +110,6 @@ public class BinaryWireNumbersTest extends WireTestCommon {
         // Check if the length of the serialized value matches the expected length
         assertEquals("Length for fixed length doesn't match for " + TextWire.asText(wire1), len, bytes1.readRemaining());
 
-        // Create Bytes and Wire objects for the actual serialization
         @SuppressWarnings("rawtypes")
         @NotNull Bytes<?> bytes2 = allocateElasticOnHeap();
         @NotNull Wire wire2 = new BinaryWire(bytes2);

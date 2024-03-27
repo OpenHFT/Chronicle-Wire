@@ -29,7 +29,6 @@ import java.io.IOException;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@SuppressWarnings("rawtypes")
 public class ReadDocumentContextTest extends WireTestCommon {
 
     // Test for writing a document that's not complete using non-shared memory

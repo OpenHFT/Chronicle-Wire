@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.io.UnsafeText;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -62,14 +61,12 @@ public class DoubleTest extends WireTestCommon {
     public void testManyDoubles() {
         // Create an elastic buffer for serialization
         final Bytes<?> bytes = Bytes.elasticByteBuffer();
-        final long address = bytes.clear().addressForRead(0);
 
         // Iterate over a range of double values and check serialization format
         for (double aDouble = -1; aDouble < 1; aDouble += 0.00001) {
             bytes.clear();
             aDouble = Maths.round6(aDouble);
-            final long end = UnsafeText.appendDouble(address, aDouble);
-            bytes.readLimit(end - address);
+            bytes.append(aDouble);
             double d2 = bytes.parseDouble();
             assertEquals(aDouble, d2, Math.ulp(aDouble));
 
