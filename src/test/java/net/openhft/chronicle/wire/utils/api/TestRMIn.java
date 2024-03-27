@@ -20,6 +20,15 @@ package net.openhft.chronicle.wire.utils.api;
 
 import net.openhft.chronicle.wire.utils.dto.ReadMarshallableDTO;
 
+/**
+ * Interface for testing ReadMarshallable operations.
+ * It defines a method to process a ReadMarshallableDTO object.
+ */
 public interface TestRMIn {
+    /**
+     * Processes a ReadMarshallableDTO object.
+     *
+     * @param dto The ReadMarshallableDTO object to be processed.
+     */
     void rm(ReadMarshallableDTO dto);
 }

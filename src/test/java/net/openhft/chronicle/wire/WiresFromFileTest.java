@@ -31,8 +31,13 @@ import static org.junit.Assert.assertEquals;
 public class WiresFromFileTest extends WireTestCommon {
     @Test
     public void testFromFile() throws IOException {
+        // Add an alias for MDU class
         ClassAliasPool.CLASS_ALIASES.addAlias(MDU.class);
+
+        // Deserialize the content of the md.yaml file to an array of MDU objects
         MDU[] o = Marshallable.fromFile(MDU[].class, "md.yaml");
+
+        // Validate the deserialized content
         assertEquals("[!MDU {\n" +
                 "  symbol: EU\n" +
                 "}\n" +
@@ -47,13 +52,19 @@ public class WiresFromFileTest extends WireTestCommon {
 
     @Test
     public void testStreamFromFile() throws IOException {
+        // Add an alias for MDU class
         ClassAliasPool.CLASS_ALIASES.addAlias(MDU.class);
+
+        // Stream content from md2.yaml, extract the symbol from each MDU object, and collect them into a list
         List<String> symbols = Marshallable.streamFromFile(MDU.class, "md2.yaml")
                 .map(m -> m.symbol)
                 .collect(Collectors.toList());
+
+        // Validate the extracted symbols
         assertEquals("[EU, UY, AU]", symbols.toString());
     }
 
+    // Definition for MDU class
     static class MDU extends SelfDescribingMarshallable {
         String symbol;
     }

@@ -21,27 +21,34 @@ package run.chronicle.account.dto;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 
 public class TransferFailed extends AbstractEvent<TransferFailed> {
+    // Field to hold the Transfer object that failed
     private Transfer transfer;
+    // Field to hold the reason for the failure
     private String reason;
 
+    // Getter for the 'transfer' field
     public Transfer transfer() {
         return transfer;
     }
 
+    // Setter for the 'transfer' field, allowing method chaining
     public TransferFailed transfer(Transfer transfer) {
         this.transfer = transfer;
         return this;
     }
 
+    // Getter for the 'reason' field
     public String reason() {
         return reason;
     }
 
+    // Setter for the 'reason' field, allowing method chaining
     public TransferFailed reason(String reason) {
         this.reason = reason;
         return this;
     }
 
+    // Method to validate if all necessary fields are set correctly
     @Override
     public void validate() throws InvalidMarshallableException {
         super.validate();

@@ -23,14 +23,45 @@ import net.openhft.chronicle.core.Jvm;
 import java.lang.reflect.Method;
 import java.util.function.BiConsumer;
 
-// lambda was causing garbage
+/**
+ * Represents a utility class responsible for writing sequences of method parameters into a given output format.
+ * Specifically, it encapsulates the logic to serialize method parameters into a wire format or similar output stream.
+ * The class is designed with the assumption that the sequence will either start from the first parameter or
+ * skip the first parameter and start from the second, as dictated by the `from0` and `from1` `BiConsumer` respectively.
+ * <p>
+ * This was a lambda but it caused garbage
+ */
 class ParameterHolderSequenceWriter {
+
+    /**
+     * Represents the parameter types of a method.
+     */
     @SuppressWarnings("rawtypes")
     final Class[] parameterTypes;
+
+    /**
+     * A consumer that writes the entire sequence of parameters into a given output format.
+     */
     final BiConsumer<Object[], ValueOut> from0;
+
+    /**
+     * A consumer that writes the sequence of parameters into a given output format,
+     * starting from the second parameter.
+     */
     final BiConsumer<Object[], ValueOut> from1;
+
+    /**
+     * Represents the method ID associated with the method.
+     * It's useful for identifying the method in serialized data.
+     */
     final long methodId;
 
+    /**
+     * Initializes the `ParameterHolderSequenceWriter` with the provided method. The method's parameters are extracted,
+     * and appropriate serialization consumers (`from0` and `from1`) are initialized based on the parameters.
+     *
+     * @param method The method whose parameters are to be serialized.
+     */
     @SuppressWarnings("unchecked")
     protected ParameterHolderSequenceWriter(Method method) {
         this.parameterTypes = method.getParameterTypes();

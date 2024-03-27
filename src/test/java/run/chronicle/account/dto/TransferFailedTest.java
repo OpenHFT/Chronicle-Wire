@@ -9,6 +9,7 @@ import static org.junit.Assert.assertEquals;
 
 public class TransferFailedTest {
 
+    // Expected string representation of a TransferFailed object
     public static final String EXPECTED = "" +
             "!run.chronicle.account.dto.TransferFailed {\n" +
             "  sender: target,\n" +
@@ -27,6 +28,7 @@ public class TransferFailedTest {
             "  reason: reasons\n" +
             "}\n";
 
+    // Test to check if the toString method of TransferFailed class generates the expected string
     @Test
     public void testToString() {
         assertEquals(EXPECTED,
@@ -39,10 +41,11 @@ public class TransferFailedTest {
                         .toString());
     }
 
+    // Test to validate if the TransferFailed object is correctly created from a string representation
     @Test
     public void testFromString() {
-        TransferFailed tf = Marshallable.fromString(EXPECTED);
-        assertEquals(TransferTest.getTransfer(), tf.transfer());
-        assertEquals("reasons", tf.reason());
+        TransferFailed tf = Marshallable.fromString(EXPECTED); // creating an object from the string representation
+        assertEquals(TransferTest.getTransfer(), tf.transfer()); // comparing the transfer details
+        assertEquals("reasons", tf.reason()); // comparing the failure reason
     }
 }

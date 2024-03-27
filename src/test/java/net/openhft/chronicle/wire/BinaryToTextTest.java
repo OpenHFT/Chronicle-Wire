@@ -25,6 +25,7 @@ import static org.junit.Assert.assertEquals;
 
 public class BinaryToTextTest extends WireTestCommon {
 
+    // Test conversion of binary data to text representation
     @Test
     public void test() {
         @SuppressWarnings("rawtypes")

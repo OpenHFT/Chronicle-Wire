@@ -99,7 +99,12 @@ worst:        6463.49       783.36       736.26       592.90       199.94       
 -XX:StartFlightRecording=filename=recording_echo.jfr,settings=profile
  */
 
+/**
+ * Main class to measure performance latency using JLBH (Java Latency Benchmark Harness).
+ */
 public class PerfLatencyMain implements JLBHTask {
+
+    // Constants to configure the performance test
     static final int THROUGHPUT = Integer.getInteger("throughput", 100_000);
     static final int RUN_TIME = Integer.getInteger("runTime", 30);
     static final int ITERATIONS = Integer.getInteger("iterations", THROUGHPUT * RUN_TIME);
@@ -108,6 +113,8 @@ public class PerfLatencyMain implements JLBHTask {
     static final String URL = System.getProperty("url", "tcp://:1248");
     static final int BATCH = Integer.getInteger("batch", Math.max(1, THROUGHPUT / 500_000));
     static final int CLIENTS = Integer.getInteger("clients", 1);
+
+    // State variables for the test
     long lastStartTimeNS = 0;
     private DummyData data;
     private Client[] clients = new Client[CLIENTS];
@@ -117,7 +124,14 @@ public class PerfLatencyMain implements JLBHTask {
     private JLBH jlbh;
     private EchoNHandler echoHandler;
 
+    /**
+     * The main entry point for running the performance latency test.
+     *
+     * @param args Command-line arguments.
+     */
     public static void main(String[] args) {
+
+        // Print the configuration details for the current test run
         System.out.println("" +
                 "-Durl=" + URL + " " +
                 "-Dsize=" + SIZE + " " +
@@ -127,51 +141,65 @@ public class PerfLatencyMain implements JLBHTask {
                 "-DrunTime=" + ITERATIONS / THROUGHPUT + " " +
                 "-Dbuffered=" + BUFFERED);
 
+        // Set up the JLBH options for the test
         JLBHOptions lth = new JLBHOptions()
                 .warmUpIterations(50_000)
                 .iterations(ITERATIONS / BATCH)
                 .throughput(THROUGHPUT / BATCH)
                 .acquireLock(AffinityLock::acquireLock)
-                // disable as otherwise single GC event skews results heavily
+                // Disable OS jitter recording as single GC event can skew results
                 .recordOSJitter(false)
+                // Do not account for coordinated omission to obtain raw results
                 .accountForCoordinatedOmission(false)
                 .runs(5)
+                // Set the task to be run by JLBH as this class
                 .jlbhTask(new PerfLatencyMain());
+
+        // Start the JLBH benchmark
         new JLBH(lth).start();
     }
 
+
     @Override
     public void init(JLBH jlbh) {
+        // Initialize the JLBH, DummyData, and the ChronicleContext
         this.jlbh = jlbh;
         this.data = new DummyData();
         this.data.data(new byte[SIZE - Long.BYTES]);
 
         context = ChronicleContext.newContext(URL);
 
+        // Set up the echo handler with desired configuration
         echoHandler = new EchoNHandler()
                 .buffered(BUFFERED)
                 .times(BATCH);
+
+        // Initialize client instances for testing
         for (int i = 0; i < CLIENTS; i++)
             clients[i] = new Client();
     }
 
     @Override
     public void run(long startTimeNS) {
+        // Ensure a unique timestamp for each run
         startTimeNS = Math.max(lastStartTimeNS + 1, startTimeNS);
         lastStartTimeNS = startTimeNS;
         data.timeNS(startTimeNS);
 
+        // Send the data to the selected client for echoing
         final Client client = clients[nextClient];
         final Echoing echoing = client.echoing;
         // the message is multiplied on the other side. re times(BATCH)
         echoing.echo(data);
 
+        // Cycle to the next client for load balancing
         if (++nextClient >= CLIENTS)
             nextClient = 0;
     }
 
     @Override
     public void complete() {
+        // Mark the test as complete and clean up resources
         this.complete = true;
         for (Client client : clients)
             client.readerThread.interrupt();
@@ -180,15 +208,22 @@ public class PerfLatencyMain implements JLBHTask {
         context.close();
     }
 
+    /**
+     * Client class responsible for echoing the provided data and reading the response.
+     */
     class Client {
         private Echoing echoing;
         private Thread readerThread;
         private MethodReader reader;
         private ChronicleChannel channel;
 
+        // Client constructor sets up the echoing, reader, and starts the reader thread
         public Client() {
+            // Initialize the channel and echoing method writer
             channel = context.newChannelSupplier(echoHandler).buffered(BUFFERED && BATCH > 1).get();
             echoing = channel.methodWriter(Echoing.class);
+
+            // Setup method reader to handle echoed data
             reader = channel.methodReader(new Echoing() {
                 long last = 0;
 
@@ -198,12 +233,15 @@ public class PerfLatencyMain implements JLBHTask {
                     if (timeNS > last) {
                         final long durationNs = System.nanoTime() - timeNS;
                         synchronized (jlbh) {
+                            // Sample the latency and record it with JLBH
                             jlbh.sample(durationNs);
                         }
                     }
                     last = timeNS;
                 }
             });
+
+            // Start the reader thread to continuously read echoed messages
             readerThread = new Thread(() -> {
                 try (AffinityLock lock = AffinityLock.acquireLock()) {
                     while (!Thread.currentThread().isInterrupted()) {

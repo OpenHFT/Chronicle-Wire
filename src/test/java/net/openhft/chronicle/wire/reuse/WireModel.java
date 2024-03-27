@@ -28,23 +28,43 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * @author gadei
+ * Base class for models in the Wire framework, providing common functionality
+ * for serialization and deserialization, along with basic model properties.
  */
 public class WireModel extends SelfDescribingMarshallable {
+    // Unique identifier for the model
     private long id;
+    // Revision number for versioning of the model
     private int revision;
+    // Optional key for additional identification
     @Nullable
     private String key;
 
+    /**
+     * Default constructor for creating an instance of WireModel.
+     */
     public WireModel() {
     }
 
+    /**
+     * Constructor with parameters to initialize the model's properties.
+     *
+     * @param id       The unique identifier for the model.
+     * @param revision The revision number for the model.
+     * @param key      Optional key for additional identification.
+     */
     public WireModel(long id, int revision, @Nullable String key) {
         this.id = id;
         this.revision = revision;
         this.key = key;
     }
 
+    /**
+     * Reads the properties of this model from a Wire input source.
+     *
+     * @param wire The Wire input source to read from.
+     * @throws IllegalStateException if reading from the Wire source fails.
+     */
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IllegalStateException {
         this.id = wire.read(ModelKeys.id).int64();
@@ -52,12 +72,19 @@ public class WireModel extends SelfDescribingMarshallable {
         this.key = wire.read(ModelKeys.key).text();
     }
 
+    /**
+     * Writes the properties of this model to a Wire output destination.
+     *
+     * @param wire The Wire output destination to write to.
+     */
     @Override
     public void writeMarshallable(@NotNull WireOut wire) {
         wire.write(ModelKeys.id).int64(id)
                 .write(ModelKeys.revision).int32(revision)
                 .write(ModelKeys.key).text(key);
     }
+
+    // Getters and setters for the model's properties.
 
     public long getId() {
         return id;
@@ -84,4 +111,3 @@ public class WireModel extends SelfDescribingMarshallable {
         this.key = key;
     }
 }
-

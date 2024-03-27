@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 @FunctionalInterface
+@Deprecated(/* remove in x.27, not used */)
 public interface ValueWriter<T> {
     void writeValue(T t, ValueOut valueOut);
 }

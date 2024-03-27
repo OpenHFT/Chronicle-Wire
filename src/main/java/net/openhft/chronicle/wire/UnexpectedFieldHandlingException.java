@@ -18,10 +18,19 @@
 package net.openhft.chronicle.wire;
 
 /**
- * Wrapper exception that is propagated to high-level API call in case
- * {@link ReadMarshallable#unexpectedField(Object, ValueIn)} has thrown an exception.
+ * Wrapper exception used to encapsulate and propagate exceptions to high-level API calls
+ * that arise from {@link ReadMarshallable#unexpectedField(Object, ValueIn)}.
+ * Typically, this is thrown when an unexpected field is encountered during marshalling or
+ * unmarshalling processes.
  */
 public class UnexpectedFieldHandlingException extends RuntimeException {
+
+    /**
+     * Constructs a new UnexpectedFieldHandlingException with the provided underlying cause.
+     *
+     * @param cause The root cause of this exception, typically originating from
+     *              {@link ReadMarshallable#unexpectedField(Object, ValueIn)}.
+     */
     public UnexpectedFieldHandlingException(Throwable cause) {
         super(cause);
     }

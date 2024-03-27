@@ -42,8 +42,15 @@ import static java.util.Objects.requireNonNull;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 import static net.openhft.chronicle.core.io.ClosedIORuntimeException.newIORuntimeException;
 
+/**
+ * This is the TCPChronicleChannel class which provides a channel that communicates
+ * over TCP and encapsulates the Chronicle logic for networking, with a focus on
+ * initialization, input-output buffer management, and header parsing.
+ * The class is designed to work both as an initiator and as an acceptor.
+ */
 public class TCPChronicleChannel extends AbstractCloseable implements InternalChronicleChannel {
-    // tune for message sizes up to this
+
+    // Default capacity for the channel buffers
     static final int CAPACITY = Integer.getInteger("tcp.capacity", 2 << 20); // 2 MB
     private static final String HEADER = "header";
     private static final ChannelHeader NO_HEADER = Mocker.ignored(ChannelHeader.class);
@@ -71,7 +78,13 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
     private Consumer<ChronicleChannel> closeCallback;
 
     /**
-     * Initiator constructor
+     * Initiator Constructor for TCPChronicleChannel.
+     * Initializes a TCPChronicleChannel with given configurations for acting as an initiator.
+     *
+     * @param channelCfg       Configuration settings for this channel.
+     * @param headerOut        Header to be used for outgoing messages.
+     * @param socketRegistry   Registry to manage and provide socket channels.
+     * @throws InvalidMarshallableException If the given parameters result in invalid marshalling.
      */
     public TCPChronicleChannel(ChronicleChannelCfg<?> channelCfg,
                                ChannelHeader headerOut,
@@ -92,7 +105,14 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
     }
 
     /**
-     * Acceptor constructor
+     * Acceptor Constructor for TCPChronicleChannel.
+     * Initializes a TCPChronicleChannel with given configurations for acting as an acceptor.
+     *
+     * @param systemContext    Context for the system in which this channel operates.
+     * @param channelCfg       Configuration settings for this channel.
+     * @param sc               SocketChannel to which this TCPChronicleChannel corresponds.
+     * @param replaceInHeader  Function to replace incoming header.
+     * @param replaceOutHeader Function to replace outgoing header.
      */
     public TCPChronicleChannel(SystemContext systemContext,
                                ChronicleChannelCfg channelCfg,
@@ -114,6 +134,20 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
         }
     }
 
+    /**
+     * Validates the header to ensure it adheres to certain conditions.
+     * <p>
+     * This method performs the following checks:
+     * <ul>
+     *     <li>The header should be non-negative.</li>
+     *     <li>The header value should not indicate oversized data.</li>
+     *     <li>The header value should not indicate oversized meta-data.</li>
+     * </ul>
+     *
+     * @param header The header value to be validated.
+     * @return True if the header is valid, otherwise exceptions are thrown for invalid conditions.
+     * @throws IllegalStateException if the header is not ready or if it's indicating oversized data or meta-data.
+     */
     @SuppressWarnings("SameReturnValue")
     static boolean validateHeader(int header) {
         if (header < 0)
@@ -130,10 +164,20 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
         return channelCfg;
     }
 
+    /**
+     * Initiates the process to flush the data stored in the 'out' buffer.
+     */
     void flush() {
         flushOut(out);
     }
 
+    /**
+     * Flushes out the data stored in the given wire's buffer.
+     * This method writes the data to the associated socket channel until all data is sent.
+     *
+     * @param out The wire containing the data to be flushed out.
+     * @throws IORuntimeException if an error occurs while writing to the socket channel.
+     */
     void flushOut(Wire out) {
         @SuppressWarnings("unchecked") final Bytes<ByteBuffer> bytes = (Bytes) out.bytes();
         if (out.bytes().writeRemaining() <= 0)
@@ -158,6 +202,11 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
         out.clear();
     }
 
+    /**
+     * Creates a buffer to store data with elastic capacity.
+     *
+     * @return A new wire instance with the created buffer.
+     */
     private Wire createBuffer() {
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer(CAPACITY);
         IOTools.unmonitor(bytes);
@@ -187,11 +236,32 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
         return dc;
     }
 
+    /**
+     * Retrieves a reading document from the wire 'in'.
+     * <p>
+     * This method checks if the channel is connected and then attempts to retrieve a reading document.
+     * If no document is available, the method will perform various checks and modifications on the buffer
+     * to ensure efficient reading. It will also handle specific protocol conditions and handle exceptions
+     * like detecting an HTTP request or an invalid protocol.
+     * </p>
+     *
+     * @return A document context representing the reading document.
+     * @throws ClosedIORuntimeException   if the socket channel is closed while attempting to read.
+     * @throws HTTPDetectedException      if an HTTP GET request is detected.
+     * @throws InvalidProtocolException   if an invalid protocol signature is detected.
+     * @throws IORuntimeException         if any other IO error occurs during the reading process.
+     */
     private DocumentContext readingDocument0() {
         checkConnected();
+
+        // Retrieve the bytes associated with the 'in' wire
         @SuppressWarnings("unchecked") final Bytes<ByteBuffer> bytes = (Bytes) in.bytes();
+
+        // Clear the bytes if no data is left
         if (bytes.readRemaining() == 0)
             bytes.clear();
+
+        // Try to retrieve a reading document from 'in'
         final DocumentContext dc = in.readingDocument();
         if (dc.isPresent())
             return dc;
@@ -200,11 +270,17 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
             endOfData = false;
             return dc;
         }
+
+        // Compact the bytes if the read position exceeds certain thresholds
         if (bytes.readPosition() * 2 > Math.max(CAPACITY / 2, bytes.readLimit()))
             bytes.compact();
+
+        // Set up the byte buffer for reading from the socket channel
         final ByteBuffer bb = bytes.underlyingObject();
         bb.position(Math.toIntExact(bytes.writePosition()));
         bb.limit(Math.min(bb.capacity(), Math.toIntExact(bytes.writeLimit())));
+
+        // Attempt to read from the socket channel
         int read;
         try {
             read = sc.read(bb);
@@ -213,29 +289,52 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
             close();
             throw newIORuntimeException(e);
         }
+
+        // Handle conditions where the channel is closed
         if (read < 0) {
             close();
             throw new ClosedIORuntimeException("Closed");
         }
         endOfData = true;
         bytes.writeSkip(read);
+
+        // Check the header for specific protocol conditions
         final int header = bytes.readInt(bytes.readPosition());
         if (headerOut == NO_HEADER) {
-            // HTTP GET
+            // Detect HTTP GET request
             if (header == 0x20544547) {
                 throw new HTTPDetectedException("Start of request\n" + bytes);
             }
+            // Detect invalid protocol
             if (header >> 16 != 0x4000) {
                 throw new InvalidProtocolException("Dump\n" + bytes.toHexString());
             }
         }
+
+        // Validate the header if enough bytes are remaining
         assert bytes.readRemaining() < 4 || validateHeader(header);
+
+        // Dump the content if required
         if (DUMP_YAML)
             System.out.println("in - " + Integer.toUnsignedString(header, 16) + "\n" + Wires.fromSizePrefixedBlobs(in));
         return in.readingDocument();
     }
 
+    /**
+     * Ensures that the current socket channel is connected.
+     * <p>
+     * If the socket channel (sc) is not open, the method attempts to establish a connection based
+     * on the host ports provided by the channel configuration (channelCfg). For initiators, it tries to
+     * connect to each host-port combination until a successful connection is established or all attempts fail.
+     * </p>
+     *
+     * @throws InvalidMarshallableException if any marshalling error occurs.
+     * @throws IllegalStateException        if the current state indicates closure.
+     * @throws IllegalArgumentException     if an invalid port is detected.
+     * @throws IORuntimeException           if all connection attempts fail or for IO issues.
+     */
     synchronized void checkConnected() throws InvalidMarshallableException {
+        // Check if socket channel is open and if headerOut is set
         if (sc != null && sc.isOpen()) {
             if (headerOut == null) {
                 acceptorRespondToHeader();
@@ -243,16 +342,19 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
             return;
         }
         closeQuietly(sc);
+
+        // Check if in a closing state
         if (isClosing())
             throw new IllegalStateException("Closed");
 
         final Set<HostPortCfg> hostPorts = channelCfg.hostPorts();
 
+        // Connection initiation logic for initiators
         if (channelCfg.initiator()) {
             boolean success = false;
             Outer:
             for (HostPortCfg hp : hostPorts) {
-
+                // Invalid port check
                 if (hp.port() < -1)
                     throw new IllegalArgumentException("Invalid port " + hp.port() + " connecting to " + hp.hostname());
 
@@ -293,9 +395,21 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
         out.clear();
     }
 
+    /**
+     * Configures the current socket channel based on the pauser mode and sets buffer sizes.
+     * <p>
+     * This method adjusts the blocking mode of the socket channel and also sets the send and receive
+     * buffer sizes for the underlying socket. It calculates the total buffer size based on these values.
+     * </p>
+     *
+     * @throws IOException if any IO error occurs during configuration.
+     */
     private void configureSocket() throws IOException {
+        // Adjust blocking mode based on pauser mode
         if (channelCfg.pauserMode() == PauserMode.busy)
             sc.configureBlocking(false);
+
+        // Adjust socket buffer sizes
         final Socket socket = sc.socket();
         socket.setReceiveBufferSize(CAPACITY);
         socket.setSendBufferSize(CAPACITY);
@@ -321,11 +435,23 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
             Closeable.closeQuietly(socketRegistry);
     }
 
+    /**
+     * Synchronized method to send an appropriate response header.
+     * <p>
+     * The method reads an incoming header and decides the appropriate response header to send.
+     * If a predefined header exists, it uses that, or else it creates a new response header or
+     * a redirection header based on the input.
+     * </p>
+     *
+     * @throws InvalidMarshallableException if any marshalling error occurs during header handling.
+     */
     synchronized void acceptorRespondToHeader() throws InvalidMarshallableException {
         headerOut = NO_HEADER;
         readHeader();
         headerInToUse = replaceInHeader.apply(headerIn);
         final ChannelHeader replyHeader = replaceOutHeader.apply(headerInToUse);
+
+        // Decide on the appropriate response header to use
         if (replyHeader == null) {
             if (headerIn instanceof ChannelHandler) // it's a ChannelHeader
                 headerOut = ((ChannelHandler) headerIn).responseHeader(chronicleContext);
@@ -335,11 +461,21 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
         } else { // return the header
             headerOut = replyHeader;
         }
+
+        // Set system context for the response header and write it
         if (systemContext != null)
             headerOut.systemContext(systemContext);
         writeHeader();
     }
 
+    /**
+     * Writes the current response header to the wire.
+     * <p>
+     * This method writes the {@code headerOut} object to the wire within a document context.
+     * </p>
+     *
+     * @throws InvalidMarshallableException if any marshalling error occurs during the write operation.
+     */
     private void writeHeader() throws InvalidMarshallableException {
         try (DocumentContext dc = writingDocument(true)) {
             dc.wire().write(HEADER).object(headerOut);
@@ -369,6 +505,15 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
         return headerInToUse;
     }
 
+    /**
+     * Reads the incoming header from the wire.
+     * <p>
+     * This method continuously reads the wire until a valid header is retrieved or the thread is interrupted.
+     * If an unexpected message type is encountered, a warning is issued.
+     * </p>
+     *
+     * @throws InvalidMarshallableException if any marshalling error occurs during the read operation.
+     */
     private void readHeader() throws InvalidMarshallableException {
         while (!Thread.currentThread().isInterrupted()) {
             try (DocumentContext dc = readingDocument()) {
@@ -397,6 +542,14 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
         return dch;
     }
 
+    /**
+     * Getter method for the current connection configuration.
+     * <p>
+     * Returns the {@code channelCfg} object representing the current connection configuration.
+     * </p>
+     *
+     * @return The {@code ChronicleChannelCfg} object for the current connection.
+     */
     public ChronicleChannelCfg connectionCfg() {
         return channelCfg;
     }
@@ -458,6 +611,11 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
         lock.unlock();
     }
 
+    /**
+     * Returns the combined size of the send and receive buffers for the socket connection.
+     *
+     * @return The combined buffer size in bytes.
+     */
     public int bufferSize() {
         return bufferSize;
     }
@@ -471,6 +629,12 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
                 && ((ChannelHandler) headerInToUse).recordHistory();
     }
 
+    /**
+     * Represents a specialized DocumentContextHolder for managing connection-based document context.
+     * <p>
+     * This holder ensures proper flushing of data upon closure and handles chained elements within a document context.
+     * </p>
+     */
     private class ConnectionDocumentContextHolder extends DocumentContextHolder implements WriteDocumentContext {
         private boolean chainedElement;
 

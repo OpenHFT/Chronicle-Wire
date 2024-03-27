@@ -26,20 +26,43 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import net.openhft.chronicle.wire.*;
 
+/**
+ * A class for reading methods pertaining to the top of the book
+ * in financial markets, extending an abstract method reader for generated methods.
+ */
 public class TopOfBookListenerMethodReader extends AbstractGeneratedMethodReader {
-    // instances on which parsed calls are invoked
+
+    // Instance of the object upon which parsed calls are invoked
     private final Object instance0;
+
+    // Default parselet used to define default behaviors or fallbacks during parsing
     private final WireParselet defaultParselet;
 
-    // topOfBook
+    // Object representing the top of the book in financial market context
     private net.openhft.chronicle.wire.channel.book.TopOfBook topOfBookarg0 = new TopOfBook();
 
+    /**
+     * Constructor for initializing the method reader with necessary context and instances.
+     *
+     * @param in                   Input object for marshallable data.
+     * @param defaultParselet      The default parselet to handle unspecified or generic parsing tasks.
+     * @param debugLoggingParselet Parselet used for debugging and logging.
+     * @param interceptor          Interceptor for method reader returns.
+     * @param metaInstances        Array of instances carrying metadata for method reading.
+     * @param instances            Array of instances upon which method reading would be performed.
+     */
     public TopOfBookListenerMethodReader(MarshallableIn in, WireParselet defaultParselet, WireParselet debugLoggingParselet, MethodReaderInterceptorReturns interceptor, Object[] metaInstances, Object[] instances) {
         super(in, debugLoggingParselet);
         this.defaultParselet = defaultParselet;
         instance0 = instances[0];
     }
 
+    /**
+     * Reads a single call from the wire input, parsing data and handling events.
+     *
+     * @param wireIn The input wire from which data is read.
+     * @return True if the read is successful; otherwise, false.
+     */
     @Override
     protected boolean readOneCall(WireIn wireIn) {
         ValueIn valueIn = wireIn.getValueIn();
@@ -68,6 +91,7 @@ public class TopOfBookListenerMethodReader extends AbstractGeneratedMethodReader
                 debugLoggingParselet.accept(lastEventName, valueIn);
             if (lastEventName == null)
                 throw new IllegalStateException("Failed to read method name or ID");
+            // Reading topOfBook event and invoking associated method
             switch (lastEventName) {
                 case MethodReader.HISTORY:
                     valueIn.marshallable(messageHistory);
@@ -87,9 +111,16 @@ public class TopOfBookListenerMethodReader extends AbstractGeneratedMethodReader
         }
     }
 
+    /**
+     * Reads the 'topOfBook' data from the wire input and invokes the method on the instance.
+     *
+     * @param valueIn Input value from the wire to be parsed and processed.
+     */
     private void readTopOfBook(ValueIn valueIn) {
         topOfBookarg0 = (TopOfBook) valueIn.marshallable(topOfBookarg0, SerializationStrategies.MARSHALLABLE);
+        // Catching and handling exceptions during method invocation
         try {
+            // Setting flag and invoking 'topOfBook' method on the listener instance
             dataEventProcessed = true;
             ((TopOfBookListener) instance0).topOfBook(topOfBookarg0);
         } catch (Exception e) {
@@ -97,6 +128,12 @@ public class TopOfBookListenerMethodReader extends AbstractGeneratedMethodReader
         }
     }
 
+    /**
+     * Reads a single meta call from the wire input, parsing and handling metadata events.
+     *
+     * @param wireIn The input wire from which metadata is read.
+     * @return True if the read is successful; otherwise, false.
+     */
     @Override
     protected boolean readOneCallMeta(WireIn wireIn) {
         ValueIn valueIn = wireIn.getValueIn();
@@ -108,6 +145,7 @@ public class TopOfBookListenerMethodReader extends AbstractGeneratedMethodReader
         } else {
             lastEventName = wireIn.readEvent(String.class);
         }
+        // Exception handling and debugging/logging
         try {
             if (Jvm.isDebug())
                 debugLoggingParselet.accept(lastEventName, valueIn);

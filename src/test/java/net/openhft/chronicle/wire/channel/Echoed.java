@@ -21,7 +21,10 @@ package net.openhft.chronicle.wire.channel;
 import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.wire.channel.echo.DummyData;
 
+// Define the `Echoed` interface, acting as a contract for echoing back received data.
 interface Echoed {
+    // Define a method that is responsible for handling the echoed data.
+    // It takes a `DummyData` object as a parameter.
     @MethodId('E')
     void echoed(DummyData data);
 }

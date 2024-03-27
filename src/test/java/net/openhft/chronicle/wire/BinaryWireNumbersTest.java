@@ -37,14 +37,17 @@ public class BinaryWireNumbersTest extends WireTestCommon {
     private final WriteValue expected;
     private final WriteValue perform;
 
+    // Constructor initializes values for each test iteration
     public BinaryWireNumbersTest(int len, WriteValue expected, WriteValue perform) {
         this.len = len;
         this.expected = expected;
         this.perform = perform;
     }
 
+    // Provides a collection of parameters to run the tests with
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
+        // Each sub-array represents a set of parameters: length, expected write value, and actual write value
         return Arrays.asList(new Object[][]{
 
                 {2 + 4, (WriteValue) w -> w.float32(-(1L << 48L)), (WriteValue) w -> w.int64(-(1L << 48L))},    //0
@@ -87,6 +90,7 @@ public class BinaryWireNumbersTest extends WireTestCommon {
         });
     }
 
+    // Test the BinaryWire number serialization using the given parameters
     @Test
     public void doTest() {
         if (counter++ == 18)
@@ -94,23 +98,33 @@ public class BinaryWireNumbersTest extends WireTestCommon {
         test(expected, perform);
     }
 
+    // Compares the serialized values from expected and perform operations
     public void test(@NotNull WriteValue expected, @NotNull WriteValue perform) {
+        // Create Bytes and Wire objects for the expected serialization
         @SuppressWarnings("rawtypes")
         @NotNull Bytes<?> bytes1 = allocateElasticOnHeap();
         @NotNull Wire wire1 = new BinaryWire(bytes1, true, false, false, Integer.MAX_VALUE, "binary", false);
 
+        // Serialize the expected value
         expected.writeValue(wire1.write());
 
+        // Check if the length of the serialized value matches the expected length
         assertEquals("Length for fixed length doesn't match for " + TextWire.asText(wire1), len, bytes1.readRemaining());
 
+        // Create Bytes and Wire objects for the actual serialization
         @SuppressWarnings("rawtypes")
         @NotNull Bytes<?> bytes2 = allocateElasticOnHeap();
         @NotNull Wire wire2 = new BinaryWire(bytes2);
+
+        // Serialize the actual value
         perform.writeValue(wire2.write());
 
+        // Compare the lengths of the serialized values
         assertEquals("Lengths for variable length expected " + bytes1
                         + " and actual " + bytes2 + " don't match for " + TextWire.asText(wire1),
                 bytes1.readRemaining(), bytes2.readRemaining());
+
+        // If serialized values don't match, log the mismatched values
         if (!bytes1.toString().equals(bytes2.toString()))
             System.out.println("Format doesn't match for " + TextWire.asText(wire2));
     }

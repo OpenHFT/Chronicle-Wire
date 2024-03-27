@@ -24,7 +24,16 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * This class tests the behavior of NaN values when used in different data types like primitives, wrappers, and objects.
+ * The tests emphasize the importance of consistent behavior when comparing such entities containing NaN.
+ */
 public class CompareNaNTest extends WireTestCommon {
+
+    /**
+     * Test the comparison behavior for primitive data types containing NaN values.
+     * Ensures that two DTOs with NaN primitive values are considered equal.
+     */
     @Test
     public void testPrim() {
         @NotNull PrimDTO a = new PrimDTO(Double.NaN, Float.NaN);
@@ -33,6 +42,10 @@ public class CompareNaNTest extends WireTestCommon {
         assertEquals(a, b);
     }
 
+    /**
+     * Test the comparison behavior for wrapper data types containing NaN values.
+     * Ensures that two DTOs with NaN wrapped values are considered equal.
+     */
     @Test
     public void testWrapDTO() {
         @NotNull WrapDTO a = new WrapDTO(Double.NaN, Float.NaN);
@@ -41,6 +54,10 @@ public class CompareNaNTest extends WireTestCommon {
         assertEquals(a, b);
     }
 
+    /**
+     * Test the comparison behavior for objects containing NaN values.
+     * Ensures that two DTOs with NaN object values are considered equal.
+     */
     @Test
     public void testObjectWrapDTO() {
         @NotNull ObjectWrapDTO a = new ObjectWrapDTO(Double.NaN, Float.NaN);
@@ -49,6 +66,9 @@ public class CompareNaNTest extends WireTestCommon {
         assertEquals(a, b);
     }
 
+    /**
+     * A Data Transfer Object (DTO) representing primitive data types.
+     */
     static class PrimDTO extends SelfDescribingMarshallable {
         double d;
         float f;
@@ -59,6 +79,9 @@ public class CompareNaNTest extends WireTestCommon {
         }
     }
 
+    /**
+     * A Data Transfer Object (DTO) representing wrapped data types (e.g., Double, Float).
+     */
     static class WrapDTO extends SelfDescribingMarshallable {
         Double d;
         Float f;
@@ -69,6 +92,10 @@ public class CompareNaNTest extends WireTestCommon {
         }
     }
 
+    /**
+     * A Data Transfer Object (DTO) representing general objects.
+     * It can hold various object types, including Double and Float wrappers.
+     */
     static class ObjectWrapDTO extends SelfDescribingMarshallable {
         Object d;
         Object f;

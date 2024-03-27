@@ -25,16 +25,23 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+/**
+ * This class is used to test the functionality related to reading individual messages and snapshots
+ * from a Wire-based data structure, ensuring they can be read in the correct sequence.
+ */
 public class ReadOneTest extends WireTestCommon {
 
+    // Definition for MyDto class, used for testing reading data from the Wire
     static class MyDto extends SelfDescribingMarshallable {
         String data;
     }
 
+    // Listener interface for MyDto to react when a MyDto is read
     interface MyDtoListener {
         void myDto(MyDto dto);
     }
 
+    // Definition for SnapshotDTO class, used to represent snapshots in the test
     static class SnapshotDTO extends SelfDescribingMarshallable {
         String data;
 
@@ -48,21 +55,26 @@ public class ReadOneTest extends WireTestCommon {
         }
     }
 
+    // Listener interface for SnapshotDTO to react when a SnapshotDTO is read
     interface SnapshotListener {
         void snapshot(SnapshotDTO dto);
     }
 
+    // Basic test for reading without scanning the wire
     @Test
     public void test() throws InterruptedException {
         doTest(false);
     }
+
+    // Test for reading the wire using scanning
     @Test
     public void testScanning() throws InterruptedException {
         doTest(true);
     }
 
+    // Core testing method that simulates writing to and reading from the Wire
     public void doTest(boolean scanning) throws InterruptedException {
-
+        // Initialization phase
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
         Wire wire = new TextWire(b) {
             @Override
@@ -74,6 +86,7 @@ public class ReadOneTest extends WireTestCommon {
         MyDtoListener myOut = wire.methodWriterBuilder(MyDtoListener.class).build();
         SnapshotListener snapshotOut = wire.methodWriterBuilder(SnapshotListener.class).build();
 
+        // Simulating different historical records and writes to the Wire
         generateHistory(1);
         myOut.myDto(new MyDto());
 
@@ -92,12 +105,14 @@ public class ReadOneTest extends WireTestCommon {
         generateHistory(6);
         myOut.myDto(new MyDto());
 
+        // Reading phase to check the data written to the Wire
         SnapshotDTO[] q = {null};
 
         MethodReader reader = wire.methodReaderBuilder()
                 .scanning(scanning)
                 .build((SnapshotListener) d -> q[0] = d);
 
+        // Conditional checks based on whether scanning mode is active
         if (!scanning) {
             // 1
             assertTrue(reader.readOne());
@@ -126,6 +141,7 @@ public class ReadOneTest extends WireTestCommon {
         assertFalse(reader.readOne());
     }
 
+    // Utility method to simulate the history of messages
     @NotNull
     private VanillaMessageHistory generateHistory(int value) {
         VanillaMessageHistory messageHistory = (VanillaMessageHistory) MessageHistory.get();

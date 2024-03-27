@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+@Deprecated(/* remove in x.27, not in used */)
 @FunctionalInterface
 public interface WritingMarshaller<T> {
     void writeToWire(T t, WireOut out);

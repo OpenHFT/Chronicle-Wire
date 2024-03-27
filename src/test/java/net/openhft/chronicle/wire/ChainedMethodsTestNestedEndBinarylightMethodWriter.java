@@ -28,33 +28,42 @@ import java.util.function.Supplier;
 
 public final class ChainedMethodsTestNestedEndBinarylightMethodWriter implements ChainedMethodsTest.NestedEnd, MethodWriter {
 
-    // result
+    // Hold the reference for the Closeable resource
     private transient final Closeable closeable;
+
+    // Supplier for obtaining MarshallableOut instances
     private transient Supplier<MarshallableOut> out;
 
-    // constructor
+    // Constructor: Initialize the writer with a MarshallableOut supplier, Closeable resource, and an UpdateInterceptor
     public ChainedMethodsTestNestedEndBinarylightMethodWriter(Supplier<MarshallableOut> out, Closeable closeable, UpdateInterceptor updateInterceptor) {
         this.out = out;
         this.closeable = closeable;
     }
 
+    // Update the MarshallableOut supplier with a new MarshallableOut instance
     @Override
     public void marshallableOut(MarshallableOut out) {
         this.out = () -> out;
     }
 
+    // End method: Acquire writing document and perform the "end" event writing
     public void end() {
         try (final WriteDocumentContext dc = (WriteDocumentContext) this.out.get().acquireWritingDocument(false)) {
             try {
+                // Chain the next element in the document context
                 dc.chainedElement(false);
+
+                // Record message history if the MarshallableOut has history recording enabled
                 if (out.get().recordHistory()) MessageHistory.writeHistory(dc);
+
+                // Write the "end" event to the wire output
                 final ValueOut valueOut = dc.wire().writeEventName("end");
                 valueOut.text("");
             } catch (Throwable t) {
+                // Rollback changes in case of an error
                 dc.rollbackOnClose();
                 throw Jvm.rethrow(t);
             }
         }
     }
-
 }

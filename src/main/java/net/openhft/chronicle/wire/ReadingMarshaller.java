@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 @FunctionalInterface
+@Deprecated(/* to be removed in x.27, not in use */)
 public interface ReadingMarshaller<T> {
     void readFromWire(T t, WireIn in);
 }

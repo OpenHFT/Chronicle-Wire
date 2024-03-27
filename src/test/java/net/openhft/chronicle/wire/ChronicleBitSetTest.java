@@ -56,21 +56,31 @@ import static org.junit.Assert.assertEquals;
 @RunWith(value = Parameterized.class)
 public class ChronicleBitSetTest extends WireTestCommon {
 
+    // Random number generator for tests
     private final Random generator = new Random();
+
+    // The type of ChronicleBitSet to test
     private final Class clazz;
+
+    // Collection of resources to close after tests
     private final List closeables = new ArrayList();
+
+    // Different instances of empty ChronicleBitSets for testing
     private final ChronicleBitSet emptyBS0;
     private final ChronicleBitSet emptyBS1;
     private final ChronicleBitSet emptyBS127;
     private final ChronicleBitSet emptyBS128;
 
+    // Capture a snapshot of all threads before test execution
     @Override
     @Before
     public void threadDump() {
         super.threadDump();
     }
 
+    // Constructor - Initializes various configurations for the test
     public ChronicleBitSetTest(Class clazz) {
+        // Ensure JVM is 64-bit for the tests
         assumeTrue(Jvm.is64bit());
         this.clazz = clazz;
         emptyBS0 = createBitSet();
@@ -79,24 +89,29 @@ public class ChronicleBitSetTest extends WireTestCommon {
         emptyBS128 = createBitSet(128);
     }
 
+    // Helper method to assume certain conditions for the test
     private void assumeTrue(boolean bit) {
     }
 
+    // Test data provider
     @NotNull
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
+        // Return test cases for different ChronicleBitSet implementations
         return Arrays.asList(new Object[][]{
                 {LongArrayValueBitSet.class},
                 {LongValueBitSet.class},
         });
     }
 
+    // Cleanup resources after test
     @Override
     protected void preAfter() {
         closeQuietly(closeables);
         super.preAfter();
     }
 
+    // Test nextSetBit() method of ChronicleBitSet
     @Test
     public void testNextSetBit0() {
 
@@ -107,6 +122,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         int maxValue = Integer.MIN_VALUE;
         int minValue = Integer.MAX_VALUE;
 
+        // Set random bits for the test
         for (int i = 0; i < 100; i++) {
             int bit = (int) (Math.random() * size);
             expected.set(bit);
@@ -118,8 +134,10 @@ public class ChronicleBitSetTest extends WireTestCommon {
         int expectBit = expected.nextSetBit(0);
         int actualBit = actual.nextSetBit(0);
 
+        // Check the correctness of the first set bit
         assertEquals(minValue, actualBit);
 
+        // Iterate and validate each set bit
         do {
             assertEquals(expectBit, actualBit);
 
@@ -130,36 +148,44 @@ public class ChronicleBitSetTest extends WireTestCommon {
         } while (expectBit != -1);
     }
 
+    // Assert a failure with a given diagnostic message
     public void fail(String diagnostic) {
         Assert.fail(diagnostic);
     }
 
+    // Check if the given condition is true
     public void check(boolean condition) {
         Assert.assertTrue(condition);
     }
 
+    // Check if the given condition is true with a diagnostic message
     public void check(boolean condition, String diagnostic) {
         Assert.assertTrue(diagnostic, condition);
     }
 
+    // Check if the ChronicleBitSet is empty
     public void checkEmpty(ChronicleBitSet s) {
         check(s.isEmpty(), "isEmpty");
         check(s.length() == 0, "length");
         check(s.cardinality() == 0, "cardinality");
+        // Comparing with different empty ChronicleBitSets
         check(s.equals(emptyBS0), "equals");
         check(s.equals(emptyBS1), "equals");
         check(s.equals(emptyBS127), "equals");
         check(s.equals(emptyBS128), "equals");
+        // Checking next set and clear bits
         check(s.nextSetBit(0) == -1, "nextSetBit");
         check(s.nextSetBit(127) == -1, "nextSetBit");
         check(s.nextSetBit(128) == -1, "nextSetBit");
         check(s.nextClearBit(0) == 0, "nextClearBit");
         check(s.nextClearBit(127) == 127, "nextClearBit");
         check(s.nextClearBit(128) == 128, "nextClearBit");
+        // Checking string representation and get method
         check(s.toString().equals("{}"), "toString");
         check(!s.get(0), "get");
     }
 
+    // Creates a ChronicleBitSet and sets bits based on given elements
     public ChronicleBitSet makeSet(int... elts) {
         ChronicleBitSet s = createBitSet(IntStream.of(elts).max().getAsInt() + 1L);
         for (int elt : elts)
@@ -167,6 +193,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         return s;
     }
 
+    // Check equality properties of two ChronicleBitSets
     public void checkEquality(ChronicleBitSet s, ChronicleBitSet t) {
         checkSanity(s, t);
         check(s.equals(t), "equals");
@@ -175,15 +202,18 @@ public class ChronicleBitSetTest extends WireTestCommon {
         check(s.cardinality() == t.cardinality(), "equal cardinalities");
     }
 
+    // Check the validity of ChronicleBitSet(s)
     public void checkSanity(ChronicleBitSet... sets) {
         for (ChronicleBitSet s : sets) {
             int len = s.length();
             int cardinality1 = s.cardinality();
             int cardinality2 = 0;
+            // Counting set bits
             for (int i = s.nextSetBit(0); i >= 0; i = s.nextSetBit(i + 1)) {
                 check(s.get(i));
                 cardinality2++;
             }
+            // Various validity checks
             check(s.nextSetBit(len) == -1, "last set bit");
             check(s.nextClearBit(len) == len, "last set bit");
             check(s.isEmpty() == (len == 0), "emptiness");
@@ -194,12 +224,15 @@ public class ChronicleBitSetTest extends WireTestCommon {
         }
     }
 
+    // Performance test for the flip operation
     @Test
     @Ignore("Performance test")
     public void testFlipTime() {
         // Make a fairly random ChronicleBitSet
         ChronicleBitSet b1 = createBitSet();
         b1.set(1000);
+
+        // Performance test for multi-word flip
         long startTime = System.currentTimeMillis();
         for (int x = 0; x < 100000; x++) {
             b1.flip(100, 900);
@@ -208,6 +241,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         long total = endTime - startTime;
         System.out.println("Multiple word flip Time " + total);
 
+        // Performance test for single-word flip
         startTime = System.currentTimeMillis();
         for (int x = 0; x < 100000; x++) {
             b1.flip(2, 44);
@@ -221,6 +255,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     public void testNextSetBit() {
         int failCount = 0;
 
+        // Repeat the test 100 times
         for (int i = 0; i < 100; i++) {
             int numberOfSetBits = generator.nextInt(100) + 1;
             ChronicleBitSet testSet = createBitSet(numberOfSetBits * 30);
@@ -241,9 +276,11 @@ public class ChronicleBitSetTest extends WireTestCommon {
                     failCount++;
             }
 
+            // Ensure the BitSet's integrity is maintained
             checkSanity(testSet);
         }
 
+        // Check that there were no discrepancies in bit retrieval
         assertEquals(0, failCount);
     }
 
@@ -251,15 +288,16 @@ public class ChronicleBitSetTest extends WireTestCommon {
     public void testNextClearBit() {
         int failCount = 0;
 
+        // Repeat the test 1000 times
         for (int i = 0; i < 1000; i++) {
             ChronicleBitSet b = createBitSet(256);
             int[] history = new int[10];
 
-            // Set all the bits
+            // Initialize the ChronicleBitSet with all set bits
             for (int x = 0; x < 256; x++)
                 b.set(x);
 
-            // Clear some random bits and remember them
+            // Clear a sequence of random bits and remember their positions
             int nextBitToClear = 0;
             for (int x = 0; x < history.length; x++) {
                 nextBitToClear += generator.nextInt(24) + 1;
@@ -274,21 +312,26 @@ public class ChronicleBitSetTest extends WireTestCommon {
                     failCount++;
             }
 
+            // Ensure the BitSet's integrity is maintained
             checkSanity(b);
         }
 
         // regression test for 4350178
         ChronicleBitSet bs = createBitSet();
+        // Ensure the first clear bit is at position 0
         if (bs.nextClearBit(0) != 0)
             failCount++;
         for (int i = 0; i < 64; i++) {
             bs.set(i);
+            // Ensure the next clear bit is immediately after the last set bit
             if (bs.nextClearBit(0) != i + 1)
                 failCount++;
         }
 
+        // Ensure the BitSet's integrity is maintained after regression testing
         checkSanity(bs);
 
+        // Check that there were no discrepancies in bit retrieval
         assertEquals(0, failCount);
     }
 
@@ -467,7 +510,8 @@ public class ChronicleBitSetTest extends WireTestCommon {
     @Test
     public void testAnd2() {
         int failCount = 0;
-        // AND that happens to clear the last word
+
+        // Test the AND operation that clears the last word of the bitset
         ChronicleBitSet b4 = makeSet(2, 127);
         assertEquals("{2, 127}", b4.toString());
         final ChronicleBitSet b4a = makeSet(2, 64);
@@ -487,7 +531,9 @@ public class ChronicleBitSetTest extends WireTestCommon {
     public void testOr() {
         int failCount = 0;
 
+        // Repeat the OR test 100 times
         for (int i = 0; i < 100; i++) {
+            // Two bitsets of size 256
             ChronicleBitSet b1 = createBitSet(256);
             ChronicleBitSet b2 = createBitSet(256);
             int[] history = new int[64];
@@ -536,7 +582,9 @@ public class ChronicleBitSetTest extends WireTestCommon {
     public void testXor() {
         int failCount = 0;
 
+        // Repeat the XOR test 100 times
         for (int i = 0; i < 100; i++) {
+            // Two bitsets of size 256
             ChronicleBitSet b1 = createBitSet(256);
             ChronicleBitSet b2 = createBitSet(256);
 
@@ -561,6 +609,8 @@ public class ChronicleBitSetTest extends WireTestCommon {
                     failCount++;
             }
             checkSanity(b1, b2, b3);
+
+            // XORing b3 with itself should result in an empty set
             b3.xor(b3);
             checkEmpty(b3);
         }
@@ -938,10 +988,12 @@ public class ChronicleBitSetTest extends WireTestCommon {
     public void testEmpty() {
         int failCount = 0;
 
+        // Create an empty ChronicleBitSet and ensure it's empty
         ChronicleBitSet b1 = createBitSet();
         if (!b1.isEmpty())
             failCount++;
 
+        // Set and clear random bits multiple times and ensure the behavior of isEmpty() is correct
         int nextBitToSet = 0;
         int numberOfSetBits = generator.nextInt(100) + 1;
         int highestPossibleSetBit = generator.nextInt(1000) + 1;
@@ -955,18 +1007,22 @@ public class ChronicleBitSetTest extends WireTestCommon {
                 failCount++;
         }
 
+        // Ensure that no unexpected behavior was observed
         assertEquals(0, failCount);
     }
 
     @Test
     public void testEmpty2() {
+        // Test the behavior of clear() method over a range
         {
             ChronicleBitSet t = createBitSet();
             t.set(100);
             t.clear(3, 600);
             checkEmpty(t);
         }
-        checkEmpty(emptyBS0);
+
+        // Check emptiness for multiple scenarios
+        checkEmpty(emptyBS0); // Presumably a predefined empty ChronicleBitSet
         checkEmpty(createBitSet(342));
         ChronicleBitSet s = createBitSet(128);
         checkEmpty(s);
@@ -979,6 +1035,8 @@ public class ChronicleBitSetTest extends WireTestCommon {
         s.set(128, 128);
         checkEmpty(s);
         ChronicleBitSet empty = createBitSet();
+
+        // Perform various bitwise operations with an empty set, should result in an empty set
         {
             ChronicleBitSet t = createBitSet();
             t.and(empty);
@@ -1034,13 +1092,17 @@ public class ChronicleBitSetTest extends WireTestCommon {
             t.and(makeSet(128));
             checkEmpty(t);
         }
+
+        // Check if flipping the same bit back and forth results in an empty set
         {
             ChronicleBitSet t = createBitSet();
             t.flip(7);
             t.flip(7);
             checkEmpty(t);
         }
-/*
+
+        // The below tests are commented out, might be related to subsetting operations
+        /*
         {
             ChronicleBitSet t = createBitSet();
             checkEmpty(t.get(200, 300));
@@ -1054,9 +1116,14 @@ public class ChronicleBitSetTest extends WireTestCommon {
 
     @Test
     public void testToString() {
+        // Check the string representation of an empty ChronicleBitSet
         check(createBitSet().toString().equals("{}"));
+
+        // Check the string representation of a ChronicleBitSet with specific set bits
         check(makeSet(2, 3, 42, 43, 234).toString().equals("{2, 3, 42, 43, 234}"));
 
+        // Check the string representation of large bit indices if enough memory is available
+        // and if the instance is of LongArrayValueBitSet class
         if (Runtime.getRuntime().maxMemory() >= (512 << 20) && clazz == LongArrayValueBitSet.class) {
             // only run it if we have enough memory
             check(makeSet(Integer.MAX_VALUE - 1).toString()
@@ -1100,7 +1167,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
                 b3.flip(x);
             if (!b1.equals(b3))
                 failCount++;
-            checkSanity(b1, b2, b3, b4);
+            checkSanity(b1, b2, b3, b4);  // Presumably checks for some sanity conditions in the ChronicleBitSet instances
         }
 
         // Verify that (b1&(!b2)|(b2&(!b1) == b1^b2
@@ -1133,15 +1200,28 @@ public class ChronicleBitSetTest extends WireTestCommon {
             b5.xor(b6);
             if (!b1.equals(b5))
                 failCount++;
-            checkSanity(b1, b2, b3, b4, b5, b6);
+            checkSanity(b1, b2, b3, b4, b5, b6);  // Checks for some sanity conditions in the ChronicleBitSet instances
         }
+
+        // Ensure that no logical identities were violated
         assertEquals(0, failCount);
     }
 
+    /**
+     * Clone the provided ChronicleBitSet using its size.
+     * @param b1 the ChronicleBitSet to clone.
+     * @return the cloned ChronicleBitSet.
+     */
     private ChronicleBitSet cloneBitSet(ChronicleBitSet b1) {
         return cloneBitSet(b1, b1.size());
     }
 
+    /**
+     * Clone the provided ChronicleBitSet with the given size.
+     * @param b1 the ChronicleBitSet to clone.
+     * @param size the size for the new cloned ChronicleBitSet.
+     * @return the cloned ChronicleBitSet.
+     */
     private ChronicleBitSet cloneBitSet(ChronicleBitSet b1, int size) {
         NativeBytes<Void> bytes = Bytes.allocateElasticDirect();
         IOTools.unmonitor(bytes);
@@ -1151,12 +1231,21 @@ public class ChronicleBitSetTest extends WireTestCommon {
         return bitSet;
     }
 
+    /**
+     * Create a new ChronicleBitSet with default size of 1024.
+     * @return the new ChronicleBitSet.
+     */
     public ChronicleBitSet createBitSet() {
         final ChronicleBitSet bitSet = createBitSet(1024);
         closeables.add(bitSet);
         return bitSet;
     }
 
+    /**
+     * Create a new ChronicleBitSet with the specified size.
+     * @param bits the size for the new ChronicleBitSet.
+     * @return the new ChronicleBitSet.
+     */
     private ChronicleBitSet createBitSet(long bits) {
         final NativeBytes<Void> bytes = Bytes.allocateElasticDirect();
         closeables.add(bytes);
@@ -1165,6 +1254,13 @@ public class ChronicleBitSetTest extends WireTestCommon {
         return bitSet;
     }
 
+    /**
+     * Create a ChronicleBitSet using the provided Wire and size.
+     * This method uses reflection to instantiate the ChronicleBitSet.
+     * @param w the Wire for the new ChronicleBitSet.
+     * @param size the size for the new ChronicleBitSet.
+     * @return the new ChronicleBitSet.
+     */
     @NotNull
     private ChronicleBitSet createBitSet(Wire w, long size) {
         try {

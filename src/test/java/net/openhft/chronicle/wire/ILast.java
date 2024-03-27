@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.wire;
 
+// An interface defining a method for echoing a text
 public interface ILast {
     void echo(String text);
 }

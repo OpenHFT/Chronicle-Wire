@@ -21,6 +21,21 @@ package net.openhft.chronicle.wire.channel.echo;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.channel.ChronicleChannel;
 
+/**
+ * Abstract class 'ChannelVisitor' serves as a template for creating objects
+ * that can visit a ChronicleChannel and perform an operation,
+ * returning a result of type T. Extends SelfDescribingMarshallable for serialization support.
+ *
+ * @param <T> the type of result to return after visiting a ChronicleChannel.
+ */
 public abstract class ChannelVisitor<T> extends SelfDescribingMarshallable {
+
+    /**
+     * Abstract method designed to be implemented by subclasses to define
+     * the operation to be performed on the visited ChronicleChannel.
+     *
+     * @param channel the ChronicleChannel to visit.
+     * @return T result of the operation performed on the channel.
+     */
     public abstract T visit(ChronicleChannel channel);
 }

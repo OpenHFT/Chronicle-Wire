@@ -18,7 +18,19 @@
 
 package net.openhft.chronicle.wire.channel.impl;
 
+/**
+ * This is the HTTPDetectedException class.
+ * It represents an exception condition where HTTP-related data or structures are encountered unexpectedly.
+ * Given that this exception extends {@link InvalidProtocolException}, it denotes an issue where the HTTP protocol
+ * was detected when it shouldn't have been or in a context where it was not expected.
+ */
 public class HTTPDetectedException extends InvalidProtocolException {
+
+    /**
+     * Constructs a new HTTPDetectedException with the specified detail message.
+     *
+     * @param message The detail message, saved for later retrieval by the {@link Throwable#getMessage()} method.
+     */
     public HTTPDetectedException(String message) {
         super(message);
     }

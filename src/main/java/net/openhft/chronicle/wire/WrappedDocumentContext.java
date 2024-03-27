@@ -20,17 +20,41 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * This is the WrappedDocumentContext class which implements the DocumentContext interface.
+ * The purpose of this class is to wrap another DocumentContext and delegate the behavior to the wrapped instance.
+ * This can be used as a base for any specialized versions of DocumentContext which need to extend the default behavior.
+ */
 public abstract class WrappedDocumentContext implements DocumentContext {
+
+    // The wrapped instance of DocumentContext.
     private DocumentContext dc;
 
+    /**
+     * Constructs a new instance of WrappedDocumentContext that wraps the provided DocumentContext.
+     *
+     * @param dc The DocumentContext to be wrapped.
+     */
     protected WrappedDocumentContext(DocumentContext dc) {
         this.dc = dc;
     }
 
+    /**
+     * Getter method to retrieve the wrapped DocumentContext instance.
+     *
+     * @return The wrapped DocumentContext instance.
+     */
     public DocumentContext dc() {
         return dc;
     }
 
+    /**
+     * Setter method to update the wrapped DocumentContext instance.
+     * This method is designed to follow the builder pattern, returning the current instance for chained calls.
+     *
+     * @param dc The new DocumentContext instance to be wrapped.
+     * @return The current instance of WrappedDocumentContext.
+     */
     public WrappedDocumentContext dc(DocumentContext dc) {
         this.dc = dc;
         return this;

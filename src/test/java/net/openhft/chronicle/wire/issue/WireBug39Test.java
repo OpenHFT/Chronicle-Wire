@@ -30,34 +30,57 @@ import java.nio.ByteBuffer;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+/**
+ * Test class that examines the BINARY WireType's ability to serialize
+ * and deserialize a string containing a Unicode character (emoji followed by text).
+ */
 public class WireBug39Test extends WireTestCommon {
+
+    /**
+     * Test the serialization and deserialization of a string
+     * containing a Unicode character (emoji) using the BINARY WireType.
+     * The test checks for consistent serialization and deserialization results.
+     */
     @Test
     public void testBinaryEncoding() {
+        // Define the BINARY WireType and a test string (an emoji followed by text)
         @NotNull final WireType wireType = WireType.BINARY;
         @NotNull final String exampleString = "\uD83E\uDDC0 extra";
 
+        // Create three instances of our MarshallableObj
         @NotNull final MarshallableObj obj1 = new MarshallableObj();
         @NotNull final MarshallableObj obj2 = new MarshallableObj();
         @NotNull final MarshallableObj obj3 = new MarshallableObj();
 
+        // Set the test string to two of the objects
         obj1.append(exampleString);
         obj2.append(exampleString);
 
+        // Assert that both objects are the same after the operation
         assertEquals("obj1.equals(obj2): ", obj1, obj2);
 
+        // Serialize obj2 into bytes using the BINARY WireType
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         obj2.writeMarshallable(wireType.apply(bytes));
 
+        // Convert the bytes back to string
         final String output = bytes.toString();
        // System.out.println("output: [" + output + "]");
 
+        // Deserialize the string back into obj3 and ensure it matches obj1 and obj2
         obj3.readMarshallable(wireType.apply(Bytes.from(output)));
 
         assertEquals("obj2.equals(obj3): ", obj1, obj2);
 
+        // Release the resources associated with the byte buffer
         bytes.releaseLast();
     }
 
+    /**
+     * Class representing an object that implements Marshallable interface.
+     * The object mainly manages a StringBuilder data and provides
+     * mechanisms to handle serialization and deserialization using Wire.
+     */
     class MarshallableObj implements Marshallable {
         private final StringBuilder builder = new StringBuilder();
 

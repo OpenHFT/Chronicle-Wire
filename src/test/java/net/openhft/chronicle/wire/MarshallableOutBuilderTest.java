@@ -46,12 +46,14 @@ import static org.junit.Assert.assertNull;
 
 public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireTestCommon {
 
+    // Before each test case, obtain a thread dump
     @Override
     @Before
     public void threadDump() {
         super.threadDump();
     }
 
+    // Test appending data to a file
     @Test
     public void fileAppend() throws IOException {
         final String expected = "" +
@@ -66,6 +68,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
         file("?append=true", expected);
     }
 
+    // Test writing data to a file without append mode
     @Test
     public void file() throws IOException {
         final String expected = "" +
@@ -76,6 +79,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
         file("", expected);
     }
 
+    // Write expected messages to the file specified in the URL and verify its content
     public void file(String query, String expected) throws IOException {
         final File file = new File(OS.getTarget(), "tmp-" + System.nanoTime());
         final URL url = new URL("file://" + file.getAbsolutePath() + query);
@@ -86,10 +90,12 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
         writeMessages(url);
     }
 
+    // Write messages to the specified URL
     private void writeMessages(URL url) {
         writeMessages(url, null);
     }
 
+    // Write messages to the specified URL with a given WireType
     private void writeMessages(URL url, WireType wireType) {
         final MarshallableOut out = MarshallableOut.builder(url).wireType(wireType).get();
         ITop top = out.methodWriter(ITop.class);
@@ -101,6 +107,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
                 .echo("echo-2");
     }
 
+    // Test writing messages to an HTTP endpoint and validate the response
     @Test
     public void http() throws IOException, InterruptedException {
         InetSocketAddress address = new InetSocketAddress(0);
@@ -124,6 +131,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
         }
     }
 
+    // Another HTTP test that might be used in conjunction with queue-web-gateway. This is a work in progress.
     @Ignore("test was added to work with queue-web-gateway, so work in progress")
     @Test
     public void http2() throws IOException, InterruptedException {
@@ -148,7 +156,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
         }
     }
 
-    //"Only JSON Wire is currently supported"
+    // Test to ensure only JSON Wire is supported and if BINARY_LIGHT is used, an IllegalArgumentException is thrown.
     @Test(expected = IllegalArgumentException.class)
     public void httpBinary() throws IOException, InterruptedException {
         InetSocketAddress address = new InetSocketAddress(0);
@@ -166,10 +174,12 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
 
     }
 
+    // Interface representing a timed event.
     interface Timed {
         void time(long timeNS);
     }
 
+    // Handler for HTTP exchanges; captures the request body and adds to a queue.
     static class Handler implements HttpHandler {
         private final BlockingQueue<String> queue;
 
@@ -191,6 +201,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
         }
     }
 
+    // The benchmarking class to evaluate HTTP performance.
     static class Benchmark implements JLBHTask {
         static final int PORT = 65432;
         static final int THROUGHPUT = Integer.getInteger("throughput", 50);
@@ -198,6 +209,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
         private Timed timed;
         private JLBH jlbh;
 
+        // This main method starts the JLBH benchmarking with specific options.
         public static void main(String[] args) {
             JLBHOptions jlbhOptions = new JLBHOptions()
                     .warmUpIterations(2000)
@@ -209,6 +221,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
             new JLBH(jlbhOptions).start();
         }
 
+        // Initialization for the benchmark.
         @Override
         public void init(JLBH jlbh) {
             this.jlbh = jlbh;
@@ -224,16 +237,19 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
             }
         }
 
+        // The benchmarking run method.
         @Override
         public void run(long startTimeNS) {
             timed.time(startTimeNS);
         }
 
+        // Cleanup after the benchmarking.
         @Override
         public void complete() {
             server.stop(1);
         }
 
+        // Handler for the benchmarking requests.
         class BenchHandler implements HttpHandler {
             Wire wire = WireType.JSON_ONLY.apply(Bytes.allocateElasticOnHeap(128));
 

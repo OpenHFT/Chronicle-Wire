@@ -18,6 +18,14 @@
 
 package net.openhft.chronicle.wire.utils;
 
+/**
+ * ErrorListener interface defines a method to handle JVM error messages.
+ */
 public interface ErrorListener {
+    /**
+     * Handles a JVM error message.
+     *
+     * @param msg The error message to handle.
+     */
     void jvmError(String msg);
 }

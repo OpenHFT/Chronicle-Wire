@@ -20,6 +20,17 @@ package net.openhft.chronicle.wire.channel.echo;
 
 import net.openhft.chronicle.core.io.Syncable;
 
+/**
+ * The {@code Says} interface outlines a communication contract
+ * for entities capable of sending messages within the system.
+ * It extends {@code Syncable}, meaning implementations may
+ * require synchronization capabilities.
+ */
 public interface Says extends Syncable {
+    /**
+     * Sends a message, represented by the provided {@code String}.
+     *
+     * @param say The message to be sent or communicated.
+     */
     void say(String say);
 }

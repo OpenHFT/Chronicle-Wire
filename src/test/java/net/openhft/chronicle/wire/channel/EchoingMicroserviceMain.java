@@ -20,8 +20,13 @@ package net.openhft.chronicle.wire.channel;
 
 import java.io.IOException;
 
+// Define the `EchoingMicroserviceMain` class which provides the entry point to initiate the echoing microservice.
 public class EchoingMicroserviceMain {
+    // Define the main method which serves as the entry point of the application.
+    // It invokes the main method of `ChronicleServiceMain` with a predefined YAML configuration file.
     public static void main(String... args) throws IOException {
+        // Call the main method of `ChronicleServiceMain` with a specific configuration file "echoing.yaml"
+        // This configuration is defining the behavior or setup of the Chronicle service.
         ChronicleServiceMain.main("echoing.yaml");
     }
 }

@@ -17,6 +17,17 @@
  */
 package net.openhft.chronicle.wire;
 
+/**
+ * Represents an interface to notify whether a certain element has a preceding comment annotation.
+ * Implementers can use this to handle scenarios where knowledge of preceding comments is required.
+ */
 interface CommentAnnotationNotifier {
+
+    /**
+     * Notifies the implementer whether a certain element has a preceding comment annotation.
+     *
+     * @param hasCommentAnnotation A flag indicating if the element has a preceding comment.
+     *                             True if it has, otherwise false.
+     */
     void hasPrecedingComment(boolean hasCommentAnnotation);
 }

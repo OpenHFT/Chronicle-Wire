@@ -21,30 +21,39 @@ package run.chronicle.account.dto;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 
 public class AccountStatusFailed extends AbstractEvent<AccountStatusFailed> {
+    // Field to store the associated AccountStatus object
     private AccountStatus accountStatus;
+
+    // Field to store the reason for the failure
     private String reason;
 
+    // Getter for 'accountStatus'
     public AccountStatus accountStatus() {
         return accountStatus;
     }
 
+    // Fluent setter for 'accountStatus', returning the current class instance
     public AccountStatusFailed accountStatus(AccountStatus accountStatus) {
         this.accountStatus = accountStatus;
         return this;
     }
 
+    // Getter for 'reason'
     public String reason() {
         return reason;
     }
 
+    // Fluent setter for 'reason', returning the current class instance
     public AccountStatusFailed reason(String reason) {
         this.reason = reason;
         return this;
     }
 
+    // Override of the 'validate' method to ensure all fields are properly set
     @Override
     public void validate() throws InvalidMarshallableException {
         super.validate();
+        // Validations for each field
         if (accountStatus == null) throw new InvalidMarshallableException("accountStatus must be set");
         if (reason == null) throw new InvalidMarshallableException("reason must be set");
     }

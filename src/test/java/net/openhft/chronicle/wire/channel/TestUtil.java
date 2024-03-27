@@ -22,15 +22,34 @@ import net.openhft.chronicle.wire.utils.YamlTester;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * TestUtil contains utility methods that aid in testing,
+ * particularly those involving YAML testing.
+ */
 public final class TestUtil {
+
+    /**
+     * Private constructor to prevent instantiation of the utility class.
+     */
     private TestUtil() {
     }
 
+    /**
+     * Allow comments out of order - however, based on the method
+     * implementation it seems like it's handling a YAML document separator "---"
+     * and ensuring that expected and actual YAML strings are equal
+     * after stripping the document separators.
+     *
+     * @param yamlTester a tester object presumably holding actual and expected YAML strings.
+     */
     public static void allowCommentsOutOfOrder(YamlTester yamlTester) {
+        // Removing YAML document separators from expected and actual strings.
         final String e = yamlTester.expected()
                 .replaceAll("---\n", "");
         final String a = yamlTester.actual()
                 .replaceAll("---\n", "");
+
+        // Asserting equality, reverting to full original strings for output if assertion fails.
         if (!e.equals(a))
             assertEquals(
                     yamlTester.expected(), yamlTester.actual());

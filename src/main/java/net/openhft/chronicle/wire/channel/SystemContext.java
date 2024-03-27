@@ -36,15 +36,33 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
  */
 @SuppressWarnings("unused")
 public class SystemContext extends SelfDescribingMarshallable {
+
+    // Singleton instance representing the current system context.
     public static final SystemContext INSTANCE = getInstance();
+
+    // Represents the number of available processors in the system.
     private int availableProcessors;
+
+    // A unique identifier for the host system.
     private int hostId;
+
+    // The name of the host system.
     private String hostName;
+
+    // The system's up time, in nanoseconds.
     @LongConversion(NanoTimestampLongConverter.class)
     private long upTime;
+
+    // The country code associated with the current user's environment settings.
     private String userCountry;
+
+    // The name of the current user of the system.
     private String userName;
+
+    // The name of the Java vendor for the current JVM.
     private String javaVendor;
+
+    // The version of the Java runtime environment.
     private String javaVersion;
 
     /**
