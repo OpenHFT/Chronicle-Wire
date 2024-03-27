@@ -133,35 +133,6 @@ public class GenerateMethodWriter {
      * @return a proxy class from an interface class or null if it can't be created
      */
     @Nullable
-    @Deprecated /* to be removed is version x.26. */
-    public static Class<?> newClass(String fullClassName,
-                                    Set<Class<?>> interfaces,
-                                    ClassLoader classLoader,
-                                    final WireType wireType,
-                                    final String genericEvent,
-                                    boolean metaData,
-                                    boolean useMethodId,
-                                    final boolean useUpdateInterceptor) {
-        String packageName = ReflectionUtil.generatedPackageName(fullClassName);
-
-        int lastDot = fullClassName.lastIndexOf('.');
-        String className = lastDot == -1 ? fullClassName : fullClassName.substring(lastDot + 1);
-
-        return new GenerateMethodWriter(packageName,
-                interfaces,
-                className,
-                classLoader,
-                wireType,
-                genericEvent,
-                metaData, useMethodId, useUpdateInterceptor, false)
-                .createClass();
-    }
-
-    /**
-     * @param interfaces an interface class
-     * @return a proxy class from an interface class or null if it can't be created
-     */
-    @Nullable
     public static Class<?> newClass(String fullClassName,
                                     Set<Class<?>> interfaces,
                                     ClassLoader classLoader,

@@ -31,7 +31,6 @@ public class TextWireAgitatorTest extends WireTestCommon {
 
     @Test
     public void lowerCaseClassTuple() {
-        Wires.THROW_CNFRE = false;
         Wires.GENERATE_TUPLES = true;
         Object o = Marshallable.fromString("!" + TextWireTest.MyDto.class.getName().toLowerCase() + " { }");
         assertEquals("!net.openhft.chronicle.wire.textwiretest$mydto {\n" +
@@ -48,7 +47,6 @@ public class TextWireAgitatorTest extends WireTestCommon {
 
     @Test(expected = ClassNotFoundRuntimeException.class)
     public void lowerCaseClassThrows() {
-        Wires.THROW_CNFRE = true;
         Wires.GENERATE_TUPLES = false;
         Object o = Marshallable.fromString("!" + TextWireTest.MyDto.class.getName().toLowerCase() + " { }");
         fail("" + o);
