@@ -30,7 +30,6 @@ import net.openhft.chronicle.core.pool.EnumCache;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.scoped.ScopedResourcePool;
-import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.wire.internal.StringConsumerMarshallableOut;
 import net.openhft.compiler.CachedCompiler;
@@ -370,15 +369,6 @@ public enum Wires {
         return WireDumper.of(wireIn).asString(abbrev);
     }
 
-    /**
-     * @deprecated Use {@link #asText(WireIn, Bytes)} instead
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    @NotNull
-    public static CharSequence asText(@NotNull WireIn wireIn) {
-        return asText(wireIn, WireInternal.acquireInternalBytes());
-    }
-
     @NotNull
     public static CharSequence asText(@NotNull WireIn wireIn, Bytes<?> output) {
         ValidatableUtil.startValidateDisabled();
@@ -397,15 +387,6 @@ public enum Wires {
      */
     private static Wire newJsonWire(Bytes bytes) {
         return new JSONWire(bytes).useTypes(true).trimFirstCurly(false).useTextDocuments();
-    }
-
-    /**
-     * @deprecated Use {@link #asBinary(WireIn, Bytes)} instead
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    @NotNull
-    public static Bytes asBinary(@NotNull WireIn wireIn) throws InvalidMarshallableException {
-        return asType(wireIn, BinaryWire::new, WireInternal.acquireInternalBytes());
     }
 
     public static Bytes<?> asBinary(@NotNull WireIn wireIn, Bytes<?> output) throws InvalidMarshallableException {
@@ -430,15 +411,6 @@ public enum Wires {
         }
     }
 
-    /**
-     * @deprecated Use {@link #asJson(WireIn, Bytes)} instead
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    @NotNull
-    public static Bytes asJson(@NotNull WireIn wireIn) throws InvalidMarshallableException {
-        return asType(wireIn, Wires::newJsonWire, WireInternal.acquireInternalBytes());
-    }
-
     public static Bytes<?> asJson(@NotNull WireIn wireIn, Bytes<?> output) throws InvalidMarshallableException {
         return asType(wireIn, Wires::newJsonWire, output);
     }
@@ -451,18 +423,6 @@ public enum Wires {
      */
     private static Wire newTextWire(Bytes bytes) {
         return new TextWire(bytes).addTimeStamps(true);
-    }
-
-    /**
-     * @deprecated Use {@link #acquireStringBuilderScoped()} instead
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    public static StringBuilder acquireStringBuilder() {
-        if (Jvm.isDebug()) {
-            return new StringBuilder();
-        } else {
-            return SBP.acquireStringBuilder();
-        }
     }
 
     public static ScopedResource<StringBuilder> acquireStringBuilderScoped() {
@@ -636,52 +596,9 @@ public enum Wires {
         return bytes;
     }
 
-    /**
-     * @deprecated Use {@link #acquireBytesScoped()} instead
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    @NotNull
-    public static Bytes<?> acquireBytes() {
-        if (Jvm.isDebug())
-            return Bytes.allocateElasticOnHeap();
-        Bytes<?> bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL,
-                Wires::unmonitoredDirectBytes);
-        bytes.clear();
-        return bytes;
-    }
-
     @NotNull
     public static ScopedResource<Bytes<?>> acquireBytesScoped() {
         return WireInternal.BYTES_SCOPED_THREAD_LOCAL.get();
-    }
-
-    /**
-     * @deprecated Use {@link #acquireBytesScoped()} instead
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    @NotNull
-    static Bytes<?> acquireBytesForToString() {
-        // otherwise we get confusing debug messages.
-        if (Jvm.isDebug())
-            return Bytes.allocateElasticOnHeap();
-
-        Bytes<?> bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_F2S_TL,
-                Wires::unmonitoredDirectBytes);
-        bytes.clear();
-        return bytes;
-    }
-
-    /**
-     * @deprecated Use {@link #acquireBinaryWireScoped()} instead
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    @NotNull
-    public static Wire acquireBinaryWire() {
-        Wire wire = ThreadLocalHelper.getTL(WireInternal.BINARY_WIRE_TL,
-                () -> new BinaryWire(Wires.unmonitoredDirectBytes())
-                        .setOverrideSelfDescribing(true));
-        wire.clear();
-        return wire;
     }
 
     public static ScopedResource<Wire> acquireBinaryWireScoped() {

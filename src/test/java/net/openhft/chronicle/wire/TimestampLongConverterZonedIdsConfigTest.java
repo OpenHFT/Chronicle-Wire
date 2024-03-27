@@ -30,7 +30,6 @@ public class TimestampLongConverterZonedIdsConfigTest extends WireTestCommon {
     @After
     public void tearDown() {
         System.clearProperty(AbstractTimestampLongConverter.TIMESTAMP_LONG_CONVERTERS_ZONE_ID_SYSTEM_PROPERTY);
-        System.clearProperty("mtlc.zoneId");
     }
 
     // Validate that the timezone for MilliTimestampLongConverter can be configured via a system property
