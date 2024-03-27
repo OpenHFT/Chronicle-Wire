@@ -78,15 +78,14 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "    lifecycle: !net.openhft.chronicle.threads.EventLoopLifecycle NEW,\n" +
                     "    name: test/core-event-loop,\n" +
                     "    mediumHandlers: [    ],\n" +
-                    "    newHandler: !!null \"\",\n" +
-                    "    pauser: !net.openhft.chronicle.threads.LongPauser { minPauseTimeNS: 500000, maxPauseTimeNS: 20000000, pausing: false, minBusyNS: 0, minYieldNS: 50000, busyNS: 9223372036854775807, yieldNS: 9223372036854775807, pauseTimeNS: 500000, timePaused: 0, countPaused: 0, thread: !!null \"\", yieldStart: 0, timeOutStart: 9223372036854775807, pauseUntilNS: 0, pauseStartNS: 0 },\n" +
+                    "    newHandlers: [    ],\n" +
+                    "    pauser: !net.openhft.chronicle.threads.LongPauser { minPauseTimeNS: 500000, maxPauseTimeNS: 20000000, pausing: false, minBusyNS: 0, minYieldNS: 50000, firstPauseNS: 9223372036854775807, pauseTimeNS: 500000, timePaused: 0, countPaused: 0, thread: !!null \"\", yieldStart: 0, pauseUntilNS: 0 },\n" +
                     "    daemon: true,\n" +
                     "    binding: none,\n" +
                     "    mediumHandlersArray: [ ],\n" +
                     "    highHandler: !net.openhft.chronicle.threads.EventHandlers NOOP,\n" +
                     "    loopStartNS: 9223372036854775807,\n" +
                     "    thread: !!null \"\",\n" +
-                    "    exceptionThrownByHandler: !net.openhft.chronicle.threads.ExceptionHandlerStrategy$LogDontRemove { },\n" +
                     "    timerHandlers: [    ],\n" +
                     "    daemonHandlers: [    ],\n" +
                     "    timerIntervalMS: 1,\n" +
@@ -117,16 +116,13 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "    pausing: false,\n" +
                     "    minBusyNS: 0,\n" +
                     "    minYieldNS: 50000,\n" +
-                    "    busyNS: 9223372036854775807,\n" +
-                    "    yieldNS: 9223372036854775807,\n" +
+                    "    firstPauseNS: 9223372036854775807,\n" +
                     "    pauseTimeNS: 500000,\n" +
                     "    timePaused: 0,\n" +
                     "    countPaused: 0,\n" +
                     "    thread: !!null \"\",\n" +
                     "    yieldStart: 0,\n" +
-                    "    timeOutStart: 9223372036854775807,\n" +
-                    "    pauseUntilNS: 0,\n" +
-                    "    pauseStartNS: 0\n" +
+                    "    pauseUntilNS: 0\n" +
                     "  },\n" +
                     "  concPauserSupplier: !net.openhft.chronicle.threads.PauserMode sleepy,\n" +
                     "  concBinding: none,\n" +
