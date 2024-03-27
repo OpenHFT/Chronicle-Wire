@@ -46,7 +46,6 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
     private final Random random = new Random(SEED_WITHOUT_COLLISIONS);
     private final String[] testData = new String[DATA_SET_SIZE];
     private final String[] internedStrings = new String[DATA_SET_SIZE];
-    @SuppressWarnings("rawtypes")
     private final Bytes<?> heapBytes = Bytes.allocateElasticOnHeap(4096);
     private final BinaryWire wire = BinaryWire.binaryOnly(heapBytes);
 

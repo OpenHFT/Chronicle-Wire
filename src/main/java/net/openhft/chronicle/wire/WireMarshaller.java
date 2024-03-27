@@ -784,7 +784,7 @@ public class WireMarshaller<T> {
                     boolean isLeaf = !Throwable.class.isAssignableFrom(componentType)
                             && WIRE_MARSHALLER_CL.get(componentType).isLeaf;
                     try {
-                        Object[] values = (Object[]) Jvm.getMethod(componentType, "values").invoke(componentType, null);
+                        Object[] values = (Object[]) Jvm.getMethod(componentType, "values").invoke(componentType);
                         return new EnumSetFieldAccess(field, isLeaf, values, componentType);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         throw Jvm.rethrow(e);

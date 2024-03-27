@@ -21,7 +21,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 
 public interface KeyedMarshallable {
-    @SuppressWarnings("rawtypes")
     default void writeKey(@NotNull Bytes<?> bytes) {
         Wires.writeKey(this, bytes);
     }

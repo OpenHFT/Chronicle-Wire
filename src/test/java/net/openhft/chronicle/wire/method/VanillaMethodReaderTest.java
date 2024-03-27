@@ -40,7 +40,6 @@ import java.util.concurrent.BlockingQueue;
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.*;
 
-@SuppressWarnings("rawtypes")
 public class VanillaMethodReaderTest extends WireTestCommon {
 
     A instance;

@@ -50,7 +50,6 @@ class WireObjectInput implements ObjectInput {
         return read(b, 0, b.length);
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public int read(@NotNull byte[] b, int off, int len) throws IOException {
         final long remaining = wire.bytes().readRemaining();

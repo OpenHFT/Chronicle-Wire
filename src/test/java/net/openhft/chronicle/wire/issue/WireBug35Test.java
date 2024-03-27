@@ -19,10 +19,7 @@
 package net.openhft.chronicle.wire.issue;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.wire.Wire;
-import net.openhft.chronicle.wire.WireTestCommon;
-import net.openhft.chronicle.wire.WireType;
-import net.openhft.chronicle.wire.Wires;
+import net.openhft.chronicle.wire.*;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 
@@ -45,7 +42,7 @@ public class WireBug35Test extends WireTestCommon {
             seq.marshallable(obj -> obj.write(() -> "key").text("value"));
         });
 
-        final String text = Wires.asText(wire).toString();
+        final String text = Wires.asText(wire, Bytes.allocateElasticOnHeap()).toString();
         Object load = new Yaml().load(text);
 
         assertEquals("{seq=[{key=value}, {key=value}]}", load.toString());
@@ -62,7 +59,7 @@ public class WireBug35Test extends WireTestCommon {
             seq.marshallable(obj -> obj.write(() -> "key").text("value"));
         });
 
-        final String text = Wires.asText(wire).toString();
+        final String text = Wires.asText(wire, Bytes.allocateElasticOnHeap()).toString();
         Object load = new Yaml().load(text);
 
         assertEquals("{seq=[{key=value}, {key=value}]}", load.toString());

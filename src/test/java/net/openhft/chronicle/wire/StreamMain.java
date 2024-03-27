@@ -31,7 +31,6 @@ public class StreamMain {
             if (wt == WireType.CSV)
                 continue;
 
-            @SuppressWarnings("rawtypes")
             @NotNull Bytes<?> b = Bytes.allocateElasticDirect();
             Wire w = wt.apply(b);
             w.writeDocument(true, w2 -> w2.write(() -> "header")

@@ -34,7 +34,6 @@ import java.util.function.Supplier;
  *
  * @author Rob Austin.
  */
-@SuppressWarnings("rawtypes")
 public class ReadAnyWire extends AbstractAnyWire implements Wire {
 
     public ReadAnyWire(@NotNull Bytes<?> bytes) {

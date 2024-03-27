@@ -69,7 +69,6 @@ public class CopyTest extends WireTestCommon {
         );
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
     public void testCopy() {
         Bytes<?> bytesFrom = Bytes.allocateElasticOnHeap(64);
