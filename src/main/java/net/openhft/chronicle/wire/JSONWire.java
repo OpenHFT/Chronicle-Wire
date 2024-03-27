@@ -58,7 +58,6 @@ public class JSONWire extends TextWire {
     static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_JSON_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT_JSON::escaping;
     boolean useTypes;
 
-    @SuppressWarnings("rawtypes")
     public JSONWire() {
         this(Bytes.allocateElasticOnHeap());
     }
@@ -68,7 +67,6 @@ public class JSONWire extends TextWire {
         trimFirstCurly(false);
     }
 
-    @SuppressWarnings("rawtypes")
     public JSONWire(@NotNull Bytes<?> bytes) {
         this(bytes, false);
     }

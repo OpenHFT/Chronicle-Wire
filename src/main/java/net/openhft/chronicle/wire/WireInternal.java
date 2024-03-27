@@ -43,7 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 import static net.openhft.chronicle.wire.Wires.toIntU30;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public enum WireInternal {
     ; // none
     static final StringInterner INTERNER = new StringInterner(Jvm.getInteger("wire.interner.size", 4096));
@@ -311,7 +311,6 @@ public enum WireInternal {
                 stes.add(stes2[i]);
         }
         try {
-            //noinspection ToArrayCallWithZeroLengthArrayArgument
             STACK_TRACE.set(finalThrowable, stes.toArray(NO_STE));
         } catch (IllegalAccessException e) {
             throw Jvm.rethrow(e);

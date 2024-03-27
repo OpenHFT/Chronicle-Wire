@@ -59,11 +59,9 @@ public class ReorderedTest extends WireTestCommon {
                 new NestedReadSubset().setTextNumber("two", 2.2));
     }
 
-    @SuppressWarnings("rawtypes")
     private final Function<Bytes<?>, Wire> wireType;
     private static final Collection<NestedReadSubset> nestedReadSubsets;
 
-    @SuppressWarnings("rawtypes")
     public ReorderedTest(Function<Bytes<?>, Wire> wireType) {
         this.wireType = wireType;
     }
@@ -79,7 +77,6 @@ public class ReorderedTest extends WireTestCommon {
         });
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
     public void testWithReorderedFields() {
         Bytes<?> bytes = Bytes.elasticByteBuffer();
@@ -116,7 +113,6 @@ public class ReorderedTest extends WireTestCommon {
         assertEquals("test1", sb.toString());
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
     public void testTopLevel() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();

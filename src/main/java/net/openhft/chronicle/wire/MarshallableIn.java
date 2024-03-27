@@ -69,7 +69,6 @@ public interface MarshallableIn {
      * @param using used to read the document
      * @return {@code true} if successful
      */
-    @SuppressWarnings("rawtypes")
     default boolean readBytes(@NotNull Bytes<?> using) throws InvalidMarshallableException {
         try (@NotNull DocumentContext dc = readingDocument()) {
             if (!dc.isPresent())

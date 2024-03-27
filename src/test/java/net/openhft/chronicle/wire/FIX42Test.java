@@ -84,7 +84,6 @@ public class FIX42Test extends WireTestCommon {
     final boolean numericField;
     final boolean fieldLess;
     private final String dump;
-    @SuppressWarnings("rawtypes")
     @NotNull
     Bytes<?> bytes = allocateElasticOnHeap();
 

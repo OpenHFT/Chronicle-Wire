@@ -1115,7 +1115,6 @@ public class YamlWireTest extends WireTestCommon {
         wire.reset();
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteMarshable() {
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();

@@ -74,9 +74,9 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
      * @param port     the port number
      * @return this configuration instance
      */
-    public ChronicleChannelCfg<C> addHostnamePort(String hostname, int port) {
+    public C addHostnamePort(String hostname, int port) {
         hostports.add(new HostPortCfg(hostname, port));
-        return this;
+        return (C) this;
     }
 
     /**
@@ -95,9 +95,9 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
      * @param initiator the initiator flag
      * @return this configuration instance
      */
-    public ChronicleChannelCfg<C> initiator(boolean initiator) {
+    public C initiator(boolean initiator) {
         this.initiator = initiator;
-        return this;
+        return (C) this;
     }
 
     /**

@@ -38,7 +38,6 @@ import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 
-@SuppressWarnings("rawtypes")
 @RunWith(value = Parameterized.class)
 public class BytesMarshallableTest extends WireTestCommon {
     private final WireType wireType;

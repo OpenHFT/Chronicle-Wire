@@ -67,7 +67,6 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
     @Test
     public void testMarshall() {
 
-        @SuppressWarnings("rawtypes")
         Bytes<?> bytes = Bytes.elasticByteBuffer();
         @NotNull Wire wire = new BinaryWire(bytes);
 

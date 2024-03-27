@@ -46,7 +46,6 @@ public class BytesUsageTest extends WireTestCommon {
         value.releaseLast();
     }
 
-    @SuppressWarnings("rawtypes")
     static class BytesWrapper extends SelfDescribingMarshallable {
         Bytes<?> clOrdId = Bytes.allocateElasticOnHeap();
 

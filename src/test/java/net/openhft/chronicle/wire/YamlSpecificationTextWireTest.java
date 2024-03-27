@@ -33,7 +33,6 @@ import java.util.Collection;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.Assert.assertEquals;
 
-@SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
 public class YamlSpecificationTextWireTest extends WireTestCommon {
     private final String input;

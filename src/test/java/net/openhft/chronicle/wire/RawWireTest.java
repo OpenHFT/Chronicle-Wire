@@ -41,7 +41,6 @@ import static org.junit.Assert.*;
 
 public class RawWireTest extends WireTestCommon {
 
-    @SuppressWarnings("rawtypes")
     @NotNull
     Bytes<?> bytes = nativeBytes();
 

@@ -70,7 +70,6 @@ public class Marshallable2Test extends WireTestCommon {
         }
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
     public void testObject() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);

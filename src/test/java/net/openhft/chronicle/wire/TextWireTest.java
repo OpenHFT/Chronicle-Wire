@@ -958,7 +958,6 @@ public class TextWireTest extends WireTestCommon {
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteStrings() {
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
@@ -1078,7 +1077,6 @@ public class TextWireTest extends WireTestCommon {
         assertEquals(fieldLen, len, 1);
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteIntegers() {
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
@@ -1133,7 +1131,6 @@ public class TextWireTest extends WireTestCommon {
                 fromString.toString());
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteMarshable() {
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();

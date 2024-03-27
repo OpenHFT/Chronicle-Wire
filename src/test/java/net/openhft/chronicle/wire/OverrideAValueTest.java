@@ -34,7 +34,7 @@ public class OverrideAValueTest extends WireTestCommon {
 
     @Test
     public void testDontTouchImmutables2() {
-        ObjectUtils.immutabile(NumberHolder.class, true);
+        ObjectUtils.immutable(NumberHolder.class, true);
         @Nullable ObjectHolder oh = Marshallable.fromString("!" + ObjectHolder.class.getName() + " { nh: !" + NumberHolder.class.getName() + " { num: 3 } } ");
         assertEquals(1, NumberHolder.ONE.intValue());
         assertEquals(1, ObjectHolder.NH.num.intValue());
@@ -60,7 +60,6 @@ public class OverrideAValueTest extends WireTestCommon {
     }
 
     static class ObjectHolder extends SelfDescribingMarshallable {
-        @SuppressWarnings("UnnecessaryBoxing")
         public static final NumberHolder NH = new NumberHolder();
         @NotNull
         NumberHolder nh = NH;

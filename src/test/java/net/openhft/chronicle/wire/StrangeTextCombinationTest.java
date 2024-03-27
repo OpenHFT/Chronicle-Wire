@@ -31,7 +31,6 @@ import java.util.Collection;
 @RunWith(value = Parameterized.class)
 public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireTestCommon {
     private WireType wireType;
-    @SuppressWarnings("rawtypes")
     private Bytes<?> bytes;
 
     public StrangeTextCombinationTest(WireType wireType) {

@@ -27,7 +27,6 @@ public class BinaryToTextTest extends WireTestCommon {
 
     @Test
     public void test() {
-        @SuppressWarnings("rawtypes")
         Bytes<?> tbytes = Bytes.allocateElasticOnHeap();
         @NotNull Wire tw = new BinaryWire(tbytes);
         tw.usePadding(true);
