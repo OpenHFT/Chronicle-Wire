@@ -109,7 +109,6 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
     @Test
     public void roundTripTest() {
         roundTrip(TIMESTAMP_STRING_UTC_NO_SUFFIX, TIMESTAMP, new MicroTimestampLongConverter("UTC"));
-        roundTrip(TIMESTAMP_STRING_UTC, TIMESTAMP, new MicroTimestampLongConverter("UTC", true));
         roundTrip(TIMESTAMP_STRING_MELBOURNE, TIMESTAMP, new MicroTimestampLongConverter("Australia/Melbourne"));
     }
 

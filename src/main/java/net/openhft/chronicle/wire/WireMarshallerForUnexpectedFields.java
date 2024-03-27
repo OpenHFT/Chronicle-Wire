@@ -32,12 +32,6 @@ public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
     // Map for storing fields based on their names.
     final CharSequenceObjectMap<FieldAccess> fieldMap;
 
-    /** @deprecated To be removed in x.26 */
-    @Deprecated
-    public WireMarshallerForUnexpectedFields(@NotNull Class<T> tClass, @NotNull FieldAccess[] fields, boolean isLeaf) {
-        this(fields, isLeaf, defaultValueForType(tClass));
-    }
-
     public WireMarshallerForUnexpectedFields(@NotNull FieldAccess[] fields, boolean isLeaf, T defaultValue) {
         super(fields, isLeaf, defaultValue);
         fieldMap = new CharSequenceObjectMap<>(fields.length * 3);

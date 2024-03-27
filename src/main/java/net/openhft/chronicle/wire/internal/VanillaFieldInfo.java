@@ -15,10 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.openhft.chronicle.wire;
+package net.openhft.chronicle.wire.internal;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.ObjectUtils;
+import net.openhft.chronicle.wire.AbstractFieldInfo;
+import net.openhft.chronicle.wire.BracketType;
+import net.openhft.chronicle.wire.FieldInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,10 +30,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Objects;
 
-/**
- * @deprecated This class will become internal in the future, use {@link FieldInfo#createForField(String, Class, BracketType, Field)} instead.
- */
-@Deprecated(/* To be removed in 2.26 */)
 @SuppressWarnings("rawtypes")
 public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
 

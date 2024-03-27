@@ -54,18 +54,6 @@ public class MilliTimestampLongConverter extends AbstractTimestampLongConverter 
     }
 
     /**
-     * Constructs a new {@code MilliTimestampLongConverter} with the specified zone ID and flag for including zone suffix for UTC.
-     * This constructor is set to be deprecated in x.26 version.
-     *
-     * @param zoneId                 the zone ID to be used for the conversion of long values
-     * @param includeZoneSuffixForUTC the flag to indicate if 'Z' suffix should be included for UTC zone timestamps
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    public MilliTimestampLongConverter(String zoneId, boolean includeZoneSuffixForUTC) {
-        super(zoneId, TimeUnit.MILLISECONDS, includeZoneSuffixForUTC);
-    }
-
-    /**
      * Parses a formatted date into a long timestamp.
      * This implementation uses the epoch day and time of the day to compute the long timestamp.
      *
