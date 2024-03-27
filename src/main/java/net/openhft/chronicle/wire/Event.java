@@ -21,7 +21,6 @@ public interface Event<E extends Event<E>> extends BaseEvent<E> {
      * Retrieves the unique identifier associated with this event.
      *
      * @return The unique identifier for this event.
-     * @deprecated This method is slated for removal in version x.25.
      */
     @NotNull
     default CharSequence eventId() {
