@@ -95,6 +95,7 @@ public enum Wires {
         if (tClass == Marshallable.class)
             interfaces = new Class[]{Marshallable.class};
         try {
+            @SuppressWarnings("deprecation")
             Class<?> proxyClass = Proxy.getProxyClass(tClass.getClassLoader(), interfaces);
             Constructor<?> constructor = proxyClass.getConstructor(InvocationHandler.class);
             constructor.setAccessible(true);
@@ -322,11 +323,7 @@ public enum Wires {
      */
     @Deprecated(/* To be removed in x.26 */)
     public static StringBuilder acquireStringBuilder() {
-        if (Jvm.isDebug()) {
             return new StringBuilder();
-        } else {
-            return SBP.acquireStringBuilder();
-        }
     }
 
     public static ScopedResource<StringBuilder> acquireStringBuilderScoped() {

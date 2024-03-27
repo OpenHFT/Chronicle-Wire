@@ -126,7 +126,7 @@ public enum WireInternal {
     @Deprecated(/* To be removed in x.26 */)
     // these might be used internally so not safe for end users.
     static StringBuilder acquireStringBuilder() {
-        return SBP.acquireStringBuilder();
+        return new StringBuilder();
     }
 
     /**
@@ -135,7 +135,7 @@ public enum WireInternal {
     @Deprecated(/* To be removed in x.26 */)
     // these might be used internally so not safe for end users.
     static StringBuilder acquireAnotherStringBuilder(CharSequence cs) {
-        StringBuilder sb = ASBP.acquireStringBuilder();
+        StringBuilder sb = new StringBuilder();
         assert sb != cs;
         return sb;
     }
@@ -355,7 +355,7 @@ public enum WireInternal {
      */
     @Deprecated(/* To be removed in x.26 */)
     static StringBuilder acquireStringBuilderForValueIn() {
-        return SBPVI.acquireStringBuilder();
+        return new StringBuilder();
     }
 
     /**
@@ -363,7 +363,7 @@ public enum WireInternal {
      */
     @Deprecated(/* To be removed in x.26 */)
     static StringBuilder acquireStringBuilderForValueOut() {
-        return SBPVO.acquireStringBuilder();
+        return new StringBuilder();
     }
 
     static class ObjectInterner<T> extends FromStringInterner<T> {
