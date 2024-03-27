@@ -23,12 +23,13 @@ import net.openhft.chronicle.core.Jvm;
 import java.lang.reflect.Method;
 import java.util.function.BiConsumer;
 
-// lambda was causing garbage
 /**
  * Represents a utility class responsible for writing sequences of method parameters into a given output format.
  * Specifically, it encapsulates the logic to serialize method parameters into a wire format or similar output stream.
  * The class is designed with the assumption that the sequence will either start from the first parameter or
  * skip the first parameter and start from the second, as dictated by the `from0` and `from1` `BiConsumer` respectively.
+ * <p>
+ * This was a lambda but it caused garbage
  */
 class ParameterHolderSequenceWriter {
 
