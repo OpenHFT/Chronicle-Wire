@@ -26,7 +26,7 @@ public class EchoingMicroserviceMain {
     // It invokes the main method of `ChronicleServiceMain` with a predefined YAML configuration file.
     public static void main(String... args) throws IOException {
         // Call the main method of `ChronicleServiceMain` with a specific configuration file "echoing.yaml"
-        // This configuration is likely defining the behavior or setup of the Chronicle service.
+        // This configuration is defining the behavior or setup of the Chronicle service.
         ChronicleServiceMain.main("echoing.yaml");
     }
 }

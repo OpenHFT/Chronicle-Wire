@@ -1685,7 +1685,7 @@ public interface ValueOut {
 
     /**
      * Writes a char value to the wire.
-     * Leverages the uint16 method, which suggests that characters are stored as unsigned 16-bit integers.
+     * Leverages the uint16 method, characters are stored as unsigned 16-bit integers.
      *
      * @param x The char value to be written.
      * @return The WireOut instance after the operation.

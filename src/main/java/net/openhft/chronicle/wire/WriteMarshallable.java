@@ -30,7 +30,7 @@ import org.jetbrains.annotations.NotNull;
  * <p>
  * This interface is annotated with {@code @FunctionalInterface}, indicating that it is
  * intended to be used primarily for lambda expressions and method references.
- * Furthermore, the {@code @DontChain} annotation suggests that implementations should
+ * Furthermore, the {@code @DontChain} annotation highlights that implementations should
  * not be chained for certain operations.
  */
 @FunctionalInterface

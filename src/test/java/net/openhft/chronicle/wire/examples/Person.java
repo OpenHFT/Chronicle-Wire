@@ -14,7 +14,6 @@ public class Person extends SelfDescribingMarshallable {
     private String name;
 
     // Represents the timestamp in nanoseconds.
-    // The @NanoTime annotation suggests a specific serialization/deserialization behavior.
     @NanoTime
     private long timestampNS;
     @ShortText

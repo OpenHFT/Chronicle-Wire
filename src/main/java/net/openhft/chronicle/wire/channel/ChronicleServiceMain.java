@@ -177,7 +177,7 @@ public class ChronicleServiceMain extends SelfDescribingMarshallable implements 
                 // Obtain a method writer proxy of the appropriate type for this channel
                 Object out = channel.methodWriter(field.getType());
 
-                // The AffinityLock is likely used here to bind the executing thread to a CPU core
+                // The AffinityLock is used here to bind the executing thread to a CPU core
                 try (AffinityLock lock = AffinityLock.acquireLock()) {
                     field.set(microservice, out);
 
