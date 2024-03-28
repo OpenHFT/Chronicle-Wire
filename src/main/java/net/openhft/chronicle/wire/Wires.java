@@ -108,6 +108,7 @@ public enum Wires {
         if (tClass == Marshallable.class)
             interfaces = new Class[]{Marshallable.class};
         try {
+            @SuppressWarnings("deprecation")
             Class<?> proxyClass = Proxy.getProxyClass(tClass.getClassLoader(), interfaces);
             Constructor<?> constructor = proxyClass.getConstructor(InvocationHandler.class);
             constructor.setAccessible(true);

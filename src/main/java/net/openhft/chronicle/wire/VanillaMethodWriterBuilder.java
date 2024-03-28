@@ -63,8 +63,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
             Serializable.class,
             CharSequence.class,
             Comparable.class,
-            Comparator.class,
-            Observer.class
+            Comparator.class
     );
 
     // Flag to indicate if the proxy generation is disabled
