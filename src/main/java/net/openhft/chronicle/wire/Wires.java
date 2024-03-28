@@ -439,8 +439,8 @@ public enum Wires {
      *
      * @param source source
      * @param target dest
+     * @param <T>    target type
      * @return target
-     * @param <T> target type
      */
     @NotNull
     public static <T> T copyTo(Object source, @NotNull T target) throws InvalidMarshallableException {
