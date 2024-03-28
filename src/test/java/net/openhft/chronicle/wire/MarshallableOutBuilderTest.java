@@ -78,6 +78,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
 
     public void file(String query, String expected) throws IOException {
         final File file = new File(OS.getTarget(), "tmp-" + System.nanoTime());
+        @SuppressWarnings("deprecation")
         final URL url = new URL("file://" + file.getAbsolutePath() + query);
         writeMessages(url);
         final Bytes bytes = BytesUtil.readFile(file.getAbsolutePath());
@@ -110,6 +111,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
         server.createContext("/echo", new Handler(queue));
         server.start();
         try {
+            @SuppressWarnings("deprecation")
             final URL url = new URL("http://localhost:" + port + "/echo");
             writeMessages(url);
             assertEquals(
@@ -134,6 +136,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
         server.createContext("/echo", new Handler(queue));
         server.start();
         try {
+            @SuppressWarnings("deprecation")
             final URL url = new URL("http://localhost:" + port + "/echo/append");
             writeMessages(url);
             assertEquals(
@@ -158,6 +161,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
         server.createContext("/echo", new Handler(queue));
         server.start();
         try {
+            @SuppressWarnings("deprecation")
             final URL url = new URL("http://localhost:" + port + "/echo");
             writeMessages(url, WireType.BINARY_LIGHT);
         } finally {
@@ -216,6 +220,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
                 server = HttpServer.create(new InetSocketAddress(PORT), 50);
                 server.createContext("/bench", new BenchHandler());
                 server.start();
+                @SuppressWarnings("deprecation")
                 final URL url = new URL("http://localhost:" + PORT + "/bench");
                 MarshallableOut out = MarshallableOut.builder(url).wireType(WireType.JSON_ONLY).get();
                 timed = out.methodWriter(Timed.class);

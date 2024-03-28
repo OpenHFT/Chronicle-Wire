@@ -53,8 +53,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
             Serializable.class,
             CharSequence.class,
             Comparable.class,
-            Comparator.class,
-            Observer.class
+            Comparator.class
     );
 
     private final boolean disableProxyGen = Jvm.getBoolean(DISABLE_WRITER_PROXY_CODEGEN, false);

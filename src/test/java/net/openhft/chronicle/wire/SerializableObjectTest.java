@@ -236,9 +236,9 @@ final class SerializableObjectTest extends WireTestCommon {
         return isSerializableEquals(o.getClass(), o);
     }
 
-    private static boolean isSerializableEquals(Class aClass, Object o) {
+    private static boolean isSerializableEquals(Class<?> aClass, Object o) {
         try {
-            Object source = o == null ? aClass.newInstance() : o;
+            Object source = o == null ? aClass.getConstructor().newInstance() : o;
             // sanity check
             if (source.toString() == null)
                 return false;

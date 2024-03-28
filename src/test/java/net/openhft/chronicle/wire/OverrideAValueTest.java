@@ -54,7 +54,7 @@ public class OverrideAValueTest extends WireTestCommon {
 
     static class NumberHolder extends SelfDescribingMarshallable {
         @SuppressWarnings("UnnecessaryBoxing")
-        public static final Integer ONE = new Integer(1);
+        public static final Integer ONE = 1;
         @NotNull
         Integer num = ONE;
     }

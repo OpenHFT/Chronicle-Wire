@@ -77,6 +77,7 @@ public class ChronicleContext extends SimpleCloseable {
     // URL for the Chronicle context
     private final String url;
     private String name;
+    @SuppressWarnings("deprecation")
     private transient URL _url;
 
     // Socket Registry for handling socket related operations
@@ -131,6 +132,7 @@ public class ChronicleContext extends SimpleCloseable {
      * @return the URL parsed from the string.
      * @throws IORuntimeException if the string cannot be parsed as a URL.
      */
+    @SuppressWarnings("deprecation")
     public static URL urlFor(String spec) throws IORuntimeException {
         try {
             if (spec.startsWith("internal:"))
