@@ -35,12 +35,6 @@
     <properties>
         <sonar.organization>openhft</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <!-- The parent POM defines this plugin and activates it in a profile. Unfortunately this plugin will generate
-        code at @NotNull call-sites that throws IllegalArgumentException rather than NullPointerException. This will
-        break various core tests. Chronicle have raised this issue before with the maintainers of the plugin. See:
-        https://github.com/osundblad/intellij-annotations-instrumenter-maven-plugin/issues/53
-        -->
-        <se.eris.notnull.instrument>false</se.eris.notnull.instrument>
     </properties>
 
     <dependencyManagement>
@@ -195,7 +189,7 @@
                         <configuration>
                             <referenceVersion>2.25ea0</referenceVersion>
                             <artifactsURI>https://teamcity.chronicle.software/repository/download</artifactsURI>
-                            <binaryCompatibilityPercentageRequired>99.6</binaryCompatibilityPercentageRequired>
+                            <binaryCompatibilityPercentageRequired>98</binaryCompatibilityPercentageRequired>
                             <extraOptions>
                                 <extraOption>
                                     <name>skip-internal-packages</name>
@@ -433,6 +427,15 @@
     </scm>
 
     <profiles>
+        <profile>
+            <id>java11-release8</id>
+            <activation>
+                <jdk>[11,</jdk>
+            </activation>
+            <properties>
+                <maven.compiler.release>8</maven.compiler.release>
+            </properties>
+        </profile>
         <profile>
             <id>sonar</id>
             <build>

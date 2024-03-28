@@ -298,15 +298,6 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * @see #writeMarshallable(Object, WireOut, boolean)
-     * @deprecated To be removed in x.26
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    public void writeMarshallable(T t, @NotNull WireOut out, T ignored, boolean copy) throws InvalidMarshallableException {
-        writeMarshallable(t, out, copy);
-    }
-
-    /**
      * Writes the values of the fields from the provided object (DTO) to the output. Before writing,
      * the object is validated. The method also supports optional copying of the values
      * from the source object to a previous instance.
@@ -330,15 +321,6 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * @see #readMarshallable(Object, WireIn, boolean)
-     * @deprecated To be removed in x.26
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    public void readMarshallable(T t, @NotNull WireIn in, T ignored, boolean overwrite) throws InvalidMarshallableException {
-        readMarshallable(t, in, overwrite);
-    }
-
-    /**
      * Reads and populates the DTO based on the provided input. The input order can be hinted.
      * After reading, the object is validated.
      *
@@ -359,15 +341,6 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * @see #readMarshallableDTOOrder(Object, WireIn, boolean)
-     * @deprecated To be removed in x.26
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    public void readMarshallableDTOOrder(T t, @NotNull WireIn in, T ignored, boolean overwrite) throws InvalidMarshallableException {
-        readMarshallableDTOOrder(t, in, overwrite);
-    }
-
-    /**
      * Reads and populates the DTO based on the provided order.
      *
      * @param t         Target object to populate with read values.
@@ -385,15 +358,6 @@ public class WireMarshaller<T> {
         } catch (IllegalAccessException e) {
             throw new AssertionError(e);
         }
-    }
-
-    /**
-     * @see #readMarshallableInputOrder(Object, WireIn, boolean)
-     * @deprecated To be removed in x.26
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    public void readMarshallableInputOrder(T t, @NotNull WireIn in, T ignored, boolean overwrite) throws InvalidMarshallableException {
-        readMarshallableDTOOrder(t, in, overwrite);
     }
 
     /**
