@@ -56,11 +56,11 @@ public class TCData implements Marshallable, BytesMarshallable {
         bytes.unsafeWriteObject(this, DTO_START, DTO_LENGTH);
     }
 
-    public static int start(Class<?>c) {
+    public static int start(Class<?> c) {
         return BytesUtil.triviallyCopyableRange(c)[0];
     }
 
-    public static int length(Class<?>c) {
+    public static int length(Class<?> c) {
         int[] BYTE_RANGE = BytesUtil.triviallyCopyableRange(c);
         return BYTE_RANGE[1] - BYTE_RANGE[0];
     }
