@@ -21,7 +21,6 @@ package net.openhft.chronicle.wire.map;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.Wires;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.io.Closeable;
@@ -31,17 +30,19 @@ import java.util.function.Function;
 
 import static org.junit.Assert.assertTrue;
 
+@SuppressWarnings("serial")
 public class MapCustomTest extends WireTestCommon {
 
     @Test
     public void test() {
         MapsHolder<Integer> mapsHolder = new MapsHolder<>(10, "one");
 
-        @NotNull MapsHolder result = Wires.deepCopy(mapsHolder);
+        MapsHolder<Integer> result = Wires.deepCopy(mapsHolder);
 
         assertTrue(result.equals(mapsHolder));
     }
 
+    @SuppressWarnings("rawtypes")
     private static class MapsHolder<T extends Integer> extends SelfDescribingMarshallable {
         private IntToStringMap i2sMap = new IntToStringMap();
         private IntMap<Void, String> iMap = new IntMap<>();
@@ -51,6 +52,7 @@ public class MapCustomTest extends WireTestCommon {
         // ClassCastException: net.openhft.chronicle.core.util.ObjectUtils$$Lambda$73/1401132667 cannot be cast to Map
         // private MarkedMap<String> mMap = i2sMap;
 
+        @SuppressWarnings("unchecked")
         public MapsHolder(T x, String y) {
             i2sMap.put(x, y);
             iMap.put(x, y);

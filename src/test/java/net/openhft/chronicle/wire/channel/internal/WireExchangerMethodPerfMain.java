@@ -115,6 +115,7 @@ public class WireExchangerMethodPerfMain implements JLBHTask {
         eventListener = be.methodWriter(EventListener.class);
     }
 
+    @SuppressWarnings({"unused", "try"})
     private void run() {
         int count = 0;
         ChronicleEvent event2 = new ChronicleEvent();

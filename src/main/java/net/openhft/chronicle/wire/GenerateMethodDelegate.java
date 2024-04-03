@@ -30,7 +30,7 @@ public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMetho
     }
 
     @Override
-    public synchronized Class acquireClass(ClassLoader classLoader) {
+    public synchronized <T> Class<T> acquireClass(ClassLoader classLoader) {
         metaData().interfaces().add(MethodDelegate.class);
         return super.acquireClass(classLoader);
     }

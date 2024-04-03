@@ -40,9 +40,9 @@ import static org.junit.Assume.assumeFalse;
 @RunWith(value = Parameterized.class)
 public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
 
-    private final Future future;
+    private final Future<?> future;
 
-    public TimestampLongConverterZoneIdsTest(String zoneId, ConverterType converterType, Future future) {
+    public TimestampLongConverterZoneIdsTest(String zoneId, ConverterType converterType, Future<?> future) {
         this.future = future;
     }
 

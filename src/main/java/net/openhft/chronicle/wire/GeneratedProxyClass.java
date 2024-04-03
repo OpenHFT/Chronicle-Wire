@@ -40,7 +40,7 @@ public enum GeneratedProxyClass {
      * @return a proxy class from an interface class or null if it can't be created
      */
     @SuppressWarnings("rawtypes")
-    public static Class from(String packageName, Set<Class> interfaces, String className, ClassLoader classLoader) {
+    public static Class<?>from(String packageName, Set<Class> interfaces, String className, ClassLoader classLoader) {
         int maxArgs = 0;
         Set<Method> methods = new LinkedHashSet<>(16);
 
@@ -62,7 +62,7 @@ public enum GeneratedProxyClass {
 
         String sep = "";
         // create methodArray
-        for (Class interfaceClazz : interfaces) {
+        for (Class<?>interfaceClazz : interfaces) {
             sb.append(sep);
             String interfaceName = nameForClass(interfaceClazz);
             sb.append(interfaceName);

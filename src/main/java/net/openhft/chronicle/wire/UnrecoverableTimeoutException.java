@@ -20,6 +20,8 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 
 public class UnrecoverableTimeoutException extends IllegalStateException {
+    private static final long serialVersionUID = 0L;
+    @SuppressWarnings("this-escape")
     public UnrecoverableTimeoutException(@NotNull Exception e) {
         super(e.getMessage());
         initCause(e);

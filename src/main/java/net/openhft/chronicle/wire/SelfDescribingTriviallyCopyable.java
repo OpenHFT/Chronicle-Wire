@@ -28,6 +28,7 @@ import java.nio.BufferUnderflowException;
 
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
+@SuppressWarnings("this-escape")
 public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMarshallable {
     @FieldGroup("header")
     transient int description = $description();

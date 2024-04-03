@@ -34,6 +34,7 @@ public interface Event<E extends Event<E>> extends BaseEvent<E> {
      * @param eventId identifier to assign to this event.
      * @return this
      */
+    @SuppressWarnings("unchecked")
     default E eventId(@NotNull final CharSequence eventId) {
         return (E) this;
     }
@@ -46,6 +47,7 @@ public interface Event<E extends Event<E>> extends BaseEvent<E> {
      * @param eventName The new name to be assigned to the event.
      * @return The current instance of the implementing class, with any necessary updates applied.
      */
+    @SuppressWarnings("unchecked")
     default E updateEvent(final String eventName) {
         if (this.eventId().length() == 0)
             this.eventId(eventName);

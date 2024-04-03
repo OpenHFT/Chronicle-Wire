@@ -56,7 +56,7 @@ import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "try"})
 public class TextWireTest extends WireTestCommon {
 
     static Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
@@ -2038,7 +2038,7 @@ public class TextWireTest extends WireTestCommon {
     }
 
     static class DTO extends SelfDescribingMarshallable {
-        Class type;
+        Class<?>type;
     }
 
     static class MapHolder extends SelfDescribingMarshallable {

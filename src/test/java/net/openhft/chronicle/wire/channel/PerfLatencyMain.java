@@ -186,6 +186,7 @@ public class PerfLatencyMain implements JLBHTask {
         private MethodReader reader;
         private ChronicleChannel channel;
 
+        @SuppressWarnings({"unused", "try"})
         public Client() {
             channel = context.newChannelSupplier(echoHandler).buffered(BUFFERED && BATCH > 1).get();
             echoing = channel.methodWriter(Echoing.class);

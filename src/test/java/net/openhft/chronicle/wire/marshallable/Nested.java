@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@SuppressWarnings("serial")
 public class Nested extends SelfDescribingMarshallable {
     ScalarValues values;
     List<String> strings;

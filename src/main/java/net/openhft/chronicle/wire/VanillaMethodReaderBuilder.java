@@ -45,7 +45,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     private WireType wireType;
     private Object[] metaDataHandler = null;
     private ExceptionHandler exceptionHandlerOnUnknownMethod = Jvm.debug();
-    private Predicate predicate = x -> true;
+    private Predicate<MethodReader> predicate = x -> true;
 
     private boolean scanning = false;
 
@@ -186,7 +186,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     }
 
     @Override
-    public MethodReaderBuilder predicate(Predicate<?> predicate) {
+    public MethodReaderBuilder predicate(Predicate<MethodReader> predicate) {
         this.predicate = predicate;
         return this;
     }

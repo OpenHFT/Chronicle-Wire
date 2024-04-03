@@ -28,12 +28,6 @@ import org.junit.Test;
 import static net.openhft.chronicle.wire.Wires.acquireStringBuilderScoped;
 import static org.junit.Assert.assertEquals;
 
-enum CcyPair {
-    EURUSD, GBPUSD, EURCHF;
-
-    static final EnumInterner<CcyPair> INTERNER = new EnumInterner<>(CcyPair.class);
-}
-
 public class CSVBytesMarshallableTest extends WireTestCommon {
     Bytes<?> bytes = Bytes.from(
             "1.09029,1.090305,EURUSD,2,1,EBS\n" +

@@ -49,7 +49,7 @@ import java.util.function.*;
 /**
  * This format writes just the data, without meta data.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
 public class RawWire extends AbstractWire implements Wire {
     private final RawValueOut valueOut = new RawValueOut();
     private final RawValueIn valueIn = new RawValueIn();
@@ -552,7 +552,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class type) {
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class<?>type) {
             long position = bytes.writePosition();
             bytes.writeSkip(1);
             typeTranslator.accept(type, bytes);
@@ -737,7 +737,7 @@ public class RawWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public Class typePrefix() {
+        public Class<?>typePrefix() {
             return null;
         }
 
@@ -1174,7 +1174,7 @@ public class RawWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public Object objectWithInferredType(Object using, SerializationStrategy strategy, Class type) {
+        public Object objectWithInferredType(Object using, SerializationStrategy strategy, Class<?>type) {
             throw new UnsupportedOperationException("Cannot read " + using + " value and " + type + " type for RawWire");
         }
     }

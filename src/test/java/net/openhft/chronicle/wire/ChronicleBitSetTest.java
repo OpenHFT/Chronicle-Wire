@@ -53,12 +53,14 @@ import java.util.stream.IntStream;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("unchecked")
 @RunWith(value = Parameterized.class)
 public class ChronicleBitSetTest extends WireTestCommon {
 
     private final Random generator = new Random();
-    private final Class clazz;
-    private final List closeables = new ArrayList();
+    private final Class<?>clazz;
+    @SuppressWarnings("rawtypes")
+    private final List closeables = new ArrayList<>();
     private final ChronicleBitSet emptyBS0;
     private final ChronicleBitSet emptyBS1;
     private final ChronicleBitSet emptyBS127;
@@ -70,7 +72,8 @@ public class ChronicleBitSetTest extends WireTestCommon {
         super.threadDump();
     }
 
-    public ChronicleBitSetTest(Class clazz) {
+    @SuppressWarnings("this-escape")
+    public ChronicleBitSetTest(Class<?>clazz) {
         assumeTrue(Jvm.is64bit());
         this.clazz = clazz;
         emptyBS0 = createBitSet();

@@ -51,6 +51,7 @@ public abstract class AbstractHandler<H extends AbstractHandler<H>>
      *                 Set to null to leave the decision to the server.
      * @return This instance of the handler, enabling method chaining.
      */
+    @SuppressWarnings("unchecked")
     public H buffered(Boolean buffered) {
         this.buffered = buffered;
         return (H) this;

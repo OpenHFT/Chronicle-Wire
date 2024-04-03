@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.Serializable;
 
 public class EndOfDayShort extends SelfDescribingMarshallable implements Serializable {
+    private static final long serialVersionUID = 0L;
     // Symbol,Company,Price,Change,ChangePercent,Day's Volume
     public String name;
     public double closingPrice, change, changePercent;

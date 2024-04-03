@@ -53,6 +53,7 @@ public class EchoHandler extends AbstractHandler<EchoHandler> {
      * @throws ClosedIORuntimeException     if the channel is closed unexpectedly
      * @throws InvalidMarshallableException if there's an issue while processing the data
      */
+    @SuppressWarnings("try")
     @Override
     public void run(ChronicleContext context, ChronicleChannel channel) throws ClosedIORuntimeException, InvalidMarshallableException {
         try (AffinityLock lock = context.affinityLock()) {
@@ -80,7 +81,7 @@ public class EchoHandler extends AbstractHandler<EchoHandler> {
      * @return a new EchoChannel instance
      */
     @Override
-    public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg channelCfg) {
+    public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg<?>channelCfg) {
         return new EchoChannel(channelCfg);
     }
 }

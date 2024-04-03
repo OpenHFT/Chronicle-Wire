@@ -41,6 +41,7 @@ import static org.junit.Assert.assertEquals;
 public class WireToOutputStreamTest extends WireTestCommon {
 
     public static class AnObject implements Serializable {
+        private static final long serialVersionUID = 0L;
         long value;
         String text;
 
@@ -122,7 +123,7 @@ public class WireToOutputStreamTest extends WireTestCommon {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @NotNull
     public Object readAnObject(Wire wire2) {
-        Class type = wire2.getValueIn().typeLiteral();
+        Class<?>type = wire2.getValueIn().typeLiteral();
         Object ao2 = ObjectUtils.newInstance(type);
         Wires.readMarshallable(ao2, wire2, true);
         return ao2;

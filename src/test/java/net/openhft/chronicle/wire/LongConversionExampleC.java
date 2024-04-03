@@ -28,11 +28,12 @@ public class LongConversionExampleC {
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(House.class);
     }
+    @SuppressWarnings("this-escape")
     public static class House extends SelfDescribingMarshallable {
         @FieldGroup("address")
         // 5 longs, each at 8 bytes = 40 bytes, so we can store a String with up to 40 ISO-8859 characters
         private long text4a, text4b, text4c, text4d, text4e;
-        private transient Bytes address = Bytes.forFieldGroup(this, "address");
+        private transient Bytes<House> address = Bytes.forFieldGroup(this, "address");
 
         public void address(CharSequence owner) {
             address.append(owner);

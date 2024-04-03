@@ -35,11 +35,11 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
     private final Supplier<MarshallableOut> marshallableOutSupplier;
     private final Map<Method, Consumer<Object[]>> visitorConverter = new LinkedHashMap<>();
 
-    TextMethodWriterInvocationHandler(Class tClass, @NotNull MarshallableOut marshallableOut) {
+    TextMethodWriterInvocationHandler(Class<?>tClass, @NotNull MarshallableOut marshallableOut) {
         this(tClass, () -> marshallableOut);
     }
 
-    public TextMethodWriterInvocationHandler(Class tClass, @NotNull Supplier<MarshallableOut> marshallableOutSupplier) {
+    public TextMethodWriterInvocationHandler(Class<?>tClass, @NotNull Supplier<MarshallableOut> marshallableOutSupplier) {
         super(tClass);
         this.marshallableOutSupplier = marshallableOutSupplier;
     }
@@ -72,7 +72,7 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
         }
     }
 
-    static final Consumer<Object[]> NOOP_CONSUMER = Mocker.ignored(Consumer.class);
+    static final Consumer<Object[]> NOOP_CONSUMER = Jvm.uncheckedCast(Mocker.ignored(Consumer.class));
 
     private Consumer<Object[]> buildConverter(Method method) {
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();

@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 public class WriteAfterEOFException extends IllegalStateException {
+    private static final long serialVersionUID = 0L;
     public WriteAfterEOFException() {
         super("You should not be able to write at EOF");
     }

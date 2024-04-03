@@ -51,7 +51,7 @@ import static net.openhft.chronicle.bytes.BytesStore.empty;
 /**
  * YAML Based wire format
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
 public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire {
     private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
@@ -522,7 +522,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             @NotNull byte[] byteArray = new byte[length];
             fromBytes.copyTo(byteArray);
 
-            return (T) bytes(byteArray);
+            return bytes(byteArray);
         }
 
         @NotNull
@@ -573,7 +573,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             if (dropDefault) {
                 writeSavedEventName();
             }
-            return (T) bytes("!binary", byteArray);
+            return bytes("!binary", byteArray);
         }
 
         @NotNull
@@ -939,7 +939,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         @NotNull
         @Override
-        public ValueOut optionalTyped(Class aClass) {
+        public ValueOut optionalTyped(Class<?>aClass) {
             return typePrefix(aClass);
         }
 
@@ -959,7 +959,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         @NotNull
         @Override
-        public T typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, Class type) {
+        public T typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, Class<?>type) {
             if (dropDefault) {
                 if (type == null)
                     return wireOut();

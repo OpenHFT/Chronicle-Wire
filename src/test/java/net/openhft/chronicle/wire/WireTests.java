@@ -152,7 +152,7 @@ public class WireTests {
             LocalDateTime expected = LocalDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
             wire.getValueOut().object(expected);
             // is a hint needed?
-            Class type = wireType == WireType.JSON ? LocalDateTime.class : Object.class;
+            Class<?>type = wireType == WireType.JSON ? LocalDateTime.class : Object.class;
             assertEquals(expected, wire.getValueIn().object(type));
         } finally {
             b.releaseLast();
@@ -166,7 +166,7 @@ public class WireTests {
         ZonedDateTime expected = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
         wire.getValueOut().object(expected);
         // is a hint needed?
-        Class type = wireType == WireType.JSON ? ZonedDateTime.class : Object.class;
+        Class<?>type = wireType == WireType.JSON ? ZonedDateTime.class : Object.class;
         assertEquals(expected, wire.getValueIn().object(type));
 
         b.releaseLast();
@@ -341,13 +341,13 @@ public class WireTests {
 
     static class TestClass extends SelfDescribingMarshallable {
 
-        Class o;
+        Class<?>o;
 
-        TestClass(Class o) {
+        TestClass(Class<?>o) {
             this.o = o;
         }
 
-        Class clazz() {
+        Class<?>clazz() {
             return o;
         }
     }

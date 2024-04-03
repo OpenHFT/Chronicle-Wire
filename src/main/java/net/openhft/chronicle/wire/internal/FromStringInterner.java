@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.wire.internal;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
@@ -42,10 +43,11 @@ public abstract class FromStringInterner<T> {
     protected final int shift;
     protected boolean toggle = false;
 
+    @SuppressWarnings("rawtypes")
     protected FromStringInterner(int capacity) throws IllegalArgumentException {
         int n = Maths.nextPower2(capacity, 128);
         shift = Maths.intLog2(n);
-        entries = new InternerEntry[n];
+        entries = Jvm.uncheckedCast(new InternerEntry[n]);
         mask = n - 1;
     }
 

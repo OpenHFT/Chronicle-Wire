@@ -193,7 +193,7 @@ public class GenerateJsonSchemaMain {
     private void addTypeForFieldOrParam(StringBuilder desc, Class<?> pType, Annotation[] annotations) {
         LongConversion lc = find(annotations, LongConversion.class);
         if (lc != null) {
-            Class value = lc.value();
+            Class<?> value = lc.value();
             if (value.getName().contains("Timestamp"))
                 desc.append("\"type\": \"string\",\n" +
                         "\"format\": \"date-time\"");
@@ -214,7 +214,7 @@ public class GenerateJsonSchemaMain {
     private <T extends Annotation> T find(Annotation[] annotations, Class<T> aClass) {
         for (Annotation annotation : annotations) {
             if (aClass.isAssignableFrom(annotation.annotationType()))
-                return (T) annotation;
+                return Jvm.uncheckedCast(annotation);
         }
         return null;
     }

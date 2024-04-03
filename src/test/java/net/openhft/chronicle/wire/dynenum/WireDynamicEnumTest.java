@@ -280,7 +280,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
         assertSame(WDENums.TWO, WDENums.TWO.deepCopy());
     }
 
-    enum WDENums implements WDEI, DynamicEnum {
+    enum WDENums implements WDEI, DynamicEnum<WDENums> {
         ONE("One", 1),
         TWO("Two", 2);
 
@@ -324,7 +324,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
         int value();
     }
 
-    static class WDENum2 extends SelfDescribingMarshallable implements WDEI, DynamicEnum {
+    static class WDENum2 extends SelfDescribingMarshallable implements WDEI, DynamicEnum<WDENum2> {
         static final WDENum2 ONE = new WDENum2("One", 1);
         static final WDENum2 TWO = new WDENum2("Two", 2);
 

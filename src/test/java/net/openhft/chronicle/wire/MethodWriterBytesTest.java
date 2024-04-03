@@ -26,8 +26,9 @@ import org.junit.Test;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+@SuppressWarnings("rawtypes")
 public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCommon {
-    private ArrayBlockingQueue<Bytes> q = new ArrayBlockingQueue(1);
+    private ArrayBlockingQueue<Bytes> q = new ArrayBlockingQueue<>(1);
 
     interface Print {
         void msg(Bytes message);

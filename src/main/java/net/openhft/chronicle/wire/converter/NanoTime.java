@@ -66,8 +66,6 @@ public @interface NanoTime {
      * An instance of {@link NanoTimestampLongConverter} specifically configured for
      * conversions related to nanosecond resolution timestamps.
      * This converter processes and manipulates data using the nanosecond timestamp format.
-     *
-     * @return the nanosecond timestamp long converter instance.
      */
     LongConverter INSTANCE = new NanoTimestampLongConverter();
 }

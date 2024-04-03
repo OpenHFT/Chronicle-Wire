@@ -29,7 +29,7 @@ class UnsafeFieldInfo extends VanillaFieldInfo {
     private static final long UNSET_OFFSET = Long.MAX_VALUE;
     private transient long offset = UNSET_OFFSET;
 
-    public UnsafeFieldInfo(String name, Class type, BracketType bracketType, @NotNull Field field) {
+    public UnsafeFieldInfo(String name, Class<?>type, BracketType bracketType, @NotNull Field field) {
         super(name, type, bracketType, field);
     }
 

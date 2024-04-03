@@ -26,7 +26,7 @@ import java.lang.reflect.Proxy;
 
 import static junit.framework.TestCase.assertFalse;
 
-interface MyInterface<I extends MyInterface> {
+interface MyInterface<I extends MyInterface<I>> {
     I hello(String hello);
 
     void terminator();
@@ -37,7 +37,7 @@ public class GenericMethodsTest extends WireTestCommon {
     public void chainedText() {
         TextWire wire = new TextWire(Bytes.allocateElasticOnHeap(128))
                 .useTextDocuments();
-        MyInterface top = wire.methodWriter(MyInterface.class);
+        MyInterface<?> top = wire.methodWriter(MyInterface.class);
         assertFalse(Proxy.isProxyClass(top.getClass()));
 
         top.hello("hello world").hello("hello world 2").terminator();

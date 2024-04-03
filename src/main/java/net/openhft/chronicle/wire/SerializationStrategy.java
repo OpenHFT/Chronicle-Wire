@@ -21,10 +21,10 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface SerializationStrategy<T> {
+public interface SerializationStrategy {
 
     @Nullable
-    T readUsing(Class clazz, T using, ValueIn in, BracketType bracketType) throws InvalidMarshallableException;
+    <T> T readUsing(Class<?>clazz, T using, ValueIn in, BracketType bracketType) throws InvalidMarshallableException;
 
     /**
      * Constructs and returns a new instance using the provided {@code type}
@@ -34,14 +34,14 @@ public interface SerializationStrategy<T> {
      * @return a new instance of the provided {@code type} or {@code null}
      */
     @Nullable
-    T newInstanceOrNull(Class<T> type);
+    <T> T newInstanceOrNull(Class<T> type);
 
     /**
      * Returns the {@code type} handled by this serialization strategy.
      *
      * @return the {@code type} handled by this serialization strategy.
      */
-    Class<T> type();
+    Class<?> type();
 
     /**
      * Returns the {@link BracketType} used by this serialization strategy.

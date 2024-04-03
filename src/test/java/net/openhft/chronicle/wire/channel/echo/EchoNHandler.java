@@ -63,7 +63,7 @@ public class EchoNHandler extends AbstractHandler<EchoNHandler> {
     }
 
     @Override
-    public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg channelCfg) {
+    public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg<?>channelCfg) {
         return new EchoChannel(channelCfg);
     }
 }

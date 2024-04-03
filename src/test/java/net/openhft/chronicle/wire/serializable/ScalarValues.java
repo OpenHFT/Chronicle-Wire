@@ -35,6 +35,7 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 
 @SuppressWarnings("rawtypes")
 public class ScalarValues implements Serializable, Validatable {
+    private static final long serialVersionUID = 0L;
     boolean flag;
     byte b;
     short s;
@@ -52,7 +53,7 @@ public class ScalarValues implements Serializable, Validatable {
     Long l2;
     Double d2;
 
-    Class aClass;
+    Class<?>aClass;
     RetentionPolicy policy;
     String text;
     LocalDate date;
@@ -102,6 +103,11 @@ public class ScalarValues implements Serializable, Validatable {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof ScalarValues && Wires.isEquals(this, obj);
+    }
+
+    @Override
+    public int hashCode() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

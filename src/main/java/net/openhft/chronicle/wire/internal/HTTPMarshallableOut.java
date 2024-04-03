@@ -19,6 +19,7 @@
 package net.openhft.chronicle.wire.internal;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.*;
@@ -33,7 +34,7 @@ import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 /**
  * Equivalent to wget --post-data='{data}' http://{host}:{port}/url...
  */
-
+@SuppressWarnings("this-escape")
 public class HTTPMarshallableOut implements MarshallableOut {
     private final URL url;
     private final Wire wire;
@@ -55,7 +56,7 @@ public class HTTPMarshallableOut implements MarshallableOut {
                 try {
                     endWire();
                     try (final OutputStream out = conn.getOutputStream()) {
-                        final Bytes<byte[]> bytes = (Bytes<byte[]>) wire.bytes();
+                        final Bytes<byte[]> bytes = Jvm.uncheckedCast(wire.bytes());
                         final byte[] b = bytes.underlyingObject();
                         assert b != null;
                         out.write(b, 0, (int) bytes.readLimit());

@@ -25,6 +25,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("all")
 public class DocumentContextTest extends WireTestCommon {
     @Test
     public void multiMessageText() {
@@ -60,9 +61,13 @@ public class DocumentContextTest extends WireTestCommon {
         wire.acquireWritingDocument(false).wire().writeEventName("two").int16(2);
         try (DocumentContext dc = wire.acquireWritingDocument(false)) {
             dc.wire().writeEventName("three").int16(3);
-            dc.close();
-            dc.close();
+            close(dc);
+            close(dc);
         }
         return wire.bytes();
+    }
+
+    private static void close(DocumentContext dc) {
+        dc.close();
     }
 }

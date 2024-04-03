@@ -151,6 +151,7 @@ public class PerfRegressionHolder {
             write8Bit(bytes, f);
         }
 
+        @SuppressWarnings("rawtypes")
         protected void write8Bit(BytesOut<?> bytes, BytesStore a) {
             if (a == null) {
                 bytes.writeStopBit(-1);
@@ -203,6 +204,7 @@ public class PerfRegressionHolder {
                 a.writeByte(bytes.readByte());
         }
 
+        @SuppressWarnings("rawtypes")
         @Override
         protected void write8Bit(BytesOut<?> bytes, BytesStore a) {
             final int length = a.length();

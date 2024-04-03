@@ -62,8 +62,6 @@ public @interface Base85 {
     /**
      * An instance of {@link Base85LongConverter} specifically configured for Base85 conversions.
      * This converter uses a character set defined by the {@link Base85LongConverter} to represent Base85 encoded data.
-     *
-     * @return the Base85 long converter instance.
      */
     LongConverter INSTANCE = Base85LongConverter.INSTANCE;
 }

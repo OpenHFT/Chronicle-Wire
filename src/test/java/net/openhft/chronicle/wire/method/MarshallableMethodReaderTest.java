@@ -75,7 +75,7 @@ public class MarshallableMethodReaderTest extends net.openhft.chronicle.wire.Wir
 
     private static void writeDoc(Wire wire, String say) {
         try (DocumentContext dc = wire.writingDocument()) {
-            wire.write(say).text("");
+            dc.wire().write(say).text("");
         }
     }
 

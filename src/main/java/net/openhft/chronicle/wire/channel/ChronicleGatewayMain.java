@@ -65,6 +65,7 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable,
      * @param url the URL for the Gateway
      * @throws InvalidMarshallableException if there's an issue while creating the gateway
      */
+    @SuppressWarnings("this-escape")
     public ChronicleGatewayMain(String url) throws InvalidMarshallableException {
         this(url, new SocketRegistry(), SystemContext.INSTANCE);
         addCloseable(socketRegistry());
@@ -79,6 +80,7 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable,
      * @param systemContext  the SystemContext that defines system-level configuration for the gateway
      * @throws InvalidMarshallableException if there's an issue while creating the gateway
      */
+    @SuppressWarnings("this-escape")
     public ChronicleGatewayMain(String url, SocketRegistry socketRegistry, SystemContext systemContext) throws InvalidMarshallableException {
         super(url, socketRegistry);
         this.systemContext(systemContext);
@@ -175,7 +177,7 @@ public class ChronicleGatewayMain extends ChronicleContext implements Closeable,
         Throwable thrown = null;
         try {
             bindSSC();
-            ChronicleChannelCfg channelCfg = new ChronicleChannelCfg().addHostnamePort(null, url().getPort()).pauserMode(pauserMode).buffered(buffered);
+            ChronicleChannelCfg<?> channelCfg = new ChronicleChannelCfg<>().addHostnamePort(null, url().getPort()).pauserMode(pauserMode).buffered(buffered);
             while (!isClosed()) {
                 final SocketChannel sc = ssc.accept();
                 sc.socket().setTcpNoDelay(true);

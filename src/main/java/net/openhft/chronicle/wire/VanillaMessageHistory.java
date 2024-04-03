@@ -404,13 +404,14 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
      *
      * @return copy of this
      */
+    @SuppressWarnings("unchecked")
     @Override
-    public @NotNull VanillaMessageHistory deepCopy() throws InvalidMarshallableException {
+    public @NotNull <T> T deepCopy() throws InvalidMarshallableException {
         @NotNull VanillaMessageHistory copy = super.deepCopy();
         // remove the extra timing
         copy.timingsArray[this.timings] = 0;
         copy.timings = this.timings;
-        return copy;
+        return (T) copy;
     }
 
     private CharSequence toStringSources() {

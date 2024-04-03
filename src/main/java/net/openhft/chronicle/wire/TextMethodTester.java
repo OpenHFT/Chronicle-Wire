@@ -97,7 +97,7 @@ public class TextMethodTester<T> implements YamlTester {
         this.onInvocationException = DEFAULT_INVOCATION_TARGET_RUNTIME_EXCEPTION_CONSUMER;
     }
 
-    public TextMethodTester<T> addOutputClass(Class outputClass) {
+    public TextMethodTester<T> addOutputClass(Class<?>outputClass) {
         additionalOutputClasses.add(outputClass);
         return this;
     }

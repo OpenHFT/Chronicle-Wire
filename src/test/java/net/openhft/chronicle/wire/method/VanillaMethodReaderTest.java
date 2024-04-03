@@ -578,9 +578,3 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     }
 }
 
-class MockDto extends SelfDescribingMarshallable {
-    @Comment("field1 comment")
-    String field1;
-    @Comment("field2 comment")
-    double field2;
-}

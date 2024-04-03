@@ -47,7 +47,7 @@ public class PerfRegressionTest extends WireTestCommon {
             file = file.getParentFile();
         } while (!file.getName().equals("target"));
 
-        Class[] classes = {
+        Class<?>[] classes = {
 //                BenchBytesMain.class,
                 BenchStringMain.class,
                 BenchArrayStringMain.class,
@@ -63,7 +63,7 @@ public class PerfRegressionTest extends WireTestCommon {
             Process[] processes = new Process[classes.length];
             int prev = -1;
             for (int i = classes.length - 1; i >= 0; i--) {
-                Class aClass = classes[i];
+                Class<?>aClass = classes[i];
                 processes[i] = getProcess(file, aClass);
                 if (prev > -1) {
                     times[prev][r] = getResult(classes[prev], Long.MAX_VALUE, processes[prev]);
@@ -77,7 +77,7 @@ public class PerfRegressionTest extends WireTestCommon {
         }
         double sum = 0;
         for (int i = 0; i < classes.length; i++) {
-            Class aClass = classes[i];
+            Class<?>aClass = classes[i];
             final long[] time = times[i];
             final long time2 = time[time.length / 2];
             sum += time2;
@@ -99,7 +99,7 @@ public class PerfRegressionTest extends WireTestCommon {
     }
 
     @NotNull
-    private Process getProcess(File file, Class aClass) throws IOException {
+    private Process getProcess(File file, Class<?>aClass) throws IOException {
         ProcessBuilder pb = new ProcessBuilder("mvn", "exec:java",
                 "-Dexec.classpathScope=test",
                 "-Dexec.mainClass=" + aClass.getName());
@@ -110,7 +110,7 @@ public class PerfRegressionTest extends WireTestCommon {
         return process;
     }
 
-    private long getResult(Class aClass, long result, Process process) throws IOException, InterruptedException {
+    private long getResult(Class<?>aClass, long result, Process process) throws IOException, InterruptedException {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             for (String line; (line = br.readLine()) != null; ) {
                 if (line.startsWith("result:")) {

@@ -127,7 +127,7 @@ final class SerializableObjectTest extends WireTestCommon {
                 // java.lang
                 true,
                 (byte) 1,
-                (char) '2',
+                '2',
                 (short) 3,
                 4,
                 5L,
@@ -184,14 +184,6 @@ final class SerializableObjectTest extends WireTestCommon {
                 new File("file")
 //                create(() -> new URL("http://chronicle.software/dir/files"))
         ).filter(SerializableObjectTest::isSerializableEqualsByObject);
-    }
-
-    private static Object create(ThrowingSupplier s) {
-        try {
-            return s.get();
-        } catch (Exception e) {
-            throw new AssertionError(e);
-        }
     }
 
     private static Stream<Object> reflectedObjects() {
@@ -310,14 +302,13 @@ final class SerializableObjectTest extends WireTestCommon {
         }
     }
 
+    @SuppressWarnings("all")
     @SafeVarargs
     private static <T> T compose(final T original,
                                  final Consumer<T>... operations) {
-        return Stream.of(operations)
-                .reduce(original, (t, oper) -> {
-                    oper.accept(t);
-                    return t;
-                }, (a, b) -> a);
+        for (Consumer<T> operation : operations)
+            operation.accept(original);
+        return original;
     }
 
     private static Stream<WireType> wires() {
@@ -337,6 +328,7 @@ final class SerializableObjectTest extends WireTestCommon {
         }
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/482")
     @TestFactory
     Stream<DynamicTest> test() {

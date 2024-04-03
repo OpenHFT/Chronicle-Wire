@@ -41,7 +41,7 @@ import java.util.function.Supplier;
 
 import static net.openhft.chronicle.wire.VanillaWireParser.SKIP_READABLE_BYTES;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes","this-escape"})
 public class VanillaMethodReader implements MethodReader {
 
     // beware enabling DEBUG_ENABLED as logMessage will not work unless Wire marshalling used - https://github.com/ChronicleEnterprise/Chronicle-Services/issues/240
@@ -53,7 +53,7 @@ public class VanillaMethodReader implements MethodReader {
     private final WireParser metaWireParser;
     private final WireParser dataWireParser;
     private final MethodReaderInterceptorReturns methodReaderInterceptorReturns;
-    private final Predicate predicate;
+    private final Predicate<MethodReader> predicate;
 
     private MessageHistory messageHistory;
     private boolean closeIn = false;
@@ -98,7 +98,7 @@ public class VanillaMethodReader implements MethodReader {
                                FieldNumberParselet fieldNumberParselet,
                                MethodReaderInterceptorReturns methodReaderInterceptorReturns,
                                Object[] metaDataHandler,
-                               Predicate predicate,
+                               Predicate<MethodReader> predicate,
                                @NotNull Object... objects) {
         this.in = in;
         this.methodReaderInterceptorReturns = methodReaderInterceptorReturns;
@@ -319,7 +319,7 @@ public class VanillaMethodReader implements MethodReader {
 
         // add chained interfaces last.
         for (@NotNull Method m : oClass.getMethods()) {
-            Class returnType = m.getReturnType();
+            Class<?>returnType = m.getReturnType();
             addParsletsFor(wireParser, interfaces, returnType, ignoreDefault, methodNamesHandled, methodsSignaturesHandled, methodFilterOnFirstArg, o, context, nextContext, nextContext);
         }
     }
@@ -347,7 +347,7 @@ public class VanillaMethodReader implements MethodReader {
 
         Jvm.setAccessible(m); // turn of security check to make a little faster
         String name = m.getName();
-        Class parameterType2 = ObjectUtils.implementationToUse(parameterType);
+        Class<?> parameterType2 = ObjectUtils.implementationToUse(parameterType);
         if (parameterType == long.class && o2 != null) {
             try {
                 MethodHandle mh = m.getDeclaringClass().isInstance(o2) ? MethodHandles.lookup().unreflect(m).bindTo(o2) : null;
@@ -380,7 +380,7 @@ public class VanillaMethodReader implements MethodReader {
                     logMessage(s, v);
 
                 //noinspection ConstantConditions
-                argArr[0] = v.object(checkRecycle(argArr[0]), parameterType2);
+                argArr[0] = v.object(checkRecycle(argArr[0]), Jvm.uncheckedCast(parameterType2));
                 if (context[0] == null)
                     updateContext(context, o2);
                 Object invoke = invoke(contextSupplier.get(), m, argArr);
@@ -425,7 +425,7 @@ public class VanillaMethodReader implements MethodReader {
         @NotNull Object[] args = new Object[parameterTypes.length];
         @NotNull BiConsumer<Object[], ValueIn> sequenceReader = (a, v) -> {
             int i = 0;
-            for (@NotNull Class clazz : parameterTypes) {
+            for (@NotNull Class<?>clazz : parameterTypes) {
                 a[i] = v.object(checkRecycle(a[i]), clazz);
                 i++;
             }
@@ -463,7 +463,7 @@ public class VanillaMethodReader implements MethodReader {
         @NotNull BiConsumer<Object[], ValueIn> sequenceReader = (a, v) -> {
             int i = 0;
             boolean ignored = false;
-            for (@NotNull Class clazz : parameterTypes) {
+            for (@NotNull Class<?>clazz : parameterTypes) {
                 if (ignored) {
                     v.skipValue();
                 } else {

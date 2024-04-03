@@ -129,6 +129,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         }
     }
 
+    @SuppressWarnings("this-escape")
     public static class DTO1 extends SelfDescribingMarshallable implements Demarshallable {
 
         int one;
@@ -153,6 +154,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         }
     }
 
+    @SuppressWarnings("this-escape")
     public static class DTO2 extends SelfDescribingMarshallable implements Demarshallable {
         Object three;
         int one;

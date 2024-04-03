@@ -45,7 +45,7 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
     @NotNull
     private List<Object> capturedArgs = new ArrayList<>();
 
-    public static boolean isSerializableLambda(@NotNull Class clazz) {
+    public static boolean isSerializableLambda(@NotNull Class<?>clazz) {
         return Serializable.class.isAssignableFrom(clazz) && Jvm.isLambdaClass(clazz);
     }
 

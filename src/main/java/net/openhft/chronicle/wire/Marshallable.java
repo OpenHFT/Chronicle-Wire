@@ -130,10 +130,11 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * @throws IORuntimeException           If an IO error occurs during the read operation.
      * @throws InvalidMarshallableException If there's an error during marshalling.
      */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     default void readMarshallable(@NotNull WireIn wire) throws IORuntimeException, InvalidMarshallableException {
         // Obtain the WireMarshaller for the current class
-        WireMarshaller<Object> wm = WIRE_MARSHALLER_CL.get(this.getClass());
+        WireMarshaller wm = WIRE_MARSHALLER_CL.get(this.getClass());
 
         // Delegate the reading process to the obtained WireMarshaller
         wm.readMarshallable(this, wire, true);
@@ -149,10 +150,11 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * @param wire The wire output destination.
      * @throws InvalidMarshallableException If there's an error during marshalling.
      */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     default void writeMarshallable(@NotNull WireOut wire) throws InvalidMarshallableException {
         // Obtain the WireMarshaller for the current class
-        WireMarshaller<Object> wm = WIRE_MARSHALLER_CL.get(this.getClass());
+        WireMarshaller wm = WIRE_MARSHALLER_CL.get(this.getClass());
 
         // Delegate the writing process to the obtained WireMarshaller
         wm.writeMarshallable(this, wire);

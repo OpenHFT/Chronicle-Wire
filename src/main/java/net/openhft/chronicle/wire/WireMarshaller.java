@@ -147,7 +147,7 @@ public class WireMarshaller<T> {
                 Map.class.isAssignableFrom(c);
     }
 
-    public static void getAllField(@NotNull Class clazz, @NotNull Map<String, Field> map) {
+    public static void getAllField(@NotNull Class<?> clazz, @NotNull Map<String, Field> map) {
         if (clazz != Object.class && clazz != AbstractCommonMarshallable.class)
             getAllField(clazz.getSuperclass(), map);
         for (@NotNull Field field : clazz.getDeclaredFields()) {
@@ -200,7 +200,7 @@ public class WireMarshaller<T> {
         return Integer.compare(cs0.length(), cs1.length());
     }
 
-    private static Type[] computeActualTypeArguments(Class iface, Field field) {
+    private static Type[] computeActualTypeArguments(Class<?> iface, Field field) {
         Type[] actual = consumeActualTypeArguments(new HashMap<>(), iface, field.getGenericType());
 
         if (actual == null)
@@ -209,8 +209,8 @@ public class WireMarshaller<T> {
         return actual;
     }
 
-    private static Type[] consumeActualTypeArguments(Map<String, Type> prevTypeParameters, Class iface, Type type) {
-        Class cls = null;
+    private static Type[] consumeActualTypeArguments(Map<String, Type> prevTypeParameters, Class<?> iface, Type type) {
+        Class<?> cls = null;
         Map<String, Type> typeParameters = new HashMap<>();
         if (type instanceof ParameterizedType) {
             ParameterizedType pType = (ParameterizedType) type;
@@ -539,7 +539,7 @@ public class WireMarshaller<T> {
          * @param clazz The class which presumably has a LongConverter.
          * @return The LongConverter instance.
          */
-        static LongConverter getInstance(Class clazz) {
+        static LongConverter getInstance(Class<?> clazz) {
             try {
                 Field converterField = clazz.getDeclaredField("INSTANCE");
                 return (LongConverter) converterField.get(null);
@@ -741,7 +741,7 @@ public class WireMarshaller<T> {
                     return new ArrayFieldAccess(field);
                 }
                 if (EnumSet.class.isAssignableFrom(type)) {
-                    final Class componentType = extractClass(computeActualTypeArguments(EnumSet.class, field)[0]);
+                    final Class<?> componentType = extractClass(computeActualTypeArguments(EnumSet.class, field)[0]);
                     if (componentType == Object.class || Modifier.isAbstract(componentType.getModifiers()))
                         throw new RuntimeException("Could not get enum constant directory");
 
@@ -837,7 +837,7 @@ public class WireMarshaller<T> {
         }
 
         @NotNull
-        static Class extractClass(Type type0) {
+        static Class<?> extractClass(Type type0) {
             if (type0 instanceof Class)
                 return (Class) type0;
             else if (type0 instanceof ParameterizedType)
@@ -1337,7 +1337,7 @@ public class WireMarshaller<T> {
     }
 
     static class ArrayFieldAccess extends FieldAccess {
-        private final Class componentType;
+        private final Class<?> componentType;
         private final Class objectType;
 
         ArrayFieldAccess(@NotNull Field field) {
@@ -1472,7 +1472,7 @@ public class WireMarshaller<T> {
         private final Supplier<EnumSet> enumSetSupplier;
         private final BiConsumer<EnumSet, ValueIn> addAll;
 
-        EnumSetFieldAccess(@NotNull final Field field, final Boolean isLeaf, final Object[] values, final Class componentType) {
+        EnumSetFieldAccess(@NotNull final Field field, final Boolean isLeaf, final Object[] values, final Class<?> componentType) {
             super(field, isLeaf);
             this.values = values;
             this.componentType = componentType;
@@ -1575,10 +1575,10 @@ public class WireMarshaller<T> {
         @NotNull
         final Supplier<Collection> collectionSupplier;
         private final Class componentType;
-        private final Class<?> type;
+        private final Class type;
         private final BiConsumer<Object, ValueOut> sequenceGetter;
 
-        public CollectionFieldAccess(@NotNull Field field, Boolean isLeaf, @Nullable Supplier<Collection> collectionSupplier, Class componentType, Class<?> type) {
+        public CollectionFieldAccess(@NotNull Field field, Boolean isLeaf, @Nullable Supplier<Collection> collectionSupplier, Class componentType, Class type) {
             super(field, isLeaf);
             this.collectionSupplier = collectionSupplier == null ? newInstance() : collectionSupplier;
             this.componentType = componentType;
@@ -1613,7 +1613,7 @@ public class WireMarshaller<T> {
         @NotNull
         static FieldAccess of(@NotNull Field field) {
             @Nullable final Supplier<Collection> collectionSupplier;
-            @NotNull final Class componentType;
+            @NotNull final Class<?> componentType;
             final Class<?> type;
             @Nullable Boolean isLeaf = null;
             type = field.getType();
@@ -1805,9 +1805,9 @@ public class WireMarshaller<T> {
         final Supplier<Map> collectionSupplier;
         private final Class<?> type;
         @NotNull
-        private final Class keyType;
+        private final Class<?> keyType;
         @NotNull
-        private final Class valueType;
+        private final Class<?> valueType;
 
         MapFieldAccess(@NotNull Field field) {
             super(field);

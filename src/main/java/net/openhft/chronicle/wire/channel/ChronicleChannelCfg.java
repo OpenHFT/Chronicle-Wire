@@ -34,6 +34,7 @@ import java.util.Set;
  *
  * @param <C> the type of the implementing class that is derived from ChronicleChannelCfg
  */
+@SuppressWarnings("unchecked")
 public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfDescribingMarshallable {
     static {
         Handler.init();

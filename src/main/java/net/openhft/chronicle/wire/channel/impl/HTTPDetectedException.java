@@ -19,6 +19,7 @@
 package net.openhft.chronicle.wire.channel.impl;
 
 public class HTTPDetectedException extends InvalidProtocolException {
+    private static final long serialVersionUID = 0L;
     public HTTPDetectedException(String message) {
         super(message);
     }
