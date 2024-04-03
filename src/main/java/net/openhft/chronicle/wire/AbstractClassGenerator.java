@@ -234,9 +234,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
         if (code.length() > maxCode())
             code = code.substring(1, maxCode());
         char ch = 'A';
-        ch += (h >>> 1) % 26;
-
-        // Construct the final class name.
+        ch += (char) ((h >>> 1) % 26);
         return metaData.baseClassName() + '$' + ch + code;
     }
 
