@@ -319,7 +319,7 @@ public class VanillaMethodReader implements MethodReader {
 
         // add chained interfaces last.
         for (@NotNull Method m : oClass.getMethods()) {
-            Class<?>returnType = m.getReturnType();
+            Class<?> returnType = m.getReturnType();
             addParsletsFor(wireParser, interfaces, returnType, ignoreDefault, methodNamesHandled, methodsSignaturesHandled, methodFilterOnFirstArg, o, context, nextContext, nextContext);
         }
     }
@@ -425,7 +425,7 @@ public class VanillaMethodReader implements MethodReader {
         @NotNull Object[] args = new Object[parameterTypes.length];
         @NotNull BiConsumer<Object[], ValueIn> sequenceReader = (a, v) -> {
             int i = 0;
-            for (@NotNull Class<?>clazz : parameterTypes) {
+            for (@NotNull Class<?> clazz : parameterTypes) {
                 a[i] = v.object(checkRecycle(a[i]), clazz);
                 i++;
             }
@@ -463,7 +463,7 @@ public class VanillaMethodReader implements MethodReader {
         @NotNull BiConsumer<Object[], ValueIn> sequenceReader = (a, v) -> {
             int i = 0;
             boolean ignored = false;
-            for (@NotNull Class<?>clazz : parameterTypes) {
+            for (@NotNull Class<?> clazz : parameterTypes) {
                 if (ignored) {
                     v.skipValue();
                 } else {

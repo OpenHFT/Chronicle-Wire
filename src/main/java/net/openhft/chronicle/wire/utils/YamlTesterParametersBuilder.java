@@ -203,7 +203,7 @@ public class YamlTesterParametersBuilder<T> {
         additionalOutputClasses.forEach(((TextMethodTester<?>) yta)::addOutputClass);
     }
 
-    public YamlTesterParametersBuilder<T> addOutputClass(Class<?>outputClass) {
+    public YamlTesterParametersBuilder<T> addOutputClass(Class<?> outputClass) {
         additionalOutputClasses.add(outputClass);
         return this;
     }

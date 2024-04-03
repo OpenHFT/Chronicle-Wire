@@ -230,7 +230,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.TEXT,
                 () -> newTextMethodWriterInvocationHandler(tClass));
-        for (Class<?>aClass : additional)
+        for (Class<?> aClass : additional)
             builder.addInterface(aClass);
         useTextDocuments();
         builder.marshallableOut(this);
@@ -494,7 +494,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         return toExpected(expectedClass, sb);
     }
 
-    protected Class<?>defaultKeyClass() {
+    protected Class<?> defaultKeyClass() {
         return Object.class;
     }
 
@@ -861,7 +861,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     @NotNull
-    List readList(int indentation, Class<?>elementType) throws InvalidMarshallableException {
+    List readList(int indentation, Class<?> elementType) throws InvalidMarshallableException {
         @NotNull List<Object> objects = new ArrayList<>();
         while (peekCode() == '-') {
             if (indentation() < indentation)
@@ -885,7 +885,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     @NotNull
-    private Map readMap(int indentation, Class<?>valueType) throws InvalidMarshallableException {
+    private Map readMap(int indentation, Class<?> valueType) throws InvalidMarshallableException {
         @NotNull Map map = new LinkedHashMap<>();
         consumePadding();
         while (bytes.readRemaining() > 0) {
@@ -1655,7 +1655,7 @@ public class TextWire extends YamlWireOut<TextWire> {
 
             char code = (char) peekCode();
             if (code == '!') {
-                @Nullable final Class<?>typePrefix = typePrefix();
+                @Nullable final Class<?> typePrefix = typePrefix();
                 if (typePrefix == void.class) {
                     text();
                     return false;
@@ -1694,7 +1694,7 @@ public class TextWire extends YamlWireOut<TextWire> {
 
             char code = (char) peekCode();
             if (code == '!') {
-                @Nullable final Class<?>typePrefix = typePrefix();
+                @Nullable final Class<?> typePrefix = typePrefix();
                 if (typePrefix == void.class) {
                     text();
                     return false;
@@ -1838,7 +1838,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         @Override
-        public Class<?>typePrefix() {
+        public Class<?> typePrefix() {
             consumePadding();
             int code = peekCode();
             if (code == '!' || code == '@') {
@@ -1863,7 +1863,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         @Override
-        public Object typePrefixOrObject(Class<?>tClass) {
+        public Object typePrefixOrObject(Class<?> tClass) {
             consumePadding();
             int code = peekCode();
             if (code == '!') {
@@ -1887,7 +1887,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         @Nullable
-        private Object handleCNFE(Class<?>tClass, ClassNotFoundRuntimeException e, StringBuilder stringBuilder) {
+        private Object handleCNFE(Class<?> tClass, ClassNotFoundRuntimeException e, StringBuilder stringBuilder) {
             if (tClass == null) {
                 if (GENERATE_TUPLES) {
                     return Wires.tupleFor(null, stringBuilder.toString());
@@ -2043,7 +2043,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         @NotNull
-        public Demarshallable demarshallable(@NotNull Class<?>clazz) {
+        public Demarshallable demarshallable(@NotNull Class<?> clazz) {
             pushState();
             consumePadding();
             int code = peekCode();
@@ -2276,7 +2276,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         @Override
-        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class<?>type) throws InvalidMarshallableException {
+        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class<?> type) throws InvalidMarshallableException {
             consumePadding();
             @Nullable Object o = objectWithInferredType0(using, strategy, type);
             consumePadding();
@@ -2299,7 +2299,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         @Nullable
-        Object objectWithInferredType0(Object using, @NotNull SerializationStrategy strategy, Class<?>type) throws InvalidMarshallableException {
+        Object objectWithInferredType0(Object using, @NotNull SerializationStrategy strategy, Class<?> type) throws InvalidMarshallableException {
             int code = peekCode();
             switch (code) {
                 case '?':
@@ -2394,7 +2394,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         @NotNull
-        private Object readSequence(@NotNull Class<?>clazz) {
+        private Object readSequence(@NotNull Class<?> clazz) {
             if (clazz == Object[].class || clazz == Object.class) {
                 //todo should this use reflection so that all array types can be handled
                 @NotNull List<Object> list = new ArrayList<>();

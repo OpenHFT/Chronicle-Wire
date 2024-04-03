@@ -53,7 +53,7 @@ public class ScalarValues implements Serializable, Validatable {
     Long l2;
     Double d2;
 
-    Class<?>aClass;
+    Class<?> aClass;
     RetentionPolicy policy;
     String text;
     LocalDate date;

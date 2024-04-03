@@ -58,7 +58,7 @@ import static org.junit.Assert.assertEquals;
 public class ChronicleBitSetTest extends WireTestCommon {
 
     private final Random generator = new Random();
-    private final Class<?>clazz;
+    private final Class<?> clazz;
     @SuppressWarnings("rawtypes")
     private final List closeables = new ArrayList<>();
     private final ChronicleBitSet emptyBS0;
@@ -73,7 +73,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     }
 
     @SuppressWarnings("this-escape")
-    public ChronicleBitSetTest(Class<?>clazz) {
+    public ChronicleBitSetTest(Class<?> clazz) {
         assumeTrue(Jvm.is64bit());
         this.clazz = clazz;
         emptyBS0 = createBitSet();

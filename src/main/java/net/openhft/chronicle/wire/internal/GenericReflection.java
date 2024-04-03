@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 public enum GenericReflection {
     ;
 
-    public static Type getReturnType(Method m, Class<?>forClass) {
+    public static Type getReturnType(Method m, Class<?> forClass) {
         final Type genericReturnType = m.getGenericReturnType();
         if (genericReturnType instanceof Class)
             return genericReturnType;

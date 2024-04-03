@@ -54,7 +54,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
                 Consumer.class,
                 Supplier.class,
                 BiConsumer.class);
-        Class<?>aClass = gmd.acquireClass(GenerateMethodDelegateTest.class.getClassLoader());
+        Class<?> aClass = gmd.acquireClass(GenerateMethodDelegateTest.class.getClassLoader());
         MethodDelegate md = (MethodDelegate) aClass.getDeclaredConstructor().newInstance();
         StringWriter sw = new StringWriter();
         md.delegate(Mocker.logging(RCSB.class, "", sw));
@@ -87,7 +87,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
                 .baseClassName("GMDTC");
         gmd.metaData().interfaces().add(Chained1.class);
         StringWriter sw = new StringWriter();
-        Class<?>aClass = gmd.acquireClass(GenerateMethodDelegateTest.class.getClassLoader());
+        Class<?> aClass = gmd.acquireClass(GenerateMethodDelegateTest.class.getClassLoader());
         MethodDelegate md = (MethodDelegate) aClass.getDeclaredConstructor().newInstance();
         md.delegate(Mocker.logging(Chained.class, "", sw));
         Chained1 c1 = (Chained1) md;

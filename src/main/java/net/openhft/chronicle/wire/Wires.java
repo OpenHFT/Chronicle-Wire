@@ -469,15 +469,15 @@ public enum Wires {
     }
 
     @NotNull
-    public static List<FieldInfo> fieldInfos(@NotNull Class<?>aClass) {
+    public static List<FieldInfo> fieldInfos(@NotNull Class<?> aClass) {
         return FIELD_INFOS.get(aClass).list;
     }
 
-    public static @NotNull Map<String, FieldInfo> fieldInfoMap(@NotNull Class<?>aClass) {
+    public static @NotNull Map<String, FieldInfo> fieldInfoMap(@NotNull Class<?> aClass) {
         return FIELD_INFOS.get(aClass).map;
     }
 
-    public static FieldInfo fieldInfo(@NotNull Class<?>aClass, String name) {
+    public static FieldInfo fieldInfo(@NotNull Class<?> aClass, String name) {
         return FIELD_INFOS.get(aClass).map.get(name);
     }
 
@@ -598,8 +598,8 @@ public enum Wires {
     }
 
     @Nullable
-    static <E> E object2(ValueIn in, @Nullable E using, @Nullable Class<? extends E> clazz, boolean bestEffort, Class<?>o) {
-        @Nullable final Class<?>clazz2 = o;
+    static <E> E object2(ValueIn in, @Nullable E using, @Nullable Class<? extends E> clazz, boolean bestEffort, Class<?> o) {
+        @Nullable final Class<?> clazz2 = o;
         if (clazz2 == void.class) {
             in.text();
             return null;
@@ -628,7 +628,7 @@ public enum Wires {
         }
         if (clazz == null)
             clazz = (Class<E>) Object.class;
-        Class<?>classForStrategy = clazz.isInterface() && using != null ? using.getClass() : clazz;
+        Class<?> classForStrategy = clazz.isInterface() && using != null ? using.getClass() : clazz;
         SerializationStrategy strategy = CLASS_STRATEGY.get(classForStrategy);
         BracketType brackets = strategy.bracketType();
         if (brackets == BracketType.UNKNOWN)
@@ -671,7 +671,7 @@ public enum Wires {
         return false;
     }
 
-    static boolean isScalarClass(Class<?>type) {
+    static boolean isScalarClass(Class<?> type) {
         if (Comparable.class.isAssignableFrom(type)) {
             final SerializationStrategy strategy = Wires.CLASS_STRATEGY.get(type);
             return strategy != ANY_OBJECT && strategy != ANY_NESTED;
@@ -679,7 +679,7 @@ public enum Wires {
         return false;
     }
 
-    public static boolean dtoInterface(Class<?>clazz) {
+    public static boolean dtoInterface(Class<?> clazz) {
         return clazz != null
                 && clazz.isInterface()
                 && clazz != Bytes.class
@@ -747,7 +747,7 @@ public enum Wires {
         return wire;
     }
 
-    static synchronized Class<?>loadFromJava(ClassLoader classLoader, String className, String code) throws ClassNotFoundException {
+    static synchronized Class<?> loadFromJava(ClassLoader classLoader, String className, String code) throws ClassNotFoundException {
         if (CACHED_COMPILER == null) {
             final String target = OS.getTarget();
             File sourceDir = null;
@@ -779,7 +779,7 @@ public enum Wires {
         INSTANCE;
 
         @Nullable
-        static SerializationStrategy getSerializationStrategy(@NotNull Class<?>aClass) {
+        static SerializationStrategy getSerializationStrategy(@NotNull Class<?> aClass) {
             if (DynamicEnum.class.isAssignableFrom(aClass))
                 return DYNAMIC_ENUM;
             if (Enum.class.isAssignableFrom(aClass))
@@ -882,7 +882,7 @@ public enum Wires {
 
         }
 
-        private static Class<?>forName(Class<?>o, ValueIn in) {
+        private static Class<?> forName(Class<?> o, ValueIn in) {
             final StringBuilder sb0 = sb.get();
             sb0.setLength(0);
             in.text(sb0);
@@ -1006,7 +1006,7 @@ public enum Wires {
                     if (aClass.isPrimitive())
                         return ANY_SCALAR;
                     if (aClass.isArray()) {
-                        final Class<?>componentType = aClass.getComponentType();
+                        final Class<?> componentType = aClass.getComponentType();
                         if (componentType.isPrimitive())
                             return PRIM_ARRAY;
                         return ARRAY;
@@ -1024,7 +1024,7 @@ public enum Wires {
         INSTANCE;
 
         @Nullable
-        static SerializationStrategy getSerializationStrategy(@NotNull Class<?>aClass) {
+        static SerializationStrategy getSerializationStrategy(@NotNull Class<?> aClass) {
             if (Demarshallable.class.isAssignableFrom(aClass))
                 return DEMARSHALLABLE;
             if (ReadMarshallable.class.isAssignableFrom(aClass)
@@ -1188,7 +1188,7 @@ public enum Wires {
                     return Boolean.TRUE;
             }
             if (args == null || args.length == 0) {
-                Class<?>returnType = method.getReturnType();
+                Class<?> returnType = method.getReturnType();
                 if (fields.containsKey(name))
                     return ObjectUtils.convertTo(returnType, fields.get(name));
                 return ObjectUtils.defaultValue(returnType);
@@ -1220,7 +1220,7 @@ public enum Wires {
     }
 
     static class TupleFieldInfo extends AbstractFieldInfo {
-        public TupleFieldInfo(String name, Class<?>type) {
+        public TupleFieldInfo(String name, Class<?> type) {
             super(type, bracketType(SerializeMarshallables.INSTANCE.apply(type)), name);
         }
 

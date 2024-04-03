@@ -169,7 +169,7 @@ public class GenerateMethodWriter {
         return contextHolder;
     }
 
-    private static CharSequence toString(Class<?>type) {
+    private static CharSequence toString(Class<?> type) {
         if (boolean.class.equals(type)) {
             return "bool";
         } else if (byte.class.equals(type)) {
@@ -195,12 +195,12 @@ public class GenerateMethodWriter {
     }
 
     @NotNull
-    private static String nameForClass(Class<?>type) {
+    private static String nameForClass(Class<?> type) {
         return type.getName().replace('$', '.');
     }
 
     @NotNull
-    private static String nameForClass(Set<String> importSet, Class<?>type) {
+    private static String nameForClass(Set<String> importSet, Class<?> type) {
         if (type.isArray())
             return nameForClass(importSet, type.getComponentType()) + "[]";
         String s = nameForClass(type);
@@ -276,7 +276,7 @@ public class GenerateMethodWriter {
             importSet.add(java.util.ArrayList.class.getName());
             importSet.add(java.util.List.class.getName());
             importSet.add(Supplier.class.getName());
-            for (Class<?>interfaceClazz : interfaces) {
+            for (Class<?> interfaceClazz : interfaces) {
                 importSet.add(nameForClass(interfaceClazz));
 
                 if (!interfaceClazz.isInterface())
@@ -313,7 +313,7 @@ public class GenerateMethodWriter {
             Set<String> handledMethodSignatures = new HashSet<>();
             Set<String> methodIds = new HashSet<>();
 
-            for (Class<?>interfaceClazz : interfaces) {
+            for (Class<?> interfaceClazz : interfaces) {
 
                 String interfaceName = nameForClass(importSet, interfaceClazz);
                 imports.append(interfaceName);
@@ -372,14 +372,14 @@ public class GenerateMethodWriter {
 
     }
 
-    private Class<?> returnType(Method dm, Class<?>interfaceClazz) {
+    private Class<?> returnType(Method dm, Class<?> interfaceClazz) {
         Type returnType = GenericReflection.getReturnType(dm, interfaceClazz);
         if (!(returnType instanceof Class))
             returnType = (Type) ((TypeVariable<?>) returnType).getGenericDeclaration();
         return erase(returnType);
     }
 
-    private String templateFor(Method dm, Class<?>interfaceType) {
+    private String templateFor(Method dm, Class<?> interfaceType) {
         Map<List<Class<?>>, String> map = TEMPLATE_METHODS.get(dm.getName());
         if (map == null)
             return null;
@@ -582,7 +582,7 @@ public class GenerateMethodWriter {
             body.append("}, Object[].class);\n");
     }
 
-    private void writeValue(final Method dm, Class<?>type, final StringBuilder body, final int startJ, final Parameter p) {
+    private void writeValue(final Method dm, Class<?> type, final StringBuilder body, final int startJ, final Parameter p) {
         final String name = p.getName();
         String className = type.getTypeName().replace('$', '.');
 

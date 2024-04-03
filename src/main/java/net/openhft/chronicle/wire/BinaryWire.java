@@ -1009,7 +1009,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
     }
 
-    private boolean usesSelfDescribing(Class<?>aClass) {
+    private boolean usesSelfDescribing(Class<?> aClass) {
         Boolean selfDesc = overrideSelfDescribing == null ? USES_SELF_DESCRIBING.get(aClass) : overrideSelfDescribing;
         return Boolean.TRUE.equals(selfDesc);
     }
@@ -1906,7 +1906,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@Nullable Class<?>type) {
+        public WireOut typeLiteral(@Nullable Class<?> type) {
             if (bytes.retainedHexDumpDescription() && type != null)
                 bytes.writeHexDumpDescription(type.getName());
             if (type == null)
@@ -1918,7 +1918,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class<?>type) {
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class<?> type) {
             if (bytes.retainedHexDumpDescription())
                 bytes.writeHexDumpDescription(type == null ? null : type.getName());
             writeCode(TYPE_LITERAL);
@@ -3532,7 +3532,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public Class<?>typePrefix() {
+        public Class<?> typePrefix() {
             int code = peekCode();
             if (code != TYPE_PREFIX) {
                 return null;
@@ -3549,7 +3549,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public Object typePrefixOrObject(Class<?>tClass) {
+        public Object typePrefixOrObject(Class<?> tClass) {
             int code = peekCode();
             if (code != TYPE_PREFIX) {
                 return null;
@@ -3922,7 +3922,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class<?>type) throws InvalidMarshallableException {
+        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class<?> type) throws InvalidMarshallableException {
             int code = peekCode();
             if ((code & 0x80) == 0) {
                 bytes.uncheckedReadSkipOne();
@@ -4000,7 +4000,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                         case TYPE_PREFIX: {
                             readCode();
                             @Nullable StringBuilder sb = readUtf8();
-                            final Class<?>clazz2 = classLookup().forName(sb);
+                            final Class<?> clazz2 = classLookup().forName(sb);
                             return object(null, clazz2);
                         }
                         case EVENT_OBJECT: {

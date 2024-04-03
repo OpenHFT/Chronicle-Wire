@@ -2038,7 +2038,7 @@ public class TextWireTest extends WireTestCommon {
     }
 
     static class DTO extends SelfDescribingMarshallable {
-        Class<?>type;
+        Class<?> type;
     }
 
     static class MapHolder extends SelfDescribingMarshallable {

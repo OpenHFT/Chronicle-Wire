@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 public interface SerializationStrategy {
 
     @Nullable
-    <T> T readUsing(Class<?>clazz, T using, ValueIn in, BracketType bracketType) throws InvalidMarshallableException;
+    <T> T readUsing(Class<?> clazz, T using, ValueIn in, BracketType bracketType) throws InvalidMarshallableException;
 
     /**
      * Constructs and returns a new instance using the provided {@code type}

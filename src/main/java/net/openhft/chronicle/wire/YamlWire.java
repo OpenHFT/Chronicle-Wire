@@ -268,7 +268,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.YAML,
                 () -> newTextMethodWriterInvocationHandler(tClass));
-        for (Class<?>aClass : additional)
+        for (Class<?> aClass : additional)
             builder.addInterface(aClass);
         useTextDocuments();
         builder.marshallableOut(this);
@@ -788,7 +788,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     @NotNull
-    private Map readMap(Class<?>valueType) {
+    private Map readMap(Class<?> valueType) {
         Map map = new LinkedHashMap();
         if (yt.current() == YamlToken.MAPPING_START) {
             while (yt.next() == YamlToken.MAPPING_KEY) {
@@ -1541,7 +1541,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         @Override
-        public Class<?>typePrefix() {
+        public Class<?> typePrefix() {
             if (yt.current() != YamlToken.TAG)
                 return null;
             final StringBuilder stringBuilder = acquireStringBuilder();
@@ -1561,7 +1561,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         @Override
-        public Object typePrefixOrObject(Class<?>tClass) {
+        public Object typePrefixOrObject(Class<?> tClass) {
             consumePadding();
             switch (yt.current()) {
                 case TAG: {
@@ -1657,7 +1657,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             }
             switch (yt.current()) {
                 case TAG:
-                    Class<?>clazz = typePrefix();
+                    Class<?> clazz = typePrefix();
                     if (clazz != object.getClass())
                         object = ObjectUtils.newInstance(clazz);
                     return marshallable(object, strategy);
@@ -1691,7 +1691,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         @NotNull
-        public Demarshallable demarshallable(@NotNull Class<?>clazz) {
+        public Demarshallable demarshallable(@NotNull Class<?> clazz) {
             consumePadding();
             switch (yt.current()) {
                 case TAG:
@@ -1901,7 +1901,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         @Override
-        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class<?>type) throws InvalidMarshallableException {
+        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class<?> type) throws InvalidMarshallableException {
             consumePadding();
             if (yt.current() == YamlToken.SEQUENCE_ENTRY)
                 yt.next();
@@ -1912,10 +1912,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
         @SuppressWarnings("fallthrough")
         @Nullable
-        Object objectWithInferredType0(Object using, @NotNull SerializationStrategy strategy, Class<?>type) throws InvalidMarshallableException {
+        Object objectWithInferredType0(Object using, @NotNull SerializationStrategy strategy, Class<?> type) throws InvalidMarshallableException {
             boolean bestEffort = type != null;
             if (yt.current() == YamlToken.TAG) {
-                Class<?>aClass = typePrefix();
+                Class<?> aClass = typePrefix();
                 if (type == null || type == Object.class || type.isInterface())
                     type = aClass;
             }
@@ -1989,12 +1989,12 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         @NotNull
-        private Object readSequence(Class<?>clazz) {
+        private Object readSequence(Class<?> clazz) {
             @NotNull Collection coll =
                     clazz == SortedSet.class ? new TreeSet<>() :
                             clazz == Set.class ? new LinkedHashSet<>() :
                                     new ArrayList<>();
-            @Nullable Class<?>componentType = (clazz != null && clazz.isArray() && clazz.getComponentType().isPrimitive())
+            @Nullable Class<?> componentType = (clazz != null && clazz.isArray() && clazz.getComponentType().isPrimitive())
                     ? clazz.getComponentType() : null;
 
             readCollection(componentType, coll);
@@ -2011,7 +2011,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             return coll;
         }
 
-        private void readCollection(@Nullable Class<?>clazz, @NotNull Collection list) {
+        private void readCollection(@Nullable Class<?> clazz, @NotNull Collection list) {
             sequence(list, (l, v) -> {
                 while (v.hasNextSequenceItem()) {
                     l.add(v.object(clazz));
@@ -2019,7 +2019,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             });
         }
 
-        private Object decodeBinary(Class<?>type) throws InvalidMarshallableException {
+        private Object decodeBinary(Class<?> type) throws InvalidMarshallableException {
             Object o = objectWithInferredType(null, SerializationStrategies.ANY_SCALAR, String.class);
             byte[] decoded = Base64.getDecoder().decode(o == null ? "" : o.toString().replaceAll("\\s", ""));
 

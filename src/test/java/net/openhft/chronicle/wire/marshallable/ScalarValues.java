@@ -47,7 +47,7 @@ public class ScalarValues extends SelfDescribingMarshallable {
     Long l2;
     Double d2;
 
-    Class<?>aClass;
+    Class<?> aClass;
     RetentionPolicy policy;
     String text;
     LocalDate date;

@@ -69,7 +69,7 @@ class ScalarStrategy<E> implements SerializationStrategy {
     @SuppressWarnings("unchecked")
     @Nullable
     @Override
-    public <T> T readUsing(Class<?>clazz, T using, @NotNull ValueIn in, BracketType bracketType) {
+    public <T> T readUsing(Class<?> clazz, T using, @NotNull ValueIn in, BracketType bracketType) {
         if (in.isNull())
             return null;
 

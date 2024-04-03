@@ -27,7 +27,7 @@ import java.lang.reflect.Field;
 
 public final class DoubleFieldInfo extends UnsafeFieldInfo {
 
-    public DoubleFieldInfo(String name, Class<?>type, BracketType bracketType, @NotNull Field field) {
+    public DoubleFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         super(name, type, bracketType, field);
     }
 

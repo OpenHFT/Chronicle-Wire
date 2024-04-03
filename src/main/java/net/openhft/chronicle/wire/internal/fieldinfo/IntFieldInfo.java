@@ -27,7 +27,7 @@ import java.lang.reflect.Field;
 
 public final class IntFieldInfo extends UnsafeFieldInfo {
 
-    public IntFieldInfo(String name, Class<?>type, BracketType bracketType, @NotNull Field field) {
+    public IntFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         super(name, type, bracketType, field);
     }
 

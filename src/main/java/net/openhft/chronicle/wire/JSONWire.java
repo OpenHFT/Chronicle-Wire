@@ -93,7 +93,7 @@ public class JSONWire extends TextWire {
     }
 
     @Override
-    protected Class<?>defaultKeyClass() {
+    protected Class<?> defaultKeyClass() {
         return String.class;
     }
 
@@ -579,7 +579,7 @@ public class JSONWire extends TextWire {
         @SuppressWarnings("rawtypes")
         @NotNull
         @Override
-        public TextWire typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, Class<?>type) {
+        public TextWire typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, Class<?> type) {
             prependSeparator();
             append("{\"@type\":\"");
             typeTranslator.accept(type, bytes);
@@ -734,7 +734,7 @@ public class JSONWire extends TextWire {
         }
 
         @Override
-        public @NotNull JSONValueOut typePrefix(Class<?>type) {
+        public @NotNull JSONValueOut typePrefix(Class<?> type) {
             if (type.isPrimitive() || isWrapper(type) || type.isEnum()) {
                 // Do nothing because there are no other alternatives
                 // and thus, the type is implicitly given in the declaration.
@@ -868,12 +868,12 @@ public class JSONWire extends TextWire {
         }
 
         @Override
-        public Class<?>typePrefix() {
+        public Class<?> typePrefix() {
             return super.typePrefix();
         }
 
         @Override
-        public Object typePrefixOrObject(Class<?>tClass) {
+        public Object typePrefixOrObject(Class<?> tClass) {
             return super.typePrefixOrObject(tClass);
         }
 

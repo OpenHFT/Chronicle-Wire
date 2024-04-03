@@ -939,7 +939,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         @NotNull
         @Override
-        public ValueOut optionalTyped(Class<?>aClass) {
+        public ValueOut optionalTyped(Class<?> aClass) {
             return typePrefix(aClass);
         }
 
@@ -959,7 +959,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         @NotNull
         @Override
-        public T typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, Class<?>type) {
+        public T typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, Class<?> type) {
             if (dropDefault) {
                 if (type == null)
                     return wireOut();
