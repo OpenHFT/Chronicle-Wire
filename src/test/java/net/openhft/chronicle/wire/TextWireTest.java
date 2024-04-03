@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.internal.NoBytesStore;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -49,6 +50,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.util.stream.Collectors.toList;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticDirect;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static net.openhft.chronicle.wire.WireType.TEXT;
@@ -1204,25 +1206,32 @@ public class TextWireTest extends WireTestCommon {
     // Test the string building behavior for ABC objects with Wire.
     @Test
     public void testABCStringBuilder() {
+        String A = "A: \"hi\", # This is an A\n";
+        String B = "B: 'hi', # This is a B\n";
+        String C = "C: hi, # And that's a C\n";
 
         // Create a wire and append values for A, B, and C
         @NotNull Wire wire = createWire();
-        wire.bytes().append(
-                "A: \"hi\",\n" +
-                        "B: 'hi',\n" +
-                        "C: hi,\n");
+        StringBuilder sb = new StringBuilder();
+        wire.commentListener(s -> sb.append(s).append('\n'));
         ABC abc = new ABC();
 
-        // Read from wire and assert its value for 5 iterations
-        for (int i = 0; i < 5; i++) {
-            wire.bytes().readPosition(0);
-            assertEquals("!net.openhft.chronicle.wire.TextWireTest$ABC {\n" +
+        // Read from wire and assert its value for all permutations
+        for (String input : new String[] { A + B + C, B + A + C, C + A + B, A + C + B, B + C + A, C + B + A }) {
+            wire.reset();
+            wire.bytes().append(input);
+            assertEquals(input, "!net.openhft.chronicle.wire.TextWireTest$ABC {\n" +
                     "  A: hi,\n" +
                     "  B: hi,\n" +
                     "  C: hi\n" +
                     "}\n", wire.getValueIn()
                     .object(abc, ABC.class)
                     .toString());
+            assertEquals(sb.toString(),
+                    // legacy behavior: "C" comment is ignored as it's after the last field
+                    Arrays.asList("This is an A", "This is a B"),
+                    Arrays.stream(sb.toString().split("\n")).sorted(Collections.reverseOrder()).collect(toList()));
+            sb.setLength(0);
         }
     }
 

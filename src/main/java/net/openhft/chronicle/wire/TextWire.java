@@ -913,7 +913,9 @@ public class TextWire extends YamlWireOut<TextWire> {
         while (bytes.readRemaining() > 0) {
             long position = bytes.readPosition();
             // at the current position look for the field.
+            valueIn.consumeAny = true;
             readField(stringBuilder);
+            valueIn.consumeAny = false;
             // might have changed due to readField in JSONWire
             curr = valueIn.curr();
 
@@ -956,7 +958,9 @@ public class TextWire extends YamlWireOut<TextWire> {
         // if not a match go back and look at old fields.
         for (int i = 0; i < curr.unexpectedSize(); i++) {
             bytes.readPosition(curr.unexpected(i));
+            valueIn.consumeAny = true;
             readField(sb);
+            valueIn.consumeAny = false;
             if (sb.length() == 0 || StringUtils.equalsCaseIgnore(sb, name)) {
                 // if an old field matches, remove it, save the current position
                 curr.removeUnexpected(i);
