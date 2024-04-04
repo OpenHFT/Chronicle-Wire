@@ -110,7 +110,7 @@ public class MapCustomTest extends WireTestCommon {
         }
     }
 
-    @SuppressWarnings({"rawtypes"})
+    @SuppressWarnings("rawtypes")
     private static class GeneralMap extends IntMap {
         // No-op.
     }

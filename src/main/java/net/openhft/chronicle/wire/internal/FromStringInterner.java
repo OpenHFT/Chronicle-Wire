@@ -36,7 +36,7 @@ import java.nio.BufferUnderflowException;
  *
  * @author peter.lawrey
  */
-@SuppressWarnings({"unchecked"})
+@SuppressWarnings("unchecked")
 public abstract class FromStringInterner<T> {
     protected final InternerEntry<T>[] entries;
     protected final int mask;
