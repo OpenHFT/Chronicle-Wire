@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
@@ -63,7 +64,7 @@ public class Issue341Test extends WireTestCommon {
         final Bytes<?> bytes = new HexDumpBytes();
         final Wire wire = wireType.apply(bytes);
 
-        wire.getValueOut().object((Class) source.getClass(), source);
+        wire.getValueOut().object(Jvm.uncheckedCast(source.getClass()), source);
         System.out.println(wireType + "\n"
                 + (wire.getValueOut().isBinary() ? bytes.toHexString() : bytes.toString()));
 
@@ -81,7 +82,7 @@ public class Issue341Test extends WireTestCommon {
         final Bytes<?> bytes = new HexDumpBytes();
         final Wire wire = wireType.apply(bytes);
 
-        wire.getValueOut().object((Class) source.getClass(), source);
+        wire.getValueOut().object(Jvm.uncheckedCast(source.getClass()), source);
         System.out.println(wireType + "\n"
                 + (wire.getValueOut().isBinary() ? bytes.toHexString() : bytes.toString()));
 
@@ -94,6 +95,7 @@ public class Issue341Test extends WireTestCommon {
     }
 
     static final class MyComparableSerializable implements Serializable, Comparable<MyComparableSerializable> {
+        private static final long serialVersionUID = 0L;
         final String value;
 
         MyComparableSerializable(String value) {

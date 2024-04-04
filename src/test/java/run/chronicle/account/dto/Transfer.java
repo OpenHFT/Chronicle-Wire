@@ -27,7 +27,7 @@ public class Transfer extends AbstractEvent<Transfer> {
     @ShortText
     private int currency;
     private double amount;
-    private Bytes reference = Bytes.allocateElasticOnHeap();
+    private Bytes<byte[]> reference = Bytes.allocateElasticOnHeap();
 
     public long from() {
         return from;
@@ -65,7 +65,7 @@ public class Transfer extends AbstractEvent<Transfer> {
         return this;
     }
 
-    public Transfer reference(Bytes reference) {
+    public Transfer reference(Bytes<?> reference) {
         this.reference.clear().append(reference);
         return this;
     }

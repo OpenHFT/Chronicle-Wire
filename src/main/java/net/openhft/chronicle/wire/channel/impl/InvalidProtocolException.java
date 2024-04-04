@@ -21,6 +21,7 @@ package net.openhft.chronicle.wire.channel.impl;
 import net.openhft.chronicle.core.io.IORuntimeException;
 
 public class InvalidProtocolException extends IORuntimeException {
+    private static final long serialVersionUID = 0L;
     public InvalidProtocolException(String message) {
         super(message);
     }

@@ -27,7 +27,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class MethodWriterStringTest extends net.openhft.chronicle.wire.WireTestCommon {
-    private ArrayBlockingQueue<String> q = new ArrayBlockingQueue(1);
+    private ArrayBlockingQueue<String> q = new ArrayBlockingQueue<>(1);
 
     interface Print {
         void msg(String message);

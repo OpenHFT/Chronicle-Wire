@@ -104,6 +104,7 @@ public class ChronicleContext extends SimpleCloseable {
      * @param url            the URL for this context
      * @param socketRegistry the socket registry for this context
      */
+    @SuppressWarnings("this-escape")
     protected ChronicleContext(String url, SocketRegistry socketRegistry) {
         this.url = url;
         this.socketRegistry = socketRegistry;

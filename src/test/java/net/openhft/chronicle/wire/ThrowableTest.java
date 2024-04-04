@@ -33,7 +33,7 @@ public class ThrowableTest extends WireTestCommon {
             try (DocumentContext dc = wire.writingDocument()) {
                 Throwable message = new Throwable("message");
                 message.initCause(new Throwable("cause"));
-                wire.getValueOut()
+                dc.wire().getValueOut()
                         .object(message);
             }
 /*            if (wireType == WireType.TEXT)
@@ -42,7 +42,7 @@ public class ThrowableTest extends WireTestCommon {
                 System.out.println(wire.bytes().toHexString()+"\n"+Wires.fromSizePrefixedBlobs(wire.bytes()));*/
 
             try (DocumentContext dc = wire.readingDocument()) {
-                Throwable t = (Throwable) wire.getValueIn().object();
+                Throwable t = (Throwable) dc.wire().getValueIn().object();
                 assertEquals("message", t.getMessage());
                 assertTrue(t.getStackTrace()[0].toString().startsWith("net.openhft.chronicle.wire.ThrowableTest.writeReadThrowable(ThrowableTest.java"));
             }

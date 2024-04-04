@@ -24,6 +24,7 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.converter.NanoTime;
 import net.openhft.chronicle.wire.converter.ShortText;
 
+@SuppressWarnings("unchecked")
 public class AbstractEvent<E extends AbstractEvent<E>> extends SelfDescribingMarshallable implements Validatable {
     @ShortText
     private long sender;

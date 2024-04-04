@@ -100,6 +100,7 @@ public final class StreamsUtil {
         }
     }
 
+    @SuppressWarnings("overloads")
     public static final class VanillaSpliteratorOfLong
             extends AbstractPrimitiveSpliterator<Long, LongConsumer, Spliterator.OfLong, PrimitiveIterator.OfLong>
             implements Spliterator.OfLong {
@@ -119,6 +120,7 @@ public final class StreamsUtil {
         }
     }
 
+    @SuppressWarnings("overloads")
     public static final class VanillaSpliteratorOfDouble
             extends AbstractPrimitiveSpliterator<Double, DoubleConsumer, Spliterator.OfDouble, PrimitiveIterator.OfDouble>
             implements Spliterator.OfDouble {

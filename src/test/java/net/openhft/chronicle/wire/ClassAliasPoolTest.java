@@ -87,6 +87,7 @@ public class ClassAliasPoolTest extends WireTestCommon {
         });
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
     public void testUsesClassLookup() {
         final ClassLookup mock = createMock(ClassLookup.class);

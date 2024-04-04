@@ -30,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import static net.openhft.chronicle.core.io.IOTools.deleteDirWithFiles;
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
+@SuppressWarnings("this-escape")
 public class TriviallyCopyableJLBH implements JLBHTask {
 
     enum HouseType {
@@ -99,7 +100,7 @@ public class TriviallyCopyableJLBH implements JLBHTask {
 
     public static class House extends SelfDescribingMarshallable implements BaseHouse {
 
-        final Bytes address = Bytes.allocateDirect(128);
+        final Bytes<Void> address = Bytes.allocateDirect(128);
 
         public BaseHouse address(CharSequence owner) {
             address.clear().append(owner);

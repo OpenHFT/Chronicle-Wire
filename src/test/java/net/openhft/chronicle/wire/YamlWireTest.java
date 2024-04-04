@@ -59,7 +59,7 @@ import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "try"})
 @RunWith(value = Parameterized.class)
 public class YamlWireTest extends WireTestCommon {
     static Wire wire = Wire.newYamlWireOnHeap();

@@ -27,7 +27,7 @@ import java.lang.reflect.Field;
 
 public final class LongFieldInfo extends UnsafeFieldInfo {
 
-    public LongFieldInfo(String name, Class type, BracketType bracketType, @NotNull Field field) {
+    public LongFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         super(name, type, bracketType, field);
     }
 

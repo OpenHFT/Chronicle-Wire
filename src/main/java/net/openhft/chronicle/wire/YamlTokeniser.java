@@ -29,6 +29,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
+@SuppressWarnings("this-escape")
 public class YamlTokeniser {
 
     static final int NO_INDENT = -1;

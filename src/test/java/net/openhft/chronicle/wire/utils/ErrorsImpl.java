@@ -74,6 +74,7 @@ public class ErrorsImpl implements ErrorsIn {
     }
 
     public static class MyAssertionError extends AssertionError {
+        private static final long serialVersionUID = 0L;
         public MyAssertionError(String msg) {
             super(msg);
         }

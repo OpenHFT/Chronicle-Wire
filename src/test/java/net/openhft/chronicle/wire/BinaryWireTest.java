@@ -1364,6 +1364,7 @@ public class BinaryWireTest extends WireTestCommon {
         }
     }
 
+    @SuppressWarnings("try")
     @Test
     public void readsComment() {
         StringBuilder sb = new StringBuilder();

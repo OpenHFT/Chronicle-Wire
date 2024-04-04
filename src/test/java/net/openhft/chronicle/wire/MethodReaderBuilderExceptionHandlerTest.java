@@ -164,7 +164,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
                 Jvm.warn(), _BC.class, true);
     }
 
-    private void doTest(String expected, ExceptionHandler eh, Class type, boolean scanning) {
+    private void doTest(String expected, ExceptionHandler eh, Class<?> type, boolean scanning) {
         @NotNull StringWriter out = new StringWriter();
         Wire wire = WireType.YAML_ONLY.apply(Bytes.from(input));
         MethodReader reader = wire

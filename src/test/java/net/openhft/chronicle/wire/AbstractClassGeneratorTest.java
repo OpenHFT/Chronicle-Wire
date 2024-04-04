@@ -153,8 +153,8 @@ public class AbstractClassGeneratorTest extends WireTestCommon {
                 .baseClassName("ACGTUI")
                 .useUpdateInterceptor(true)
                 .message = message;
-        Class<Consumer> aClass = scg.acquireClass(getClass().getClassLoader());
-        Consumer callable = aClass.getDeclaredConstructor(UpdateInterceptor.class).newInstance(ui);
+        Class<Consumer<MyTypes>> aClass = scg.acquireClass(getClass().getClassLoader());
+        Consumer<MyTypes> callable = aClass.getDeclaredConstructor(UpdateInterceptor.class).newInstance(ui);
         // break point on the next line to be able to debug the generated class.
         MyTypes mt = new MyTypes().text(message);
         callable.accept(mt);

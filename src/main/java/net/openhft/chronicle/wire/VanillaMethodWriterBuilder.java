@@ -34,7 +34,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
 public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBuilder<T> {
     public static final String DISABLE_WRITER_PROXY_CODEGEN = "disableProxyCodegen";
 
@@ -110,13 +110,13 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     }
 
     @NotNull
-    public MethodWriterBuilder<T> addInterface(Class additionalClass) {
+    public MethodWriterBuilder<T> addInterface(Class<?> additionalClass) {
         if (interfaces.contains(additionalClass))
             return this;
         if (additionalClass == DocumentContext.class)
             return this;
 
-        for (Class invalidSuperInterface : invalidSuperInterfaces) {
+        for (Class<?> invalidSuperInterface : invalidSuperInterfaces) {
             if (invalidSuperInterface.isAssignableFrom(additionalClass))
                 throw new IllegalArgumentException("The event interface shouldn't implement " + invalidSuperInterface.getName());
         }
@@ -204,7 +204,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
             try {
                 return (T) newInstance(Class.forName(fullClassName));
             } catch (ClassNotFoundException e) {
-                Class clazz;
+                Class<?> clazz;
                 // only one thread at a time so two threads don't try to generate the same class.
                 synchronized (classCache) {
                     clazz = classCache.computeIfAbsent(fullClassName, this::newClass);
@@ -224,7 +224,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         return null;
     }
 
-    private Class newClass(final String fullClassName) {
+    private Class<?> newClass(final String fullClassName) {
         if (wireType.isText() || !Jvm.getBoolean("wire.generator.v2"))
             return GenerateMethodWriter.newClass(fullClassName,
                     interfaces,
@@ -247,7 +247,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         return gmw.acquireClass(classLoader);
     }
 
-    private Object newInstance(final Class aClass) {
+    private Object newInstance(final Class<?> aClass) {
         try {
             if (outSupplier == null)
                 throw new NullPointerException("marshallableOut(out) has not been set.");

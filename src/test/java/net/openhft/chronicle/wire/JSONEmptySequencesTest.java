@@ -13,7 +13,7 @@ public class JSONEmptySequencesTest extends net.openhft.chronicle.wire.WireTestC
     public void emptySequence() {
         ClassAliasPool.CLASS_ALIASES.addAlias(Foo.class);
 
-        final Bytes data = Bytes.allocateElasticOnHeap();
+        final Bytes<byte[]> data = Bytes.allocateElasticOnHeap();
         data.append("!Foo {\n" +
                 "  field1: 1234,\n" +
                 "  field2: 456,\n" +

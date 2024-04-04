@@ -10,6 +10,7 @@ import static net.openhft.chronicle.wire.WireType.JSON_ONLY;
 import static org.junit.Assert.assertEquals;
 
 public class JSONWireTypesTest extends WireTestCommon {
+    @SuppressWarnings("unchecked")
     @Test
     public void nestedSets() {
         DtoWithNestedSets dto = new DtoWithNestedSets()
@@ -30,7 +31,8 @@ public class JSONWireTypesTest extends WireTestCommon {
         assertEquals(dto, JSON_ONLY.fromString(dtoAsJson));
     }
 
-    private <T> Set<T> of(T... ts) {
+    @SuppressWarnings("rawtypes")
+    private Set of(Object... ts) {
         return new HashSet<>(Arrays.asList(ts));
     }
 

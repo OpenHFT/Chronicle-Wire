@@ -57,7 +57,7 @@ public class PrimitiveTypeWrappersTest extends WireTestCommon {
         @NotNull final Number[] nums = new Number[]{(byte) 1, (short) 2, (float) 3, 4, (long) 5, (double) 6};
 
         for (@NotNull Number num : nums) {
-            for (@NotNull Class type : types) {
+            for (@NotNull Class<?> type : types) {
                 @NotNull final Wire wire = wireFactory();
 
                 wire.write().object(num);

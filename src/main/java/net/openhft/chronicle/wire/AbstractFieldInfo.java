@@ -22,10 +22,10 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 @SuppressWarnings("rawtypes")
 public abstract class AbstractFieldInfo implements FieldInfo {
     protected final String name;
-    protected final Class type;
+    protected final Class<?> type;
     protected final BracketType bracketType;
 
-    protected AbstractFieldInfo(Class type, BracketType bracketType, String name) {
+    protected AbstractFieldInfo(Class<?> type, BracketType bracketType, String name) {
         this.type = type;
         this.bracketType = bracketType;
         this.name = name;

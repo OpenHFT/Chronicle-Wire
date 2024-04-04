@@ -42,6 +42,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
                 .baseClassName("GMDT-");
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
     public void testAcquireClass() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         GenerateMethodDelegate gmd = new GenerateMethodDelegate();
@@ -53,13 +54,13 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
                 Consumer.class,
                 Supplier.class,
                 BiConsumer.class);
-        Class aClass = gmd.acquireClass(GenerateMethodDelegateTest.class.getClassLoader());
+        Class<?> aClass = gmd.acquireClass(GenerateMethodDelegateTest.class.getClassLoader());
         MethodDelegate md = (MethodDelegate) aClass.getDeclaredConstructor().newInstance();
         StringWriter sw = new StringWriter();
         md.delegate(Mocker.logging(RCSB.class, "", sw));
         ((Runnable) md).run();
         ((Consumer) md).accept("consumer");
-        ((Supplier) md).get();
+        ((Supplier<?>) md).get();
         ((BiConsumer) md).accept("bi", "consumer");
         assertEquals("run[]\n" +
                 "accept[consumer]\n" +
@@ -67,6 +68,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
                 "accept[bi, consumer]\n", sw.toString().replace("\r", ""));
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
     public void chainedDelegate() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         GenerateMethodDelegate gmd = new GenerateMethodDelegate() {
@@ -85,7 +87,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
                 .baseClassName("GMDTC");
         gmd.metaData().interfaces().add(Chained1.class);
         StringWriter sw = new StringWriter();
-        Class aClass = gmd.acquireClass(GenerateMethodDelegateTest.class.getClassLoader());
+        Class<?> aClass = gmd.acquireClass(GenerateMethodDelegateTest.class.getClassLoader());
         MethodDelegate md = (MethodDelegate) aClass.getDeclaredConstructor().newInstance();
         md.delegate(Mocker.logging(Chained.class, "", sw));
         Chained1 c1 = (Chained1) md;
@@ -112,6 +114,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
         void say(String text);
     }
 
+    @SuppressWarnings("rawtypes")
     interface RCSB extends Runnable, Consumer, Supplier, BiConsumer {
     }
 }

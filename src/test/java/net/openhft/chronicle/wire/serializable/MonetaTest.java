@@ -31,7 +31,9 @@ import java.util.TreeSet;
 
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("unchecked")
 public class MonetaTest extends net.openhft.chronicle.wire.WireTestCommon {
+
     @Test
     public void monetary() {
         SortedSet<NonScalarComparable> set = new TreeSet<>();
@@ -48,6 +50,7 @@ public class MonetaTest extends net.openhft.chronicle.wire.WireTestCommon {
     }
 
     public static class NonScalarComparable implements Serializable, Comparable<NonScalarComparable> {
+        private static final long serialVersionUID = 0L;
         final Currency currency;
 
         public NonScalarComparable(Currency currency) {

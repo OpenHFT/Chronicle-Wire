@@ -37,7 +37,7 @@ public class YamlTesterParametersBuilder<T> {
     private final ThrowingFunction<T, Object, Throwable> builder;
     private final Class<T> outClass;
     private final List<String> paths;
-    private final Set<Class> additionalOutputClasses = new LinkedHashSet<>();
+    private final Set<Class<?>> additionalOutputClasses = new LinkedHashSet<>();
     private YamlAgitator[] agitators = {};
     private Function<T, ExceptionHandler> exceptionHandlerFunction;
     private boolean exceptionHandlerFunctionAndLog;
@@ -203,7 +203,7 @@ public class YamlTesterParametersBuilder<T> {
         additionalOutputClasses.forEach(((TextMethodTester<?>) yta)::addOutputClass);
     }
 
-    public YamlTesterParametersBuilder<T> addOutputClass(Class outputClass) {
+    public YamlTesterParametersBuilder<T> addOutputClass(Class<?> outputClass) {
         additionalOutputClasses.add(outputClass);
         return this;
     }

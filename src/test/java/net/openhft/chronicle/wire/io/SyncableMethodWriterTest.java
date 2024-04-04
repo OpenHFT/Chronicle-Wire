@@ -58,7 +58,7 @@ public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTes
         doTest(bytes);
     }
 
-    private void doTest(Bytes bytes) {
+    private void doTest(Bytes<?> bytes) {
         Wire wire = new SyncableYamlWire(bytes);
         SayAndSync sas = wire.methodWriter(SayAndSync.class);
         sas.say("hello");

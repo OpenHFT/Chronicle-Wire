@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings("unchecked")
 public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMarshallableCfg implements Event<E> {
     private String eventId = "";
     @LongConversion(ServicesTimestampLongConverter.class)

@@ -63,7 +63,7 @@ import static net.openhft.chronicle.wire.Wires.*;
 /**
  * This Wire is a binary translation of TextWire which is a sub set of YAML.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
 public class BinaryWire extends AbstractWire implements Wire {
 
     static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal();
@@ -1009,7 +1009,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
     }
 
-    private boolean usesSelfDescribing(Class aClass) {
+    private boolean usesSelfDescribing(Class<?> aClass) {
         Boolean selfDesc = overrideSelfDescribing == null ? USES_SELF_DESCRIBING.get(aClass) : overrideSelfDescribing;
         return Boolean.TRUE.equals(selfDesc);
     }
@@ -1906,7 +1906,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@Nullable Class type) {
+        public WireOut typeLiteral(@Nullable Class<?> type) {
             if (bytes.retainedHexDumpDescription() && type != null)
                 bytes.writeHexDumpDescription(type.getName());
             if (type == null)
@@ -1918,7 +1918,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class type) {
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class<?> type) {
             if (bytes.retainedHexDumpDescription())
                 bytes.writeHexDumpDescription(type == null ? null : type.getName());
             writeCode(TYPE_LITERAL);
@@ -3486,10 +3486,10 @@ public class BinaryWire extends AbstractWire implements Wire {
                 return null;
             // its possible that the object that you are allocating may not have a
             // default constructor
-            final Class clazz = classLookup().forName(sb);
+            final Class<T> clazz = (Class<T>) classLookup().forName(sb);
 
             if (Demarshallable.class.isAssignableFrom(clazz)) {
-                return (T) demarshallable(clazz);
+                return (T) demarshallable((Class<? extends Demarshallable>) clazz);
             }
             if (!Marshallable.class.isAssignableFrom(clazz) && !Demarshallable.class.isAssignableFrom(clazz))
                 throw new IllegalStateException("its not possible to Marshallable and object that" +
@@ -3513,7 +3513,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @Override
         @Nullable
-        public <T> T typedMarshallable(@NotNull Function<Class, ReadMarshallable> marshallableFunction)
+        public <T> T typedMarshallable(@NotNull Function<Class<T>, ReadMarshallable> marshallableFunction)
                 throws IORuntimeException, InvalidMarshallableException {
 
             int code = peekCode();
@@ -3521,7 +3521,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 // todo get delta wire to support Function<Class, ReadMarshallable> correctly
                 return typedMarshallable();
 
-            @Nullable final Class aClass = typePrefix();
+            @Nullable final Class<T>aClass = (Class<T>) typePrefix();
 
             if (ReadMarshallable.class.isAssignableFrom(aClass)) {
                 final ReadMarshallable marshallable = marshallableFunction.apply(aClass);
@@ -3532,7 +3532,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public Class typePrefix() {
+        public Class<?> typePrefix() {
             int code = peekCode();
             if (code != TYPE_PREFIX) {
                 return null;
@@ -3549,7 +3549,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public Object typePrefixOrObject(Class tClass) {
+        public Object typePrefixOrObject(Class<?> tClass) {
             int code = peekCode();
             if (code != TYPE_PREFIX) {
                 return null;
@@ -3700,7 +3700,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 long limit2 = bytes.readPosition() + length;
                 bytes.readLimit(limit2);
                 try {
-                    strategy.readUsing(null, object, this, BracketType.MAP);
+                    strategy.readUsing(null, Jvm.uncheckedCast(object), this, BracketType.MAP);
 
                 } finally {
                     bytes.readLimit(limit);
@@ -3732,7 +3732,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Nullable
-        public Demarshallable demarshallable(@NotNull Class clazz) throws BufferUnderflowException, IORuntimeException {
+        public Demarshallable demarshallable(@NotNull Class<? extends Demarshallable> clazz) throws BufferUnderflowException, IORuntimeException {
             if (this.isNull())
                 return null;
 
@@ -3922,7 +3922,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class type) throws InvalidMarshallableException {
+        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class<?> type) throws InvalidMarshallableException {
             int code = peekCode();
             if ((code & 0x80) == 0) {
                 bytes.uncheckedReadSkipOne();
@@ -4000,7 +4000,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                         case TYPE_PREFIX: {
                             readCode();
                             @Nullable StringBuilder sb = readUtf8();
-                            final Class clazz2 = classLookup().forName(sb);
+                            final Class<?> clazz2 = classLookup().forName(sb);
                             return object(null, clazz2);
                         }
                         case EVENT_OBJECT: {

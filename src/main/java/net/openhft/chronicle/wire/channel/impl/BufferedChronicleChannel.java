@@ -36,6 +36,7 @@ import java.util.concurrent.ThreadFactory;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 import static net.openhft.chronicle.wire.channel.impl.TCPChronicleChannel.validateHeader;
 
+@SuppressWarnings("this-escape")
 public class BufferedChronicleChannel extends DelegateChronicleChannel {
     private static final boolean ALLOW_AFFINITY = Jvm.getBoolean("useAffinity", true);
     private final Pauser pauser;

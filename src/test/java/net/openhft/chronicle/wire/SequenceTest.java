@@ -108,13 +108,13 @@ public class SequenceTest extends WireTestCommon {
         Wire w1 = wireType.apply(bytes);
         Set<String> value = new LinkedHashSet<>(Arrays.asList("a", "b", "c"));
         try (DocumentContext dc = w1.writingDocument()) {
-            w1.write("list").object(value);
+            dc.wire().write("list").object(value);
         }
         System.out.println(Wires.fromSizePrefixedBlobs(w1));
         try (DocumentContext dc = w1.readingDocument()) {
-            Object o = w1.read("list").object();
+            Object o = dc.wire().read("list").object();
             if (wireType == WireType.JSON)
-                o = new LinkedHashSet<>((Collection) o);
+                o = new LinkedHashSet<>((Collection<?>) o);
             assertEquals(value, o);
         }
     }
@@ -125,11 +125,11 @@ public class SequenceTest extends WireTestCommon {
         Wire w1 = wireType.apply(bytes);
         List<String> value = Arrays.asList("a", "b", "c");
         try (DocumentContext dc = w1.writingDocument()) {
-            w1.write("list").object(value);
+            dc.wire().write("list").object(value);
         }
         System.out.println(Wires.fromSizePrefixedBlobs(w1));
         try (DocumentContext dc = w1.readingDocument()) {
-            Object o = w1.read("list").object();
+            Object o = dc.wire().read("list").object();
             assertEquals(value, o);
         }
     }
@@ -143,12 +143,12 @@ public class SequenceTest extends WireTestCommon {
         value.put("a", "aya");
         value.put("b", "bee");
         try (DocumentContext dc = w1.writingDocument()) {
-            w1.write("map").object(value);
+            dc.wire().write("map").object(value);
         }
 
         System.out.println(Wires.fromSizePrefixedBlobs(w1));
         try (DocumentContext dc = w1.readingDocument()) {
-            Object o = w1.read("map").object();
+            Object o = dc.wire().read("map").object();
             assertEquals(value, o);
         }
     }

@@ -72,7 +72,7 @@ public class WireInternalInternTest extends WireTestCommon {
     //    @Test
     public void intern() {
         int sep = typeValue.indexOf(' ');
-        Class type = ClassAliasPool.CLASS_ALIASES.forName(
+        Class<?> type = ClassAliasPool.CLASS_ALIASES.forName(
                 typeValue.substring(1, sep));
         String value = typeValue.substring(sep + 1);
         Object value2 = WireInternal.intern(type, value);

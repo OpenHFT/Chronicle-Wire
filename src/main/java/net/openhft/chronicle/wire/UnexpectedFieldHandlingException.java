@@ -22,6 +22,7 @@ package net.openhft.chronicle.wire;
  * {@link ReadMarshallable#unexpectedField(Object, ValueIn)} has thrown an exception.
  */
 public class UnexpectedFieldHandlingException extends RuntimeException {
+    private static final long serialVersionUID = 0L;
     public UnexpectedFieldHandlingException(Throwable cause) {
         super(cause);
     }

@@ -32,7 +32,7 @@ public class DelegateChronicleChannel implements InternalChronicleChannel, Close
     }
 
     @Override
-    public ChronicleChannelCfg channelCfg() {
+    public ChronicleChannelCfg<?> channelCfg() {
         return channel.channelCfg();
     }
 

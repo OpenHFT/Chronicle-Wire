@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,12 +25,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-class ScalarStrategy<T> implements SerializationStrategy<T> {
+class ScalarStrategy<E> implements SerializationStrategy {
     @NotNull
-    final BiFunction<? super T, ValueIn, T> read;
-    private final Class<T> type;
+    final BiFunction<? super E, ValueIn, E> read;
+    private final Class<E> type;
 
-    ScalarStrategy(Class<T> type, @NotNull BiFunction<? super T, ValueIn, T> read) {
+    ScalarStrategy(Class<E> type, @NotNull BiFunction<? super E, ValueIn, E> read) {
         this.type = type;
         this.read = read;
     }
@@ -56,22 +57,23 @@ class ScalarStrategy<T> implements SerializationStrategy<T> {
     @SuppressWarnings("rawtypes")
     @NotNull
     @Override
-    public T newInstanceOrNull(Class type) {
-        return ObjectUtils.newInstance(this.type);
+    public <T> T newInstanceOrNull(Class<T>type) {
+        return Jvm.uncheckedCast(ObjectUtils.newInstance(this.type));
     }
 
     @Override
-    public Class<T> type() {
+    public Class<E> type() {
         return type;
     }
 
+    @SuppressWarnings("unchecked")
     @Nullable
     @Override
-    public T readUsing(Class clazz, T using, @NotNull ValueIn in, BracketType bracketType) {
+    public <T> T readUsing(Class<?> clazz, T using, @NotNull ValueIn in, BracketType bracketType) {
         if (in.isNull())
             return null;
 
-        return read.apply(using, in);
+        return (T) read.apply((E) using, in);
     }
 
     @NotNull

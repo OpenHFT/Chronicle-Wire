@@ -35,7 +35,7 @@ public class ConventionsTest extends WireTestCommon {
     @Test
     public void testTypeConversionsMaxValue() throws NoSuchFieldException, IllegalAccessException {
 
-        for (@NotNull Class type : new Class[]{String.class, Integer.class, Long.class, Short
+        for (@NotNull Class<?> type : new Class[]{String.class, Integer.class, Long.class, Short
                 .class, Byte
                 .class, Float.class, Double.class}) {
             Object extected;
@@ -55,7 +55,7 @@ public class ConventionsTest extends WireTestCommon {
     @Test
     public void testTypeConversionsMinValue() throws IllegalAccessException, NoSuchFieldException {
 
-        for (@NotNull Class type : new Class[]{String.class, Integer.class, Long.class, Short.class, Byte
+        for (@NotNull Class<?> type : new Class[]{String.class, Integer.class, Long.class, Short.class, Byte
                 .class, Float.class, Double.class}) {
             Object extected;
             if (Number.class.isAssignableFrom(type)) {
@@ -74,7 +74,7 @@ public class ConventionsTest extends WireTestCommon {
     @Test
     public void testTypeConversionsSmallNumber() {
 
-        for (@NotNull Class type : new Class[]{String.class, Integer.class, Long.class, Short
+        for (@NotNull Class<?> type : new Class[]{String.class, Integer.class, Long.class, Short
                 .class, Byte.class}) {
 
             @NotNull Object extected = "123"; // small number
@@ -82,7 +82,7 @@ public class ConventionsTest extends WireTestCommon {
         }
 
         Assert.assertEquals(123.0, test("123", Double.class), 0);
-        Assert.assertEquals(123.0, (double) (Float) test("123", Float.class), 0);
+        Assert.assertEquals(123.0, (double) test("123", Float.class), 0);
 
     }
 
@@ -90,7 +90,7 @@ public class ConventionsTest extends WireTestCommon {
     @Test
     public void testTypeConversionsConvertViaString() throws NoSuchFieldException, IllegalAccessException {
 
-        for (@NotNull Class type : new Class[]{Integer.class, Long.class, Short.class, Byte
+        for (@NotNull Class<?> type : new Class[]{Integer.class, Long.class, Short.class, Byte
                 .class}) {
             Object extected;
             if (Number.class.isAssignableFrom(type)) {

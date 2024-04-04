@@ -34,6 +34,7 @@ import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unchecked")
 public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.MetaData<M>> {
     public static final CachedCompiler CACHED_COMPILER = new CachedCompiler(Jvm.isDebug() ? new File(OS.getTarget(), "generated-test-sources") : null, null);
     private static final boolean DUMP_CODE = Jvm.getBoolean("dumpCode");

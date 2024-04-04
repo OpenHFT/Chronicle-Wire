@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 import static java.util.Arrays.stream;
 import static java.util.Collections.*;
 
+@SuppressWarnings("this-escape")
 public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethodWriter2.GMWMetaData> {
 
     private static final String DOCUMENT_CONTEXT = DocumentContext.class.getSimpleName();

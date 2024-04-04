@@ -3,6 +3,8 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.junit.Test;
 
+import java.nio.ByteBuffer;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 
@@ -18,7 +20,7 @@ public class AbstractMarshallableCfgTest extends WireTestCommon{
     }
 
     static class NestedSDM extends SelfDescribingMarshallable {
-        Bytes bytes = Bytes.elasticHeapByteBuffer();
+        Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer();
         double amt = 1.0;
     }
 

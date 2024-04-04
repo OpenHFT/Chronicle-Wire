@@ -27,7 +27,7 @@ import java.lang.reflect.Field;
 
 public final class CharFieldInfo extends UnsafeFieldInfo {
 
-    public CharFieldInfo(String name, Class type, BracketType bracketType, @NotNull Field field) {
+    public CharFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         super(name, type, bracketType, field);
     }
 

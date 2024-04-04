@@ -77,7 +77,7 @@ class BClass extends BytesInBinaryMarshallable {
             l = in.readLong();
             f = in.readFloat();
             d = in.readDouble();
-            text = (String) in.readObject(String.class);
+            text = in.readObject(String.class);
         } else {
             throw new IllegalStateException("Unknown version " + version);
         }

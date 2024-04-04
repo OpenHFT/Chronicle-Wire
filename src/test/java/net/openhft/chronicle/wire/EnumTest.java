@@ -51,7 +51,7 @@ public class EnumTest extends WireTestCommon {
         }
     }
 
-    public enum TestEnum implements Marshallable, ReadResolvable<TestEnum> {
+    public enum TestEnum implements Marshallable {
         INSTANCE;
 
         @Override
@@ -60,12 +60,6 @@ public class EnumTest extends WireTestCommon {
 
         @Override
         public void writeMarshallable(@NotNull WireOut wire) {
-        }
-
-        @NotNull
-        @Override
-        public EnumTest.TestEnum readResolve() {
-            return INSTANCE;
         }
     }
 }

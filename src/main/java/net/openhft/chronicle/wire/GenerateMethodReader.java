@@ -97,7 +97,7 @@ public class GenerateMethodReader {
         this.generatedClassName = generatedClassName0();
     }
 
-    private static String signature(Method m, Class type) {
+    private static String signature(Method m, Class<?> type) {
         return GenericReflection.getReturnType(m, type) + " " + m.getName() + " " + Arrays.toString(GenericReflection.getParameterTypes(m, type));
     }
 

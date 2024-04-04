@@ -19,5 +19,5 @@
 package net.openhft.chronicle.wire.channel.echo;
 
 public interface ChannelVisiting {
-    void visitor(ChannelVisitor visitor);
+    void visitor(ChannelVisitor<?> visitor);
 }

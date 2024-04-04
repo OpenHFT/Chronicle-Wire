@@ -24,11 +24,12 @@ import org.junit.Test;
 import java.lang.reflect.Proxy;
 
 import static org.easymock.EasyMock.*;
+import static org.junit.Assert.assertNotNull;
 
 public class BinaryMethodWriterInvocationHandlerTest extends WireTestCommon {
 
     @Test
-    public void testOnClose() throws Exception {
+    public void testOnClose() {
         Closeable closeable = createMock(Closeable.class);
         closeable.close();
         replay(closeable);
@@ -40,7 +41,9 @@ public class BinaryMethodWriterInvocationHandlerTest extends WireTestCommon {
         @NotNull BinaryMethodWriterInvocationHandler handler = new BinaryMethodWriterInvocationHandler(Closeable.class, false, out);
         handler.onClose(closeable);
 
-        try (@NotNull Closeable close = (Closeable) Proxy.newProxyInstance(Closeable.class.getClassLoader(), new Class[]{Closeable.class}, handler)) {
+        Class<?>[] interfaces = {Closeable.class};
+        try (@NotNull Closeable close = (Closeable) Proxy.newProxyInstance(Closeable.class.getClassLoader(), interfaces, handler)) {
+            assertNotNull(close);
             // and close it
         }
 

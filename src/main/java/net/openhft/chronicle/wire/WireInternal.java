@@ -238,7 +238,7 @@ public enum WireInternal {
     }
 
     public static Throwable throwable(@NotNull ValueIn valueIn, boolean appendCurrentStack) throws InvalidMarshallableException {
-        @Nullable Class type = valueIn.typePrefix();
+        @Nullable Class<?> type = valueIn.typePrefix();
         Throwable throwable = ObjectUtils.newInstance((Class<Throwable>) type);
 
         return throwable(valueIn, appendCurrentStack, throwable);

@@ -8,6 +8,7 @@ import net.openhft.chronicle.wire.*;
 import net.openhft.chronicle.wire.converter.NanoTime;
 import net.openhft.chronicle.wire.converter.ShortText;
 
+@SuppressWarnings("unchecked")
 public class AbstractEvent<E extends AbstractEvent<E>> extends SelfDescribingMarshallable {
     @ShortText
     private long sender;

@@ -90,7 +90,7 @@ public class JSON222Test extends WireTestCommon {
         boolean fail = file.getName().startsWith("n");
         Bytes<?> bytes3 = Bytes.elasticByteBuffer();
         try {
-            @NotNull List list = new ArrayList();
+            @NotNull List<Object> list = new ArrayList<>();
             do {
                 @Nullable final Object object = wire.getValueIn()
                         .object();

@@ -37,6 +37,7 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  * This {@code BitSet} is intended to be shared between processes. To minimize locking constraints, it is implemented as a lock-free solution
  * without support for resizing.
  */
+@SuppressWarnings("this-escape")
 public class LongValueBitSet extends AbstractCloseable implements Marshallable, ChronicleBitSet {
 
     /* Used to shift left or right for a partial word mask */

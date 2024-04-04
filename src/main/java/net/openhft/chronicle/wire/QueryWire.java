@@ -273,7 +273,7 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public QueryWire typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @NotNull Class type) {
+        public QueryWire typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @NotNull Class<?> type) {
             throw new UnsupportedOperationException();
         }
 

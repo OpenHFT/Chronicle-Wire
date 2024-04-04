@@ -97,7 +97,7 @@ public abstract class AbstractLongConverter implements LongConverter {
     }
 
     /**
-     * Appends the provided long value to the provided {@code Bytes<?>} text.
+     * Appends the provided long value to the provided {@code Bytes} text.
      *
      * @param bytes the Bytes object to append to.
      * @param value the long value to convert and append.

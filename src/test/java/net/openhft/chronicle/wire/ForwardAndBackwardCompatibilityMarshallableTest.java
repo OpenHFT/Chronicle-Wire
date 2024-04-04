@@ -33,6 +33,7 @@ import java.util.Collection;
 
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
+@SuppressWarnings("this-escape")
 @RunWith(value = Parameterized.class)
 public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCommon {
 

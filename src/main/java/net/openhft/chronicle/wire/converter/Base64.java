@@ -56,8 +56,6 @@ public @interface Base64 {
     /**
      * An instance of {@link PowerOfTwoLongConverter} specifically configured for Base64 conversions.
      * This converter uses a defined character set suitable for Base64 representations.
-     *
-     * @return the Base64 long converter instance.
      */
     LongConverter INSTANCE = new PowerOfTwoLongConverter(".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_");
 }

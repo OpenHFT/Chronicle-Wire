@@ -38,7 +38,7 @@ import static org.junit.Assert.assertNull;
 public class EscapeCharsTest extends WireTestCommon {
     @NotNull
     final String chs;
-    private final Future future;
+    private final Future<?> future;
 
     @Override
     @Before
@@ -46,7 +46,7 @@ public class EscapeCharsTest extends WireTestCommon {
         super.threadDump();
     }
 
-    public EscapeCharsTest(@NotNull String chs, Future future) {
+    public EscapeCharsTest(@NotNull String chs, Future<?> future) {
         this.chs = chs;
         this.future = future;
     }

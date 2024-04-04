@@ -18,7 +18,7 @@ public class WireTypeConverter {
         return delegate.yamlToJson(yaml);
     }
 
-    public void addAlias(Class newClass, String oldTypeName) {
+    public void addAlias(Class<?> newClass, String oldTypeName) {
         delegate.addAlias(newClass, oldTypeName);
     }
 }
