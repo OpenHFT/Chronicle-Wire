@@ -18,7 +18,6 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
      */
     @Test(expected = ClassNotFoundRuntimeException.class)
     public void throwClassNotFoundRuntimeExceptionOnMissingClassAlias() {
-        WiresTest.wiresThrowCNFRE(true);
         Wires.GENERATE_TUPLES = false;
         Wire wire = new TextWire(Bytes.from("" +
                 "a: !Aaa { hi: bye }"));
@@ -37,7 +36,6 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
      */
     @Test(expected = ClassNotFoundRuntimeException.class)
     public void throwClassNotFoundRuntimeExceptionOnMissingClassForField() {
-        WiresTest.wiresThrowCNFRE(true);
         Wires.GENERATE_TUPLES = false;
         ClassAliasPool.CLASS_ALIASES.addAlias(TwoFields.class);
         String simpleObject = "!TwoFields { name: \"henry\", fieldOne: !ThisClassDoesntExist { value: 1234 } }";
@@ -57,42 +55,17 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
      */
     @Test(expected = ClassNotFoundRuntimeException.class)
     public void throwClassNotFoundRuntimeExceptionOnMissingClassForField2() {
-        testFieldNotObject0(false, true, null);
+        testFieldNotObject0(false, null);
     }
 
     @Test(expected = ClassNotFoundRuntimeException.class)
     public void throwClassNotFoundRuntimeExceptionOnMissingClassForFieldNotATuple() {
-        testFieldNotObject0(true, true, null);
+        testFieldNotObject0(true, null);
     }
 
-    @Test
-    public void useBaseClassForMissingTypeWithoutTuples() {
-        expectException("Cannot find a class for ThisClassDoesntExist are you missing an alias?");
-        testFieldNotObject0(false, false, "" +
-                "!UsesTwoFields {\n" +
-                "  bothFields: {\n" +
-                "    name: Jerry\n" +
-                "  },\n" +
-                "  name: henry\n" +
-                "}\n");
-    }
 
-    @Test
-    public void useBaseClassForMissingTypeWithTuples() {
-        // only once
-        ignoreException("Cannot find a class for ThisClassDoesntExist are you missing an alias?");
-        testFieldNotObject0(true, false, "" +
-                "!UsesTwoFields {\n" +
-                "  bothFields: {\n" +
-                "    name: Jerry\n" +
-                "  },\n" +
-                "  name: henry\n" +
-                "}\n");
-    }
-
-    private void testFieldNotObject0(boolean generateTuples, boolean throwCNFE, String expected) {
+    private void testFieldNotObject0(boolean generateTuples, String expected) {
         Wires.GENERATE_TUPLES = generateTuples;
-        WiresTest.wiresThrowCNFRE(throwCNFE);
         ClassAliasPool.CLASS_ALIASES.addAlias(UsesTwoFields.class);
         String simpleObject = "!UsesTwoFields { name: \"henry\", bothFields: !ThisClassDoesntExist { name: Jerry } }";
         final UsesTwoFields simple = Marshallable.fromString(simpleObject);
@@ -113,7 +86,7 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
      */
     @Test(expected = ClassNotFoundRuntimeException.class)
     public void throwClassNotFoundRuntimeExceptionOnMissingClassForInterfaceField() {
-        testInterfaceFieldTest0(false, true, null);
+        testInterfaceFieldTest0(false, null);
     }
 
     /**
@@ -122,7 +95,7 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
      */
     @Test
     public void useTupleOnMissingClassForInterfaceField() {
-        testInterfaceFieldTest0(true, true, "" +
+        testInterfaceFieldTest0(true, "" +
                 "!UsesInterfaceField {\n" +
                 "  name: henry,\n" +
                 "  engineListener: !ThisListenerClassDoesntExist {\n" +
@@ -131,29 +104,8 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
                 "}\n");
     }
 
-    /**
-     * Tests if ClassNotFoundRuntimeException is correctly thrown for an interface field with no fallback,
-     * when the class for the interface is missing.
-     */
-    @Test(expected = ClassNotFoundRuntimeException.class)
-    public void throwClassNotFoundRuntimeExceptionOnMissingClassForInterfaceFieldNoFallback() {
-        testInterfaceFieldTest0(false, false, null);
-    }
-
-    @Test
-    public void useTupleOnMissingClassForInterfaceField2() {
-        testInterfaceFieldTest0(true, false, "" +
-                "!UsesInterfaceField {\n" +
-                "  name: henry,\n" +
-                "  engineListener: !ThisListenerClassDoesntExist {\n" +
-                "    value: 128\n" +
-                "  }\n" +
-                "}\n");
-    }
-
-    private void testInterfaceFieldTest0(boolean generateTuples, boolean throwCNFE, String expected) {
+    private void testInterfaceFieldTest0(boolean generateTuples, String expected) {
         Wires.GENERATE_TUPLES = generateTuples;
-        WiresTest.wiresThrowCNFRE(throwCNFE);
 
         ClassAliasPool.CLASS_ALIASES.addAlias(UsesInterfaceField.class);
         String simpleObject = "!UsesInterfaceField { name: \"henry\", engineListener: !ThisListenerClassDoesntExist { value: 128 } }";

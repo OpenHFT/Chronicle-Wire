@@ -60,6 +60,7 @@ public class WireTestCommon {
         // Ignore exceptions with incubating feature warnings
         ignoreException("The incubating features are subject to change");
         ignoreException("NamedThreadFactory created here");
+        ignoreException("Unable to find suitable cleaner service, falling back to using reflection");
     }
 
     // Activates the reference tracing before executing tests

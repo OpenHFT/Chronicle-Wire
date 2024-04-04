@@ -4359,10 +4359,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 if (Wires.dtoInterface(tClass) && GENERATE_TUPLES) {
                     return Wires.tupleFor(tClass, sb.toString());
                 }
-                if (true)
-                    throw e;
-                Jvm.warn().on(getClass(), "Unknown class (" + sb + "), perhaps you need to define an alias", e);
-                return null;
+                throw e;
             }
         }
 
