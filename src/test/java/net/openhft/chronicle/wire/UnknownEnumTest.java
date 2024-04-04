@@ -76,7 +76,6 @@ public class UnknownEnumTest extends WireTestCommon {
     // This test demonstrates the behavior of BinaryWire when encountering an unknown Enum type
     @Test
     public void shouldConvertEnumValueToStringWhenTypeIsNotKnownInBinaryWire() {
-        Wires.THROW_CNFRE = false;
         expectException("Unknown class (net.openhft.chronicle.wire.UnknownEnumTest$Temp), perhaps you need to define an alias");
         final Bytes<ByteBuffer> bytes = Bytes.wrapForRead(ByteBuffer.wrap(SERIALISED_MAP_DATA));
 
@@ -87,7 +86,6 @@ public class UnknownEnumTest extends WireTestCommon {
 
     @Test(expected = ClassNotFoundRuntimeException.class)
     public void shouldConvertEnumValueToStringWhenTypeIsNotKnownInBinaryWireThrows() {
-        Wires.THROW_CNFRE = true;
         final Bytes<ByteBuffer> bytes = Bytes.wrapForRead(ByteBuffer.wrap(SERIALISED_MAP_DATA));
 
         final Wire wire = WireType.BINARY.apply(bytes);
