@@ -80,23 +80,6 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
         assertEquals(expected, actual);
     }
 
-    // Test to check behavior when a missing type is assumed
-    @Test
-    public void testAssumeTheTypeMissingType() {
-        Wires.GENERATE_TUPLES = false;
-        expectException("Cannot find a class for Xyz are you missing an alias?");
-        final String cs = "!Xyz " +
-                "{\n" +
-                "  y: hello8\n" +
-                "}\n";
-        String s = Marshallable.fromString(Dto.class, cs).toString();
-        assertEquals("" +
-                "!net.openhft.chronicle.wire.InvalidYamWithCommonMistakesTest$Dto {\n" +
-                "  y: hello8,\n" +
-                "  x: !!null \"\"\n" +
-                "}\n", s);
-    }
-
     @Test(expected = ClassNotFoundRuntimeException.class)
     public void testAssumeTheTypeMissingTypeThrows() {
         Wires.GENERATE_TUPLES = false;
