@@ -40,7 +40,6 @@ public class TextWireAgitatorTest extends WireTestCommon {
     @Test
     public void lowerCaseClassWarn() {
         expectException("Unable to load net.openhft.chronicle.wire.textwiretest$mydto, is a class alias missing");
-        Wires.THROW_CNFRE = false;
         Wires.GENERATE_TUPLES = false;
         assertTrue(Marshallable.fromString("!" + TextWireTest.MyDto.class.getName().toLowerCase() + " { }") instanceof Map);
     }

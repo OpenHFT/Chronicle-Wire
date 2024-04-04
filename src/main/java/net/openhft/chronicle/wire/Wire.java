@@ -30,19 +30,6 @@ import java.io.IOException;
 @SingleThreaded
 @DontChain
 public interface Wire extends WireIn, WireOut {
-    @Deprecated(/*to be removed?*/)
-    static Wire fromFile(@NotNull String name) throws IOException {
-        @NotNull String ext = name.substring(name.lastIndexOf('.') + 1).toLowerCase();
-        switch (ext) {
-            case "csv":
-                return CSVWire.fromFile(name);
-            case "yaml":
-                return TextWire.fromFile(name);
-            default:
-                throw new IllegalArgumentException("Unknown file type " + name);
-        }
-    }
-
     /**
      * Create a YamlWire that write to an on heap Bytes
      *

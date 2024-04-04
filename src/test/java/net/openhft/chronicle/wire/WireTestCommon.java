@@ -170,6 +170,5 @@ public class WireTestCommon {
 
     @Before
     public void throwCNFRE() {
-        Wires.THROW_CNFRE = true;
     }
 }

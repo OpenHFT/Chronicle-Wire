@@ -70,7 +70,6 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
 
     @Test
     public void testAssumeTheTypeMissingType() {
-        Wires.THROW_CNFRE = false;
         Wires.GENERATE_TUPLES = false;
         expectException("Cannot find a class for Xyz are you missing an alias?");
         final String cs = "!Xyz " +
@@ -87,7 +86,6 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
 
     @Test(expected = ClassNotFoundRuntimeException.class)
     public void testAssumeTheTypeMissingTypeThrows() {
-        Wires.THROW_CNFRE = true;
         Wires.GENERATE_TUPLES = false;
 
         final String cs = "!Xyz " +

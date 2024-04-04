@@ -1852,7 +1852,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                     return classLookup().forName(stringBuilder);
                 } catch (ClassNotFoundRuntimeException e) {
                     // Note: it's not possible to generate a Tuple without an interface implied.
-                    if (THROW_CNFRE)
+                    if (true)
                         throw e;
                     String message = "Unable to find " + stringBuilder + " " + e.getCause();
                     Jvm.warn().on(getClass(), message);
@@ -1893,7 +1893,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                     return Wires.tupleFor(null, stringBuilder.toString());
                 }
                 String message = "Unable to load " + stringBuilder + ", is a class alias missing.";
-                if (THROW_CNFRE)
+                if (true)
                     throw new ClassNotFoundRuntimeException(new ClassNotFoundException(message));
                 Jvm.warn().on(TextWire.class, message);
                 return null;
@@ -1910,20 +1910,14 @@ public class TextWire extends YamlWireOut<TextWire> {
                             : classLookup().forName(className);
 
                 } catch (ClassNotFoundRuntimeException e1) {
-                    if (!THROW_CNFRE) {
-                        Jvm.warn().on(getClass(), "ClassNotFoundException class=" + className);
-                        return Wires.tupleFor(tClass, className);
-                    }
+                    throw e;
                 }
 
             } else if (GENERATE_TUPLES && tClass.getClassLoader() != null && tClass.isInterface()) {
                 return Wires.tupleFor(tClass, stringBuilder.toString());
             }
 
-            if (THROW_CNFRE || tClass.isInterface())
-                throw e;
-            Jvm.warn().on(TextWire.class, "Cannot find a class for " + stringBuilder + " are you missing an alias?");
-            return null;
+            throw e;
         }
 
         @Override
