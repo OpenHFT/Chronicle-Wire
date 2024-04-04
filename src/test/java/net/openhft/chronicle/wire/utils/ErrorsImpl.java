@@ -95,7 +95,7 @@ public class ErrorsImpl implements ErrorsIn {
 
     // Custom AssertionError class used within ErrorsImpl
     public static class MyAssertionError extends AssertionError {
-        // Constructor initializing MyAssertionError with a message
+        private static final long serialVersionUID = 0L;
         public MyAssertionError(String msg) {
             super(msg);
         }

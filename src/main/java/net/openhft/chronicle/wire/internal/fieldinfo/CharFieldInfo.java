@@ -40,7 +40,7 @@ public final class CharFieldInfo extends UnsafeFieldInfo {
      * @param bracketType The bracket type associated with the field.
      * @param field       The field object representation.
      */
-    public CharFieldInfo(String name, Class type, BracketType bracketType, @NotNull Field field) {
+    public CharFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         super(name, type, bracketType, field);
     }
 

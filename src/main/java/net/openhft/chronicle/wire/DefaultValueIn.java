@@ -464,7 +464,7 @@ public class DefaultValueIn implements ValueIn {
     }
 
     @Override
-    public Object objectWithInferredType(Object using, SerializationStrategy strategy, Class type) {
+    public Object objectWithInferredType(Object using, SerializationStrategy strategy, Class<?> type) {
         return defaultValue;
     }
 
@@ -479,7 +479,7 @@ public class DefaultValueIn implements ValueIn {
     }
 
     @Override
-    public Class typePrefix() {
+    public Class<?> typePrefix() {
         @Nullable Object o = defaultValue;
         if (o == null) return void.class;
         return o.getClass();

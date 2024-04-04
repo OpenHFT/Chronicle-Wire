@@ -39,7 +39,7 @@ public class ThrowableTest extends WireTestCommon {
                 // Initialize the Throwable object with a message and cause
                 Throwable message = new Throwable("message");
                 message.initCause(new Throwable("cause"));
-                wire.getValueOut()
+                dc.wire().getValueOut()
                         .object(message);
             }
 /*            if (wireType == WireType.TEXT)
@@ -49,7 +49,7 @@ public class ThrowableTest extends WireTestCommon {
 
             // Read the written Throwable and validate its content
             try (DocumentContext dc = wire.readingDocument()) {
-                Throwable t = (Throwable) wire.getValueIn().object();
+                Throwable t = (Throwable) dc.wire().getValueIn().object();
                 assertEquals("message", t.getMessage());
                 assertTrue(t.getStackTrace()[0].toString().startsWith("net.openhft.chronicle.wire.ThrowableTest.writeReadThrowable(ThrowableTest.java"));
             }

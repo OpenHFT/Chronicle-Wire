@@ -56,7 +56,7 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
     private static final ChannelHeader NO_HEADER = Mocker.ignored(ChannelHeader.class);
     private static final boolean DUMP_YAML = Jvm.getBoolean("dumpYaml");
     private final ReentrantLock lock = new ReentrantLock();
-    private final ChronicleChannelCfg channelCfg;
+    private final ChronicleChannelCfg<?> channelCfg;
     private final Wire in = createBuffer();
     private final Wire out = createBuffer();
     private final DocumentContextHolder dch = new ConnectionDocumentContextHolder();
@@ -86,6 +86,7 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
      * @param socketRegistry   Registry to manage and provide socket channels.
      * @throws InvalidMarshallableException If the given parameters result in invalid marshalling.
      */
+    @SuppressWarnings("this-escape")
     public TCPChronicleChannel(ChronicleChannelCfg<?> channelCfg,
                                ChannelHeader headerOut,
                                SocketRegistry socketRegistry) throws InvalidMarshallableException {
@@ -114,8 +115,9 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
      * @param replaceInHeader  Function to replace incoming header.
      * @param replaceOutHeader Function to replace outgoing header.
      */
+    @SuppressWarnings("this-escape")
     public TCPChronicleChannel(SystemContext systemContext,
-                               ChronicleChannelCfg channelCfg,
+                               ChronicleChannelCfg<?> channelCfg,
                                SocketChannel sc,
                                Function<ChannelHeader, ChannelHeader> replaceInHeader,
                                Function<ChannelHeader, ChannelHeader> replaceOutHeader) {
@@ -160,7 +162,7 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
     }
 
     @Override
-    public ChronicleChannelCfg channelCfg() {
+    public ChronicleChannelCfg<?> channelCfg() {
         return channelCfg;
     }
 
@@ -179,7 +181,7 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
      * @throws IORuntimeException if an error occurs while writing to the socket channel.
      */
     void flushOut(Wire out) {
-        @SuppressWarnings("unchecked") final Bytes<ByteBuffer> bytes = (Bytes) out.bytes();
+        @SuppressWarnings("unchecked") final Bytes<ByteBuffer> bytes = (Bytes<ByteBuffer>) out.bytes();
         if (out.bytes().writeRemaining() <= 0)
             return;
         ByteBuffer bb = bytes.underlyingObject();
@@ -253,11 +255,8 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
      */
     private DocumentContext readingDocument0() {
         checkConnected();
-
-        // Retrieve the bytes associated with the 'in' wire
-        @SuppressWarnings("unchecked") final Bytes<ByteBuffer> bytes = (Bytes) in.bytes();
-
-        // Clear the bytes if no data is left
+        @SuppressWarnings("unchecked")
+        final Bytes<ByteBuffer> bytes = (Bytes<ByteBuffer>) in.bytes();
         if (bytes.readRemaining() == 0)
             bytes.clear();
 
@@ -456,8 +455,7 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
             if (headerIn instanceof ChannelHandler) // it's a ChannelHeader
                 headerOut = ((ChannelHandler) headerIn).responseHeader(chronicleContext);
             else // reject the connection
-                //noinspection unchecked
-                headerOut = new RedirectHeader(Collections.EMPTY_LIST);
+                headerOut = new RedirectHeader(Collections.emptyList());
         } else { // return the header
             headerOut = replyHeader;
         }
@@ -550,7 +548,7 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
      *
      * @return The {@code ChronicleChannelCfg} object for the current connection.
      */
-    public ChronicleChannelCfg connectionCfg() {
+    public ChronicleChannelCfg<?> connectionCfg() {
         return channelCfg;
     }
 

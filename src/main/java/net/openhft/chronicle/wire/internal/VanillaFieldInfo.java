@@ -33,10 +33,10 @@ import java.util.Objects;
 @SuppressWarnings("rawtypes")
 public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
 
-    private final Class parent;
+    private final Class<?> parent;
     private transient Field field;
 
-    public VanillaFieldInfo(String name, Class type, BracketType bracketType, @NotNull Field field) {
+    public VanillaFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         super(type, bracketType, name);
         parent = field.getDeclaringClass();
         this.field = field;

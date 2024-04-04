@@ -23,6 +23,7 @@ package net.openhft.chronicle.wire;
  * This is typically used to safeguard against improper file manipulation and to maintain data integrity.
  */
 public class WriteAfterEOFException extends IllegalStateException {
+    private static final long serialVersionUID = 0L;
 
     /**
      * Constructs a new instance of WriteAfterEOFException with a default error message.

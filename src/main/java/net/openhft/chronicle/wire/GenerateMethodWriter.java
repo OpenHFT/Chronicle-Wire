@@ -295,7 +295,7 @@ public class GenerateMethodWriter {
      * @param type   The class type to be converted.
      * @return       A representative string for the given class type.
      */
-    private static CharSequence toString(Class type) {
+    private static CharSequence toString(Class<?> type) {
         if (boolean.class.equals(type)) {
             return "bool";
         } else if (byte.class.equals(type)) {
@@ -327,7 +327,7 @@ public class GenerateMethodWriter {
      * @return       The full name of the class with '$' characters replaced.
      */
     @NotNull
-    private static String nameForClass(Class type) {
+    private static String nameForClass(Class<?> type) {
         return type.getName().replace('$', '.');
     }
 
@@ -341,7 +341,7 @@ public class GenerateMethodWriter {
      * @return            The appropriate name of the class based on the import context.
      */
     @NotNull
-    private static String nameForClass(Set<String> importSet, Class type) {
+    private static String nameForClass(Set<String> importSet, Class<?> type) {
         if (type.isArray())
             return nameForClass(importSet, type.getComponentType()) + "[]";
         String s = nameForClass(type);
@@ -470,7 +470,7 @@ public class GenerateMethodWriter {
             importSet.add(Supplier.class.getName());
 
             // Iterate through all interfaces to extract required imports and validations
-            for (Class interfaceClazz : interfaces) {
+            for (Class<?> interfaceClazz : interfaces) {
                 importSet.add(nameForClass(interfaceClazz));
 
                 if (!interfaceClazz.isInterface())
@@ -485,7 +485,7 @@ public class GenerateMethodWriter {
                     if (template != null)
                         continue;
                     for (Type type : getParameterTypes(dm, interfaceClazz)) {
-                        Class pType = erase(type);
+                        Class<?> pType = erase(type);
                         if (pType.isPrimitive() || pType.isArray() || pType.getPackage().getName().equals("java.lang"))
                             continue;
                         importSet.add(nameForClass(pType));
@@ -512,7 +512,7 @@ public class GenerateMethodWriter {
             Set<String> handledMethodSignatures = new HashSet<>();
             Set<String> methodIds = new HashSet<>();
 
-            for (Class interfaceClazz : interfaces) {
+            for (Class<?> interfaceClazz : interfaces) {
 
                 String interfaceName = nameForClass(importSet, interfaceClazz);
                 imports.append(interfaceName);
@@ -585,7 +585,7 @@ public class GenerateMethodWriter {
      * @param interfaceClazz The interface class relative to which the method's return type is evaluated.
      * @return The class type of the method's return type.
          */
-    private Class<?> returnType(Method dm, Class interfaceClazz) {
+    private Class<?> returnType(Method dm, Class<?> interfaceClazz) {
         Type returnType = GenericReflection.getReturnType(dm, interfaceClazz);
         if (!(returnType instanceof Class))
             returnType = (Type) ((TypeVariable<?>) returnType).getGenericDeclaration();
@@ -600,11 +600,11 @@ public class GenerateMethodWriter {
      * @param interfaceType The interface type in which the method is defined.
      * @return The template string if found, otherwise {@code null}.
      */
-    private String templateFor(Method dm, Class interfaceType) {
+    private String templateFor(Method dm, Class<?> interfaceType) {
         Map<List<Class<?>>, String> map = TEMPLATE_METHODS.get(dm.getName());
         if (map == null)
             return null;
-        List<Class> sig = new ArrayList<>();
+        List<Class<?>> sig = new ArrayList<>();
         sig.add(returnType(dm, interfaceType));
         for (Type type : getParameterTypes(dm, interfaceType)) {
             addAll(sig, erase(type));
@@ -709,7 +709,7 @@ public class GenerateMethodWriter {
             final String name;
             if (parameterCount > 0) {
                 Type type = parameterTypes[parameterCount - 1];
-                if (type instanceof Class && ((Class) type).isPrimitive())
+                if (type instanceof Class<?>&& ((Class<?>) type).isPrimitive())
                     Jvm.warn().on(getClass(), "Generated code to call updateInterceptor for " + dm + " will box and generate garbage");
                 name = parameters[parameterCount - 1].getName();
             } else
@@ -883,7 +883,7 @@ public class GenerateMethodWriter {
      * @param startJ   The starting index to check if the current parameter is among multiple arguments.
      * @param p        The parameter whose value is being written.
      */
-    private void writeValue(final Method dm, Class type, final StringBuilder body, final int startJ, final Parameter p) {
+    private void writeValue(final Method dm, Class<?> type, final StringBuilder body, final int startJ, final Parameter p) {
         final String name = p.getName();
         String className = type.getTypeName().replace('$', '.');
 

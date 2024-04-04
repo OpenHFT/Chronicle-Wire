@@ -21,7 +21,6 @@ package net.openhft.chronicle.wire.map;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.Wires;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.io.Closeable;
@@ -35,6 +34,7 @@ import static org.junit.Assert.assertTrue;
  * Test suite for custom map implementations and their serialization.
  * Inherits from WireTestCommon for common test setup and teardown functionalities.
  */
+@SuppressWarnings("serial")
 public class MapCustomTest extends WireTestCommon {
 
     /**
@@ -47,7 +47,7 @@ public class MapCustomTest extends WireTestCommon {
         MapsHolder<Integer> mapsHolder = new MapsHolder<>(10, "one");
 
         // Perform a deep copy of the maps holder
-        @NotNull MapsHolder result = Wires.deepCopy(mapsHolder);
+        MapsHolder<Integer> result = Wires.deepCopy(mapsHolder);
 
         // Assert that the copied object is equivalent to the original
         assertTrue(result.equals(mapsHolder));
@@ -57,6 +57,7 @@ public class MapCustomTest extends WireTestCommon {
      * Custom data holder that encapsulates various map implementations.
      * Inherits from SelfDescribingMarshallable for marshalling capabilities.
      */
+    @SuppressWarnings("rawtypes")
     private static class MapsHolder<T extends Integer> extends SelfDescribingMarshallable {
         // Define custom maps and their instances
         private IntToStringMap i2sMap = new IntToStringMap();
@@ -68,6 +69,7 @@ public class MapCustomTest extends WireTestCommon {
         // private MarkedMap<String> mMap = i2sMap;
 
         // Constructor to initialize maps with provided key-value pairs
+        @SuppressWarnings("unchecked")
         public MapsHolder(T x, String y) {
             i2sMap.put(x, y);
             iMap.put(x, y);
@@ -143,7 +145,7 @@ public class MapCustomTest extends WireTestCommon {
     /**
      * A more generic version of IntMap.
      */
-    @SuppressWarnings({"rawtypes"})
+    @SuppressWarnings("rawtypes")
     private static class GeneralMap extends IntMap {
         // No-op.
     }

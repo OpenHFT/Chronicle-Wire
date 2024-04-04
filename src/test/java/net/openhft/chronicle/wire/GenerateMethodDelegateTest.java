@@ -46,7 +46,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
                 .baseClassName("GMDT-");
     }
 
-    // Test acquiring a class that implements multiple interfaces
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
     public void testAcquireClass() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         // Initialize a new GenerateMethodDelegate
@@ -62,11 +62,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
                 Consumer.class,
                 Supplier.class,
                 BiConsumer.class);
-
-        // Acquire the class with the specified class loader
-        Class aClass = gmd.acquireClass(GenerateMethodDelegateTest.class.getClassLoader());
-
-        // Create an instance of the acquired class
+        Class<?> aClass = gmd.acquireClass(GenerateMethodDelegateTest.class.getClassLoader());
         MethodDelegate md = (MethodDelegate) aClass.getDeclaredConstructor().newInstance();
 
         // Create a StringWriter for logging
@@ -76,7 +72,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
         md.delegate(Mocker.logging(RCSB.class, "", sw));
         ((Runnable) md).run();
         ((Consumer) md).accept("consumer");
-        ((Supplier) md).get();
+        ((Supplier<?>) md).get();
         ((BiConsumer) md).accept("bi", "consumer");
 
         // Assert the expected log output
@@ -86,7 +82,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
                 "accept[bi, consumer]\n", sw.toString().replace("\r", ""));
     }
 
-    // Test the chaining of delegates
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
     public void chainedDelegate() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         // Create a custom GenerateMethodDelegate with overridden methods for chaining
@@ -113,11 +109,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
 
         // Create a StringWriter for logging
         StringWriter sw = new StringWriter();
-
-        // Acquire the class with the specified class loader
-        Class aClass = gmd.acquireClass(GenerateMethodDelegateTest.class.getClassLoader());
-
-        // Create an instance of the acquired class
+        Class<?> aClass = gmd.acquireClass(GenerateMethodDelegateTest.class.getClassLoader());
         MethodDelegate md = (MethodDelegate) aClass.getDeclaredConstructor().newInstance();
 
         // Set delegate and invoke chained methods
@@ -151,6 +143,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
         void say(String text);
     }
 
+    @SuppressWarnings("rawtypes")
     // A combined interface that extends multiple standard Java interfaces
     interface RCSB extends Runnable, Consumer, Supplier, BiConsumer {
     }

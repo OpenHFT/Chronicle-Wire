@@ -25,6 +25,7 @@ package net.openhft.chronicle.wire;
  * {@link MethodWriter} creation.
  */
 public class MethodWriterValidationException extends IllegalArgumentException {
+    private static final long serialVersionUID = 0L;
 
     /**
      * Constructs a new {@code MethodWriterValidationException} with the specified detail message.

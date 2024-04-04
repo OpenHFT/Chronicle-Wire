@@ -394,11 +394,11 @@ public class WiresTest extends WireTestCommon {
 
     static class Thing extends AbstractEventCfg<Thing> {
         @AsMarshallable
-        DynamicEnum dee1;
+        DynamicEnum<?> dee1;
         String someString;
     }
 
-    enum EnumThing implements DynamicEnum {
+    enum EnumThing implements DynamicEnum<EnumThing> {
         ONE,
         TWO;
     }

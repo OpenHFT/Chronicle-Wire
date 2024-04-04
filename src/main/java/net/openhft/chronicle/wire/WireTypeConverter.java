@@ -45,7 +45,7 @@ public class WireTypeConverter {
      * @param newClass    The new class type.
      * @param oldTypeName The older or previous type name.
      */
-    public void addAlias(Class newClass, String oldTypeName) {
+    public void addAlias(Class<?> newClass, String oldTypeName) {
         delegate.addAlias(newClass, oldTypeName);
     }
 }

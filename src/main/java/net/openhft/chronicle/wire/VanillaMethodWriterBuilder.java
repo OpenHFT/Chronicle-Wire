@@ -34,13 +34,13 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
 /**
  * This is the VanillaMethodWriterBuilder class implementing both Builder and MethodWriterBuilder interfaces.
  * It is responsible for constructing method writers based on specified configurations and properties.
  * The class has been designed to support a variety of functionalities like code generation disabling, proxy generation,
  * and method invocation handling among others.
  */
+@SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
 public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBuilder<T> {
     // Flag name to check whether proxy code generation is disabled
     public static final String DISABLE_WRITER_PROXY_CODEGEN = "disableProxyCodegen";
@@ -160,13 +160,13 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * @throws IllegalArgumentException if the provided interface is deemed invalid.
      */
     @NotNull
-    public MethodWriterBuilder<T> addInterface(Class additionalClass) {
+    public MethodWriterBuilder<T> addInterface(Class<?> additionalClass) {
         if (interfaces.contains(additionalClass))
             return this;
         if (additionalClass == DocumentContext.class)
             return this;
 
-        for (Class invalidSuperInterface : invalidSuperInterfaces) {
+        for (Class<?> invalidSuperInterface : invalidSuperInterfaces) {
             if (invalidSuperInterface.isAssignableFrom(additionalClass))
                 throw new IllegalArgumentException("The event interface shouldn't implement " + invalidSuperInterface.getName());
         }
@@ -296,7 +296,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                 // Attempt to create an instance from an already loaded class
                 return (T) newInstance(Class.forName(fullClassName));
             } catch (ClassNotFoundException e) {
-                Class clazz;
+                Class<?> clazz;
                 // only one thread at a time so two threads don't try to generate the same class.
                 synchronized (classCache) {
                     clazz = classCache.computeIfAbsent(fullClassName, this::newClass);
@@ -329,7 +329,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * @param fullClassName The fully qualified name of the class to be generated.
      * @return The generated class, or {@code COMPILE_FAILED} if class generation failed.
      */
-    private Class newClass(final String fullClassName) {
+    private Class<?> newClass(final String fullClassName) {
         if (wireType.isText() || !Jvm.getBoolean("wire.generator.v2"))
             // Use version 1 of the method writer generator
             return GenerateMethodWriter.newClass(fullClassName,
@@ -369,7 +369,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * @throws NullPointerException if the outSupplier is not set.
      * @throws RuntimeException if any other exception occurs during instantiation.
      */
-    private Object newInstance(final Class aClass) {
+    private Object newInstance(final Class<?> aClass) {
         try {
             // Ensure the outSupplier is set before proceeding.
             if (outSupplier == null)

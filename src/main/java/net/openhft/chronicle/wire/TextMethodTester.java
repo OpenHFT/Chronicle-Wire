@@ -150,7 +150,7 @@ public class TextMethodTester<T> implements YamlTester {
      * @param outputClass The additional output class to be added.
      * @return The current TextMethodTester instance.
      */
-    public TextMethodTester<T> addOutputClass(Class outputClass) {
+    public TextMethodTester<T> addOutputClass(Class<?> outputClass) {
         additionalOutputClasses.add(outputClass);
         return this;
     }

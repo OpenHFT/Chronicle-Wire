@@ -31,5 +31,5 @@ public interface ChannelVisiting {
      *
      * @param visitor The {@code ChannelVisitor} visiting the entity.
      */
-    void visitor(ChannelVisitor visitor);
+    void visitor(ChannelVisitor<?> visitor);
 }

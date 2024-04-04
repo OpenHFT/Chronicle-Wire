@@ -27,6 +27,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
  * that the exception is related to I/O operations, but specifically points to protocol-related problems.
  */
 public class InvalidProtocolException extends IORuntimeException {
+    private static final long serialVersionUID = 0L;
 
     /**
      * Constructs a new InvalidProtocolException with the specified detail message.

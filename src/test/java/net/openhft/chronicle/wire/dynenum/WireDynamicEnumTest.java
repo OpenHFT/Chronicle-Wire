@@ -335,7 +335,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
     }
 
     // Enum representing WDENums with associated values and display names
-    enum WDENums implements WDEI, DynamicEnum {
+    enum WDENums implements WDEI, DynamicEnum<WDENums> {
         ONE("One", 1),  // Enum value representing "One" with a value of 1
         TWO("Two", 2);  // Enum value representing "Two" with a value of 2
 
@@ -392,7 +392,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
     }
 
     // Represents an enhanced version of WDENums with additional functionalities
-    static class WDENum2 extends SelfDescribingMarshallable implements WDEI, DynamicEnum {
+    static class WDENum2 extends SelfDescribingMarshallable implements WDEI, DynamicEnum<WDENum2> {
         // Static instances representing pre-defined values
         static final WDENum2 ONE = new WDENum2("One", 1);  // Represents "One" with a value of 1
         static final WDENum2 TWO = new WDENum2("Two", 2);  // Represents "Two" with a value of 2

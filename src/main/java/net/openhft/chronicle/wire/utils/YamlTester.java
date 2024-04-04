@@ -60,6 +60,7 @@ public interface YamlTester {
      * @return YamlTester instance containing the test results for comparison.
      * @throws AssertionError If the test encounters issues or if the constructor doesn't match the expected format.
      */
+    @SuppressWarnings("unchecked")
     static YamlTester runTest(Class<?> implClass, String path) throws AssertionError {
         for (Constructor<?> cons : implClass.getDeclaredConstructors()) {
             if (cons.getParameterCount() == 1) {
@@ -71,7 +72,7 @@ public interface YamlTester {
                         } catch (Exception e) {
                             throw new AssertionError(e);
                         }
-                    }, (Class) parameterTypes[0], path);
+                    }, (Class<Object>) parameterTypes[0], path);
                 }
             }
         }

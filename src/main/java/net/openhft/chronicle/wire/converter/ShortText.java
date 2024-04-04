@@ -62,8 +62,6 @@ public @interface ShortText {
     /**
      * An instance of {@link ShortTextLongConverter} specifically configured for Base85 conversions.
      * This converter uses a character set defined by the {@link ShortTextLongConverter} to represent Base85 encoded data.
-     *
-     * @return the specialized Base85 long converter instance for ShortText.
      */
     LongConverter INSTANCE = ShortTextLongConverter.INSTANCE;
 }

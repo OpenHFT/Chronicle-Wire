@@ -30,7 +30,7 @@ public abstract class AbstractFieldInfo implements FieldInfo {
     protected final String name;
 
     // The type of the field
-    protected final Class type;
+    protected final Class<?> type;
 
     // The bracket type associated with the field
     protected final BracketType bracketType;
@@ -42,7 +42,7 @@ public abstract class AbstractFieldInfo implements FieldInfo {
      * @param bracketType  The bracket type associated with the field
      * @param name         The name of the field
      */
-    protected AbstractFieldInfo(Class type, BracketType bracketType, String name) {
+    protected AbstractFieldInfo(Class<?> type, BracketType bracketType, String name) {
         this.type = type;
         this.bracketType = bracketType;
         this.name = name;

@@ -152,7 +152,7 @@ public class Issue272Test {
         while(!wire.isEmpty()) {
             try (DocumentContext dc = wire.readingDocument()) {
                 try (DocumentContext dc2 = copyWire.writingDocument()) {
-                    wire.copyTo(copyWire);
+                    dc.wire().copyTo(dc2.wire());
                 }
             }
         }

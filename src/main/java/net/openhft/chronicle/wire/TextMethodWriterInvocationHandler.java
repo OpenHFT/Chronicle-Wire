@@ -46,7 +46,7 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
      * @param tClass           The class for which this invocation handler is being used.
      * @param marshallableOut  The MarshallableOut instance used for data serialization.
      */
-    TextMethodWriterInvocationHandler(Class tClass, @NotNull MarshallableOut marshallableOut) {
+    TextMethodWriterInvocationHandler(Class<?> tClass, @NotNull MarshallableOut marshallableOut) {
         this(tClass, () -> marshallableOut);
     }
 
@@ -56,7 +56,7 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
      * @param tClass                   The class for which this invocation handler is being used.
      * @param marshallableOutSupplier  The supplier providing instances of MarshallableOut for data serialization.
      */
-    public TextMethodWriterInvocationHandler(Class tClass, @NotNull Supplier<MarshallableOut> marshallableOutSupplier) {
+    public TextMethodWriterInvocationHandler(Class<?> tClass, @NotNull Supplier<MarshallableOut> marshallableOutSupplier) {
         super(tClass);
         this.marshallableOutSupplier = marshallableOutSupplier;
     }
@@ -89,7 +89,7 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
         }
     }
 
-    static final Consumer<Object[]> NOOP_CONSUMER = Mocker.ignored(Consumer.class);
+    static final Consumer<Object[]> NOOP_CONSUMER = Jvm.uncheckedCast(Mocker.ignored(Consumer.class));
 
     /**
      * Builds a converter for method parameters based on the annotations present on the method.

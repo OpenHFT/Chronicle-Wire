@@ -51,7 +51,7 @@ import java.util.function.*;
  * The {@code RawWire} class is specifically designed for efficient binary serialization
  * where headers and other metadata might not be necessary.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
 public class RawWire extends AbstractWire implements Wire {
 
     // Output mechanism for writing raw values
@@ -565,7 +565,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class type) {
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class<?> type) {
             long position = bytes.writePosition();
             bytes.writeSkip(1);
             typeTranslator.accept(type, bytes);
@@ -756,7 +756,7 @@ public class RawWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public Class typePrefix() {
+        public Class<?> typePrefix() {
             return null;
         }
 
@@ -1193,7 +1193,7 @@ public class RawWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public Object objectWithInferredType(Object using, SerializationStrategy strategy, Class type) {
+        public Object objectWithInferredType(Object using, SerializationStrategy strategy, Class<?> type) {
             throw new UnsupportedOperationException("Cannot read " + using + " value and " + type + " type for RawWire");
         }
     }

@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.EnumCache;
 import net.openhft.chronicle.core.util.CoreDynamicEnum;
 
@@ -28,7 +29,7 @@ import java.util.List;
  * possessing a {@code String name} field. The interface extends both {@link CoreDynamicEnum} and
  * {@link Marshallable}, facilitating serialization and specific dynamic enumeration operations.
  */
-public interface DynamicEnum extends CoreDynamicEnum, Marshallable {
+public interface DynamicEnum<E extends DynamicEnum<E>> extends CoreDynamicEnum<E>, Marshallable {
 
     /**
      * Refreshes the cached instance of a {@code DynamicEnum} based on the given template.
@@ -40,11 +41,8 @@ public interface DynamicEnum extends CoreDynamicEnum, Marshallable {
      *
      * @param e The {@code DynamicEnum} template used to refresh the cached version.
      */
-    static <E extends DynamicEnum> void updateEnum(E e) {
-        // Retrieve the enum cache corresponding to the class of the provided template
-        EnumCache<E> cache = EnumCache.of((Class<E>) e.getClass());
-
-        // Fetch the enum instance with the same name from the cache
+    static <E extends DynamicEnum<E>> void updateEnum(E e) {
+        EnumCache<E> cache = EnumCache.of(Jvm.uncheckedCast(e.getClass()));
         E nums = cache.valueOf(e.name());
 
         // Obtain field details of the provided template

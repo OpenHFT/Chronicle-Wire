@@ -84,7 +84,7 @@ public class ChronicleServiceMain extends SelfDescribingMarshallable implements 
         try {
             ssc = ServerSocketChannel.open();
             ssc.bind(new InetSocketAddress(port));
-            ChronicleChannelCfg channelCfg = new ChronicleChannelCfg().addHostnamePort(null, port);
+            ChronicleChannelCfg<?> channelCfg = new ChronicleChannelCfg<>().addHostnamePort(null, port);
             Function<ChannelHeader, ChannelHeader> redirectFunction = this::replaceOutHeader;
             while (!isClosed()) {
                 final SocketChannel sc = ssc.accept();
@@ -123,7 +123,7 @@ public class ChronicleServiceMain extends SelfDescribingMarshallable implements 
         if (channelHandler instanceof OkHeader)
             return new OkHeader();
         //noinspection unchecked
-        return new RedirectHeader(Collections.EMPTY_LIST);
+        return new RedirectHeader(Collections.emptyList());
     }
 
     @Override
@@ -160,6 +160,7 @@ public class ChronicleServiceMain extends SelfDescribingMarshallable implements 
          * This method manages the lifecycle of the channel's connection, processes messages/events
          * using the service's microservice logic, and handles various exceptions.
          */
+        @SuppressWarnings("try")
         void run() {
             try {
                 Jvm.debug().on(ChronicleServiceMain.class, "Server got " + channel.headerIn());

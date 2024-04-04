@@ -85,7 +85,7 @@ class BClass extends BytesInBinaryMarshallable {
             l = in.readLong();
             f = in.readFloat();
             d = in.readDouble();
-            text = (String) in.readObject(String.class);
+            text = in.readObject(String.class);
         } else {
             // Throws an exception if the read version number doesn't match the expected version. Useful for detecting data format changes.
             throw new IllegalStateException("Unknown version " + version);

@@ -29,7 +29,9 @@ import java.util.Set;
 
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
+@SuppressWarnings("serial")
 public class Nested implements Serializable, Validatable {
+    private static final long serialVersionUID = 0L;
     // Fields of various types including a custom class, collections, and a map
     ScalarValues values;
     List<String> strings;
@@ -53,6 +55,11 @@ public class Nested implements Serializable, Validatable {
     public boolean equals(Object obj) {
         // Check for instance equality and delegate to Wires utility for deep comparison
         return obj instanceof Nested && Wires.isEquals(this, obj);
+    }
+
+    @Override
+    public int hashCode() {
+        throw new UnsupportedOperationException();
     }
 
     // Overriding toString method to provide a string representation of the object

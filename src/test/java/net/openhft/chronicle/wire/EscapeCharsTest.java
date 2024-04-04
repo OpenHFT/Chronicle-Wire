@@ -41,7 +41,7 @@ import static org.junit.Assert.assertNull;
 public class EscapeCharsTest extends WireTestCommon {
     @NotNull
     final String chs;
-    private final Future future;
+    private final Future<?> future;
 
     // Override the threadDump from WireTestCommon to use the parent implementation
     @Override
@@ -56,7 +56,7 @@ public class EscapeCharsTest extends WireTestCommon {
      * @param chs   Characters to test
      * @param future Represents the result of an asynchronous computation
      */
-    public EscapeCharsTest(@NotNull String chs, Future future) {
+    public EscapeCharsTest(@NotNull String chs, Future<?> future) {
         this.chs = chs;
         this.future = future;
     }

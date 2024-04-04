@@ -44,7 +44,7 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 public abstract class AbstractGeneratedMethodReader implements MethodReader {
 
     // A no-operation message history consumer.
-    private static final Consumer<MessageHistory> NO_OP_MH_CONSUMER = Mocker.ignored(Consumer.class);
+    private static final Consumer<MessageHistory> NO_OP_MH_CONSUMER = Jvm.uncheckedCast(Mocker.ignored(Consumer.class));
     public final static ThreadLocal<String> SERVICE_NAME = new ThreadLocal<>();
     private final static ConcurrentHashMap<String, MessageHistoryThreadLocal> TEMP_MESSAGE_HISTORY_BY_SERVICE_NAME = new ConcurrentHashMap<>();
     protected final WireParselet debugLoggingParselet;
@@ -61,9 +61,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     // Consumer for processing message history.
     private Consumer<MessageHistory> historyConsumer = NO_OP_MH_CONSUMER;
 
-    private Predicate predicate;
-
-    // Flag to determine if scanning is active.
+    private Predicate<MethodReader> predicate;
     private boolean scanning;
 
     /**
@@ -95,7 +93,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      * @param predicate The predicate for filtering
      * @return The current instance of the AbstractGeneratedMethodReader class
      */
-    public AbstractGeneratedMethodReader predicate(Predicate predicate) {
+    public AbstractGeneratedMethodReader predicate(Predicate<MethodReader> predicate) {
         this.predicate = predicate;
         return this;
     }

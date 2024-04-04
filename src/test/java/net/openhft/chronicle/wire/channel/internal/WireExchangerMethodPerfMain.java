@@ -132,6 +132,7 @@ public class WireExchangerMethodPerfMain implements JLBHTask {
      * This checks the order of the events and measures
      * the latency based on the event's metadata.
      */
+    @SuppressWarnings({"unused", "try"})
     private void run() {
         int count = 0;
         ChronicleEvent event2 = new ChronicleEvent();

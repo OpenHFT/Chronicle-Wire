@@ -42,6 +42,7 @@ public abstract class AbstractMarshallableCfg extends SelfDescribingMarshallable
      * @throws IORuntimeException             If there's an IO-related exception during reading.
      * @throws InvalidMarshallableException   If a marshalling error occurs.
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException, InvalidMarshallableException {
         // Obtain the WireMarshaller for the current class
@@ -62,6 +63,7 @@ public abstract class AbstractMarshallableCfg extends SelfDescribingMarshallable
      * @param wire Wire output target for writing the configuration.
      * @throws InvalidMarshallableException If a marshalling error occurs.
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void writeMarshallable(@NotNull WireOut wire) throws InvalidMarshallableException {
         // Obtain the WireMarshaller for the current class

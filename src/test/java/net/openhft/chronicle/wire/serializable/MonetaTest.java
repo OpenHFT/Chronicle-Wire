@@ -31,6 +31,7 @@ import java.util.TreeSet;
 
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("unchecked")
 public class MonetaTest extends net.openhft.chronicle.wire.WireTestCommon {
     // Test method for serialization and deserialization of a SortedSet with custom Comparable objects
     @Test
@@ -59,6 +60,7 @@ public class MonetaTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Inner class representing a non-scalar comparable object
     public static class NonScalarComparable implements Serializable, Comparable<NonScalarComparable> {
+        private static final long serialVersionUID = 0L;
         // Currency instance
         final Currency currency;
 

@@ -212,6 +212,7 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
 
     // Custom class implementing Serializable interface for testing
     static final class Ser implements Serializable {
+        private static final long serialVersionUID = 0L;
         int foo;
     }
 

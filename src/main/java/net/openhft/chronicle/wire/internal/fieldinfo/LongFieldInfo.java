@@ -40,7 +40,7 @@ public final class LongFieldInfo extends UnsafeFieldInfo {
      * @param bracketType The bracket type associated with the field.
      * @param field       The actual field representation.
      */
-    public LongFieldInfo(String name, Class type, BracketType bracketType, @NotNull Field field) {
+    public LongFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         super(name, type, bracketType, field);
     }
 

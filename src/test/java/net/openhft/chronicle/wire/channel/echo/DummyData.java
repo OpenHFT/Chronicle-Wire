@@ -82,9 +82,9 @@ public class DummyData extends BytesInBinaryMarshallable {
      * @throws IORuntimeException, BufferUnderflowException, IllegalStateException Potential exceptions during reading operation.
      */
     @Override
-    public void readMarshallable(BytesIn bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
-        timeNS = bytes.readLong(); // Reading a long value (timeNS)
-        int len = bytes.readInt();  // Reading length of the upcoming data byte array
+    public void readMarshallable(BytesIn<?> bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
+        timeNS = bytes.readLong();
+        int len = bytes.readInt();
         if (len == -1) {
             data = null;
         } else {
@@ -102,8 +102,8 @@ public class DummyData extends BytesInBinaryMarshallable {
      * @throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException Potential exceptions during writing operation.
      */
     @Override
-    public void writeMarshallable(BytesOut bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
-        bytes.writeLong(timeNS); // Writing the nanosecond timestamp
+    public void writeMarshallable(BytesOut<?> bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
+        bytes.writeLong(timeNS);
         if (data == null) {
             bytes.writeInt(-1); // Writing a null flag if data is null
         } else {

@@ -378,11 +378,7 @@ public enum WireInternal {
      * @throws InvalidMarshallableException If the throwable cannot be instantiated properly.
      */
     public static Throwable throwable(@NotNull ValueIn valueIn, boolean appendCurrentStack) throws InvalidMarshallableException {
-
-        // Determine the type of the throwable from the valueIn
-        @Nullable Class type = valueIn.typePrefix();
-
-        // Create a new instance of the determined throwable type
+        @Nullable Class<?> type = valueIn.typePrefix();
         Throwable throwable = ObjectUtils.newInstance((Class<Throwable>) type);
 
         // Further process and return the throwable (the method for this is not provided)

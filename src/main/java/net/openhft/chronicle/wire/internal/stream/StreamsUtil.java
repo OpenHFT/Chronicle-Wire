@@ -119,6 +119,7 @@ public final class StreamsUtil {
      * The VanillaSpliteratorOfLong is a spliterator over a PrimitiveIterator.OfLong,
      * providing basic spliterator functionalities for long elements.
      */
+    @SuppressWarnings("overloads")
     public static final class VanillaSpliteratorOfLong
             extends AbstractPrimitiveSpliterator<Long, LongConsumer, Spliterator.OfLong, PrimitiveIterator.OfLong>
             implements Spliterator.OfLong {
@@ -153,6 +154,7 @@ public final class StreamsUtil {
      * The VanillaSpliteratorOfDouble is a spliterator over a PrimitiveIterator.OfDouble,
      * providing basic spliterator functionalities for double elements.
      */
+    @SuppressWarnings("overloads")
     public static final class VanillaSpliteratorOfDouble
             extends AbstractPrimitiveSpliterator<Double, DoubleConsumer, Spliterator.OfDouble, PrimitiveIterator.OfDouble>
             implements Spliterator.OfDouble {
