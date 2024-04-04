@@ -62,7 +62,7 @@ public interface FieldInfo {
      */
     @NotNull
     static Wires.FieldInfoPair lookupClass(@NotNull Class<?> aClass) {
-        final SerializationStrategy<?> ss = Wires.CLASS_STRATEGY.get(aClass);
+        final SerializationStrategy ss = Wires.CLASS_STRATEGY.get(aClass);
         switch (ss.bracketType()) {
             case NONE:
             case SEQ:
@@ -83,7 +83,7 @@ public interface FieldInfo {
         for (@NotNull WireMarshaller.FieldAccess fa : marshaller.fields) {
             final String name = fa.field.getName();
             final Class<?> type = fa.field.getType();
-            final SerializationStrategy<?> ss2 = Wires.CLASS_STRATEGY.get(type);
+            final SerializationStrategy ss2 = Wires.CLASS_STRATEGY.get(type);
             final BracketType bracketType = ss2.bracketType();
             fields.add(createForField(name, type, bracketType, fa.field));
         }

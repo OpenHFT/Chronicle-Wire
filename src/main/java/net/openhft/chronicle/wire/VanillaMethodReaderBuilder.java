@@ -70,7 +70,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     private ExceptionHandler exceptionHandlerOnUnknownMethod = Jvm.debug();
 
     // A predicate to further filter method calls.
-    private Predicate predicate = x -> true;
+    private Predicate<MethodReader> predicate = x -> true;
 
     // A flag to indicate whether the reader is in a scanning mode.
     private boolean scanning = false;
@@ -285,7 +285,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     }
 
     @Override
-    public MethodReaderBuilder predicate(Predicate<?> predicate) {
+    public MethodReaderBuilder predicate(Predicate<MethodReader> predicate) {
         this.predicate = predicate;
         return this;
     }

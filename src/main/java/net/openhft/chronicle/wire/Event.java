@@ -35,6 +35,7 @@ public interface Event<E extends Event<E>> extends BaseEvent<E> {
      * @param eventId The unique identifier to assign to this event.
      * @return The current instance of the event, facilitating method chaining.
      */
+    @SuppressWarnings("unchecked")
     default E eventId(@NotNull final CharSequence eventId) {
         // By default, the event identifier is unchanged and the current instance is returned.
         return (E) this;
@@ -48,6 +49,7 @@ public interface Event<E extends Event<E>> extends BaseEvent<E> {
      * @param eventName The new name to be assigned to the event.
      * @return The current instance of the implementing class, with any necessary updates applied.
      */
+    @SuppressWarnings("unchecked")
     default E updateEvent(final String eventName) {
         // Set the event ID to the given name if it's currently unset
         if (this.eventId().length() == 0)

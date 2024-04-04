@@ -85,6 +85,11 @@ public class NestedGenericTest extends WireTestCommon {
             ValueHolder<?> that = (ValueHolder<?>) o;
             return Objects.equals(defaultValue, that.defaultValue);
         }
+
+        @Override
+        public int hashCode() {
+            throw new UnsupportedOperationException();
+        }
     }
 
     // Defined ValueHolder class to hold values of type A for testing
@@ -102,6 +107,11 @@ public class NestedGenericTest extends WireTestCommon {
             if (o == null || getClass() != o.getClass()) return false;
             ValueHolderDef that = (ValueHolderDef) o;
             return Objects.equals(defaultValue, that.defaultValue);
+        }
+
+        @Override
+        public int hashCode() {
+            throw new UnsupportedOperationException();
         }
     }
 
@@ -122,6 +132,11 @@ public class NestedGenericTest extends WireTestCommon {
             if (o == null || getClass() != o.getClass()) return false;
             A a = (A) o;
             return x == a.x && Objects.equals(y, a.y);
+        }
+
+        @Override
+        public int hashCode() {
+            throw new UnsupportedOperationException();
         }
     }
 }

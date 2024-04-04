@@ -39,7 +39,7 @@ public abstract class ReplyingHandler<H extends ReplyingHandler<H>> extends Abst
     }
 
     @Override
-    public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg channelCfg) {
+    public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg<?> channelCfg) {
         throw new UnsupportedOperationException("asInternalChannel operation is not supported in ReplyingHandler");
     }
 }

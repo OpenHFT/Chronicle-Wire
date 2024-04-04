@@ -113,11 +113,12 @@ public class WireExchangerPerfMain implements JLBHTask {
      * Represents the consumer logic, where messages are read,
      * and latency samples are taken.
      */
+    @SuppressWarnings("try")
     private void run() {
         try (AffinityLock lock = AffinityLock.acquireLock()) {
             started = true;
             while (!Thread.currentThread().isInterrupted()) {
-                final Bytes<ByteBuffer> bytes = (Bytes<ByteBuffer>) be.acquireConsumer().bytes();
+                final Bytes<ByteBuffer> bytes = Jvm.uncheckedCast(be.acquireConsumer().bytes());
                 while (bytes.readRemaining() > 0) {
                     long time = bytes.readLong();
                     jlbh.sample(System.nanoTime() - time);
@@ -136,7 +137,7 @@ public class WireExchangerPerfMain implements JLBHTask {
      */
     @Override
     public void run(long startTimeNS) {
-        final Bytes<ByteBuffer> bytes = (Bytes<ByteBuffer>) be.acquireProducer().bytes();
+        final Bytes<ByteBuffer> bytes = Jvm.uncheckedCast(be.acquireProducer().bytes());
         if (bytes.writePosition() > 32000) {
             System.out.print(".");
             Jvm.pause(++count);

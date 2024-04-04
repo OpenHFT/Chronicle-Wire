@@ -83,9 +83,8 @@ public class WireInternalInternTest extends WireTestCommon {
 //    @Test
     public void intern() {
         int sep = typeValue.indexOf(' ');
-        // Extracting the class type from the test input value.
-        Class type = ClassAliasPool.CLASS_ALIASES.forName(typeValue.substring(1, sep));
-        // Extracting the actual value from the test input value.
+        Class<?> type = ClassAliasPool.CLASS_ALIASES.forName(
+                typeValue.substring(1, sep));
         String value = typeValue.substring(sep + 1);
         // Interning the value using WireInternal.
         Object value2 = WireInternal.intern(type, value);

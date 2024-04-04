@@ -67,7 +67,7 @@ import static net.openhft.chronicle.wire.Wires.*;
  * Extends the `AbstractWire` and implements the `Wire` interface to ensure compatibility and a common API
  * with other wire formats.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
 public class BinaryWire extends AbstractWire implements Wire {
 
     static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal();
@@ -1436,8 +1436,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      * @param aClass The class to check.
      * @return True if the class is self-describing, false otherwise.
      */
-    private boolean usesSelfDescribing(Class aClass) {
-        // Check if we have an override set; if not, get from the map.
+    private boolean usesSelfDescribing(Class<?> aClass) {
         Boolean selfDesc = overrideSelfDescribing == null ? USES_SELF_DESCRIBING.get(aClass) : overrideSelfDescribing;
 
         // Return true if the class is marked as self-describing.
@@ -2566,7 +2565,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@Nullable Class type) {
+        public WireOut typeLiteral(@Nullable Class<?> type) {
             if (bytes.retainedHexDumpDescription() && type != null)
                 bytes.writeHexDumpDescription(type.getName());
             if (type == null)
@@ -2578,7 +2577,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class type) {
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class<?> type) {
             if (bytes.retainedHexDumpDescription())
                 bytes.writeHexDumpDescription(type == null ? null : type.getName());
             writeCode(TYPE_LITERAL);
@@ -4295,12 +4294,12 @@ public class BinaryWire extends AbstractWire implements Wire {
             @Nullable StringBuilder sb = readUtf8();
             if (sb == null)
                 return null;
-
-            // Find the class by name from the string builder content
-            final Class clazz = classLookup().forName(sb);
+            // its possible that the object that you are allocating may not have a
+            // default constructor
+            final Class<T> clazz = (Class<T>) classLookup().forName(sb);
 
             if (Demarshallable.class.isAssignableFrom(clazz)) {
-                return (T) demarshallable(clazz);
+                return (T) demarshallable((Class<? extends Demarshallable>) clazz);
             }
 
             // Check if the class is neither of type Marshallable nor Demarshallable
@@ -4340,7 +4339,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @Override
         @Nullable
-        public <T> T typedMarshallable(@NotNull Function<Class, ReadMarshallable> marshallableFunction)
+        public <T> T typedMarshallable(@NotNull Function<Class<T>, ReadMarshallable> marshallableFunction)
                 throws IORuntimeException, InvalidMarshallableException {
 
             int code = peekCode();
@@ -4348,7 +4347,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 // todo get delta wire to support Function<Class, ReadMarshallable> correctly
                 return typedMarshallable();
 
-            @Nullable final Class aClass = typePrefix();
+            @Nullable final Class<T>aClass = (Class<T>) typePrefix();
 
             if (ReadMarshallable.class.isAssignableFrom(aClass)) {
                 final ReadMarshallable marshallable = marshallableFunction.apply(aClass);
@@ -4359,7 +4358,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public Class typePrefix() {
+        public Class<?> typePrefix() {
             int code = peekCode();
             if (code != TYPE_PREFIX) {
                 return null;
@@ -4376,7 +4375,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public Object typePrefixOrObject(Class tClass) {
+        public Object typePrefixOrObject(Class<?> tClass) {
             int code = peekCode();
             if (code != TYPE_PREFIX) {
                 return null;
@@ -4542,7 +4541,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 long limit2 = bytes.readPosition() + length;
                 bytes.readLimit(limit2);
                 try {
-                    strategy.readUsing(null, object, this, BracketType.MAP);
+                    strategy.readUsing(null, Jvm.uncheckedCast(object), this, BracketType.MAP);
 
                 } finally {
                     bytes.readLimit(limit);
@@ -4589,8 +4588,8 @@ public class BinaryWire extends AbstractWire implements Wire {
          * @throws IORuntimeException for general IO issues.
          */
         @Nullable
-        public Demarshallable demarshallable(@NotNull Class clazz) throws BufferUnderflowException, IORuntimeException {
-            if (this.isNull())  // If the next value is null, return null.
+        public Demarshallable demarshallable(@NotNull Class<? extends Demarshallable> clazz) throws BufferUnderflowException, IORuntimeException {
+            if (this.isNull())
                 return null;
 
             long length = readLength();  // Read the expected length of the data.
@@ -4813,7 +4812,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class type) throws InvalidMarshallableException {
+        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class<?> type) throws InvalidMarshallableException {
             int code = peekCode();
             if ((code & 0x80) == 0) {
                 bytes.uncheckedReadSkipOne();
@@ -4891,7 +4890,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                         case TYPE_PREFIX: {
                             readCode();
                             @Nullable StringBuilder sb = readUtf8();
-                            final Class clazz2 = classLookup().forName(sb);
+                            final Class<?> clazz2 = classLookup().forName(sb);
                             return object(null, clazz2);
                         }
                         case EVENT_OBJECT: {

@@ -218,6 +218,7 @@ public class PerfLatencyMain implements JLBHTask {
         private ChronicleChannel channel;
 
         // Client constructor sets up the echoing, reader, and starts the reader thread
+        @SuppressWarnings({"unused", "try"})
         public Client() {
             // Initialize the channel and echoing method writer
             channel = context.newChannelSupplier(echoHandler).buffered(BUFFERED && BATCH > 1).get();

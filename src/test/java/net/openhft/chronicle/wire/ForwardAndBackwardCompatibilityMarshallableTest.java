@@ -33,7 +33,7 @@ import java.util.Collection;
 
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
-// Test class to check forward and backward compatibility with various WireTypes
+@SuppressWarnings("this-escape")
 @RunWith(value = Parameterized.class)
 public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCommon {
 

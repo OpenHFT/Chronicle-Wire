@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,13 +33,9 @@ import java.util.function.Function;
  * @param <T> The type of the scalar value that this strategy handles.
  */
 class ScalarStrategy<T> implements SerializationStrategy<T> {
-
-    // Function to read the scalar value from an input source
-    @NotNull
-    final BiFunction<? super T, ValueIn, T> read;
-
+    final BiFunction<? super E, ValueIn, E> read;
     // The class type of the scalar value
-    private final Class<T> type;
+    private final Class<E> type;
 
     /**
      * Constructs a new {@code ScalarStrategy} with the given type and read function.
@@ -47,6 +44,7 @@ class ScalarStrategy<T> implements SerializationStrategy<T> {
      * @param read The function used to read the scalar value.
      */
     ScalarStrategy(Class<T> type, @NotNull BiFunction<? super T, ValueIn, T> read) {
+    ScalarStrategy(Class<E> type, @NotNull BiFunction<? super E, ValueIn, E> read) {
         this.type = type;
         this.read = read;
     }
@@ -92,22 +90,23 @@ class ScalarStrategy<T> implements SerializationStrategy<T> {
     @SuppressWarnings("rawtypes")
     @NotNull
     @Override
-    public T newInstanceOrNull(Class type) {
-        return ObjectUtils.newInstance(this.type);
+    public <T> T newInstanceOrNull(Class<T>type) {
+        return Jvm.uncheckedCast(ObjectUtils.newInstance(this.type));
     }
 
     @Override
-    public Class<T> type() {
+    public Class<E> type() {
         return type;
     }
 
+    @SuppressWarnings("unchecked")
     @Nullable
     @Override
-    public T readUsing(Class clazz, T using, @NotNull ValueIn in, BracketType bracketType) {
+    public <T> T readUsing(Class<?> clazz, T using, @NotNull ValueIn in, BracketType bracketType) {
         if (in.isNull())
             return null;
 
-        return read.apply(using, in);
+        return (T) read.apply((E) using, in);
     }
 
     @NotNull

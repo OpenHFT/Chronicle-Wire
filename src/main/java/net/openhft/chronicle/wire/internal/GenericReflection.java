@@ -40,8 +40,7 @@ public enum GenericReflection {
      * @param forClass The class context within which the method's return type is to be evaluated
      * @return The resolved return type. It returns the raw type if generic resolution is not possible.
      */
-    public static Type getReturnType(Method m, Class forClass) {
-        // Gets the generic return type of the method
+    public static Type getReturnType(Method m, Class<?> forClass) {
         final Type genericReturnType = m.getGenericReturnType();
 
         // If the return type is not generic, return it
@@ -83,6 +82,6 @@ public enum GenericReflection {
         // Checks if the type is parameterized and retrieves its raw type
         return t instanceof ParameterizedType
                 ? erase(((ParameterizedType) t).getRawType())
-                : (Class) t;
+                : (Class<?>) t;
     }
 }

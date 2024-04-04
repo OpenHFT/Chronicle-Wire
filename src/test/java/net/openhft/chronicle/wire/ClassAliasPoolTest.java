@@ -96,6 +96,7 @@ public class ClassAliasPoolTest extends WireTestCommon {
     }
 
     // This test verifies the use of custom class lookups in the wire
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
     public void testUsesClassLookup() {
         // Create a mock for the ClassLookup interface

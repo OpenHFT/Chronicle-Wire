@@ -85,7 +85,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
         @SuppressWarnings("deprecation")
         final URL url = new URL("file://" + file.getAbsolutePath() + query);
         writeMessages(url);
-        final Bytes bytes = BytesUtil.readFile(file.getAbsolutePath());
+        final Bytes<?> bytes = BytesUtil.readFile(file.getAbsolutePath());
         assertEquals(expected, bytes.toString());
         // can overwrite ok
         writeMessages(url);
@@ -193,7 +193,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
 
         @Override
         public void handle(HttpExchange xchg) throws IOException {
-            Bytes bytes = Bytes.allocateElasticOnHeap();
+            Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap();
             char ch;
             for (InputStream is = xchg.getRequestBody(); (ch = (char) is.read()) != (char) -1; )
                 bytes.writeUnsignedByte(ch);
@@ -262,7 +262,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
             public void handle(HttpExchange xchg) {
                 try {
                     InputStream is = xchg.getRequestBody();
-                    final Bytes<byte[]> bytes2 = (Bytes<byte[]>) wire.bytes();
+                    final Bytes<byte[]> bytes2 = Jvm.uncheckedCast(wire.bytes());
                     int length = is.available();
                     byte[] bytes = bytes2.underlyingObject();
                     int length2 = is.read(bytes);

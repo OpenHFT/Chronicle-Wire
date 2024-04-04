@@ -19,6 +19,7 @@
 package net.openhft.chronicle.wire.internal;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.*;
@@ -60,7 +61,7 @@ public class FileMarshallableOut implements MarshallableOut {
             final String path = url.getPath();
             final String path0 = options.append ? path : (path + ".tmp");
             try (FileOutputStream out = new FileOutputStream(path0, options.append)) {
-                final Bytes<byte[]> bytes = (Bytes<byte[]>) wire.bytes();
+                final Bytes<byte[]> bytes = Jvm.uncheckedCast(wire.bytes());
                 out.write(bytes.underlyingObject(), 0, (int) bytes.readLimit());
             } catch (IOException ioe) {
                 throw new IORuntimeException(ioe);

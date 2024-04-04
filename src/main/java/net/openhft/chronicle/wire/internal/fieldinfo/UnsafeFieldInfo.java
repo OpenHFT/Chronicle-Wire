@@ -41,7 +41,7 @@ class UnsafeFieldInfo extends VanillaFieldInfo {
      * @param bracketType The bracket type associated with the field.
      * @param field       The actual field representation.
      */
-    public UnsafeFieldInfo(String name, Class type, BracketType bracketType, @NotNull Field field) {
+    public UnsafeFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         super(name, type, bracketType, field);
     }
 

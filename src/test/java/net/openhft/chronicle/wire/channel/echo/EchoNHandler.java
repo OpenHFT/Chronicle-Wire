@@ -81,8 +81,7 @@ public class EchoNHandler extends AbstractHandler<EchoNHandler> {
 
     // This method creates and returns an EchoChannel object with specific configurations.
     @Override
-    public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg channelCfg) {
-        // Return a new instance of EchoChannel with the given configuration.
+    public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg<?> channelCfg) {
         return new EchoChannel(channelCfg);
     }
 }

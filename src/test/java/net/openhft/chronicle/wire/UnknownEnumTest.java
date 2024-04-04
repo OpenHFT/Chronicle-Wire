@@ -116,8 +116,7 @@ public class UnknownEnumTest extends WireTestCommon {
         }
     }
 
-    // Dynamic Enum for testing
-    enum YesNo implements DynamicEnum {
+    enum YesNo implements DynamicEnum<YesNo> {
         Yes,
         No
     }

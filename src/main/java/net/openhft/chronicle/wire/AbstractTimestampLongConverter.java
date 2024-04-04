@@ -47,6 +47,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @see LongConverter for the interface this abstract class implements.
  */
+@SuppressWarnings("this-escape")
 public abstract class AbstractTimestampLongConverter implements LongConverter {
     /**
      * Universal Time Coordinated (UTC) timezone

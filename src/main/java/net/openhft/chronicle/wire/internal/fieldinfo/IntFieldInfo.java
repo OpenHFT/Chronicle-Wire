@@ -40,7 +40,7 @@ public final class IntFieldInfo extends UnsafeFieldInfo {
      * @param bracketType The bracket type associated with the field.
      * @param field       The field object representation.
      */
-    public IntFieldInfo(String name, Class type, BracketType bracketType, @NotNull Field field) {
+    public IntFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         super(name, type, bracketType, field);
     }
 

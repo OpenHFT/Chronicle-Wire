@@ -40,8 +40,7 @@ import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
-@SuppressWarnings("rawtypes")
-// Testing the BinaryWire2 with different padding configurations
+@SuppressWarnings({"rawtypes","try"})
 @RunWith(value = Parameterized.class)
 public class BinaryWire2Test extends WireTestCommon {
     final boolean usePadding;

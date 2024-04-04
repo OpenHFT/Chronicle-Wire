@@ -138,7 +138,7 @@ public class SequenceTest extends WireTestCommon {
 
         // Write the set to the wire.
         try (DocumentContext dc = w1.writingDocument()) {
-            w1.write("list").object(value);
+            dc.wire().write("list").object(value);
         }
 
         // Print the serialized data.
@@ -146,9 +146,9 @@ public class SequenceTest extends WireTestCommon {
 
         // Read the set back from the wire.
         try (DocumentContext dc = w1.readingDocument()) {
-            Object o = w1.read("list").object();
+            Object o = dc.wire().read("list").object();
             if (wireType == WireType.JSON)
-                o = new LinkedHashSet<>((Collection) o); // Convert back to set if JSON.
+                o = new LinkedHashSet<>((Collection<?>) o);
             assertEquals(value, o);
         }
     }
@@ -167,7 +167,7 @@ public class SequenceTest extends WireTestCommon {
 
         // Write the list to the wire.
         try (DocumentContext dc = w1.writingDocument()) {
-            w1.write("list").object(value);
+            dc.wire().write("list").object(value);
         }
 
         // Print the serialized data.
@@ -175,7 +175,7 @@ public class SequenceTest extends WireTestCommon {
 
         // Read the list back from the wire.
         try (DocumentContext dc = w1.readingDocument()) {
-            Object o = w1.read("list").object();
+            Object o = dc.wire().read("list").object();
             assertEquals(value, o);
         }
     }
@@ -199,7 +199,7 @@ public class SequenceTest extends WireTestCommon {
 
         // Write the map to the wire.
         try (DocumentContext dc = w1.writingDocument()) {
-            w1.write("map").object(value);
+            dc.wire().write("map").object(value);
         }
 
         // Print the serialized data.
@@ -207,7 +207,7 @@ public class SequenceTest extends WireTestCommon {
 
         // Read the map back from the wire.
         try (DocumentContext dc = w1.readingDocument()) {
-            Object o = w1.read("map").object();
+            Object o = dc.wire().read("map").object();
             assertEquals(value, o);
         }
     }

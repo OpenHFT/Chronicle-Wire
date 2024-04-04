@@ -71,8 +71,7 @@ public class ChannelVisitorHandler extends AbstractHandler<ChannelVisitorHandler
      * @throws UnsupportedOperationException always, as the operation is not supported.
      */
     @Override
-    public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg channelCfg) {
-        // Unsupported operation, throw an exception if this method is called
+    public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg<?> channelCfg) {
         throw new UnsupportedOperationException();
     }
 }

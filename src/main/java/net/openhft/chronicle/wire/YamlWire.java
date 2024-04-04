@@ -51,7 +51,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
  * The YamlWire class extends YamlWireOut and utilizes a custom tokenizer to convert YAML tokens into byte sequences.
  * It provides utility methods to read from and write to both byte buffers and files.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
 public class YamlWire extends YamlWireOut<YamlWire> {
 
     // YAML-specific tag constants for representing special constructs.
@@ -380,7 +380,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.YAML,
                 () -> newTextMethodWriterInvocationHandler(tClass));
-        for (Class aClass : additional)
+        for (Class<?> aClass : additional)
             builder.addInterface(aClass);
         useTextDocuments();
         builder.marshallableOut(this);
@@ -739,6 +739,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         return sb;
     }
 
+    @SuppressWarnings("fallthrough")
     @Nullable
     @Override
     public <K> K readEvent(@NotNull Class<K> expectedClass) throws InvalidMarshallableException {
@@ -779,6 +780,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     @Override
+    @SuppressWarnings("fallthrough")
     public void consumePadding() {
         while (true) {
             switch (yt.current()) {
@@ -1014,7 +1016,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * @return A Java Map representing the YAML map.
      */
     @NotNull
-    private Map readMap(Class valueType) {
+    private Map readMap(Class<?> valueType) {
         Map map = new LinkedHashMap();
         if (yt.current() == YamlToken.MAPPING_START) {
             while (yt.next() == YamlToken.MAPPING_KEY) {
@@ -1210,7 +1212,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         @Override
-        public <E> E object(@Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
+        public <E> E object(@Nullable E using, @Nullable Class<? extends E> clazz, boolean bestEffort) throws InvalidMarshallableException {
             YamlToken current = yt.current();
             if (current == YamlToken.ALIAS) {
                 String alias = yt.text();
@@ -1841,7 +1843,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         @Override
-        public Class typePrefix() {
+        public Class<?> typePrefix() {
             if (yt.current() != YamlToken.TAG)
                 return null;
             final StringBuilder stringBuilder = acquireStringBuilder();
@@ -1861,7 +1863,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         @Override
-        public Object typePrefixOrObject(Class tClass) {
+        public Object typePrefixOrObject(Class<?> tClass) {
             consumePadding();
             switch (yt.current()) {
                 case TAG: {
@@ -1952,7 +1954,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             }
             switch (yt.current()) {
                 case TAG:
-                    Class clazz = typePrefix();
+                    Class<?> clazz = typePrefix();
                     if (clazz != object.getClass())
                         object = ObjectUtils.newInstance(clazz);
                     return marshallable(object, strategy);
@@ -1993,8 +1995,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          * @throws IORuntimeException If there's an error in the YAML format or during demarshalling.
          */
         @NotNull
-        public Demarshallable demarshallable(@NotNull Class clazz) {
-            // Consume any padding or white space in the YAML stream.
+        public Demarshallable demarshallable(@NotNull Class<?> clazz) {
             consumePadding();
             switch (yt.current()) {
                 case TAG:
@@ -2019,7 +2020,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 bytes.readSkip(1);  // skip the opening curly brace '{'
                 consumePadding();
 
-                object = Demarshallable.newInstance(clazz, YamlWire.this);
+                object = Demarshallable.newInstance((Class<? extends Demarshallable>) clazz, YamlWire.this);
             } finally {
                 // Restore original read limits after processing.
                 bytes.readLimit(limit);
@@ -2234,7 +2235,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         @Override
-        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class type) throws InvalidMarshallableException {
+        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class<?> type) throws InvalidMarshallableException {
             consumePadding();
             if (yt.current() == YamlToken.SEQUENCE_ENTRY)
                 yt.next();
@@ -2254,13 +2255,14 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          * @return The read object, possibly of the expected type. Might be null if the YAML token is NONE.
          * @throws InvalidMarshallableException if any error occurs while parsing or constructing the object.
          */
+        @SuppressWarnings("fallthrough")
         @Nullable
-        Object objectWithInferredType0(Object using, @NotNull SerializationStrategy strategy, Class type) throws InvalidMarshallableException {
+        Object objectWithInferredType0(Object using, @NotNull SerializationStrategy strategy, Class<?> type) throws InvalidMarshallableException {
             boolean bestEffort = type != null;
 
             // Handle type declaration, if present
             if (yt.current() == YamlToken.TAG) {
-                Class aClass = typePrefix();
+                Class<?> aClass = typePrefix();
                 if (type == null || type == Object.class || type.isInterface())
                     type = aClass;
             }
@@ -2360,14 +2362,12 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          * @return An object representing the read sequence, which might be a collection or an array.
          */
         @NotNull
-        private Object readSequence(Class clazz) {
-            // Determine the appropriate type of collection based on the provided class
+        private Object readSequence(Class<?> clazz) {
             @NotNull Collection coll =
                     clazz == SortedSet.class ? new TreeSet<>() :
                             clazz == Set.class ? new LinkedHashSet<>() :
                                     new ArrayList<>();
-            // Detect primitive array component types
-            @Nullable Class componentType = (clazz != null && clazz.isArray() && clazz.getComponentType().isPrimitive())
+            @Nullable Class<?> componentType = (clazz != null && clazz.isArray() && clazz.getComponentType().isPrimitive())
                     ? clazz.getComponentType() : null;
 
             // Read the YAML sequence into the determined collection type
@@ -2394,7 +2394,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          * @param clazz The class type to which each item should be casted, can be null.
          * @param list The target collection to be populated.
          */
-        private void readCollection(@Nullable Class clazz, @NotNull Collection list) {
+        private void readCollection(@Nullable Class<?> clazz, @NotNull Collection list) {
             sequence(list, (l, v) -> {
                 while (v.hasNextSequenceItem()) {
                     l.add(v.object(clazz));
@@ -2412,8 +2412,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          * @return The decoded object, potentially wrapped or converted according to the desired type.
          * @throws InvalidMarshallableException If there's an error during the deserialization.
          */
-        private Object decodeBinary(Class type) throws InvalidMarshallableException {
-            // Extract the Base64 string, clean it, and decode into a byte array
+        private Object decodeBinary(Class<?> type) throws InvalidMarshallableException {
             Object o = objectWithInferredType(null, SerializationStrategies.ANY_SCALAR, String.class);
             byte[] decoded = Base64.getDecoder().decode(o == null ? "" : o.toString().replaceAll("\\s", ""));
 

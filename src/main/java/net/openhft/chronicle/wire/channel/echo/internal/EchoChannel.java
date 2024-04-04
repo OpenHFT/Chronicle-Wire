@@ -42,11 +42,7 @@ public class EchoChannel extends SimpleCloseable implements ChronicleChannel {
 
     // The wire used for reading and writing documents
     private final Wire wire = WireType.BINARY_LIGHT.apply(Bytes.allocateElasticOnHeap());
-
-    // Configuration associated with the channel
-    private final ChronicleChannelCfg channelCfg;
-
-    // Keeps track of the last test message's timestamp
+    private final ChronicleChannelCfg<?> channelCfg;
     private long lastTestMessage;
 
     /**
@@ -54,12 +50,12 @@ public class EchoChannel extends SimpleCloseable implements ChronicleChannel {
      *
      * @param channelCfg The configuration for this channel.
      */
-    public EchoChannel(ChronicleChannelCfg channelCfg) {
+    public EchoChannel(ChronicleChannelCfg<?> channelCfg) {
         this.channelCfg = channelCfg;
     }
 
     @Override
-    public ChronicleChannelCfg channelCfg() {
+    public ChronicleChannelCfg<?> channelCfg() {
         return channelCfg;
     }
 

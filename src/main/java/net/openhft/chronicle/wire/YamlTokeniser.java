@@ -35,6 +35,7 @@ import java.util.Set;
  * a distinct construct or symbol in YAML. This class is integral to
  * processes such as parsing or tokenization of YAML documents.
  */
+@SuppressWarnings("this-escape")
 public class YamlTokeniser {
 
     /** Represents an undefined or invalid indentation. */

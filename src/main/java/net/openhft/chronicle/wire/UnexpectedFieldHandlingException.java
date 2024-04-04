@@ -24,6 +24,7 @@ package net.openhft.chronicle.wire;
  * unmarshalling processes.
  */
 public class UnexpectedFieldHandlingException extends RuntimeException {
+    private static final long serialVersionUID = 0L;
 
     /**
      * Constructs a new UnexpectedFieldHandlingException with the provided underlying cause.

@@ -83,15 +83,14 @@ public enum Wires {
     public static final Bytes<?> NO_BYTES = BytesStore.empty().bytesForRead();
     // Size of the SPB header
     public static final int SPB_HEADER_SIZE = 4;
-    // Dynamic list of class strategy functions
-    public static final List<Function<Class, SerializationStrategy>> CLASS_STRATEGY_FUNCTIONS = new CopyOnWriteArrayList<>();
+    public static final List<Function<Class<?>, SerializationStrategy>> CLASS_STRATEGY_FUNCTIONS = new CopyOnWriteArrayList<>();
 
     // Adding SuppressWarnings on every usage could have too many side effects, so make it a comment for now, but still remove it.
     // @Deprecated(/* for removal in x.26 */)
     static boolean THROW_CNFRE = Jvm.getBoolean("class.not.found.for.missing.class.alias", true);
     // Class local storage for serialization strategies based on the class type
     static final ClassLocal<SerializationStrategy> CLASS_STRATEGY = ClassLocal.withInitial(c -> {
-        for (@NotNull Function<Class, SerializationStrategy> func : CLASS_STRATEGY_FUNCTIONS) {
+        for (@NotNull Function<Class<?>, SerializationStrategy> func : CLASS_STRATEGY_FUNCTIONS) {
             final SerializationStrategy strategy = func.apply(c);
             if (strategy != null)
                 return strategy;
@@ -758,7 +757,7 @@ public enum Wires {
             Wire wire = wireSR.get();
             wire.getValueOut().object(source);
             wire.getValueIn().typePrefix(); // drop the type prefix.
-            wire.getValueIn().object(target, target.getClass());
+            wire.getValueIn().object(target, (Class<T>) target.getClass());
             return target;
         } finally {
             ValidatableUtil.endValidateDisabled();
@@ -799,7 +798,7 @@ public enum Wires {
      * @return List of field information
      */
     @NotNull
-    public static List<FieldInfo> fieldInfos(@NotNull Class aClass) {
+    public static List<FieldInfo> fieldInfos(@NotNull Class<?> aClass) {
         return FIELD_INFOS.get(aClass).list;
     }
 
@@ -809,7 +808,8 @@ public enum Wires {
      * @param aClass Class to retrieve field information for
      * @return Map of field names to their information
      */
-    public static @NotNull Map<String, FieldInfo> fieldInfoMap(@NotNull Class aClass) {
+    public static @NotNull Map<String, FieldInfo> fieldInfoMap(@NotNull Class<?> aClass) {
+    public static @NotNull Map<String, FieldInfo> fieldInfoMap(@NotNull Class<?> aClass) {
         return FIELD_INFOS.get(aClass).map;
     }
 
@@ -820,7 +820,7 @@ public enum Wires {
      * @param name   Field name
      * @return Information about the field
      */
-    public static FieldInfo fieldInfo(@NotNull Class aClass, String name) {
+    public static FieldInfo fieldInfo(@NotNull Class<?> aClass, String name) {
         return FIELD_INFOS.get(aClass).map.get(name);
     }
 
@@ -922,13 +922,13 @@ public enum Wires {
      * @return A sequence of objects read using the provided serialization strategy
      */
     @Nullable
-    public static <E> E objectSequence(ValueIn in, @Nullable E using, @Nullable Class clazz, SerializationStrategy<E> strategy) {
+    public static <E> E objectSequence(ValueIn in, @Nullable E using, @Nullable Class<? extends E> clazz, SerializationStrategy strategy) {
         if (clazz == Object.class)
             strategy = LIST;
         if (using == null)
-            using = (E) strategy.newInstanceOrNull(clazz);
+            using = strategy.newInstanceOrNull((Class<E>) clazz);
 
-        SerializationStrategy<E> finalStrategy = strategy;
+        SerializationStrategy finalStrategy = strategy;
         return in.sequence(using, (using1, in1) -> finalStrategy.readUsing(clazz, using1, in1, BracketType.UNKNOWN)) ? readResolve(using) : null;
     }
 
@@ -944,9 +944,7 @@ public enum Wires {
      * @throws InvalidMarshallableException If the deserialization process encounters an error
      */
     @Nullable
-    public static <E> E objectMap(ValueIn in, @Nullable E using, @Nullable Class clazz, @NotNull SerializationStrategy<E> strategy) throws InvalidMarshallableException {
-
-        // If the input value is null, return null.
+    public static <E> E objectMap(ValueIn in, @Nullable E using, @Nullable Class<? extends E> clazz, @NotNull SerializationStrategy strategy) throws InvalidMarshallableException {
         if (in.isNull())
             return null;
 
@@ -956,7 +954,7 @@ public enum Wires {
 
         // If no object is provided to populate, instantiate a new one using the strategy.
         if (using == null) {
-            using = (E) strategy.newInstanceOrNull(clazz);
+            using = strategy.newInstanceOrNull((Class<E>) clazz);
         }
 
         // If the class represents a Throwable, deserialize it using a special method.
@@ -1034,7 +1032,7 @@ public enum Wires {
      * @throws InvalidMarshallableException If the deserialization process encounters an error
      */
     @Nullable
-    public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class clazz) throws InvalidMarshallableException {
+    public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class<? extends E> clazz) throws InvalidMarshallableException {
         return ValidatableUtil.validate(object1(in, using, clazz, true));
     }
 
@@ -1049,7 +1047,7 @@ public enum Wires {
      * @return The deserialized and validated object.
      * @throws InvalidMarshallableException If an error occurs during deserialization.
      */
-    public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
+    public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class<? extends E> clazz, boolean bestEffort) throws InvalidMarshallableException {
         return ValidatableUtil.validate(object1(in, using, clazz, bestEffort));
     }
 
@@ -1064,9 +1062,7 @@ public enum Wires {
      * @return The deserialized object.
      * @throws InvalidMarshallableException If an error occurs during deserialization.
      */
-    public static <E> E object1(ValueIn in, @Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
-
-        // Attempt to get the type prefix or the object directly from the input.
+    public static <E> E object1(ValueIn in, @Nullable E using, @Nullable Class<? extends E> clazz, boolean bestEffort) throws InvalidMarshallableException {
         Object o = in.typePrefixOrObject(clazz);
         if (o == null && using instanceof ReadMarshallable)
             o = using;
@@ -1077,15 +1073,15 @@ public enum Wires {
     }
 
     @Nullable
-    static <E> E object2(ValueIn in, @Nullable E using, @Nullable Class clazz, boolean bestEffort, Class o) {
-        @Nullable final Class clazz2 = o;
+    static <E> E object2(ValueIn in, @Nullable E using, @Nullable Class<? extends E> clazz, boolean bestEffort, Class<?> o) {
+        @Nullable final Class<?> clazz2 = o;
         if (clazz2 == void.class) {
             in.text();
             return null;
         } else if (clazz2 == BytesStore.class) {
             if (using == null)
                 using = (E) Bytes.allocateElasticOnHeap(32);
-            clazz = Base64.class;
+            clazz = (Class<E>) Base64.class;
             bestEffort = true;
         }
 
@@ -1101,7 +1097,7 @@ public enum Wires {
                     || clazz.isAssignableFrom(clazz2)
                     || ReadResolvable.class.isAssignableFrom(clazz2)
                     || !ObjectUtils.isConcreteClass(clazz)) {
-                clazz = clazz2;
+                clazz = (Class<E>) clazz2;
                 if (!clazz.isInstance(using))
                     using = null;
             } else if (!bestEffort && !(isScalarClass(clazz) && isScalarClass(clazz2))) {
@@ -1109,9 +1105,9 @@ public enum Wires {
             }
         }
         if (clazz == null)
-            clazz = Object.class;
-        Class classForStrategy = clazz.isInterface() && using != null ? using.getClass() : clazz;
-        SerializationStrategy<E> strategy = CLASS_STRATEGY.get(classForStrategy);
+            clazz = (Class<E>) Object.class;
+        Class<?> classForStrategy = clazz.isInterface() && using != null ? using.getClass() : clazz;
+        SerializationStrategy strategy = CLASS_STRATEGY.get(classForStrategy);
         BracketType brackets = strategy.bracketType();
         if (brackets == BracketType.UNKNOWN)
             brackets = in.getBracketType();
@@ -1170,8 +1166,7 @@ public enum Wires {
      * @param type The class type to check.
      * @return True if the class type is scalar, false otherwise.
      */
-    static boolean isScalarClass(Class type) {
-        // If type is a subtype of Comparable, fetch the associated serialization strategy.
+    static boolean isScalarClass(Class<?> type) {
         if (Comparable.class.isAssignableFrom(type)) {
             final SerializationStrategy strategy = Wires.CLASS_STRATEGY.get(type);
             // Return true only if the strategy is neither ANY_OBJECT nor ANY_NESTED.
@@ -1186,7 +1181,7 @@ public enum Wires {
      * @param clazz The class to check.
      * @return True if the class is considered a DTO interface, false otherwise.
      */
-    public static boolean dtoInterface(Class clazz) {
+    public static boolean dtoInterface(Class<?> clazz) {
         return clazz != null
                 && clazz.isInterface()
                 && clazz != Bytes.class
@@ -1325,6 +1320,7 @@ public enum Wires {
      */
     static synchronized Class loadFromJava(ClassLoader classLoader, String className, String code) throws ClassNotFoundException {
         // Check if the CACHED_COMPILER instance is initialized.
+    static synchronized Class<?> loadFromJava(ClassLoader classLoader, String className, String code) throws ClassNotFoundException {
         if (CACHED_COMPILER == null) {
             final String target = OS.getTarget();
             File sourceDir = null;
@@ -1357,7 +1353,7 @@ public enum Wires {
     /**
      * Enum to provide serialization strategy based on the class type (Enum or DynamicEnum).
      */
-    enum SerializeEnum implements Function<Class, SerializationStrategy> {
+    enum SerializeEnum implements Function<Class<?>, SerializationStrategy> {
         INSTANCE;
 
         /**
@@ -1367,7 +1363,7 @@ public enum Wires {
          * @return The serialization strategy or null if none matches.
          */
         @Nullable
-        static SerializationStrategy getSerializationStrategy(@NotNull Class aClass) {
+        static SerializationStrategy getSerializationStrategy(@NotNull Class<?> aClass) {
             if (DynamicEnum.class.isAssignableFrom(aClass))
                 return DYNAMIC_ENUM;
             if (Enum.class.isAssignableFrom(aClass))
@@ -1383,7 +1379,7 @@ public enum Wires {
          */
         @Nullable
         @Override
-        public SerializationStrategy apply(@NotNull Class aClass) {
+        public SerializationStrategy apply(@NotNull Class<?> aClass) {
             return getSerializationStrategy(aClass);
         }
     }
@@ -1391,7 +1387,7 @@ public enum Wires {
     /**
      * Enum providing serialization strategy specifically for Java Language related classes.
      */
-    enum SerializeJavaLang implements Function<Class, SerializationStrategy> {
+    enum SerializeJavaLang implements Function<Class<?>, SerializationStrategy> {
         INSTANCE;
 
         // Constants for date formatting.
@@ -1507,8 +1503,7 @@ public enum Wires {
          * @param in The ValueIn object which contains the class name.
          * @return The Class object associated with the name.
          */
-        private static Class forName(Class o, ValueIn in) {
-            // Acquire a StringBuilder from a ThreadLocal (presumably for performance reasons to avoid frequent allocations).
+        private static Class<?> forName(Class<?> o, ValueIn in) {
             final StringBuilder sb0 = sb.get();
 
             // Reset the StringBuilder to its initial state.
@@ -1522,7 +1517,7 @@ public enum Wires {
         }
 
         @Override
-        public SerializationStrategy apply(@NotNull Class aClass) {
+        public SerializationStrategy apply(@NotNull Class<?> aClass) {
             switch (aClass.getName()) {
                 case "[B":
                     return ScalarStrategy.of(byte[].class, (o, in) -> in.bytes());
@@ -1637,7 +1632,7 @@ public enum Wires {
                     if (aClass.isPrimitive())
                         return ANY_SCALAR;
                     if (aClass.isArray()) {
-                        final Class componentType = aClass.getComponentType();
+                        final Class<?> componentType = aClass.getComponentType();
                         if (componentType.isPrimitive())
                             return PRIM_ARRAY;
                         return ARRAY;
@@ -1658,7 +1653,7 @@ public enum Wires {
      * The primary function of this enum is to map a {@link Class} to its appropriate {@link SerializationStrategy}.
      * For example, classes that implement the {@link Demarshallable} interface will be associated with the DEMARSHALLABLE strategy.
      */
-    enum SerializeMarshallables implements Function<Class, SerializationStrategy> {
+    enum SerializeMarshallables implements Function<Class<?>, SerializationStrategy> {
         INSTANCE;
 
         /**
@@ -1668,7 +1663,7 @@ public enum Wires {
          * @return The serialization strategy, or null if there's no specific strategy for the class.
          */
         @Nullable
-        static SerializationStrategy getSerializationStrategy(@NotNull Class aClass) {
+        static SerializationStrategy getSerializationStrategy(@NotNull Class<?> aClass) {
             if (Demarshallable.class.isAssignableFrom(aClass))
                 return DEMARSHALLABLE;
             if (ReadMarshallable.class.isAssignableFrom(aClass)
@@ -1685,7 +1680,7 @@ public enum Wires {
          * @return The corresponding serialization strategy for the given class.
          */
         @Override
-        public SerializationStrategy apply(@NotNull Class aClass) {
+        public SerializationStrategy apply(@NotNull Class<?> aClass) {
             @Nullable SerializationStrategy x = getSerializationStrategy(aClass);
             if (x != null) return x;
             if (Map.class.isAssignableFrom(aClass))
@@ -1711,7 +1706,7 @@ public enum Wires {
      * classes like BytesStore, Bytes, and Base64 encoded bytes. It helps in mapping specific classes
      * to the corresponding serialization strategies.
      */
-    enum SerializeBytes implements Function<Class, SerializationStrategy> {
+    enum SerializeBytes implements Function<Class<?>, SerializationStrategy> {
         INSTANCE;
 
         /**
@@ -1742,7 +1737,7 @@ public enum Wires {
          * @return The corresponding serialization strategy for the given class or null if not found.
          */
         @Override
-        public SerializationStrategy apply(@NotNull Class aClass) {
+        public SerializationStrategy apply(@NotNull Class<?> aClass) {
             switch (aClass.getName()) {
                 case "net.openhft.chronicle.bytes.BytesStore":
                     return ScalarStrategy.of(BytesStore.class, (o, in) -> in.bytesStore());
@@ -1892,7 +1887,7 @@ public enum Wires {
                     return Boolean.TRUE;
             }
             if (args == null || args.length == 0) {
-                Class returnType = method.getReturnType();
+                Class<?> returnType = method.getReturnType();
                 if (fields.containsKey(name))
                     return ObjectUtils.convertTo(returnType, fields.get(name));
                 return ObjectUtils.defaultValue(returnType);
@@ -1950,7 +1945,7 @@ public enum Wires {
          * @param name The name of the field.
          * @param type The type of the field.
          */
-        public TupleFieldInfo(String name, Class type) {
+        public TupleFieldInfo(String name, Class<?> type) {
             super(type, bracketType(SerializeMarshallables.INSTANCE.apply(type)), name);
         }
 

@@ -24,12 +24,12 @@ import org.junit.Test;
 import java.lang.reflect.Proxy;
 
 import static org.easymock.EasyMock.*;
+import static org.junit.Assert.assertNotNull;
 
 public class BinaryMethodWriterInvocationHandlerTest extends WireTestCommon {
 
     @Test
-    public void testOnClose() throws Exception {
-        // Creating a mock of the Closeable interface using some mock library (presumably EasyMock).
+    public void testOnClose() {
         Closeable closeable = createMock(Closeable.class);
 
         // Setting expectations on the mock: When the close() method is called, do nothing.
@@ -50,10 +50,10 @@ public class BinaryMethodWriterInvocationHandlerTest extends WireTestCommon {
         // Calls onClose on the handler passing the mocked closeable. This may have been added for setup or verification purposes.
         handler.onClose(closeable);
 
-        // Uses Java's Proxy class to dynamically create a new object that implements Closeable. This object uses the handler for its method invocations.
-        try (@NotNull Closeable close = (Closeable) Proxy.newProxyInstance(Closeable.class.getClassLoader(), new Class[]{Closeable.class}, handler)) {
-            // The try-with-resources block ensures that when we exit this block, the close() method is automatically called on the proxy.
-            // This is probably done to trigger some behavior in the handler, and possibly to satisfy the expectation set on the mock.
+        Class<?>[] interfaces = {Closeable.class};
+        try (@NotNull Closeable close = (Closeable) Proxy.newProxyInstance(Closeable.class.getClassLoader(), interfaces, handler)) {
+            assertNotNull(close);
+            // and close it
         }
 
         // Verify that the methods called on the mock match the expectations that were set.

@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class MethodWriterStringTest extends net.openhft.chronicle.wire.WireTestCommon {
     // A blocking queue to hold String messages, used for synchronization between writer and reader.
-    private ArrayBlockingQueue<String> q = new ArrayBlockingQueue(1);
+    private ArrayBlockingQueue<String> q = new ArrayBlockingQueue<>(1);
 
     /**
      * An interface defining a single method that accepts a String message.

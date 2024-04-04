@@ -48,7 +48,7 @@ public class ChannelSecondaryConnectionTest extends net.openhft.chronicle.wire.W
             context.startNewGateway();
 
             // Configure the Chronicle Channel to be an initiator and to be buffered
-            final ChronicleChannelCfg channelCfg = new ChronicleChannelCfg().initiator(true).buffered(true);
+            final ChronicleChannelCfg<?> channelCfg = new ChronicleChannelCfg<>().initiator(true).buffered(true);
 
             // Add an invalid hostname and port intending for this connection to fail
             channelCfg.addHostnamePort("localhost", 8092);

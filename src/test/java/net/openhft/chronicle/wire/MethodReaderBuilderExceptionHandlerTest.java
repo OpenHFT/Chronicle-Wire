@@ -188,7 +188,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
     // - The constructed MethodReader uses the provided exception handler, and its scanning behavior is determined by the `scanning` flag.
     // - The MethodReader then processes each message in the Wire, logging its output and the result of each read to the StringWriter.
     // - Finally, it compares the StringWriter's output with the expected output to determine if the test passes or fails.
-    private void doTest(String expected, ExceptionHandler eh, Class type, boolean scanning) {
+    private void doTest(String expected, ExceptionHandler eh, Class<?> type, boolean scanning) {
         @NotNull StringWriter out = new StringWriter();
         Wire wire = WireType.YAML_ONLY.apply(Bytes.from(input));
         MethodReader reader = wire

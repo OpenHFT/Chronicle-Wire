@@ -74,7 +74,7 @@ public final class ChronicleChannelUtils {
     }
 
     @Deprecated(/* To be removed in x.27 */)
-    public static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg channelCfg, ChannelHeader headerOut) throws InvalidMarshallableException {
+    public static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg<?> channelCfg, ChannelHeader headerOut) throws InvalidMarshallableException {
         return newChannel(socketRegistry, channelCfg, headerOut, null);
     }
 

@@ -563,7 +563,7 @@ public interface ValueOut {
      * @return The ValueOut instance for chained calls.
      */
     @NotNull
-    default ValueOut typePrefix(Class type) {
+    default ValueOut typePrefix(Class<?> type) {
         return type == null ? this : typePrefix(classLookup().nameFor(type));
     }
 
@@ -583,7 +583,7 @@ public interface ValueOut {
      * @return The WireOut instance for chained calls.
      */
     @NotNull
-    default WireOut typeLiteral(@Nullable Class type) {
+    default WireOut typeLiteral(@Nullable Class<?> type) {
         return type == null ? nu11()
                 : typeLiteral((t, b) -> b.appendUtf8(classLookup().nameFor(t)), type);
     }
@@ -599,7 +599,7 @@ public interface ValueOut {
     @NotNull
     default WireOut typeLiteral(@Nullable Type type) {
         return type == null ? nu11()
-                : type instanceof Class ? typeLiteral((Class) type)
+                : type instanceof Class<?>? typeLiteral((Class) type)
                 : typeLiteral(type.getTypeName());
     }
 
@@ -622,7 +622,7 @@ public interface ValueOut {
      * @return The WireOut instance for chained calls.
      */
     @NotNull
-    WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class type);
+    WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class<?> type);
 
     /**
      * Writes a universally unique identifier (UUID) to the wire.
@@ -876,7 +876,7 @@ public interface ValueOut {
      * @return The current instance of the WireOut.
      */
     @NotNull
-    default WireOut array(@NotNull WriteValue writer, @NotNull Class arrayType) {
+    default WireOut array(@NotNull WriteValue writer, @NotNull Class<?> arrayType) {
         if (arrayType == String[].class) {
             typePrefix("String[] ");
         } else if (arrayType != Object[].class) {
@@ -1381,8 +1381,8 @@ public interface ValueOut {
             WireSerializedLambda.write(value, this);
             return wireOut();
         } else if (Object[].class.isAssignableFrom(valueClass)) {
-            @NotNull Class type = valueClass.getComponentType();
-            return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), valueClass);
+            @NotNull Class<?> type = valueClass.getComponentType();
+            return array(v -> Stream.of((Object[]) value).forEach(val -> v.object((Class) type, val)), valueClass);
         } else if (value instanceof Thread) {
             return text(((Thread) value).getName());
         } else if (value instanceof Serializable) {
@@ -1438,7 +1438,7 @@ public interface ValueOut {
      * @return this
      */
     @NotNull
-    default ValueOut optionalTyped(Class aClass) {
+    default ValueOut optionalTyped(Class<?> aClass) {
         return this;
     }
 
@@ -1552,8 +1552,8 @@ public interface ValueOut {
             return bytesMarshallable((BytesMarshallable) value);
         // Handle object arrays
         if (Object[].class.isAssignableFrom(value.getClass())) {
-            @NotNull Class type = value.getClass().getComponentType();
-            return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), Object[].class);
+            @NotNull Class<?> type = value.getClass().getComponentType();
+            return array(v -> Stream.of((Object[]) value).forEach(val -> v.object((Class) type, val)), Object[].class);
         }
         // Default serialization for other types
         return object(value);

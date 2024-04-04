@@ -139,7 +139,7 @@ public class GenerateMethodReader {
      * @param type The type under consideration
      * @return A string representing the method's signature
      */
-    private static String signature(Method m, Class type) {
+    private static String signature(Method m, Class<?> type) {
         return GenericReflection.getReturnType(m, type) + " " + m.getName() + " " + Arrays.toString(GenericReflection.getParameterTypes(m, type));
     }
 

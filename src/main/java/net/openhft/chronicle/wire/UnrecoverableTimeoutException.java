@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
  * conventional manner.
  */
 public class UnrecoverableTimeoutException extends IllegalStateException {
+    private static final long serialVersionUID = 0L;
 
     /**
      * Constructs a new UnrecoverableTimeoutException with the specified underlying
@@ -35,6 +36,7 @@ public class UnrecoverableTimeoutException extends IllegalStateException {
      *
      * @param e The underlying exception that caused this timeout exception.
      */
+    @SuppressWarnings("this-escape")
     public UnrecoverableTimeoutException(@NotNull Exception e) {
         super(e.getMessage());
         initCause(e);

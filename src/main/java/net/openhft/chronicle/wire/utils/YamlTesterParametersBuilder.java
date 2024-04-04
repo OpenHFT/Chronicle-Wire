@@ -52,7 +52,7 @@ public class YamlTesterParametersBuilder<T> {
     private final List<String> paths;
 
     // Additional output classes provided for advanced testing scenarios
-    private final Set<Class> additionalOutputClasses = new LinkedHashSet<>();
+    private final Set<Class<?>> additionalOutputClasses = new LinkedHashSet<>();
 
     // Array of agitators used to modify or adjust the test parameters
     private YamlAgitator[] agitators = {};
@@ -296,7 +296,7 @@ public class YamlTesterParametersBuilder<T> {
      * @param outputClass The class to be added.
      * @return The current instance of YamlTesterParametersBuilder.
      */
-    public YamlTesterParametersBuilder<T> addOutputClass(Class outputClass) {
+    public YamlTesterParametersBuilder<T> addOutputClass(Class<?> outputClass) {
         additionalOutputClasses.add(outputClass);
         return this;
     }

@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.util.BinaryLengthLength;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.Base85LongConverter;
 import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
@@ -52,12 +53,12 @@ public class TopOfBook extends BytesInBinaryMarshallable implements Cloneable {
 //    private double b0, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15, b16, b17;
 
     @Override
-    public final void readMarshallable(BytesIn bytes) throws IORuntimeException {
+    public final void readMarshallable(BytesIn<?> bytes) throws IORuntimeException {
         bytes.unsafeReadObject(this, START_BYTES, LENGTH_BYTES);
     }
 
     @Override
-    public final void writeMarshallable(BytesOut bytes) {
+    public final void writeMarshallable(BytesOut<?> bytes) {
         bytes.unsafeWriteObject(this, START_BYTES, LENGTH_BYTES);
     }
 
@@ -138,7 +139,7 @@ public class TopOfBook extends BytesInBinaryMarshallable implements Cloneable {
 
     // Create and return a deep copy of the current TopOfBook instance
     @Override
-    public TopOfBook deepCopy() {
+    public <T> T deepCopy() {
         TopOfBook tob = new TopOfBook();
         tob.symbol = symbol;
         tob.ecn = ecn;
@@ -147,7 +148,7 @@ public class TopOfBook extends BytesInBinaryMarshallable implements Cloneable {
         tob.askQuantity = askQuantity;
         tob.bidPrice = bidPrice;
         tob.bidQuantity = bidQuantity;
-        return tob;
+        return Jvm.uncheckedCast(tob);
     }
 
     // Specify the binary length format as 8-bit for the TopOfBook instance

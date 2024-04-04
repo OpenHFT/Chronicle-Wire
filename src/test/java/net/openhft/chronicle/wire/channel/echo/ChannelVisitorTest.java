@@ -33,6 +33,7 @@ public class ChannelVisitorTest extends net.openhft.chronicle.wire.WireTestCommo
         super.threadDump();
     }
 
+    @SuppressWarnings("unchecked")
     static <T> T visitOne(ChronicleChannel channel, ChannelVisiting visiting, ChannelVisitor<T> visitor) {
         StringBuilder reply = new StringBuilder();
         visiting.visitor(visitor);

@@ -181,6 +181,7 @@ public class PerfRegressionHolder {
         }
 
         // Writes the provided BytesStore to the provided byte sequence as an 8-bit byte sequence
+        @SuppressWarnings("rawtypes")
         protected void write8Bit(BytesOut<?> bytes, BytesStore a) {
             if (a == null) {
                 bytes.writeStopBit(-1);
@@ -249,6 +250,7 @@ public class PerfRegressionHolder {
         // Writes the provided BytesStore to the provided byte sequence
         // by first writing the length of the bytes to be written (as stop-bit encoded),
         // and then writing each byte individually.
+        @SuppressWarnings("rawtypes")
         @Override
         protected void write8Bit(BytesOut<?> bytes, BytesStore a) {
             final int length = a.length();

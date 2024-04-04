@@ -34,8 +34,8 @@ public class ConventionsTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testTypeConversionsMaxValue() throws NoSuchFieldException, IllegalAccessException {
-        // Test conversion of maximum values for various types
-        for (@NotNull Class type : new Class[]{String.class, Integer.class, Long.class, Short
+
+        for (@NotNull Class<?> type : new Class[]{String.class, Integer.class, Long.class, Short
                 .class, Byte
                 .class, Float.class, Double.class}) {
             Object extected;
@@ -58,8 +58,8 @@ public class ConventionsTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testTypeConversionsMinValue() throws IllegalAccessException, NoSuchFieldException {
-        // Test conversion of minimum values for various types
-        for (@NotNull Class type : new Class[]{String.class, Integer.class, Long.class, Short.class, Byte
+
+        for (@NotNull Class<?> type : new Class[]{String.class, Integer.class, Long.class, Short.class, Byte
                 .class, Float.class, Double.class}) {
             Object extected;
             // Check if type is a subclass of Number
@@ -81,8 +81,8 @@ public class ConventionsTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testTypeConversionsSmallNumber() {
-        // Test conversion of a small number for various types
-        for (@NotNull Class type : new Class[]{String.class, Integer.class, Long.class, Short
+
+        for (@NotNull Class<?> type : new Class[]{String.class, Integer.class, Long.class, Short
                 .class, Byte.class}) {
             // Use a small number as a string for the expected value
             @NotNull Object extected = "123"; // small number
@@ -92,15 +92,15 @@ public class ConventionsTest extends WireTestCommon {
 
         // Special cases for floating-point numbers
         Assert.assertEquals(123.0, test("123", Double.class), 0);
-        Assert.assertEquals(123.0, (double) (Float) test("123", Float.class), 0);
+        Assert.assertEquals(123.0, (double) test("123", Float.class), 0);
 
     }
 
     @SuppressWarnings("rawtypes")
     @Test
     public void testTypeConversionsConvertViaString() throws NoSuchFieldException, IllegalAccessException {
-        // Test type conversions via String for various numeric types
-        for (@NotNull Class type : new Class[]{Integer.class, Long.class, Short.class, Byte
+
+        for (@NotNull Class<?> type : new Class[]{Integer.class, Long.class, Short.class, Byte
                 .class}) {
             Object extected;
             // If type is a subclass of Number, get its MAX_VALUE
