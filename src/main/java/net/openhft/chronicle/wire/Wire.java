@@ -33,30 +33,6 @@ import java.io.IOException;
 @SingleThreaded
 @DontChain
 public interface Wire extends WireIn, WireOut {
-
-    /**
-     * Factory method to create a Wire instance based on the file extension provided in the file name.
-     * Currently, supports "csv" and "yaml" extensions.
-     *
-     * @param name The name of the file, including its extension.
-     * @return A Wire implementation corresponding to the file extension.
-     * @throws IOException If there's an error accessing the file.
-     * @throws IllegalArgumentException If the file type is unknown.
-     * @deprecated This method might be removed in future releases. Consider other ways to create a Wire instance.
-     */
-    @Deprecated(/*to be removed?*/)
-    static Wire fromFile(@NotNull String name) throws IOException {
-        @NotNull String ext = name.substring(name.lastIndexOf('.') + 1).toLowerCase();
-        switch (ext) {
-            case "csv":
-                return CSVWire.fromFile(name);
-            case "yaml":
-                return TextWire.fromFile(name);
-            default:
-                throw new IllegalArgumentException("Unknown file type " + name);
-        }
-    }
-
     /**
      * Factory method to create a new YamlWire instance that writes to an on-heap Bytes object.
      *

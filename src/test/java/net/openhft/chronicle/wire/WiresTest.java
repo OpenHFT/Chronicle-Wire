@@ -255,7 +255,6 @@ public class WiresTest extends WireTestCommon {
     }
 
     public static void wiresThrowCNFRE(boolean throwCnfre) {
-        Wires.THROW_CNFRE = throwCnfre;
     }
     @Test
     public void recordAsYaml() {

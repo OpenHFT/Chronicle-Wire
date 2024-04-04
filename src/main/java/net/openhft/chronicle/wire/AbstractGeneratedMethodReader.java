@@ -138,36 +138,9 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      * @param wireIn Data input.
      * @return MethodReaderStatus.
      */
-    protected MethodReaderStatus readOneGenerated(WireIn wireIn) {
-        readOneCall(wireIn);
-        return MethodReaderStatus.KNOWN;
-    }
+    protected abstract MethodReaderStatus readOneGenerated(WireIn wireIn);
 
-    /**
-     * Reads call name and arguments from the wire and performs invocation on a target object instance.
-     * The implementation of this method is generated at runtime, see {@link GenerateMethodReader}.
-     *
-     * @param wireIn Data input.
-     * @return {@code true} read a known event, {@code false} if reading should be delegated.
-     */
-    @Deprecated(/* for removal in x.26*/)
-    protected boolean readOneCall(WireIn wireIn) {
-        // At least one of these methods must be overridden.
-        readOneGenerated(wireIn);
-        return true;
-    }
-
-    protected MethodReaderStatus readOneMetaGenerated(WireIn wireIn) {
-        readOneCallMeta(wireIn);
-        return MethodReaderStatus.KNOWN;
-    }
-
-    @Deprecated(/* for removal in x.26*/)
-    protected boolean readOneCallMeta(WireIn wireIn) {
-        // At least one of these methods must be overridden.
-        readOneMetaGenerated(wireIn);
-        return true;
-    }
+    protected abstract MethodReaderStatus readOneMetaGenerated(WireIn wireIn);
 
     /**
      * Reads the content based on the provided document context.
