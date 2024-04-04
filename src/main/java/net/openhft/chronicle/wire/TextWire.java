@@ -1848,16 +1848,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                 stringBuilder.setLength(0);
                 parseUntil(stringBuilder, END_OF_TYPE);
                 bytes.readSkip(-1);
-                try {
-                    return classLookup().forName(stringBuilder);
-                } catch (ClassNotFoundRuntimeException e) {
-                    // Note: it's not possible to generate a Tuple without an interface implied.
-                    if (true)
-                        throw e;
-                    String message = "Unable to find " + stringBuilder + " " + e.getCause();
-                    Jvm.warn().on(getClass(), message);
-                    return null;
-                }
+                return classLookup().forName(stringBuilder);
             }
             return null;
         }
@@ -1893,10 +1884,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                     return Wires.tupleFor(null, stringBuilder.toString());
                 }
                 String message = "Unable to load " + stringBuilder + ", is a class alias missing.";
-                if (true)
-                    throw new ClassNotFoundRuntimeException(new ClassNotFoundException(message));
-                Jvm.warn().on(TextWire.class, message);
-                return null;
+                throw new ClassNotFoundRuntimeException(new ClassNotFoundException(message));
             }
 
             final String className = tClass.getName();
