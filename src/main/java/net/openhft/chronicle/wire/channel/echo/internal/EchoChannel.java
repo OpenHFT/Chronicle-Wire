@@ -34,15 +34,15 @@ public class EchoChannel extends SimpleCloseable implements ChronicleChannel {
 
     private static final OkHeader OK = new OkHeader();
     private final Wire wire = WireType.BINARY_LIGHT.apply(Bytes.allocateElasticOnHeap());
-    private final ChronicleChannelCfg<?>channelCfg;
+    private final ChronicleChannelCfg<?> channelCfg;
     private long lastTestMessage;
 
-    public EchoChannel(ChronicleChannelCfg<?>channelCfg) {
+    public EchoChannel(ChronicleChannelCfg<?> channelCfg) {
         this.channelCfg = channelCfg;
     }
 
     @Override
-    public ChronicleChannelCfg<?>channelCfg() {
+    public ChronicleChannelCfg<?> channelCfg() {
         return channelCfg;
     }
 
