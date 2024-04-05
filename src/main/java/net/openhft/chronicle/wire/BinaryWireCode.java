@@ -35,6 +35,8 @@ public enum BinaryWireCode {
     // sequence of length 0 - 255
 //        public static final int BYTES_LENGTH64 = 0x83;
 
+    @Deprecated(/* to be removed in x.27 */)
+    public static final int BYTES_MARSHALLABLE = 0x86;
     public static final int HISTORY_MESSAGE = 0x86; // was BYTES_MARSHALLABLE, but only used for this purpose
     public static final int FIELD_ANCHOR = 0x87;
     public static final int ANCHOR = 0x88;
