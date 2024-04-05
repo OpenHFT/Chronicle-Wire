@@ -831,6 +831,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             case FIELD_NUMBER:
                 bytes.uncheckedReadSkipOne();
                 long fieldId = bytes.readStopBit();
+                // special handling for MethodReader.HISTORY messages as this has a more compact form as it can be very common
                 if (fieldId == MethodReader.MESSAGE_HISTORY_METHOD_ID) {
                     sb.setLength(0);
                     sb.append(MethodReader.HISTORY);
