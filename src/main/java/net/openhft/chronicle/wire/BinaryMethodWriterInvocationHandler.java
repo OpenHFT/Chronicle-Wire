@@ -23,15 +23,33 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
 
+/**
+ * The BinaryMethodWriterInvocationHandler handles method invocations specific to binary writing scenarios with optional metadata support.
+ */
 public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInvocationHandler {
     @NotNull
     private final Supplier<MarshallableOut> marshallableOutSupplier;
-    private final boolean metaData;
+    private final boolean metaData;  // Flag to determine if metadata should be written.
 
+    /**
+     * Constructor that initializes the handler using the given class, metadata flag and MarshallableOut.
+     * This constructor uses a constant MarshallableOut.
+     *
+     * @param tClass           The class type associated with this handler.
+     * @param metaData         Flag to determine if metadata is to be written.
+     * @param marshallableOut  The MarshallableOut instance for binary writing.
+     */
     BinaryMethodWriterInvocationHandler(Class<?> tClass, final boolean metaData, @NotNull MarshallableOut marshallableOut) {
         this(tClass, metaData, () -> marshallableOut);
     }
 
+    /**
+     * Constructor that initializes the handler using the given class, metadata flag and a supplier of MarshallableOut.
+     *
+     * @param tClass                  The class type associated with this handler.
+     * @param metaData                Flag to determine if metadata is to be written.
+     * @param marshallableOutSupplier The supplier providing instances of MarshallableOut.
+     */
     public BinaryMethodWriterInvocationHandler(Class<?> tClass, final boolean metaData, Supplier<MarshallableOut> marshallableOutSupplier) {
         super(tClass);
         this.marshallableOutSupplier = marshallableOutSupplier;
@@ -48,6 +66,11 @@ public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInv
         return super.doInvoke(proxy, method, args);
     }
 
+    /**
+     * Gets the current metadata setting for this handler.
+     *
+     * @return {@code true} if metadata is enabled, {@code false} otherwise.
+     */
     public boolean metaData() {
         return metaData;
     }

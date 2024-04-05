@@ -24,19 +24,33 @@ import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import java.util.List;
 
 /**
- * Either the DynamicEnum must be an Enum or a class with a String name as a field.
+ * Represents a dynamic enumeration which can either be a traditional {@code Enum} or a class
+ * possessing a {@code String name} field. The interface extends both {@link CoreDynamicEnum} and
+ * {@link Marshallable}, facilitating serialization and specific dynamic enumeration operations.
  */
 public interface DynamicEnum extends CoreDynamicEnum, Marshallable {
 
     /**
-     * Uses a floating DynamicEnum to update the cached copy so every deserialization of the value from name() use have this information
+     * Refreshes the cached instance of a {@code DynamicEnum} based on the given template.
+     * This ensures that every deserialization of the enum value from its {@code name()} method
+     * is up-to-date with the most recent information.
+     * <p>
+     * Leveraging this method to update the cached enum details is essential for maintaining
+     * data consistency, especially during frequent deserialization operations.
      *
-     * @param e template to use.
+     * @param e The {@code DynamicEnum} template used to refresh the cached version.
      */
     static <E extends DynamicEnum> void updateEnum(E e) {
+        // Retrieve the enum cache corresponding to the class of the provided template
         EnumCache<E> cache = EnumCache.of((Class<E>) e.getClass());
+
+        // Fetch the enum instance with the same name from the cache
         E nums = cache.valueOf(e.name());
+
+        // Obtain field details of the provided template
         List<FieldInfo> fieldInfos = e.$fieldInfos();
+
+        // Update each field in the cached enum instance using details from the template
         for (FieldInfo fieldInfo : fieldInfos) {
             fieldInfo.copy(e, nums);
         }

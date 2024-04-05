@@ -28,16 +28,19 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.Collection;
 
+// A parameterized test class that tests various string serialization behaviors for different WireTypes.
 @RunWith(value = Parameterized.class)
 public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireTestCommon {
     private WireType wireType;
     @SuppressWarnings("rawtypes")
     private Bytes<?> bytes;
 
+    // Constructor initializes the WireType for this instance of the test.
     public StrangeTextCombinationTest(WireType wireType) {
         this.wireType = wireType;
     }
 
+    // Parameterized test data. Each WireType will be tested.
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         Object[][] list = {
@@ -49,6 +52,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
         return Arrays.asList(list);
     }
 
+    // Tests that a string with a leading space is serialized and deserialized correctly.
     @Test
     public void testPrependedSpace() {
         @NotNull final String prependedSpace = " hello world";
@@ -59,6 +63,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
 
     }
 
+    // Tests that a string with a trailing space is serialized and deserialized correctly.
     @Test
     public void testPostpendedSpace() {
         @NotNull final String postpendedSpace = "hello world ";
@@ -68,6 +73,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
         Assert.assertEquals(postpendedSpace, wire.read().text());
     }
 
+    // Tests that a string with escape characters is serialized and deserialized correctly.
     @Test
     public void testSlashQuoteTest() {
         @NotNull final String expected = "\\\" ";
@@ -76,6 +82,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
         Assert.assertEquals(expected, wire.read().text());
     }
 
+    // Tests that a string with specific YAML syntax is serialized and deserialized correctly.
     @Test
     public void testYaml() {
         @NotNull final String expected = "!String{chars:hello world}";
@@ -84,6 +91,11 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
         Assert.assertEquals(expected, wire.read().text());
     }
 
+    // Test class to ensure various string values are correctly serialized and deserialized using
+    // Chronicle-Wire. The class contains multiple test cases, each focused on a specific string value
+    // or format.
+
+    // Tests that a string "!String" is serialized and deserialized correctly.
     @Test
     public void testString() {
         @NotNull final String expected = "!String";
@@ -92,6 +104,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
         Assert.assertEquals(expected, wire.read().text());
     }
 
+    // Tests that a string "!binary" is serialized and deserialized correctly.
     @Test
     public void testBinary() {
         @NotNull final String expected = "!binary";
@@ -100,6 +113,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
         Assert.assertEquals(expected, wire.read().text());
     }
 
+    // Tests that a string " !binary" with a leading space is serialized and deserialized correctly.
     @Test
     public void testBinaryWithSpace() {
         @NotNull final String expected = " !binary";
@@ -108,6 +122,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
         Assert.assertEquals(expected, wire.read().text());
     }
 
+    // Tests that an empty string is serialized and deserialized correctly.
     @Test
     public void testEmpty() {
         @NotNull final String expected = "";
@@ -116,6 +131,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
         Assert.assertEquals(expected, wire.read().text());
     }
 
+    // Tests that a null string value is serialized and deserialized correctly.
     @Test
     public void testNull() {
         @Nullable final String expected = null;
@@ -124,6 +140,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
         Assert.assertEquals(expected, wire.read().text());
     }
 
+    // Tests that a string with a newline character is serialized and deserialized correctly.
     @Test
     public void testNewLine() {
         @NotNull final String expected = "\n";
@@ -132,6 +149,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
         Assert.assertEquals(expected, wire.read().text());
     }
 
+    // Tests that a string with a Unicode null character is serialized and deserialized correctly.
     @Test
     public void testUnicode() {
         @NotNull final String expected = "\u0000";
@@ -140,6 +158,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
         Assert.assertEquals(expected, wire.read().text());
     }
 
+    // Tests that an XML formatted string is serialized and deserialized correctly.
     @Test
     public void testXML() {
         @NotNull final String expected = "<name>rob austin</name>";
@@ -148,6 +167,8 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
         Assert.assertEquals(expected, wire.read().text());
     }
 
+    // Helper method to create a new Wire instance using the given WireType.
+    // The Wire is backed by an on-heap elastic byte buffer.
     @NotNull
     private Wire wireFactory() {
         bytes = Bytes.allocateElasticOnHeap(64);

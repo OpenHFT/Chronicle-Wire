@@ -18,6 +18,8 @@
 
 package net.openhft.chronicle.wire.utils;
 
+// Interface for outputting error messages
 public interface ErrorsOut {
+    // Method to output an error message
     void error(String msg);
 }

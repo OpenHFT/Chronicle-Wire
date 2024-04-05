@@ -28,29 +28,48 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * The defines the standard interface for writing and reading sequentially to/from a Bytes stream
+ * Defines the standard interface for sequential writing to a Bytes stream.
  */
 @DontChain
 public interface WireOut extends WireCommon, MarshallableOut {
     /**
-     * Write an empty filed marker
+     * Writes an empty field marker to the stream.
+     *
+     * @return An interface to further define the output for the written value.
      */
     @NotNull
     ValueOut write();
 
     /**
-     * Always write a key.  For RAW types, this label with be in text.  To read this, use
-     * readEventName()
+     * Writes a key to the stream. For RAW types, the label will be in text.
+     * This can be read using readEventName().
+     *
+     * @param key The key to write to the stream.
+     * @return An interface to further define the output for the written value.
      */
     @NotNull
     default ValueOut writeEventName(WireKey key) {
         return write(key);
     }
 
+    /**
+     * Writes a CharSequence key to the stream.
+     *
+     * @param key The CharSequence key to write to the stream.
+     * @return An interface to further define the output for the written value.
+     */
     default ValueOut writeEventName(CharSequence key) {
         return write(key);
     }
 
+    /**
+     * Writes an event to the stream based on the type and event key.
+     *
+     * @param expectedType The expected type of the event to write.
+     * @param eventKey The key of the event.
+     * @return An interface to further define the output for the written value.
+     * @throws InvalidMarshallableException if there's an error marshalling the event.
+     */
     @SuppressWarnings({"rawtypes", "unchecked"})
     default ValueOut writeEvent(Class expectedType, Object eventKey) throws InvalidMarshallableException {
         if (eventKey instanceof WireKey)
@@ -63,44 +82,87 @@ public interface WireOut extends WireCommon, MarshallableOut {
         return getValueOut();
     }
 
+    /**
+     * Writes an event identifier to the stream.
+     *
+     * @param methodId The ID of the method representing the event.
+     * @return An interface to further define the output for the written value.
+     */
     default ValueOut writeEventId(int methodId) {
         return write(new MethodWireKey(null, methodId));
     }
 
+    /**
+     * Writes an event identifier with a name to the stream.
+     *
+     * @param name The name of the event.
+     * @param methodId The ID of the method representing the event.
+     * @return An interface to further define the output for the written value.
+     */
     default ValueOut writeEventId(String name, int methodId) {
         return write(new MethodWireKey(name, methodId));
     }
 
     /**
-     * Write a key for wires that support fields.
+     * Writes a WireKey to the stream. This method is typically used for
+     * wires that support fields with structured keys.
+     *
+     * @param key The WireKey to write to the stream.
+     * @return An interface to further define the output for the written value.
      */
     @NotNull
     ValueOut write(WireKey key);
 
+    /**
+     * Writes a CharSequence key to the stream. This provides flexibility
+     * to write non-standard keys to the wire.
+     *
+     * @param key The CharSequence key to write to the stream.
+     * @return An interface to further define the output for the written value.
+     */
     ValueOut write(CharSequence key);
 
     /**
-     * Obtain the value out
+     * Retrieves the interface for defining the output of a value
+     * that will be written to the stream.
+     *
+     * @return The interface to further define the output for the written value.
      */
     @NotNull
     ValueOut getValueOut();
 
+    /**
+     * Get the ObjectOutput associated with this WireOut.
+     *
+     * @return The ObjectOutput associated with this WireOut.
+     */
     ObjectOutput objectOutput();
 
-    /*
-     * read and write comments.
+    /**
+     * Writes a comment to the wire. Comments may be useful for debugging
+     * or providing context within the wire stream.
+     *
+     * @param s The comment to be written to the stream.
+     * @return This WireOut instance for method chaining.
      */
     @NotNull
     WireOut writeComment(CharSequence s);
 
+    /**
+     * Adds padding to the wire. This is particularly useful for aligning data.
+     *
+     * @param paddingToAdd The amount of padding to add.
+     * @return This WireOut instance for method chaining.
+     */
     @NotNull
     WireOut addPadding(int paddingToAdd);
 
     /**
-     * If near the end of a cache line, pad it so a following 4-byte int value will not split a
-     * cache line.
+     * Ensures that the wire's output aligns with cache boundaries. If the current write position
+     * is close to the end of a cache line, this method will pad the wire such that a subsequent
+     * 4-byte integer won't span across cache lines, optimizing cache performance.
      *
-     * @return this
+     * @return This WireOut instance for method chaining.
      */
     @NotNull
     default WireOut padToCacheAlign() {
@@ -116,6 +178,14 @@ public interface WireOut extends WireCommon, MarshallableOut {
         return this;
     }
 
+    /**
+     * Aligns the write position to the provided alignment boundary, taking into account
+     * the specified offset (plus). Padding will be added as necessary.
+     *
+     * @param alignment The alignment boundary.
+     * @param plus Additional offset to the write position.
+     * @return This WireOut instance for method chaining.
+     */
     @NotNull
     default WireOut writeAlignTo(int alignment, int plus) {
         assert Integer.bitCount(alignment) == 1;
@@ -126,43 +196,55 @@ public interface WireOut extends WireCommon, MarshallableOut {
     }
 
     /**
-     * This will reset the positions and the header number.
+     * Resets both the positions in the wire and the header number.
      */
     @Override
     void clear();
 
     /**
-     * This will increment the headerNumber as appropriate if successful
+     * Writes a document to the wire. This will automatically handle header numbering.
+     *
+     * @param metaData Indicates if metadata should be written.
+     * @param writer The logic for writing the content of the document.
      */
     default void writeDocument(boolean metaData, @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
         WireInternal.writeData(this, metaData, false, writer);
     }
 
     /**
-     * This will increment the headerNumber as appropriate if successful
+     * Starts the process of writing a document to the wire with an option for metadata.
      *
-     * @param metaData if {@code true} the document context will be used for writing meta data,
-     *                 otherwise data
-     * @return a document context used for witting
+     * @param metaData If true, the returned document context will be used for writing metadata.
+     * @return A context for the document being written.
      */
     @Override
     DocumentContext writingDocument(boolean metaData);
 
+    /**
+     * Starts the process of writing a data document (not metadata) to the wire.
+     *
+     * @return A context for the document being written.
+     */
     @Override
     @NotNull
     default DocumentContext writingDocument() {
         return writingDocument(false);
     }
 
+    /**
+     * Retrieves a context for writing either data or metadata, reusing an existing context if available.
+     *
+     * @param metaData If true, the returned context will be used for writing metadata.
+     * @return A context for the document being written.
+     */
     DocumentContext acquireWritingDocument(boolean metaData);
 
     /**
-     * This will increment the headerNumber as appropriate if successful
-     * <p>
-     * This is used in networking, but no longer used in queue.
+     * Writes a document to the wire without marking its completion. This is primarily used in
+     * networking scenarios, but no longer used for queues.
      *
-     * @param metaData {@code true} if the write should write metaData rather than data
-     * @param writer   writes bytes to the wire
+     * @param metaData If true, metadata will be written instead of regular data.
+     * @param writer Logic for writing the content of the document.
      */
     default void writeNotCompleteDocument(boolean metaData, @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
         WireInternal.writeData(this, metaData, true, writer);
@@ -270,6 +352,6 @@ public interface WireOut extends WireCommon, MarshallableOut {
         /**
          * EOF marker is present
          */
-        PRESENT;
+        PRESENT
     }
 }

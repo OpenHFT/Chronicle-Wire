@@ -28,7 +28,13 @@ import org.jetbrains.annotations.Nullable;
 
 import static net.openhft.chronicle.wire.Wires.lengthOf;
 
+/**
+ * This is the BinaryReadDocumentContext class which implements the ReadDocumentContext interface.
+ * It provides an implementation tailored for reading from binary document contexts and ensures
+ * full read capability if required.
+ */
 public class BinaryReadDocumentContext implements ReadDocumentContext {
+
     private final boolean ensureFullRead;
     public long start = -1;
     public long lastStart = -1;
@@ -41,10 +47,23 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     protected boolean metaData;
     protected boolean rollback;
 
+    /**
+     * Constructor that initializes the BinaryReadDocumentContext using the provided wire.
+     * It also determines if a full read should be ensured based on the wire type.
+     *
+     * @param wire The wire used for reading the document.
+     */
     public BinaryReadDocumentContext(@Nullable Wire wire) {
         this(wire, wire != null && wire.getValueIn() instanceof BinaryWire.DeltaValueIn);
     }
 
+    /**
+     * Constructor that initializes the BinaryReadDocumentContext using the provided wire and
+     * a flag to determine if a full read should be ensured.
+     *
+     * @param wire           The wire used for reading the document.
+     * @param ensureFullRead Flag to determine if full reading is required.
+     */
     public BinaryReadDocumentContext(@Nullable Wire wire, boolean ensureFullRead) {
         this.wire = (AbstractWire) wire;
         this.ensureFullRead = ensureFullRead;
@@ -76,12 +95,24 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         return wire;
     }
 
+    /**
+     * Determines if a rollback is required for this document context.
+     *
+     * @return {@code true} if rollback is required, {@code false} otherwise.
+     */
     protected boolean rollback() {
         return rollback;
     }
 
     static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal(1);
 
+    /**
+     * Performs a full read for a delta wire starting from a specified position.
+     * This is used to ensure that all content of the wire is read.
+     *
+     * @param wire0 The delta wire to read from.
+     * @param start The starting position for the full read.
+     */
     private static void fullReadForDeltaWire(AbstractWire wire0, long start) {
         long readPosition1 = wire0.bytes().readPosition();
         try {
@@ -146,9 +177,10 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     }
 
     /**
-     * Rolls back document context state to a one before opening if rollback marker is set.
+     * Rolls back the document context to its state before opening, if the rollback marker is set.
+     * Resets relevant attributes and updates the read position and limit accordingly.
      *
-     * @return If rolled back.
+     * @return {@code true} if the context was rolled back, {@code false} otherwise.
      */
     protected boolean rollbackIfNeeded() {
         if (rollback) {
@@ -224,6 +256,12 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         rollback = true;
     }
 
+    /**
+     * Sets the start position of the document context and updates the last start position.
+     * This is useful to keep track of the beginning position for reading purposes.
+     *
+     * @param start The new starting position to set.
+     */
     public void setStart(long start) {
         this.start = start;
         this.lastStart = start;

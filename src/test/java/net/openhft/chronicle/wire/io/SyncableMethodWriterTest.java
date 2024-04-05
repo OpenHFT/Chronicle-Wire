@@ -35,16 +35,20 @@ import java.io.FileNotFoundException;
 import static org.junit.Assert.assertEquals;
 
 public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon {
+
+    // A custom interface combining message sending (say) and synchronization capabilities (sync)
     interface SayAndSync extends Syncable {
         void say(String say);
     }
 
+    // A specialized YamlWire that has synchronization capabilities
     static class SyncableYamlWire extends YamlWire implements Syncable {
         public SyncableYamlWire(@NotNull Bytes<?> bytes) {
             super(bytes);
             useTextDocuments();
         }
 
+        // Override the sync method to write a comment and then invoke the sync on the underlying bytes
         @Override
         public void sync() {
             writeComment("sync");
@@ -52,12 +56,14 @@ public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTes
         }
     }
 
+    // Test the ability to use the custom method writer to write a message and then synchronize the wire
     @Test
     public void sayAndSync() {
         final OnHeapBytes bytes = Bytes.allocateElasticOnHeap();
         doTest(bytes);
     }
 
+    // Core logic for testing the say and sync operations, encapsulated for reuse
     private void doTest(Bytes bytes) {
         Wire wire = new SyncableYamlWire(bytes);
         SayAndSync sas = wire.methodWriter(SayAndSync.class);
@@ -78,6 +84,7 @@ public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTes
                 "...\n", wire.toString());
     }
 
+    // Test the say and sync operations but this time with a MappedBytes instance which maps bytes to a file
     @Test
     public void sayAndSyncMappedBytes() throws FileNotFoundException {
         final File file = IOTools.createTempFile("sayAndSyncMappedBytes");

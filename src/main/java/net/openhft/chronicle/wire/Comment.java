@@ -22,9 +22,21 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})
+/**
+ * The Comment annotation represents a way to attach user-defined comments to elements like fields,
+ * parameters, or types. This can be especially useful for documenting the intention, usage, or any other
+ * relevant information about the annotated element at runtime.
+ * <p>
+ * Being retained at runtime, it can be inspected via reflection to influence behavior based on the comment's content.
+ */
+@Retention(RetentionPolicy.RUNTIME)  // This annotation is available at runtime.
+@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})  // Specifies the kinds of elements this annotation can be applied to.
 public @interface Comment {
+
+    /**
+     * Returns the comment content as a string.
+     *
+     * @return The comment content associated with the annotated element.
+     */
     String value();
 }
-

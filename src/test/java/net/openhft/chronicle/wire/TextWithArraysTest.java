@@ -21,9 +21,13 @@ package net.openhft.chronicle.wire;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+// This test class focuses on TextWire's ability to handle arrays of various primitive and object types.
 public class TextWithArraysTest extends WireTestCommon {
+
+    // Test the behavior of TextWire with arrays of different types.
     @Test
     public void testWithArrays() {
+        // Check the string representation of an uninitialized WithArrays object
         assertEquals("!net.openhft.chronicle.wire.TextWithArraysTest$WithArrays {\n" +
                 "  booleans: !!null \"\",\n" +
                 "  bytes: !!null \"\",\n" +
@@ -35,6 +39,8 @@ public class TextWithArraysTest extends WireTestCommon {
                 "  doubles: !!null \"\",\n" +
                 "  words: !!null \"\"\n" +
                 "}\n", new WithArrays().toString());
+
+        // Initialize the arrays with sample values
         WithArrays wa = new WithArrays();
         wa.booleans = new boolean[]{true, false};
         wa.bytes = new byte[]{-1, 0, 1};
@@ -45,6 +51,8 @@ public class TextWithArraysTest extends WireTestCommon {
         wa.floats = new float[]{-1, 0, 1};
         wa.doubles = new double[]{-1, 0, 1};
         wa.words = "Hello World Bye for now".split(" ");
+
+        // Validate the string representation of the initialized object
         assertEquals("!net.openhft.chronicle.wire.TextWithArraysTest$WithArrays {\n" +
                 "  booleans: [ true, false ],\n" +
                 "  bytes: !!binary /wAB,\n" +
@@ -59,6 +67,7 @@ public class TextWithArraysTest extends WireTestCommon {
 
     }
 
+    // Inner class that holds arrays of different data types for testing.
     static class WithArrays extends SelfDescribingMarshallable {
         boolean[] booleans;
         byte[] bytes;

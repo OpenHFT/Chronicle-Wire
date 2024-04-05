@@ -23,53 +23,64 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.converter.ShortText;
 
 public class Transfer extends AbstractEvent<Transfer> {
+    // Fields representing transaction details
     private long from, to;
     @ShortText
     private int currency;
     private double amount;
     private Bytes reference = Bytes.allocateElasticOnHeap();
 
+    // Getter for 'from' field
     public long from() {
         return from;
     }
 
+    // Setter for 'from' field, allowing method chaining
     public Transfer from(long from) {
         this.from = from;
         return this;
     }
 
+    // Getter for 'to' field
     public long to() {
         return to;
     }
 
+    // Setter for 'to' field, allowing method chaining
     public Transfer to(long to) {
         this.to = to;
         return this;
     }
 
+    // Getter for 'currency' field
     public int currency() {
         return currency;
     }
 
+    // Setter for 'currency' field, allowing method chaining
     public Transfer currency(int currency) {
         this.currency = currency;
         return this;
     }
 
+    // Getter for 'amount' field
     public double amount() {
         return amount;
     }
 
+    // Setter for 'amount' field, allowing method chaining
     public Transfer amount(double amount) {
         this.amount = amount;
         return this;
     }
 
+    // Setter for 'reference' field, allowing method chaining
     public Transfer reference(Bytes reference) {
         this.reference.clear().append(reference);
         return this;
     }
 
+    // Method to validate if all necessary fields are set correctly
     @Override
     public void validate() throws InvalidMarshallableException {
         super.validate();

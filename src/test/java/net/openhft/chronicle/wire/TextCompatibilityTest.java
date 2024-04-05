@@ -38,20 +38,26 @@ import static org.junit.Assert.assertEquals;
 @RunWith(value = Parameterized.class)
 @Ignore("TODO FIX")
 public class TextCompatibilityTest extends WireTestCommon {
+
+    // File name for the current test run.
     private final String filename;
+    // Expected content for the current test run.
     private final String expected;
 
+    // Constructor to initialize the test with a specific file and its expected content.
     public TextCompatibilityTest(String filename, String expected) {
         this.filename = filename;
         this.expected = expected;
     }
 
+    // Main method that demonstrates how to find YAML files in a directory and run the test on them.
     public static void main(String[] args) throws IOException {
         String base = "/home/peter/git/snakeyaml/src/test/resources";
         Files.find(Paths.get(base), 4, (p, a) -> p.toString().endsWith(".yaml"))
                 .forEach(p -> runTest(p.toString(), p.toString(), true));
     }
 
+    // Provide the combinations of files and their expected content for the tests.
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() throws IOException {
         List<Object[]> list = new ArrayList<>();
@@ -65,6 +71,7 @@ public class TextCompatibilityTest extends WireTestCommon {
         return list;
     }
 
+    // Add a test case (file and expected content) to the list.
     private static void addTest(List<Object[]> list, String file) {
         String out = file.replace(".yaml", ".out.yaml");
         if (!new File(out).exists())
@@ -73,6 +80,7 @@ public class TextCompatibilityTest extends WireTestCommon {
         list.add(args);
     }
 
+    // Run the actual compatibility test on a file and its expected content.
     @SuppressWarnings("rawtypes")
     private static void runTest(String filename, String expectedFilename, boolean print) {
         String expected = null;
@@ -106,6 +114,7 @@ public class TextCompatibilityTest extends WireTestCommon {
         }
     }
 
+    // Perform the compatibility test for the current combination of file and expected content.
     @Test
     public void test() {
         runTest(filename, expected, false);

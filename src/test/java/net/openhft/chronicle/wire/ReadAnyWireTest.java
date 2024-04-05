@@ -27,17 +27,27 @@ import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.wire.WireType.*;
 
+// This class is for testing different wire formats
 public class ReadAnyWireTest extends WireTestCommon {
 
+    // A test case to test the TEXT wire format
     @Test
     public void testReadAny() {
+        // Create a buffer to hold wire data
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
+
+        // Write to the buffer using TEXT wire format
         final Wire wire = TEXT.apply(bytes);
         wire.write((() -> "hello")).text("world");
+
+        // Read from the buffer and validate
         Assert.assertEquals("world", READ_ANY.apply(bytes).read(() -> "hello").text());
+
+        // Release the buffer resources
         bytes.releaseLast();
     }
 
+    // Another test for the TEXT wire format
     @Test
     public void testCreateReadAnyFirstTextWire() {
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -47,6 +57,7 @@ public class ReadAnyWireTest extends WireTestCommon {
         bytes.releaseLast();
     }
 
+    // Test the BINARY wire format
     @Test
     public void testCreateReadAnyFirstBinaryWire() {
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -56,6 +67,7 @@ public class ReadAnyWireTest extends WireTestCommon {
         bytes.releaseLast();
     }
 
+    // Test the JSON wire format
     @Test
     public void testCreateReadAnyFirstJSONWire() {
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -65,6 +77,7 @@ public class ReadAnyWireTest extends WireTestCommon {
         bytes.releaseLast();
     }
 
+    // Test the FIELDLESS_BINARY wire format, but it's currently ignored due to some issues that need to be resolved
     @Test
     @Ignore("TODO FIX")
     public void testCreateReadAnyFirstFIELDLESS_BINARYWire() {
@@ -75,4 +88,3 @@ public class ReadAnyWireTest extends WireTestCommon {
         bytes.releaseLast();
     }
 }
-

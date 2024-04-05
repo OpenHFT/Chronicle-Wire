@@ -22,12 +22,25 @@ import net.openhft.chronicle.wire.LongConversion;
 import net.openhft.chronicle.wire.NanoTimestampLongConverter;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
+/**
+ * Represents a test event with specific time attributes. It extends the SelfDescribingMarshallable class
+ * to provide serialization and deserialization capabilities.
+ */
 public class TestEvent extends SelfDescribingMarshallable {
+
+    // The time at which the event occurred, represented as a long. The annotation @LongConversion
+    // specifies that this long value should be converted using the NanoTimestampLongConverter class,
+    // which likely converts between a long value and a more human-readable time format.
     @LongConversion(NanoTimestampLongConverter.class)
     long eventTime;
 
+    // The time at which the event was processed. Similar to eventTime, it's also a long value
+    // converted using the NanoTimestampLongConverter.
     @LongConversion(NanoTimestampLongConverter.class)
     long processedTime;
+
+    // Represents the current time when the event is being handled, in a similar format to
+    // eventTime and processedTime.
     @LongConversion(NanoTimestampLongConverter.class)
     long currentTime;
 }

@@ -47,13 +47,23 @@ import java.util.UUID;
 import java.util.function.*;
 
 /**
- * This format writes just the data, without meta data.
+ * Represents a wire type that focuses on writing pure data, omitting any metadata.
+ * The {@code RawWire} class is specifically designed for efficient binary serialization
+ * where headers and other metadata might not be necessary.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class RawWire extends AbstractWire implements Wire {
+
+    // Output mechanism for writing raw values
     private final RawValueOut valueOut = new RawValueOut();
+
+    // Input mechanism for reading raw values
     private final RawValueIn valueIn = new RawValueIn();
+
+    // Context for writing data to this wire
     private final WriteDocumentContext writeContext = new BinaryWriteDocumentContext(this);
+
+    // Context for reading data from this wire without metadata
     private final BinaryReadDocumentContext readContext = new BinaryReadDocumentContext(this, false);
     @Nullable
     private StringBuilder lastSB;
@@ -310,6 +320,9 @@ public class RawWire extends AbstractWire implements Wire {
         return new BinaryIntArrayReference();
     }
 
+    /**
+     * An inner class that facilitates the writing of raw values to the wire.
+     */
     class RawValueOut implements ValueOut {
 
         @NotNull
@@ -692,6 +705,12 @@ public class RawWire extends AbstractWire implements Wire {
         }
     }
 
+    /**
+     * The {@code RawValueIn} class implements the {@link ValueIn} interface,
+     * providing functionality for reading values from a binary wire format.
+     * Internally, it maintains a state stack that facilitates tracking
+     * and managing nested serialized objects or contexts.
+     */
     class RawValueIn implements ValueIn {
         final ValueInStack stack = new ValueInStack();
 

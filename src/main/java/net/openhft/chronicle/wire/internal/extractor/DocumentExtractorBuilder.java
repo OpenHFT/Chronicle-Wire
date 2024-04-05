@@ -27,14 +27,29 @@ import java.util.function.Supplier;
 
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
+/**
+ * Responsible for building and configuring document extractors for a specified type {@code E}.
+ * This class provides flexibility in the extraction process, enabling efficient document extraction.
+ */
 public final class DocumentExtractorBuilder<E> implements DocumentExtractor.Builder<E> {
 
+    // Represents the type of element to be extracted.
     private final Class<E> elementType;
 
+    // A supplier to provide instances of the type E.
     private Supplier<? extends E> supplier;
+
+    // Flag to determine if reuse of the supplier is confined to the current thread.
     private boolean threadConfinedReuse;
+
+    // Reference to the method used for extraction.
     private MethodRef<Object, E> methodRef;
 
+    /**
+     * Constructs a new DocumentExtractorBuilder for the specified element type.
+     *
+     * @param elementType Class of the elements to be extracted.
+     */
     public DocumentExtractorBuilder(@NotNull final Class<E> elementType) {
         this.elementType = requireNonNull(elementType);
     }
@@ -89,17 +104,32 @@ public final class DocumentExtractorBuilder<E> implements DocumentExtractor.Buil
         }
     }
 
+    /**
+     * Provides a thread-safe supplier, ensuring the supplier's reuse is either confined to the
+     * current thread or utilizes a thread-local mechanism.
+     *
+     * @return A guarded supplier of type E.
+     */
     Supplier<E> guardedSupplier() {
-        // Either of these protected Suppliers are used
+        // Determines which supplier to use based on thread confinement.
         return threadConfinedReuse
                 ? new ThreadConfinedSupplier<>(supplier)
                 : new ThreadLocalSupplier<>(supplier);
     }
 
+    /**
+     * A supplier backed by a ThreadLocal instance, ensuring separate values for each thread.
+     */
     static final class ThreadLocalSupplier<E> implements Supplier<E> {
 
+        // ThreadLocal instance to provide thread-specific values.
         private final ThreadLocal<E> threadLocal;
 
+        /**
+         * Constructs the ThreadLocalSupplier with a given supplier.
+         *
+         * @param supplier The supplier to initialize the thread-local with.
+         */
         public ThreadLocalSupplier(@NotNull final Supplier<? extends E> supplier) {
             this.threadLocal = ThreadLocal.withInitial(supplier);
         }
@@ -110,11 +140,22 @@ public final class DocumentExtractorBuilder<E> implements DocumentExtractor.Buil
         }
     }
 
+    /**
+     * A supplier that ensures its use is confined to a single thread, providing thread safety.
+     */
     static final class ThreadConfinedSupplier<E> implements Supplier<E> {
 
+        // Utility to assert that the current thread is the one this supplier is confined to.
         private final ThreadConfinementAsserter asserter = ThreadConfinementAsserter.createEnabled();
+
+        // The actual object to be supplied.
         private final E delegate;
 
+        /**
+         * Constructs the ThreadConfinedSupplier with a given supplier.
+         *
+         * @param supplier The supplier to provide the delegate object.
+         */
         public ThreadConfinedSupplier(@NotNull final Supplier<? extends E> supplier) {
             // Eagerly create the reuse object
             this.delegate = requireNonNull(supplier.get());
@@ -127,11 +168,23 @@ public final class DocumentExtractorBuilder<E> implements DocumentExtractor.Buil
         }
     }
 
+    /**
+     * Represents a reference to a method for extracting data.
+     */
     private static final class MethodRef<I, E> {
 
+        // Type of interface the method belongs to.
         final Class<I> interfaceType;
+
+        // Reference to the extraction method.
         final BiConsumer<I, E> methodReference;
 
+        /**
+         * Constructs the MethodRef with specified interface type and method reference.
+         *
+         * @param interfaceType The class type of the interface.
+         * @param methodReference The actual method reference for extraction.
+         */
         @SuppressWarnings("unchecked")
         public MethodRef(@NotNull final Class<I> interfaceType,
                          @NotNull final BiConsumer<? super I, ? super E> methodReference) {
@@ -147,5 +200,4 @@ public final class DocumentExtractorBuilder<E> implements DocumentExtractor.Buil
             return methodReference;
         }
     }
-
 }

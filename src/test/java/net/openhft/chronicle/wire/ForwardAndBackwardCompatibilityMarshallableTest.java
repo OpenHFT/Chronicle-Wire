@@ -33,6 +33,7 @@ import java.util.Collection;
 
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
+// Test class to check forward and backward compatibility with various WireTypes
 @RunWith(value = Parameterized.class)
 public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCommon {
 
@@ -43,6 +44,7 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
         this.wireType = wireType;
     }
 
+    // Define the wire types to be tested
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
@@ -53,12 +55,14 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
         });
     }
 
+    // Clean up resources after tests
     @Override
     public void afterChecks() {
         bytes.releaseLast();
         super.afterChecks();
     }
 
+    // Test to check the compatibility of a marshallable StringBuilder
     @Test
     public void marshableStringBuilderTest() throws Exception {
         final Wire wire = wireType.apply(bytes);
@@ -81,6 +85,7 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
         }
     }
 
+    // Test for checking backward compatibility of the Wire
     @Test
     public void backwardsCompatibility() {
         final Wire wire = wireType.apply(bytes);
@@ -110,53 +115,75 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
 
     @Test
     public void forwardCompatibility() {
+        // Apply the given wireType to bytes to get a Wire instance
         final Wire wire = wireType.apply(bytes);
+
+        // Check if the wire is an instance of YamlWire and skip the test if true
         Assume.assumeFalse(wire instanceof YamlWire);
+
+        // Check if the wire is binary and apply padding if true
         wire.usePadding(wire.isBinary());
+
+        // Wrap the CLASS_ALIASES and add an alias for MDTO2 as "MDTO"
         ClassLookup wrap2 = CLASS_ALIASES.wrap();
         wrap2.addAlias(MDTO2.class, "MDTO");
         wire.classLookup(wrap2);
 
+        // Write a new instance of MDTO2 to the wire
         wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new MDTO2(1, 2, "3")));
         // System.out.println(Wires.fromSizePrefixedBlobs(wire));
 
+        // Wrap the CLASS_ALIASES again and add an alias for MDTO2
         ClassLookup wrap1 = CLASS_ALIASES.wrap();
         wrap1.addAlias(MDTO2.class, "MDTO");
         wire.classLookup(wrap1);
 
+        // If the wire is an instance of TextWire, use binary documents
         if (wire instanceof TextWire)
             ((TextWire) wire).useBinaryDocuments();
+
+        // Read the document from the wire
         try (DocumentContext dc = wire.readingDocument()) {
+            // If there's no document present, fail the test
             if (!dc.isPresent())
                 Assert.fail();
+
+            // Create a new instance of MDTO1 and read its value from the wire
             @NotNull MDTO1 dto1 = new MDTO1();
-            dc.wire().getValueIn()
-                    .marshallable(dto1);
+            dc.wire().getValueIn().marshallable(dto1);
+
+            // Assert that the value read is as expected
             Assert.assertEquals(1, dto1.one);
         }
     }
 
+    // Class representing a data transfer object with a single integer field "one"
     public static class MDTO1 extends SelfDescribingMarshallable implements Demarshallable {
 
         int one;
 
+        // Constructor used via reflection when reading from the wire
         @UsedViaReflection
         public MDTO1(@NotNull WireIn wire) {
             readMarshallable(wire);
         }
 
+        // Constructor to set the value of "one" directly
         public MDTO1(int i) {
             this.one = i;
         }
 
+        // Default constructor
         public MDTO1() {
 
         }
 
+        // Getter method for "one"
         public int one() {
             return one;
         }
 
+        // Setter method for 'one' that returns the MDTO1 instance for chaining
         @NotNull
         public MDTO1 one(int one) {
             this.one = one;
@@ -164,17 +191,21 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
         }
     }
 
+    // Class representing a data transfer object with fields "one", "two", and "three"
     public static class MDTO2 extends SelfDescribingMarshallable implements Demarshallable {
 
+        // Using StringBuilder for "three" to easily modify its content
         final StringBuilder three = new StringBuilder();
         int one;
         int two;
 
+        // Constructor used via reflection when reading from the wire
         @UsedViaReflection
         public MDTO2(@NotNull WireIn wire) {
             readMarshallable(wire);
         }
 
+        // Constructor to initialize "one", "two", and "three" with given values
         public MDTO2(int one, int two, @NotNull Object three) {
             this.one = one;
             this.two = two;
@@ -182,15 +213,18 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
             this.three.append(three);
         }
 
+        // Default constructor
         public MDTO2() {
 
         }
 
+        // Getter method for "three"
         @NotNull
         public Object three() {
             return three;
         }
 
+        // Setter method for 'three' that returns the MDTO2 instance for chaining
         @NotNull
         public MDTO2 three(@NotNull Object three) {
             this.three.setLength(0);
@@ -198,20 +232,24 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
             return this;
         }
 
+        // Getter method for "one"
         public int one() {
             return one;
         }
 
+        // Setter method for 'one' that returns the MDTO2 instance for chaining
         @NotNull
         public MDTO2 one(int one) {
             this.one = one;
             return this;
         }
 
+        // Getter method for "two"
         public int two() {
             return two;
         }
 
+        // Setter method for 'two' that returns the MDTO2 instance for chaining
         @NotNull
         public MDTO2 two(int two) {
             this.two = two;
@@ -219,4 +257,3 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
         }
     }
 }
-

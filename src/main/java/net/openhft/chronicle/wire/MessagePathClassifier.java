@@ -27,14 +27,33 @@ import java.util.function.IntSupplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * The {@code MessagePathClassifier} class is responsible for classifying message paths based on their histories.
+ * This classifier allows messages to be grouped or identified based on patterns of their source IDs. It provides
+ * mechanisms to associate a path ID with certain patterns of source IDs and to retrieve the appropriate path ID
+ * for a given message history.
+ * <p>
+ * This class also implements {@link IntSupplier}, allowing the direct fetching of path ID for the current
+ * {@link MessageHistory}.
+ * </p>
+ */
 public class MessagePathClassifier implements IntSupplier {
+
+    // Patterns of source IDs for classification.
     private final List<int[]> sourcePattern = new ArrayList<>();
+
+    // Path IDs corresponding to the patterns.
     private final List<Integer> pathIds = new ArrayList<>();
 
     /**
-     * @param pathId  0 indexed pathId for sourcces ending with
-     * @param sources match a message history ending with this.
-     * @return this
+     * Registers a path ID for message histories ending with a specific sequence of source IDs.
+     *
+     * This method enables the user to define how the classifier should categorize certain patterns
+     * of message history.
+     *
+     * @param pathId  A unique identifier for the message path.
+     * @param sources An ordered array of source IDs representing a pattern in the message history.
+     * @return The current instance of the {@link MessagePathClassifier} for chaining.
      */
     public MessagePathClassifier addPathForSourcesEnding(int pathId, int... sources) {
         OptionalInt duplicate = IntStream.range(0, sourcePattern.size())
@@ -57,6 +76,12 @@ public class MessagePathClassifier implements IntSupplier {
         return pathFor(MessageHistory.get());
     }
 
+    /**
+     * Determines the path ID for a specific {@link MessageHistory}.
+     *
+     * @param messageHistory The message history to classify.
+     * @return The classified path ID for the given message history.
+     */
     public int pathFor(MessageHistory messageHistory) {
         Integer pathId = null;
         int length = -1;

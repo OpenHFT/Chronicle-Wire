@@ -34,6 +34,11 @@ import java.util.stream.Collector;
 
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
+/**
+ * This is the Reduction interface which extends ExcerptListener.
+ * It provides a means to consume excerpts from a given wire and apply reductions on them.
+ * The implementations of this interface should be thread-safe, especially if they are referenced as an {@link ExcerptListener}.
+ */
 public interface Reduction<T> extends ExcerptListener {
 
     /**
@@ -115,6 +120,10 @@ public interface Reduction<T> extends ExcerptListener {
         return new ReductionUtil.VanillaDoubleReductionBuilder(extractor);
     }
 
+    /**
+     * ReductionBuilder is an interface that defines the contract for creating new Reductions using a specific collector.
+     * Implementations of this interface should cater to the specific type of element being reduced.
+     */
     interface ReductionBuilder<E> {
 
         /**
@@ -131,6 +140,9 @@ public interface Reduction<T> extends ExcerptListener {
         <A, R> Reduction<R> collecting(@NotNull final Collector<E, A, ? extends R> collector);
     }
 
+    /**
+     * LongReductionBuilder is an interface that defines the contract for creating Reductions specialized for handling long data types.
+     */
     interface LongReductionBuilder {
 
         /**
@@ -150,6 +162,9 @@ public interface Reduction<T> extends ExcerptListener {
 
     }
 
+    /**
+     * DoubleReductionBuilder is an interface that defines the contract for creating Reductions specialized for handling double data types.
+     */
     interface DoubleReductionBuilder {
 
         /**

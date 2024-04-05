@@ -24,23 +24,36 @@ import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Data Transfer Object (DTO) for reading and writing marshallable data.
+ * It encapsulates three string properties named 'a', 'b', and 'c'.
+ */
 public class ReadMarshallableDTO extends SelfDescribingMarshallable {
-    String a, b, c;
+    String a, b, c; // Three string properties.
 
+    /**
+     * Reads the marshallable data from the given WireIn instance.
+     * Populates the properties 'a', 'b', and 'c' with the read values.
+     *
+     * @param wire The WireIn instance from which to read the data.
+     * @throws IORuntimeException if an IO error occurs during reading.
+     */
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
-        a = wire.read("a")
-                .text();
-        b = wire.read("b")
-                .text();
-        c = wire.read("c")
-                .text();
+        a = wire.read("a").text(); // Read and assign the value for 'a'.
+        b = wire.read("b").text(); // Read and assign the value for 'b'.
+        c = wire.read("c").text(); // Read and assign the value for 'c'.
     }
 
+    /**
+     * Writes the properties 'a', 'b', and 'c' to the given WireOut instance.
+     *
+     * @param wire The WireOut instance to which the data is written.
+     */
     @Override
     public void writeMarshallable(@NotNull WireOut wire) {
-        wire.write("a").text(a);
-        wire.write("b").text(b);
-        wire.write("c").text(c);
+        wire.write("a").text(a); // Write the value of 'a'.
+        wire.write("b").text(b); // Write the value of 'b'.
+        wire.write("c").text(c); // Write the value of 'c'.
     }
 }

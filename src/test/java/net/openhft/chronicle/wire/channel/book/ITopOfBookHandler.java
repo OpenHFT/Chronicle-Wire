@@ -20,6 +20,17 @@ package net.openhft.chronicle.wire.channel.book;
 
 import net.openhft.chronicle.wire.Marshallable;
 
+/**
+ * ITopOfBookHandler interface extends TopOfBookListener and Marshallable to provide functionality
+ * for handling top of book updates and serialization respectively.
+ */
 public interface ITopOfBookHandler extends TopOfBookListener, Marshallable {
+
+    /**
+     * Outputs (or delegates) the received top-of-book updates to another TopOfBookListener.
+     *
+     * @param topOfBookListener A listener to which the updates will be delegated.
+     * @return An instance of EchoTopOfBookHandler which is configured to forward updates to the provided listener.
+     */
     EchoTopOfBookHandler out(TopOfBookListener topOfBookListener);
 }

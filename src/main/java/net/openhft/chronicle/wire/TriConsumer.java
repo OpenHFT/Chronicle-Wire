@@ -22,6 +22,17 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * Represents an operation that accepts three input arguments and returns no result.
+ * This is a three-arity specialization of {@code Consumer}.
+ * Unlike most other functional interfaces, {@code TriConsumer} is expected to operate
+ * via side effects. This interface is useful in scenarios where lambda expressions
+ * or method references would benefit from custom manipulations of three separate arguments.
+ *
+ * @param <T> the type of the first argument to the operation
+ * @param <U> the type of the second argument to the operation
+ * @param <V> the type of the third argument to the operation
+ */
 @FunctionalInterface
 public interface TriConsumer<T, U, V> {
 
@@ -31,6 +42,8 @@ public interface TriConsumer<T, U, V> {
      * @param t the first input argument
      * @param u the second input argument
      * @param v the third input argument
+     * @throws InvalidMarshallableException if there are issues with marshalling
+     *                                      during the accept operation.
      */
     void accept(T t, U u, V v) throws InvalidMarshallableException;
 

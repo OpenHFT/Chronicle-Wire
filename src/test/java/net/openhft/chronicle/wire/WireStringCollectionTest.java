@@ -32,7 +32,10 @@ public class WireStringCollectionTest extends net.openhft.chronicle.wire.WireTes
 
     @Test
     public void readAndWrite() {
+        // Add an alias for ContainsList class
         ClassAliasPool.CLASS_ALIASES.addAlias(ContainsList.class);
+
+        // The string representation of a serialized ContainsList object
         final String hbStr = "!ContainsList {\n" +
                 "  list: [\n" +
                 "    xx,\n" +
@@ -42,12 +45,18 @@ public class WireStringCollectionTest extends net.openhft.chronicle.wire.WireTes
                 "    key: value\n" +
                 "  }\n" +
                 "}\n";
+
+        // Deserialize hbStr to a ContainsList object
         ContainsList defn = Marshallable.fromString(hbStr);
+
+        // Validate the deserialized list and map contents
         Assert.assertEquals(2, defn.list.size());
         Assert.assertEquals(1, defn.map.size());
+        // Validate the string representation of the deserialized object matches the original
         Assert.assertEquals(hbStr, defn.toString());
     }
 
+    // Definition for ContainsList class
     private static class ContainsList extends AbstractEventCfg<ContainsList> {
         @NotNull List<String> list = new ArrayList<>();
         @NotNull Map<String, String> map = new HashMap<>();

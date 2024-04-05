@@ -21,10 +21,29 @@ package net.openhft.chronicle.wire.utils;
 import net.openhft.chronicle.wire.LongConversion;
 import net.openhft.chronicle.wire.NanoTimestampLongConverter;
 
+/**
+ * TestIn interface defines methods for processing various types of events and time data.
+ */
 public interface TestIn {
+
+    /**
+     * Processes a time value with nanosecond precision.
+     *
+     * @param time The time value to be processed, represented in nanoseconds.
+     */
     void time(@LongConversion(NanoTimestampLongConverter.class) long time);
 
+    /**
+     * Processes a TestEvent object with details of a specific event.
+     *
+     * @param dto The TestEvent data transfer object containing event details.
+     */
     void testEvent(TestEvent dto);
 
+    /**
+     * Processes a TestAbstractMarshallableCfgEvent object.
+     *
+     * @param dto The TestAbstractMarshallableCfgEvent data transfer object to be processed.
+     */
     void testAbstractMarshallableCfgEvent(TestAbstractMarshallableCfgEvent dto);
 }

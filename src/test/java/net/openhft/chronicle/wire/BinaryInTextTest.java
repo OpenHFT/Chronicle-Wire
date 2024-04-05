@@ -32,12 +32,16 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(value = Parameterized.class)
 public class BinaryInTextTest extends WireTestCommon {
+
+    // Holds the wire type for each test iteration
     private final WireType wireType;
 
+    // Constructor to initialize the wire type
     public BinaryInTextTest(WireType wireType) {
         this.wireType = wireType;
     }
 
+    // Specifies the set of wire types that will be passed to the test constructor
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
@@ -45,6 +49,7 @@ public class BinaryInTextTest extends WireTestCommon {
                 new Object[]{WireType.YAML});
     }
 
+    // Test for converting binary content from text representation to Bytes
     @SuppressWarnings("rawtypes")
     @Test
     public void testBytesFromText() {
@@ -61,6 +66,7 @@ public class BinaryInTextTest extends WireTestCommon {
         assertEquals("00000000 03", b2.toHexString().substring(0, 58).trim());
     }
 
+    // Test to validate reserialization of binary content from text
     @Test
     public void testReserialize() {
         BIT bit = wireType.fromString(BIT.class, "{\n" +
@@ -68,6 +74,7 @@ public class BinaryInTextTest extends WireTestCommon {
                 "c: !!binary CCCCCCCC,\n" +
                 "}");
         String bitToString = bit.toString();
+        // Checks both possible serializations since field order is not guaranteed
         assertTrue(bitToString.equals("!net.openhft.chronicle.wire.BinaryInTextTest$BIT {\n" +
                 "  b: !!binary AAAAAAA=,\n" +
                 "  c: !!binary CCCCCCCC\n" +
@@ -78,6 +85,7 @@ public class BinaryInTextTest extends WireTestCommon {
                         "}\n"));
     }
 
+    // Inner class to test serialization and deserialization of binary content in text
     @SuppressWarnings("rawtypes")
     static class BIT extends SelfDescribingMarshallable {
         Bytes<?> b;

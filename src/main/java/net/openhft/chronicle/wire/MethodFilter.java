@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+@Deprecated(/* to be removed in x.27, use MethodFilterOnFirstArg */)
 @FunctionalInterface
 public interface MethodFilter {
     boolean shouldHandleMessage(String method, Object firstArg);

@@ -32,16 +32,20 @@ import static org.junit.Assert.assertEquals;
 @RunWith(value = Parameterized.class)
 public class TextSkipValueTest extends WireTestCommon {
 
+    // This will store the input string for each run of the test.
     final String input;
 
+    // Constructor that initializes the 'input' member variable.
     public TextSkipValueTest(String input) {
         this.input = input;
     }
 
+    // This method provides the parameters (inputs) for the test.
     @NotNull
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
         List<Object[]> list = new ArrayList<>();
+        // Here are the different inputs we are testing:
         for (String s : new String[]{
                 "data: {\n" +
                         "  a: 123\n" +
@@ -83,17 +87,24 @@ public class TextSkipValueTest extends WireTestCommon {
                 "a,\n" +
                         "end"
         }) {
+            // Add each input string wrapped in an Object array to the list.
             list.add(new Object[]{s});
         }
         return list;
     }
 
+    // This is the actual test that will run once for each input string provided by combinations() method.
     @Test
     public void skipValue() {
+        // Create a TextWire from the input string.
         Wire wire = TextWire.from(input);
+        // Try to skip the value in the input string.
         wire.getValueIn()
-                .skipValue();
+            .skipValue();
+        // Consume any padding in the wire.
         wire.consumePadding();
+        // After skipping the value and consuming padding,
+        // the next value in the wire should be "end". Assert this expectation.
         assertEquals("end", wire.bytes().toString());
     }
 }

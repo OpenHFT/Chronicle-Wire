@@ -21,8 +21,14 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * This is the DocumentContextHolder class which implements both {@link DocumentContext}
+ * and {@link WriteDocumentContext}. It acts as a wrapper or a delegate around an instance of
+ * {@link DocumentContext}, providing methods to interact with the encapsulated context.
+ */
 public class DocumentContextHolder implements DocumentContext, WriteDocumentContext {
 
+    // The encapsulated DocumentContext instance.
     DocumentContext dc;
 
     @Override
@@ -46,10 +52,20 @@ public class DocumentContextHolder implements DocumentContext, WriteDocumentCont
         return dc.isNotComplete();
     }
 
+    /**
+     * Retrieves the encapsulated {@link DocumentContext} instance.
+     *
+     * @return The current {@link DocumentContext} instance.
+     */
     public DocumentContext documentContext() {
         return dc;
     }
 
+    /**
+     * Sets the encapsulated {@link DocumentContext} instance to the provided value.
+     *
+     * @param dc The new {@link DocumentContext} to be set.
+     */
     public void documentContext(DocumentContext dc) {
         this.dc = dc;
     }
@@ -82,6 +98,13 @@ public class DocumentContextHolder implements DocumentContext, WriteDocumentCont
         return dc.index();
     }
 
+    /**
+     * Determines if the DocumentContextHolder has been closed or not.
+     * This method checks if the encapsulated {@link DocumentContext} is {@code null}, indicating a closed state.
+     *
+     * @return {@code true} if the holder is closed (i.e., the internal {@link DocumentContext} is {@code null}),
+     * {@code false} otherwise.
+     */
     public boolean isClosed() {
         return dc == null;
     }

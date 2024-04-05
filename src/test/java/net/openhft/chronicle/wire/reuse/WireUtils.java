@@ -31,24 +31,39 @@ import java.util.stream.IntStream;
 import static org.junit.Assert.assertEquals;
 
 /**
- * @author gadei
+ * Utility class for creating and comparing WireProperty and WireCollection objects.
  */
 public class WireUtils {
 
+    // Random object for generating random values
     private static final Random rand = new Random();
 
+    /**
+     * Creates a randomly generated WireProperty instance.
+     *
+     * @param i An integer to influence the generated property's values.
+     * @return A WireProperty with randomly generated attributes.
+     */
     @NotNull
     public static WireProperty randomWireProperty(int i) {
         return new WireProperty("reference" + i, "@:" + i, "name" + i, UUID.randomUUID().toString().replace("-", ""), rand.nextLong(), rand.nextInt(), UUID.randomUUID().toString());
     }
 
+    /**
+     * Creates a WireCollection with randomly generated WireProperty instances.
+     *
+     * @return A WireCollection with nested properties and sub-collections.
+     */
     @NotNull
     public static WireCollection randomWireCollection() {
         @NotNull WireCollection collection = new WireCollection("reference", "@", "name", 234234234, 23, UUID.randomUUID().toString());
 
+        // Add randomly generated properties
         IntStream.range(1, 10).forEach((i) -> {
             collection.addProperty(randomWireProperty(i));
         });
+
+        // Add sub-collections with their properties
 
         IntStream.range(1, 4).forEach((i) -> {
             @NotNull WireCollection c = new WireCollection("reference" + i, "@:" + i, "name" + i, rand.nextLong(), rand.nextInt(), UUID.randomUUID().toString());
@@ -61,12 +76,24 @@ public class WireUtils {
         return collection;
     }
 
+    /**
+     * Compares two WireModel instances for equality.
+     *
+     * @param a The first WireModel instance.
+     * @param b The second WireModel instance.
+     */
     public static void compareWireModel(@NotNull WireModel a, @NotNull WireModel b) {
         assertEquals(a.getId(), b.getId());
         assertEquals(a.getRevision(), b.getRevision());
         assertEquals(a.getKey(), b.getKey());
     }
 
+    /**
+     * Compares two WireProperty instances for equality.
+     *
+     * @param a The first WireProperty instance.
+     * @param b The second WireProperty instance.
+     */
     public static void compareWireProperty(@NotNull WireProperty a, @NotNull WireProperty b) {
         compareWireModel(a, b);
         assertEquals(a.getReference(), b.getReference());
@@ -75,6 +102,12 @@ public class WireUtils {
         assertEquals(a.getPath(), b.getPath());
     }
 
+    /**
+     * Compares two WireCollection instances for equality.
+     *
+     * @param a The first WireCollection instance.
+     * @param b The second WireCollection instance.
+     */
     public static void compareWireCollection(@NotNull WireCollection a, @NotNull WireCollection b) {
         compareWireModel(a, b);
         assertEquals(a.getReference(), b.getReference());
@@ -84,6 +117,7 @@ public class WireUtils {
         assertEquals(a.getCollections().size(), b.getCollections().size());
         assertEquals(a.getProperties().size(), b.getProperties().size());
 
+        // Check each property and collection in 'a' against the corresponding elements in 'b'
         a.getProperties().values().forEach(c -> {
             if (b.getProperties().containsKey(c.getReference())) {
                 compareWireProperty(c, b.getProperties().get(c.getReference()));
