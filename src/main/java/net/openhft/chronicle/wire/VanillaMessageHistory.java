@@ -56,7 +56,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     private static final boolean HISTORY_WALL_CLOCK = Jvm.getBoolean("history.wall.clock");
     private boolean useBytesMarshallable = HISTORY_AS_BYTES;
     private boolean historyWallClock = HISTORY_WALL_CLOCK;
-    private boolean historyMethodId = HISTORY_AS_METHOD_ID;
 
     @NotNull
     private final int[] sourceIdArray = new int[MESSAGE_HISTORY_LENGTH];
