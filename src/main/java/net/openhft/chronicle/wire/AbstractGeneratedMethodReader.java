@@ -316,7 +316,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      *
      * @throws ClosedIllegalStateException if this instance has already been closed.
      */
-    public void throwExceptionIfClosed() throws ClosedIllegalStateException{
+    public void throwExceptionIfClosed() throws ClosedIllegalStateException {
         if (isClosed())
             throw new ClosedIllegalStateException("Closed");
     }

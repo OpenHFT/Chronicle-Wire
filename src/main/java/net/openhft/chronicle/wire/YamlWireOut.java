@@ -56,8 +56,7 @@ import static net.openhft.chronicle.bytes.BytesStore.empty;
  */
 @SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
 public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire {
-
-    // Default values and static configurations for the YAML writer
+    @Deprecated(/* to remove in x.28 */)
     private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
     public static final BytesStore TYPE = BytesStore.from("!type ");

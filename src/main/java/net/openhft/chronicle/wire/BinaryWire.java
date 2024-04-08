@@ -58,7 +58,7 @@ import java.util.function.*;
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.BinaryWire.AnyCodeMatch.ANY_CODE_MATCH;
 import static net.openhft.chronicle.wire.BinaryWireCode.*;
-import static net.openhft.chronicle.wire.Wires.*;
+import static net.openhft.chronicle.wire.Wires.GENERATE_TUPLES;
 
 /**
  * Represents a binary translation of TextWire, which is a subset of YAML.
