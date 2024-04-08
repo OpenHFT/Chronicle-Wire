@@ -870,6 +870,9 @@ public class GenerateMethodReader {
         } else {
             // Handling other object types.
             final String typeName = argumentType.getCanonicalName();
+            if (!argumentType.isArray() && !AbstractMarshallableCfg.class.isAssignableFrom(argumentType) && !Collection.class.isAssignableFrom(argumentType) && !Map.class.isAssignableFrom(argumentType) && Object.class != argumentType && !argumentType.isInterface()) {
+                return format("%s = %s.object(%s, %s.class);\n", argumentName, valueInName, argumentName, typeName);
+            }
             return format("%s = %s.object(checkRecycle(%s), %s.class);\n", argumentName, valueInName, argumentName, typeName);
         }
     }
