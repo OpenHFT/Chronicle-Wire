@@ -346,18 +346,6 @@ public interface WireIn extends WireCommon, MarshallableIn {
     void readMetaDataHeader();
 
     /**
-     * Provides a textual representation of the current WireIn instance.
-     * Deprecated and set to be removed in future versions.
-     *
-     * @return A CharSequence containing a text representation, or null if conversion is not possible.
-     */
-    @Deprecated(/* to be removed in x.25 */)
-    @Nullable
-    default CharSequence asText() {
-        return Wires.asText(this);
-    }
-
-    /**
      * Peeks at the content in the current WireIn instance and returns it as a YAML string.
      *
      * @return A String containing a YAML representation of the peeked content.

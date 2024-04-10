@@ -28,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * @param <T> the type of objects this strategy can handle.
  */
-public interface SerializationStrategy<T> {
+public interface SerializationStrategy {
 
     /**
      * Reads an object of type {@code T} from the provided input source and populates
