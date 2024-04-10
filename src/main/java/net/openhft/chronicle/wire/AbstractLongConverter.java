@@ -24,7 +24,6 @@ import net.openhft.chronicle.bytes.Bytes;
  * <p>
  * This class delegates the core conversion operations to an encapsulated {@link LongConverter} instance.
  * Subclasses can build upon this base while retaining or customizing the behavior of the underlying converter.
- * </p>
  */
 public abstract class AbstractLongConverter implements LongConverter {
 

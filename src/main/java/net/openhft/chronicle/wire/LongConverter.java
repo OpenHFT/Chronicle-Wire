@@ -36,11 +36,11 @@ import static java.text.MessageFormat.format;
 public interface LongConverter {
 
     /**
-     * Creates an instance of the appropriate implementation of {@link LongConverter}
+     * Creates an instance of the appropriate implementation of
      * based on the length of the provided character set.
      *
      * @param chars A set of symbols or characters to be used in the conversion.
-     * @return An instance of {@link LongConverter}. If the length of chars is a power of 2,
+     * @return An instance of . If the length of chars is a power of 2,
      * a {@link PowerOfTwoLongConverter} is returned; otherwise, a {@link SymbolsLongConverter} is returned.
      */
     static LongConverter forSymbols(String chars) {
@@ -163,7 +163,7 @@ public interface LongConverter {
     /**
      * Checks that the length of the provided text does not exceed the allowable maximum.
      *
-     * @param text
+     * @param text The text to check.
      * @param beginIndex the beginning index, inclusive.
      * @param endIndex   the ending index, exclusive.
      * @throws IllegalArgumentException if the text length exceeds the maximum allowable length.

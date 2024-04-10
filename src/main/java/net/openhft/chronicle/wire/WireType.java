@@ -54,7 +54,6 @@ import static net.openhft.chronicle.core.io.IOTools.*;
  * This enumeration provides utilities to check for the availability of certain wire types
  * such as DeltaWire and DefaultZeroWire. It also provides methods to acquire bytes,
  * useful in serialization operations.
- * </p>
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
@@ -412,7 +411,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     }
 
     /**
-     * Determines the {@link WireType} of a given {@link Wire} instance. This method inspects
+     * Determines the  of a given {@link Wire} instance. This method inspects
      * the underlying type of the provided wire instance and maps it to its corresponding
      * WireType.
      *

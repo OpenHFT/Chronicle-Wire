@@ -33,8 +33,7 @@ public interface MethodDelegate<OUT> {
      * <p>
      * This mechanism allows the delegation of method calls to an alternate implementation,
      * enabling behaviors like logging, mocking, or additional processing.
-     * </p>
-     * @param delegate The object that will receive the delegated method calls.
+         * @param delegate The object that will receive the delegated method calls.
      */
     void delegate(OUT delegate);
 }

@@ -407,8 +407,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
      * The method retrieves abstract methods from the interfaces specified in the metadata and the superclass.
      * Any concrete method present in the superclass or interfaces is considered to have already been
      * overridden, so these methods are excluded from the result.
-     * </p>
-     *
+         *
      * @return A set of methods that need to be overridden.
      */
     @NotNull
@@ -458,8 +457,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
      * The `MetaData` class serves as a blueprint for the characteristics of the class
      * to be generated. It provides specifications like the package name, base class name,
      * interfaces to be implemented, and the flag to use an update interceptor.
-     * </p>
-     * @param <M> Represents the actual type extending this `MetaData` class, facilitating method chaining.
+         * @param <M> Represents the actual type extending this `MetaData` class, facilitating method chaining.
      */
     public abstract static class MetaData<M extends MetaData<M>> extends SelfDescribingMarshallable {
         private String packageName = "";

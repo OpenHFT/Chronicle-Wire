@@ -46,7 +46,7 @@ public interface ToDoubleDocumentExtractor {
      * queue but of another type.
      * <p>
      * Extractors that must include {@link Double#NaN} as a valid value must use other means of
-     * aggregating values (e.g. use an {@link DocumentExtractor DocumentExtractor<Double> }.
+     * aggregating values (e.g. use an {@link DocumentExtractor DocumentExtractor&lt;Double> }.
      *
      * @param wire  to use
      * @param index to use

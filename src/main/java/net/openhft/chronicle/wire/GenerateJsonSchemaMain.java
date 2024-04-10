@@ -269,7 +269,7 @@ public class GenerateJsonSchemaMain {
     /**
      * Adds a type descriptor to the given StringBuilder based on the type and annotations
      * of a field or method parameter. This method checks for specific annotations like
-     * {@link IntConversion} and {@link LongConversion} to determine the type description.
+     * {@link LongConversion} to determine the type description.
      * If the field/parameter is of Collection type, it's identified as an "array", and if it's
      * of type Map, it's identified as an "object". For other types, the corresponding schema is generated.
      *

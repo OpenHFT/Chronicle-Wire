@@ -56,8 +56,7 @@ public class IdentifierLongConverter implements LongConverter {
      * <p>
      * If the text length is less than or equal to 10, it is treated as a base 66 encoded string. Otherwise,
      * it is treated as a nanosecond timestamp.
-     * </p>
-     * @param text The CharSequence to be parsed.
+         * @param text The CharSequence to be parsed.
      * @return The parsed long identifier representation.
      */
     @Override

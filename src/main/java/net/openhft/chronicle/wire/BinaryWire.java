@@ -1935,7 +1935,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     /**
      * Generates an UnsupportedOperationException when an unknown code is encountered.
-     *
+     * <p>
      * The function formats the provided code to a hexadecimal string and
      * includes it in the exception message.
      *
@@ -1950,7 +1950,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     /**
      * Reads a code from the byte storage without checks.
-     *
+     * <p>
      * This method retrieves a code that indicates the format or type of the next data
      * to be read from the bytes storage.
      *
@@ -1963,7 +1963,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     /**
      * Converts the current state of the bytes storage to a debug string.
-     *
+     * <p>
      * This method provides a string representation of the bytes, useful for
      * debugging purposes.
      *
@@ -2011,7 +2011,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     /**
      * Reads a UTF-8 formatted string from the byte storage.
-     *
+     * <p>
      * The method retrieves a string encoded in UTF-8 from the bytes storage,
      * appending the characters to a StringBuilder.
      *
@@ -2026,7 +2026,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     /**
      * Determines whether a given object should use the self-describing message format.
-     *
+     * <p>
      * This method first checks if an override value for self-describing is set. If not,
      * it uses the self-describing value from the provided object.
      *
@@ -2183,7 +2183,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         /**
          * Writes bytes from the given BytesStore to the byte storage.
-         *
+         * <p>
          * It first writes the length of the bytes and then the bytes themselves.
          * This method ensures the U8_ARRAY code is prefixed before the actual byte data.
          *
@@ -2332,7 +2332,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         /**
          * Writes a 32-bit integer value to the byte storage in an order-preserving binary format.
-         *
+         * <p>
          * Additionally, if hex dump description is retained, it writes a hex dump description.
          *
          * @param i32 The 32-bit integer value to be written.
@@ -2381,7 +2381,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         /**
          * Writes a 64-bit integer value to the byte storage in an order-preserving binary format.
-         *
+         * <p>
          * Additionally, if hex dump description is retained, it writes a hex dump description.
          * This method ensures that the writing is aligned to 8 bytes and then the INT64 code is
          * prefixed before the actual 64-bit data.
@@ -2638,7 +2638,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         /**
          * Sets the length of the sequence in the byte storage at the given position.
-         *
+         * <p>
          * It calculates the length from the current position to the specified position,
          * then writes this length at the specified position. If the bytes instance is
          * of type HexDumpBytes, the length is written directly. Otherwise, a check is

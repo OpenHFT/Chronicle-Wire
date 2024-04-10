@@ -55,8 +55,7 @@ public class JavaSourceCodeFormatter extends SourceCodeFormatter {
      *
      * <p>
      * This can be useful in scenarios where the indentation needs to be managed or adjusted externally.
-     * </p>
-     *
+         *
      * @param indent AtomicInteger managing the indentation level.
      */
     public JavaSourceCodeFormatter(AtomicInteger indent) {

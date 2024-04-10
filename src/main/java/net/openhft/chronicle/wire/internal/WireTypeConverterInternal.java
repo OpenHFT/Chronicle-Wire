@@ -7,7 +7,7 @@ import net.openhft.chronicle.wire.WireType;
 /**
  * Provides the capability to convert between different wire types, with a primary focus on
  * converting from JSON to YAML format.
- *
+ * <p>
  * This class encapsulates both JSON and YAML wire types to facilitate the conversion.
  * In addition to conversion, it supports validation mechanisms to ensure correctness and integrity of
  * the transformed data.

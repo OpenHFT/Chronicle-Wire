@@ -428,8 +428,7 @@ public class GenerateMethodWriter {
      *     <li>Processes each method from the provided interfaces and generates an appropriate method body.</li>
      *     <li>Attempts to load the newly created class using the generated source code.</li>
      * </ol>
-     * </p>
-     *
+         *
      * <p><b>Debugging:</b> If the static field `DUMP_CODE` is set to {@code true}, the generated Java code
      * will be printed to the standard output. This can be useful for debugging purposes.</p>
      *

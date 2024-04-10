@@ -31,10 +31,8 @@ import java.nio.BufferUnderflowException;
  * <p>
  * This cache guarantees that it will provide a value matching the decoded bytes of the input string,
  * but doesn't ensure the same object is returned on subsequent calls or across threads.
- * </p>
  * <p>
  * Note: While it's not strictly thread-safe, it's expected to still produce correct results.
- * </p>
  * @author peter.lawrey
  */
 @SuppressWarnings("unchecked")

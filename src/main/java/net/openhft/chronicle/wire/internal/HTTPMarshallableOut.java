@@ -34,7 +34,7 @@ import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 /**
  * This class allows for the serialization of {@link Marshallable} objects and their transmission over HTTP using the POST method.
  * It is conceptually similar to the command {@code wget --post-data='{data}' http://{host}:{port}/url...}.
- *
+ * <p>
  * The class encapsulates a {@link Wire} which holds the serialized representation. On closure of a document context,
  * the serialized content is posted to the given URL.
  */

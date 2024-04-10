@@ -61,7 +61,7 @@ worst:         295.42        96.13       222.46       179.46       187.14       
  * The {@code WireExchangerPerfMain} class is designed to measure
  * and analyze the performance of a {@code WireExchanger} object,
  * specifically focusing on its latency and throughput.
- *
+ * <p>
  * The class utilizes the JLBH (Java Latency Benchmark Harness)
  * to manage benchmarking results and provide a performance analysis.
  */

@@ -284,8 +284,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * First, the method tries to fetch the class by name. If the class is not found,
      * it attempts to generate a new class. In case of a failure during the class generation,
      * a warning is logged, and a proxy method writer is used as a fallback.
-     * </p>
-     *
+         *
      * @return A newly created instance of the method writer or {@code null} if the instance couldn't be created.
      */
     @Nullable
@@ -324,8 +323,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * <p>
      * The method configures the class generator with various settings, such as package name,
      * base class name, interfaces, event types, and other configuration parameters.
-     * </p>
-     *
+         *
      * @param fullClassName The fully qualified name of the class to be generated.
      * @return The generated class, or {@code COMPILE_FAILED} if class generation failed.
      */
@@ -362,8 +360,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * Before the instantiation, it checks if the outSupplier is set and whether it records
      * history. If the outSupplier does record history, it enables recordHistory for the
      * handlerSupplier as well.
-     * </p>
-     *
+         *
      * @param aClass The class for which a new instance is to be created.
      * @return A newly created object of the provided class.
      * @throws NullPointerException if the outSupplier is not set.

@@ -32,11 +32,8 @@ import java.lang.annotation.Target;
  * <p>
  * When this annotation is applied to a field or parameter, it provides a hint about the expected format
  * and representation of the data, allowing for potential encoding and decoding operations based on Base64.
- * </p>
  * <p>
  * The provided {@link #INSTANCE} is a default converter that can be used for operations relevant to the Base64 format.
- * </p>
- *
  * <b>Example:</b>
  * <pre>
  * {@code

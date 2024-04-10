@@ -26,7 +26,7 @@ import java.util.function.Consumer;
 /**
  * An implementation of {@link MarshallableOut} that serializes {@link Marshallable} objects and forwards
  * the serialized string representation to a provided {@link Consumer<String>}.
- *
+ * <p>
  * The class encapsulates a {@link Wire} to hold the serialized representation. Upon closing of a document context,
  * the serialized content is converted to a string and passed to the given string consumer.
  */

@@ -25,8 +25,6 @@ import org.jetbrains.annotations.Nullable;
  * Represents a strategy for serializing and deserializing objects of type {@code T}.
  * Implementations of this interface define methods for reading, instantiating,
  * and providing metadata about the serialized format.
- *
- * @param <T> the type of objects this strategy can handle.
  */
 public interface SerializationStrategy {
 

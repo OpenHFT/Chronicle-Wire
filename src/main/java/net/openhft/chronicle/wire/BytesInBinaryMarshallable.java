@@ -20,7 +20,7 @@ package net.openhft.chronicle.wire;
 /**
  * Represents an abstract base class for binary marshallables that primarily deal with bytes.
  * By default, this class does not use self-describing messages.
- *
+ * <p>
  * This class extends the {@link AbstractCommonMarshallable} to provide common functionalities
  * shared among marshallables.
  */
