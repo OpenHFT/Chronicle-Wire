@@ -32,10 +32,10 @@ public class NewOrderSingle extends AbstractEvent<NewOrderSingle> {
     }
 
     /**
-     * Sets the client order ID and returns the updated {@link NewOrderSingle} instance.
+     * Sets the client order ID and returns the updated  instance.
      *
      * @param clOrdID Client order ID as a string.
-     * @return Updated {@link NewOrderSingle} instance.
+     * @return Updated  instance.
      */
     public NewOrderSingle clOrdID(String clOrdID) {
         this.clOrdID = clOrdID;
@@ -52,10 +52,10 @@ public class NewOrderSingle extends AbstractEvent<NewOrderSingle> {
     }
 
     /**
-     * Sets the symbol for the order and returns the updated {@link NewOrderSingle} instance.
+     * Sets the symbol for the order and returns the updated  instance.
      *
      * @param symbol Symbol associated with the order.
-     * @return Updated {@link NewOrderSingle} instance.
+     * @return Updated  instance.
      */
     public NewOrderSingle symbol(long symbol) {
         this.symbol = symbol;
@@ -72,10 +72,10 @@ public class NewOrderSingle extends AbstractEvent<NewOrderSingle> {
     }
 
     /**
-     * Sets the side of the order (buy or sell) and returns the updated {@link NewOrderSingle} instance.
+     * Sets the side of the order (buy or sell) and returns the updated  instance.
      *
      * @param side Order side (buy or sell).
-     * @return Updated {@link NewOrderSingle} instance.
+     * @return Updated  instance.
      */
     public NewOrderSingle side(BuySell side) {
         this.side = side;
@@ -92,10 +92,10 @@ public class NewOrderSingle extends AbstractEvent<NewOrderSingle> {
     }
 
     /**
-     * Sets the transaction time for the order and returns the updated {@link NewOrderSingle} instance.
+     * Sets the transaction time for the order and returns the updated  instance.
      *
      * @param transactTime Transaction time for the order.
-     * @return Updated {@link NewOrderSingle} instance.
+     * @return Updated  instance.
      */
     public NewOrderSingle transactTime(long transactTime) {
         this.transactTime = transactTime;
@@ -112,10 +112,10 @@ public class NewOrderSingle extends AbstractEvent<NewOrderSingle> {
     }
 
     /**
-     * Sets the quantity for the order and returns the updated {@link NewOrderSingle} instance.
+     * Sets the quantity for the order and returns the updated  instance.
      *
      * @param orderQty Order quantity.
-     * @return Updated {@link NewOrderSingle} instance.
+     * @return Updated  instance.
      */
     public NewOrderSingle orderQty(double orderQty) {
         this.orderQty = orderQty;
@@ -132,10 +132,10 @@ public class NewOrderSingle extends AbstractEvent<NewOrderSingle> {
     }
 
     /**
-     * Sets the price per unit for the order and returns the updated {@link NewOrderSingle} instance.
+     * Sets the price per unit for the order and returns the updated  instance.
      *
      * @param price Price per unit.
-     * @return Updated {@link NewOrderSingle} instance.
+     * @return Updated  instance.
      */
     public NewOrderSingle price(double price) {
         this.price = price;
@@ -152,10 +152,10 @@ public class NewOrderSingle extends AbstractEvent<NewOrderSingle> {
     }
 
     /**
-     * Sets the order type and returns the updated {@link NewOrderSingle} instance.
+     * Sets the order type and returns the updated  instance.
      *
      * @param ordType Type of the order.
-     * @return Updated {@link NewOrderSingle} instance.
+     * @return Updated  instance.
      */
     public NewOrderSingle ordType(OrderType ordType) {
         this.ordType = ordType;

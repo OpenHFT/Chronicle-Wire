@@ -457,6 +457,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
      * The `MetaData` class serves as a blueprint for the characteristics of the class
      * to be generated. It provides specifications like the package name, base class name,
      * interfaces to be implemented, and the flag to use an update interceptor.
+     *
      * @param <M> Represents the actual type extending this `MetaData` class, facilitating method chaining.
      */
     public abstract static class MetaData<M extends MetaData<M>> extends SelfDescribingMarshallable {

@@ -32,7 +32,6 @@ import java.lang.annotation.Target;
  * <p>
  * This allows for consistent, self-descriptive annotations in fields or parameters,
  * guiding developers and API users about the intended format of the long value.
- *
  * <p>
  * The Base16 format is often used for representing binary data in an ASCII string format,
  * and this annotation helps in ensuring that the long value adheres to this representation.

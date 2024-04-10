@@ -415,7 +415,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     }
 
     /**
-     * Determines the {@link WireType} of a given {@link Wire} instance. This method inspects
+     * Determines the  of a given {@link Wire} instance. This method inspects
      * the underlying type of the provided wire instance and maps it to its corresponding
      * WireType.
      *

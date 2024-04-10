@@ -36,7 +36,7 @@ public class CancelOrderRequest extends AbstractEvent<CancelOrderRequest> {
      * Sets the client order ID for the cancellation request.
      *
      * @param clOrdID The client order ID.
-     * @return The current instance of {@link CancelOrderRequest} for method chaining.
+     * @return The current instance of  for method chaining.
      */
     public CancelOrderRequest clOrdID(String clOrdID) {
         this.clOrdID = clOrdID;
@@ -56,7 +56,7 @@ public class CancelOrderRequest extends AbstractEvent<CancelOrderRequest> {
      * Sets the symbol of the financial instrument involved in the cancellation request.
      *
      * @param symbol The symbol as a long value.
-     * @return The current instance of {@link CancelOrderRequest} for method chaining.
+     * @return The current instance of  for method chaining.
      */
     public CancelOrderRequest symbol(long symbol) {
         this.symbol = symbol;

@@ -34,8 +34,7 @@ public class ChannelSecondaryConnectionTest extends net.openhft.chronicle.wire.W
      * to the secondary server and sends a message using the 'SayMsg' interface.
      * The expected message is defined by the 'EXPECTED' constant and the test asserts that
      * the message received from the server equals 'EXPECTED'.
-     * </p>
-     */
+         */
     @Test
     public void testEchoHandlerOnSecondaryConnection() {
         // Expect an exception with a message indicating a connection failure to be thrown during the test

@@ -105,7 +105,6 @@ public interface Reduction<T> extends ExcerptListener {
      *
      * @param extractor the document extractor for long values, must not be null
      * @return a new {@code LongReductionBuilder} instance
-     * @see #ofLong(ToLongDocumentExtractor)
      * @see #ofDouble(ToDoubleDocumentExtractor)
      */
     static LongReductionBuilder ofLong(@NotNull final ToLongDocumentExtractor extractor) {

@@ -137,10 +137,10 @@ public class ExecutionReport extends AbstractEvent<ExecutionReport> {
     }
 
     /**
-     * Sets the price per unit for the order and returns the updated {@link ExecutionReport} instance.
+     * Sets the price per unit for the order and returns the updated  instance.
      *
      * @param price Price per unit as a double.
-     * @return Updated {@link ExecutionReport} instance.
+     * @return Updated  instance.
      */
     public ExecutionReport price(double price) {
         this.price = price;
@@ -157,10 +157,10 @@ public class ExecutionReport extends AbstractEvent<ExecutionReport> {
     }
 
     /**
-     * Sets the order ID and returns the updated {@link ExecutionReport} instance.
+     * Sets the order ID and returns the updated  instance.
      *
      * @param orderID Unique identifier for the order.
-     * @return Updated {@link ExecutionReport} instance.
+     * @return Updated  instance.
      */
     public ExecutionReport orderID(long orderID) {
         this.orderID = orderID;
@@ -177,10 +177,10 @@ public class ExecutionReport extends AbstractEvent<ExecutionReport> {
     }
 
     /**
-     * Sets the order type and returns the updated {@link ExecutionReport} instance.
+     * Sets the order type and returns the updated  instance.
      *
      * @param ordType Type of the order.
-     * @return Updated {@link ExecutionReport} instance.
+     * @return Updated  instance.
      */
     public ExecutionReport ordType(OrderType ordType) {
         this.ordType = ordType;
@@ -197,10 +197,10 @@ public class ExecutionReport extends AbstractEvent<ExecutionReport> {
     }
 
     /**
-     * Sets the last traded price for the order and returns the updated {@link ExecutionReport} instance.
+     * Sets the last traded price for the order and returns the updated  instance.
      *
      * @param lastPx Last traded price.
-     * @return Updated {@link ExecutionReport} instance.
+     * @return Updated  instance.
      */
     public ExecutionReport lastPx(double lastPx) {
         this.lastPx = lastPx;
@@ -217,10 +217,10 @@ public class ExecutionReport extends AbstractEvent<ExecutionReport> {
     }
 
     /**
-     * Sets the remaining quantity of the order and returns the updated {@link ExecutionReport} instance.
+     * Sets the remaining quantity of the order and returns the updated  instance.
      *
      * @param leavesQty Remaining quantity of the order.
-     * @return Updated {@link ExecutionReport} instance.
+     * @return Updated  instance.
      */
     public ExecutionReport leavesQty(double leavesQty) {
         this.leavesQty = leavesQty;
@@ -237,10 +237,10 @@ public class ExecutionReport extends AbstractEvent<ExecutionReport> {
     }
 
     /**
-     * Sets the accumulated executed quantity for the order and returns the updated {@link ExecutionReport} instance.
+     * Sets the accumulated executed quantity for the order and returns the updated  instance.
      *
      * @param cumQty Accumulated executed quantity.
-     * @return Updated {@link ExecutionReport} instance.
+     * @return Updated  instance.
      */
     public ExecutionReport cumQty(double cumQty) {
         this.cumQty = cumQty;
@@ -257,10 +257,10 @@ public class ExecutionReport extends AbstractEvent<ExecutionReport> {
     }
 
     /**
-     * Sets the average price for the order and returns the updated {@link ExecutionReport} instance.
+     * Sets the average price for the order and returns the updated  instance.
      *
      * @param avgPx Average price of the order.
-     * @return Updated {@link ExecutionReport} instance.
+     * @return Updated  instance.
      */
     public ExecutionReport avgPx(double avgPx) {
         this.avgPx = avgPx;
@@ -277,10 +277,10 @@ public class ExecutionReport extends AbstractEvent<ExecutionReport> {
     }
 
     /**
-     * Sets the additional text information for the order and returns the updated {@link ExecutionReport} instance.
+     * Sets the additional text information for the order and returns the updated  instance.
      *
      * @param text Additional text information.
-     * @return Updated {@link ExecutionReport} instance.
+     * @return Updated  instance.
      */
     public ExecutionReport text(String text) {
         this.text = text;

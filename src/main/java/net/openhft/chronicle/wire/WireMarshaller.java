@@ -380,7 +380,7 @@ public class WireMarshaller<T> {
      * with the remaining fields.
      *
      * @param fieldNames Names of the fields to be excluded.
-     * @return A new instance of the  with the specified fields excluded.
+     * @return A new instance of the {@link WireMarshaller} with the specified fields excluded.
      */
     public WireMarshaller<T> excludeFields(String... fieldNames) {
         Set<String> fieldSet = new HashSet<>(Arrays.asList(fieldNames));
@@ -1038,7 +1038,7 @@ public class WireMarshaller<T> {
          * <p>
          * This method checks if the provided field has a LongConversion annotation. If present,
          * it retrieves the corresponding LongConverter using the LongConverterFieldAccess helper class.
-         *
+                 *
          * @param field The field for which the LongConverter needs to be obtained
          * @return The associated LongConverter instance, or null if not present
          */
@@ -1056,7 +1056,7 @@ public class WireMarshaller<T> {
          * <p>
          * This method aims to handle various Type representations, like Class or ParameterizedType,
          * and return the underlying Class representation.
-         *
+                 *
          * @param type0 The type from which the class should be extracted
          * @return The extracted Class representation
          */
@@ -1085,7 +1085,7 @@ public class WireMarshaller<T> {
          * This method serializes the value of the specified object's field and writes it to
          * the WireOut. If the field has a Comment annotation, a special processing is done
          * using the CommentAnnotationNotifier.
-         *
+                 *
          * @param o    The object containing the field to be written
          * @param out  The WireOut instance to write the field value to
          * @throws IllegalAccessException If the field cannot be accessed
@@ -1110,7 +1110,7 @@ public class WireMarshaller<T> {
          * <p>
          * If the field has a Comment annotation, its value is formatted using the field's value and appended as a comment.
          * The CommentAnnotationNotifier is used to indicate that the written value is preceded by a comment.
-         *
+                 *
          * @param o         The object containing the field whose value needs to be retrieved
          * @param out       The WireOut instance to which the value and the comment are written
          * @param valueOut  The ValueOut instance representing the field's value

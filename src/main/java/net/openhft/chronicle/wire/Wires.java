@@ -1770,7 +1770,7 @@ public enum Wires {
         final Map<String, Object> fields = new LinkedHashMap<>();
 
         /**
-         * Constructs an instance with the provided type name.
+         * Constructs an instance of {@link TupleInvocationHandler} with the provided type name.
          *
          * @param typeName The name of the type represented by this invocation handler.
          */
@@ -1884,8 +1884,8 @@ public enum Wires {
          * 2. If the other object is an instance of {@link Marshallable}.
          * 3. If the class names match.
          * 4. If the other object is a proxy.
-         * 5. If the proxy's invocation handler is an instance of {@link TupleInvocationHandler}.
-         * 6. If the fields map inside both {@link TupleInvocationHandler} instances are equal.
+         * 5. If the proxy's invocation handler is an instance of .
+         * 6. If the fields map inside both  instances are equal.
          *
          * @param proxy The proxy instance being compared.
          * @param o     The object to be compared with the proxy for equality.

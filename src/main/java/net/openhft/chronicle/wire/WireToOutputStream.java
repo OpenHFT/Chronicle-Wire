@@ -70,7 +70,7 @@ public class WireToOutputStream {
      * <p>
      * The method writes the length of the data followed by the actual data to
      * the OutputStream. After the flush, the internal buffer is ready to hold new data.
-     *
+         *
      * @throws IOException If an I/O error occurs.
      */
     public void flush() throws IOException {
