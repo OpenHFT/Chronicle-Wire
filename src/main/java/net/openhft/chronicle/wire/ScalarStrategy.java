@@ -30,9 +30,9 @@ import java.util.function.Function;
  * This strategy is designed for simple types and provides mechanisms for reading
  * them using provided functions.
  *
- * @param <T> The type of the scalar value that this strategy handles.
+ * @param <E> The type of the scalar value that this strategy handles.
  */
-class ScalarStrategy<T> implements SerializationStrategy<T> {
+class ScalarStrategy<E> implements SerializationStrategy {
     final BiFunction<? super E, ValueIn, E> read;
     // The class type of the scalar value
     private final Class<E> type;
@@ -43,7 +43,6 @@ class ScalarStrategy<T> implements SerializationStrategy<T> {
      * @param type The class type of the scalar value.
      * @param read The function used to read the scalar value.
      */
-    ScalarStrategy(Class<T> type, @NotNull BiFunction<? super T, ValueIn, T> read) {
     ScalarStrategy(Class<E> type, @NotNull BiFunction<? super E, ValueIn, E> read) {
         this.type = type;
         this.read = read;
@@ -55,11 +54,11 @@ class ScalarStrategy<T> implements SerializationStrategy<T> {
      *
      * @param clazz The class type of the scalar value.
      * @param read  The function used to read the scalar value.
-     * @param <T>   The type of the scalar value.
+     * @param <E>   The type of the scalar value.
      * @return A new instance of {@code ScalarStrategy}.
      */
     @NotNull
-    static <T> ScalarStrategy<T> of(Class<T> clazz, @NotNull BiFunction<? super T, ValueIn, T> read) {
+    static <E > ScalarStrategy< E > of(Class< E > clazz, @NotNull BiFunction<? super E, ValueIn, E > read) {
         return new ScalarStrategy<>(clazz, read);
     }
 
@@ -70,11 +69,11 @@ class ScalarStrategy<T> implements SerializationStrategy<T> {
      *
      * @param clazz The class type of the scalar value.
      * @param func  The function used to convert text into the scalar value.
-     * @param <T>   The type of the scalar value.
+     * @param <E>   The type of the scalar value.
      * @return A new instance of {@code ScalarStrategy} for text.
      */
     @Nullable
-    static <T> ScalarStrategy<T> text(Class<T> clazz, @NotNull Function<String, T> func) {
+    static <E > ScalarStrategy< E > text(Class< E > clazz, @NotNull Function<String, E > func) {
         return new ScalarStrategy<>(clazz, (Object o, ValueIn in) -> {
             @Nullable String text = in.text();
             return text == null ? null : func.apply(text);

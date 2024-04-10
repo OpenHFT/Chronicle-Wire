@@ -412,27 +412,6 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     }
 
     /**
-     * @deprecated Use {@link Wires#acquireBytesScoped()} instead
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    @NotNull
-    static Bytes<?> getBytesForToString() {
-        return Wires.acquireBytesForToString();
-    }
-
-    /**
-     * @deprecated Use {@link Wires#acquireBytesScoped()} instead
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    @NotNull
-    static Bytes<?> getBytes2() {
-        // When in debug, the output becomes confused if you reuse the buffer.
-        if (Jvm.isDebug())
-            return Bytes.allocateElasticOnHeap();
-        return Wires.acquireAnotherBytes();
-    }
-
-    /**
      * Determines the {@link WireType} of a given {@link Wire} instance. This method inspects
      * the underlying type of the provided wire instance and maps it to its corresponding
      * WireType.

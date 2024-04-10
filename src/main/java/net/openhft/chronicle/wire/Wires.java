@@ -602,21 +602,6 @@ public enum Wires {
     }
 
     /**
-     * @return
-     * @deprecated Use {@link Wires#acquireBytesScoped()} instead
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    @NotNull
-    public static Bytes<?> acquireAnotherBytes() {
-        if (Jvm.isDebug())
-            return Bytes.allocateElasticOnHeap();
-        Bytes<?> bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL,
-                Wires::unmonitoredDirectBytes);
-        bytes.clear();
-        return bytes;
-    }
-
-    /**
      * Creates a string representation of a specific portion of size-prefixed blob data.
      *
      * @param bytes    the source of the blob data
@@ -804,7 +789,6 @@ public enum Wires {
      * @param aClass Class to retrieve field information for
      * @return Map of field names to their information
      */
-    public static @NotNull Map<String, FieldInfo> fieldInfoMap(@NotNull Class<?> aClass) {
     public static @NotNull Map<String, FieldInfo> fieldInfoMap(@NotNull Class<?> aClass) {
         return FIELD_INFOS.get(aClass).map;
     }
@@ -1312,8 +1296,6 @@ public enum Wires {
      * @return The loaded class.
      * @throws ClassNotFoundException If the class could not be found or loaded.
      */
-    static synchronized Class loadFromJava(ClassLoader classLoader, String className, String code) throws ClassNotFoundException {
-        // Check if the CACHED_COMPILER instance is initialized.
     static synchronized Class<?> loadFromJava(ClassLoader classLoader, String className, String code) throws ClassNotFoundException {
         if (CACHED_COMPILER == null) {
             final String target = OS.getTarget();

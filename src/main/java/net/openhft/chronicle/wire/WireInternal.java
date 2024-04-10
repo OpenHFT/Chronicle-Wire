@@ -54,14 +54,6 @@ public enum WireInternal {
     static final StringInterner INTERNER = new StringInterner(Jvm.getInteger("wire.interner.size", 4096));
     private static final int BINARY_WIRE_SCOPED_INSTANCES_PER_THREAD = Jvm.getInteger("chronicle.wireInternal.pool.binaryWire.instancesPerThread", 4);
     private static final int BYTES_SCOPED_INSTANCES_PER_THREAD = Jvm.getInteger("chronicle.wireInternal.pool.bytes.instancesPerThread", 2);
-    @Deprecated(/* For removal in x.26 */)
-    static final StringBuilderPool SBP = new StringBuilderPool();
-    @Deprecated(/* For removal in x.26 */)
-    static final StringBuilderPool ASBP = new StringBuilderPool();
-    @Deprecated(/* For removal in x.26 */)
-    static final StringBuilderPool SBPVI = new StringBuilderPool();
-    @Deprecated(/* For removal in x.26 */)
-    static final StringBuilderPool SBPVO = new StringBuilderPool();
 
     // Thread-local storage for various utility instances.
     static final ThreadLocal<WeakReference<Bytes<?>>> BYTES_TL = new ThreadLocal<>();
@@ -146,26 +138,6 @@ public enum WireInternal {
     @NotNull
     public static <E extends Enum<E>> E internEnum(@NotNull Class<E> eClass, @NotNull CharSequence cs) {
         return (E) EnumInterner.ENUM_INTERNER.get(eClass).intern(cs);
-    }
-
-    /**
-     * @deprecated Use {@link Wires#acquireStringBuilderScoped()} instead
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    // these might be used internally so not safe for end users.
-    static StringBuilder acquireStringBuilder() {
-        return SBP.acquireStringBuilder();
-    }
-
-    /**
-     * @deprecated Use {@link Wires#acquireStringBuilderScoped()} instead
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    // these might be used internally so not safe for end users.
-    static StringBuilder acquireAnotherStringBuilder(CharSequence cs) {
-        StringBuilder sb = ASBP.acquireStringBuilder();
-        assert sb != cs;
-        return sb;
     }
 
     /**
@@ -487,36 +459,6 @@ public enum WireInternal {
             return (T) interner.intern(s);
         }
         return ObjectUtils.convertTo(tClass, o);
-    }
-
-    /**
-     * @deprecated Use {@link Wires#acquireBytesScoped()} instead
-     */
-    @NotNull
-    @Deprecated(/* To be removed in x.26 */)
-    static Bytes<?> acquireInternalBytes() {
-        if (Jvm.isDebug())
-            return Bytes.allocateElasticOnHeap();
-        Bytes<?> bytes = ThreadLocalHelper.getTL(INTERNAL_BYTES_TL,
-                Wires::unmonitoredDirectBytes);
-        bytes.clear();
-        return bytes;
-    }
-
-    /**
-     * @deprecated Use {@link Wires#acquireStringBuilderScoped()} instead
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    static StringBuilder acquireStringBuilderForValueIn() {
-        return SBPVI.acquireStringBuilder();
-    }
-
-    /**
-     * @deprecated Use {@link Wires#acquireStringBuilderScoped()} instead
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    static StringBuilder acquireStringBuilderForValueOut() {
-        return SBPVO.acquireStringBuilder();
     }
 
     /**
