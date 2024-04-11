@@ -50,6 +50,7 @@ import static net.openhft.chronicle.core.UnsafeMemory.*;
  *
  * @param <T> The type of the object to be marshalled/unmarshalled.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class WireMarshaller<T> {
     private static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
     private static final FieldAccess[] NO_FIELDS = {};
@@ -384,7 +385,7 @@ public class WireMarshaller<T> {
      */
     public WireMarshaller<T> excludeFields(String... fieldNames) {
         Set<String> fieldSet = new HashSet<>(Arrays.asList(fieldNames));
-        return new WireMarshaller(Stream.of(fields)
+        return new WireMarshaller<>(Stream.of(fields)
                 .filter(f -> !fieldSet.contains(f.field.getName()))
                 .toArray(FieldAccess[]::new),
                 isLeaf, defaultValue);
@@ -401,7 +402,7 @@ public class WireMarshaller<T> {
      */
     public void writeMarshallable(T t, @NotNull WireOut out) throws InvalidMarshallableException {
         ValidatableUtil.validate(t);
-        HexDumpBytesDescription bytes = out.bytesComment();
+        HexDumpBytesDescription<?> bytes = out.bytesComment();
         bytes.adjustHexDumpIndentation(+1);
         try {
             for (@NotNull FieldAccess field : fields)
@@ -1356,7 +1357,7 @@ public class WireMarshaller<T> {
      * taking into account special cases where the field may be marshaled differently based on annotations.
      */
     static class ObjectFieldAccess extends FieldAccess {
-        private final Class type; // Type of the object field
+        private final Class<?> type; // Type of the object field
         private final AsMarshallable asMarshallable; // Annotation indicating if the field should be treated as marshallable
 
         /**
@@ -1649,7 +1650,7 @@ public class WireMarshaller<T> {
      */
     static class ArrayFieldAccess extends FieldAccess {
         private final Class<?> componentType;
-        private final Class objectType;
+        private final Class<?> objectType;
 
         ArrayFieldAccess(@NotNull Field field) {
             super(field);
@@ -1799,7 +1800,7 @@ public class WireMarshaller<T> {
         private final BiConsumer<Object, ValueOut> sequenceGetter;
 
         // The type of the enum component
-        private final Class componentType;
+        private final Class<?>componentType;
 
         // A supplier for creating an empty EnumSet of the component type
         private final Supplier<EnumSet> enumSetSupplier;
@@ -1819,7 +1820,7 @@ public class WireMarshaller<T> {
             super(field, isLeaf);
             this.values = values;
             this.componentType = componentType;
-            this.enumSetSupplier = () -> EnumSet.noneOf(this.componentType);
+            this.enumSetSupplier = () -> EnumSet.noneOf((Class) this.componentType);
             this.sequenceGetter = (o, out) -> sequenceGetter(o,
                     out, this.values, this.field, this.componentType);
             this.addAll = this::addAll;
@@ -1841,7 +1842,7 @@ public class WireMarshaller<T> {
                                            ValueOut out,
                                            Object[] values,
                                            Field field,
-                                           Class componentType)
+                                           Class<?>componentType)
                 throws InvalidMarshallableException {
             final EnumSet coll;
             try {
@@ -1929,7 +1930,7 @@ public class WireMarshaller<T> {
             if (!c.isEmpty())
                 c.clear();
             while (in2.hasNextSequenceItem()) {
-                c.add(in2.asEnum(componentType));
+                c.add(in2.asEnum((Class) componentType));
             }
         }
     }
@@ -1948,7 +1949,7 @@ public class WireMarshaller<T> {
         final Supplier<Collection> collectionSupplier;
 
         // The component type of the Collection
-        private final Class componentType;
+        private final Class<?>componentType;
         private final Class<?> type;
         private final BiConsumer<Object, ValueOut> sequenceGetter;
 
@@ -1962,7 +1963,7 @@ public class WireMarshaller<T> {
          * @param componentType The type of the elements in the collection.
          * @param type The type of the collection itself.
          */
-        public CollectionFieldAccess(@NotNull Field field, Boolean isLeaf, @Nullable Supplier<Collection> collectionSupplier, Class componentType, Class type) {
+        public CollectionFieldAccess(@NotNull Field field, Boolean isLeaf, @Nullable Supplier<Collection> collectionSupplier, Class<?>componentType, Class<?>type) {
             super(field, isLeaf);
             this.collectionSupplier = collectionSupplier == null ? newInstance() : collectionSupplier;
             this.componentType = componentType;

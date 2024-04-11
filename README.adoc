@@ -537,7 +537,7 @@ Data{message='Howyall', number=1234567890, timeUnit=SECONDS, price=1000.0}
 ----
 
 === link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Example7.java[Using the `ClassAliasPool`]
-This example shows how to pass your classes to `ClassAliasPool.CLASS_ALIASES.addAlias(Class... classes)`, to create alias names for them so that you can refer to them without using the complete name of their packages.
+This example shows how to pass your classes to `ClassAliasPool.CLASS_ALIASES.addAlias(Class<?>... classes)`, to create alias names for them so that you can refer to them without using the complete name of their packages.
 
 [source,java]
 ----

@@ -113,7 +113,7 @@ public class PerfThroughputMain {
             long end = start + RUN_TIME * 1000L;
 
             // Calculate window size based on buffer and number of clients
-            int window =  bufferSize /  (4 + size);
+            int window = bufferSize /  (4 + size);
             if (size < 1024)
                 window *= 2;
             if (nClients > 4)

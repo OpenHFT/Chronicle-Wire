@@ -39,7 +39,7 @@ public class BytesUsageTest extends WireTestCommon {
     @Test
     public void testBytes() {
         // Initialize a BytesStore instance from a string
-        BytesStore value = Bytes.from("helloWorld");
+        BytesStore<?, ?> value = Bytes.from("helloWorld");
 
         // Simple usage of BytesWrapper and setting its clOrdId value
         {

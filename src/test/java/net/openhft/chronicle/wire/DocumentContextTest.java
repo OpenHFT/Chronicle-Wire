@@ -46,6 +46,7 @@ public class DocumentContextTest extends WireTestCommon {
     }
 
     // Test multi-message serialization in BINARY format.
+    @SuppressWarnings("deprecation")
     @Test
     public void multiMessageBinary() {
         // Create a wire of BINARY type with hex dump

@@ -141,6 +141,7 @@ public class BinaryWireTest extends WireTestCommon {
     }
 
     // Create a BinaryWire with pre-defined properties set during initialization
+    @SuppressWarnings("deprecation")
     @NotNull
     private BinaryWire createWire() {
         bytes.clear();
@@ -1762,7 +1763,9 @@ public class BinaryWireTest extends WireTestCommon {
             final Bytes<?> bytes = mappedFile.acquireBytesForWrite(owner, 0);
             Wire wire = WireType.BINARY.apply(bytes);
             wireConsumer.accept(wire);
-            ((MappedBytesStore) bytes.bytesStore()).syncUpTo(8192);
+            @SuppressWarnings("unchecked")
+            MappedBytesStore mappedBytesStore = (MappedBytesStore) (BytesStore) bytes.bytesStore();
+            mappedBytesStore.syncUpTo(8192);
             bytes.releaseLast(owner);
         }
     }

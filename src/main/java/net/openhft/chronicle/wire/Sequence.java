@@ -17,7 +17,6 @@
  */
 package net.openhft.chronicle.wire;
 
-@Deprecated(/* to be removed in x.27, not in used */)
 public interface Sequence {
     long NOT_FOUND_RETRY = Long.MIN_VALUE;
     long NOT_FOUND = -1;

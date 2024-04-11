@@ -65,7 +65,7 @@ public enum WireInternal {
                     .setOverrideSelfDescribing(true),
             Wire::clear,
             BINARY_WIRE_SCOPED_INSTANCES_PER_THREAD);
-    static final ScopedThreadLocal<Bytes<?>> BYTES_SCOPED_THREAD_LOCAL = new ScopedThreadLocal<>(
+    static final ScopedThreadLocal<Bytes<Void>> BYTES_SCOPED_THREAD_LOCAL = new ScopedThreadLocal<>(
             Wires::unmonitoredDirectBytes,
             Bytes::clear,
             BYTES_SCOPED_INSTANCES_PER_THREAD);

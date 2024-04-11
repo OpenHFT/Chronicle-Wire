@@ -60,7 +60,7 @@ public class JSONWire extends TextWire {
 
     // Bytes for comma, commonly used as JSON separator.
     @SuppressWarnings("rawtypes")
-    static final BytesStore COMMA = BytesStore.from(",");
+    static final BytesStore<?, ?> COMMA = BytesStore.from(",");
 
     // A thread-local variable to store a reference to the stop characters tester for JSON parsing.
     static final ThreadLocal<WeakReference<StopCharsTester>> STRICT_ESCAPED_END_OF_TEXT_JSON = new ThreadLocal<>();
@@ -681,7 +681,7 @@ public class JSONWire extends TextWire {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public ValueOut writeEvent(Class expectedType, Object eventKey) throws InvalidMarshallableException {
+    public ValueOut writeEvent(Class<?> expectedType, Object eventKey) throws InvalidMarshallableException {
         return super.writeEvent(String.class, "" + eventKey);
     }
 
@@ -952,7 +952,7 @@ public class JSONWire extends TextWire {
         }
 
         @Override
-        public @NotNull <V> JSONWire object(@NotNull Class<V> expectedType, V v) throws InvalidMarshallableException {
+        public @NotNull <V> JSONWire object(@NotNull Class<? extends V> expectedType, V v) throws InvalidMarshallableException {
             return (JSONWire) (useTypes ? super.object(v) : super.object(expectedType, v));
         }
 

@@ -43,7 +43,6 @@ import java.util.concurrent.TimeUnit;
  * <p>
  * Parsing of ISO dates, with or without timestamps, is supported. If an ISO date is read with no
  * timezone, it is assumed to be in the converter's zone.
- * <p>
  *
  * @see LongConverter for the interface this abstract class implements.
  */

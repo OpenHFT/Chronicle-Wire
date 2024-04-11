@@ -2778,7 +2778,7 @@ public class TextWireTest extends WireTestCommon {
 
     // Class holding byte storage and a long, with custom serialization logic.
     static class DtoWithBytesField extends SelfDescribingMarshallable {
-        BytesStore bytes;
+        BytesStore<?, ?> bytes;
         long another;
 
         // Implement custom deserialization logic for this object.

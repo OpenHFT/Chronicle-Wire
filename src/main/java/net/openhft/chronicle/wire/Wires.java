@@ -381,7 +381,7 @@ public enum Wires {
      * @param bytes the byte buffer for the wire
      * @return a new instance of JSONWire
      */
-    private static Wire newJsonWire(Bytes bytes) {
+    private static Wire newJsonWire(Bytes<?> bytes) {
         return new JSONWire(bytes).useTypes(true).trimFirstCurly(false).useTextDocuments();
     }
 
@@ -417,7 +417,7 @@ public enum Wires {
      * @param bytes the byte buffer for the wire
      * @return a new instance of TextWire with timestamps
      */
-    private static Wire newTextWire(Bytes bytes) {
+    private static Wire newTextWire(Bytes<?> bytes) {
         return new TextWire(bytes).addTimeStamps(true);
     }
 
@@ -526,7 +526,7 @@ public enum Wires {
      * @param position the position at which to lock
      * @return true if the lock was successfully acquired, false otherwise
      */
-    public static boolean acquireLock(@NotNull BytesStore store, long position) {
+    public static boolean acquireLock(@NotNull BytesStore<?, ?> store, long position) {
         return store.compareAndSwapInt(position, NOT_INITIALIZED, NOT_COMPLETE);
     }
 
@@ -586,14 +586,14 @@ public enum Wires {
      *
      * @return the created Bytes instance
      */
-    static Bytes<?> unmonitoredDirectBytes() {
-        Bytes<?> bytes = Bytes.allocateElasticDirect(128);
+    static Bytes<Void> unmonitoredDirectBytes() {
+        Bytes<Void> bytes = Bytes.allocateElasticDirect(128);
         IOTools.unmonitor(bytes);
         return bytes;
     }
 
     @NotNull
-    public static ScopedResource<Bytes<?>> acquireBytesScoped() {
+    public static ScopedResource<Bytes<Void>> acquireBytesScoped() {
         return WireInternal.BYTES_SCOPED_THREAD_LOCAL.get();
     }
 

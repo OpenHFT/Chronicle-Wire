@@ -118,6 +118,7 @@ public class MethodWriterTest extends WireTestCommon {
         Assert.assertTrue(wire.toString().startsWith("callToDefaultMethod: hello world"));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void multiOut() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());

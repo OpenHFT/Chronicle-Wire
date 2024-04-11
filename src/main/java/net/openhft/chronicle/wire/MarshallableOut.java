@@ -257,7 +257,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      */
     @SuppressWarnings("rawtypes")
     @NotNull
-    default <T> T methodWriter(@NotNull Class<T> tClass, Class... additional) {
+    default <T> T methodWriter(@NotNull Class<T> tClass, Class<?>... additional) {
         VanillaMethodWriterBuilder<T> builder =
                 (VanillaMethodWriterBuilder<T>) methodWriterBuilder(false, tClass);
         Stream.of(additional).forEach(builder::addInterface);

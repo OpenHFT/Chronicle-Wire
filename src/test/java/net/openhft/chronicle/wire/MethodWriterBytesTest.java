@@ -39,7 +39,7 @@ public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCo
      * An interface defining a single method that accepts a Bytes message.
      */
     interface Print {
-        void msg(Bytes message);
+        void msg(Bytes<?> message);
     }
 
     /**
@@ -65,7 +65,7 @@ public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCo
     /**
      * A helper method to add Bytes messages to the blocking queue.
      */
-    private void println(Bytes bytes) {
+    private void println(Bytes<?> bytes) {
         q.add(bytes);
     }
 

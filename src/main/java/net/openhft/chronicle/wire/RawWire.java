@@ -347,7 +347,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut text(@Nullable BytesStore s) {
+        public WireOut text(@Nullable BytesStore<?, ?> s) {
             if (use8bit)
                 if (s == null) {
                     bytes.writeStopBit(-1);
@@ -375,7 +375,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut bytes(@Nullable BytesStore bytesStore) {
+        public WireOut bytes(@Nullable BytesStore<?, ?> bytesStore) {
             if (bytesStore == null) {
                 writeLength(-1);
             } else {
@@ -394,7 +394,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut bytes(String type, @Nullable BytesStore fromBytes) {
+        public WireOut bytes(String type, @Nullable BytesStore<?, ?> fromBytes) {
             typePrefix(type);
             return bytes(fromBytes);
         }
@@ -812,7 +812,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireIn bytesMatch(@NotNull BytesStore compareBytes, @NotNull BooleanConsumer consumer) {
+        public WireIn bytesMatch(@NotNull BytesStore<?, ?> compareBytes, @NotNull BooleanConsumer consumer) {
             long length = readLength();
             @NotNull Bytes<?> bytes = wireIn().bytes();
 

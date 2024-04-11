@@ -376,7 +376,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
     @Override
     @NotNull
-    public <T> T methodWriter(@NotNull Class<T> tClass, Class... additional) {
+    public <T> T methodWriter(@NotNull Class<T> tClass, Class<?>... additional) {
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.YAML,
                 () -> newTextMethodWriterInvocationHandler(tClass));
@@ -395,7 +395,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * @return A new instance of TextMethodWriterInvocationHandler.
      */
     @NotNull
-    TextMethodWriterInvocationHandler newTextMethodWriterInvocationHandler(Class... interfaces) {
+    TextMethodWriterInvocationHandler newTextMethodWriterInvocationHandler(Class<?>... interfaces) {
         for (Class<?> anInterface : interfaces) {
             Comment c = Jvm.findAnnotation(anInterface, Comment.class);
             if (c != null)
@@ -1304,7 +1304,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
         @NotNull
         @Override
-        public WireIn bytesMatch(@NotNull BytesStore compareBytes, BooleanConsumer consumer) {
+        public WireIn bytesMatch(@NotNull BytesStore<?, ?> compareBytes, BooleanConsumer consumer) {
             throw new UnsupportedOperationException(yt.toString());
         }
 

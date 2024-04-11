@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @param <E> The type parameter extending AbstractEventCfg
  */
+@SuppressWarnings("unchecked")
 public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMarshallableCfg implements Event<E> {
 
     // The unique identifier for the event

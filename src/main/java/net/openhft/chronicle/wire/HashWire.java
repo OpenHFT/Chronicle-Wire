@@ -209,7 +209,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
 
     @NotNull
     @Override
-    public ValueOut writeEvent(Class ignored, @NotNull Object eventKey) {
+    public ValueOut writeEvent(Class<?> ignored, @NotNull Object eventKey) {
         hash += K0 + eventKey.hashCode() * M0;
         return valueOut;
     }
@@ -393,14 +393,14 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
 
         @NotNull
         @Override
-        public WireOut bytes(@Nullable BytesStore fromBytes) {
+        public WireOut bytes(@Nullable BytesStore<?, ?> fromBytes) {
             hash = hash * M1 + Maths.hash64(fromBytes);
             return HashWire.this;
         }
 
         @NotNull
         @Override
-        public WireOut bytes(@NotNull String type, @Nullable BytesStore fromBytes) {
+        public WireOut bytes(@NotNull String type, @Nullable BytesStore<?, ?> fromBytes) {
             hash = hash * M1 + Maths.hash64(type) ^ Maths.hash64(fromBytes);
             return HashWire.this;
         }

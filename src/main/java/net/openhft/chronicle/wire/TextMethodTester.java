@@ -714,7 +714,7 @@ public class TextMethodTester<T> implements YamlTester {
                 key.append(",").append(m.get(s));
             }
             long end = wireOut.bytes().readPosition();
-            BytesStore bytesStore = wireOut.bytes().subBytes(start, end - start);
+            BytesStore<?, ?> bytesStore = wireOut.bytes().subBytes(start, end - start);
             events.put(key.toString(), bytesStore.toString().trim());
             bytesStore.releaseLast();
             consumeDocumentSeparator(wireOut);

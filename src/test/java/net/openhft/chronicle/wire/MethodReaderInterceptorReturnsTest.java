@@ -83,6 +83,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void doTestInterceptorSupportedInGeneratedCode(CountDownLatch readerCreateLatch, boolean addDummyInstance) {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
@@ -151,6 +152,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
      * Covers {@link GeneratingMethodReaderInterceptorReturns}, which allows intervening in method reader's logic
      * without resorting to reflective calls.
      */
+    @SuppressWarnings("deprecation")
     @Test
     public void testGeneratingAggregatingInfoInterceptor() {
         // Create a wire with a buffer of size 128 and padding enabled
@@ -192,6 +194,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
      * Covers {@link GeneratingMethodReaderInterceptorReturns}, which allows intervening in method reader's logic
      * without resorting to reflective calls.
      */
+    @SuppressWarnings("deprecation")
     @Test
     public void testGeneratingSkippingInterceptor() {
         // Create a wire with a buffer of size 128 and padding enabled
