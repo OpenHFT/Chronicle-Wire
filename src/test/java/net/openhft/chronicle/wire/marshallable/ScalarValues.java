@@ -102,7 +102,7 @@ public class ScalarValues extends SelfDescribingMarshallable {
 /**
  * A simple dynamic enumeration used in ScalarValues.
  */
-enum TestDynamicEnum implements DynamicEnum<TestDynamicEnum>  {
+enum TestDynamicEnum implements DynamicEnum<TestDynamicEnum> {
     ONE,   // Represents the first value
     TWO,   // Represents the second value
     THREE  // Represents the third value

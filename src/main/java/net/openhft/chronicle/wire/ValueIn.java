@@ -179,7 +179,7 @@ public interface ValueIn {
      * @return The BytesStore object or null.
      */
     @Nullable
-    default BytesStore bytesLiteral() {
+    default BytesStore<?, ?> bytesLiteral() {
         return bytesStore();
     }
 
@@ -200,7 +200,7 @@ public interface ValueIn {
      * @return The current WireIn instance.
      */
     @NotNull
-    WireIn bytesMatch(@NotNull BytesStore compareBytes, BooleanConsumer consumer);
+    WireIn bytesMatch(@NotNull BytesStore<?, ?> compareBytes, BooleanConsumer consumer);
 
     /**
      * Reads byte data using the provided ReadBytesMarshallable.
@@ -234,7 +234,7 @@ public interface ValueIn {
      * @return The BytesStore object or null.
      */
     @Nullable
-    default BytesStore bytesStore() {
+    default BytesStore<?, ?> bytesStore() {
         byte @Nullable [] bytes = bytes();
         return bytes == null ? null : BytesStore.wrap(bytes);
     }

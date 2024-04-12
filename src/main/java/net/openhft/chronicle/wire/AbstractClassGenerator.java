@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
  *
  * @param <M> Represents the meta-data associated with the class being generated.
  */
+@SuppressWarnings("unchecked")
 public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.MetaData<M>> {
 
     // TODO Use Wires.loadFromJava() instead of a public static final
@@ -140,7 +141,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
             }
 
             // Compile and load the generated class.
-            return CACHED_COMPILER.loadFromJava(classLoader, fullName, sourceCode.toString());
+            return (Class<T>) CACHED_COMPILER.loadFromJava(classLoader, fullName, sourceCode.toString());
         } catch (Throwable e) {
             // If there's any error during generation, compile, or load, throw an exception.
             throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + sourceCode, e));

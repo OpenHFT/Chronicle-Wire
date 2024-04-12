@@ -61,6 +61,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     TEXT {
         private final boolean TEXT_AS_YAML = Jvm.getBoolean("wire.testAsYaml");
 
+        @SuppressWarnings("deprecation")
         @NotNull
         @Override
         public Wire apply(@NotNull Bytes<?> bytes) {
@@ -287,6 +288,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     },
     // for backward compatibility, this doesn't support types
     JSON {
+        @SuppressWarnings("deprecation")
         @NotNull
         @Override
         public Wire apply(@NotNull Bytes<?> bytes) {
@@ -313,6 +315,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
     },
     YAML {
+        @SuppressWarnings("deprecation")
         @NotNull
         @Override
         public Wire apply(@NotNull Bytes<?> bytes) {
@@ -517,7 +520,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      */
     public String asString(Object marshallable) {
         ValidatableUtil.startValidateDisabled();
-        try (ScopedResource<Bytes<?>> stlBytes = Wires.acquireBytesScoped()) {
+        try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             final Bytes<?> bytes = stlBytes.get();
             asBytes(marshallable, bytes);
             return bytes.toString();
@@ -578,7 +581,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     public <T> T fromString(Class<T> tClass, @NotNull CharSequence cs) throws InvalidMarshallableException {
         if (cs.length() == 0)
             throw new IllegalArgumentException("cannot deserialize an empty string");
-        try (ScopedResource<Bytes<?>> stlBytes = Wires.acquireBytesScoped()) {
+        try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
             bytes.appendUtf8(cs);
             Wire wire = apply(bytes);
@@ -706,7 +709,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     public <T extends Marshallable> void toFileAsMap(@NotNull String filename, @NotNull Map<String, T> map, boolean compact)
             throws IOException, InvalidMarshallableException {
         String tempFilename = IOTools.tempName(filename);
-        try (ScopedResource<Bytes<?>> stlBytes = Wires.acquireBytesScoped()) {
+        try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
             Wire wire = apply(bytes);
             for (@NotNull Map.Entry<String, T> entry : map.entrySet()) {
@@ -737,7 +740,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      */
     public void toFile(@NotNull String filename, WriteMarshallable marshallable) throws IOException, InvalidMarshallableException {
         String tempFilename = IOTools.tempName(filename);
-        try (ScopedResource<Bytes<?>> stlBytes = Wires.acquireBytesScoped()) {
+        try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
             Wire wire = apply(bytes);
             wire.getValueOut().typedMarshallable(marshallable);
@@ -759,7 +762,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     @NotNull
     String asHexString(Object marshallable) {
         ValidatableUtil.startValidateDisabled();
-        try (ScopedResource<Bytes<?>> stlBytes = Wires.acquireBytesScoped()) {
+        try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             final Bytes<?> bytes = stlBytes.get();
             asBytes(marshallable, bytes);
             return bytes.toHexString();
@@ -795,7 +798,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      */
     @Nullable
     public Map<String, Object> asMap(@NotNull CharSequence cs) throws InvalidMarshallableException {
-        try (ScopedResource<Bytes<?>> stlBytes = Wires.acquireBytesScoped()) {
+        try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
             bytes.appendUtf8(cs);
             Wire wire = apply(bytes);

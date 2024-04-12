@@ -203,7 +203,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      * @param bytes The BytesStore to check
      * @return true if the BytesStore can be treated as text, false otherwise
      */
-    static boolean textable(BytesStore bytes) {
+    static boolean textable(BytesStore<?, ?> bytes) {
         if (bytes == null)
             return false;
         for (long pos = bytes.readPosition(); pos < bytes.readLimit(); pos++) {
@@ -664,7 +664,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     // For simple or NONE type, just read and process the object.
                     @Nullable Object object = this.getValueIn().object();
                     if (object instanceof BytesStore) {
-                        @Nullable BytesStore bytes = (BytesStore) object;
+                        @Nullable BytesStore<?, ?> bytes = (BytesStore) object;
                         if (textable(bytes)) {
                             wireValueOut.text(bytes);
                             bytes.releaseLast();
@@ -1314,7 +1314,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                     try {
                         // Attempt to find the class for the name found in the type prefix.
-                        Class aClass = classLookup.forName(sb);
+                        Class<?> aClass = classLookup.forName(sb);
 
                         // Special handling based on the class type.
                         if (aClass == byte[].class) {
@@ -2165,7 +2165,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut text(@Nullable BytesStore s) {
+        public WireOut text(@Nullable BytesStore<?, ?> s) {
             if (s == null) {
                 writeCode(NULL);
 
@@ -2183,7 +2183,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut bytes(@Nullable BytesStore fromBytes) {
+        public WireOut bytes(@Nullable BytesStore<?, ?> fromBytes) {
             if (fromBytes == null)
                 return nu11();
             long remaining = fromBytes.readRemaining();
@@ -2197,7 +2197,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut bytesLiteral(@Nullable BytesStore fromBytes) {
+        public WireOut bytesLiteral(@Nullable BytesStore<?, ?> fromBytes) {
             if (fromBytes == null)
                 return nu11();
             long remaining = fromBytes.readRemaining();
@@ -2220,7 +2220,7 @@ public class BinaryWire extends AbstractWire implements Wire {
          * @param fromBytes The source of the bytes to be written.
          * @param remaining The number of bytes to be written.
          */
-        public void bytes0(@NotNull BytesStore fromBytes, long remaining) {
+        public void bytes0(@NotNull BytesStore<?, ?> fromBytes, long remaining) {
             // Write the length of the bytes.
             writeLength(Maths.toInt32(remaining + 1));
             // Write the U8_ARRAY code.
@@ -2273,7 +2273,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut bytes(String type, @Nullable BytesStore fromBytes) {
+        public WireOut bytes(String type, @Nullable BytesStore<?, ?> fromBytes) {
             typePrefix(type);
             if (fromBytes != null)
                 bytes0(fromBytes, fromBytes.readRemaining());
@@ -3432,9 +3432,9 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public BytesStore bytesLiteral() {
+        public BytesStore<?, ?> bytesLiteral() {
             int length = Maths.toUInt31(readLength());
-            @NotNull BytesStore toBytes = BytesStore.wrap(new byte[length]);
+            @NotNull BytesStore<?, ?> toBytes = BytesStore.wrap(new byte[length]);
             toBytes.write(0, bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
             return toBytes;
@@ -3458,7 +3458,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireIn bytesMatch(@NotNull BytesStore compareBytes, @NotNull BooleanConsumer consumer) {
+        public WireIn bytesMatch(@NotNull BytesStore<?, ?> compareBytes, @NotNull BooleanConsumer consumer) {
             long length = readLength();
             int code = readCode();
             if (code != U8_ARRAY)
@@ -3476,13 +3476,13 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @Override
         @Nullable
-        public BytesStore bytesStore() {
+        public BytesStore<?, ?> bytesStore() {
             long length = readLength() - 1;
             int code = readCode();
             switch (code) {
                 case I64_ARRAY:
                 case U8_ARRAY:
-                    @NotNull BytesStore toBytes = BytesStore.lazyNativeBytesStoreWithFixedCapacity(length);
+                    @NotNull BytesStore<?, ?> toBytes = BytesStore.lazyNativeBytesStoreWithFixedCapacity(length);
                     toBytes.write(0, bytes, bytes.readPosition(), length);
                     bytes.readSkip(length);
                     return toBytes;
@@ -4859,7 +4859,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                             long length = bytes.readRemaining();
                             if (length == 0)
                                 return BytesStore.empty();
-                            @NotNull BytesStore toBytes = BytesStore.lazyNativeBytesStoreWithFixedCapacity(length);
+                            @NotNull BytesStore<?, ?> toBytes = BytesStore.lazyNativeBytesStoreWithFixedCapacity(length);
                             toBytes.write(0, bytes, bytes.readPosition(), length);
                             bytes.readSkip(length);
                             return toBytes;

@@ -38,12 +38,12 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Thread)
 public class ObjectPoolMain {
 
-    private static final BytesStore CHAR1 = BytesStoreFrom("A");
-    private static final BytesStore CHAR2 = BytesStoreFrom("A2");
-    private static final BytesStore CHAR4 = BytesStoreFrom("A234");
-    private static final BytesStore CHAR8 = BytesStoreFrom("A2345678");
-    private static final BytesStore CHAR16 = BytesStoreFrom("A234567890123456");
-    private static final BytesStore CHAR32 = BytesStoreFrom("A2345678901234567890123456789012");
+    private static final BytesStore<?, ?> CHAR1 = BytesStoreFrom("A");
+    private static final BytesStore<?, ?> CHAR2 = BytesStoreFrom("A2");
+    private static final BytesStore<?, ?> CHAR4 = BytesStoreFrom("A234");
+    private static final BytesStore<?, ?> CHAR8 = BytesStoreFrom("A2345678");
+    private static final BytesStore<?, ?> CHAR16 = BytesStoreFrom("A234567890123456");
+    private static final BytesStore<?, ?> CHAR32 = BytesStoreFrom("A2345678901234567890123456789012");
     private static final byte[] BUFFER = new byte[32];
     private final Bit8StringInterner si = new Bit8StringInterner(64);
 
@@ -79,7 +79,7 @@ public class ObjectPoolMain {
     }
 
 //    @NotNull
-    protected static String newStringUTF8(BytesStore bs) {
+    protected static String newStringUTF8(BytesStore<?, ?> bs) {
         int length = bs.length();
         bs.read(0, BUFFER, 0, length);
         return new String(BUFFER, 0, length, StandardCharsets.UTF_8);
@@ -148,11 +148,11 @@ public class ObjectPoolMain {
 
 //    @Benchmark
     public String newStringB01() {
-        BytesStore bs = CHAR1;
+        BytesStore<?, ?> bs = CHAR1;
         return newStringHiByte0(bs);
     }
 
-    protected String newStringHiByte0(BytesStore bs) {
+    protected String newStringHiByte0(BytesStore<?, ?> bs) {
         int length = bs.length();
         bs.read(0, BUFFER, 0, length);
         return new String(BUFFER, 0, 0, length);

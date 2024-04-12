@@ -63,7 +63,7 @@ import static net.openhft.chronicle.wire.Wires.*;
 public class TextWire extends YamlWireOut<TextWire> {
 
     // Constants representing specific textual constructs in YAML.
-    public static final BytesStore BINARY = BytesStore.from("!!binary");
+    public static final BytesStore<?, ?> BINARY = BytesStore.from("!!binary");
     public static final @NotNull Bytes<byte[]> TYPE_STR = Bytes.from("type ");
     static final String SEQ_MAP = "!seqmap";
 
@@ -332,7 +332,7 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     @Override
     @NotNull
-    public <T> T methodWriter(@NotNull Class<T> tClass, Class... additional) {
+    public <T> T methodWriter(@NotNull Class<T> tClass, Class<?>... additional) {
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.TEXT,
                 () -> newTextMethodWriterInvocationHandler(tClass));
@@ -352,7 +352,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      * @return A newly instantiated {@link TextMethodWriterInvocationHandler} for the provided interface(s).
      */
     @NotNull
-    TextMethodWriterInvocationHandler newTextMethodWriterInvocationHandler(Class... interfaces) {
+    TextMethodWriterInvocationHandler newTextMethodWriterInvocationHandler(Class<?>... interfaces) {
         for (Class<?> anInterface : interfaces) {
             Comment c = Jvm.findAnnotation(anInterface, Comment.class);
             if (c != null)
@@ -1535,7 +1535,7 @@ public class TextWire extends YamlWireOut<TextWire> {
 
         @NotNull
         @Override
-        public WireIn bytesMatch(@NotNull BytesStore compareBytes, BooleanConsumer consumer) {
+        public WireIn bytesMatch(@NotNull BytesStore<?, ?> compareBytes, BooleanConsumer consumer) {
             throw new UnsupportedOperationException("todo");
         }
 

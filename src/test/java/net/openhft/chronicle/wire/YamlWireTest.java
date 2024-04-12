@@ -1998,7 +1998,7 @@ public class YamlWireTest extends WireTestCommon {
     }
 
     interface PutData {
-        void put(Bytes key, Data data);
+        void put(Bytes<?> key, Data data);
     }
 
     static class FieldWithComment extends SelfDescribingMarshallable {

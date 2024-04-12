@@ -84,6 +84,7 @@ public class WireDumper {
      * @param align Boolean value indicating whether to align the dumped data
      * @return A new WireDumper instance
      */
+    @SuppressWarnings("deprecation")
     @NotNull
     public static WireDumper of(@NotNull Bytes<?> bytes, boolean align) {
         final BinaryWire wireIn = new BinaryWire(bytes);

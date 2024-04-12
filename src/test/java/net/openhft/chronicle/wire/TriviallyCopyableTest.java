@@ -65,6 +65,7 @@ public class TriviallyCopyableTest extends WireTestCommon {
 
     // Inner class representing a binary-serializable data structure
     static class AA extends BytesInBinaryMarshallable {
+        static final int OFFSET = BytesUtil.triviallyCopyableStart(AA.class);
         static final int FORMAT = 1;  // version format for serialization
 
         // natural order on a 64-bit JVM.
@@ -99,7 +100,7 @@ public class TriviallyCopyableTest extends WireTestCommon {
                 case FORMAT:
                     if (OS.is64Bit())
                         // Perform direct memory read if 64-bit OS
-                        bytes.unsafeReadObject(this, 32);
+                        bytes.unsafeReadObject(this, OFFSET, 32);
                     else
                         // Read individual fields if not 64-bit OS
                         readMarshallable1(bytes);
@@ -129,7 +130,7 @@ public class TriviallyCopyableTest extends WireTestCommon {
             bytes.writeStopBit(FORMAT);
             if (OS.is64Bit())
                 // Directly write the memory contents if 64-bit OS
-                bytes.unsafeWriteObject(this, 32);
+                bytes.unsafeWriteObject(this, OFFSET, 32);
             else
                 // Write individual fields if not 64-bit OS
                 writeMarshallable1(bytes);

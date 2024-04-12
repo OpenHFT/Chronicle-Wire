@@ -261,7 +261,7 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public QueryWire bytes(@Nullable BytesStore fromBytes) {
+        public QueryWire bytes(@Nullable BytesStore<?, ?> fromBytes) {
             throw new UnsupportedOperationException("todo");
         }
 

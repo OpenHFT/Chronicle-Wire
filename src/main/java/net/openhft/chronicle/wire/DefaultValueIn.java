@@ -94,7 +94,7 @@ public class DefaultValueIn implements ValueIn {
         @Nullable Object o = defaultValue;
         if (o == null)
             return wireIn();
-        @NotNull BytesStore bytes = (BytesStore) o;
+        @NotNull BytesStore<?, ?> bytes = (BytesStore) o;
         toBytes.write(bytes);
         return wireIn();
     }
@@ -107,16 +107,16 @@ public class DefaultValueIn implements ValueIn {
             toBytes.set(NoBytesStore.NO_PAGE, 0);
             return wireIn();
         }
-        @NotNull BytesStore bytes = (BytesStore) o;
+        @NotNull BytesStore<?, ?> bytes = (BytesStore) o;
         toBytes.set(bytes.addressForRead(0), bytes.realCapacity());
         return wireIn();
     }
 
     @NotNull
     @Override
-    public WireIn bytesMatch(@NotNull BytesStore compareBytes, @NotNull BooleanConsumer consumer) {
+    public WireIn bytesMatch(@NotNull BytesStore<?, ?> compareBytes, @NotNull BooleanConsumer consumer) {
         @Nullable Object o = defaultValue;
-        @NotNull BytesStore bytes = (BytesStore) o;
+        @NotNull BytesStore<?, ?> bytes = (BytesStore) o;
         consumer.accept(compareBytes.contentEquals(bytes));
         return wireIn();
     }
@@ -129,7 +129,7 @@ public class DefaultValueIn implements ValueIn {
             wireInConsumer.readMarshallable(Wires.NO_BYTES);
             return wireIn();
         }
-        @Nullable BytesStore bytes = (BytesStore) o;
+        @Nullable BytesStore<?, ?> bytes = (BytesStore) o;
         wireInConsumer.readMarshallable(bytes.bytesForRead());
         return wireIn();
     }

@@ -156,7 +156,7 @@ public interface ValueOut {
      * @return The WireOut instance for chained calls.
      */
     @NotNull
-    default WireOut text(@Nullable BytesStore s) {
+    default WireOut text(@Nullable BytesStore<?, ?> s) {
         return text((CharSequence) s);
     }
 
@@ -189,7 +189,7 @@ public interface ValueOut {
      * @return The WireOut instance for chained calls.
      */
     @NotNull
-    WireOut bytes(@Nullable BytesStore fromBytes);
+    WireOut bytes(@Nullable BytesStore<?, ?> fromBytes);
 
     /**
      * Write a sequence of bytes from a {@link BytesStore} object as a literal value,
@@ -199,7 +199,7 @@ public interface ValueOut {
      * @return The WireOut instance for chained calls.
      */
     @NotNull
-    default WireOut bytesLiteral(@Nullable BytesStore fromBytes) {
+    default WireOut bytesLiteral(@Nullable BytesStore<?, ?> fromBytes) {
         return bytes(fromBytes);
     }
 
@@ -211,7 +211,7 @@ public interface ValueOut {
      * @return The WireOut instance for chained calls.
      */
     @NotNull
-    WireOut bytes(String type, @Nullable BytesStore fromBytes);
+    WireOut bytes(String type, @Nullable BytesStore<?, ?> fromBytes);
 
     /**
      * Write a raw sequence of bytes. The exact behavior of this method depends on the implementation.
@@ -1125,7 +1125,7 @@ public interface ValueOut {
      * @throws InvalidMarshallableException If the object cannot be marshalled.
      */
     @NotNull
-    default <V> WireOut object(@NotNull Class<V> expectedType, V v) throws InvalidMarshallableException {
+    default <V> WireOut object(@NotNull Class<? extends V> expectedType, V v) throws InvalidMarshallableException {
         Class<?> vClass = v == null ? void.class : v.getClass();
         // Check for various types and marshall accordingly
         if (v instanceof WriteMarshallable && !isAnEnum(v))
@@ -1629,7 +1629,7 @@ public interface ValueOut {
         // If the byte size is smaller than the threshold, just write the bytes directly
         if (uncompressedBytes.readRemaining() < SMALL_MESSAGE)
             return bytes(uncompressedBytes);
-        try (ScopedResource<Bytes<?>> stlBytes = Wires.acquireBytesScoped()) {
+        try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> tmpBytes = stlBytes.get();
             Compression.compress(compression, uncompressedBytes, tmpBytes);
         // Write the compressed bytes
