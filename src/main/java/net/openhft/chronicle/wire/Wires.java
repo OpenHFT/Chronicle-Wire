@@ -1222,6 +1222,8 @@ public enum Wires {
                         ? (E) e
                         : (E) WireInternal.intern(clazz, e);
 
+            case UNKNOWN:
+            case HISTORY_MESSAGE:
             default:
                 throw new AssertionError();
         }
