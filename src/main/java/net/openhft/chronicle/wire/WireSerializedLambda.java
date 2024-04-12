@@ -28,7 +28,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Helper calls to support serialization of lambdas in Wire formats.
+ * Helper class to support the serialization of lambda expressions in Wire formats.
+ * <p>
+ * This class provides functionalities to check if a class is a serializable lambda and
+ * serialize it using the Wire format. It uses Java's {@link SerializedLambda} mechanism
+ * to capture details about the lambda and then writes those details to a Wire format.
  */
 @SuppressWarnings("rawtypes")
 public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
@@ -45,27 +49,32 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
     @NotNull
     private List<Object> capturedArgs = new ArrayList<>();
 
-    public static boolean isSerializableLambda(@NotNull Class clazz) {
+    /**
+     * Determines if the provided class is a serializable lambda.
+     *
+     * @param clazz The class to be checked.
+     * @return {@code true} if the class is a serializable lambda, {@code false} otherwise.
+     */
+    public static boolean isSerializableLambda(@NotNull Class<?> clazz) {
         return Serializable.class.isAssignableFrom(clazz) && Jvm.isLambdaClass(clazz);
     }
 
+    /**
+     * Serializes the given lambda to a Wire format using the provided {@link ValueOut} instance.
+     * <p>
+     * This method fetches the details of the lambda using the {@link SerializedLambda} mechanism
+     * and then writes these details to the provided Wire format.
+         *
+     * @param <L> The type of the lambda to be serialized.
+     * @param lambda The lambda instance to be serialized.
+     * @param valueOut The {@link ValueOut} instance to which the lambda should be serialized.
+     */
     public static <L> void write(@NotNull L lambda, @NotNull ValueOut valueOut) {
         try {
             Method writeReplace = lambda.getClass().getDeclaredMethod("writeReplace");
             Jvm.setAccessible(writeReplace);
             @NotNull SerializedLambda sl = (SerializedLambda) writeReplace.invoke(lambda);
-/*
-                public SerializedLambda(Class<?> capturingClass,
-                            String functionalInterfaceClass,
-                            String functionalInterfaceMethodName,
-                            String functionalInterfaceMethodSignature,
-                            int implMethodKind,
-                            String implClass,
-                            String implMethodName,
-                            String implMethodSignature,
-                            String instantiatedMethodType,
-                            Object[] capturedArgs) {
-             */
+
             valueOut.typePrefix("SerializedLambda");
             valueOut.marshallable(v ->
                     v.write(() -> "cc").typeLiteral(sl.getCapturingClass().replace('/', '.'))

@@ -28,13 +28,16 @@ import java.util.Arrays;
 import java.util.Collection;
 
 /**
- * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/324
+ * This test class corresponds to an issue raised in the Chronicle-Wire repository.
+ * See: https://github.com/OpenHFT/Chronicle-Wire/issues/324
  */
 @RunWith(value = Parameterized.class)
 public class JSONTypesWithEnumsAndBoxedTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
 
+    // Instance variable to determine if types are to be used in the JSON Wire representation.
     private final boolean useTypes;
 
+    // Providing two sets of parameters for the tests, based on whether types should be used or not.
     @Parameterized.Parameters(name = "useTypes={0}")
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
@@ -43,22 +46,26 @@ public class JSONTypesWithEnumsAndBoxedTypesTest extends net.openhft.chronicle.w
         );
     }
 
+    // Constructor to initialize the `useTypes` instance variable.
     public JSONTypesWithEnumsAndBoxedTypesTest(boolean useTypes) {
         this.useTypes = useTypes;
     }
 
+    // Enum representing various locations in a Formula 1 race.
     enum Location {
         PITS, TRACK, GRAVEL
     }
 
+    // Class representing Formula 1 details.
     static class F1 extends AbstractMarshallableCfg {
 
-        private String surname;
+        private String surname;  // Surname of the F1 driver.
 
         // change this to and int from an Integer and, it will work !
         private Integer car;
-        private Location location;
+        private Location location;  // Represents the current location of the car.
 
+        // Constructor for the F1 class.
         public F1(String surname, int car, Location location) {
             this.surname = surname;
             this.car = car;
@@ -66,18 +73,27 @@ public class JSONTypesWithEnumsAndBoxedTypesTest extends net.openhft.chronicle.w
         }
     }
 
+    // Test method to verify the JSON Wire representation.
     @Test
     public void test() {
+        // Add an alias for the F1 class for a more concise YAML representation.
         ClassAliasPool.CLASS_ALIASES.addAlias(F1.class);
+
+        // Create a new JSONWire instance and decide if it should use types based on `useTypes`.
         final JSONWire jsonWire = new JSONWire()
                 .useTypes(useTypes);
 
+        // Write the F1 object to the wire.
         jsonWire.getValueOut()
                 .object(new F1("Hamilton", 44, Location.TRACK));
 
-         System.out.println(jsonWire.bytes());
+        // Print the bytes to the console for verification.
+        System.out.println(jsonWire.bytes());
 
+        // Extract the object from the wire and convert it to a string.
         final String actual = jsonWire.getValueIn().object().toString();
+
+        // Assert to verify if the string representation contains the word "TRACK".
         Assert.assertTrue(actual.contains("TRACK"));
     }
 }

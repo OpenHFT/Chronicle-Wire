@@ -18,12 +18,13 @@ import org.jetbrains.annotations.NotNull;
 public interface Event<E extends Event<E>> extends BaseEvent<E> {
 
     /**
-     * Returns an identifier attached to this event.
+     * Retrieves the unique identifier associated with this event.
      *
-     * @return an identifier attached to this event.
+     * @return The unique identifier for this event.
      */
     @NotNull
     default CharSequence eventId() {
+        // Return an empty string as the default event ID
         return "";
     }
 
@@ -31,10 +32,12 @@ public interface Event<E extends Event<E>> extends BaseEvent<E> {
      * Assigns an identifier to this event. The provided identifier must not be null.
      * This method can be used to explicitly set or change the event's identifier.
      *
-     * @param eventId identifier to assign to this event.
-     * @return this
+     * @param eventId The unique identifier to assign to this event.
+     * @return The current instance of the event, facilitating method chaining.
      */
+    @SuppressWarnings("unchecked")
     default E eventId(@NotNull final CharSequence eventId) {
+        // By default, the event identifier is unchanged and the current instance is returned.
         return (E) this;
     }
 
@@ -46,10 +49,13 @@ public interface Event<E extends Event<E>> extends BaseEvent<E> {
      * @param eventName The new name to be assigned to the event.
      * @return The current instance of the implementing class, with any necessary updates applied.
      */
+    @SuppressWarnings("unchecked")
     default E updateEvent(final String eventName) {
+        // Set the event ID to the given name if it's currently unset
         if (this.eventId().length() == 0)
             this.eventId(eventName);
 
+        // Update the event time to the current system time if it's currently unset
         if (this.eventTime() <= 0)
             this.eventTimeNow();
         return (E) this;

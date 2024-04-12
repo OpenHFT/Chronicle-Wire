@@ -38,14 +38,20 @@ import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
 public class ClassAliasPoolTest extends WireTestCommon {
+
+    // Define the type of wire (e.g., TEXT, YAML, BINARY) being tested
     private final WireType wireType;
+
+    // Define a consumer that performs checks on the wire's content
     private final Consumer<Wire> wireChecker;
 
+    // Constructor to initialize wire type and checker
     public ClassAliasPoolTest(WireType wireType, Consumer<Wire> wireChecker) {
         this.wireType = wireType;
         this.wireChecker = wireChecker;
     }
 
+    // Helper method to match char sequences in a mock setup
     public static CharSequence charSequence(String text) {
         EasyMock.reportMatcher(new IArgumentMatcher() {
             @Override
@@ -61,6 +67,8 @@ public class ClassAliasPoolTest extends WireTestCommon {
         return null;
     }
 
+    // Define the set of parameters to run the test with
+    // Each set represents a wire type and the expected outcome to validate against
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
@@ -87,38 +95,62 @@ public class ClassAliasPoolTest extends WireTestCommon {
         });
     }
 
+    // This test verifies the use of custom class lookups in the wire
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
     public void testUsesClassLookup() {
+        // Create a mock for the ClassLookup interface
         final ClassLookup mock = createMock(ClassLookup.class);
+
+        // Setup expectations for the mock to return the name "CAPTData" when CAPTData.class is provided and vice-versa
         expect(mock.nameFor(CAPTData.class)).andReturn("CAPTData");
         expect(mock.forName(charSequence("CAPTData"))).andReturn((Class) CAPTData.class);
+
+        // Switch the mock to replay mode
         replay(mock);
 
+        // Create a wire with the provided wireType and associate it with a HexDumpBytes
         Wire wire = wireType.apply(new HexDumpBytes());
+
+        // Assign the created mock as the class lookup for the wire
         wire.classLookup(mock);
+
+        // Create a method writer for the TestedMethods interface and write a handle event
         final TestedMethods writer = wire.methodWriter(TestedMethods.class);
         writer.handle(new CAPTData());
 
+        // Validate the content of the wire using the wire checker
         wireChecker.accept(wire);
+
+        // Prepare a StringWriter to capture the output of the method reader
         StringWriter out = new StringWriter();
+
+        // Create a method reader and ensure it's not a proxy class
         final MethodReader reader = wire.methodReader(
                 Mocker.logging(TestedMethods.class, "", out));
         String name = reader.getClass().getName();
         assertFalse(name, name.contains("$Proxy"));
-        assertTrue(reader.readOne());
-        assertFalse(reader.readOne());
-        assertEquals("handle[!net.openhft.chronicle.wire.ClassAliasPoolTest$CAPTData {\n" +
+
+        // Read events from the wire and validate their output
+        assertTrue(reader.readOne()); // Expect one event to be read
+        assertFalse(reader.readOne()); // No more events expected
+        assertEquals("" +
+                        "handle[!net.openhft.chronicle.wire.ClassAliasPoolTest$CAPTData {\n" +
                         "  value: 0\n" +
                         "}\n" +
                         "]\n",
                 out.toString().replace("\r", ""));
+
+        // Verify that the mock was used as expected
         verify(mock);
     }
 
+    // Interface to represent tested methods
     public interface TestedMethods {
         void handle(Marshallable m);
     }
 
+    // Test data class representing a type of event with a single value
     public static class CAPTData extends SelfDescribingMarshallable {
         long value;
     }

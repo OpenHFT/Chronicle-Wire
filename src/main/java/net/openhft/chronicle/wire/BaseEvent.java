@@ -56,6 +56,7 @@ public interface BaseEvent<E extends BaseEvent<E>> extends Marshallable {
     /**
      * Updates event's time with the current time if it hasn't been set.
      */
+    @SuppressWarnings("unchecked")
     default E updateEvent() {
         if (this.eventTime() <= 0)
             this.eventTimeNow();

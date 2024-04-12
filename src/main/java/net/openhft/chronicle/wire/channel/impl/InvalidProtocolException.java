@@ -20,7 +20,20 @@ package net.openhft.chronicle.wire.channel.impl;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
 
+/**
+ * This is the InvalidProtocolException class.
+ * It signifies that there has been a protocol-related issue, especially when the expected protocol requirements
+ * aren't met during data exchange or processing. This exception extends {@link IORuntimeException}, indicating
+ * that the exception is related to I/O operations, but specifically points to protocol-related problems.
+ */
 public class InvalidProtocolException extends IORuntimeException {
+    private static final long serialVersionUID = 0L;
+
+    /**
+     * Constructs a new InvalidProtocolException with the specified detail message.
+     *
+     * @param message The detail message, saved for later retrieval by the {@link Throwable#getMessage()} method.
+     */
     public InvalidProtocolException(String message) {
         super(message);
     }

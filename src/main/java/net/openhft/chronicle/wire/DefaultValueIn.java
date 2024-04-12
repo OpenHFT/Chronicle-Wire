@@ -38,12 +38,25 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.*;
-
+/**
+ * This class provides the default implementation for the {@link ValueIn} interface. It's primarily designed
+ * to handle default values, converting them into various formats such as text and bytes.
+ * The default value is retrieved from an underlying {@link WireIn} source.
+ */
 @SuppressWarnings("rawtypes")
 public class DefaultValueIn implements ValueIn {
+
+    // The underlying WireIn source for fetching default values
     private final WireIn wireIn;
+
+    // The stored default value, fetched from the WireIn source
     Object defaultValue;
 
+    /**
+     * Constructs a new instance of DefaultValueIn with a given {@link WireIn} source.
+     *
+     * @param wireIn The WireIn source to fetch default values from.
+     */
     DefaultValueIn(WireIn wireIn) {
         this.wireIn = wireIn;
     }
@@ -451,7 +464,7 @@ public class DefaultValueIn implements ValueIn {
     }
 
     @Override
-    public Object objectWithInferredType(Object using, SerializationStrategy strategy, Class type) {
+    public Object objectWithInferredType(Object using, SerializationStrategy strategy, Class<?> type) {
         return defaultValue;
     }
 
@@ -466,7 +479,7 @@ public class DefaultValueIn implements ValueIn {
     }
 
     @Override
-    public Class typePrefix() {
+    public Class<?> typePrefix() {
         @Nullable Object o = defaultValue;
         if (o == null) return void.class;
         return o.getClass();

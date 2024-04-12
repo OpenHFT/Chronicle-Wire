@@ -22,47 +22,61 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.converter.ShortText;
 
 public class AccountStatus extends AbstractEvent<AccountStatus> {
+    // Field for account name
     private String name;
+
+    // Field for account number
     private long account;
     @ShortText
     private int currency;
+
+    // Field for amount in the account
     private double amount;
 
+    // Getter for 'account'
     public long account() {
         return account;
     }
 
+    // Fluent setter for 'account', returning the current class instance
     public AccountStatus account(long account) {
         this.account = account;
         return this;
     }
 
+    // Fluent setter for 'name', returning the current class instance
     public AccountStatus name(String name) {
         this.name = name;
         return this;
     }
 
+    // Getter for 'currency'
     public int currency() {
         return currency;
     }
 
+    // Fluent setter for 'currency', returning the current class instance
     public AccountStatus currency(int currency) {
         this.currency = currency;
         return this;
     }
 
+    // Getter for 'amount'
     public double amount() {
         return amount;
     }
 
+    // Fluent setter for 'amount', returning the current class instance
     public AccountStatus amount(double amount) {
         this.amount = amount;
         return this;
     }
 
+    // Override of the 'validate' method to ensure all fields are properly set
     @Override
     public void validate() throws InvalidMarshallableException {
         super.validate();
+        // Validations for each field
         if (name == null) throw new InvalidMarshallableException("name must be set");
         if (account == 0) throw new InvalidMarshallableException("account must be set");
         if (currency == 0) throw new InvalidMarshallableException("currency must be set");

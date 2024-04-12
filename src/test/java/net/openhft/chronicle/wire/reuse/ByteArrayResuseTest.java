@@ -28,7 +28,17 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
+/**
+ * ByteArrayReuseTest extends WireTestCommon to test the reuse of byte arrays during
+ * serialization and deserialization in Chronicle Wire.
+ */
 public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestCommon {
+
+    /**
+     * Test method to verify the serialization and deserialization of byte arrays using
+     * a self-describing message format. It checks the equality of the serialized data
+     * with the expected hexadecimal string.
+     */
     @Test
     public void writeReadBytesArray() {
         SELF_DESCRIBING = true;
@@ -45,8 +55,14 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
                 "   a6 d2 02 96 49                                  # 1234567890\n" +
                 "   c5 62 79 74 65 73 80 0b 8a 01 02 03 04 05 06 07 # bytes:\n" +
                 "   08 09 00\n");
-    }
+    }           // Provide the expected hex string for the serialized data
 
+
+    /**
+     * Test method to verify the serialization and deserialization of byte arrays using
+     * a binary format. It checks the equality of the serialized data with the expected
+     * hexadecimal string.
+     */
     @Test
     public void writeReadBytesArrayBinary() {
         SELF_DESCRIBING = false;
@@ -59,8 +75,16 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
                 "80 16                                           # Data\n" +
                 "   d2 02 96 49 00 00 00 00                         # timestamp\n" +
                 "   0a 00 00 00 01 02 03 04 05 06 07 08 09 00       # bytes\n");
-    }
+    }           // Provide the expected hex string for the serialized data
 
+
+    /**
+     * Helper method to perform serialization and deserialization of Data objects.
+     * It asserts the equality of the serialized data with the expected string and
+     * checks object equality and array reference equality after deserialization.
+     *
+     * @param expected The expected hexadecimal string representation of the serialized data.
+     */
     public void doWriteReadBytesArray(String expected) {
         Data data = new Data();
         data.timestamp = 1234567890L;
@@ -81,11 +105,15 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
         byte[] bytes2 = data2.bytes;
         wire.read("data").object(data2, Data.class);
         assertEquals(data, data2);
-        assertSame(bytes2, data2.bytes);
+        assertSame(bytes2, data2.bytes); // Check for byte array reuse
     }
 
     static boolean SELF_DESCRIBING;
 
+    /**
+     * Data class extends SelfDescribingMarshallable for testing byte array reuse.
+     * It includes a timestamp and a byte array, with custom serialization behavior.
+     */
     static class Data extends SelfDescribingMarshallable {
         long timestamp;
         byte[] bytes;

@@ -33,12 +33,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RunWith(value = Parameterized.class)
 public class Marshallable2Test extends WireTestCommon {
+
+    // Instance variable for the WireType being tested in this instance of the test
     private final WireType wireType;
 
+    // Constructor that initializes the WireType for this instance of the test
     public Marshallable2Test(WireType wireType) {
         this.wireType = wireType;
     }
 
+    // Parameterized test setup: defining the different WireTypes that the tests will be run with
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
@@ -52,6 +56,7 @@ public class Marshallable2Test extends WireTestCommon {
         );
     }
 
+    // Test case to verify if the Wire's WriteDocumentContext behaves correctly in terms of being empty or not
     @Test
     public void writeDocumentIsEmpty() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(16);
@@ -70,6 +75,7 @@ public class Marshallable2Test extends WireTestCommon {
         }
     }
 
+    // Test case to verify that a complex object with nested inner objects can be correctly serialized and deserialized
     @SuppressWarnings("rawtypes")
     @Test
     public void testObject() {
@@ -85,6 +91,7 @@ public class Marshallable2Test extends WireTestCommon {
         assertTrue(target.validated);
     }
 
+    // Test case to verify if writing to the Wire is complete under various conditions
     @Test
     public void writingIsComplete() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
@@ -111,6 +118,7 @@ public class Marshallable2Test extends WireTestCommon {
         assertTrue(wire.writingIsComplete());
     }
 
+    // Static class representing an outer object that contains nested inner objects and implements the Validatable interface
     @SuppressWarnings("unused")
     private static class Outer extends SelfDescribingMarshallable implements Validatable {
         String name;
@@ -128,9 +136,11 @@ public class Marshallable2Test extends WireTestCommon {
         }
     }
 
+    // Static class representing a first type of inner object
     private static class Inner1 extends SelfDescribingMarshallable {
     }
 
+    // Static class representing a second type of inner object
     private static class Inner2 extends SelfDescribingMarshallable {
     }
 }

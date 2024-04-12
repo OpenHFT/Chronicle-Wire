@@ -58,11 +58,18 @@ worst:          28.13        63.04        27.94         5.90         4.89       
 
  */
 
+/**
+ * A benchmark to assess the performance of method invocation
+ * via the {@code WireExchanger} in relation to event processing
+ * using {@code ChronicleEvent} objects.
+ */
 public class WireExchangerMethodPerfMain implements JLBHTask {
 
+    // Configuration constants for the benchmark.
     private static final int warmup = 100_000;
     private static final int iterations = 10_000_000;
     private static final int throughput = 1_000_000;
+
     private final WireExchanger be = new WireExchanger();
     private int count = 0;
     private JLBH jlbh;
@@ -87,9 +94,13 @@ public class WireExchangerMethodPerfMain implements JLBHTask {
     @Override
     public void init(JLBH jlbh) {
         this.jlbh = jlbh;
+
+        // Initializing and starting the consumer thread.
         final Thread consumer = new Thread(this::run, "consumer");
         consumer.setDaemon(true);
         consumer.start();
+
+        // Initializing a sample event.
         event = Marshallable.fromString(ChronicleEvent.class, "{\n" +
                 "    dateTime1: 2022-01-06T11:00:00,\n" +
                 "    dateTime2: 2022-01-06T12:00:00,\n" +
@@ -112,20 +123,32 @@ public class WireExchangerMethodPerfMain implements JLBHTask {
                 "    value7: 1e12,\n" +
                 "    value8: 8888.8888\n" +
                 "  }");
+        // Getting the method writer proxy for the EventListener interface.
         eventListener = be.methodWriter(EventListener.class);
     }
 
+    /**
+     * The consumer logic to process events from the wire.
+     * This checks the order of the events and measures
+     * the latency based on the event's metadata.
+     */
+    @SuppressWarnings({"unused", "try"})
     private void run() {
         int count = 0;
         ChronicleEvent event2 = new ChronicleEvent();
         try (AffinityLock lock = AffinityLock.acquireLock()) {
+            // Continue consuming while not interrupted.
             while (!Thread.currentThread().isInterrupted()) {
                 final Wire wire = be.acquireConsumer();
+                // Process all events in the current wire.
                 while (!wire.isEmpty()) {
                     try (DocumentContext dc = wire.readingDocument()) {
                         final ChronicleEvent event2b = dc.wire().read().object(event2, ChronicleEvent.class);
+                        // Validating event order.
                         if (event2b.transactTimeNS() != count)
                             throw new AssertionError("Missed a message, expected " + count + " got " + event2.transactTimeNS());
+
+                        // Measuring the latency.
                         final long durationNs = System.nanoTime() - event2b.sendingTimeNS();
                         jlbh.sample(durationNs);
                         ++count;
@@ -137,6 +160,13 @@ public class WireExchangerMethodPerfMain implements JLBHTask {
         }
     }
 
+    /**
+     * The producer logic to send events. This populates
+     * the event's metadata and sends it through the
+     * {@code eventListener} proxy.
+     *
+     * @param startTimeNS The start time in nanoseconds of the current operation.
+     */
     @Override
     public void run(long startTimeNS) {
         event.sendingTimeNS(startTimeNS);

@@ -33,47 +33,119 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+/**
+ * The YamlTesterParametersBuilder class facilitates the configuration of parameters for YAML-based testing.
+ * This class leverages the builder pattern, enabling a fluent and intuitive setup of testing parameters.
+ * Each method within this class is designed to either set a specific configuration or retrieve a particular value,
+ * enhancing clarity and simplifying the process of parameter setup.
+ */
 public class YamlTesterParametersBuilder<T> {
+
+    // A function responsible for constructing the test component
     private final ThrowingFunction<T, Object, Throwable> builder;
+
+    // Specifies the expected output type for the test
     private final Class<T> outClass;
+
+    // List of paths indicating where the YAML files are located
     private final List<String> paths;
-    private final Set<Class> additionalOutputClasses = new LinkedHashSet<>();
+
+    // Additional output classes provided for advanced testing scenarios
+    private final Set<Class<?>> additionalOutputClasses = new LinkedHashSet<>();
+
+    // Array of agitators used to modify or adjust the test parameters
     private YamlAgitator[] agitators = {};
+
+    // A function that provides a customized exception handling mechanism
     private Function<T, ExceptionHandler> exceptionHandlerFunction;
+
+    // Flag to determine whether the exception handler function should log the exception or not
     private boolean exceptionHandlerFunctionAndLog;
+
+    // Predicate to filter which tests to execute
     private Predicate<String> testFilter = new ContainsDifferentMessageFilter();
+
+    // A function to process and possibly modify the test input
     private Function<String, String> inputFunction;
 
+    /**
+     * Constructor that initializes the builder with a given component builder, output class, and paths specified as a comma-separated string.
+     *
+     * @param builder    A function responsible for constructing the test component.
+     * @param outClass   Expected output type for the test.
+     * @param paths      Comma-separated string indicating locations of YAML files.
+     */
     public YamlTesterParametersBuilder(ThrowingFunction<T, Object, Throwable> builder, Class<T> outClass, String paths) {
         this(builder, outClass, Arrays.asList(paths.split(" *, *")));
     }
 
+    /**
+     * Constructor that initializes the builder with a given component builder, output class, and list of paths.
+     *
+     * @param builder    A function responsible for constructing the test component.
+     * @param outClass   Expected output type for the test.
+     * @param paths      List indicating locations of YAML files.
+     */
     public YamlTesterParametersBuilder(ThrowingFunction<T, Object, Throwable> builder, Class<T> outClass, List<String> paths) {
         this.builder = builder;
         this.outClass = outClass;
         this.paths = paths;
     }
 
+    /**
+     * Sets the agitators used for modifying test parameters.
+     * This method follows the builder pattern and returns the current instance.
+     *
+     * @param agitators  Array of YamlAgitator objects.
+     * @return The current instance of YamlTesterParametersBuilder.
+     */
     public YamlTesterParametersBuilder<T> agitators(YamlAgitator... agitators) {
         this.agitators = agitators;
         return this;
     }
 
+    /**
+     * Specifies a custom exception handler function for the test.
+     * This method follows the builder pattern and returns the current instance.
+     *
+     * @param exceptionHandlerFunction   A function providing custom exception handling.
+     * @return The current instance of YamlTesterParametersBuilder.
+     */
     public YamlTesterParametersBuilder<T> exceptionHandlerFunction(Function<T, ExceptionHandler> exceptionHandlerFunction) {
         this.exceptionHandlerFunction = exceptionHandlerFunction;
         return this;
     }
 
+    /**
+     * Constructs and returns a list of test parameters based on YAML configurations.
+     * This method reads YAML configurations from specified paths, processes them based on various configurations, and
+     * returns them as test parameters. It also takes into account any defined agitators and combinations.
+     *
+     * @return A list of test parameters with each entry containing a path and its associated YamlTester.
+     */
     public List<Object[]> get() {
+        // Convert the builder into a function that returns an object
         Function<T, Object> compFunction = ThrowingFunction.asFunction(builder);
+
+        // List to hold the test parameters
         List<Object[]> params = new ArrayList<>();
+
+        // Local copy of the test filter
         Predicate<String> testFilter = this.testFilter;
+
+        // Map to store the test configurations
         Map<String, YamlTester> testers = new LinkedHashMap<>();
+
+        // Process each path, constructing and storing the YamlTester configurations
         for (String path : paths) {
             path = path.trim(); // trim without a regex
             if (path.isEmpty())
                 continue;
+
+            // Define the setup YAML path
             String setup = path + "/_setup.yaml";
+
+            // Construct the YamlTester for this path
             YamlTester yt =
                     new YamlMethodTester<>(path + "/in.yaml", compFunction, outClass, path + "/out.yaml")
                             .genericEvent("event")
@@ -92,10 +164,15 @@ public class YamlTesterParametersBuilder<T> {
             Object[] test = {path, yt};
             params.add(test);
         }
+
+        // If only base tests are to be run, return early
         if (YamlTester.BASE_TESTS)
             return params;
 
+        // Hold paths that are being skipped due to file not found
         SortedSet<String> skipping = new TreeSet<>();
+
+        // Process agitated tests
         for (Map.Entry<String, YamlTester> pyt : testers.entrySet()) {
             String path = pyt.getKey();
             YamlTester yt = pyt.getValue();
@@ -133,6 +210,8 @@ public class YamlTesterParametersBuilder<T> {
                 }
             }
         }
+
+        // Combine tests
         for (Map.Entry<String, YamlTester> pyt : testers.entrySet()) {
             String path = pyt.getKey();
 
@@ -193,45 +272,91 @@ public class YamlTesterParametersBuilder<T> {
                     skipping.add(path + "/" + path + "+" + path2);
                 }
             }
+
+            // Log paths that have been skipped, if any
             if (!skipping.isEmpty())
                 Jvm.debug().on(YamlTester.class, "Skipping " + skipping);
         }
         return params;
     }
 
+    /**
+     * Adds all additional output classes to the provided YamlTester.
+     *
+     * @param yta The YamlTester to which the output classes are to be added.
+     */
     private void addOutputClasses(YamlTester yta) {
         additionalOutputClasses.forEach(((TextMethodTester<?>) yta)::addOutputClass);
     }
 
-    public YamlTesterParametersBuilder<T> addOutputClass(Class outputClass) {
+    /**
+     * Adds a class to the set of additional output classes.
+     *
+     * @param outputClass The class to be added.
+     * @return The current instance of YamlTesterParametersBuilder.
+     */
+    public YamlTesterParametersBuilder<T> addOutputClass(Class<?> outputClass) {
         additionalOutputClasses.add(outputClass);
         return this;
     }
 
+    /**
+     * Returns the state of the exceptionHandlerFunctionAndLog flag.
+     *
+     * @return true if the exception handler function and log are enabled, false otherwise.
+     */
     public boolean exceptionHandlerFunctionAndLog() {
         return exceptionHandlerFunctionAndLog;
     }
 
+    /**
+     * Sets the state of the exceptionHandlerFunctionAndLog flag.
+     *
+     * @param exceptionHandlerFunctionAndLog The new state of the flag.
+     * @return The current instance of YamlTesterParametersBuilder.
+     */
     public YamlTesterParametersBuilder<T> exceptionHandlerFunctionAndLog(boolean exceptionHandlerFunctionAndLog) {
         this.exceptionHandlerFunctionAndLog = exceptionHandlerFunctionAndLog;
         return this;
     }
 
+    /**
+     * Returns the current test filter predicate.
+     *
+     * @return The current test filter predicate.
+     */
     public Predicate<String> testFilter() {
         return testFilter;
     }
 
+    /**
+     * Sets a new test filter predicate.
+     *
+     * @param testFilter The new test filter predicate.
+     * @return The current instance of YamlTesterParametersBuilder.
+     */
     public YamlTesterParametersBuilder<T> testFilter(Predicate<String> testFilter) {
         this.testFilter = testFilter;
         return this;
     }
 
+    /**
+     * Sets the input function that transforms input strings.
+     *
+     * @param inputFunction The function to set.
+     * @return The current instance of YamlTesterParametersBuilder.
+     */
     public YamlTesterParametersBuilder<T> inputFunction(Function<String, String> inputFunction) {
         this.inputFunction = inputFunction;
         return this;
     }
 
+    /**
+     * The ContainsDifferentMessageFilter class is a Predicate implementation that tests if a given string
+     * contains messages that haven't been seen before. Messages are split by "...\\n".
+     */
     static class ContainsDifferentMessageFilter implements Predicate<String> {
+        // Set to hold unique messages
         final Set<String> msgs = new HashSet<>();
 
         @Override

@@ -77,6 +77,7 @@ public class ChronicleContext extends SimpleCloseable {
     // URL for the Chronicle context
     private final String url;
     private String name;
+    @SuppressWarnings("deprecation")
     private transient URL _url;
 
     // Socket Registry for handling socket related operations
@@ -103,6 +104,7 @@ public class ChronicleContext extends SimpleCloseable {
      * @param url            the URL for this context
      * @param socketRegistry the socket registry for this context
      */
+    @SuppressWarnings("this-escape")
     protected ChronicleContext(String url, SocketRegistry socketRegistry) {
         this.url = url;
         this.socketRegistry = socketRegistry;
@@ -131,6 +133,7 @@ public class ChronicleContext extends SimpleCloseable {
      * @return the URL parsed from the string.
      * @throws IORuntimeException if the string cannot be parsed as a URL.
      */
+    @SuppressWarnings("deprecation")
     public static URL urlFor(String spec) throws IORuntimeException {
         try {
             if (spec.startsWith("internal:"))
@@ -147,7 +150,6 @@ public class ChronicleContext extends SimpleCloseable {
      * @return an AffinityLock appropriate for this context
      * Acquires an AffinityLock instance based on the affinity usage status of the context. If affinity usage is enabled,
      * a lock is acquired without a specific tag. If affinity usage is disabled, a lock is acquired with a null tag.
-     * @return an AffinityLock instance suitable for the context's affinity usage settings.
      */
     public AffinityLock affinityLock() {
         return useAffinity()
@@ -207,8 +209,7 @@ public class ChronicleContext extends SimpleCloseable {
 
         connectionSupplier
                 .protocol(url().getProtocol())
-                .hostname(hostname == null || hostname.isEmpty() ? "localhost" : hostname)
-                .port(port)
+                .addHostnamePort(hostname == null || hostname.isEmpty() ? "localhost" : hostname, port)
                 .connectionId(connectionId)
                 .buffered(buffered())
                 .initiator(true);

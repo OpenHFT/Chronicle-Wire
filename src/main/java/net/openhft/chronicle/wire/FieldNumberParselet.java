@@ -19,6 +19,18 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 
+/**
+ * Represents a parselet to process field numbers in a wire format.
+ * Implementations should provide logic to read data based on the field number from a wire input source.
+ */
 public interface FieldNumberParselet {
+
+    /**
+     * Reads and processes data corresponding to the given field number (methodId) from the wire input.
+     *
+     * @param methodId The field number or methodId that denotes which data to read.
+     * @param wire     The wire input source from which the data is read.
+     * @throws InvalidMarshallableException If there's an error in reading or processing the data.
+     */
     void readOne(long methodId, WireIn wire) throws InvalidMarshallableException;
 }

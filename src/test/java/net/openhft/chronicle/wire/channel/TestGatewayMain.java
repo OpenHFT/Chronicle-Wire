@@ -21,10 +21,21 @@ package net.openhft.chronicle.wire.channel;
 import java.io.IOException;
 
 /**
- * Just like ChronicleGatewayMain but with test class path scope
+ * TestGatewayMain serves as a testing entry point to the application,
+ * delegating its start through ChronicleGatewayMain's main method.
+ * This class is intended to be used within a test classpath scope.
  */
 public class TestGatewayMain {
+
+    /**
+     * Main method to launch the test gateway.
+     *
+     * @param args Command-line arguments to be passed to ChronicleGatewayMain.
+     * @throws IOException if an I/O error occurs in ChronicleGatewayMain.
+     */
     public static void main(String[] args) throws IOException {
+        // Delegates the call to ChronicleGatewayMain's main method,
+        // effectively starting the application with the provided arguments.
         ChronicleGatewayMain.main(args);
     }
 }

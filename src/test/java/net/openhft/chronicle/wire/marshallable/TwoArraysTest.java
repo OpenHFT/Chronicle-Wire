@@ -27,13 +27,29 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * Test suite for the TwoArrays class.
+ */
 public class TwoArraysTest extends WireTestCommon {
+
+    /**
+     * Tests serialization and deserialization of TwoArrays using the Chronicle Wire library.
+     */
     @Test
     public void testTwoArrays() {
+        // Ignore exceptions with specific error message
         ignoreException("BytesMarshallable found in field which is not matching exactly");
+
+        // Create a new HexDumpBytes which will be used to serialize the TwoArrays object
         Bytes<?> bytes = new HexDumpBytes();
+
+        // Create a BinaryWire instance for serialization and deserialization
         Wire wire = new BinaryWire(bytes);
+
+        // Create an instance of TwoArrays
         TwoArrays ta = new TwoArrays(4, 8);
+
+        // Serialize the TwoArrays object
         ta.writeMarshallable(wire);
         assertEquals("" +
                         "   c2 69 61                                        # ia:\n" +
@@ -54,15 +70,22 @@ public class TwoArraysTest extends WireTestCommon {
                 bytes.toHexString());
 
         TwoArrays ta2 = new TwoArrays(0, 0);
+
+        // Deserialize the TwoArrays object
         ta2.readMarshallable(wire);
+
+        // Assertions to validate deserialization results
         assertEquals(4, ta2.ia.getCapacity());
         assertEquals(8, ta2.la.getCapacity());
+
+        // Modify the values in the deserialized TwoArrays instance
         ta2.ia.setMaxUsed(1);
         ta2.ia.setValueAt(0, 11);
         ta2.la.setMaxUsed(2);
         ta2.la.setValueAt(0, 111);
         ta2.la.setValueAt(1, 222);
 
+        // Serialize the modified TwoArrays object
         Bytes<?> bytes2 = new HexDumpBytes();
         Wire wire2 = new BinaryWire(bytes2);
         ta2.writeMarshallable(wire2);
@@ -80,8 +103,12 @@ public class TwoArraysTest extends WireTestCommon {
                 bytes2.toHexString());
 
         bytes.readPosition(0);
+
+        // Deserialize the modified TwoArrays object
         TwoArrays ta3 = new TwoArrays(0, 0);
         ta3.readMarshallable(wire);
+
+        // Assertions to validate deserialization results of the modified TwoArrays instance
         assertEquals(4, ta3.ia.getCapacity());
         assertEquals(1, ta3.ia.getUsed());
         assertEquals(11, ta3.ia.getValueAt(0));
@@ -89,6 +116,8 @@ public class TwoArraysTest extends WireTestCommon {
         assertEquals(2, ta3.la.getUsed());
         assertEquals(111, ta3.la.getValueAt(0));
         assertEquals(222, ta3.la.getValueAt(1));
+
+        // Close resources and release memory
         ta.close();
         ta2.close();
         ta3.close();

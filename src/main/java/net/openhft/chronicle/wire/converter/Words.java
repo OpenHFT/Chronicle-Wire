@@ -33,7 +33,6 @@ import java.lang.annotation.Target;
  * long representations and word sequences for better human readability.
  * <p>
  * The actual conversion between long values and words is handled by the {@link WordsLongConverter} class.
- * </p>
  *
  * @see WordsLongConverter
  * @see LongConverter

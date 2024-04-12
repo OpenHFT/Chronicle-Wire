@@ -47,7 +47,7 @@ public class ScalarValues extends SelfDescribingMarshallable {
     Long l2;
     Double d2;
 
-    Class aClass;
+    Class<?> aClass;
     RetentionPolicy policy;
     String text;
     LocalDate date;
@@ -99,8 +99,11 @@ public class ScalarValues extends SelfDescribingMarshallable {
     }
 }
 
-enum TestDynamicEnum implements DynamicEnum {
-    ONE,
-    TWO,
-    THREE
+/**
+ * A simple dynamic enumeration used in ScalarValues.
+ */
+enum TestDynamicEnum implements DynamicEnum<TestDynamicEnum>  {
+    ONE,   // Represents the first value
+    TWO,   // Represents the second value
+    THREE  // Represents the third value
 }

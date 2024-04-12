@@ -28,26 +28,39 @@ import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.function.Function;
 
+/**
+ * The YamlTester interface provides utilities to perform testing on components using YAML configurations.
+ * It offers methods to run tests on given implementations using YAML files, compare them, and report any discrepancies.
+ * Two system properties can be set to influence the behavior of the tests:
+ *
+ * <ul>
+ *     <li><b>regress.tests</b>: If set to true, it overwrites the output YAML file instead of checking it.
+ *         Though the test will still fail on an exception. This is useful to verify the reasonableness
+ *         of the output changes while committing.</li>
+ *     <li><b>base.tests</b>: If set to true, only the base tests are executed, skipping the generated tests.</li>
+ * </ul>
+ */
 public interface YamlTester {
     /**
-     * Enabling this will overwrite the output yaml file instead of checking it. The test will still fail on an exception.
-     * You can check the output has changing in a reasonable way when committing the changes.
+     * System property to determine whether to overwrite the output YAML file.
      */
     boolean REGRESS_TESTS = Jvm.getBoolean("regress.tests");
     /**
-     * When enabled only the base tests are run. i.e. generated tests are skipped.
+     * System property to determine whether to run only base tests.
      */
     boolean BASE_TESTS = Jvm.getBoolean("base.tests");
 
     /**
-     * Test a component implemented in a class using in.yaml comparing with out.yaml,
-     * with optionally setup.yaml to initialise it.
+     * Executes tests for a given implementation class using the specified YAML files. The method
+     * searches for a constructor in the implementation class that accepts a single interface argument
+     * and uses it to create an instance of the component.
      *
-     * @param implClass of the implementation
-     * @param path      where the yaml files can be found
-     * @return the results for comparison
-     * @throws AssertionError if anything went wrong
+     * @param implClass Class of the implementation to be tested.
+     * @param path      Directory path where the YAML files (in.yaml, out.yaml, and setup.yaml) are located.
+     * @return YamlTester instance containing the test results for comparison.
+     * @throws AssertionError If the test encounters issues or if the constructor doesn't match the expected format.
      */
+    @SuppressWarnings("unchecked")
     static YamlTester runTest(Class<?> implClass, String path) throws AssertionError {
         for (Constructor<?> cons : implClass.getDeclaredConstructors()) {
             if (cons.getParameterCount() == 1) {
@@ -59,7 +72,7 @@ public interface YamlTester {
                         } catch (Exception e) {
                             throw new AssertionError(e);
                         }
-                    }, (Class) parameterTypes[0], path);
+                    }, (Class<Object>) parameterTypes[0], path);
                 }
             }
         }
@@ -67,14 +80,15 @@ public interface YamlTester {
     }
 
     /**
-     * Test a component implemented in a class using in.yaml comparing with out.yaml,
-     * with optionally setup.yaml to initialise it.
+     * Executes tests for a component built using the provided builder function. This method allows
+     * for more flexibility in constructing the component to be tested.
      *
-     * @param builder  to construct a component to be tested
-     * @param outClass the interface of output
-     * @param path     where the yaml files can be found
-     * @return the results for comparison
-     * @throws AssertionError if anything went wrong
+     * @param builder  Function that builds the component to be tested.
+     * @param outClass Interface that represents the expected output type.
+     * @param path     Directory path where the YAML files (in.yaml, out.yaml, and setup.yaml) are located.
+     * @param <T>      Type parameter representing the type of the input to the builder function.
+     * @return YamlTester instance containing the test results for comparison.
+     * @throws AssertionError If the test encounters issues.
      */
     static <T> YamlTester runTest(Function<T, Object> builder, Class<T> outClass, String path) throws AssertionError {
         try {
@@ -91,14 +105,16 @@ public interface YamlTester {
     }
 
     /**
-     * Test a component implemented in a class using in.yaml comparing with out.yaml,
-     * with optionally setup.yaml to initialise it.
+     * Executes tests on a component constructed by the given builder function and outputs the result using
+     * the provided outFunction. The input and expected results are sourced from `in.yaml` and `out.yaml` files,
+     * respectively. An optional `setup.yaml` file can also be provided to initialize the testing environment.
      *
-     * @param builder     to construct a component to be tested
-     * @param outFunction the interface of output
-     * @param path        where the yaml files can be found
-     * @return the results for comparison
-     * @throws AssertionError if anything went wrong
+     * @param builder     Function to create the component under test.
+     * @param outFunction Interface function that represents the expected output type.
+     * @param path        Directory path containing the YAML files (in.yaml, out.yaml, and optionally setup.yaml).
+     * @param <T>         Type parameter indicating the type accepted by the builder function.
+     * @return YamlTester instance containing the test results for comparison.
+     * @throws AssertionError if any discrepancy is found or if an exception occurs during test execution.
      */
     static <T> YamlTester runTest(Function<T, Object> builder, Function<WireOut, T> outFunction, String path) throws AssertionError {
         try {
@@ -115,21 +131,26 @@ public interface YamlTester {
     }
 
     /**
-     * Using this test as a template, generate more tests using this YamlAgitator
+     * Generates additional tests based on the current test configuration by using a specified YamlAgitator.
+     * These agitated tests can be used to validate component behavior under specific, possibly edge-case, scenarios.
      *
-     * @param agitator to use
-     * @return a map of gerenated inputs to test names
-     * @throws IORuntimeException if an IO error occurs
+     * @param agitator YamlAgitator instance used to create additional test cases.
+     * @return A map where each key represents an agitated test input and the corresponding value is its test name.
+     * @throws IORuntimeException if an I/O error occurs during test generation.
      */
     Map<String, String> agitate(YamlAgitator agitator);
 
     /**
-     * @return the expected String
+     * Retrieves the expected result string after test execution.
+     *
+     * @return Expected result string.
      */
     String expected();
 
     /**
-     * @return the actual String
+     * Retrieves the actual result string obtained after test execution.
+     *
+     * @return Actual result string.
      */
     String actual();
 }

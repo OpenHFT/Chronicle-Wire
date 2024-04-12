@@ -29,6 +29,14 @@ import java.util.function.*;
 
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
+/**
+ * The DocumentExtractor functional interface defines methods to extract data from documents, with
+ * the ability to transform the extracted data using provided mappers. Implementers of this
+ * interface should provide the logic for extracting data from documents based on the provided
+ * wire and index.
+ *
+ * @param <T> The type of data to be extracted from the document.
+ */
 @FunctionalInterface
 public interface DocumentExtractor<T> {
 

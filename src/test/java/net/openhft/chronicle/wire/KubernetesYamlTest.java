@@ -29,22 +29,36 @@ import java.util.stream.Stream;
 import static net.openhft.chronicle.wire.WireType.YAML;
 import static org.junit.Assert.assertEquals;
 
-@SuppressWarnings("rawtypes")
 @RequiredForClient
 public class KubernetesYamlTest extends WireTestCommon {
+
+    // Directory path to Kubernetes YAML files
     static String DIR = "/yaml/k8s/";
 
+    /**
+     * Performs a test based on a given YAML file and expected results.
+     *
+     * @param file The name of the YAML file to be read.
+     * @param expected The expected string representations of Kubernetes objects.
+     */
     public static void doTest(String file, String... expected) {
+        // Bytes buffer to be used for reading
         Bytes<?> b = Bytes.elasticByteBuffer();
         try {
+            // Reading the YAML file into a stream
             InputStream is = KubernetesYamlTest.class.getResourceAsStream(DIR + file);
 
             Scanner s = new Scanner(is).useDelimiter("\\A");
             Bytes<?> bytes = Bytes.from(s.hasNext() ? s.next() : "");
+
+            // Parsing the YAML content into a stream of objects
             Stream<Object> stream = YAML.streamFromBytes(Object.class, bytes);
             Object[] objects = stream.toArray();
+
+            // Validating the number of parsed objects
             assertEquals(expected.length, objects.length);
 
+            // Comparing each parsed object to the expected results
             for (int i = 0; i < objects.length; i++) {
                 Object o = objects[i];
                 String actual = o.toString();
@@ -52,10 +66,12 @@ public class KubernetesYamlTest extends WireTestCommon {
                 assertEquals(expected[i], actual.replace("\r", ""));
             }
         } finally {
+            // Releasing the bytes buffer
             b.releaseLast();
         }
     }
 
+    // Test cases for the "example*.yaml" Kubernetes file
     @Test
     public void testExample1() {
         doTest("example1.yaml",

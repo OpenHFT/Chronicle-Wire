@@ -18,6 +18,18 @@
 
 package net.openhft.chronicle.wire.channel.echo;
 
+/**
+ * The {@code ChannelVisiting} interface establishes a contract
+ * for entities that can be visited by a {@code ChannelVisitor},
+ * potentially enabling operations like status checks, modifications,
+ * or extraction of specific data from the visiting entity.
+ */
 public interface ChannelVisiting {
-    void visitor(ChannelVisitor visitor);
+    /**
+     * Accepts a {@code ChannelVisitor}, allowing it to visit
+     * and potentially interact with the implementing entity.
+     *
+     * @param visitor The {@code ChannelVisitor} visiting the entity.
+     */
+    void visitor(ChannelVisitor<?> visitor);
 }

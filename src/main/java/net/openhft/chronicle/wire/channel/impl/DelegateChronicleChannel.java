@@ -24,15 +24,30 @@ import net.openhft.chronicle.wire.UnrecoverableTimeoutException;
 import net.openhft.chronicle.wire.WireOut;
 import net.openhft.chronicle.wire.channel.*;
 
+/**
+ * This is the DelegateChronicleChannel class.
+ * It acts as a delegate or a wrapper around an instance of the {@link InternalChronicleChannel},
+ * effectively forwarding all method calls to the underlying channel.
+ * This design allows for modification, monitoring, or extension of the behavior of the internal channel without altering its code.
+ *
+ * @see InternalChronicleChannel
+ */
 public class DelegateChronicleChannel implements InternalChronicleChannel, Closeable {
+
+    // The internal channel instance to which method calls are delegated
     protected final InternalChronicleChannel channel;
 
+    /**
+     * Constructs a new DelegateChronicleChannel, initializing it with the provided internal channel instance.
+     *
+     * @param channel The underlying {@link InternalChronicleChannel} to which this delegate will forward method calls.
+     */
     public DelegateChronicleChannel(InternalChronicleChannel channel) {
         this.channel = channel;
     }
 
     @Override
-    public ChronicleChannelCfg channelCfg() {
+    public ChronicleChannelCfg<?> channelCfg() {
         return channel.channelCfg();
     }
 

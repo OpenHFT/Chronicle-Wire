@@ -29,23 +29,32 @@ import java.io.IOException;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@SuppressWarnings("rawtypes")
 public class ReadDocumentContextTest extends WireTestCommon {
+
+    // Test for writing a document that's not complete using non-shared memory
     @Test
     public void testWritingNotCompleteDocument() {
 
+        // Create an elastic byte buffer
         Bytes<?> b = Bytes.elasticByteBuffer();
+
+        // Assert that memory is not shared
         assertFalse(b.sharedMemory());
+
+        // Create a TEXT wire
         @NotNull Wire wire = WireType.TEXT.apply(b);
         assertFalse(wire.notCompleteIsNotPresent());
 
+        // Reading a document, expecting it to not be present
         try (DocumentContext dc = wire.readingDocument()) {
             assertFalse(dc.isPresent());
             assertFalse(dc.isNotComplete());
         }
 
+        // Write an incomplete document to the wire
         wire.writeNotCompleteDocument(false, w -> w.write("key").text("someText"));
 
+        // Read the incomplete document and verify its content
         try (DocumentContext dc = wire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertTrue(dc.isNotComplete());
@@ -53,8 +62,10 @@ public class ReadDocumentContextTest extends WireTestCommon {
             Assert.assertEquals("someText", wire.read(() -> "key").text());
         }
 
+        // Write a complete document to the wire
         wire.writeDocument(false, w -> w.write("key2").text("someText2"));
 
+        // Read the complete document and verify its content
         try (DocumentContext dc = wire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertFalse(dc.isNotComplete());
@@ -62,36 +73,49 @@ public class ReadDocumentContextTest extends WireTestCommon {
             Assert.assertEquals("someText2", wire.read(() -> "key2").text());
         }
 
+        // Release the byte buffer's resources
         b.releaseLast();
     }
 
+    // Test for writing a document that's not complete using shared memory
     @Test
     public void testWritingNotCompleteDocumentShared() throws IOException {
+        // Create a MappedBytes buffer with shared memory from a temp file
         @NotNull MappedBytes b = MappedBytes.mappedBytes(File.createTempFile("delete", "me"), 64 << 10);
+
+        // Assert that memory is shared
         assertTrue(b.sharedMemory());
+
+        // Create a TEXT wire
         @NotNull Wire wire = WireType.TEXT.apply(b);
         assertTrue(wire.notCompleteIsNotPresent());
 
+        // Reading a document, expecting it to not be present
         try (DocumentContext dc = wire.readingDocument()) {
             assertFalse(dc.isPresent());
             assertFalse(dc.isNotComplete());
         }
 
+        // Save the current write position of the wire
         long pos = wire.bytes().writePosition();
+
+        // Write an incomplete document to the wire
         wire.writeNotCompleteDocument(false, w -> w.write("key").text("someText"));
 
+        // Write a complete document to the wire
         wire.writeDocument(false, w -> w.write("key2").text("someText2"));
 
+        // Reading a document, still expecting it to be incomplete
         try (DocumentContext dc = wire.readingDocument()) {
             assertFalse(dc.isPresent());
             assertTrue(dc.isNotComplete());
         }
 
-        // go back and make the document complete.
+        // Modify the header of the incomplete document to make it complete
         int header = wire.bytes().readInt(pos);
         assertTrue(wire.bytes().compareAndSwapInt(pos, header, header & ~Wires.NOT_COMPLETE));
 
-        // now we can read it.
+        // Read the now completed document and verify its content
         try (DocumentContext dc = wire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertFalse(dc.isNotComplete());
@@ -99,131 +123,159 @@ public class ReadDocumentContextTest extends WireTestCommon {
             Assert.assertEquals("someText", wire.read(() -> "key").text());
         }
 
-        // and the message after it.
+        // Read the subsequent complete document and verify its content
         try (DocumentContext dc = wire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertFalse(dc.isNotComplete());
             assertFalse(dc.isMetaData());
             Assert.assertEquals("someText2", wire.read(() -> "key2").text());
         }
+
+        // Release the MappedBytes' resources
         b.releaseLast();
     }
 
     @Test
     public void testEmptyMessage() {
-
+        // Create an elastic byte buffer
         Bytes<?> b = Bytes.elasticByteBuffer();
 
+        // Apply the TEXT wire type to the buffer
         Wire textWire = WireType.TEXT.apply(b);
 
-        textWire.writeDocument(true, w -> {
-        });
+        // Write an empty meta-data document to the wire
+        textWire.writeDocument(true, w -> {});
 
+        // Write a data document with content to the wire
         textWire.writeDocument(false, w -> w.write("key2").text("someText2"));
 
+        // Read the empty meta-data document and verify its properties
         try (@NotNull DocumentContext dc = textWire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertFalse(dc.isData());
             assertTrue(dc.wire().bytes().isEmpty());
         }
 
+        // Read the data document and verify its content
         try (@NotNull DocumentContext dc = textWire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertFalse(dc.isMetaData());
             Assert.assertEquals("someText2", textWire.read(() -> "key2").text());
         }
 
+        // Release the byte buffer's resources
         b.releaseLast();
     }
 
     @Test
-    public void testReadingADocumentThatHasNotBeenFullyReadFromTheTcpSocketAt2Bytes() throws
-            Exception {
-
+    public void testReadingADocumentThatHasNotBeenFullyReadFromTheTcpSocketAt2Bytes() throws Exception {
+        // Create an elastic byte buffer
         Bytes<?> b = Bytes.elasticByteBuffer();
 
+        // Apply the TEXT wire type to the buffer
         Wire textWire = WireType.TEXT.apply(b);
 
+        // Write two meta-data documents and one data document to the wire
         textWire.writeDocument(true, w -> w.write("key").text("someText"));
         textWire.writeDocument(true, w -> w.write("key").text("someText"));
         textWire.writeDocument(false, w -> w.write("key2").text("someText2"));
 
+        // Read the first meta-data document and verify its content
         try (@NotNull DocumentContext dc = textWire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertTrue(dc.isMetaData());
             Assert.assertEquals("someText", textWire.read(() -> "key").text());
         }
 
+        // Store the current read limit of the buffer
         long limit = b.readLimit();
 
-        // simulate the the data has not been fully read off the socket
+        // Simulate a scenario where data has not been fully read from the socket by moving the read position and limiting the read limit
         long newReadPosition = b.readPosition() + 2;
         b.readLimit(newReadPosition);
 
+        // Try reading the next document, but it should not be present due to the simulated limit
         try (@NotNull DocumentContext dc = textWire.readingDocument()) {
             assertFalse(dc.isPresent());
         }
 
+        // Assert that the new read limit has been applied
         Assert.assertEquals(newReadPosition, b.readLimit());
 
+        // Reset the read limit to its original value
         b.readLimit(limit);
+
+        // Read the next meta-data document (which was previously unreadable due to the limit) and verify its content
         try (@NotNull DocumentContext dc = textWire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertTrue(dc.isMetaData());
             Assert.assertEquals("someText", textWire.read(() -> "key").text());
         }
 
+        // Read the data document and verify its content
         try (@NotNull DocumentContext dc = textWire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertFalse(dc.isMetaData());
             Assert.assertEquals("someText2", textWire.read(() -> "key2").text());
         }
 
+        // Release the byte buffer's resources
         b.releaseLast();
     }
 
     @Test
     public void testReadingADocumentThatHasNotBeenFullyReadFromTheTcpSocketAt5Bytes() {
-
+        // Create an elastic byte buffer
         Bytes<?> b = Bytes.elasticByteBuffer();
 
+        // Apply the TEXT wire type to the buffer
         Wire wire = WireType.TEXT.apply(b);
 
+        // Write two meta-data documents and one data document to the wire
         wire.writeDocument(true, w -> w.write("key").text("someText"));
         wire.writeDocument(true, w -> w.write("key").text("someText"));
         wire.writeDocument(false, w -> w.write("key2").text("someText2"));
 
+        // Read the first meta-data document and verify its content
         try (@NotNull DocumentContext dc = wire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertTrue(dc.isMetaData());
             Assert.assertEquals("someText", wire.read(() -> "key").text());
         }
 
+        // Store the current read limit of the buffer
         long limit = b.readLimit();
 
-        // simulate the the data has not been fully read off the socket
+        // Simulate a scenario where data has not been fully read from the socket by moving the read position and setting the read limit 5 bytes further
         long newReadPosition = b.readPosition() + 5;
         b.readLimit(newReadPosition);
 
+        // Try reading the next document; it should not be present due to the simulated limit
         try (@NotNull DocumentContext dc = wire.readingDocument()) {
             assertFalse(dc.isPresent());
         }
 
+        // Assert that the new read limit has been applied
         Assert.assertEquals(newReadPosition, b.readLimit());
 
+        // Reset the read limit to its original value
         b.readLimit(limit);
+
+        // Read the next meta-data document (which was previously unreadable due to the limit) and verify its content
         try (@NotNull DocumentContext dc = wire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertTrue(dc.isMetaData());
             Assert.assertEquals("someText", wire.read(() -> "key").text());
         }
 
+        // Read the data document and verify its content
         try (@NotNull DocumentContext dc = wire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertFalse(dc.isMetaData());
             Assert.assertEquals("someText2", wire.read(() -> "key2").text());
         }
 
+        // Release the byte buffer's resources
         b.releaseLast();
     }
 }

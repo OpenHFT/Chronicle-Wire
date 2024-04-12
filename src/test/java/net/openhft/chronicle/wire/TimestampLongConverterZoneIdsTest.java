@@ -37,20 +37,24 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assume.assumeFalse;
 
+// Running the test class in a parameterized manner.
 @RunWith(value = Parameterized.class)
 public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
 
-    private final Future future;
+    private final Future<?> future;
 
-    public TimestampLongConverterZoneIdsTest(String zoneId, ConverterType converterType, Future future) {
+    public TimestampLongConverterZoneIdsTest(String zoneId, ConverterType converterType, Future<?> future) {
         this.future = future;
     }
 
+    // This method defines the parameters to be injected into the test class.
     @NotNull
     @Parameterized.Parameters(name = "zoneId={0}, converterType={1}")
     public static Collection<Object[]> combinations() {
         ExecutorService es = ForkJoinPool.commonPool();
         Random random = new Random(-1);
+
+        // Filter and map all available time zones (excluding GMT0) and converter types.
         return ZoneId.getAvailableZoneIds().stream()
                 .filter(z -> !z.equals("GMT0"))
                 .filter(z -> random.nextInt(10) == 0)
@@ -59,6 +63,7 @@ public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
                 .collect(Collectors.toList());
     }
 
+    // This static method tests a given zoneId with the specified converter type.
     static void testManyZones(String zoneId, ConverterType converterType) {
         assumeFalse(zoneId.equals("GMT0"));
         AbstractTimestampLongConverter mtlc = converterType.createConverter(zoneId);
@@ -66,11 +71,13 @@ public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
         assertEquals(zoneId, converterType.sampleTimeInUTC, mtlc.parse(str));
     }
 
+    // This test method checks the result of the future from the asynchronous operation.
     @Test
     public void testManyZones() throws ExecutionException, InterruptedException {
         assertNull(future.get());
     }
 
+    // Enum representing the different converter types: Milli, Micro, and Nano.
     enum ConverterType implements ConverterFactory {
         Milli(MilliTimestampLongConverter.INSTANCE.parse("2020/09/18T01:02:03.123")) {
             public MilliTimestampLongConverter createConverter(String zoneId) {
@@ -87,6 +94,8 @@ public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
                 return new NanoTimestampLongConverter(zoneId);
             }
         };
+
+        // The sample time in UTC for each converter type.
         long sampleTimeInUTC;
 
         ConverterType(long sampleTimeInUTC) {
@@ -94,6 +103,7 @@ public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
         }
     }
 
+    // Interface that defines a method to create an instance of the timestamp converter based on the zoneId.
     interface ConverterFactory {
         AbstractTimestampLongConverter createConverter(String zoneId);
     }

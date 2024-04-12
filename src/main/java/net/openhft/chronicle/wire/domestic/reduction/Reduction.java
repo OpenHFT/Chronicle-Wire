@@ -34,6 +34,11 @@ import java.util.stream.Collector;
 
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
+/**
+ * This is the Reduction interface which extends ExcerptListener.
+ * It provides a means to consume excerpts from a given wire and apply reductions on them.
+ * The implementations of this interface should be thread-safe, especially if they are referenced as an {@link ExcerptListener}.
+ */
 public interface Reduction<T> extends ExcerptListener {
 
     /**
@@ -76,13 +81,16 @@ public interface Reduction<T> extends ExcerptListener {
     // Basic static constructors
 
     /**
-     * Creates and returns a new ReductionBuilder that will use the provided
-     * {@code extractor) to extract elements of type E.
+     * Creates and returns a new {@code ReductionBuilder} that will use the provided
+     * {@code extractor} to extract elements of type {@code E}.
      * <p>
-     * @param extractor (non-null)
-     * @param <E>       element type
-     * @return a new ReductionBuilder
-     * @see LongReductionBuilder, DoubleReductionBuilder
+     * This method initializes a generic reduction builder suitable for custom element types.
+     *
+     * @param <E>       the element type
+     * @param extractor the document extractor used to extract elements, must not be null
+     * @return a new {@code ReductionBuilder} instance
+     * @see LongReductionBuilder
+     * @see DoubleReductionBuilder
      */
     static <E> ReductionBuilder<E> of(@NotNull final DocumentExtractor<E> extractor) {
         requireNonNull(extractor);
@@ -90,12 +98,14 @@ public interface Reduction<T> extends ExcerptListener {
     }
 
     /**
-     * Creates and returns a new LongReductionBuilder that will use the provided
-     * {@code extractor) to extract elements of type {@code long}.
+     * Creates and returns a new {@code LongReductionBuilder} that will use the provided
+     * {@code extractor} to extract elements of type {@code long}.
      * <p>
-     * @param extractor (non-null)
-     * @return a new LongReductionBuilder
-     * @see {@link #ofLong(ToLongDocumentExtractor)} and {@link #ofDouble(ToDoubleDocumentExtractor)}
+     * This method initializes a reduction builder specifically for handling long values.
+     *
+     * @param extractor the document extractor for long values, must not be null
+     * @return a new {@code LongReductionBuilder} instance
+     * @see #ofDouble(ToDoubleDocumentExtractor)
      */
     static LongReductionBuilder ofLong(@NotNull final ToLongDocumentExtractor extractor) {
         requireNonNull(extractor);
@@ -103,18 +113,25 @@ public interface Reduction<T> extends ExcerptListener {
     }
 
     /**
-     * Creates and returns a new DoubleReductionBuilder that will use the provided
-     * {@code extractor) to extract elements of type {@code double}.
+     * Creates and returns a new {@code DoubleReductionBuilder} that will use the provided
+     * {@code extractor} to extract elements of type {@code double}.
      * <p>
-     * @param extractor (non-null)
-     * @return a new DoubleReductionBuilder
-     * @see {@link #of(DocumentExtractor)} and {@link #ofLong(ToLongDocumentExtractor)}
+     * This method initializes a reduction builder specifically for handling double values.
+     *
+     * @param extractor the document extractor for double values, must not be null
+     * @return a new {@code DoubleReductionBuilder} instance
+     * @see #of(DocumentExtractor)
+     * @see #ofLong(ToLongDocumentExtractor)
      */
     static DoubleReductionBuilder ofDouble(@NotNull final ToDoubleDocumentExtractor extractor) {
         requireNonNull(extractor);
         return new ReductionUtil.VanillaDoubleReductionBuilder(extractor);
     }
 
+    /**
+     * ReductionBuilder is an interface that defines the contract for creating new Reductions using a specific collector.
+     * Implementations of this interface should cater to the specific type of element being reduced.
+     */
     interface ReductionBuilder<E> {
 
         /**
@@ -131,6 +148,9 @@ public interface Reduction<T> extends ExcerptListener {
         <A, R> Reduction<R> collecting(@NotNull final Collector<E, A, ? extends R> collector);
     }
 
+    /**
+     * LongReductionBuilder is an interface that defines the contract for creating Reductions specialized for handling long data types.
+     */
     interface LongReductionBuilder {
 
         /**
@@ -150,6 +170,9 @@ public interface Reduction<T> extends ExcerptListener {
 
     }
 
+    /**
+     * DoubleReductionBuilder is an interface that defines the contract for creating Reductions specialized for handling double data types.
+     */
     interface DoubleReductionBuilder {
 
         /**

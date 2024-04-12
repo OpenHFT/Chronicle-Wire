@@ -24,12 +24,11 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.EnumInterner;
-import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.scoped.ScopedThreadLocal;
-import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.wire.internal.FromStringInterner;
+import net.openhft.chronicle.wire.internal.VanillaFieldInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,20 +42,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 import static net.openhft.chronicle.wire.Wires.toIntU30;
 
+/**
+ * The WireInternal enum provides a collection of utility constants, data structures,
+ * and internal configurations to support wire operations. This enum does not have any
+ * direct instances (as signified by the empty enum declaration). Instead, it serves as
+ * a container for static members.
+ */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum WireInternal {
     ; // none
     static final StringInterner INTERNER = new StringInterner(Jvm.getInteger("wire.interner.size", 4096));
     private static final int BINARY_WIRE_SCOPED_INSTANCES_PER_THREAD = Jvm.getInteger("chronicle.wireInternal.pool.binaryWire.instancesPerThread", 4);
     private static final int BYTES_SCOPED_INSTANCES_PER_THREAD = Jvm.getInteger("chronicle.wireInternal.pool.bytes.instancesPerThread", 2);
-    @Deprecated(/* For removal in x.26 */)
-    static final StringBuilderPool SBP = new StringBuilderPool();
-    @Deprecated(/* For removal in x.26 */)
-    static final StringBuilderPool ASBP = new StringBuilderPool();
-    @Deprecated(/* For removal in x.26 */)
-    static final StringBuilderPool SBPVI = new StringBuilderPool();
-    @Deprecated(/* For removal in x.26 */)
-    static final StringBuilderPool SBPVO = new StringBuilderPool();
+
+    // Thread-local storage for various utility instances.
     static final ThreadLocal<WeakReference<Bytes<?>>> BYTES_TL = new ThreadLocal<>();
     static final ThreadLocal<WeakReference<Bytes<?>>> BYTES_F2S_TL = new ThreadLocal<>();
     static final ThreadLocal<WeakReference<Wire>> BINARY_WIRE_TL = new ThreadLocal<>();
@@ -71,7 +70,10 @@ public enum WireInternal {
             Bytes::clear,
             BYTES_SCOPED_INSTANCES_PER_THREAD);
 
+    // Empty array for stack trace elements.
     static final StackTraceElement[] NO_STE = {};
+
+    // Collection of classes that are internable to reduce memory consumption.
     static final Set<Class> INTERNABLE = new HashSet<>(Arrays.asList(
             String.class,
 //            Date.class,
@@ -92,11 +94,16 @@ public enum WireInternal {
 //            ZoneId.class,
 //            ZoneOffset.class
     ));
+
+    // Map to store and retrieve object interners for specific classes.
     static final Map<Class, ObjectInterner> OBJECT_INTERNERS = new ConcurrentHashMap<>();
+
+    // Internal fields for obtaining detailed messages and stack traces from Throwable instances.
     private static final Field DETAILED_MESSAGE = Jvm.getField(Throwable.class, "detailMessage");
     private static final Field STACK_TRACE = Jvm.getField(Throwable.class, "stackTrace");
 
     static {
+        // Initialization block to add aliases for various classes.
         CLASS_ALIASES.addAlias(WireSerializedLambda.class, "SerializedLambda");
         CLASS_ALIASES.addAlias(WireType.class);
         CLASS_ALIASES.addAlias(SerializableFunction.class, "Function");
@@ -111,35 +118,38 @@ public enum WireInternal {
         CLASS_ALIASES.addAlias(LongArrayValueBitSet.class);
     }
 
+    /**
+     * Triggers the static initialization block of this enum.
+     * The actual work of adding aliases is done by the static init block.
+     */
     static void addAliases() {
         // static init block does the work.
     }
 
+    /**
+     * Returns the interned instance of the given enum {@code E} that matches the specified character sequence.
+     * The method ensures that repeated requests for the same enum instance return the same shared object.
+     *
+     * @param <E>    The enum type
+     * @param eClass The class of the enum type
+     * @param cs     The character sequence that represents the enum constant
+     * @return The interned enum constant that matches the provided character sequence
+     */
     @NotNull
     public static <E extends Enum<E>> E internEnum(@NotNull Class<E> eClass, @NotNull CharSequence cs) {
         return (E) EnumInterner.ENUM_INTERNER.get(eClass).intern(cs);
     }
 
     /**
-     * @deprecated Use {@link Wires#acquireStringBuilderScoped()} instead
+     * Writes data to the provided {@code wireOut} based on the given configurations and writer.
+     *
+     * @param wireOut    The output wire to write to
+     * @param metaData   A flag indicating if meta data should be included in the write
+     * @param notComplete A flag indicating if the data is not complete
+     * @param writer     The writer responsible for writing the marshallable data
+     * @return The position where the data was written
+     * @throws InvalidMarshallableException If the provided data cannot be marshalled properly
      */
-    @Deprecated(/* To be removed in x.26 */)
-    // these might be used internally so not safe for end users.
-    static StringBuilder acquireStringBuilder() {
-        return SBP.acquireStringBuilder();
-    }
-
-    /**
-     * @deprecated Use {@link Wires#acquireStringBuilderScoped()} instead
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    // these might be used internally so not safe for end users.
-    static StringBuilder acquireAnotherStringBuilder(CharSequence cs) {
-        StringBuilder sb = ASBP.acquireStringBuilder();
-        assert sb != cs;
-        return sb;
-    }
-
     public static long writeData(@NotNull WireOut wireOut, boolean metaData, boolean notComplete,
                                  @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
         wireOut.getValueOut().resetBetweenDocuments();
@@ -177,6 +187,19 @@ public enum WireInternal {
         return position;
     }
 
+    /**
+     * Reads data from the provided {@code wireIn} starting from the given offset, and processes
+     * the data using the provided meta data and data consumers.
+     *
+     * @param offset            The offset to start reading from within the wire input
+     * @param wireIn            The input wire to read data from
+     * @param metaDataConsumer  The consumer responsible for processing meta data.
+     *                          May be null if meta data processing is not required.
+     * @param dataConsumer      The consumer responsible for processing the actual data.
+     *                          May be null if data processing is not required.
+     * @return A boolean value indicating success or failure of reading the data.
+     * @throws InvalidMarshallableException If the data cannot be unmarshalled properly.
+     */
     public static boolean readData(long offset,
                                    @NotNull WireIn wireIn,
                                    @Nullable ReadMarshallable metaDataConsumer,
@@ -194,21 +217,48 @@ public enum WireInternal {
         }
     }
 
+    /**
+     * Reads data from the given {@code wireIn} and processes the data using the provided
+     * meta data and data consumers. This method continues to read as long as there is data
+     * to read and processes the data based on its header to determine whether it's meta data
+     * or actual data.
+     *
+     * @param wireIn            The input wire to read data from.
+     * @param metaDataConsumer  The consumer responsible for processing meta data.
+     *                          May be null if meta data processing is not required.
+     * @param dataConsumer      The consumer responsible for processing the actual data.
+     *                          May be null if data processing is not required.
+     * @return A boolean value indicating whether any data was successfully read.
+     *         True if data was read, false otherwise.
+     * @throws InvalidMarshallableException If the data cannot be unmarshalled properly or
+     *                                      there's an issue with the data structure.
+     * @throws BufferUnderflowException If attempting to read more data than what's available.
+     */
     public static boolean readData(@NotNull WireIn wireIn,
                                    @Nullable ReadMarshallable metaDataConsumer,
                                    @Nullable ReadMarshallable dataConsumer) throws InvalidMarshallableException {
         @NotNull final Bytes<?> bytes = wireIn.bytes();
         boolean read = false;
+
+        // Loop to continually read data as long as there's data available
         while (true) {
             bytes.readPositionForHeader(wireIn.usePadding());
+
+            // If less than 4 bytes remain, break from loop
             if (bytes.readRemaining() < 4) break;
             long position = bytes.readPosition();
             int header = bytes.readVolatileInt(position);
+
+            // Check if the header's length is known
             if (!isKnownLength(header))
                 return read;
+
+            // Move the read position past the header
             bytes.readSkip(4);
 
             final int len = Wires.lengthOf(header);
+
+            // If header indicates data
             if (Wires.isData(header)) {
                 if (dataConsumer == null) {
                     return false;
@@ -217,14 +267,14 @@ public enum WireInternal {
                     bytes.readWithLength(len, b -> dataConsumer.readMarshallable(wireIn));
                     return true;
                 }
-            } else {
+            } else {  // If header indicates metadata
 
                 if (metaDataConsumer == null) {
-                    // skip the header
+                    // Skip the metadata
                     bytes.readSkip(len);
                 } else {
                     // bytes.readWithLength(len, b -> metaDataConsumer.accept(wireIn));
-                    // inlined to avoid garbage
+                    // Reading meta data, setting limits to ensure correct data length
                     if (len > bytes.readRemaining())
                         throw new BufferUnderflowException();
                     long limit0 = bytes.readLimit();
@@ -238,6 +288,7 @@ public enum WireInternal {
                     }
                 }
 
+                // If there's no data consumer, simply return true
                 if (dataConsumer == null)
                     return true;
                 read = true;
@@ -246,14 +297,31 @@ public enum WireInternal {
         return read;
     }
 
+    /**
+     * Reads raw data from the given {@code wireIn} without processing metadata and uses the provided
+     * {@code dataConsumer} to process this data.
+     *
+     * @param wireIn        The input wire from which data is read.
+     * @param dataConsumer  The consumer responsible for processing the actual data.
+     * @throws InvalidMarshallableException If the data cannot be unmarshalled properly or
+     *                                      there's an issue with the data structure.
+     */
     public static void rawReadData(@NotNull WireIn wireIn, @NotNull ReadMarshallable dataConsumer) throws InvalidMarshallableException {
         @NotNull final Bytes<?> bytes = wireIn.bytes();
+
+        // Read the data header from the wire
         int header = bytes.readInt();
+
+        // Ensure the header is both ready and indicates data
         assert Wires.isReady(header) && Wires.isData(header);
+
+        // Determine the length of the data from the header
         final int len = Wires.lengthOf(header);
 
         long limit0 = bytes.readLimit();
         long limit = bytes.readPosition() + len;
+
+        // Set the new reading limit and process the data, resetting the limit afterwards
         try {
             bytes.readLimit(limit);
             dataConsumer.readMarshallable(wireIn);
@@ -262,21 +330,55 @@ public enum WireInternal {
         }
     }
 
+    /**
+     * Determines if the provided length value is a known length (neither metadata nor of unknown length).
+     *
+     * @param len The length value to be evaluated.
+     * @return True if the length is known, false otherwise.
+     */
     private static boolean isKnownLength(long len) {
         return (len & (Wires.META_DATA | Wires.LENGTH_MASK)) != Wires.UNKNOWN_LENGTH;
     }
 
+    /**
+     * Creates a throwable instance based on the type provided by {@code valueIn}. Optionally, this method
+     * can also append the current stack trace to the throwable if {@code appendCurrentStack} is true.
+     *
+     * @param valueIn           The value input from which the type of the throwable is determined.
+     * @param appendCurrentStack Flag indicating whether to append the current stack trace to the throwable.
+     * @return A throwable instance of the type determined from {@code valueIn}.
+     * @throws InvalidMarshallableException If the throwable cannot be instantiated properly.
+     */
     public static Throwable throwable(@NotNull ValueIn valueIn, boolean appendCurrentStack) throws InvalidMarshallableException {
-        @Nullable Class type = valueIn.typePrefix();
+        @Nullable Class<?> type = valueIn.typePrefix();
         Throwable throwable = ObjectUtils.newInstance((Class<Throwable>) type);
 
+        // Further process and return the throwable (the method for this is not provided)
         return throwable(valueIn, appendCurrentStack, throwable);
     }
 
+    /**
+     * Creates and processes a throwable object based on the data present in the provided {@code valueIn}.
+     * The provided throwable is populated with a message and stack trace extracted from the {@code valueIn}.
+     * Optionally, the current stack trace can be appended to the throwable's stack trace.
+     *
+     * @param valueIn           The value input containing the details of the throwable.
+     * @param appendCurrentStack Flag indicating whether to append the current stack trace to the throwable.
+     * @param throwable         The throwable to be populated with details from {@code valueIn}.
+     * @return The processed throwable.
+     * @throws InvalidMarshallableException If the data in {@code valueIn} cannot be processed properly.
+     */
     protected static Throwable throwable(@NotNull ValueIn valueIn, boolean appendCurrentStack, Throwable throwable) throws InvalidMarshallableException {
+
+        // Store the reference to the throwable being processed
         final Throwable finalThrowable = throwable;
+
+        // List to hold the stack trace elements extracted from valueIn
         @NotNull final List<StackTraceElement> stes = new ArrayList<>();
+
+        // Process the marshallable data in valueIn
         valueIn.marshallable(m -> {
+            // Read and set the throwable's message
             @Nullable final String message = m.read(() -> "message").text();
 
             if (message != null) {
@@ -286,9 +388,12 @@ public enum WireInternal {
                     throw new AssertionError(e);
                 }
             }
+
+            // Extract and process the stack trace
             m.read(() -> "stackTrace").sequence(stes, (stes0, stackTrace) -> {
                 while (stackTrace.hasNextSequenceItem()) {
                     stackTrace.marshallable(r -> {
+                        // Extract details of each stack trace element
                         @Nullable final String declaringClass = r.read(() -> "class").text();
                         @Nullable final String methodName = r.read(() -> "method").text();
                         @Nullable final String fileName = r.read(() -> "file").text();
@@ -301,17 +406,19 @@ public enum WireInternal {
             });
         });
 
+        // If appendCurrentStack is true, add current stack trace details
         if (appendCurrentStack) {
             stes.add(new StackTraceElement("~ remote", "tcp ~", "", 0));
             StackTraceElement[] stes2 = Thread.currentThread().getStackTrace();
             int first = 6;
             int last = Jvm.trimLast(first, stes2);
-            //noinspection ManualArrayToCollectionCopy
+            // Loop to add each stack trace element from current thread's stack
             for (int i = first; i <= last; i++)
                 stes.add(stes2[i]);
         }
+
+        // Set the final stack trace to the throwable
         try {
-            //noinspection ToArrayCallWithZeroLengthArrayArgument
             STACK_TRACE.set(finalThrowable, stes.toArray(NO_STE));
         } catch (IllegalAccessException e) {
             throw Jvm.rethrow(e);
@@ -319,11 +426,28 @@ public enum WireInternal {
         return throwable;
     }
 
+    /**
+     * Merges two strings with a space in between. If one of the strings is null,
+     * the other string is returned. If both are null, null is returned.
+     *
+     * @param a The first string.
+     * @param b The second string.
+     * @return The merged string or one of the strings if the other is null.
+     */
     @Nullable
     static String merge(@Nullable String a, @Nullable String b) {
         return a == null ? b : b == null ? a : a + " " + b;
     }
 
+    /**
+     * Attempts to intern an object if it's of a type that is internable
+     * and is actually a string. Otherwise, converts the object to the given class.
+     *
+     * @param tClass The class to which the object needs to be converted or interned.
+     * @param o      The object to be interned or converted.
+     * @param <T>    Type of the class.
+     * @return The interned or converted object.
+     */
     static <T> T intern(Class<T> tClass, Object o) {
         if (INTERNABLE.contains(tClass) && o instanceof String) {
             String s = (String) o;
@@ -338,38 +462,19 @@ public enum WireInternal {
     }
 
     /**
-     * @deprecated Use {@link Wires#acquireBytesScoped()} instead
+     * A specialized class that interns objects based on their string representations.
+     *
+     * @param <T> Type of the object being interned.
      */
-    @NotNull
-    @Deprecated(/* To be removed in x.26 */)
-    static Bytes<?> acquireInternalBytes() {
-        if (Jvm.isDebug())
-            return Bytes.allocateElasticOnHeap();
-        Bytes<?> bytes = ThreadLocalHelper.getTL(INTERNAL_BYTES_TL,
-                Wires::unmonitoredDirectBytes);
-        bytes.clear();
-        return bytes;
-    }
-
-    /**
-     * @deprecated Use {@link Wires#acquireStringBuilderScoped()} instead
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    static StringBuilder acquireStringBuilderForValueIn() {
-        return SBPVI.acquireStringBuilder();
-    }
-
-    /**
-     * @deprecated Use {@link Wires#acquireStringBuilderScoped()} instead
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    static StringBuilder acquireStringBuilderForValueOut() {
-        return SBPVO.acquireStringBuilder();
-    }
-
     static class ObjectInterner<T> extends FromStringInterner<T> {
         final Class<T> tClass;
 
+        /**
+         * Constructs an ObjectInterner for the specified class type with a
+         * default capacity of 256.
+         *
+         * @param tClass The class type of the object to be interned.
+         */
         ObjectInterner(Class<T> tClass) {
             super(256);
             this.tClass = tClass;

@@ -31,6 +31,14 @@ import java.util.function.Supplier;
 
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
+/**
+ * Utility class that provides a set of functions and interfaces related to auto-tailers.
+ * Auto-tailers are utilities for automatically "tailing" or tracking the end of a data source.
+ * This class is designed to support operations on tailers, especially those that deal with Marshallable data.
+ * <p>
+ * The {@code AutoTailers} class provides static methods and inner interfaces to aid in the creation
+ * and management of tailers and related event handlers.
+ */
 public final class AutoTailers {
 
     // Suppresses default constructor, ensuring non-instantiability.
@@ -74,5 +82,4 @@ public final class AutoTailers {
 
         return new InternalAutoTailers.EventHandlerPoller(tailerSupplier, excerptListener);
     }
-
 }

@@ -24,16 +24,22 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+// This test class focuses on handling Throwable objects with different WireTypes.
 public class ThrowableTest extends WireTestCommon {
+
+    // Tests the writing and reading capabilities of a Throwable object with TEXT and BINARY_LIGHT WireTypes.
     @Test
     public void writeReadThrowable() {
+        // Loop through TEXT and BINARY_LIGHT WireTypes for testing
         for (WireType wireType : new WireType[]{WireType.TEXT, WireType.BINARY_LIGHT}) {
 
+            // Create the wire instance based on the current wireType
             Wire wire = wireType.apply(Bytes.allocateElasticDirect());
             try (DocumentContext dc = wire.writingDocument()) {
+                // Initialize the Throwable object with a message and cause
                 Throwable message = new Throwable("message");
                 message.initCause(new Throwable("cause"));
-                wire.getValueOut()
+                dc.wire().getValueOut()
                         .object(message);
             }
 /*            if (wireType == WireType.TEXT)
@@ -41,11 +47,14 @@ public class ThrowableTest extends WireTestCommon {
             else
                 System.out.println(wire.bytes().toHexString()+"\n"+Wires.fromSizePrefixedBlobs(wire.bytes()));*/
 
+            // Read the written Throwable and validate its content
             try (DocumentContext dc = wire.readingDocument()) {
-                Throwable t = (Throwable) wire.getValueIn().object();
+                Throwable t = (Throwable) dc.wire().getValueIn().object();
                 assertEquals("message", t.getMessage());
                 assertTrue(t.getStackTrace()[0].toString().startsWith("net.openhft.chronicle.wire.ThrowableTest.writeReadThrowable(ThrowableTest.java"));
             }
+
+            // Release the byte resources
             wire.bytes().releaseLast();
         }
     }

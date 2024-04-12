@@ -25,6 +25,12 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInput;
 
+/**
+ * This is the WireObjectInput class that implements the ObjectInput interface.
+ * It is designed to read objects and data from a WireIn instance. The class provides
+ * methods to read an object, bytes, and other basic data types, ensuring that the data is
+ * retrieved correctly from the underlying wire instance.
+ */
 class WireObjectInput implements ObjectInput {
     private final WireIn wire;
 
@@ -50,7 +56,6 @@ class WireObjectInput implements ObjectInput {
         return read(b, 0, b.length);
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public int read(@NotNull byte[] b, int off, int len) throws IOException {
         final long remaining = wire.bytes().readRemaining();

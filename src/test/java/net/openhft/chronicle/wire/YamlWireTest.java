@@ -50,6 +50,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.util.stream.Collectors.toList;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticDirect;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static net.openhft.chronicle.wire.TextWireTest.ABC;
@@ -59,16 +60,18 @@ import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "try"})
 @RunWith(value = Parameterized.class)
 public class YamlWireTest extends WireTestCommon {
-    static Wire wire = Wire.newYamlWireOnHeap();
-    final boolean usePadding;
+    static Wire wire = Wire.newYamlWireOnHeap(); // Initialize a static YAML wire
+    final boolean usePadding; // Flag to indicate if padding should be used
 
+    // Constructor for initializing the usePadding flag
     public YamlWireTest(boolean usePadding) {
         this.usePadding = usePadding;
     }
 
+    // Defines the set of parameters to be used for the test
     @Parameterized.Parameters(name = "usePadding={0}")
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
@@ -77,34 +80,40 @@ public class YamlWireTest extends WireTestCommon {
         );
     }
 
+    // Test case for adding a comment to a wire
     @Test
     public void comment() {
-        @NotNull Wire wire = createWire();
-        wire.writeComment("\thi: omg");
-        wire.write("hi").text("there");
+        @NotNull Wire wire = createWire(); // Create a new Wire object
+        wire.writeComment("\thi: omg"); // Write a comment to the wire
+        wire.write("hi").text("there"); // Write key-value pair to the wire
+        // Assert that reading the value back works
         assertEquals("there",
                 wire.read("hi")
                         .text());
     }
 
+    // Test case for reading a null value
     @Test
     public void testTypeInsteadOfField() {
         Wire wire = YamlWire.from("!!null \"\"");
         StringBuilder sb = new StringBuilder();
         wire.read(sb)
                 .object(Object.class);
-        assertEquals(0, sb.length());
+        assertEquals(0, sb.length()); // Assert the StringBuilder is empty
     }
 
+    // Test case for writing and reading an object with TreeMap
     @Test
     public void writeObjectWithTreeMap() {
-        Wire wire = createWire();
+        Wire wire = createWire(); // Create a new Wire object
+        // Initialize and populate an ObjectWithTreeMap
         ObjectWithTreeMap value = new ObjectWithTreeMap();
         value.map.put("hello", "world");
-        wire.write().object(value);
+        wire.write().object(value); // Write the object to the wire
 
         // System.out.println(wire);
 
+        // Deserialization tests here
         ObjectWithTreeMap value2 = new ObjectWithTreeMap();
         wire.read().object(value2, ObjectWithTreeMap.class);
         assertEquals("{hello=world}", value2.map.toString());
@@ -121,8 +130,10 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals("{hello=world}", value4.map.toString());
     }
 
+    // Test case for hexadecimal integer values
     @Test
     public void testFromString2() {
+        // Loop over integer values and assert their deserialization
         for (int i = 0; i <= 256; i++) {
             Wire w = YamlWire.from(
                     "data: 0x" + Integer.toHexString(i).toUpperCase() + ",\n" +
@@ -132,6 +143,7 @@ public class YamlWireTest extends WireTestCommon {
         }
     }
 
+    // Test case for a large hexadecimal value
     @Test
     public void testLargeHex() {
         Wire w = YamlWire.from(
@@ -139,6 +151,7 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals(3405691582L, w.read("magic").int64());
     }
 
+    // Test case for C-style octal integers
     @Test
     public void testCStyleOctal() {
         // Do we need it?
@@ -146,12 +159,14 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals(420, w.read("perms").int64());
     }
 
+    // Test case for YAML-style octal integers
     @Test
     public void testYamlStyleOctal() {
         Wire w = YamlWire.from("perms: 0o750\n");
         assertEquals(488, w.read("perms").int64());
     }
 
+    // Test case for parsing a complex YAML string to an Object
     @Test
     public void testFromString() {
         @Nullable Object w = WireType.YAML.fromString("changedRow: {\n" +
@@ -167,65 +182,77 @@ public class YamlWireTest extends WireTestCommon {
                 "    open: 107.9\n" +
                 "  }\n" +
                 "}");
-        Assert.assertTrue(w instanceof Map);
+        Assert.assertTrue(w instanceof Map); // Assert the deserialized object is a Map
     }
 
+    // Test case for writing multiple empty fields
     @Test
     public void testWrite() {
-        @NotNull Wire wire = createWire();
+        @NotNull Wire wire = createWire(); // Create a new Wire object
+        wire.write(); // Write a few empty fields
         wire.write();
         wire.write();
-        wire.write();
+        // Assert the output string matches the expected empty fields
         assertEquals("\"\": \"\": \"\": ", wire.toString());
     }
 
+    // Test case for writing data in binary and reading it back in text
     @Test
     public void testWriteToBinaryAndTriesToConvertToText() {
-        Wire wire = WireType.BINARY.apply(Bytes.allocateElasticOnHeap());
-        wire.usePadding(usePadding);
+        Wire wire = WireType.BINARY.apply(Bytes.allocateElasticOnHeap()); // Create a binary wire
+        wire.usePadding(usePadding); // Set padding
 
+        // Create a data map
         @NotNull Map<String, String> data = Collections.singletonMap("key", "value");
 
+        // Create a nested map
         @NotNull HashMap map = new HashMap();
         map.put("some", data);
         map.put("some-other", data);
 
         try (DocumentContext dc = wire.writingDocument()) {
-            wire.write("map").object(map);
+            wire.write("map").object(map); // Write the map object
         }
 
+        // Convert the binary data to text and read it
         final String textYaml = Wires.fromSizePrefixedBlobs(wire);
         // System.out.println(textYaml);
         @Nullable Object o = WireType.YAML.fromString(textYaml);
+        // Assert the object's string representation is as expected
         Assert.assertEquals("{map={some={key=value}, some-other={key=value}}}", o.toString());
     }
 
+    // Utility method for creating a Wire object
     @NotNull
     private Wire createWire() {
-        wire.reset();
-        wire.usePadding(usePadding);
+        wire.reset(); // Reset the wire
+        wire.usePadding(usePadding); // Set padding
         return wire;
     }
 
+    // Test case for simple boolean values
     @Test
     public void testSimpleBool() {
-        @NotNull Wire wire = createWire();
+        @NotNull Wire wire = createWire(); // Create a new Wire object
 
-        wire.write(() -> "F").bool(false);
-        wire.write(() -> "T").bool(true);
+        wire.write(() -> "F").bool(false); // Write a false boolean value
+        wire.write(() -> "T").bool(true); // Write a true boolean value
+
+        // Assert the output string matches the expected values
         assertEquals("F: false\n" +
                 "T: true\n", wire.toString());
         @NotNull String expected = "{F=false, T=true}";
         expectWithSnakeYaml(expected, wire);
 
-        assertFalse(wire.read(() -> "F").bool());
-        assertTrue(wire.read(() -> "T").bool());
+        assertFalse(wire.read(() -> "F").bool()); // Assert read false boolean value
+        assertTrue(wire.read(() -> "T").bool()); // Assert read true boolean value
     }
 
+    // Test case for failing boolean conversion from text
     @Test
     public void testFailingBool() {
-        @NotNull Wire wire = createWire();
-
+        @NotNull Wire wire = createWire(); // Create a new Wire object
+        // Write non-boolean text values
         wire.write(() -> "A").text("");
         wire.write(() -> "B").text("other");
         assertEquals("A: \"\"\n" +
@@ -233,14 +260,16 @@ public class YamlWireTest extends WireTestCommon {
         @NotNull String expected = "{A=, B=other}";
         expectWithSnakeYaml(expected, wire);
 
+        // Assert that reading as boolean results in 'false' for these values
         assertFalse(wire.read(() -> "A").bool());
         assertFalse(wire.read(() -> "B").bool());
     }
 
+    // Test case for failing boolean conversion from Object
     @Test
     public void testFailingBoolean() {
-        @NotNull Wire wire = createWire();
-
+        @NotNull Wire wire = createWire(); // Create a new Wire object
+        // Write non-boolean text values
         wire.write(() -> "A").text("");
         wire.write(() -> "B").text("other");
         assertEquals("A: \"\"\n" +
@@ -248,134 +277,152 @@ public class YamlWireTest extends WireTestCommon {
         @NotNull String expected = "{A=, B=other}";
         expectWithSnakeYaml(expected, wire);
 
-        // TODO fix.
-        // assertEquals(null, wire.read(() -> "A").object(Boolean.class));
+        // ... (other test logic like 'expectWithSnakeYaml' omitted for brevity)
+
+        // Assert that reading as Boolean object results in 'false' or 'null'
+        // TODO: Fix this behavior to return null as indicated
         assertEquals(false, wire.read(() -> "B").object(Boolean.class));
     }
 
+    // Test case for reading text with leading spaces
     @Test
     public void testLeadingSpace() {
-        @NotNull Wire wire = createWire();
-        wire.write().text(" leadingspace");
-        assertEquals(" leadingspace", wire.read().text());
+        @NotNull Wire wire = createWire(); // Create a new Wire object
+        wire.write().text(" leadingspace"); // Write text with leading space
+        assertEquals(" leadingspace", wire.read().text()); // Assert that leading space is preserved
     }
 
+    // Utility method to check if YAML parsed by SnakeYaml matches the expected output
     private void expectWithSnakeYaml(String expected, @NotNull Wire wire) {
         String s = wire.toString();
         @Nullable Object load = null;
         try {
             @NotNull Yaml yaml = new Yaml();
-            load = yaml.load(new StringReader(s));
+            load = yaml.load(new StringReader(s)); // Parse using SnakeYaml
         } catch (Exception e) {
             throw e;
         }
-        assertEquals(expected, load.toString());
+        assertEquals(expected, load.toString()); // Assert it matches the expected output
     }
 
+    // Test case for handling 64-bit integers
     @Test
     public void testInt64() {
-        @NotNull Wire wire = createWire();
+        @NotNull Wire wire = createWire();  // Create a new Wire object
         long expected = 1234567890123456789L;
-        wire.write(() -> "VALUE").int64(expected);
-        expectWithSnakeYaml("{VALUE=1234567890123456789}", wire);
-        assertEquals(expected, wire.read(() -> "VALUE").int64());
+        wire.write(() -> "VALUE").int64(expected); // Write a 64-bit integer
+        expectWithSnakeYaml("{VALUE=1234567890123456789}", wire); // Check YAML output
+        assertEquals(expected, wire.read(() -> "VALUE").int64()); // Assert reading the value back works
     }
 
+    // Test case for handling 16-bit integers
     @Test
     public void testInt16() {
-        @NotNull Wire wire = createWire();
+        @NotNull Wire wire = createWire();  // Create a new Wire object
         short expected = 12345;
-        wire.write(() -> "VALUE").int64(expected);
-        expectWithSnakeYaml("{VALUE=12345}", wire);
-        assertEquals(expected, wire.read(() -> "VALUE").int16());
+        wire.write(() -> "VALUE").int64(expected); // Write a 16-bit integer
+        expectWithSnakeYaml("{VALUE=12345}", wire); // Check YAML output
+        assertEquals(expected, wire.read(() -> "VALUE").int16()); // Assert reading the value back works
     }
 
+    // Test case for reading 16-bit integers, expecting an exception when value is too large
     @Test(expected = IllegalStateException.class)
     public void testInt16TooLarge() {
-        @NotNull Wire wire = createWire();
-        wire.write(() -> "VALUE").int64(Long.MAX_VALUE);
-        wire.read(() -> "VALUE").int16();
+        @NotNull Wire wire = createWire();  // Create a new Wire object
+        wire.write(() -> "VALUE").int64(Long.MAX_VALUE); // Write a value too large for a 16-bit integer
+        wire.read(() -> "VALUE").int16(); // This should throw an IllegalStateException
     }
 
+    // Test case for handling 32-bit integers
     @Test
     public void testInt32() {
-        @NotNull Wire wire = createWire();
+        @NotNull Wire wire = createWire();  // Create a new Wire object
         int expected = 1;
-        wire.write(() -> "VALUE").int64(expected);
-        wire.write(() -> "VALUE2").int64(expected);
-        expectWithSnakeYaml("{VALUE=1, VALUE2=1}", wire);
-        assertEquals(expected, wire.read(() -> "VALUE").int16());
-        assertEquals(expected, wire.read(() -> "VALUE2").int16());
+        wire.write(() -> "VALUE").int64(expected);  // Write a 32-bit integer
+        wire.write(() -> "VALUE2").int64(expected); // Write another 32-bit integer
+        expectWithSnakeYaml("{VALUE=1, VALUE2=1}", wire); // Check YAML output
+        assertEquals(expected, wire.read(() -> "VALUE").int16()); // Assert reading the first value back works
+        assertEquals(expected, wire.read(() -> "VALUE2").int16()); // Assert reading the second value back works
     }
 
+    // Test case for reading 32-bit integers, expecting an exception when value is too large
     @Test(expected = IllegalStateException.class)
     public void testInt32TooLarge() {
-        @NotNull Wire wire = createWire();
-        wire.write(() -> "VALUE").int64(Integer.MAX_VALUE);
-        wire.read(() -> "VALUE").int16();
+        @NotNull Wire wire = createWire();  // Create a new Wire object
+        wire.write(() -> "VALUE").int64(Integer.MAX_VALUE); // Write a value too large for a 32-bit integer
+        wire.read(() -> "VALUE").int16(); // This should throw an IllegalStateException
     }
 
+    // Test case for writing fields with predefined keys (BWKey)
     @Test
     public void testWrite1() {
-        @NotNull Wire wire = createWire();
-        wire.write(BWKey.field1);
+        @NotNull Wire wire = createWire();  // Create a new Wire object
+        wire.write(BWKey.field1);  // Write a few fields with predefined keys
         wire.write(BWKey.field2);
         wire.write(BWKey.field3);
-        assertEquals("field1: field2: field3: ", wire.toString());
+        assertEquals("field1: field2: field3: ", wire.toString()); // Assert the output string matches expected fields
     }
 
+    // Test case for writing fields with different length names
     @Test
     public void testWrite2() {
-        @NotNull Wire wire = createWire();
-        wire.write(() -> "Hello");
-        wire.write(() -> "World");
+        @NotNull Wire wire = createWire();  // Create a new Wire object
+        wire.write(() -> "Hello");  // Write a field with short name
+        wire.write(() -> "World");  // Write another field with short name
+        // Write a field with a long name exceeding 32 characters
         wire.write(() -> "Long field name which is more than 32 characters, Bye");
         assertEquals("Hello: World: \"Long field name which is more than 32 characters, Bye\": ", wire.toString());
     }
 
+    // Test case for reading fields
     @Test
     public void testRead() {
-        @NotNull Wire wire = createWire();
-        wire.write();
-        wire.bytes().append("\n");
-        wire.write(BWKey.field1);
-        wire.bytes().append("\n");
-        wire.write(() -> "Test");
-        wire.bytes().append("\n");
+        @NotNull Wire wire = createWire();  // Create a new Wire object
+        wire.write();  // Write an empty field
+        wire.bytes().append("\n");  // Add a newline
+        wire.write(BWKey.field1);  // Write a field with predefined key
+        wire.bytes().append("\n");  // Add a newline
+        wire.write(() -> "Test");  // Write a custom field
+        wire.bytes().append("\n");  // Add a newline
+        wire.read(); // Read a few fields
         wire.read();
         wire.read();
-        wire.read();
-        assertEquals(0, wire.bytes().readRemaining());
-        // check it's safe to read too much.
+        assertEquals(0, wire.bytes().readRemaining()); // Assert no bytes remaining to read
+        // It should be safe to read beyond the available bytes
         wire.read();
     }
 
+    // Test case to demonstrate reading values with specific keys
     @Test
     public void testRead1() {
-        @NotNull Wire wire = createWire();
+        @NotNull Wire wire = createWire();  // Create a new Wire object
         wire.write().text("1");
         wire.write(BWKey.field1).text("2");
         wire.write(() -> "Test").text("3");
 
-        // ok as blank matches anything
+        // The following reads are considered okay because an empty or blank field matches anything
         wire.read(BWKey.field1).text();
         wire.read(BWKey.field1).text();
-        // not a match
+
+        // This read doesn't match the field
         wire.read(BWKey.field1).text();
-        assertEquals(0, wire.bytes().readRemaining());
-        // check it's safe to read too much.
+
+        assertEquals(0, wire.bytes().readRemaining()); // Ensure no bytes are left to read
+
+        // Verify that it's safe to read beyond the available data
         wire.read();
     }
 
+    // Test case to demonstrate reading with dynamically built names
     @Test
     public void testRead2() {
-        @NotNull Wire wire = createWire();
+        @NotNull Wire wire = createWire();  // Create a new Wire object
         wire.write().text("");
         wire.write(BWKey.field1).text("");
         @NotNull String name1 = "Long field name which is more than 32 characters, Bye";
         wire.write(name1).text("");
 
-        // ok as blank matches anything
+        // Read into a dynamically built name, asserting the captured name at each step
         @NotNull StringBuilder name = new StringBuilder();
         wire.read(name).text();
         assertEquals(0, name.length());
@@ -386,92 +433,110 @@ public class YamlWireTest extends WireTestCommon {
         wire.read(name).text();
         assertEquals(name1, name.toString());
 
-        assertEquals(0, wire.bytes().readRemaining());
-        // check it's safe to read too much.
+        assertEquals(0, wire.bytes().readRemaining());  // Ensure no bytes are left to read
+
+        // Verify that it's safe to read beyond the available data
         assertNull(wire.read().text());
     }
 
+    // Test case for 8-bit integers
     @Test
     public void int8() {
-        @NotNull Wire wire = createWire();
+        @NotNull Wire wire = createWire();  // Create a new Wire object
+        // Write 8-bit integers
         wire.write().int8(1);
         wire.write(BWKey.field1).int8(2);
         wire.write(() -> "Test").int8(3);
+
+        // Validate YAML output and string representation
         expectWithSnakeYaml("{=1, field1=2, Test=3}", wire);
         assertEquals("\"\": 1\n" +
                 "field1: 2\n" +
                 "Test: 3\n", wire.toString());
 
-        // ok as blank matches anything
+        // Read the 8-bit integers back and validate
         @NotNull AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().int8(i, AtomicInteger::set);
             assertEquals(e, i.get());
         });
 
-        assertEquals(0, wire.bytes().readRemaining());
-        // check it's safe to read too much.
+        assertEquals(0, wire.bytes().readRemaining());  // Ensure no bytes are left to read
+
+        // Verify that it's safe to read beyond the available data
         wire.read();
     }
 
+    // Test case for 16-bit integers
     @Test
     public void int16() {
-        @NotNull Wire wire = createWire();
+        @NotNull Wire wire = createWire();  // Create a new Wire object
+        // Write 16-bit integers
         wire.write().int16(1);
         wire.write(BWKey.field1).int16(2);
         wire.write(() -> "Test").int16(3);
+
+        // Validate YAML output and string representation
         expectWithSnakeYaml("{=1, field1=2, Test=3}", wire);
         assertEquals("\"\": 1\n" +
                 "field1: 2\n" +
                 "Test: 3\n", wire.toString());
 
-        // ok as blank matches anything
+        // Read the 16-bit integers back and validate
         @NotNull AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().int16(i, AtomicInteger::set);
             assertEquals(e, i.get());
         });
 
-        assertEquals(0, wire.bytes().readRemaining());
-        // check it's safe to read too much.
+        assertEquals(0, wire.bytes().readRemaining());  // Ensure no bytes are left to read
+
+        // Verify that it's safe to read beyond the available data
         wire.read();
     }
 
+    // Test case for handling 8-bit unsigned integers
     @Test
     public void uint8() {
-        @NotNull Wire wire = createWire();
-        wire.write().uint8(1);
+        @NotNull Wire wire = createWire(); // Create a new Wire object
+        wire.write().uint8(1); // Write a few 8-bit unsigned integers
         wire.write(BWKey.field1).uint8(2);
         wire.write(() -> "Test").uint8(3);
+
+        // Validate YAML output and string representation
         expectWithSnakeYaml("{=1, field1=2, Test=3}", wire);
         assertEquals("\"\": 1\n" +
                 "field1: 2\n" +
                 "Test: 3\n", wire.toString());
 
-        // ok as blank matches anything
+        // Read the unsigned integers back and validate
         @NotNull AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().uint8(i, AtomicInteger::set);
             assertEquals(e, i.get());
         });
 
-        assertEquals(0, wire.bytes().readRemaining());
-        // check it's safe to read too much.
+        assertEquals(0, wire.bytes().readRemaining()); // Ensure no bytes are left to read
+
+        // Verify that it's safe to read beyond the available data
         wire.read();
     }
 
+    // Test case for handling 16-bit unsigned integers
     @Test
     public void uint16() {
-        @NotNull Wire wire = createWire();
-        wire.write().uint16(1);
+        @NotNull Wire wire = createWire(); // Create a new Wire object
+        wire.write().uint16(1); // Write a few 16-bit unsigned integers
         wire.write(BWKey.field1).uint16(2);
         wire.write(() -> "Test").uint16(3);
+
+        // Validate YAML output and string representation
         expectWithSnakeYaml("{=1, field1=2, Test=3}", wire);
         assertEquals("\"\": 1\n" +
                 "field1: 2\n" +
                 "Test: 3\n", wire.toString());
 
-        // ok as blank matches anything
+        // Read the unsigned integers back and validate
         @NotNull AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().uint16(i, AtomicInteger::set);
@@ -483,18 +548,21 @@ public class YamlWireTest extends WireTestCommon {
         wire.read();
     }
 
+    // Test case for handling 32-bit unsigned integers
     @Test
     public void uint32() {
-        @NotNull Wire wire = createWire();
+        @NotNull Wire wire = createWire(); // Create a new Wire object
         wire.write().uint32(1);
-        wire.write(BWKey.field1).uint32(2);
+        wire.write(BWKey.field1).uint32(2); // Write a couple 32-bit unsigned integers
         wire.write(() -> "Test").uint32(3);
+
+        // Validate YAML output and string representation
         expectWithSnakeYaml("{=1, field1=2, Test=3}", wire);
         assertEquals("\"\": 1\n" +
                 "field1: 2\n" +
                 "Test: 3\n", wire.toString());
 
-        // ok as blank matches anything
+        // Read the unsigned integers back and validate
         @NotNull AtomicLong i = new AtomicLong();
         IntStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().uint32(i, AtomicLong::set);
@@ -506,18 +574,21 @@ public class YamlWireTest extends WireTestCommon {
         wire.read();
     }
 
+    // Test case for handling 32-bit signed integers
     @Test
     public void int32() {
-        @NotNull Wire wire = createWire();
-        wire.write().int32(1);
+        @NotNull Wire wire = createWire(); // Create a new Wire object
+        wire.write().int32(1); // Write a few 32-bit signed integers
         wire.write(BWKey.field1).int32(2);
         wire.write(() -> "Test").int32(3);
+
+        // Validate YAML output and string representation
         expectWithSnakeYaml("{=1, field1=2, Test=3}", wire);
         assertEquals("\"\": 1\n" +
                 "field1: 2\n" +
                 "Test: 3\n", wire.toString());
 
-        // ok as blank matches anything
+        // Read the signed integers back and validate
         @NotNull AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().int32(i, AtomicInteger::set);
@@ -529,47 +600,49 @@ public class YamlWireTest extends WireTestCommon {
         wire.read();
     }
 
+    // Test case for handling 64-bit signed integers
     @Test
     public void int64() {
-        @NotNull Wire wire = createWire();
-        wire.write().int64(1);
+        @NotNull Wire wire = createWire();  // Create a new Wire object
+        wire.write().int64(1); // Write a few 64-bit integers
         wire.write(BWKey.field1).int64(2);
         wire.write(() -> "Test").int64(3);
+
+        // Validate YAML output and string representation
         expectWithSnakeYaml("{=1, field1=2, Test=3}", wire);
         assertEquals("\"\": 1\n" +
                 "field1: 2\n" +
                 "Test: 3\n", wire.toString());
 
-        // ok as blank matches anything
+        // Read the 64-bit integers back and validate
         @NotNull AtomicLong i = new AtomicLong();
         LongStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().int64(i, AtomicLong::set);
             assertEquals(e, i.get());
         });
 
-        assertEquals(0, wire.bytes().readRemaining());
-        // check it's safe to read too much.
-        wire.read();
+        assertEquals(0, wire.bytes().readRemaining());  // Ensure no bytes are left to read
+        wire.read();  // Test that reading beyond available data is safe
     }
 
+    // Test case for handling 64-bit floating-point numbers
     @Test
     public void float64() {
-        @NotNull Wire wire = createWire();
-        wire.write().float64(1);
+        @NotNull Wire wire = createWire();  // Create a new Wire object
+        wire.write().float64(1);  // Write a few 64-bit floats
         wire.write(BWKey.field1).float64(2);
         wire.write(() -> "Test").float64(3);
         assertEquals("\"\": 1.0\n" +
                 "field1: 2.0\n" +
                 "Test: 3.0\n", wire.toString());
+
+        // Validate the output and read it back for comparison
         expectWithSnakeYaml("{=1.0, field1=2.0, Test=3.0}", wire);
 
-        // ok as blank matches anything
+        // Custom object to hold floating-point value for verification
         class Floater {
             double f;
-
-            public void set(double d) {
-                f = d;
-            }
+            public void set(double d) { f = d; }
         }
         @NotNull Floater n = new Floater();
         IntStream.rangeClosed(1, 3).forEach(e -> {
@@ -577,45 +650,47 @@ public class YamlWireTest extends WireTestCommon {
             assertEquals(e, n.f, 0.0);
         });
 
-        assertEquals(0, wire.bytes().readRemaining());
-        // check it's safe to read too much.
-        wire.read();
+        assertEquals(0, wire.bytes().readRemaining());  // Ensure no bytes are left to read
+        wire.read();  // Test that reading beyond available data is safe
     }
 
+    // Test case for handling text data types
     @Test
     public void text() {
-        @NotNull Wire wire = createWire();
-        wire.write().text("Hello");
-        wire.write(BWKey.field1).text("world");
+        @NotNull Wire wire = createWire();  // Create a new Wire object
+        wire.write().text("Hello");  // Write a type text
+        wire.write(BWKey.field1).text("world");  // Write another type text
         @NotNull String name = "Long field name which is more than 32 characters, \\ \nBye";
 
         wire.write(() -> "Test")
                 .text(name);
+
+        // Validate the output and read it back for comparison
         expectWithSnakeYaml("{=Hello, field1=world, Test=Long field name which is more than 32 characters, \\ \n" +
                 "Bye}", wire);
         assertEquals("\"\": Hello\n" +
                 "field1: world\n" +
                 "Test: \"Long field name which is more than 32 characters, \\\\ \\nBye\"\n", wire.toString());
 
-        // ok as blank matches anything
+        // Read the text back and validate
         @NotNull StringBuilder sb = new StringBuilder();
         Stream.of("Hello", "world", name).forEach(e -> {
             assertNotNull(wire.read().textTo(sb));
             assertEquals(e, sb.toString());
         });
 
-        assertEquals(0, wire.bytes().readRemaining());
-        // check it's safe to read too much.
-        wire.read();
+        assertEquals(0, wire.bytes().readRemaining());  // Ensure no bytes are left to read
+        wire.read();  // Test that reading beyond available data is safe
     }
 
+    // Test case for handling type prefix data types
     @Test
     public void type() {
-        @NotNull Wire wire = createWire();
-        wire.write().typePrefix("MyType").text("");
-        wire.write(BWKey.field1).typePrefix("AlsoMyType").text("");
+        @NotNull Wire wire = createWire();  // Create a new Wire object
+        wire.write().typePrefix("MyType").text("");  // Write a type prefix
+        wire.write(BWKey.field1).typePrefix("AlsoMyType").text("");  // Write another type prefix
         @NotNull String name1 = "com.sun.java.swing.plaf.nimbus.InternalFrameInternalFrameTitlePaneInternalFrameTitlePaneMaximizeButtonWindowNotFocusedState";
-        wire.write(() -> "Test").typePrefix(name1).text("");
+        wire.write(() -> "Test").typePrefix(name1).text("");  // Write a long type prefix
         wire.writeComment("");
         // TODO fix how types are serialized.
         // expectWithSnakeYaml(wire, "{=1, field1=2, Test=3}");
@@ -624,37 +699,42 @@ public class YamlWireTest extends WireTestCommon {
                 "Test: !" + name1 + " \"\"\n" +
                 "# \n", wire.toString());
 
-        // ok as blank matches anything
+        // Read the type prefix back and validate
         Stream.of("MyType", "AlsoMyType", name1).forEach(e -> {
             wire.read()
                     .typePrefix(e, Assert::assertEquals)
                     .text();
         });
 
-        assertEquals(0, wire.bytes().readRemaining(), 1);
-        // check it's safe to read too much.
-        wire.read();
+        assertEquals(0, wire.bytes().readRemaining(), 1);  // Ensure no bytes are left to read
+        wire.read();  // Test that reading beyond available data is safe
     }
 
+    // Test case for boolean types
     @Test
     public void testBool() {
-        @NotNull Wire wire = createWire();
+        @NotNull Wire wire = createWire(); // Create a new Wire object
+        // Write different boolean values
         wire.write().bool(false)
                 .write().bool(true)
                 .write().bool(null);
+        // Read back and verify
         wire.read().bool(false, Assert::assertEquals)
                 .read().bool(true, Assert::assertEquals)
                 .read().bool(null, Assert::assertEquals);
     }
 
+    // Test case for 32-bit floating point types
     @Test
     public void testFloat32() {
-        @NotNull Wire wire = createWire();
+        @NotNull Wire wire = createWire(); // Create a new Wire object
+        // Write float values including edge cases
         wire.write().float32(0.0F)
                 .write().float32(Float.NaN)
                 .write().float32(Float.POSITIVE_INFINITY)
                 .write().float32(Float.NEGATIVE_INFINITY)
                 .write().float32(123456.0f);
+        // Read back and verify
         wire.read().float32(this, (o, t) -> assertEquals(0.0F, t, 0.0F))
                 .read().float32(this, (o, t) -> assertTrue(Float.isNaN(t)))
                 .read().float32(this, (o, t) -> assertEquals(Float.POSITIVE_INFINITY, t, 0.0F))
@@ -662,29 +742,36 @@ public class YamlWireTest extends WireTestCommon {
                 .read().float32(this, (o, t) -> assertEquals(123456.0f, t, 0.0F));
     }
 
+    // Test case for time representation
     @Test
     public void testTime() {
-        @NotNull Wire wire = createWire();
-        LocalTime now = LocalTime.now();
+        @NotNull Wire wire = createWire(); // Create a new Wire object
+        LocalTime now = LocalTime.now(); // Get current time
+        // Write time values
         wire.write().time(now)
                 .write().time(LocalTime.MAX)
                 .write().time(LocalTime.MIN);
+        // Verify written time
         assertEquals("\"\": " + now + "\n" +
                         "\"\": 23:59:59.999999999\n" +
                         "\"\": 00:00\n",
                 wire.toString());
+        // Read back and verify
         wire.read().time(now, Assert::assertEquals)
                 .read().time(LocalTime.MAX, Assert::assertEquals)
                 .read().time(LocalTime.MIN, Assert::assertEquals);
     }
 
+    // Test case for ZonedDateTime types
     @Test
     public void testZonedDateTime() {
-        @NotNull Wire wire = createWire();
-        ZonedDateTime now = ZonedDateTime.now();
-        ZoneId zone = ZoneId.of("Europe/London");
+        @NotNull Wire wire = createWire(); // Create a new Wire object
+        ZonedDateTime now = ZonedDateTime.now(); // Get current ZonedDateTime
+        ZoneId zone = ZoneId.of("Europe/London"); // Zone ID
         final ZonedDateTime max = ZonedDateTime.of(LocalDateTime.MAX, zone);
         final ZonedDateTime min = ZonedDateTime.of(LocalDateTime.MIN, zone);
+
+        // Write ZonedDateTime values
         wire.write()
                 .zonedDateTime(now)
                 .write().zonedDateTime(max)
@@ -696,6 +783,7 @@ public class YamlWireTest extends WireTestCommon {
                 .read().zonedDateTime(max, Assert::assertEquals)
                 .read().zonedDateTime(min, Assert::assertEquals);
 
+        // This part checks the serialization when explicitly written as an object
         wire.clear();
         wire.write().object(now)
                 .write().object(max)
@@ -707,6 +795,7 @@ public class YamlWireTest extends WireTestCommon {
                 .read().object(Object.class, max, Assert::assertEquals)
                 .read().object(Object.class, min, Assert::assertEquals);
 
+        // This part checks the serialization when written as a ZonedDateTime class
         wire.clear();
         wire.write().object(ZonedDateTime.class, now)
                 .write().object(ZonedDateTime.class, max)
@@ -844,25 +933,33 @@ public class YamlWireTest extends WireTestCommon {
         }
     }
 
+    // Test the string building behavior for ABC objects with Wire.
     @Test
     public void testABCStringBuilder() {
+        String A = "A: \"hi\", # This is an A\n";
+        String B = "B: 'hi', # This is a B\n";
+        String C = "C: hi, # And that's a C\n";
+
+        // Create a wire and append values for A, B, and C
         @NotNull Wire wire = createWire();
-        wire.bytes().append(
-                "A: \"hi\",\n" +
-                        "B: 'hi',\n" +
-                        "C: hi,\n");
+        StringBuilder sb = new StringBuilder();
+        wire.commentListener(s -> sb.append(s).append('\n'));
         ABC abc = new ABC();
 
-        for (int i = 0; i < 5; i++) {
-            wire.bytes().readPosition(0);
-            wire.getValueIn().resetState();
-            assertEquals("!net.openhft.chronicle.wire.TextWireTest$ABC {\n" +
+        // Read from wire and assert its value for all permutations
+        for (String input : new String[] { A + B + C, B + A + C, C + A + B, A + C + B, B + C + A, C + B + A }) {
+            wire.reset();
+            wire.bytes().append(input);
+            assertEquals(input, "!net.openhft.chronicle.wire.TextWireTest$ABC {\n" +
                     "  A: hi,\n" +
                     "  B: hi,\n" +
                     "  C: hi\n" +
                     "}\n", wire.getValueIn()
                     .object(abc, ABC.class)
                     .toString());
+            assertEquals(sb.toString(), Arrays.asList("This is an A", "This is a B", "And that's a C"),
+                    Arrays.stream(sb.toString().split("\n")).sorted(Collections.reverseOrder()).collect(toList()));
+            sb.setLength(0);
         }
     }
 
@@ -1115,7 +1212,6 @@ public class YamlWireTest extends WireTestCommon {
         wire.reset();
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteMarshable() {
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();

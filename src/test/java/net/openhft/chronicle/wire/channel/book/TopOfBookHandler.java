@@ -24,21 +24,51 @@ import net.openhft.chronicle.wire.channel.ChronicleChannel;
 import net.openhft.chronicle.wire.channel.ChronicleChannelCfg;
 import net.openhft.chronicle.wire.channel.ChronicleContext;
 
+/**
+ * Handler for managing the top of the book in a financial market, extending the abstract handler.
+ */
 public class TopOfBookHandler extends AbstractHandler<TopOfBookHandler> {
+
+    // Nested handler for interfacing with the top of the book.
     private final ITopOfBookHandler nestedHandler;
 
+    /**
+     * Constructor initializing the handler with a given ITopOfBookHandler instance.
+     *
+     * @param nestedHandler An instance of a class implementing ITopOfBookHandler.
+     */
     public TopOfBookHandler(ITopOfBookHandler nestedHandler) {
         this.nestedHandler = nestedHandler;
     }
 
+    /**
+     * Execute the run method for channel event handling and writing methods
+     * related to the top of the book through the provided nested handler.
+     *
+     * @param context The context under which the chronicle is running.
+     * @param channel The channel through which the chronicle communicates.
+     * @throws ClosedIORuntimeException If an I/O error occurs.
+     */
     @Override
     public void run(ChronicleContext context, ChronicleChannel channel) throws ClosedIORuntimeException {
+        // Direct method writing for TopOfBookListener class through the channel
         nestedHandler.out(channel.methodWriter(TopOfBookListener.class));
+
+        // Execute the runnable event handler within the nested handler.
         channel.eventHandlerAsRunnable(nestedHandler).run();
     }
 
+    /**
+     * Method to convert the handler into an internal channel, however, is unsupported
+     * and throws an exception in this implementation.
+     *
+     * @param context The context under which the chronicle is running.
+     * @param channelCfg The configuration for the Chronicle channel.
+     * @return Nothing.
+     * @throws UnsupportedOperationException as this operation is not supported.
+     */
     @Override
-    public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg channelCfg) {
+    public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg<?> channelCfg) {
         throw new UnsupportedOperationException();
     }
 }

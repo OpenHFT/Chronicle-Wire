@@ -7,8 +7,10 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 public class AccountStatusTest {
+    // Test method to verify if AccountStatus object is converted to String correctly
     @Test
     public void testToString() {
+        // Asserting that the string representation of AccountStatus matches the expected string
         assertEquals("" +
                         "!run.chronicle.account.dto.AccountStatus {\n" +
                         "  sender: sender,\n" +
@@ -22,7 +24,9 @@ public class AccountStatusTest {
                 getAccountStatus().toString());
     }
 
+    // Helper method to create a predefined AccountStatus object
     static AccountStatus getAccountStatus() {
+        // Creating and returning a new AccountStatus object with predefined properties
         return new AccountStatus()
                 .sender(ShortText.INSTANCE.parse("sender"))
                 .target(ShortText.INSTANCE.parse("target"))

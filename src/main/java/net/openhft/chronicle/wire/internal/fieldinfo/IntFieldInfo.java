@@ -25,9 +25,22 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 
+/**
+ * Represents field information for integer fields, extending the generic field information capabilities
+ * provided by {@link UnsafeFieldInfo}. It offers direct memory access functionality to get and set
+ * integer values in objects, leveraging unsafe operations for enhanced performance.
+ */
 public final class IntFieldInfo extends UnsafeFieldInfo {
 
-    public IntFieldInfo(String name, Class type, BracketType bracketType, @NotNull Field field) {
+    /**
+     * Constructs an instance of IntFieldInfo with the provided details about an integer field.
+     *
+     * @param name        The name of the field.
+     * @param type        The type of the field.
+     * @param bracketType The bracket type associated with the field.
+     * @param field       The field object representation.
+     */
+    public IntFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         super(name, type, bracketType, field);
     }
 

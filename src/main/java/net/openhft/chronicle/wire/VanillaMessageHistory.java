@@ -34,39 +34,51 @@ import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
  * The {@code VanillaMessageHistory} class is an implementation of {@link MessageHistory} that
  * provides an array-backed history of messages.
  */
-@SuppressWarnings("rawtypes")
 public class VanillaMessageHistory extends SelfDescribingMarshallable implements MessageHistory {
 
     // Maximum length for storing message history
     public static final int MESSAGE_HISTORY_LENGTH = 128;
+
     public static final int MAX_LENGTH = 2 + MESSAGE_HISTORY_LENGTH * 8 * 4;
+    // ThreadLocal instance for storing per-thread message history instances
     private static final ThreadLocal<MessageHistory> THREAD_LOCAL =
             ThreadLocal.withInitial(() -> {
+                // Create a new VanillaMessageHistory instance for the thread
                 @NotNull VanillaMessageHistory veh = new VanillaMessageHistory();
                 veh.addSourceDetails(true);
                 return veh;
             });
+    // Configuration flag to determine whether to use bytes marshallable
     private static final boolean HISTORY_AS_BYTES = Jvm.getBoolean("history.as.bytes");
     private static final boolean HISTORY_WALL_CLOCK = Jvm.getBoolean("history.wall.clock");
     private static final boolean HISTORY_AS_METHOD_ID = Jvm.getBoolean("history.as.method_id");
     private boolean useBytesMarshallable = HISTORY_AS_BYTES;
     private boolean historyWallClock = HISTORY_WALL_CLOCK;
     private boolean historyMethodId = HISTORY_AS_METHOD_ID;
+
     @NotNull
     private final int[] sourceIdArray = new int[MESSAGE_HISTORY_LENGTH];
+
+    // Array to hold source indices
     @NotNull
     private final long[] sourceIndexArray = new long[MESSAGE_HISTORY_LENGTH];
+
+    // Array to hold timings information
     @NotNull
     private final long[] timingsArray = new long[MESSAGE_HISTORY_LENGTH * 2];
 
-    // To avoid lambda allocations
+    // Consumers for accepting sources and timings, defined to avoid lambda allocations
     private final transient BiConsumer<VanillaMessageHistory, ValueOut> acceptSourcesConsumer = this::acceptSources;
     private final transient BiConsumer<VanillaMessageHistory, ValueOut> acceptTimingsConsumer = this::acceptTimings;
 
-    // true if these change have been written
+    // Flag to check if the current history entry is updated
     private transient boolean dirty;
+
+    // Count of sources and timings
     private int sources;
     private int timings;
+
+    // Flag to decide if source details should be added or not
     private boolean addSourceDetails = false;
 
     /**
@@ -90,21 +102,37 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             THREAD_LOCAL.set(md);
     }
 
+    /**
+     * Accepts sources from the input stream and updates the message history.
+     *
+     * @param t  The instance of VanillaMessageHistory to update.
+     * @param in The input stream containing source data.
+     */
     private static void acceptSourcesRead(VanillaMessageHistory t, ValueIn in) {
+        // Read each sequence item from the input stream
         while (in.hasNextSequenceItem()) {
+            // Add the source details (ID and Index) to the message history
             t.addSource(in.int32(), in.int64());
         }
     }
 
+    /**
+     * Accepts timings from the input stream and updates the message history.
+     *
+     * @param t  The instance of VanillaMessageHistory to update.
+     * @param in The input stream containing timing data.
+     */
     private static void acceptTimingsRead(VanillaMessageHistory t, ValueIn in) {
+        // Read each sequence item from the input stream
         while (in.hasNextSequenceItem()) {
+            // Add the timing detail to the message history
             t.addTiming(in.int64());
         }
     }
 
     /**
-     * Whether to automatically add timestamp on read. Set this {@code false} for utilities that expect to
-     * read MessageHistory without mutation
+     * Sets whether the MessageHistory should automatically add a timestamp on read.
+     * Useful for utilities that expect to read MessageHistory without mutation.
      *
      * @param addSourceDetails True if source details should be added, false otherwise.
      */
@@ -223,6 +251,11 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         dirty = false;
     }
 
+    /**
+     * Reads the message history data from the provided bytes input.
+     *
+     * @param bytes Input bytes to read the data from.
+     */
     @Override
     public void readMarshallable(@NotNull BytesIn<?> bytes) throws IORuntimeException {
         if (bytes.canReadDirect(MAX_LENGTH)) {
@@ -255,12 +288,15 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     }
 
     private void readMarshallable0(@NotNull BytesIn<?> bytes) {
-        sources = bytes.readUnsignedByte();
+        sources = bytes.readUnsignedByte();  // Read the number of sources
+        // Read source IDs
         for (int i = 0; i < sources; i++)
             sourceIdArray[i] = bytes.readInt();
+        // Read source indexes
         for (int i = 0; i < sources; i++)
             sourceIndexArray[i] = bytes.readLong();
-        timings = bytes.readUnsignedByte();
+        timings = bytes.readUnsignedByte();  // Read the number of timings
+        // Read timing values
         for (int i = 0; i < timings; i++)
             timingsArray[i] = bytes.readLong();
     }
@@ -315,32 +351,55 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         dirty = false;
     }
 
+    /**
+     * Returns the current time in nanoseconds.
+     *
+     * @return Current time in nanoseconds.
+     */
     protected long nanoTime() {
         return historyWallClock ? CLOCK.currentTimeNanos() : System.nanoTime();
     }
 
+    /**
+     * Writes the sources information of the provided message history to the output.
+     *
+     * @param t    Message history instance with the source's data.
+     * @param out  Output to write the sources data to.
+     */
     private void acceptSources(VanillaMessageHistory t, ValueOut out) {
         HexDumpBytesDescription<?> b = bytesComment(out);
 
         for (int i = 0; i < t.sources; i++) {
             if (b != null)
-                b.writeHexDumpDescription("source id & index");
+                b.writeHexDumpDescription("source id & index");  // Add a description for hex dump
             out.uint32(t.sourceIdArray[i]);
             out.int64_0x(t.sourceIndexArray[i]);
         }
     }
 
+    /**
+     * Writes the timings information of the provided message history to the output.
+     *
+     * @param t    Message history instance with the timing's data.
+     * @param out  Output to write the timings data to.
+     */
     private void acceptTimings(VanillaMessageHistory t, ValueOut out) {
         HexDumpBytesDescription<?> b = bytesComment(out);
         for (int i = 0; i < t.timings; i++) {
             if (b != null)
-                b.writeHexDumpDescription("timing in nanos");
+                b.writeHexDumpDescription("timing in nanos");  // Add a description for hex dump
             out.int64(t.timingsArray[i]);
         }
         if (!(out.wireOut() instanceof HashWire))
-            out.int64(nanoTime());
+            out.int64(nanoTime());  // Add the current nano time if the output isn't HashWire
     }
 
+    /**
+     * Retrieves a byte description if it's available, otherwise returns null.
+     *
+     * @param out The output for which to retrieve the byte description.
+     * @return The byte description if available, otherwise null.
+     */
     @Nullable
     private HexDumpBytesDescription<?> bytesComment(ValueOut out) {
         final WireOut wireOut = out.wireOut();
@@ -348,7 +407,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         if (!(wireOut instanceof HashWire)) {
             b = wireOut.bytes();
             if (!b.retainedHexDumpDescription())
-                b = null;
+                b = null;  // Set to null if the description isn't retained
         }
         return b;
     }
@@ -362,7 +421,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     public void addSource(int id, long index) {
         sourceIdArray[sources] = id;
         sourceIndexArray[sources++] = index;
-        dirty = true;
+        dirty = true;  // Mark as modified
     }
 
     @Override
@@ -406,18 +465,22 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
      * @return copy of this
      */
     @Override
-    public @NotNull VanillaMessageHistory deepCopy() throws InvalidMarshallableException {
+    public @NotNull <T> T deepCopy() throws InvalidMarshallableException {
         @NotNull VanillaMessageHistory copy = super.deepCopy();
         // remove the extra timing
         copy.timingsArray[this.timings] = 0;
         copy.timings = this.timings;
-        return copy;
+        @SuppressWarnings("unchecked")
+        T copy2 = (T) copy;
+        return copy2;
     }
 
     private CharSequence toStringSources() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < sources; i++) {
+            // Append comma for all items after the first
             if (i > 0) sb.append(',');
+            // Append the source ID and its index in hexadecimal format
             sb.append(sourceIdArray[i]).append("=0x").append(Long.toHexString(sourceIndexArray[i]));
         }
         return sb;

@@ -34,13 +34,17 @@ import java.util.stream.StreamSupport;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
 /**
- * This {@code BitSet} is intended to be shared between processes. To minimize locking constraints, it is implemented as a lock-free solution
- * without support for resizing.
+ * This is the LongValueBitSet class extending AbstractCloseable.
+ * This class represents a BitSet designed to be shared across processes without requiring locks.
+ * It has been implemented as a lock-free solution and does not support resizing.
  */
+@SuppressWarnings("this-escape")
 public class LongValueBitSet extends AbstractCloseable implements Marshallable, ChronicleBitSet {
 
-    /* Used to shift left or right for a partial word mask */
+    // Mask used for operations on partial words.
     private static final long WORD_MASK = ~0L;
+
+    // Provides a pausing strategy for contention management.
     private transient Pauser pauser;
 
     /**
@@ -48,20 +52,42 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      */
     private LongValue[] words;
 
+    /**
+     * Constructor that initializes a LongValueBitSet with a maximum number of bits provided as an integer.
+     *
+     * @param maxNumberOfBits The maximum number of bits this BitSet can accommodate.
+     */
     public LongValueBitSet(final int maxNumberOfBits) {
         this((long) maxNumberOfBits);
     }
 
+    /**
+     * Constructor that initializes a LongValueBitSet with a maximum number of bits provided as an integer and associates it with a Wire.
+     *
+     * @param maxNumberOfBits The maximum number of bits this BitSet can accommodate.
+     * @param w The Wire associated with this BitSet.
+     */
     public LongValueBitSet(final int maxNumberOfBits, Wire w) {
         this((long) maxNumberOfBits, w);
     }
 
+    /**
+     * Constructor that initializes a LongValueBitSet with a maximum number of bits provided as a long.
+     *
+     * @param maxNumberOfBits The maximum number of bits this BitSet can accommodate.
+     */
     public LongValueBitSet(final long maxNumberOfBits) {
         int size = (int) ((maxNumberOfBits + BITS_PER_WORD - 1) / BITS_PER_WORD);
         words = new LongValue[size];
         singleThreadedCheckDisabled(true);
     }
 
+    /**
+     * Constructor that initializes a LongValueBitSet with a maximum number of bits provided as a long and associates it with a Wire.
+     *
+     * @param maxNumberOfBits The maximum number of bits this BitSet can accommodate.
+     * @param w The Wire associated with this BitSet.
+     */
     public LongValueBitSet(final long maxNumberOfBits, Wire w) {
         this(maxNumberOfBits);
         writeMarshallable(w);
@@ -69,21 +95,32 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Given a bit index, return word index containing it.
+     * Determines the word index for a given bit index. This method helps in locating the word in the array
+     * that contains a specific bit.
+     *
+     * @param bitIndex The index of the bit in the BitSet.
+     * @return The index of the word containing the bit.
      */
     private static int wordIndex(int bitIndex) {
         return (int) (bitIndex / BITS_PER_WORD);
     }
 
     /**
-     * Returns a new bit set containing all the bits in the given byte array.
+     * Creates a new BitSet from a given byte array.
+     *
+     * @param bytes The byte array containing the bits.
+     * @return A BitSet containing the bits from the byte array.
      */
     public static BitSet valueOf(byte[] bytes) {
         return BitSet.valueOf(ByteBuffer.wrap(bytes));
     }
 
     /**
-     * Checks that fromIndex ... toIndex is a valid range of bit indices.
+     * Validates that the range specified by fromIndex and toIndex is a legitimate range of bit indices.
+     * Throws an IndexOutOfBoundsException if any of the indices are invalid.
+     *
+     * @param fromIndex Starting index of the range.
+     * @param toIndex Ending index of the range.
      */
     private static void checkRange(int fromIndex, int toIndex) {
         if (fromIndex < 0)
@@ -108,13 +145,26 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
 
     @Override
     protected void performClose() {
-        closeQuietly(words);
+        closeQuietly((Object[]) words);
     }
 
+    /**
+     * Fetches the number of words currently in use in this BitSet.
+     *
+     * @return The number of words in use.
+     */
     public int getWordsInUse() {
         return words.length;
     }
 
+    /**
+     * Atomically sets the value of a LongValue object based on a provided function and parameter.
+     * It uses a pausing strategy to deal with contention.
+     *
+     * @param word The LongValue object whose value needs to be set.
+     * @param param The parameter to pass to the function.
+     * @param function A function that takes the old value of the word and the provided parameter to produce a new value.
+     */
     public void set(LongValue word, long param, LongFunction function) {
         throwExceptionIfClosed();
 
@@ -129,12 +179,25 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         }
     }
 
+    /**
+     * Fetches the Pauser object for this bit set.
+     * If the Pauser object is not yet initialized, it initializes it to a busy pauser.
+     *
+     * @return The Pauser object associated with this bit set.
+     */
     private Pauser pauser() {
         if (this.pauser == null)
             this.pauser = Pauser.busy();
         return this.pauser;
     }
 
+    /**
+     * Atomically sets the value of a LongValue object to a new value.
+     * It uses a pausing strategy to handle contention during the set operation.
+     *
+     * @param word The LongValue object whose value needs to be set.
+     * @param newValue The new value to be set.
+     */
     public void set(LongValue word, long newValue) {
         throwExceptionIfClosed();
 
@@ -146,7 +209,10 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Returns a new byte array containing all the bits in this bit set.
+     * Converts the bit set to a byte array representation.
+     * It serializes the bits into bytes in little-endian order.
+     *
+     * @return A byte array containing all the bits set in this bit set.
      */
     public byte[] toByteArray() {
         throwExceptionIfClosed();
@@ -167,19 +233,25 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Ensures that the ChronicleBitSet can accommodate a given wordIndex.
+     * Ensures that the current bit set can accommodate a specified word index.
+     * Throws an UnsupportedOperationException if the bit set cannot be expanded.
+     *
+     * @param wordIndex The word index that needs to be accommodated.
      */
     private void expandTo(int wordIndex) {
         int wordsRequired = wordIndex + 1;
         if (getWordsInUse() < wordsRequired) {
             throw new UnsupportedOperationException("todo: it is not possible currently to expand " +
-                    "this stucture, because if its concurrent nature and have to implement cross " +
+                    "this structure, because if its concurrent nature and have to implement cross " +
                     "process locking");
         }
     }
 
     /**
-     * Sets the bit at the specified index to the complement of its current value.
+     * Flips the bit at the specified index, toggling it from its current value.
+     * If the bit is currently set to 0, it will become 1, and vice versa.
+     *
+     * @param bitIndex The index of the bit to flip.
      */
     public void flip(int bitIndex) {
         throwExceptionIfClosed();
@@ -192,17 +264,34 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         caret(words[wordIndex], 1L << bitIndex);
     }
 
+    /**
+     * Applies the bitwise XOR operation between the provided word and parameter.
+     * The result of this operation toggles the bits where they differ.
+     *
+     * @param word The LongValue object representing the word.
+     * @param param The parameter against which XOR operation needs to be performed.
+     */
     private void caret(LongValue word, long param) {
         set(word, param, (x, y) -> x ^ y);
     }
 
+    /**
+     * Applies the bitwise AND operation between the provided word and parameter.
+     * The result of this operation retains the bits that are set in both the word and the parameter.
+     *
+     * @param word The LongValue object representing the word.
+     * @param param The parameter against which AND operation needs to be performed.
+     */
     private void and(LongValue word, final long param) {
         set(word, param, (x, y) -> x & y);
     }
 
     /**
-     * Sets each bit from the specified {@code fromIndex} (inclusive) to the specified {@code toIndex} (exclusive) to the complement of its current
-     * value.
+     * Flips a range of bits, toggling them from their current value.
+     * If a bit within the range is currently set to 0, it will become 1, and vice versa.
+     *
+     * @param fromIndex Index of the first bit to flip (inclusive).
+     * @param toIndex Index of the last bit to flip (exclusive).
      */
     public void flip(int fromIndex, int toIndex) {
         throwExceptionIfClosed();
@@ -214,8 +303,11 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
 
         int startWordIndex = wordIndex(fromIndex);
         int endWordIndex = wordIndex(toIndex - 1);
+
+        // Ensure the BitSet is large enough to accommodate the word index
         expandTo(endWordIndex);
 
+        // Create masks to target specific bits within the words
         long firstWordMask = WORD_MASK << fromIndex;
         long lastWordMask = WORD_MASK >>> -toIndex;
         if (startWordIndex == endWordIndex) {
@@ -237,24 +329,42 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
 
     /**
      * Sets the bit at the specified index to {@code true}.
+     *
+     * @param bitIndex The index of the bit to be set to {@code true}.
      */
     public void set(int bitIndex) {
+        // Check if the BitSet is closed, if so, throws an exception
         throwExceptionIfClosed();
 
+        // Validate the bit index
         if (bitIndex < 0)
             throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
 
+        // Calculate the word index based on the given bit index
         int wordIndex = wordIndex(bitIndex);
 
-        pipe(words[wordIndex], (1L << bitIndex)); // Restores
+        // Set the desired bit to 1 (true) within the corresponding word
+        pipe(words[wordIndex], (1L << bitIndex));
     }
 
+    /**
+     * Performs a bitwise OR operation on the given word and parameter.
+     * This method is particularly used to set a specific bit to {@code true} within a word.
+     *
+     * @param word The word on which the operation will be performed.
+     * @param param The parameter value used in the OR operation.
+     */
     private void pipe(LongValue word, long param) {
+        // Set the desired bit by using the OR operation
         set(word, param, (x, y) -> x | y);
     }
 
     /**
      * Sets the bit at the specified index to the specified value.
+     * If the value is {@code true}, the bit is set to 1, otherwise it is set to 0.
+     *
+     * @param bitIndex The index of the bit to be modified.
+     * @param value The new value for the specified bit.
      */
     public void set(int bitIndex, boolean value) {
         throwExceptionIfClosed();
@@ -276,13 +386,15 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         if (fromIndex == toIndex)
             return;
 
-        // Increase capacity if necessary
+        // Determine the word indexes for the start and end of the range
         int startWordIndex = wordIndex(fromIndex);
         int endWordIndex = wordIndex(toIndex - 1);
         expandTo(endWordIndex);
 
+        // Create masks for the start and end words
         long firstWordMask = WORD_MASK << fromIndex;
         long lastWordMask = WORD_MASK >>> -toIndex;
+
         if (startWordIndex == endWordIndex) {
             // Case 1: One word
             pipe(words[startWordIndex], firstWordMask & lastWordMask);
@@ -349,12 +461,16 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         if (startWordIndex >= getWordsInUse())
             return;
 
+        // Determine the word indexes for the end of the range.
         int endWordIndex = wordIndex(toIndex - 1);
+
+        // Adjust the end index and word if it exceeds the current words in use.
         if (endWordIndex >= getWordsInUse()) {
             toIndex = length();
             endWordIndex = getWordsInUse() - 1;
         }
 
+        // Create masks for the start and end words.
         long firstWordMask = WORD_MASK << fromIndex;
         long lastWordMask = WORD_MASK >>> -toIndex;
         if (startWordIndex == endWordIndex) {
@@ -387,8 +503,11 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Returns the value of the bit with the specified index. The value is {@code true} if the bit with the index {@code bitIndex} is currently set in
-     * this {@code ChronicleBitSet}; otherwise, the result is {@code false}.
+     * Returns the value of the bit with the specified index. The value is {@code true} if the bit with the index {@code bitIndex}
+     * is currently set in this {@code ChronicleBitSet}; otherwise, the result is {@code false}.
+     *
+     * @param bitIndex the index of the bit to check
+     * @return true if the bit at the specified index is set, false otherwise
      */
     public boolean get(int bitIndex) {
         throwExceptionIfClosed();
@@ -402,8 +521,11 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Returns the index of the first bit that is set to {@code true} that occurs on or after the specified starting index. If no such bit exists then
-     * {@code -1} is returned.
+     * Returns the index of the first bit that is set to {@code true} that occurs on or after the specified starting index.
+     * If no such bit exists then {@code -1} is returned.
+     *
+     * @param fromIndex the index to start checking from
+     * @return the index of the next set bit, or -1 if no such bit is found
      */
     public int nextSetBit(int fromIndex) {
         throwExceptionIfClosed();
@@ -412,23 +534,36 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
             throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
 
         int u = wordIndex(fromIndex);
+
+        // If the starting word index is beyond the current words in use, return -1 immediately.
         if (u >= getWordsInUse())
             return -1;
 
+        // Mask off any bits in the current word before the starting index.
         long word = words[u].getVolatileValue() & (WORD_MASK << fromIndex);
 
+        // Loop to find the first set bit.
         while (true) {
+            // If a set bit is found in the current word, calculate its index and return.
             if (word != 0)
                 return Math.toIntExact((u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word));
+
+            // Move to the next word.
             if (++u == getWordsInUse())
-                return -1;
+                return -1; // No set bits found in remaining words.
+
+            // Load the next word's value.
             word = words[u].getVolatileValue();
         }
     }
 
     /**
-     * Returns the index of the first bit that is set to {@code true} that occurs on or after the specified starting index. If no such bit exists then
-     * {@code -1} is returned.
+     * Returns the index of the first bit that is set to {@code true} that occurs on or after the specified starting index but before the toIndex.
+     * If no such bit exists then {@code -1} is returned.
+     *
+     * @param fromIndex the index to start checking from
+     * @param toIndex the index to stop checking (exclusive)
+     * @return the index of the next set bit within the specified range, or -1 if no such bit is found
      */
     public int nextSetBit(int fromIndex, int toIndex) {
         throwExceptionIfClosed();
@@ -440,21 +575,32 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         if (u >= getWordsInUse())
             return -1;
 
+        // Mask off any bits in the current word before the starting index.
         long word = words[u].getVolatileValue() & (WORD_MASK << fromIndex);
 
+        // Loop to find the first set bit.
         while (true) {
             if (word != 0)
                 return Math.toIntExact((u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word));
+
+            // Move to the next word.
             if (++u == getWordsInUse())
-                return -1;
+                return -1; // No set bits found in remaining words.
+
+            // Exit if we have crossed the toIndex boundary.
             if (u * BITS_PER_WORD > toIndex)
                 return -1;
+
+            // Load the next word's value.
             word = words[u].getVolatileValue();
         }
     }
 
     /**
      * Returns the index of the first bit that is set to {@code false} that occurs on or after the specified starting index.
+     *
+     * @param fromIndex the index to start checking from
+     * @return the index of the next unset bit, or the total length if all bits are set
      */
     public int nextClearBit(int fromIndex) {
         throwExceptionIfClosed();
@@ -465,27 +611,43 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
             throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
 
         int u = wordIndex(fromIndex);
+
+        // If the starting word index is beyond the current words in use,
+        // return the fromIndex as no words after it have been set.
         if (u >= getWordsInUse())
             return fromIndex;
 
+        // Invert the word's bits (i.e., 'set' becomes 'unset' and vice versa)
+        // and mask off any bits in the current word before the starting index.
         long word = ~words[u].getVolatileValue() & (WORD_MASK << fromIndex);
 
+        // Loop to find the first unset bit.
         while (true) {
             if (word != 0)
                 return Math.toIntExact((u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word));
+
+            // Move to the next word.
             if (++u == getWordsInUse())
-                return Math.toIntExact(getWordsInUse() * BITS_PER_WORD);
+                return Math.toIntExact(getWordsInUse() * BITS_PER_WORD); // All bits in use are set.
+
+            // Invert the next word's bits.
             word = ~words[u].getValue();
         }
     }
 
     /**
-     * Returns the index of the nearest bit that is set to {@code true} that occurs on or before the specified starting index. If no such bit exists,
-     * or if {@code -1} is given as the starting index, then {@code -1} is returned.
+     * This method searches for the closest bit set to {@code true} from the specified starting index moving backwards.
+     * If the bit at the specified starting index is set to {@code true}, it will return the index itself.
+     * If no such bit exists before the given index, or if {@code -1} is the specified index, then {@code -1} is returned.
+     *
+     * @param fromIndex The starting index to begin the search. The search moves towards the index 0 from this point.
+     * @return The index of the nearest set bit (with value {@code true}) before the specified starting index, or {@code -1} if none exists.
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is less than {@code -1}
      */
     public int previousSetBit(int fromIndex) {
         throwExceptionIfClosed();
 
+        // Check for special case where index is -1
         if (fromIndex < 0) {
             if (fromIndex == -1)
                 return -1;
@@ -509,12 +671,18 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Returns the index of the nearest bit that is set to {@code false} that occurs on or before the specified starting index. If no such bit exists,
-     * or if {@code -1} is given as the starting index, then {@code -1} is returned.
+     * This method searches for the closest bit set to {@code false} from the specified starting index moving backwards.
+     * If the bit at the specified starting index is set to {@code false}, it will return the index itself.
+     * If no such unset bit exists before the given index, or if {@code -1} is the specified index, then {@code -1} is returned.
+     *
+     * @param fromIndex The starting index to begin the search. The search moves towards the index 0 from this point.
+     * @return The index of the nearest unset bit (with value {@code false}) before the specified starting index, or {@code -1} if none exists.
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is less than {@code -1}
      */
     public int previousClearBit(int fromIndex) {
         throwExceptionIfClosed();
 
+        // Check for special case where index is -1
         if (fromIndex < 0) {
             if (fromIndex == -1)
                 return -1;
@@ -538,66 +706,99 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Returns {@code true} if the specified {@code ChronicleBitSet} has any bits set to {@code true} that are also set to {@code true} in this {@code ChronicleBitSet}.
+     * Checks if the current {@code ChronicleBitSet} has any common set bits with the specified {@code ChronicleBitSet}.
+     * If any bits set to {@code true} in the provided set are also set to {@code true} in this set, then the method returns {@code true}.
+     *
+     * @param set The {@code ChronicleBitSet} to compare with the current instance.
+     * @return {@code true} if there's an intersection, otherwise {@code false}.
      */
     public boolean intersects(ChronicleBitSet set) {
         throwExceptionIfClosed();
 
+        // Check common words between both bitsets for any intersection
         for (int i = Math.min(getWordsInUse(), set.getWordsInUse()) - 1; i >= 0; i--)
             if ((words[i].getVolatileValue() & set.getWord(i)) != 0)
                 return true;
         return false;
     }
 
+    /**
+     * Checks if the current {@code ChronicleBitSet} intersects with the provided {@code LongValueBitSet}.
+     * This method is an overloaded version of the intersects method, designed to work specifically with {@code LongValueBitSet}.
+     *
+     * @param set The {@code LongValueBitSet} to compare with the current instance.
+     * @return {@code true} if there's an intersection, otherwise {@code false}.
+     */
     public boolean intersects(LongValueBitSet set) {
         return intersects((ChronicleBitSet) set);
     }
 
     /**
-     * Returns the number of bits set to {@code true} in this {@code ChronicleBitSet}.
+     * Calculates and returns the number of bits set to {@code true} in this {@code ChronicleBitSet}.
+     *
+     * @return The number of bits currently set to {@code true}.
      */
     public int cardinality() {
         throwExceptionIfClosed();
 
         int sum = 0;
+        // Count set bits in each word
         for (int i = 0; i < getWordsInUse(); i++)
             sum += Long.bitCount(words[i].getVolatileValue());
         return sum;
     }
 
     /**
-     * Performs a logical <b>AND</b> of this target bit set with the argument bit set. This bit set is modified so that each bit in it has the value
-     * {@code true} if and only if it both initially had the value {@code true} and the corresponding bit in the bit set argument also had the value
-     * {@code true}.
+     * Performs a logical <b>AND</b> operation between this {@code ChronicleBitSet} and the specified {@code ChronicleBitSet}.
+     * After this operation, a bit in this set will be set to {@code true} only if it was originally {@code true} and the corresponding bit in the specified set is {@code true}.
+     *
+     * @param set The {@code ChronicleBitSet} to perform the logical <b>AND</b> operation with.
      */
     public void and(ChronicleBitSet set) {
         throwExceptionIfClosed();
 
+        // If both bitsets are the same, no operation is needed
         if (this == set)
             return;
 
+        // Ensure words in excess in this set are set to 0
         int value = getWordsInUse();
         while (value > set.getWordsInUse()) {
             words[--value].setValue(0);
         }
 
-        // Perform logical AND on words in common
+        // Perform logical AND operation on words in common
         for (int i = 0; i < getWordsInUse(); i++)
             and(words[i], set.getWord(i));
     }
 
+    /**
+     * Performs a logical <b>AND</b> operation between this {@code ChronicleBitSet} and the specified {@code LongValueBitSet}.
+     * This is an overloaded version of the method that accepts {@code ChronicleBitSet}, designed to work with {@code LongValueBitSet}.
+     * The logic of the operation is handled by the base method.
+     *
+     * @param set The {@code LongValueBitSet} to perform the logical <b>AND</b> operation with.
+     */
     public void and(LongValueBitSet set) {
         and((ChronicleBitSet) set);
     }
 
     /**
-     * Performs a logical <b>OR</b> of this bit set with the bit set argument. This bit set is modified so that a bit in it has the value {@code true}
-     * if and only if it either already had the value {@code true} or the corresponding bit in the bit set argument has the value {@code true}.
+     * Performs a logical <b>OR</b> operation between this {@code ChronicleBitSet} and the provided {@code LongValueBitSet}.
+     * This overloaded version casts the provided set to its base type {@code ChronicleBitSet} before performing the operation.
+     *
+     * @param set The {@code LongValueBitSet} to perform the logical <b>OR</b> operation with.
      */
     public void or(LongValueBitSet set) {
         or((ChronicleBitSet) set);
     }
 
+    /**
+     * Executes a logical <b>OR</b> operation between this {@code ChronicleBitSet} and the provided {@code ChronicleBitSet}.
+     * Each bit in this set will be set to {@code true} if it was originally {@code true} or the corresponding bit in the provided set is {@code true}.
+     *
+     * @param set The {@code ChronicleBitSet} to perform the logical <b>OR</b> operation with.
+     */
     public void or(ChronicleBitSet set) {
         throwExceptionIfClosed();
 
@@ -612,7 +813,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         for (i = 0; i < wordsInCommon; i++)
             pipe(words[i], set.getWord(i));
 
-        // Copy any remaining words
+        // Copy any remaining words from the argument bit set
         for (; i < set.getWordsInUse(); i++)
             setWord(i, set.getWord(i));
         OS.memory().storeFence();
@@ -627,6 +828,8 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * <li>The bit initially has the value {@code false}, and the
      * corresponding bit in the argument has the value {@code true}.
      * </ul>
+     *
+     * @param set The {@code ChronicleBitSet} to perform the logical <b>XOR</b> operation with.
      */
     public void xor(ChronicleBitSet set) {
         throwExceptionIfClosed();
@@ -634,6 +837,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         int wordsInCommon = Math.min(getWordsInUse(), set.getWordsInUse());
 
         OS.memory().loadFence();
+        // Perform logical XOR on words in common
         int i;
         for (i = 0; i < wordsInCommon; i++)
             caret(words[i], set.getWord(i));
@@ -644,12 +848,22 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         OS.memory().storeFence();
     }
 
+    /**
+     * Performs a logical <b>XOR</b> operation between this {@code ChronicleBitSet} and the specified {@code LongValueBitSet}.
+     * This is an overloaded version of the method that accepts {@code ChronicleBitSet}, designed to work with {@code LongValueBitSet}.
+     * The logic of the operation is handled by the base method.
+     *
+     * @param set The {@code LongValueBitSet} to perform the logical <b>XOR</b> operation with.
+     */
     public void xor(LongValueBitSet set) {
         xor((ChronicleBitSet) set);
     }
 
     /**
-     * Clears all of the bits in this {@code ChronicleBitSet} whose corresponding bit is set in the specified {@code ChronicleBitSet}.
+     * Clears all the bits in this {@code ChronicleBitSet} where the corresponding bit is set in the specified {@code ChronicleBitSet}.
+     * Effectively performs a logical <b>AND NOT</b> operation on this bit set with the given set.
+     *
+     * @param set The {@code ChronicleBitSet} to use for clearing matching bits.
      */
     public void andNot(ChronicleBitSet set) {
         throwExceptionIfClosed();
@@ -661,12 +875,20 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         OS.memory().storeFence();
     }
 
+    /**
+     * Clears all the bits in this {@code ChronicleBitSet} where the corresponding bit is set in the specified {@code LongValueBitSet}.
+     * This is an overloaded version designed to work with {@code LongValueBitSet}.
+     *
+     * @param set The {@code LongValueBitSet} to use for clearing matching bits.
+     */
     public void andNot(LongValueBitSet set) {
         andNot((ChronicleBitSet) set);
     }
 
     /**
-     * Returns the hash code value for this bit set. The hash code depends only on which bits are set within this {@code ChronicleBitSet}.
+     * Computes the hash code for this {@code ChronicleBitSet}. The hash code is calculated based on the bit values that are set.
+     *
+     * @return The computed hash code.
      */
     public int hashCode() {
         long h = 1234;
@@ -678,17 +900,26 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Returns the number of bits of space actually in use by this {@code ChronicleBitSet} to represent bit values. The maximum element in the set is the size
-     * - 1st element.
+     * Retrieves the number of bits that are actually being used by this {@code ChronicleBitSet} to represent bit values.
+     * Essentially, this is the highest set bit plus one.
+     *
+     * @return The number of bits of space in use.
      */
     public int size() {
         return Math.toIntExact(words.length * BITS_PER_WORD);
     }
 
     /**
-     * Compares this object against the specified object. The result is {@code true} if and only if the argument is not {@code null} and is a {@code
-     * ChronicleBitSet} object that has exactly the same set of bits set to {@code true} as this bit set. That is, for every nonnegative {@code int} index
-     * {@code k},
+     * Compares this {@code ChronicleBitSet} object against the specified object. The result is {@code true} if and only if:
+     * <ul>
+     *     <li>The provided object is not {@code null}.
+     *     <li>The provided object is an instance of {@code ChronicleBitSet}.
+     *     <li>Both {@code ChronicleBitSet} objects have the exact same set of bits set to {@code true}.
+     * </ul>
+     * In essence, for every non-negative {@code int} index {@code k}, the bits of both {@code ChronicleBitSet} objects at index {@code k} should be identical.
+     *
+     * @param obj The object to compare with.
+     * @return {@code true} if the objects are the same; {@code false} otherwise.
      */
     public boolean equals(Object obj) {
         throwExceptionIfClosed();
@@ -796,7 +1027,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         singleThreadedCheckDisabled(true);
         throwExceptionIfClosed();
 
-        closeQuietly(words);
+        closeQuietly((Object[]) words);
 
         int numberOfLongValues = wire.read("numberOfLongValues").int32();
         words = new LongReference[numberOfLongValues];
@@ -819,8 +1050,30 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         OS.memory().storeFence();
     }
 
+    /**
+     * Represents a function that accepts two long values (an old value and a parameter) and produces a long result.
+     * This is the {@code long}-consuming and {@code long}-producing primitive specialization for
+     * {@link java.util.function.Function}.
+     *
+     * <p>For example, this interface can be used to represent functions like addition:
+     * <pre>
+     * {@code
+     * LongFunction add = (oldValue, param) -> oldValue + param;
+     * long result = add.apply(2L, 3L);  // result will be 5
+     * }
+     * </pre>
+     *
+         */
     @FunctionalInterface
     interface LongFunction {
+
+        /**
+         * Applies this function to the given arguments.
+         *
+         * @param oldValue The old long value.
+         * @param param The long parameter.
+         * @return The function result.
+         */
         long apply(long oldValue, long param);
     }
 }

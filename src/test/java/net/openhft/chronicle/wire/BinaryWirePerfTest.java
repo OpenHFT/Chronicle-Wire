@@ -33,14 +33,16 @@ import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 @Ignore("Long running test")
 @RunWith(value = Parameterized.class)
 public class BinaryWirePerfTest extends WireTestCommon {
+
+    // Define test parameters
     final int testId;
     final boolean fixed;
     final boolean numericField;
     final boolean fieldLess;
-    @SuppressWarnings("rawtypes")
     @NotNull
     Bytes<?> bytes = allocateElasticOnHeap();
 
+    // Constructor for parameterized test
     public BinaryWirePerfTest(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
         this.testId = testId;
         this.fixed = fixed;
@@ -48,6 +50,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
         this.fieldLess = fieldLess;
     }
 
+    // Provide combinations of parameters for the test
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
         return Arrays.asList(
@@ -60,6 +63,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
         );
     }
 
+    // Create and return a Wire object based on the test parameters
     @NotNull
     private Wire createBytes() {
         bytes.clear();
@@ -70,10 +74,17 @@ public class BinaryWirePerfTest extends WireTestCommon {
         return wire;
     }
 
+    // *************************************************************************
+    // Test Cases
+    // *************************************************************************
+
+    // Performance test for Wire serialization and deserialization
     @Test
     public void wirePerf() throws StreamCorruptedException {
        // System.out.println("Custom TestId: " + testId + ", fixed: " + fixed + ", numberField: " + numericField + ", fieldLess: " + fieldLess);
         @NotNull Wire wire = createBytes();
+
+        // Custom type serialization and deserialization test
         @NotNull MyTypesCustom a = new MyTypesCustom();
         for (int t = 0; t < 3; t++) {
             a.text.setLength(0);
@@ -108,6 +119,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
        // System.out.printf("(vars) %,d : %,d ns avg, len= %,d%n", t, rate, wire.bytes().readPosition());
     }
 
+    // Performance test for serializing and deserializing integers with Wire
     @Test
     public void wirePerfInts() {
        // System.out.println("TestId: " + testId + ", fixed: " + fixed + ", numberField: " + numericField + ", fieldLess: " + fieldLess);
@@ -118,6 +130,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
         }
     }
 
+    // Common method to test serialization and deserialization for type MyType2
     private void wirePerf0(@NotNull Wire wire, @NotNull MyType2 a, @NotNull MyType2 b, int t) {
         long start = System.nanoTime();
         int runs = 300000;
@@ -133,9 +146,15 @@ public class BinaryWirePerfTest extends WireTestCommon {
        // System.out.printf("(ints) %,d : %,d ns avg, len= %,d%n", t, rate, wire.bytes().readPosition());
     }
 
+    // *************************************************************************
+    // Internal Classes
+    // *************************************************************************
+
+    // MyType2 class for serialization and deserialization tests
     static class MyType2 implements Marshallable {
         int i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x;
 
+        // Write this object's fields to the provided Wire
         @Override
         public void writeMarshallable(@NotNull WireOut wire) {
             wire.write(Fields.I).int32(i)
@@ -157,6 +176,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
                     .write(Fields.X).int32(v);
         }
 
+        // Read this object's fields from the provided Wire
         @Override
         public void readMarshallable(@NotNull WireIn wire) {
             wire.read(Fields.I).int32(this, (o, x) -> o.i = x)
@@ -177,9 +197,11 @@ public class BinaryWirePerfTest extends WireTestCommon {
                     .read(Fields.X).int32(this, (o, x) -> o.x = x);
         }
 
+        // Enum to represent the field keys for serialization/deserialization
         enum Fields implements WireKey {
             I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X;
 
+            // Return the code for this field key (ordinal value)
             @Override
             public int code() {
                 return ordinal();

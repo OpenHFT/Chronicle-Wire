@@ -29,12 +29,28 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * This is the GenerateJsonSchemaMain class.
+ * Its primary function is to generate a JSON schema based on the provided set of classes.
+ * The generated JSON schema represents the structure and types of the specified classes.
+ */
 public class GenerateJsonSchemaMain {
+
+    // A mapping of Java Classes to their corresponding JSON data types.
     final Map<Class<?>, String> aliases = new LinkedHashMap<>();
+
+    // A mapping of Java Classes to their corresponding JSON schema definitions.
     final Map<Class<?>, String> definitions = new LinkedHashMap<>();
+
+    // A sorted mapping of event names to their JSON schema representations.
     final Map<String, String> events = new TreeMap<>();
+
+    // A set containing classes that represent events.
     final Set<Class<?>> eventClasses = new LinkedHashSet<>();
 
+    /**
+     * Default constructor initializing some common aliases for Java types to JSON types.
+     */
     public GenerateJsonSchemaMain() {
         aliases.put(void.class, "null");
         aliases.put(Void.class, "null");
@@ -48,11 +64,25 @@ public class GenerateJsonSchemaMain {
         aliases.put(boolean.class, "boolean");
     }
 
+    /**
+     * Main entry point of the application.
+     * For each provided class name argument, it generates a corresponding JSON schema and prints it.
+     *
+     * @param args Array of class names to generate JSON schema for.
+     * @throws ClassNotFoundException if any of the provided class names is not found.
+     */
     public static void main(String... args) throws ClassNotFoundException {
         final String json = main0(args);
         System.out.println(json);
     }
 
+    /**
+     * Processes the provided class names, generates the JSON schema for each, and returns the combined schema.
+     *
+     * @param args Array of class names to generate JSON schema for.
+     * @return The combined JSON schema for all provided class names.
+     * @throws ClassNotFoundException if any of the provided class names is not found.
+     */
     static String main0(String... args) throws ClassNotFoundException {
         Set<Class<?>> interfaces = new LinkedHashSet<>();
         for (String arg : args) {
@@ -66,6 +96,12 @@ public class GenerateJsonSchemaMain {
         return json;
     }
 
+    /**
+     * Generates and returns a JSON-formatted schema string.
+     * The schema is constructed based on the definitions and events stored in the instance.
+     *
+     * @return A string representation of the JSON schema.
+     */
     String asJson() {
         SourceCodeFormatter sb = new JsonSourceCodeFormatter();
         String str = "{\n" +
@@ -95,6 +131,14 @@ public class GenerateJsonSchemaMain {
         return sb.toString();
     }
 
+    /**
+     * Generates a JSON schema representation for events based on the given type.
+     * It processes the type's methods to derive the schema.
+     * The generated schema is stored within the 'events' map, with the method name as the key
+     * and the generated schema description as the value.
+     *
+     * @param type The class type for which the event schema is to be generated.
+     */
     void generateEventSchemaFor(Class<?> type) {
         if (type.isArray())
             return;
@@ -125,6 +169,14 @@ public class GenerateJsonSchemaMain {
         }
     }
 
+    /**
+     * Constructs and appends properties in JSON schema format to the provided StringBuilder.
+     * The provided properties map holds the property names and their corresponding JSON definitions.
+     * The resulting JSON schema structure will encapsulate these properties within a 'properties' object.
+     *
+     * @param properties A map of property names to their JSON schema representations.
+     * @param sb         The StringBuilder to which the properties will be appended in JSON schema format.
+     */
     private void addProperties(Map<String, String> properties, StringBuilder sb) {
         sb.append("\"properties\": {");
         String sep = "\n";
@@ -139,6 +191,15 @@ public class GenerateJsonSchemaMain {
                 "}\n");
     }
 
+    /**
+     * Generates a JSON schema representation for objects based on the given type.
+     * This method processes the type's fields to derive the schema.
+     * The generated schema is stored within the 'definitions' map with the class name as the key
+     * and the generated schema description as the value.
+     * If the type is already present in the 'aliases' map, the method will return without generating the schema.
+     *
+     * @param type The class type for which the object schema is to be generated.
+     */
     void generateObjectSchemaFor(Class<?> type) {
         if (type.isArray())
             return;
@@ -178,6 +239,13 @@ public class GenerateJsonSchemaMain {
         definitions.put(type, sb.toString());
     }
 
+    /**
+     * Determines whether the provided array of annotations contains any annotation whose name ends with '.NotNull'.
+     * This method is typically used to check if a field has a NotNull validation constraint.
+     *
+     * @param annotations The array of annotations to be checked.
+     * @return true if an annotation with name ending in '.NotNull' is found, false otherwise.
+     */
     private boolean hasNotNull(Annotation[] annotations) {
         for (Annotation annotation : annotations) {
             if (annotation.annotationType().getName().endsWith(".NotNull"))
@@ -186,14 +254,33 @@ public class GenerateJsonSchemaMain {
         return false;
     }
 
+    /**
+     * Generates a description for a method parameter for use in a JSON schema.
+     * The description is based on the type and annotations associated with the parameter.
+     *
+     * @param desc The StringBuilder to which the description is appended.
+     * @param pType The type of the method parameter.
+     * @param annotations The array of annotations associated with the method parameter.
+     */
     private void generateMethodDesc(StringBuilder desc, Class<?> pType, Annotation[] annotations) {
         addTypeForFieldOrParam(desc, pType, annotations);
     }
 
+    /**
+     * Adds a type descriptor to the given StringBuilder based on the type and annotations
+     * of a field or method parameter. This method checks for specific annotations like
+     * {@link LongConversion} to determine the type description.
+     * If the field/parameter is of Collection type, it's identified as an "array", and if it's
+     * of type Map, it's identified as an "object". For other types, the corresponding schema is generated.
+     *
+     * @param desc The StringBuilder to which the type descriptor is appended.
+     * @param pType The type of the field or method parameter.
+     * @param annotations The array of annotations associated with the field or method parameter.
+     */
     private void addTypeForFieldOrParam(StringBuilder desc, Class<?> pType, Annotation[] annotations) {
         LongConversion lc = find(annotations, LongConversion.class);
         if (lc != null) {
-            Class value = lc.value();
+            Class<?> value = lc.value();
             if (value.getName().contains("Timestamp"))
                 desc.append("\"type\": \"string\",\n" +
                         "\"format\": \"date-time\"");
@@ -211,10 +298,18 @@ public class GenerateJsonSchemaMain {
         }
     }
 
+    /**
+     * Searches the provided array of annotations for an annotation of the specified class type.
+     *
+     * @param <T> The generic type parameter for the annotation.
+     * @param annotations The array of annotations to search.
+     * @param aClass The class type of the annotation to find.
+     * @return The first found annotation of the specified class type, or null if not found.
+     */
     private <T extends Annotation> T find(Annotation[] annotations, Class<T> aClass) {
         for (Annotation annotation : annotations) {
             if (aClass.isAssignableFrom(annotation.annotationType()))
-                return (T) annotation;
+                return Jvm.uncheckedCast(annotation);
         }
         return null;
     }

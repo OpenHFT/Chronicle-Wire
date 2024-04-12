@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+@Deprecated(/* to be removed in x.27, not in use */)
 public interface MethodWriterWithContext extends DocumentWritten, MethodWriter {
     /**
      * @return true if this output is configured to expect the history of the message to be written

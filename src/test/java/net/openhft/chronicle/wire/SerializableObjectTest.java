@@ -52,11 +52,15 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.Assert.assertEquals;
 
+// Test class to verify serializable objects with Wire.
 final class SerializableObjectTest extends WireTestCommon {
 
+    // Constant to represent a specific time.
     private static final long TIME_MS = 1_000_000_000;
 
+    // Define packages which should be ignored.
     private static final Set<String> IGNORED_PACKAGES = Stream.of(
+                    // Various packages to ignore during the test
                     "jnr.",
                     "sun.",
                     "io.github.",
@@ -81,53 +85,62 @@ final class SerializableObjectTest extends WireTestCommon {
                     // Do not test classes from the maven plugins
                     "org.apache.maven"
             )
-            .collect(Collectors.collectingAndThen(toSet(), Collections::unmodifiableSet));
+            .collect(Collectors.collectingAndThen(toSet(), Collections::unmodifiableSet));  // Collect into an unmodifiable set for safety.
 
+    // Define classes which should be ignored.
     private static final Set<Class<?>> IGNORED_CLASSES = new HashSet<>(Arrays.asList(
-            DoubleSummaryStatistics.class,
+            DoubleSummaryStatistics.class, // Specific classes to exclude from testing.
             DriverPropertyInfo.class,
             SimpleDateFormat.class
     ));
 
+    // Static block to handle specific classes that fail in certain Java versions.
     static {
 
         try {
-            // change to this because it fails in java11
+            // Include this class for exclusion as it fails in Java 11.
             final Class<?> aClass = Class.forName("com.sun.jndi.toolkit.ctx.Continuation");
             IGNORED_CLASSES.add(aClass);
         } catch (ClassNotFoundException ignore) {
-
+            // This exception means the class isn't present, so we can safely ignore it.
         }
 
     }
 
+    // Predicate to check if a constructor is the default one.
     private static final Predicate<MethodInfo> CONSTRUCTOR_IS_DEFAULT = methodInfo -> methodInfo.isPublic() && methodInfo.getTypeDescriptor().getTypeParameters().isEmpty();
+    // Filter to exclude the ignored packages.
     private static final ClassInfoList.ClassInfoFilter NOT_IGNORED = ci -> IGNORED_PACKAGES.stream().noneMatch(ip -> ci.getPackageName().startsWith(ip));
 
+    // Return test cases for different wire types and objects.
     private static Stream<WireTypeObject> cases() {
         return wires()
-                .flatMap(wt -> mergedObjects().map(o -> new WireTypeObject(wt, o)));
+                .flatMap(wt -> mergedObjects().map(o -> new WireTypeObject(wt, o)));  // Combine wire types with objects.
     }
 
+    // Merge the handcrafted and reflected objects.
     private static Stream<Object> mergedObjects() {
+        // Create a map of objects using their class names.
         Map<String, Object> map = handcraftedObjects()
                 .collect(Collectors.toMap(o -> {
                     final Class<?> aClass = o.getClass();
-                    IGNORED_CLASSES.add(aClass);
+                    IGNORED_CLASSES.add(aClass);  // Update the ignored classes list.
                     return aClass.getName();
-                }, Function.identity()));
+                }, Function.identity()));  // Use the object itself as the value.
 
+        // Add reflected objects to the map.
         reflectedObjects()
                 .forEach(o -> map.put(o.getClass().getName(), o));
-        return map.values().stream();
+        return map.values().stream();  // Return the values as a stream.
     }
 
+    // Generates a stream of manually created objects to be tested.
     private static Stream<Object> handcraftedObjects() {
         return Stream.of(
                 // java.lang
                 true,
                 (byte) 1,
-                (char) '2',
+                '2',
                 (short) 3,
                 4,
                 5L,
@@ -183,38 +196,32 @@ final class SerializableObjectTest extends WireTestCommon {
 //                InetAddress.getLoopbackAddress(),
                 new File("file")
 //                create(() -> new URL("http://chronicle.software/dir/files"))
-        ).filter(SerializableObjectTest::isSerializableEqualsByObject);
-    }
-
-    private static Object create(ThrowingSupplier s) {
-        try {
-            return s.get();
-        } catch (Exception e) {
-            throw new AssertionError(e);
-        }
+        ).filter(SerializableObjectTest::isSerializableEqualsByObject);  // Retain only those objects that are serializable and equivalent when reconstituted.
     }
 
     private static Stream<Object> reflectedObjects() {
         try (ScanResult scanResult = new ClassGraph().enableSystemJarsAndModules().enableAllInfo().scan()) {
+            // Use ClassGraph to scan for all classes implementing Serializable.
             final ClassInfoList widgetClasses = scanResult.getClassesImplementing(Serializable.class)
-                    .filter(ci -> !ci.isAbstract())
-                    .filter(ClassInfo::isPublic)
-                    .filter(NOT_IGNORED)
-                    .filter(ci -> !ci.isAnonymousInnerClass())
-                    .filter(ci -> !ci.extendsSuperclass(LookAndFeel.class)) // These create problems
-                    .filter(ci -> !ci.implementsInterface(DesktopManager.class)) // These create problems
-                    .filter(ci -> ci.getConstructorInfo().stream().anyMatch(CONSTRUCTOR_IS_DEFAULT))
-                    .filter(SerializableObjectTest::isSerializableEquals);
+                    .filter(ci -> !ci.isAbstract())  // Exclude abstract classes.
+                    .filter(ClassInfo::isPublic)  // Only consider public classes.
+                    .filter(NOT_IGNORED)  // Exclude classes from ignored packages.
+                    .filter(ci -> !ci.isAnonymousInnerClass())  // No anonymous inner classes.
+                    .filter(ci -> !ci.extendsSuperclass(LookAndFeel.class)) // Excludes classes which extend LookAndFeel.
+                    .filter(ci -> !ci.implementsInterface(DesktopManager.class)) // Excludes classes implementing DesktopManager.
+                    .filter(ci -> ci.getConstructorInfo().stream().anyMatch(CONSTRUCTOR_IS_DEFAULT)) // Only classes with a default constructor.
+                    .filter(SerializableObjectTest::isSerializableEquals);  // Ensure that it's serializable and equivalent upon reconstitution.
 
             List<Object> objects = widgetClasses.stream()
-                    .filter(c -> !IGNORED_CLASSES.contains(c.loadClass(true)))
-                    .filter(SerializableObjectTest::overridesEqualsObject)
-                    .map(ci -> ci.loadClass(true))
-                    .filter(Objects::nonNull)
-                    .map(SerializableObjectTest::createOrNull)
-                    .filter(Objects::nonNull)
+                    .filter(c -> !IGNORED_CLASSES.contains(c.loadClass(true)))  // Filter out classes from the ignored list.
+                    .filter(SerializableObjectTest::overridesEqualsObject)  // Ensure the class overrides equals() method.
+                    .map(ci -> ci.loadClass(true))  // Load the actual class.
+                    .filter(Objects::nonNull)  // Filter out nulls.
+                    .map(SerializableObjectTest::createOrNull)  // Create an instance or return null if not possible.
+                    .filter(Objects::nonNull)  // Filter out nulls.
                     .collect(Collectors.toList());
 
+            // Uncomment below to see the counts and details of the discovered classes.
             /*
             System.out.println("widgetClasses.size() = " + widgetClasses.size());
             System.out.println("objects.size = " + objects.size());
@@ -228,28 +235,43 @@ final class SerializableObjectTest extends WireTestCommon {
         //return null;
     }
 
+    // Check if a ClassInfo object is serializable by loading the class and invoking the serialization check
     private static boolean isSerializableEquals(ClassInfo ci) {
         return isSerializableEquals(ci.loadClass(), null);
     }
 
+    // Check if the given object is serializable by checking its class
     private static boolean isSerializableEqualsByObject(Object o) {
         return isSerializableEquals(o.getClass(), o);
     }
 
+    /**
+     * Determines if a given class is serializable and whether its serialized form can be deserialized
+     * back to an object that is equal to the original.
+     *
+     * @param aClass The class to check.
+     * @param o An optional instance of the class to check. If null, a new instance will be created.
+     * @return true if the class is serializable and deserializable, and the original and deserialized objects are equal; false otherwise.
+     */
     private static boolean isSerializableEquals(Class aClass, Object o) {
         try {
+            // Create an instance if not provided
             Object source = o == null ? aClass.newInstance() : o;
-            // sanity check
+            // Sanity check to ensure non-null toString representation
             if (source.toString() == null)
                 return false;
-            // can it be serialized
+
+            // Attempt to serialize the object
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(bos);
             oos.writeObject(source);
 
+            // Deserialize the object from the serialized form
             ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
             ObjectInputStream ois = new ObjectInputStream(bis);
             Object source2 = ois.readObject();
+
+            // Compare the original and deserialized objects for equality
             if (source instanceof Throwable) {
                 return source.getClass() == source2.getClass()
                         && Objects.equals(((Throwable) source).getMessage(), ((Throwable) source2).getMessage());
@@ -264,6 +286,7 @@ final class SerializableObjectTest extends WireTestCommon {
         }
     }
 
+    // Tries to create a new instance of the specified class. If it fails, returns null.
     private static <T> T createOrNull(final Class<T> clazz) {
         try {
             return clazz.getConstructor().newInstance();
@@ -271,24 +294,8 @@ final class SerializableObjectTest extends WireTestCommon {
             return null;
         }
     }
-/*
 
-    @Test
-    void reflectedObjects2() {
-        try (ScanResult scanResult = new ClassGraph().enableSystemJarsAndModules().enableAllInfo().scan()) {
-            final ClassInfoList widgetClasses = scanResult.getClassesImplementing(Serializable.class)
-                    .filter(ci -> !ci.isAbstract())
-                    .filter(ClassInfo::isPublic)
-                    .filter(ci -> !IGNORED_PACKAGES.stream().anyMatch(ip -> ci.getPackageName().startsWith(ip)));
-
-            widgetClasses.
-                    forEach(System.out::println);
-            System.out.println("widgetClasses.size() = " + widgetClasses.size());
-        }
-        //return null;
-    }
-*/
-
+    // Check if the given ClassInfo overrides the equals method with Object as a parameter
     private static boolean overridesEqualsObject(ClassInfo ci) {
         return ci.getMethodInfo("equals").stream()
                 .anyMatch(m -> {
@@ -302,6 +309,7 @@ final class SerializableObjectTest extends WireTestCommon {
                 });
     }
 
+    // Wrap a ThrowingSupplier's get method to propagate its checked exceptions as runtime exceptions
     private static <T, X extends Exception> T wrap(ThrowingSupplier<T, X> supplier) {
         try {
             return supplier.get();
@@ -310,21 +318,22 @@ final class SerializableObjectTest extends WireTestCommon {
         }
     }
 
+    // Compose multiple operations on an original object and return the modified object
     @SuppressWarnings("unchecked")
     @SafeVarargs
     private static <T> T compose(final T original,
                                  final Consumer<T>... operations) {
-        return Stream.of(operations)
-                .reduce(original, (t, oper) -> {
-                    oper.accept(t);
-                    return t;
-                }, (a, b) -> a);
+        for (Consumer<T> operation : operations)
+            operation.accept(original);
+        return original;
     }
 
+    // Return a Stream of WireType enumerations for testing
     private static Stream<WireType> wires() {
         return Stream.of(WireType.TEXT, WireType.JSON, WireType.BINARY);
     }
 
+    // Assert that two objects are "equivalent" based on certain conditions
     static void assertEqualEnough(Object a, Object b) {
         if (a.getClass() != b.getClass())
             assertEquals(a, b);
@@ -338,20 +347,24 @@ final class SerializableObjectTest extends WireTestCommon {
         }
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/482")
     @TestFactory
     Stream<DynamicTest> test() {
         return DynamicTest.stream(cases(), Objects::toString, wireTypeObject -> {
             final Object source = wireTypeObject.object;
-            // Can't handle suclasses of Properties.
+            // Exclude handling of subclasses of Properties
             if (source instanceof Properties && source.getClass() != Properties.class)
                 return;
 
             final Bytes<?> bytes = Bytes.allocateElasticDirect();
             try {
+                // Serialize and deserialize the object using the wire type
                 final Wire wire = wireTypeObject.wireType.apply(bytes);
                 wire.getValueOut().object((Class) source.getClass(), source);
                 final Object target = wire.getValueIn().object(source.getClass());
+
+                // Assert the source and target objects are equivalent
                 if (!(source instanceof Comparable) || ((Comparable) source).compareTo(target) != 0) {
                     if (wireTypeObject.wireType == WireType.JSON || source instanceof EnumMap)
                         assertEquals(source.toString(), target.toString());
@@ -359,21 +372,24 @@ final class SerializableObjectTest extends WireTestCommon {
                         assertEqualEnough(source, target);
                 }
             } catch (IllegalArgumentException iae) {
-                // allow JSON to reject types not supported.
+                // Allow JSON wire type to reject unsupported types
                 if (wireTypeObject.wireType == WireType.JSON)
                     return;
                 throw iae;
             } finally {
+                // Release the allocated bytes
                 bytes.releaseLast();
             }
         });
     }
 
+    // Functional interface representing suppliers that can throw exceptions
     @FunctionalInterface
     public interface ThrowingSupplier<T, X extends Exception> {
         T get() throws X;
     }
 
+    // Inner class representing a pairing of WireType and object for testing
     private static final class WireTypeObject {
         WireType wireType;
         Object object;
@@ -383,6 +399,7 @@ final class SerializableObjectTest extends WireTestCommon {
             this.object = object;
         }
 
+        // Provide a descriptive string representation for this WireTypeObject
         @Override
         public String toString() {
             try {

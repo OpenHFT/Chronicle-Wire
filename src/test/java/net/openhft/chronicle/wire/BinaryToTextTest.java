@@ -25,9 +25,9 @@ import static org.junit.Assert.assertEquals;
 
 public class BinaryToTextTest extends WireTestCommon {
 
+    // Test conversion of binary data to text representation
     @Test
     public void test() {
-        @SuppressWarnings("rawtypes")
         Bytes<?> tbytes = Bytes.allocateElasticOnHeap();
         @NotNull Wire tw = new BinaryWire(tbytes);
         tw.usePadding(true);

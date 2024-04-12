@@ -24,7 +24,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * OuterClass extends SelfDescribingMarshallable to facilitate serialization and deserialization.
+ * It contains multiple lists of NestedClass objects and handles custom serialization logic.
+ */
 public class OuterClass extends SelfDescribingMarshallable {
+    // Lists for maintaining instances of NestedClass and their free pools
     final List<NestedClass> listAFree = new ArrayList<>();
     final List<NestedClass> listA = new ArrayList<>();
     final List<NestedClass> listBFree = new ArrayList<>();
@@ -32,6 +37,13 @@ public class OuterClass extends SelfDescribingMarshallable {
     String text;
     WireType wireType;
 
+    /**
+     * Custom read logic for marshalling from Wire. It specifies how fields and lists
+     * of nested classes are read from the wire.
+     *
+     * @param wire The WireIn instance to read the data from.
+     * @throws IORuntimeException If an IO error occurs during reading.
+     */
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
         wire.read(() -> "text").text(this, (t, v) -> t.text = v)
@@ -49,6 +61,12 @@ public class OuterClass extends SelfDescribingMarshallable {
         });
     }
 
+    /**
+     * Custom write logic for marshalling to Wire. It specifies how fields and lists
+     * of nested classes are written to the wire.
+     *
+     * @param wire The WireOut instance to write the data to.
+     */
     @Override
     public void writeMarshallable(@NotNull WireOut wire) {
         wire.write(() -> "text").text(text)
@@ -74,6 +92,7 @@ public class OuterClass extends SelfDescribingMarshallable {
         this.text = text;
     }
 
+    // Getter and setter methods for 'text' and 'wireType'
     public WireType getWireType() {
         return wireType;
     }
@@ -82,6 +101,10 @@ public class OuterClass extends SelfDescribingMarshallable {
         this.wireType = wireType;
     }
 
+    /**
+     * Getters for lists A and B, methods to clear lists, and methods to add elements to lists
+     * leveraging the free pool pattern for efficient memory management.
+     */
     @NotNull
     public List<NestedClass> getListA() {
         return listA;
@@ -116,16 +139,25 @@ public class OuterClass extends SelfDescribingMarshallable {
         return nc;
     }
 
+    /**
+     * Overrides equals method for object comparison based on Marshallable logic.
+     */
     @Override
     public boolean equals(Object o) {
         return Marshallable.$equals(this, o);
     }
 
+    /**
+     * Overrides hashCode method for object hashing based on Marshallable logic.
+     */
     @Override
     public int hashCode() {
         return Marshallable.$hashCode(this);
     }
 
+    /**
+     * Provides a string representation of this class, including all its fields and lists.
+     */
     @Override
     public String toString() {
         return Marshallable.$toString(this);

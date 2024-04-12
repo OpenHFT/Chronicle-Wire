@@ -35,14 +35,23 @@ public class IgnoreHighOrderBitsTest extends WireTestCommon {
      */
     @Test
     public void testWriteByte() throws IOException {
+        // Create a new HexDumpBytes object to represent byte sequences in a human-readable format
         @SuppressWarnings("rawtypes") final Bytes<?> bytes = new HexDumpBytes();
         try {
+            // Initialize a binary wire to serialize data to/from the bytes object
             final Wire wire = new BinaryWire(bytes);
+
+            // Create a DataOutput object based on the binary wire to write data into it
             @SuppressWarnings("resource")
             DataOutput out = new WireObjectOutput(wire);
-            int b = 256;
-            out.write(b); // expecting 0 to be written
 
+            // Integer value to test the writing process
+            int b = 256;
+
+            // Write the integer to the DataOutput object
+            out.write(b);  // Only the low-order 8 bits should be written (expecting 0)
+
+            // Assert that the byte representation matches the expected output
             assertEquals("" +
                             "a1 00                                           # 0\n",
                     bytes.toHexString());

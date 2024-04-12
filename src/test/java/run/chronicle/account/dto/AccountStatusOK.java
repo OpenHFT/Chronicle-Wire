@@ -21,20 +21,26 @@ package run.chronicle.account.dto;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 
 public class AccountStatusOK extends AbstractEvent<AccountStatusOK> {
+    // Field to hold account status information
     private AccountStatus accountStatus;
 
+    // Getter method for account status
     public AccountStatus accountStatus() {
         return accountStatus;
     }
 
+    // Setter method for account status with a fluent interface
     public AccountStatusOK accountStatus(AccountStatus accountStatus) {
         this.accountStatus = accountStatus;
         return this;
     }
 
+    // Validates the object ensuring all required fields are set
     @Override
     public void validate() throws InvalidMarshallableException {
+        // Call the validate method of the parent class
         super.validate();
+
         if (accountStatus == null) throw new InvalidMarshallableException("accountStatus must be set");
     }
 }

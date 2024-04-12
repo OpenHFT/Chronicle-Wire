@@ -38,10 +38,16 @@ import static net.openhft.chronicle.wire.JsonUtil.assertBalancedBrackets;
 @RunWith(value = Parameterized.class)
 public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon {
 
+    // Constant representing the text value for tests
     private final String TEXT = "abc";
+
+    // Flag to indicate if types should be used or not
     private final boolean useTypes;
+
+    // Instance of JSONWire which will be used in the tests
     private JSONWire wire;
 
+    // Parameterized test data provider
     @Parameterized.Parameters(name = "useTypes={0}")
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
@@ -50,15 +56,18 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         );
     }
 
+    // Constructor to initialize the parameterized test instance with useTypes value
     public JSONWireMiscTest(boolean useTypes) {
         this.useTypes = useTypes;
     }
 
+    // Setup method to initialize JSONWire with or without types based on the test instance
     @Before
     public void before() {
         wire = new JSONWire().useTypes(useTypes);
     }
 
+    // Test to write a byte array to the wire and verify the written content
     @Test
     public void bytesByteArray() {
         final byte[] arr = TEXT.getBytes(StandardCharsets.UTF_8);
@@ -68,6 +77,7 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         System.out.println("actual = " + actual);
     }
 
+    // Test to write a byte array with a given name to the wire and verify the written content
     @Test
     public void bytesStringByteArray() {
         final byte[] arr = TEXT.getBytes(StandardCharsets.UTF_8);
@@ -77,6 +87,7 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         assertBalancedBrackets(actual);
     }
 
+    // Test to write a Bytes object with a given name to the wire and verify the written content
     @Test
     public void bytesStringBytes() {
         final Bytes<?> bytes = Bytes.from(TEXT);
@@ -86,6 +97,7 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         assertBalancedBrackets(actual);
     }
 
+    // Test to write a sequence of strings to the wire and verify the written content
     @Test
     public void sequenceOfStrings() {
         final List<String> list = Arrays.asList("A", "B", "C");
@@ -95,10 +107,12 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         assertBalancedBrackets(actual);
     }
 
+    // Enum definitions to be used for the asEnum test
     enum A {
         FIRST, SECOND, THIRD;
     }
 
+    // Test to write an enum value to the wire and verify the written content
     @Test
     public void asEnum() {
         wire.getValueOut().asEnum(A.SECOND);
@@ -107,6 +121,7 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         assertBalancedBrackets(actual);
     }
 
+    // Test to write a sequence of enums to the wire and verify the written content
     @Test
     public void sequenceOfEnums() {
         final List<A> list = Arrays.asList(A.values());
@@ -116,6 +131,7 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         assertBalancedBrackets(actual);
     }
 
+    // Test to write a set of enums to the wire and verify the written content
     @Test
     public void sequenceOfSet() {
         final Set<A> set = new HashSet<>(Arrays.asList(A.values()));
@@ -125,6 +141,7 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         assertBalancedBrackets(actual);
     }
 
+    // Test to write a sorted set of enums to the wire and verify the written content
     @Test
     public void sequenceOfSortedSet() {
         final Set<A> set = new TreeSet<>(Arrays.asList(A.values()));
@@ -134,6 +151,7 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         assertBalancedBrackets(actual);
     }
 
+    // Test to write a LocalTime instance to the wire and verify the written content
     @Test
     public void localTime() {
         final LocalTime localTime = LocalTime.parse("17:01");
@@ -143,6 +161,7 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         assertBalancedBrackets(actual);
     }
 
+    // Custom class definition with an integer value for testing
     final static class Foo {
         final int value;
 
@@ -151,6 +170,7 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         }
     }
 
+    // Test to write a sequence of custom class Foo instances to the wire and verify the written content
     @Test
     public void sequenceOfCustomClass() {
         final List<Foo> list = Arrays.asList(new Foo(0), new Foo(1), new Foo(2));
@@ -160,6 +180,7 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         assertBalancedBrackets(actual);
     }
 
+    // Custom class definition with a string value for testing
     final static class Bar {
 
         final String value;
@@ -170,6 +191,7 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
 
     }
 
+    // Test to write a custom class Bar instance to the wire and verify the written content
     @Test
     public void customClass() {
         wire.getValueOut().object(new Bar("Bazz"));
@@ -178,6 +200,7 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         assertBalancedBrackets(actual);
     }
 
+    // Test to write a Duration instance to the wire and verify the written content
     @Test
     public void duration() {
         final Duration duration = Duration.ofSeconds(63);
@@ -187,10 +210,13 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         assertBalancedBrackets(actual);
     }
 
+    // Custom class implementing Serializable interface for testing
     static final class Ser implements Serializable {
+        private static final long serialVersionUID = 0L;
         int foo;
     }
 
+    // Test to write a serializable class instance to the wire and verify the written content
     @Test
     public void serializable() {
         final Ser s = new Ser();

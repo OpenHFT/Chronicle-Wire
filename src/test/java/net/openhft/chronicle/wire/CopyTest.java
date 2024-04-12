@@ -32,15 +32,21 @@ import static org.junit.Assert.assertFalse;
 
 @RunWith(value = Parameterized.class)
 public class CopyTest extends WireTestCommon {
+
+    // Initial source and destination wire types for the copy test
     private final WireType from, to;
+
+    // Determines if the test uses the type information while copying
     private boolean withType;
 
+    // Constructor to initialize wire types and whether the test runs with type information
     public CopyTest(WireType from, WireType to, boolean withType) {
         this.from = from;
         this.to = to;
         this.withType = withType;
     }
 
+    // Define the combinations of wire types and settings for the test
     @Parameterized.Parameters(name = "from: {0}, to: {1}, withType: {2}")
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
@@ -72,29 +78,41 @@ public class CopyTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testCopy() {
+        // Create source bytes and wire objects
         Bytes<?> bytesFrom = Bytes.allocateElasticOnHeap(64);
         Wire wireFrom = from.apply(bytesFrom);
+
+        // Create destination bytes and wire objects
         Bytes<?> bytesTo = Bytes.allocateElasticOnHeap(64);
         Wire wireTo = to.apply(bytesTo);
 
+        // Create an instance of 'AClass' for testing
         AClass a = create();
+
+        // Write the 'AClass' instance to the source wire
         if (withType)
             wireFrom.write("test").object(a);
         else
             wireFrom.write("test").marshallable(a);
 
+        // Copy data from source to destination wire
         wireFrom.copyTo(wireTo);
+
+        // Perform checks if the destination wire type is JSON
         if (to == WireType.JSON || to == WireType.JSON_ONLY) {
             final String text = wireTo.toString();
             assertFalse(text, text.contains("? "));
             assertFalse(text, text.contains("\n\""));
         }
+
+        // Validate the data in the destination wire
         final String event = wireTo.readEvent(String.class);
         assertEquals("test", event);
         AClass b = wireTo.getValueIn().object(AClass.class);
 
         assertEquals(a, b);
 
+        // If testing with type information, re-run copy with typedMarshallable
         if (withType) {
             wireFrom.clear();
             wireTo.clear();
@@ -111,6 +129,7 @@ public class CopyTest extends WireTestCommon {
         }
     }
 
+    // Helper method to create a test instance of 'AClass'
     private AClass create() {
         AClass aClass = new AClass();
         aClass.map = new HashMap<>();
@@ -121,6 +140,7 @@ public class CopyTest extends WireTestCommon {
         return aClass;
     }
 
+    // Class representing the data structure to be used in the copy test
     @SuppressWarnings("unused")
     private static class AClass extends SelfDescribingMarshallable {
         Map<CcyPair, String> map;

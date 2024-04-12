@@ -24,9 +24,17 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * Unit test for the ThreeSequence class.
+ */
 public class ThreeSequenceTest extends WireTestCommon {
+
+    /**
+     * Tests the serialization and deserialization process for the ThreeSequence class.
+     */
     @Test
     public void testThree() {
+        // Deserialize the YAML string into a ThreeSequence object
         ThreeSequence ts = Marshallable.fromString("!" + ThreeSequence.class.getName() + " {\n" +
                 "  a: [\n" +
                 "    { price: 1.1, qty: 2.0 },\n" +
@@ -42,6 +50,8 @@ public class ThreeSequenceTest extends WireTestCommon {
                 "  ],\n" +
                 "  text: hello\n" +
                 "}\n");
+
+        // Verify the toString() output of the ThreeSequence object
         assertEquals("!net.openhft.chronicle.wire.marshallable.ThreeSequence {\n" +
                 "  a: [\n" +
                 "    { price: 1.1, qty: 2.0 },\n" +
@@ -57,6 +67,8 @@ public class ThreeSequenceTest extends WireTestCommon {
                 "  ],\n" +
                 "  text: hello\n" +
                 "}\n", ts.toString());
+
+        // Round-trip test: serialize and then deserialize to verify the entire process
         assertEquals(ts, Marshallable.fromString(ts.toString()));
     }
 }

@@ -27,10 +27,21 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * The DotNetTest class tests the .NET serialization and deserialization
+ * using the facilities provided by the WireTestCommon.
+ */
 public class DotNetTest extends WireTestCommon {
+
+    /**
+     * Test the conversion of a Hex string representation to a textual format.
+     * It uses a sample Hex string (possibly from a .NET application) and checks
+     * if it's correctly converted to a text representation.
+     */
     @SuppressWarnings("rawtypes")
     @Test
     public void testCode() {
+        // Sample Hex string possibly representing serialized data
         final Bytes<?> bytes = Bytes.fromHexString("000000: B9 06 75 73 65 72 49 64 E5 61 6E 64 72 65 B9 06\n" +
                 "000016: 64 6F 6D 61 69 6E EB 54 45 53 54 2D 44 4F 4D 41\n" +
                 "000032: 49 4E B9 0D 73 65 63 75 72 69 74 79 54 6F 6B 65\n" +
@@ -39,9 +50,16 @@ public class DotNetTest extends WireTestCommon {
                 "000080: 35 61 31 38 2D 61 62 34 39 2D 34 65 39 37 2D 39\n" +
                 "000096: 66 65 38 2D 65 37 36 30 32 38 38 31 34 34 64 39\n");
         // System.out.println(bytes.toHexString());
+        // Convert the given Hex string to a Binary Wire representation
         @NotNull Wire wire = new BinaryWire(bytes);
+
+        // Allocate a Bytes object with elasticity on heap for textual representation
         @NotNull Bytes<?> text = Bytes.allocateElasticOnHeap();
+
+        // Convert the Binary Wire representation to a Text Wire representation
         wire.copyTo(WireType.TEXT.apply(text));
+
+        // Validate the converted textual representation against the expected output
         assertEquals("" +
                         "userId: andre\n" +
                         "domain: TEST-DOMAIN\n" +
@@ -49,6 +67,7 @@ public class DotNetTest extends WireTestCommon {
                         "clientId: \"4b425a18-ab49-4e97-9fe8-e760288144d9\"\n",
                 text.toString());
 
+        // Release the allocated bytes to prevent memory leaks
         bytes.releaseLast();
     }
 }

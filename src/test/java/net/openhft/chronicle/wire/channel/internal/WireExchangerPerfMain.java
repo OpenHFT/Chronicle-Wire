@@ -57,14 +57,27 @@ worst:         295.42        96.13       222.46       179.46       187.14       
 
  */
 
+/**
+ * The {@code WireExchangerPerfMain} class is designed to measure
+ * and analyze the performance of a {@code WireExchanger} object,
+ * specifically focusing on its latency and throughput.
+ * <p>
+ * The class utilizes the JLBH (Java Latency Benchmark Harness)
+ * to manage benchmarking results and provide a performance analysis.
+ */
 public class WireExchangerPerfMain implements JLBHTask {
 
+    // Total number of warm-up iterations to bring the system to a steady state.
     private static final int warmup = 500_000;
+    // Total number of iterations for the benchmark.
     private static final int iterations = 10_000_000;
+    // Target throughput (operations/second) for the benchmark.
     private static final int throughput = 1_000_000;
+
     private final WireExchanger be = new WireExchanger();
     private int count = 0;
     private JLBH jlbh;
+    // Flag to check whether the consumer thread has started.
     private volatile boolean started;
 
     public static void main(String[] args) {
@@ -82,6 +95,12 @@ public class WireExchangerPerfMain implements JLBHTask {
         new JLBH(lth).start();
     }
 
+    /**
+     * Initializes the {@code JLBH} instance and starts a new consumer
+     * thread which handles the reading of messages and sampling of data.
+     *
+     * @param jlbh The {@code JLBH} instance for managing the benchmark.
+     */
     @Override
     public void init(JLBH jlbh) {
         this.jlbh = jlbh;
@@ -90,11 +109,16 @@ public class WireExchangerPerfMain implements JLBHTask {
         consumer.start();
     }
 
+    /**
+     * Represents the consumer logic, where messages are read,
+     * and latency samples are taken.
+     */
+    @SuppressWarnings("try")
     private void run() {
         try (AffinityLock lock = AffinityLock.acquireLock()) {
             started = true;
             while (!Thread.currentThread().isInterrupted()) {
-                final Bytes<ByteBuffer> bytes = (Bytes<ByteBuffer>) be.acquireConsumer().bytes();
+                final Bytes<ByteBuffer> bytes = Jvm.uncheckedCast(be.acquireConsumer().bytes());
                 while (bytes.readRemaining() > 0) {
                     long time = bytes.readLong();
                     jlbh.sample(System.nanoTime() - time);
@@ -105,9 +129,15 @@ public class WireExchangerPerfMain implements JLBHTask {
         }
     }
 
+    /**
+     * Represents the producer logic, where messages, in this case,
+     * timestamps, are written to be consumed by the consumer.
+     *
+     * @param startTimeNS The start time in nanoseconds of the current operation.
+     */
     @Override
     public void run(long startTimeNS) {
-        final Bytes<ByteBuffer> bytes = (Bytes<ByteBuffer>) be.acquireProducer().bytes();
+        final Bytes<ByteBuffer> bytes = Jvm.uncheckedCast(be.acquireProducer().bytes());
         if (bytes.writePosition() > 32000) {
             System.out.print(".");
             Jvm.pause(++count);

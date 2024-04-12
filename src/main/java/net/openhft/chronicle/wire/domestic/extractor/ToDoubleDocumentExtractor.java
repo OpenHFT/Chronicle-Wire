@@ -30,6 +30,11 @@ import java.util.function.DoubleUnaryOperator;
 import static java.lang.Double.isNaN;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
+/**
+ * The ToDoubleDocumentExtractor functional interface is designed for extracting
+ * double values from documents based on a given wire and index. This interface provides
+ * methods for transformations and mapping to different object types after extraction.
+ */
 @FunctionalInterface
 public interface ToDoubleDocumentExtractor {
 
@@ -41,7 +46,7 @@ public interface ToDoubleDocumentExtractor {
      * queue but of another type.
      * <p>
      * Extractors that must include {@link Double#NaN} as a valid value must use other means of
-     * aggregating values (e.g. use an {@link DocumentExtractor DocumentExtractor<Double> }.
+     * aggregating values (e.g. use an {@link DocumentExtractor DocumentExtractor&lt;Double> }.
      *
      * @param wire  to use
      * @param index to use

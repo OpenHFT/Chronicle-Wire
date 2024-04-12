@@ -71,7 +71,7 @@ public class ChronicleServiceMainTest extends WireTestCommon {
         t.setDaemon(true);
         t.start();
 
-        final ChronicleChannelCfg channelCfg = new ChronicleChannelCfg().hostname("localhost").port(65432).initiator(true).buffered(true);
+        final ChronicleChannelCfg<?> channelCfg = new ChronicleChannelCfg<>().addHostnamePort("localhost", 65432).initiator(true).buffered(true);
         try (ChronicleChannel client = ChronicleChannel.newChannel(null, channelCfg, new OkHeader())) {
             assertEquals("" +
                             "!net.openhft.chronicle.wire.channel.OkHeader {\n" +

@@ -17,6 +17,31 @@
  */
 package net.openhft.chronicle.wire;
 
+/**
+ * Represents the type of bracketing used, especially useful for indicating structures
+ * like maps and sequences. This enumeration can be leveraged to denote the type or absence
+ * of bracketing in specific contexts.
+ */
 public enum BracketType {
-    UNKNOWN, NONE, MAP, SEQ
+
+    /**
+     * Represents an unknown bracketing type. Useful for cases where the type
+     * is not yet determined or cannot be classified.
+     */
+    UNKNOWN,
+
+    /**
+     * Indicates that there is no bracketing used.
+     */
+    NONE,
+
+    /**
+     * Denotes the use of brackets typically associated with maps, e.g., '{}'.
+     */
+    MAP,
+
+    /**
+     * Denotes the use of brackets typically associated with sequences or lists, e.g., '[]'.
+     */
+    SEQ
 }
