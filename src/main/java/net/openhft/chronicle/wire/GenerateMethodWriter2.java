@@ -103,7 +103,7 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
      * <p>
      * The method looks up the template from the predefined {@code TEMPLATE_METHODS}. If no matching template is
      * found, it returns {@code null}.
-         *
+     *
      * @param name The method name to look up
      * @param returnType The return type of the method
      * @param pts The parameter types of the method
@@ -124,7 +124,7 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
      * <p>
      * This method provides string representations for various primitive types, {@link CharSequence}, and
      * {@link Marshallable}. If the type does not match any predefined types, it defaults to returning "object".
-         *
+     *
      * @param type The class type to convert
      * @return The corresponding string representation of the type
      */

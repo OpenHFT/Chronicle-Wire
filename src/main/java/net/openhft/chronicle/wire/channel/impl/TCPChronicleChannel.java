@@ -324,7 +324,6 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
      * If the socket channel (sc) is not open, the method attempts to establish a connection based
      * on the host ports provided by the channel configuration (channelCfg). For initiators, it tries to
      * connect to each host-port combination until a successful connection is established or all attempts fail.
-         *
      * @throws InvalidMarshallableException if any marshalling error occurs.
      * @throws IllegalStateException        if the current state indicates closure.
      * @throws IllegalArgumentException     if an invalid port is detected.
@@ -397,7 +396,7 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
      * <p>
      * This method adjusts the blocking mode of the socket channel and also sets the send and receive
      * buffer sizes for the underlying socket. It calculates the total buffer size based on these values.
-         *
+     *
      * @throws IOException if any IO error occurs during configuration.
      */
     private void configureSocket() throws IOException {
@@ -437,7 +436,7 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
      * The method reads an incoming header and decides the appropriate response header to send.
      * If a predefined header exists, it uses that, or else it creates a new response header or
      * a redirection header based on the input.
-         *
+     *
      * @throws InvalidMarshallableException if any marshalling error occurs during header handling.
      */
     synchronized void acceptorRespondToHeader() throws InvalidMarshallableException {
@@ -466,7 +465,7 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
      * Writes the current response header to the wire.
      * <p>
      * This method writes the {@code headerOut} object to the wire within a document context.
-         *
+     *
      * @throws InvalidMarshallableException if any marshalling error occurs during the write operation.
      */
     private void writeHeader() throws InvalidMarshallableException {
@@ -503,7 +502,7 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
      * <p>
      * This method continuously reads the wire until a valid header is retrieved or the thread is interrupted.
      * If an unexpected message type is encountered, a warning is issued.
-         *
+     *
      * @throws InvalidMarshallableException if any marshalling error occurs during the read operation.
      */
     private void readHeader() throws InvalidMarshallableException {
@@ -538,7 +537,7 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
      * Getter method for the current connection configuration.
      * <p>
      * Returns the {@code channelCfg} object representing the current connection configuration.
-         *
+     *
      * @return The {@code ChronicleChannelCfg} object for the current connection.
      */
     public ChronicleChannelCfg<?> connectionCfg() {

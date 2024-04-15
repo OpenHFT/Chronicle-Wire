@@ -168,7 +168,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
      * <p>
      * This method uses the current hash value and applies an agitation function to provide
      * a consistent and dispersed 64-bit hash result.
-         *
+     *
      * @return The 64-bit agitated hash value.
      */
     public long hash64() {
@@ -180,7 +180,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
      * <p>
      * This method derives the 32-bit hash from the 64-bit hash value. The derived hash is
      * the result of XOR-ing the high and low 32-bits of the 64-bit hash.
-         *
+     *
      * @return The derived 32-bit hash value.
      */
     public int hash32() {
