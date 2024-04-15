@@ -45,7 +45,7 @@ public interface ToLongDocumentExtractor {
      * queue but of another type.
      * <p>
      * Extractors that must include {@link Long#MIN_VALUE} as a valid value must use other means of
-     * aggregating values (e.g. use an {@link DocumentExtractor DocumentExtractor<Long> }.
+     * aggregating values (e.g. use an {@link DocumentExtractor DocumentExtractor&lt;Long> }.
      *
      * @param wire  to use
      * @param index to use

@@ -243,7 +243,6 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
      * If no document is available, the method will perform various checks and modifications on the buffer
      * to ensure efficient reading. It will also handle specific protocol conditions and handle exceptions
      * like detecting an HTTP request or an invalid protocol.
-     * </p>
      *
      * @return A document context representing the reading document.
      * @throws ClosedIORuntimeException   if the socket channel is closed while attempting to read.
@@ -400,7 +399,6 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
      * <p>
      * This method adjusts the blocking mode of the socket channel and also sets the send and receive
      * buffer sizes for the underlying socket. It calculates the total buffer size based on these values.
-     * </p>
      *
      * @throws IOException if any IO error occurs during configuration.
      */
@@ -441,7 +439,6 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
      * The method reads an incoming header and decides the appropriate response header to send.
      * If a predefined header exists, it uses that, or else it creates a new response header or
      * a redirection header based on the input.
-     * </p>
      *
      * @throws InvalidMarshallableException if any marshalling error occurs during header handling.
      */
@@ -472,7 +469,6 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
      * Writes the current response header to the wire.
      * <p>
      * This method writes the {@code headerOut} object to the wire within a document context.
-     * </p>
      *
      * @throws InvalidMarshallableException if any marshalling error occurs during the write operation.
      */
@@ -510,7 +506,6 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
      * <p>
      * This method continuously reads the wire until a valid header is retrieved or the thread is interrupted.
      * If an unexpected message type is encountered, a warning is issued.
-     * </p>
      *
      * @throws InvalidMarshallableException if any marshalling error occurs during the read operation.
      */
@@ -546,7 +541,6 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
      * Getter method for the current connection configuration.
      * <p>
      * Returns the {@code channelCfg} object representing the current connection configuration.
-     * </p>
      *
      * @return The {@code ChronicleChannelCfg} object for the current connection.
      */
@@ -633,7 +627,6 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
      * Represents a specialized DocumentContextHolder for managing connection-based document context.
      * <p>
      * This holder ensures proper flushing of data upon closure and handles chained elements within a document context.
-     * </p>
      */
     private class ConnectionDocumentContextHolder extends DocumentContextHolder implements WriteDocumentContext {
         private boolean chainedElement;

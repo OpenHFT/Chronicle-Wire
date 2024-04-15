@@ -33,7 +33,6 @@ import java.util.List;
  * This class provides functionalities to check if a class is a serializable lambda and
  * serialize it using the Wire format. It uses Java's {@link SerializedLambda} mechanism
  * to capture details about the lambda and then writes those details to a Wire format.
- * </p>
  */
 @SuppressWarnings("rawtypes")
 public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
@@ -65,7 +64,6 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
      * <p>
      * This method fetches the details of the lambda using the {@link SerializedLambda} mechanism
      * and then writes these details to the provided Wire format.
-     * </p>
      *
      * @param <L> The type of the lambda to be serialized.
      * @param lambda The lambda instance to be serialized.

@@ -34,7 +34,6 @@ import java.util.TreeMap;
  * parselets to associate specific actions with events or field names.
  * <p>
  * This parser uses a default consumer to handle unmatched entries and a field number parselet for numbered fields.
- * </p>
  */
 public class VanillaWireParser implements WireParser {
 

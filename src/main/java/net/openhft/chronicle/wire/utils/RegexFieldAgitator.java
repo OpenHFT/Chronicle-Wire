@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 /**
  * The RegexFieldAgitator class is an implementation of the YamlAgitator interface.
  * This class allows for a regular expression-based transformation of input YAML content.
- *
+ * <p>
  * The agitator applies the specified regex pattern to identify and replace matching segments
  * within the YAML content. This class is useful for scenarios where you need to modify
  * or sanitize certain patterns within YAML strings, especially in testing and validation contexts.

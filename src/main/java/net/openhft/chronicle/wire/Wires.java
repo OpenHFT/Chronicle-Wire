@@ -829,8 +829,8 @@ public enum Wires {
      *
      * @param source source
      * @param target dest
+     * @param <T>    target type
      * @return target
-     * @param <T> target type
      */
     @NotNull
     public static <T> T copyTo(Object source, @NotNull T target) throws InvalidMarshallableException {
@@ -1879,7 +1879,7 @@ public enum Wires {
         final Map<String, Object> fields = new LinkedHashMap<>();
 
         /**
-         * Constructs an instance of {@link TupleInvocationHandler} with the provided type name.
+         * Constructs an instance with the provided type name.
          *
          * @param typeName The name of the type represented by this invocation handler.
          */
@@ -1998,7 +1998,7 @@ public enum Wires {
          *
          * @param proxy The proxy instance being compared.
          * @param o     The object to be compared with the proxy for equality.
-         * @return true if the specified object is equal to the proxy, otherwise false.
+         * @return Boolean.TRUE if the specified object is equal to the proxy, otherwise Boolean.FALSE.
          */
         @NotNull
         private Object equals0(Object proxy, Object o) {
@@ -2029,8 +2029,6 @@ public enum Wires {
     static class TupleFieldInfo extends AbstractFieldInfo {
 
         /**
-         * Constructor for the {@link TupleFieldInfo}.
-         *
          * @param name The name of the field.
          * @param type The type of the field.
          */

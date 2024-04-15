@@ -81,13 +81,16 @@ public interface Reduction<T> extends ExcerptListener {
     // Basic static constructors
 
     /**
-     * Creates and returns a new ReductionBuilder that will use the provided
-     * {@code extractor) to extract elements of type E.
+     * Creates and returns a new {@code ReductionBuilder} that will use the provided
+     * {@code extractor} to extract elements of type {@code E}.
      * <p>
-     * @param extractor (non-null)
-     * @param <E>       element type
-     * @return a new ReductionBuilder
-     * @see LongReductionBuilder, DoubleReductionBuilder
+     * This method initializes a generic reduction builder suitable for custom element types.
+     *
+     * @param <E>       the element type
+     * @param extractor the document extractor used to extract elements, must not be null
+     * @return a new {@code ReductionBuilder} instance
+     * @see LongReductionBuilder
+     * @see DoubleReductionBuilder
      */
     static <E> ReductionBuilder<E> of(@NotNull final DocumentExtractor<E> extractor) {
         requireNonNull(extractor);
@@ -95,12 +98,14 @@ public interface Reduction<T> extends ExcerptListener {
     }
 
     /**
-     * Creates and returns a new LongReductionBuilder that will use the provided
-     * {@code extractor) to extract elements of type {@code long}.
+     * Creates and returns a new {@code LongReductionBuilder} that will use the provided
+     * {@code extractor} to extract elements of type {@code long}.
      * <p>
-     * @param extractor (non-null)
-     * @return a new LongReductionBuilder
-     * @see {@link #ofLong(ToLongDocumentExtractor)} and {@link #ofDouble(ToDoubleDocumentExtractor)}
+     * This method initializes a reduction builder specifically for handling long values.
+     *
+     * @param extractor the document extractor for long values, must not be null
+     * @return a new {@code LongReductionBuilder} instance
+     * @see #ofDouble(ToDoubleDocumentExtractor)
      */
     static LongReductionBuilder ofLong(@NotNull final ToLongDocumentExtractor extractor) {
         requireNonNull(extractor);
@@ -108,12 +113,15 @@ public interface Reduction<T> extends ExcerptListener {
     }
 
     /**
-     * Creates and returns a new DoubleReductionBuilder that will use the provided
-     * {@code extractor) to extract elements of type {@code double}.
+     * Creates and returns a new {@code DoubleReductionBuilder} that will use the provided
+     * {@code extractor} to extract elements of type {@code double}.
      * <p>
-     * @param extractor (non-null)
-     * @return a new DoubleReductionBuilder
-     * @see {@link #of(DocumentExtractor)} and {@link #ofLong(ToLongDocumentExtractor)}
+     * This method initializes a reduction builder specifically for handling double values.
+     *
+     * @param extractor the document extractor for double values, must not be null
+     * @return a new {@code DoubleReductionBuilder} instance
+     * @see #of(DocumentExtractor)
+     * @see #ofLong(ToLongDocumentExtractor)
      */
     static DoubleReductionBuilder ofDouble(@NotNull final ToDoubleDocumentExtractor extractor) {
         requireNonNull(extractor);

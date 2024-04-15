@@ -31,10 +31,8 @@ import java.util.regex.Pattern;
  * Its primary purpose is to convert long numbers into their equivalent word representation using a predefined word list.
  * <p>
  * The word list is sourced from the 'common-words.txt' file associated with this class.
- * </p>
  * <p>
  * For example, a long value might be represented by a sequence of words from this list.
- * </p>
  */
 public class WordsLongConverter implements LongConverter {
 

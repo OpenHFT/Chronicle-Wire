@@ -676,7 +676,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         /**
          * Reads an array object from the provided input source, adding each
          * item in the sequence to a list, which is then converted into an array.
-         *
+         * <p>
          * If the 'using' parameter is an instance of ArrayWrapper, the method
          * first deserializes items into a list and then wraps them into an array
          * with the correct component type. Otherwise, it deserializes items into
@@ -749,7 +749,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         /**
          * Reads a primitive array object from the provided input source,
          * dynamically resizing the array during the deserialization process.
-         *
+         * <p>
          * The method starts with an empty array and doubles its size as needed
          * to accommodate the incoming data. After all items have been read,
          * the array is resized to fit the number of items that were read.
@@ -825,7 +825,7 @@ public enum SerializationStrategies implements SerializationStrategy {
      * definition for serialization purposes.
      * <p>
      * Attempts to create a new instance of the given class.
-     * </p>
+     *
      * @param type The class for which a new instance is to be created.
      * @return A new instance of the given class or {@code null} if the instantiation fails.
      */

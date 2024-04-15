@@ -26,7 +26,7 @@ package net.openhft.chronicle.wire;
  * Implementors of this interface can define custom logic to determine if a specific method
  * should be ignored based on its first argument. This can be especially useful in scenarios
  * where performance is crucial, and not every method needs to be processed.
- * </p>
+ *
  * @param <T> the type of the first argument that the method receives
  */
 @FunctionalInterface

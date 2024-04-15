@@ -380,7 +380,7 @@ public class WireMarshaller<T> {
      * with the remaining fields.
      *
      * @param fieldNames Names of the fields to be excluded.
-     * @return A new instance of the {@link WireMarshaller} with the specified fields excluded.
+     * @return A new instance of the  with the specified fields excluded.
      */
     public WireMarshaller<T> excludeFields(String... fieldNames) {
         Set<String> fieldSet = new HashSet<>(Arrays.asList(fieldNames));
@@ -1074,7 +1074,6 @@ public class WireMarshaller<T> {
          * <p>
          * This method checks if the provided field has a LongConversion annotation. If present,
          * it retrieves the corresponding LongConverter using the LongConverterFieldAccess helper class.
-         * </p>
          *
          * @param field The field for which the LongConverter needs to be obtained
          * @return The associated LongConverter instance, or null if not present
@@ -1093,7 +1092,6 @@ public class WireMarshaller<T> {
          * <p>
          * This method aims to handle various Type representations, like Class or ParameterizedType,
          * and return the underlying Class representation.
-         * </p>
          *
          * @param type0 The type from which the class should be extracted
          * @return The extracted Class representation
@@ -1123,7 +1121,6 @@ public class WireMarshaller<T> {
          * This method serializes the value of the specified object's field and writes it to
          * the WireOut. If the field has a Comment annotation, a special processing is done
          * using the CommentAnnotationNotifier.
-         * </p>
          *
          * @param o    The object containing the field to be written
          * @param out  The WireOut instance to write the field value to
@@ -1149,7 +1146,6 @@ public class WireMarshaller<T> {
          * <p>
          * If the field has a Comment annotation, its value is formatted using the field's value and appended as a comment.
          * The CommentAnnotationNotifier is used to indicate that the written value is preceded by a comment.
-         * </p>
          *
          * @param o         The object containing the field whose value needs to be retrieved
          * @param out       The WireOut instance to which the value and the comment are written
@@ -1682,7 +1678,7 @@ public class WireMarshaller<T> {
     /**
      * The ArrayFieldAccess class extends FieldAccess to provide specialized access
      * and manipulation methods for fields that are arrays.
-     *
+     * <p>
      * It calculates the component type of the array and retrieves its equivalent object type
      * for ease of use. The class is designed to handle arrays in a generic manner and
      * use the provided methods of the superclass for actual field manipulation.
@@ -1769,7 +1765,7 @@ public class WireMarshaller<T> {
     /**
      * The ByteArrayFieldAccess class extends FieldAccess to provide specialized access
      * and manipulation methods for fields that are byte arrays.
-     *
+     * <p>
      * The class is optimized for reading and writing byte arrays to and from a wire format
      * while preserving encapsulation and supporting null values.
      */
@@ -1830,7 +1826,7 @@ public class WireMarshaller<T> {
     /**
      * The EnumSetFieldAccess class extends FieldAccess to provide specialized access and manipulation methods
      * for fields that are of type {@link EnumSet}.
-     *
+     * <p>
      * This class allows efficient reading and writing of EnumSet fields to and from a wire format while
      * preserving encapsulation and supporting null values.
      */
@@ -1981,7 +1977,7 @@ public class WireMarshaller<T> {
     /**
      * The CollectionFieldAccess class extends FieldAccess to provide specialized access and manipulation methods
      * for fields that are of type {@link Collection}.
-     *
+     * <p>
      * It is optimized to handle both random-access and non-random-access collections efficiently. Additionally,
      * the class provides flexibility by allowing users to supply custom collection creation logic if needed.
      */
@@ -2042,7 +2038,7 @@ public class WireMarshaller<T> {
 
         /**
          * Determines the appropriate type of FieldAccess based on the provided field's type and characteristics.
-         *
+         * <p>
          * This method analyses the type and generic parameters of the field, decides on a suitable Collection
          * supplier, and then returns an instance of either StringCollectionFieldAccess or CollectionFieldAccess.
          *
@@ -2078,7 +2074,7 @@ public class WireMarshaller<T> {
 
         /**
          * Provides a supplier to create a new instance of the collection type associated with this field access.
-         *
+         * <p>
          * This method utilizes the ObjectUtils utility class to instantiate a new collection object
          * based on the type.
          *
@@ -2158,7 +2154,7 @@ public class WireMarshaller<T> {
     /**
      * The StringCollectionFieldAccess class extends FieldAccess to provide specialized access and manipulation methods
      * for fields that are of type {@link Collection} where the elements of the collection are {@link String} instances.
-     *
+     * <p>
      * This extension particularly manages the parsing of strings from the given input and offers utility functions
      * for instantiation of the correct {@link Collection} type.
      */
@@ -2202,7 +2198,7 @@ public class WireMarshaller<T> {
 
         /**
          * Provides a supplier to create a new instance of the collection type associated with this field access.
-         *
+         * <p>
          * This method utilizes the ObjectUtils utility class to instantiate a new collection object
          * based on the type.
          *
@@ -2279,7 +2275,7 @@ public class WireMarshaller<T> {
     /**
      * The MapFieldAccess class extends FieldAccess to provide specialized access and manipulation methods
      * for fields that are of type {@link Map}.
-     *
+     * <p>
      * This extension is designed to manage the parsing and instantiation of the correct {@link Map} type
      * and provides functionality to work with the key-value pairs within the map.
      */
@@ -2302,7 +2298,7 @@ public class WireMarshaller<T> {
 
         /**
          * Constructs an instance of MapFieldAccess for the specified field.
-         *
+         * <p>
          * This constructor initializes the map type, key type, value type, and an appropriate
          * supplier for instantiating new map instances based on the field's type and generic parameters.
          *
@@ -2326,7 +2322,7 @@ public class WireMarshaller<T> {
 
         /**
          * Provides a supplier to create a new instance of the map type associated with this field access.
-         *
+         * <p>
          * This method utilizes the ObjectUtils utility class to instantiate a new map object
          * based on the type.
          *
@@ -2390,7 +2386,7 @@ public class WireMarshaller<T> {
     /**
      * The BooleanFieldAccess class extends FieldAccess to provide specialized access and manipulation methods
      * for fields that are of type boolean or {@link Boolean}.
-     *
+     * <p>
      * This extension uses unsafe operations to get and set the boolean value efficiently without invoking reflection
      * on each operation.
      */
@@ -2428,7 +2424,7 @@ public class WireMarshaller<T> {
     /**
      * The ByteFieldAccess class extends FieldAccess to provide specialized access and manipulation methods
      * for fields that are of type byte or {@link Byte}.
-     *
+     * <p>
      * This extension leverages unsafe operations to get and set the byte value directly without the need for
      * reflective access each time, ensuring better performance.
      */
@@ -2466,7 +2462,7 @@ public class WireMarshaller<T> {
     /**
      * The ShortFieldAccess class extends FieldAccess to provide specialized access and manipulation methods
      * for fields that are of type short or {@link Short}.
-     *
+     * <p>
      * This extension leverages unsafe operations to get and set the short value directly without the need for
      * reflective access each time, ensuring optimal performance.
      */
@@ -2504,7 +2500,7 @@ public class WireMarshaller<T> {
     /**
      * The CharFieldAccess class extends FieldAccess to provide specialized access and manipulation methods
      * for fields that are of type char or {@link Character}.
-     *
+     * <p>
      * This extension leverages unsafe operations to get and set the character value directly without the need for
      * reflective access each time, ensuring optimal performance.
      */
@@ -2564,7 +2560,7 @@ public class WireMarshaller<T> {
     /**
      * The IntegerFieldAccess class extends FieldAccess to provide specialized access and manipulation methods
      * for fields that are of type int or {@link Integer}.
-     *
+     * <p>
      * This extension leverages unsafe operations to get and set the integer value directly without the need for
      * reflective access each time, ensuring optimal performance.
      */
@@ -2606,7 +2602,7 @@ public class WireMarshaller<T> {
     /**
      * The ByteIntConversionFieldAccess class extends IntConversionFieldAccess to provide specialized access
      * and conversion between fields that are of type byte and their representation as int.
-     *
+     * <p>
      * This extension leverages unsafe operations to get and set the byte value directly from or to an object
      * while converting to or from an int respectively. This helps in preserving the value of the byte as an
      * unsigned integer representation.
@@ -2630,7 +2626,7 @@ public class WireMarshaller<T> {
     /**
      * The ShortIntConversionFieldAccess class extends IntConversionFieldAccess to provide specialized access
      * and conversion between fields that are of type short and their representation as int.
-     *
+     * <p>
      * This extension leverages unsafe operations to get and set the short value directly from or to an object
      * while converting to or from an int respectively. This helps in preserving the value of the short as an
      * unsigned integer representation.
@@ -2658,7 +2654,7 @@ public class WireMarshaller<T> {
     static class ByteLongConverterFieldAccess extends LongConverterFieldAccess {
 
         /**
-         * Constructs a new instance of {@link ByteLongConverterFieldAccess}.
+         * Constructs a new instance
          *
          * @param field         The byte field to be accessed.
          * @param longConverter The converter to be used for the transformations.
@@ -2708,7 +2704,7 @@ public class WireMarshaller<T> {
     static class ShortLongConverterFieldAccess extends LongConverterFieldAccess {
 
         /**
-         * Constructs a new instance of {@link ShortLongConverterFieldAccess}.
+         * Constructs a new instance
          *
          * @param field         The short field to be accessed.
          * @param longConverter The converter to be used for the transformations.
@@ -2758,7 +2754,7 @@ public class WireMarshaller<T> {
     static class CharLongConverterFieldAccess extends LongConverterFieldAccess {
 
         /**
-         * Constructs a new instance of {@link CharLongConverterFieldAccess}.
+         * Constructs a new instance
          *
          * @param field         The char field to be accessed.
          * @param longConverter The converter used for transformations.
@@ -2808,7 +2804,7 @@ public class WireMarshaller<T> {
     static class IntLongConverterFieldAccess extends LongConverterFieldAccess {
 
         /**
-         * Constructs a new instance of {@link IntLongConverterFieldAccess}.
+         * Constructs a new instance
          *
          * @param field         The int field to be accessed.
          * @param longConverter The converter used for transformations.
