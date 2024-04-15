@@ -58,7 +58,7 @@ import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
 
-@SuppressWarnings({"rawtypes", "unchecked", "try"})
+@SuppressWarnings({"rawtypes", "unchecked", "try", "serial"})
 public class TextWireTest extends WireTestCommon {
 
     // Create a new TextWire instance with an elastic heap allocated buffer
