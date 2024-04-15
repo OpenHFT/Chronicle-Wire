@@ -51,7 +51,6 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
  * It currently provides a subset of functionalities similar to the YAML wire format.
  * The core capability of this class is to handle JSON data structures as {@code Bytes}
  * objects, allowing for efficient manipulation and parsing.
- * </p>
  */
 public class JSONWire extends TextWire {
 
@@ -132,7 +131,7 @@ public class JSONWire extends TextWire {
      * <p>
      * This is useful for handling certain JSON conversion scenarios where
      * native types have wrapper counterparts, such as int and Integer.
-     * </p>
+     *
      * @param type The class to be checked.
      * @return {@code true} if the class is a Java wrapper type, otherwise {@code false}.
      */

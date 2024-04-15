@@ -30,7 +30,6 @@ import java.nio.ByteBuffer;
  * The class facilitates writing data to an OutputStream using the Wire format. It uses
  * an intermediate {@link Bytes} buffer to temporarily hold data in the Wire format
  * before flushing it to the actual OutputStream.
- * </p>
  */
 public class WireToOutputStream {
 
@@ -58,7 +57,6 @@ public class WireToOutputStream {
      * Retrieves the Wire object for writing data.
      * <p>
      * This method also clears any previous data in the Wire.
-     * </p>
      *
      * @return The Wire object to be used for writing data.
      */
@@ -72,7 +70,6 @@ public class WireToOutputStream {
      * <p>
      * The method writes the length of the data followed by the actual data to
      * the OutputStream. After the flush, the internal buffer is ready to hold new data.
-     * </p>
      *
      * @throws IOException If an I/O error occurs.
      */

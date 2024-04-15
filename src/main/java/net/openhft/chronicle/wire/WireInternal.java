@@ -43,13 +43,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 import static net.openhft.chronicle.wire.Wires.toIntU30;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
 /**
  * The WireInternal enum provides a collection of utility constants, data structures,
  * and internal configurations to support wire operations. This enum does not have any
  * direct instances (as signified by the empty enum declaration). Instead, it serves as
  * a container for static members.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public enum WireInternal {
     ; // none
     static final StringInterner INTERNER = new StringInterner(Jvm.getInteger("wire.interner.size", 4096));

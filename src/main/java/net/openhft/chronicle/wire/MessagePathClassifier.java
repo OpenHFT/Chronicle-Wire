@@ -35,7 +35,6 @@ import java.util.stream.IntStream;
  * <p>
  * This class also implements {@link IntSupplier}, allowing the direct fetching of path ID for the current
  * {@link MessageHistory}.
- * </p>
  */
 public class MessagePathClassifier implements IntSupplier {
 
@@ -47,13 +46,13 @@ public class MessagePathClassifier implements IntSupplier {
 
     /**
      * Registers a path ID for message histories ending with a specific sequence of source IDs.
-     *
+     * <p>
      * This method enables the user to define how the classifier should categorize certain patterns
      * of message history.
      *
      * @param pathId  A unique identifier for the message path.
      * @param sources An ordered array of source IDs representing a pattern in the message history.
-     * @return The current instance of the {@link MessagePathClassifier} for chaining.
+     * @return The current instance of the  for chaining.
      */
     public MessagePathClassifier addPathForSourcesEnding(int pathId, int... sources) {
         OptionalInt duplicate = IntStream.range(0, sourcePattern.size())

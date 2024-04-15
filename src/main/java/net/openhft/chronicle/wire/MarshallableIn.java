@@ -37,7 +37,6 @@ import java.util.Map;
  * Note: This interface assumes that you are familiar with the concept of marshallable objects,
  * which are objects that can be marshalled (converted to byte streams) and unmarshalled
  * (converted back to objects).
- * </p>
  */
 @FunctionalInterface
 public interface MarshallableIn {

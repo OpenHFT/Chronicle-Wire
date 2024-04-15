@@ -25,7 +25,7 @@ package net.openhft.chronicle.wire;
  *
  * <p>Example Usage:
  * <pre>
- *     ObjectIntObjectConsumer<String, Double> printer = (str, num, dbl) ->
+ *     ObjectIntObjectConsumer&lt;String, Double&gt; printer = (str, num, dbl) -&gt;
  *         System.out.println(str + " - " + num + " - " + dbl);
  *     printer.accept("Value", 5, 20.5);
  * </pre>

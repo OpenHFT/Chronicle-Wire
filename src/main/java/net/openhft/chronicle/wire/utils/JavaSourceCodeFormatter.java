@@ -52,10 +52,8 @@ public class JavaSourceCodeFormatter extends SourceCodeFormatter {
 
     /**
      * Constructs a new Java source code formatter with a provided AtomicInteger to manage the indentation level.
-     *
      * <p>
      * This can be useful in scenarios where the indentation needs to be managed or adjusted externally.
-     * </p>
      *
      * @param indent AtomicInteger managing the indentation level.
      */

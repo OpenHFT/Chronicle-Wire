@@ -45,7 +45,6 @@ import java.util.function.BiConsumer;
  * <p>
  * This class provides a consistent hashing mechanism by leveraging a predefined set of constants and algorithms.
  * Instances are stored in a {@code ThreadLocal} to ensure thread-safety and optimized access across the application.
- * </p>
  * @see WriteMarshallable
  */
 @SuppressWarnings("rawtypes")
@@ -168,7 +167,6 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
      * <p>
      * This method uses the current hash value and applies an agitation function to provide
      * a consistent and dispersed 64-bit hash result.
-     * </p>
      *
      * @return The 64-bit agitated hash value.
      */
@@ -181,7 +179,6 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
      * <p>
      * This method derives the 32-bit hash from the 64-bit hash value. The derived hash is
      * the result of XOR-ing the high and low 32-bits of the 64-bit hash.
-     * </p>
      *
      * @return The derived 32-bit hash value.
      */
@@ -371,7 +368,6 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
      * The class implements the {@link ValueOut} interface, providing methods to handle
      * various data types like booleans, text, bytes, etc., and updating the hash
      * value accordingly.
-     * </p>
      */
     class HashValueOut implements ValueOut {
         @NotNull

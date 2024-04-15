@@ -26,7 +26,7 @@ import java.util.Map;
  * This class aims to simulate the effect of overriding specific fields in YAML content.
  * For every field provided, the agitator will generate versions of the input YAML where these fields
  * are replaced with new values, as specified.
- *
+ * <p>
  * A primary use-case for this agitator is in testing scenarios to verify that the overridden values
  * are correctly recognized and processed by YAML consumers.
  */
