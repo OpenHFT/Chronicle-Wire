@@ -8,6 +8,7 @@ import net.openhft.chronicle.wire.WireOut;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 public class MarshallingJSONStringTest implements Marshallable {
@@ -35,9 +36,15 @@ public class MarshallingJSONStringTest implements Marshallable {
                 "    \"subscribePort\": 4024,\n" +
                 "  }\n" +
                 "}";
+        String expectedJson = "{\n" +
+        "    \"username\": \"sampleApp\",\n" +
+                "    \"password\": \"samplePassword\",\n" +
+                "    \"publishPort\": 4021,\n" +
+                "    \"subscribePort\": 4024,\n" +
+                "  }";
 
         MarshallingJSONStringTest read = Marshallable.fromString(configJson);
-        assertFalse(read.configAsJSON.startsWith("4024"));
+        assertEquals(expectedJson, read.configAsJSON);
     }
 
 }
