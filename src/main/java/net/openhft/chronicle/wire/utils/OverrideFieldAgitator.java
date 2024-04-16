@@ -30,6 +30,7 @@ import java.util.Map;
  * A primary use-case for this agitator is in testing scenarios to verify that the overridden values
  * are correctly recognized and processed by YAML consumers.
  */
+@Deprecated(/* to be moved in x.27 */)
 public class OverrideFieldAgitator implements YamlAgitator {
 
     // Fields with their new values to be overridden in the YAML content

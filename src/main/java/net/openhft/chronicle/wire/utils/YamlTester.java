@@ -40,6 +40,7 @@ import java.util.function.Function;
  *     <li><b>base.tests</b>: If set to true, only the base tests are executed, skipping the generated tests.</li>
  * </ul>
  */
+@Deprecated(/* to be moved in x.27 */)
 public interface YamlTester {
     /**
      * System property to determine whether to overwrite the output YAML file.

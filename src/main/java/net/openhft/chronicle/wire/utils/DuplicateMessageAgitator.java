@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
  *
  * @see YamlAgitator
  */
+@Deprecated(/* to be moved in x.27 */)
 public class DuplicateMessageAgitator implements YamlAgitator {
 
     /** Pattern to identify the separation between distinct YAML messages. */

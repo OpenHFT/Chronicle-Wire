@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
  * within the YAML content. This class is useful for scenarios where you need to modify
  * or sanitize certain patterns within YAML strings, especially in testing and validation contexts.
  */
+@Deprecated(/* to be moved in x.27 */)
 public class RegexFieldAgitator implements YamlAgitator {
 
     // Name of the agitator, used primarily for identification

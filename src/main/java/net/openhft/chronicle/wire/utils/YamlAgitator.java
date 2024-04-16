@@ -28,6 +28,7 @@ import java.util.Map;
  * Through its static methods, the interface offers access to various concrete agitator implementations,
  * enabling different ways of agitating YAML content.
  */
+@Deprecated(/* to be moved in x.27 */)
 public interface YamlAgitator {
 
     /**

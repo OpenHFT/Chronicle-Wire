@@ -30,6 +30,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings("deprecated")
 @RunWith(Parameterized.class)
 public class TopOfBookHandlerTest extends WireTestCommon {
     static final String paths = "" +
