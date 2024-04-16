@@ -1670,6 +1670,8 @@ public class TextWire extends YamlWireOut<TextWire> {
                 // Reset the consumption flag and reading position
                 this.consumeAny = false;
                 bytes.readPosition(start);
+                // @TODO - use ScopedResource<StringBuilder> for consistency throughout YamlWireOut - https://github.com/OpenHFT/Chronicle-Wire/issues/879
+                sb.setLength(0);
             }
         }
 
