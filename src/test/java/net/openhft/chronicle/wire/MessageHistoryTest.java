@@ -21,7 +21,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.junit.Test;
 
@@ -80,7 +79,7 @@ public class MessageHistoryTest extends WireTestCommon {
         // Attempt to copy again and expect an exception.
         try {
             Wires.copyTo(container1, container2);
-            fail();
+            fail("timings=" + container2.timings());
         } catch (ArithmeticException e) {
             assertTrue(e.getMessage().contains("257 out of range"));
         }
