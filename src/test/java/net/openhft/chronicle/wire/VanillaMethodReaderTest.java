@@ -93,7 +93,7 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
     @Test
     public void logMessage0() {
 
-        // not Mac lays it memory out differently
+        // do not check Mac as it lays it memory out differently
         Assume.assumeTrue(!OS.isMacOSX());
 
         TriviallyCopyableMarketData data = new TriviallyCopyableMarketData();
