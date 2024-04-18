@@ -21,8 +21,10 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.wire.marshallable.TriviallyCopyableMarketData;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -90,6 +92,10 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
     // Test case to log a binary message and validate its content
     @Test
     public void logMessage0() {
+
+        // not Mac lays it memory out differently
+        Assume.assumeTrue(!OS.isMacOSX());
+
         TriviallyCopyableMarketData data = new TriviallyCopyableMarketData();
         data.securityId(0x828282828282L);
 
@@ -116,6 +122,8 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
         // Read the written message and validate its content
         try (DocumentContext dc = wire.readingDocument()) {
             final ValueIn marketData = dc.wire().read("marketData");
+
+
             assertEquals("" +
                             "read md - 00000010 80 90 82 82 82 82 82 82  00 00 00 00 00 00 00 00 ········ ········\n" +
                             "00000020 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
