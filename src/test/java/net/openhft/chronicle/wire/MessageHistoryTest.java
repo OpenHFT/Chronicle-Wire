@@ -28,10 +28,10 @@ import static net.openhft.chronicle.bytes.MethodReader.MESSAGE_HISTORY_METHOD_ID
 import static org.junit.Assert.*;
 
 public class MessageHistoryTest extends WireTestCommon {
+
     static {
         System.setProperty("history.as.bytes", "false");
     }
-
 
     // Test to check if clearing and retrieving the MessageHistory works correctly.
     @Test
