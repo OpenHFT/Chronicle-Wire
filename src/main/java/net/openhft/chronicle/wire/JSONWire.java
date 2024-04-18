@@ -25,6 +25,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.ClassLookup;
+import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import net.openhft.chronicle.core.util.UnresolvedType;
@@ -371,28 +372,30 @@ public class JSONWire extends TextWire {
      * @throws InvalidMarshallableException if there's a problem with copying the data.
      */
     private void copyTypePrefix(WireOut wire) throws InvalidMarshallableException {
-        final StringBuilder sb = acquireStringBuilder();
+        try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+            final StringBuilder sb = sbR.get();
 
-        // Extract the type literal
-        getValueIn().text(sb);
+            // Extract the type literal
+            getValueIn().text(sb);
 
-        // Remove the '@' prefix from the type literal
-        sb.deleteCharAt(0);
-        wire.getValueOut().typePrefix(sb);
+            // Remove the '@' prefix from the type literal
+            sb.deleteCharAt(0);
+            wire.getValueOut().typePrefix(sb);
 
-        // Consume any padding characters (e.g., whitespace)
-        consumePadding();
-        int ch = bytes.readUnsignedByte();
-        if (ch != ':')
-            throw new IORuntimeException("Expected a ':' after the type " + sb + " but got a " + (char) ch);
+            // Consume any padding characters (e.g., whitespace)
+            consumePadding();
+            int ch = bytes.readUnsignedByte();
+            if (ch != ':')
+                throw new IORuntimeException("Expected a ':' after the type " + sb + " but got a " + (char) ch);
 
-        // Recursively copy the associated value after the colon
-        copyOne(wire, true, false);
+            // Recursively copy the associated value after the colon
+            copyOne(wire, true, false);
 
-        consumePadding();
-        int ch2 = bytes.readUnsignedByte();
-        if (ch2 != '}')
-            throw new IORuntimeException("Expected a '}' after the type " + sb + " but got a " + (char) ch);
+            consumePadding();
+            int ch2 = bytes.readUnsignedByte();
+            if (ch2 != '}')
+                throw new IORuntimeException("Expected a '}' after the type " + sb + " but got a " + (char) ch);
+        }
     }
 
     /**
@@ -418,29 +421,31 @@ public class JSONWire extends TextWire {
      * @throws InvalidMarshallableException if there's a problem with copying the data.
      */
     private void copyQuote(WireOut wire, int ch, boolean inMap, boolean topLevel) throws InvalidMarshallableException {
-        final StringBuilder sb = acquireStringBuilder();
-        // Extract the quoted text
-        while (bytes.readRemaining() > 0) {
-            int ch2 = bytes.readUnsignedByte();
-            if (ch2 == ch)
-                break;
-            sb.append((char) ch2);
+        try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+            final StringBuilder sb = sbR.get();
+            // Extract the quoted text
+            while (bytes.readRemaining() > 0) {
+                int ch2 = bytes.readUnsignedByte();
+                if (ch2 == ch)
+                    break;
+                sb.append((char) ch2);
 
-            // If an escape character is found, append the following character as well
-            if (ch2 == '\\')
-                sb.append((char) bytes.readUnsignedByte());
-        }
+                // If an escape character is found, append the following character as well
+                if (ch2 == '\\')
+                    sb.append((char) bytes.readUnsignedByte());
+            }
 
-        // Process any escaped characters within the text
-        unescape(sb);
+            // Process any escaped characters within the text
+            unescape(sb);
 
-        // Determine how to write the text to the wire based on the provided flags
-        if (topLevel) {
-            wire.writeEvent(String.class, sb);
-        } else if (inMap) {
-            wire.write(sb);
-        } else {
-            wire.getValueOut().text(sb);
+            // Determine how to write the text to the wire based on the provided flags
+            if (topLevel) {
+                wire.writeEvent(String.class, sb);
+            } else if (inMap) {
+                wire.write(sb);
+            } else {
+                wire.getValueOut().text(sb);
+            }
         }
     }
 
@@ -1133,15 +1138,20 @@ public class JSONWire extends TextWire {
             if (!hasTypeDefinition()) {
                 return super.object();
             } else {
-                final StringBuilder sb = acquireStringBuilder();
-                sb.setLength(0);
                 consume('{');
-                this.wireIn().read(sb);
-                final Class<?> clazz = classLookup().forName(sb.subSequence(1, sb.length()));
+                final Class<?> clazz = readAndLoadClassOther();
                 Object object = parseType(null, clazz, true);
                 consume('}');
                 consumePadding(1);
                 return object;
+            }
+        }
+
+        private Class<?> readAndLoadClassOther() {
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                final StringBuilder sb = sbR.get();
+                this.wireIn().read(sb);
+                return classLookup().forName(sb.subSequence(1, sb.length()));
             }
         }
 
@@ -1173,10 +1183,7 @@ public class JSONWire extends TextWire {
             if (!hasTypeDefinition()) {
                 return super.object(using, clazz, bestEffort);
             } else {
-                final StringBuilder sb = acquireStringBuilder();
-                sb.setLength(0);
-                readTypeDefinition(sb);
-                final Class<?> overrideClass = classLookup().forName(sb.subSequence(1, sb.length()));
+                final Class<?> overrideClass = readAndLoadClass();
                 if (clazz != null && !clazz.isAssignableFrom(overrideClass))
                     throw new ClassCastException("Unable to cast " + overrideClass.getName() + " to " + clazz.getName());
                 if (using != null && !overrideClass.isInstance(using))
@@ -1190,6 +1197,14 @@ public class JSONWire extends TextWire {
                 consumePadding(1);
 
                 return result;
+            }
+        }
+
+        private Class<?> readAndLoadClass() {
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                final StringBuilder sb = sbR.get();
+                readTypeDefinition(sb);
+                return classLookup().forName(sb.subSequence(1, sb.length()));
             }
         }
 

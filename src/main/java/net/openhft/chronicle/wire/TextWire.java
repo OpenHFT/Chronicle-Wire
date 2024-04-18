@@ -503,19 +503,23 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     @Override
     public long readEventNumber() {
-        final StringBuilder stringBuilder = acquireStringBuilder();
-        readField(stringBuilder);
-        try {
-            return StringUtils.parseInt(stringBuilder, 10);
-        } catch (NumberFormatException ignored) {
-            return Long.MIN_VALUE;
+        try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+            StringBuilder stringBuilder = sbR.get();
+            readField(stringBuilder);
+            try {
+                return StringUtils.parseInt(stringBuilder, 10);
+            } catch (NumberFormatException ignored) {
+                return Long.MIN_VALUE;
+            }
         }
     }
 
     @NotNull
     @Override
     public ValueIn read() {
-        readField(acquireStringBuilder());
+        try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+            readField(sbR.get());
+        }
         return valueIn;
     }
 
@@ -596,58 +600,59 @@ public class TextWire extends YamlWireOut<TextWire> {
     @Override
     public <K> K readEvent(@NotNull Class<K> expectedClass) throws InvalidMarshallableException {
         consumePadding(0);
-        @NotNull StringBuilder sb = acquireStringBuilder();
-        try {
-            int ch = peekCode();
-            // 10xx xxxx, 1111 xxxx
-            if (ch > 0x80 && ((ch & 0xC0) == 0x80 || (ch & 0xF0) == 0xF0)) {
-                throw new IllegalStateException("Attempting to read binary as TextWire ch=" + Integer.toHexString(ch));
+        try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+            @NotNull StringBuilder sb = sbR.get();
+            try {
+                int ch = peekCode();
+                // 10xx xxxx, 1111 xxxx
+                if (ch > 0x80 && ((ch & 0xC0) == 0x80 || (ch & 0xF0) == 0xF0)) {
+                    throw new IllegalStateException("Attempting to read binary as TextWire ch=" + Integer.toHexString(ch));
 
-            } else if (ch == '?') {
-                bytes.readSkip(1);
-                consumePadding();
-                @Nullable final K object;
-                // if we don't know what type of key we are looking for, and it is not being defined with !
-                // then we force it to be String as otherwise valueIn.object gets confused and gives us back a Map
-                int ch3 = peekCode();
-                if (ch3 != '!' && expectedClass == Object.class) {
-                    object = (K) valueIn.objectWithInferredType0(null, SerializationStrategies.ANY_SCALAR, defaultKeyClass());
+                } else if (ch == '?') {
+                    bytes.readSkip(1);
+                    consumePadding();
+                    @Nullable final K object;
+                    // if we don't know what type of key we are looking for, and it is not being defined with !
+                    // then we force it to be String as otherwise valueIn.object gets confused and gives us back a Map
+                    int ch3 = peekCode();
+                    if (ch3 != '!' && expectedClass == Object.class) {
+                        object = (K) valueIn.objectWithInferredType0(null, SerializationStrategies.ANY_SCALAR, defaultKeyClass());
+                    } else {
+                        object = valueIn.object(expectedClass);
+                    }
+                    consumePadding();
+                    int ch2 = readCode();
+                    if (ch2 != ':')
+                        throw new IllegalStateException("Unexpected character after field " + ch + " '" + (char) ch2 + "'");
+                    return object;
+
+                } else if (ch == '[') {
+                    return valueIn.object(expectedClass);
+
+                } else if (ch == '"' || ch == '\'') {
+                    bytes.readSkip(1);
+
+                    final StopCharTester escapingQuotes = ch == '"' ? getEscapingQuotes() : getEscapingSingleQuotes();
+                    parseUntil(sb, escapingQuotes);
+
+                    consumePadding(1);
+                    ch = readCode();
+                    if (ch != ':')
+                        throw new UnsupportedOperationException("Expected a : at " + bytes.toDebugString());
+
+                } else if (ch < 0) {
+                    return null;
+
                 } else {
-                    object = valueIn.object(expectedClass);
+                    parseUntil(sb, getEscapingEndOfText());
                 }
-                consumePadding();
-                int ch2 = readCode();
-                if (ch2 != ':')
-                    throw new IllegalStateException("Unexpected character after field " + ch + " '" + (char) ch2 + "'");
-                return object;
-
-            } else if (ch == '[') {
-                return valueIn.object(expectedClass);
-
-            } else if (ch == '"' || ch == '\'') {
-                bytes.readSkip(1);
-
-                final StopCharTester escapingQuotes = ch == '"' ? getEscapingQuotes() : getEscapingSingleQuotes();
-                parseUntil(sb, escapingQuotes);
-
-                consumePadding(1);
-                ch = readCode();
-                if (ch != ':')
-                    throw new UnsupportedOperationException("Expected a : at " + bytes.toDebugString());
-
-            } else if (ch < 0) {
-                sb.setLength(0);
-                return null;
-
-            } else {
-                parseUntil(sb, getEscapingEndOfText());
+                unescape(sb);
+            } catch (BufferUnderflowException e) {
+                Jvm.debug().on(getClass(), e);
             }
-            unescape(sb);
-        } catch (BufferUnderflowException e) {
-            Jvm.debug().on(getClass(), e);
+            //      consumePadding();
+            return toExpected(expectedClass, sb);
         }
-        //      consumePadding();
-        return toExpected(expectedClass, sb);
     }
 
     /**
@@ -901,43 +906,46 @@ public class TextWire extends YamlWireOut<TextWire> {
     private ValueIn read(@NotNull CharSequence keyName, int keyCode, Object defaultValue) {
         consumePadding();
         ValueInState curr = valueIn.curr();
-        final StringBuilder stringBuilder = acquireStringBuilder();
-        // did we save the position last time
-        // so we could go back and parseOne an older field?
-        if (curr.savedPosition() > 0) {
-            bytes.readPosition(curr.savedPosition() - 1);
-            curr.savedPosition(0L);
-        }
 
-        // Iterate while bytes remain.
-        while (bytes.readRemaining() > 0) {
-            long position = bytes.readPosition();
-            // at the current position look for the field.
-            valueIn.consumeAny = true;
-            readField(stringBuilder);
-            valueIn.consumeAny = false;
-            // might have changed due to readField in JSONWire
-            curr = valueIn.curr();
-
-            // If the field matches the required key, return its value.
-            if (StringUtils.equalsCaseIgnore(stringBuilder, keyName))
-                return valueIn;
-            if (stringBuilder.length() == 0) {
-                if (curr.unexpectedSize() > 0)
-                    break;
-                return valueIn;
+        try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+            final StringBuilder stringBuilder = sbR.get();
+            // did we save the position last time
+            // so we could go back and parseOne an older field?
+            if (curr.savedPosition() > 0) {
+                bytes.readPosition(curr.savedPosition() - 1);
+                curr.savedPosition(0L);
             }
 
-            // if no old field nor current field matches, set to default values.
-            // we may come back and set the field later if we find it.
-            curr.addUnexpected(position);
-            long toSkip = valueIn.readLengthMarshallable();
-            bytes.readSkip(toSkip);
-            consumePadding(1);
-        }
+            // Iterate while bytes remain.
+            while (bytes.readRemaining() > 0) {
+                long position = bytes.readPosition();
+                // at the current position look for the field.
+                valueIn.consumeAny = true;
+                readField(stringBuilder);
+                valueIn.consumeAny = false;
+                // might have changed due to readField in JSONWire
+                curr = valueIn.curr();
 
-        // Continuation of the read operation (possibly handles edge cases or fallbacks).
-        return read2(keyName, keyCode, defaultValue, curr, stringBuilder, keyName);
+                // If the field matches the required key, return its value.
+                if (StringUtils.equalsCaseIgnore(stringBuilder, keyName))
+                    return valueIn;
+                if (stringBuilder.length() == 0) {
+                    if (curr.unexpectedSize() > 0)
+                        break;
+                    return valueIn;
+                }
+
+                // if no old field nor current field matches, set to default values.
+                // we may come back and set the field later if we find it.
+                curr.addUnexpected(position);
+                long toSkip = valueIn.readLengthMarshallable();
+                bytes.readSkip(toSkip);
+                consumePadding(1);
+            }
+
+            // Continuation of the read operation (possibly handles edge cases or fallbacks).
+            return read2(keyName, keyCode, defaultValue, curr, stringBuilder, keyName);
+        }
     }
 
     /**
@@ -1257,7 +1265,6 @@ public class TextWire extends YamlWireOut<TextWire> {
     public void reset() {
         writeContext.reset();
         readContext.reset();
-        sb.setLength(0);
         lineStart = 0;
         valueIn.resetState();
         valueOut.resetState();
@@ -1334,8 +1341,10 @@ public class TextWire extends YamlWireOut<TextWire> {
         @Nullable
         @Override
         public String text() {
-            @Nullable CharSequence cs = textTo0(acquireStringBuilder());
-            return cs == null ? null : WireInternal.INTERNER.intern(cs);
+            try (ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                @Nullable CharSequence cs = textTo0(sbR.get());
+                return cs == null ? null : WireInternal.INTERNER.intern(cs);
+            }
         }
 
         @Nullable
@@ -1418,18 +1427,20 @@ public class TextWire extends YamlWireOut<TextWire> {
                     // Handle explicit typing (e.g. "!null" or "!type")
 
                     bytes.readSkip(1);
-                    final StringBuilder stringBuilder = acquireStringBuilder();
-                    parseWord(stringBuilder);
-                    if (StringUtils.isEqual(stringBuilder, "!null")) {
-                        textTo(stringBuilder);
-                        ret = null;
-                    } else {
-                        // ignore the type.
-                        if (a instanceof StringBuilder) {
-                            textTo((StringBuilder) a);
-                        } else {
+                    try (ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                        final StringBuilder stringBuilder = sbR.get();
+                        parseWord(stringBuilder);
+                        if (StringUtils.isEqual(stringBuilder, "!null")) {
                             textTo(stringBuilder);
-                            ret = stringBuilder;
+                            ret = null;
+                        } else {
+                            // ignore the type.
+                            if (a instanceof StringBuilder) {
+                                textTo((StringBuilder) a);
+                            } else {
+                                textTo(stringBuilder);
+                                ret = stringBuilder;
+                            }
                         }
                     }
                     break;
@@ -1562,17 +1573,19 @@ public class TextWire extends YamlWireOut<TextWire> {
         @NotNull
         public WireIn bytes(@NotNull ReadBytesMarshallable bytesConsumer) {
             consumePadding();
-            try {
+            try (final ScopedResource<StringBuilder> sbR1 = acquireStringBuilder()) {
                 // TODO needs to be made much more efficient.
-                @NotNull StringBuilder sb = acquireStringBuilder();
+                @NotNull StringBuilder sb = sbR1.get();
                 if (peekCode() == '!') {
                     bytes.readSkip(1);
                     parseWord(sb);
                     @Nullable byte[] uncompressed = Compression.uncompress(sb, TextWire.this, t -> {
-                        @NotNull StringBuilder sb2 = acquireStringBuilder();
-                        AppendableUtil.setLength(sb2, 0);
-                        t.parseUntil(sb2, StopCharTesters.COMMA_SPACE_STOP);
-                        return Base64.getDecoder().decode(sb2.toString());
+                        try (final ScopedResource<StringBuilder> sbR2 = acquireStringBuilder()) {
+                            @NotNull StringBuilder sb2 = sbR2.get();
+                            AppendableUtil.setLength(sb2, 0);
+                            t.parseUntil(sb2, StopCharTesters.COMMA_SPACE_STOP);
+                            return Base64.getDecoder().decode(sb2.toString());
+                        }
                     });
                     if (uncompressed != null) {
                         bytesConsumer.readMarshallable(Bytes.wrapForRead(uncompressed));
@@ -1596,9 +1609,9 @@ public class TextWire extends YamlWireOut<TextWire> {
         @Override
         public byte[] bytes(byte[] using) {
             consumePadding();
-            try {
+            try (final ScopedResource<StringBuilder> sbR1 = acquireStringBuilder()) {
                 // TODO needs to be made much more efficient.
-                final StringBuilder stringBuilder = acquireStringBuilder();
+                final StringBuilder stringBuilder = sbR1.get();
                 if (peekCode() == '!') {
                     bytes.readSkip(1);
                     parseWord(stringBuilder);
@@ -1609,9 +1622,11 @@ public class TextWire extends YamlWireOut<TextWire> {
                     }
 
                     byte @Nullable [] bytes = Compression.uncompress(stringBuilder, this, t -> {
-                        @NotNull StringBuilder sb0 = acquireStringBuilder();
-                        parseUntil(sb0, StopCharTesters.COMMA_SPACE_STOP);
-                        return Base64.getDecoder().decode(WireInternal.INTERNER.intern(sb0));
+                        try (final ScopedResource<StringBuilder> sbR2 = acquireStringBuilder()) {
+                            @NotNull StringBuilder sb0 = sbR2.get();
+                            parseUntil(sb0, StopCharTesters.COMMA_SPACE_STOP);
+                            return Base64.getDecoder().decode(WireInternal.INTERNER.intern(sb0));
+                        }
                     });
                     if (bytes != null)
                         return bytes;
@@ -1856,20 +1871,22 @@ public class TextWire extends YamlWireOut<TextWire> {
          */
         private void consumeValue() {
             consumePadding();
-            final StringBuilder stringBuilder = acquireStringBuilder();
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                final StringBuilder stringBuilder = sbR.get();
 
-            // If the value has a type annotation, handle it
-            if (peekCode() == '!') {
-                bytes.readSkip(1); // Skip the '!' character
-                parseWord(stringBuilder);
-                if (StringUtils.isEqual(stringBuilder, "type")) { // If it's a type value, consume the type
-                    consumeType();
-                } else { // Otherwise, consume whatever comes next
-                    consumeAny();
+                // If the value has a type annotation, handle it
+                if (peekCode() == '!') {
+                    bytes.readSkip(1); // Skip the '!' character
+                    parseWord(stringBuilder);
+                    if (StringUtils.isEqual(stringBuilder, "type")) { // If it's a type value, consume the type
+                        consumeType();
+                    } else { // Otherwise, consume whatever comes next
+                        consumeAny();
+                    }
+                } else {
+                    // Convert the remaining value to text
+                    textTo(stringBuilder);
                 }
-            } else {
-                // Convert the remaining value to text
-                textTo(stringBuilder);
             }
         }
 
@@ -1877,7 +1894,9 @@ public class TextWire extends YamlWireOut<TextWire> {
          * Consumes a type, which is expected to end with a comma, space or another stop character.
          */
         private void consumeType() {
-            parseUntil(acquireStringBuilder(), StopCharTesters.COMMA_SPACE_STOP);
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                parseUntil(sbR.get(), StopCharTesters.COMMA_SPACE_STOP);
+            }
         }
 
         @NotNull
@@ -1885,14 +1904,16 @@ public class TextWire extends YamlWireOut<TextWire> {
         public <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> tFlag) {
             consumePadding();
 
-            final StringBuilder stringBuilder = acquireStringBuilder();
-            if (textTo(stringBuilder) == null) {
-                tFlag.accept(t, null);
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                final StringBuilder stringBuilder = sbR.get();
+                if (textTo(stringBuilder) == null) {
+                    tFlag.accept(t, null);
+                    return TextWire.this;
+                }
+
+                tFlag.accept(t, StringUtils.isEqual(stringBuilder, "true"));
                 return TextWire.this;
             }
-
-            tFlag.accept(t, StringUtils.isEqual(stringBuilder, "true"));
-            return TextWire.this;
         }
 
         @NotNull
@@ -2032,40 +2053,48 @@ public class TextWire extends YamlWireOut<TextWire> {
         @Override
         public <T> WireIn time(@NotNull T t, @NotNull BiConsumer<T, LocalTime> setLocalTime) {
             consumePadding();
-            final StringBuilder stringBuilder = acquireStringBuilder();
-            textTo(stringBuilder);
-            setLocalTime.accept(t, LocalTime.parse(WireInternal.INTERNER.intern(stringBuilder)));
-            return TextWire.this;
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                final StringBuilder stringBuilder = sbR.get();
+                textTo(stringBuilder);
+                setLocalTime.accept(t, LocalTime.parse(WireInternal.INTERNER.intern(stringBuilder)));
+                return TextWire.this;
+            }
         }
 
         @NotNull
         @Override
         public <T> WireIn zonedDateTime(@NotNull T t, @NotNull BiConsumer<T, ZonedDateTime> tZonedDateTime) {
             consumePadding();
-            final StringBuilder stringBuilder = acquireStringBuilder();
-            textTo(stringBuilder);
-            tZonedDateTime.accept(t, ZonedDateTime.parse(WireInternal.INTERNER.intern(stringBuilder)));
-            return TextWire.this;
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                final StringBuilder stringBuilder = sbR.get();
+                textTo(stringBuilder);
+                tZonedDateTime.accept(t, ZonedDateTime.parse(WireInternal.INTERNER.intern(stringBuilder)));
+                return TextWire.this;
+            }
         }
 
         @NotNull
         @Override
         public <T> WireIn date(@NotNull T t, @NotNull BiConsumer<T, LocalDate> tLocalDate) {
             consumePadding();
-            final StringBuilder stringBuilder = acquireStringBuilder();
-            textTo(stringBuilder);
-            tLocalDate.accept(t, LocalDate.parse(WireInternal.INTERNER.intern(stringBuilder)));
-            return TextWire.this;
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                final StringBuilder stringBuilder = sbR.get();
+                textTo(stringBuilder);
+                tLocalDate.accept(t, LocalDate.parse(WireInternal.INTERNER.intern(stringBuilder)));
+                return TextWire.this;
+            }
         }
 
         @NotNull
         @Override
         public <T> WireIn uuid(@NotNull T t, @NotNull BiConsumer<T, UUID> tuuid) {
             consumePadding();
-            final StringBuilder stringBuilder = acquireStringBuilder();
-            textTo(stringBuilder);
-            tuuid.accept(t, UUID.fromString(WireInternal.INTERNER.intern(stringBuilder)));
-            return TextWire.this;
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                final StringBuilder stringBuilder = sbR.get();
+                textTo(stringBuilder);
+                tuuid.accept(t, UUID.fromString(WireInternal.INTERNER.intern(stringBuilder)));
+                return TextWire.this;
+            }
         }
 
         @NotNull
@@ -2328,18 +2357,19 @@ public class TextWire extends YamlWireOut<TextWire> {
         public <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts) {
             consumePadding();
             int code = peekCode();
-            final StringBuilder stringBuilder = acquireStringBuilder();
-            stringBuilder.setLength(0);
-            if (code == -1) {
-                stringBuilder.append("java.lang.Object");
-            } else if (code == '!') {
-                readCode();
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                final StringBuilder stringBuilder = sbR.get();
+                if (code == -1) {
+                    stringBuilder.append("java.lang.Object");
+                } else if (code == '!') {
+                    readCode();
 
-                parseUntil(stringBuilder, END_OF_TYPE);
-                bytes.readSkip(-1);
-                consumePadding();
+                    parseUntil(stringBuilder, END_OF_TYPE);
+                    bytes.readSkip(-1);
+                    consumePadding();
+                }
+                return this;
             }
-            return this;
         }
 
         @Override
@@ -2349,19 +2379,21 @@ public class TextWire extends YamlWireOut<TextWire> {
             if (code == '!' || code == '@') {
                 readCode();
 
-                final StringBuilder stringBuilder = acquireStringBuilder();
-                stringBuilder.setLength(0);
-                parseUntil(stringBuilder, END_OF_TYPE);
-                bytes.readSkip(-1);
-                try {
-                    return classLookup().forName(stringBuilder);
-                } catch (ClassNotFoundRuntimeException e) {
-                    // Note: it's not possible to generate a Tuple without an interface implied.
-                    if (THROW_CNFRE)
-                        throw e;
-                    String message = "Unable to find " + stringBuilder + " " + e.getCause();
-                    Jvm.warn().on(getClass(), message);
-                    return null;
+                try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                    final StringBuilder stringBuilder = sbR.get();
+                    stringBuilder.setLength(0);
+                    parseUntil(stringBuilder, END_OF_TYPE);
+                    bytes.readSkip(-1);
+                    try {
+                        return classLookup().forName(stringBuilder);
+                    } catch (ClassNotFoundRuntimeException e) {
+                        // Note: it's not possible to generate a Tuple without an interface implied.
+                        if (THROW_CNFRE)
+                            throw e;
+                        String message = "Unable to find " + stringBuilder + " " + e.getCause();
+                        Jvm.warn().on(getClass(), message);
+                        return null;
+                    }
                 }
             }
             return null;
@@ -2374,16 +2406,17 @@ public class TextWire extends YamlWireOut<TextWire> {
             if (code == '!') {
                 readCode();
 
-                final StringBuilder stringBuilder = acquireStringBuilder();
-                stringBuilder.setLength(0);
-                parseUntil(stringBuilder, END_OF_TYPE);
-                bytes.readSkip(-1);
-                try {
-                    return classLookup().forName(stringBuilder);
-                } catch (ClassNotFoundRuntimeException e) {
-                    Object o = handleCNFE(tClass, e, stringBuilder);
-                    if (o != null)
-                        return o;
+                try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                    final StringBuilder stringBuilder = sbR.get();
+                    parseUntil(stringBuilder, END_OF_TYPE);
+                    bytes.readSkip(-1);
+                    try {
+                        return classLookup().forName(stringBuilder);
+                    } catch (ClassNotFoundRuntimeException e) {
+                        Object o = handleCNFE(tClass, e, stringBuilder);
+                        if (o != null)
+                            return o;
+                    }
                 }
             }
             if (Wires.dtoInterface(tClass) && GENERATE_TUPLES && ObjectUtils.implementationToUse(tClass) == tClass)
@@ -2458,10 +2491,12 @@ public class TextWire extends YamlWireOut<TextWire> {
             if (!peekStringIgnoreCase("type "))
                 throw new UnsupportedOperationException(stringForCode(code));
             bytes.readSkip("type ".length());
-            final StringBuilder stringBuilder = acquireStringBuilder();
-            parseUntil(stringBuilder, END_OF_TYPE);
-            classNameConsumer.accept(t, stringBuilder);
-            return TextWire.this;
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                final StringBuilder stringBuilder = sbR.get();
+                parseUntil(stringBuilder, END_OF_TYPE);
+                classNameConsumer.accept(t, stringBuilder);
+                return TextWire.this;
+            }
         }
 
         @Override
@@ -2476,12 +2511,14 @@ public class TextWire extends YamlWireOut<TextWire> {
             if (!peekStringIgnoreCase("type "))
                 throw new UnsupportedOperationException(stringForCode(code));
             bytes.readSkip("type ".length());
-            final StringBuilder stringBuilder = acquireStringBuilder();
-            parseUntil(stringBuilder, END_OF_TYPE);
-            try {
-                return classLookup().forName(stringBuilder);
-            } catch (ClassNotFoundRuntimeException e) {
-                return unresolvedHandler.apply(stringBuilder, e.getCause());
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                final StringBuilder stringBuilder = sbR.get();
+                parseUntil(stringBuilder, END_OF_TYPE);
+                try {
+                    return classLookup().forName(stringBuilder);
+                } catch (ClassNotFoundRuntimeException e) {
+                    return unresolvedHandler.apply(stringBuilder, e.getCause());
+                }
             }
         }
 
@@ -2639,17 +2676,19 @@ public class TextWire extends YamlWireOut<TextWire> {
             else
                 usingMap.clear();
 
-            final StringBuilder stringBuilder = acquireStringBuilder();
-            int code = peekCode();
-            switch (code) {
-                case '!':
-                    return typedMap(kClass, vClass, usingMap, stringBuilder);
-                case '{':
-                    return marshallableAsMap(kClass, vClass, usingMap);
-                case '?':
-                    return readAllAsMap(kClass, vClass, usingMap);
-                default:
-                    throw new IORuntimeException("Unexpected code " + (char) code);
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                final StringBuilder stringBuilder = sbR.get();
+                int code = peekCode();
+                switch (code) {
+                    case '!':
+                        return typedMap(kClass, vClass, usingMap, stringBuilder);
+                    case '{':
+                        return marshallableAsMap(kClass, vClass, usingMap);
+                    case '?':
+                        return readAllAsMap(kClass, vClass, usingMap);
+                    default:
+                        throw new IORuntimeException("Unexpected code " + (char) code);
+                }
             }
         }
 
@@ -2704,16 +2743,18 @@ public class TextWire extends YamlWireOut<TextWire> {
         @Override
         public boolean bool() {
             consumePadding();
-            final StringBuilder stringBuilder = acquireStringBuilder();
-            if (textTo(stringBuilder) == null)
-                throw new NullPointerException("value is null");
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                final StringBuilder stringBuilder = sbR.get();
+                if (textTo(stringBuilder) == null)
+                    throw new NullPointerException("value is null");
 
-            if (ObjectUtils.isTrue(stringBuilder))
-                return true;
-            if (ObjectUtils.isFalse(stringBuilder))
+                if (ObjectUtils.isTrue(stringBuilder))
+                    return true;
+                if (ObjectUtils.isFalse(stringBuilder))
+                    return false;
+                Jvm.debug().on(getClass(), "Unable to parse '" + stringBuilder + "' as a boolean flag, assuming false");
                 return false;
-            Jvm.debug().on(getClass(), "Unable to parse '" + stringBuilder + "' as a boolean flag, assuming false");
-            return false;
+            }
         }
 
         @Override
@@ -2819,10 +2860,12 @@ public class TextWire extends YamlWireOut<TextWire> {
 
             // If the next byte is '!', indicating the start of a type string.
             if (peek == '!') {
-                final StringBuilder stringBuilder = acquireStringBuilder();
+                try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                    final StringBuilder stringBuilder = sbR.get();
 
-                // Parse the type string until reaching an end-of-type character.
-                parseUntil(stringBuilder, END_OF_TYPE);
+                    // Parse the type string until reaching an end-of-type character.
+                    parseUntil(stringBuilder, END_OF_TYPE);
+                }
 
                 // Consume any padding after the type string.
                 consumePadding();

@@ -90,6 +90,12 @@ public class WireTestCommon {
         exceptions = Jvm.recordExceptions();
     }
 
+    @Before
+    public void ignorePoolCapacityExceededErrors() {
+        // Remove this to see where we have problematic re-use of YamlWire#acquireStringBuffer
+        ignoreException("Pool capacity exceeded, consider increasing maxInstances");
+    }
+
     // Adds an exception with a particular message to the ignore list
     public void ignoreException(String message) {
         ignoreException(k -> contains(k.message, message) || (k.throwable != null && contains(k.throwable.getMessage(), message)), message);

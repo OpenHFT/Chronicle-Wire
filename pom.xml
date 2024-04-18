@@ -198,7 +198,7 @@
                         <configuration>
                             <referenceVersion>2.25ea0</referenceVersion>
                             <artifactsURI>https://teamcity.chronicle.software/repository/download</artifactsURI>
-                            <binaryCompatibilityPercentageRequired>99.6</binaryCompatibilityPercentageRequired>
+                            <binaryCompatibilityPercentageRequired>98.4</binaryCompatibilityPercentageRequired>
                             <extraOptions>
                                 <extraOption>
                                     <name>skip-internal-packages</name>

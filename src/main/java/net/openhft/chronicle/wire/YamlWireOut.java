@@ -32,6 +32,9 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.ClassLookup;
+import net.openhft.chronicle.core.pool.StringBuilderPool;
+import net.openhft.chronicle.core.scoped.ScopedResource;
+import net.openhft.chronicle.core.scoped.ScopedResourcePool;
 import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -85,7 +88,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     protected final YamlValueOut valueOut = createValueOut();
-    protected final StringBuilder sb = new StringBuilder();
+    protected final ScopedResourcePool<StringBuilder> sb = StringBuilderPool.createThreadLocal(1);
     private boolean addTimeStamps = false;
     private boolean trimFirstCurly = true;
 
@@ -139,9 +142,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
      * @return The internal StringBuilder after it has been cleared.
      */
     @NotNull
-    protected StringBuilder acquireStringBuilder() {
-        sb.setLength(0);
-        return sb;
+    protected ScopedResource<StringBuilder> acquireStringBuilder() {
+        return sb.get();
     }
 
     @NotNull
@@ -847,9 +849,11 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 writeSavedEventName();
             }
             prependSeparator();
-            final StringBuilder stringBuilder = acquireStringBuilder();
-            stringBuilder.appendCodePoint(codepoint);
-            text(stringBuilder);
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                StringBuilder stringBuilder = sbR.get();
+                stringBuilder.appendCodePoint(codepoint);
+                text(stringBuilder);
+            }
             sep = empty();
             return wireOut();
         }
