@@ -75,13 +75,14 @@ public class MessageHistoryTest extends WireTestCommon {
             Wires.copyTo(container2, container1);
         }
 
+        // this is the limit, one more timing should fail
+        assertEquals(256, container1.timings());
         // Attempt to copy again and expect an exception.
         try {
             Wires.copyTo(container1, container2);
-            if (!OS.isMacOSX())
-                fail();
-        } catch (IllegalStateException | ArithmeticException e) {
-            // Expected exception, all good.
+            fail();
+        } catch (ArithmeticException e) {
+            assertTrue(e.getMessage().contains("257 out of range"));
         }
     }
 
