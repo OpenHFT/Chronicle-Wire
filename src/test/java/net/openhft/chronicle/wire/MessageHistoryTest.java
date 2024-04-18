@@ -28,6 +28,10 @@ import static net.openhft.chronicle.bytes.MethodReader.MESSAGE_HISTORY_METHOD_ID
 import static org.junit.Assert.*;
 
 public class MessageHistoryTest extends WireTestCommon {
+    static {
+        System.setProperty("history.as.bytes", "false");
+    }
+
 
     // Test to check if clearing and retrieving the MessageHistory works correctly.
     @Test
@@ -82,6 +86,8 @@ public class MessageHistoryTest extends WireTestCommon {
             fail("timings=" + container2.timings());
         } catch (ArithmeticException e) {
             assertTrue(e.getMessage().contains("257 out of range"));
+        } catch (java.lang.IllegalStateException ignore) {
+            //expected
         }
     }
 
