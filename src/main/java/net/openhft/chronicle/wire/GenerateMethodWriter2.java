@@ -33,8 +33,15 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
 import static java.util.Collections.*;
-
-@SuppressWarnings("StringBufferReplaceableByString")
+/**
+ * The {@code GenerateMethodWriter2} class is responsible for generating method writers based on the provided metadata.
+ * <p>
+ * It extends the {@link AbstractClassGenerator} with metadata type {@link GMWMetaData}. This class internally maintains
+ * a set of template methods that help in the method writer generation. These templates are based on certain method names
+ * and parameter types, which define their structure.
+ */
+@SuppressWarnings("this-escape")
+@Deprecated(/* to be moved in x.27 */)
 public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethodWriter2.GMWMetaData> {
 
     private static final String DOCUMENT_CONTEXT = DocumentContext.class.getSimpleName();

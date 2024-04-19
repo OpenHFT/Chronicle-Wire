@@ -44,6 +44,7 @@ import static net.openhft.chronicle.wire.GenerateMethodWriter.isSynthetic;
 /**
  * Responsible for code generation and its runtime compilation of custom {@link MethodReader}s.
  */
+@Deprecated(/* to be moved in x.27 */)
 public class GenerateMethodReader {
     private static final boolean DUMP_CODE = Jvm.getBoolean("dumpCode");
     private static final Set<Class<?>> IGNORED_INTERFACES = new LinkedHashSet<>();

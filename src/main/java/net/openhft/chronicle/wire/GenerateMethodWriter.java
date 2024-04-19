@@ -48,7 +48,7 @@ import static java.util.Collections.*;
 import static net.openhft.chronicle.core.util.GenericReflection.erase;
 import static net.openhft.chronicle.core.util.GenericReflection.getParameterTypes;
 
-@SuppressWarnings("StringBufferReplaceableByString")
+@Deprecated(/* to be moved in x.27 */)
 public class GenerateMethodWriter {
 
     public static final String UPDATE_INTERCEPTOR = UpdateInterceptor.class.getSimpleName();

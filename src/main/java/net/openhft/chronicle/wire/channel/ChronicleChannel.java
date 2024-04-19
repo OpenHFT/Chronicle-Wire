@@ -34,6 +34,7 @@ import java.util.function.Consumer;
  * The ChronicleChannel interface encapsulates a communication channel that can process various data types.
  * It extends the Closeable, MarshallableOut, and MarshallableIn interfaces, thereby supporting a wide range of I/O operations.
  */
+@Deprecated(/* to be moved in x.27 */)
 public interface ChronicleChannel extends Closeable, MarshallableOut, MarshallableIn {
 
     /**
