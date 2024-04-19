@@ -25,6 +25,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.ValidatableUtil;
 import net.openhft.chronicle.core.pool.ClassLookup;
+import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
@@ -687,19 +688,23 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
     @Override
     public long readEventNumber() {
-        final StringBuilder stringBuilder = acquireStringBuilder();
-        readField(stringBuilder);
-        try {
-            return StringUtils.parseInt(stringBuilder, 10);
-        } catch (NumberFormatException ignored) {
-            return Long.MIN_VALUE;
+        try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+            final StringBuilder stringBuilder = sbR.get();
+            readField(stringBuilder);
+            try {
+                return StringUtils.parseInt(stringBuilder, 10);
+            } catch (NumberFormatException ignored) {
+                return Long.MIN_VALUE;
+            }
         }
     }
 
     @NotNull
     @Override
     public ValueIn read() {
-        readField(acquireStringBuilder());
+        try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+            readField(sbR.get());
+        }
         switch (yt.current()) {
             case NONE:
             case MAPPING_END:
@@ -822,19 +827,22 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 initRereadWire();
             }
             int indent = yt.topContext().indent;
-            for (int i = 0; i < count; i++) {
-                rereadWire.yt.topContext().indent = indent;
-                long end = bytes.readPosition();
-                long offset = offsets[i];
-                rereadWire.bytes.readPositionRemaining(offset, end - offset);
-                rereadWire.yt.rereadFrom(offset);
-                YamlToken next = rereadWire.yt.next();
-                if (next == YamlToken.MAPPING_START) // indented rather than iin { }
-                    next = rereadWire.yt.next();
-                assert next == YamlToken.MAPPING_KEY : "next: " + next;
-                if (rereadWire.checkForMatch(keyName)) {
-                    keys.removeIndex(i);
-                    return rereadWire.valueIn;
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                StringBuilder stringBuilder = sbR.get();
+                for (int i = 0; i < count; i++) {
+                    rereadWire.yt.topContext().indent = indent;
+                    long end = bytes.readPosition();
+                    long offset = offsets[i];
+                    rereadWire.bytes.readPositionRemaining(offset, end - offset);
+                    rereadWire.yt.rereadFrom(offset);
+                    YamlToken next = rereadWire.yt.next();
+                    if (next == YamlToken.MAPPING_START) // indented rather than iin { }
+                        next = rereadWire.yt.next();
+                    assert next == YamlToken.MAPPING_KEY : "next: " + next;
+                    if (rereadWire.checkForMatch(stringBuilder, keyName)) {
+                        keys.removeIndex(i);
+                        return rereadWire.valueIn;
+                    }
                 }
             }
             // Next lines not covered by any tests
@@ -842,15 +850,18 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         YamlTokeniser.YTContext yc = yt.topContext();
         int minIndent = yc.indent;
         // go through remaining keys
-        while (yt.current() == YamlToken.MAPPING_KEY) {
-            long lastKeyPosition = yt.lineStart;
-            if (checkForMatch(keyName))
-                return valueIn;
+        try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+            StringBuilder stringBuilder = sbR.get();
+            while (yt.current() == YamlToken.MAPPING_KEY) {
+                long lastKeyPosition = yt.lineStart;
+                if (checkForMatch(stringBuilder, keyName))
+                    return valueIn;
 
-            if (!StringUtils.startsWith(sb, "-"))
-                keys.push(lastKeyPosition);
-            // Avoid consuming '}' but consume to next mapping key
-            valueIn.consumeAny(minIndent >= 0 ? minIndent : Integer.MAX_VALUE);
+                if (!StringUtils.startsWith(stringBuilder, "-"))
+                    keys.push(lastKeyPosition);
+                // Avoid consuming '}' but consume to next mapping key
+                valueIn.consumeAny(minIndent >= 0 ? minIndent : Integer.MAX_VALUE);
+            }
         }
 
         return defaultValueIn;
@@ -893,21 +904,21 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * @param keyName The expected key name.
      * @return true if the next token's text matches the given key name; false otherwise.
      */
-    private boolean checkForMatch(@NotNull String keyName) {
+    private boolean checkForMatch(StringBuilder stringBuilder, @NotNull String keyName) {
         YamlToken next = yt.next();
 
         // If the next token is textual
         if (next == YamlToken.TEXT) {
-            sb.setLength(0);          // Reset the StringBuilder
-            sb.append(yt.text());     // Append the text of the next token to the StringBuilder
-            unescape(sb, yt.blockQuote()); // Handle any escape sequences within the text
+            stringBuilder.setLength(0);          // Reset the StringBuilder
+            stringBuilder.append(yt.text());     // Append the text of the next token to the StringBuilder
+            unescape(stringBuilder, yt.blockQuote()); // Handle any escape sequences within the text
             yt.next();
         } else {
             throw new IllegalStateException(next.toString());
         }
 
         // Compare the processed string in the StringBuilder with the expected keyName
-        return (sb.length() == 0 || StringUtils.isEqual(sb, keyName));
+        return (stringBuilder.length() == 0 || StringUtils.isEqual(stringBuilder, keyName));
     }
 
     @NotNull
@@ -1114,7 +1125,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
         // Clear the bytes buffer and internal StringBuilder
         bytes.clear();
-        sb.setLength(0);
 
         // Reset the YAML tokenizer and value states
         yt.reset();
@@ -1165,9 +1175,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Nullable
         @Override
         public String text() {
-            @Nullable CharSequence cs = textTo0(acquireStringBuilder());
-            yt.next();
-            return cs == null ? null : WireInternal.INTERNER.intern(cs);
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                @Nullable CharSequence cs = textTo0(sbR.get());
+                yt.next();
+                return cs == null ? null : WireInternal.INTERNER.intern(cs);
+            }
         }
 
         @Nullable
@@ -1329,43 +1341,47 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         public WireIn bytes(@NotNull ReadBytesMarshallable bytesConsumer) {
             consumePadding();
             // TODO needs to be made much more efficient.
-            @NotNull StringBuilder sb = acquireStringBuilder();
-            if (yt.current() == YamlToken.TAG) {
-                bytes.readSkip(1);
-                yt.text(sb);
-                yt.next();
-                if (yt.current() != YamlToken.TEXT)
-                    throw new UnsupportedOperationException(yt.toString());
-                @Nullable byte[] uncompressed = Compression.uncompress(sb, yt, t -> {
-                    @NotNull StringBuilder sb2 = acquireStringBuilder();
-                    t.text(sb2);
-                    return Base64.getDecoder().decode(sb2.toString());
-                });
-                if (uncompressed != null) {
-                    Bytes<byte[]> bytes = Bytes.wrapForRead(uncompressed);
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                @NotNull StringBuilder sb = sbR.get();
+                if (yt.current() == YamlToken.TAG) {
+                    bytes.readSkip(1);
+                    yt.text(sb);
+                    yt.next();
+                    if (yt.current() != YamlToken.TEXT)
+                        throw new UnsupportedOperationException(yt.toString());
+                    @Nullable byte[] uncompressed = Compression.uncompress(sb, yt, t -> {
+                        try (final ScopedResource<StringBuilder> sbR2 = acquireStringBuilder()) {
+                            @NotNull StringBuilder sb2 = sbR2.get();
+                            t.text(sb2);
+                            return Base64.getDecoder().decode(sb2.toString());
+                        }
+                    });
+                    if (uncompressed != null) {
+                        Bytes<byte[]> bytes = Bytes.wrapForRead(uncompressed);
+                        try {
+                            bytesConsumer.readMarshallable(bytes);
+                        } finally {
+                            bytes.releaseLast();
+                        }
+
+                    } else if (StringUtils.isEqual(sb, NULL_TAG)) {
+                        bytesConsumer.readMarshallable(null);
+                        yt.next();
+
+                    } else {
+                        throw new IORuntimeException("Unsupported type=" + sb);
+                    }
+                } else {
+                    textTo(sb);
+                    Bytes<byte[]> bytes = Bytes.wrapForRead(sb.toString().getBytes(ISO_8859_1));
                     try {
                         bytesConsumer.readMarshallable(bytes);
                     } finally {
                         bytes.releaseLast();
                     }
-
-                } else if (StringUtils.isEqual(sb, NULL_TAG)) {
-                    bytesConsumer.readMarshallable(null);
-                    yt.next();
-
-                } else {
-                    throw new IORuntimeException("Unsupported type=" + sb);
                 }
-            } else {
-                textTo(sb);
-                Bytes<byte[]> bytes = Bytes.wrapForRead(sb.toString().getBytes(ISO_8859_1));
-                try {
-                    bytesConsumer.readMarshallable(bytes);
-                } finally {
-                    bytes.releaseLast();
-                }
+                return YamlWire.this;
             }
-            return YamlWire.this;
         }
 
         @Override
@@ -1496,15 +1512,17 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         public <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> tFlag) {
             consumePadding();
 
-            final StringBuilder stringBuilder = acquireStringBuilder();
-            if (textTo(stringBuilder) == null) {
-                tFlag.accept(t, null);
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                final StringBuilder stringBuilder = sbR.get();
+                if (textTo(stringBuilder) == null) {
+                    tFlag.accept(t, null);
+                    return YamlWire.this;
+                }
+
+                Boolean flag = stringBuilder.length() == 0 ? null : StringUtils.isEqual(stringBuilder, "true");
+                tFlag.accept(t, flag);
                 return YamlWire.this;
             }
-
-            Boolean flag = stringBuilder.length() == 0 ? null : StringUtils.isEqual(stringBuilder, "true");
-            tFlag.accept(t, flag);
-            return YamlWire.this;
         }
 
         @NotNull
@@ -1614,40 +1632,48 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public <T> WireIn time(@NotNull T t, @NotNull BiConsumer<T, LocalTime> setLocalTime) {
             consumePadding();
-            final StringBuilder stringBuilder = acquireStringBuilder();
-            textTo(stringBuilder);
-            setLocalTime.accept(t, LocalTime.parse(WireInternal.INTERNER.intern(stringBuilder)));
-            return YamlWire.this;
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                final StringBuilder stringBuilder = sbR.get();
+                textTo(stringBuilder);
+                setLocalTime.accept(t, LocalTime.parse(WireInternal.INTERNER.intern(stringBuilder)));
+                return YamlWire.this;
+            }
         }
 
         @NotNull
         @Override
         public <T> WireIn zonedDateTime(@NotNull T t, @NotNull BiConsumer<T, ZonedDateTime> tZonedDateTime) {
             consumePadding();
-            final StringBuilder stringBuilder = acquireStringBuilder();
-            textTo(stringBuilder);
-            tZonedDateTime.accept(t, ZonedDateTime.parse(WireInternal.INTERNER.intern(stringBuilder)));
-            return YamlWire.this;
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                final StringBuilder stringBuilder = sbR.get();
+                textTo(stringBuilder);
+                tZonedDateTime.accept(t, ZonedDateTime.parse(WireInternal.INTERNER.intern(stringBuilder)));
+                return YamlWire.this;
+            }
         }
 
         @NotNull
         @Override
         public <T> WireIn date(@NotNull T t, @NotNull BiConsumer<T, LocalDate> tLocalDate) {
             consumePadding();
-            final StringBuilder stringBuilder = acquireStringBuilder();
-            textTo(stringBuilder);
-            tLocalDate.accept(t, LocalDate.parse(WireInternal.INTERNER.intern(stringBuilder)));
-            return YamlWire.this;
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                final StringBuilder stringBuilder = sbR.get();
+                textTo(stringBuilder);
+                tLocalDate.accept(t, LocalDate.parse(WireInternal.INTERNER.intern(stringBuilder)));
+                return YamlWire.this;
+            }
         }
 
         @NotNull
         @Override
         public <T> WireIn uuid(@NotNull T t, @NotNull BiConsumer<T, UUID> tuuid) {
             consumePadding();
-            final StringBuilder stringBuilder = acquireStringBuilder();
-            textTo(stringBuilder);
-            tuuid.accept(t, UUID.fromString(WireInternal.INTERNER.intern(stringBuilder)));
-            return YamlWire.this;
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                final StringBuilder stringBuilder = sbR.get();
+                textTo(stringBuilder);
+                tuuid.accept(t, UUID.fromString(WireInternal.INTERNER.intern(stringBuilder)));
+                return YamlWire.this;
+            }
         }
 
         @NotNull
@@ -1844,19 +1870,21 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         public Class typePrefix() {
             if (yt.current() != YamlToken.TAG)
                 return null;
-            final StringBuilder stringBuilder = acquireStringBuilder();
-            yt.text(stringBuilder);
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                final StringBuilder stringBuilder = sbR.get();
+                yt.text(stringBuilder);
 
-            // Do not handle !!binary, do not resolve to BytesStore, do not consume tag
-            if (BINARY_TAG.contentEquals(stringBuilder) || DATA_TAG.contains(stringBuilder))
-                return null;
+                // Do not handle !!binary, do not resolve to BytesStore, do not consume tag
+                if (BINARY_TAG.contentEquals(stringBuilder) || DATA_TAG.contains(stringBuilder))
+                    return null;
 
-            try {
-                yt.next();
-                return classLookup().forName(stringBuilder);
-            } catch (ClassNotFoundRuntimeException e) {
-                Jvm.warn().on(getClass(), "Unable to find " + stringBuilder + " " + e);
-                return null;
+                try {
+                    yt.next();
+                    return classLookup().forName(stringBuilder);
+                } catch (ClassNotFoundRuntimeException e) {
+                    Jvm.warn().on(getClass(), "Unable to find " + stringBuilder + " " + e);
+                    return null;
+                }
             }
         }
 
@@ -1910,11 +1938,13 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             if (yt.next() != YamlToken.TEXT)
                 throw new UnsupportedOperationException(yt.toString());
 
-            StringBuilder stringBuilder = acquireStringBuilder();
-            textTo(stringBuilder);
-            classNameConsumer.accept(t, stringBuilder);
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                StringBuilder stringBuilder = sbR.get();
+                textTo(stringBuilder);
+                classNameConsumer.accept(t, stringBuilder);
 
-            return YamlWire.this;
+                return YamlWire.this;
+            }
         }
 
         @Override
@@ -2063,16 +2093,18 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             else
                 usingMap.clear();
 
-            @NotNull StringBuilder sb = acquireStringBuilder();
-            switch (yt.current()) {
-                case TAG:
-                    return typedMap(kClass, vClass, usingMap, sb);
-                case MAPPING_START:
-                    return marshallableAsMap(kClass, vClass, usingMap);
-                case SEQUENCE_START:
-                    return readAllAsMap(kClass, vClass, usingMap);
-                default:
-                    throw new IORuntimeException("Unexpected code " + yt.current());
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                @NotNull StringBuilder sb = sbR.get();
+                switch (yt.current()) {
+                    case TAG:
+                        return typedMap(kClass, vClass, usingMap, sb);
+                    case MAPPING_START:
+                        return marshallableAsMap(kClass, vClass, usingMap);
+                    case SEQUENCE_START:
+                        return readAllAsMap(kClass, vClass, usingMap);
+                    default:
+                        throw new IORuntimeException("Unexpected code " + yt.current());
+                }
             }
         }
 
@@ -2125,16 +2157,18 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public boolean bool() {
             consumePadding();
-            final StringBuilder stringBuilder = acquireStringBuilder();
-            if (textTo(stringBuilder) == null)
-                throw new NullPointerException("value is null");
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                final StringBuilder stringBuilder = sbR.get();
+                if (textTo(stringBuilder) == null)
+                    throw new NullPointerException("value is null");
 
-            if (ObjectUtils.isTrue(stringBuilder))
-                return true;
-            if (ObjectUtils.isFalse(stringBuilder))
+                if (ObjectUtils.isTrue(stringBuilder))
+                    return true;
+                if (ObjectUtils.isFalse(stringBuilder))
+                    return false;
+                Jvm.debug().on(getClass(), "Unable to parse '" + stringBuilder + "' as a boolean flag, assuming false");
                 return false;
-            Jvm.debug().on(getClass(), "Unable to parse '" + stringBuilder + "' as a boolean flag, assuming false");
-            return false;
+            }
         }
 
         @Override
@@ -2322,13 +2356,15 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
                 case TAG:
                     // Handle specific YAML tags
-                    final StringBuilder stringBuilder = acquireStringBuilder();
-                    yt.text(stringBuilder);
+                    try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                        final StringBuilder stringBuilder = sbR.get();
+                        yt.text(stringBuilder);
 
-                    // Specific handling for binary data
-                    if (BINARY_TAG.contentEquals(stringBuilder)) {
-                        yt.next();
-                        return decodeBinary(type);
+                        // Specific handling for binary data
+                        if (BINARY_TAG.contentEquals(stringBuilder)) {
+                            yt.next();
+                            return decodeBinary(type);
+                        }
                     }
                     // Intentional fall-through for other tags
 
@@ -2349,10 +2385,12 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             // Determine the kind of quote used for the YAML block
             char bq = yt.blockQuote();
             // Extract the text content into a StringBuilder
-            @Nullable StringBuilder s = textTo0(acquireStringBuilder());
-            if (yt.current() == YamlToken.LITERAL)
-                return s;
-            return readNumberOrTextFrom(bq, s);
+            try (final ScopedResource<StringBuilder> sbR = acquireStringBuilder()) {
+                @Nullable StringBuilder s = textTo0(sbR.get());
+                if (yt.current() == YamlToken.LITERAL)
+                    return s;
+                return readNumberOrTextFrom(bq, s);
+            }
         }
 
         /**
