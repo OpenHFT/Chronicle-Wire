@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
  * This agitator is designed to create altered YAML content by omitting specific messages based on a limit.
  * The purpose is to simulate scenarios where a certain message in the YAML content is missing.
  */
+@Deprecated(/* to be moved in x.27 */)
 public class MessageMissingAgitator implements YamlAgitator {
 
     // Pattern to identify YAML message separators

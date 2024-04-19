@@ -39,6 +39,7 @@ import java.util.function.Predicate;
  * Each method within this class is designed to either set a specific configuration or retrieve a particular value,
  * enhancing clarity and simplifying the process of parameter setup.
  */
+@Deprecated(/* to be moved in x.27 */)
 public class YamlTesterParametersBuilder<T> {
 
     // A function responsible for constructing the test component

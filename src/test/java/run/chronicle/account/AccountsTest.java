@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings("deprecated")
 @RunWith(Parameterized.class)
 public class AccountsTest extends WireTestCommon {
     // Test scenarios located in the following paths
