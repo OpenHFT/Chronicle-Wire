@@ -24,7 +24,12 @@ import run.chronicle.account.dto.CheckPoint;
 import run.chronicle.account.dto.Transfer;
 
 public interface AccountsIn {
+    // Processes an account status request, potentially throwing an exception if the request is invalid.
     void accountStatus(AccountStatus accountStatus) throws InvalidMarshallableException;
+
+    // Processes a transfer request between accounts.
     void transfer(Transfer transfer);
+
+    // Processes a checkpoint event, used to mark a specific point in the processing sequence.
     void checkPoint(CheckPoint checkPoint);
 }

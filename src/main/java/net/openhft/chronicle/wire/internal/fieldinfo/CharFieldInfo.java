@@ -25,8 +25,21 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 
+/**
+ * Represents field information for character fields, extending the generic field information capabilities
+ * provided by {@link UnsafeFieldInfo}. It offers direct memory access functionality to get and set
+ * character values in objects, leveraging unsafe operations for performance.
+ */
 public final class CharFieldInfo extends UnsafeFieldInfo {
 
+    /**
+     * Constructs an instance of CharFieldInfo with the provided details about a character field.
+     *
+     * @param name        The name of the field.
+     * @param type        The type of the field.
+     * @param bracketType The bracket type associated with the field.
+     * @param field       The field object representation.
+     */
     public CharFieldInfo(String name, Class type, BracketType bracketType, @NotNull Field field) {
         super(name, type, bracketType, field);
     }

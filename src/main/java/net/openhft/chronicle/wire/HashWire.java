@@ -40,9 +40,16 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
-
+/**
+ * The {@code HashWire} class is responsible for generating hash values from provided objects or {@link WriteMarshallable} instances.
+ * <p>
+ * This class provides a consistent hashing mechanism by leveraging a predefined set of constants and algorithms.
+ * Instances are stored in a {@code ThreadLocal} to ensure thread-safety and optimized access across the application.
+ * @see WriteMarshallable
+ */
 @SuppressWarnings("rawtypes")
 public class HashWire implements WireOut, HexDumpBytesDescription {
+    // Thread-local storage for HashWire instances.
     private static final ThreadLocal<HashWire> hwTL = new ThreadLocal<HashWire>() {
         @Override
         protected HashWire initialValue() {
@@ -56,28 +63,58 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return hashWire;
         }
     };
+
+    // Hashing constants
     private static final int K0 = 0x6d0f27bd;
     private static final int M0 = 0x5bc80bad;
     private static final int M1 = 0xea7585d7;
     private static final int M2 = 0x7a646e19;
     private static final int M3 = 0x855dd4db;
+
+    // Value output for hashing.
     private final ValueOut valueOut = new HashValueOut();
+
+    // Current hash value.
     long hash = 0;
 
+    /**
+     * Computes a 64-bit hash for the provided {@link WriteMarshallable} value.
+     *
+     * @param value The {@link WriteMarshallable} value to be hashed.
+     * @return The 64-bit hash value.
+     */
     public static long hash64(WriteMarshallable value) {
         return hash64((Object) value);
     }
 
+    /**
+     * Computes a 64-bit hash for the provided object.
+     *
+     * @param value The object to be hashed.
+     * @return The 64-bit hash value.
+     */
     public static long hash64(Object value) {
         @NotNull HashWire hashWire = hwTL.get();
         hashWire.getValueOut().object(value);
         return hashWire.hash64();
     }
 
+    /**
+     * Computes a 32-bit hash for the provided {@link WriteMarshallable} value.
+     *
+     * @param value The {@link WriteMarshallable} value to be hashed.
+     * @return The 32-bit hash value.
+     */
     public static int hash32(WriteMarshallable value) {
         return hash32((Object) value);
     }
 
+    /**
+     * Computes a 32-bit hash for the provided object.
+     *
+     * @param value The object to be hashed.
+     * @return The 32-bit hash value.
+     */
     public static int hash32(Object value) {
         @NotNull HashWire hashWire = hwTL.get();
         hashWire.getValueOut().object(value);
@@ -125,10 +162,26 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         return false;
     }
 
+    /**
+     * Computes and returns the 64-bit hash value.
+     * <p>
+     * This method uses the current hash value and applies an agitation function to provide
+     * a consistent and dispersed 64-bit hash result.
+     *
+     * @return The 64-bit agitated hash value.
+     */
     public long hash64() {
         return Maths.agitate(hash);
     }
 
+    /**
+     * Computes and returns the 32-bit hash value.
+     * <p>
+     * This method derives the 32-bit hash from the 64-bit hash value. The derived hash is
+     * the result of XOR-ing the high and low 32-bits of the 64-bit hash.
+     *
+     * @return The derived 32-bit hash value.
+     */
     public int hash32() {
         long h = hash64();
         return (int) (h ^ (h >>> 32));
@@ -308,6 +361,14 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * The {@code HashValueOut} class is responsible for updating the hash value of
+     * the {@link HashWire} based on the type of value being processed.
+     * <p>
+     * The class implements the {@link ValueOut} interface, providing methods to handle
+     * various data types like booleans, text, bytes, etc., and updating the hash
+     * value accordingly.
+     */
     class HashValueOut implements ValueOut {
         @NotNull
         @Override

@@ -33,26 +33,65 @@ import java.util.function.Predicate;
 
 import static net.openhft.chronicle.wire.WireParser.SKIP_READABLE_BYTES;
 
+/**
+ * The {@code VanillaMethodReaderBuilder} class implements the {@link MethodReaderBuilder} interface.
+ * It provides a mechanism to create a method reader for deserializing method calls from a wire input.
+ */
 public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
+
+    // A constant representing the configuration property to disable reader proxy code generation.
     public static final String DISABLE_READER_PROXY_CODEGEN = "disableReaderProxyCodegen";
+
+    // Cache for storing classes associated with their names for optimization.
     private static final Map<String, Class<?>> classCache = new ConcurrentHashMap<>();
+
+    // A sentinel value indicating a failed compilation attempt.
     private static final Class<?> COMPILE_FAILED = ClassNotFoundException.class;
 
+    // The input from which method calls are read.
     private final MarshallableIn in;
+
+    // A flag to determine whether default values should be ignored.
     private boolean ignoreDefaults;
+
+    // The default parselet used when a method is not recognized.
     private WireParselet defaultParselet;
+
+    // An interceptor for handling return values from method calls.
     private MethodReaderInterceptorReturns methodReaderInterceptorReturns;
+
+    // The wire type for deserialization.
     private WireType wireType;
+
+    // An optional handler for metadata associated with method calls.
     private Object[] metaDataHandler = null;
+
+    // The exception handler to use when a method is not recognized.
     private ExceptionHandler exceptionHandlerOnUnknownMethod = Jvm.debug();
+
+    // A predicate to further filter method calls.
     private Predicate predicate = x -> true;
 
+    // A flag to indicate whether the reader is in a scanning mode.
     private boolean scanning = false;
 
+    /**
+     * Constructs a new {@code VanillaMethodReaderBuilder} with the specified wire input.
+     *
+     * @param in The input from which method calls are read.
+     */
     public VanillaMethodReaderBuilder(MarshallableIn in) {
         this.in = in;
     }
 
+    /**
+     * Creates a default {@link WireParselet} that handles unrecognized methods.
+     * When an unrecognized method is encountered, it logs a warning or uses
+     * the provided exception handler, depending on the method name's length.
+     *
+     * @param exceptionHandlerOnUnknownMethod The exception handler to use when a method is not recognized.
+     * @return A {@link WireParselet} that logs or handles unrecognized methods.
+     */
     @NotNull
     public static WireParselet createDefaultParselet(ExceptionHandler exceptionHandlerOnUnknownMethod) {
         return (s, v) -> {
@@ -66,9 +105,18 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         };
     }
 
+    /**
+     * Returns an error message based on the given parameters.
+     *
+     * @param s             The sequence that represents either a method name or a method ID.
+     * @param history       The message history for the current method call.
+     * @param sourceIndex   The index of the source from where the method call was read.
+     * @return A formatted error message for unrecognized methods or method IDs.
+     */
     @NotNull
     private static String errorMsg(CharSequence s, MessageHistory history, long sourceIndex) {
 
+        // Determine whether the provided sequence is a method name or a method ID based on its first character.
         final String identifierType = s.length() != 0 && Character.isDigit(s.charAt(0)) ? "@MethodId" : "method-name";
         String msg = "Unknown " + identifierType + "='" + s + "'";
         if (history.lastSourceId() >= 0)
@@ -81,11 +129,23 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         return defaultParselet;
     }
 
+    /**
+     * Sets a new default parselet.
+     *
+     * @param defaultParselet The new default parselet.
+     * @return This builder for chaining.
+     */
     public MethodReaderBuilder defaultParselet(WireParselet defaultParselet) {
         this.defaultParselet = defaultParselet;
         return this;
     }
 
+    /**
+     * Sets the method reader interceptor that handles return values from method calls.
+     *
+     * @param methodReaderInterceptorReturns The interceptor to set.
+     * @return This builder for chaining.
+     */
     public VanillaMethodReaderBuilder methodReaderInterceptorReturns(MethodReaderInterceptorReturns methodReaderInterceptorReturns) {
         this.methodReaderInterceptorReturns = methodReaderInterceptorReturns;
         return this;
@@ -97,26 +157,46 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         return this;
     }
 
+    /**
+     * Returns the {@code wireType} of the reader.
+     *
+     * @return The {@code wireType} of the reader.
+     */
     public WireType wireType() {
         return wireType;
     }
 
+    /**
+     * Sets the {@code wireType} of the reader.
+     *
+     * @param wireType The {@code wireType} to set.
+     * @return This builder instance for chaining.
+     */
     public VanillaMethodReaderBuilder wireType(WireType wireType) {
         this.wireType = wireType;
         return this;
     }
 
     /**
-     * When enabled, readOne() will skip over meta data and unknown events to find at least one event.
+     * Configures the reader to skip over metadata and unknown events to find at least one known event.
+     * This is useful when reading from a stream with mixed types of data.
      *
-     * @param scanning whether to read events until it finds a known one.
-     * @return this
+     * @param scanning Whether the reader should skip to the next known event.
+     * @return This builder instance for chaining.
      */
     public VanillaMethodReaderBuilder scanning(boolean scanning) {
         this.scanning = scanning;
         return this;
     }
 
+    /**
+     * Creates an instance of a generated method reader.
+     * The method first checks if the desired generated reader class is already loaded.
+     * If not, it attempts to generate a new class and then instantiate it.
+     *
+     * @param impls An array of implementations used by the generated method reader.
+     * @return An instance of the generated method reader or null if the class generation failed.
+     */
     @Nullable
     private MethodReader createGeneratedInstance(Object... impls) {
         if (ignoreDefaults || Jvm.getBoolean(DISABLE_READER_PROXY_CODEGEN))
@@ -147,6 +227,17 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         return null;
     }
 
+    /**
+     * Instantiates a reader from a generated class.
+     * This method handles creating an instance for classes generated at runtime.
+     *
+     * @param generatedClass The class of the generated method reader.
+     * @param impls An array of implementations used by the generated method reader.
+     * @return An instance of the generated method reader.
+     * @throws InstantiationException If the class cannot be instantiated.
+     * @throws IllegalAccessException If the constructor or a method is not accessible.
+     * @throws InvocationTargetException If a method throws an exception.
+     */
     @NotNull
     private MethodReader instanceForGeneratedClass(Class<?> generatedClass, Object[] impls)
             throws InstantiationException, IllegalAccessException, InvocationTargetException {
@@ -172,6 +263,13 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         return this;
     }
 
+    /**
+     * Constructs and returns a {@code MethodReader} instance using the given implementations.
+     * If the generated reader instance is not available, it falls back to a default implementation.
+     *
+     * @param impls An array of implementations used by the method reader.
+     * @return A built {@code MethodReader} instance.
+     */
     @NotNull
     public MethodReader build(Object... impls) {
         if (this.defaultParselet == null)
@@ -179,6 +277,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
         final MethodReader generatedInstance = createGeneratedInstance(impls);
 
+        // If the generated instance isn't available, use the default vanilla method reader.
         return generatedInstance == null ? new VanillaMethodReader(in, ignoreDefaults, defaultParselet, SKIP_READABLE_BYTES,
                 methodReaderInterceptorReturns, metaDataHandler, predicate,
                 impls) :

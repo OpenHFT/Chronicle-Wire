@@ -24,23 +24,37 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import net.openhft.chronicle.wire.*;
 
+/**
+ * A generated method reader designed to interpret and process method calls
+ * from wire-format messages, particularly focusing on echoing instances of TopOfBook.
+ */
 public class EchoTopOfBookHandlerMethodReader extends AbstractGeneratedMethodReader {
-    // instances on which parsed calls are invoked
+
+    // Instance on which parsed calls are invoked
     private final Object instance0;
+
+    // Default parselet used for handling unexpected method calls
     private final WireParselet defaultParselet;
 
-    // out
+    // Holder for the 'out' method argument (not used in provided code)
     private net.openhft.chronicle.wire.channel.book.TopOfBookListener outarg0;
 
-    // topOfBook
+    // Holder for the 'topOfBook' method argument
     private net.openhft.chronicle.wire.channel.book.TopOfBook topOfBookarg0 = new TopOfBook();
 
+    /**
+     * Constructor initializing reader components and setting up parsing infrastructure.
+     */
     public EchoTopOfBookHandlerMethodReader(MarshallableIn in, WireParselet defaultParselet, WireParselet debugLoggingParselet, MethodReaderInterceptorReturns interceptor, Object[] metaInstances, Object[] instances) {
         super(in, debugLoggingParselet);
         this.defaultParselet = defaultParselet;
         instance0 = instances[0];
     }
 
+    /**
+     * Parses one method call from the provided wire message, interpreting its method identifier
+     * and arguments, then dispatching to the corresponding method.
+     */
     @Override
     protected boolean readOneCall(WireIn wireIn) {
         ValueIn valueIn = wireIn.getValueIn();
@@ -88,16 +102,25 @@ public class EchoTopOfBookHandlerMethodReader extends AbstractGeneratedMethodRea
         }
     }
 
+    // Local method to read 'topOfBook' data and invoke corresponding method on instance0
     private void readTopOfBook(ValueIn valueIn) {
+        // Deserialize the incoming data into a TopOfBook instance, reusing existing instance if possible
         topOfBookarg0 = (TopOfBook) valueIn.marshallable(topOfBookarg0, SerializationStrategies.MARSHALLABLE);
         try {
-            dataEventProcessed = true;
+            dataEventProcessed = true;  // Note: Ensure 'dataEventProcessed' is defined and relevant in your context.
+                // Dispatch to the 'topOfBook' method on the target instance, providing the deserialized data
             ((TopOfBookListener) instance0).topOfBook(topOfBookarg0);
         } catch (Exception e) {
+            // Wrap and propagate any exceptions encountered during method dispatch
             throw new InvocationTargetRuntimeException(e);
         }
     }
 
+    /**
+     * Parses one method call from the provided wire message, interpreting its method identifier
+     * and arguments in a context of metadata, then dispatching to the corresponding method
+     * or handling as appropriate.
+     */
     @Override
     protected boolean readOneCallMeta(WireIn wireIn) {
         ValueIn valueIn = wireIn.getValueIn();

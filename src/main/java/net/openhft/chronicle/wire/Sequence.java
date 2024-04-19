@@ -17,6 +17,9 @@
  */
 package net.openhft.chronicle.wire;
 
+/**
+ * This is used in Chronicle-Queue to map a position to a sequence number.
+ */
 public interface Sequence {
     long NOT_FOUND_RETRY = Long.MIN_VALUE;
     long NOT_FOUND = -1;

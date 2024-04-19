@@ -147,7 +147,6 @@ public class ChronicleContext extends SimpleCloseable {
      * @return an AffinityLock appropriate for this context
      * Acquires an AffinityLock instance based on the affinity usage status of the context. If affinity usage is enabled,
      * a lock is acquired without a specific tag. If affinity usage is disabled, a lock is acquired with a null tag.
-     * @return an AffinityLock instance suitable for the context's affinity usage settings.
      */
     public AffinityLock affinityLock() {
         return useAffinity()

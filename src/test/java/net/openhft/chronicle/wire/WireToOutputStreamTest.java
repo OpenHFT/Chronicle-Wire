@@ -40,6 +40,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parameterized.class)
 public class WireToOutputStreamTest extends WireTestCommon {
 
+    // Serializable class for testing
     public static class AnObject implements Serializable {
         long value;
         String text;
@@ -48,6 +49,7 @@ public class WireToOutputStreamTest extends WireTestCommon {
 
         @Override
         public String toString() {
+            // Override toString for easier debugging
             return "AnObject{" +
                     "value=" + value +
                     ", text='" + text + '\'' +
@@ -55,16 +57,19 @@ public class WireToOutputStreamTest extends WireTestCommon {
                     '}';
         }
     }
+
     private WireType currentWireType;
 
+    // Constructor to initialize the parameter
     public WireToOutputStreamTest(WireType currentWireType) {
         this.currentWireType = currentWireType;
     }
 
+    // Parameters for the test
     @Parameters(name = "{index}: {0}")
     public static Collection<WireType> data() {
         List<WireType> wireTypes = new ArrayList<>();
-
+        // populate wireTypes based on availability and certain conditions
         for (WireType wireType : WireType.values()) {
             if (wireType.isAvailable()
                     && wireType != WireType.RAW // Serializable objects are not support for RAW binary
@@ -79,6 +84,7 @@ public class WireToOutputStreamTest extends WireTestCommon {
     }
 
     @Test
+    // Test to ensure the Timestamp object can be serialized and deserialized correctly
     public void testTimestamp() {
         Wire wire = currentWireType.apply(Bytes.allocateElasticOnHeap(128));
         Timestamp ts = new Timestamp(1234567890000L);
@@ -91,6 +97,7 @@ public class WireToOutputStreamTest extends WireTestCommon {
     }
 
     @Test
+    // Test serialization and deserialization without a socket
     public void testNoSocket() {
         Wire wire = currentWireType.apply(Bytes.allocateElasticOnHeap(128));
         AnObject ao = writeAnObject(wire);
@@ -101,6 +108,7 @@ public class WireToOutputStreamTest extends WireTestCommon {
     }
 
     @Test
+    // Test serialization and deserialization using a socket
     public void testVisSocket() throws IOException {
         try (ServerSocket ss = new ServerSocket(0);
              Socket s = new Socket("localhost", ss.getLocalPort());
@@ -121,6 +129,7 @@ public class WireToOutputStreamTest extends WireTestCommon {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @NotNull
+    // Function to read an object from the wire
     public Object readAnObject(Wire wire2) {
         Class type = wire2.getValueIn().typeLiteral();
         Object ao2 = ObjectUtils.newInstance(type);
@@ -129,6 +138,7 @@ public class WireToOutputStreamTest extends WireTestCommon {
     }
 
     @NotNull
+    // Function to write an object to the wire
     public AnObject writeAnObject(Wire wire) {
         AnObject ao = new AnObject();
         ao.value = 12345;

@@ -24,8 +24,12 @@ import org.junit.Test;
 
 import static org.hamcrest.core.StringContains.containsString;
 
-// see https://github.com/OpenHFT/Chronicle-Wire/issues/240
+// A test class to ensure small double values are marshaled and unmarshaled correctly using
+// Chronicle-Wire.
+// See: https://github.com/OpenHFT/Chronicle-Wire/issues/240
 public class SmallDoublesMarshallingTest extends WireTestCommon {
+
+    // An example class containing a single double value to be marshaled and unmarshaled.
     public static class Example extends SelfDescribingMarshallable {
         private double doubleVal;
 
@@ -39,11 +43,11 @@ public class SmallDoublesMarshallingTest extends WireTestCommon {
         }
     }
 
+    // A test to ensure that a specific small double value is marshaled and unmarshaled correctly.
     @Test
     public void marshallingTest() {
         final Example example = new Example().doubleVal(1.104326320059551E-14);
         final String textRepr = example.toString();
-
         final Example demarshalled = WireType.TEXT.fromString(Example.class, textRepr);
 
         MatcherAssert.assertThat(textRepr, containsString("1.104326320059551E-14"));

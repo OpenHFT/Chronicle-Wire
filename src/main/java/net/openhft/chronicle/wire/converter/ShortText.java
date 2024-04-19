@@ -33,21 +33,15 @@ import java.lang.annotation.Target;
  * <p>
  * Base85, also known as Ascii85, is a binary-to-ASCII encoding scheme that provides
  * an efficient way to encode binary data for transport over text-based protocols.
- * </p>
  * <p>
  * When this annotation is applied to a field or parameter, it provides a hint about the expected format
  * and representation of the data, allowing for potential encoding and decoding operations based on Base85.
- * </p>
  * <p>
  * The provided {@link #INSTANCE} is a default converter that can be used for operations relevant to the Base85 format.
- * </p>
- *
  * <b>Usage Example:</b>
  * <pre>
- * {@code
- * @ShortText
+ * {@code @ShortText}
  * private long encodedText;
- * }
  * </pre>
  *
  * @see LongConverter
@@ -62,8 +56,6 @@ public @interface ShortText {
     /**
      * An instance of {@link ShortTextLongConverter} specifically configured for Base85 conversions.
      * This converter uses a character set defined by the {@link ShortTextLongConverter} to represent Base85 encoded data.
-     *
-     * @return the specialized Base85 long converter instance for ShortText.
      */
     LongConverter INSTANCE = ShortTextLongConverter.INSTANCE;
 }

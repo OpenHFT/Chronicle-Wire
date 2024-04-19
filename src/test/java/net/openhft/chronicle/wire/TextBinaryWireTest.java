@@ -34,16 +34,20 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
+// Use Parameterized runner for performing tests with different WireType instances.
 @RunWith(value = Parameterized.class)
 public class TextBinaryWireTest extends WireTestCommon {
 
+    // The specific WireType for the current test run.
     private final WireType wireType;
 
+    // Constructor to initialize the test with a specific WireType instance.
     public TextBinaryWireTest(WireType wireType) {
 
         this.wireType = wireType;
     }
 
+    // Provide the combinations of WireType instances for the tests.
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() {
         Object[][] list = {
@@ -57,6 +61,7 @@ public class TextBinaryWireTest extends WireTestCommon {
         return Arrays.asList(list);
     }
 
+    // Test the WireType's valueOf() method.
     @Test
     public void testValueOf() {
         Wire wire = createWire();
@@ -66,12 +71,14 @@ public class TextBinaryWireTest extends WireTestCommon {
 
     }
 
+    // Create a Wire instance based on the wireType of the test.
     public Wire createWire() {
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
         wire.usePadding(wire.isBinary());
         return wire;
     }
 
+    // Test reading a document location from a Wire instance.
     @Test
     public void readingDocumentLocation() {
         Wire wire = createWire();
@@ -88,8 +95,10 @@ public class TextBinaryWireTest extends WireTestCommon {
         wire.bytes().releaseLast();
     }
 
+    // Test reading comments from a Wire instance.
     @Test
     public void testReadComment() {
+        // Only execute for specific wireTypes.
         assumeTrue(wireType == WireType.TEXT || wireType == WireType.BINARY || wireType == WireType.YAML);
 
         Wire wire = createWire();
@@ -101,8 +110,10 @@ public class TextBinaryWireTest extends WireTestCommon {
         wire.bytes().releaseLast();
     }
 
+    // Test reading fields as objects from a Wire instance.
     @Test
     public void readFieldAsObject() {
+        // Exclude certain wireTypes.
         assumeFalse(wireType == WireType.RAW || wireType == WireType.FIELDLESS_BINARY);
 
         Wire wire = createWire();
@@ -118,8 +129,10 @@ public class TextBinaryWireTest extends WireTestCommon {
         wire.bytes().releaseLast();
     }
 
+    // Test reading fields as long values from a Wire instance.
     @Test
     public void readFieldAsLong() {
+        // Exclude certain wireTypes.
         assumeFalse(wireType == WireType.RAW || wireType == WireType.FIELDLESS_BINARY);
 
         Wire wire = createWire();
@@ -139,8 +152,10 @@ public class TextBinaryWireTest extends WireTestCommon {
         wire.bytes().releaseLast();
     }
 
+    // Test conversion of different values to numeric values in a Wire instance.
     @Test
     public void testConvertToNum() {
+        // Exclude certain wireTypes.
         assumeFalse(wireType == WireType.RAW || /* No support for bool conversions */ wireType == WireType.YAML);
 
         Wire wire = createWire();
@@ -158,4 +173,3 @@ public class TextBinaryWireTest extends WireTestCommon {
         wire.bytes().releaseLast();
     }
 }
-

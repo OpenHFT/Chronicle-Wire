@@ -18,10 +18,29 @@
 
 package net.openhft.chronicle.wire.utils;
 
+/**
+ * TestOut interface defines methods for outputting event data and error messages.
+ */
 public interface TestOut {
+
+    /**
+     * Outputs a processed TestEvent object.
+     *
+     * @param dto The processed TestEvent data transfer object.
+     */
     void testEvent(TestEvent dto);
 
+    /**
+     * Outputs an error message.
+     *
+     * @param message The error message to be outputted.
+     */
     void error(String message);
 
+    /**
+     * Outputs a processed TestAbstractMarshallableCfgEvent object.
+     *
+     * @param dto The processed TestAbstractMarshallableCfgEvent data transfer object.
+     */
     void testAbstractMarshallableCfgEvent(TestAbstractMarshallableCfgEvent dto);
 }

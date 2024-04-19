@@ -24,6 +24,12 @@ import java.io.ObjectOutput;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This is the WireObjectOutput class that implements the ObjectOutput interface.
+ * It is designed to write objects and data to a WireOut instance. The class provides
+ * methods to write an object, bytes, and other basic data types, ensuring that the data is
+ * written correctly to the underlying wire instance.
+ */
 class WireObjectOutput implements ObjectOutput {
     private final WireOut wire;
 

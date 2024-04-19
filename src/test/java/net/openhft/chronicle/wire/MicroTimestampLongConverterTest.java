@@ -25,14 +25,21 @@ import static org.junit.Assert.assertEquals;
 
 public class MicroTimestampLongConverterTest extends WireTestCommon {
 
+    // Define constant strings for different timestamp representations
     private static final String TIMESTAMP_STRING_UTC = "2023-02-15T05:31:49.856123Z";
     private static final String TIMESTAMP_STRING_UTC_NO_SUFFIX = "2023-02-15T05:31:49.856123";
     private static final long TIMESTAMP = 1676439109856123L;
     private static final String TIMESTAMP_STRING_MELBOURNE = "2023-02-15T16:31:49.856123+11:00";
 
+    // *************************************************************************
+    // Test Cases
+    // *************************************************************************
+
+    // Test if the parse method correctly interprets timestamps
     @Test
     public void parse() {
         long now = System.currentTimeMillis();
+        // Uncomment the below lines if needed
         // long parse1 = INSTANCE.parse(Long.toString(now));
         // assertEquals(now, parse1 / 1000);
         long parse2 = INSTANCE.parse(Long.toString(now * 1000));
@@ -41,12 +48,14 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
         assertEquals(now, parse3 / 1000);
     }
 
+    // Test different date format parsing
     @Test
     public void parse2() {
         assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456789"),
                 INSTANCE.parse("2020-09-18T01:02:03.456789"));
     }
 
+    // Check if trailing 'Z' in timestamp does not affect parsing
     @Test
     public void parse3() {
         assertEquals(INSTANCE.parse("202020/09/18T01:02:03.456789", 2, 28),
@@ -59,6 +68,7 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
         assertEquals(INSTANCE.parse(text), INSTANCE.parse(text + "Z"));
     }
 
+    // Test timestamp parsing with New York timezone
     @Test
     public void NYparse() {
         MicroTimestampLongConverter mtlc = new MicroTimestampLongConverter("America/New_York");
@@ -68,6 +78,7 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
         assertEquals(time, mtlc.parse(str));
     }
 
+    // Verify that timestamps without timezone are treated as local timestamps
     @Test
     public void datesWithNoTimezoneAreAssumedToBeLocal() {
         MicroTimestampLongConverter mtlc = new MicroTimestampLongConverter("America/New_York");
@@ -75,6 +86,7 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
                 mtlc.parse("2020-09-17T21:02:03.456789"));
     }
 
+    // Test if timestamps are correctly appended for Melbourne timezone
     @Test
     public void appendTest() {
         final MicroTimestampLongConverter converter = new MicroTimestampLongConverter("Australia/Melbourne");
@@ -83,6 +95,7 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
         assertEquals(TIMESTAMP_STRING_MELBOURNE, builder.toString());
     }
 
+    // Test if timestamps are correctly appended for UTC timezone
     @Test
     public void appendTestUTC() {
         final MicroTimestampLongConverter converter = new MicroTimestampLongConverter("UTC");
@@ -91,6 +104,7 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
         assertEquals(TIMESTAMP_STRING_UTC_NO_SUFFIX, builder.toString());
     }
 
+    // Test round-trip conversion for various timezones
     @SuppressWarnings("deprecation")
     @Test
     public void roundTripTest() {
@@ -99,6 +113,7 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
         roundTrip(TIMESTAMP_STRING_MELBOURNE, TIMESTAMP, new MicroTimestampLongConverter("Australia/Melbourne"));
     }
 
+    // Helper method for round-trip tests
     private void roundTrip(String timestampString, long timestamp, LongConverter longConverter) {
         assertEquals(longConverter.asString(longConverter.parse(timestampString)), timestampString);
         assertEquals(longConverter.parse(longConverter.asString(timestamp)), timestamp);

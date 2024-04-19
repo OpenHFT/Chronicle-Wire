@@ -28,33 +28,39 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings("deprecated")
 @RunWith(Parameterized.class)
 public class YamlTesterReadMarshallableTest extends WireTestCommon {
+    // Paths to the YAML test files
     static final String paths = "" +
             "yaml-tester/rm,"+
             "yaml-tester/rm-indent";
 
+    // Name of the test and the YamlTester instance
     final String name;
     final YamlTester tester;
 
+    // Constructor that assigns name and tester
     public YamlTesterReadMarshallableTest(String name, YamlTester tester) {
         this.name = name;
         this.tester = tester;
     }
 
+    // Generates parameters for the test cases
     @Parameterized.Parameters(name = "{0}")
     public static List<Object[]> parameters() {
-        // ignored as duplicate
-        // ignored
-        // also ignored as duplicates
+        // Builds parameters for the test using YamlTesterParametersBuilder
+        // The agitator for missing fields 'a', 'b', 'c' is used
         return new YamlTesterParametersBuilder<>(TestRMImpl::new, TestRMIn.class, paths)
                 .agitators(
                         YamlAgitator.missingFields("a", "b", "c"))
                 .get();
     }
 
+    // Test method to run the YAML tester
     @Test
     public void runTester() {
+        // Asserting that the expected output matches the actual output
         assertEquals(tester.expected(), tester.actual());
     }
 }

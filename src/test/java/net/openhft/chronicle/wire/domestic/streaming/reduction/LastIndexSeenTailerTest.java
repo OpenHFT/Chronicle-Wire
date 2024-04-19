@@ -42,10 +42,13 @@ public class LastIndexSeenTailerTest extends WireTestCommon {
                 a -> a.writeString("three")
         );
 
+        // Define a reduction to obtain the last seen index from a tailer
         final Reduction<LongSupplier> listener = Reductions.reducingLong(ToLongDocumentExtractor.extractingIndex(), 0, (a, b) -> b);
+
+        // Process the tailer with the defined listener
         listener.accept(tailer);
 
+        // Assert that the retrieved index is greater than the sum of the lengths of the simulated strings (3 + 3 + 5)
         assertTrue(listener.reduction().getAsLong() > 3 + 3 + 5);
-
     }
 }

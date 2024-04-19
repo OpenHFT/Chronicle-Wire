@@ -17,7 +17,22 @@
  */
 package net.openhft.chronicle.wire;
 
+/**
+ * Represents a functional interface for checking header numbers against specific criteria.
+ * <p>
+ * This interface provides a contract for checking a given header number and its position.
+ * Typically, implementations of this interface will contain logic to determine whether
+ * the provided header number, in the context of its position are a valid combination.
+ */
 @FunctionalInterface
 public interface HeadNumberChecker {
+
+    /**
+     * Checks whether the provided header number meets a certain condition in the context of its position.
+     *
+     * @param headerNumber The header number to be checked.
+     * @param position The position or context associated with the header number.
+     * @return {@code true} if the header number is valid; {@code false} otherwise.
+     */
     boolean checkHeaderNumber(long headerNumber, long position);
 }

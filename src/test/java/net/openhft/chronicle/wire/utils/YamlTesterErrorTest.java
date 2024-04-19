@@ -31,21 +31,27 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings("deprecated")
 @RunWith(Parameterized.class)
 public class YamlTesterErrorTest extends WireTestCommon {
+    // Path to the YAML test files
     static final String paths = "" +
             "yaml-tester/errors";
 
+    // Name of the test and the YamlTester instance
     final String name;
     final YamlTester tester;
 
+    // Constructor assigns name and tester instance
     public YamlTesterErrorTest(String name, YamlTester tester) {
         this.name = name;
         this.tester = tester;
     }
 
+    // Generates parameters for the test cases
     @Parameterized.Parameters(name = "{0}")
     public static List<Object[]> parameters() {
+        // Builds parameters for the test using YamlTesterParametersBuilder
         return new YamlTesterParametersBuilder<>(ErrorsImpl::new, ErrorsOut.class, paths)
                 .exceptionHandlerFunction(out -> (log, msg, thrown) -> ((ErrorListener) out).jvmError(thrown == null ? msg : (msg + " " + thrown)))
                 .exceptionHandlerFunctionAndLog(true)
@@ -54,22 +60,28 @@ public class YamlTesterErrorTest extends WireTestCommon {
                 .get();
     }
 
+    // Resets the SystemTimeProvider after each test
     @After
     public void tearDown() {
         SystemTimeProvider.CLOCK = SystemTimeProvider.INSTANCE;
     }
 
+    // Test method to run the YAML tester
     @Test
     public void runTester() {
+        // Ignoring and expecting specific exceptions during the test
         ignoreException(" to the classpath");
         expectException("Unknown method-name='unknownMethod'");
         expectException((ExceptionKey ek) -> ek.throwable instanceof StackTrace, "StackTrace");
         expectException((ExceptionKey ek) -> ek.throwable instanceof ErrorsImpl.MyAssertionError, "MyAssertionError");
 
+        // Expecting specific error and warning messages
         expectException("warning one");
         expectException("error one");
         expectException("exception one");
         expectException("warnings done");
+
+        // Asserting that the expected output matches the actual output
         assertEquals(tester.expected(), tester.actual());
     }
 }

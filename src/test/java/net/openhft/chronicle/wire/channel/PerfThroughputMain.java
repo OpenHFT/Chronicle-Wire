@@ -30,14 +30,25 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+/**
+ * Main class for testing the throughput performance of the Chronicle system.
+ */
 public class PerfThroughputMain {
+
+    // Configuration options
     static final String URL = System.getProperty("url", "tcp://:1248");
     static final int RUN_TIME = Integer.getInteger("runTime", 10);
     static final int BATCH = Integer.getInteger("batch", 1);
     static final int CLIENTS = Integer.getInteger("clients", 8);
     static final boolean METHODS = Jvm.getBoolean("methods");
 
+    /**
+     * The entry point of the application. This method sets up the testing environment and runs the throughput tests.
+     *
+     * @param args Command-line arguments (not used)
+     */
     public static void main(String[] args) {
+        // Output the configuration being used for the test
         System.out.println("-Durl=" + URL + " " +
                 "-DrunTime=" + RUN_TIME + " " +
                 "-Dclients=" + CLIENTS + " " +
@@ -45,47 +56,76 @@ public class PerfThroughputMain {
                 "-Dmethods=" + METHODS
         );
         System.out.println("This is the total of the messages sent and messages received");
+
+        // Determine number of clients to test with
         int[] nClients = {CLIENTS};
         if (CLIENTS == 0)
             nClients = new int[]{16, 8, 4, 2, 1};
+
+        // Loop through each client configuration and run the tests
         for (int nClient : nClients) {
+            // Open a new Chronicle context for the test
             try (ChronicleContext context = ChronicleContext.newContext(URL)) {
+                // Initialize the Echo handler with the specified batch size
                 EchoNHandler echoHandler = new EchoNHandler();
                 echoHandler.times(BATCH);
+
+                // Create a new channel supplier for the test
                 final ChronicleChannelSupplier supplier = context.newChannelSupplier(echoHandler);
 
+                // Run unbuffered test
                 echoHandler.buffered(false);
                 doTest("unbuffered", supplier.buffered(false), nClient);
 
+                // Run buffered test
                 echoHandler.buffered(true);
                 doTest("buffered", supplier.buffered(true), nClient);
             }
         }
     }
 
+    /**
+     * Perform a throughput test under specified conditions.
+     *
+     * @param desc             Description or name of the test, typically to signify the type of buffering.
+     * @param channelSupplier  The supplier for the chronicle channels.
+     * @param nClients         Number of client channels to create and test.
+     */
     private static void doTest(String desc, ChronicleChannelSupplier channelSupplier, int nClients) {
+        // Create and initialize client channels
         InternalChronicleChannel[] clients = new InternalChronicleChannel[nClients];
         for (int i = 0; i < nClients; i++)
             clients[i] = (InternalChronicleChannel) channelSupplier.get();
+
         int bufferSize = clients[0].bufferSize();
+
+        // Check and warn if buffer size is insufficient on Linux
         if (bufferSize < 4 << 20 && OS.isLinux()) {
             System.err.println("Try increasing the maximum buffer sizes");
             System.err.println("sudo sysctl --write net.core.rmem_max=2097152");
             System.err.println("sudo sysctl --write net.core.wmem_max=2097152");
         }
+
+        // Loop through each size and perform a throughput test
         for (int size = 1 << 20; size >= 8; size /= 2) {
+            // Initialize test timing
             long start = System.currentTimeMillis();
             long end = start + RUN_TIME * 1000L;
+
+            // Calculate window size based on buffer and number of clients
             int window =  bufferSize /  (4 + size);
             if (size < 1024)
                 window *= 2;
             if (nClients > 4)
                 window = window * 4 / nClients;
+
+            // Initialize atomic variables and test-specific functionality
             int finalWindow = window;
             AtomicLong totalRead = new AtomicLong(0);
             int finalSize = size;
             final Consumer<InternalChronicleChannel> sendAndReceive;
 
+            // Configure the message sending mechanism depending on METHODS flag and message size
             if (METHODS) {
                 if (size < 256) {
                     // send messages via MethodWriters
@@ -147,10 +187,13 @@ public class PerfThroughputMain {
                     totalRead.addAndGet(read);
                 };
             }
+
+            // Execute the configured test on all clients in parallel
             Stream.of(clients)
                     .parallel()
                     .forEach(sendAndReceive);
 
+            // Calculate and print the results
             long count = totalRead.get();
             long time = System.currentTimeMillis() - start;
             long totalBytes = size * count;
@@ -164,7 +207,17 @@ public class PerfThroughputMain {
         }
     }
 
+    /**
+     * Reads messages from the channel up to the specified window size.
+     *
+     * @param window   The number of messages to read.
+     * @param icc      The channel from which messages are to be read.
+     * @param written  The number of messages written to the channel.
+     * @param read     The number of messages already read from the channel.
+     * @return         The updated number of messages read from the channel.
+     */
     private static long readUpto(int window, InternalChronicleChannel icc, long written, long read) {
+        // Continuously read messages until the unread window is below the specified size
         do {
             try (DocumentContext dc = icc.readingDocument()) {
                 if (dc.isPresent())

@@ -82,11 +82,21 @@ public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMetho
                 .append(".").append(method.getName()).append("(").append(params).append(");\n");
     }
 
+    /**
+     * Appends the delegate to the main code.
+     *
+     * @param mainCode The SourceCodeFormatter to append the delegate.
+     * @param method The associated method.
+     * @return Updated SourceCodeFormatter with delegate appended.
+     */
     protected SourceCodeFormatter getDelegate(SourceCodeFormatter mainCode, Method method) {
         return mainCode.append("this.delegate");
     }
 
+    /**
+     * This is an inner static class representing metadata for GenerateMethodDelegate.
+     */
     public static class GMDMetaData extends AbstractClassGenerator.MetaData<GMDMetaData> {
-
+        // This class serves as a metadata container with no additional methods or attributes.
     }
 }

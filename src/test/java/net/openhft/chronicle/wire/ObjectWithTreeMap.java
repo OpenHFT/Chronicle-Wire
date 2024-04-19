@@ -20,6 +20,8 @@ package net.openhft.chronicle.wire;
 
 import java.util.TreeMap;
 
+// Class ObjectWithTreeMap extends SelfDescribingMarshallable and contains a TreeMap
 class ObjectWithTreeMap extends SelfDescribingMarshallable {
+    // Declaration and instantiation of a TreeMap, mapping String keys to String values
     final TreeMap<String, String> map = new TreeMap<>();
 }

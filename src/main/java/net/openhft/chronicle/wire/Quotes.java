@@ -17,10 +17,30 @@
  */
 package net.openhft.chronicle.wire;
 
+/**
+ * Enumerates the types of quotation marks.
+ * This enum represents the most common quotation marks: none, single, and double.
+ * Each enumeration value is associated with its corresponding character representation.
+ */
 enum Quotes {
-    NONE(' '), SINGLE('\''), DOUBLE('"');
+
+    /** Represents the absence of a quotation mark. */
+    NONE(' '),
+
+    /** Represents a single quotation mark. */
+    SINGLE('\''),
+
+    /** Represents a double quotation mark. */
+    DOUBLE('"');
+
+    // The character representation of the quotation mark
     final char q;
 
+    /**
+     * Constructs a new instance of {@code Quotes} with the provided character representation.
+     *
+     * @param q The character representation of the quotation mark.
+     */
     Quotes(char q) {
         this.q = q;
     }

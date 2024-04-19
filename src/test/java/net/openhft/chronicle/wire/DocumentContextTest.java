@@ -25,23 +25,37 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+// Class to test the functionality of the DocumentContext in different wire formats.
 public class DocumentContextTest extends WireTestCommon {
+
+    // Test multi-message serialization in TEXT format.
     @Test
     public void multiMessageText() {
+        // Create a wire of TEXT type
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
+
+        // Serialize messages and retrieve bytes
         Bytes<?> bytes = doTest(wire);
         bytes.readSkip(4);
+
+        // Check serialization format
         assertEquals("one: 1\n" +
                 "two: 2\n" +
                 "three: 3\n", bytes.toString());
         bytes.releaseLast();
     }
 
+    // Test multi-message serialization in BINARY format.
     @Test
     public void multiMessageBinary() {
+        // Create a wire of BINARY type with hex dump
         BinaryWire wire = new BinaryWire(new HexDumpBytes());
         wire.usePadding(true);
+
+        // Serialize messages and retrieve bytes
         Bytes<?> bytes = doTest(wire);
+
+        // Check serialization format
         assertEquals("" +
                         "17 00 00 00                                     # msg-length\n" +
                         "b9 03 6f 6e 65                                  # one: (event)\n" +
@@ -54,6 +68,7 @@ public class DocumentContextTest extends WireTestCommon {
         bytes.releaseLast();
     }
 
+    // Helper method to create serialized messages.
     @NotNull
     private Bytes<?> doTest(Wire wire) {
         wire.acquireWritingDocument(false).wire().writeEventName("one").int16(1);

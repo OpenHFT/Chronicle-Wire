@@ -36,12 +36,15 @@ import static org.junit.Assume.assumeFalse;
 @RunWith(value = Parameterized.class)
 public class Issue341Test extends WireTestCommon {
 
+    // Instance variable to store the current WireType that the test is running for.
     private final WireType wireType;
 
+    // Constructor that initializes the WireType for this test run.
     public Issue341Test(WireType wireType) {
         this.wireType = wireType;
     }
 
+    // This method specifies the different WireTypes the tests will run for.
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
@@ -55,56 +58,79 @@ public class Issue341Test extends WireTestCommon {
         });
     }
 
+    // Test for serializing and deserializing an instance of MyClass using different WireTypes.
     @Test
     public void instant() {
         final MyClass source = new MyClass();
         source.instant = Instant.ofEpochMilli(1_000_000_000_000L);
 
+        // Create bytes from HexDumpBytes for serialization.
         final Bytes<?> bytes = new HexDumpBytes();
+        // Create a wire instance based on the current WireType.
         final Wire wire = wireType.apply(bytes);
 
+        // Write the source object to the wire.
         wire.getValueOut().object((Class) source.getClass(), source);
+
+        // Print the WireType and serialized representation of the source object.
         System.out.println(wireType + "\n"
                 + (wire.getValueOut().isBinary() ? bytes.toHexString() : bytes.toString()));
 
+        // Deserialize the source object from the wire.
         final MyClass target = wire.getValueIn().object(source.getClass());
+
+        // Verify that the deserialized object matches the original source object.
         Assert.assertEquals(source, target);
 
     }
 
+    // Test for serializing and deserializing an instance of MyComparableSerializable using different WireTypes.
     @Test
     public void testComparableSerializable() {
         // for backward compatibility, this doesn't support types
         assumeFalse(wireType == WireType.JSON);
         final MyComparableSerializable source = new MyComparableSerializable("hello");
 
+        // Create bytes from HexDumpBytes for serialization.
         final Bytes<?> bytes = new HexDumpBytes();
+        // Create a wire instance based on the current WireType.
         final Wire wire = wireType.apply(bytes);
 
+        // Write the source object to the wire.
         wire.getValueOut().object((Class) source.getClass(), source);
+
+        // Print the WireType and serialized representation of the source object.
         System.out.println(wireType + "\n"
                 + (wire.getValueOut().isBinary() ? bytes.toHexString() : bytes.toString()));
 
+        // Deserialize the source object from the wire.
         final MyComparableSerializable target = wire.getValueIn().object(source.getClass());
+
+        // Verify that the deserialized object's value matches the original source object's value.
         Assert.assertEquals(source.value, target.value);
     }
 
+    // Class that represents a test object with an Instant property.
     static final class MyClass extends SelfDescribingMarshallable {
         Instant instant;
     }
 
+    // Class that represents a test object with a String value and implements Serializable and Comparable.
     static final class MyComparableSerializable implements Serializable, Comparable<MyComparableSerializable> {
         final String value;
 
+        // Constructor to initialize the object with the given value.
         MyComparableSerializable(String value) {
             this.value = value;
         }
 
+        // Return the string representation of this object.
         @Override
         public String toString() {
             return value;
         }
 
+        // Compare this object with another MyComparableSerializable object based on their values.
         @Override
         public int compareTo(@NotNull MyComparableSerializable o) {
             return value.compareTo(o.value);

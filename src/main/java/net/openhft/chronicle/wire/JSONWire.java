@@ -45,39 +45,78 @@ import java.util.function.Supplier;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
 /**
- * JSON wire format
+ * Represents the JSON wire format.
  * <p>
- * At the moment, this is a cut down version of the YAML wire format.
+ * This class provides functionality for managing JSON data in a wire format.
+ * It currently provides a subset of functionalities similar to the YAML wire format.
+ * The core capability of this class is to handle JSON data structures as {@code Bytes}
+ * objects, allowing for efficient manipulation and parsing.
  */
 public class JSONWire extends TextWire {
 
+    // Represents the bytes for "ull" which might be used for some JSON representations.
     public static final @NotNull Bytes<byte[]> ULL = Bytes.from("ull");
+
+    // Bytes for comma, commonly used as JSON separator.
     @SuppressWarnings("rawtypes")
     static final BytesStore COMMA = BytesStore.from(",");
-    static final ThreadLocal<WeakReference<StopCharsTester>> STRICT_ESCAPED_END_OF_TEXT_JSON = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
+
+    // A thread-local variable to store a reference to the stop characters tester for JSON parsing.
+    static final ThreadLocal<WeakReference<StopCharsTester>> STRICT_ESCAPED_END_OF_TEXT_JSON = new ThreadLocal<>();
+
+    // Supplier for stop character tester for strict JSON text that escapes specific characters.
     static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_JSON_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT_JSON::escaping;
+
+    // Flag to determine whether to use types or not during parsing.
     boolean useTypes;
 
+    /**
+     * Default constructor, initializes with elastic bytes allocated on heap.
+     */
     @SuppressWarnings("rawtypes")
     public JSONWire() {
         this(Bytes.allocateElasticOnHeap());
     }
 
+    /**
+     * Constructs a JSONWire with the given bytes and a flag for using 8-bit.
+     *
+     * @param bytes   The bytes to be used for initializing.
+     * @param use8bit Flag indicating whether to use 8-bit representation.
+     */
     public JSONWire(@NotNull Bytes<?> bytes, boolean use8bit) {
         super(bytes, use8bit);
         trimFirstCurly(false);
     }
 
+    /**
+     * Constructs a JSONWire with the given bytes.
+     *
+     * @param bytes The bytes to be used for initializing.
+     */
     @SuppressWarnings("rawtypes")
     public JSONWire(@NotNull Bytes<?> bytes) {
         this(bytes, false);
     }
 
+    /**
+     * Static method to construct a JSONWire from a string representation of JSON.
+     *
+     * @param text The string containing JSON data.
+     * @return A new instance of JSONWire.
+     */
     @NotNull
     public static JSONWire from(@NotNull String text) {
         return new JSONWire(Bytes.from(text));
     }
 
+    /**
+     * Converts the content of the provided wire to a JSON string.
+     *
+     * @param wire The wire instance to be converted.
+     * @return The string representation of the JSON content.
+     * @throws InvalidMarshallableException If there's an error during conversion.
+     */
     public static String asText(@NotNull Wire wire) throws InvalidMarshallableException {
         long pos = wire.bytes().readPosition();
         @NotNull JSONWire tw = new JSONWire(nativeBytes());
@@ -87,6 +126,15 @@ public class JSONWire extends TextWire {
         return tw.toString();
     }
 
+    /**
+     * Determines if a given class is a wrapper type in Java.
+     * <p>
+     * This is useful for handling certain JSON conversion scenarios where
+     * native types have wrapper counterparts, such as int and Integer.
+     *
+     * @param type The class to be checked.
+     * @return {@code true} if the class is a Java wrapper type, otherwise {@code false}.
+     */
     static boolean isWrapper(Class<?> type) {
         return type == Integer.class || type == Long.class || type == Float.class ||
                 type == Double.class || type == Short.class || type == Character.class ||
@@ -98,11 +146,24 @@ public class JSONWire extends TextWire {
         return String.class;
     }
 
+    /**
+     * Sets the flag to determine whether to use types during the JSON parsing or not.
+     * <p>
+     * This method is designed to follow the builder pattern, allowing it to be chained with other method calls on the {@code JSONWire} object.
+     *
+     * @param outputTypes A boolean value indicating whether to use types.
+     * @return The current instance of the {@code JSONWire} class.
+     */
     public JSONWire useTypes(boolean outputTypes) {
         this.useTypes = outputTypes;
         return this;
     }
 
+    /**
+     * Gets the current setting for the use of types during JSON parsing.
+     *
+     * @return {@code true} if types are being used in the current instance, otherwise {@code false}.
+     */
     public boolean useTypes() {
         return useTypes;
     }
@@ -192,39 +253,68 @@ public class JSONWire extends TextWire {
     }
 
     private void trimCurlyBrackets() {
+        // If the next byte is a closing curly bracket
         if (peekNextByte() == '}') {
+            // Move past the closing curly bracket
             bytes.readSkip(1);
+
+            // Consume any padding characters (e.g., whitespace)
             consumePadding();
+
+            // Loop backwards through the byte buffer, trimming whitespace or other padding characters
             while (peekPreviousByte() <= ' ')
                 bytes.writeSkip(-1);
+
+            // If the previous character is also a closing curly bracket, skip past it
             if (peekPreviousByte() == '}')
                 bytes.writeSkip(-1);
-            // TODO else error?
+
+            // TODO: Handle the case where an expected '}' character is missing (potential error situation)
         }
     }
 
+    /**
+     * Peeks the previous byte from the current read position without moving the read pointer.
+     *
+     * @return The byte value just before the current read position.
+     */
     private int peekPreviousByte() {
+        // Return the byte just before the current read limit
         return bytes.peekUnsignedByte(bytes.readLimit() - 1);
     }
 
+    /**
+     * Copies one segment of data from this wire to the given wire output.
+     * The segment copied depends on the first character encountered (e.g., '{' indicates a map).
+     * This method understands JSON structural elements and translates them appropriately.
+     *
+     * @param wire The wire output to copy the data to.
+     * @param inMap Flag indicating if the current position is inside a map structure.
+     * @param topLevel Flag indicating if this is the topmost level of the copy operation.
+     * @throws InvalidMarshallableException if there's a problem with copying the data.
+     */
     public void copyOne(@NotNull WireOut wire, boolean inMap, boolean topLevel) throws InvalidMarshallableException {
         consumePadding();
         int ch = bytes.readUnsignedByte();
         switch (ch) {
             case '\'':
             case '"':
+                // Handle quoted values
                 copyQuote(wire, ch, inMap, topLevel);
                 if (inMap) {
+                    // For key-value pairs, consume any padding and expect a colon (:) separator
                     consumePadding();
                     int ch2 = bytes.readUnsignedByte();
                     if (ch2 != ':')
                         throw new IORuntimeException("Expected a ':' but got a '" + (char) ch);
-                    // copy the value
+
+                    // Recursively copy the associated value after the colon
                     copyOne(wire, false, false);
                 }
                 return;
 
             case '{':
+                // Determine if this is a type prefix or a standard map, and copy accordingly
                 if (isTypePrefix())
                     copyTypePrefix(wire);
                 else
@@ -232,6 +322,7 @@ public class JSONWire extends TextWire {
                 return;
 
             case '[':
+                // Handle sequences or arrays
                 copySequence(wire);
                 return;
 
@@ -248,10 +339,12 @@ public class JSONWire extends TextWire {
             case '8':
             case '9':
             case '.':
+                // Handle numeric values
                 copyNumber(wire);
                 return;
 
             case 'n':
+                // Special handling for the 'null' value
                 if (bytes.startsWith(ULL) && !Character.isLetterOrDigit(bytes.peekUnsignedByte(bytes.readPosition() + 3))) {
                     bytes.readSkip(3);
                     consumePadding();
@@ -263,21 +356,37 @@ public class JSONWire extends TextWire {
             default:
                 break;
         }
+
+        // If the code reaches here, an unexpected character sequence was found
         bytes.readSkip(-1);
         throw new IORuntimeException("Unexpected chars '" + bytes.parse8bit(StopCharTesters.CONTROL_STOP) + "'");
     }
 
+    /**
+     * Copies a type prefix from the input to the given wire output.
+     * The type prefix is assumed to be a text value prefixed with '@'. This method will extract
+     * the type prefix and pass it on to the wire output.
+     *
+     * @param wire The wire output to copy the type prefix to.
+     * @throws InvalidMarshallableException if there's a problem with copying the data.
+     */
     private void copyTypePrefix(WireOut wire) throws InvalidMarshallableException {
         final StringBuilder sb = acquireStringBuilder();
-        // the type literal
+
+        // Extract the type literal
         getValueIn().text(sb);
-        // drop the '@
+
+        // Remove the '@' prefix from the type literal
         sb.deleteCharAt(0);
         wire.getValueOut().typePrefix(sb);
+
+        // Consume any padding characters (e.g., whitespace)
         consumePadding();
         int ch = bytes.readUnsignedByte();
         if (ch != ':')
             throw new IORuntimeException("Expected a ':' after the type " + sb + " but got a " + (char) ch);
+
+        // Recursively copy the associated value after the colon
         copyOne(wire, true, false);
 
         consumePadding();
@@ -286,23 +395,46 @@ public class JSONWire extends TextWire {
             throw new IORuntimeException("Expected a '}' after the type " + sb + " but got a " + (char) ch);
     }
 
+    /**
+     * Determines if the current position in the byte buffer represents a type prefix.
+     * A type prefix is recognized by a leading '"' character followed by '@'.
+     *
+     * @return True if the current position indicates a type prefix, false otherwise.
+     */
     private boolean isTypePrefix() {
         final long rp = bytes.readPosition();
         return bytes.peekUnsignedByte(rp) == '"'
                 && bytes.peekUnsignedByte(rp + 1) == '@';
     }
 
+    /**
+     * Copies a quoted string value from the input to the given wire output.
+     * This method handles escaped characters within the quoted string.
+     *
+     * @param wire The wire output to copy the quoted string to.
+     * @param ch The starting quote character (either single or double quote).
+     * @param inMap Flag indicating if the current position is inside a map structure.
+     * @param topLevel Flag indicating if this is the topmost level of the copy operation.
+     * @throws InvalidMarshallableException if there's a problem with copying the data.
+     */
     private void copyQuote(WireOut wire, int ch, boolean inMap, boolean topLevel) throws InvalidMarshallableException {
         final StringBuilder sb = acquireStringBuilder();
+        // Extract the quoted text
         while (bytes.readRemaining() > 0) {
             int ch2 = bytes.readUnsignedByte();
             if (ch2 == ch)
                 break;
             sb.append((char) ch2);
+
+            // If an escape character is found, append the following character as well
             if (ch2 == '\\')
                 sb.append((char) bytes.readUnsignedByte());
         }
+
+        // Process any escaped characters within the text
         unescape(sb);
+
+        // Determine how to write the text to the wire based on the provided flags
         if (topLevel) {
             wire.writeEvent(String.class, sb);
         } else if (inMap) {
@@ -312,27 +444,50 @@ public class JSONWire extends TextWire {
         }
     }
 
+    /**
+     * Copies a map structure from the input to the given wire output.
+     * A map is assumed to be a set of key-value pairs enclosed in curly braces '{}'.
+     *
+     * @param wire The wire output to copy the map structure to.
+     * @throws InvalidMarshallableException if there's a problem with copying the data.
+     */
     private void copyMap(WireOut wire) throws InvalidMarshallableException {
         wire.getValueOut().marshallable(out -> {
             consumePadding();
 
+            // Process each key-value pair within the map until the end is reached or the buffer is exhausted
             while (bytes.readRemaining() > 0) {
                 final int ch = peekNextByte();
+
+                // If we've reached the end of the map, move past the closing brace and exit
                 if (ch == '}') {
                     bytes.readSkip(1);
                     return;
                 }
+
+                // Process one key-value pair within the map
                 copyOne(wire, true, false);
+
+                // After processing a key-value pair, expect either a comma (next pair) or the end of the map
                 expectComma('}');
             }
         });
     }
 
+    /**
+     * Consumes padding and expects either a comma (indicating another entry) or a given end character.
+     *
+     * @param end The expected end character (e.g., '}' for maps or ']' for sequences).
+     */
     private void expectComma(char end) {
         consumePadding();
         final int ch = peekNextByte();
+
+        // If we've reached the expected end character, simply return
         if (ch == end)
             return;
+
+        // If a comma is found, move past it and consume any subsequent padding
         if (ch == ',') {
             bytes.readSkip(1);
             consumePadding();
@@ -341,30 +496,60 @@ public class JSONWire extends TextWire {
         }
     }
 
+    /**
+     * Copies a sequence structure from the input to the given wire output.
+     * A sequence is assumed to be a list of values enclosed in square brackets '[]'.
+     *
+     * @param wire The wire output to copy the sequence to.
+     */
     private void copySequence(WireOut wire) {
         wire.getValueOut().sequence(out -> {
+            // Consume any padding characters (e.g., whitespace) before the sequence content
             consumePadding();
 
+            // Process each value within the sequence until the end is reached or the buffer is almost exhausted
             while (bytes.readRemaining() > 1) {
                 final int ch = peekNextByte();
+
+                // If we've reached the end of the sequence, move past the closing bracket and exit
                 if (ch == ']') {
                     bytes.readSkip(1);
                     return;
                 }
+
+                // Process one value within the sequence
                 copyOne(wire, false, false);
+
+                // After processing a value, expect either a comma (next value) or the end of the sequence
                 expectComma(']');
             }
         });
     }
 
+    /**
+     * Peeks at the next byte in the buffer without advancing the read position.
+     *
+     * @return The next byte from the current read position.
+     */
     private int peekNextByte() {
         return bytes.peekUnsignedByte(bytes.readPosition());
     }
 
+    /**
+     * Copies a numeric value from the input buffer to the given wire output.
+     * The method can handle both integer and decimal numbers. For binary wire outputs,
+     * it can distinguish between the two and write the appropriate format. For textual wire outputs,
+     * the number is written as is.
+     *
+     * @param wire The wire output to which the numeric value should be copied.
+     */
     private void copyNumber(WireOut wire) {
+        // Move back one position to re-read the first character of the number
         bytes.readSkip(-1);
         long rp = bytes.readPosition();
         boolean decimal = false;
+
+        // Continuously read the buffer until a non-numeric character is encountered
         while (true) {
             int ch2 = peekNextByte();
             switch (ch2) {
@@ -382,12 +567,17 @@ public class JSONWire extends TextWire {
                 case '9':
                 case '.':
                     bytes.readSkip(1);
+                    // If we're dealing with a binary wire format
                     if (wire.isBinary()) {
+                        // Check if the character represents a decimal point
                         decimal |= ch2 == '.';
                     } else {
+                        // For textual wire formats, simply append the character
                         wire.bytes().append((char) ch2);
                     }
                     break;
+
+                // If we encounter an end of structure character or any non-numeric character, stop parsing
                 case '}':
                 case ']':
                 case ',':
@@ -395,7 +585,10 @@ public class JSONWire extends TextWire {
                     if (wire.isBinary()) {
                         long rl = bytes.readLimit();
                         try {
+                            // Set the read position and limit to parse just the number
                             bytes.readPositionRemaining(rp, bytes.readPosition() - rp);
+
+                            // If the number had a decimal point, treat it as a double, otherwise as a long
                             if (decimal)
                                 wire.getValueOut().float64(bytes.parseDouble());
                             else
@@ -404,6 +597,7 @@ public class JSONWire extends TextWire {
                             bytes.readLimit(rl);
                         }
                     } else {
+                        // For textual wire outputs, append a comma after the number
                         wire.bytes().append(",");
                     }
                     return;
@@ -433,37 +627,49 @@ public class JSONWire extends TextWire {
         bytes.writeUnsignedByte('"');
     }
 
-    // https://www.rfc-editor.org/rfc/rfc7159#section-7
+    /**
+     * Escapes special characters in a CharSequence as per JSON String encoding standards detailed in RFC 7159, Section 7.
+     * This ensures that the resulting string can be safely embedded within a JSON string while preserving its meaning.
+     * See <a href="https://www.rfc-editor.org/rfc/rfc7159#section-7">RFC 7159, Section 7</a> for more details.
+     *
+     * @param s The CharSequence to escape.
+     * @param quotes Specifies the type of quotes used in the CharSequence and guides escaping.
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7159#section-7">RFC 7159, Section 7</a>
+     */
     protected void escape0(@NotNull CharSequence s, @NotNull Quotes quotes) {
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
+
+            // Switch on each character and apply the appropriate escape sequence
             switch (ch) {
-                case '\b':
+                case '\b': // Backspace
                     bytes.append("\\b");
                     break;
-                case '\t':
+                case '\t': // Horizontal tab
                     bytes.append("\\t");
                     break;
-                case '\f':
+                case '\f': // Form feed
                     bytes.append("\\f");
                     break;
-                case '\n':
+                case '\n': // Line feed
                     bytes.append("\\n");
                     break;
-                case '\r':
+                case '\r': // Carriage return
                     bytes.append("\\r");
                     break;
                 case '"':
+                    // If the character is the same as the quote type, escape it
                     if (ch == quotes.q) {
                         bytes.writeUnsignedByte('\\').writeUnsignedByte(ch);
                     } else {
                         bytes.writeUnsignedByte(ch);
                     }
                     break;
-                case '\\':
+                case '\\': // Backslash
                     bytes.writeUnsignedByte('\\').writeUnsignedByte(ch);
                     break;
                 default:
+                    // For characters outside the ASCII range, or control characters below ASCII 32, use Unicode escape
                     if (ch < ' ' || ch > 127)
                         appendU4(ch);
                     else
@@ -539,9 +745,21 @@ public class JSONWire extends TextWire {
         }
     }
 
+    /**
+     * The JSONWriteDocumentContext class extends the TextWriteDocumentContext class.
+     * It provides a specialized context for writing JSON data, adjusting writing positions
+     * and handling JSON-specific syntax such as curly braces.
+     *
+         */
     class JSONWriteDocumentContext extends TextWriteDocumentContext {
+        // Position marker to track the start of a JSON object
         private long start;
 
+        /**
+         * Constructor for JSONWriteDocumentContext.
+         *
+         * @param wire The wire to be used for writing data
+         */
         public JSONWriteDocumentContext(Wire wire) {
             super(wire);
         }
@@ -574,6 +792,10 @@ public class JSONWire extends TextWire {
         }
     }
 
+    /**
+     * The JSONValueOut class extends the YamlValueOut class.
+     * It provides methods for adjusting and outputting values in JSON format.
+     */
     class JSONValueOut extends YamlValueOut {
 
         @NotNull
@@ -755,6 +977,11 @@ public class JSONWire extends TextWire {
         }
     }
 
+    /**
+     * The JSONValueIn class extends the TextValueIn class.
+     * It provides specialized methods for interpreting values from JSON data,
+     * ensuring proper handling of JSON-specific constructs like the "null" value.
+     */
     class JSONValueIn extends TextValueIn {
 
 
@@ -819,8 +1046,11 @@ public class JSONWire extends TextWire {
 
 
         /**
-         * @return true if !!null "", if {@code true} reads the !!null "" up to the next STOP, if
-         * {@code false} no  data is read  ( data is only peaked if {@code false} )
+         * Determines if the current value represents a JSON null value.
+         *
+         * @return True if the value is "null" in the JSON context; otherwise, False.
+         *         When true, it consumes the "null" and moves to the next token.
+         *         When false, no data is read, only peaked.
          */
         @Override
         public boolean isNull() {
@@ -891,6 +1121,14 @@ public class JSONWire extends TextWire {
             return useTypes || super.isTyped();
         }
 
+        /**
+         * Parses the type of the object based on the data. If a type definition is present,
+         * it will use that to determine the class of the object. Otherwise, it falls back
+         * to the default parsing mechanism.
+         *
+         * @return The parsed object.
+         * @throws InvalidMarshallableException If there's an issue with unmarshalling the data.
+         */
         private Object parseType() throws InvalidMarshallableException {
             if (!hasTypeDefinition()) {
                 return super.object();
@@ -913,6 +1151,19 @@ public class JSONWire extends TextWire {
                 bytes.readByte();
         }
 
+        /**
+         * Parses the type of the object based on the data and the given parameters. It will
+         * either use the provided class or, if a type definition is present in the data, will
+         * override with that. If the provided class or object instance is incompatible with the
+         * type definition, it will throw a ClassCastException.
+         *
+         * @param using The object instance to use, or null if not provided.
+         * @param clazz The class to parse the object as, or null if not provided.
+         * @param bestEffort Indicates whether to give a best effort attempt to parse the object even if it's partially incorrect.
+         * @return The parsed object.
+         * @throws InvalidMarshallableException If there's an issue with unmarshalling the data.
+         * @throws ClassCastException If there's a type mismatch between the provided class or instance and the type definition.
+         */
         private <E> E parseType(@Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
 
             Type aClass = consumeTypeLiteral(null);
@@ -942,6 +1193,12 @@ public class JSONWire extends TextWire {
             }
         }
 
+        /**
+         * Checks if the next set of characters in the bytes stream represents a type definition.
+         * A type definition is expected to start with the pattern {"@ after consuming any padding.
+         *
+         * @return true if a type definition is found, false otherwise.
+         */
         boolean hasTypeDefinition() {
             final long readPos = bytes.readPosition();
             try {
@@ -959,6 +1216,14 @@ public class JSONWire extends TextWire {
             }
         }
 
+        /**
+         * Reads the type definition from the bytes stream into the provided StringBuilder.
+         * It assumes that the current position in the bytes stream is the start of the type
+         * definition and consumes characters until it encounters a colon (":").
+         *
+         * @param sb The StringBuilder to which the type definition will be appended.
+         * @throws IORuntimeException If the expected opening bracket "{" is not found.
+         */
         void readTypeDefinition(StringBuilder sb) {
             consumePadding();
             if (bytes.readChar() != '{')
@@ -971,6 +1236,11 @@ public class JSONWire extends TextWire {
 
         }
 
+        /**
+         * Indicates whether types are being used in the current context or not.
+         *
+         * @return true if types are being used, false otherwise.
+         */
         public boolean useTypes() {
             return useTypes;
         }

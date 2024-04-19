@@ -26,8 +26,9 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 
 public class ChainedMethodsTestChainedMethodsTest$1MethodReader extends AbstractGeneratedMethodReader {
-    // instances on which parsed calls are invoked
+    // The object instance on which the parsed method calls are to be invoked
     private final Object instance0;
+    // Default parselet used for reading method invocations
     private final WireParselet defaultParselet;
 
     // mid2
@@ -52,7 +53,7 @@ public class ChainedMethodsTestChainedMethodsTest$1MethodReader extends Abstract
     // mid
     private String midarg0;
 
-    // chained call result
+    // Holds the result of a chained call, if any
     private Object chainedCallReturnResult;
 
     public ChainedMethodsTestChainedMethodsTest$1MethodReader(MarshallableIn in, WireParselet defaultParselet, WireParselet debugLoggingParselet, MethodReaderInterceptorReturns interceptor, Object[] metaInstances, Object[] instances) {
@@ -61,15 +62,19 @@ public class ChainedMethodsTestChainedMethodsTest$1MethodReader extends Abstract
         instance0 = instances[0];
     }
 
+    // Checks if the result of the chained call is an instance of the IgnoresEverything interface
     @Override
     public boolean restIgnored() {
         return chainedCallReturnResult instanceof net.openhft.chronicle.core.util.IgnoresEverything;
     }
 
+    // Attempts to read a single method call from the input and invoke the corresponding method on an instance
     @Override
     protected boolean readOneCall(WireIn wireIn) {
         ValueIn valueIn = wireIn.getValueIn();
         String lastEventName = "";
+
+        // Check the type of method identification (by name or ID)
         if (wireIn.bytes().peekUnsignedByte() == BinaryWireCode.FIELD_NUMBER) {
             int methodId = (int) wireIn.readEventNumber();
             switch (methodId) {
@@ -84,11 +89,18 @@ public class ChainedMethodsTestChainedMethodsTest$1MethodReader extends Abstract
         } else {
             lastEventName = wireIn.readEvent(String.class);
         }
+
+        // Handle the identified method
         try {
+            // If in debug mode, log the method being invoked
             if (Jvm.isDebug())
                 debugLoggingParselet.accept(lastEventName, valueIn);
+
+            // If method name or ID isn't available, throw an error
             if (lastEventName == null)
                 throw new IllegalStateException("Failed to read method name or ID");
+
+            // Switch on the method's name to determine which method to invoke
             switch (lastEventName) {
                 case MethodReader.HISTORY:
                     valueIn.marshallable(messageHistory);
@@ -114,6 +126,7 @@ public class ChainedMethodsTestChainedMethodsTest$1MethodReader extends Abstract
                     }
                     break;
 
+                // Handle the "next2" method call: Extract the argument and invoke the corresponding method on IMid2 interface
                 case "next2":
                     next2arg0 = valueIn.text();
                     try {
@@ -124,6 +137,7 @@ public class ChainedMethodsTestChainedMethodsTest$1MethodReader extends Abstract
                     }
                     break;
 
+                // Handle the "echo" method call: Extract the argument and invoke the corresponding method on ILast interface
                 case "echo":
                     echoarg0 = valueIn.text();
                     try {
@@ -134,6 +148,7 @@ public class ChainedMethodsTestChainedMethodsTest$1MethodReader extends Abstract
                     }
                     break;
 
+                // Handle the "midTwoArgs" method call: Extract the arguments using sequence and invoke the corresponding method on ITop interface
                 case "midTwoArgs":
                     valueIn.sequence(this, (f, v) -> { // todo optimize megamorphic lambda call
                         f.midTwoArgsarg0 = v.int32();
@@ -147,6 +162,7 @@ public class ChainedMethodsTestChainedMethodsTest$1MethodReader extends Abstract
                     }
                     break;
 
+                // Handle the "next" method call: Extract the argument and invoke the corresponding method on IMid interface
                 case "next":
                     nextarg0 = valueIn.int64();
                     try {
@@ -157,6 +173,7 @@ public class ChainedMethodsTestChainedMethodsTest$1MethodReader extends Abstract
                     }
                     break;
 
+                // Handle the "midNoArg" method call: Skip reading the value and invoke the corresponding method on ITop interface
                 case "midNoArg":
                     valueIn.skipValue();
                     try {
@@ -167,6 +184,7 @@ public class ChainedMethodsTestChainedMethodsTest$1MethodReader extends Abstract
                     }
                     break;
 
+                // Handle the "mid" method call: Extract the argument and invoke the corresponding method on ITop interface
                 case "mid":
                     midarg0 = valueIn.text();
                     try {
@@ -177,6 +195,7 @@ public class ChainedMethodsTestChainedMethodsTest$1MethodReader extends Abstract
                     }
                     break;
 
+                // Handle any method calls not explicitly accounted for
                 default:
                     defaultParselet.accept(lastEventName, valueIn);
             }
@@ -186,10 +205,13 @@ public class ChainedMethodsTestChainedMethodsTest$1MethodReader extends Abstract
         }
     }
 
+    // Read and process metadata associated with the call
     @Override
     protected boolean readOneCallMeta(WireIn wireIn) {
         ValueIn valueIn = wireIn.getValueIn();
         String lastEventName = "";
+
+        // Determine whether the event is indicated by a FIELD_NUMBER or a String
         if (wireIn.bytes().peekUnsignedByte() == BinaryWireCode.FIELD_NUMBER) {
             int methodId = (int) wireIn.readEventNumber();
             switch (methodId) {
@@ -200,11 +222,15 @@ public class ChainedMethodsTestChainedMethodsTest$1MethodReader extends Abstract
         } else {
             lastEventName = wireIn.readEvent(String.class);
         }
+
+        // Handle debug logging and read the method name or ID
         try {
             if (Jvm.isDebug())
                 debugLoggingParselet.accept(lastEventName, valueIn);
             if (lastEventName == null)
                 throw new IllegalStateException("Failed to read method name or ID");
+
+            // Handle specific event names or skip reading the value
             switch (lastEventName) {
                 case MethodReader.HISTORY:
                     valueIn.marshallable(messageHistory);

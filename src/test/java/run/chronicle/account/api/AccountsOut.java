@@ -22,12 +22,21 @@ import net.openhft.chronicle.wire.utils.ErrorListener;
 import run.chronicle.account.dto.*;
 
 public interface AccountsOut extends ErrorListener {
+    // Sends a successful account status response.
     void accountStatusOK(AccountStatusOK accountStatusOK);
+
+    // Sends a failed account status response, indicating a problem with the account status request.
     void accountStatusFailed(AccountStatusFailed accountStatusFailed);
 
+    // Sends a successful transfer response, indicating the transfer was completed successfully.
     void transferOK(TransferOK transferOK);
+
+    // Sends a failed transfer response, indicating a problem occurred during the transfer.
     void transferFailed(TransferFailed transferFailed);
 
+    // Marks the start of a checkpoint in the processing sequence.
     void startCheckpoint(CheckPoint checkPoint);
+
+    // Marks the end of a checkpoint in the processing sequence.
     void endCheckpoint(CheckPoint checkPoint);
 }

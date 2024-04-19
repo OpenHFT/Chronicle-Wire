@@ -32,34 +32,40 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings("deprecated")
 @RunWith(Parameterized.class)
 public class YamlTesterParametersTest extends WireTestCommon {
+    // Paths to the YAML test files
     static final String[] paths = {
             "yaml-tester/t1",
             "yaml-tester/t2",
             "yaml-tester/t3",
             "yaml-tester/comments-new"};
 
+    // Name of the test and the YamlTester instance
     final String name;
     final YamlTester tester;
 
+    // Constructor that assigns name and tester
     public YamlTesterParametersTest(String name, YamlTester tester) {
         this.name = name;
         this.tester = tester;
     }
 
+    // Generates parameters for the test cases
     @Parameterized.Parameters(name = "{0}")
     public static List<Object[]> parameters() {
-        // ignored as duplicate
-        // ignored
-        // also ignored as duplicates
+        // Builds parameters for the test using YamlTesterParametersBuilder
+        // Some agitators are ignored as duplicates
         return new YamlTesterParametersBuilder<>(TestImpl::new, TestOut.class, Arrays.asList(paths))
                 .agitators(
                         YamlAgitator.messageMissing(),
                         YamlAgitator.messageMissing(),
+                        // Duplicate messageMissing agitator is ignored
                         YamlAgitator.duplicateMessage(),
                         YamlAgitator.duplicateMessage(),
                         YamlAgitator.duplicateMessage(),
+                        // Duplicate duplicateMessage agitators are ignored
                         YamlAgitator.missingFields("eventTime"),
                         YamlAgitator.overrideFields("eventTime: 1999-01-01T01:01:01"),
                         YamlAgitator.replaceAll("5 to 6", "[5]", "6"))
@@ -67,15 +73,20 @@ public class YamlTesterParametersTest extends WireTestCommon {
                 .get();
     }
 
+    // Resets the SystemTimeProvider after each test
     @After
     public void tearDown() {
         SystemTimeProvider.CLOCK = SystemTimeProvider.INSTANCE;
     }
 
+    // Test method to run the YAML tester
     @Test
     public void runTester() {
+        // Setting a custom time provider for the test
         SystemTimeProvider.CLOCK = new SetTimeProvider("2022-05-17T20:26:00")
                 .autoIncrement(1, TimeUnit.MICROSECONDS);
+
+        // Asserting that the expected output matches the actual output
         assertEquals(tester.expected(), tester.actual());
     }
 }

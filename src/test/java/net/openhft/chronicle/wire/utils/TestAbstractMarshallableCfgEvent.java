@@ -20,6 +20,15 @@ package net.openhft.chronicle.wire.utils;
 
 import net.openhft.chronicle.wire.AbstractMarshallableCfg;
 
+/**
+ * Defines a test event class that extends from AbstractMarshallableCfg. This class is
+ * primarily used for testing purposes, leveraging the serialization and deserialization
+ * capabilities provided by the AbstractMarshallableCfg.
+ */
 public class TestAbstractMarshallableCfgEvent extends AbstractMarshallableCfg {
+
+    // Represents a numerical value associated with this event. The 'number' field is of type long,
+    // suggesting it can store large integer values. This field's specific usage or purpose
+    // would typically depend on the context in which the TestAbstractMarshallableCfgEvent is used.
     private long number;
 }

@@ -24,10 +24,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * A utility class for handling reflection-based tasks.
+ * This class provides utility methods related to class reflection and
+ * name generation, especially concerning interfaces and package names.
+ * <p>
+ * Note: This class is not intended for instantiation.
+ */
 public final class ReflectionUtil {
+
+    // Configuration flag to determine if package name should be prepended
     private static final boolean PREPEND_PACKAGE = Jvm.getBoolean("wire.method.prependPackage");
+    // Base package prefix for generated names
     private static final String PACKAGE_PREFIX = "net.openhft.chronicle.wire.method";
 
+    // Private constructor to prevent instantiation
     private ReflectionUtil() {
     }
 
@@ -35,8 +46,8 @@ public final class ReflectionUtil {
      * Creates and returns a new List of all interfaces implemented by
      * the provided {@code oClass} and all its super classes.
      *
-     * @param oClass class
-     * @return interfaces
+     * @param oClass The class to inspect.
+     * @return A list of interfaces implemented by the given class and its ancestors.
      */
     public static List<Class<?>> interfaces(@NotNull final Class<?> oClass) {
         final List<Class<?>> list = new ArrayList<>();
@@ -44,6 +55,7 @@ public final class ReflectionUtil {
         return list;
     }
 
+    // Recursively gather interfaces from the given class and its superclasses
     private static void interfaces(final Class<?> oClass, final List<Class<?>> list) {
         final Class<?> baseClass = oClass.getSuperclass();
         if (baseClass == null)
@@ -53,6 +65,15 @@ public final class ReflectionUtil {
         interfaces(baseClass, list);
     }
 
+    /**
+     * Generates a package name based on a given class full name.
+     * If the class belongs to specific packages (like 'java.', 'javax.', 'com.sun.'),
+     * or if the {@code PREPEND_PACKAGE} flag is set, the generated package name
+     * will be prefixed with {@code PACKAGE_PREFIX}.
+     *
+     * @param classFullName The full name of the class.
+     * @return The generated package name.
+     */
     @NotNull
     public static String generatedPackageName(String classFullName) {
         int lastDot = classFullName.lastIndexOf('.');

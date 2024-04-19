@@ -51,11 +51,18 @@ import static net.openhft.chronicle.wire.SerializationStrategies.MARSHALLABLE;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface ValueIn {
-    Consumer<ValueIn> DISCARD = v -> {
-    };
+    /** A constant consumer that does nothing when accepting a {@link ValueIn}. */
+    Consumer<ValueIn> DISCARD = v -> {};
 
-    /*
-     * Text / Strings.
+    // ---- Text / Strings section ----
+
+    /**
+     * Reads text data and applies a given bi-consumer to the text data and the provided object.
+     *
+     * @param t  The target object.
+     * @param ts The bi-consumer that accepts the target object and the read text.
+     * @param <T> Type of the target object.
+     * @return The current WireIn instance.
      */
     @NotNull
     default <T> WireIn text(T t, @NotNull BiConsumer<T, String> ts) {
@@ -64,6 +71,12 @@ public interface ValueIn {
         return wireIn();
     }
 
+    /**
+     * Reads text data and appends it to the given StringBuilder. If the data is null, the StringBuilder is cleared.
+     *
+     * @param sb The StringBuilder to append the text data to.
+     * @return The current WireIn instance.
+     */
     @NotNull
     default WireIn text(@NotNull StringBuilder sb) {
         if (textTo(sb) == null)
@@ -71,6 +84,11 @@ public interface ValueIn {
         return wireIn();
     }
 
+    /**
+     * Reads text data and returns the first character. If the data is null or empty, a null character is returned.
+     *
+     * @return The first character of the text data or '\u0000' if none.
+     */
     default char character() {
         try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
             @Nullable CharSequence cs = textTo(stlSb.get());
@@ -81,6 +99,12 @@ public interface ValueIn {
         }
     }
 
+    /**
+     * Reads text data into the provided Bytes object, which is then cleared.
+     *
+     * @param sdo The Bytes object to store the text data.
+     * @return The current WireIn instance.
+     */
     @NotNull
     default WireIn text(@NotNull Bytes<?> sdo) {
         sdo.clear();
@@ -88,70 +112,173 @@ public interface ValueIn {
         return wireIn();
     }
 
+    /**
+     * Reads and returns the text data.
+     *
+     * @return The text data or null.
+     */
     @Nullable
     String text();
 
+    /**
+     * Reads text data and appends it to the given StringBuilder.
+     *
+     * @param sb The StringBuilder to append the text data to.
+     * @return The StringBuilder with appended text or null.
+     */
     @Nullable
     StringBuilder textTo(@NotNull StringBuilder sb);
 
+    /**
+     * Reads text data into the provided Bytes object.
+     *
+     * @param bytes The Bytes object to store the text data.
+     * @return The Bytes object with the text data or null.
+     */
     @Nullable
     Bytes<?> textTo(@NotNull Bytes<?> bytes);
 
+    /**
+     * Reads byte data into the provided BytesOut object.
+     *
+     * @param toBytes The BytesOut object to store the byte data.
+     * @return The current WireIn instance.
+     */
     @NotNull
     WireIn bytes(@NotNull BytesOut<?> toBytes);
 
+    /**
+     * Reads byte data into the provided BytesOut object with an option to clear the BytesOut before reading.
+     *
+     * @param toBytes The BytesOut object to store the byte data.
+     * @param clearBytes If true, the BytesOut object will be cleared before reading.
+     * @return The current WireIn instance.
+     */
     default WireIn bytes(@NotNull BytesOut<?> toBytes, boolean clearBytes) {
         if (clearBytes)
             toBytes.clear();
         return bytes(toBytes);
     }
 
+    /**
+     * Reads byte data into the provided BytesOut object.
+     * This method acts as a semantic alias for {@link #bytes(BytesOut)} method.
+     *
+     * @param toBytes The BytesOut object to store the byte data.
+     * @return The current WireIn instance.
+     */
     @NotNull
     default WireIn bytesLiteral(@NotNull BytesOut<?> toBytes) {
         return bytes(toBytes);
     }
 
+    /**
+     * Retrieves the byte data as a BytesStore object.
+     * This method acts as a semantic alias for {@link #bytesStore()} method.
+     *
+     * @return The BytesStore object or null.
+     */
     @Nullable
     default BytesStore bytesLiteral() {
         return bytesStore();
     }
 
+    /**
+     * Sets byte data to the provided PointerBytesStore.
+     *
+     * @param toBytes The PointerBytesStore to set the byte data.
+     * @return The current WireIn instance.
+     */
     @Nullable
     WireIn bytesSet(@NotNull PointerBytesStore toBytes);
 
+    /**
+     * Compares byte data with the provided BytesStore and uses the given BooleanConsumer based on the result.
+     *
+     * @param compareBytes The BytesStore to compare with.
+     * @param consumer     The BooleanConsumer to be called based on the comparison result.
+     * @return The current WireIn instance.
+     */
     @NotNull
     WireIn bytesMatch(@NotNull BytesStore compareBytes, BooleanConsumer consumer);
 
+    /**
+     * Reads byte data using the provided ReadBytesMarshallable.
+     *
+     * @param bytesMarshallable The ReadBytesMarshallable to read the byte data.
+     * @return The current WireIn instance.
+     */
     @NotNull
     WireIn bytes(@NotNull ReadBytesMarshallable bytesMarshallable);
 
+    /**
+     * Retrieves the byte data as an array.
+     *
+     * @return The byte data as an array or null.
+     */
     default byte @Nullable [] bytes() {
         return bytes((byte[]) null);
     }
 
+    /**
+     * Retrieves the byte data as an array with the option to reuse an existing byte array.
+     *
+     * @param using The existing byte array to use or null.
+     * @return The byte data as an array or null.
+     */
     byte @Nullable [] bytes(byte[] using);
 
+    /**
+     * Retrieves the byte data as a BytesStore object.
+     *
+     * @return The BytesStore object or null.
+     */
     @Nullable
     default BytesStore bytesStore() {
         byte @Nullable [] bytes = bytes();
         return bytes == null ? null : BytesStore.wrap(bytes);
     }
 
+    /**
+     * Puts the byte data into the provided ByteBuffer.
+     *
+     * @param bb The ByteBuffer to put the byte data.
+     */
     default void byteBuffer(@NotNull ByteBuffer bb) {
         bb.put(bytes());
     }
 
+    /**
+     * Provides the current WireIn instance.
+     *
+     * @return The current WireIn instance.
+     */
     @NotNull
     WireIn wireIn();
 
     /**
-     * the length of the field as bytes including any encoding and header character
+     * Retrieves the length of the field in bytes, inclusive of any encoding and header character.
+     *
+     * @return The length of the field in bytes.
      */
     long readLength();
 
+    /**
+     * Skips the current value while reading.
+     *
+     * @return The current WireIn instance.
+     */
     @NotNull
     WireIn skipValue();
 
+    /**
+     * Reads a boolean value and applies it to the provided consumer.
+     *
+     * @param t     The target object.
+     * @param tFlag The consumer that accepts the target object and the read boolean value.
+     * @return The current WireIn instance.
+     * @param <T>   The type of the target object.
+     */
     @NotNull <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> tFlag);
 
     /**
@@ -366,6 +493,12 @@ public interface ValueIn {
     @NotNull
     WireIn int32(@NotNull IntValue value);
 
+    /**
+     * Reads a 64-bit integer for binding. If the provided LongValue is null, creates a new reference.
+     *
+     * @param value The LongValue to be populated or null.
+     * @return The populated or newly created LongValue.
+     */
     @NotNull
     default LongValue int64ForBinding(@Nullable LongValue value) {
         @NotNull LongValue ret = value == null ? wireIn().newLongReference() : value;
@@ -373,12 +506,44 @@ public interface ValueIn {
         return ret;
     }
 
+    /**
+     * Reads a boolean value and populates the provided BooleanValue.
+     *
+     * @param ret The BooleanValue to be populated.
+     * @return The current WireIn instance.
+     */
     WireIn bool(@NotNull BooleanValue ret);
 
+    /**
+     * Reads a 64-bit signed integer, populates the LongValue, and applies the LongValue using the provided consumer.
+     *
+     * @param value  The LongValue to be populated.
+     * @param t      The target object.
+     * @param setter The consumer that accepts the target object and the populated LongValue.
+     * @param <T>    The type of the target object.
+     * @return The current WireIn instance.
+     */
     @NotNull <T> WireIn int64(@Nullable LongValue value, T t, @NotNull BiConsumer<T, LongValue> setter);
 
+    /**
+     * Reads a 32-bit signed integer, populates the IntValue, and applies the IntValue using the provided consumer.
+     *
+     * @param value  The IntValue to be populated.
+     * @param t      The target object.
+     * @param setter The consumer that accepts the target object and the populated IntValue.
+     * @param <T>    The type of the target object.
+     * @return The current WireIn instance.
+     */
     @NotNull <T> WireIn int32(@Nullable IntValue value, T t, @NotNull BiConsumer<T, IntValue> setter);
 
+    /**
+     * Reads a sequence of values using the provided consumer.
+     *
+     * @param t       The target object.
+     * @param tReader The consumer that reads the sequence into the target object.
+     * @param <T>     The type of the target object.
+     * @return A boolean indicating if the sequence reading was successful.
+     */
     <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader);
 
 /**
@@ -452,6 +617,14 @@ public interface ValueIn {
  */
     @NotNull <T, K> WireIn sequence(@NotNull T t, K k, @NotNull TriConsumer<T, K, ValueIn> tReader) throws InvalidMarshallableException;
 
+    /**
+     * Reads a sequence of values and applies a function that returns the length of the sequence.
+     *
+     * @param t       The target object.
+     * @param tReader A function that accepts a ValueIn reader and the target object and returns the length.
+     * @param <T>     The type of the target object.
+     * @return The length of the sequence.
+     */
     default <T> int sequenceWithLength(@NotNull T t, @NotNull ToIntBiFunction<ValueIn, T> tReader) {
         int[] length = {0};
         sequence(t, (tt, in) -> length[0] = tReader.applyAsInt(in, tt));
@@ -655,6 +828,16 @@ public interface ValueIn {
         return collection(o, tSupplier);
     }
 
+    /**
+     * Reads a sequence of {@link ReadMarshallable} items into a collection, where each item is constructed using the provided {@link Function}.
+     *
+     * @param o An object passed to the function to create instances of {@link ReadMarshallable}.
+     * @param tSupplier A function that, given the object 'o', returns an instance of {@link ReadMarshallable}.
+     * @param <O> The type of the provided object.
+     * @param <T> The type of the ReadMarshallable.
+     * @return The current {@link WireIn} instance for chaining.
+     * @throws InvalidMarshallableException If there's a serialization issue.
+     */
     @NotNull
     default <O, T extends ReadMarshallable> WireIn collection(@NotNull O o, Function<O, T> tSupplier) throws InvalidMarshallableException {
         sequence(o, tSupplier, (o2, ts, v) -> {
@@ -745,9 +928,25 @@ public interface ValueIn {
  */
     @NotNull <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts);
 
+    /**
+     * Consumes a type literal (a class name) as text from the wire, passing it to a consumer.
+     *
+     * @param t The object to which the type literal relates.
+     * @param classNameConsumer A consumer that accepts the provided object and the read class name.
+     * @param <T> The type of the provided object.
+     * @return The current {@link WireIn} instance for chaining.
+     * @throws IORuntimeException If there's an IO issue during reading.
+     * @throws BufferUnderflowException If there's not enough data in the buffer.
+     */
     @NotNull <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer)
             throws IORuntimeException, BufferUnderflowException;
 
+    /**
+     * Retrieves a {@link ClassLookup} instance associated with the current {@link WireIn}.
+     * The ClassLookup allows for the resolution of class names to actual {@link Class} objects.
+     *
+     * @return The associated ClassLookup instance.
+     */
     ClassLookup classLookup();
 
 
@@ -825,11 +1024,11 @@ public interface ValueIn {
         return marshallable(object, SerializationStrategies.MARSHALLABLE) != null;
     }
 
-/**
- * Reads a boolean value from the wire.
- *
- * @return The boolean value read from the wire.
- */
+    /**
+     * Reads a boolean value from the wire.
+     *
+     * @return The boolean value read from the wire.
+     */
     boolean bool();
 
 /**
@@ -887,6 +1086,11 @@ public interface ValueIn {
         return int64();
     }
 
+    /**
+     * Reads a 32-bit floating point number from the wire.
+     *
+     * @return The float value read from the wire.
+     */
     float float32();
 
 /**
@@ -900,7 +1104,10 @@ public interface ValueIn {
     }
 
     /**
-     * @return the value as a float, or -0.0 indicates that we have not been able to parse this data ( we don't throw an exception )
+     * Reads a 64-bit floating point number from the wire.
+     * If the data is not parsed successfully, returns -0.0.
+     *
+     * @return The double value read from the wire, or -0.0 if parsing fails.
      */
     double float64();
 
@@ -1013,7 +1220,6 @@ public interface ValueIn {
         return Wires.object0(this, null, clazz);
     }
 
-
     @Nullable
     default Object object() throws InvalidMarshallableException {
         @Nullable final Object o = objectWithInferredType(null, SerializationStrategies.ANY_OBJECT, null);
@@ -1021,9 +1227,12 @@ public interface ValueIn {
     }
 
     /**
-     * Used for logging whatever we can get
+     * Deserializes an object from the current data stream, attempting to return any object that can be parsed.
+     * <p>
+     * This method is used for logging purposes and aims to be lenient, capturing and returning exceptions
+     * as results if they occur during the deserialization process.
      *
-     * @return the object or Throwable
+     * @return The deserialized object, or a {@link Throwable} if an error occurs during deserialization.
      */
     default Object objectBestEffort() {
         ValidatableUtil.startValidateDisabled();
@@ -1151,9 +1360,9 @@ public interface ValueIn {
     Object objectWithInferredType(Object using, SerializationStrategy strategy, Class type) throws InvalidMarshallableException;
 
     /**
-     * Check if the value is present
+     * Checks if a value is present in the data stream.
      *
-     * @return true if the value was present in the Wire, false otherwise
+     * @return True if a value is present, false otherwise.
      */
     default boolean isPresent() {
         return true;
@@ -1277,6 +1486,18 @@ public interface ValueIn {
  * Interface for reading values from the wire into a list.
  */
     interface Reader {
+
+        /**
+         * Accepts and processes a value from the data stream, with the possibility of
+         * utilizing provided lists and suppliers for custom data processing.
+         *
+         * @param <T> The type of elements in the lists.
+         * @param valueIn The input value from the data stream.
+         * @param list A list to potentially store and process the data.
+         * @param buffer An auxiliary buffer list for temporary storage and processing.
+         * @param bufferAdd A supplier to generate elements for the buffer list.
+         * @throws InvalidMarshallableException If an error occurs during the processing.
+         */
         <T> void accept(ValueIn valueIn, List<T> list, List<T> buffer, Supplier<T> bufferAdd) throws InvalidMarshallableException;
     }
 }

@@ -30,19 +30,37 @@ import org.junit.runners.Parameterized;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
-
+/**
+ * Test suite for validating Map serialization and deserialization using different wire types.
+ * Inherits from WireTestCommon for common test setup and teardown functionalities.
+ */
 @RunWith(value = Parameterized.class)
 public class MapWireTest extends WireTestCommon {
+
+    // The wire type for serialization and deserialization (TEXT or BINARY)
     private final WireType wireType;
+
+    // The map to be tested
     @SuppressWarnings("rawtypes")
     private final Map m;
 
+    /**
+     * Constructs a new MapWireTest instance with the specified wire type and map.
+     *
+     * @param wireType The wire type for serialization and deserialization.
+     * @param m The map to be tested.
+     */
     @SuppressWarnings("rawtypes")
     public MapWireTest(WireType wireType, Map m) {
         this.wireType = wireType;
         this.m = m;
     }
 
+    /**
+     * Provides a collection of test parameters including wire types and maps with various content.
+     *
+     * @return Collection of object arrays with wire types and maps.
+     */
     @NotNull
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
@@ -65,19 +83,31 @@ public class MapWireTest extends WireTestCommon {
         return list;
     }
 
+    /**
+     * Test the serialization and deserialization of maps using the given wire type.
+     * The test will serialize the map into wire format, then deserialize it back
+     * and compare to the original map to ensure data integrity.
+     */
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
     public void writeMap() {
+        // Create an elastic buffer to hold serialized data
         Bytes<?> bytes = Bytes.elasticByteBuffer();
-        Wire wire = wireType.apply(bytes);
-        wire.getValueOut()
-                .marshallable(m);
-       // System.out.println(wire);
 
-        @Nullable Map m2 = wire.getValueIn()
-                .marshallableAsMap(Object.class, Object.class);
+        // Apply the wire type to the bytes buffer
+        Wire wire = wireType.apply(bytes);
+        // Serialize the map into the wire format
+        wire.getValueOut().marshallable(m);
+        // Uncomment the following line to print the wire content
+        // System.out.println(wire);
+
+        // Deserialize the map from the wire format
+        @Nullable Map m2 = wire.getValueIn().marshallableAsMap(Object.class, Object.class);
+
+        // Ensure that the deserialized map matches the original map
         assertEquals(m, m2);
 
+        // Release the bytes buffer
         bytes.releaseLast();
     }
 }

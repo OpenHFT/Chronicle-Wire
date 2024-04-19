@@ -37,19 +37,25 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 
 @RunWith(Parameterized.class)
 public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
+
+    // Parameterized value to determine if proxy code generation is disabled
     @Parameterized.Parameter
     public boolean disableProxyCodegen;
 
+    // Data set for parameterized tests, providing true and false values for 'disableProxyCodegen'
     @Parameterized.Parameters(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[]{false}, new Object[]{true});
     }
 
+    // Creates and returns a new Wire instance with allocated memory
     static Wire createWire() {
         final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
         return wire;
     }
 
+    // Before each test execution, set the appropriate system property and
+    // expect a specific exception if proxy code generation is disabled
     @Before
     public void setUp() {
         System.setProperty(DISABLE_WRITER_PROXY_CODEGEN, String.valueOf(disableProxyCodegen));
@@ -57,11 +63,13 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
             expectException("Falling back to proxy method writer");
     }
 
+    // After each test execution, clean up by clearing the system property
     @After
     public void cleanUp() {
         System.clearProperty(DISABLE_WRITER_PROXY_CODEGEN);
     }
 
+    // Test to verify behavior with an interceptor on a method that has no return type
     @Test
     public void testUpdateInterceptorNoReturnType() {
 
@@ -77,6 +85,7 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
                 Wires.fromSizePrefixedBlobs(wire));
     }
 
+    // Test to verify behavior with an interceptor on a method that has an integer return type
     @Test
     public void testUpdateInterceptorWithIntReturnType() {
         final Wire wire = createWire();
@@ -92,6 +101,7 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
                 Wires.fromSizePrefixedBlobs(wire));
     }
 
+    // Test to verify behavior with an interceptor on a method that has an object return type
     @Test
     public void testUpdateInterceptorWithObjectReturnType() {
         final Wire wire = createWire();
@@ -103,7 +113,8 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
         assertSame(mw, value);
         assertEquals(disableProxyCodegen, Proxy.isProxyClass(mw.getClass()));
         assumeFalse(disableProxyCodegen);
-        // data is written but on hold until the end of message is written.
+
+        // Here, data is written but is on hold until the end of the message is written.
         // WireDumper no longer scans data that is written but not ready
         assertEquals("" +
                         "--- !!not-ready-data\n" +
@@ -119,6 +130,7 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
                 Wires.fromSizePrefixedBlobs(wire));
     }
 
+    // Test to verify the behavior of an interceptor on a method from the LadderByQtyListener interface
     @Test
     public void testUpdateInterceptorWithLadderByQtyListener() {
         final Wire wire = createWire();
@@ -133,32 +145,43 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
                 Wires.fromSizePrefixedBlobs(wire));
     }
 
+    // Interface that represents a listener for 'LadderByQty' updates
     public interface LadderByQtyListener {
+        // Declares an action to perform when a ladder update is received
         void ladderByQty(String ladder);
 
+        // Default method to provide a shorthand for 'ladderByQty' with an additional argument
         default void lbq(String name, String ladder) {
             ladderByQty(ladder);
         }
 
+        // Default method to potentially ignore certain methods based on the first argument.
+        // The current implementation does not ignore any method, but this can be customized.
         default boolean ignoreMethodBasedOnFirstArg(String methodName, String ladderDefinitionName) {
             return false;
         }
     }
 
+    // Interface that represents an action without any return type
     interface NoReturnType {
         void x(String x);
     }
 
+    // Interface that represents an action with an integer return type
     interface WithIntReturnType {
         int x(String x);
     }
 
+    // Interface that represents an action with an object return type
     interface WithObjectReturnType {
         Object x(String x);
 
         void y(String y);
     }
 
+    // Interface that represents an action with a 'Void' return type
+    // Note: 'Void' is different from 'void'. 'Void' can be used when you need a generic type
+    // that represents "no return value", while 'void' is a basic keyword indicating the absence of a return value.
     interface WithObjectVoidReturnType {
         Void x(String x);
     }

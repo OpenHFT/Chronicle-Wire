@@ -30,11 +30,20 @@ import org.junit.Test;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Test class to validate the behavior of the marshalling process within an EventGroup context.
+ */
 public class MarshallingEventGroupTest extends WireTestCommon {
+
+    /**
+     * Test method to evaluate the serialization of the EventGroup object.
+     */
     @Test
     public void test() {
-        // produced longer timeout in debug
+        // Skip this test if JVM is running in debug mode, as it could lead to longer timeouts
         assumeFalse(Jvm.isDebug());
+
+        // Using the EventGroupBuilder, create an instance of EventGroup and use try-with-resources to ensure it's closed
         try (final EventGroup eg =
                      EventGroupBuilder.builder()
                              .withName("test")
@@ -44,8 +53,11 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                              .withBlockingPauserSupplier(PauserMode.sleepy)
                              .withConcurrentThreadsNum(1)
                              .build()) {
+
+            // Convert the EventGroup object to its TEXT representation
             final String actual = WireType.TEXT.asString(eg);
 
+            // A previously expected serialized string for the EventGroup object (omitted parts for brevity)
             String oldExpected = "" +
                     "!net.openhft.chronicle.threads.EventGroup {\n" +
                     "  referenceId: 0,\n" +
@@ -66,15 +78,14 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "    lifecycle: !net.openhft.chronicle.threads.EventLoopLifecycle NEW,\n" +
                     "    name: test/core-event-loop,\n" +
                     "    mediumHandlers: [    ],\n" +
-                    "    newHandler: !!null \"\",\n" +
-                    "    pauser: !net.openhft.chronicle.threads.LongPauser { minPauseTimeNS: 500000, maxPauseTimeNS: 20000000, pausing: false, minBusyNS: 0, minYieldNS: 50000, busyNS: 9223372036854775807, yieldNS: 9223372036854775807, pauseTimeNS: 500000, timePaused: 0, countPaused: 0, thread: !!null \"\", yieldStart: 0, timeOutStart: 9223372036854775807, pauseUntilNS: 0, pauseStartNS: 0 },\n" +
+                    "    newHandlers: [    ],\n" +
+                    "    pauser: !net.openhft.chronicle.threads.LongPauser { minPauseTimeNS: 500000, maxPauseTimeNS: 20000000, pausing: false, minBusyNS: 0, minYieldNS: 50000, firstPauseNS: 9223372036854775807, pauseTimeNS: 500000, timePaused: 0, countPaused: 0, thread: !!null \"\", yieldStart: 0, pauseUntilNS: 0 },\n" +
                     "    daemon: true,\n" +
                     "    binding: none,\n" +
                     "    mediumHandlersArray: [ ],\n" +
                     "    highHandler: !net.openhft.chronicle.threads.EventHandlers NOOP,\n" +
                     "    loopStartNS: 9223372036854775807,\n" +
                     "    thread: !!null \"\",\n" +
-                    "    exceptionThrownByHandler: !net.openhft.chronicle.threads.ExceptionHandlerStrategy$LogDontRemove { },\n" +
                     "    timerHandlers: [    ],\n" +
                     "    daemonHandlers: [    ],\n" +
                     "    timerIntervalMS: 1,\n" +
@@ -105,16 +116,13 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "    pausing: false,\n" +
                     "    minBusyNS: 0,\n" +
                     "    minYieldNS: 50000,\n" +
-                    "    busyNS: 9223372036854775807,\n" +
-                    "    yieldNS: 9223372036854775807,\n" +
+                    "    firstPauseNS: 9223372036854775807,\n" +
                     "    pauseTimeNS: 500000,\n" +
                     "    timePaused: 0,\n" +
                     "    countPaused: 0,\n" +
                     "    thread: !!null \"\",\n" +
                     "    yieldStart: 0,\n" +
-                    "    timeOutStart: 9223372036854775807,\n" +
-                    "    pauseUntilNS: 0,\n" +
-                    "    pauseStartNS: 0\n" +
+                    "    pauseUntilNS: 0\n" +
                     "  },\n" +
                     "  concPauserSupplier: !net.openhft.chronicle.threads.PauserMode sleepy,\n" +
                     "  concBinding: none,\n" +
@@ -137,9 +145,12 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "  replicationPauser: !!null \"\",\n" +
                     "  replication: !!null \"\"\n" +
                     "}\n";
+
+            // Return if the actual serialized string matches the old expected string
             if (oldExpected.equals(actual))
                 return;
 
+            // An updated expected serialized string for the EventGroup object
             String expected = "" +
                     "!net.openhft.chronicle.threads.EventGroup {\n" +
                     "  referenceId: 0,\n" +
@@ -228,6 +239,7 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "  replication: !!null \"\"\n" +
                     "}\n";
 
+            // Assert that the actual serialized string matches the updated expected string
             assertEquals(expected, actual);
         }
     }

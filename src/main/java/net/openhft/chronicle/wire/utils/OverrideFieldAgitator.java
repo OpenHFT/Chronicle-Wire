@@ -21,9 +21,27 @@ package net.openhft.chronicle.wire.utils;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * The OverrideFieldAgitator class is an implementation of the YamlAgitator interface.
+ * This class aims to simulate the effect of overriding specific fields in YAML content.
+ * For every field provided, the agitator will generate versions of the input YAML where these fields
+ * are replaced with new values, as specified.
+ * <p>
+ * A primary use-case for this agitator is in testing scenarios to verify that the overridden values
+ * are correctly recognized and processed by YAML consumers.
+ */
+@Deprecated(/* to be moved in x.27 */)
 public class OverrideFieldAgitator implements YamlAgitator {
+
+    // Fields with their new values to be overridden in the YAML content
     private String[] fields;
 
+    /**
+     * Constructs a new OverrideFieldAgitator with the specified fields and their values
+     * to be overridden.
+     *
+     * @param fields Varargs of field names along with their new values in the "field: value" format.
+     */
     public OverrideFieldAgitator(String... fields) {
         this.fields = fields;
     }

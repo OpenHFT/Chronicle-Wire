@@ -18,21 +18,32 @@
 
 package net.openhft.chronicle.wire.utils;
 
+// Interface defining methods for various error and logging actions
 public interface ErrorsIn {
+    // Method to log a debug message
     void debug(String msg);
 
+    // Method to log a debug message along with an exception
     void debugWithException(String msg);
 
+    // Method to log a warning message
     void warn(String msg);
 
+    // Method to log a warning message along with an exception
     void warnWithException(String msg);
 
+    // Method to output an error message
     void outError(String msg);
+
+    // Method to log an error message
     void error(String msg);
 
+    // Method to log an error message along with an exception
     void errorWithException(String msg);
 
+    // Method to throw a generic exception with a message
     void throwException(String msg);
 
+    // Method to throw a custom error with a message
     void throwError(String msg);
 }

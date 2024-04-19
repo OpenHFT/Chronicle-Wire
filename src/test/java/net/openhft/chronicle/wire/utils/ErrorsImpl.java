@@ -22,58 +22,80 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.StackTrace;
 
 public class ErrorsImpl implements ErrorsIn {
+    // Reference to an ErrorsOut instance
     private final ErrorsOut out;
 
+    // Constructor initializing ErrorsImpl with an ErrorsOut instance
     public ErrorsImpl(ErrorsOut out) {
         this.out = out;
     }
 
+    // Implementation of debug method from ErrorsIn interface
     @Override
     public void debug(String msg) {
+        // Logging a debug message using Jvm utility
         Jvm.debug().on(getClass(), msg);
     }
 
+    // Implementation of debugWithException method from ErrorsIn interface
     @Override
     public void debugWithException(String msg) {
+        // Logging a debug message with a StackTrace exception using Jvm utility
         Jvm.debug().on(getClass(), msg, new StackTrace());
     }
 
+    // Implementation of warn method from ErrorsIn interface
     @Override
     public void warn(String msg) {
+        // Logging a warning message using Jvm utility
         Jvm.warn().on(getClass(), msg);
     }
 
+    // Implementation of warnWithException method from ErrorsIn interface
     @Override
     public void warnWithException(String msg) {
+        // Logging a warning message with a StackTrace exception using Jvm utility
         Jvm.warn().on(getClass(), msg, new StackTrace());
     }
 
+    // Implementation of error method from ErrorsIn interface
     @Override
     public void error(String msg) {
+        // Logging an error message using Jvm utility
         Jvm.error().on(getClass(), msg);
     }
 
+    // Implementation of errorWithException method from ErrorsIn interface
     @Override
     public void errorWithException(String msg) {
+        // Logging an error message with a StackTrace exception using Jvm utility
         Jvm.error().on(getClass(), msg, new StackTrace());
     }
 
+    // Implementation of outError method from ErrorsIn interface
     @Override
     public void outError(String msg) {
+        // Sending error message to the output
         out.error(msg);
     }
 
+    // Implementation of throwException method from ErrorsIn interface
     @Override
     public void throwException(String msg) {
+        // Throwing a runtime exception with the provided message
         throw new RuntimeException(msg);
     }
 
+    // Implementation of throwError method from ErrorsIn interface
     @Override
     public void throwError(String msg) {
+        // Throwing a custom AssertionError with the provided message
         throw new MyAssertionError(msg);
     }
 
+    // Custom AssertionError class used within ErrorsImpl
     public static class MyAssertionError extends AssertionError {
+        // Constructor initializing MyAssertionError with a message
         public MyAssertionError(String msg) {
             super(msg);
         }

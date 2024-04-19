@@ -21,6 +21,13 @@ import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 
 public interface KeyedMarshallable {
+
+    /**
+     * Writes the key of the current instance into the provided {@code Bytes} object.
+     * This default implementation utilizes the {@code Wires.writeKey} method.
+     *
+     * @param bytes The {@code Bytes} object into which the key of the current instance is written.
+     */
     @SuppressWarnings("rawtypes")
     default void writeKey(@NotNull Bytes<?> bytes) {
         Wires.writeKey(this, bytes);

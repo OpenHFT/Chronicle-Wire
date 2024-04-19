@@ -28,12 +28,23 @@ import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 
 public class YamlTokeniserTest extends WireTestCommon {
+
+    // Utility function to tokenize YAML from a given resource file
     public static String doTest(String resource) {
         try {
+            // Reads the file into a Bytes object
             Bytes<?> bytes = BytesUtil.readFile(resource);
-           // bytes = Bytes.from(bytes.toString().replace("\r", ""));
+
+            // Uncomment to remove carriage return characters
+            // bytes = Bytes.from(bytes.toString().replace("\r", ""));
+
+            // Initialize a new YamlTokeniser with the Bytes object
             YamlTokeniser yt = new YamlTokeniser(bytes);
+
+            // StringBuilder to collect tokens
             StringBuilder sb = new StringBuilder();
+
+            // Tokenize the YAML, but limit to 100 tokens for safety
             int i = 0;
             while (yt.next(Integer.MIN_VALUE) != YamlToken.STREAM_END) {
                 sb.append(yt).append('\n');
@@ -44,182 +55,194 @@ public class YamlTokeniserTest extends WireTestCommon {
             }
             return sb.toString();
         } catch (IOException e) {
+            // If any IOException occurs, throw an AssertionError
             throw new AssertionError(e);
         }
     }
 
+    // Test to verify the tokenization of a specific YAML file representing Morse code
     @Test
     public void morseCode() {
+        // The expected tokenized representation of the morse-code.yaml file
         assertEquals("" +
-                "DIRECTIVES_END \n" +
-                "MAPPING_START \n" +
-                "MAPPING_KEY \n" +
-                "TEXT A\n" +
-                "TEXT .-\n" +
-                "MAPPING_KEY \n" +
-                "TEXT B\n" +
-                "TEXT -...\n" +
-                "MAPPING_KEY \n" +
-                "TEXT C\n" +
-                "TEXT -.-.\n" +
-                "MAPPING_KEY \n" +
-                "TEXT D\n" +
-                "TEXT -..\n" +
-                "MAPPING_KEY \n" +
-                "TEXT E\n" +
-                "TEXT .\n" +
-                "MAPPING_KEY \n" +
-                "TEXT F\n" +
-                "TEXT ..-.\n" +
-                "MAPPING_KEY \n" +
-                "TEXT G\n" +
-                "TEXT --.\n" +
-                "MAPPING_KEY \n" +
-                "TEXT H\n" +
-                "TEXT ....\n" +
-                "MAPPING_KEY \n" +
-                "TEXT I\n" +
-                "TEXT ..\n" +
-                "MAPPING_KEY \n" +
-                "TEXT J\n" +
-                "TEXT .---\n" +
-                "MAPPING_KEY \n" +
-                "TEXT K\n" +
-                "TEXT -.-\n" +
-                "MAPPING_KEY \n" +
-                "TEXT L\n" +
-                "TEXT .-..\n" +
-                "MAPPING_KEY \n" +
-                "TEXT M\n" +
-                "TEXT --\n" +
-                "MAPPING_KEY \n" +
-                "TEXT N\n" +
-                "TEXT -.\n" +
-                "MAPPING_KEY \n" +
-                "TEXT O\n" +
-                "TEXT ---\n" +
-                "MAPPING_KEY \n" +
-                "TEXT P\n" +
-                "TEXT .--.\n" +
-                "MAPPING_KEY \n" +
-                "TEXT Q\n" +
-                "TEXT --.-\n" +
-                "MAPPING_KEY \n" +
-                "TEXT R\n" +
-                "TEXT .-.\n" +
-                "MAPPING_KEY \n" +
-                "TEXT S\n" +
-                "TEXT ...\n" +
-                "MAPPING_KEY \n" +
-                "TEXT T\n" +
-                "TEXT \" -\n" +
-                "MAPPING_KEY \n" +
-                "TEXT U\n" +
-                "TEXT ..-\n" +
-                "MAPPING_KEY \n" +
-                "TEXT V\n" +
-                "TEXT ...-\n" +
-                "MAPPING_KEY \n" +
-                "TEXT W\n" +
-                "TEXT .--\n" +
-                "MAPPING_KEY \n" +
-                "TEXT X\n" +
-                "TEXT -..-\n" +
-                "MAPPING_KEY \n" +
-                "TEXT Y\n" +
-                "TEXT -.--\n" +
-                "MAPPING_KEY \n" +
-                "TEXT Z\n" +
-                "TEXT --..\n" +
-                "MAPPING_END \n" +
-                "DOCUMENT_END \n", doTest("morse-code.yaml"));
+                        "DIRECTIVES_END \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT A\n" +
+                        "TEXT .-\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT B\n" +
+                        "TEXT -...\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT C\n" +
+                        "TEXT -.-.\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT D\n" +
+                        "TEXT -..\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT E\n" +
+                        "TEXT .\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT F\n" +
+                        "TEXT ..-.\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT G\n" +
+                        "TEXT --.\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT H\n" +
+                        "TEXT ....\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT I\n" +
+                        "TEXT ..\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT J\n" +
+                        "TEXT .---\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT K\n" +
+                        "TEXT -.-\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT L\n" +
+                        "TEXT .-..\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT M\n" +
+                        "TEXT --\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT N\n" +
+                        "TEXT -.\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT O\n" +
+                        "TEXT ---\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT P\n" +
+                        "TEXT .--.\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT Q\n" +
+                        "TEXT --.-\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT R\n" +
+                        "TEXT .-.\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT S\n" +
+                        "TEXT ...\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT T\n" +
+                        "TEXT \" -\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT U\n" +
+                        "TEXT ..-\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT V\n" +
+                        "TEXT ...-\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT W\n" +
+                        "TEXT .--\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT X\n" +
+                        "TEXT -..-\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT Y\n" +
+                        "TEXT -.--\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT Z\n" +
+                        "TEXT --..\n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("morse-code.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+ // Test case for tokenizing YAML content with mixed quotes
     @Test
     public void mixedQuotes() {
+        // The expected tokenized representation of the mixed-quotes.yaml file
         assertEquals("" +
-                "DIRECTIVES_END \n" +
-                "SEQUENCE_START \n" +
-                "TEXT \" \\\"\n" +
-                "TEXT ' \"\n" +
-                "TEXT ' \\\n" +
-                "TEXT ' \"\n" +
-                "TEXT \" \\\"'\n" +
-                "TEXT \" \\\"\n" +
-                "TEXT \" \\\"\\\"\n" +
-                "TEXT \" \\'\\'\n" +
-                "SEQUENCE_END \n" +
-                "DOCUMENT_END \n", doTest("mixed-quotes.yaml"));
+                        "DIRECTIVES_END \n" +
+                        "SEQUENCE_START \n" +
+                        "TEXT \" \\\"\n" +
+                        "TEXT ' \"\n" +
+                        "TEXT ' \\\n" +
+                        "TEXT ' \"\n" +
+                        "TEXT \" \\\"'\n" +
+                        "TEXT \" \\\"\n" +
+                        "TEXT \" \\\"\\\"\n" +
+                        "TEXT \" \\'\\'\n" +
+                        "SEQUENCE_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("mixed-quotes.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing YAML content that describes an exception
     @Test
     public void exception() {
+        // The expected tokenized representation of the exception.yaml file
         assertEquals("DIRECTIVES_END \n" +
-                "TAG !data\n" +
-                "MAPPING_START \n" +
-                "MAPPING_KEY \n" +
-                "TEXT exception\n" +
-                "TAG java.security.InvalidAlgorithmParameterException\n" +
-                "MAPPING_START \n" +
-                "MAPPING_KEY \n" +
-                "TEXT message\n" +
-                "TEXT Reference cannot be null\n" +
-                "MAPPING_KEY \n" +
-                "TEXT stackTrace\n" +
-                "SEQUENCE_START \n" +
-                "SEQUENCE_ENTRY \n" +
-                "MAPPING_START \n" +
-                "MAPPING_KEY \n" +
-                "TEXT class\n" +
-                "TEXT net.openhft.chronicle.wire.YamlWireTest\n" +
-                "MAPPING_KEY \n" +
-                "TEXT method\n" +
-                "TEXT testException\n" +
-                "MAPPING_KEY \n" +
-                "TEXT file\n" +
-                "TEXT YamlWireTest.java\n" +
-                "MAPPING_KEY \n" +
-                "TEXT line\n" +
-                "TEXT 783\n" +
-                "MAPPING_END \n" +
-                "SEQUENCE_ENTRY \n" +
-                "MAPPING_START \n" +
-                "MAPPING_KEY \n" +
-                "TEXT class\n" +
-                "TEXT net.openhft.chronicle.wire.YamlWireTest\n" +
-                "MAPPING_KEY \n" +
-                "TEXT method\n" +
-                "TEXT runTestException\n" +
-                "MAPPING_KEY \n" +
-                "TEXT file\n" +
-                "TEXT YamlWireTest.java\n" +
-                "MAPPING_KEY \n" +
-                "TEXT line\n" +
-                "TEXT 73\n" +
-                "MAPPING_END \n" +
-                "SEQUENCE_ENTRY \n" +
-                "MAPPING_START \n" +
-                "MAPPING_KEY \n" +
-                "TEXT class\n" +
-                "TEXT sun.reflect.NativeMethodAccessorImpl\n" +
-                "MAPPING_KEY \n" +
-                "TEXT method\n" +
-                "TEXT invoke0\n" +
-                "MAPPING_KEY \n" +
-                "TEXT file\n" +
-                "TEXT NativeMethodAccessorImpl.java\n" +
-                "MAPPING_KEY \n" +
-                "TEXT line\n" +
-                "TEXT -2\n" +
-                "MAPPING_END \n" +
-                "SEQUENCE_END \n" +
-                "MAPPING_END \n" +
-                "MAPPING_END \n" +
-                "DOCUMENT_END \n", doTest("exception.yaml"));
+                        "TAG !data\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT exception\n" +
+                        "TAG java.security.InvalidAlgorithmParameterException\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT message\n" +
+                        "TEXT Reference cannot be null\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT stackTrace\n" +
+                        "SEQUENCE_START \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT class\n" +
+                        "TEXT net.openhft.chronicle.wire.YamlWireTest\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT method\n" +
+                        "TEXT testException\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT file\n" +
+                        "TEXT YamlWireTest.java\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT line\n" +
+                        "TEXT 783\n" +
+                        "MAPPING_END \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT class\n" +
+                        "TEXT net.openhft.chronicle.wire.YamlWireTest\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT method\n" +
+                        "TEXT runTestException\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT file\n" +
+                        "TEXT YamlWireTest.java\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT line\n" +
+                        "TEXT 73\n" +
+                        "MAPPING_END \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT class\n" +
+                        "TEXT sun.reflect.NativeMethodAccessorImpl\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT method\n" +
+                        "TEXT invoke0\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT file\n" +
+                        "TEXT NativeMethodAccessorImpl.java\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT line\n" +
+                        "TEXT -2\n" +
+                        "MAPPING_END \n" +
+                        "SEQUENCE_END \n" +
+                        "MAPPING_END \n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("exception.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing YAML content with incomplete int mapping
     @Test
     public void intMappingIncomplete() {
+        // The expected tokenized representation of the int-mapping-incomplete.yaml
         assertEquals("DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
@@ -230,11 +253,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_END \n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/int-mapping-incomplete.yaml"));
+                doTest("yaml/int-mapping-incomplete.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing YAML content with a complete int mapping
     @Test
     public void intMapping() {
+        // The expected tokenized representation of the int-mapping.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
@@ -258,11 +283,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_END \n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/int-mapping.yaml"));
+                doTest("yaml/int-mapping.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing YAML content with a complex mapping structure
     @Test
     public void complexMapping() {
+        // The expected tokenized representation of the complex-mapping.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
@@ -300,11 +327,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_END \n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/complex-mapping.yaml"));
+                doTest("yaml/complex-mapping.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML sequence of scalar values
     @Test
     public void eg2_1() {
+        // The expected tokenized representation of the 2_1_SequenceOfScalars.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +
@@ -315,11 +344,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT Ken Griffey\n" +
                         "SEQUENCE_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_1_SequenceOfScalars.yaml"));
+                doTest("yaml/spec/2_1_SequenceOfScalars.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML mapping of scalar to scalar values
     @Test
     public void eg2_2() {
+        // The expected tokenized representation of the 2_2_MappingScalarsToScalars.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
@@ -336,11 +367,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "COMMENT Runs Batted In\n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_2_MappingScalarsToScalars.yaml"));
+                doTest("yaml/spec/2_2_MappingScalarsToScalars.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML mapping of scalar to sequence values
     @Test
     public void eg2_3() {
+        // The expected tokenized representation of the 2_3_MappingScalarsToSequences.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
@@ -365,11 +398,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "SEQUENCE_END \n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_3_MappingScalarsToSequences.yaml"));
+                doTest("yaml/spec/2_3_MappingScalarsToSequences.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML sequence of mappings
     @Test
     public void eg2_4() {
+        // The expected tokenized representation of the 2_4_SequenceOfMappings.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +
@@ -398,11 +433,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_END \n" +
                         "SEQUENCE_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_4_SequenceOfMappings.yaml"));
+                doTest("yaml/spec/2_4_SequenceOfMappings.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for verifying the tokenized output of an alternative version of 2_4_SequenceOfMappings.yaml
     @Test
     public void eg2_4out() {
+        // The expected tokenized representation of the 2_4_SequenceOfMappings.out.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +
@@ -431,11 +468,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_END \n" +
                         "SEQUENCE_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_4_SequenceOfMappings.out.yaml"));
+                doTest("yaml/spec/2_4_SequenceOfMappings.out.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Another test case for verifying the tokenized output of the 2_4_SequenceOfMappings.yaml
     @Test
     public void eg2_4B() {
+        // The expected tokenized representation of the 2_4_SequenceOfMappings.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +
@@ -464,11 +503,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_END \n" +
                         "SEQUENCE_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_4_SequenceOfMappings.yaml"));
+                doTest("yaml/spec/2_4_SequenceOfMappings.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML sequence of sequences
     @Test
     public void eg2_5() {
+        // The expected tokenized representation of the 2_5_SequenceOfSequences.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +
@@ -500,11 +541,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "SEQUENCE_END \n" +
                         "SEQUENCE_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_5_SequenceOfSequences.yaml"));
+                doTest("yaml/spec/2_5_SequenceOfSequences.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML mapping of mappings structure
     @Test
     public void eg2_6() {
+        // The expected tokenized representation of the 2_6_MappingOfMappings.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
@@ -529,11 +572,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_END \n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_6_MappingOfMappings.yaml"));
+                doTest("yaml/spec/2_6_MappingOfMappings.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML file with two separate documents in a single stream
     @Test
     public void eg2_7() {
+        // The expected tokenized representation of the 2_7_TwoDocumentsInAStream.yaml file
         assertEquals("COMMENT Ranking of 1998 home runs\n" +
                         "DIRECTIVES_END \n" +
                         "SEQUENCE_START \n" +
@@ -554,11 +599,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT St Louis Cardinals\n" +
                         "SEQUENCE_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_7_TwoDocumentsInAStream.yaml"));
+                doTest("yaml/spec/2_7_TwoDocumentsInAStream.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML file containing play-by-play actions in a sports event
     @Test
     public void eg2_8() {
+        // The expected tokenized representation of the 2_8_PlayByPlayFeed.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
@@ -585,11 +632,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT grand slam\n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_8_PlayByPlayFeed.yaml"));
+                doTest("yaml/spec/2_8_PlayByPlayFeed.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML file with comments indicating 1998 HR and RBI rankings
     @Test
     public void eg2_9() {
+        // The expected tokenized representation of the 2_9_SingleDocumentWithTwoComments.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
@@ -612,11 +661,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "SEQUENCE_END \n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_9_SingleDocumentWithTwoComments.yaml"));
+                doTest("yaml/spec/2_9_SingleDocumentWithTwoComments.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML file featuring node anchors and aliases
     @Test
     public void eg2_10() {
+        // The expected tokenized representation of the 2_10_NodeAppearsTwiceInThisDocument.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
@@ -640,11 +691,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "SEQUENCE_END \n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_10_NodeAppearsTwiceInThisDocument.yaml"));
+                doTest("yaml/spec/2_10_NodeAppearsTwiceInThisDocument.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML file with complex mappings between sequences
     @Test
     public void eg2_11() {
+        // The expected tokenized representation of the 2_11MappingBetweenSequences.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -676,11 +729,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "SEQUENCE_END \n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_11MappingBetweenSequences.yaml"));
+                doTest("yaml/spec/2_11MappingBetweenSequences.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML file featuring a compact nested mapping of purchased items and their quantities
     @Test
     public void eg2_12() {
+        // The expected tokenized representation of the 2_12CompactNestedMapping.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
                         "COMMENT Products purchased\n" +
@@ -714,38 +769,46 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_END \n" +
                         "SEQUENCE_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_12CompactNestedMapping.yaml"));
+                doTest("yaml/spec/2_12CompactNestedMapping.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML file that preserves newlines within literal blocks (ASCII Art)
     @Test
     public void eg2_13() {
+        // The expected tokenized representation of the 2_13InLiteralsNewlinesArePreserved.yaml file
         assertEquals(
                 "COMMENT ASCII Art\n" +
                         "DIRECTIVES_END \n" +
                         "LITERAL \\//||\\/||\n" +
                         "// ||  ||__\n\n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_13InLiteralsNewlinesArePreserved.yaml").replace("\r", ""));
+                doTest("yaml/spec/2_13InLiteralsNewlinesArePreserved.yaml").replace("\r", "")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML file that uses folded scalars to preserve newlines only at the end of double-indented lines
     @Test
     public void eg2_14() {
+        // The expected tokenized representation of the 2_14InThefoldedScalars.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
                         "LITERAL Mark McGwire's year was crippled by a knee injury.\n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_14InThefoldedScalars.yaml").replace("\r", ""));
+                doTest("yaml/spec/2_14InThefoldedScalars.yaml").replace("\r", "")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML file featuring folded newlines
     @Test
     public void eg2_15() {
+        // The expected tokenized representation of the 2_15FoldedNewlines.yaml file
         assertEquals(
                 "LITERAL Sammy Sosa completed another fine season with great stats.   63 Home Runs   0.288 Batting Average What a year!\n",
-                doTest("yaml/spec/2_15FoldedNewlines.yaml").replace("\r", ""));
+                doTest("yaml/spec/2_15FoldedNewlines.yaml").replace("\r", "")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML file that relies on indentation to determine scope
     @Test
     public void eg2_16() {
+        // The expected tokenized representation of the 2_16IndentationDeterminesScope.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -762,11 +825,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "\n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_16IndentationDeterminesScope.yaml").replace("\r", ""));
+                doTest("yaml/spec/2_16IndentationDeterminesScope.yaml").replace("\r", "")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML file that contains various types of quoted scalars including Unicode, control, hex escapes, and single-quoted text
     @Test
     public void eg2_17() {
+        // The expected tokenized representation of the 2_17QuotedScalars.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -790,12 +855,14 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT ' |\\-*-/|\n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_17QuotedScalars.yaml"));
+                doTest("yaml/spec/2_17QuotedScalars.yaml")); // Invoke the tokenization utility and verify the output
     }
 
-    @Ignore("TODO FIX")
+    // Test case for tokenizing a YAML file that includes multi-line flow scalars, both plain and quoted
+    @Ignore("TODO FIX")  // This test is currently ignored and needs fixing
     @Test
     public void eg2_18() {
+        // The expected tokenized representation of the 2_18Multi_lineFlowScalars.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -807,11 +874,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "  quoted scalar.\\n\n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_18Multi_lineFlowScalars.yaml"));
+                doTest("yaml/spec/2_18Multi_lineFlowScalars.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML file that contains various representations of integers
     @Test
     public void eg2_19() {
+        // The expected tokenized representation of the 2_19Integers.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -832,11 +901,12 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT 0xC\n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_19Integers.yaml"));
+                doTest("yaml/spec/2_19Integers.yaml")); // Invoke the tokenization utility and verify the output
     }
 
     @Test
     public void eg2_20() {
+        // The expected tokenized representation of the 2_20FloatingPoint.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -860,11 +930,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT .NaN\n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_20FloatingPoint.yaml"));
+                doTest("yaml/spec/2_20FloatingPoint.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML file that contains miscellaneous types like null, boolean, and string
     @Test
     public void eg2_21() {
+        // The expected tokenized representation of the 2_21Miscellaneous.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -883,11 +955,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT ' 012345\n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_21Miscellaneous.yaml"));
+                doTest("yaml/spec/2_21Miscellaneous.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML file that contains various representations of timestamps
     @Test
     public void eg2_22() {
+        // The expected tokenized representation of the 2_22Timestamps.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -905,11 +979,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT 2002-12-14\n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_22Timestamps.yaml"));
+                doTest("yaml/spec/2_22Timestamps.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML file that contains various explicit tags including application-specific tags
     @Test
     public void eg2_23() {
+        // The expected tokenized representation of the 2_23VariousExplicitTags.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -936,11 +1012,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
                 doTest("yaml/spec/2_23VariousExplicitTags.yaml")
-                        .replace("\r", ""));
+                        .replace("\r", "")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML file that contains globally-defined tags
     @Test
     public void eg2_24() {
+        // The expected tokenized representation of the 2_24GlobalTags.yaml file
         assertEquals(
                 "DIRECTIVE TAG ! tag:clarkevans.com,2002\n" +
                         "DIRECTIVES_END \n" +
@@ -998,12 +1076,14 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_END \n" +
                         "SEQUENCE_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_24GlobalTags.yaml"));
+                doTest("yaml/spec/2_24GlobalTags.yaml")); // Invoke the tokenization utility and verify the output
     }
 
     @Ignore("TODO FIX")
+    // Test case for tokenizing a YAML file representing an unordered set
     @Test
     public void eg2_25() {
+        // Expected tokenized representation of the 2_25UnorderedSets.yaml file
         assertEquals(
                 "COMMENT Sets are represented as a\n" +
                         "COMMENT Mapping where each key is\n" +
@@ -1019,11 +1099,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT Ken Griff\n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_25UnorderedSets.yaml"));
+                doTest("yaml/spec/2_25UnorderedSets.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML file representing an ordered mapping
     @Test
     public void eg2_26() {
+        // Expected tokenized representation of the 2_26OrderedMappings.yaml file
         assertEquals(
                 "COMMENT ordered maps are represented as\n" +
                         "COMMENT a sequence of mappings, with\n" +
@@ -1051,11 +1133,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_END \n" +
                         "SEQUENCE_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_26OrderedMappings.yaml"));
+                doTest("yaml/spec/2_26OrderedMappings.yaml")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a complex YAML file representing an invoice
     @Test
     public void eg2_27() {
+        // Expected tokenized representation of the 2_27Invoice.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
                         "TAG tag:clarkevans.com,2002:invoice\n" +
@@ -1146,11 +1230,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
                 doTest("yaml/spec/2_27Invoice.yaml")
-                        .replace("\r", ""));
+                        .replace("\r", "")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML file representing log files with multiple documents
     @Test
     public void eg2_28() {
+        // Expected tokenized representation of the 2_28LogFile.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -1223,11 +1309,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "SEQUENCE_END \n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_28LogFile.yaml").replace("\r", ""));
+                doTest("yaml/spec/2_28LogFile.yaml").replace("\r", "")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML file representing a sample configuration
     @Test
     public void sample1() {
+        // Expected tokenized representation of the sample1.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -1258,11 +1346,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "DOCUMENT_END \n" +
                         "DIRECTIVES_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/sample1.yaml").replace("\r", ""));
+                doTest("yaml/sample1.yaml").replace("\r", "")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML file containing metadata and a custom object type
     @Test
     public void sample2() {
+        // Expected tokenized representation of the sample2.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
                         "TAG !meta-data\n" +
@@ -1276,11 +1366,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT 12345\n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/sample2.yaml").replace("\r", ""));
+                doTest("yaml/sample2.yaml").replace("\r", "")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML string containing an empty custom object type
     @Test
     public void sample3() {
+        // Expected tokenized representation of the sample3.yaml string
         assertEquals(
                 "DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -1291,11 +1383,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_END \n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("=A: !net.openhft.chronicle.wire.DemarshallableObject{}"));
+                doTest("=A: !net.openhft.chronicle.wire.DemarshallableObject{}")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML string containing multiple types of data
     @Test
     public void sample4() {
+        // Expected tokenized representation of the sample4.yaml string
         assertEquals(
                 "DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -1312,11 +1406,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT hi\n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("=a: !type \"[B\", b: !type \"String[]\", c: hi"));
+                doTest("=a: !type \"[B\", b: !type \"String[]\", c: hi")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML string containing a mapping of mappings
     @Test
     public void sample5() {
+        // Expected tokenized representation of the sample5.yaml string
         assertEquals(
                 "DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -1356,11 +1452,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                                 "B: \n" +
                                 "  c: lo\n" +
                                 "  d: xyz\n" +
-                                "C: see\n"));
+                                "C: see\n"));  // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML string containing nested mappings and an empty mapping
     @Test
     public void sample6() {
+        // Expected tokenized representation of the sample6.yaml string
         assertEquals(
                 "COMMENT \n" +
                         "DIRECTIVES_END \n" +
@@ -1388,11 +1486,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
                 doTest(
-                        "=" + "#\nb: AA\nc: {}\nd: \n  A: 1\n  B: 2\ne: end"));
+                        "=" + "#\nb: AA\nc: {}\nd: \n  A: 1\n  B: 2\ne: end")); // Invoke the tokenization utility and verify the output
     }
 
+    // Test case for tokenizing a YAML string containing a tag and various field types
     @Test
     public void sample7() {
+        // Expected tokenized representation of the sample7.yaml string
         assertEquals(
                 "DIRECTIVES_END \n" +
                         "TAG Data\n" +
@@ -1413,6 +1513,6 @@ public class YamlTokeniserTest extends WireTestCommon {
                                 "  name : NAME,\n" +
                                 "  time\t: 12:34:45,\n" +
                                 "  empty  : ''\n" +
-                                "}\n"));
+                                "}\n")); // Invoke the tokenization utility and verify the output
     }
 }

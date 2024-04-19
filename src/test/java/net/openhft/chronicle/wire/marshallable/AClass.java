@@ -22,7 +22,9 @@ import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
 import org.jetbrains.annotations.NotNull;
 
+// AClass extends the functionality of SelfDescribingMarshallable, providing custom serialization and deserialization for its fields.
 class AClass extends SelfDescribingMarshallable {
+    // Member variables
     int id;
     boolean flag;
     byte b;
@@ -34,6 +36,7 @@ class AClass extends SelfDescribingMarshallable {
     double d;
     String text;
 
+    // Constructor to initialize the AClass with given arguments.
     public AClass(int id, boolean flag, byte b, char ch, short s, int i, long l, float f, double d, String text) {
         this.id = id;
         this.flag = flag;
@@ -47,6 +50,7 @@ class AClass extends SelfDescribingMarshallable {
         this.text = text;
     }
 
+    // Custom serialization logic for AClass's fields.
     @Override
     public void writeMarshallable(@NotNull WireOut out) {
         out.write("id").writeInt(id);
@@ -61,6 +65,7 @@ class AClass extends SelfDescribingMarshallable {
         out.write("text").object(String.class, text);
     }
 
+    // Custom deserialization logic for AClass's fields.
     @Override
     public void readMarshallable(@NotNull WireIn in) {
         id = in.read("id").readInt();

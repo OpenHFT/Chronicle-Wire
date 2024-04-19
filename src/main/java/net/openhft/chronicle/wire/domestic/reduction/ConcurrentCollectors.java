@@ -33,6 +33,11 @@ import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toConcurrentMap;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
+/**
+ * Provides utility methods to obtain concurrent {@code Collector}s that can be used
+ * in conjunction with the Java Stream API. These collectors allow for thread-safe
+ * accumulation of elements into collections or other aggregate results.
+ */
 public final class ConcurrentCollectors {
 
     // Suppresses default constructor, ensuring non-instantiability.
@@ -50,6 +55,7 @@ public final class ConcurrentCollectors {
     @NotNull
     public static <T>
     Collector<T, ?, List<T>> toConcurrentList() {
+        // Creates a synchronized list for concurrent access and sets up accumulation and combination operations.
         return Collector.of(
                 () -> Collections.synchronizedList(new ArrayList<>()),
                 List::add,
@@ -75,6 +81,7 @@ public final class ConcurrentCollectors {
     @NotNull
     public static <T>
     Collector<T, ?, Set<T>> toConcurrentSet() {
+        // Collects elements into a synchronized map and then retrieves the key set.
         return collectingAndThen(
                 toConcurrentMap(Function.identity(),
                         t -> Boolean.TRUE,
@@ -86,22 +93,25 @@ public final class ConcurrentCollectors {
      * Returns a {@link java.util.stream.Collector} which performs a concurrent reduction of its
      * input elements under a specified {@code BinaryOperator} using the
      * provided identity.
+     * <p>
+     *     Note: The {@code reducing()} collectors are most useful when used in a
+     * multi-level reduction, downstream of {@code groupingBy} or
+     * {@code partitioningBy}.
      *
      * @param <T>      element type for the input and output of the reduction
      * @param identity the identity value for the reduction (also, the value
      *                 that is returned when there are no input elements)
      * @param op       a {@code BinaryOperator<T>} used to reduce the input elements
      * @return a {@code Collector} which implements the reduction operation
-     * @apiNote The {@code reducing()} collectors are most useful when used in a
-     * multi-level reduction, downstream of {@code groupingBy} or
-     * {@code partitioningBy}.
      * @see Collectors#reducing(Object, BinaryOperator)
      */
     public static <T>
     Collector<T, ?, T> reducingConcurrent(final T identity,
                                           @NotNull final BinaryOperator<T> op) {
+                                          // Ensure the binary operator is not null.
         requireNonNull(op);
 
+        // Set up a concurrent reduction using an AtomicReference as the accumulator.
         return Collector.of(
                 () -> new AtomicReference<>(identity),
                 (AtomicReference<T> ar, T e) -> ar.accumulateAndGet(e, op),
@@ -160,6 +170,12 @@ public final class ConcurrentCollectors {
      * {@code BinaryOperator}. This is a generalization of
      * {@link Collectors#reducing(Object, BinaryOperator)} which allows a transformation
      * of the elements before reduction.
+     * <p>
+     * Note: The {@code reducing()} collectors are most useful when used in a
+     * multi-level reduction, downstream of {@code groupingBy} or
+     * {@code partitioningBy}.  To perform a simple map-reduce on a stream,
+     * use {@link Stream#map(Function)} and {@link Stream#reduce(Object, BinaryOperator)}
+     * instead.
      *
      * @param <T>      the type of the input elements
      * @param <R>      the type of the mapped values
@@ -168,11 +184,6 @@ public final class ConcurrentCollectors {
      * @param mapper   a mapping function to apply to each input value
      * @param op       a {@code BinaryOperator<U>} used to reduce the mapped values
      * @return a {@code Collector} implementing the map-reduce operation
-     * @apiNote The {@code reducing()} collectors are most useful when used in a
-     * multi-level reduction, downstream of {@code groupingBy} or
-     * {@code partitioningBy}.  To perform a simple map-reduce on a stream,
-     * use {@link Stream#map(Function)} and {@link Stream#reduce(Object, BinaryOperator)}
-     * instead.
      *
      * <p>For example, given a stream of {@code Person}, to calculate the longest
      * last name of residents in each city:

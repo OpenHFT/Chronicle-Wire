@@ -30,15 +30,32 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * This class represents an invocation handler specifically for text method writers. It extends the
+ * AbstractMethodWriterInvocationHandler to implement method call behavior for text-based method writers.
+ * It mainly converts method calls to textual data using the provided MarshallableOut.
+ */
 public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvocationHandler {
     @NotNull
     private final Supplier<MarshallableOut> marshallableOutSupplier;
     private final Map<Method, Consumer<Object[]>> visitorConverter = new LinkedHashMap<>();
 
+    /**
+     * Constructor initializing the handler with a MarshallableOut instance.
+     *
+     * @param tClass           The class for which this invocation handler is being used.
+     * @param marshallableOut  The MarshallableOut instance used for data serialization.
+     */
     TextMethodWriterInvocationHandler(Class tClass, @NotNull MarshallableOut marshallableOut) {
         this(tClass, () -> marshallableOut);
     }
 
+    /**
+     * Constructor initializing the handler with a supplier for MarshallableOut.
+     *
+     * @param tClass                   The class for which this invocation handler is being used.
+     * @param marshallableOutSupplier  The supplier providing instances of MarshallableOut for data serialization.
+     */
     public TextMethodWriterInvocationHandler(Class tClass, @NotNull Supplier<MarshallableOut> marshallableOutSupplier) {
         super(tClass);
         this.marshallableOutSupplier = marshallableOutSupplier;
@@ -74,9 +91,18 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
 
     static final Consumer<Object[]> NOOP_CONSUMER = Mocker.ignored(Consumer.class);
 
+    /**
+     * Builds a converter for method parameters based on the annotations present on the method.
+     * It supports long and int conversions based on annotations like @LongConversion and @IntConversion.
+     *
+     * @param method  The method for which the converter is being built.
+     * @return A Consumer that takes in an Object array and performs conversions on it.
+     */
     private Consumer<Object[]> buildConverter(Method method) {
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-        if (parameterAnnotations.length <= 0)
+
+        // If there are no annotations, return a no-operation consumer.
+        if (parameterAnnotations.length == 0)
             return NOOP_CONSUMER;
         for (Annotation anno : parameterAnnotations[0]) {
             if (anno instanceof LongConversion) {
@@ -93,14 +119,29 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
         return NOOP_CONSUMER;
     }
 
+    /**
+     * Creates a long converter based on the provided class. The converter will convert the input
+     * object to its long representation using the provided LongConverter. It primarily focuses on
+     * handling the conversion of numbers to their textual representation in the format dictated by
+     * the provided LongConverter.
+     *
+     * @param value The class representing the desired LongConverter. The class should ideally have
+     *              a public static field named "INSTANCE" which holds a pre-created instance of
+     *              the converter. If not, a new instance is created using reflection.
+     * @return A Consumer that takes in an Object array and performs the long conversion on its first element.
+     * @throws RuntimeException If there is an IllegalAccessException when accessing the "INSTANCE" field.
+     */
     @NotNull
     private Consumer<Object[]> buildLongConverter(Class<?> value) {
         LongConverter lc;
         try {
+            // Attempt to retrieve a pre-created INSTANCE of the converter.
             lc = (LongConverter) value.getField("INSTANCE").get(null);
         } catch (NoSuchFieldException e) {
+            // If there's no INSTANCE field, create a new instance of the converter.
             lc = (LongConverter) ObjectUtils.newInstance(value);
         } catch (IllegalAccessException e) {
+            // Throw an exception if there's a problem accessing the field.
             throw new RuntimeException(e);
         }
         LongConverter finalLc = lc;

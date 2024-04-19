@@ -19,22 +19,30 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
 
+/**
+ * This is the SourceContext interface.
+ * It defines methods to interact with the underlying source context, particularly in terms of accessing its source ID
+ * and the last read index. Implementations of this interface are expected to handle source contexts which could be used
+ * in various scenarios like I/O operations, data streaming, or context management.
+ */
 public interface SourceContext {
 
     /**
-     * Returns the source id of this source context. If the id does not
-     * exist, -1 is returned instead.
+     * Retrieves the source ID associated with this context.
+     * A unique identifier that represents the source from which data or operations might be fetched or to which data
+     * might be written. If a valid source ID has not been established or isn't available, it defaults to returning -1.
      *
-     * @return the current source id of this source context or -1 if the
-     * source id does not exist.
+     * @return The unique identifier for this source context, or -1 if not available.
      */
     int sourceId();
 
     /**
-     * Index last read, only available for read contexts.
+     * Obtains the index of the last read operation from this source context.
+     * This is particularly useful to track the reading progress and can act as a checkpoint or reference point.
+     * Note: This method is specifically intended for read contexts and might not be relevant for other context types.
      *
-     * @return the current Excerpt's index
-     * @throws IORuntimeException if an error occurred while getting the index
+     * @return The index corresponding to the last read operation.
+     * @throws IORuntimeException if any issue arises while fetching the index.
      */
     long index() throws IORuntimeException;
 }
