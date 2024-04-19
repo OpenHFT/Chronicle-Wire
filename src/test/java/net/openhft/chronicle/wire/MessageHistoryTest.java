@@ -21,6 +21,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.junit.Test;
 
@@ -28,10 +29,6 @@ import static net.openhft.chronicle.bytes.MethodReader.MESSAGE_HISTORY_METHOD_ID
 import static org.junit.Assert.*;
 
 public class MessageHistoryTest extends WireTestCommon {
-
-    static {
-        System.setProperty("history.as.bytes", "false");
-    }
 
     // Test to check if clearing and retrieving the MessageHistory works correctly.
     @Test
@@ -66,10 +63,11 @@ public class MessageHistoryTest extends WireTestCommon {
     // Test to check if an exception is thrown when history exceeds maximum size.
     @Test
     public void checkHistoryMaxSizeException() {
-
         VanillaMessageHistory container1 = new VanillaMessageHistory();
+        container1.useBytesMarshallable(!OS.isMacOSX());
         container1.addSourceDetails(true);
         VanillaMessageHistory container2 = new VanillaMessageHistory();
+        container2.useBytesMarshallable(!OS.isMacOSX());
         container2.addSourceDetails(true);
 
         // Copy data between containers until reaching the message history length limit.
