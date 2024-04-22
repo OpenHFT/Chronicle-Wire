@@ -22,4 +22,5 @@
  *
  * @see net.openhft.chronicle.wire.channel.echo
  */
+@Deprecated(/* to be moved in x.27 */)
 package net.openhft.chronicle.wire.channel;
