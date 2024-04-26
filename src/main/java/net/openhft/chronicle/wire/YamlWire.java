@@ -2214,11 +2214,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public float float32() {
 
-            double d = float64();
-            if ((double) (((float) d)) != d)
-                throw new IllegalStateException("value=" + d + " can not be represented as a float");
-
-            return (float) d;
+            return (float) float64();
         }
 
         /**

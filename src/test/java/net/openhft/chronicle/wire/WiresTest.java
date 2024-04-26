@@ -86,7 +86,7 @@ public class WiresTest extends WireTestCommon {
         Assert.assertTrue(Double.isInfinite(TEXT.apply(Bytes.from("-Infinity")).getValueIn().float64()));
 
         // -0.0 is sent to denote and error
-        Assert.assertEquals(-0.0, TEXT.apply(Bytes.from("'1.0'")).getValueIn().float64(), 0);
+        Assert.assertEquals(-0.0, TEXT.apply(Bytes.from("''")).getValueIn().float64(), 0.0);
 
         // -0.0 is sent to denote and error
         Assert.assertEquals(-0.0, TEXT.apply(Bytes.from("Broken")).getValueIn().float64(), 0);

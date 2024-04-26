@@ -193,11 +193,16 @@ public class JSONWire extends TextWire {
             public double float64() {
                 consumePadding();
                 valueIn.skipType();
+                int sep = 0;
                 switch (peekCode()) {
                     case '[':
                     case '{':
                         Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a double.");
                         return 0;
+                    case '\'':
+                    case '"':
+                        sep = bytes.readUnsignedByte();
+                        break;
                 }
 
                 boolean isNull;
@@ -216,7 +221,13 @@ public class JSONWire extends TextWire {
                 }
 
                 final double v = isNull ? Double.NaN : bytes.parseDouble();
-                checkRewind();
+                if (sep != 0) {
+                    int end = peekBack();
+                    if (end != sep)
+                        throw new IORuntimeException("Expected " + (char) sep + " but was " + (char) end);
+                } else {
+                    checkRewindDouble();
+                }
                 return v;
             }
 
