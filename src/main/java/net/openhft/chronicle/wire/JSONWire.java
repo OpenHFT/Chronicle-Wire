@@ -224,7 +224,7 @@ public class JSONWire extends TextWire {
                 if (sep != 0) {
                     int end = peekBack();
                     if (end != sep)
-                        throw new IORuntimeException("Expected " + sep + " but was " + end);
+                        throw new IORuntimeException("Expected " + (char) sep + " but was " + (char) end);
                 } else {
                     checkRewindDouble();
                 }
