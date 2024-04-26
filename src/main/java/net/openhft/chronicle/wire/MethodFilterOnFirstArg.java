@@ -29,6 +29,7 @@ package net.openhft.chronicle.wire;
  *
  * @param <T> the type of the first argument that the method receives
  */
+@Deprecated(/* to be moved to services in x.27 */)
 @FunctionalInterface
 public interface MethodFilterOnFirstArg<T> {
     /**

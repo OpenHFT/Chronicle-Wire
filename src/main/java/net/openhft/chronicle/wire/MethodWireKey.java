@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
  * This class can be particularly useful in scenarios where wire keys are required to be identified
  * both by a textual name and a numeric code.
  */
+@Deprecated(/* to be moved to services in x.27 */)
 public class MethodWireKey extends BytesInBinaryMarshallable implements WireKey {
 
     // The name of the wire key

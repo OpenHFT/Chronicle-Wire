@@ -34,6 +34,7 @@ import java.util.Set;
  * format for the proxy class. Furthermore, it provides an option to dump the generated code for debugging purposes.
  */
 @SuppressWarnings("restriction")
+@Deprecated(/* to be moved to services in x.27 */)
 public enum GeneratedProxyClass {
     ; // This enum does not have any instances; it is used solely for its static members.
 

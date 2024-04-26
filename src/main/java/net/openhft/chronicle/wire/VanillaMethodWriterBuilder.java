@@ -41,6 +41,7 @@ import java.util.function.Supplier;
  * and method invocation handling among others.
  */
 @SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
+@Deprecated(/* to be moved to services in x.27 */)
 public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBuilder<T> {
     // Flag name to check whether proxy code generation is disabled
     public static final String DISABLE_WRITER_PROXY_CODEGEN = "disableProxyCodegen";

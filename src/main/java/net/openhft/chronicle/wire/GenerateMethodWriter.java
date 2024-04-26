@@ -52,6 +52,7 @@ import static net.openhft.chronicle.core.util.GenericReflection.getParameterType
  * It provides utility methods and configurations to facilitate the dynamic generation of method writers.
  */
 @SuppressWarnings("StringBufferReplaceableByString")
+@Deprecated(/* to be moved to services in x.27 */)
 public class GenerateMethodWriter {
 
     // Constants for class names to be used in the generated method writer code

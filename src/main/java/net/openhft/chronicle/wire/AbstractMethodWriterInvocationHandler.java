@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * It manages the invocation by mapping methods to their respective parameter holders and writing them to wires.
  * This class can handle both regular and generic events and supports method IDs for binary output.
  */
+@Deprecated(/* to be moved to services in x.27 */)
 public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvocationHandler implements MethodWriterInvocationHandler {
 
     // Map to cache the parameter holders for method invocations

@@ -26,6 +26,7 @@ import java.util.function.Supplier;
 /**
  * The BinaryMethodWriterInvocationHandler handles method invocations specific to binary writing scenarios with optional metadata support.
  */
+@Deprecated(/* to be moved to services in x.27 */)
 public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInvocationHandler {
     @NotNull
     private final Supplier<MarshallableOut> marshallableOutSupplier;

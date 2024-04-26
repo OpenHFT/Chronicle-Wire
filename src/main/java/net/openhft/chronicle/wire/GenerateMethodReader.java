@@ -46,6 +46,7 @@ import static net.openhft.chronicle.wire.GenerateMethodWriter.isSynthetic;
  * The class dynamically generates Java source code based on the provided configurations and compiles them at runtime.
  * It offers the flexibility to create custom MethodReaders tailored to specific needs without manual coding.
  */
+@Deprecated(/* to be moved to services in x.27 */)
 public class GenerateMethodReader {
 
      // Configuration flag for dumping the generated code.

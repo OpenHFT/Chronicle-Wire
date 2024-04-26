@@ -28,6 +28,7 @@ import java.util.function.Supplier;
  * configurations which influence the behavior of the generated {@link MethodWriterInvocationHandler} instances.
  * Configurable behaviors include thread safety, recording history, and more.
  */
+@Deprecated(/* to be moved to services in x.27 */)
 public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWriterInvocationHandler> {
 
     // The main supplier delegate that provides the base MethodWriterInvocationHandler instances.

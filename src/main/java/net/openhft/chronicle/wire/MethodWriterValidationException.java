@@ -24,6 +24,7 @@ package net.openhft.chronicle.wire;
  * implementation. It is typically thrown when there are invalid conditions or configurations related to
  * {@link MethodWriter} creation.
  */
+@Deprecated(/* to be moved to services in x.27 */)
 public class MethodWriterValidationException extends IllegalArgumentException {
 
     /**

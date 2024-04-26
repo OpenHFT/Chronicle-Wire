@@ -51,6 +51,7 @@ import java.lang.reflect.Method;
  * with {@link #intercept(Method, Object, Object[], Invocation)}, like it happens with a regular
  * {@link MethodReaderInterceptorReturns}.
  */
+@Deprecated(/* to be moved to services in x.27 */)
 public interface GeneratingMethodReaderInterceptorReturns extends MethodReaderInterceptorReturns {
     /**
      * Specifies ID of this generating interceptor.<br>

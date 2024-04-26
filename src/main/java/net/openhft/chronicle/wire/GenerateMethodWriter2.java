@@ -41,6 +41,7 @@ import static java.util.Collections.*;
  * and parameter types, which define their structure.
  */
 @SuppressWarnings("StringBufferReplaceableByString")
+@Deprecated(/* to be moved to services in x.27 */)
 public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethodWriter2.GMWMetaData> {
 
     // The simple name of the DocumentContext class used for template methods.
