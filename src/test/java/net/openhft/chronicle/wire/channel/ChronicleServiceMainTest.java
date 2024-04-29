@@ -36,6 +36,7 @@ interface NoOut {
     Closeable out();
 }
 
+@SuppressWarnings("deprecation")
 public class ChronicleServiceMainTest extends WireTestCommon {
 
     @Before

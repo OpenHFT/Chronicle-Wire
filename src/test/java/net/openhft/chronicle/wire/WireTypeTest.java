@@ -29,6 +29,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("deprecation")
 public class WireTypeTest extends WireTestCommon {
 
     // Add alias for TestMarshallable class for the test

@@ -25,6 +25,7 @@ import net.openhft.chronicle.core.io.Closeable;
  * It extends the Closeable interface, therefore any class implementing EventPoller must
  * implement the close() method from the Closeable interface, which is used to release any system resources associated with the EventPoller.
  */
+@SuppressWarnings("deprecation")
 public interface EventPoller extends Closeable {
 
     /**

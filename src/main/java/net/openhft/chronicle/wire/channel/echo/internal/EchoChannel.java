@@ -25,17 +25,17 @@ import net.openhft.chronicle.wire.UnrecoverableTimeoutException;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.channel.ChannelHeader;
-import net.openhft.chronicle.wire.channel.ChronicleChannel;
 import net.openhft.chronicle.wire.channel.ChronicleChannelCfg;
 import net.openhft.chronicle.wire.channel.OkHeader;
 import net.openhft.chronicle.wire.converter.NanoTime;
 
 /**
- * Represents an echo channel that implements the {@link ChronicleChannel} interface. The primary responsibility of this class is
+ * Represents an echo channel. The primary responsibility of this class is
  * to manage the reading and writing of documents to a {@link Wire} while keeping track of test messages
  * and headers.
  */
-public class EchoChannel extends SimpleCloseable implements ChronicleChannel {
+@SuppressWarnings("deprecation")
+public class EchoChannel extends SimpleCloseable implements net.openhft.chronicle.wire.channel.ChronicleChannel {
 
     // A default OK header that signifies a successful operation or message
     private static final OkHeader OK = new OkHeader();

@@ -1340,6 +1340,7 @@ public enum Wires {
          * @param aClass The class for which to determine the serialization strategy.
          * @return The serialization strategy or null if none matches.
          */
+        @SuppressWarnings("deprecation")
         @Nullable
         static SerializationStrategy getSerializationStrategy(@NotNull Class<?> aClass) {
             if (DynamicEnum.class.isAssignableFrom(aClass))

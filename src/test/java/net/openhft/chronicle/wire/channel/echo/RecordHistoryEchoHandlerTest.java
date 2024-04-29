@@ -21,10 +21,7 @@ package net.openhft.chronicle.wire.channel.echo;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
-import net.openhft.chronicle.wire.DocumentContext;
-import net.openhft.chronicle.wire.MessageHistory;
-import net.openhft.chronicle.wire.VanillaMessageHistory;
-import net.openhft.chronicle.wire.WireTestCommon;
+import net.openhft.chronicle.wire.*;
 import net.openhft.chronicle.wire.channel.*;
 import org.junit.After;
 import org.junit.Before;
@@ -36,6 +33,7 @@ import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
+@SuppressWarnings("deprecation")
 public class RecordHistoryEchoHandlerTest extends WireTestCommon {
 
     private static void doTest(ChronicleContext context, ChannelHandler handler) {

@@ -19,7 +19,6 @@
 package net.openhft.chronicle.wire.channel.echo;
 
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
-import net.openhft.chronicle.wire.channel.ChronicleChannel;
 
 /**
  * Abstract class 'ChannelVisitor' serves as a template for creating objects
@@ -28,6 +27,7 @@ import net.openhft.chronicle.wire.channel.ChronicleChannel;
  *
  * @param <T> the type of result to return after visiting a ChronicleChannel.
  */
+@SuppressWarnings("deprecation")
 public abstract class ChannelVisitor<T> extends SelfDescribingMarshallable {
 
     /**
@@ -37,5 +37,5 @@ public abstract class ChannelVisitor<T> extends SelfDescribingMarshallable {
      * @param channel the ChronicleChannel to visit.
      * @return T result of the operation performed on the channel.
      */
-    public abstract T visit(ChronicleChannel channel);
+    public abstract T visit(net.openhft.chronicle.wire.channel.ChronicleChannel channel);
 }

@@ -322,13 +322,15 @@ public class WiresTest extends WireTestCommon {
         assertEquals(thing2, thingCopy);
     }
 
+    @SuppressWarnings("deprecation")
     static class Thing extends AbstractEventCfg<Thing> {
         @AsMarshallable
-        DynamicEnum<?> dee1;
+        DynamicEnum dee1;
         String someString;
     }
 
-    enum EnumThing implements DynamicEnum<EnumThing> {
+    @SuppressWarnings("deprecation")
+    enum EnumThing implements DynamicEnum {
         ONE,
         TWO;
     }

@@ -33,7 +33,7 @@ import java.util.UUID;
 
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes","deprecation"})
 public class ScalarValues implements Serializable, Validatable {
     private static final long serialVersionUID = 0L;
     // Primitive data type fields

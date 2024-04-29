@@ -54,7 +54,7 @@ import static net.openhft.chronicle.bytes.BytesStore.empty;
  *
  * @param <T> The type that extends YamlWireOut
  */
-@SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
+@SuppressWarnings({"rawtypes", "unchecked", "this-escape", "deprecation"})
 public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire {
     @Deprecated(/* to remove in x.28 */)
     private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);

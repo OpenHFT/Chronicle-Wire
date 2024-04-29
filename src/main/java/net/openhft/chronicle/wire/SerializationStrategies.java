@@ -40,11 +40,11 @@ import java.util.*;
 
 import static net.openhft.chronicle.wire.BracketType.UNKNOWN;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
 /**
  * Enumerates the available serialization strategies, each implementing the {@link SerializationStrategy} interface.
  * These strategies cater to different serialization requirements and support specific object types.
  */
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public enum SerializationStrategies implements SerializationStrategy {
 
     /**

@@ -37,7 +37,7 @@ import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
-@SuppressWarnings("deprecated")
+@SuppressWarnings("deprecation")
 public class YamlTesterTest extends WireTestCommon {
     // Test implementation instance
     private static TestImpl testImpl;

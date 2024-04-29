@@ -50,7 +50,7 @@ import static net.openhft.chronicle.core.UnsafeMemory.*;
  *
  * @param <T> The type of the object to be marshalled/unmarshalled.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public class WireMarshaller<T> {
     private static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
     private static final FieldAccess[] NO_FIELDS = {};

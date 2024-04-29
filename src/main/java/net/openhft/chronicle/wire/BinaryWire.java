@@ -67,7 +67,7 @@ import static net.openhft.chronicle.wire.Wires.GENERATE_TUPLES;
  * Extends the `AbstractWire` and implements the `Wire` interface to ensure compatibility and a common API
  * with other wire formats.
  */
-@SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
+@SuppressWarnings({"rawtypes", "unchecked", "this-escape", "deprecation"})
 public class BinaryWire extends AbstractWire implements Wire {
 
     static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal();

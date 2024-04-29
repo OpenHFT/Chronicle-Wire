@@ -33,6 +33,7 @@ import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
+@SuppressWarnings("deprecation")
 public class EchoHandlerTest extends WireTestCommon {
 
     @Override

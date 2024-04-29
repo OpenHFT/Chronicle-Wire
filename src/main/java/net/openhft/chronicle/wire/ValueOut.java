@@ -81,6 +81,7 @@ public interface ValueOut {
      * @param v Object to be checked.
      * @return {@code true} if the object is an instance of Enum or DynamicEnum; {@code false} otherwise.
      */
+    @SuppressWarnings("deprecation")
     static boolean isAnEnum(Object v) {
         return (v instanceof Enum) || (v instanceof DynamicEnum);
     }
@@ -1497,6 +1498,7 @@ public interface ValueOut {
      * This method attempts to serialize an object without the caller explicitly specifying the object type.
      * This is done by checking the object's class name against a list of known class names and using appropriate serialization methods.
      */
+    @SuppressWarnings("deprecation")
     @NotNull
     default WireOut untypedObject(@Nullable Object value) throws InvalidMarshallableException {
         // Handle null value case first

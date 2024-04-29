@@ -27,6 +27,7 @@ import java.util.function.Supplier;
  *
  * @see java.util.function.Supplier
  */
+@SuppressWarnings("deprecation")
 public class ChronicleChannelSupplier extends ChronicleChannelCfg<ChronicleChannelSupplier> implements Supplier<ChronicleChannel> {
     private final transient ChronicleContext context;
     private final ChannelHandler handler;

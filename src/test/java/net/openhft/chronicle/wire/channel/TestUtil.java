@@ -18,14 +18,13 @@
 
 package net.openhft.chronicle.wire.channel;
 
-import net.openhft.chronicle.wire.utils.YamlTester;
-
 import static org.junit.Assert.assertEquals;
 
 /**
  * TestUtil contains utility methods that aid in testing,
  * particularly those involving YAML testing.
  */
+@SuppressWarnings("deprecation")
 public final class TestUtil {
 
     /**
@@ -42,7 +41,7 @@ public final class TestUtil {
      *
      * @param yamlTester a tester object presumably holding actual and expected YAML strings.
      */
-    public static void allowCommentsOutOfOrder(YamlTester yamlTester) {
+    public static void allowCommentsOutOfOrder(net.openhft.chronicle.wire.utils.YamlTester yamlTester) {
         // Removing YAML document separators from expected and actual strings.
         final String e = yamlTester.expected()
                 .replaceAll("---\n", "");

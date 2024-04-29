@@ -31,7 +31,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SuppressWarnings("deprecated")
+@SuppressWarnings("deprecation")
 @RunWith(Parameterized.class)
 public class YamlTesterErrorTest extends WireTestCommon {
     // Path to the YAML test files

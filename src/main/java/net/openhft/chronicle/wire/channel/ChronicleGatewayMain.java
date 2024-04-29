@@ -45,6 +45,7 @@ import java.util.function.Function;
  * have the ability to manage their lifecycle autonomously and can operate in individual threads. Configuration of the Gateway
  * can be done utilizing system properties.
  */
+@SuppressWarnings("deprecation")
 public class ChronicleGatewayMain extends ChronicleContext implements Closeable, Runnable {
 
     // Default port for the gateway

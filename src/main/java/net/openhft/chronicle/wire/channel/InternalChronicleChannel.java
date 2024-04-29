@@ -26,6 +26,7 @@ import net.openhft.chronicle.wire.WireOut;
  * This interface is intended for internal use within the system and its options might change
  * in future versions, hence it should be used with caution.
  */
+@SuppressWarnings("deprecation")
 public interface InternalChronicleChannel extends ChronicleChannel {
 
     /**

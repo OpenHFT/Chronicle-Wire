@@ -1,12 +1,11 @@
 package net.openhft.chronicle.wire.utils;
 
-import net.openhft.chronicle.wire.VanillaMessageHistory;
-
 /**
  * Write a history before each message
  *
  * @param <T> interface of messages with prepended history
  */
+@SuppressWarnings("deprecation")
 public interface RecordHistory<T> {
-    T history(VanillaMessageHistory history);
+    T history(net.openhft.chronicle.wire.VanillaMessageHistory history);
 }

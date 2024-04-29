@@ -63,6 +63,7 @@ import static net.openhft.chronicle.wire.WireType.YAML;
  *   assertEquals("say: Hello World", eventType + ": " + text);
  * </pre>
  */
+@SuppressWarnings("deprecation")
 public class ChronicleContext extends SimpleCloseable {
     static {
         // Initialize Handler at static context

@@ -20,6 +20,7 @@ import java.util.function.Consumer;
  * The class provides utility methods related to operations and handling of the {@link ChronicleChannel}.
  * Designed as a purely static utility class, it should not be instantiated.
  */
+@SuppressWarnings("deprecation")
 public final class ChronicleChannelUtils {
 
     // Private constructor to prevent instantiation

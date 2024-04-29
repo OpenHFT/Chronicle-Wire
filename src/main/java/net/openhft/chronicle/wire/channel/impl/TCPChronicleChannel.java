@@ -48,6 +48,7 @@ import static net.openhft.chronicle.core.io.ClosedIORuntimeException.newIORuntim
  * initialization, input-output buffer management, and header parsing.
  * The class is designed to work both as an initiator and as an acceptor.
  */
+@SuppressWarnings("deprecation")
 public class TCPChronicleChannel extends AbstractCloseable implements InternalChronicleChannel {
 
     // Default capacity for the channel buffers

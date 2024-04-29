@@ -1,6 +1,5 @@
 package net.openhft.chronicle.wire.channel.echo;
 
-import net.openhft.chronicle.wire.channel.ChronicleChannel;
 import net.openhft.chronicle.wire.channel.ChronicleChannelCfg;
 import net.openhft.chronicle.wire.channel.ChronicleContext;
 import org.junit.Before;
@@ -8,6 +7,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("deprecation")
 public class ChannelSecondaryConnectionTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Constant string that is expected to be returned by the secondary server in the test
@@ -57,7 +57,7 @@ public class ChannelSecondaryConnectionTest extends net.openhft.chronicle.wire.W
 
             try (
                 // Establish a new channel, using the defined configuration and an instance of EchoHandler
-                ChronicleChannel channel = ChronicleChannel.newChannel(context.socketRegistry(), channelCfg,
+                net.openhft.chronicle.wire.channel.ChronicleChannel channel = net.openhft.chronicle.wire.channel.ChronicleChannel.newChannel(context.socketRegistry(), channelCfg,
                         new EchoHandler())
             ) {
                 // Send the 'EXPECTED' message to the secondary server using method writer of the SayMsg interface

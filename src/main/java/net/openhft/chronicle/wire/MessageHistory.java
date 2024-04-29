@@ -24,7 +24,7 @@ import net.openhft.chronicle.core.annotation.UsedViaReflection;
  * This is the {@code MessageHistory} interface, which extends {@link Marshallable}.
  * It provides functionalities related to managing the history of messages.
  */
-@Deprecated(/* to be moved in x.27 to services */)
+@SuppressWarnings("deprecation")
 public interface MessageHistory extends Marshallable {
 
     /**

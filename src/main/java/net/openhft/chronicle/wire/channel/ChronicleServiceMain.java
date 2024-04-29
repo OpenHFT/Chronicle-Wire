@@ -48,6 +48,7 @@ import java.util.function.Function;
  * Represents the main class for the Chronicle Service which is responsible for
  * accepting and managing incoming connections using multiple threads.
  */
+@SuppressWarnings("deprecation")
 public class ChronicleServiceMain extends SelfDescribingMarshallable implements Closeable {
     int port;  // The port on which the server listens for incoming connections
     Marshallable microservice;  // The microservice configuration or definition (not used in the provided code)

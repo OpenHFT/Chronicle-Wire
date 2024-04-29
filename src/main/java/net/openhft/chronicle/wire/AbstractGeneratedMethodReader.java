@@ -41,6 +41,7 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  * It serves as a base class for generated method readers, providing foundational functionality
  * and utility methods to facilitate method reading.
  */
+@SuppressWarnings("deprecation")
 public abstract class AbstractGeneratedMethodReader implements MethodReader {
 
     // A no-operation message history consumer.

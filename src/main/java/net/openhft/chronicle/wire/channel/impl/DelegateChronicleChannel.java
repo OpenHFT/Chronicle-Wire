@@ -32,6 +32,7 @@ import net.openhft.chronicle.wire.channel.*;
  *
  * @see InternalChronicleChannel
  */
+@SuppressWarnings("deprecation")
 public class DelegateChronicleChannel implements InternalChronicleChannel, Closeable {
 
     // The internal channel instance to which method calls are delegated

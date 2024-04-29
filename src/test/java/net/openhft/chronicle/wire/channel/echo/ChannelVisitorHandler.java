@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire.channel.echo;
 
 import net.openhft.chronicle.core.io.ClosedIORuntimeException;
 import net.openhft.chronicle.wire.channel.AbstractHandler;
-import net.openhft.chronicle.wire.channel.ChronicleChannel;
 import net.openhft.chronicle.wire.channel.ChronicleChannelCfg;
 import net.openhft.chronicle.wire.channel.ChronicleContext;
 
@@ -34,6 +33,7 @@ import net.openhft.chronicle.wire.channel.ChronicleContext;
  * <p>
  * 'asInternalChannel' is not supported in this implementation.
  */
+@SuppressWarnings("deprecation")
 public class ChannelVisitorHandler extends AbstractHandler<ChannelVisitorHandler> {
 
     /**
@@ -48,7 +48,7 @@ public class ChannelVisitorHandler extends AbstractHandler<ChannelVisitorHandler
      * @throws ClosedIORuntimeException if an I/O error occurs.
      */
     @Override
-    public void run(ChronicleContext context, ChronicleChannel channel) throws ClosedIORuntimeException {
+    public void run(ChronicleContext context, net.openhft.chronicle.wire.channel.ChronicleChannel channel) throws ClosedIORuntimeException {
         // Acquire a method writer for the Replies interface
         Replies replies = channel.methodWriter(Replies.class);
 
@@ -71,7 +71,7 @@ public class ChannelVisitorHandler extends AbstractHandler<ChannelVisitorHandler
      * @throws UnsupportedOperationException always, as the operation is not supported.
      */
     @Override
-    public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg<?> channelCfg) {
+    public net.openhft.chronicle.wire.channel.ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg<?> channelCfg) {
         throw new UnsupportedOperationException();
     }
 }

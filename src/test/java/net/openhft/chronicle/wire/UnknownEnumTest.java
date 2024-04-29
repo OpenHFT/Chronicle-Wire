@@ -106,7 +106,8 @@ public class UnknownEnumTest extends WireTestCommon {
         }
     }
 
-    enum YesNo implements DynamicEnum<YesNo> {
+    @SuppressWarnings("deprecation")
+    enum YesNo implements DynamicEnum {
         Yes,
         No
     }

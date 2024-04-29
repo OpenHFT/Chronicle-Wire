@@ -102,6 +102,7 @@ worst:        6463.49       783.36       736.26       592.90       199.94       
 /**
  * Main class to measure performance latency using JLBH (Java Latency Benchmark Harness).
  */
+@SuppressWarnings("deprecation")
 public class PerfLatencyMain implements JLBHTask {
 
     // Constants to configure the performance test

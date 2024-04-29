@@ -18,13 +18,13 @@
 
 package net.openhft.chronicle.wire.channel.echo;
 
-import net.openhft.chronicle.wire.channel.ChronicleChannel;
 import net.openhft.chronicle.wire.channel.ChronicleContext;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("deprecation")
 public class ChannelVisitorTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     @Override
@@ -34,7 +34,7 @@ public class ChannelVisitorTest extends net.openhft.chronicle.wire.WireTestCommo
     }
 
     @SuppressWarnings("unchecked")
-    static <T> T visitOne(ChronicleChannel channel, ChannelVisiting visiting, ChannelVisitor<T> visitor) {
+    static <T> T visitOne(net.openhft.chronicle.wire.channel.ChronicleChannel channel, ChannelVisiting visiting, ChannelVisitor<T> visitor) {
         StringBuilder reply = new StringBuilder();
         visiting.visitor(visitor);
         return (T) channel.readOne(reply, Object.class);
@@ -43,7 +43,7 @@ public class ChannelVisitorTest extends net.openhft.chronicle.wire.WireTestCommo
     @Test
     public void testChannel() {
         try (ChronicleContext context = ChronicleContext.newContext("tcp://:0?sessionName=testId");
-             final ChronicleChannel channel = context.newChannelSupplier(new ChannelVisitorHandler()).get()) {
+             final net.openhft.chronicle.wire.channel.ChronicleChannel channel = context.newChannelSupplier(new ChannelVisitorHandler()).get()) {
             final ChannelVisiting visiting = channel.methodWriter(ChannelVisiting.class);
             int hostId = visitOne(channel, visiting, new ChannelHostId());
             assertEquals(0, hostId);
@@ -55,14 +55,14 @@ public class ChannelVisitorTest extends net.openhft.chronicle.wire.WireTestCommo
 
     static class ChannelSessionName extends ChannelVisitor<String> {
         @Override
-        public String visit(ChronicleChannel channel) {
+        public String visit(net.openhft.chronicle.wire.channel.ChronicleChannel channel) {
             return channel.headerIn().sessionName();
         }
     }
 
     static class ChannelHostId extends ChannelVisitor<Integer> {
         @Override
-        public Integer visit(ChronicleChannel channel) {
+        public Integer visit(net.openhft.chronicle.wire.channel.ChronicleChannel channel) {
             return channel.headerIn().systemContext().hostId();
         }
     }

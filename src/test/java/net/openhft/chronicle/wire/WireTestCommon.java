@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
-@SuppressWarnings("this-escape")
+@SuppressWarnings({"this-escape", "deprecation"})
 public class WireTestCommon {
 
     // A thread dump to monitor thread states and detect unwanted thread creation

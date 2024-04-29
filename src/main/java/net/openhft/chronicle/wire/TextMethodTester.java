@@ -24,8 +24,6 @@ import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.onoes.ChainedExceptionHandler;
 import net.openhft.chronicle.core.onoes.ExceptionHandler;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
-import net.openhft.chronicle.wire.utils.YamlAgitator;
-import net.openhft.chronicle.wire.utils.YamlTester;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
@@ -42,7 +40,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.*;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
 /**
  * Provides a tester for methods with text input, primarily focused on YAML testing.
  * This tester is configurable and can simulate various situations, using specified exception handlers,
@@ -50,7 +47,8 @@ import java.util.function.*;
  *
  * @param <T> The type of the output class.
  */
-public class TextMethodTester<T> implements YamlTester {
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
+public class TextMethodTester<T> implements net.openhft.chronicle.wire.utils.YamlTester {
 
     // Flags to determine if tests should include comments.
     private static final boolean TESTS_INCLUDE_COMMENTS = Jvm.getBoolean("tests.include.comments", true);
@@ -600,7 +598,7 @@ public class TextMethodTester<T> implements YamlTester {
     }
 
     @Override
-    public Map<String, String> agitate(YamlAgitator agitator) throws IORuntimeException {
+    public Map<String, String> agitate(net.openhft.chronicle.wire.utils.YamlAgitator agitator) throws IORuntimeException {
         try {
             final Class<?> clazz = outputClass == null ? getClass() : outputClass;
             String yaml = input.startsWith("=")

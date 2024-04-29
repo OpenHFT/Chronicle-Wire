@@ -29,6 +29,7 @@ import net.openhft.chronicle.core.io.ClosedIORuntimeException;
  *
  * @param <H> The specific subclass of ReplyingHandler, used for ensuring type correctness in fluent APIs.
  */
+@SuppressWarnings("deprecation")
 public abstract class ReplyingHandler<H extends ReplyingHandler<H>> extends AbstractHandler<H> {
     @Override
     public abstract ChannelHeader responseHeader(ChronicleContext context);

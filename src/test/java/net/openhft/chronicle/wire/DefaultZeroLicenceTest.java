@@ -26,6 +26,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 // This class provides tests for checking the default zero licence.
+@SuppressWarnings("deprecation")
 public class DefaultZeroLicenceTest extends WireTestCommon {
 
     // Test the default zero licence check to ensure correct behaviour.
