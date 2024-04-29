@@ -47,7 +47,7 @@ import static net.openhft.chronicle.wire.VanillaWireParser.SKIP_READABLE_BYTES;
  * The class primarily handles reading methods from a MarshallableIn source and provides related utilities.
  * It works with WireParselet, MethodReaderInterceptorReturns, and other constructs to facilitate the reading process.
  */
-@SuppressWarnings({"rawtypes","this-escape"})
+@SuppressWarnings({"rawtypes","this-escape", "deprecation"})
 public class VanillaMethodReader implements MethodReader {
 
     // beware enabling DEBUG_ENABLED as logMessage will not work unless Wire marshalling used - https://github.com/ChronicleEnterprise/Chronicle-Services/issues/240
