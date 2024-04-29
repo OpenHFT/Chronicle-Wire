@@ -35,6 +35,7 @@ import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
  * provides an array-backed history of messages.
  */
 @SuppressWarnings("rawtypes")
+@Deprecated(/* to be moved in x.27 to services */)
 public class VanillaMessageHistory extends SelfDescribingMarshallable implements MessageHistory {
 
     // Maximum length for storing message history
