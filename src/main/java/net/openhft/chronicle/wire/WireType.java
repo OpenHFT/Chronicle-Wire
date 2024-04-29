@@ -146,6 +146,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
             return fromHexString(cs);
         }
     },
+    @Deprecated(/* to be removed in x.27 */)
     DEFAULT_ZERO_BINARY {
         @NotNull
         @Override
@@ -196,6 +197,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
             return fromHexString(cs);
         }
     },
+    @Deprecated(/* to be removed in x.27 */)
     DELTA_BINARY {
         @NotNull
         @Override
@@ -387,6 +389,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      *
      * @return true if DeltaWire is available, false otherwise.
      */
+    @Deprecated(/* to be removed in x.27 */)
     private static boolean isDeltaAvailable() {
         try {
             Class.forName("software.chronicle.wire.DeltaWire").getDeclaredConstructor(Bytes.class);
@@ -401,6 +404,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      *
      * @return true if DefaultZeroWire is available, false otherwise.
      */
+    @Deprecated(/* to be removed in x.27 */)
     private static boolean isDefaultZeroAvailable() {
         try {
             Class.forName("software.chronicle.wire.DefaultZeroWire").getDeclaredConstructor(Bytes.class);
