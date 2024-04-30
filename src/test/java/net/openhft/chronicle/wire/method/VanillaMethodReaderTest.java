@@ -40,7 +40,6 @@ import java.util.concurrent.BlockingQueue;
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.*;
 
-@SuppressWarnings("deprecation")
 public class VanillaMethodReaderTest extends WireTestCommon {
 
     A instance;
@@ -328,7 +327,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
             assertFalse(reader.readOne());
             assertEquals(0, MessageHistory.get().sources());
         } finally {
-            MessageHistory.set(null);
+            MessageHistory.clear();
         }
     }
 

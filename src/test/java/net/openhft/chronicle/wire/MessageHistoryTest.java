@@ -28,7 +28,6 @@ import org.junit.Test;
 import static net.openhft.chronicle.bytes.MethodReader.MESSAGE_HISTORY_METHOD_ID;
 import static org.junit.Assert.*;
 
-@SuppressWarnings("deprecation")
 public class MessageHistoryTest extends WireTestCommon {
 
     // Test to check if clearing and retrieving the MessageHistory works correctly.
@@ -39,7 +38,7 @@ public class MessageHistoryTest extends WireTestCommon {
         assertNotNull(mg);
 
         // Reset the message history.
-        MessageHistory.set(null);
+        MessageHistory.clear();
 
         // Retrieve a new instance of message history.
         MessageHistory mg2 = MessageHistory.get();
@@ -370,7 +369,7 @@ public class MessageHistoryTest extends WireTestCommon {
                     bytes.toHexString().split("\n")[0]);
 
         } finally {
-            MessageHistory.set(null);
+            MessageHistory.clear();
         }
     }
 
