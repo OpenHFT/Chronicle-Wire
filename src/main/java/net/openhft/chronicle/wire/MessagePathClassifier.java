@@ -37,7 +37,6 @@ import java.util.stream.IntStream;
  * {@link MessageHistory}.
  */
 @Deprecated(/* to be moved in x.27 */)
-@SuppressWarnings("deprecation")
 public class MessagePathClassifier implements IntSupplier {
 
     // Patterns of source IDs for classification.

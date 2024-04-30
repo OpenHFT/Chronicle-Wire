@@ -29,7 +29,6 @@ import static org.junit.Assert.*;
  * This class is used to test the functionality related to reading individual messages and snapshots
  * from a Wire-based data structure, ensuring they can be read in the correct sequence.
  */
-@SuppressWarnings("deprecation")
 public class ReadOneTest extends WireTestCommon {
 
     // Definition for MyDto class, used for testing reading data from the Wire
