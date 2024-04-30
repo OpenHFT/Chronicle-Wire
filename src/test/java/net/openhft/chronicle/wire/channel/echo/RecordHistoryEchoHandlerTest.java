@@ -33,6 +33,7 @@ import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
+@SuppressWarnings("deprecation")
 public class RecordHistoryEchoHandlerTest extends WireTestCommon {
 
     private static void doTest(ChronicleContext context, ChannelHandler handler) {
