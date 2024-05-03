@@ -104,7 +104,6 @@ final class SerializableObjectTest extends WireTestCommon {
         } catch (ClassNotFoundException ignore) {
             // This exception means the class isn't present, so we can safely ignore it.
         }
-
     }
 
     // Predicate to check if a constructor is the default one.
@@ -256,7 +255,7 @@ final class SerializableObjectTest extends WireTestCommon {
     private static boolean isSerializableEquals(Class<?> aClass, Object o) {
         try {
             // Create an instance if not provided
-            Object source = o == null ? aClass.newInstance() : o;
+            Object source = o == null ? aClass.getConstructor().newInstance() : o;
             // Sanity check to ensure non-null toString representation
             if (source.toString() == null)
                 return false;
@@ -409,5 +408,4 @@ final class SerializableObjectTest extends WireTestCommon {
             }
         }
     }
-
 }

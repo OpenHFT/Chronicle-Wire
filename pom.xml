@@ -428,15 +428,6 @@
 
     <profiles>
         <profile>
-            <id>java11-release8</id>
-            <activation>
-                <jdk>[11,</jdk>
-            </activation>
-            <properties>
-                <maven.compiler.release>8</maven.compiler.release>
-            </properties>
-        </profile>
-        <profile>
             <id>sonar</id>
             <build>
                 <plugins>
