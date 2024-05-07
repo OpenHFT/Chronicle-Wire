@@ -63,7 +63,6 @@ public class ListLookup {
         } else {
             System.out.println("Not found!");
         }
-
     }
 
     private static final class Data extends SelfDescribingMarshallable {
@@ -134,5 +133,4 @@ public class ListLookup {
         }
         return -(low + 1);  // key not found
     }
-
 }

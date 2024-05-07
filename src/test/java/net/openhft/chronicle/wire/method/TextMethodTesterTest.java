@@ -101,4 +101,3 @@ public class TextMethodTesterTest extends WireTestCommon {
                 test.actual().replaceAll("\\s+#", " #"));
     }
 }
-

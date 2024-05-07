@@ -95,7 +95,6 @@ public class TriviallyCopyableJLBH implements JLBHTask {
         public BinaryLengthLength binaryLengthLength() {
             return BinaryLengthLength.LENGTH_8BIT;
         }
-
     }
 
     public static class House extends SelfDescribingMarshallable implements BaseHouse {
@@ -166,7 +165,6 @@ public class TriviallyCopyableJLBH implements JLBHTask {
         } catch (Exception e) {
             Jvm.rethrow(e);
         }
-
     }
 
     @NotNull

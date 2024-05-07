@@ -160,7 +160,6 @@ public class PerfLatencyMain implements JLBHTask {
         new JLBH(lth).start();
     }
 
-
     @Override
     public void init(JLBH jlbh) {
         // Initialize the JLBH, DummyData, and the ChronicleContext

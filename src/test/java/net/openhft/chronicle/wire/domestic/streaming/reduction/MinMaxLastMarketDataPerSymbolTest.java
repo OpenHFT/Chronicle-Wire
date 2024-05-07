@@ -119,5 +119,4 @@ public class MinMaxLastMarketDataPerSymbolTest extends WireTestCommon {
             dc.wire().getValueOut().object(marketData);
         }
     }
-
 }

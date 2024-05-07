@@ -349,7 +349,6 @@ public final class StreamsUtil {
             next = null;
             return val;
         }
-
     }
 
     /**
@@ -415,7 +414,6 @@ public final class StreamsUtil {
             next = Long.MIN_VALUE;
             return val;
         }
-
     }
 
     /**
@@ -481,7 +479,5 @@ public final class StreamsUtil {
             next = Double.NaN;
             return val;
         }
-
     }
-
 }

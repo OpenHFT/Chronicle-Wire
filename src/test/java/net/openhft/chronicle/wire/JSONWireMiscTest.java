@@ -188,7 +188,6 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         public Bar(String value) {
             this.value = value;
         }
-
     }
 
     // Test to write a custom class Bar instance to the wire and verify the written content
@@ -225,5 +224,4 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         System.out.println("actual = " + actual);
         assertBalancedBrackets(actual);
     }
-
 }

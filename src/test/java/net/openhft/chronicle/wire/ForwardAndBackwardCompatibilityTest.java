@@ -243,4 +243,3 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         }
     }
 }
-

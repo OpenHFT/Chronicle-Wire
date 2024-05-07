@@ -35,5 +35,4 @@ public class AccountStatusFailedTest {
         // Assuming 'getAccountStatus()' returns the expected AccountStatus object for comparison
         assertEquals(getAccountStatus(), asf.accountStatus());
     }
-
 }

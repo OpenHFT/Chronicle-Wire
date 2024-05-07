@@ -382,7 +382,6 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
                 } catch (Exception e) {
                     Jvm.warn().on(getClass(), "failed to connect to host-port=" + hp);
                 }
-
             }
             if (!success)
                 throw new IORuntimeException("failed to connect to any of the following " + hostPorts);

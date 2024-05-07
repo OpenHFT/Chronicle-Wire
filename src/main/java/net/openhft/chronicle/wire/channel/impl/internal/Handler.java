@@ -67,5 +67,4 @@ public class Handler extends URLStreamHandler {
     protected URLConnection openConnection(URL u) {
         throw new UnsupportedOperationException();
     }
-
 }

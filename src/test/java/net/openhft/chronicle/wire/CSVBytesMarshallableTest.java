@@ -172,7 +172,6 @@ class FXPrice implements BytesMarshallable {
         }
     }
 }
-
 /**
  * Class representing a foreign exchange price.
  * Implements the Marshallable interface to support reading and writing of its values using the Wire format.

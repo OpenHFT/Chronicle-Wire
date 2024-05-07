@@ -106,4 +106,3 @@ public abstract class AbstractLongConverter implements LongConverter {
         converter.append(bytes, value);
     }
 }
-

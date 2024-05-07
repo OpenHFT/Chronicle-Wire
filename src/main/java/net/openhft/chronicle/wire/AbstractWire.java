@@ -590,7 +590,6 @@ public abstract class AbstractWire implements Wire {
         } finally {
             resetTimedPauser();
         }
-
     }
 
     /**

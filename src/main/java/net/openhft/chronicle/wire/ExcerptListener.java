@@ -64,5 +64,4 @@ public interface ExcerptListener {
             after.onExcerpt(wire, index);
         });
     }
-
 }

@@ -191,5 +191,4 @@ public interface DocumentExtractor<T> {
         requireNonNull(elementType);
         return new DocumentExtractorBuilder<>(elementType);
     }
-
 }

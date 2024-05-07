@@ -2443,7 +2443,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         public String toString() {
             return YamlWire.this.toString();
         }
-
     }
 
     @Override

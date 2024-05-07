@@ -88,7 +88,6 @@ final class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
                             .collect(joining(", ")))
                     .build();
         }
-
     }
 
     static final class WireOperationsRecord {
@@ -175,5 +174,4 @@ final class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
                 .collect(toList());
         assertEquals(expectedList, actualList);
     }
-
 }

@@ -84,4 +84,3 @@ public abstract class AbstractHeader<H extends AbstractHeader<H>>
         return (H) this;
     }
 }
-

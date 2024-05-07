@@ -269,5 +269,4 @@ public final class Streams {
 
         return new StreamsUtil.ExcerptIteratorOfDouble(documentProvider, extractor);
     }
-
 }

@@ -178,7 +178,6 @@ public class JSONWire extends TextWire {
         return this;
     }
 
-
     @NotNull
     @Override
     protected JSONValueOut createValueOut() {
@@ -999,7 +998,6 @@ public class JSONWire extends TextWire {
      */
     class JSONValueIn extends TextValueIn {
 
-
         @Nullable
         private Type consumeTypeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
             long start = bytes.readPosition();
@@ -1058,7 +1056,6 @@ public class JSONWire extends TextWire {
                 return UnresolvedType.of(clazz);
             }
         }
-
 
         /**
          * Determines if the current value represents a JSON null value.

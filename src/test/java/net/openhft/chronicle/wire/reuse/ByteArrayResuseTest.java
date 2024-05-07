@@ -57,7 +57,6 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
                 "   08 09 00\n");
     }           // Provide the expected hex string for the serialized data
 
-
     /**
      * Test method to verify the serialization and deserialization of byte arrays using
      * a binary format. It checks the equality of the serialized data with the expected
@@ -76,7 +75,6 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
                 "   d2 02 96 49 00 00 00 00                         # timestamp\n" +
                 "   0a 00 00 00 01 02 03 04 05 06 07 08 09 00       # bytes\n");
     }           // Provide the expected hex string for the serialized data
-
 
     /**
      * Helper method to perform serialization and deserialization of Data objects.

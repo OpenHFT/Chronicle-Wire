@@ -149,5 +149,4 @@ public interface ToLongDocumentExtractor {
     static ToLongDocumentExtractor extractingIndex() {
         return (wire, index) -> index;
     }
-
 }

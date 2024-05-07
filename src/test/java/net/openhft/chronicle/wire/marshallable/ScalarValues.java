@@ -97,7 +97,6 @@ public class ScalarValues extends SelfDescribingMarshallable {
         dynamicEnum = TestEnum.THREE;
     }
 }
-
 /**
  * A simple dynamic enumeration used in ScalarValues.
  */

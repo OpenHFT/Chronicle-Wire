@@ -1476,7 +1476,6 @@ public class WireMarshaller<T> {
         public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             bytes.writeUtf8(unsafeGetObject(o, offset));
         }
-
     }
 
     /**
@@ -3008,5 +3007,4 @@ public class WireMarshaller<T> {
             unsafePutDouble(to, offset, unsafeGetDouble(from, offset));
         }
     }
-
 }

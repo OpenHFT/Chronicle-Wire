@@ -146,7 +146,6 @@ public class PerfRegressionTest extends WireTestCommon {
                     System.out.println(aClass.getSimpleName() + " - " + line);
                     result = Long.parseLong(line.split(" ")[1]);
                 }
-
             }
         }
 

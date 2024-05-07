@@ -949,7 +949,6 @@ public interface ValueIn {
      */
     ClassLookup classLookup();
 
-
     /**
      * Reads a type literal as text and applies it to a given object using the provided BiConsumer.
      *

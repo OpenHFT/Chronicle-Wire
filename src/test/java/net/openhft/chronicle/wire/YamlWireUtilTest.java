@@ -159,5 +159,4 @@ public class YamlWireUtilTest {
         StringBuilder s = new StringBuilder("2023-07-27T12:34:56.789Z");
         assertEquals(ZonedDateTime.parse(s), readNumberOrTextFrom('\0', s));
     }
-
 }

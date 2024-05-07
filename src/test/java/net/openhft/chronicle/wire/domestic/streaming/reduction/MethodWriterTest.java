@@ -103,5 +103,4 @@ public class MethodWriterTest extends WireTestCommon {
 
         void greeting(String greeting);
     }
-
 }

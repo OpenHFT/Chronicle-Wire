@@ -377,7 +377,6 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         return o;
     }
 
-
     /**
      * Invokes a given method on the provided object with the specified arguments.
      *

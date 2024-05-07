@@ -84,5 +84,4 @@ public class LastMarketDataPerSymbolTest extends WireTestCommon {
             dc.wire().getValueOut().object(marketData);
         }
     }
-
 }

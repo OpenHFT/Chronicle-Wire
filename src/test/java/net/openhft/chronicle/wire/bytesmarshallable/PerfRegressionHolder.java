@@ -404,7 +404,6 @@ public class PerfRegressionHolder {
             bytes.writeUtf8(e);
             bytes.writeUtf8(f);
         }
-
     }
 
     // Example test method for benchmarking a specific type of object

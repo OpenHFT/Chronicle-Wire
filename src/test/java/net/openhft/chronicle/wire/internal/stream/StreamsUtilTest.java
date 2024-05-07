@@ -106,5 +106,4 @@ public class StreamsUtilTest extends net.openhft.chronicle.wire.WireTestCommon {
         StreamsUtil.VanillaSpliteratorOfDouble spliterator = new StreamsUtil.VanillaSpliteratorOfDouble(iterator);
         assertEquals(Long.MAX_VALUE, spliterator.estimateSize());
     }
-
 }

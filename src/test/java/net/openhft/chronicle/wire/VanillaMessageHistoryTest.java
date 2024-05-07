@@ -91,5 +91,4 @@ public class VanillaMessageHistoryTest extends net.openhft.chronicle.wire.WireTe
         assertEquals(vmh.hashCode(),
                 vmh2.hashCode());
     }
-
 }

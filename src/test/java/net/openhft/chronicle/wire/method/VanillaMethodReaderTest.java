@@ -521,4 +521,3 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         }
     }
 }
-

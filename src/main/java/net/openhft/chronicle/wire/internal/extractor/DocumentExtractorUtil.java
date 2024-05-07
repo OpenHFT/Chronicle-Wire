@@ -94,7 +94,6 @@ public final class DocumentExtractorUtil {
 
     }
 
-
     /**
      * Extracts the method name and its message type from a provided method reference of a specified type.
      * The extraction process leverages Java's Proxy mechanism to determine which method gets invoked
@@ -169,5 +168,4 @@ public final class DocumentExtractorUtil {
             return messageType;
         }
     }
-
 }

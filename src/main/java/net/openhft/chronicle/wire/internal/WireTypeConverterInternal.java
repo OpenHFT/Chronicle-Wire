@@ -35,7 +35,6 @@ public class WireTypeConverterInternal {
         return jsonWire.bytes();
     }
 
-
     /**
      * Adds aliasing support for type leniency. This facilitates the serialization and deserialization
      * of objects whose class names might have changed. By providing an alias, the system can recognize

@@ -67,5 +67,4 @@ public class MethodWriterStringTest extends net.openhft.chronicle.wire.WireTestC
     private void println(String msg) {
         q.add(msg);
     }
-
 }

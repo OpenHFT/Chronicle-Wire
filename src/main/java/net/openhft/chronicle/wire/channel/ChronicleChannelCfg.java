@@ -52,7 +52,6 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
     @Deprecated(/* to be removed in x.27  - use net.openhft.chronicle.wire.channel.ChronicleChannelCfg.hostports instead */)
     private String hostname;
 
-
     @Deprecated(/* to be removed in x.27 - use net.openhft.chronicle.wire.channel.ChronicleChannelCfg.hostports instead */)
     private int port;
 

@@ -86,5 +86,4 @@ public class TestMarshallableZoneId {
         // Assert that the 'expected' and 'actual' objects are equal
         Assert.assertEquals(expected, actual);
     }
-
 }

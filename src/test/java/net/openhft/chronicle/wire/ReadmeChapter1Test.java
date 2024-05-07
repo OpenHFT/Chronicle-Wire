@@ -209,7 +209,6 @@ mydata: {
   timeUnit: NANOSECONDS,
   price: 10.5
 }
-
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ```
 To write in binary instead
@@ -271,7 +270,6 @@ mydata: !Data {
   timeUnit: NANOSECONDS,
   price: 10.5
 }
-
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ```
 To write in binary instead
@@ -414,13 +412,15 @@ mydata: [
     number: 98765,
     timeUnit: HOURS,
     price: 1.5
-},
+}
+,
   !Data {
     message: G'Day All,
     number: 1212121,
     timeUnit: MINUTES,
     price: 12.34
-},
+}
+,
   !Data {
     message: Howyall,
     number: 1234567890,
@@ -462,13 +462,15 @@ mydata: [
     number: 98765,
     timeUnit: HOURS,
     price: 1.5
-},
+}
+,
   !Data {
     message: G'Day All,
     number: 1212121,
     timeUnit: MINUTES,
     price: 12.34
-},
+}
+,
   !Data {
     message: Howyall,
     number: 1234567890,
@@ -519,7 +521,6 @@ prints
   timeUnit: NANOSECONDS,
   price: 10.5
 }
-
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ```
 To write in binary instead
@@ -553,7 +554,6 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
         bytes2.releaseLast();
     }
 }
-
 /*
 The code for the class Data
 ```java

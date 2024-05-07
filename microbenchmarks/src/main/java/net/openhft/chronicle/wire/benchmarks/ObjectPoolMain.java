@@ -50,7 +50,7 @@ public class ObjectPoolMain {
     private static BytesStore<?, Void> BytesStoreFrom(String s) {
         return BytesStore.nativeStoreFrom(s.getBytes(StandardCharsets.ISO_8859_1));
     }
-    
+
     public static void main(String... args) throws RunnerException, InvocationTargetException, IllegalAccessException {
         Affinity.setAffinity(2);
         if (Jvm.isDebug()) {
@@ -183,4 +183,3 @@ public class ObjectPoolMain {
         return newStringHiByte0(CHAR32);
     }
 }
-

@@ -43,11 +43,9 @@ enum DataFields implements WireKey {
         return ordinal();
     }
 }
-
 @Retention(RetentionPolicy.RUNTIME)
 @interface PrintAsText {
 }
-
 @State(Scope.Thread)
 public class Main {
     final Bytes<?> bytes = Bytes.allocateDirect(128).unchecked(true);
@@ -235,4 +233,3 @@ public class Main {
         return data2B;
     }
 }
-

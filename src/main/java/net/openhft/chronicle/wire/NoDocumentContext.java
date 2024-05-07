@@ -74,5 +74,4 @@ public enum NoDocumentContext implements DocumentContext {
     public void reset() {
         close();
     }
-
 }

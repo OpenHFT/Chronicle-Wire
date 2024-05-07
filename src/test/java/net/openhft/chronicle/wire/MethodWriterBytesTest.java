@@ -68,5 +68,4 @@ public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCo
     private void println(Bytes<?> bytes) {
         q.add(bytes);
     }
-
 }

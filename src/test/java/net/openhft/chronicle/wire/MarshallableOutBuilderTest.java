@@ -175,7 +175,6 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
         } finally {
             server.stop(1);
         }
-
     }
 
     // Interface representing a timed event.
@@ -281,4 +280,3 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
         }
     }
 }
-

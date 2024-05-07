@@ -51,6 +51,4 @@ public class MethodWriterClassNameGenerator {
     private String toFirstCapCase(@NotNull String name) {
         return Character.toUpperCase(name.charAt(0)) + name.substring(1).toLowerCase();
     }
-
 }
-

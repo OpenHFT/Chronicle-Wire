@@ -72,4 +72,3 @@ public class MicroDurationLongConverter implements LongConverter {
         bytes.append(duration(value).toString());
     }
 }
-

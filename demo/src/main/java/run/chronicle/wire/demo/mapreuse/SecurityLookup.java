@@ -53,5 +53,4 @@ public class SecurityLookup {
 
         System.out.println("security100 = " + security100);
     }
-
 }

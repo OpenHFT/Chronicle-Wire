@@ -63,7 +63,6 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
         testFieldNotObject0(true, null);
     }
 
-
     private void testFieldNotObject0(boolean generateTuples, String expected) {
         Wires.GENERATE_TUPLES = generateTuples;
         ClassAliasPool.CLASS_ALIASES.addAlias(UsesTwoFields.class);

@@ -35,7 +35,6 @@ import static org.junit.Assume.assumeFalse;
 interface NoOut {
     Closeable out();
 }
-
 @SuppressWarnings("deprecation")
 public class ChronicleServiceMainTest extends WireTestCommon {
 

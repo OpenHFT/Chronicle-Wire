@@ -1070,4 +1070,3 @@ public class BinaryWire2Test extends WireTestCommon {
         }
     }
 }
-
