@@ -572,7 +572,6 @@ public class GenerateMethodWriter {
             // In case of other exceptions, wrap the cause and rethrow
             throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + imports, e));
         }
-
     }
 
     /**
@@ -708,7 +707,7 @@ public class GenerateMethodWriter {
             final String name;
             if (parameterCount > 0) {
                 Type type = parameterTypes[parameterCount - 1];
-                if (type instanceof Class<?>&& ((Class<?>) type).isPrimitive())
+                if (type instanceof Class && ((Class<?>) type).isPrimitive())
                     Jvm.warn().on(getClass(), "Generated code to call updateInterceptor for " + dm + " will box and generate garbage");
                 name = parameters[parameterCount - 1].getName();
             } else
