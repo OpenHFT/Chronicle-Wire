@@ -77,6 +77,11 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
             }
 
             @Override
+            public void wrappedListCall(ListContainingDto ld) {
+                lastArgumentRef = ld;
+            }
+
+            @Override
             public void listCall(List<?> c) {
                 lastArgumentRef = c;
             }
@@ -217,6 +222,30 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
         assertSame(firstRef, lastArgumentRef);
     }
 
+    // Test to ascertain that a DTO object's list field gets recycled between calls.
+    @Test
+    public void testWrappedListRecycled() {
+        ListContainingDto first = new ListContainingDto();
+        first.list = new ArrayList<>(Arrays.asList(6, "f"));
+
+        ListContainingDto second = new ListContainingDto();
+        second.list = new ArrayList<>(Arrays.asList(-3, "s"));
+
+        // Make a call with the first ListContainingDto and read the response.
+        writer.wrappedListCall(first);
+        assertTrue(reader.readOne());
+        Object firstRef = lastArgumentRef;
+        assertEquals(first.list, ((ListContainingDto)lastArgumentRef).list);
+
+        // Make a call with the second ListContainingDto and read the response.
+        writer.wrappedListCall(second);
+        assertTrue(reader.readOne());
+        assertEquals(second.list, ((ListContainingDto)lastArgumentRef).list);
+
+        // Ensure the reference from the first call is the same as the second.
+        assertSame(firstRef, lastArgumentRef);
+    }
+
     // Test to ensure that a List argument gets recycled between calls.
     @Test
     public void testListRecycled() {
@@ -310,6 +339,8 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
         void dtoCall(RegularDTO d);
 
+        void wrappedListCall(ListContainingDto ld);
+
         void listCall(List<?> c);
 
         void mapCall(Map<?, ?> m);
@@ -331,5 +362,10 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
     public static class RegularDTO {
         String s;
         int i;
+    }
+
+    // Definition of a DTO with a list-containing field.
+    public static class ListContainingDto {
+        Object list;
     }
 }
