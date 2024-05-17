@@ -238,7 +238,7 @@ public class WireMarshaller<T> {
                 && !tClass.isEnum()
                 && !tClass.isArray()) {
             T t = ObjectUtils.newInstance(tClass);
-            IOTools.unmonitor(t);
+            Monitorable.unmonitor(t);
             return t;
         }
         if (DynamicEnum.class.isAssignableFrom(tClass)) {

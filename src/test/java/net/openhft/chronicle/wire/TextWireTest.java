@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.internal.NoBytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.Monitorable;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
@@ -2642,11 +2643,12 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // Class with fields of Bytes type initialized with various Byte buffers
-    static class ABCD extends SelfDescribingMarshallable {
+    static class ABCD extends SelfDescribingMarshallable implements Monitorable {
         Bytes<?> A = Bytes.allocateElasticDirect();
         Bytes<?> B = Bytes.allocateDirect(64);
         Bytes<?> C = Bytes.elasticByteBuffer();
         Bytes<?> D = Bytes.allocateElasticOnHeap(1);
+
 
         // Method to release all byte buffers
         void releaseAll() {
@@ -2654,6 +2656,14 @@ public class TextWireTest extends WireTestCommon {
             B.releaseLast();
             C.releaseLast();
             D.releaseLast();
+        }
+
+        @Override
+        public void unmonitor() {
+            Monitorable.unmonitor(A);
+            Monitorable.unmonitor(B);
+            Monitorable.unmonitor(C);
+            Monitorable.unmonitor(D);
         }
     }
 
