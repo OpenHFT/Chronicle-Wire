@@ -35,6 +35,7 @@ import static org.junit.Assert.*;
 
 public class RecordHistoryEchoHandlerTest extends WireTestCommon {
 
+    @SuppressWarnings("deprecation")
     private static void doTest(ChronicleContext context, ChannelHandler handler) {
         ChronicleChannel channel = context.newChannelSupplier(handler).connectionTimeoutSecs(1).get();
         assertTrue(channel.recordHistory());
