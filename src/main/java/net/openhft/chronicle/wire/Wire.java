@@ -28,7 +28,7 @@ import java.io.IOException;
  * Defines the standard interface for sequentially writing to and reading from a Bytes stream.
  * Implementations of this interface should ensure single-threaded access and avoid method chaining.
  *
- * <p>This interface combines the capabilities of both {@link WireIn} and {@link WireOut} interfaces.</p>
+ * <p>This interface combines the capabilities of both {@link WireIn} and {@link WireOut} interfaces.
  */
 @SingleThreaded
 @DontChain

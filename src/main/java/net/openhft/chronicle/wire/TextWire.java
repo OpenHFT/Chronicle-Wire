@@ -54,10 +54,10 @@ import static net.openhft.chronicle.wire.Wires.*;
  * of the YAML text format.
  *
  * <p>This class utilizes bit sets, thread locals, and regular expressions to efficiently handle
- * the YAML formatting nuances.</p>
+ * the YAML formatting nuances.
  *
  * <p><b>Important:</b> Some configurations and methods in this class are marked as deprecated
- * and are slated for removal in future versions, suggesting that its behavior might evolve in future releases.</p>
+ * and are slated for removal in future versions, suggesting that its behavior might evolve in future releases.
  */
 @SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
 public class TextWire extends YamlWireOut<TextWire> {

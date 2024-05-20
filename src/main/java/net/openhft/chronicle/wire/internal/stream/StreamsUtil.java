@@ -190,7 +190,7 @@ public final class StreamsUtil {
      * mechanisms to iterate over primitive elements, supporting parallel processing by splitting the source into smaller chunks.
      *
      * <p>The abstract class expects the implementation of the {@code split} method, which dictates the splitting mechanism
-     * for derived primitive spliterators.</p>
+     * for derived primitive spliterators.
      *
      * @param <T> The type of the elements returned by this spliterator.
      * @param <C> The type of consumer for the primitive type.

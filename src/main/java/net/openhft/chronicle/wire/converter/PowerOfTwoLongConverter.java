@@ -32,7 +32,7 @@ import java.util.Arrays;
  * for converting long values to and from strings using power-of-two bases.
  *
  * <p>This converter leverages certain mathematical properties of power-of-two bases
- * to optimize the conversion process.</p>
+ * to optimize the conversion process.
  */
 public class PowerOfTwoLongConverter implements LongConverter {
 

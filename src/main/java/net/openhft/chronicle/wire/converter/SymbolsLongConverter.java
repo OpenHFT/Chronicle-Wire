@@ -31,7 +31,7 @@ import java.util.Arrays;
  * those not necessarily in powers of two.
  *
  * <p>This converter efficiently manages conversion using provided symbols,
- * allowing flexible and adaptable encoding and decoding processes.</p>
+ * allowing flexible and adaptable encoding and decoding processes.
  */
 public class SymbolsLongConverter implements LongConverter {
 

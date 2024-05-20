@@ -316,7 +316,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     /**
      * Determines if a given string representation should be left unparsed based on certain criteria.
      *
-     * <p>For instance, it checks:</p>
+     * <p>For instance, it checks:
      * <ul>
      *     <li>If the string is null.</li>
      *     <li>If a block quote character is present.</li>

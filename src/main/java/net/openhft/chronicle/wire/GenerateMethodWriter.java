@@ -430,7 +430,7 @@ public class GenerateMethodWriter {
      * </ol>
      *
      * <p><b>Debugging:</b> If the static field `DUMP_CODE` is set to {@code true}, the generated Java code
-     * will be printed to the standard output. This can be useful for debugging purposes.</p>
+     * will be printed to the standard output. This can be useful for debugging purposes.
      *
      * @return The {@link Class} object representing the dynamically generated class.
      * @throws MethodWriterValidationException If there's an issue validating methods during the code generation.

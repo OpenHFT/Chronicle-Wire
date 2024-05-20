@@ -46,9 +46,9 @@ import static net.openhft.chronicle.wire.WireType.YAML;
  *
  * <p>The ChronicleContext provides methods to set important parameters such as the context's URL, whether
  * to use buffering and affinity, and the context's name (which can define the relative directory).
- * It also manages the lifecycle of closeable resources and provides the URL, buffering state, and the socket registry.</p>
+ * It also manages the lifecycle of closeable resources and provides the URL, buffering state, and the socket registry.
  *
- * <p>Example usage:</p>
+ * <p>Example usage:
  * <pre>
  * String url = "tcp://:0";
  * try (ChronicleContext context = ChronicleContext.newContext(url)
@@ -128,7 +128,7 @@ public class ChronicleContext extends SimpleCloseable {
      * <p>This method supports "internal:" and "tcp:" URL schemas in addition to the standard schemas.
      * If a URL starts with "internal:", a new Handler object is used as the URLStreamHandler.
      * If a URL starts with "tcp:", a new tcp.Handler object is used as the URLStreamHandler.
-     * For other URL schemas, no custom URLStreamHandler is used.</p>
+     * For other URL schemas, no custom URLStreamHandler is used.
      *
      * @param spec the string to parse as a URL.
      * @return the URL parsed from the string.
