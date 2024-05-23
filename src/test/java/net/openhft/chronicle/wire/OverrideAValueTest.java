@@ -65,7 +65,7 @@ public class OverrideAValueTest extends WireTestCommon {
     }
 
     // Static class NumberHolder, extending SelfDescribingMarshallable, to represent a holder for an Integer object
-    @SuppressWarnings({"removal", "deprecation"})
+    @SuppressWarnings({"deprecation", "removal"})
     static class NumberHolder extends SelfDescribingMarshallable {
         // Declaration and initialization of a static final Integer ONE
         @SuppressWarnings("UnnecessaryBoxing")
