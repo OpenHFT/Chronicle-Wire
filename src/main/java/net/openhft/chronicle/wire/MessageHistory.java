@@ -45,6 +45,20 @@ public interface MessageHistory extends Marshallable {
         VanillaMessageHistory.setThreadLocal(md);
     }
 
+    /**
+     * Clears the {@code MessageHistory} for the current thread.
+     */
+    static void clear() {
+        VanillaMessageHistory.setThreadLocal(null);
+    }
+
+    /**
+     * Sets an empty history the {@code MessageHistory} for the current thread.
+     */
+    static void emptyHistory() {
+        VanillaMessageHistory.setThreadLocal(new VanillaMessageHistory());
+    }
+
     @UsedViaReflection
     static void writeHistory(DocumentContext dc) {
         if (((WriteDocumentContext) dc).isEmpty()) { // only add to the start of a message. i.e. for chained calls.

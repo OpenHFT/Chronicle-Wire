@@ -104,6 +104,4 @@ public class MessageRoutingExample {
         } while (success);
 
     }
-
 }
-

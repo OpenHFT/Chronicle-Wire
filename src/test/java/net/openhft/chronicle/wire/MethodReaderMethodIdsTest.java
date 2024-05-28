@@ -33,6 +33,7 @@ public class MethodReaderMethodIdsTest extends WireTestCommon {
     /**
      * Test case to verify that method calls can be identified by Method IDs.
      */
+    @SuppressWarnings("deprecation")
     @Test
     public void shouldDetermineMethodNamesFromMethodIds() {
         final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());

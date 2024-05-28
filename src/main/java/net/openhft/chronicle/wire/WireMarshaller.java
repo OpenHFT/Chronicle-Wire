@@ -50,6 +50,7 @@ import static net.openhft.chronicle.core.UnsafeMemory.*;
  *
  * @param <T> The type of the object to be marshalled/unmarshalled.
  */
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public class WireMarshaller<T> {
     private static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
     private static final FieldAccess[] NO_FIELDS = {};
@@ -210,7 +211,7 @@ public class WireMarshaller<T> {
      * @param clazz The class type from which fields are to be extracted.
      * @param map   The map to populate with field names and their corresponding Field objects.
      */
-    public static void getAllField(@NotNull Class clazz, @NotNull Map<String, Field> map) {
+    public static void getAllField(@NotNull Class<?> clazz, @NotNull Map<String, Field> map) {
         if (clazz != Object.class && clazz != AbstractCommonMarshallable.class)
             getAllField(clazz.getSuperclass(), map);
         for (@NotNull Field field : clazz.getDeclaredFields()) {
@@ -282,7 +283,7 @@ public class WireMarshaller<T> {
      * @param field The field whose type arguments need to be determined.
      * @return An array of actual type arguments or the interface's type parameters if no actual arguments can be deduced.
      */
-    private static Type[] computeActualTypeArguments(Class iface, Field field) {
+    private static Type[] computeActualTypeArguments(Class<?> iface, Field field) {
         Type[] actual = consumeActualTypeArguments(new HashMap<>(), iface, field.getGenericType());
 
         if (actual == null)
@@ -306,8 +307,8 @@ public class WireMarshaller<T> {
      * @return An array of actual type arguments used by the provided type for the specified interface,
      *         or null if the type doesn't directly or indirectly implement or extend the given interface.
      */
-    private static Type[] consumeActualTypeArguments(Map<String, Type> prevTypeParameters, Class iface, Type type) {
-        Class cls = null;
+    private static Type[] consumeActualTypeArguments(Map<String, Type> prevTypeParameters, Class<?> iface, Type type) {
+        Class<?> cls = null;
         Map<String, Type> typeParameters = new HashMap<>();
 
         // If the type is a ParameterizedType, retrieve its actual type arguments and
@@ -380,11 +381,11 @@ public class WireMarshaller<T> {
      * with the remaining fields.
      *
      * @param fieldNames Names of the fields to be excluded.
-     * @return A new instance of the  with the specified fields excluded.
+     * @return A new instance of the {@link WireMarshaller} with the specified fields excluded.
      */
     public WireMarshaller<T> excludeFields(String... fieldNames) {
         Set<String> fieldSet = new HashSet<>(Arrays.asList(fieldNames));
-        return new WireMarshaller(Stream.of(fields)
+        return new WireMarshaller<>(Stream.of(fields)
                 .filter(f -> !fieldSet.contains(f.field.getName()))
                 .toArray(FieldAccess[]::new),
                 isLeaf, defaultValue);
@@ -401,7 +402,7 @@ public class WireMarshaller<T> {
      */
     public void writeMarshallable(T t, @NotNull WireOut out) throws InvalidMarshallableException {
         ValidatableUtil.validate(t);
-        HexDumpBytesDescription bytes = out.bytesComment();
+        HexDumpBytesDescription<?> bytes = out.bytesComment();
         bytes.adjustHexDumpIndentation(+1);
         try {
             for (@NotNull FieldAccess field : fields)
@@ -431,15 +432,6 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * @see #writeMarshallable(Object, WireOut, boolean)
-     * @deprecated To be removed in x.26
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    public void writeMarshallable(T t, @NotNull WireOut out, T ignored, boolean copy) throws InvalidMarshallableException {
-        writeMarshallable(t, out, copy);
-    }
-
-    /**
      * Writes the values of the fields from the provided object (DTO) to the output. Before writing,
      * the object is validated. The method also supports optional copying of the values
      * from the source object to a previous instance.
@@ -463,15 +455,6 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * @see #readMarshallable(Object, WireIn, boolean)
-     * @deprecated To be removed in x.26
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    public void readMarshallable(T t, @NotNull WireIn in, T ignored, boolean overwrite) throws InvalidMarshallableException {
-        readMarshallable(t, in, overwrite);
-    }
-
-    /**
      * Reads and populates the DTO based on the provided input. The input order can be hinted.
      * After reading, the object is validated.
      *
@@ -492,15 +475,6 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * @see #readMarshallableDTOOrder(Object, WireIn, boolean)
-     * @deprecated To be removed in x.26
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    public void readMarshallableDTOOrder(T t, @NotNull WireIn in, T ignored, boolean overwrite) throws InvalidMarshallableException {
-        readMarshallableDTOOrder(t, in, overwrite);
-    }
-
-    /**
      * Reads and populates the DTO based on the provided order.
      *
      * @param t         Target object to populate with read values.
@@ -518,15 +492,6 @@ public class WireMarshaller<T> {
         } catch (IllegalAccessException e) {
             throw new AssertionError(e);
         }
-    }
-
-    /**
-     * @see #readMarshallableInputOrder(Object, WireIn, boolean)
-     * @deprecated To be removed in x.26
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    public void readMarshallableInputOrder(T t, @NotNull WireIn in, T ignored, boolean overwrite) throws InvalidMarshallableException {
-        readMarshallableDTOOrder(t, in, overwrite);
     }
 
     /**
@@ -781,7 +746,7 @@ public class WireMarshaller<T> {
          * @param clazz The class which presumably has a LongConverter.
          * @return The LongConverter instance.
          */
-        static LongConverter getInstance(Class clazz) {
+        static LongConverter getInstance(Class<?> clazz) {
             try {
                 Field converterField = clazz.getDeclaredField("INSTANCE");
                 return (LongConverter) converterField.get(null);
@@ -983,14 +948,14 @@ public class WireMarshaller<T> {
                     return new ArrayFieldAccess(field);
                 }
                 if (EnumSet.class.isAssignableFrom(type)) {
-                    final Class componentType = extractClass(computeActualTypeArguments(EnumSet.class, field)[0]);
+                    final Class<?> componentType = extractClass(computeActualTypeArguments(EnumSet.class, field)[0]);
                     if (componentType == Object.class || Modifier.isAbstract(componentType.getModifiers()))
                         throw new RuntimeException("Could not get enum constant directory");
 
                     boolean isLeaf = !Throwable.class.isAssignableFrom(componentType)
                             && WIRE_MARSHALLER_CL.get(componentType).isLeaf;
                     try {
-                        Object[] values = (Object[]) Jvm.getMethod(componentType, "values").invoke(componentType, null);
+                        Object[] values = (Object[]) Jvm.getMethod(componentType, "values").invoke(componentType);
                         return new EnumSetFieldAccess(field, isLeaf, values, componentType);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         throw Jvm.rethrow(e);
@@ -1074,7 +1039,7 @@ public class WireMarshaller<T> {
          * <p>
          * This method checks if the provided field has a LongConversion annotation. If present,
          * it retrieves the corresponding LongConverter using the LongConverterFieldAccess helper class.
-         *
+                 *
          * @param field The field for which the LongConverter needs to be obtained
          * @return The associated LongConverter instance, or null if not present
          */
@@ -1092,12 +1057,12 @@ public class WireMarshaller<T> {
          * <p>
          * This method aims to handle various Type representations, like Class or ParameterizedType,
          * and return the underlying Class representation.
-         *
+                 *
          * @param type0 The type from which the class should be extracted
          * @return The extracted Class representation
          */
         @NotNull
-        static Class extractClass(Type type0) {
+        static Class<?> extractClass(Type type0) {
             if (type0 instanceof Class)
                 return (Class) type0;
             else if (type0 instanceof ParameterizedType)
@@ -1121,7 +1086,7 @@ public class WireMarshaller<T> {
          * This method serializes the value of the specified object's field and writes it to
          * the WireOut. If the field has a Comment annotation, a special processing is done
          * using the CommentAnnotationNotifier.
-         *
+                 *
          * @param o    The object containing the field to be written
          * @param out  The WireOut instance to write the field value to
          * @throws IllegalAccessException If the field cannot be accessed
@@ -1146,7 +1111,7 @@ public class WireMarshaller<T> {
          * <p>
          * If the field has a Comment annotation, its value is formatted using the field's value and appended as a comment.
          * The CommentAnnotationNotifier is used to indicate that the written value is preceded by a comment.
-         *
+                 *
          * @param o         The object containing the field whose value needs to be retrieved
          * @param out       The WireOut instance to which the value and the comment are written
          * @param valueOut  The ValueOut instance representing the field's value
@@ -1392,7 +1357,7 @@ public class WireMarshaller<T> {
      * taking into account special cases where the field may be marshaled differently based on annotations.
      */
     static class ObjectFieldAccess extends FieldAccess {
-        private final Class type; // Type of the object field
+        private final Class<?> type; // Type of the object field
         private final AsMarshallable asMarshallable; // Annotation indicating if the field should be treated as marshallable
 
         /**
@@ -1511,7 +1476,6 @@ public class WireMarshaller<T> {
         public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             bytes.writeUtf8(unsafeGetObject(o, offset));
         }
-
     }
 
     /**
@@ -1684,12 +1648,8 @@ public class WireMarshaller<T> {
      * use the provided methods of the superclass for actual field manipulation.
      */
     static class ArrayFieldAccess extends FieldAccess {
-
-        // The type of components stored in the array
-        private final Class componentType;
-
-        // The object equivalent type of the componentType
-        private final Class objectType;
+        private final Class<?> componentType;
+        private final Class<?> objectType;
 
         ArrayFieldAccess(@NotNull Field field) {
             super(field);
@@ -1839,7 +1799,7 @@ public class WireMarshaller<T> {
         private final BiConsumer<Object, ValueOut> sequenceGetter;
 
         // The type of the enum component
-        private final Class componentType;
+        private final Class<?>componentType;
 
         // A supplier for creating an empty EnumSet of the component type
         private final Supplier<EnumSet> enumSetSupplier;
@@ -1855,11 +1815,11 @@ public class WireMarshaller<T> {
          * @param values An array of possible enum values.
          * @param componentType The type of enum component within the EnumSet.
          */
-        EnumSetFieldAccess(@NotNull final Field field, final Boolean isLeaf, final Object[] values, final Class componentType) {
+        EnumSetFieldAccess(@NotNull final Field field, final Boolean isLeaf, final Object[] values, final Class<?> componentType) {
             super(field, isLeaf);
             this.values = values;
             this.componentType = componentType;
-            this.enumSetSupplier = () -> EnumSet.noneOf(this.componentType);
+            this.enumSetSupplier = () -> EnumSet.noneOf((Class) this.componentType);
             this.sequenceGetter = (o, out) -> sequenceGetter(o,
                     out, this.values, this.field, this.componentType);
             this.addAll = this::addAll;
@@ -1881,7 +1841,7 @@ public class WireMarshaller<T> {
                                            ValueOut out,
                                            Object[] values,
                                            Field field,
-                                           Class componentType)
+                                           Class<?>componentType)
                 throws InvalidMarshallableException {
             final EnumSet coll;
             try {
@@ -1969,7 +1929,7 @@ public class WireMarshaller<T> {
             if (!c.isEmpty())
                 c.clear();
             while (in2.hasNextSequenceItem()) {
-                c.add(in2.asEnum(componentType));
+                c.add(in2.asEnum((Class) componentType));
             }
         }
     }
@@ -1988,9 +1948,7 @@ public class WireMarshaller<T> {
         final Supplier<Collection> collectionSupplier;
 
         // The component type of the Collection
-        private final Class componentType;
-
-        // The type of the Collection itself
+        private final Class<?>componentType;
         private final Class<?> type;
         private final BiConsumer<Object, ValueOut> sequenceGetter;
 
@@ -2004,7 +1962,7 @@ public class WireMarshaller<T> {
          * @param componentType The type of the elements in the collection.
          * @param type The type of the collection itself.
          */
-        public CollectionFieldAccess(@NotNull Field field, Boolean isLeaf, @Nullable Supplier<Collection> collectionSupplier, Class componentType, Class<?> type) {
+        public CollectionFieldAccess(@NotNull Field field, Boolean isLeaf, @Nullable Supplier<Collection> collectionSupplier, Class<?>componentType, Class<?>type) {
             super(field, isLeaf);
             this.collectionSupplier = collectionSupplier == null ? newInstance() : collectionSupplier;
             this.componentType = componentType;
@@ -2048,7 +2006,7 @@ public class WireMarshaller<T> {
         @NotNull
         static FieldAccess of(@NotNull Field field) {
             @Nullable final Supplier<Collection> collectionSupplier;
-            @NotNull final Class componentType;
+            @NotNull final Class<?> componentType;
             final Class<?> type;
             @Nullable Boolean isLeaf = null;
             type = field.getType();
@@ -2290,11 +2248,9 @@ public class WireMarshaller<T> {
 
         // The type of the keys within the map
         @NotNull
-        private final Class keyType;
-
-        // The type of the values within the map
+        private final Class<?> keyType;
         @NotNull
-        private final Class valueType;
+        private final Class<?> valueType;
 
         /**
          * Constructs an instance of MapFieldAccess for the specified field.
@@ -3051,5 +3007,4 @@ public class WireMarshaller<T> {
             unsafePutDouble(to, offset, unsafeGetDouble(from, offset));
         }
     }
-
 }

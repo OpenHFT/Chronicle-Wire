@@ -125,14 +125,12 @@ public class WireResetTest extends WireTestCommon {
         public boolean isClosed() {
             return isClosed;
         }
-
     }
 
     public static class EventAbstractCloseable extends AbstractCloseable implements Marshallable {
         @Override
         protected void performClose() {
         }
-
     }
 
     static class Identifier extends SelfDescribingMarshallable {

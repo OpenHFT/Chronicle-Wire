@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.AppendableUtil;
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.core.Jvm;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -44,12 +43,10 @@ import java.util.concurrent.TimeUnit;
  * <p>
  * Parsing of ISO dates, with or without timestamps, is supported. If an ISO date is read with no
  * timezone, it is assumed to be in the converter's zone.
- * <p>
- * As of x.26, the property `timestampLongConverters.includeZoneSuffixWhenZoneIsUTC` will be deprecated
- * and UTC dates will always be written with a 'Z' suffix.
  *
  * @see LongConverter for the interface this abstract class implements.
  */
+@SuppressWarnings("this-escape")
 public abstract class AbstractTimestampLongConverter implements LongConverter {
     /**
      * Universal Time Coordinated (UTC) timezone
@@ -60,11 +57,6 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
      * System property to specify the ZoneId for timestamp conversion.
      */
     public static final String TIMESTAMP_LONG_CONVERTERS_ZONE_ID_SYSTEM_PROPERTY = "timestampLongConverters.zoneId";
-
-    /**
-     * System property to specify whether to include the 'Z' suffix for UTC zone timestamps. To be deprecated in x.26 version.
-     */
-    public static final String INCLUDE_ZONE_SUFFIX_WHEN_ZONE_IS_UTC_SYSTEM_PROPERTY = "timestampLongConverters.includeZoneSuffixWhenZoneIsUTC";
 
     /**
      * The specific timezone used by this converter.
@@ -108,27 +100,13 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
 
     /**
      * Constructs a new {@code AbstractTimestampLongConverter} with the specified zone ID and time unit.
-     * The flag for including zone suffix for UTC is fetched from the system property.
      *
      * @param zoneId   the zone ID to be used for the conversion of long values
      * @param timeUnit the time unit for the conversion of long values
      */
     protected AbstractTimestampLongConverter(String zoneId, TimeUnit timeUnit) {
-        this(zoneId, timeUnit, Jvm.getBoolean(INCLUDE_ZONE_SUFFIX_WHEN_ZONE_IS_UTC_SYSTEM_PROPERTY));
-    }
-
-    /**
-     * Constructs a new {@code AbstractTimestampLongConverter} with the specified zone ID, time unit and flag for including zone suffix for UTC.
-     * This constructor is set to be deprecated in x.26 version.
-     *
-     * @param zoneId                  the zone ID to be used for the conversion of long values
-     * @param timeUnit                the time unit for the conversion of long values
-     * @param includeZoneSuffixForUTC the flag to indicate if 'Z' suffix should be included for UTC zone timestamps
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    protected AbstractTimestampLongConverter(String zoneId, TimeUnit timeUnit, boolean includeZoneSuffixForUTC) {
         this.zoneId = ZoneId.of(zoneId);
-        this.writingUtcDatesWithNoSuffix = this.zoneId.equals(UTC) && !includeZoneSuffixForUTC;
+        this.writingUtcDatesWithNoSuffix = this.zoneId.equals(UTC);
         this.amountPerSecond = timeUnit.convert(1, TimeUnit.SECONDS);
         this.nanosPerAmount = TimeUnit.NANOSECONDS.convert(1, timeUnit);
         this.formatterForParsing = createFormatter();

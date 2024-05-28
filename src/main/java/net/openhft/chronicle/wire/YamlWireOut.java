@@ -54,23 +54,22 @@ import static net.openhft.chronicle.bytes.BytesStore.empty;
  *
  * @param <T> The type that extends YamlWireOut
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "this-escape", "deprecation"})
 public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire {
-
-    // Default values and static configurations for the YAML writer
+    @Deprecated(/* to remove in x.28 */)
     private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
-    public static final BytesStore TYPE = BytesStore.from("!type ");
+    public static final BytesStore<?, ?> TYPE = BytesStore.from("!type ");
     static final String NULL = "!null \"\"";
     static final BitSet STARTS_QUOTE_CHARS = new BitSet();
     static final BitSet QUOTE_CHARS = new BitSet();
-    static final BytesStore COMMA_SPACE = BytesStore.from(", ");
-    static final BytesStore COMMA_NEW_LINE = BytesStore.from(",\n");
-    static final BytesStore NEW_LINE = BytesStore.from("\n");
-    static final BytesStore EMPTY_AFTER_COMMENT = BytesStore.wrap(new byte[0]); // not the same as EMPTY, so we can check this value.
-    static final BytesStore EMPTY = BytesStore.from("");
-    static final BytesStore SPACE = BytesStore.from(" ");
-    static final BytesStore END_FIELD = NEW_LINE;
+    static final BytesStore<?, ?> COMMA_SPACE = BytesStore.from(", ");
+    static final BytesStore<?, ?> COMMA_NEW_LINE = BytesStore.from(",\n");
+    static final BytesStore<?, ?> NEW_LINE = BytesStore.from("\n");
+    static final BytesStore<?, ?> EMPTY_AFTER_COMMENT = BytesStore.wrap(new byte[0]); // not the same as EMPTY, so we can check this value.
+    static final BytesStore<?, ?> EMPTY = BytesStore.from("");
+    static final BytesStore<?, ?> SPACE = BytesStore.from(" ");
+    static final BytesStore<?, ?> END_FIELD = NEW_LINE;
     static final char[] HEXADECIMAL = "0123456789ABCDEF".toCharArray();
 
     // Static initializer block to configure quote characters for the YAML writer
@@ -97,8 +96,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
      */
     protected YamlWireOut(@NotNull Bytes bytes, boolean use8bit) {
         super(bytes, use8bit);
-        bytes.decimaliser(GeneralDecimaliser.GENERAL)
-                .fpAppend0(APPEND_0);
+        bytes.decimaliser(GeneralDecimaliser.GENERAL);
     }
 
     /**
@@ -169,7 +167,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     @Override
-    public ValueOut writeEvent(Class expectedType, Object eventKey) throws InvalidMarshallableException {
+    public ValueOut writeEvent(Class<?> expectedType, Object eventKey) throws InvalidMarshallableException {
         if (eventKey instanceof WireKey)
             return writeEventName((WireKey) eventKey);
         if (eventKey instanceof CharSequence)
@@ -520,7 +518,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         // The current separator being used.
         @NotNull
-        protected BytesStore sep = BytesStore.empty();
+        protected BytesStore<?, ?> sep = BytesStore.empty();
 
         // Flag indicating if the value is a leaf node (i.e., doesn't have child elements).
         protected boolean leaf = false;
@@ -667,7 +665,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         @NotNull
         @Override
-        public T bytes(@Nullable BytesStore fromBytes) {
+        public T bytes(@Nullable BytesStore<?, ?> fromBytes) {
             if (dropDefault) {
                 if (fromBytes == null)
                     return wireOut();
@@ -680,7 +678,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             @NotNull byte[] byteArray = new byte[length];
             fromBytes.copyTo(byteArray);
 
-            return (T) bytes(byteArray);
+            return bytes(byteArray);
         }
 
         @NotNull
@@ -714,7 +712,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
          * @param fromBytes The BytesStore object to inspect.
          * @return True if the content is textual, otherwise false.
          */
-        private boolean isText(@Nullable BytesStore fromBytes) {
+        private boolean isText(@Nullable BytesStore<?, ?> fromBytes) {
 
             if (fromBytes == null)
                 return true;
@@ -738,7 +736,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             if (dropDefault) {
                 writeSavedEventName();
             }
-            return (T) bytes("!binary", byteArray);
+            return bytes("!binary", byteArray);
         }
 
         @NotNull
@@ -762,7 +760,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         @NotNull
         @Override
-        public T bytes(@NotNull String type, @Nullable BytesStore bytesStore) {
+        public T bytes(@NotNull String type, @Nullable BytesStore<?, ?> bytesStore) {
             if (dropDefault) {
                 writeSavedEventName();
             }
@@ -1155,7 +1153,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         @NotNull
         @Override
-        public ValueOut optionalTyped(Class aClass) {
+        public ValueOut optionalTyped(Class<?> aClass) {
             return typePrefix(aClass);
         }
 
@@ -1175,7 +1173,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         @NotNull
         @Override
-        public T typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, Class type) {
+        public T typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, Class<?> type) {
             if (dropDefault) {
                 if (type == null)
                     return wireOut();
@@ -1448,7 +1446,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 newLine();
 
             object.writeMarshallable(wireOut());
-            @Nullable BytesStore popSep = null;
+            @Nullable BytesStore<?, ?> popSep = null;
             if (wasLeaf) {
                 if (sep.endsWith(' '))
                     append(" ");
@@ -1502,7 +1500,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 newLine();
 
             writeSerializable(object);
-            @Nullable BytesStore popSep = null;
+            @Nullable BytesStore<?, ?> popSep = null;
             if (wasLeaf) {
                 leaf = false;
             } else if (seps.size() > 0) {
@@ -1658,7 +1656,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
          * @throws InvalidMarshallableException If the object cannot be serialized.
          */
         @NotNull
-        public YamlValueOut write(Class expectedType, @NotNull Object objectKey) throws InvalidMarshallableException {
+        public YamlValueOut write(Class<?> expectedType, @NotNull Object objectKey) throws InvalidMarshallableException {
             if (dropDefault) {
                 if (expectedType != String.class)
                     throw new UnsupportedOperationException("todo");

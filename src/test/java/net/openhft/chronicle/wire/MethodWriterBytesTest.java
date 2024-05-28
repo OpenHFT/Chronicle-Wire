@@ -30,15 +30,16 @@ import java.util.concurrent.TimeUnit;
  * This class tests the behavior of MethodWriter when handling Bytes as input.
  * It extends the WireTestCommon from the `net.openhft.chronicle.wire` package for common test setup and utilities.
  */
+@SuppressWarnings("rawtypes")
 public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCommon {
     // A blocking queue to hold Bytes instances, used for synchronization between writer and reader.
-    private ArrayBlockingQueue<Bytes> q = new ArrayBlockingQueue(1);
+    private ArrayBlockingQueue<Bytes> q = new ArrayBlockingQueue<>(1);
 
     /**
      * An interface defining a single method that accepts a Bytes message.
      */
     interface Print {
-        void msg(Bytes message);
+        void msg(Bytes<?> message);
     }
 
     /**
@@ -64,8 +65,7 @@ public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCo
     /**
      * A helper method to add Bytes messages to the blocking queue.
      */
-    private void println(Bytes bytes) {
+    private void println(Bytes<?> bytes) {
         q.add(bytes);
     }
-
 }

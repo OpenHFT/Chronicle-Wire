@@ -28,15 +28,6 @@ import org.junit.Test;
 import static net.openhft.chronicle.wire.Wires.acquireStringBuilderScoped;
 import static org.junit.Assert.assertEquals;
 
-// Enum representing currency pairs and an interner utility for its values
-enum CcyPair {
-    EURUSD, GBPUSD, EURCHF;
-
-    // Static utility to intern the currency pair values
-    static final EnumInterner<CcyPair> INTERNER = new EnumInterner<>(CcyPair.class);
-}
-
-@SuppressWarnings("rawtypes")
 public class CSVBytesMarshallableTest extends WireTestCommon {
 
     // Bytes representing raw data for the tests
@@ -181,7 +172,6 @@ class FXPrice implements BytesMarshallable {
         }
     }
 }
-
 /**
  * Class representing a foreign exchange price.
  * Implements the Marshallable interface to support reading and writing of its values using the Wire format.

@@ -59,8 +59,7 @@ import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
 
-// The test suite focuses on validating various behaviors of the TextWire class.
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "try", "serial", "deprecation"})
 public class TextWireTest extends WireTestCommon {
 
     // Create a new TextWire instance with an elastic heap allocated buffer
@@ -2600,7 +2599,7 @@ public class TextWireTest extends WireTestCommon {
     // Static class representing a Data Transfer Object (DTO)
     // with a 'Class' type field
     static class DTO extends SelfDescribingMarshallable {
-        Class type;
+        Class<?> type;
     }
 
     // Static class holding a Map with RetentionPolicy keys and Double values
@@ -2789,7 +2788,7 @@ public class TextWireTest extends WireTestCommon {
 
     // Class holding byte storage and a long, with custom serialization logic.
     static class DtoWithBytesField extends SelfDescribingMarshallable {
-        BytesStore bytes;
+        BytesStore<?, ?> bytes;
         long another;
 
         // Implement custom deserialization logic for this object.

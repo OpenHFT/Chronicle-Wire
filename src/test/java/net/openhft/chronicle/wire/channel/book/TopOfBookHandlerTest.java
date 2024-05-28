@@ -19,9 +19,6 @@
 package net.openhft.chronicle.wire.channel.book;
 
 import net.openhft.chronicle.wire.WireTestCommon;
-import net.openhft.chronicle.wire.utils.YamlAgitator;
-import net.openhft.chronicle.wire.utils.YamlTester;
-import net.openhft.chronicle.wire.utils.YamlTesterParametersBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -30,28 +27,28 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SuppressWarnings("deprecated")
+@SuppressWarnings("deprecation")
 @RunWith(Parameterized.class)
 public class TopOfBookHandlerTest extends WireTestCommon {
     static final String paths = "" +
             "echo-tob";
 
     final String name;
-    final YamlTester tester;
+    final net.openhft.chronicle.wire.utils.YamlTester tester;
 
-    public TopOfBookHandlerTest(String name, YamlTester tester) {
+    public TopOfBookHandlerTest(String name, net.openhft.chronicle.wire.utils.YamlTester tester) {
         this.name = name;
         this.tester = tester;
     }
 
     @Parameterized.Parameters(name = "{0}")
     public static List<Object[]> parameters() {
-        return new YamlTesterParametersBuilder<>(out -> new EchoTopOfBookHandler().out(out), TopOfBookListener.class, paths)
+        return new net.openhft.chronicle.wire.utils.YamlTesterParametersBuilder<>(out -> new EchoTopOfBookHandler().out(out), TopOfBookListener.class, paths)
                 .agitators(
-                        YamlAgitator.messageMissing(),
-                        YamlAgitator.duplicateMessage(),
-                        YamlAgitator.overrideFields("ecn: RFX"),
-                        YamlAgitator.missingFields("bidPrice"))
+                        net.openhft.chronicle.wire.utils.YamlAgitator.messageMissing(),
+                        net.openhft.chronicle.wire.utils.YamlAgitator.duplicateMessage(),
+                        net.openhft.chronicle.wire.utils.YamlAgitator.overrideFields("ecn: RFX"),
+                        net.openhft.chronicle.wire.utils.YamlAgitator.missingFields("bidPrice"))
                 .get();
     }
 

@@ -104,7 +104,6 @@ final class SerializableObjectTest extends WireTestCommon {
         } catch (ClassNotFoundException ignore) {
             // This exception means the class isn't present, so we can safely ignore it.
         }
-
     }
 
     // Predicate to check if a constructor is the default one.
@@ -140,7 +139,7 @@ final class SerializableObjectTest extends WireTestCommon {
                 // java.lang
                 true,
                 (byte) 1,
-                (char) '2',
+                '2',
                 (short) 3,
                 4,
                 5L,
@@ -199,17 +198,6 @@ final class SerializableObjectTest extends WireTestCommon {
         ).filter(SerializableObjectTest::isSerializableEqualsByObject);  // Retain only those objects that are serializable and equivalent when reconstituted.
     }
 
-    // A utility method to safely create an object using a supplier that might throw an exception.
-    private static Object create(ThrowingSupplier s) {
-        try {
-            return s.get();
-        } catch (Exception e) {
-            // Convert any caught exception into an assertion error.
-            throw new AssertionError(e);
-        }
-    }
-
-    // Generates a stream of objects created through reflection.
     private static Stream<Object> reflectedObjects() {
         try (ScanResult scanResult = new ClassGraph().enableSystemJarsAndModules().enableAllInfo().scan()) {
             // Use ClassGraph to scan for all classes implementing Serializable.
@@ -264,10 +252,10 @@ final class SerializableObjectTest extends WireTestCommon {
      * @param o An optional instance of the class to check. If null, a new instance will be created.
      * @return true if the class is serializable and deserializable, and the original and deserialized objects are equal; false otherwise.
      */
-    private static boolean isSerializableEquals(Class aClass, Object o) {
+    private static boolean isSerializableEquals(Class<?> aClass, Object o) {
         try {
             // Create an instance if not provided
-            Object source = o == null ? aClass.newInstance() : o;
+            Object source = o == null ? aClass.getConstructor().newInstance() : o;
             // Sanity check to ensure non-null toString representation
             if (source.toString() == null)
                 return false;
@@ -334,11 +322,9 @@ final class SerializableObjectTest extends WireTestCommon {
     @SafeVarargs
     private static <T> T compose(final T original,
                                  final Consumer<T>... operations) {
-        return Stream.of(operations)
-                .reduce(original, (t, oper) -> {
-                    oper.accept(t);
-                    return t;
-                }, (a, b) -> a);
+        for (Consumer<T> operation : operations)
+            operation.accept(original);
+        return original;
     }
 
     // Return a Stream of WireType enumerations for testing
@@ -360,7 +346,7 @@ final class SerializableObjectTest extends WireTestCommon {
         }
     }
 
-    // TestFactory to perform dynamic tests on different wire types and objects
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/482")
     @TestFactory
     Stream<DynamicTest> test() {
@@ -422,5 +408,4 @@ final class SerializableObjectTest extends WireTestCommon {
             }
         }
     }
-
 }

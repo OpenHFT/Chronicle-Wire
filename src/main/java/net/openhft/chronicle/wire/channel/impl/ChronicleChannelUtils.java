@@ -20,6 +20,7 @@ import java.util.function.Consumer;
  * The class provides utility methods related to operations and handling of the {@link ChronicleChannel}.
  * Designed as a purely static utility class, it should not be instantiated.
  */
+@SuppressWarnings("deprecation")
 public final class ChronicleChannelUtils {
 
     // Private constructor to prevent instantiation
@@ -57,8 +58,7 @@ public final class ChronicleChannelUtils {
             for (String location : rh.locations()) {
                 try {
                     URL url = ChronicleContext.urlFor(location);
-                    channelCfg.hostname(url.getHost());
-                    channelCfg.port(url.getPort());
+                    channelCfg.addHostnamePort(url.getHost(), url.getPort());
                     return newChannel(socketRegistry, channelCfg, headerOut,null);
 
                 } catch (IORuntimeException e) {
@@ -75,7 +75,7 @@ public final class ChronicleChannelUtils {
     }
 
     @Deprecated(/* To be removed in x.27 */)
-    public static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg channelCfg, ChannelHeader headerOut) throws InvalidMarshallableException {
+    public static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg<?> channelCfg, ChannelHeader headerOut) throws InvalidMarshallableException {
         return newChannel(socketRegistry, channelCfg, headerOut, null);
     }
 

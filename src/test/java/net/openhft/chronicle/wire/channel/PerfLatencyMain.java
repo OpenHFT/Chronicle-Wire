@@ -102,6 +102,7 @@ worst:        6463.49       783.36       736.26       592.90       199.94       
 /**
  * Main class to measure performance latency using JLBH (Java Latency Benchmark Harness).
  */
+@SuppressWarnings("deprecation")
 public class PerfLatencyMain implements JLBHTask {
 
     // Constants to configure the performance test
@@ -158,7 +159,6 @@ public class PerfLatencyMain implements JLBHTask {
         // Start the JLBH benchmark
         new JLBH(lth).start();
     }
-
 
     @Override
     public void init(JLBH jlbh) {
@@ -218,6 +218,7 @@ public class PerfLatencyMain implements JLBHTask {
         private ChronicleChannel channel;
 
         // Client constructor sets up the echoing, reader, and starts the reader thread
+        @SuppressWarnings({"unused", "try"})
         public Client() {
             // Initialize the channel and echoing method writer
             channel = context.newChannelSupplier(echoHandler).buffered(BUFFERED && BATCH > 1).get();

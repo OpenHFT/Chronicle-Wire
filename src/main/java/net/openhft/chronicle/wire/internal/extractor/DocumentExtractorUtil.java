@@ -94,7 +94,6 @@ public final class DocumentExtractorUtil {
 
     }
 
-
     /**
      * Extracts the method name and its message type from a provided method reference of a specified type.
      * The extraction process leverages Java's Proxy mechanism to determine which method gets invoked
@@ -111,9 +110,8 @@ public final class DocumentExtractorUtil {
                                          @NotNull final BiConsumer<? super I, ? super M> methodReference) {
 
         final AtomicReference<MethodNameAndMessageType<M>> method = new AtomicReference<>();
-
-        // Create a dynamic proxy instance for the provided type to capture method invocations.
-        @SuppressWarnings("unchecked") final I proxy = (I) Proxy.newProxyInstance(type.getClassLoader(), new Class[]{type}, (p, m, args) -> {
+        Class<?>[] interfaces = {type};
+        @SuppressWarnings("unchecked") final I proxy = (I) Proxy.newProxyInstance(type.getClassLoader(), interfaces, (p, m, args) -> {
             if (args == null || args.length != 1) {
                 throw new IllegalArgumentException("The provided method reference does not take exactly one parameter");
             }
@@ -170,5 +168,4 @@ public final class DocumentExtractorUtil {
             return messageType;
         }
     }
-
 }

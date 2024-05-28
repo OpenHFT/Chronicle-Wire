@@ -152,5 +152,4 @@ public class CollectorTest extends WireTestCommon {
 
         void greeting(String greeting);
     }
-
 }

@@ -55,7 +55,7 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
      * @param clazz The class to be checked.
      * @return {@code true} if the class is a serializable lambda, {@code false} otherwise.
      */
-    public static boolean isSerializableLambda(@NotNull Class clazz) {
+    public static boolean isSerializableLambda(@NotNull Class<?> clazz) {
         return Serializable.class.isAssignableFrom(clazz) && Jvm.isLambdaClass(clazz);
     }
 

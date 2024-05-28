@@ -52,6 +52,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
  * The core capability of this class is to handle JSON data structures as {@code Bytes}
  * objects, allowing for efficient manipulation and parsing.
  */
+@SuppressWarnings("this-escape")
 public class JSONWire extends TextWire {
 
     // Represents the bytes for "ull" which might be used for some JSON representations.
@@ -59,7 +60,7 @@ public class JSONWire extends TextWire {
 
     // Bytes for comma, commonly used as JSON separator.
     @SuppressWarnings("rawtypes")
-    static final BytesStore COMMA = BytesStore.from(",");
+    static final BytesStore<?, ?> COMMA = BytesStore.from(",");
 
     // A thread-local variable to store a reference to the stop characters tester for JSON parsing.
     static final ThreadLocal<WeakReference<StopCharsTester>> STRICT_ESCAPED_END_OF_TEXT_JSON = new ThreadLocal<>();
@@ -142,7 +143,7 @@ public class JSONWire extends TextWire {
     }
 
     @Override
-    protected Class defaultKeyClass() {
+    protected Class<?> defaultKeyClass() {
         return String.class;
     }
 
@@ -176,7 +177,6 @@ public class JSONWire extends TextWire {
                 : new JSONWriteDocumentContext(this);
         return this;
     }
-
 
     @NotNull
     @Override
@@ -690,8 +690,9 @@ public class JSONWire extends TextWire {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public ValueOut writeEvent(Class expectedType, Object eventKey) throws InvalidMarshallableException {
+    public ValueOut writeEvent(Class<?> expectedType, Object eventKey) throws InvalidMarshallableException {
         return super.writeEvent(String.class, "" + eventKey);
     }
 
@@ -809,9 +810,10 @@ public class JSONWire extends TextWire {
      */
     class JSONValueOut extends YamlValueOut {
 
+        @SuppressWarnings("rawtypes")
         @NotNull
         @Override
-        public TextWire typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, Class type) {
+        public TextWire typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, Class<?> type) {
             prependSeparator();
             append("{\"@type\":\"");
             typeTranslator.accept(type, bytes);
@@ -961,12 +963,12 @@ public class JSONWire extends TextWire {
         }
 
         @Override
-        public @NotNull <V> JSONWire object(@NotNull Class<V> expectedType, V v) throws InvalidMarshallableException {
+        public @NotNull <V> JSONWire object(@NotNull Class<? extends V> expectedType, V v) throws InvalidMarshallableException {
             return (JSONWire) (useTypes ? super.object(v) : super.object(expectedType, v));
         }
 
         @Override
-        public @NotNull JSONValueOut typePrefix(Class type) {
+        public @NotNull JSONValueOut typePrefix(Class<?> type) {
             if (type.isPrimitive() || isWrapper(type) || type.isEnum()) {
                 // Do nothing because there are no other alternatives
                 // and thus, the type is implicitly given in the declaration.
@@ -976,9 +978,10 @@ public class JSONWire extends TextWire {
             }
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public @NotNull <K, V> JSONWire marshallable(@Nullable Map<K, V> map, @NotNull Class<K> kClass, @NotNull Class<V> vClass, boolean leaf) throws InvalidMarshallableException {
-            return (JSONWire) super.marshallable(map, (Class) String.class, vClass, leaf);
+            return (JSONWire) super.marshallable(map, (Class<K>) String.class, vClass, leaf);
         }
 
         public @NotNull JSONWire time(final LocalTime localTime) {
@@ -994,7 +997,6 @@ public class JSONWire extends TextWire {
      * ensuring proper handling of JSON-specific constructs like the "null" value.
      */
     class JSONValueIn extends TextValueIn {
-
 
         @Nullable
         private Type consumeTypeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
@@ -1055,7 +1057,6 @@ public class JSONWire extends TextWire {
             }
         }
 
-
         /**
          * Determines if the current value represents a JSON null value.
          *
@@ -1102,17 +1103,17 @@ public class JSONWire extends TextWire {
         }
 
         @Override
-        public <E> E object(@Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
+        public <E> E object(@Nullable E using, @Nullable Class<? extends E> clazz, boolean bestEffort) throws InvalidMarshallableException {
             return useTypes ? parseType(using, clazz, bestEffort) : super.object(using, clazz, bestEffort);
         }
 
         @Override
-        public Class typePrefix() {
+        public Class<?> typePrefix() {
             return super.typePrefix();
         }
 
         @Override
-        public Object typePrefixOrObject(Class tClass) {
+        public Object typePrefixOrObject(Class<?> tClass) {
             return super.typePrefixOrObject(tClass);
         }
 
@@ -1175,11 +1176,11 @@ public class JSONWire extends TextWire {
          * @throws InvalidMarshallableException If there's an issue with unmarshalling the data.
          * @throws ClassCastException If there's a type mismatch between the provided class or instance and the type definition.
          */
-        private <E> E parseType(@Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
+        private <E> E parseType(@Nullable E using, @Nullable Class<? extends E> clazz, boolean bestEffort) throws InvalidMarshallableException {
 
             Type aClass = consumeTypeLiteral(null);
             if (aClass != null)
-                return (E) aClass;
+                return Jvm.uncheckedCast(aClass);
 
             if (!hasTypeDefinition()) {
                 return super.object(using, clazz, bestEffort);
@@ -1187,7 +1188,7 @@ public class JSONWire extends TextWire {
                 final StringBuilder sb = acquireStringBuilder();
                 sb.setLength(0);
                 readTypeDefinition(sb);
-                final Class<?> overrideClass = classLookup().forName(sb.subSequence(1, sb.length()));
+                final Class<E> overrideClass = Jvm.uncheckedCast(classLookup().forName(sb.subSequence(1, sb.length())));
                 if (clazz != null && !clazz.isAssignableFrom(overrideClass))
                     throw new ClassCastException("Unable to cast " + overrideClass.getName() + " to " + clazz.getName());
                 if (using != null && !overrideClass.isInstance(using))

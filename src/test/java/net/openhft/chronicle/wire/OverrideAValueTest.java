@@ -41,7 +41,7 @@ public class OverrideAValueTest extends WireTestCommon {
     @Test
     public void testDontTouchImmutables2() {
         // Mark NumberHolder class as immutable
-        ObjectUtils.immutabile(NumberHolder.class, true);
+        ObjectUtils.immutable(NumberHolder.class, true);
         // Deserialize an ObjectHolder with a nested NumberHolder
         @Nullable ObjectHolder oh = Marshallable.fromString("!" + ObjectHolder.class.getName() + " { nh: !" + NumberHolder.class.getName() + " { num: 3 } } ");
         // Assert various values remain unchanged after deserialization
@@ -65,6 +65,7 @@ public class OverrideAValueTest extends WireTestCommon {
     }
 
     // Static class NumberHolder, extending SelfDescribingMarshallable, to represent a holder for an Integer object
+    @SuppressWarnings({"deprecation", "removal"})
     static class NumberHolder extends SelfDescribingMarshallable {
         // Declaration and initialization of a static final Integer ONE
         @SuppressWarnings("UnnecessaryBoxing")

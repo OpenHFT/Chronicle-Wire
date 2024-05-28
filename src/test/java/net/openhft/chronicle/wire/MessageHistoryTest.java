@@ -38,7 +38,7 @@ public class MessageHistoryTest extends WireTestCommon {
         assertNotNull(mg);
 
         // Reset the message history.
-        MessageHistory.set(null);
+        MessageHistory.clear();
 
         // Retrieve a new instance of message history.
         MessageHistory mg2 = MessageHistory.get();
@@ -92,7 +92,6 @@ public class MessageHistoryTest extends WireTestCommon {
     // Test the serialization of bytes in the VanillaMessageHistory.
     @Test
     public void checkSerialiseBytes() {
-
 
         // Initialize a new history and add sources and timings.
         VanillaMessageHistory history = new SetTimeMessageHistory();
@@ -191,7 +190,6 @@ public class MessageHistoryTest extends WireTestCommon {
                             "00 00\n",
                     bw2.bytes().toHexString());
             bw2.bytes().releaseLast();
-
 
             // check direct and on heap memory serialize the same.
             Wire wire1 = new BinaryWire(Bytes.allocateElasticOnHeap());
@@ -295,7 +293,6 @@ public class MessageHistoryTest extends WireTestCommon {
         }
     }
 
-
     @Test
     public void copyableSelfDescribing() {
         doCopyableTest(false);
@@ -369,7 +366,7 @@ public class MessageHistoryTest extends WireTestCommon {
                     bytes.toHexString().split("\n")[0]);
 
         } finally {
-            MessageHistory.set(null);
+            MessageHistory.clear();
         }
     }
 

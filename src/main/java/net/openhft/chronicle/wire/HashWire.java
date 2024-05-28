@@ -45,6 +45,7 @@ import java.util.function.BiConsumer;
  * <p>
  * This class provides a consistent hashing mechanism by leveraging a predefined set of constants and algorithms.
  * Instances are stored in a {@code ThreadLocal} to ensure thread-safety and optimized access across the application.
+ *
  * @see WriteMarshallable
  */
 @SuppressWarnings("rawtypes")
@@ -209,7 +210,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
 
     @NotNull
     @Override
-    public ValueOut writeEvent(Class ignored, @NotNull Object eventKey) {
+    public ValueOut writeEvent(Class<?> ignored, @NotNull Object eventKey) {
         hash += K0 + eventKey.hashCode() * M0;
         return valueOut;
     }
@@ -368,7 +369,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
      * The class implements the {@link ValueOut} interface, providing methods to handle
      * various data types like booleans, text, bytes, etc., and updating the hash
      * value accordingly.
-     */
+         */
     class HashValueOut implements ValueOut {
         @NotNull
         @Override
@@ -393,14 +394,14 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
 
         @NotNull
         @Override
-        public WireOut bytes(@Nullable BytesStore fromBytes) {
+        public WireOut bytes(@Nullable BytesStore<?, ?> fromBytes) {
             hash = hash * M1 + Maths.hash64(fromBytes);
             return HashWire.this;
         }
 
         @NotNull
         @Override
-        public WireOut bytes(@NotNull String type, @Nullable BytesStore fromBytes) {
+        public WireOut bytes(@NotNull String type, @Nullable BytesStore<?, ?> fromBytes) {
             hash = hash * M1 + Maths.hash64(type) ^ Maths.hash64(fromBytes);
             return HashWire.this;
         }
@@ -571,7 +572,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class type) {
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class<?> type) {
             hash = hash * M1 + (type == null ? 0 : type.hashCode() * M2);
             return HashWire.this;
         }

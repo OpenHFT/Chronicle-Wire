@@ -163,7 +163,5 @@ public class StreamingDemoMain {
         enum Action {
             OPEN, CLOSE;
         }
-
     }
-
 }

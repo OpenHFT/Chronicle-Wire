@@ -41,7 +41,6 @@ interface Flow3 {
     // Complete the flow by accepting a list of strings
     void third(List<String> list);
 }
-
 @Ignore
 public class FlowMethodTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")

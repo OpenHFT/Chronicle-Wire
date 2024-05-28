@@ -76,7 +76,7 @@ public class EnumTest extends WireTestCommon {
      * Enumeration used for testing purposes.
      * Implements Marshallable for Wire compatibility.
      */
-    public enum TestEnum implements Marshallable, ReadResolvable<TestEnum> {
+    public enum TestEnum implements Marshallable {
         INSTANCE;
 
         // Read data from the wire, currently no implementation
@@ -87,13 +87,6 @@ public class EnumTest extends WireTestCommon {
         // Write data to the wire, currently no implementation
         @Override
         public void writeMarshallable(@NotNull WireOut wire) {
-        }
-
-        // Ensure deserialized instance is resolved to the same INSTANCE
-        @NotNull
-        @Override
-        public EnumTest.TestEnum readResolve() {
-            return INSTANCE;
         }
     }
 }

@@ -59,7 +59,7 @@ public class TextMethodTesterTest extends WireTestCommon {
 
     @Test
     public void runTestEmptyOut() throws IOException {
-        TextMethodTester test = new TextMethodTester<>(
+        TextMethodTester<MockMethods> test = new TextMethodTester<>(
                 "tmtt/methods-in.yaml",
                 NoopMockMethods::new,
                 MockMethods.class,
@@ -85,7 +85,7 @@ public class TextMethodTesterTest extends WireTestCommon {
     @Test
     public void checkExceptionsProvidedToHandler() throws IOException {
         List<Exception> exceptions = new ArrayList<>();
-        TextMethodTester test = new TextMethodTester<>(
+        TextMethodTester<MockMethods> test = new TextMethodTester<>(
                 "tmtt/methods-in-exception.yaml",
                 MockMethodsImpl::new,
                 MockMethods.class,
@@ -96,9 +96,8 @@ public class TextMethodTesterTest extends WireTestCommon {
         assertEquals(4, exceptions.size());
     }
 
-    private void compareResults(TextMethodTester test) {
+    private void compareResults(TextMethodTester<?> test) {
         assertEquals(test.expected().replaceAll("\\s+#", " #"),
                 test.actual().replaceAll("\\s+#", " #"));
     }
 }
-

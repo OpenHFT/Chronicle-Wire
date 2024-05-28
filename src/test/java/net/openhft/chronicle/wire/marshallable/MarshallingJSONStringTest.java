@@ -46,5 +46,4 @@ public class MarshallingJSONStringTest implements Marshallable {
         MarshallingJSONStringTest read = Marshallable.fromString(configJson);
         assertEquals(expectedJson, read.configAsJSON);
     }
-
 }

@@ -23,11 +23,11 @@ import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.channel.AbstractHandler;
-import net.openhft.chronicle.wire.channel.ChronicleChannel;
 import net.openhft.chronicle.wire.channel.ChronicleChannelCfg;
 import net.openhft.chronicle.wire.channel.ChronicleContext;
 import net.openhft.chronicle.wire.channel.echo.internal.EchoChannel;
 
+@SuppressWarnings("deprecation")
 public class EchoNHandler extends AbstractHandler<EchoNHandler> {
     // The number of times the message will be echoed back.
     int times;
@@ -45,7 +45,7 @@ public class EchoNHandler extends AbstractHandler<EchoNHandler> {
 
     // The main run method where the logic for echoing messages is implemented.
     @Override
-    public void run(ChronicleContext context, ChronicleChannel channel) throws ClosedIORuntimeException {
+    public void run(ChronicleContext context, net.openhft.chronicle.wire.channel.ChronicleChannel channel) throws ClosedIORuntimeException {
         // Create a pauser which manages pausing and resuming of a thread in a balanced manner.
         Pauser pauser = Pauser.balanced();
 
@@ -81,8 +81,7 @@ public class EchoNHandler extends AbstractHandler<EchoNHandler> {
 
     // This method creates and returns an EchoChannel object with specific configurations.
     @Override
-    public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg channelCfg) {
-        // Return a new instance of EchoChannel with the given configuration.
+    public net.openhft.chronicle.wire.channel.ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg<?> channelCfg) {
         return new EchoChannel(channelCfg);
     }
 }

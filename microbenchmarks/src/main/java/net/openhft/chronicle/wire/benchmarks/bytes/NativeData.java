@@ -30,7 +30,7 @@ public class NativeData implements Byteable {
     static final int TEXT = FLAG + 1;
     private static final int MAX_TEXT = 16;
 
-    private BytesStore bytesStore;
+    private BytesStore<?, ?> bytesStore;
     private long offset;
     private long length;
 
@@ -75,7 +75,7 @@ public class NativeData implements Byteable {
     }
 
     @Override
-    public void bytesStore(BytesStore bytesStore, long offset, long length) {
+    public void bytesStore(BytesStore<?, ?> bytesStore, long offset, long length) {
         this.bytesStore = bytesStore;
         this.offset = offset;
         this.length = length;
@@ -95,7 +95,7 @@ public class NativeData implements Byteable {
     }
 
     @Override
-    public BytesStore bytesStore() {
+    public BytesStore<?, ?> bytesStore() {
         return bytesStore;
     }
 

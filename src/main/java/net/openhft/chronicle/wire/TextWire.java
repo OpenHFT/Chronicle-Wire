@@ -46,8 +46,7 @@ import java.util.regex.Pattern;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.wire.TextStopCharTesters.END_OF_TYPE;
-import static net.openhft.chronicle.wire.Wires.GENERATE_TUPLES;
-import static net.openhft.chronicle.wire.Wires.THROW_CNFRE;
+import static net.openhft.chronicle.wire.Wires.*;
 
 /**
  * A representation of the YAML-based wire format. `TextWire` provides functionalities
@@ -55,16 +54,16 @@ import static net.openhft.chronicle.wire.Wires.THROW_CNFRE;
  * of the YAML text format.
  *
  * <p>This class utilizes bit sets, thread locals, and regular expressions to efficiently handle
- * the YAML formatting nuances.</p>
+ * the YAML formatting nuances.
  *
  * <p><b>Important:</b> Some configurations and methods in this class are marked as deprecated
- * and are slated for removal in future versions, suggesting that its behavior might evolve in future releases.</p>
+ * and are slated for removal in future versions, suggesting that its behavior might evolve in future releases.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
 public class TextWire extends YamlWireOut<TextWire> {
 
     // Constants representing specific textual constructs in YAML.
-    public static final BytesStore BINARY = BytesStore.from("!!binary");
+    public static final BytesStore<?, ?> BINARY = BytesStore.from("!!binary");
     public static final @NotNull Bytes<byte[]> TYPE_STR = Bytes.from("type ");
     static final String SEQ_MAP = "!seqmap";
 
@@ -333,11 +332,11 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     @Override
     @NotNull
-    public <T> T methodWriter(@NotNull Class<T> tClass, Class... additional) {
+    public <T> T methodWriter(@NotNull Class<T> tClass, Class<?>... additional) {
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.TEXT,
                 () -> newTextMethodWriterInvocationHandler(tClass));
-        for (Class aClass : additional)
+        for (Class<?> aClass : additional)
             builder.addInterface(aClass);
         useTextDocuments();
         builder.marshallableOut(this);
@@ -353,7 +352,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      * @return A newly instantiated {@link TextMethodWriterInvocationHandler} for the provided interface(s).
      */
     @NotNull
-    TextMethodWriterInvocationHandler newTextMethodWriterInvocationHandler(Class... interfaces) {
+    TextMethodWriterInvocationHandler newTextMethodWriterInvocationHandler(Class<?>... interfaces) {
         for (Class<?> anInterface : interfaces) {
             Comment c = Jvm.findAnnotation(anInterface, Comment.class);
             if (c != null)
@@ -656,7 +655,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      *
      * @return The default key class, which is {@link Object}.
      */
-    protected Class defaultKeyClass() {
+    protected Class<?> defaultKeyClass() {
         return Object.class;
     }
 
@@ -1194,7 +1193,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      * @throws InvalidMarshallableException If any object within the list could not be properly unmarshalled.
      */
     @NotNull
-    List readList(int indentation, Class elementType) throws InvalidMarshallableException {
+    List readList(int indentation, Class<?> elementType) throws InvalidMarshallableException {
         @NotNull List<Object> objects = new ArrayList<>();
         while (peekCode() == '-') {
             if (indentation() < indentation)
@@ -1229,7 +1228,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      * @throws InvalidMarshallableException If any key-value pair within the map could not be properly unmarshalled.
      */
     @NotNull
-    private Map readMap(int indentation, Class valueType) throws InvalidMarshallableException {
+    private Map readMap(int indentation, Class<?> valueType) throws InvalidMarshallableException {
         @NotNull Map map = new LinkedHashMap<>();
         consumePadding();
         while (bytes.readRemaining() > 0) {
@@ -1382,8 +1381,8 @@ public class TextWire extends YamlWireOut<TextWire> {
             }
         }
 
-        @Nullable
-        <ACS extends Appendable & CharSequence> CharSequence textTo0(@NotNull ACS a) {
+        @SuppressWarnings("fallthrough")
+        @Nullable <ACS extends Appendable & CharSequence> CharSequence textTo0(@NotNull ACS a) {
             consumePadding();
             int ch = peekCode();
             @Nullable CharSequence ret = a;
@@ -1536,7 +1535,7 @@ public class TextWire extends YamlWireOut<TextWire> {
 
         @NotNull
         @Override
-        public WireIn bytesMatch(@NotNull BytesStore compareBytes, BooleanConsumer consumer) {
+        public WireIn bytesMatch(@NotNull BytesStore<?, ?> compareBytes, BooleanConsumer consumer) {
             throw new UnsupportedOperationException("todo");
         }
 
@@ -2150,7 +2149,7 @@ public class TextWire extends YamlWireOut<TextWire> {
 
             char code = (char) peekCode();
             if (code == '!') {
-                @Nullable final Class typePrefix = typePrefix();
+                @Nullable final Class<?> typePrefix = typePrefix();
                 if (typePrefix == void.class) {
                     text();
                     return false;
@@ -2201,7 +2200,7 @@ public class TextWire extends YamlWireOut<TextWire> {
 
             char code = (char) peekCode();
             if (code == '!') {
-                @Nullable final Class typePrefix = typePrefix();
+                @Nullable final Class<?> typePrefix = typePrefix();
                 if (typePrefix == void.class) {
                     text();
                     return false;
@@ -2222,7 +2221,7 @@ public class TextWire extends YamlWireOut<TextWire> {
 
                 final T t = buffer.get(size);
                 if (t instanceof Resettable) ((Resettable) t).reset();
-                list.add(object(t, t.getClass()));
+                list.add(object(t, (Class<T>) t.getClass()));
             }
 
             if (code == '[') {
@@ -2345,7 +2344,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         @Override
-        public Class typePrefix() {
+        public Class<?> typePrefix() {
             consumePadding();
             int code = peekCode();
             if (code == '!' || code == '@') {
@@ -2355,22 +2354,13 @@ public class TextWire extends YamlWireOut<TextWire> {
                 stringBuilder.setLength(0);
                 parseUntil(stringBuilder, END_OF_TYPE);
                 bytes.readSkip(-1);
-                try {
-                    return classLookup().forName(stringBuilder);
-                } catch (ClassNotFoundRuntimeException e) {
-                    // Note: it's not possible to generate a Tuple without an interface implied.
-                    if (THROW_CNFRE)
-                        throw e;
-                    String message = "Unable to find " + stringBuilder + " " + e.getCause();
-                    Jvm.warn().on(getClass(), message);
-                    return null;
-                }
+                return classLookup().forName(stringBuilder);
             }
             return null;
         }
 
         @Override
-        public Object typePrefixOrObject(Class tClass) {
+        public Object typePrefixOrObject(Class<?> tClass) {
             consumePadding();
             int code = peekCode();
             if (code == '!') {
@@ -2394,16 +2384,13 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         @Nullable
-        private Object handleCNFE(Class tClass, ClassNotFoundRuntimeException e, StringBuilder stringBuilder) {
+        private Object handleCNFE(Class<?> tClass, ClassNotFoundRuntimeException e, StringBuilder stringBuilder) {
             if (tClass == null) {
                 if (GENERATE_TUPLES) {
                     return Wires.tupleFor(null, stringBuilder.toString());
                 }
                 String message = "Unable to load " + stringBuilder + ", is a class alias missing.";
-                if (THROW_CNFRE)
-                    throw new ClassNotFoundRuntimeException(new ClassNotFoundException(message));
-                Jvm.warn().on(TextWire.class, message);
-                return null;
+                throw new ClassNotFoundRuntimeException(new ClassNotFoundException(message));
             }
 
             final String className = tClass.getName();
@@ -2417,20 +2404,14 @@ public class TextWire extends YamlWireOut<TextWire> {
                             : classLookup().forName(className);
 
                 } catch (ClassNotFoundRuntimeException e1) {
-                    if (!THROW_CNFRE) {
-                        Jvm.warn().on(getClass(), "ClassNotFoundException class=" + className);
-                        return Wires.tupleFor(tClass, className);
-                    }
+                    throw e;
                 }
 
             } else if (GENERATE_TUPLES && tClass.getClassLoader() != null && tClass.isInterface()) {
                 return Wires.tupleFor(tClass, stringBuilder.toString());
             }
 
-            if (THROW_CNFRE || tClass.isInterface())
-                throw e;
-            Jvm.warn().on(TextWire.class, "Cannot find a class for " + stringBuilder + " are you missing an alias?");
-            return null;
+            throw e;
         }
 
         @Override
@@ -2562,8 +2543,7 @@ public class TextWire extends YamlWireOut<TextWire> {
          * @return A new instance of the class initialized with the data from the wire.
          */
         @NotNull
-        public Demarshallable demarshallable(@NotNull Class clazz) {
-            // Save the current state.
+        public Demarshallable demarshallable(@NotNull Class<?> clazz) {
             pushState();
 
             // Skip any padding or whitespace.
@@ -2593,8 +2573,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                 bytes.readSkip(1); // skip the opening brace '{'
                 consumePadding();
 
-                // Create a new instance of the desired class using the wire input.
-                object = Demarshallable.newInstance(clazz, TextWire.this);
+                object = Demarshallable.newInstance((Class<? extends Demarshallable>) clazz, TextWire.this);
             } finally {
                 // Restore the original limit and position of the byte buffer.
                 bytes.readLimit(limit);
@@ -2870,7 +2849,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         @Override
-        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class type) throws InvalidMarshallableException {
+        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class<?> type) throws InvalidMarshallableException {
             consumePadding();
             @Nullable Object o = objectWithInferredType0(using, strategy, type);
             consumePadding();
@@ -2919,7 +2898,7 @@ public class TextWire extends YamlWireOut<TextWire> {
          * @throws InvalidMarshallableException If any issues are encountered during the deserialization process.
          */
         @Nullable
-        Object objectWithInferredType0(Object using, @NotNull SerializationStrategy strategy, Class type) throws InvalidMarshallableException {
+        Object objectWithInferredType0(Object using, @NotNull SerializationStrategy strategy, Class<?> type) throws InvalidMarshallableException {
             int code = peekCode();
             switch (code) {
                 // Different cases for different object types or data representations.
@@ -3056,9 +3035,7 @@ public class TextWire extends YamlWireOut<TextWire> {
          * @throws UnsupportedOperationException if the provided class type isn't supported.
          */
         @NotNull
-        private Object readSequence(@NotNull Class clazz) {
-
-            // Handle sequences expected to be of type Object or Object[].
+        private Object readSequence(@NotNull Class<?> clazz) {
             if (clazz == Object[].class || clazz == Object.class) {
                 // TODO: Consider using reflection to handle all array types.
                 @NotNull List<Object> list = new ArrayList<>();

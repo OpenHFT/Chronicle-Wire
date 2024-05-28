@@ -67,7 +67,6 @@ public class JSON322Test extends WireTestCommon {
 
         public Three() {
         }
-
     }
 
     @Test

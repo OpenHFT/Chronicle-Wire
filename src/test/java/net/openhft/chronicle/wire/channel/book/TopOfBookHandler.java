@@ -20,13 +20,13 @@ package net.openhft.chronicle.wire.channel.book;
 
 import net.openhft.chronicle.core.io.ClosedIORuntimeException;
 import net.openhft.chronicle.wire.channel.AbstractHandler;
-import net.openhft.chronicle.wire.channel.ChronicleChannel;
 import net.openhft.chronicle.wire.channel.ChronicleChannelCfg;
 import net.openhft.chronicle.wire.channel.ChronicleContext;
 
 /**
  * Handler for managing the top of the book in a financial market, extending the abstract handler.
  */
+@SuppressWarnings("deprecation")
 public class TopOfBookHandler extends AbstractHandler<TopOfBookHandler> {
 
     // Nested handler for interfacing with the top of the book.
@@ -50,7 +50,7 @@ public class TopOfBookHandler extends AbstractHandler<TopOfBookHandler> {
      * @throws ClosedIORuntimeException If an I/O error occurs.
      */
     @Override
-    public void run(ChronicleContext context, ChronicleChannel channel) throws ClosedIORuntimeException {
+    public void run(ChronicleContext context, net.openhft.chronicle.wire.channel.ChronicleChannel channel) throws ClosedIORuntimeException {
         // Direct method writing for TopOfBookListener class through the channel
         nestedHandler.out(channel.methodWriter(TopOfBookListener.class));
 
@@ -68,7 +68,7 @@ public class TopOfBookHandler extends AbstractHandler<TopOfBookHandler> {
      * @throws UnsupportedOperationException as this operation is not supported.
      */
     @Override
-    public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg channelCfg) {
+    public net.openhft.chronicle.wire.channel.ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg<?> channelCfg) {
         throw new UnsupportedOperationException();
     }
 }

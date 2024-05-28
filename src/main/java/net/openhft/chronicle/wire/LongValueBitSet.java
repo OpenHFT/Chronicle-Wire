@@ -38,6 +38,7 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  * This class represents a BitSet designed to be shared across processes without requiring locks.
  * It has been implemented as a lock-free solution and does not support resizing.
  */
+@SuppressWarnings("this-escape")
 public class LongValueBitSet extends AbstractCloseable implements Marshallable, ChronicleBitSet {
 
     // Mask used for operations on partial words.
@@ -144,7 +145,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
 
     @Override
     protected void performClose() {
-        closeQuietly(words);
+        closeQuietly((Object[]) words);
     }
 
     /**
@@ -1026,14 +1027,13 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         singleThreadedCheckDisabled(true);
         throwExceptionIfClosed();
 
-        closeQuietly(words);
+        closeQuietly((Object[]) words);
 
         int numberOfLongValues = wire.read("numberOfLongValues").int32();
         words = new LongReference[numberOfLongValues];
         for (int i = 0; i < numberOfLongValues; i++) {
             words[i] = wire.getValueIn().int64ForBinding(null);
         }
-
     }
 
     @Override

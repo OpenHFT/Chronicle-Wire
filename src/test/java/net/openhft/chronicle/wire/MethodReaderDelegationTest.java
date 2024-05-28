@@ -166,7 +166,6 @@ public class MethodReaderDelegationTest extends WireTestCommon {
             assertTrue(reader.readOne());
             assertEquals("*myCall[]*myCall[]", sb.toString());
         }
-
     }
 
     // Test case to ensure that unsuccessful calls are not delegated when certain conditions are met
@@ -248,6 +247,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
     }
 
     // Test to ensure that user exceptions are not delegated during method calls
+    @SuppressWarnings("deprecation")
     @Test
     public void testUserExceptionsAreNotDelegated() {
         // Initialize a wire with BINARY type and allocate space on the heap

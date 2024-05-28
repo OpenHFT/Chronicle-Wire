@@ -94,5 +94,4 @@ public class UnknownFieldsTest extends WireTestCommon {
                             "' and value '" + valueIn + "'");
         }
     }
-
 }

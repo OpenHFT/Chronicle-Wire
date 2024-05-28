@@ -188,7 +188,6 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         public Bar(String value) {
             this.value = value;
         }
-
     }
 
     // Test to write a custom class Bar instance to the wire and verify the written content
@@ -212,6 +211,7 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
 
     // Custom class implementing Serializable interface for testing
     static final class Ser implements Serializable {
+        private static final long serialVersionUID = 0L;
         int foo;
     }
 
@@ -224,5 +224,4 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         System.out.println("actual = " + actual);
         assertBalancedBrackets(actual);
     }
-
 }

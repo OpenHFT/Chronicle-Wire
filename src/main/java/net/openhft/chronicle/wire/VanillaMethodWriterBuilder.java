@@ -63,8 +63,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
             Serializable.class,
             CharSequence.class,
             Comparable.class,
-            Comparator.class,
-            Observer.class
+            Comparator.class
     );
 
     // Flag to indicate if the proxy generation is disabled
@@ -161,13 +160,13 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * @throws IllegalArgumentException if the provided interface is deemed invalid.
      */
     @NotNull
-    public MethodWriterBuilder<T> addInterface(Class additionalClass) {
+    public MethodWriterBuilder<T> addInterface(Class<?> additionalClass) {
         if (interfaces.contains(additionalClass))
             return this;
         if (additionalClass == DocumentContext.class)
             return this;
 
-        for (Class invalidSuperInterface : invalidSuperInterfaces) {
+        for (Class<?> invalidSuperInterface : invalidSuperInterfaces) {
             if (invalidSuperInterface.isAssignableFrom(additionalClass))
                 throw new IllegalArgumentException("The event interface shouldn't implement " + invalidSuperInterface.getName());
         }
@@ -296,7 +295,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                 // Attempt to create an instance from an already loaded class
                 return (T) newInstance(Class.forName(fullClassName));
             } catch (ClassNotFoundException e) {
-                Class clazz;
+                Class<?> clazz;
                 // only one thread at a time so two threads don't try to generate the same class.
                 synchronized (classCache) {
                     clazz = classCache.computeIfAbsent(fullClassName, this::newClass);
@@ -328,7 +327,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * @param fullClassName The fully qualified name of the class to be generated.
      * @return The generated class, or {@code COMPILE_FAILED} if class generation failed.
      */
-    private Class newClass(final String fullClassName) {
+    private Class<?> newClass(final String fullClassName) {
         if (wireType.isText() || !Jvm.getBoolean("wire.generator.v2"))
             // Use version 1 of the method writer generator
             return GenerateMethodWriter.newClass(fullClassName,
@@ -367,7 +366,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * @throws NullPointerException if the outSupplier is not set.
      * @throws RuntimeException if any other exception occurs during instantiation.
      */
-    private Object newInstance(final Class aClass) {
+    private Object newInstance(final Class<?> aClass) {
         try {
             // Ensure the outSupplier is set before proceeding.
             if (outSupplier == null)

@@ -50,7 +50,7 @@ public class PerfRegressionTest extends WireTestCommon {
         } while (!file.getName().equals("target"));
 
         // Array of classes that appear to be subjected to the benchmark test.
-        Class[] classes = {
+        Class<?>[] classes = {
 //                BenchBytesMain.class,
                 BenchStringMain.class,
                 BenchArrayStringMain.class,
@@ -70,7 +70,7 @@ public class PerfRegressionTest extends WireTestCommon {
             Process[] processes = new Process[classes.length];
             int prev = -1;
             for (int i = classes.length - 1; i >= 0; i--) {
-                Class aClass = classes[i];
+                Class<?> aClass = classes[i];
                 processes[i] = getProcess(file, aClass);
                 if (prev > -1) {
                     times[prev][r] = getResult(classes[prev], Long.MAX_VALUE, processes[prev]);
@@ -88,7 +88,7 @@ public class PerfRegressionTest extends WireTestCommon {
         // Calculate and output median execution times and their sum.
         double sum = 0;
         for (int i = 0; i < classes.length; i++) {
-            Class aClass = classes[i];
+            Class<?> aClass = classes[i];
             final long[] time = times[i];
             final long time2 = time[time.length / 2];  // Median time value
             sum += time2;
@@ -117,8 +117,7 @@ public class PerfRegressionTest extends WireTestCommon {
 
     // Create and start a new process for executing a specified class in a Maven environment
     @NotNull
-    private Process getProcess(File file, Class aClass) throws IOException {
-        // Initialize ProcessBuilder with Maven command and specify main class to be executed
+    private Process getProcess(File file, Class<?> aClass) throws IOException {
         ProcessBuilder pb = new ProcessBuilder("mvn", "exec:java",
                 "-Dexec.classpathScope=test",
                 "-Dexec.mainClass=" + aClass.getName());
@@ -138,8 +137,7 @@ public class PerfRegressionTest extends WireTestCommon {
     }
 
     // Retrieve and return the execution result from the output stream of a given process
-    private long getResult(Class aClass, long result, Process process) throws IOException, InterruptedException {
-        // Wrap the process's input stream with a BufferedReader to read its output
+    private long getResult(Class<?> aClass, long result, Process process) throws IOException, InterruptedException {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             // Iterate through each line of the process output
             for (String line; (line = br.readLine()) != null; ) {
@@ -148,7 +146,6 @@ public class PerfRegressionTest extends WireTestCommon {
                     System.out.println(aClass.getSimpleName() + " - " + line);
                     result = Long.parseLong(line.split(" ")[1]);
                 }
-
             }
         }
 

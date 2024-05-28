@@ -25,10 +25,8 @@ import org.jetbrains.annotations.Nullable;
  * Represents a strategy for serializing and deserializing objects of type {@code T}.
  * Implementations of this interface define methods for reading, instantiating,
  * and providing metadata about the serialized format.
- *
- * @param <T> the type of objects this strategy can handle.
  */
-public interface SerializationStrategy<T> {
+public interface SerializationStrategy {
 
     /**
      * Reads an object of type {@code T} from the provided input source and populates
@@ -44,7 +42,7 @@ public interface SerializationStrategy<T> {
      * @throws InvalidMarshallableException If an error occurs during the deserialization process.
      */
     @Nullable
-    T readUsing(Class clazz, T using, ValueIn in, BracketType bracketType) throws InvalidMarshallableException;
+    <T> T readUsing(Class<?> clazz, T using, ValueIn in, BracketType bracketType) throws InvalidMarshallableException;
 
     /**
      * Constructs and returns a new instance of the provided {@code type}
@@ -55,14 +53,14 @@ public interface SerializationStrategy<T> {
      * @return A new instance of the provided {@code type} or {@code null} if instantiation is not possible.
      */
     @Nullable
-    T newInstanceOrNull(Class<T> type);
+    <T> T newInstanceOrNull(Class<T> type);
 
     /**
      * Returns the class type of objects this serialization strategy is designed to handle.
      *
      * @return The class type of objects this strategy can serialize and deserialize.
      */
-    Class<T> type();
+    Class<?> type();
 
     /**
      * Provides the bracket type used in the serialized format, which might

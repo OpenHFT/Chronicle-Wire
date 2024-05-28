@@ -309,7 +309,6 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
         if (Runtime.getRuntime().availableProcessors() > 2) {
             assertTrue(threads.size() > 1);
         }
-
     }
 
     @Test
@@ -371,7 +370,6 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
                 st += streamDurationMs;
                 it += iterationDurationMs;
             }
-
         }
         System.out.println("st = " + st);
         System.out.println("it = " + it);
@@ -518,7 +516,6 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
         public void body(String body) {
             this.body = body;
         }
-
     }
 
     private static void assertLongSummaryStatisticsEqual(LongSummaryStatistics a,
@@ -537,5 +534,4 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
         ((Wire) in).bytes().readPosition(0);
         return in;
     }
-
 }

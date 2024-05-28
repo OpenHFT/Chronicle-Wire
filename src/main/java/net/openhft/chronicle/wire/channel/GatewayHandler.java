@@ -24,6 +24,7 @@ package net.openhft.chronicle.wire.channel;
  * <p>This handler is meant to be replaced by a Gateway with a handler that it supports. If no such handler
  * is provided by the Gateway, this handler falls back to returning an error message indicating the absence of a default handler for the Gateway.
  */
+@SuppressWarnings("this-escape")
 public class GatewayHandler extends ErrorReplyHandler {
 
     /**

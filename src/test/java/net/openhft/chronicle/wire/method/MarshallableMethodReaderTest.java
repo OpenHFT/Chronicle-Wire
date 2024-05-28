@@ -102,7 +102,7 @@ public class MarshallableMethodReaderTest extends net.openhft.chronicle.wire.Wir
     // Utility method to write a method call into the wire
     private static void writeDoc(@NotNull Wire wire, String say) {
         try (DocumentContext dc = wire.writingDocument()) {
-            wire.write(say).text("");
+            dc.wire().write(say).text("");
         }
     }
 

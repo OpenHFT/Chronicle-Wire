@@ -81,6 +81,7 @@ public interface ValueOut {
      * @param v Object to be checked.
      * @return {@code true} if the object is an instance of Enum or DynamicEnum; {@code false} otherwise.
      */
+    @SuppressWarnings("deprecation")
     static boolean isAnEnum(Object v) {
         return (v instanceof Enum) || (v instanceof DynamicEnum);
     }
@@ -156,7 +157,7 @@ public interface ValueOut {
      * @return The WireOut instance for chained calls.
      */
     @NotNull
-    default WireOut text(@Nullable BytesStore s) {
+    default WireOut text(@Nullable BytesStore<?, ?> s) {
         return text((CharSequence) s);
     }
 
@@ -189,7 +190,7 @@ public interface ValueOut {
      * @return The WireOut instance for chained calls.
      */
     @NotNull
-    WireOut bytes(@Nullable BytesStore fromBytes);
+    WireOut bytes(@Nullable BytesStore<?, ?> fromBytes);
 
     /**
      * Write a sequence of bytes from a {@link BytesStore} object as a literal value,
@@ -199,7 +200,7 @@ public interface ValueOut {
      * @return The WireOut instance for chained calls.
      */
     @NotNull
-    default WireOut bytesLiteral(@Nullable BytesStore fromBytes) {
+    default WireOut bytesLiteral(@Nullable BytesStore<?, ?> fromBytes) {
         return bytes(fromBytes);
     }
 
@@ -211,7 +212,7 @@ public interface ValueOut {
      * @return The WireOut instance for chained calls.
      */
     @NotNull
-    WireOut bytes(String type, @Nullable BytesStore fromBytes);
+    WireOut bytes(String type, @Nullable BytesStore<?, ?> fromBytes);
 
     /**
      * Write a raw sequence of bytes. The exact behavior of this method depends on the implementation.
@@ -563,7 +564,7 @@ public interface ValueOut {
      * @return The ValueOut instance for chained calls.
      */
     @NotNull
-    default ValueOut typePrefix(Class type) {
+    default ValueOut typePrefix(Class<?> type) {
         return type == null ? this : typePrefix(classLookup().nameFor(type));
     }
 
@@ -583,7 +584,7 @@ public interface ValueOut {
      * @return The WireOut instance for chained calls.
      */
     @NotNull
-    default WireOut typeLiteral(@Nullable Class type) {
+    default WireOut typeLiteral(@Nullable Class<?> type) {
         return type == null ? nu11()
                 : typeLiteral((t, b) -> b.appendUtf8(classLookup().nameFor(t)), type);
     }
@@ -599,7 +600,7 @@ public interface ValueOut {
     @NotNull
     default WireOut typeLiteral(@Nullable Type type) {
         return type == null ? nu11()
-                : type instanceof Class ? typeLiteral((Class) type)
+                : type instanceof Class<?>? typeLiteral((Class) type)
                 : typeLiteral(type.getTypeName());
     }
 
@@ -622,7 +623,7 @@ public interface ValueOut {
      * @return The WireOut instance for chained calls.
      */
     @NotNull
-    WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class type);
+    WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class<?> type);
 
     /**
      * Writes a universally unique identifier (UUID) to the wire.
@@ -876,7 +877,7 @@ public interface ValueOut {
      * @return The current instance of the WireOut.
      */
     @NotNull
-    default WireOut array(@NotNull WriteValue writer, @NotNull Class arrayType) {
+    default WireOut array(@NotNull WriteValue writer, @NotNull Class<?> arrayType) {
         if (arrayType == String[].class) {
             typePrefix("String[] ");
         } else if (arrayType != Object[].class) {
@@ -1125,7 +1126,7 @@ public interface ValueOut {
      * @throws InvalidMarshallableException If the object cannot be marshalled.
      */
     @NotNull
-    default <V> WireOut object(@NotNull Class<V> expectedType, V v) throws InvalidMarshallableException {
+    default <V> WireOut object(@NotNull Class<? extends V> expectedType, V v) throws InvalidMarshallableException {
         Class<?> vClass = v == null ? void.class : v.getClass();
         // Check for various types and marshall accordingly
         if (v instanceof WriteMarshallable && !isAnEnum(v))
@@ -1381,8 +1382,8 @@ public interface ValueOut {
             WireSerializedLambda.write(value, this);
             return wireOut();
         } else if (Object[].class.isAssignableFrom(valueClass)) {
-            @NotNull Class type = valueClass.getComponentType();
-            return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), valueClass);
+            @NotNull Class<?> type = valueClass.getComponentType();
+            return array(v -> Stream.of((Object[]) value).forEach(val -> v.object((Class) type, val)), valueClass);
         } else if (value instanceof Thread) {
             return text(((Thread) value).getName());
         } else if (value instanceof Serializable) {
@@ -1438,7 +1439,7 @@ public interface ValueOut {
      * @return this
      */
     @NotNull
-    default ValueOut optionalTyped(Class aClass) {
+    default ValueOut optionalTyped(Class<?> aClass) {
         return this;
     }
 
@@ -1497,6 +1498,7 @@ public interface ValueOut {
      * This method attempts to serialize an object without the caller explicitly specifying the object type.
      * This is done by checking the object's class name against a list of known class names and using appropriate serialization methods.
      */
+    @SuppressWarnings("deprecation")
     @NotNull
     default WireOut untypedObject(@Nullable Object value) throws InvalidMarshallableException {
         // Handle null value case first
@@ -1552,8 +1554,8 @@ public interface ValueOut {
             return bytesMarshallable((BytesMarshallable) value);
         // Handle object arrays
         if (Object[].class.isAssignableFrom(value.getClass())) {
-            @NotNull Class type = value.getClass().getComponentType();
-            return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), Object[].class);
+            @NotNull Class<?> type = value.getClass().getComponentType();
+            return array(v -> Stream.of((Object[]) value).forEach(val -> v.object((Class) type, val)), Object[].class);
         }
         // Default serialization for other types
         return object(value);
@@ -1629,7 +1631,7 @@ public interface ValueOut {
         // If the byte size is smaller than the threshold, just write the bytes directly
         if (uncompressedBytes.readRemaining() < SMALL_MESSAGE)
             return bytes(uncompressedBytes);
-        try (ScopedResource<Bytes<?>> stlBytes = Wires.acquireBytesScoped()) {
+        try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> tmpBytes = stlBytes.get();
             Compression.compress(compression, uncompressedBytes, tmpBytes);
         // Write the compressed bytes
@@ -1788,7 +1790,7 @@ public interface ValueOut {
         try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
             StringBuilder sb = stlSb.get();
             longConverter.append(sb, l);
-            if (longConverter.allSafeChars(wireOut()) && sb.length() > 0)
+            if (longConverter.allSafeChars() && sb.length() > 0)
                 return rawText(sb);
             else
                 return text(sb);

@@ -30,26 +30,8 @@ import static org.junit.Assert.*;
 // based on random character changes, a method called "agitator testing".
 public class TextWireAgitatorTest extends WireTestCommon {
 
-    @Test
-    public void lowerCaseClassTuple() {
-        Wires.THROW_CNFRE = false;
-        Wires.GENERATE_TUPLES = true;
-        Object o = Marshallable.fromString("!" + TextWireTest.MyDto.class.getName().toLowerCase() + " { }");
-        assertEquals("!net.openhft.chronicle.wire.textwiretest$mydto {\n" +
-                "}\n", o.toString());
-    }
-
-    @Test
-    public void lowerCaseClassWarn() {
-        expectException("Unable to load net.openhft.chronicle.wire.textwiretest$mydto, is a class alias missing");
-        Wires.THROW_CNFRE = false;
-        Wires.GENERATE_TUPLES = false;
-        assertTrue(Marshallable.fromString("!" + TextWireTest.MyDto.class.getName().toLowerCase() + " { }") instanceof Map);
-    }
-
     @Test(expected = ClassNotFoundRuntimeException.class)
     public void lowerCaseClassThrows() {
-        Wires.THROW_CNFRE = true;
         Wires.GENERATE_TUPLES = false;
         Object o = Marshallable.fromString("!" + TextWireTest.MyDto.class.getName().toLowerCase() + " { }");
         fail("" + o);

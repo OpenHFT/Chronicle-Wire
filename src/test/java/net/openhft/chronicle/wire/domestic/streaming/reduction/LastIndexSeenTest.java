@@ -67,5 +67,4 @@ public class LastIndexSeenTest extends WireTestCommon {
         listener.accept(tailer);
 
     }
-
 }

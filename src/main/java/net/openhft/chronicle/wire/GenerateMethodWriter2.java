@@ -40,7 +40,7 @@ import static java.util.Collections.*;
  * a set of template methods that help in the method writer generation. These templates are based on certain method names
  * and parameter types, which define their structure.
  */
-@SuppressWarnings("StringBufferReplaceableByString")
+@SuppressWarnings("this-escape")
 public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethodWriter2.GMWMetaData> {
 
     // The simple name of the DocumentContext class used for template methods.

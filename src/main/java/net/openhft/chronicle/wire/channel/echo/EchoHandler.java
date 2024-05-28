@@ -24,7 +24,6 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.channel.AbstractHandler;
-import net.openhft.chronicle.wire.channel.ChronicleChannel;
 import net.openhft.chronicle.wire.channel.ChronicleChannelCfg;
 import net.openhft.chronicle.wire.channel.ChronicleContext;
 import net.openhft.chronicle.wire.channel.echo.internal.EchoChannel;
@@ -34,14 +33,14 @@ import net.openhft.chronicle.wire.channel.echo.internal.EchoChannel;
  * The handler extends {@link AbstractHandler}, and implements the `run` and `asInternalChannel` methods
  * for specific behavior.
  * <p>
- * This handler acquires an {@link AffinityLock} before running, and releases it after
- * the {@link ChronicleChannel} is closed. While the channel is open, it continuously reads incoming data,
- * echoing it back to the sender.
+ * This handler acquires an {@link AffinityLock} before running, and releases it is closed.
+ * While the channel is open, it continuously reads incoming data, echoing it back to the sender.
  * <p>
  * When there is no data available, it invokes the {@link Pauser} to pause execution,
  * reducing the CPU usage when idle. If data is available, it resets the pauser to wake up immediately
  * the next time it checks for data.
  */
+@SuppressWarnings("deprecation")
 public class EchoHandler extends AbstractHandler<EchoHandler> {
 
     /**
@@ -53,8 +52,9 @@ public class EchoHandler extends AbstractHandler<EchoHandler> {
      * @throws ClosedIORuntimeException     if the channel is closed unexpectedly
      * @throws InvalidMarshallableException if there's an issue while processing the data
      */
+    @SuppressWarnings("try")
     @Override
-    public void run(ChronicleContext context, ChronicleChannel channel) throws ClosedIORuntimeException, InvalidMarshallableException {
+    public void run(ChronicleContext context, net.openhft.chronicle.wire.channel.ChronicleChannel channel) throws ClosedIORuntimeException, InvalidMarshallableException {
         try (AffinityLock lock = context.affinityLock()) {
             Pauser pauser = Pauser.balanced();
             while (!channel.isClosed()) {
@@ -80,7 +80,7 @@ public class EchoHandler extends AbstractHandler<EchoHandler> {
      * @return a new EchoChannel instance
      */
     @Override
-    public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg channelCfg) {
+    public net.openhft.chronicle.wire.channel.ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg<?> channelCfg) {
         return new EchoChannel(channelCfg);
     }
 }

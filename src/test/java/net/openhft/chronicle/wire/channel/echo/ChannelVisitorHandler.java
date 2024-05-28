@@ -20,25 +20,25 @@ package net.openhft.chronicle.wire.channel.echo;
 
 import net.openhft.chronicle.core.io.ClosedIORuntimeException;
 import net.openhft.chronicle.wire.channel.AbstractHandler;
-import net.openhft.chronicle.wire.channel.ChronicleChannel;
 import net.openhft.chronicle.wire.channel.ChronicleChannelCfg;
 import net.openhft.chronicle.wire.channel.ChronicleContext;
 
 /**
  * 'ChannelVisitorHandler' class extends 'AbstractHandler' and is responsible for
  * handling events in the context of channels by utilizing ChannelVisitors.
- *
+ * <p>
  * When 'run' is invoked, it sets up a mechanism to reply to received messages
  * by performing an operation defined by a ChannelVisitor on the provided channel.
  * Note that the actual visitor logic is abstract and must be defined elsewhere.
- *
+ * <p>
  * 'asInternalChannel' is not supported in this implementation.
  */
+@SuppressWarnings("deprecation")
 public class ChannelVisitorHandler extends AbstractHandler<ChannelVisitorHandler> {
 
     /**
      * Executes logic to handle events on the provided channel within the provided context.
-     *
+     * <p>
      * The 'run' method sets up a 'Replies' instance and assigns to it a lambda function
      * that takes a 'ChannelVisitor', calls its 'visit' method with the channel as argument,
      * and sends the resulting message as a reply.
@@ -48,7 +48,7 @@ public class ChannelVisitorHandler extends AbstractHandler<ChannelVisitorHandler
      * @throws ClosedIORuntimeException if an I/O error occurs.
      */
     @Override
-    public void run(ChronicleContext context, ChronicleChannel channel) throws ClosedIORuntimeException {
+    public void run(ChronicleContext context, net.openhft.chronicle.wire.channel.ChronicleChannel channel) throws ClosedIORuntimeException {
         // Acquire a method writer for the Replies interface
         Replies replies = channel.methodWriter(Replies.class);
 
@@ -61,7 +61,7 @@ public class ChannelVisitorHandler extends AbstractHandler<ChannelVisitorHandler
 
     /**
      * Throws UnsupportedOperationException as this functionality is not supported.
-     *
+     * <p>
      * This method is intended to provide an internal channel based on provided
      * context and channel configuration. However, the functionality is not supported
      * in this implementation and will throw an exception if called.
@@ -71,8 +71,7 @@ public class ChannelVisitorHandler extends AbstractHandler<ChannelVisitorHandler
      * @throws UnsupportedOperationException always, as the operation is not supported.
      */
     @Override
-    public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg channelCfg) {
-        // Unsupported operation, throw an exception if this method is called
+    public net.openhft.chronicle.wire.channel.ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg<?> channelCfg) {
         throw new UnsupportedOperationException();
     }
 }

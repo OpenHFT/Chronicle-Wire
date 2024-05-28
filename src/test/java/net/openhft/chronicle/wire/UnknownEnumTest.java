@@ -73,21 +73,11 @@ public class UnknownEnumTest extends WireTestCommon {
         assertThrows(IllegalArgumentException.class, () -> wire.read("value").asEnum(StrictYesNo.class));
     }
 
-    // This test demonstrates the behavior of BinaryWire when encountering an unknown Enum type
-    @Test
-    public void shouldConvertEnumValueToStringWhenTypeIsNotKnownInBinaryWire() {
-        Wires.THROW_CNFRE = false;
-        expectException("Unknown class (net.openhft.chronicle.wire.UnknownEnumTest$Temp), perhaps you need to define an alias");
-        final Bytes<ByteBuffer> bytes = Bytes.wrapForRead(ByteBuffer.wrap(SERIALISED_MAP_DATA));
-
-        final Wire wire = WireType.BINARY.apply(bytes);
-        final Map<String, Object> enumField = wire.read("event").marshallableAsMap(String.class, Object.class);
-        assertEquals("FIRST", enumField.get("key"));
-    }
-
+    /*
+    Documents the behaviour of BinaryWire when an enum type is unknown
+     */
     @Test(expected = ClassNotFoundRuntimeException.class)
     public void shouldConvertEnumValueToStringWhenTypeIsNotKnownInBinaryWireThrows() {
-        Wires.THROW_CNFRE = true;
         final Bytes<ByteBuffer> bytes = Bytes.wrapForRead(ByteBuffer.wrap(SERIALISED_MAP_DATA));
 
         final Wire wire = WireType.BINARY.apply(bytes);
@@ -116,7 +106,7 @@ public class UnknownEnumTest extends WireTestCommon {
         }
     }
 
-    // Dynamic Enum for testing
+    @SuppressWarnings("deprecation")
     enum YesNo implements DynamicEnum {
         Yes,
         No

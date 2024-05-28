@@ -39,6 +39,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
     private volatile Object lastArgumentRef;
 
     // This method sets up the test environment before each test case.
+    @SuppressWarnings("deprecation")
     @Before
     public void setUp() {
         // Create a new BinaryWire backed by a dynamically expanding Bytes object.

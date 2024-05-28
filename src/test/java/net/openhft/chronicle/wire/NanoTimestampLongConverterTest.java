@@ -93,7 +93,6 @@ public class NanoTimestampLongConverterTest extends WireTestCommon {
     public void roundTripTest() {
         roundTrip(TIMESTAMP_STRING_MELBOURNE, TIMESTAMP, new NanoTimestampLongConverter("Australia/Melbourne"));
         roundTrip(TIMESTAMP_STRING_UTC_NO_SUFFIX, TIMESTAMP, new NanoTimestampLongConverter("UTC"));
-        roundTrip(TIMESTAMP_STRING_UTC, TIMESTAMP, new NanoTimestampLongConverter("UTC", true));
     }
 
     // Helper method for the round-trip conversions.

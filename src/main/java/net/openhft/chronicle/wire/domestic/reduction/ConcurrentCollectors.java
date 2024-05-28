@@ -246,5 +246,4 @@ public final class ConcurrentCollectors {
             throw new IllegalStateException(String.format("Duplicate value for %s", u));
         };
     }
-
 }

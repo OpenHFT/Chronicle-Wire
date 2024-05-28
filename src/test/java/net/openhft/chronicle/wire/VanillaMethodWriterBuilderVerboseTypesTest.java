@@ -84,7 +84,7 @@ public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chro
         TextWire textWire = new TextWire(bytes);
 
         // Configure method writer builder with verbosity settings
-        VanillaMethodWriterBuilder<Printer> methodWriterBuilder = (VanillaMethodWriterBuilder) textWire.methodWriterBuilder(false, Printer.class);
+        VanillaMethodWriterBuilder<Printer> methodWriterBuilder = (VanillaMethodWriterBuilder<Printer>) textWire.methodWriterBuilder(false, Printer.class);
         methodWriterBuilder.verboseTypes(verboseTypes);
 
         // Create a printer instance and print a message

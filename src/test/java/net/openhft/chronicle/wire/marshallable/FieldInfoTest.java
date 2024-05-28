@@ -258,8 +258,8 @@ public class FieldInfoTest extends WireTestCommon {
                         "}\n" +
                         ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: dynamicEnum,\n" +
-                        "  type: !type net.openhft.chronicle.wire.marshallable.TestDynamicEnum,\n" +
-                        "  bracketType: UNKNOWN,\n" +
+                        "  type: !type net.openhft.chronicle.wire.marshallable.TestEnum,\n" +
+                        "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         "]",

@@ -57,4 +57,3 @@ public class Base32LongConverter extends AbstractLongConverter {
             converter.addEncode(ch, Character.toUpperCase(ch));
     }
 }
-

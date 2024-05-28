@@ -188,7 +188,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
     }
 
     @Override
-    public ValueOut writeEvent(Class expectedType, Object eventKey) throws InvalidMarshallableException {
+    public ValueOut writeEvent(Class<?> expectedType, Object eventKey) throws InvalidMarshallableException {
         return wireAcquisition.acquireWire().writeEvent(expectedType, eventKey);
     }
 

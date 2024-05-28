@@ -35,7 +35,6 @@ public class WireTypeConverterInternal {
         return jsonWire.bytes();
     }
 
-
     /**
      * Adds aliasing support for type leniency. This facilitates the serialization and deserialization
      * of objects whose class names might have changed. By providing an alias, the system can recognize
@@ -44,7 +43,7 @@ public class WireTypeConverterInternal {
      * @param newClass    The new class type to use for serialization and deserialization.
      * @param oldTypeName The old type name that this new class is an alias for.
      */
-    public void addAlias(Class newClass, String oldTypeName) {
+    public void addAlias(Class<?> newClass, String oldTypeName) {
         jsonWire.classLookup().addAlias(newClass, oldTypeName);
         yamlWire.classLookup().addAlias(newClass, oldTypeName);
     }

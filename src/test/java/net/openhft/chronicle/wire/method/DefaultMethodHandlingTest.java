@@ -43,7 +43,6 @@ interface WithDefault {
         throw new UnsupportedOperationException();
     }
 }
-
 /**
  * Test class for validating the handling of default methods in the WithDefault interface.
  * Extends WireTestCommon for common wire testing utilities.

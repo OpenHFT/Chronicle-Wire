@@ -48,6 +48,7 @@ import java.util.function.Function;
  * Represents the main class for the Chronicle Service which is responsible for
  * accepting and managing incoming connections using multiple threads.
  */
+@SuppressWarnings("deprecation")
 public class ChronicleServiceMain extends SelfDescribingMarshallable implements Closeable {
     int port;  // The port on which the server listens for incoming connections
     Marshallable microservice;  // The microservice configuration or definition (not used in the provided code)
@@ -82,12 +83,10 @@ public class ChronicleServiceMain extends SelfDescribingMarshallable implements 
         Thread.currentThread().setName("acceptor");
         ExecutorService service = Executors.newCachedThreadPool(new NamedThreadFactory("connections"));  // Thread pool to manage incoming connections
         try {
-            ssc = ServerSocketChannel.open();  // Open the server socket channel
-            ssc.bind(new InetSocketAddress(port));  // Bind it to the specified port
-            ChronicleChannelCfg channelCfg = new ChronicleChannelCfg().port(port);  // Configuration for the channel with the specified port
-            Function<ChannelHeader, ChannelHeader> redirectFunction = this::replaceOutHeader;  // Function to redirect channel headers (method not provided in the code)
-
-            // Continuously accept incoming connections until the service is closed
+            ssc = ServerSocketChannel.open();
+            ssc.bind(new InetSocketAddress(port));
+            ChronicleChannelCfg<?> channelCfg = new ChronicleChannelCfg<>().addHostnamePort(null, port);
+            Function<ChannelHeader, ChannelHeader> redirectFunction = this::replaceOutHeader;
             while (!isClosed()) {
                 final SocketChannel sc = ssc.accept();
                 sc.socket().setTcpNoDelay(true);
@@ -125,7 +124,7 @@ public class ChronicleServiceMain extends SelfDescribingMarshallable implements 
         if (channelHandler instanceof OkHeader)
             return new OkHeader();
         //noinspection unchecked
-        return new RedirectHeader(Collections.EMPTY_LIST);
+        return new RedirectHeader(Collections.emptyList());
     }
 
     @Override
@@ -162,6 +161,7 @@ public class ChronicleServiceMain extends SelfDescribingMarshallable implements 
          * This method manages the lifecycle of the channel's connection, processes messages/events
          * using the service's microservice logic, and handles various exceptions.
          */
+        @SuppressWarnings("try")
         void run() {
             try {
                 Jvm.debug().on(ChronicleServiceMain.class, "Server got " + channel.headerIn());

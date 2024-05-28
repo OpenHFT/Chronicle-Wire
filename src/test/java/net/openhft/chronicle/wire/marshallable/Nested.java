@@ -27,6 +27,7 @@ import java.util.Set;
  * Represents a nested structure containing various data types.
  * This class can be serialized/deserialized as it extends SelfDescribingMarshallable.
  */
+@SuppressWarnings("serial")
 public class Nested extends SelfDescribingMarshallable {
 
     // Holds scalar values

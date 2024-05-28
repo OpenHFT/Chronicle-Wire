@@ -22,9 +22,7 @@ import net.openhft.chronicle.core.time.SetTimeProvider;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.converter.ShortText;
-import net.openhft.chronicle.wire.utils.YamlAgitator;
-import net.openhft.chronicle.wire.utils.YamlTester;
-import net.openhft.chronicle.wire.utils.YamlTesterParametersBuilder;
+import net.openhft.chronicle.wire.utils.*;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SuppressWarnings("deprecated")
+@SuppressWarnings("deprecation")
 @RunWith(Parameterized.class)
 public class AccountsTest extends WireTestCommon {
     // Test scenarios located in the following paths

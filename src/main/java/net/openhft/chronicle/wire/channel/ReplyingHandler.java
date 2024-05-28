@@ -29,6 +29,7 @@ import net.openhft.chronicle.core.io.ClosedIORuntimeException;
  *
  * @param <H> The specific subclass of ReplyingHandler, used for ensuring type correctness in fluent APIs.
  */
+@SuppressWarnings("deprecation")
 public abstract class ReplyingHandler<H extends ReplyingHandler<H>> extends AbstractHandler<H> {
     @Override
     public abstract ChannelHeader responseHeader(ChronicleContext context);
@@ -39,7 +40,7 @@ public abstract class ReplyingHandler<H extends ReplyingHandler<H>> extends Abst
     }
 
     @Override
-    public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg channelCfg) {
+    public ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg<?> channelCfg) {
         throw new UnsupportedOperationException("asInternalChannel operation is not supported in ReplyingHandler");
     }
 }

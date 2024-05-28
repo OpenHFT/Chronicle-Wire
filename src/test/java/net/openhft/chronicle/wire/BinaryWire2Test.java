@@ -40,8 +40,7 @@ import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
-@SuppressWarnings("rawtypes")
-// Testing the BinaryWire2 with different padding configurations
+@SuppressWarnings({"rawtypes","try"})
 @RunWith(value = Parameterized.class)
 public class BinaryWire2Test extends WireTestCommon {
     final boolean usePadding;
@@ -63,6 +62,7 @@ public class BinaryWire2Test extends WireTestCommon {
     }
 
     // Create a new BinaryWire instance based on the current test configuration
+    @SuppressWarnings("deprecation")
     @NotNull
     private BinaryWire createWire() {
         bytes.clear();
@@ -674,7 +674,7 @@ public class BinaryWire2Test extends WireTestCommon {
 
         // Create a repetitive string and convert it to BytesStore
         @NotNull String str = "xxxxxxxxxxxxxxxx2xxxxxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyyyyyyyy2yyyyyyyyyyyyyyyyy";
-        BytesStore bytes = Bytes.from(str);
+        BytesStore<?, ?> bytes = Bytes.from(str);
 
         // Write the string to the wire using the specified compression
         wire.write().bytes(bytes);
@@ -849,7 +849,7 @@ public class BinaryWire2Test extends WireTestCommon {
 
         // Read the nested wire's content and check its value
         wire1.readDocument(null, w -> {
-            @Nullable final BytesStore bytesStore = w.read(() -> "nested")
+            @Nullable final BytesStore<?, ?> bytesStore = w.read(() -> "nested")
                     .bytesLiteral();
             assertEquals(wire.bytes(), bytesStore);
         });
@@ -1070,4 +1070,3 @@ public class BinaryWire2Test extends WireTestCommon {
         }
     }
 }
-

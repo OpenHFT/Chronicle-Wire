@@ -113,5 +113,4 @@ class AbstractUntypedFieldTest extends WireTestCommon {
     private static final class Holder {
         A a;
     }
-
 }

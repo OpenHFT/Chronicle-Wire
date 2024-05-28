@@ -29,5 +29,4 @@ public class AccountStatusOKTest {
         assertEquals("target", ShortText.INSTANCE.asString(asf.target()));
         assertEquals(getAccountStatus(), asf.accountStatus());
     }
-
 }

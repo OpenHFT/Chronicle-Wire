@@ -25,6 +25,7 @@ package net.openhft.chronicle.wire.channel.impl;
  * was detected when it shouldn't have been or in a context where it was not expected.
  */
 public class HTTPDetectedException extends InvalidProtocolException {
+    private static final long serialVersionUID = 0L;
 
     /**
      * Constructs a new HTTPDetectedException with the specified detail message.

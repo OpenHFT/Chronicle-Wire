@@ -29,11 +29,11 @@ import org.junit.Test;
 
 import java.io.StringWriter;
 
-import static net.openhft.chronicle.wire.DynamicEnum.updateEnum;
 import static org.junit.Assert.*;
 
 // The WireDynamicEnumTest class extends WireTestCommon to inherit its common functionalities.
 // This class is intended to test dynamic enumeration functionalities in the context of wiring.
+@SuppressWarnings("deprecation")
 public class WireDynamicEnumTest extends WireTestCommon {
 
     // This setup method is executed before each test.
@@ -278,7 +278,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
             public void unwraps(UnwrapsWDENum unwrapsWDENum) {
                 WDENums c = unwrapsWDENum.c;
                 sw.append("Update " + c + "\n");
-                updateEnum(c);
+                net.openhft.chronicle.wire.DynamicEnum.updateEnum(c);
             }
 
             // Implement the 'push2' method to capture the name, nice, and value of the WDENum2 enum.
@@ -292,7 +292,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
             public void unwrap2(UnwrapsWDENum2 unwrapsWDENum2) {
                 WDENum2 d = unwrapsWDENum2.d;
                 sw.append("Update " + d + "\n");
-                updateEnum(d);
+                net.openhft.chronicle.wire.DynamicEnum.updateEnum(d);
             }
         });
 

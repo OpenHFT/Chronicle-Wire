@@ -44,7 +44,7 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 public abstract class AbstractGeneratedMethodReader implements MethodReader {
 
     // A no-operation message history consumer.
-    private static final Consumer<MessageHistory> NO_OP_MH_CONSUMER = Mocker.ignored(Consumer.class);
+    private static final Consumer<MessageHistory> NO_OP_MH_CONSUMER = Jvm.uncheckedCast(Mocker.ignored(Consumer.class));
     public final static ThreadLocal<String> SERVICE_NAME = new ThreadLocal<>();
     private final static ConcurrentHashMap<String, MessageHistoryThreadLocal> TEMP_MESSAGE_HISTORY_BY_SERVICE_NAME = new ConcurrentHashMap<>();
     protected final WireParselet debugLoggingParselet;
@@ -61,9 +61,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     // Consumer for processing message history.
     private Consumer<MessageHistory> historyConsumer = NO_OP_MH_CONSUMER;
 
-    private Predicate predicate;
-
-    // Flag to determine if scanning is active.
+    private Predicate<MethodReader> predicate;
     private boolean scanning;
 
     /**
@@ -95,7 +93,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      * @param predicate The predicate for filtering
      * @return The current instance of the AbstractGeneratedMethodReader class
      */
-    public AbstractGeneratedMethodReader predicate(Predicate predicate) {
+    public AbstractGeneratedMethodReader predicate(Predicate<MethodReader> predicate) {
         this.predicate = predicate;
         return this;
     }
@@ -140,36 +138,9 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      * @param wireIn Data input.
      * @return MethodReaderStatus.
      */
-    protected MethodReaderStatus readOneGenerated(WireIn wireIn) {
-        readOneCall(wireIn);
-        return MethodReaderStatus.KNOWN;
-    }
+    protected abstract MethodReaderStatus readOneGenerated(WireIn wireIn);
 
-    /**
-     * Reads call name and arguments from the wire and performs invocation on a target object instance.
-     * The implementation of this method is generated at runtime, see {@link GenerateMethodReader}.
-     *
-     * @param wireIn Data input.
-     * @return {@code true} read a known event, {@code false} if reading should be delegated.
-     */
-    @Deprecated(/* for removal in x.26*/)
-    protected boolean readOneCall(WireIn wireIn) {
-        // At least one of these methods must be overridden.
-        readOneGenerated(wireIn);
-        return true;
-    }
-
-    protected MethodReaderStatus readOneMetaGenerated(WireIn wireIn) {
-        readOneCallMeta(wireIn);
-        return MethodReaderStatus.KNOWN;
-    }
-
-    @Deprecated(/* for removal in x.26*/)
-    protected boolean readOneCallMeta(WireIn wireIn) {
-        // At least one of these methods must be overridden.
-        readOneMetaGenerated(wireIn);
-        return true;
-    }
+    protected abstract MethodReaderStatus readOneMetaGenerated(WireIn wireIn);
 
     /**
      * Reads the content based on the provided document context.
@@ -345,7 +316,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      *
      * @throws ClosedIllegalStateException if this instance has already been closed.
      */
-    public void throwExceptionIfClosed() throws ClosedIllegalStateException{
+    public void throwExceptionIfClosed() throws ClosedIllegalStateException {
         if (isClosed())
             throw new ClosedIllegalStateException("Closed");
     }
@@ -405,7 +376,6 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         // Return the potentially modified object.
         return o;
     }
-
 
     /**
      * Invokes a given method on the provided object with the specified arguments.

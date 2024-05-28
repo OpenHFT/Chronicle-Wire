@@ -139,7 +139,7 @@ public class GenerateMethodReader {
      * @param type The type under consideration
      * @return A string representing the method's signature
      */
-    private static String signature(Method m, Class type) {
+    private static String signature(Method m, Class<?> type) {
         return GenericReflection.getReturnType(m, type) + " " + m.getName() + " " + Arrays.toString(GenericReflection.getParameterTypes(m, type));
     }
 
@@ -870,6 +870,9 @@ public class GenerateMethodReader {
         } else {
             // Handling other object types.
             final String typeName = argumentType.getCanonicalName();
+            if (!argumentType.isArray() && !AbstractMarshallableCfg.class.isAssignableFrom(argumentType) && !Collection.class.isAssignableFrom(argumentType) && !Map.class.isAssignableFrom(argumentType) && Object.class != argumentType && !argumentType.isInterface()) {
+                return format("%s = %s.object(%s, %s.class);\n", argumentName, valueInName, argumentName, typeName);
+            }
             return format("%s = %s.object(checkRecycle(%s), %s.class);\n", argumentName, valueInName, argumentName, typeName);
         }
     }

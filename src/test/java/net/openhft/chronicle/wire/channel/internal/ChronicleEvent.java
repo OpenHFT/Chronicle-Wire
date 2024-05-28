@@ -25,23 +25,18 @@ import net.openhft.chronicle.wire.*;
 
 // Extends `BytesInBinaryMarshallable` which likely facilitates efficient serialization/deserialization
 // of this object into/from binary format (such as Bytes).
+@SuppressWarnings("this-escape")
 public class ChronicleEvent extends BytesInBinaryMarshallable {
 
     // Static fields that are related to the class itself, not to an instance.
     // They seem to be used for efficient marshalling and copying.
     static final int START_BYTES = BytesUtil.triviallyCopyableStart(ChronicleEvent.class);
     static final int LENGTH_BYTES = BytesUtil.triviallyCopyableLength(ChronicleEvent.class);
-    static int count = 0; // might be used for debugging or some control mechanism.
-
-    // Bytes fields for specific text groups.
-    private final Bytes text3 = Bytes.forFieldGroup(this, "text3");
-    private final Bytes text4 = Bytes.forFieldGroup(this, "text4");
-
-    // Various fields for the event.
-    private long sendingTimeNS;  // timestamp for when the event was sent.
-    private long transactTimeNS; // timestamp for when the event was processed.
-
-    // Fields with converters, likely to change the format of the long values.
+    static int count = 0;
+    private final Bytes<ChronicleEvent> text3 = Bytes.forFieldGroup(this, "text3");
+    private final Bytes<ChronicleEvent> text4 = Bytes.forFieldGroup(this, "text4");
+    private long sendingTimeNS;
+    private long transactTimeNS;
     @LongConversion(NanoTimestampLongConverter.class)
     private long dateTime1, dateTime2, dateTime3, dateTime4;
     @LongConversion(Base85LongConverter.class)
@@ -58,12 +53,12 @@ public class ChronicleEvent extends BytesInBinaryMarshallable {
 
     // Methods to read and write the object from/into Bytes, utilizing unsafe operations for efficiency.
     @Override
-    public final void readMarshallable(BytesIn bytes) throws IORuntimeException {
+    public final void readMarshallable(BytesIn<?> bytes) throws IORuntimeException {
         bytes.unsafeReadObject(this, START_BYTES, LENGTH_BYTES);
     }
 
     @Override
-    public final void writeMarshallable(BytesOut bytes) {
+    public final void writeMarshallable(BytesOut<?> bytes) {
         bytes.unsafeWriteObject(this, START_BYTES, LENGTH_BYTES);
 
         // A control mechanism to slow down the producer during warmup, possibly for testing or debugging.

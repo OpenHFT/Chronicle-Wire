@@ -46,11 +46,11 @@ public interface ChronicleChannel extends Closeable, MarshallableOut, Marshallab
      * @return a new ChronicleChannel instance
      * @throws InvalidMarshallableException if there's an error marshalling the objects for communication
      */
-    static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg channelCfg, ChannelHeader headerOut) throws InvalidMarshallableException {
+    static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg<?> channelCfg, ChannelHeader headerOut) throws InvalidMarshallableException {
         return ChronicleChannelUtils.newChannel(socketRegistry, channelCfg, headerOut, null);
     }
 
-    static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg channelCfg, ChannelHeader headerOut, Consumer<ChronicleChannel> closeCallback) throws InvalidMarshallableException {
+    static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg<?> channelCfg, ChannelHeader headerOut,  Consumer<ChronicleChannel> closeCallback) throws InvalidMarshallableException {
         return ChronicleChannelUtils.newChannel(socketRegistry, channelCfg, headerOut, closeCallback);
     }
 
@@ -59,7 +59,7 @@ public interface ChronicleChannel extends Closeable, MarshallableOut, Marshallab
      *
      * @return the ChronicleChannelCfg instance representing the channel configuration
      */
-    ChronicleChannelCfg channelCfg();
+    ChronicleChannelCfg<?> channelCfg();
 
     /**
      * Retrieves the header for outgoing messages.

@@ -122,7 +122,6 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     @Test
     public void testCheckThatNewDataAddedToADocumentDoesNotEffectOldReads() {
 
-        @SuppressWarnings("rawtypes")
         Bytes<?> b = Bytes.elasticByteBuffer();
         try {
             // Creating a Wire instance
@@ -153,7 +152,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         }
     }
 
-    // DTO1 class to represent a data structure with one field 'one'
+    @SuppressWarnings("this-escape")
     public static class DTO1 extends SelfDescribingMarshallable implements Demarshallable {
 
         // Field to hold an integer value
@@ -183,7 +182,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         }
     }
 
-    // DTO2 class to represent a data structure with fields 'one', 'two', and 'three'
+    @SuppressWarnings("this-escape")
     public static class DTO2 extends SelfDescribingMarshallable implements Demarshallable {
         // Field to hold an Object
         Object three;
@@ -244,4 +243,3 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         }
     }
 }
-

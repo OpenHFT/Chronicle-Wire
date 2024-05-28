@@ -613,5 +613,4 @@ public class JSONWireTest extends WireTestCommon {
         private boolean bool;
     }
 
-
 }

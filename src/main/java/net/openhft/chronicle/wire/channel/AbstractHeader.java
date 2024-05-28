@@ -54,6 +54,7 @@ public abstract class AbstractHeader<H extends AbstractHeader<H>>
      * @param systemContext the SystemContext object to set as the system context for this header.
      * @return this instance of the header, allowing method chaining.
      */
+    @SuppressWarnings("unchecked")
     @Override
     public H systemContext(SystemContext systemContext) {
         this.systemContext = systemContext;
@@ -76,10 +77,10 @@ public abstract class AbstractHeader<H extends AbstractHeader<H>>
      * @param sessionName the String to set as the session name for this header.
      * @return this instance of the header, allowing method chaining.
      */
+    @SuppressWarnings("unchecked")
     @Override
     public H sessionName(String sessionName) {
         this.sessionName = sessionName;
         return (H) this;
     }
 }
-

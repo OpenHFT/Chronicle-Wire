@@ -63,5 +63,4 @@ class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
         assertEquals("Hello", iterator.next());
         assertFalse(iterator.hasNext());
     }
-
 }

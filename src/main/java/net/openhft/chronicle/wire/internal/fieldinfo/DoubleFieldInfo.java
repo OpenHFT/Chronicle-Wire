@@ -40,7 +40,7 @@ public final class DoubleFieldInfo extends UnsafeFieldInfo {
      * @param bracketType The bracket type associated with the field.
      * @param field       The field object representation.
      */
-    public DoubleFieldInfo(String name, Class type, BracketType bracketType, @NotNull Field field) {
+    public DoubleFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         super(name, type, bracketType, field);
     }
 

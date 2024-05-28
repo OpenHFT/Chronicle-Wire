@@ -56,7 +56,7 @@ public class BinaryInTextTest extends WireTestCommon {
         Bytes<?> a = wireType.fromString(Bytes.class, "A==");
         assertEquals("A==", a.toString());
 
-        BytesStore a2 = wireType.fromString(BytesStore.class, "A==");
+        BytesStore<?, ?> a2 = wireType.fromString(BytesStore.class, "A==");
         assertEquals("A==", a2.toString());
 
         Bytes<?> b = wireType.fromString(Bytes.class, "!!binary BA==");
@@ -89,6 +89,6 @@ public class BinaryInTextTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     static class BIT extends SelfDescribingMarshallable {
         Bytes<?> b;
-        BytesStore c;
+        BytesStore<?, ?> c;
     }
 }

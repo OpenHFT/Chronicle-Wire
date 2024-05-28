@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
  *
  * @param <M> Represents the meta-data associated with the class being generated.
  */
+@SuppressWarnings("unchecked")
 public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.MetaData<M>> {
 
     // TODO Use Wires.loadFromJava() instead of a public static final
@@ -140,7 +141,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
             }
 
             // Compile and load the generated class.
-            return CACHED_COMPILER.loadFromJava(classLoader, fullName, sourceCode.toString());
+            return (Class<T>) CACHED_COMPILER.loadFromJava(classLoader, fullName, sourceCode.toString());
         } catch (Throwable e) {
             // If there's any error during generation, compile, or load, throw an exception.
             throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + sourceCode, e));
@@ -234,9 +235,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
         if (code.length() > maxCode())
             code = code.substring(1, maxCode());
         char ch = 'A';
-        ch += (h >>> 1) % 26;
-
-        // Construct the final class name.
+        ch += (char) ((h >>> 1) % 26);
         return metaData.baseClassName() + '$' + ch + code;
     }
 
@@ -459,6 +458,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
      * The `MetaData` class serves as a blueprint for the characteristics of the class
      * to be generated. It provides specifications like the package name, base class name,
      * interfaces to be implemented, and the flag to use an update interceptor.
+     *
      * @param <M> Represents the actual type extending this `MetaData` class, facilitating method chaining.
      */
     public abstract static class MetaData<M extends MetaData<M>> extends SelfDescribingMarshallable {

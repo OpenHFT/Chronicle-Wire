@@ -26,6 +26,7 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
  * such as executing actions within a context, handling responses, and configuring channel settings.
  * The ChannelHandler is passed from the client to the gateway or set by the gateway based on context.
  */
+@SuppressWarnings("deprecation")
 public interface ChannelHandler extends ChannelHeader {
 
     /**
@@ -66,7 +67,7 @@ public interface ChannelHandler extends ChannelHeader {
      * @param channelCfg the ChronicleChannelCfg used to configure the new internal channel
      * @return a new ChronicleChannel instance
      */
-    ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg channelCfg);
+    ChronicleChannel asInternalChannel(ChronicleContext context, ChronicleChannelCfg<?> channelCfg);
 
     /**
      * Indicates whether the handler supports buffering.

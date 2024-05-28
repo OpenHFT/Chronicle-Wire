@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.wire.internal.VanillaFieldInfo;
 import net.openhft.chronicle.wire.internal.fieldinfo.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,7 +36,6 @@ import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
  */
 public interface FieldInfo {
 
-    @SuppressWarnings("deprecation" /* VanillaFieldInfo will become internal in the future, remove this suppression in x.26 */)
     static FieldInfo createForField(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         // Choose the FieldInfo type based on the field's type.
         if (!type.isPrimitive()) {
@@ -62,7 +62,7 @@ public interface FieldInfo {
      */
     @NotNull
     static Wires.FieldInfoPair lookupClass(@NotNull Class<?> aClass) {
-        final SerializationStrategy<?> ss = Wires.CLASS_STRATEGY.get(aClass);
+        final SerializationStrategy ss = Wires.CLASS_STRATEGY.get(aClass);
         switch (ss.bracketType()) {
             case NONE:
             case SEQ:
@@ -83,7 +83,7 @@ public interface FieldInfo {
         for (@NotNull WireMarshaller.FieldAccess fa : marshaller.fields) {
             final String name = fa.field.getName();
             final Class<?> type = fa.field.getType();
-            final SerializationStrategy<?> ss2 = Wires.CLASS_STRATEGY.get(type);
+            final SerializationStrategy ss2 = Wires.CLASS_STRATEGY.get(type);
             final BracketType bracketType = ss2.bracketType();
             fields.add(createForField(name, type, bracketType, fa.field));
         }
@@ -108,7 +108,6 @@ public interface FieldInfo {
      * @return a {@link Class} identifying the declared type of the field
      * represented by this {@code FieldInfo} object.
      */
-    @SuppressWarnings("rawtypes")
     Class<?> type();
 
     /**

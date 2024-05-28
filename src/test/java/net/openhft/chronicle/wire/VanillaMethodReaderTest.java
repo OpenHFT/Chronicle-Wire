@@ -30,6 +30,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 // Extend WireTestCommon to inherit common utility and setup methods for wire tests
+@SuppressWarnings("deprecation")
 public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Define an interface representing a method with a single message parameter
@@ -123,7 +124,6 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
         try (DocumentContext dc = wire.readingDocument()) {
             final ValueIn marketData = dc.wire().read("marketData");
 
-
             assertEquals("" +
                             "read md - 00000010 80 90 82 82 82 82 82 82  00 00 00 00 00 00 00 00 ········ ········\n" +
                             "00000020 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
@@ -137,5 +137,4 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
     interface ITCO {
         void marketData(TriviallyCopyableMarketData tcmd);
     }
-
 }

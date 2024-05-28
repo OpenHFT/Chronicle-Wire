@@ -34,6 +34,7 @@ import java.util.Set;
  *
  * @param <C> the type of the implementing class that is derived from ChronicleChannelCfg
  */
+@SuppressWarnings("unchecked")
 public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfDescribingMarshallable {
     static {
         Handler.init();
@@ -50,7 +51,6 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
 
     @Deprecated(/* to be removed in x.27  - use net.openhft.chronicle.wire.channel.ChronicleChannelCfg.hostports instead */)
     private String hostname;
-
 
     @Deprecated(/* to be removed in x.27 - use net.openhft.chronicle.wire.channel.ChronicleChannelCfg.hostports instead */)
     private int port;
@@ -84,9 +84,9 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
      * @param port     the designated port number
      * @return the current configuration instance, supporting chained method calls
      */
-    public ChronicleChannelCfg<C> addHostnamePort(String hostname, int port) {
+    public C addHostnamePort(String hostname, int port) {
         hostports.add(new HostPortCfg(hostname, port));
-        return this;
+        return (C) this;
     }
 
     /**
@@ -105,9 +105,9 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
      * @param initiator the desired state for the initiator flag
      * @return the current configuration instance, supporting chained method calls
      */
-    public ChronicleChannelCfg<C> initiator(boolean initiator) {
+    public C initiator(boolean initiator) {
         this.initiator = initiator;
-        return this;
+        return (C) this;
     }
 
     /**

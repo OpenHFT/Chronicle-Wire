@@ -149,5 +149,4 @@ public class ReadOneTest extends WireTestCommon {
         messageHistory.addSource(value, value);
         return messageHistory;
     }
-
 }

@@ -90,7 +90,6 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
     }
 
     @Override
-    @SuppressWarnings("rawtypes")
     public void close() {
         if (chainedElement)
             return;

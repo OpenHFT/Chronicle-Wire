@@ -20,7 +20,7 @@ package net.openhft.chronicle.wire.internal.fieldinfo;
 
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.wire.BracketType;
-import net.openhft.chronicle.wire.VanillaFieldInfo;
+import net.openhft.chronicle.wire.internal.VanillaFieldInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
@@ -41,7 +41,7 @@ class UnsafeFieldInfo extends VanillaFieldInfo {
      * @param bracketType The bracket type associated with the field.
      * @param field       The actual field representation.
      */
-    public UnsafeFieldInfo(String name, Class type, BracketType bracketType, @NotNull Field field) {
+    public UnsafeFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         super(name, type, bracketType, field);
     }
 

@@ -40,9 +40,7 @@ public class Issue844Test extends WireTestCommon {
         );
     }
 
-
     public enum Enum {
         INSTANCE
     }
-
 }

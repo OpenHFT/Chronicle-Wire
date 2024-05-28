@@ -14,6 +14,7 @@ import net.openhft.chronicle.wire.converter.ShortText;
  *
  * @param <E> The type of the event extending this class, used for fluent interface pattern.
  */
+@SuppressWarnings("unchecked")
 public class AbstractEvent<E extends AbstractEvent<E>> extends SelfDescribingMarshallable {
     @ShortText
     private long sender;

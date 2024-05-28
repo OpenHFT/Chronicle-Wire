@@ -72,4 +72,3 @@ public class NanoDurationLongConverter implements LongConverter {
         bytes.append(duration(value).toString());
     }
 }
-

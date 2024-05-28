@@ -46,9 +46,9 @@ import static net.openhft.chronicle.wire.WireType.YAML;
  *
  * <p>The ChronicleContext provides methods to set important parameters such as the context's URL, whether
  * to use buffering and affinity, and the context's name (which can define the relative directory).
- * It also manages the lifecycle of closeable resources and provides the URL, buffering state, and the socket registry.</p>
+ * It also manages the lifecycle of closeable resources and provides the URL, buffering state, and the socket registry.
  *
- * <p>Example usage:</p>
+ * <p>Example usage:
  * <pre>
  * String url = "tcp://:0";
  * try (ChronicleContext context = ChronicleContext.newContext(url)
@@ -63,6 +63,7 @@ import static net.openhft.chronicle.wire.WireType.YAML;
  *   assertEquals("say: Hello World", eventType + ": " + text);
  * </pre>
  */
+@SuppressWarnings("deprecation")
 public class ChronicleContext extends SimpleCloseable {
     static {
         // Initialize Handler at static context
@@ -77,6 +78,7 @@ public class ChronicleContext extends SimpleCloseable {
     // URL for the Chronicle context
     private final String url;
     private String name;
+    @SuppressWarnings("deprecation")
     private transient URL _url;
 
     // Socket Registry for handling socket related operations
@@ -103,6 +105,7 @@ public class ChronicleContext extends SimpleCloseable {
      * @param url            the URL for this context
      * @param socketRegistry the socket registry for this context
      */
+    @SuppressWarnings("this-escape")
     protected ChronicleContext(String url, SocketRegistry socketRegistry) {
         this.url = url;
         this.socketRegistry = socketRegistry;
@@ -125,12 +128,13 @@ public class ChronicleContext extends SimpleCloseable {
      * <p>This method supports "internal:" and "tcp:" URL schemas in addition to the standard schemas.
      * If a URL starts with "internal:", a new Handler object is used as the URLStreamHandler.
      * If a URL starts with "tcp:", a new tcp.Handler object is used as the URLStreamHandler.
-     * For other URL schemas, no custom URLStreamHandler is used.</p>
+     * For other URL schemas, no custom URLStreamHandler is used.
      *
      * @param spec the string to parse as a URL.
      * @return the URL parsed from the string.
      * @throws IORuntimeException if the string cannot be parsed as a URL.
      */
+    @SuppressWarnings("deprecation")
     public static URL urlFor(String spec) throws IORuntimeException {
         try {
             if (spec.startsWith("internal:"))
@@ -206,8 +210,7 @@ public class ChronicleContext extends SimpleCloseable {
 
         connectionSupplier
                 .protocol(url().getProtocol())
-                .hostname(hostname == null || hostname.isEmpty() ? "localhost" : hostname)
-                .port(port)
+                .addHostnamePort(hostname == null || hostname.isEmpty() ? "localhost" : hostname, port)
                 .connectionId(connectionId)
                 .buffered(buffered())
                 .initiator(true);

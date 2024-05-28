@@ -60,7 +60,7 @@ import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "try", "serial"})
 @RunWith(value = Parameterized.class)
 public class YamlWireTest extends WireTestCommon {
     static Wire wire = Wire.newYamlWireOnHeap(); // Initialize a static YAML wire
@@ -1212,7 +1212,6 @@ public class YamlWireTest extends WireTestCommon {
         wire.reset();
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteMarshable() {
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
@@ -1999,7 +1998,7 @@ public class YamlWireTest extends WireTestCommon {
     }
 
     interface PutData {
-        void put(Bytes key, Data data);
+        void put(Bytes<?> key, Data data);
     }
 
     static class FieldWithComment extends SelfDescribingMarshallable {

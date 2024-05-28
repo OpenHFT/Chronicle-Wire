@@ -23,7 +23,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-@SuppressWarnings("deprecated")
+@SuppressWarnings("deprecation")
 public class YamlTesterAbstractMarshallableCfgTest extends WireTestCommon {
     // Test method for AbstractMarshallableCfg reset behavior
     @Test

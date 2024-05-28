@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("deprecation")
 public class MessagePathClassifierTest extends WireTestCommon {
 
     // Utility function to convert a string into a VanillaMessageHistory object.
