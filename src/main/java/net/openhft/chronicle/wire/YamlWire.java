@@ -1270,34 +1270,58 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             if (yt.current() == YamlToken.SEQUENCE_ENTRY)
                 yt.next();
 
-            // handle text or literal tokens
-            if (yt.current() == YamlToken.TEXT || yt.current() == YamlToken.LITERAL) {
-                a.append(yt.text()); // append the text value
+            switch (yt.current()) {
+                // handle text or literal tokens
+                case TEXT:
+                case LITERAL:
+                    a.append(yt.text()); // append the text value
 
-                // unescape the text value if needed
-                if (yt.current() == YamlToken.TEXT)
-                    unescape(a, yt.blockQuote());
+                    // unescape the text value if needed
+                    if (yt.current() == YamlToken.TEXT)
+                        unescape(a, yt.blockQuote());
 
-            // handle tag tokens
-            } else if (yt.current() == YamlToken.TAG) {
-                // check for a NULL tag and move to the next token
-                if (yt.isText(NULL_TAG)) {
+                    break;
+
+                case ANCHOR:
+                    // Handle YAML anchors, which can be referred to later as aliases
+                    String alias = yt.text();
                     yt.next();
+                    textTo0(sb);
+                    // Store the anchor for later reference
+                    anchorValues.put(alias, sb.toString());
+                    break;
 
-                    return null;
-                }
+                case ALIAS:
+                    // Retrieve the actual object that an alias refers to
+                    alias = yt.text();
+                    Object o = anchorValues.get(alias);
+                    if (o == null)
+                        throw new IllegalStateException("Unknown alias " + alias + " with no corresponding anchor");
 
-                // check for a BINARY tag, decode and append its value
-                if (yt.isText(BINARY_TAG)) {
                     yt.next();
-                    final byte[] arr = (byte[]) decodeBinary(byte[].class);
-                    for (byte b : arr) {
-                        a.append((char) b);
+                    sb.append(o);
+                    break;
+
+                // handle tag tokens
+                case TAG:
+                    // check for a NULL tag and move to the next token
+                    if (yt.isText(NULL_TAG)) {
+                        yt.next();
+
+                        return null;
                     }
-                    return a;
-                }
 
-                throw new UnsupportedOperationException(yt.toString());
+                    // check for a BINARY tag, decode and append its value
+                    if (yt.isText(BINARY_TAG)) {
+                        yt.next();
+                        final byte[] arr = (byte[]) decodeBinary(byte[].class);
+                        for (byte b : arr) {
+                            a.append((char) b);
+                        }
+                        return a;
+                    }
+
+                    throw new UnsupportedOperationException(yt.toString());
             }
             return a;
         }
