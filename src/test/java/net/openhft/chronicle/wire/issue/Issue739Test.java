@@ -89,4 +89,19 @@ public class Issue739Test extends WireTestCommon {
         assertEquals("hello", ((One)three.twoAndHalf).text);
         assertSame(three.one, three.twoAndHalf);
     }
+
+    @Test
+    public void anchorOfTextField() {
+        Wire wire = new YamlWire(Bytes.wrapForRead(("three: !net.openhft.chronicle.wire.issue.Issue739Test$IThree\n" +
+                "  one: &first !net.openhft.chronicle.wire.issue.Issue739Test$One\n" +
+                "    text: &msg hello\n" +
+                "  two: !net.openhft.chronicle.wire.issue.Issue739Test$Two\n" +
+                "    text: *msg\n" +
+                "  twoAndHalf: !net.openhft.chronicle.wire.issue.Issue739Test$One\n" +
+                "    text: world\n").getBytes()));
+        IThree three = (IThree) wire.getValueIn().<Map<String, Object>>typedMarshallable().get("three");
+        assertEquals("hello", ((One)three.one).text);
+        assertEquals("hello", ((Two)three.two).text);
+        assertEquals("world", ((One)three.twoAndHalf).text);
+    }
 }
