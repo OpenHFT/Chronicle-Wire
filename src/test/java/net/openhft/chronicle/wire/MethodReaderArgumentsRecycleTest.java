@@ -242,7 +242,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
                 "    !net.openhft.chronicle.wire.MethodReaderArgumentsRecycleTest$MyDto { a: 5, b: 6 }\n" +
                 "  ]\n" +
                 "}\n", lastArgumentRef.toString());
-        List list1 = (List) ((ObjectContainingDto) lastArgumentRef).list;
+        List<?> list1 = (List<?>) ((ObjectContainingDto) lastArgumentRef).list;
         assertEquals(first.list, list1);
         MyDto dto0 = (MyDto) list1.get(0);
         MyDto dto1 = (MyDto) list1.get(1);
@@ -256,7 +256,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
                 "    !net.openhft.chronicle.wire.MethodReaderArgumentsRecycleTest$MyDto { a: 9, b: 0 }\n" +
                 "  ]\n" +
                 "}\n", lastArgumentRef.toString());
-        List list2 = (List) ((ObjectContainingDto) lastArgumentRef).list;
+        List<?> list2 = (List<?>) ((ObjectContainingDto) lastArgumentRef).list;
         assertEquals(second.list, list2);
         assertSame(dto0, (MyDto) list1.get(0));
         assertSame(dto1, (MyDto) list1.get(1));
