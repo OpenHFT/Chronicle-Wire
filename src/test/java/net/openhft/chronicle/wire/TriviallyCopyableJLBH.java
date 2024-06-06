@@ -51,7 +51,6 @@ public class TriviallyCopyableJLBH implements JLBHTask {
         CLASS_ALIASES.addAlias(House.class, "House2");
         System.setProperty("disable.thread.safety", "true");
         System.setProperty("jvm.resource.tracing", "false");
-        System.setProperty("check.thread.safety", "false");
     }
 
     public interface BaseHouse {
