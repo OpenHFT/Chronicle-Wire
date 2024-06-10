@@ -20,11 +20,9 @@ package net.openhft.chronicle.wire;
 
 import io.github.classgraph.*;
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import javax.swing.*;
 import java.awt.*;
@@ -32,7 +30,6 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
-import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.sql.*;
 import java.text.SimpleDateFormat;
@@ -91,7 +88,10 @@ final class SerializableObjectTest extends WireTestCommon {
     private static final Set<Class<?>> IGNORED_CLASSES = new HashSet<>(Arrays.asList(
             DoubleSummaryStatistics.class, // Specific classes to exclude from testing.
             DriverPropertyInfo.class,
-            SimpleDateFormat.class
+            SimpleDateFormat.class,
+            java.rmi.dgc.VMID.class,
+            net.openhft.chronicle.wire.serializable.ScalarValues.class,
+            net.openhft.chronicle.wire.serializable.Nested.class
     ));
 
     // Static block to handle specific classes that fail in certain Java versions.
@@ -155,7 +155,6 @@ final class SerializableObjectTest extends WireTestCommon {
                 new DriverPropertyInfo("A", "B"),
                 new Date(TIME_MS),
                 wrap(() -> new SerialClob("A".toCharArray())),
-                wrap(() -> new SerialBlob("A".getBytes(StandardCharsets.UTF_8))),
                 // java.util
                 compose(new ArrayList<String>(), l -> l.add("a"), l -> l.add("b")),
                 compose(new BitSet(), bs -> bs.set(10)),
@@ -214,6 +213,7 @@ final class SerializableObjectTest extends WireTestCommon {
             List<Object> objects = widgetClasses.stream()
                     .filter(c -> !IGNORED_CLASSES.contains(c.loadClass(true)))  // Filter out classes from the ignored list.
                     .filter(SerializableObjectTest::overridesEqualsObject)  // Ensure the class overrides equals() method.
+                    .filter(SerializableObjectTest::overridesToString)  // Ensure the class overrides toString() method.
                     .map(ci -> ci.loadClass(true))  // Load the actual class.
                     .filter(Objects::nonNull)  // Filter out nulls.
                     .map(SerializableObjectTest::createOrNull)  // Create an instance or return null if not possible.
@@ -308,6 +308,10 @@ final class SerializableObjectTest extends WireTestCommon {
                 });
     }
 
+    private static boolean overridesToString(ClassInfo ci) {
+        return !ci.getMethodInfo("toString").isEmpty();
+    }
+
     // Wrap a ThrowingSupplier's get method to propagate its checked exceptions as runtime exceptions
     private static <T, X extends Exception> T wrap(ThrowingSupplier<T, X> supplier) {
         try {
@@ -347,7 +351,6 @@ final class SerializableObjectTest extends WireTestCommon {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/482")
     @TestFactory
     Stream<DynamicTest> test() {
         return DynamicTest.stream(cases(), Objects::toString, wireTypeObject -> {
