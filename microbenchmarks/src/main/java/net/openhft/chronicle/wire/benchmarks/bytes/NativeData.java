@@ -75,7 +75,7 @@ public class NativeData implements Byteable {
     }
 
     @Override
-    public void bytesStore(BytesStore<?, ?> bytesStore, long offset, long length) {
+    public void bytesStore(BytesStore bytesStore, long offset, long length) {
         this.bytesStore = bytesStore;
         this.offset = offset;
         this.length = length;
