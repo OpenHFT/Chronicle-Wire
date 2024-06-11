@@ -351,6 +351,7 @@ public class GenerateMethodWriter {
                 || (!type.getName().contains("$")
                 && importSet.contains(packageName + ".*")))
             return type.getSimpleName();
+        return s;
     }
 
     /**
