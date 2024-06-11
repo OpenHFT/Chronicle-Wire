@@ -182,7 +182,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
         String packageName = Jvm.getPackageName(clazz);
         if (!clazz.getName().contains("$")) {
             // Exclude common java.lang imports and handle others.
-            if (!"java.lang".equals(packageName)
+            if (!"java.lang".equals(packageName) && !packageName.isEmpty()
                     && !importSet.contains(packageName + ".*")) {
                 try {
                     if (!importSet.contains(s))
