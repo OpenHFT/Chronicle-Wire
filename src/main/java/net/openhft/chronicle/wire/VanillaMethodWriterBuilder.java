@@ -108,7 +108,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     public VanillaMethodWriterBuilder(@NotNull Class<T> tClass,
                                       WireType wireType,
                                       @NotNull Supplier<MethodWriterInvocationHandler> handlerSupplier) {
-        this.packageName = tClass.getPackage().getName();
+        this.packageName = Jvm.getPackageName(tClass);
         this.wireType = wireType;
         addInterface(tClass);
         ClassLoader clsLdr = tClass.getClassLoader();

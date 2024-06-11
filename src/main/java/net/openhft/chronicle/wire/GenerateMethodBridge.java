@@ -19,6 +19,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.UpdateInterceptor;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
 
 import java.lang.reflect.Method;
@@ -55,7 +56,7 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
         MethodBridgeMetaData md = gmb.metaData();
 
         // Set metadata properties based on the destination type and the objects to be invoked.
-        md.packageName(destType.getPackage().getName());
+        md.packageName(Jvm.getPackageName(destType));
         md.baseClassName(destType.getSimpleName());
         md.invokes(toInvoke.stream().map(o -> findClass(o)).collect(Collectors.toList()));
         md.interfaces().add(destType);

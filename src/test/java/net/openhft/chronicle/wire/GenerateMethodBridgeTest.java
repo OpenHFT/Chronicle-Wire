@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.Mocker;
 import org.junit.Test;
 
@@ -64,7 +65,7 @@ public class GenerateMethodBridgeTest extends WireTestCommon {
         md.invokes().add(GMBZ.class);
 
         // Setting package and base class names for the metadata
-        md.packageName(getClass().getPackage().getName());
+        md.packageName(Jvm.getPackageName(getClass()));
         md.baseClassName("GMB");
 
         // Acquiring a class based on the metadata

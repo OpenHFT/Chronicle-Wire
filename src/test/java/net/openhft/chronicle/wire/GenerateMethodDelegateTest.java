@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
@@ -42,7 +43,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
         GenerateMethodDelegate gmd = new GenerateMethodDelegate();
 
         // Set metadata for the generated class with an invalid name
-        gmd.metaData().packageName(GenerateMethodDelegateTest.class.getPackage().getName())
+        gmd.metaData().packageName(Jvm.getPackageName(GenerateMethodDelegateTest.class))
                 .baseClassName("GMDT-");
     }
 
@@ -53,7 +54,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
         GenerateMethodDelegate gmd = new GenerateMethodDelegate();
 
         // Set metadata for the generated class
-        gmd.metaData().packageName(GenerateMethodDelegateTest.class.getPackage().getName())
+        gmd.metaData().packageName(Jvm.getPackageName(GenerateMethodDelegateTest.class))
                 .baseClassName("GMDT");
 
         // Add multiple interfaces to the metadata
@@ -103,7 +104,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
         };
 
         // Set metadata for the generated class
-        gmd.metaData().packageName(GenerateMethodDelegateTest.class.getPackage().getName())
+        gmd.metaData().packageName(Jvm.getPackageName(GenerateMethodDelegateTest.class))
                 .baseClassName("GMDTC");
         gmd.metaData().interfaces().add(Chained1.class);
 

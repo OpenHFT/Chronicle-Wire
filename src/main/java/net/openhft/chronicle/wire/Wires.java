@@ -1166,7 +1166,7 @@ public enum Wires {
                 && clazz.isInterface()
                 && clazz != Bytes.class
                 && clazz != BytesStore.class
-                && !clazz.getPackage().getName().startsWith("java");
+                && !Jvm.getPackageName(clazz).startsWith("java");
     }
 
     /**
@@ -1247,7 +1247,7 @@ public enum Wires {
      * @return True if the object's package name is internal, false otherwise.
      */
     public static boolean isInternal(@NotNull Object value) {
-        String name = value.getClass().getPackage().getName();
+        String name = Jvm.getPackageName(value.getClass());
         return name.startsWith("java.")
                 || name.startsWith("javax.")
                 || name.startsWith("jdk.");
