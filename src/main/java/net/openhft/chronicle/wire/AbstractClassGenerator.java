@@ -179,11 +179,11 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
         if (clazz.isArray())
             return nameForClass(clazz.getComponentType()) + "[]";
         String s = clazz.getName().replace('$', '.');
-        Package aPackage = clazz.getPackage();
-        if (aPackage != null && !clazz.getName().contains("$")) {
+        String packageName = Jvm.getPackageName(clazz);
+        if (!clazz.getName().contains("$")) {
             // Exclude common java.lang imports and handle others.
-            if (!"java.lang".equals(aPackage.getName())
-                    && !importSet.contains(aPackage.getName() + ".*")) {
+            if (!"java.lang".equals(packageName) && !packageName.isEmpty()
+                    && !importSet.contains(packageName + ".*")) {
                 try {
                     if (!importSet.contains(s))
                         importSet.add(s);

@@ -19,6 +19,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.UpdateInterceptor;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
 import org.junit.Test;
 
@@ -104,7 +105,7 @@ public class AbstractClassGeneratorTest extends WireTestCommon {
     protected void doTest(String message) throws Exception {
         SimpleClassGenerator scg = new SimpleClassGenerator();
         scg.metaData()
-                .packageName(getClass().getPackage().getName())
+                .packageName(Jvm.getPackageName(getClass()))
                 .baseClassName("ACGT")
                 .message = message;
         Class<Callable<String>> aClass = scg.acquireClass(getClass().getClassLoader());
@@ -182,7 +183,7 @@ public class AbstractClassGeneratorTest extends WireTestCommon {
     protected void doTest(UpdateInterceptor ui, String message) throws Exception {
         UIClassGenerator scg = new UIClassGenerator();
         scg.metaData()
-                .packageName(getClass().getPackage().getName())
+                .packageName(Jvm.getPackageName(getClass()))
                 .baseClassName("ACGTUI")
                 .useUpdateInterceptor(true)
                 .message = message;

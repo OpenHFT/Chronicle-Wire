@@ -345,13 +345,12 @@ public class GenerateMethodWriter {
         if (type.isArray())
             return nameForClass(importSet, type.getComponentType()) + "[]";
         String s = nameForClass(type);
-        Package aPackage = type.getPackage();
-        if (aPackage != null)
-            if (importSet.contains(s)
-                    || "java.lang".equals(aPackage.getName())
-                    || (!type.getName().contains("$")
-                    && importSet.contains(aPackage.getName() + ".*")))
-                return type.getSimpleName();
+        String packageName = Jvm.getPackageName(type);
+        if (importSet.contains(s)
+                || "java.lang".equals(packageName)
+                || (!type.getName().contains("$")
+                && importSet.contains(packageName + ".*")))
+            return type.getSimpleName();
         return s;
     }
 
@@ -485,7 +484,7 @@ public class GenerateMethodWriter {
                         continue;
                     for (Type type : getParameterTypes(dm, interfaceClazz)) {
                         Class<?> pType = erase(type);
-                        if (pType.isPrimitive() || pType.isArray() || pType.getPackage().getName().equals("java.lang"))
+                        if (pType.isPrimitive() || pType.isArray() || Jvm.getPackageName(pType).equals("java.lang"))
                             continue;
                         importSet.add(nameForClass(pType));
                     }

@@ -18,6 +18,8 @@
 
 package net.openhft.chronicle.wire.channel.impl.internal;
 
+import net.openhft.chronicle.core.Jvm;
+
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
@@ -52,7 +54,7 @@ public class Handler extends URLStreamHandler {
         String was = System.getProperty("java.protocol.handler.pkgs", "");
 
         // Get the package name for this class
-        String pkg = Handler.class.getPackage().getName();
+        String pkg = Jvm.getPackageName(Handler.class);
         int ind = pkg.lastIndexOf('.');
 
         // Ensure that the package isn't the base package
