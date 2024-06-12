@@ -620,15 +620,22 @@ public enum SerializationStrategies implements SerializationStrategy {
             @NotNull List<Object> list = (o == null ? new ArrayList<>() : (List<Object>) o);
             @NotNull final WireIn wireIn = in.wireIn();
             long pos = wireIn.bytes().readPosition();
+            int count = 0;
             while (in.hasNextSequenceItem()) {
-                list.add(in.object());
-
+                if (list.size() > count) {
+                    list.set(count, in.object(list.get(count), Object.class));
+                } else {
+                    list.add(in.object());
+                }
+                count++;
                 // make sure we are progressing.
                 long pos2 = wireIn.bytes().readPosition();
                 if (pos2 <= pos && !Jvm.isDebug())
                     throw new IllegalStateException(wireIn.bytes().toDebugString());
                 pos = pos2;
             }
+            while (list.size() > count)
+                list.remove(list.size() - 1);
             return list;
         }
 
