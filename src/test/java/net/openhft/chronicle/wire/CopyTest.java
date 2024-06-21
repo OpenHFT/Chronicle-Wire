@@ -105,6 +105,8 @@ public class CopyTest extends WireTestCommon {
             assertFalse(text, text.contains("\n\""));
         }
 
+        if (to == WireType.BINARY_LIGHT)
+            wireTo.readingDocument();
         // Validate the data in the destination wire
         final String event = wireTo.readEvent(String.class);
         assertEquals("test", event);
@@ -123,6 +125,8 @@ public class CopyTest extends WireTestCommon {
                 System.out.println(wireFrom);
                 System.out.println(wireTo);
             }
+            if (to == WireType.BINARY_LIGHT)
+                wireTo.readingDocument();
             Object b2 = wireTo.read("msg").object();
 
             assertEquals(a, b2);

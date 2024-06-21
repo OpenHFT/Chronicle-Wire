@@ -52,6 +52,7 @@ public class JSONWireTest extends WireTestCommon {
 
         // Initialize another JSONWire for copying back from binary
         JSONWire json2 = new JSONWire(Bytes.allocateElasticOnHeap());
+        json2.useTypes(true);
 
         // Perform the copying operations
         json.copyTo(binary);
@@ -70,6 +71,36 @@ public class JSONWireTest extends WireTestCommon {
                         .replaceAll(" ?\\] ?", "]")
         );
         hexDump.releaseLast();
+    }
+
+    // Utility function to test copying from a JSONWire to a binary wire and back to a JSONWire.
+    static void testCopyToYAMLAndBack(CharSequence str) {
+        // Initialize a JSONWire from the input string
+        JSONWire json = new JSONWire(Bytes.from(str));
+
+        // Initialize a YAML wire
+        YamlWire yaml = new YamlWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
+
+        // Initialize another JSONWire for copying back from binary
+        JSONWire json2 = new JSONWire(Bytes.allocateElasticOnHeap());
+        json2.useTypes(true);
+
+        // Perform the copying operations
+        json.copyTo(yaml);
+        System.out.println(yaml);
+        yaml.copyTo(json2);
+
+        // Assertions to make sure the copying was successful
+        assertEquals(
+                str.toString()
+                        .replaceAll("\\.0(\\D)", "$1")
+                        .replaceAll(" ?\\[ ?", "[")
+                        .replaceAll(" ?\\] ?", "]")
+                ,
+                json2.toString()
+                        .replaceAll(" ?\\[ ?", "[")
+                        .replaceAll(" ?\\] ?", "]")
+        );
     }
 
     // Utility function to create a JSONWire from a string
@@ -151,6 +182,7 @@ public class JSONWireTest extends WireTestCommon {
                 "{\"name\":\"item4\",\"number1\":4235666,\"number2\":1.51231}]", out.toString());
 
         testCopyToBinaryAndBack(out.toString());
+        testCopyToYAMLAndBack("{" + out + '}');
         wire.bytes().releaseLast();
     }
 
@@ -256,6 +288,7 @@ public class JSONWireTest extends WireTestCommon {
                     "}\n", lists1.toString());
             final String str = JSON.asString(lists1);
             testCopyToBinaryAndBack(str);
+//            testCopyToYAMLAndBack(str);
         } finally {
             // Release occupied memory
             wire.bytes().releaseLast();
@@ -274,8 +307,13 @@ public class JSONWireTest extends WireTestCommon {
         doTestMapOfNamedKeys(mh); // Test with HashMap
         mh.map = new LinkedHashMap<>(map); // Convert map to LinkedHashMap
         doTestMapOfNamedKeys(mh); // Test with LinkedHashMap
+    }
 
-        testCopyToBinaryAndBack("{\"map\":{\"CLASS\":0.1}}"); // Test binary and back with the specified string
+    @Test
+    public void testMapOfNamedKeys2() {
+        String str = "{\"map\":{\"CLASS\":0.1}}";
+        testCopyToBinaryAndBack(str); // Test binary and back with the specified string
+        testCopyToYAMLAndBack(str);
     }
 
     private void doTestMapOfNamedKeys(MapHolder mh) {
@@ -299,6 +337,7 @@ public class JSONWireTest extends WireTestCommon {
         assertEquals(expected, jw.toString()); // Assert that the JSONWire output matches the expected format
 
         testCopyToBinaryAndBack(str); // Test binary and back with the provided string
+        testCopyToYAMLAndBack(str);
     }
 
     @Test
@@ -330,38 +369,41 @@ public class JSONWireTest extends WireTestCommon {
         // Assert that all date fields in the JSON string are null
         assertEquals("{\"date\":null,\"dateTime\":null,\"zdateTime\":null}", str);
         testCopyToBinaryAndBack(str); // Test binary conversion and back with the JSON string
+        testCopyToYAMLAndBack(str);
     }
 
     @Test
     public void testArrayInDictionary2() {
         // Define a complex JSON string containing nested arrays and dictionaries
-        String text = "[320,{\"as\":[[\"32905.50000\",\"1.60291699\",\"1625822573.857656\"],[\"32905.60000\",\"0.10415889\",\"1625822573.194909\"]],\"bs\":[[\"32893.60000\",\"0.15042948\",\"1625822574.220475\"]]},\"book-10\"]";
-        final JSONWire jsonWire = new JSONWire(Bytes.from(text)); // Create a JSONWire object from the text
+        String str = "[320,{\"as\":[[\"32905.50000\",\"1.60291699\",\"1625822573.857656\"],[\"32905.60000\",\"0.10415889\",\"1625822573.194909\"]],\"bs\":[[\"32893.60000\",\"0.15042948\",\"1625822574.220475\"]]},\"book-10\"]";
+        final JSONWire jsonWire = new JSONWire(Bytes.from(str)); // Create a JSONWire object from the str
         final Object list = jsonWire.getValueIn().object(); // Extract the content of the wire
         // Assert that the extracted content matches the expected format
         assertEquals("[320, {as=[[32905.50000, 1.60291699, 1625822573.857656], [32905.60000, 0.10415889, 1625822573.194909]], bs=[[32893.60000, 0.15042948, 1625822574.220475]]}, book-10]", "" + list);
-        testCopyToBinaryAndBack(text); // Test binary conversion and back with the provided JSON string
+        testCopyToBinaryAndBack(str); // Test binary conversion and back with the provided JSON string
+        testCopyToYAMLAndBack('{'+str+'}');
     }
 
     @Test
     public void testArrayDelimiterNoSpace() {
         // A complex JSON string causing some parsing issues
-        String text = "[320,{\"as\":[[\"32905.50000\",\"1.60291699\",\"1625822573.857656\"],[\"32905.60000\",\"0.10415889\",\"1625822573.194909\"]],\"bs\":[[\"32893.60000\",\"0.15042948\",\"1625822574.220475\"]]},\"book-10\"]";
+        String str = "[320,{\"as\":[[\"32905.50000\",\"1.60291699\",\"1625822573.857656\"],[\"32905.60000\",\"0.10415889\",\"1625822573.194909\"]],\"bs\":[[\"32893.60000\",\"0.15042948\",\"1625822574.220475\"]]},\"book-10\"]";
 
-        // A simple version of JSON text for testing purposes (commented out)
-//        String text = "[1,{\"a\":[2,3]}]";
+        // A simple version of JSON str for testing purposes (commented out)
+//        String str = "[1,{\"a\":[2,3]}]";
 
         // A different simple JSON string that seems to work
-//        String text = "[1,2,3,\"c\"]";
+//        String str = "[1,2,3,\"c\"]";
 
         final Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer(); // Create an elastic byte buffer
-        byteBufferBytes.append(text); // Append the JSON string to the byte buffer
+        byteBufferBytes.append(str); // Append the JSON string to the byte buffer
 
         final JSONWire jsonWire = new JSONWire(byteBufferBytes); // Create a JSONWire object using the byte buffer
 
         final List<Object> list = jsonWire.getValueIn().list(Object.class); // Extract the content of the wire into a list
         assertNotNull(list); // Assert that the extracted list is not null
-        testCopyToBinaryAndBack(text); // Test binary conversion and back with the JSON string
+        testCopyToBinaryAndBack(str); // Test binary conversion and back with the JSON string
+        testCopyToYAMLAndBack('{'+str+'}');
         byteBufferBytes.releaseLast(); // Release the last buffer to free up resources
     }
 
@@ -404,15 +446,16 @@ public class JSONWireTest extends WireTestCommon {
         mh.longMap.put(999999999999L, "nines");
         mh.doubleMap.put(1.28, "number");
         mh.doubleMap.put(2.56, "number");
-        final String text = JSON.asString(mh); // Convert the populated object to its JSON string representation
+        final String str = JSON.asString(mh); // Convert the populated object to its JSON string representation
         // Assert the generated JSON string matches the expected JSON string
         assertEquals("" +
                         "{\"intMap\":{\"1111\":\"ones\",\"2222\":\"twos\"},\"longMap\":{\"888888888888\":\"eights\",\"999999999999\":\"nines\"},\"doubleMap\":{\"1.28\":\"number\",\"2.56\":\"number\"}}",
-                text);
+                str);
         // Convert the JSON string back to a new instance of MapWithIntegerKeysHolder
-        MapWithIntegerKeysHolder mh2 = JSON.fromString(MapWithIntegerKeysHolder.class, text);
+        MapWithIntegerKeysHolder mh2 = JSON.fromString(MapWithIntegerKeysHolder.class, str);
         assertEquals(mh, mh2); // Assert that the original and reconverted objects are the same
-        testCopyToBinaryAndBack(text); // Test binary conversion and back with the JSON string
+        testCopyToBinaryAndBack(str); // Test binary conversion and back with the JSON string
+        testCopyToYAMLAndBack(str);
     }
 
     @Test
@@ -465,6 +508,14 @@ public class JSONWireTest extends WireTestCommon {
                     // Assert the generated JSON string matches the expected format
                     assertEquals("{\"key\":\"" + val + "\"}", text);
                 });
+    }
+
+    @Test
+    public void copyTypedDataToBinaryAndBack() {
+        ignoreException("Unable to copy object safely, message will not be repeated");
+        String str = "{\"a\":{\"@Mapped\":{\"b\":\"c\",\"d\":123.4}},\"e\":{\"@Scalar\":\"Value\"},\"f\":{\"@Mapped2\":{\"b\":\"c\"}},\"g\":{\"@Scalar2\":12345.6}}";
+        testCopyToBinaryAndBack(str);
+        testCopyToYAMLAndBack(str);
     }
 
     // A class to represent a nested structure for testing JSON serialization
@@ -549,7 +600,7 @@ public class JSONWireTest extends WireTestCommon {
         }
     }
 
-// Class to hold a map of retention policies to their double values
+    // Class to hold a map of retention policies to their double values
     static class MapHolder extends SelfDescribingMarshallable {
 
         Map<RetentionPolicy, Double> map;
