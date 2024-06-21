@@ -1335,10 +1335,12 @@ public class BinaryWire extends AbstractWire implements Wire {
                         // Log a warning if the class is not found.
                         if (FIRST_WARN_MISSING_CLASS.compareAndSet(false, true))
                             Jvm.warn().on(BinaryWire.class, "Unable to copy object safely, message will not be repeated: " + ex);
+                        copyOne(wire, false);
                     } catch (Exception e) {
                         // Log a warning for any other exceptions.
                         Jvm.warn().on(getClass(), "Unable to copy " + sb + " safely will try anyway " + e);
                     }
+                    wire.getValueOut().endTypePrefix();
                 }
                 break;
             }
@@ -2781,6 +2783,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public void resetState() {
             // Do nothing
+        }
+
+        @Override
+        public void elementSeparator() {
+            throw new UnsupportedOperationException();
         }
     }
 

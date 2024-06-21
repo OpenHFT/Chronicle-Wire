@@ -703,6 +703,11 @@ public class RawWire extends AbstractWire implements Wire {
         public void resetState() {
             // Do nothing
         }
+
+        @Override
+        public void elementSeparator() {
+            // Do nothing
+        }
     }
 
     /**

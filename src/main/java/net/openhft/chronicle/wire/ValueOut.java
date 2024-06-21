@@ -1798,6 +1798,11 @@ public interface ValueOut {
     }
 
     /**
+     * Signifies the end of an element that has been added direcftly to the wire.
+     */
+    void elementSeparator();
+
+    /**
      * MapMarshaller is a utility for serializing a Map into a Wire format.
      * This is an inner class used for handling the custom marshalling process for Map objects.
      * Its primary function is to loop through a Map's entries and write each key-value pair to the Wire.

@@ -55,8 +55,12 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 @SuppressWarnings("this-escape")
 public class JSONWire extends TextWire {
 
-    // Represents the bytes for "ull" which might be used for some JSON representations.
+    // The rest of null
     public static final @NotNull Bytes<byte[]> ULL = Bytes.from("ull");
+    // the rest of true
+    public static final @NotNull Bytes<byte[]> RUE = Bytes.from("rue");
+    // the rest of false
+    public static final @NotNull Bytes<byte[]> ALSE = Bytes.from("alse");
 
     // Bytes for comma, commonly used as JSON separator.
     @SuppressWarnings("rawtypes")
@@ -70,6 +74,7 @@ public class JSONWire extends TextWire {
 
     // Flag to determine whether to use types or not during parsing.
     boolean useTypes;
+    private JSONValueOutFromStart valueOutFromStart;
 
     /**
      * Default constructor, initializes with elastic bytes allocated on heap.
@@ -300,19 +305,19 @@ public class JSONWire extends TextWire {
      * This method understands JSON structural elements and translates them appropriately.
      *
      * @param wire The wire output to copy the data to.
-     * @param inMap Flag indicating if the current position is inside a map structure.
+     * @param expectKeyValues Flag indicating if the current position is inside a map structure.
      * @param topLevel Flag indicating if this is the topmost level of the copy operation.
      * @throws InvalidMarshallableException if there's a problem with copying the data.
      */
-    public void copyOne(@NotNull WireOut wire, boolean inMap, boolean topLevel) throws InvalidMarshallableException {
+    public void copyOne(@NotNull WireOut wire, boolean expectKeyValues, boolean topLevel) throws InvalidMarshallableException {
         consumePadding();
         int ch = bytes.readUnsignedByte();
         switch (ch) {
             case '\'':
             case '"':
                 // Handle quoted values
-                copyQuote(wire, ch, inMap, topLevel);
-                if (inMap) {
+                copyQuote(wire, ch, expectKeyValues, topLevel);
+                if (expectKeyValues) {
                     // For key-value pairs, consume any padding and expect a colon (:) separator
                     consumePadding();
                     int ch2 = bytes.readUnsignedByte();
@@ -354,12 +359,35 @@ public class JSONWire extends TextWire {
                 copyNumber(wire);
                 return;
 
+            case 'N':
             case 'n':
                 // Special handling for the 'null' value
                 if (bytes.startsWith(ULL) && !Character.isLetterOrDigit(bytes.peekUnsignedByte(bytes.readPosition() + 3))) {
                     bytes.readSkip(3);
                     consumePadding();
                     wire.getValueOut().nu11();
+                    return;
+                }
+                break;
+
+            case 'f':
+            case 'F':
+                // Special handling for the 'false' value
+                if (bytes.startsWith(ALSE) && !Character.isLetterOrDigit(bytes.peekUnsignedByte(bytes.readPosition() + 4))) {
+                    bytes.readSkip(4);
+                    consumePadding();
+                    wire.getValueOut().bool(false);
+                    return;
+                }
+                break;
+
+            case 't':
+            case 'T':
+                // Special handling for the 'true' value
+                if (bytes.startsWith(RUE) && !Character.isLetterOrDigit(bytes.peekUnsignedByte(bytes.readPosition() + 3))) {
+                    bytes.readSkip(3);
+                    consumePadding();
+                    wire.getValueOut().bool(true);
                     return;
                 }
                 break;
@@ -398,7 +426,7 @@ public class JSONWire extends TextWire {
             throw new IORuntimeException("Expected a ':' after the type " + sb + " but got a " + (char) ch);
 
         // Recursively copy the associated value after the colon
-        copyOne(wire, true, false);
+        copyOne(wire, false, false);
 
         consumePadding();
         int ch2 = bytes.readUnsignedByte();
@@ -609,7 +637,7 @@ public class JSONWire extends TextWire {
                         }
                     } else {
                         // For textual wire outputs, append a comma after the number
-                        wire.bytes().append(",");
+                        wire.getValueOut().elementSeparator();
                     }
                     return;
             }
@@ -854,10 +882,17 @@ public class JSONWire extends TextWire {
         @Override
         public JSONValueOut typePrefix(@NotNull CharSequence typeName) {
             if (useTypes) {
-                startBlock('{');
+                boolean nested = bytes.peekUnsignedByte(bytes.writePosition() - 1) == '{';
+                if (!nested)
+                    startBlock('{');
                 bytes.append("\"@");
                 bytes.append(applyAsAlias(classLookup, typeName));
                 bytes.append("\":");
+                if (nested) {
+                    if (valueOutFromStart == null)
+                         valueOutFromStart = new JSONValueOutFromStart();
+                    return valueOutFromStart;
+                }
             }
             return this;
         }
@@ -988,6 +1023,13 @@ public class JSONWire extends TextWire {
             // Todo: fix quoted text
             return (JSONWire) super.time(localTime);
             /*return text(localTime.toString());*/
+        }
+    }
+
+    class JSONValueOutFromStart extends JSONValueOut {
+        @Override
+        public void endTypePrefix() {
+            elementSeparator();
         }
     }
 

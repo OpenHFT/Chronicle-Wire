@@ -659,5 +659,10 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         public void resetState() {
             // No nothing
         }
+
+        @Override
+        public void elementSeparator() {
+
+        }
     }
 }
