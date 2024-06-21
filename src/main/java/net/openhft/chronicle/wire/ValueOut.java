@@ -1800,7 +1800,9 @@ public interface ValueOut {
     /**
      * Signifies the end of an element that has been added direcftly to the wire.
      */
-    void elementSeparator();
+    default void elementSeparator() {
+        // Do nothing in the default implementation
+    }
 
     /**
      * MapMarshaller is a utility for serializing a Map into a Wire format.

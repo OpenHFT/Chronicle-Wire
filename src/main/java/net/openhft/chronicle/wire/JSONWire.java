@@ -56,11 +56,13 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 public class JSONWire extends TextWire {
 
     // The rest of null
-    public static final @NotNull Bytes<byte[]> ULL = Bytes.from("ull");
+    private static final @NotNull Bytes<byte[]> _ULL = Bytes.from("ull");
+    @Deprecated(/* to be removed in x.28 */)
+    public static final @NotNull Bytes<byte[]> ULL = _ULL;
     // the rest of true
-    public static final @NotNull Bytes<byte[]> RUE = Bytes.from("rue");
+    private static final @NotNull Bytes<byte[]> _RUE = Bytes.from("rue");
     // the rest of false
-    public static final @NotNull Bytes<byte[]> ALSE = Bytes.from("alse");
+    private static final @NotNull Bytes<byte[]> _ALSE = Bytes.from("alse");
 
     // Bytes for comma, commonly used as JSON separator.
     @SuppressWarnings("rawtypes")
@@ -362,7 +364,7 @@ public class JSONWire extends TextWire {
             case 'N':
             case 'n':
                 // Special handling for the 'null' value
-                if (bytes.startsWith(ULL) && !Character.isLetterOrDigit(bytes.peekUnsignedByte(bytes.readPosition() + 3))) {
+                if (bytes.startsWith(_ULL) && !Character.isLetterOrDigit(bytes.peekUnsignedByte(bytes.readPosition() + 3))) {
                     bytes.readSkip(3);
                     consumePadding();
                     wire.getValueOut().nu11();
@@ -373,7 +375,7 @@ public class JSONWire extends TextWire {
             case 'f':
             case 'F':
                 // Special handling for the 'false' value
-                if (bytes.startsWith(ALSE) && !Character.isLetterOrDigit(bytes.peekUnsignedByte(bytes.readPosition() + 4))) {
+                if (bytes.startsWith(_ALSE) && !Character.isLetterOrDigit(bytes.peekUnsignedByte(bytes.readPosition() + 4))) {
                     bytes.readSkip(4);
                     consumePadding();
                     wire.getValueOut().bool(false);
@@ -384,7 +386,7 @@ public class JSONWire extends TextWire {
             case 't':
             case 'T':
                 // Special handling for the 'true' value
-                if (bytes.startsWith(RUE) && !Character.isLetterOrDigit(bytes.peekUnsignedByte(bytes.readPosition() + 3))) {
+                if (bytes.startsWith(_RUE) && !Character.isLetterOrDigit(bytes.peekUnsignedByte(bytes.readPosition() + 3))) {
                     bytes.readSkip(3);
                     consumePadding();
                     wire.getValueOut().bool(true);
