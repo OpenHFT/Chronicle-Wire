@@ -290,7 +290,8 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         @NotNull
         @Override
         public Wire apply(@NotNull Bytes<?> bytes) {
-            final TextWire wire = new JSONWire(bytes).useBinaryDocuments();
+            final JSONWire wire = new JSONWire(bytes);
+            wire.useBinaryDocuments();
             wire.usePadding(true);
             return wire;
         }
