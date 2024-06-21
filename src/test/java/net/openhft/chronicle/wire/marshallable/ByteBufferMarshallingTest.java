@@ -25,6 +25,7 @@ import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.Test;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertEquals;
@@ -76,12 +77,13 @@ public class ByteBufferMarshallingTest extends WireTestCommon {
 
         // Configure the positions and limits for the ByteBuffer
         ByteBuffer bb = bytes.underlyingObject();
-        bb.position((int) bytes.readPosition());
-        bb.limit((int) bytes.readLimit());
+        Buffer b = bb;
+        b.position((int) bytes.readPosition());
+        b.limit((int) bytes.readLimit());
 
         // Create a second ByteBuffer and transfer data from the first one
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
-        bytes2.ensureCapacity(bb.remaining());
+        bytes2.ensureCapacity(b.remaining());
 
         ByteBuffer bb2 = bytes2.underlyingObject();
         bb2.clear();

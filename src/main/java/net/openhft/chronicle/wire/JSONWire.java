@@ -17,11 +17,9 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.StopCharTesters;
-import net.openhft.chronicle.bytes.StopCharsTester;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.ClassLookup;
@@ -364,9 +362,7 @@ public class JSONWire extends TextWire {
             case 'N':
             case 'n':
                 // Special handling for the 'null' value
-                if (bytes.startsWith(_ULL) && !Character.isLetterOrDigit(bytes.peekUnsignedByte(bytes.readPosition() + 3))) {
-                    bytes.readSkip(3);
-                    consumePadding();
+                if (compareRest(bytes, _ULL)) {
                     wire.getValueOut().nu11();
                     return;
                 }
@@ -375,9 +371,7 @@ public class JSONWire extends TextWire {
             case 'f':
             case 'F':
                 // Special handling for the 'false' value
-                if (bytes.startsWith(_ALSE) && !Character.isLetterOrDigit(bytes.peekUnsignedByte(bytes.readPosition() + 4))) {
-                    bytes.readSkip(4);
-                    consumePadding();
+                if (compareRest(bytes, _ALSE)) {
                     wire.getValueOut().bool(false);
                     return;
                 }
@@ -386,9 +380,7 @@ public class JSONWire extends TextWire {
             case 't':
             case 'T':
                 // Special handling for the 'true' value
-                if (bytes.startsWith(_RUE) && !Character.isLetterOrDigit(bytes.peekUnsignedByte(bytes.readPosition() + 3))) {
-                    bytes.readSkip(3);
-                    consumePadding();
+                if (compareRest(bytes, _RUE)) {
                     wire.getValueOut().bool(true);
                     return;
                 }
@@ -401,6 +393,30 @@ public class JSONWire extends TextWire {
         // If the code reaches here, an unexpected character sequence was found
         bytes.readSkip(-1);
         throw new IORuntimeException("Unexpected chars '" + bytes.parse8bit(StopCharTesters.CONTROL_STOP) + "'");
+    }
+
+    static boolean compareRest(@NotNull StreamingDataInput in, @NotNull Bytes s)
+            throws BufferUnderflowException, ClosedIllegalStateException {
+        if (s.length() > in.readRemaining())
+            return false;
+        long position = in.readPosition();
+        for (int i = 0; i < s.length(); i++) {
+            if (in.readUnsignedByte() != s.charAt(i)) {
+                in.readPosition(position);
+                return false;
+            }
+        }
+        int ch = in.peekUnsignedByte();
+        if (Character.isLetterOrDigit(ch)) {
+            in.readPosition(position);
+            return false;
+        }
+        while (ch > 0 && ch <= ' ') {
+            in.readSkip(1);
+            ch = in.peekUnsignedByte();
+        }
+
+        return true;
     }
 
     /**
