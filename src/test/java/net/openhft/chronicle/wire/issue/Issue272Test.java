@@ -55,6 +55,7 @@ public class Issue272Test {
         new YamlWire(buffer.readPosition(0)) // Verify the hex representation of the binary wire
                 .copyTo(copyWire0);
         assertEquals("" +
+                        "28 00 00 00                                     # msg-length\n" +
                         "b9 03 6f 6e 65                                  # one: (event)\n" +
                         "82 0a 00 00 00                                  # sequence\n" +
                         "a1 01                                           # 1\n" +
@@ -73,8 +74,25 @@ public class Issue272Test {
 
         // Create a fresh YamlWire, copy data from the BinaryWire, and verify the result
         Wire copyWire = new YamlWire(Bytes.allocateElasticOnHeap());
-        copyWire0.copyTo(copyWire);
-        System.out.println(copyWire);
+        try (DocumentContext dc = copyWire0.readingDocument()) {
+            dc.wire().copyTo(copyWire);
+        }
+        assertEquals("" +
+                        "one: [\n" +
+                        "  1,\n" +
+                        "  2,\n" +
+                        "  3,\n" +
+                        "  4,\n" +
+                        "  5\n" +
+                        "]\n" +
+                        "two: [\n" +
+                        "  101,\n" +
+                        "  102,\n" +
+                        "  103,\n" +
+                        "  104,\n" +
+                        "  105\n" +
+                        "]\n",
+                copyWire.toString());
         doTest(copyWire);
     }
 

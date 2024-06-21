@@ -530,9 +530,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             wire.bytes().write(this.bytes, yt.blockStart(), bytes0.readLimit() - yt.blockStart);
             this.bytes.readPosition(this.bytes.readLimit());
         } else {
-            while (!endOfDocument()) {
-                copyOne(wire, true);
-                yt.next();
+            try (DocumentContext dc = wire.writingDocument()) {
+                while (!endOfDocument()) {
+                    copyOne(dc.wire(), true);
+                    yt.next();
+                }
             }
         }
     }
@@ -555,11 +557,15 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 wire.writeComment(yt.text());
                 break;
             case TAG:
-                wireValueOut.typePrefix(yt.text());
+                if (yt.current() == YamlToken.TAG && yt.isText(NULL_TAG)) {
+                    wireValueOut.nu11();
+                    yt.next();
+                    break;
+                }
+                ValueOut valueOut2 = wireValueOut.typePrefix(yt.text());
                 yt.next();
                 copyOne(wire, true);
-                wireValueOut.endTypePrefix();
-                yt.next();
+                valueOut2.endTypePrefix();
                 break;
             case DIRECTIVE:
                 break;
@@ -2372,6 +2378,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             @Nullable StringBuilder s = textTo0(acquireStringBuilder());
             if (yt.current() == YamlToken.LITERAL)
                 return s;
+            if (StringUtils.isEqual(s, "true"))
+                return true;
+            if (StringUtils.isEqual(s, "false"))
+                return false;
             return readNumberOrTextFrom(bq, s);
         }
 

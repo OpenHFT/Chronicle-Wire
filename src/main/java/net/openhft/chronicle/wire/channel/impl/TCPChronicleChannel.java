@@ -183,9 +183,10 @@ public class TCPChronicleChannel extends AbstractCloseable implements InternalCh
         if (out.bytes().writeRemaining() <= 0)
             return;
         ByteBuffer bb = bytes.underlyingObject();
+        Buffer b = bb;
         assert bb != null;
-        ((Buffer)bb).position(Math.toIntExact(bytes.readPosition()));
-        bb.limit(Math.toIntExact(bytes.readLimit()));
+        b.position(Math.toIntExact(bytes.readPosition()));
+        b.limit(Math.toIntExact(bytes.readLimit()));
         while (bb.remaining() > 0) {
             int len;
             try {

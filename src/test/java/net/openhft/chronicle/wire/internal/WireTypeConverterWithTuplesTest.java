@@ -63,21 +63,21 @@ public class WireTypeConverterWithTuplesTest extends WireTestCommon {
         String expected = "" +
                 "{\"@ChronicleServicesCfg\":{\"queues\":{\"in\":{\"path\":\"tmp/benchmark/in\"},\n" +
                 "\"sender-one-out\":{\"path\":\"tmp/benchmark/sender-one-out\",\n" +
-                "\"builder\":{\"@SingleChronicleQueueBuilder\":{\"useSparseFiles\":\"true\",\n" +
-                "\"rollCycle\":\"HUGE_DAILY\"}},\n" +
+                "\"builder\":{\"@SingleChronicleQueueBuilder\":{\"useSparseFiles\":true,\n" +
+                "\"rollCycle\":\"HUGE_DAILY\"}}},\n" +
                 "\"sender-two-out\":{\"path\":\"tmp/benchmark/sender-two-out\",\n" +
-                "\"builder\":{\"@SingleChronicleQueueBuilder\":{\"useSparseFiles\":\"true\",\n" +
-                "\"rollCycle\":\"HUGE_DAILY\"}},\n" +
+                "\"builder\":{\"@SingleChronicleQueueBuilder\":{\"useSparseFiles\":true,\n" +
+                "\"rollCycle\":\"HUGE_DAILY\"}}},\n" +
                 "\"sender-three-out\":{\"path\":\"tmp/benchmark/sender-three-out\",\n" +
-                "\"builder\":{\"@SingleChronicleQueueBuilder\":{\"useSparseFiles\":\"true\",\n" +
-                "\"rollCycle\":\"HUGE_DAILY\"}},\n" +
+                "\"builder\":{\"@SingleChronicleQueueBuilder\":{\"useSparseFiles\":true,\n" +
+                "\"rollCycle\":\"HUGE_DAILY\"}}},\n" +
                 "\"receiver-out\":{\"path\":\"tmp/benchmark/receiver-out\"}},\n" +
                 "\"services\":{\"sender-one\":{\"inputs\":[\"in\" ],\n" +
                 "\"output\":\"sender-one-out\",\n" +
                 "\"startFromStrategy\":\"$property.name\",\n" +
                 "\"affinityCpu\":\"any\",\n" +
                 "\"pretouchMS\":100,\n" +
-                "\"serviceConfig\":{\"param\":{\"@CustomClass1\":{\"param2\":\"value\"}}}}}}}}}}";
+                "\"serviceConfig\":{\"param\":{\"@CustomClass1\":{\"param2\":\"value\"}}}}}}}";
         assertEquals(expected,
                 json.toString().replace(",", ",\n"));
 
@@ -87,7 +87,13 @@ public class WireTypeConverterWithTuplesTest extends WireTestCommon {
                 "!ChronicleServicesCfg {\n" +
                 "  queues: {\n" +
                 "    in: { path: tmp/benchmark/in },\n" +
-                "    sender-one-out: { path: tmp/benchmark/sender-one-out, builder: !SingleChronicleQueueBuilder { useSparseFiles: true, rollCycle: HUGE_DAILY }, sender-two-out: { path: tmp/benchmark/sender-two-out, builder: !SingleChronicleQueueBuilder { useSparseFiles: true, rollCycle: HUGE_DAILY }, sender-three-out: { path: tmp/benchmark/sender-three-out, builder: !SingleChronicleQueueBuilder { useSparseFiles: true, rollCycle: HUGE_DAILY }, receiver-out: { path: tmp/benchmark/receiver-out } }, services: { sender-one: { inputs: [ in ], output: sender-one-out, startFromStrategy: $property.name, affinityCpu: any, pretouchMS: 100,serviceConfig: { param: !CustomClass1 { param2: value } } } } } }\n" +
+                "    sender-one-out: { path: tmp/benchmark/sender-one-out, builder: !SingleChronicleQueueBuilder { useSparseFiles: true, rollCycle: HUGE_DAILY } },\n" +
+                "    sender-two-out: { path: tmp/benchmark/sender-two-out, builder: !SingleChronicleQueueBuilder { useSparseFiles: true, rollCycle: HUGE_DAILY } },\n" +
+                "    sender-three-out: { path: tmp/benchmark/sender-three-out, builder: !SingleChronicleQueueBuilder { useSparseFiles: true, rollCycle: HUGE_DAILY } },\n" +
+                "    receiver-out: { path: tmp/benchmark/receiver-out }\n" +
+                "  },\n" +
+                "  services: {\n" +
+                "    sender-one: { inputs: [ in ], output: sender-one-out, startFromStrategy: $property.name, affinityCpu: any, pretouchMS: 100, serviceConfig: { param: !CustomClass1 { param2: value } } }\n" +
                 "  }\n" +
                 "}\n", jsonToYaml.toString());
     }

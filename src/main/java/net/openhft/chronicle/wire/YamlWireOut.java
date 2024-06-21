@@ -179,6 +179,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 return writeEventName(((Enum) eventKey).name());
             if (eventKey instanceof DynamicEnum)
                 return writeEventName(((DynamicEnum) eventKey).name());
+            if (eventKey instanceof Boolean)
+                return writeEventName(eventKey.toString());
         }
         boolean wasLeft = valueOut.swapLeaf(true);
         try {
@@ -608,6 +610,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
          * Determines and sets the appropriate separator for the current YAML element.
          * The separator varies based on the indentation level and whether the current value is a leaf node.
          */
+        @Override
         public void elementSeparator() {
             if (indentation == 0) {
                 if (leaf) {
