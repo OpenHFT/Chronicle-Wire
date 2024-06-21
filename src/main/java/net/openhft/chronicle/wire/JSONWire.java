@@ -395,7 +395,7 @@ public class JSONWire extends TextWire {
         throw new IORuntimeException("Unexpected chars '" + bytes.parse8bit(StopCharTesters.CONTROL_STOP) + "'");
     }
 
-    static boolean compareRest(@NotNull StreamingDataInput in, @NotNull Bytes s)
+    static boolean compareRest(@NotNull StreamingDataInput<?> in, @NotNull Bytes<?> s)
             throws BufferUnderflowException, ClosedIllegalStateException {
         if (s.length() > in.readRemaining())
             return false;
