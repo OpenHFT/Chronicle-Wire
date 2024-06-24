@@ -54,7 +54,8 @@ class AbstractUntypedFieldTest extends WireTestCommon {
         final Bytes<byte[]> bytes = Bytes.from("" +
                 "!net.openhft.chronicle.wire.AbstractUntypedFieldShouldBeNull$Holder {\n" +
                 "  a: !AImpl {\n" +
-                "  }\n" +
+                "  }," +
+                "  \"b\": \"Impl\",\n" +
                 "}");
         final Wire textWire = wireConstruction.apply(bytes);
 
@@ -72,7 +73,8 @@ class AbstractUntypedFieldTest extends WireTestCommon {
     void untypedFieldsShouldBeNull(Function<Bytes<byte[]>, Wire> wireConstruction) {
         final Bytes<byte[]> bytes = Bytes.from("!net.openhft.chronicle.wire.AbstractUntypedFieldShouldBeNull$Holder {\n" +
                 "  a: {\n" +
-                "  }\n" +
+                "  }," +
+                "  \"b\": \"Abstract\",\n" +
                 "}");
         final Wire textWire = wireConstruction.apply(bytes);
 
@@ -112,6 +114,7 @@ class AbstractUntypedFieldTest extends WireTestCommon {
     // Holder class to hold instances of type A
     private static final class Holder {
         A a;
+        String b;
     }
 
 }
