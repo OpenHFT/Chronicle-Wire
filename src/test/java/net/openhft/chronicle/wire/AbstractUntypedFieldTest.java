@@ -53,7 +53,7 @@ class AbstractUntypedFieldTest extends WireTestCommon {
     void typedFieldsShouldBeNonNull(Function<Bytes<byte[]>, Wire> wireConstruction) {
         final Bytes<byte[]> bytes = Bytes.from("" +
                 "!net.openhft.chronicle.wire.AbstractUntypedFieldShouldBeNull$Holder {\n" +
-                "  a: !AImpl {\n" +
+                "  \"a\": !AImpl {\n" +
                 "  }," +
                 "  \"b\": \"Impl\",\n" +
                 "}");
@@ -72,7 +72,7 @@ class AbstractUntypedFieldTest extends WireTestCommon {
     @MethodSource("provideWire")
     void untypedFieldsShouldBeNull(Function<Bytes<byte[]>, Wire> wireConstruction) {
         final Bytes<byte[]> bytes = Bytes.from("!net.openhft.chronicle.wire.AbstractUntypedFieldShouldBeNull$Holder {\n" +
-                "  a: {\n" +
+                "  \"a\": {\n" +
                 "  }," +
                 "  \"b\": \"Abstract\",\n" +
                 "}");
