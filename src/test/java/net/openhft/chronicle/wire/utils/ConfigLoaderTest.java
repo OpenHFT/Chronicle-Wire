@@ -9,13 +9,13 @@ import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ConfigLoaderTest {
+class ConfigLoaderTest {
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(SimpleConfig.class);
     }
 
     @Test
-    public void testLoadFromFile() throws IOException {
+    void testLoadFromFile() throws IOException {
 
         SimpleConfig config = ConfigLoader.loadFromFile("utils/simple-config.yaml");
         assertEquals("some name", config.name());
@@ -23,7 +23,7 @@ public class ConfigLoaderTest {
     }
 
     @Test
-    public void testLoadFromFileWithProperties() throws IOException {
+    void testLoadFromFileWithProperties() throws IOException {
         Properties properties = new Properties();
         properties.put("config-name", "some name");
         SimpleConfig config = ConfigLoader.loadFromFile("utils/simple-config-properties.yaml", properties);
@@ -31,7 +31,7 @@ public class ConfigLoaderTest {
         assertEquals(10, config.value());
     }
 
-    public static class SimpleConfig extends AbstractMarshallableCfg {
+    static class SimpleConfig extends AbstractMarshallableCfg {
         private String name;
         private int value;
 
