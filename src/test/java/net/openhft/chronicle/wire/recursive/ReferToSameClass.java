@@ -4,8 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReferToSameClass extends Base {
-    private List<ReferToSameClass> list = new ArrayList<>();
+    private final List<ReferToSameClass> list = new ArrayList<>();
 
-    public ReferToSameClass() {
+    public ReferToSameClass(String name) {
+        super(name);
+    }
+
+    public List<ReferToSameClass> list() {
+        return list;
     }
 }
