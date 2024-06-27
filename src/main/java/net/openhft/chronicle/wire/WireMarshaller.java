@@ -1563,6 +1563,8 @@ public class WireMarshaller<T> {
             componentType = extractClass(computeActualTypeArguments(Collection.class, field)[0]);
             if (componentType != Object.class) {
                 isLeaf = !Throwable.class.isAssignableFrom(componentType)
+                        // Don't recurse into the same class
+                        && !componentType.equals(field.getDeclaringClass())
                         && WIRE_MARSHALLER_CL.get(componentType).isLeaf;
             }
 
