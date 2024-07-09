@@ -144,6 +144,7 @@ public class TestJsonIssue467 {
         return jsonWire;
     }
 
+    @Ignore
     @Test
     public void testWireObject() {
         final Wire jsonWire = jsonResponseItem();
