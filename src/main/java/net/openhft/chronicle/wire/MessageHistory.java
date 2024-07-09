@@ -150,10 +150,10 @@ public interface MessageHistory extends Marshallable {
     boolean isDirty();
 
     /**
-     * @return the name of the service that last wrote the message history
+     * @return the name of the service that last wrote the message history, or empty string if not set.
      */
     default CharSequence serviceName() {
-        return null;
+        return "";
     }
 
     /**
