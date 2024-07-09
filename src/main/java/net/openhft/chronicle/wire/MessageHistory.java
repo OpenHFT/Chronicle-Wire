@@ -148,4 +148,17 @@ public interface MessageHistory extends Marshallable {
      * {@link Marshallable#writeMarshallable(net.openhft.chronicle.wire.WireOut)}
      */
     boolean isDirty();
+
+    /**
+     * @return the name of the service that last wrote the message history
+     */
+    default CharSequence serviceName() {
+        return null;
+    }
+
+    /**
+     * sets the name of the current service
+     */
+    default void serviceName(long serviceName) {
+    }
 }
