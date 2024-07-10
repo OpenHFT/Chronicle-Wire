@@ -549,4 +549,9 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     public void serviceName(long serviceName) {
         this.ourServiceName = serviceName;
     }
+
+    @Override
+    public long serviceNameAsLong() {
+        return serviceName;
+    }
 }
