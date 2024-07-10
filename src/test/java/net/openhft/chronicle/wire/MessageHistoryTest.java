@@ -154,7 +154,7 @@ public class MessageHistoryTest extends WireTestCommon {
             bw.writeEventName(MethodReader.HISTORY).marshallable(history);
             assertEquals("" +
                             "b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
-                            "81 4b 00                                        # SetTimeMessageHistory\n" +
+                            "81 59 00                                        # SetTimeMessageHistory\n" +
                             "c7 73 6f 75 72 63 65 73                         # sources:\n" +
                             "82 16 00 00 00                                  # sequence\n" +
                             "                                                # source id & index\n" +
@@ -167,7 +167,9 @@ public class MessageHistoryTest extends WireTestCommon {
                             "a7 00 00 64 a7 b3 b6 e0 0d                      # 1000000000000000000\n" +
                             "                                                # timing in nanos\n" +
                             "a7 10 27 64 a7 b3 b6 e0 0d                      # 1000000000000010000\n" +
-                            "a7 64 0c 2c b5 03 6e 00 00                      # 120962203520100\n",
+                            "a7 64 0c 2c b5 03 6e 00 00                      # 120962203520100\n" +
+                            "cb 73 65 72 76 69 63 65 4e 61 6d 65             # serviceName:\n" +
+                            "a1 00                                           # 0\n",
                     bw.bytes().toHexString());
 
             // Release the bytes from the wire.
@@ -183,11 +185,11 @@ public class MessageHistoryTest extends WireTestCommon {
             bw2.writeEventName(MethodReader.HISTORY).marshallable(history);
             assertEquals("" +
                             "b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
-                            "81 33 00 86                                     # SetTimeMessageHistory\n" +
+                            "81 3b 00 86                                     # SetTimeMessageHistory\n" +
                             "02 01 00 00 00 02 00 00 00 ff 00 00 00 00 00 00 # sources\n" +
                             "00 ff 0f 00 00 00 00 00 00 03 00 00 64 a7 b3 b6 # timings\n" +
                             "e0 0d 10 27 64 a7 b3 b6 e0 0d 64 0c 2c b5 03 6e\n" +
-                            "00 00\n",
+                            "00 00 00 00 00 00 00 00 00 00\n",
                     bw2.bytes().toHexString());
             bw2.bytes().releaseLast();
 
@@ -235,7 +237,7 @@ public class MessageHistoryTest extends WireTestCommon {
 
             assertEquals("" +
                             "b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
-                            "81 34 00                                        # SetTimeMessageHistory\n" +
+                            "81 42 00                                        # SetTimeMessageHistory\n" +
                             "c7 73 6f 75 72 63 65 73                         # sources:\n" +
                             "82 0b 00 00 00                                  # sequence\n" +
                             "                                                # source id & index\n" +
@@ -246,11 +248,14 @@ public class MessageHistoryTest extends WireTestCommon {
                             "a5 57 04                                        # 1111\n" +
                             "                                                # timing in nanos\n" +
                             "a5 ae 08                                        # 2222\n" +
-                            "a7 64 0c 2c b5 03 6e 00 00 ba 80 00             # 120962203520100\n" +
-                            "81 27 00 86                                     # SetTimeMessageHistory\n" +
+                            "a7 64 0c 2c b5 03 6e 00 00                      # 120962203520100\n" +
+                            "cb 73 65 72 76 69 63 65 4e 61 6d 65             # serviceName:\n" +
+                            "a1 00 ba 80 00                                  # 0\n" +
+                            "81 2f 00 86                                     # SetTimeMessageHistory\n" +
                             "01 01 00 00 00 02 00 00 00 00 00 00 00          # sources\n" +
                             "03 57 04 00 00 00 00 00 00 ae 08 00 00 00 00 00 # timings\n" +
-                            "00 64 0c 2c b5 03 6e 00 00\n",
+                            "00 64 0c 2c b5 03 6e 00 00 00 00 00 00 00 00 00\n" +
+                            "00\n",
                     bytes.toHexString());
 
             // Add additional timing to the original history.
@@ -288,7 +293,7 @@ public class MessageHistoryTest extends WireTestCommon {
                 MessageHistory.writeHistory(dc);
             }
 
-            assertEquals("00000000 57 00 00 00 b9 07 68 69  73 74 6f 72 79 81 4b 00 W·····hi story·K·",
+            assertEquals("00000000 65 00 00 00 b9 07 68 69  73 74 6f 72 79 81 59 00 e·····hi story·Y·",
                     bytes.toHexString().split("\n")[0]);
         }
     }
@@ -328,7 +333,8 @@ public class MessageHistoryTest extends WireTestCommon {
                 "    11111111,\n" +
                 "    22222222,\n" +
                 "    120962203520100\n" +
-                "  ]\n" +
+                "  ],\n" +
+                "  serviceName: 0\n" +
                 "}\n", wire2.toString());
         VanillaMessageHistory vmh2 = new VanillaMessageHistory();
         vmh2.addSourceDetails(false);
@@ -350,7 +356,7 @@ public class MessageHistoryTest extends WireTestCommon {
                 MessageHistory.writeHistory(dc);
             }
 
-            assertEquals("00000000 39 00 00 00 ba 80 00 81  33 00 86 02 01 00 00 00 9······· 3·······",
+            assertEquals("00000000 41 00 00 00 ba 80 00 81  3b 00 86 02 01 00 00 00 A······· ;·······",
                     bytes.toHexString().split("\n")[0]);
 
             final SetTimeMessageHistory history2 = new SetTimeMessageHistory();
@@ -362,7 +368,7 @@ public class MessageHistoryTest extends WireTestCommon {
                 MessageHistory.writeHistory(dc);
             }
 
-            assertEquals("00000000 39 00 00 00 ba 80 00 81  33 00 86 02 01 00 00 00 9······· 3·······",
+            assertEquals("00000000 41 00 00 00 ba 80 00 81  3b 00 86 02 01 00 00 00 A······· ;·······",
                     bytes.toHexString().split("\n")[0]);
 
         } finally {
