@@ -55,7 +55,7 @@ public class VanillaMessageHistoryTest extends net.openhft.chronicle.wire.WireTe
         assertEquals("" +
                         "c3 76 6d 68                                     # vmh:\n" +
                         "b6 03 56 4d 48                                  # VMH\n" +
-                        "81 33 00                                        # VanillaMessageHistory\n" +
+                        "81 41 00                                        # VanillaMessageHistory\n" +
                         "c7 73 6f 75 72 63 65 73                         # sources:\n" +
                         "82 0b 00 00 00                                  # sequence\n" +
                         "                                                # source id & index\n" +
@@ -64,7 +64,9 @@ public class VanillaMessageHistoryTest extends net.openhft.chronicle.wire.WireTe
                         "82 0e 00 00 00                                  # sequence\n" +
                         "                                                # timing in nanos\n" +
                         "a6 7c f4 b8 00                                  # 12121212\n" +
-                        "a7 timestamp\n",
+                        "a7 timestamp\n" +
+                        "cb 73 65 72 76 69 63 65 4e 61 6d 65             # serviceName:\n" +
+                        "a1 00                                           # 0\n",
                 wire.bytes().toHexString().replaceAll("\na7.*\n", "\na7 timestamp\n"));
 
         // Create two new VanillaMessageHistory objects for comparison
