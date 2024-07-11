@@ -37,7 +37,7 @@ public class TestJsonIssue467 {
         private Object payload;
     }
 
-    //  @Ignore
+    @Ignore
     @Test
     public void test() {
         CLASS_ALIASES.addAlias(ResponseItem.class);
