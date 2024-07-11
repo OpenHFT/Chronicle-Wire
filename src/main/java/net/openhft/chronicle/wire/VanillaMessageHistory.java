@@ -239,6 +239,9 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             wire.read("sources").sequence(this, VanillaMessageHistory::acceptSourcesRead);
             timings = 0;
             wire.read("timings").sequence(this, VanillaMessageHistory::acceptTimingsRead);
+            if (wire.bytes().readRemaining() >= 8) {
+                serviceName = wire.read("serviceName").int64();
+            }
         }
         if (addSourceDetails) {
             @Nullable Object o = wire.parent();
@@ -298,6 +301,10 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             timingsArray[i] = memory.readLong(addr);
             addr += 8;
         }
+        if (bytes.readRemaining() >= 8) {
+            serviceName = memory.readLong(addr); // skip the time for this output
+            addr += 8;
+        }
         bytes.readSkip(addr - start);
     }
 
@@ -313,6 +320,8 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         // Read timing values
         for (int i = 0; i < timings; i++)
             timingsArray[i] = bytes.readLong();
+        if (bytes.readRemaining() >= 8)
+            serviceName = bytes.readLong();
     }
 
     @Override
@@ -472,7 +481,8 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         return "VanillaMessageHistory { " +
                 "sources: [" + toStringSources() +
                 "], timings: [" + toStringTimings() +
-                "], addSourceDetails=" + addSourceDetails +
+                (serviceName == 0 ? "" : "], serviceName=" + ShortText.INSTANCE.asString(serviceName)) +
+                ", addSourceDetails=" + addSourceDetails +
                 " }";
     }
 
