@@ -481,7 +481,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         return "VanillaMessageHistory { " +
                 "sources: [" + toStringSources() +
                 "], timings: [" + toStringTimings() +
-                (serviceName == 0 ? "" : "], serviceName=" + ShortText.INSTANCE.asString(serviceName)) +
+                (serviceName == 0 ? "]" : "], serviceName=" + ShortText.INSTANCE.asString(serviceName)) +
                 ", addSourceDetails=" + addSourceDetails +
                 " }";
     }
