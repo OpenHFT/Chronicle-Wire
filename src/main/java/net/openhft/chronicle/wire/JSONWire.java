@@ -1163,6 +1163,11 @@ public class JSONWire extends TextWire {
         }
 
         @Override
+        public <E> E object(@Nullable E using, @Nullable Class<? extends E> clazz) throws InvalidMarshallableException {
+            return useTypes ? parseType(using, clazz, true) : super.object(using, clazz, true);
+        }
+
+        @Override
         public <E> E object(@Nullable E using, @Nullable Class<? extends E> clazz, boolean bestEffort) throws InvalidMarshallableException {
             return useTypes ? parseType(using, clazz, bestEffort) : super.object(using, clazz, bestEffort);
         }

@@ -22,7 +22,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.OnHeapBytes;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
@@ -30,19 +29,19 @@ import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 // relates to https://github.com/OpenHFT/Chronicle-Wire/issues/467
 public class TestJsonIssue467 {
 
-    public static class ResponseItem extends SelfDescribingMarshallable {
+    public static class ResponseItem467 extends SelfDescribingMarshallable {
         @NotNull
         String index;
         private final Bytes<?> key = Bytes.elasticByteBuffer();
         private Object payload;
     }
 
-    @Ignore
+
     @Test
     public void test() {
-        CLASS_ALIASES.addAlias(ResponseItem.class);
+        CLASS_ALIASES.addAlias(ResponseItem467.class);
 
-        ResponseItem responseItem = Marshallable.fromString(ResponseItem.class, "!ResponseItem {\n" +
+        ResponseItem467 responseItem467 = Marshallable.fromString(ResponseItem467.class, "!ResponseItem467 {\n" +
                 "  index: \"4ab100000005\",\n" +
                 "  key: seqNumber,\n" +
                 "  payload: {\n" +
@@ -67,7 +66,7 @@ public class TestJsonIssue467 {
 
         OnHeapBytes buffer = Bytes.allocateElasticOnHeap();
         final Wire jsonWire = WireType.JSON_ONLY.apply(buffer);
-        jsonWire.getValueOut().object(responseItem);
+        jsonWire.getValueOut().object(responseItem467);
 
         String actual = buffer.toString();
 
@@ -84,15 +83,14 @@ public class TestJsonIssue467 {
         Assert.assertTrue("openBracket=" + openBracket + ",closeBracket=" + closeBracket, openBracket == closeBracket);
 
         // DON'T CHANGE THE EXPECTED JSON IT IS CORRECT ! - please use this website to validate the json - https://jsonformatter.org
-        Assert.assertEquals("{\"@ResponseItem\":{\"index\":\"4ab100000005\",\"key\":\"seqNumber\",\"payload\":{\"eventId\":\"periodicUpdate\",\"eventTime\":1652109920838805734,\"seqNumbers\":[ {\"sessionID\":{\"localCompID\":\"SERVER\",\"remoteCompID\":\"CLIENT\",\"localSubID\":null,\"remoteSubID\":null},\"rSeq\":1517,\"wSeq\":1519,\"isActive\":true,\"isConnected\":false} ]}}}", actual);
+        Assert.assertEquals("{\"@ResponseItem467\":{\"index\":\"4ab100000005\",\"key\":\"seqNumber\",\"payload\":{\"eventId\":\"periodicUpdate\",\"eventTime\":1652109920838805734,\"seqNumbers\":[ {\"sessionID\":{\"localCompID\":\"SERVER\",\"remoteCompID\":\"CLIENT\",\"localSubID\":null,\"remoteSubID\":null},\"rSeq\":1517,\"wSeq\":1519,\"isActive\":true,\"isConnected\":false} ]}}}", actual);
     }
 
-    @Ignore
     @Test
     public void test2() {
-        CLASS_ALIASES.addAlias(ResponseItem.class);
+        CLASS_ALIASES.addAlias(ResponseItem467.class);
 
-        ResponseItem responseItem = Marshallable.fromString(ResponseItem.class, "!ResponseItem {\n" +
+        ResponseItem467 responseItem467 = Marshallable.fromString(ResponseItem467.class, "!ResponseItem467 {\n" +
                 "  index: \"4ab100000005\",\n" +
                 "  key: seqNumber,\n" +
                 "  payload: {\n" +
@@ -117,7 +115,7 @@ public class TestJsonIssue467 {
 
         OnHeapBytes buffer = Bytes.allocateElasticOnHeap();
         final Wire jsonWire = WireType.JSON_ONLY.apply(buffer);
-        jsonWire.getValueOut().object(responseItem);
+        jsonWire.getValueOut().object(responseItem467);
 
         String actual = buffer.toString();
 
@@ -134,40 +132,38 @@ public class TestJsonIssue467 {
         Assert.assertTrue("openBracket=" + openBracket + ",closeBracket=" + closeBracket, openBracket == closeBracket);
 
         // DON'T CHANGE THE EXPECTED JSON IT IS CORRECT ! - please use this website to validate the json - https://jsonformatter.org
-        Assert.assertEquals("{\"@ResponseItem\":{\"index\":\"4ab100000005\",\"key\":\"seqNumber\",\"payload\":{\"eventId\":\"periodicUpdate\",\"eventTime\":1652109920838805734,\"seqNumbers\":[ {\"sessionID\":{\"localCompID\":\"SERVER\",\"remoteCompID\":\"CLIENT\",\"localSubID\":null,\"remoteSubID\":null},\"rSeq\":1517,\"wSeq\":1519,\"isActive\":true,\"isConnected\":false} ]}}}", actual);
+        Assert.assertEquals("{\"@ResponseItem467\":{\"index\":\"4ab100000005\",\"key\":\"seqNumber\",\"payload\":{\"eventId\":\"periodicUpdate\",\"eventTime\":1652109920838805734,\"seqNumbers\":[ {\"sessionID\":{\"localCompID\":\"SERVER\",\"remoteCompID\":\"CLIENT\",\"localSubID\":null,\"remoteSubID\":null},\"rSeq\":1517,\"wSeq\":1519,\"isActive\":true,\"isConnected\":false} ]}}}", actual);
     }
 
     private static Wire jsonResponseItem() {
-        CLASS_ALIASES.addAlias(ResponseItem.class);
-        String json = " {\"@ResponseItem\":{\"index\":\"4dc800000034\",\"key\":\"notificationMsg\",\"payload\":\"Successfully debited your account by 0.0\"}}";
+        CLASS_ALIASES.addAlias(ResponseItem467.class);
+        String json = " {\"@ResponseItem467\":{\"index\":\"4dc800000034\",\"key\":\"notificationMsg\",\"payload\":\"Successfully debited your account by 0.0\"}}";
         final Wire jsonWire = WireType.JSON_ONLY.apply(Bytes.from(json));
         return jsonWire;
     }
 
-    @Ignore
     @Test
     public void testWireObject() {
         final Wire jsonWire = jsonResponseItem();
-        ResponseItem responseItem = jsonWire.getValueIn().object(ResponseItem.class);
+        ResponseItem467 responseItem467 = jsonWire.getValueIn().object(ResponseItem467.class);
 
-        Assert.assertEquals("!ResponseItem {\n" +
+        Assert.assertEquals("!ResponseItem467 {\n" +
                 "  index: \"4dc800000034\",\n" +
                 "  key: notificationMsg,\n" +
                 "  payload: Successfully debited your account by 0.0\n" +
-                "}\n", responseItem.toString());
+                "}\n", responseItem467.toString());
     }
 
-    @Ignore("to do fix - https://github.com/OpenHFT/Chronicle-Wire/issues/920")
     @Test
     public void testWireReusingObject() {
         final Wire jsonWire = jsonResponseItem();
-        ResponseItem responseItem1 = new ResponseItem();
-        ResponseItem responseItem = jsonWire.getValueIn().object(responseItem1, ResponseItem.class);
-        Assert.assertEquals("!ResponseItem {\n" +
+        ResponseItem467 responseItem4671 = new ResponseItem467();
+        ResponseItem467 responseItem467 = jsonWire.getValueIn().object(responseItem4671, ResponseItem467.class);
+        Assert.assertEquals("!ResponseItem467 {\n" +
                 "  index: \"4dc800000034\",\n" +
                 "  key: notificationMsg,\n" +
                 "  payload: Successfully debited your account by 0.0\n" +
-                "}\n", responseItem.toString());
+                "}\n", responseItem467.toString());
     }
 
 
