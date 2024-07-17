@@ -429,6 +429,30 @@ public class JSONWireTest extends WireTestCommon {
         assertEquals("{\"field1\":1234,\"field2\":456,\"field3\":[ ],\"field4\":[\"abc\",\"xyz\" ]}", JSON.asString(f));
     }
 
+    @Test
+    public void testNestedListObjectSequence() {
+        // Create a JSON string with different field types
+        final Bytes<byte[]> data = Bytes.allocateElasticOnHeap();
+        data.append("{\n" +
+                "  \"field1\": 1234,\n" +
+                "  \"field2\": 456,\n" +
+                "  \"field4\": [ ],\n" +
+                "  \"field3\": [ { \"@Item\": {\n" +
+                "    \"name\": \"ones\",\n" +
+                "    \"number1\": 1," +
+                "    \"number2\": 2\n" +
+                "  } } ]\n" +
+                "}");
+
+        final JSONWire wire = new JSONWire(data); // Create a JSONWire object from the data
+        wire.useTypes(true);
+        final TwoNestedLists f = new TwoNestedLists(); // Instantiate a new SimpleTwoLists object
+        wire.getValueIn().object(f, TwoNestedLists.class); // Read the content of the wire into the object
+
+        // Assert that the resulting JSON string from the object matches the expected format
+        assertEquals("{\"field1\":1234,\"field2\":456,\"field3\":[ {\"name\":\"ones\",\"number1\":1,\"number2\":2.0} ],\"field4\":[ ]}", JSON.asString(f));
+    }
+
     // A static class to demonstrate a holder of maps with different types of numeric keys and string values
     static class MapWithIntegerKeysHolder extends SelfDescribingMarshallable {
         Map<Integer, String> intMap = new LinkedHashMap<>(); // A map with integer keys
@@ -630,6 +654,30 @@ public class JSONWireTest extends WireTestCommon {
             wire.read(() -> "field2").int32(this, (self, n) -> self.field2 = n); // Reading integer value for field2
             wire.read(() -> "field3").sequence(this, field3, SimpleTwoLists::readList); // Reading sequence for field3
             wire.read(() -> "field4").sequence(this, field4, SimpleTwoLists::readList); // Reading sequence for field4
+        }
+
+        // Helper method to read and add string values from the reader to a list
+        private static void readList(SimpleTwoLists record, List<String> data, ValueIn reader) {
+            while (reader.hasNextSequenceItem()) { // Looping through sequence items
+                data.add(reader.text()); // Adding each text item to the list
+            }
+        }
+    }
+
+    // Class to represent an entity with two fields and two lists of nested objects
+    private static final class TwoNestedLists implements Marshallable {
+        int field1; // Integer field 1
+        int field2; // Integer field 2
+        final List<Item> field3 = new ArrayList<>(); // List of items for field3
+        final List<Item> field4 = new ArrayList<>(); // List of items for field4
+
+        // Method to read marshallable data from the wire input
+        @Override
+        public void readMarshallable(@NotNull final WireIn wire) throws IORuntimeException {
+            wire.read(() -> "field1").int32(this, (self, n) -> self.field1 = n); // Reading integer value for field1
+            wire.read(() -> "field2").int32(this, (self, n) -> self.field2 = n); // Reading integer value for field2
+            wire.read(() -> "field3").sequence(field3, new ArrayList<>(), () -> new Item()); // Reading sequence for field3
+            wire.read(() -> "field4").sequence(field4, new ArrayList<>(), () -> new Item()); // Reading sequence for field4
         }
 
         // Helper method to read and add string values from the reader to a list
