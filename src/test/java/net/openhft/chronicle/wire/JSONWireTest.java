@@ -437,7 +437,7 @@ public class JSONWireTest extends WireTestCommon {
                 "  \"field1\": 1234,\n" +
                 "  \"field2\": 456,\n" +
                 "  \"field4\": [ ],\n" +
-                "  \"field3\": [ { \"@Item\": {\n" +
+                "  \"field3\": [ { \"@net.openhft.chronicle.wire.JSONWireTest$Item\": {\n" +
                 "    \"name\": \"ones\",\n" +
                 "    \"number1\": 1," +
                 "    \"number2\": 2\n" +

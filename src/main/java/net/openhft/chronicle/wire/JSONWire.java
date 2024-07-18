@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.ValidatableUtil;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
@@ -41,6 +42,7 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+import static net.openhft.chronicle.wire.SerializationStrategies.MARSHALLABLE;
 
 /**
  * Represents the JSON wire format.
@@ -1165,6 +1167,15 @@ public class JSONWire extends TextWire {
         @Override
         public <E> E object(@Nullable E using, @Nullable Class<? extends E> clazz, boolean bestEffort) throws InvalidMarshallableException {
             return useTypes ? parseType(using, clazz, bestEffort) : super.object(using, clazz, bestEffort);
+        }
+
+        @Override
+        public <E> @Nullable E object(@Nullable E using, @Nullable Class<? extends E> clazz) throws InvalidMarshallableException {
+            if (useTypes && hasTypeDefinition()) {
+                return ValidatableUtil.validate((E) parseType());
+            }
+
+            return super.object(using, clazz);
         }
 
         @Override
