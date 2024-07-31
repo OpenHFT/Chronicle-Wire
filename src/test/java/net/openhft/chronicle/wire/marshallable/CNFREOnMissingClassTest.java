@@ -133,10 +133,10 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
     }
 
     /**
-     * Tests if ClassNotFoundRuntimeException is correctly thrown for an interface field with no fallback,
-     * when the class for the interface is missing.
+     * Tests if ClassNotFoundRuntimeException is suppressed for an interface field with no fallback,
+     * when the class for the interface is missing, but Wires CNFE property is set to false
      */
-    @Test(expected = ClassNotFoundRuntimeException.class)
+    @Test
     public void throwClassNotFoundRuntimeExceptionOnMissingClassForInterfaceFieldNoFallback() {
         testInterfaceFieldTest0(false, false, null);
     }
