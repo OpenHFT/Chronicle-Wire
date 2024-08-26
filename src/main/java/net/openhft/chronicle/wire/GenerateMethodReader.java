@@ -78,7 +78,10 @@ public class GenerateMethodReader {
     // Configuration for the type of wire to use for serialization/deserialization.
     private final WireType wireType;
 
-     // Handlers for metadata during the method reader generation.
+    // Check for supporting parameters which can either be non-Marshallable or Marshallable
+    private final Boolean multipleNonMarshallableParamTypes;
+
+    // Handlers for metadata during the method reader generation.
     private final Object[] metaDataHandler;
 
     // Instances of the classes/interfaces for which method readers are to be generated.
@@ -118,14 +121,15 @@ public class GenerateMethodReader {
      * Constructs a new instance of GenerateMethodReader.
      * Initializes the required configurations, metadata handlers, and instances which are essential for code generation.
      *
-     * @param wireType Configuration for serialization/deserialization
-     * @param interceptor An instance of MethodReaderInterceptorReturns
+     * @param wireType        Configuration for serialization/deserialization
+     * @param interceptor     An instance of MethodReaderInterceptorReturns
      * @param metaDataHandler Array of meta-data handlers
-     * @param instances Instances that dictate the structure of the generated MethodReader
+     * @param instances       Instances that dictate the structure of the generated MethodReader
      */
-    public GenerateMethodReader(WireType wireType, MethodReaderInterceptorReturns interceptor, Object[] metaDataHandler, Object... instances) {
+    public GenerateMethodReader(WireType wireType, MethodReaderInterceptorReturns interceptor, Boolean multipleNonMarshallableParamTypes, Object[] metaDataHandler, Object... instances) {
         this.wireType = wireType;
         this.interceptor = interceptor;
+        this.multipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes;
         this.metaDataHandler = metaDataHandler;
         this.instances = instances;
         this.generatedClassName = generatedClassName0();
@@ -135,7 +139,7 @@ public class GenerateMethodReader {
      * Computes the signature of a given method.
      * The signature comprises the return type, method name, and parameter types.
      *
-     * @param m The method for which the signature is to be computed
+     * @param m    The method for which the signature is to be computed
      * @param type The type under consideration
      * @return A string representing the method's signature
      */
@@ -239,6 +243,7 @@ public class GenerateMethodReader {
             sourceCode.append(format("package %s;\n", packageName()));
 
         // Import statements required for the generated code.
+        boolean hasMultipleNonMarshallableParamTypes = !Boolean.FALSE.equals(multipleNonMarshallableParamTypes);
         sourceCode.append("" +
                 "import net.openhft.chronicle.core.Jvm;\n" +
                 "import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;\n" +
@@ -248,7 +253,9 @@ public class GenerateMethodReader {
                 "import net.openhft.chronicle.wire.utils.*;\n" +
                 "import net.openhft.chronicle.wire.BinaryWireCode;\n" +
                 "\n" +
+                (hasMultipleNonMarshallableParamTypes ? "import java.util.HashMap;\n" : "") +
                 "import java.util.Map;\n" +
+                (hasMultipleNonMarshallableParamTypes ? "import java.util.function.Function;\n" : "") +
                 "import java.lang.reflect.Method;\n" +
                 "\n");
 
@@ -462,9 +469,9 @@ public class GenerateMethodReader {
      * @param anInterface          The interface being processed.
      * @param instanceFieldName    In the generated code, methods are executed on a field with this name.
      * @param methodFilter         Indicates if the passed interface is marked with {@link MethodFilterOnFirstArg}. If true, only certain methods are processed.
-     * @ blocks based on method event IDs.
      * @param eventNameSwitchBlock The block of code that handles the switching of event names.
      * @param eventIdSwitchBlock   The block of code that handles the switching of event IDs.
+     * @ blocks based on method event IDs.
      */
     private void handleInterface(Class<?> anInterface, String instanceFieldName, boolean methodFilter, SourceCodeFormatter eventNameSwitchBlock, SourceCodeFormatter eventIdSwitchBlock) {
         if (Jvm.dontChain(anInterface))
@@ -555,10 +562,15 @@ public class GenerateMethodReader {
             final String typeName = parameterType.getCanonicalName();
             String fieldName = m.getName() + "arg" + i;
             if (fieldNames.add(fieldName)) {
-                if (parameterType == Bytes.class)
+                if (parameterType == Bytes.class) {
                     fields.append(format("private Bytes %s = Bytes.allocateElasticOnHeap();\n", fieldName));
-                else
+                } else {
+                    if (!parameterType.isPrimitive() && !Modifier.isFinal(parameterType.getModifiers()) && multipleNonMarshallableParamTypes(parameterType)) {
+                        fields.append(format("private final Map<Class<? extends %s>, %s> %sInstances = new HashMap<>();\n", typeName, typeName, fieldName));
+                        fields.append(format("private final Function<Class<? extends %s>, %s> %sFunc = %sInstances::get;\n", typeName, typeName, fieldName, fieldName));
+                    }
                     fields.append(format("private %s %s;\n", typeName, fieldName));
+                }
             }
         }
 
@@ -870,8 +882,26 @@ public class GenerateMethodReader {
         } else {
             // Handling other object types.
             final String typeName = argumentType.getCanonicalName();
-            return format("%s = %s.object(checkRecycle(%s), %s.class);\n", argumentName, valueInName, argumentName, typeName);
+            boolean multipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes(argumentType);
+            if (!Modifier.isFinal(argumentType.getModifiers()) && multipleNonMarshallableParamTypes) {
+                return format("%s = %s.object(%s, %s.class); %sInstances.put(%s.getClass(), %s);\n", argumentName, valueInName, argumentName + "Func", typeName, argumentName, argumentName, argumentName);
+            }
+            if (isRecyclable(argumentType)) {
+                return format("%s = %s.object(checkRecycle(%s), %s.class);\n", argumentName, valueInName, argumentName, typeName);
+            }
+            return format("%s = %s.object(%s, %s.class);\n", argumentName, valueInName, argumentName, typeName);
         }
+    }
+
+    private static boolean isRecyclable(Class<?> argumentType) {
+        return argumentType.isArray() || AbstractMarshallableCfg.class.isAssignableFrom(argumentType) || Collection.class.isAssignableFrom(argumentType) || Map.class.isAssignableFrom(argumentType);
+    }
+
+    private boolean multipleNonMarshallableParamTypes(Class<?> argumentType) {
+        Boolean _multipleNonMarshallableParamTypes = this.multipleNonMarshallableParamTypes;
+        return _multipleNonMarshallableParamTypes == null
+                ? argumentType.isInterface() && !isRecyclable(argumentType) || argumentType == Object.class
+                : _multipleNonMarshallableParamTypes;
     }
 
     /**
@@ -907,7 +937,8 @@ public class GenerateMethodReader {
 
     /**
      * Constructs the generated class name using various components such as
-     * the names of instances, metadata handlers, wire type, and potential interceptor.
+     * the names of instances, metadata handlers, wire type, support for interchangeable marshallable/non-marshallable
+     * ([T]rue, [F]alse or [A]uto) and potential interceptor.
      * Special characters, such as underscores and slashes, are handled to format the class name.
      *
      * @return The constructed name for the generated class.
@@ -929,6 +960,11 @@ public class GenerateMethodReader {
         if (wireType != null)
             sb.append(wireType.toString()
                     .replace("_", ""));
+
+        // Append multi marshal/non-marshal support
+        if (multipleNonMarshallableParamTypes != null) {
+            sb.append(Boolean.TRUE.equals(multipleNonMarshallableParamTypes) ? 'T' : 'F');
+        }
 
         // Append interceptor details to the class name.
         if (interceptor instanceof GeneratingMethodReaderInterceptorReturns)

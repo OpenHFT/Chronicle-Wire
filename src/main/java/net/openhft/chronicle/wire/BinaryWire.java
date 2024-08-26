@@ -4356,7 +4356,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 marshallable(marshallable);
                 return (T) marshallable;
             }
-            return object(null, aClass);
+            return object((T)null, aClass);
         }
 
         @Override

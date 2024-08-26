@@ -75,6 +75,10 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     // A flag to indicate whether the reader is in a scanning mode.
     private boolean scanning = false;
 
+    // A flag to determine support for parameters which can either be non-Marshallable or Marshallable
+    // null for auto-detect
+    private Boolean multipleNonMarshallableParamTypes = null;
+
     /**
      * Constructs a new {@code VanillaMethodReaderBuilder} with the specified wire input.
      *
@@ -190,6 +194,17 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     }
 
     /**
+     * Configures the reader to handle parameters which can have multiple non-marshallable parameter types.
+     *
+     * @param multipleNonMarshallableParamTypes Whether the reader should handle multiple non-marshallable parameter types.
+     * @return This builder instance for chaining.
+     */
+    public VanillaMethodReaderBuilder multipleNonMarshallableParamTypes(Boolean multipleNonMarshallableParamTypes) {
+        this.multipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes;
+        return this;
+    }
+
+    /**
      * Creates an instance of a generated method reader.
      * The method first checks if the desired generated reader class is already loaded.
      * If not, it attempts to generate a new class and then instantiate it.
@@ -202,7 +217,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         if (ignoreDefaults || Jvm.getBoolean(DISABLE_READER_PROXY_CODEGEN))
             return null;
 
-        GenerateMethodReader generateMethodReader = new GenerateMethodReader(wireType, methodReaderInterceptorReturns, metaDataHandler, impls);
+        GenerateMethodReader generateMethodReader = new GenerateMethodReader(wireType, methodReaderInterceptorReturns, multipleNonMarshallableParamTypes, metaDataHandler, impls);
 
         String fullClassName = generateMethodReader.packageName() + "." + generateMethodReader.generatedClassName();
 

@@ -915,7 +915,7 @@ public interface ValueIn {
             marshallable(marshallable);
             return (T) marshallable;
         }
-        return object(null, aClass);
+        return object((T)null, aClass);
     }
 
 /**
@@ -1264,6 +1264,27 @@ public interface ValueIn {
             t = (@Nullable E) marshallable(o, MARSHALLABLE);
         } else {
             t = Wires.object2(this, using, clazz, true, (Class) o);
+        }
+        return ValidatableUtil.validate(t);
+    }
+
+    /**
+     * Reads an object from the wire.
+     *
+     * @param <E>   The type of the object to read.
+     * @param usingFunction A function to apply retrieve the instance of an object to reuse, or null to create a new instance.
+     * @param clazz The class of the object to read.
+     * @return The object read from the wire, or null if it cannot be read.
+     * @throws InvalidMarshallableException if the object is invalid
+     */
+    @Nullable
+    default <E> E object(@Nullable Function<Class<? extends E>, E> usingFunction, @Nullable Class<? extends E> clazz) throws InvalidMarshallableException {
+        E t;
+        Object o = typePrefixOrObject(clazz);
+        if (o != null && !(o instanceof Class)) {
+            t = (@Nullable E) marshallable(o, MARSHALLABLE);
+        } else {
+            t = Wires.object2(this, o != null ? usingFunction.apply((Class<? extends E>) o) : null , clazz, true, (Class) o);
         }
         return ValidatableUtil.validate(t);
     }
