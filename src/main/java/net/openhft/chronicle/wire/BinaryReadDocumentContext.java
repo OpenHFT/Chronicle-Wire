@@ -39,7 +39,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     public long start = -1;
     public long lastStart = -1;
     @Nullable
-    protected AbstractWire wire;
+    protected Wire wire;
     protected boolean present;
     protected boolean notComplete;
     protected long readPosition;
@@ -65,7 +65,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
      * @param ensureFullRead Flag to determine if full reading is required.
      */
     public BinaryReadDocumentContext(@Nullable Wire wire, boolean ensureFullRead) {
-        this.wire = (AbstractWire) wire;
+        this.wire = wire;
         this.ensureFullRead = ensureFullRead;
     }
 
@@ -113,7 +113,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
      * @param wire0 The delta wire to read from.
      * @param start The starting position for the full read.
      */
-    private static void fullReadForDeltaWire(AbstractWire wire0, long start) {
+    private static void fullReadForDeltaWire(Wire wire0, long start) {
         long readPosition1 = wire0.bytes().readPosition();
         try {
             // we have to read back from the start, as close may have been called in
@@ -152,7 +152,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         long readLimit0 = this.readLimit;
         long readPosition0 = this.readPosition;
 
-        AbstractWire wire0 = this.wire;
+        Wire wire0 = this.wire;
         if (present && ensureFullRead && start >= 0 && wire0 != null && wire0.hasMore()) {
             fullReadForDeltaWire(wire0, start);
         }
