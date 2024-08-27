@@ -303,9 +303,9 @@ public enum Wires {
             try {
                 // Write the computed header to the temporary bytes
                 tempBytes.writeOrderedInt(header);
-                final AbstractWire wire2 = ((BinaryReadDocumentContext) dc).wire;
+                final Wire wire2 = ((BinaryReadDocumentContext) dc).wire;
                 // Copy data from the original wire to the temporary bytes
-                tempBytes.write(wire2.bytes, 0, wire2.bytes.readLimit());
+                tempBytes.write(wire2.bytes(), 0, wire2.bytes().readLimit());
 
                 // Derive the wire type and apply it to the temporary bytes
                 final WireType wireType = WireType.valueOf(wire);

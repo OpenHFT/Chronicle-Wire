@@ -36,7 +36,7 @@ public class TextReadDocumentContext implements ReadDocumentContext {
 
     // The wire instance this context operates on
     @Nullable
-    protected AbstractWire wire;
+    protected Wire wire;
 
     // Indicators for the state of the document
     protected boolean present, notComplete;
@@ -58,7 +58,7 @@ public class TextReadDocumentContext implements ReadDocumentContext {
      *
      * @param wire The wire instance to be used by this context. Can be null.
      */
-    public TextReadDocumentContext(@Nullable AbstractWire wire) {
+    public TextReadDocumentContext(@Nullable Wire wire) {
         this.wire = wire;
     }
 
@@ -132,8 +132,8 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         long readLimit = this.readLimit;
         long readPosition = this.readPosition;
 
-        AbstractWire wire0 = this.wire;
-        Bytes<?> bytes = wire0.bytes;
+        Wire wire0 = this.wire;
+        Bytes<?> bytes = wire0.bytes();
         bytes.readLimit(readLimit);
 
         if (rollback) {

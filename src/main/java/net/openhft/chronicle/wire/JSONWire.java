@@ -776,7 +776,7 @@ public class JSONWire extends TextWire {
     class JSONReadDocumentContext extends TextReadDocumentContext {
         private int first;
 
-        public JSONReadDocumentContext(@Nullable AbstractWire wire) {
+        public JSONReadDocumentContext(@Nullable Wire wire) {
             super(wire);
         }
 
