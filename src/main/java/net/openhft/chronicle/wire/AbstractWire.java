@@ -29,6 +29,7 @@ import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.IgnoresEverything;
 import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.threads.TimingPauser;
+import net.openhft.chronicle.wire.domestic.InternalWire;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ObjectInput;
@@ -45,7 +46,7 @@ import static net.openhft.chronicle.wire.Wires.*;
  * Represents the AbstractWire class which serves as a base for all Wire implementations.
  * This class provides fundamental shared behaviors, configurations, and initializations for Wire types.
  */
-public abstract class AbstractWire implements Wire {
+public abstract class AbstractWire implements Wire, InternalWire {
 
     // Default padding configuration loaded from the system properties.
     public static final boolean DEFAULT_USE_PADDING = Jvm.getBoolean("wire.usePadding", false);
@@ -642,6 +643,7 @@ public abstract class AbstractWire implements Wire {
     /**
      * used by write bytes when doing a rollback
      */
+    @Override
     public void forceNotInsideHeader() {
         insideHeader = false;
     }
