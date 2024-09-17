@@ -105,7 +105,9 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
             ExceptionHandler eh = s.length() == 0
                     ? Jvm.warn()
                     : exceptionHandlerOnUnknownMethod;
-            eh.on(VanillaMethodReader.class, errorMsg(s, history, sourceIndex));
+            if (eh.isEnabled(VanillaMethodReader.class)) {
+                eh.on(VanillaMethodReader.class, errorMsg(s, history, sourceIndex));
+            }
         };
     }
 
