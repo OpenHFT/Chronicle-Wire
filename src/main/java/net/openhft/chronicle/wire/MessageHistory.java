@@ -157,14 +157,6 @@ public interface MessageHistory extends Marshallable {
     }
 
     /**
-     * @return the name of the service that last wrote the message history, or 0 if not set.
-     */
-    default long serviceNameAsLong() {
-        return 0;
-    }
-
-
-    /**
      * sets the name of the current service
      */
     default void serviceName(long serviceName) {
