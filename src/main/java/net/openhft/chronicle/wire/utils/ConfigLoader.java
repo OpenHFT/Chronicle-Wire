@@ -2,6 +2,7 @@ package net.openhft.chronicle.wire.utils;
 
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.wire.TextWire;
+import net.openhft.chronicle.wire.WireType;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -51,13 +52,32 @@ public enum ConfigLoader {
         return loadWithProperties(loadFile(classLoader, filename), properties);
     }
 
+    public static <T> T loadFromFile(Class<T> expectedClass, Class<?> classLoader, String filename, Properties properties) throws IOException {
+        return loadWithProperties(expectedClass, loadFile(classLoader, filename), properties);
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> T load(String fileAsString) {
         return  (T) TextWire.from(replaceTokensWithProperties(fileAsString)).readObject();
     }
 
     @SuppressWarnings("unchecked")
+    public static <T> T loadWithProperties(String fileAsString) {
+        return loadWithProperties(fileAsString, System.getProperties());
+    }
+
+    @SuppressWarnings("unchecked")
     public static <T> T loadWithProperties(String fileAsString, Properties properties) {
-        return (T) TextWire.from(replaceTokensWithProperties(fileAsString, properties)).readObject();
+        return loadWithProperties(null, fileAsString, properties);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T loadWithProperties(Class<T> expectedClass, String fileAsString) {
+        return loadWithProperties(expectedClass, fileAsString, System.getProperties());
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T loadWithProperties(Class<T> expectedClass, String fileAsString, Properties properties) {
+        return WireType.TEXT.fromString(expectedClass, replaceTokensWithProperties(fileAsString, properties));
     }
 }
