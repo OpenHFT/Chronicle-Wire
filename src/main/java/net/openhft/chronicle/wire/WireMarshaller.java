@@ -1433,7 +1433,7 @@ public class WireMarshaller<T> {
                 Object object = null;
                 try {
                     object = read.object(using, type, false);
-                } catch (Exception e) {
+                } catch (ClassNotFoundRuntimeException e) {
                     // "Unhandled" Abstract classes that are not types should be null (Enums are abstract classes in Java but should not be null here)
                     if (using == null &&
                             Modifier.isAbstract(type.getModifiers()) &&
@@ -1441,6 +1441,7 @@ public class WireMarshaller<T> {
                             !type.isEnum() &&
                             !read.isTyped()) {
                         // retain the null value of object
+                        read.wireIn().bytes().readPosition(pos);
                         Jvm.warn().on(getClass(), "Ignoring exception and setting field '" + field.getName() + "' to null", e);
                     } else {
                         Jvm.rethrow(e);
