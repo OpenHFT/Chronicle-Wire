@@ -700,37 +700,6 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
                 }, false);
     }
 
-    @Deprecated(/* for removal in x.27*/)
-    public <T extends Marshallable> void toFileAsMap(@NotNull String filename, @NotNull Map<String, T> map)
-            throws IOException, InvalidMarshallableException {
-        toFileAsMap(filename, map, false);
-    }
-
-    @Deprecated(/* for removal in x.27*/)
-    public <T extends Marshallable> void toFileAsMap(@NotNull String filename, @NotNull Map<String, T> map, boolean compact)
-            throws IOException, InvalidMarshallableException {
-        String tempFilename = IOTools.tempName(filename);
-        try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
-            Bytes<?> bytes = stlBytes.get();
-            Wire wire = apply(bytes);
-            for (@NotNull Map.Entry<String, T> entry : map.entrySet()) {
-                @NotNull ValueOut valueOut = wire.writeEventName(entry::getKey);
-                boolean wasLeaf = valueOut.swapLeaf(compact);
-                valueOut.marshallable(entry.getValue());
-                valueOut.swapLeaf(wasLeaf);
-            }
-            IOTools.writeFile(tempFilename, bytes.toByteArray());
-        }
-        @NotNull File file2 = new File(tempFilename);
-        @NotNull File dest = new File(filename);
-        if (!file2.renameTo(dest)) {
-            if (dest.delete() && file2.renameTo(dest))
-                return;
-            file2.delete();
-            throw new IOException("Failed to rename " + tempFilename + " to " + filename);
-        }
-    }
-
     /**
      * Writes a {@link WriteMarshallable} object to a file.
      *

@@ -68,13 +68,7 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
      * @return the set of host ports
      */
     public Set<HostPortCfg> hostPorts() {
-        LinkedHashSet<HostPortCfg> result = new LinkedHashSet<>();
-        // Check if the deprecated hostname is initialized and add to the set
-        if (hostname != null)
-            result.add(new HostPortCfg(hostname, port));
-        // Incorporate the existing hostport configurations
-        result.addAll(hostports);
-        return Collections.unmodifiableSet(result);
+        return Collections.unmodifiableSet(hostports);
     }
 
     /**
@@ -117,54 +111,6 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
      */
     public boolean initiator() {
         return initiator;
-    }
-
-    /**
-     * Returns the hostname.
-     *
-     * @return the hostname
-     * @deprecated use {@link ChronicleChannelCfg#hostPorts()}
-     */
-    @Deprecated(/* to be removed in x.27 */)
-    public String hostname() {
-        return hostname;
-    }
-
-    /**
-     * Sets the hostname for the connection.
-     *
-     * @param hostname the hostname
-     * @return this configuration instance
-     * @deprecated use {@link ChronicleChannelCfg#addHostnamePort(String, int)}
-     */
-    @Deprecated(/* to be removed in x.27 */)
-    public C hostname(String hostname) {
-        this.hostname = hostname;
-        return (C) this;
-    }
-
-    /**
-     * Returns the port number.
-     *
-     * @return the port number
-     * @deprecated use {@link ChronicleChannelCfg#hostPorts()}
-     */
-    @Deprecated(/* to be removed in x.27 */)
-    public int port() {
-        return port;
-    }
-
-    /**
-     * Sets the port number.
-     *
-     * @param port the port number
-     * @return this configuration instance
-     * @deprecated use {@link ChronicleChannelCfg#addHostnamePort(String, int)}
-     */
-    @Deprecated(/* to be removed in x.27 */)
-    public C port(int port) {
-        this.port = port;
-        return (C) this;
     }
 
     /**

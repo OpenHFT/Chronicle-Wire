@@ -45,12 +45,6 @@ public enum BinaryWireCode {
      */
     public static final int BYTES_LENGTH32 = 0x82;
 
-    /**
-     * Explicitly indicates BytesMarshallable sequences.
-     */
-    @Deprecated(/* to be removed in x.27 */)
-    public static final int BYTES_MARSHALLABLE = 0x86;
-
    /**
     * Indicates a HistoryMessage follows. was BYTES_MARSHALLABLE, but only used for this purpose
     */

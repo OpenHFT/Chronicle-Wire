@@ -189,46 +189,6 @@ public class GenerateMethodWriter {
 
     /**
      * Generates a proxy class based on the provided interface class.
-     * Note: This method is deprecated and will be removed in version x.26.
-     *
-     * @param fullClassName         Fully qualified class name for the generated proxy class.
-     * @param interfaces            A set of interface classes that the generated proxy class will implement.
-     * @param classLoader           The class loader to use for generating the proxy class.
-     * @param wireType              The wire type for serialization.
-     * @param genericEvent          The generic event type.
-     * @param metaData              Indicates if metadata should be included.
-     * @param useMethodId           Indicates if method ID should be used.
-     * @param useUpdateInterceptor  Indicates if the update interceptor should be used.
-     * @return                      A generated proxy class based on the provided interface class,
-     *                              or null if it can't be created.
-     */
-    @Nullable
-    @Deprecated /* to be removed is version x.26. */
-    public static Class<?> newClass(String fullClassName,
-                                    Set<Class<?>> interfaces,
-                                    ClassLoader classLoader,
-                                    final WireType wireType,
-                                    final String genericEvent,
-                                    boolean metaData,
-                                    boolean useMethodId,
-                                    final boolean useUpdateInterceptor) {
-        String packageName = ReflectionUtil.generatedPackageName(fullClassName);
-
-        int lastDot = fullClassName.lastIndexOf('.');
-        String className = lastDot == -1 ? fullClassName : fullClassName.substring(lastDot + 1);
-
-        return new GenerateMethodWriter(packageName,
-                interfaces,
-                className,
-                classLoader,
-                wireType,
-                genericEvent,
-                metaData, useMethodId, useUpdateInterceptor, false)
-                .createClass();
-    }
-
-    /**
-     * Generates a proxy class based on the provided interface class.
      *
      * @param fullClassName         Fully qualified class name for the generated proxy class.
      * @param interfaces            A set of interface classes that the generated proxy class will implement.
