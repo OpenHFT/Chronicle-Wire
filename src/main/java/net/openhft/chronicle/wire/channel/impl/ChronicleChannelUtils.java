@@ -74,11 +74,6 @@ public final class ChronicleChannelUtils {
                 : simpleConnection;
     }
 
-    @Deprecated(/* To be removed in x.27 */)
-    public static ChronicleChannel newChannel(SocketRegistry socketRegistry, ChronicleChannelCfg<?> channelCfg, ChannelHeader headerOut) throws InvalidMarshallableException {
-        return newChannel(socketRegistry, channelCfg, headerOut, null);
-    }
-
     /**
      * Converts an event handler associated with a {@link ChronicleChannel} into a runnable task.
      * The returned task can then be executed in a separate thread. During its run, the task efficiently waits

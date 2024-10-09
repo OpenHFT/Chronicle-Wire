@@ -175,19 +175,6 @@ public interface LongConverter {
     }
 
     /**
-     * Checks if the characters in the provided {@link WireOut} object are "safe",
-     * meaning they don't require additional quoting or escaping, especially in contexts
-     * like YAML serialization.
-     *
-     * @param wireOut The WireOut instance to check.
-     * @return {@code true} if no characters need escaping or additional quoting for YAML, {@code false} otherwise.
-     */
-    @Deprecated(/* to be removed in x.27 */)
-    default boolean allSafeChars(WireOut wireOut) {
-        return allSafeChars();
-    }
-
-    /**
      * Checks if the characters used are "safe",
      * meaning they don't require additional quoting or escaping, especially in contexts
      * like YAML serialization.
