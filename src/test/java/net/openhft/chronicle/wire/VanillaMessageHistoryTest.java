@@ -26,7 +26,6 @@ import org.junit.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@SuppressWarnings("deprecation")
 public class VanillaMessageHistoryTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Test to check the equality and hashcode of a VanillaMessageHistory object

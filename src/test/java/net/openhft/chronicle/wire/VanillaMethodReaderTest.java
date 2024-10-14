@@ -30,7 +30,6 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 // Extend WireTestCommon to inherit common utility and setup methods for wire tests
-@SuppressWarnings("deprecation")
 public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Define an interface representing a method with a single message parameter

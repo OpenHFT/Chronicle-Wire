@@ -1226,7 +1226,6 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // Test reading and writing of a string map with Wire.
-    @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteStrings() {
         // Initialize bytes and wire for writing
@@ -1377,7 +1376,6 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // Test reading and writing a map with integer keys and values to/from a Wire.
-    @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteIntegers() {
         // Create a byte store and wire to work with
@@ -1441,7 +1439,6 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // Test reading and writing a map with Marshallable keys and values to/from a Wire.
-    @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteMarshable() {
         // Create a byte store and wire to work with

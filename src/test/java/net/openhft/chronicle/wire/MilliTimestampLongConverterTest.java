@@ -97,7 +97,6 @@ public class MilliTimestampLongConverterTest extends WireTestCommon {
     }
 
     // Test the round-trip conversion for various timezones, ensuring consistency in parsing and conversion back to string
-    @SuppressWarnings("deprecation")
     @Test
     public void roundTripTest() {
         roundTrip(TIMESTAMP_STRING_UTC_NO_SUFFIX, TIMESTAMP, new MilliTimestampLongConverter("UTC"));
