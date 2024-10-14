@@ -105,7 +105,6 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
     }
 
     // Test round-trip conversion for various timezones
-    @SuppressWarnings("deprecation")
     @Test
     public void roundTripTest() {
         roundTrip(TIMESTAMP_STRING_UTC_NO_SUFFIX, TIMESTAMP, new MicroTimestampLongConverter("UTC"));

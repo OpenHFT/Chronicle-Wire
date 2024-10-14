@@ -5,7 +5,6 @@ package net.openhft.chronicle.wire.utils;
  *
  * @param <T> interface of messages with prepended history
  */
-@SuppressWarnings("deprecation")
 public interface RecordHistory<T> {
     T history(net.openhft.chronicle.wire.VanillaMessageHistory history);
 }

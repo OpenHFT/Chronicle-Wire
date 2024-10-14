@@ -88,7 +88,6 @@ public class NanoTimestampLongConverterTest extends WireTestCommon {
     }
 
     // Testing round-trip conversions (from string to long and back) for different timezones and formats.
-    @SuppressWarnings("deprecation")
     @Test
     public void roundTripTest() {
         roundTrip(TIMESTAMP_STRING_MELBOURNE, TIMESTAMP, new NanoTimestampLongConverter("Australia/Melbourne"));

@@ -12,7 +12,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 // Test class extending WireTestCommon to test MethodReader functionality with history recording
-@SuppressWarnings("deprecation")
 public class MethodReaderWithHistoryTest extends WireTestCommon {
 
     // Test with text wire type
