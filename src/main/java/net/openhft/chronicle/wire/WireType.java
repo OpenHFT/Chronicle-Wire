@@ -147,107 +147,6 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
             return fromHexString(cs);
         }
     },
-    @Deprecated(/* to be removed in x.27 */)
-    DEFAULT_ZERO_BINARY {
-        @NotNull
-        @Override
-        public Wire apply(Bytes<?> bytes) {
-
-            try {
-                return (Wire) Class.forName("software.chronicle.wire.DefaultZeroWire")
-                        .getDeclaredConstructor(Bytes.class)
-                        .newInstance(bytes);
-
-            } catch (Exception e) {
-                @NotNull IllegalStateException licence = new IllegalStateException(
-                        "A Chronicle Wire Enterprise licence is required to run this code " +
-                                "because you are using DefaultZeroWire which is a licence product. " +
-                                "Please contact sales@chronicle.software");
-                Jvm.warn().on(getClass(), licence);
-                throw licence;
-            }
-        }
-
-        @Override
-        public void licenceCheck() {
-            if (isAvailable())
-                return;
-
-            @NotNull final IllegalStateException licence = new IllegalStateException("A Chronicle Wire " +
-                    "Enterprise licence is required to run this code because you are using " +
-                    "DEFAULT_ZERO_BINARY which is a licence product. " +
-                    "Please contact sales@chronicle.software");
-            Jvm.warn().on(getClass(), licence);
-            throw licence;
-        }
-
-        @Override
-        public boolean isAvailable() {
-            return IS_DEFAULT_ZERO_AVAILABLE;
-        }
-
-        @NotNull
-        @Override
-        public String asString(Object marshallable) {
-            return asHexString(marshallable);
-        }
-
-        @Nullable
-        @Override
-        public <T> T fromString(@NotNull CharSequence cs) throws InvalidMarshallableException {
-            return fromHexString(cs);
-        }
-    },
-    @Deprecated(/* to be removed in x.27 */)
-    DELTA_BINARY {
-        @NotNull
-        @Override
-        public Wire apply(Bytes<?> bytes) {
-
-            try {
-                @NotNull
-                Class<Wire> aClass = (Class) Class.forName("software.chronicle.wire.DeltaWire");
-                final Constructor<Wire> declaredConstructor = aClass.getDeclaredConstructor(Bytes.class);
-                return declaredConstructor.newInstance(bytes);
-
-            } catch (Exception e) {
-                licenceCheck();
-
-                // this should never happen
-                throw new AssertionError(e);
-            }
-        }
-
-        @Override
-        public void licenceCheck() {
-            if (isAvailable())
-                return;
-
-            @NotNull final IllegalStateException licence = new IllegalStateException("A Chronicle-Wire-" +
-                    "Enterprise licence is required to run this code because you are using " +
-                    "DELTA_BINARY which is a licence product. " +
-                    "Please contact sales@chronicle.software");
-            Jvm.error().on(WireType.class, licence);
-            throw licence;
-        }
-
-        @Override
-        public boolean isAvailable() {
-            return IS_DELTA_AVAILABLE;
-        }
-
-        @NotNull
-        @Override
-        public String asString(Object marshallable) {
-            return asHexString(marshallable);
-        }
-
-        @Nullable
-        @Override
-        public <T> T fromString(@NotNull CharSequence cs) throws InvalidMarshallableException {
-            return fromHexString(cs);
-        }
-    },
     FIELDLESS_BINARY {
         @NotNull
         @Override
@@ -444,15 +343,6 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
 
         if (wire instanceof TextWire)
             return WireType.TEXT;
-
-        if ("DeltaWire".equals(wire.getClass().getSimpleName())) {
-            return DELTA_BINARY;
-        }
-
-        // this must be above BinaryWire
-        if ("DefaultZeroWire".equals(wire.getClass().getSimpleName())) {
-            return DEFAULT_ZERO_BINARY;
-        }
 
         if (wire instanceof BinaryWire) {
             @NotNull BinaryWire binaryWire = (BinaryWire) wire;
