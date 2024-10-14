@@ -69,7 +69,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
         bytes.clear();
         @NotNull Wire wire = testId == -1
                 ? new RawWire(bytes)
-                : new BinaryWire(bytes, fixed, numericField, fieldLess, Integer.MAX_VALUE, "lzw", false);
+                : new BinaryWire(bytes, fixed, numericField, fieldLess, Integer.MAX_VALUE, "lzw");
 
         return wire;
     }

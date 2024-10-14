@@ -52,7 +52,7 @@ public class WireTextBugTest extends WireTestCommon {
         ClassAliasPool.CLASS_ALIASES.addAlias(Bug.class);
 
         // Create a BinaryWire object with specific settings
-        @NotNull Wire encodeWire = new BinaryWire(Bytes.elasticByteBuffer(), false, true, false, Integer.MAX_VALUE, "lzw", true);
+        @NotNull Wire encodeWire = new BinaryWire(Bytes.elasticByteBuffer(), false, true, false, Integer.MAX_VALUE, "lzw");
 
         // Create a Bug object and set its clOrdID field
         @NotNull Bug b = new Bug();

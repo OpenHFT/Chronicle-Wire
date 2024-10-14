@@ -461,7 +461,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      */
     @NotNull
     public YamlWire useBinaryDocuments() {
-        readContext = new BinaryReadDocumentContext(this, false);
+        readContext = new BinaryReadDocumentContext(this);
         writeContext = new BinaryWriteDocumentContext(this);
         return this;
     }
