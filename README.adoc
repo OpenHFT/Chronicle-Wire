@@ -102,7 +102,6 @@ To support wire format discovery, the first byte should be in the `ASCII` range;
 The binary formats include:
 
 * binary YAML.
-* delta compressing Binary YAML.This is a Chronicle Wire Enterprise feature
 * typed data without fields
 * raw untyped fieldless data
 * Trivially Copyable Objects (lowest latency)
@@ -124,19 +123,16 @@ To support wire format discovery, the first bytes should have the top bit set.
 |===============
 |WireType |Enum |Human Readable |Self Describing |Size/ Latency |NOTE
 |TextWire |TEXT |YES |NO |More compact than JSON |YAML based
-|BinaryWire |BINARY |NO |YES |Better performance than YAML (half the latency) |Use this only if using Delta and Binary. Otherwise use BINARY_LIGHT
-|BinaryWire |BINARY_LIGHT |NO |YES |Better performance than YAML (half the latency) |Use this when only using Binary (does not support DeltaWire)
-|DefaultZeroWire |DEFAULT_ZERO_BINARY |NO |YES |Better performance than YAML (half the latency) |
-|DeltaWire |DELTA_BINARY |NO |YES |Better performance than YAML (half the latency) |Licenced product
+|BinaryWire |BINARY |NO |YES |Better performance than YAML (half the latency) |Use this when only using Binary
+|BinaryWire |BINARY_LIGHT |NO |YES |Better performance than YAML (half the latency) |Use this when only using Binary, same as BINARY
 |BinaryWire |FIELDLESS_BINARY |NO |YES |Better performance than YAML (half the latency) |
-|BinaryWire |COMPRESSED_BINARY |NO |YES |Better performance than YAML (half the latency) |
-|JSONWire |JSON |YES |NO |Microsecond latencies |
-|JSONWire |JSON_ONLY |YES |NO |Microsecond latencies |
+|JSONWire |JSON |YES |NO |Microsecond latencies |Uses a 4-bit length prefix
+|JSONWire |JSON_ONLY |YES |NO |Microsecond latencies |Uses new lines between messages
 |YamlWire |YAML |YES |NO |More compact than JSON |YAML based
 |YamlWire |YAML_ONLY |YES |NO |More compact than JSON |YAML based
 |RawWire |RAW |NO |YES |More compact than BinaryWire |Writes just the data without the metadata
 |CSVWire |CSV |YES |NO |More compact than JSON |YAML based
-|ReadAnyWire |READ_ANY |- |- |Can be either
+|ReadAnyWire |READ_ANY |- |- |Can be either |Reads any format
 |===============
 
 == Using Wire

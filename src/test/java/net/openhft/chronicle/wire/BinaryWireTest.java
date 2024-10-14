@@ -145,7 +145,7 @@ public class BinaryWireTest extends WireTestCommon {
     @NotNull
     private BinaryWire createWire() {
         bytes.clear();
-        @NotNull BinaryWire wire = new BinaryWire(bytes, fixed, numericField, fieldLess, compressedSize, "lzw", false);
+        @NotNull BinaryWire wire = new BinaryWire(bytes, fixed, numericField, fieldLess, compressedSize, "lzw");
         wire.usePadding(true);
         return wire;
     }

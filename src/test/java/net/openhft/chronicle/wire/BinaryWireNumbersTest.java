@@ -102,7 +102,7 @@ public class BinaryWireNumbersTest extends WireTestCommon {
     public void test(@NotNull WriteValue expected, @NotNull WriteValue perform) {
         @SuppressWarnings("rawtypes")
         @NotNull Bytes<?> bytes1 = allocateElasticOnHeap();
-        @NotNull Wire wire1 = new BinaryWire(bytes1, true, false, false, Integer.MAX_VALUE, "binary", false);
+        @NotNull Wire wire1 = new BinaryWire(bytes1, true, false, false, Integer.MAX_VALUE, "binary");
 
         // Serialize the expected value
         expected.writeValue(wire1.write());

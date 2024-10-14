@@ -427,7 +427,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      */
     @NotNull
     public TextWire useBinaryDocuments() {
-        readContext = new BinaryReadDocumentContext(this, false);
+        readContext = new BinaryReadDocumentContext(this);
         writeContext = new BinaryWriteDocumentContext(this);
         return this;
     }

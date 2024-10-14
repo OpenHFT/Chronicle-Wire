@@ -51,8 +51,7 @@ import static net.openhft.chronicle.core.io.IOTools.*;
  * Enumerates a selection of prebuilt wire types. These wire types define specific ways
  * data can be serialized and deserialized.
  * <p>
- * This enumeration provides utilities to check for the availability of certain wire types
- * such as DeltaWire and DefaultZeroWire. It also provides methods to acquire bytes,
+ * It also provides methods to acquire bytes,
  * useful in serialization operations.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -104,13 +103,13 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
     },
     /**
-     * Use this ONLY if intend to use Delta and Binary. Otherwise, use {@link #BINARY_LIGHT}
+     * With the removal of DeltaWire, this is the same as BINARY_LIGHT
      */
     BINARY {
         @NotNull
         @Override
         public Wire apply(@NotNull Bytes<?> bytes) {
-            return new BinaryWire(bytes);
+            return BinaryWire.binaryOnly(bytes);
         }
 
         @NotNull
@@ -151,7 +150,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         @NotNull
         @Override
         public Wire apply(@NotNull Bytes<?> bytes) {
-            return new BinaryWire(bytes, false, false, true, Integer.MAX_VALUE, "binary", false);
+            return new BinaryWire(bytes, false, false, true, Integer.MAX_VALUE, "binary");
         }
 
         @NotNull
@@ -170,7 +169,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         @NotNull
         @Override
         public Wire apply(@NotNull Bytes<?> bytes) {
-            return new BinaryWire(bytes, false, false, false, COMPRESSED_SIZE, "lzw", true);
+            return new BinaryWire(bytes, false, false, false, COMPRESSED_SIZE, "lzw");
         }
 
         @NotNull
@@ -282,40 +281,6 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
 
     // Size after which data is compressed.
     private static final int COMPRESSED_SIZE = Integer.getInteger("WireType.compressedSize", 128);
-
-    // Flags to check the availability of certain wire types.
-    private static final boolean IS_DELTA_AVAILABLE = isDeltaAvailable();
-    private static final boolean IS_DEFAULT_ZERO_AVAILABLE = isDefaultZeroAvailable();
-
-    /**
-     * Checks if the DeltaWire type is available in the current environment.
-     *
-     * @return true if DeltaWire is available, false otherwise.
-     */
-    @Deprecated(/* to be removed in x.27 */)
-    private static boolean isDeltaAvailable() {
-        try {
-            Class.forName("software.chronicle.wire.DeltaWire").getDeclaredConstructor(Bytes.class);
-            return true;
-        } catch (Exception fallback) {
-            return false;
-        }
-    }
-
-    /**
-     * Checks if the DefaultZeroWire type is available in the current environment.
-     *
-     * @return true if DefaultZeroWire is available, false otherwise.
-     */
-    @Deprecated(/* to be removed in x.27 */)
-    private static boolean isDefaultZeroAvailable() {
-        try {
-            Class.forName("software.chronicle.wire.DefaultZeroWire").getDeclaredConstructor(Bytes.class);
-            return true;
-        } catch (Exception var4) {
-            return false;
-        }
-    }
 
     /**
      * Determines the  of a given {@link Wire} instance. This method inspects
