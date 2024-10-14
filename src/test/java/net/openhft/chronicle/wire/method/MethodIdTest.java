@@ -36,7 +36,7 @@ public class MethodIdTest extends WireTestCommon {
     @Test
     public void methodIdInBinary() {
         // Create a new BinaryWire instance with specified configurations
-        Wire wire = new BinaryWire(new HexDumpBytes(), true, true, false, 128, "", false);
+        Wire wire = new BinaryWire(new HexDumpBytes(), true, true, false, 128, "");
 
         // Generate a proxy instance for the Methods interface
         final Methods methods = wire.methodWriter(Methods.class);

@@ -71,7 +71,6 @@ import static net.openhft.chronicle.wire.Wires.GENERATE_TUPLES;
 public class BinaryWire extends AbstractWire implements Wire {
 
     static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal();
-    private static final boolean SUPPORT_DELTA = supportDelta();
 
     // UTF-8 string interner for memory-efficient string operations
     private static final UTF8StringInterner UTF8 = new UTF8StringInterner(4096);
@@ -118,9 +117,6 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     private final BinaryReadDocumentContext readContext;
 
-    // Indicates if delta support is activated
-    private final boolean supportDelta;
-
     // String builder for various internal operations
     private final StringBuilder stringBuilder = new StringBuilder();
 
@@ -135,7 +131,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      * @param bytes The bytes to be processed by this wire
      */
     public BinaryWire(@NotNull Bytes<?> bytes) {
-        this(bytes, false, false, false, Integer.MAX_VALUE, "binary", SUPPORT_DELTA);
+        this(bytes, false, false, false, Integer.MAX_VALUE, "binary", false);
     }
 
     /**
@@ -147,49 +143,40 @@ public class BinaryWire extends AbstractWire implements Wire {
      * @param fieldLess Indicates if fields are absent
      * @param compressedSize Threshold size for compression
      * @param compression Type of compression (e.g., "binary")
-     * @param supportDelta Indicates if delta support is activated
      */
-    public BinaryWire(@NotNull Bytes<?> bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression, boolean supportDelta) {
+    public BinaryWire(@NotNull Bytes<?> bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression) {
         super(bytes, false);
         this.numericFields = numericFields;
         this.fieldLess = fieldLess;
         this.compressedSize = compressedSize;
         valueOut = getFixedBinaryValueOut(fixed);
         this.compression = compression;
-        valueIn = supportDelta ? new DeltaValueIn() : new BinaryValueIn();
-        readContext = new BinaryReadDocumentContext(this, supportDelta);
-        this.supportDelta = supportDelta;
+        valueIn = new BinaryValueIn();
+        readContext = new BinaryReadDocumentContext(this);
     }
 
     /**
-     * Determines and returns whether delta support is enabled or not.
-     * The method first checks the system property "deltaWire.enable". If it's set to "true" or "false", it returns
-     * the respective boolean value. If not set, it checks the presence of the "software.chronicle.wire.DeltaWire" class.
+     * Constructs a BinaryWire with specified configurations.
      *
-     * @return true if delta support is enabled, false otherwise.
+     * @param bytes The bytes to be processed by this wire
+     * @param fixed Indicates whether the value output is fixed
+     * @param numericFields Indicates if fields are represented numerically
+     * @param fieldLess Indicates if fields are absent
+     * @param compressedSize Threshold size for compression
+     * @param compression Type of compression (e.g., "binary")
+     * @param supportDelta must be false
      */
-    private static boolean supportDelta() {
-        String supportDeltaStr = System.getProperty("deltaWire.enable");
-        if (supportDeltaStr != null) {
-            if (ObjectUtils.isTrue(supportDeltaStr))
-                return true;
-            if (ObjectUtils.isFalse(supportDeltaStr))
-                return false;
-        }
-
-        try {
-            Class.forName("software.chronicle.wire.DeltaWire");
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+    @Deprecated(/* to be removed in x.29 */)
+    public BinaryWire(@NotNull Bytes<?> bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression, boolean supportDelta) {
+        this(bytes, fixed, numericFields, fieldLess, compressedSize, compression);
+        assert !supportDelta;
     }
 
     /**
      * Creates and returns a new instance of BinaryWire with the delta support disabled.
      *
      * @param bytes The bytes to be processed by this wire
-     * @return A new instance of BinaryWire without delta support
+     * @return A new instance of BinaryWire
      */
     @NotNull
     public static BinaryWire binaryOnly(@NotNull Bytes<?> bytes) {
@@ -308,16 +295,6 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     protected FixedBinaryValueOut getFixedBinaryValueOut(boolean fixed) {
         return fixed ? fixedValueOut : new BinaryValueOut();
-    }
-
-    /**
-     * Creates and returns a new DeltaValueIn instance.
-     *
-     * @return A new DeltaValueIn instance.
-     */
-    @NotNull
-    protected BinaryValueIn getBinaryValueIn() {
-        return new DeltaValueIn();
     }
 
     @Override
@@ -1008,16 +985,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                 return ObjectUtils.convertTo(expectedClass, WireInternal.INTERNER.intern(sb));
             }
 
-            case FIELD_ANCHOR: {
-                // Skip the peek code and read the field anchor.
-                bytes.uncheckedReadSkipOne();
-                try (final ScopedResource<StringBuilder> sbTl = SBP.get()) {
-                    final StringBuilder sb = sbTl.get();
-                    readFieldAnchor(sb);
-                    return ObjectUtils.convertTo(expectedClass, sb);
-                }
-            }
-
             case EVENT_OBJECT:
                 // Skip the peek code and read the event object.
                 bytes.uncheckedReadSkipOne();
@@ -1171,11 +1138,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                 bytes.read8bit(sb);
                 return sb;
 
-            case FIELD_ANCHOR:
-                // Read and return the field anchor.
-                bytes.uncheckedReadSkipOne();
-                return readFieldAnchor(sb);
-
             case EVENT_OBJECT:
                 // Get the textual representation of the event object.
                 valueIn.text(sb);
@@ -1186,33 +1148,6 @@ public class BinaryWire extends AbstractWire implements Wire {
         return null;
     }
 
-    /**
-     * Reads a field anchor from the wire and populates the provided StringBuilder.
-     * This method specifically handles the case when the valueIn is an instance of DeltaValueIn.
-     *
-     * @param sb The StringBuilder to be populated with the read field anchor.
-     * @return The populated StringBuilder with the read field anchor.
-     * @throws UnsupportedOperationException If the valueIn is not an instance of DeltaValueIn.
-     */
-    @NotNull
-    protected StringBuilder readFieldAnchor(@NotNull StringBuilder sb) {
-        if (valueIn instanceof DeltaValueIn) {
-            // Cast the valueIn to DeltaValueIn for specific operations.
-            @NotNull DeltaValueIn in = (DeltaValueIn) valueIn;
-
-            // Read the reference and ensure the inField array can accommodate it.
-            int ref = Maths.toUInt31(bytes.readStopBit());
-            if (ref >= in.inField.length)
-                in.inField = Arrays.copyOf(in.inField, in.inField.length * 2);
-
-            // Read the UTF8 value and store it in the inField array.
-            bytes.readUtf8(sb);
-            in.inField[ref] = sb.toString();
-            return sb;
-        } else {
-            throw new UnsupportedOperationException();
-        }
-    }
 
     /**
      * Reads a field number from the wire and populates the provided StringBuilder.
@@ -1225,17 +1160,6 @@ public class BinaryWire extends AbstractWire implements Wire {
      */
     @NotNull
     protected StringBuilder readFieldNumber(CharSequence keyName, int keyCode, @NotNull StringBuilder sb, long fieldId) {
-        // Check if valueIn is an instance of DeltaValueIn, a specific type of input.
-        if (valueIn instanceof DeltaValueIn) {
-            @NotNull DeltaValueIn in = (DeltaValueIn) valueIn;
-            // Ensure the fieldId is within bounds.
-            if (fieldId >= 0 && fieldId < in.inField.length) {
-                String s = in.inField[(int) fieldId];
-                if (s != null)
-                    return sb.append(s); // Append field value to the StringBuilder and return.
-            }
-        }
-
         // Check if the keyCode matches a predefined "ANY" match code.
         if (keyCode == ANY_CODE_MATCH.code()) {
             sb.append(fieldId);  // Append field ID to the StringBuilder.
@@ -1384,16 +1308,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             case FIELD_NUMBER: {
                 bytes.uncheckedReadSkipOne();
                 long code2 = bytes.readStopBit();
-                if (valueIn instanceof DeltaValueIn) {
-                    @NotNull final DeltaValueIn din = (DeltaValueIn) this.valueIn;
-                    if (code2 >= 0 && code2 < din.inField.length) {
-                        String name = din.inField[(int) code2];
-                        if (name != null) {
-                            wire.write(name);
-                            break;
-                        }
-                    }
-                } else if (code2 == MethodReader.MESSAGE_HISTORY_METHOD_ID && !wire.isBinary()) {
+                if (code2 == MethodReader.MESSAGE_HISTORY_METHOD_ID && !wire.isBinary()) {
                     wire.write(MethodReader.HISTORY);
                     break;
                 }
@@ -4272,12 +4187,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                     case NULL:
                         return null;
 
-                    case ANCHOR:
-                        return anchor();
-
-                    case UPDATED_ALIAS:
-                        return updateAlias();
-
                     default:
                         cantRead(code);
                         return null; // only if the throw doesn't work.
@@ -4318,30 +4227,6 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             marshallable(m, true);
             return readResolve(m);
-        }
-
-        /**
-         * Throws an exception indicating this method should be used with DeltaWire.
-         *
-         * @param <T> Placeholder type parameter.
-         * @return Never returns a value; always throws.
-         * @throws InvalidMarshallableException Always.
-         */
-        @NotNull
-        protected <T> T updateAlias() throws InvalidMarshallableException {
-            throw new UnsupportedOperationException("Used by DeltaWire");
-        }
-
-        /**
-         * Throws an exception indicating this method should be used with DeltaWire.
-         *
-         * @param <T> Placeholder type parameter.
-         * @return Never returns a value; always throws.
-         * @throws InvalidMarshallableException Always.
-         */
-        @NotNull
-        protected <T> T anchor() throws InvalidMarshallableException {
-            throw new UnsupportedOperationException("Used by DeltaWire");
         }
 
         @Override
@@ -4535,10 +4420,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                 return null;
             pushState();
             consumePadding();
-            if (supportDelta) {
-                Object o = readMarshallableAnchor(object);
-                if (o != null) return o;
-            }
             long length = readLength();
             if (length >= 0) {
                 long limit = bytes.readLimit();
@@ -4556,31 +4437,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                 throw new IORuntimeException("Length unknown " + length);
             }
             return object;
-        }
-
-        /**
-         * Reads a Marshallable object that is referred to as an anchor or an updated alias in the binary data.
-         *
-         * @param object Existing object instance to check type against.
-         * @return The Marshallable object instance.
-         * @throws InvalidMarshallableException if there's an issue reading the object.
-         */
-        @Nullable
-        private Object readMarshallableAnchor(@NotNull Object object) throws InvalidMarshallableException {
-            int code = peekCode(); // Peek at the next code without advancing the reader position.
-            switch (code) {
-                case ANCHOR:
-                case UPDATED_ALIAS: {
-                    bytes.uncheckedReadSkipOne();  // Advance by one position.
-                    @NotNull Object o = code == ANCHOR ? anchor() : updateAlias();  // Depending on the code, retrieve either the anchor or the updated alias.
-                    if (object == null || o.getClass() != object.getClass()) {
-                        return o instanceof Marshallable ? Wires.deepCopy((Marshallable) o) : o;  // Return a deep copy if it's Marshallable, else return as is.
-                    }
-                    Wires.copyTo(o, object);  // Copy values from o to object.
-                    return object;  // Return the updated object.
-                }
-            }
-            return null;  // If code was neither ANCHOR nor UPDATED_ALIAS, return null.
         }
 
         /**
@@ -5012,17 +4868,6 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                             return;
 
-                        // For anchor or updated alias, read the best-effort object representation.
-                        case ANCHOR:
-                        case UPDATED_ALIAS:
-                            valueIn.objectBestEffort();
-                            return;
-
-                        // For field anchor, skip the code byte and read the anchor into a StringBuilder.
-                        case FIELD_ANCHOR:
-                            bytes.readSkip(1);
-                            readFieldAnchor(acquireStringBuilder());
-                            return;
                         default:
                             // Warn if an unrecognized control code is encountered.
                             Jvm.warn().on(getClass(), "reading control code as text");
@@ -5128,125 +4973,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
             // If the code doesn't match any known pattern, assume it's a text encoding
             text();
-        }
-    }
-
-    /**
-     * This class `DeltaValueIn` is an extension of {@link BinaryWire.BinaryValueIn}, specialized in
-     * decoding delta-encoded serialized objects.
-     * It offers an efficient means of wire-protocol communication, focusing on differences or "deltas" rather
-     * than entire objects. The class utilizes caches for objects and fields, enabling minimized data redundancy
-     * and enhanced deserialization.
-     */
-    class DeltaValueIn extends BinaryWire.BinaryValueIn {
-        // Cached objects that have been read, indexed by reference
-        @NotNull
-        Marshallable[] inObjects = new Marshallable[128];
-        // Cached field names that have been read, indexed by reference
-        @NotNull
-        String[] inField = new String[128];
-
-        @NotNull
-        @Override
-        protected <T> T anchor() throws InvalidMarshallableException {
-            long ref = bytes.readStopBit();
-//            System.out.println("anchor " + ref + " inObjects " + Integer.toHexString(inObjects.hashCode()));
-            if (ref >= inObjects.length)
-                inObjects = Arrays.copyOf(inObjects, inObjects.length * 2);
-            @NotNull T t = super.typedMarshallable0();
-            inObjects[Maths.toUInt31(ref)] = (Marshallable) t;
-            return t;
-        }
-
-        @NotNull
-        @Override
-        protected <T> T updateAlias() throws InvalidMarshallableException {
-            int ref = Maths.toUInt31(bytes.readStopBit());
-//            System.out.println("update " + ref + " inObjects " + Integer.toHexString(inObjects.hashCode()));
-            Marshallable previous = inObjects[ref];
-            if (previous == null)
-                throw new IllegalStateException("Unknown ref: " + ref);
-            super.marshallable(previous, false);
-            return (T) previous;
-        }
-
-        @Override
-        public int int32(int previous) {
-            consumePadding();
-            int code = peekCode();
-            switch (code) {
-                case BinaryWireCode.SET_LOW_INT8:
-                    bytes.uncheckedReadSkipOne();
-                    return (previous & (~0 << 8)) | bytes.readUnsignedByte();
-                case BinaryWireCode.SET_LOW_INT16:
-                    bytes.uncheckedReadSkipOne();
-                    return (previous & (~0 << 16)) | bytes.readUnsignedShort();
-                default:
-                    return super.int32();
-            }
-        }
-
-        @Override
-        public long int64(long previous) {
-            consumePadding();
-            int code = peekCode();
-            switch (code) {
-                case BinaryWireCode.SET_LOW_INT8:
-                    bytes.uncheckedReadSkipOne();
-                    return (previous & (~0L << 8)) | bytes.readUnsignedByte();
-                case BinaryWireCode.SET_LOW_INT16:
-                    bytes.uncheckedReadSkipOne();
-                    return (previous & (~0L << 16)) | bytes.readUnsignedShort();
-                default:
-                    return super.int64();
-            }
-        }
-
-        @Override
-        public float float32(float previous) {
-            consumePadding();
-            int code = peekCode();
-            switch (code) {
-                case BinaryWireCode.FLOAT_SET_LOW_2:
-                    bytes.uncheckedReadSkipOne();
-                    final int i = bytes.readUnsignedByte();
-                    int fi = Math.round(previous * 100);
-                    fi = (fi & (~0 << 8)) | i;
-                    return fi / 100.0f;
-                default:
-                    return super.float32();
-            }
-        }
-
-        @Override
-        public double float64(double previous) {
-            consumePadding();
-            int code = peekCode();
-            switch (code) {
-                case BinaryWireCode.FLOAT_SET_LOW_0: {
-                    bytes.uncheckedReadSkipOne();
-                    final int i = bytes.readUnsignedByte();
-                    long fi = Math.round(previous);
-                    fi = (fi & (~0L << 8)) | i;
-                    return fi;
-                }
-                case BinaryWireCode.FLOAT_SET_LOW_2: {
-                    bytes.uncheckedReadSkipOne();
-                    final int i = bytes.readUnsignedByte();
-                    long fi = Math.round(previous * 100);
-                    fi = (fi & (~0L << 8)) | i;
-                    return fi / 100.0;
-                }
-                case BinaryWireCode.FLOAT_SET_LOW_4: {
-                    bytes.uncheckedReadSkipOne();
-                    final int i = bytes.readUnsignedByte();
-                    long fi = Math.round(previous * 10000);
-                    fi = (fi & (~0L << 8)) | i;
-                    return fi / 1e4;
-                }
-                default:
-                    return super.float64();
-            }
         }
     }
 }

@@ -35,7 +35,6 @@ import static net.openhft.chronicle.wire.Wires.lengthOf;
  */
 public class BinaryReadDocumentContext implements ReadDocumentContext {
 
-    private final boolean ensureFullRead;
     public long start = -1;
     public long lastStart = -1;
     @Nullable
@@ -54,7 +53,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
      * @param wire The wire used for reading the document.
      */
     public BinaryReadDocumentContext(@Nullable Wire wire) {
-        this(wire, wire != null && wire.getValueIn() instanceof BinaryWire.DeltaValueIn);
+        this.wire = wire;
     }
 
     /**
@@ -64,9 +63,10 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
      * @param wire           The wire used for reading the document.
      * @param ensureFullRead Flag to determine if full reading is required.
      */
+    @Deprecated(/* to be removed in x.29 */)
     public BinaryReadDocumentContext(@Nullable Wire wire, boolean ensureFullRead) {
         this.wire = wire;
-        this.ensureFullRead = ensureFullRead;
+        assert !ensureFullRead : "DeltaWire not supported";
     }
 
     @Override
@@ -106,44 +106,6 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
 
     static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal(1);
 
-    /**
-     * Performs a full read for a delta wire starting from a specified position.
-     * This is used to ensure that all content of the wire is read.
-     *
-     * @param wire0 The delta wire to read from.
-     * @param start The starting position for the full read.
-     */
-    private static void fullReadForDeltaWire(Wire wire0, long start) {
-        long readPosition1 = wire0.bytes().readPosition();
-        try {
-            // we have to read back from the start, as close may have been called in
-            // the middle of reading a value
-            wire0.bytes().readPosition(start);
-            wire0.bytes().readSkip(4);
-            while (wire0.hasMore()) {
-                final long remaining = wire0.bytes().readRemaining();
-                final ValueIn read = wire0.read();
-                if (read.isTyped()) {
-                    read.skipValue();
-                } else {
-                    try (final ScopedResource<StringBuilder> tlSb = SBP.get()){
-                        read.text(tlSb.get());  // todo remove this and use skipValue
-                    }
-                }
-
-                if (wire0.bytes().readRemaining() == remaining) {
-                    // stopped making progress, exit loop
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            // TODO: don't believe this is need any more. Have changed from debug to warn
-            Jvm.warn().on(BinaryReadDocumentContext.class, e);
-        } finally {
-            wire0.bytes().readPosition(readPosition1);
-        }
-    }
-
     @Override
     public void close() {
         if (rollbackIfNeeded())
@@ -153,10 +115,6 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         long readPosition0 = this.readPosition;
 
         Wire wire0 = this.wire;
-        if (present && ensureFullRead && start >= 0 && wire0 != null && wire0.hasMore()) {
-            fullReadForDeltaWire(wire0, start);
-        }
-
         start = -1;
         if (readLimit0 > 0 && wire0 != null) {
             @NotNull final Bytes<?> bytes = wire0.bytes();
