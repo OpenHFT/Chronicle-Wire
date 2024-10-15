@@ -29,7 +29,7 @@ import java.util.List;
  * {@link Marshallable}, facilitating serialization and specific dynamic enumeration operations.
  */
 @SuppressWarnings({"deprecation", "rawtypes", "unchecked"})
-@Deprecated(/* to be removed in x.27 */)
+@Deprecated(/* to be removed in x.28 */)
 public interface DynamicEnum extends CoreDynamicEnum, Marshallable {
 
     /**
