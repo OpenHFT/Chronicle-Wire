@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesIn;
+import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.scoped.ScopedResource;
@@ -539,7 +540,7 @@ public class YamlTokeniser {
             if (ch < 0) {
                 // Reached end of input, write any remaining content to temp buffer.
                 long length = in.readPosition() - start;
-                BytesInternal.writeFully(in, start, length, temp);
+                temp.write((BytesStore<?, ?>) in, start, length);
                 break;
             }
             if (ch == '\r' || ch == '\n') {
@@ -548,7 +549,7 @@ public class YamlTokeniser {
                 if (withNewLines)
                     readNewline();
                 long length = in.readPosition() - start;
-                BytesInternal.writeFully(in, start, length, temp);
+                temp.write((BytesStore<?, ?>) in, start, length);
 
                 readIndent();
                 int indent3 = Math.toIntExact(in.readPosition() - lineStart);
