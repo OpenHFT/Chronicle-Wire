@@ -49,12 +49,6 @@ public class ChronicleChannelCfg<C extends ChronicleChannelCfg<C>> extends SelfD
     // Determines the mode of pausing; defaults to yielding mode
     private PauserMode pauser = PauserMode.yielding;
 
-    @Deprecated(/* to be removed in x.27  - use net.openhft.chronicle.wire.channel.ChronicleChannelCfg.hostports instead */)
-    private String hostname;
-
-    @Deprecated(/* to be removed in x.27 - use net.openhft.chronicle.wire.channel.ChronicleChannelCfg.hostports instead */)
-    private int port;
-
     // Specifies the maximum time in seconds that the system will wait while trying to establish a connection
     private double connectionTimeoutSecs = 1.0;
 
