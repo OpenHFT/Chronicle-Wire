@@ -1,9 +1,0 @@
----
-# override eventTime: 2022-05-17T20:25:01.001 to eventTime: 1999-01-01T01:01:01
----
-testEvent: {
-  eventTime: 1999-01-01T01:01:01,
-  processedTime: 2022-05-17T20:25:02.002,
-  currentTime: 2022-05-17T20:26:00
-}
-...

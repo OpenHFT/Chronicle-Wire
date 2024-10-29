@@ -1,9 +1,0 @@
----
-time: 2022-05-17T20:25:02.002
-...
-# Replace comment
----
-testEvent: {
-  eventTime: 2022-05-17T20:25:01.001
-}
-...
