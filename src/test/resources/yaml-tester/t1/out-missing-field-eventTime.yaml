@@ -1,9 +1,0 @@
----
-# missing eventTime: 2022-05-17T20:25:01.001
----
-testEvent: {
-  eventTime: 0,
-  processedTime: 2022-05-17T20:25:02.002,
-  currentTime: 2022-05-17T20:26:00
-}
-...

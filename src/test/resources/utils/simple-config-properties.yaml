@@ -1,4 +1,0 @@
-!SimpleConfig {
-    name: ${config-name},
-    value: 10,
-}
