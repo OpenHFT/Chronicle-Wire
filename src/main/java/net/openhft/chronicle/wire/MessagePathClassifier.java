@@ -36,7 +36,6 @@ import java.util.stream.IntStream;
  * This class also implements {@link IntSupplier}, allowing the direct fetching of path ID for the current
  * {@link MessageHistory}.
  */
-@Deprecated(/* to be moved in x.27 */)
 public class MessagePathClassifier implements IntSupplier {
 
     // Patterns of source IDs for classification.
