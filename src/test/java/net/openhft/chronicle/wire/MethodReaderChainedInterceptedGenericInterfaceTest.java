@@ -110,6 +110,54 @@ public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTest
         methodReader.readOne();
     }
 
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testNested() {
+        BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        wire.usePadding(true);
+
+        final NestedInterface writer = wire.methodWriterBuilder(NestedInterface.class)
+                .updateInterceptor((methodName, t) -> true).build();
+
+        writer.move("T2");
+        writer.fly("plane");
+        writer.destination("Chile").call("Santiago");
+        writer.destination("Peru").call("Lima");
+
+        MethodReader methodReader = wire.methodReader(new NestedInterface() {
+            @Override
+            public void move(String where) {
+                assertEquals("T2", where);
+            }
+
+            @Override
+            public void fly(String what) {
+                assertEquals("plane", what);
+            }
+
+            @Override
+            public Endpoint destination(String target) {
+                return result -> {
+                    switch (target) {
+                        case "Chile":
+                            assertEquals("Santiago", result);
+                            break;
+                        case "Peru":
+                            assertEquals("Lima", result);
+                            break;
+                        default:
+                            fail();
+                    }
+                };
+            }
+        });
+
+        methodReader.readOne();
+        methodReader.readOne();
+        methodReader.readOne();
+        methodReader.readOne();
+    }
+
     /**
      * Interface resembling QWG's Transport.
      */
@@ -122,13 +170,6 @@ public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTest
     }
 
     /**
-     * Interface which extends Transport but does not clarify its method.
-     */
-    interface IndefiniteIface extends Transport<Endpoint> {
-        void fly(String what);
-    }
-
-    /**
      * Interface which extends Transport and clarifies its method.
      */
     interface DefinitiveIface extends Transport<Endpoint> {
@@ -136,5 +177,19 @@ public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTest
 
         @Override
         Endpoint destination(String target);
+    }
+
+    /**
+     * Interface which extends Transport but does not clarify its method.
+     */
+    interface IndefiniteIface extends Transport<Endpoint> {
+        void fly(String what);
+    }
+
+    /**
+     * Interface which non-generically extends another interface extending Transport.
+     */
+    interface NestedInterface extends IndefiniteIface {
+        void move(String where);
     }
 }
