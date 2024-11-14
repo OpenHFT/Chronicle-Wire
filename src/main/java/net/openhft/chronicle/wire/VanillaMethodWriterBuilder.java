@@ -21,7 +21,7 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.util.Builder;
-import net.openhft.chronicle.wire.internal.GenericReflection;
+import net.openhft.chronicle.core.util.GenericReflection;
 import net.openhft.chronicle.wire.internal.MethodWriterClassNameGenerator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -169,8 +169,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                 throw new IllegalArgumentException("The event interface shouldn't implement " + invalidSuperInterface.getName());
         }
         interfaces.add(additionalClass);
-        for (Method method : additionalClass.getMethods()) {
-            Type returnType = GenericReflection.getReturnType(method, additionalClass);
+        for (Type returnType : GenericReflection.getMethodReturnTypes(additionalClass)) {
             if (!(returnType instanceof Class))
                 continue;
             Class returnClass = (Class<?>) returnType;
