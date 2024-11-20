@@ -26,6 +26,7 @@ import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import net.openhft.chronicle.core.util.UnresolvedType;
+import net.openhft.chronicle.wire.internal.UnicodeToStringHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -762,6 +763,11 @@ public class JSONWire extends TextWire {
             bytes.readSkip(1);
         }
         return super.readField(sb);
+    }
+
+    @Override
+    public String toString() {
+        return UnicodeToStringHelper.toUnicodeString(bytes);
     }
 
     @Override

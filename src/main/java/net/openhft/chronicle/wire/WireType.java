@@ -27,6 +27,7 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.ValidatableUtil;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.values.*;
+import net.openhft.chronicle.wire.internal.UnicodeToStringHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,7 +35,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.Map;
 import java.util.Spliterator;
@@ -200,6 +200,12 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         public boolean isText() {
             return true;
         }
+
+        @Override
+        public String asString(Object marshallable) {
+            return asUnicodeString(marshallable);
+        }
+
     },
     JSON_ONLY {
         @NotNull
@@ -211,6 +217,11 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         @Override
         public boolean isText() {
             return true;
+        }
+
+        @Override
+        public String asString(Object marshallable) {
+            return asUnicodeString(marshallable);
         }
     },
     YAML {
@@ -385,6 +396,17 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
     }
 
+    protected @NotNull String asUnicodeString(Object marshallable) {
+        ValidatableUtil.startValidateDisabled();
+        try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
+            final Bytes<?> bytes = stlBytes.get();
+            asBytes(marshallable, bytes);
+            return UnicodeToStringHelper.toUnicodeString(bytes);
+        } finally {
+            ValidatableUtil.endValidateDisabled();
+        }
+    }
+
     /**
      * Converts the given marshallable object to a {@link Bytes} buffer.
      * This method uses various strategies to serialize different types of
@@ -395,7 +417,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      * @throws InvalidMarshallableException If the object cannot be serialized properly.
      */
     @NotNull
-    private void asBytes(Object marshallable, Bytes<?> bytes) throws InvalidMarshallableException {
+    protected void asBytes(Object marshallable, Bytes<?> bytes) throws InvalidMarshallableException {
         Wire wire = apply(bytes);
         wire.usePadding(wire.isBinary() && AbstractWire.DEFAULT_USE_PADDING);
         @NotNull final ValueOut valueOut = wire.getValueOut();
