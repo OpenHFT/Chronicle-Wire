@@ -413,7 +413,6 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      * objects to a byte buffer, e.g., WriteMarshallable, Map, Iterable, etc.
      *
      * @param marshallable The object to be converted to bytes.
-     * @return A Bytes buffer containing the serialized form of the object.
      * @throws InvalidMarshallableException If the object cannot be serialized properly.
      */
     @NotNull
