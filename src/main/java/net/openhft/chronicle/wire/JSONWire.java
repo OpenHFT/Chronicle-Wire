@@ -230,6 +230,9 @@ public class JSONWire extends TextWire {
                     int end = peekBack();
                     if (end != sep)
                         throw new IORuntimeException("Expected " + (char) sep + " but was " + (char) end);
+                    consumePadding();
+                    if (peekCode() == ',')
+                        bytes.readSkip(1);
                 } else {
                     checkRewindDouble();
                 }
