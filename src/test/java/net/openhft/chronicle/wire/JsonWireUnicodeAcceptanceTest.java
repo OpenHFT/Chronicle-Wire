@@ -20,6 +20,8 @@ package net.openhft.chronicle.wire;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,12 +32,16 @@ import static org.junit.Assert.assertEquals;
  */
 public class JsonWireUnicodeAcceptanceTest {
 
+    private static Collection<WireType> WIRE_TYPES = Arrays.asList(WireType.JSON, WireType.JSON_ONLY);
+
     @ParameterizedTest
     @ValueSource(strings = {"£", "€", "¥", "₹", "ó", "óaóó", "☞☞☞☞☞", "ÊÆÄ"})
     public void json_verifyAsString(String input) {
         Map<String, String> map = new HashMap<>();
         map.put("x", input);
-        assertEquals("{\"x\":\"" + input + "\"}", WireType.JSON.asString(map));
+        for (WireType wireType : WIRE_TYPES) {
+            assertEquals("{\"x\":\"" + input + "\"}", wireType.asString(map));
+        }
     }
 
     @ParameterizedTest
