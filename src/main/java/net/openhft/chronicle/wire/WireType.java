@@ -416,7 +416,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      * @throws InvalidMarshallableException If the object cannot be serialized properly.
      */
     @NotNull
-    protected void asBytes(Object marshallable, Bytes<?> bytes) throws InvalidMarshallableException {
+    private void asBytes(Object marshallable, Bytes<?> bytes) throws InvalidMarshallableException {
         Wire wire = apply(bytes);
         wire.usePadding(wire.isBinary() && AbstractWire.DEFAULT_USE_PADDING);
         @NotNull final ValueOut valueOut = wire.getValueOut();
