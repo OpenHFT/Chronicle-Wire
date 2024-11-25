@@ -17,11 +17,16 @@
 package net.openhft.chronicle.wire.benchmarks;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.serializer.SerializeConfig;
+import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONStyle;
 import net.minidev.json.parser.JSONParser;
+import net.openhft.affinity.Affinity;
 import net.openhft.affinity.AffinityLock;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
@@ -49,20 +54,27 @@ import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
+/* on a Ryzen 5950X, with 8 threads
+Benchmark                          Mode  Cnt         Score         Error  Units
+ComparisonMain.fastjson           thrpt   33  10986645.275 ± 1033839.257  ops/s
+ComparisonMain.jacksonWithCBytes  thrpt   33  11644821.957 ±  186579.126  ops/s
+ComparisonMain.jsonBytes          thrpt   33  12630238.718 ±  178770.580  ops/s
+ComparisonMain.jsonWire           thrpt   33   3750653.689 ±  256018.536  ops/s
+ */
 /**
  * Compare JSON writing/parsing
  */
 @State(Scope.Thread)
 public class ComparisonMain {
     final Yaml yaml;
-    final ExternalizableData data = new ExternalizableData(123, 1234567890L, 1234.5, true, "Hello World!", Side.Sell);
-    private final ByteBuffer allocate = ByteBuffer.allocate(64);
-    private final UnsafeBuffer buffer = new UnsafeBuffer(allocate);
+    final ExternalizableData data = new ExternalizableData(1234.5678, true, "Hello World!", Side.Sell, 123, 1234567890L);
+    //private final ByteBuffer allocate = ByteBuffer.allocate(64);
+    //private final UnsafeBuffer buffer = new UnsafeBuffer(allocate);
     ExternalizableData data2 = new ExternalizableData();
     String s;
     StringBuilder sb = new StringBuilder();
     JSONParser jsonParser = new JSONParser(JSONParser.MODE_JSON_SIMPLE);
-    // {"smallInt":123,"longInt":1234567890,"price":1234.0,"flag":true,"text":"Hello World","side":"Sell"}
+    // {"smallInt":123,"longInt":1234567890,"price":1234.5678,"flag":true,"text":"Hello World","side":"Sell"}
     com.fasterxml.jackson.core.JsonFactory jsonFactory = new com.fasterxml.jackson.core.JsonFactory(); // or, for data binding, org.codehaus.jackson.mapper.MappingJsonFactory
     UnsafeBuffer directBuffer = new UnsafeBuffer(ByteBuffer.allocateDirect(128));
     Bytes<?> bytes = Bytes.allocateDirect(512).unchecked(true);
@@ -75,6 +87,7 @@ public class ComparisonMain {
     JsonParser jp;
     JsonParser textJP;
     private byte[] buf;
+    private AffinityLock affinityLock;
 
     public ComparisonMain() {
         DumperOptions options = new DumperOptions();
@@ -120,27 +133,42 @@ public class ComparisonMain {
                 }
             }
         } else {
-            try (AffinityLock affinityLock = AffinityLock.acquireLock(Jvm.getProperty("affinity", "any"))) {
-                int time = Jvm.getBoolean("longTest") ? 30 : 2;
-                System.out.println("measurementTime: " + time + " secs");
-                Options opt = new OptionsBuilder()
-                        .include(ComparisonMain.class.getSimpleName())
-                        .warmupIterations(5)
-                        .measurementIterations(5)
-                        .threads(2)
-                        .forks(1) // use only one fork with affinity
-                        .mode(Mode.SampleTime)
-                        .warmupTime(TimeValue.seconds(1))
-                        .measurementTime(TimeValue.seconds(time))
-                        .timeUnit(TimeUnit.NANOSECONDS)
-                        .build();
+            int time = Jvm.getBoolean("longTest") ? 30 : 2;
+            System.out.println("measurementTime: " + time + " secs");
+            String[] jvmArgs = {
+                    "--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED",
+                    "--add-exports=java.base/jdk.internal.ref=ALL-UNNAMED",
+                    "--add-exports=java.base/jdk.internal.util=ALL-UNNAMED",
+                    "--add-exports=java.base/sun.nio.ch=ALL-UNNAMED",
+                    "--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
+                    "--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
+                    "--add-exports=jdk.unsupported/sun.misc=ALL-UNNAMED",
+                    "--add-opens=java.base/java.io=ALL-UNNAMED",
+                    "--add-opens=java.base/java.lang=ALL-UNNAMED",
+                    "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
+                    "--add-opens=java.base/java.util=ALL-UNNAMED",
+                    "--add-opens=jdk.compiler/com.sun.tools.javac=ALL-UNNAMED"};
+            if (!Jvm.isJava9Plus())
+                jvmArgs = new String[0];
 
-                new Runner(opt).run();
-            }
+            Options opt = new OptionsBuilder()
+                    .include(ComparisonMain.class.getSimpleName())
+                    .jvmArgsAppend(jvmArgs)
+                    .warmupIterations(3)
+                    .measurementIterations(3)
+                    .threads(8)
+                    .forks(11)
+                    .mode(Mode.Throughput)
+                    .warmupTime(TimeValue.seconds(1))
+                    .measurementTime(TimeValue.seconds(time))
+                    .timeUnit(TimeUnit.SECONDS)
+                    .build();
+
+            new Runner(opt).run();
         }
     }
 
-    @Benchmark
+    //    @Benchmark
     public Data snakeYaml() {
         s = yaml.dumpAsMap(data);
         Data data = yaml.load(s);
@@ -169,7 +197,7 @@ public class ComparisonMain {
         data.readFrom(jsonObject);
     }
 
-    @Benchmark
+    //    @Benchmark
     public ExternalizableData jackson() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         JsonGenerator generator = jsonFactory.createGenerator(baos);
@@ -184,17 +212,18 @@ public class ComparisonMain {
 
     @Benchmark
     public ExternalizableData jacksonWithCBytes() throws IOException {
+        if (affinityLock == null)
+            affinityLock = Affinity.acquireLock();
         bytes.clear();
         generator = jsonFactory.createGenerator(outputStream);
         data.writeTo(generator);
         generator.flush();
-
         jp.clearCurrentToken();
         data2.readFrom(jp);
         return data2;
     }
 
-    @Benchmark
+    //    @Benchmark
     public ExternalizableData jacksonWithTextCBytes() throws IOException {
         bytes.clear();
         generator = jsonFactory.createGenerator(writer);
@@ -206,7 +235,7 @@ public class ComparisonMain {
         return data2;
     }
 
-    @Benchmark
+    //    @Benchmark
     public Object externalizable() throws IOException, ClassNotFoundException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -219,7 +248,7 @@ public class ComparisonMain {
         }
     }
 
-    @Benchmark
+    //    @Benchmark
     public Object externalizableWithCBytes() throws IOException, ClassNotFoundException {
         bytes.clear();
         ObjectOutputStream oos = new ObjectOutputStream(outputStream);
@@ -232,6 +261,9 @@ public class ComparisonMain {
 
     @Benchmark
     public Object jsonWire() {
+        if (affinityLock == null)
+            affinityLock = Affinity.acquireLock();
+
         jsonWire.reset();
         jsonWire.getValueOut().marshallable((WriteMarshallable) data);
         // below is faster than jsonWire.getValueIn().marshallable((ReadMarshallable) data2) as it does not read length first
@@ -240,11 +272,48 @@ public class ComparisonMain {
     }
 
     @Benchmark
-    public Object fastjson() {
+    public Object jsonBytes() {
+        if (affinityLock == null)
+            affinityLock = Affinity.acquireLock();
         bytes.clear();
-        // TODO: JSONWriter
-        byte[] ba = JSON.toJSONBytes(data);
-        bytes.write(ba);
-        return JSON.parseObject(ba, ExternalizableData.class);
+        data.writeMarshallable(bytes);
+        data2.readMarshallable(bytes);
+        return data2;
+    }
+
+    JSONWriter.Context context = JSON.createWriteContext(SerializeConfig.global, JSON.DEFAULT_GENERATE_FEATURE);
+
+    @Benchmark
+    public Object fastjson() {
+        if (affinityLock == null)
+            affinityLock = Affinity.acquireLock();
+
+        try (JSONWriter writer1 = JSONWriter.ofUTF8(context)) {
+            writer1.setRootObject(data);
+            Class<?> valueClass = ((Object) data).getClass();
+            ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
+            objectWriter.write(writer1, data, null, null, 0);
+
+            byte[] result = writer1.getBytes();
+
+            return JSON.parseObject(result, ExternalizableData.class);
+        } catch (com.alibaba.fastjson2.JSONException ex) {
+            Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+            throw new JSONException("toJSONBytes error", cause);
+        } catch (RuntimeException ex) {
+            throw new JSONException("toJSONBytes error", ex);
+        }
+    }
+
+    static class Profile {
+        static volatile Object bh;
+
+        public static void main(String[] args) {
+            ComparisonMain comparisonMain = new ComparisonMain();
+            long start = System.currentTimeMillis();
+            do {
+                bh = comparisonMain.jsonBytes();
+            } while (System.currentTimeMillis() < start + 30_000);
+        }
     }
 }

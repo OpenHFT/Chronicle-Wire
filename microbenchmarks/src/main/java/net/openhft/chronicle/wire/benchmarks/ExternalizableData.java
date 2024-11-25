@@ -20,7 +20,8 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import net.minidev.json.JSONObject;
-import net.openhft.chronicle.bytes.BytesIn;
+import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
@@ -31,28 +32,42 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.nio.BufferUnderflowException;
 
 public class ExternalizableData extends SelfDescribingMarshallable implements Externalizable {
-    int smallInt = 0;
-    long longInt = 0;
+    // {"smallInt":123,"longInt":1234567890,"price":1234.0,"flag":true,"text":"Hello World","side":"Sell"}
+
+    static final Bytes<Void> PRICE = Bytes.fromDirect("{\"price\":");
+    static final Bytes<Void> FLAG = Bytes.fromDirect(",\"flag\":");
+    static final Bytes<Void> TEXT = Bytes.fromDirect("\"text\":\"");
+    static final Bytes<Void> SIDE = Bytes.fromDirect("\",\"side\":\"");
+    static final Bytes<Void> SMALL_INT = Bytes.fromDirect("\",\"smallInt\":");
+    static final Bytes<Void> LONG_INT = Bytes.fromDirect(",\"longInt\":");
+    static final Bytes<Void> END = Bytes.fromDirect("}");
+    static final Bytes<Void> TRUE = Bytes.fromDirect("true");
+    static final Bytes<Void> FALSE = Bytes.fromDirect("false");
+
     double price = 0;
     boolean flag = false;
     String text;
+    Bytes<?> textBytes;
     Side side;
+    int smallInt = 0;
+    long longInt = 0;
 
-    public ExternalizableData(int smallInt, long longInt, double price, boolean flag, String text, Side side) {
-        this.smallInt = smallInt;
-        this.longInt = longInt;
+    public ExternalizableData(double price, boolean flag, String text, Side side, int smallInt, long longInt) {
         this.price = price;
         this.flag = flag;
-        this.side = side;
         this.text = text;
+        textBytes = Bytes.from(text);
+        this.side = side;
+        this.smallInt = smallInt;
+        this.longInt = longInt;
     }
 
     public ExternalizableData() {
-
+        textBytes = Bytes.allocateElasticOnHeap(128).unchecked(true);
     }
+
     public int getSmallInt() {
         return smallInt;
     }
@@ -161,19 +176,18 @@ public class ExternalizableData extends SelfDescribingMarshallable implements Ex
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeDouble(price);
-        out.writeLong(longInt);
-        out.writeInt(smallInt);
         out.writeBoolean(flag);
-        out.writeObject(side);
         out.writeObject(getText());
+        out.writeObject(side);
+        out.writeInt(smallInt);
+        out.writeLong(longInt);
     }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         setPrice(in.readDouble());
-        setLongInt(in.readLong());
-        setSmallInt(in.readInt());
         setFlag(in.readBoolean());
+        setText((String) in.readObject());
         Object s = in.readObject();
         if (s instanceof Side)
             setSide((Side) s);
@@ -181,7 +195,8 @@ public class ExternalizableData extends SelfDescribingMarshallable implements Ex
             setSide(Side.valueOf((String) s));
         else
             throw new IllegalStateException();
-        setText((String) in.readObject());
+        setSmallInt(in.readInt());
+        setLongInt(in.readLong());
     }
 
     @Override
@@ -202,5 +217,51 @@ public class ExternalizableData extends SelfDescribingMarshallable implements Ex
         side = Side.valueOf(wire.read("side").readString());
         smallInt = wire.read("smallInt").readInt();
         longInt = wire.read("longInt").readLong();
+    }
+
+    @Override
+    public void writeMarshallable(BytesOut<?> bytes) throws InvalidMarshallableException {
+        appendBytes(bytes, PRICE);
+        bytes.append(price);
+        appendBytes(bytes, FLAG);
+        appendBytes(bytes, flag ? TRUE : FALSE);
+        appendBytes(bytes, TEXT);
+        appendBytes(bytes, textBytes);
+        appendBytes(bytes, SIDE);
+        appendBytes(bytes, side.bs);
+        appendBytes(bytes, SMALL_INT);
+        bytes.append(smallInt);
+        appendBytes(bytes, LONG_INT);
+        bytes.append(longInt);
+        appendBytes(bytes, END);
+    }
+
+    private static void appendBytes(BytesOut<?> bytes, BytesStore<?, ?> bytesAdded) {
+        BytesInternal.writeFully(bytesAdded, 0, bytesAdded.readLimit(), bytes);
+    }
+
+    @Override
+    public void readMarshallable(BytesIn<?> bytes) throws IORuntimeException, InvalidMarshallableException {
+        expectUtf8(bytes, PRICE, 0);
+        price = bytes.parseDouble();
+        expectUtf8(bytes, FLAG, -1);
+        flag = Boolean.TRUE.equals(bytes.parseBoolean());
+        expectUtf8(bytes, TEXT, -1);
+        bytes.parseUtf8(textBytes, StopCharTesters.QUOTES);
+        expectUtf8(bytes, SIDE, -1);
+        side = Side.valueOf(bytes.parse8bit(StopCharTesters.QUOTES));
+        expectUtf8(bytes, SMALL_INT, -1);
+        smallInt = bytes.parseInt();
+        expectUtf8(bytes, LONG_INT, -1);
+        longInt = bytes.parseLong();
+        expectUtf8(bytes, END, 0);
+    }
+
+    private void expectUtf8(BytesIn<?> bytesIn, Bytes<Void> text, int readSkip) {
+        Bytes<?> bytes = (Bytes<?>) bytesIn;
+        bytes.readSkip(readSkip);
+        if (!bytes.startsWith(text))
+            throw new IORuntimeException("Expected " + text + " but got " + bytes);
+        bytes.readSkip(text.length());
     }
 }

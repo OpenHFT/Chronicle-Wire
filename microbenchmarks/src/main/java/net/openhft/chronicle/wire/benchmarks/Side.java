@@ -16,6 +16,10 @@
 
 package net.openhft.chronicle.wire.benchmarks;
 
+import net.openhft.chronicle.bytes.BytesStore;
+
 public enum Side {
-    Buy, Sell
+    Buy, Sell;
+
+    final BytesStore<?,?> bs = BytesStore.from(this.name());
 }
