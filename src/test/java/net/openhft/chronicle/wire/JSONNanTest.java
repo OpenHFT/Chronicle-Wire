@@ -61,10 +61,11 @@ public class JSONNanTest extends WireTestCommon {
     // Test to verify that a leading space before the JSON formatted null is handled correctly
     @Test
     public void readNaNWithFieldNext() {
-        Bytes<?> b = Bytes.from("\"\":{\"value\": null, \"field\":\"text\"}");
+        Bytes<?> b = Bytes.from("\"\":{\"value\": 1 , \"value1\": 1 , \"field\" : \"text\"}");
         Wire wire = WireType.JSON.apply(b);
         Dto value = wire.read().object(Dto.class);
         Assert.assertTrue(Double.isNaN(value.value));
+        Assert.assertEquals(1.0, value.value1, 0.01);
     }
 
     // Class Dto extending SelfDescribingMarshallable with a single double field
