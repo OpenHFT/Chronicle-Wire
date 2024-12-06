@@ -70,9 +70,9 @@ public class TextWireTest extends WireTestCommon {
     @Test
     public void fromList() {
         for (String text : new String[]{
-                "[a, b, c]",
-                "[ 'a', 'b', 'c' ]",
-                "[ \"a\", \"b\", \"c\" ]"
+                "[a , b , c]",
+                "[ 'a' , 'b' , 'c' ]",
+                "[ \"a\" , \"b\" , \"c\" ]"
         }) {
             @NotNull Wire wire = createWire();
             wire.bytes().append(text);
@@ -182,7 +182,7 @@ public class TextWireTest extends WireTestCommon {
                 "a : 1,\n" +
                 "b\t : two,\n" +
                 "c: three,\n" +
-                "d: 44,\n" +
+                "d: 44 ,\n" +
                 "e: also,\n" +
                 "f: at the end\n" +
                 "}");
@@ -2190,8 +2190,8 @@ public class TextWireTest extends WireTestCommon {
         // Create a NestedList instance from its serialized string representation.
         NestedList nl = Marshallable.fromString("!" + NestedList.class.getName() + " {\n" +
                 "  name: name,\n" +
-                "  listA: [ { a: 1, b: 1.2 } ],\n" +
-                "  listB: [ { a: 1, b: 1.2 }, { a: 3, b: 2.3 } ]," +
+                "  listA: [ { a: 1 , b: 1.2 } ],\n" +
+                "  listB: [ { a: 1 , b: 1.2 }, { a: 3 , b: 2.3 } ]," +
                 "  num: 128\n" +
                 "}\n");
 
