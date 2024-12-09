@@ -356,7 +356,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     public void testArrayInDictionary() {
-        String text = "[320,{\"as\":[1,2,3]}]"; // Define a string with a list that contains an integer and a dictionary
+        String text = "[320 , {\"as\":[1 ,\n2\n, 3]}]"; // Define a string with a list that contains an integer and a dictionary
         final JSONWire jsonWire = new JSONWire(Bytes.from(text)); // Create a new JSONWire with the given text
         final Object list = jsonWire.getValueIn().object(); // Extract the object from the JSONWire
         assertEquals("[320, {as=[1, 2, 3]}]", "" + list); // Assert that the extracted object matches the expected format
@@ -412,11 +412,11 @@ public class JSONWireTest extends WireTestCommon {
         // Create a JSON string with different field types
         final Bytes<byte[]> data = Bytes.allocateElasticOnHeap();
         data.append("{\n" +
-                "  \"field1\": 1234,\n" +
-                "  \"field2\": 456,\n" +
-                "  \"field3\": [ ],\n" +
+                "  \"field1\": 1234 , " +
+                "  \"field2\": 456\n,\n" +
+                "  \"field3\": [ ] ,\n" +
                 "  \"field4\": [\n" +
-                "    \"abc\",\n" +
+                "    \"abc\" ,\n" +
                 "    \"xyz\"\n" +
                 "  ]\n" +
                 "}");
