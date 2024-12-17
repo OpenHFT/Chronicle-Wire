@@ -677,7 +677,14 @@ public class VanillaMethodReader implements MethodReader {
             ((Collection<?>) o).clear();
             return o;
         }
-        // If object is Marshallable, return the same object, else return null
+        if (o instanceof Map) {
+            ((Map<?, ?>) o).clear();
+            return o;
+        }
+        // For objects of type AbstractMarshallableCfg, reset them to their default state.
+        if (o instanceof AbstractMarshallableCfg) {
+            ((AbstractMarshallableCfg) o).reset();
+        }
         return o instanceof Marshallable ? o : null;
     }
 
