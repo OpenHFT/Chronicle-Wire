@@ -34,7 +34,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.Map;
 import java.util.Spliterator;
@@ -200,6 +199,11 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         public boolean isText() {
             return true;
         }
+
+        @Override
+        public String asString(Object marshallable) {
+            return asUtf8String(marshallable);
+        }
     },
     JSON_ONLY {
         @NotNull
@@ -211,6 +215,11 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         @Override
         public boolean isText() {
             return true;
+        }
+
+        @Override
+        public String asString(Object marshallable) {
+            return asUtf8String(marshallable);
         }
     },
     YAML {
@@ -281,6 +290,17 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
 
     // Size after which data is compressed.
     private static final int COMPRESSED_SIZE = Integer.getInteger("WireType.compressedSize", 128);
+
+    protected @NotNull String asUtf8String(Object marshallable) {
+        ValidatableUtil.startValidateDisabled();
+        try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
+            final Bytes<?> bytes = stlBytes.get();
+            asBytes(marshallable, bytes);
+            return bytes.toUtf8String();
+        } finally {
+            ValidatableUtil.endValidateDisabled();
+        }
+    }
 
     /**
      * Determines the  of a given {@link Wire} instance. This method inspects

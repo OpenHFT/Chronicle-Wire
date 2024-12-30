@@ -1291,4 +1291,14 @@ public class JSONWire extends TextWire {
             return useTypes;
         }
     }
+
+    /**
+     * Render as a UTF-8 string.
+     *
+     * @return a UTF-8 string representation of the wire data.
+     */
+    @Override
+    public String toString() {
+        return toUtf8String();
+    }
 }

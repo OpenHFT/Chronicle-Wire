@@ -487,6 +487,24 @@ public class TextWire extends YamlWireOut<TextWire> {
             return bytes.toString();
     }
 
+    /**
+     * Converts the underlying bytes of this TextWire to its ISO-8859-1 string representation.
+     *
+     * @return A string representation of the TextWire's underlying bytes in ISO-8859-1 encoding.
+     */
+    public String to8bitString() {
+        return bytes.to8bitString();
+    }
+
+    /**
+     * Converts the underlying bytes of this TextWire to its UTF-8 string representation.
+     *
+     * @return A string representation of the TextWire's underlying bytes in UTF-8 encoding.
+     */
+    public String toUtf8String() {
+        return bytes.toUtf8String();
+    }
+
     @Override
     public void copyTo(@NotNull WireOut wire) throws InvalidMarshallableException {
         if (wire instanceof TextWire || wire instanceof YamlWire) {
