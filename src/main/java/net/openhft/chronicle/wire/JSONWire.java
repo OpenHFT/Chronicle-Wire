@@ -955,14 +955,30 @@ public class JSONWire extends TextWire {
         public void writeComment(@NotNull CharSequence s) {
         }
 
+        /**
+         * Write a special double value (e.g. NaN) as a string to the given bytes.
+         *
+         * @param bytes The bytes to append the stringified double value to
+         * @param value The double value to convert to a string
+         */
         @Override
-        protected String doubleToString(double d) {
-            return Double.isNaN(d) ? "null" : super.doubleToString(d);
+        protected void writeSpecialDoubleValueToBytes(Bytes<?> bytes, double value) {
+            bytes.append('"');
+            bytes.append(Double.toString(value));
+            bytes.append('"');
         }
 
+        /**
+         * Write a special double value (e.g. NaN) as a string to the given bytes.
+         *
+         * @param bytes The bytes to append the stringified double value to
+         * @param value The double value to convert to a string
+         */
         @Override
-        protected String floatToString(float f) {
-            return Float.isNaN(f) ? "null" : super.floatToString(f);
+        protected void writeSpecialFloatValueToBytes(Bytes<?> bytes, float value) {
+            bytes.append('"');
+            bytes.append(Float.toString(value));
+            bytes.append('"');
         }
 
         @NotNull

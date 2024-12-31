@@ -42,7 +42,7 @@ public class JSONNanTest extends WireTestCommon {
             wire.write().marshallable(value);
 
             // Assert that the wire content represents the NaN as null
-            Assert.assertEquals("\"\":{\"value\":0.0,\"value1\":null,\"value2\":0,\"field\":\"text\"}", wire.toString());
+            Assert.assertEquals("\"\":{\"value\":0.0,\"value1\":\"NaN\",\"value2\":0,\"field\":\"text\"}", wire.toString());
         } finally {
             // Release the byte buffer resources
             b.releaseLast();

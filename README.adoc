@@ -743,6 +743,26 @@ class Data implements Marshallable {
 }
 ----
 
+== Wire type implementation details
+
+=== JSONWire
+
+==== Handling of special floating point values such as Double.NaN
+
+JSONWire will serialize and deserialize special floating point values such as `Double.NaN` to and from valid JSON string literals in accordance
+with the following table:
+
+[cols="2*", options="header"]
+|=================================================
+| Java primitive value     | String representation
+| Double.NaN               | "NaN"
+| Double.POSITIVE_INFINITY | "Infinity"
+| Double.NEGATIVE_INFINITY | "-Infinity"
+| Float.NaN                | "NaN"
+| Float.POSITIVE_INFINITY  | "Infinity"
+| Float.NEGATIVE_INFINITY  | "-Infinity"
+|=================================================
+
 == LongConverter
 
 Provides an abstraction for converting between long values and their string representations,
