@@ -564,7 +564,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
          * Appends the current separator to the output bytes and handles any necessary whitespace trimming.
          */
         protected void appendSep() {
-            append(sep);
+            if (!sep.isEmpty())
+                append(sep);
             trimWhiteSpace();
             if (bytes.endsWith('\n') || sep == EMPTY_AFTER_COMMENT)
                 indent();
