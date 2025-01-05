@@ -645,11 +645,7 @@ public class JSONWire extends TextWire {
     @Override
     void escape(@NotNull CharSequence s) {
         bytes.writeUnsignedByte('"');
-        if (needsQuotes(s) == Quotes.NONE) {
-            bytes.appendUtf8(s);
-        } else {
-            escape0(s, Quotes.DOUBLE);
-        }
+        escape0(s, Quotes.DOUBLE);
         bytes.writeUnsignedByte('"');
     }
 
@@ -665,6 +661,12 @@ public class JSONWire extends TextWire {
     protected void escape0(@NotNull CharSequence s, @NotNull Quotes quotes) {
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
+
+            // Skip if doesn't match one of these
+            if (!(ch == '"' || ch < ' ' || ch == '\\')) {
+                bytes.append(ch);
+                continue;
+            }
 
             // Switch on each character and apply the appropriate escape sequence
             switch (ch) {
