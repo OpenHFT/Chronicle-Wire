@@ -6,6 +6,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.util.Histogram;
+import net.openhft.chronicle.testframework.GcControls;
 import net.openhft.chronicle.wire.*;
 
 import static run.chronicle.wire.perf.BytesInBytesMarshallableMain.histoOut;
@@ -34,11 +35,16 @@ public class JSONWireMarshallableMain {
                 end = System.nanoTime();
                 readHist.sample(end - start);
                 if (i == 0) {
+                    System.out.println("Warmup complete, awaiting GC");
                     readHist.reset();
                     writeHist.reset();
+                    GcControls.waitForGcCycle();
+                    System.out.println("GC complete, starting benchmark");
                 }
             }
         }
+
+        System.out.println("Benchmark complete, writing results");
 
         histoOut("read", JSONWireMarshallableMain.class, readHist);
         histoOut("write", JSONWireMarshallableMain.class, writeHist);
