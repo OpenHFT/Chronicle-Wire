@@ -37,7 +37,6 @@ public class JSONWireMarshallableMain {
                     readHist.reset();
                     writeHist.reset();
                 }
-                Jvm.nanoPause();
             }
         }
 
