@@ -67,6 +67,8 @@
         <dependency>
             <groupId>net.openhft</groupId>
             <artifactId>chronicle-wire</artifactId>
+            <!-- FIXME DO NOT CHECK IN: used to force use of latest version -->
+            <version>2.27ea2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>net.openhft</groupId>
