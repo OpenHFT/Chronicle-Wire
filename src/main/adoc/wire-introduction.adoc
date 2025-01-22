@@ -1,0 +1,265 @@
+= Introduction to Chronicle Wire
+:keywords: Chronicle, Java
+:author: Peter Lawrey
+
+Chronicle Wire is a simple, fast, and efficient framework for writing and reading data in multiple formats—text-based (JSON, YAML) or performant binary. It provides multiple levels of abstraction to balance ease of use and performance.
+
+== Overview
+
+Chronicle Wire offers:
+* **SelfDescribingMarshallable**: A flexible, schema-tolerant approach (especially in YAML).
+* **ByteInBinaryMarshallable**: A more efficient approach that omits field names but is less tolerant of changes to field ordering.
+* **Method Reader / Method Writer**: A high-level abstraction for asynchronous RPC-style calls using Java interfaces.
+
+== Binary Wire vs. YAML
+
+The `BinaryWire` format is essentially a binary version of YAML, making it straightforward to translate to and from human-readable text. For every example below, the Binary Wire behaves the same as its YAML counterpart but is typically faster.
+
+== Method Reader / Method Writer
+
+The highest-level abstraction in Chronicle Wire is the Method Reader / Method Writer pattern, designed to facilitate asynchronous RPC calls. It offers flexibility by requiring only an interface from both the caller and the implementer—no additional infrastructure is necessary.
+
+[mermaid]
+----
+flowchart LR
+  A[MethodReader] --> B[Component] --> C[MethodWriter]
+----
+
+In its simplest form, each event is identified by a different method name. These methods can accept a single DTO as their parameter.
+
+.Example Interface
+[source,java]
+----
+public interface MyComponent {
+    void myMethod(MyDTO dto);
+}
+
+public class MyDTO extends SelfDescribingMarshallable {
+    String text;
+    int number;
+}
+----
+
+=== Self Describing Marshallable
+
+A `SelfDescribingMarshallable` is a DTO that includes field names in its serialized form. In YAML, it might look like this:
+
+[source,yaml]
+----
+!MyDTO {
+  text: "Hello World",
+  number: 123
+}
+----
+
+The benefit of this approach is that it it tolerant of schema changes which ar ecommon in the early stages of a project, but still useful as the project matures.
+
+This allows automatic handling of:
+
+- Adding new fields
+- Removing fields
+- Renaming fields, but this requires a little more work
+- Changing the type of fields
+
+Say `number` was changed from an `int` to a `long` in the DTO, the YAML would look exactly the same.
+If `number` was changed to being a `String` the YAML would look like
+
+This approach tolerates common schema changes such as adding, removing, or renaming fields and changing field types. For example, if `number` changes from an `int` to a `long`, the YAML remains the same.
+
+[source,yaml]
+----
+!MyDTO {
+  number: "123", // originally an int
+  text: "Hello World",
+  more: "data" // this is ignored by old readers
+}
+----
+
+Say your `symbol` field like this
+
+[source,yaml]
+----
+!MyOrder {
+  symbol: EUR_USD,
+  number: "123"
+}
+----
+
+It's type could be a `String`, an `enum`, or a `long` with `@ShortText` or a custom encoding.
+
+If a field is dropped e.g. say you add a `more` field, but the producer isn't ready to send it, the consumer will fill it with the default.
+
+[source,yaml]
+----
+!MyDTO {
+  text: "Hello World",
+  number: 123
+  // more: isn't set by the produce
+}
+----
+
+You can set the default value in the DTO by providing a no args constructor.
+
+[source,java]
+----
+public class MyDTO extends SelfDescribingMarshallable {
+    String text = "na";
+    int number = 128;
+    String more = "default";
+}
+----
+
+This will result in the MyDTO being read as
+
+[source,yaml]
+----
+!MyDTO {
+  text: "Hello World",
+  number: 123,
+  more: "default"
+}
+----
+
+In this case, field names always appear even in binary.
+
+=== `ByteInBinaryMarshallable`
+
+field names and instead relies on the order of fields. This is ideal when:
+
+* You have many fields and want to reduce overhead.
+* You can guarantee that the order of fields will not change (though you can still append new fields at the end).
+
+For example, in text-based YAML:
+
+[source,yaml]
+----
+myOrder: {
+  symbol: EUR_USD,
+  number: 123
+}
+----
+
+can become:
+
+[source,yaml]
+----
+myOrder: [ EUR_USD, 123 ]
+----
+
+This still means that if the types change, or a field is added it can handle this, but a change in the order of fields, or add a field not at the end, it will break the reader.
+
+If you use a text wire, the object will still be self describing.
+
+In binary formats, no field names appear.
+
+=== Method Reader / Method Writer
+
+The Method approach writes the method name or event name as a key.
+If the type matches the type in the interface it is dropped. e.g.
+
+[source,java]
+----
+public interface MyComponent {
+    void myMethod(MyDTO dto);
+}
+----
+
+[source,yaml]
+----
+# Calling out.myMethod(new MyDTO("Hello World", 123));
+myMethod: {
+    text: "Hello World",
+    number: 123
+}
+----
+
+However, if you pass a subclass, the class is defined
+
+[source,java]
+----
+class MySubDTO extends MyDTO {
+    String more;
+}
+----
+
+[source,yaml]
+----
+# Calling out.myMethod(new MySubDTO("Hello World", 123, "more data"));
+myMethod: !MySubDTO {
+    text: "Hello World",
+    number: 123,
+    more: "more data"
+}
+----
+
+Overloaded methods (same method name, different parameters) are not supported because Chronicle Wire identifies events by method name alone.
+
+=== Components using Method Reader / Method Writer
+
+To use the Method Reader / Method Writer pattern, you only need:
+* An interface for incoming calls.
+* An interface for outgoing calls.
+* An implementation that references the output interface.
+
+The minimum contract to support this is to have an interface which is called or implemented, and an interface it calls.
+
+NOTE: This is the purpose, make it super simple to write business components that know nothing about how the infrastructure works.
+
+[source,java]
+----
+public interface MyComponentIn {
+    void myMethod(MyDTO dto);
+}
+
+public interface MyComponentOut {
+    void myOtherMethod(MyOtherDTO dto);
+}
+
+// Example business logic
+public class MyComponentImpl implements MyComponentIn {
+
+    private final MyOtherDTO other = new MyOtherDTO();
+    private final MyComponentOut out;
+
+    public MyComponentImpl(MyComponentOut out) {
+        this.out = out;
+    }
+
+    @Override
+    public void myMethod(MyDTO dto) {
+        other.text = dto.text;
+        other.number = dto.number;
+        other.more = "more data";
+        out.myOtherMethod(other);
+    }
+}
+----
+
+=== Testing with YAML
+
+You can test components in a behavior-driven style by providing an input YAML and verifying the output YAML.
+
+.When the following `in.yaml` is passed in:
+[source,yaml]
+----
+myMethod: {
+    text: "Hello World",
+    number: 123
+}
+----
+
+.Then the `out.yaml` should be
+[source,yaml]
+----
+myOtherMethod: {
+    text: "Hello World",
+    number: 123,
+    more: "more data"
+}
+----
+
+== BinaryWire
+
+BinaryWire is a binary format which is a binary for of the features we support in YAML for serialization and deserialization.
+
+The codes it uses are in `BinaryWireCode` which contains all the byte codes used in the serialization.  This can be seen in detail using `HexDumpBytes` which shows the byte codes in a human readable form.
