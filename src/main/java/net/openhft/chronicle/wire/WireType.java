@@ -164,6 +164,10 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
             return fromHexString(cs);
         }
     },
+    /**
+     * To be removed in X.29 - use BINARY_LIGHT instead
+     */
+    @Deprecated
     COMPRESSED_BINARY {
         @NotNull
         @Override
