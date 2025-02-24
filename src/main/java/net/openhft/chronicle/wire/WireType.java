@@ -35,7 +35,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -586,7 +588,33 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
             Bytes<?> bytes = stlBytes.get();
             bytes.appendUtf8(cs);
             Wire wire = apply(bytes);
-            return wire.getValueIn().object(tClass);
+
+            T object = wire.getValueIn().object(tClass);
+            cleanNullCollections(object);
+            return object;
+        }
+    }
+
+    private void cleanNullCollections(Object object) {
+        if (object == null) return;
+
+        Class<?> clazz = object.getClass();
+        for (Field field : clazz.getDeclaredFields()) {
+            if (!Collection.class.isAssignableFrom(field.getType())) continue;
+
+            try {
+                field.setAccessible(true);
+                Object fieldValue = field.get(object);
+
+                if (fieldValue instanceof Collection) {
+                    Collection<?> collection = (Collection<?>) fieldValue;
+                    if (collection.size() == 1 && collection.iterator().next() == null) {
+                        field.set(object, null);
+                    }
+                }
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+                throw new InvalidMarshallableException("Failed cleaning null collection during processing field: " + field.getName());
+            }
         }
     }
 

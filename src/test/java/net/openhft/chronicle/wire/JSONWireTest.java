@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
@@ -662,6 +663,19 @@ public class JSONWireTest extends WireTestCommon {
     private static class DtoWithClassReference extends SelfDescribingMarshallable {
         private Class<?> implClass;
         private boolean bool;
+    }
+
+    @Test
+    public void testNullListCollectionWithMultipleFieldsJson() {
+        ClassAliasPool.CLASS_ALIASES.addAlias(CollectionContainer.class);
+        CollectionContainer container = WireType.JSON_ONLY.fromString("{ \"@CollectionContainer\": { \"collection\": [null, \"testValue\"] } }");
+        Object[] array = container.collection.toArray();
+        Assert.assertNull(array[0]);
+        Assert.assertEquals("testValue", array[1]);
+    }
+
+    private static class CollectionContainer {
+        private Collection<String> collection;
     }
 
 }
