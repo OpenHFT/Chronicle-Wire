@@ -597,9 +597,10 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
 
     private void cleanNullCollections(Object object) {
         if (object == null) return;
+        Field[] declaredFields = object.getClass().getDeclaredFields();
 
-        Class<?> clazz = object.getClass();
-        for (Field field : clazz.getDeclaredFields()) {
+        for (int i=0; i<declaredFields.length; i++) {
+            Field field = declaredFields[i];
             if (!Collection.class.isAssignableFrom(field.getType())) continue;
 
             try {
@@ -737,7 +738,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     @Deprecated(/* for removal in x.27*/)
     public <T extends Marshallable> void toFileAsMap(@NotNull String filename, @NotNull Map<String, T> map, boolean compact)
             throws IOException, InvalidMarshallableException {
-        String tempFilename = IOTools.tempName(filename);
+        String tempFilename = tempName(filename);
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
             Wire wire = apply(bytes);
@@ -747,7 +748,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
                 valueOut.marshallable(entry.getValue());
                 valueOut.swapLeaf(wasLeaf);
             }
-            IOTools.writeFile(tempFilename, bytes.toByteArray());
+            writeFile(tempFilename, bytes.toByteArray());
         }
         @NotNull File file2 = new File(tempFilename);
         @NotNull File dest = new File(filename);
@@ -768,12 +769,12 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      * @throws InvalidMarshallableException If the object cannot be properly serialized.
      */
     public void toFile(@NotNull String filename, WriteMarshallable marshallable) throws IOException, InvalidMarshallableException {
-        String tempFilename = IOTools.tempName(filename);
+        String tempFilename = tempName(filename);
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
             Wire wire = apply(bytes);
             wire.getValueOut().typedMarshallable(marshallable);
-            IOTools.writeFile(tempFilename, bytes.toByteArray());
+            writeFile(tempFilename, bytes.toByteArray());
         }
         @NotNull File file2 = new File(tempFilename);
         if (!file2.renameTo(new File(filename))) {
