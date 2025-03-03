@@ -150,8 +150,6 @@ public class WireDumperTest extends WireTestCommon {
 
         expectedContentByType.put(WireType.FIELDLESS_BINARY, expectedBinary);
 
-        expectedContentByType.put(WireType.COMPRESSED_BINARY, expectedBinary);
-
         expectedContentByType.put(WireType.JSON, "" +
                 "--- !!data\n" +
                 "17\n" +
@@ -216,8 +214,6 @@ public class WireDumperTest extends WireTestCommon {
         expectedPartialContent.put(WireType.BINARY_LIGHT, expectedPartialBinary);
 
         expectedPartialContent.put(WireType.FIELDLESS_BINARY, expectedPartialBinary);
-
-        expectedPartialContent.put(WireType.COMPRESSED_BINARY, expectedPartialBinary);
 
         expectedPartialContent.put(WireType.JSON, "" +
                 "--- !!data\n" +
