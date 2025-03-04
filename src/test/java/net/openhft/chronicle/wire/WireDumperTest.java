@@ -61,6 +61,7 @@ public class WireDumperTest extends WireTestCommon {
                 .filter(wt -> wt != WireType.READ_ANY)
                 .filter(wt -> wt != WireType.JSON_ONLY)
                 .filter(wt -> wt != WireType.YAML_ONLY)
+                .filter(wt -> wt != WireType.COMPRESSED_BINARY) // Deprecated - to be removed in X.29
                 .map(wt -> new Object[]{wt.toString(), wt})
                 .toArray(Object[][]::new);
     }
