@@ -61,7 +61,6 @@ public class WireDumperTest extends WireTestCommon {
                 .filter(wt -> wt != WireType.READ_ANY)
                 .filter(wt -> wt != WireType.JSON_ONLY)
                 .filter(wt -> wt != WireType.YAML_ONLY)
-                .filter(wt -> wt != WireType.COMPRESSED_BINARY) // Deprecated - to be removed in X.29
                 .map(wt -> new Object[]{wt.toString(), wt})
                 .toArray(Object[][]::new);
     }
@@ -107,6 +106,7 @@ public class WireDumperTest extends WireTestCommon {
         bytes.releaseLast();  // Releasing the last bytes used
     }
 
+    @SuppressWarnings("deprecation")
     private void initTestData() {
 
         // Adding the expected serialized output for TEXT WireType
@@ -150,6 +150,8 @@ public class WireDumperTest extends WireTestCommon {
         expectedContentByType.put(WireType.BINARY_LIGHT, expectedBinary);
 
         expectedContentByType.put(WireType.FIELDLESS_BINARY, expectedBinary);
+
+        expectedContentByType.put(WireType.COMPRESSED_BINARY, expectedBinary);
 
         expectedContentByType.put(WireType.JSON, "" +
                 "--- !!data\n" +
@@ -215,6 +217,8 @@ public class WireDumperTest extends WireTestCommon {
         expectedPartialContent.put(WireType.BINARY_LIGHT, expectedPartialBinary);
 
         expectedPartialContent.put(WireType.FIELDLESS_BINARY, expectedPartialBinary);
+
+        expectedPartialContent.put(WireType.COMPRESSED_BINARY, expectedPartialBinary);
 
         expectedPartialContent.put(WireType.JSON, "" +
                 "--- !!data\n" +
