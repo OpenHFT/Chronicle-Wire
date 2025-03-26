@@ -1,9 +1,12 @@
 package run.chronicle.wire.perf;
 
+import net.openhft.affinity.AffinityLock;
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.util.Histogram;
+import net.openhft.chronicle.testframework.GcControls;
 import net.openhft.chronicle.wire.*;
 
 import static run.chronicle.wire.perf.BytesInBytesMarshallableMain.histoOut;
@@ -20,23 +23,28 @@ public class JSONWireMarshallableMain {
         Example n2 = new Example();
         Wire wire = WireType.JSON.apply(Bytes.allocateElasticDirect(128));
 
-        for (int i = -20_000; i < 50_000_000; i++) {
-            wire.clear();
-            long start = System.nanoTime();
-            n.writeMarshallable(wire);
-            long end = System.nanoTime();
-            writeHist.sample(end - start);
-            start = System.nanoTime();
-            n2.readMarshallable(wire);
-            end = System.nanoTime();
-            readHist.sample(end - start);
-            if (i == 0) {
-                readHist.reset();
-                writeHist.reset();
+        try (AffinityLock lock = AffinityLock.acquireLock()) {
+            for (int i = -100_000; i < 50_000_000; i++) {
+                wire.clear();
+                long start = System.nanoTime();
+                n.writeMarshallable(wire);
+                long end = System.nanoTime();
+                writeHist.sample(end - start);
+                start = System.nanoTime();
+                n2.readMarshallable(wire);
+                end = System.nanoTime();
+                readHist.sample(end - start);
+                if (i == 0) {
+                    System.out.println("Warmup complete, awaiting GC");
+                    readHist.reset();
+                    writeHist.reset();
+                    GcControls.waitForGcCycle();
+                    System.out.println("GC complete, starting benchmark");
+                }
             }
-            if (i >= -1000)
-                Thread.yield();
         }
+
+        System.out.println("Benchmark complete, writing results");
 
         histoOut("read", JSONWireMarshallableMain.class, readHist);
         histoOut("write", JSONWireMarshallableMain.class, writeHist);

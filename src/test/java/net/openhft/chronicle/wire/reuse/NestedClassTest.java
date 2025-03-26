@@ -82,7 +82,7 @@ public class NestedClassTest extends WireTestCommon {
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
         return Arrays.asList(
-                new Object[]{(Function<Bytes<?>, Wire>) bytes -> new BinaryWire(bytes, false, true, false, 128, "binary", false)},
+                new Object[]{(Function<Bytes<?>, Wire>) bytes -> new BinaryWire(bytes, false, true, false, 128, "binary")},
                 new Object[]{WireType.TEXT},
                 new Object[]{WireType.YAML_ONLY},
                 new Object[]{WireType.BINARY},

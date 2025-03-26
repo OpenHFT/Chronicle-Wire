@@ -64,7 +64,7 @@ public class RawWire extends AbstractWire implements Wire {
     private final WriteDocumentContext writeContext = new BinaryWriteDocumentContext(this);
 
     // Context for reading data from this wire without metadata
-    private final BinaryReadDocumentContext readContext = new BinaryReadDocumentContext(this, false);
+    private final BinaryReadDocumentContext readContext = new BinaryReadDocumentContext(this);
     @Nullable
     private StringBuilder lastSB;
 

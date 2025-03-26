@@ -113,9 +113,6 @@ public enum Wires {
         }
     });
     static final ScopedResourcePool<StringBuilder> STRING_BUILDER_SCOPED_RESOURCE_POOL = StringBuilderPool.createThreadLocal();
-    @Deprecated(/* To be removed in x.26 */)
-    // Pool for string builders, aiding in efficient string operations
-    static final StringBuilderPool SBP = new StringBuilderPool();
     // Thread local storage for BinaryWire instances
     static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(Bytes.allocateElasticOnHeap()));
     // Flag to determine if code dump is enabled
@@ -1503,13 +1500,14 @@ public enum Wires {
 
                 case "java.lang.StringBuilder":
                     return ScalarStrategy.of(StringBuilder.class, (o, in) -> {
+                        StringBuilder builder;
                         try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
-                            StringBuilder builder = (o == null)
+                             builder = (o == null)
                                     ? stlSb.get()
                                     : o;
                             in.textTo(builder);
                         }
-                        return o;
+                        return builder;
                     });
 
                 case "java.lang.String":

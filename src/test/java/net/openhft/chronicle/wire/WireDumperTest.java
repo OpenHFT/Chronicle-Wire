@@ -106,6 +106,7 @@ public class WireDumperTest extends WireTestCommon {
         bytes.releaseLast();  // Releasing the last bytes used
     }
 
+    @SuppressWarnings("deprecation")
     private void initTestData() {
 
         // Adding the expected serialized output for TEXT WireType

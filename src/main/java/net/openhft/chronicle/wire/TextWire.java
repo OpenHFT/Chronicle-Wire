@@ -427,7 +427,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      */
     @NotNull
     public TextWire useBinaryDocuments() {
-        readContext = new BinaryReadDocumentContext(this, false);
+        readContext = new BinaryReadDocumentContext(this);
         writeContext = new BinaryWriteDocumentContext(this);
         return this;
     }
@@ -485,6 +485,24 @@ public class TextWire extends YamlWireOut<TextWire> {
             }
         } else
             return bytes.toString();
+    }
+
+    /**
+     * Converts the underlying bytes of this TextWire to its ISO-8859-1 string representation.
+     *
+     * @return A string representation of the TextWire's underlying bytes in ISO-8859-1 encoding.
+     */
+    public String to8bitString() {
+        return bytes.to8bitString();
+    }
+
+    /**
+     * Converts the underlying bytes of this TextWire to its UTF-8 string representation.
+     *
+     * @return A string representation of the TextWire's underlying bytes in UTF-8 encoding.
+     */
+    public String toUtf8String() {
+        return bytes.toUtf8String();
     }
 
     @Override
@@ -1932,7 +1950,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         @Override
         public <T> WireIn int32(@NotNull T t, @NotNull ObjIntConsumer<T> ti) {
             consumePadding();
-            ti.accept(t, (int) getALong());
+            ti.accept(t, (int) int64());
             return TextWire.this;
         }
 
@@ -2001,31 +2019,22 @@ public class TextWire extends YamlWireOut<TextWire> {
         @Override
         public <T> WireIn int64(@NotNull T t, @NotNull ObjLongConsumer<T> tl) {
             consumePadding();
-            tl.accept(t, getALong());
+            tl.accept(t, int64());
             return TextWire.this;
         }
 
         @NotNull
         @Override
         public <T> WireIn float32(@NotNull T t, @NotNull ObjFloatConsumer<T> tf) {
-            consumePadding();
-            if (peekCode() == '$') {
-                unsubstitutedNumber();
-            } else {
-                tf.accept(t, (float) bytes.parseDouble());
-            }
+            // this parses a double and casts to a float, so there may be some loss of precision
+            tf.accept(t, (float) float64());
             return TextWire.this;
         }
 
         @NotNull
         @Override
         public <T> WireIn float64(@NotNull T t, @NotNull ObjDoubleConsumer<T> td) {
-            consumePadding();
-            if (peekCode() == '$') {
-                unsubstitutedNumber();
-            } else {
-                td.accept(t, bytes.parseDouble());
-            }
+            td.accept(t, float64());
             return TextWire.this;
         }
 
@@ -2743,6 +2752,7 @@ public class TextWire extends YamlWireOut<TextWire> {
 
             long l = getALong();
             checkRewind();
+            consumePadding(1);
             return l;
         }
 
@@ -2798,6 +2808,8 @@ public class TextWire extends YamlWireOut<TextWire> {
             } else {
                 checkRewindDouble();
             }
+
+            consumePadding(1);
             return v;
         }
 

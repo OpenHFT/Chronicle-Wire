@@ -997,7 +997,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             if (af == 0 || (af >= 1e-3 && af < 1e6))
                 bytes.append(f);
             else
-                bytes.append(floatToString(f));
+                writeSpecialFloatValueToBytes(bytes, f);
             elementSeparator();
 
             return wireOut();
@@ -1037,7 +1037,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                     bytes.append(d);
                 }
             } else {
-                bytes.append(doubleToString(d));
+                writeSpecialDoubleValueToBytes(bytes, d);
             }
             elementSeparator();
 
@@ -1045,23 +1045,19 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Converts the provided double value to its corresponding String representation.
-         *
-         * @param d The double value to convert.
-         * @return The String representation of the provided double value.
+         * Writes a special double value, e.g. NaN, to bytes in the context of Yaml Wire. For now this
+         * remains as an unquoted string representation.
          */
-        protected String doubleToString(double d) {
-            return Double.toString(d);
+        protected void writeSpecialDoubleValueToBytes(Bytes<?> bytes, double value) {
+            bytes.append(Double.toString(value));
         }
 
         /**
-         * Converts the provided float value to its corresponding String representation.
-         *
-         * @param f The float value to convert.
-         * @return The String representation of the provided float value.
+         * Writes a special double value, e.g. NaN, to bytes in the context of Yaml Wire. For now this
+         * remains as an unquoted string representation.
          */
-        protected String floatToString(float f) {
-            return Float.toString(f);
+        protected void writeSpecialFloatValueToBytes(Bytes<?> bytes, float value) {
+            bytes.append(Float.toString(value));
         }
 
         @NotNull

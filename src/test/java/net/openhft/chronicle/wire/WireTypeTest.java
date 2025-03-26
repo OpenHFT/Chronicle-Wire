@@ -116,9 +116,7 @@ public class WireTypeTest extends WireTestCommon {
             // Skip unsupported WireTypes
             if (wt == WireType.RAW
                     || wt == WireType.READ_ANY
-                    || wt == WireType.CSV
-                    || wt == WireType.DELTA_BINARY
-                    || wt == WireType.DEFAULT_ZERO_BINARY)
+                    || wt == WireType.CSV)
                 continue;
 
             // Create a temporary file

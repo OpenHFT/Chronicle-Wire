@@ -66,7 +66,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @NotNull
     private BinaryWire createWire() {
         bytes.clear();
-        @NotNull BinaryWire wire = new BinaryWire(bytes, false, false, false, 32, "lzw", false);
+        @NotNull BinaryWire wire = new BinaryWire(bytes, false, false, false, 32, "lzw");
         wire.usePadding(usePadding);
         return wire;
     }
@@ -90,9 +90,6 @@ public class BinaryWire2Test extends WireTestCommon {
                     e.printStackTrace();
                 }
         }
-        wireCodes.remove(BinaryWireCode.FIELD_ANCHOR); // TODO
-        wireCodes.remove(BinaryWireCode.ANCHOR); // TODO
-        wireCodes.remove(BinaryWireCode.UPDATED_ALIAS); // TODO
         wireCodes.remove(BinaryWireCode.U8_ARRAY); // should always be nested
         wireCodes.remove(BinaryWireCode.I64_ARRAY); // should always be nested
         wireCodes.remove(BinaryWireCode.FIELD_NAME_ANY); // should always be nested
@@ -670,7 +667,7 @@ public class BinaryWire2Test extends WireTestCommon {
      */
     public void testCompression(String comp) {
         bytes.clear();
-        @NotNull Wire wire = new BinaryWire(bytes, false, false, false, 32, comp, false);
+        @NotNull Wire wire = new BinaryWire(bytes, false, false, false, 32, comp);
 
         // Create a repetitive string and convert it to BytesStore
         @NotNull String str = "xxxxxxxxxxxxxxxx2xxxxxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyyyyyyyy2yyyyyyyyyyyyyyyyy";

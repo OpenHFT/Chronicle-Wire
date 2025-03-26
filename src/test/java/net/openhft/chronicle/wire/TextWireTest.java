@@ -70,9 +70,9 @@ public class TextWireTest extends WireTestCommon {
     @Test
     public void fromList() {
         for (String text : new String[]{
-                "[a, b, c]",
-                "[ 'a', 'b', 'c' ]",
-                "[ \"a\", \"b\", \"c\" ]"
+                "[a , b\n, c]",
+                "[ 'a'\n, 'b' , 'c' ]",
+                "[ \"a\" , \"b\" ,\n\"c\"\n]"
         }) {
             @NotNull Wire wire = createWire();
             wire.bytes().append(text);
@@ -179,10 +179,10 @@ public class TextWireTest extends WireTestCommon {
         // Deserialize a string with more fields than the TwoFields class has.
         // Fields "d", "e", and "f" are not part of TwoFields, and should be collected in the "others" field.
         TwoFields tf = Marshallable.fromString("!" + TwoFields.class.getName() + " {" +
-                "a : 1,\n" +
+                "a : 1 ,\n" +
                 "b\t : two,\n" +
                 "c: three,\n" +
-                "d: 44,\n" +
+                "d: 44 , \n" +
                 "e: also,\n" +
                 "f: at the end\n" +
                 "}");
@@ -231,16 +231,6 @@ public class TextWireTest extends WireTestCommon {
         // Verify that TEXT WireType doesn't require any license check.
         WireType.TEXT.licenceCheck();
         assertTrue(WireType.TEXT.isAvailable());
-
-        // Check that DELTA_BINARY WireType requires a license and throws an exception if not present.
-        try {
-            expectException("A Chronicle-Wire-Enterprise licence is required to run this code because you are using DELTA_BINARY which is a licence product");
-            WireType.DELTA_BINARY.licenceCheck();
-            fail();
-        } catch (IllegalStateException expected) {
-            // exception is expected
-        }
-        assertFalse(WireType.DELTA_BINARY.isAvailable());
     }
 
     // Test to ensure that objects with TreeMap fields are correctly serialized and deserialized.
@@ -1236,7 +1226,6 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // Test reading and writing of a string map with Wire.
-    @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteStrings() {
         // Initialize bytes and wire for writing
@@ -1387,7 +1376,6 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // Test reading and writing a map with integer keys and values to/from a Wire.
-    @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteIntegers() {
         // Create a byte store and wire to work with
@@ -1451,7 +1439,6 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // Test reading and writing a map with Marshallable keys and values to/from a Wire.
-    @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteMarshable() {
         // Create a byte store and wire to work with
@@ -2190,8 +2177,8 @@ public class TextWireTest extends WireTestCommon {
         // Create a NestedList instance from its serialized string representation.
         NestedList nl = Marshallable.fromString("!" + NestedList.class.getName() + " {\n" +
                 "  name: name,\n" +
-                "  listA: [ { a: 1, b: 1.2 } ],\n" +
-                "  listB: [ { a: 1, b: 1.2 }, { a: 3, b: 2.3 } ]," +
+                "  listA: [ { a: 1\n, b: 1.2 } ],\n" +
+                "  listB: [ { a: 1 ,\nb: 1.2 }, { a: 3 , b: 2.3 } ]," +
                 "  num: 128\n" +
                 "}\n");
 

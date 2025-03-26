@@ -23,7 +23,6 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.converter.NanoTime;
-import net.openhft.chronicle.wire.converter.ShortText;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -82,16 +81,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
 
     // Flag to decide if source details should be added or not
     private boolean addSourceDetails = false;
-
-
-    // the name of the service that was used to write the message history
-    @ShortText
-    private long serviceName;
-
-    // the name of our-service that we use to read the history message
-    // this name will be used in the next write
-    @ShortText
-    private transient long ourServiceName;
 
     /**
      * Returns the thread-local instance of {@link MessageHistory}.
@@ -239,9 +228,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             wire.read("sources").sequence(this, VanillaMessageHistory::acceptSourcesRead);
             timings = 0;
             wire.read("timings").sequence(this, VanillaMessageHistory::acceptTimingsRead);
-            if (wire.bytes().readRemaining() >= 8) {
-                serviceName = wire.read("serviceName").int64();
-            }
         }
         if (addSourceDetails) {
             @Nullable Object o = wire.parent();
@@ -262,7 +248,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         } else {
             wire.write("sources").sequence(this, acceptSourcesConsumer);
             wire.write("timings").sequence(this, acceptTimingsConsumer);
-            wire.write("serviceName").int64(ourServiceName);
         }
         dirty = false;
     }
@@ -279,7 +264,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         } else {
             readMarshallable0(bytes);
         }
-        serviceName = bytes.readRemaining() >= 8 ? bytes.readLong() : 0;
         assert !addSourceDetails : "Bytes marshalling does not yet support addSourceDetails";
     }
 
@@ -301,10 +285,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             timingsArray[i] = memory.readLong(addr);
             addr += 8;
         }
-        if (bytes.readRemaining() >= 8) {
-            serviceName = memory.readLong(addr); // skip the time for this output
-            addr += 8;
-        }
         bytes.readSkip(addr - start);
     }
 
@@ -320,8 +300,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         // Read timing values
         for (int i = 0; i < timings; i++)
             timingsArray[i] = bytes.readLong();
-        if (bytes.readRemaining() >= 8)
-            serviceName = bytes.readLong();
     }
 
     @Override
@@ -353,8 +331,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         }
         memory.writeLong(addr, nanoTime()); // add time for this output
         addr += 8;
-        memory.writeLong(addr, ourServiceName); // add time for this output
-        addr += 8;
         b.writeSkip(addr - start);
     }
 
@@ -373,7 +349,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             bytes.writeLong(timingsArray[i]);
         }
         bytes.writeLong(nanoTime()); // add time for this output
-        bytes.writeLong(ourServiceName);
         dirty = false;
     }
 
@@ -389,8 +364,8 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     /**
      * Writes the sources information of the provided message history to the output.
      *
-     * @param t   Message history instance with the source's data.
-     * @param out Output to write the sources data to.
+     * @param t    Message history instance with the source's data.
+     * @param out  Output to write the sources data to.
      */
     private void acceptSources(VanillaMessageHistory t, ValueOut out) {
         HexDumpBytesDescription<?> b = bytesComment(out);
@@ -406,8 +381,8 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     /**
      * Writes the timings information of the provided message history to the output.
      *
-     * @param t   Message history instance with the timing's data.
-     * @param out Output to write the timings data to.
+     * @param t    Message history instance with the timing's data.
+     * @param out  Output to write the timings data to.
      */
     private void acceptTimings(VanillaMessageHistory t, ValueOut out) {
         HexDumpBytesDescription<?> b = bytesComment(out);
@@ -481,8 +456,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         return "VanillaMessageHistory { " +
                 "sources: [" + toStringSources() +
                 "], timings: [" + toStringTimings() +
-                (serviceName == 0 ? "]" : "], serviceName=" + ShortText.INSTANCE.asString(serviceName)) +
-                ", addSourceDetails=" + addSourceDetails +
+                "], addSourceDetails=" + addSourceDetails +
                 " }";
     }
 
@@ -548,20 +522,5 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
 
     public void historyWallClock(boolean historyWallClock) {
         this.historyWallClock = historyWallClock;
-    }
-
-    @Override
-    public CharSequence serviceName() {
-        return ShortText.INSTANCE.asString(serviceName); // this will create GC, please don't call it ! too often.
-    }
-
-    @Override
-    public void serviceName(long serviceName) {
-        this.ourServiceName = serviceName;
-    }
-
-    @Override
-    public long serviceNameAsLong() {
-        return serviceName;
     }
 }

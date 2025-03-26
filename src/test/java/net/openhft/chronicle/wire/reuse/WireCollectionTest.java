@@ -71,7 +71,7 @@ public class WireCollectionTest extends WireTestCommon {
                 // Test with various wire types
                 new Object[]{WireType.TEXT},
                 new Object[]{WireType.YAML_ONLY},
-                new Object[]{(Function<Bytes<?>, Wire>) bytes -> new BinaryWire(bytes, false, true, false, 128, "binary", false)},
+                new Object[]{(Function<Bytes<?>, Wire>) bytes -> new BinaryWire(bytes, false, true, false, 128, "binary")},
                 new Object[]{WireType.BINARY},
                 new Object[]{WireType.BINARY_LIGHT},
                 new Object[]{WireType.FIELDLESS_BINARY},

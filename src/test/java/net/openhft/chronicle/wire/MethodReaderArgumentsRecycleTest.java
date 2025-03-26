@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -74,6 +75,11 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
             @Override
             public void dtoCall(RegularDTO d) {
+                lastArgumentRef = d;
+            }
+
+            @Override
+            public void configDtoCall(ConfigDTO d) {
                 lastArgumentRef = d;
             }
 
@@ -197,6 +203,22 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
         verifyRecycled(first, second, writer::dtoCall);
     }
 
+    @Test
+    public void testConfigDtoRecycled() {
+        ConfigDTO first = new ConfigDTO();
+        first.s = "f";
+        first.b = true;
+
+        ConfigDTO second = new ConfigDTO();
+        second.s = "s";
+        // don't set b
+
+        verifyRecycled(first, second, writer::configDtoCall);
+
+        ConfigDTO dto = (ConfigDTO) lastArgumentRef;
+        Assert.assertFalse(dto.b);
+    }
+
     // Test to ascertain that a DTO object's list field gets recycled between calls.
     @Test
     public void testWrappedListRecycled() {
@@ -258,8 +280,8 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
                 "}\n", lastArgumentRef.toString());
         List<?> list2 = (List<?>) ((ObjectContainingDto) lastArgumentRef).list;
         assertEquals(second.list, list2);
-        assertSame(dto0, (MyDto) list1.get(0));
-        assertSame(dto1, (MyDto) list1.get(1));
+        assertSame(dto0, list1.get(0));
+        assertSame(dto1, list1.get(1));
 
         // Ensure the reference from the first call is the same as the second.
         assertSame(firstRef, lastArgumentRef);
@@ -322,6 +344,8 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
         void dtoCall(RegularDTO d);
 
+        void configDtoCall(ConfigDTO d);
+
         void wrappedListCall(ListContainingDto ld);
 
         void wrappedObjectCall(ObjectContainingDto ld);
@@ -347,6 +371,11 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
     public static class RegularDTO extends SelfDescribingMarshallable {
         String s;
         int i;
+    }
+
+    public static class ConfigDTO extends AbstractMarshallableCfg {
+        String s;
+        boolean b;
     }
 
     // Definition of a DTO with a list-containing field.

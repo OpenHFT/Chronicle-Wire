@@ -21,15 +21,13 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.util.Builder;
+import net.openhft.chronicle.core.util.GenericReflection;
 import net.openhft.chronicle.wire.internal.MethodWriterClassNameGenerator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -171,11 +169,12 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                 throw new IllegalArgumentException("The event interface shouldn't implement " + invalidSuperInterface.getName());
         }
         interfaces.add(additionalClass);
-        for (Method method : additionalClass.getMethods()) {
-            Class<?> returnType = method.getReturnType();
-            if (returnType.isInterface() && !Jvm.dontChain(returnType)) {
-                addInterface(returnType);
-            }
+        for (Type returnType : GenericReflection.getMethodReturnTypes(additionalClass)) {
+            if (!(returnType instanceof Class))
+                continue;
+            Class returnClass = (Class<?>) returnType;
+            if (returnClass.isInterface() && !Jvm.dontChain(returnClass))
+                addInterface(returnClass);
         }
         return this;
     }

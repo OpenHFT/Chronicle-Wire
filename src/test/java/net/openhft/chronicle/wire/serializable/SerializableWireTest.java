@@ -19,9 +19,7 @@ package net.openhft.chronicle.wire.serializable;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
-import net.openhft.chronicle.wire.Wire;
-import net.openhft.chronicle.wire.WireTestCommon;
-import net.openhft.chronicle.wire.WireType;
+import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
@@ -115,4 +113,26 @@ public class SerializableWireTest extends WireTestCommon {
             bytes.releaseLast();
         }
     }
+
+    @Test
+    public void testStringBuilderSerialization() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+        try {
+            Wire wire = new BinaryWire(bytes);
+            TextContainer outerContainer = new TextContainer();
+            outerContainer.innerBuilders = new StringBuilder[] { new StringBuilder("innerText") };
+            wire.write("data").object(outerContainer);
+
+            TextContainer deserializedContainer = wire.read("data").object(TextContainer.class);
+
+            assertEquals(outerContainer.innerBuilders[0].toString(), deserializedContainer.innerBuilders[0].toString());
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    public static class TextContainer extends SelfDescribingMarshallable {
+        StringBuilder[] innerBuilders; // Represents inner StringBuilders
+    }
+
 }

@@ -198,42 +198,11 @@ public class JSONWire extends TextWire {
             public double float64() {
                 consumePadding();
                 valueIn.skipType();
-                int sep = 0;
-                switch (peekCode()) {
-                    case '[':
-                    case '{':
-                        Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a double.");
-                        return 0;
-                    case '\'':
-                    case '"':
-                        sep = bytes.readUnsignedByte();
-                        break;
-                }
 
-                boolean isNull;
+                if (isNull())
+                    return Double.NaN;
 
-                long l = bytes.readLimit();
-                try {
-                    bytes.readLimit(bytes.readPosition() + 4);
-                    isNull = "null".contentEquals(bytes);
-                } finally {
-                    bytes.readLimit(l);
-                }
-
-                if (isNull) {
-                    bytes.readSkip("null".length());
-                    consumePadding();
-                }
-
-                final double v = isNull ? Double.NaN : bytes.parseDouble();
-                if (sep != 0) {
-                    int end = peekBack();
-                    if (end != sep)
-                        throw new IORuntimeException("Expected " + (char) sep + " but was " + (char) end);
-                } else {
-                    checkRewindDouble();
-                }
-                return v;
+                return super.float64();
             }
 
             @Override
@@ -986,14 +955,30 @@ public class JSONWire extends TextWire {
         public void writeComment(@NotNull CharSequence s) {
         }
 
+        /**
+         * Write a special double value (e.g. NaN) as a string to the given bytes.
+         *
+         * @param bytes The bytes to append the stringified double value to
+         * @param value The double value to convert to a string
+         */
         @Override
-        protected String doubleToString(double d) {
-            return Double.isNaN(d) ? "null" : super.doubleToString(d);
+        protected void writeSpecialDoubleValueToBytes(Bytes<?> bytes, double value) {
+            bytes.append('"');
+            bytes.append(Double.toString(value));
+            bytes.append('"');
         }
 
+        /**
+         * Write a special double value (e.g. NaN) as a string to the given bytes.
+         *
+         * @param bytes The bytes to append the stringified double value to
+         * @param value The double value to convert to a string
+         */
         @Override
-        protected String floatToString(float f) {
-            return Float.isNaN(f) ? "null" : super.floatToString(f);
+        protected void writeSpecialFloatValueToBytes(Bytes<?> bytes, float value) {
+            bytes.append('"');
+            bytes.append(Float.toString(value));
+            bytes.append('"');
         }
 
         @NotNull
@@ -1321,5 +1306,15 @@ public class JSONWire extends TextWire {
         public boolean useTypes() {
             return useTypes;
         }
+    }
+
+    /**
+     * Render as a UTF-8 string.
+     *
+     * @return a UTF-8 string representation of the wire data.
+     */
+    @Override
+    public String toString() {
+        return toUtf8String();
     }
 }
