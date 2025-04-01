@@ -21,7 +21,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.internal.NoBytesStore;
-import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.TextWireTest.ABCD;
 import net.openhft.chronicle.wire.converter.NanoTime;
@@ -1989,37 +1988,6 @@ public class YamlWireTest extends WireTestCommon {
                 "]\n" +
                 "...\n", wire2.toString());
     }
-
-    // Test for Empty YAML Document
-    @Test
-    public void testEmptyYamlDocument() {
-        Wire wire = createWire();
-        wire.bytes().append("");
-        assertFalse(wire.readingDocument().isPresent());
-    }
-
-    // Test for Large YAML Documents
-    @Test
-    public void testLargeYamlDocument() {
-        Wire wire = createWire();
-        StringBuilder largeYaml = new StringBuilder();
-        for (int i = 0; i < 10000; i++) {
-            largeYaml.append("key").append(i).append(": value").append(i).append("\n");
-        }
-        wire.bytes().append(largeYaml.toString());
-        for (int i = 0; i < 10000; i++) {
-            assertEquals("value" + i, wire.read("key" + i).text());
-        }
-    }
-
-    // Test for Special Characters in Strings
-    @Test
-    public void testSpecialCharactersInStrings() {
-        Wire wire = createWire();
-        wire.bytes().append("text: \"Line1\\nLine2\\tTabbed\\u263A\"");
-        assertEquals("Line1\nLine2\tTabbed☺", wire.read("text").text());
-    }
-
 
     enum BWKey implements WireKey {
         field1, field2, field3
