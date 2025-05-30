@@ -39,23 +39,23 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.*;
 /**
- * This class provides the default implementation for the {@link ValueIn} interface. It's primarily designed
- * to handle default values, converting them into various formats such as text and bytes.
- * The default value is retrieved from an underlying {@link WireIn} source.
+ * Default implementation of {@link ValueIn} used when a field is absent on the wire.
+ * The value returned by the various read methods comes from {@link #defaultValue} which is
+ * populated by the {@link WireMarshaller} for missing fields.
  */
 @SuppressWarnings("rawtypes")
 public class DefaultValueIn implements ValueIn {
 
-    // The underlying WireIn source for fetching default values
+    /** Parent {@link WireIn} that this instance belongs to. */
     private final WireIn wireIn;
 
-    // The stored default value, fetched from the WireIn source
+    /** Value returned when the requested field is missing. */
     Object defaultValue;
 
     /**
-     * Constructs a new instance of DefaultValueIn with a given {@link WireIn} source.
+     * Constructs a {@code DefaultValueIn} associated with the given {@link WireIn}.
      *
-     * @param wireIn The WireIn source to fetch default values from.
+     * @param wireIn parent wire used when returning to the caller
      */
     DefaultValueIn(WireIn wireIn) {
         this.wireIn = wireIn;

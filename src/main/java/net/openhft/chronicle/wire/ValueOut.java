@@ -54,24 +54,25 @@ import java.util.stream.Stream;
 import static net.openhft.chronicle.wire.Wires.isScalar;
 
 /**
- * Defines an interface for writing out values after writing a field.
- * Implementations of this interface should provide methods to handle writing various data types.
+ * Responsible for writing the value component of a key-value pair to a wire. After a field name
+ * has been written using {@link WireOut#write(CharSequence)}, a {@code ValueOut} is obtained to
+ * serialise the corresponding value. Each instance is generally used to write one value only.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface ValueOut {
 
     /**
-     * Thread local instance for MapMarshaller to support thread-safe marshalling operations.
+     * Thread-local {@link MapMarshaller} used for efficient, thread-safe map serialisation.
      */
     ThreadLocal<MapMarshaller> MM_TL = ThreadLocal.withInitial(MapMarshaller::new);
 
     /**
-     * Defines a threshold for small messages.
+     * Threshold size in bytes below which {@link #compress(String, Bytes)} may choose not to compress.
      */
     int SMALL_MESSAGE = 64;
 
     /**
-     * Represents a 64-character sequence of zeros.
+     * Utility string containing 64 zeros, used for formatting of binary representations.
      */
     String ZEROS_64 = "0000000000000000000000000000000000000000000000000000000000000000";
 

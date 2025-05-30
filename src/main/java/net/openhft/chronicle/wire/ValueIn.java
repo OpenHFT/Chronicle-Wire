@@ -43,26 +43,31 @@ import java.util.function.*;
 import static net.openhft.chronicle.wire.SerializationStrategies.MARSHALLABLE;
 
 /**
- * Represents an interface for reading values in various formats from a serialized data source.
- * This interface is part of the Chronicle Wire library, which is designed for high-performance
- * serialization and deserialization of data. It provides methods to read data types like text,
- * binary, numeric, and temporal values, as well as support for more complex types like collections
- * and marshallable objects.
+ * Represents the value part of a key-value pair being read from a wire. After a field name
+ * (or event key) is processed via {@link WireIn#read()}, a {@code ValueIn} instance is used to
+ * deserialize the associated value. Implementations provide methods for reading primitive types,
+ * text, bytes and marshallable objects from the underlying wire format.
+ * <p>
+ * A {@code ValueIn} instance is typically used only once for a single field before obtaining the
+ * next one from {@link WireIn}.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface ValueIn {
-    /** A constant consumer that does nothing when accepting a {@link ValueIn}. */
+    /**
+     * A {@link Consumer} for {@code ValueIn} instances that discards the value. Useful
+     * as a no-op placeholder when a value is intentionally ignored.
+     */
     Consumer<ValueIn> DISCARD = v -> {};
 
     // ---- Text / Strings section ----
 
     /**
-     * Reads text data and applies a given bi-consumer to the text data and the provided object.
+     * Reads the current field as text and supplies it to the provided bi-consumer.
      *
-     * @param t  The target object.
-     * @param ts The bi-consumer that accepts the target object and the read text.
-     * @param <T> Type of the target object.
-     * @return The current WireIn instance.
+     * @param t  target object passed back to {@code ts}
+     * @param ts consumer receiving {@code t} and the deserialized text
+     * @param <T> type of the target object
+     * @return parent {@link WireIn} for chaining
      */
     @NotNull
     default <T> WireIn text(T t, @NotNull BiConsumer<T, String> ts) {
@@ -72,10 +77,11 @@ public interface ValueIn {
     }
 
     /**
-     * Reads text data and appends it to the given StringBuilder. If the data is null, the StringBuilder is cleared.
+     * Reads the current value as text and appends it to the supplied {@link StringBuilder}.
+     * If the underlying value is {@code null}, the builder is cleared.
      *
-     * @param sb The StringBuilder to append the text data to.
-     * @return The current WireIn instance.
+     * @param sb destination for the text
+     * @return parent {@link WireIn} for chaining
      */
     @NotNull
     default WireIn text(@NotNull StringBuilder sb) {
@@ -85,9 +91,10 @@ public interface ValueIn {
     }
 
     /**
-     * Reads text data and returns the first character. If the data is null or empty, a null character is returned.
+     * Reads the value as text and returns its first character. If no text is present
+     * an {@code '\u0000'} character is returned.
      *
-     * @return The first character of the text data or '\u0000' if none.
+     * @return first character of the text value or {@code '\u0000'} if the value was null or empty
      */
     default char character() {
         try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
@@ -100,10 +107,11 @@ public interface ValueIn {
     }
 
     /**
-     * Reads text data into the provided Bytes object, which is then cleared.
+     * Reads the current value as text and writes it into the supplied {@link Bytes} instance.
+     * The target bytes are cleared before writing.
      *
-     * @param sdo The Bytes object to store the text data.
-     * @return The current WireIn instance.
+     * @param sdo destination for the text value
+     * @return parent {@link WireIn} for chaining
      */
     @NotNull
     default WireIn text(@NotNull Bytes<?> sdo) {
@@ -113,9 +121,9 @@ public interface ValueIn {
     }
 
     /**
-     * Reads and returns the text data.
+     * Reads and returns the current value as a {@link String}.
      *
-     * @return The text data or null.
+     * @return the text representation or {@code null} if the value on the wire was null
      */
     @Nullable
     String text();
@@ -130,10 +138,10 @@ public interface ValueIn {
     StringBuilder textTo(@NotNull StringBuilder sb);
 
     /**
-     * Reads text data into the provided Bytes object.
+     * Reads the value as text and appends it to the provided {@link Bytes} buffer.
      *
-     * @param bytes The Bytes object to store the text data.
-     * @return The Bytes object with the text data or null.
+     * @param bytes destination for the text
+     * @return the passed in {@link Bytes} populated with the text, or {@code null} if the wire value was null
      */
     @Nullable
     Bytes<?> textTo(@NotNull Bytes<?> bytes);
@@ -249,24 +257,21 @@ public interface ValueIn {
     }
 
     /**
-     * Provides the current WireIn instance.
-     *
-     * @return The current WireIn instance.
+     * Returns the parent {@link WireIn} from which this {@code ValueIn} was obtained.
      */
     @NotNull
     WireIn wireIn();
 
     /**
-     * Retrieves the length of the field in bytes, inclusive of any encoding and header character.
-     *
-     * @return The length of the field in bytes.
+     * Returns the length in bytes of the current value as represented on the wire,
+     * excluding the field name.
      */
     long readLength();
 
     /**
-     * Skips the current value while reading.
+     * Consumes and discards the current field's value, advancing the read position.
      *
-     * @return The current WireIn instance.
+     * @return parent {@link WireIn}
      */
     @NotNull
     WireIn skipValue();
@@ -430,16 +435,13 @@ public interface ValueIn {
     }
 
     /**
-     * Checks if there is another element to read in a sequence or collection.
-     *
-     * @return True if there is another element to read, false otherwise.
+     * Indicates whether more fields or items remain to be read in the current context.
+     * Typically used when iterating over a map or list structure.
      */
     boolean hasNext();
 
     /**
-     * Checks if there is another item in a sequence.
-     *
-     * @return True if there is another sequence item, false otherwise.
+     * Returns {@code true} if the current value represents a sequence and more items are available.
      */
     boolean hasNextSequenceItem();
 

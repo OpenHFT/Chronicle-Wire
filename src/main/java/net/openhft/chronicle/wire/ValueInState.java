@@ -20,26 +20,26 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Represents the state associated with a particular input value.
- * This class is primarily designed to manage unexpected inputs and the position of these unexpected values.
+ * Package-private helper used by {@link ValueIn} implementations to track parsing state.
+ * It records positions of any fields encountered out of order so they can be revisited later.
  */
 class ValueInState {
 
-    // A constant representing an empty array of long values
+    /** Shared empty array used to initialise {@link #unexpected}. */
     private static final long[] EMPTY_ARRAY = {};
 
-    // The saved position for the current state
+    /** Position in the wire to return to. */
     private long savedPosition;
 
-    // Size of the unexpected values
+    /** Number of unexpected field positions currently stored. */
     private int unexpectedSize;
 
-    // An array to hold unexpected values
+    /** Wire positions of fields encountered but not yet processed. */
     @NotNull
     private long[] unexpected = EMPTY_ARRAY;
 
     /**
-     * Resets the saved position and the unexpected values to their initial states.
+     * Clears the saved position and any recorded unexpected field positions.
      */
     public void reset() {
         savedPosition = 0;
@@ -47,9 +47,9 @@ class ValueInState {
     }
 
     /**
-     * Adds an unexpected position to the list of unexpected values.
+     * Records an unexpected field start position so it can be processed later.
      *
-     * @param position The unexpected position to be added
+     * @param position wire position of the unexpected field
      */
     public void addUnexpected(long position) {
         if (unexpectedSize >= unexpected.length) {
@@ -62,46 +62,39 @@ class ValueInState {
     }
 
     /**
-     * Sets the saved position for the current state.
+     * Sets the wire position to return to later.
      *
-     * @param savedPosition The position to be saved
+     * @param savedPosition position in the underlying wire
      */
     public void savedPosition(long savedPosition) {
         this.savedPosition = savedPosition;
     }
 
     /**
-     * Retrieves the saved position for the current state.
-     *
-     * @return The saved position
+     * Returns the currently saved wire position.
      */
     public long savedPosition() {
         return savedPosition;
     }
 
     /**
-     * Retrieves the number of unexpected positions stored.
-     *
-     * @return The size of unexpected positions
+     * Number of unexpected positions currently recorded.
      */
     public int unexpectedSize() {
         return unexpectedSize;
     }
 
     /**
-     * Retrieves a specific unexpected position based on its index.
-     *
-     * @param index The index of the unexpected position
-     * @return The unexpected position at the given index
+     * Returns the unexpected field position at the given index.
      */
     public long unexpected(int index) {
         return unexpected[index];
     }
 
     /**
-     * Removes an unexpected position from the list based on its index.
+     * Removes the unexpected position at the supplied index.
      *
-     * @param i The index of the unexpected position to be removed
+     * @param i index of the entry to remove
      */
     public void removeUnexpected(int i) {
         int length = unexpectedSize - i - 1;
