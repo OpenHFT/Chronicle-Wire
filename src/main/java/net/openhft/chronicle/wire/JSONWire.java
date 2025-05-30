@@ -1087,12 +1087,18 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * The JSONValueIn class extends the TextValueIn class.
-     * It provides specialized methods for interpreting values from JSON data,
-     * ensuring proper handling of JSON-specific constructs like the "null" value.
+     * The {@link ValueIn} implementation for {@link JSONWire}.
+     * Handles JSON-specific parsing nuances, such as string quoting,
+     * number parsing, and type prefix ("{@literal @}type") detection
+     * if {@link JSONWire#useTypes()} is enabled.
      */
     class JSONValueIn extends TextValueIn {
 
+        /**
+         * Internal helper to parse a JSON type literal expression like
+         * {@code {"@type":"com.example.MyClass"}}.
+         * Returns the resolved {@link Type} or a representation of an unresolved type.
+         */
         @Nullable
         private Type consumeTypeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
             long start = bytes.readPosition();
@@ -1153,11 +1159,8 @@ public class JSONWire extends TextWire {
         }
 
         /**
-         * Determines if the current value represents a JSON null value.
-         *
-         * @return True if the value is "null" in the JSON context; otherwise, False.
-         *         When true, it consumes the "null" and moves to the next token.
-         *         When false, no data is read, only peaked.
+         * Checks if the current value is the JSON literal {@code null},
+         * consuming it if true.
          */
         @Override
         public boolean isNull() {
@@ -1176,42 +1179,78 @@ public class JSONWire extends TextWire {
             return false;
         }
 
+        /**
+         * Reads a JSON string (expecting double quotes and handling escapes) or
+         * a JSON literal such as {@code null}, {@code true} or {@code false}.
+         * Returns {@code null} if the JSON value is {@code null}.
+         */
         @Override
         public String text() {
             @Nullable String text = super.text();
             return text == null || text.equals("null") ? null : text;
         }
 
+        /**
+         * For JSON, most characters following a value (such as {@code }} or {@code ,}) act as separators.
+         */
         @Override
         protected boolean isASeparator(int nextChar) {
             return true;
         }
 
+        /**
+         * If {@link JSONWire#useTypes()} is enabled, attempts to
+         * {@link #parseType(Object, Class, boolean)}. Otherwise delegates to
+         * the superclass for text-based object deserialisation.
+         */
         @Override
         public @Nullable Object object() throws InvalidMarshallableException {
             return useTypes ? parseType() : super.object();
         }
 
+        /**
+         * If {@link JSONWire#useTypes()} is enabled, attempts to
+         * {@link #parseType(Object, Class, boolean)}. Otherwise delegates to
+         * the superclass for text-based object deserialisation.
+         */
         @Override
         public <E> @Nullable E object(@Nullable Class<E> clazz) throws InvalidMarshallableException {
             return useTypes ? parseType(null, clazz, true) : super.object(null, clazz, true);
         }
 
+        /**
+         * If {@link JSONWire#useTypes()} is enabled, attempts to
+         * {@link #parseType(Object, Class, boolean)}. Otherwise delegates to
+         * the superclass for text-based object deserialisation.
+         */
         @Override
         public <E> E object(@Nullable E using, @Nullable Class<? extends E> clazz) throws InvalidMarshallableException {
             return useTypes ? parseType(using, clazz, true) : super.object(using, clazz, true);
         }
 
+        /**
+         * If {@link JSONWire#useTypes()} is enabled, attempts to
+         * {@link #parseType(Object, Class, boolean)}. Otherwise delegates to
+         * the superclass for text-based object deserialisation.
+         */
         @Override
         public <E> E object(@Nullable E using, @Nullable Class<? extends E> clazz, boolean bestEffort) throws InvalidMarshallableException {
             return useTypes ? parseType(using, clazz, bestEffort) : super.object(using, clazz, bestEffort);
         }
 
+        /**
+         * For JSON, attempts to find the {@code "@type":"..."} prefix if types
+         * are enabled.
+         */
         @Override
         public Class<?> typePrefix() {
             return super.typePrefix();
         }
 
+        /**
+         * As {@link #typePrefix()} but falls back to reading the whole object
+         * if no prefix is present.
+         */
         @Override
         public Object typePrefixOrObject(Class<?> tClass) {
             return super.typePrefixOrObject(tClass);
@@ -1234,12 +1273,15 @@ public class JSONWire extends TextWire {
         }
 
         /**
-         * Parses the type of the object based on the data. If a type definition is present,
-         * it will use that to determine the class of the object. Otherwise, it falls back
-         * to the default parsing mechanism.
+         * Core logic for deserialising a typed JSON object. If
+         * {@link #hasTypeDefinition()} returns {@code true} this reads the
+         * class name from the {@code "@type"} field and uses it to parse the
+         * remainder of the object. Otherwise it falls back to standard object
+         * parsing.
          *
          * @return The parsed object.
-         * @throws InvalidMarshallableException If there's an issue with unmarshalling the data.
+         * @throws InvalidMarshallableException If there is an issue with
+         *                                      unmarshalling the data.
          */
         private Object parseType() throws InvalidMarshallableException {
             if (!hasTypeDefinition()) {
@@ -1264,17 +1306,20 @@ public class JSONWire extends TextWire {
         }
 
         /**
-         * Parses the type of the object based on the data and the given parameters. It will
-         * either use the provided class or, if a type definition is present in the data, will
-         * override with that. If the provided class or object instance is incompatible with the
-         * type definition, it will throw a ClassCastException.
+         * Core logic for deserialising a typed JSON object with optional hints
+         * from the caller. If {@link #hasTypeDefinition()} is {@code true} the
+         * type is read from the {@code "@type"} field and used to guide
+         * deserialisation. The supplied class or instance is validated against
+         * that type. When no type definition is present this method falls back to
+         * standard object parsing.
          *
-         * @param using The object instance to use, or null if not provided.
-         * @param clazz The class to parse the object as, or null if not provided.
-         * @param bestEffort Indicates whether to give a best effort attempt to parse the object even if it's partially incorrect.
-         * @return The parsed object.
-         * @throws InvalidMarshallableException If there's an issue with unmarshalling the data.
-         * @throws ClassCastException If there's a type mismatch between the provided class or instance and the type definition.
+         * @param using      the object instance to reuse, or {@code null}
+         * @param clazz      the class expected, or {@code null}
+         * @param bestEffort whether to attempt deserialisation even if partially incorrect
+         * @return the parsed object
+         * @throws InvalidMarshallableException if unmarshalling fails
+         * @throws ClassCastException           if the parsed type is incompatible
+         *                                      with {@code clazz} or {@code using}
          */
         private <E> E parseType(@Nullable E using, @Nullable Class<? extends E> clazz, boolean bestEffort) throws InvalidMarshallableException {
 
@@ -1306,10 +1351,10 @@ public class JSONWire extends TextWire {
         }
 
         /**
-         * Checks if the next set of characters in the bytes stream represents a type definition.
-         * A type definition is expected to start with the pattern {"@ after consuming any padding.
+         * Checks if the current JSON structure appears to be an object starting
+         * with an {@code "@type"} key.
          *
-         * @return true if a type definition is found, false otherwise.
+         * @return {@code true} if a type definition is found
          */
         boolean hasTypeDefinition() {
             final long readPos = bytes.readPosition();
@@ -1329,12 +1374,10 @@ public class JSONWire extends TextWire {
         }
 
         /**
-         * Reads the type definition from the bytes stream into the provided StringBuilder.
-         * It assumes that the current position in the bytes stream is the start of the type
-         * definition and consumes characters until it encounters a colon (":").
+         * Reads the {@code "@type"} key and its string value into {@code sb}.
          *
-         * @param sb The StringBuilder to which the type definition will be appended.
-         * @throws IORuntimeException If the expected opening bracket "{" is not found.
+         * @param sb the destination buffer
+         * @throws IORuntimeException if the expected opening brace is missing
          */
         void readTypeDefinition(StringBuilder sb) {
             consumePadding();
@@ -1349,9 +1392,7 @@ public class JSONWire extends TextWire {
         }
 
         /**
-         * Indicates whether types are being used in the current context or not.
-         *
-         * @return true if types are being used, false otherwise.
+         * Returns the {@link JSONWire#useTypes()} setting.
          */
         public boolean useTypes() {
             return useTypes;
