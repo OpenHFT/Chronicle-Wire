@@ -20,34 +20,76 @@ package net.openhft.chronicle.wire;
 /**
  * Enumerates the different types of tokens that can be found in a YAML document.
  * Each token represents a distinct construct or symbol in YAML, which can be used
- * for tasks such as parsing or tokenization of YAML documents.
+ * for tasks such as parsing or tokenisation of YAML documents.
  */
 public enum YamlToken {
+    /**
+     * Represents no specific token, often used as a sentinel or when parsing
+     * reaches an ambiguous state.
+     */
     NONE,
+
+    /** A YAML comment line (starts with '#'). */
     COMMENT,
+
+    /** A YAML tag such as {@code !str} or {@code !!map}. */
     TAG,
+
+    /** A YAML directive like {@code %YAML 1.2}. */
     DIRECTIVE,
+
+    /** The end of a YAML document marker ({@code ...}). */
     DOCUMENT_END(),
-    /** Represents the end of the directives in a YAML document. */
+
+    /** The end of the directives section marker ({@code ---}). */
     DIRECTIVES_END(DOCUMENT_END),
+
+    /** Indicates that the following token is a key in a YAML mapping. */
     MAPPING_KEY(NONE),
+
+    /** The end of a YAML mapping (<code>}</code>). */
     MAPPING_END(),
-    /** Represents the start of a key-value mapping in a YAML document. */
+
+    /** The start of a YAML mapping (<code>{</code>). */
     MAPPING_START(MAPPING_END),
+
+    /** The end of a YAML sequence ({@code ]}). */
     SEQUENCE_END(),
+
+    /** Indicates a new entry in a YAML sequence. */
     SEQUENCE_ENTRY,
-    /** Represents the start of a sequence in a YAML document. */
+
+    /** The start of a YAML sequence (<code>[</code> or indicated by <code>-</code>). */
     SEQUENCE_START(SEQUENCE_END),
+
+    /** A scalar textual value (string, number or boolean). */
     TEXT,
+
+    /** A literal block scalar introduced by {@code |} or {@code >}. */
     LITERAL,
+
+    /** A YAML anchor such as {@code &anchor_name}. */
     ANCHOR,
+
+    /** A YAML alias such as {@code *anchor_name}. */
     ALIAS,
+
+    /** A reserved YAML indicator, for example {@code @} or {@code `}. */
     RESERVED,
+
+    /** The end of a YAML stream. */
     STREAM_END,
-    /** Represents the start of a YAML document stream. */
+
+    /** The start of a YAML stream, implicit before any content. */
     STREAM_START(STREAM_END);
 
-    /** The corresponding end token for certain start tokens. */
+    /**
+     * For tokens that represent the start of a block structure (for example
+     * {@link #MAPPING_START}, {@link #SEQUENCE_START} or {@link #STREAM_START}),
+     * this field holds the token that marks the end of that block, such as
+     * {@link #MAPPING_END}. It is {@code null} when the token does not start a
+     * block.
+     */
     public final YamlToken toEnd;
 
     /**
