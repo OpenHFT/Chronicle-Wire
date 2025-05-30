@@ -22,11 +22,11 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@SuppressWarnings("rawtypes")
 /**
  * The WireDumper class provides utility methods to obtain a human-readable dump representation of {@link WireIn} content.
  * This class can operate on different WireIn or Bytes inputs and is designed to facilitate debugging and logging.
  */
-@SuppressWarnings("rawtypes")
 public class WireDumper {
 
     // Instance of WireIn to read from
