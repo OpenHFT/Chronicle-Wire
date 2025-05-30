@@ -157,8 +157,8 @@ public class TextWire extends YamlWireOut<TextWire> {
      * @throws IOException if any I/O error occurs.
      */
     @NotNull
-    public static TextWire fromFile(String name) throws IOException {
-        return new TextWire(BytesUtil.readFile(name), true);
+    public static TextWire fromFile(String filePath) throws IOException {
+        return new TextWire(BytesUtil.readFile(filePath), true);
     }
 
     /**

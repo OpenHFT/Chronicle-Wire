@@ -612,6 +612,13 @@ public class YamlTokeniser {
      * @param nextTokenToParse The token type to be pushed to the stack.
      * @param currentIndentLevel The current indentation level.
      * @return The next token after processing the current input.
+     * Handles and determines the indentation level and relevant token type based on context.
+     *
+     * @param currentIndentedContextToken The token for the start of indentation context.
+     * @param keyDefinitionToken The key token type.
+     * @param nextTokenToParse The token type to be pushed to the stack.
+     * @param currentIndentLevel The current indentation level.
+     * @return The next token after processing the current input.
      */
     private YamlToken indent(
             YamlToken currentIndentedContextToken,
@@ -812,7 +819,8 @@ public class YamlTokeniser {
     }
 
     /**
-     * Removes the top context from the context stack, and frees up the context.
+     * Pops the top context and adds it to {@link #freeContexts}. Emits the
+     * context's end token if present.
      */
     private void contextPop() {
         YTContext context0 = contexts.remove(contextSize() - 1); // Remove the top context.
