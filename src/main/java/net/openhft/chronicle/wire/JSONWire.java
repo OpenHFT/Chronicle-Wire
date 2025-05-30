@@ -43,41 +43,53 @@ import java.util.function.Supplier;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
 /**
- * Represents the JSON wire format.
+ * Provides a {@link Wire} implementation for serialising and deserialising data
+ * using JavaScript Object Notation (JSON).
  * <p>
- * This class provides functionality for managing JSON data in a wire format.
- * It currently provides a subset of functionalities similar to the YAML wire format.
- * The core capability of this class is to handle JSON data structures as {@code Bytes}
- * objects, allowing for efficient manipulation and parsing.
+ * Whilst sharing common behaviour with {@link TextWire} and YAML based wires,
+ * this implementation enforces JSON rules such as the use of double quotes and
+ * optional type prefixes.  The underlying bytes can be manipulated directly for
+ * high performance parsing and formatting.
+ * <p>
+ * Features include configurable type output via {@link #useTypes(boolean)} and
+ * trimming of the outer most braces through {@link #trimFirstCurly(boolean)}.
+ * It is typically used when interoperability with external JSON based systems
+ * or human readable configuration is required.
  */
 @SuppressWarnings("this-escape")
 public class JSONWire extends TextWire {
 
-    // The rest of null
+    /** Trailing characters of the JSON literal {@code null}. */
     private static final @NotNull Bytes<byte[]> _ULL = Bytes.from("ull");
+    /**
+     * @deprecated maintained for binary compatibility. Use {@link #_ULL}
+     * instead.
+     */
     @Deprecated(/* to be removed in x.28 */)
     public static final @NotNull Bytes<byte[]> ULL = _ULL;
-    // the rest of true
+    /** Trailing characters of the JSON literal {@code true}. */
     private static final @NotNull Bytes<byte[]> _RUE = Bytes.from("rue");
-    // the rest of false
+    /** Trailing characters of the JSON literal {@code false}. */
     private static final @NotNull Bytes<byte[]> _ALSE = Bytes.from("alse");
 
-    // Bytes for comma, commonly used as JSON separator.
+    /** Constant {@link BytesStore} containing a comma character used as the JSON element separator. */
     @SuppressWarnings("rawtypes")
     static final BytesStore<?, ?> COMMA = BytesStore.from(",");
 
-    // A thread-local variable to store a reference to the stop characters tester for JSON parsing.
+    /** Thread local cache of the {@link StopCharsTester} used for strict JSON string escaping. */
     static final ThreadLocal<WeakReference<StopCharsTester>> STRICT_ESCAPED_END_OF_TEXT_JSON = new ThreadLocal<>();
 
-    // Supplier for stop character tester for strict JSON text that escapes specific characters.
+    /** Supplier returning the {@link #STRICT_ESCAPED_END_OF_TEXT_JSON} tester. */
     static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_JSON_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT_JSON::escaping;
 
-    // Flag to determine whether to use types or not during parsing.
+    /** When {@code true} type prefixes are written and expected during parsing. */
     boolean useTypes;
+    /** Helper used when a type prefix appears at the very start of an object. */
     private JSONValueOutFromStart valueOutFromStart;
 
     /**
-     * Default constructor, initializes with elastic bytes allocated on heap.
+     * Creates a new {@code JSONWire} backed by an elastic on-heap buffer. The
+     * outer most curly brace is retained by default.
      */
     @SuppressWarnings("rawtypes")
     public JSONWire() {
@@ -85,10 +97,11 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * Constructs a JSONWire with the given bytes and a flag for using 8-bit.
+     * Constructs a {@code JSONWire} over the provided {@link Bytes} object.
      *
-     * @param bytes   The bytes to be used for initializing.
-     * @param use8bit Flag indicating whether to use 8-bit representation.
+     * @param bytes   underlying bytes for reading and writing
+     * @param use8bit hint from {@link TextWire} whether to use 8&nbsp;bit
+     *                characters; JSON is usually UTF-8 so this rarely matters
      */
     public JSONWire(@NotNull Bytes<?> bytes, boolean use8bit) {
         super(bytes, use8bit);
@@ -96,9 +109,9 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * Constructs a JSONWire with the given bytes.
+     * Convenience constructor using the provided bytes with {@code use8bit=false}.
      *
-     * @param bytes The bytes to be used for initializing.
+     * @param bytes the bytes to read from and write to
      */
     @SuppressWarnings("rawtypes")
     public JSONWire(@NotNull Bytes<?> bytes) {
@@ -106,10 +119,10 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * Static method to construct a JSONWire from a string representation of JSON.
+     * Creates a new instance initialised with the supplied JSON text.
      *
-     * @param text The string containing JSON data.
-     * @return A new instance of JSONWire.
+     * @param text JSON data to load
+     * @return the wire wrapping the parsed bytes
      */
     @NotNull
     public static JSONWire from(@NotNull String text) {
@@ -117,11 +130,12 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * Converts the content of the provided wire to a JSON string.
+     * Utility that returns a JSON representation of any given {@link Wire}.
+     * The original wire's read position is preserved.
      *
-     * @param wire The wire instance to be converted.
-     * @return The string representation of the JSON content.
-     * @throws InvalidMarshallableException If there's an error during conversion.
+     * @param wire source wire to convert
+     * @return JSON text of the wire's remaining data
+     * @throws InvalidMarshallableException if an object could not be marshalled
      */
     public static String asText(@NotNull Wire wire) throws InvalidMarshallableException {
         long pos = wire.bytes().readPosition();
@@ -149,16 +163,15 @@ public class JSONWire extends TextWire {
 
     @Override
     protected Class<?> defaultKeyClass() {
+        // JSON object keys are always strings
         return String.class;
     }
 
     /**
-     * Sets the flag to determine whether to use types during the JSON parsing or not.
-     * <p>
-     * This method is designed to follow the builder pattern, allowing it to be chained with other method calls on the {@code JSONWire} object.
+     * Enables or disables explicit type output.
      *
-     * @param outputTypes A boolean value indicating whether to use types.
-     * @return The current instance of the {@code JSONWire} class.
+     * @param outputTypes {@code true} to emit and expect type information
+     * @return this instance for chaining
      */
     public JSONWire useTypes(boolean outputTypes) {
         this.useTypes = outputTypes;
@@ -174,6 +187,9 @@ public class JSONWire extends TextWire {
         return useTypes;
     }
 
+    /**
+     * Configures this wire for text based document contexts.
+     */
     @Override
     public @NotNull TextWire useTextDocuments() {
         readContext = new JSONReadDocumentContext(this);
@@ -186,12 +202,14 @@ public class JSONWire extends TextWire {
     @NotNull
     @Override
     protected JSONValueOut createValueOut() {
+        // factory for the JSON specific ValueOut implementation
         return new JSONValueOut();
     }
 
     @NotNull
     @Override
     protected TextValueIn createValueIn() {
+        // create the JSON aware ValueIn instance
         return new JSONValueIn() {
 
             @Override
@@ -219,6 +237,9 @@ public class JSONWire extends TextWire {
         };
     }
 
+    /**
+     * Copies the remaining JSON data to another {@link Wire}.
+     */
     @Override
     public void copyTo(@NotNull WireOut wire) throws InvalidMarshallableException {
         if (wire.getClass() == getClass()) {
@@ -237,6 +258,9 @@ public class JSONWire extends TextWire {
         }
     }
 
+    /**
+     * Removes an outer pair of braces from the underlying bytes if present.
+     */
     private void trimCurlyBrackets() {
         // If the next byte is a closing curly bracket
         if (peekNextByte() == '}') {
@@ -642,6 +666,9 @@ public class JSONWire extends TextWire {
         return Quotes.NONE;
     }
 
+    /**
+     * Writes the given character sequence as a JSON string, escaping when necessary.
+     */
     @Override
     void escape(@NotNull CharSequence s) {
         bytes.writeUnsignedByte('"');
@@ -742,6 +769,10 @@ public class JSONWire extends TextWire {
         return escaping;
     }
 
+    /**
+     * Document context used when reading JSON documents. It deals with optional
+     * leading and trailing braces on top level messages.
+     */
     class JSONReadDocumentContext extends TextReadDocumentContext {
         private int first;
 
@@ -773,11 +804,9 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * The JSONWriteDocumentContext class extends the TextWriteDocumentContext class.
-     * It provides a specialized context for writing JSON data, adjusting writing positions
-     * and handling JSON-specific syntax such as curly braces.
-     *
-         */
+     * Document context used when writing JSON. It ensures top level objects are
+     * wrapped in braces when {@link JSONWire#trimFirstCurly()} is {@code false}.
+     */
     class JSONWriteDocumentContext extends TextWriteDocumentContext {
         // Position marker to track the start of a JSON object
         private long start;
@@ -820,8 +849,8 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * The JSONValueOut class extends the YamlValueOut class.
-     * It provides methods for adjusting and outputting values in JSON format.
+     * {@link ValueOut} implementation used for emitting JSON. Strings are always
+     * quoted and type prefixes are written when {@link JSONWire#useTypes()} is enabled.
      */
     class JSONValueOut extends YamlValueOut {
 
@@ -1029,6 +1058,10 @@ public class JSONWire extends TextWire {
         }
     }
 
+    /**
+     * Variant of {@link JSONValueOut} used when a type prefix is written at the
+     * very beginning of a value.
+     */
     class JSONValueOutFromStart extends JSONValueOut {
         @Override
         public void endTypePrefix() {
@@ -1037,9 +1070,8 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * The JSONValueIn class extends the TextValueIn class.
-     * It provides specialized methods for interpreting values from JSON data,
-     * ensuring proper handling of JSON-specific constructs like the "null" value.
+     * {@link ValueIn} implementation with JSON specific parsing logic including
+     * handling of quoted strings and optional type prefixes.
      */
     class JSONValueIn extends TextValueIn {
 
@@ -1309,9 +1341,7 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * Render as a UTF-8 string.
-     *
-     * @return a UTF-8 string representation of the wire data.
+     * Returns any unread JSON bytes as a UTF‑8 string.
      */
     @Override
     public String toString() {
