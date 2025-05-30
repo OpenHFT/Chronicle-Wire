@@ -281,7 +281,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         // Remove underscores if present, as they can be used in YAML as visual separators in numbers.
-        if (s.indexOf("_") >= 0) {
+        if (inputTextBuilder.indexOf("_") >= 0) {
             targetBuffer = new StringBuilder(inputTextBuilder);
             removeUnderscore(targetBuffer);
         }
@@ -1120,7 +1120,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
         // Clear the bytes buffer and internal StringBuilder
         bytes.clear();
-        targetBuffer.setLength(0);
+        sb.setLength(0);
 
         // Reset the YAML tokenizer and value states
         yt.reset();
@@ -2349,7 +2349,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
                 case SEQUENCE_START:
                     // Read a YAML sequence
-                    return readSequence(type);
+                    return readSequence(defaultType);
 
                 case TEXT:
                 case LITERAL:
@@ -2358,9 +2358,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     yt.next();
                     if (o instanceof StringBuilder)
                         o = o.toString();
-                    if (type == Class.class)
+                    if (defaultType == Class.class)
                         return classLookup.forName(o.toString());
-                    return ObjectUtils.convertTo(type, o);
+                    return ObjectUtils.convertTo(defaultType, o);
 
                 case ANCHOR:
                     // Handle YAML anchors, which can be referred to later as aliases
@@ -2393,7 +2393,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     // Specific handling for binary data
                     if (BINARY_TAG.contentEquals(stringBuilder)) {
                         yt.next();
-                        return decodeBinary(type);
+                        return decodeBinary(defaultType);
                     }
                     // Intentional fall-through for other tags
 

@@ -1434,11 +1434,11 @@ public class TextWire extends YamlWireOut<TextWire> {
 
                 }
                 case '"':
-                    readText(a, getEscapingQuotes());
+                    readText(destination, getEscapingQuotes());
                     break;
 
                 case '\'':
-                    readText(a, getEscapingSingleQuotes());
+                    readText(destination, getEscapingSingleQuotes());
                     break;
 
                 case '!': {
@@ -3069,9 +3069,17 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         /**
-         * Deserialises a YAML sequence into either an array or a {@link Collection}
-         * of the requested type. Only a small set of collection types are
-         * supported.
+         * Reads a sequence from the current stream context and attempts to interpret
+         * it based on the provided class type. This method has specialized handling
+         * for arrays and collections including {@link Object[]}, {@link String[]},
+         * {@link List}, and {@link Set}.
+         * <p>
+         * If the class type isn't one of the recognized specialized types, an
+         * {@link UnsupportedOperationException} will be thrown.
+         *
+         * @param targetSequenceType The expected type of the sequence to be read.
+         * @return An array or collection representing the read sequence.
+         * @throws UnsupportedOperationException if the provided class type isn't supported.
          */
         @NotNull
         private Object readSequence(@NotNull Class<?> targetSequenceType) {
@@ -3086,7 +3094,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                 return targetSequenceType == Object[].class ? list.toArray() : list;
 
             // Handle sequences expected to be of type String[].
-            } else if (clazz == String[].class) {
+            } else if (targetSequenceType == String[].class) {
                 @NotNull List<String> list = new ArrayList<>();
                 sequence(list, (l, v) -> {
                     while (v.hasNextSequenceItem()) {
@@ -3096,7 +3104,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                 return list.toArray(new String[0]);
 
             // Handle sequences expected to be of type List.
-            } else if (clazz == List.class) {
+            } else if (targetSequenceType == List.class) {
                 @NotNull List<String> list = new ArrayList<>();
                 sequence(list, (l, v) -> {
                     while (v.hasNextSequenceItem()) {
@@ -3106,7 +3114,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                 return list;
 
             // Handle sequences expected to be of type Set.
-            } else if (clazz == Set.class) {
+            } else if (targetSequenceType == Set.class) {
                 @NotNull Set<String> list = new HashSet<>();
                 sequence(list, (l, v) -> {
                     while (v.hasNextSequenceItem()) {
@@ -3118,7 +3126,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             // Throw an exception if the class type is unsupported.
             } else {
                 throw new UnsupportedOperationException("Arrays of type "
-                        + clazz + " not supported.");
+                        + targetSequenceType + " not supported.");
             }
         }
 

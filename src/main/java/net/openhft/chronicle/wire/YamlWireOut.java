@@ -377,8 +377,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             return Quotes.DOUBLE;
 
         // If string starts with special characters or ends with whitespace, use double quoteStyle.
-        if (STARTS_QUOTE_CHARS.get(s.charAt(0)) ||
-                Character.isWhitespace(s.charAt(s.length() - 1)))
+        if (STARTS_QUOTE_CHARS.get(text.charAt(0)) ||
+                Character.isWhitespace(text.charAt(text.length() - 1)))
             return Quotes.DOUBLE;
         boolean hasSingleQuote = false;
         for (int i = 0; i < text.length(); i++) {
@@ -394,7 +394,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
             // If a double quote is found followed by a single quote, return double quoteStyle.
             if (ch == '"') {
-                if (i < s.length() - 1 && s.charAt(i + 1) == '\'')
+                if (i < text.length() - 1 && text.charAt(i + 1) == '\'')
                     return Quotes.DOUBLE;
                 quoteStyle = Quotes.SINGLE;
             }

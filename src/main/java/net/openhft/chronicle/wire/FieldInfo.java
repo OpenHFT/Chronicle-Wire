@@ -196,7 +196,7 @@ public interface FieldInfo {
      * to the provided {@code value} of type {@code long}. The provided {@code object} is used as a
      * target from which the field is extracted.
      *
-     * @param object The object containing the field to be set.
+     * @param instance The object containing the field to be set.
      * @param value  The value to set the field to.
      * @throws IllegalArgumentException if the specified object is not an instance of the class or
      *                                  interface declaring the underlying field, or if an unwrapping
@@ -209,7 +209,7 @@ public interface FieldInfo {
      * to the provided {@code value} of type {@code double}. The provided {@code object} is used as a
      * target from which the field is extracted.
      *
-     * @param object The object containing the field to be set.
+     * @param instance The object containing the field to be set.
      * @param value  The value to set the field to.
      * @throws IllegalArgumentException if the specified object is not an instance of the class or
      *                                  interface declaring the underlying field, or if an unwrapping
@@ -243,8 +243,8 @@ public interface FieldInfo {
      * Compares the value of the field represented by this {@code FieldInfo} in both provided
      * objects {@code a} and {@code b} and determines if they are equal.
      *
-     * @param a First object to compare the field's value.
-     * @param b Second object to compare the field's value.
+     * @param instanceA First object to compare the field's value.
+     * @param instanceB Second object to compare the field's value.
      * @return {@code true} if the values are equal, {@code false} otherwise.
      */
     boolean isEqual(Object instanceA, Object instanceB);
