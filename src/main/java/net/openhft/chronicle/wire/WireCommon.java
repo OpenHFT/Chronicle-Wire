@@ -26,33 +26,48 @@ import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Common functionality shared by all {@link Wire} implementations.
+ * <p>
+ * This interface groups configuration options and utility factory methods that
+ * are required by both {@link WireIn} and {@link WireOut}. Implementations
+ * use these methods to control how marshalling is performed, how waiting or
+ * back pressure is handled and to create value references bound to the
+ * underlying wire format.
+ */
 public interface WireCommon {
 
     /**
-     * Sets the {@link ClassLookup} implementation to be used for class lookup.
+     * Sets the {@link ClassLookup} used to resolve class names during
+     * deserialization.  This is particularly important when type information is
+     * written as a textual alias or when reading a {@code class} field from the
+     * wire.
      *
-     * @param classLookup implementation to be used for class lookup.
+     * @param classLookup strategy used for class resolution
      */
     void classLookup(ClassLookup classLookup);
 
     /**
-     * Returns the current {@link ClassLookup} implementation being used for class lookup.
+     * Returns the current {@link ClassLookup} used for resolving class names
+     * while reading objects from the wire.
      *
-     * @return the current {@link ClassLookup} implementation being used for class lookup
+     * @return the {@link ClassLookup} in use
      */
     ClassLookup classLookup();
 
     /**
-     * Sets the {@link Pauser} implementation to be used for blocking operations.
+     * Sets the {@link Pauser} implementation.  A {@code Pauser} defines the
+     * strategy used by blocking operations to wait for data (for example,
+     * busy-spin, yield or park).
      *
-     * @param pauser implementation to be used for blocking operations.
+     * @param pauser strategy for blocking/waiting operations
      */
     void pauser(Pauser pauser);
 
     /**
-     * Returns the current {@link Pauser} implementation being used for blocking operations.
+     * Returns the {@link Pauser} used when blocking for more data or capacity.
      *
-     * @return the current {@link Pauser} implementation being used for blocking operations
+     * @return the pauser strategy
      */
     Pauser pauser();
 
@@ -65,35 +80,32 @@ public interface WireCommon {
     Bytes<?> bytes();
 
     /**
-     * Returns the bytes() but only for comment.
-     *
-     * @return the bytes() but only for comment
+     * Returns the underlying bytes when generating debug output such as hex
+     * dumps.  Comments written via {@link ValueOut#comment(CharSequence)} are
+     * directed here so the primary data stream is unaffected.
      */
     HexDumpBytesDescription<?> bytesComment();
 
     /**
-     * Creates and returns a new {@link IntValue}. The {@link IntValue} implementation that is
-     * returned depends on the wire implementation.
-     *
-     * @return a new {@link IntValue}.
+     * Creates a direct {@link IntValue} bound to this wire.  The concrete
+     * implementation (binary or text) depends on the underlying wire type and
+     * allows low latency access to an integer field stored within the wire.
      */
     @NotNull
     IntValue newIntReference();
 
     /**
-     * Creates and returns a new {@link LongValue}. The {@link LongValue} implementation that is
-     * returned depends on the wire implementation.
-     *
-     * @return a new {@link LongValue}
+     * Creates a direct {@link LongValue} bound to this wire.  As with
+     * {@link #newIntReference()}, the actual implementation is wire specific and
+     * provides direct access to a long field within the wire data.
      */
     @NotNull
     LongValue newLongReference();
 
     /**
-     * Creates and returns a new {@link TwoLongValue}. The {@link TwoLongValue} implementation that
-     * is returned depends on the wire implementation.
-     *
-     * @return a new {@link TwoLongValue}
+     * Creates a new {@link TwoLongValue} reference.  The returned instance gives
+     * low level access to two consecutive long values stored in the wire.
+     * Concrete implementation is wire specific.
      */
     @NotNull
     default TwoLongValue newTwoLongReference() {
@@ -101,48 +113,48 @@ public interface WireCommon {
     }
 
     /**
-     * Creates and returns a new {@link LongArrayValues}. The {@link LongArrayValues} implementation that
-     * is returned depends on the wire implementation.
-     *
-     * @return a new {@link LongArrayValues}
+     * Creates an array view over long values stored in the wire.  Useful for
+     * accessing memory-mapped arrays directly without additional copying.
      */
     @NotNull
     LongArrayValues newLongArrayReference();
 
     /**
-     * Creates and returns a new {@link IntArrayValues}. The {@link IntArrayValues} implementation that
-     * is returned depends on the wire implementation.
-     *
-     * @return a new {@link IntArrayValues}
+     * Creates an array view over integer values stored in the wire.  The
+     * concrete implementation depends on the wire type.
      */
     @NotNull
     IntArrayValues newIntArrayReference();
 
     /**
-     * Resets the state of the underlying {@link Bytes} stored by the wire.
+     * Clears the underlying {@link Bytes} and resets any internal state held by
+     * the wire implementation.
      */
     void clear();
 
     /**
-     * Returns the wire parent object. If the parent was not assigned, {@code null} is
-     * returned instead.
+     * Returns the parent object associated with this wire.  This is typically
+     * used for nested marshallable objects to access their containing object.
      *
-     * @return the wire parent object or {@code null} if none was assigned.
+     * @return the parent object or {@code null} if none was set
      */
     @Nullable
     Object parent();
 
     /**
-     * Assigns the wire parent object for later retrieval.
+     * Assigns a parent object which may later be retrieved via
+     * {@link #parent()}.  This allows wires to maintain a hierarchy of
+     * marshallable objects if required.
      *
-     * @param parent to set, or null if there isn't one.
+     * @param parent the parent object or {@code null}
      */
     void parent(Object parent);
 
     /**
-     * If a message is marked as NOT_COMPLETE is it still present.
+     * Whether a message flagged as {@link Wires#NOT_COMPLETE} should still be
+     * treated as visible when reading.
      *
-     * @return true if NOT_COMPLETE messages can be seen, false if they cannot.
+     * @return {@code true} if incomplete messages appear as absent
      */
     default boolean notCompleteIsNotPresent() {
         return true;
@@ -157,35 +169,42 @@ public interface WireCommon {
 
     long headerNumber();
 
+    /**
+     * Enables or disables padding around messages.  Padding can be used to
+     * align messages on cache-line boundaries to improve performance.
+     */
     void usePadding(boolean usePadding);
 
+    /**
+     * @return {@code true} if padding is enabled for read and write operations
+     */
     boolean usePadding();
 
     /**
-     * Creates and returns a new {@link BooleanValue}. The {@link BooleanValue} implementation that is
-     * returned depends on the wire implementation.
-     *
-     * @return a new {@link BooleanValue}.
+     * Creates a {@link BooleanValue} bound to this wire for direct manipulation
+     * of an on-wire boolean value.
      */
     @NotNull
     BooleanValue newBooleanReference();
 
     /**
-     * Should this wire write the object as a Marshallable or BytesMarshallable
+     * Determines whether the provided object should write its own class type
+     * when being marshalled.  Implementations may choose to omit the type if it
+     * can be inferred from context.
      *
-     * @return use Marshallable
+     * @return {@code true} if the object should use a self describing message
      */
     boolean useSelfDescribingMessage(@NotNull CommonMarshallable object);
 
     /**
-     * Determine whether direct access to the underlying byte() makes sense or should it be treated as text
-     *
-     * @return Is this a binary protocol
+     * Determines whether the underlying wire format is binary.  Binary wires are
+     * optimised for speed and size whereas text wires favour readability.
      */
     boolean isBinary();
 
     /**
-     * Reset the state of the wire
+     * Reset any internal read/write positions or temporary state held by the
+     * wire.
      */
     void reset();
 }

@@ -48,16 +48,25 @@ import static net.openhft.chronicle.wire.Wires.*;
  */
 public abstract class AbstractWire implements Wire, InternalWire {
 
-    // Default padding configuration loaded from the system properties.
+    /**
+     * Default padding configuration loaded from the system property
+     * {@code wire.usePadding}. Padding can be used to align messages on cache
+     * line boundaries.
+     */
     public static final boolean DEFAULT_USE_PADDING = Jvm.getBoolean("wire.usePadding", false);
 
-    // Message used when a header is detected inside another header.
+    /**
+     * Error message issued when a header is detected inside another header,
+     * usually indicating nested document contexts.
+     */
     private static final String INSIDE_HEADER_MESSAGE = "you cant put a header inside a header, check that " +
             "you have not nested the documents. If you are using Chronicle-Queue please " +
             "ensure that you have a unique instance of the Appender per thread, in " +
             "other-words you can not share appenders across threads.";
 
     static {
+        // populate the global class alias pool with common aliases before any
+        // wires are constructed
         WireInternal.addAliases();
     }
 

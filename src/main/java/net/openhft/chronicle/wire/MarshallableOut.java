@@ -41,10 +41,9 @@ import java.util.stream.Stream;
 public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteNotifier {
 
     /**
-     * Creates and returns a new instance of {@link MarshallableOutBuilder} initialized with the provided URL.
-     *
-     * @param url The URL which will dictate the specific type of {@code MarshallableOut} to create.
-     * @return A new instance of {@code MarshallableOutBuilder}.
+     * Returns a builder whose implementation is chosen based on the scheme of
+     * the provided {@link URL}.  For example {@code file:} may create a queue
+     * appender while {@code http:} might create a network writer.
      */
     static MarshallableOutBuilder builder(URL url) {
         return new MarshallableOutBuilder(url);
@@ -89,8 +88,8 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException;
 
     /**
-     * @return true if this output is configured to expect the history of the message to be written
-     * to.
+     * Indicates whether history information (source id, index) should be
+     * appended with each message for tracing and debugging purposes.
      */
     default boolean recordHistory() {
         return false;

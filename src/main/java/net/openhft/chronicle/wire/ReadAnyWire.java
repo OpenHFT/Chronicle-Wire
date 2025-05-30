@@ -28,9 +28,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Supplier;
 
 /**
- * Represents a wire type that can be either {@code TextWire} or {@code BinaryWire}.
- * The specific wire type is determined dynamically based on the provided bytes.
- * This class provides flexibility in reading from wires that could be in either format.
+ * Wire implementation that inspects the first bytes of the input to decide
+ * whether it is text, binary or fieldless binary.  Primarily used for reading
+ * where the wire type is not known ahead of time.
  */
 public class ReadAnyWire extends AbstractAnyWire implements Wire {
 
@@ -83,15 +83,18 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
 
     @NotNull
     @Override
+    /**
+     * Returns the raw {@link Bytes} backing this wire.  Calling this forces the
+     * underlying wire type to be determined if it hasn't already.
+     */
     public Bytes<?> bytes() {
         checkWire();
         return bytes;
     }
 
     /**
-     * Represents a mechanism to acquire the correct wire type based on provided bytes.
-     * This class is responsible for dynamically determining whether the bytes
-     * correspond to a {@code TextWire} or a {@code BinaryWire}.
+     * Acquisition strategy used by {@link ReadAnyWire}.  It peeks at the initial
+     * bytes to decide which concrete wire to instantiate.
      */
     static class ReadAnyWireAcquisition implements WireAcquisition {
         private final Bytes<?> bytes;
@@ -129,6 +132,12 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
 
         @Override
         @Nullable
+        /**
+         * Lazily determines the wire type by inspecting the first few bytes. If
+         * all high bits of the first eight bytes are clear it assumes text; if
+         * the first byte is a field code it chooses fieldless binary otherwise
+         * {@link WireType#BINARY}.
+         */
         public Wire acquireWire() {
             if (wire != null)
                 return wire;

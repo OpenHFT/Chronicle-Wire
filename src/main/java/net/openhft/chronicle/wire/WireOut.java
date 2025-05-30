@@ -28,24 +28,26 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Defines the standard interface for sequential writing to a Bytes stream.
+ * Defines the standard interface for sequential writing to a
+ * {@link net.openhft.chronicle.bytes.Bytes} stream.  Implementations know how
+ * to encode data in a particular wire format while presenting a common API.
+ * Typically a user obtains a {@link DocumentContext} via
+ * {@link #writingDocument()} and then writes fields using the {@code write}
+ * methods.
  */
 @DontChain
 public interface WireOut extends WireCommon, MarshallableOut {
     /**
-     * Writes an empty field marker to the stream.
-     *
-     * @return An interface to further define the output for the written value.
+     * Begins writing a value without an explicit field name.  This is typically
+     * used for sequence elements.
      */
     @NotNull
     ValueOut write();
 
     /**
-     * Writes a key to the stream. For RAW types, the label will be in text.
-     * This can be read using readEventName().
-     *
-     * @param key The key to write to the stream.
-     * @return An interface to further define the output for the written value.
+     * Writes a field/event name using a {@link WireKey}.  For RAW wires the key
+     * is output in text form so that it can be read back with
+     * {@link WireIn#readEventName(StringBuilder)}.
      */
     @NotNull
     default ValueOut writeEventName(WireKey key) {
@@ -53,10 +55,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
     }
 
     /**
-     * Writes a CharSequence key to the stream.
-     *
-     * @param key The CharSequence key to write to the stream.
-     * @return An interface to further define the output for the written value.
+     * Writes an event or field name as a {@link CharSequence}.
      */
     default ValueOut writeEventName(CharSequence key) {
         return write(key);
@@ -120,6 +119,10 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * @param key The CharSequence key to write to the stream.
      * @return An interface to further define the output for the written value.
      */
+    /**
+     * Writes a field/event name supplied as a raw character sequence and
+     * returns a {@link ValueOut} to write its value.
+     */
     ValueOut write(CharSequence key);
 
     /**
@@ -149,10 +152,8 @@ public interface WireOut extends WireCommon, MarshallableOut {
     WireOut writeComment(CharSequence s);
 
     /**
-     * Adds padding to the wire. This is particularly useful for aligning data.
-     *
-     * @param paddingToAdd The amount of padding to add.
-     * @return This WireOut instance for method chaining.
+     * Adds explicit padding bytes to the output.  Padding is most often used for
+     * alignment when appending to shared memory or files.
      */
     @NotNull
     WireOut addPadding(int paddingToAdd);

@@ -32,22 +32,27 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 /**
- * Defines the standard interface for reading sequentially from a Bytes stream.
+ * Defines the standard interface for reading sequentially from a {@link
+ * net.openhft.chronicle.bytes.Bytes} stream.  Concrete implementations know how
+ * to parse a specific wire format (text, binary, field-less binary, etc.) but
+ * present a consistent API to clients.  Typical usage is to obtain a
+ * {@link DocumentContext} via {@link #readingDocument()} and read fields via the
+ * {@code read()} or {@code readEventName()} methods.
  */
 @DontChain
 public interface WireIn extends WireCommon, MarshallableIn {
 
     /**
-     * Reads all available entries and populates the provided map with these entries.
-     * Each entry in the wire source is read as a key-value pair where the key is of type {@code K} and the value is of type {@code V}.
+     * Convenience method to consume the remainder of the current document as a
+     * map.  Each key/value pair is read in sequence until no more data is
+     * available.
      *
-     * @param <K>     The type of keys in the map.
-     * @param <V>     The type of values in the map.
-     * @param kClass  The class type of the key.
-     * @param vClass  The class type of the value.
-     * @param map     The map to populate with read entries.
-     * @return The populated map.
-     * @throws InvalidMarshallableException If there's an error in the marshalling process.
+     * @param <K>    key type
+     * @param <V>    value type
+     * @param kClass class of the key
+     * @param vClass class of the value
+     * @param map    destination map to populate
+     * @return the populated {@code map}
      */
     @NotNull
     default <K, V> Map<K, V> readAllAsMap(Class<K> kClass, @NotNull Class<V> vClass, @NotNull Map<K, V> map) throws InvalidMarshallableException {
@@ -64,35 +69,31 @@ public interface WireIn extends WireCommon, MarshallableIn {
     }
 
     /**
-     * Copies the content from the current WireIn source to the provided WireOut destination.
-     *
-     * @param wire The WireOut instance where the content will be copied to.
-     * @throws InvalidMarshallableException If there's an error in the marshalling process.
+     * Writes the remaining readable data from this wire into another
+     * {@link WireOut}.  This is a utility method used when reserializing a
+     * document or forwarding it to another destination.
      */
     void copyTo(@NotNull WireOut wire) throws InvalidMarshallableException;
 
     /**
-     * Reads the next field if present, or returns an empty string if not present.
+     * Begins reading the next field or sequence element.  For text formats this
+     * also consumes the field name if present.  Binary formats may simply return
+     * the next value.
      *
-     * @return The value of the next field, encapsulated in a {@link ValueIn} instance.
+     * @return {@link ValueIn} used to read the value
      */
     @NotNull
     ValueIn read();
 
     /**
-     * Reads the next field if present. The field should match the provided {@link WireKey}.
-     *
-     * @param key The WireKey that should match the next field.
-     * @return The value of the matched field, encapsulated in a {@link ValueIn} instance.
+     * Reads the field identified by {@code key}.  Fields that do not match may
+     * be skipped internally until the requested key is found.
      */
     @NotNull
     ValueIn read(@NotNull WireKey key);
 
     /**
-     * Reads the next field based on the provided field name.
-     *
-     * @param fieldName The name of the field to read.
-     * @return The value of the specified field, encapsulated in a {@link ValueIn} instance.
+     * Convenience overload of {@link #read(WireKey)} using a simple field name.
      */
     @NotNull
     default ValueIn read(String fieldName) {
@@ -100,20 +101,16 @@ public interface WireIn extends WireCommon, MarshallableIn {
     }
 
     /**
-     * Reads the next event number. If no number is present, returns Long.MIN_VALUE.
-     *
-     * @return The next event number or Long.MIN_VALUE if no number is present.
+     * Reads a numeric identifier for the next event.  Binary wires sometimes
+     * encode events as integers rather than textual names.  If no such identifier
+     * is present {@code Long.MIN_VALUE} is returned.
      */
     long readEventNumber();
 
     /**
-     * Reads a field or string, ensuring the value is always read.
-     * This method is specifically designed to ensure reading even for formats that might
-     * potentially omit the field, such as RAW.
-     *
-     * @param name The StringBuilder that holds the name of the field or string.
-     * @return The value of the field or string, encapsulated in a {@link ValueIn} instance.
-     * @throws IORuntimeException If the bytes fail to be parsed.
+     * Reads the event or field name into {@code name} and returns a
+     * {@link ValueIn} for its value.  This method always consumes a value even if
+     * the underlying format does not explicitly encode the name (e.g. RAW).
      */
     @NotNull
     default ValueIn readEventName(@NotNull StringBuilder name) {
@@ -182,22 +179,16 @@ public interface WireIn extends WireCommon, MarshallableIn {
     void clear();
 
     /**
-     * This consumes any padding before checking if readRemaining() &gt; 0 <p> NOTE: This method
-     * only works inside a document. Call it just before a document and it won't know not to read
-     * the read in case there is padding.
-     *
-     * @return if there is more data to be read in this document.
+     * Indicates whether more fields/events remain in the current document.  Any
+     * trailing padding bytes are consumed before the check is made.
      */
     default boolean hasMore() {
         return isNotEmptyAfterPadding();
     }
 
     /**
-     * This consumes any padding before checking if readRemaining() &gt; 0 <p> NOTE: This method
-     * only works inside a document. Call it just before a document and it won't know not to read
-     * the read in case there is padding.
-     *
-     * @return if there is more data to be read in this document.
+     * Helper used by {@link #hasMore()} which consumes any alignment padding and
+     * then checks if unread bytes remain in this document.
      */
     default boolean isNotEmptyAfterPadding() {
         consumePadding();
@@ -289,29 +280,27 @@ public interface WireIn extends WireCommon, MarshallableIn {
     void consumePadding();
 
     /**
-     * Sets a listener that gets notified whenever a comment is encountered during reading.
-     *
-     * @param commentListener The consumer that handles and processes the comments.
+     * Registers a consumer to receive any comments encountered while parsing the
+     * wire.  Comments are primarily used for debugging or additional metadata and
+     * are not part of the logical data model.
      */
     void commentListener(Consumer<CharSequence> commentListener);
 
     /**
-     * Consume a header if one is available.
+     * Consume a header if one is available.  This is typically used by queue or
+     * networking layers to determine whether a complete message is ready to be
+     * read.
      *
-     * @return true, if a message can be read between readPosition and readLimit, else false if no
-     * header is ready.
-     * @throws EOFException if the end of wire marker is reached.
+     * @return {@code true} if a data header was consumed
      */
     default boolean readDataHeader() throws EOFException {
         return readDataHeader(false) == HeaderType.DATA;
     }
 
     /**
-     * Attempts to read a header for data or metadata, based on the provided parameter.
-     *
-     * @param includeMetaData If true, metadata headers are included in the read attempt.
-     * @return The type of header that was read.
-     * @throws EOFException if an end-of-file marker is encountered.
+     * Low level method used to read the next message header.  The returned
+     * {@link HeaderType} indicates whether the message is data, metadata or the
+     * end-of-stream marker.
      */
     @NotNull
     HeaderType readDataHeader(boolean includeMetaData) throws EOFException;
@@ -346,9 +335,8 @@ public interface WireIn extends WireCommon, MarshallableIn {
     void readMetaDataHeader();
 
     /**
-     * Peeks at the content in the current WireIn instance and returns it as a YAML string.
-     *
-     * @return A String containing a YAML representation of the peeked content.
+     * Returns a YAML representation of the remaining bytes without advancing the
+     * read position.  Useful for logging and diagnostics.
      */
     String readingPeekYaml();
 

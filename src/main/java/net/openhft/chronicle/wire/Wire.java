@@ -25,10 +25,10 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 
 /**
- * Defines the standard interface for sequentially writing to and reading from a Bytes stream.
- * Implementations of this interface should ensure single-threaded access and avoid method chaining.
- *
- * <p>This interface combines the capabilities of both {@link WireIn} and {@link WireOut} interfaces.
+ * Top level interface for bidirectional wire implementations.  It combines the
+ * functionality of {@link WireIn} and {@link WireOut} and represents the most
+ * common entry point for using Chronicle Wire.  All operations are expected to
+ * be single threaded on a given instance.
  */
 @SingleThreaded
 @DontChain
@@ -43,10 +43,8 @@ public interface Wire extends WireIn, WireOut {
     }
 
     /**
-     * Set the header number for the Wire. Concrete implementations should ensure they provide the expected behavior for this method.
-     *
-     * @param headerNumber The header number to be set.
-     * @return The current Wire instance, often for method chaining.
+     * Sets the sequence number used when writing headers.  Queue and TCP
+     * protocols typically increment this value for each new document.
      */
     @Override
     @NotNull

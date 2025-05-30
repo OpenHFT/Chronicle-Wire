@@ -20,10 +20,9 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.io.IORuntimeException;
 
 /**
- * This is the SourceContext interface.
- * It defines methods to interact with the underlying source context, particularly in terms of accessing its source ID
- * and the last read index. Implementations of this interface are expected to handle source contexts which could be used
- * in various scenarios like I/O operations, data streaming, or context management.
+ * Provides access to metadata about the source of a message, typically used by
+ * queue tailers or network receivers.  A {@link DocumentContext} implements
+ * this interface so consumers can obtain the source id and last read index.
  */
 public interface SourceContext {
 
