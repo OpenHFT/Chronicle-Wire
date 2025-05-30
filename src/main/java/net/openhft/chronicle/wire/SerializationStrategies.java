@@ -57,14 +57,14 @@ public enum SerializationStrategies implements SerializationStrategy {
          */
         @NotNull
         @Override
-        public Object readUsing(Class clazz, @NotNull Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
-            WireIn wireIn = in.wireIn();
-            if (wireIn.useSelfDescribingMessage((CommonMarshallable) o) && o instanceof ReadMarshallable) {
-                ((ReadMarshallable) o).readMarshallable(wireIn);
+        public Object readUsing(Class expectedType, @NotNull Object target, @NotNull ValueIn valueIn, BracketType structure) throws InvalidMarshallableException {
+            WireIn wireIn = valueIn.wireIn();
+            if (wireIn.useSelfDescribingMessage((CommonMarshallable) target) && target instanceof ReadMarshallable) {
+                ((ReadMarshallable) target).readMarshallable(wireIn);
             } else {
-                ((ReadBytesMarshallable) o).readMarshallable(wireIn.bytes());
+                ((ReadBytesMarshallable) target).readMarshallable(wireIn.bytes());
             }
-            return o;
+            return target;
         }
 
         /**
@@ -99,8 +99,8 @@ public enum SerializationStrategies implements SerializationStrategy {
          */
         @Nullable
         @Override
-        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
-            return in.objectWithInferredType(o, ANY_NESTED, null);
+        public Object readUsing(Class expectedType, Object target, @NotNull ValueIn valueIn, BracketType structure) throws InvalidMarshallableException {
+            return valueIn.objectWithInferredType(target, ANY_NESTED, null);
         }
 
         /**
@@ -136,8 +136,8 @@ public enum SerializationStrategies implements SerializationStrategy {
          */
         @Nullable
         @Override
-        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
-            return in.objectWithInferredType(o, ANY_NESTED, null);
+        public Object readUsing(Class expectedType, Object target, @NotNull ValueIn valueIn, BracketType structure) throws InvalidMarshallableException {
+            return valueIn.objectWithInferredType(target, ANY_NESTED, null);
         }
 
         /**
@@ -172,8 +172,8 @@ public enum SerializationStrategies implements SerializationStrategy {
          */
         @Nullable
         @Override
-        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) {
-            return in.text();
+        public Object readUsing(Class expectedType, Object target, @NotNull ValueIn valueIn, BracketType structure) {
+            return valueIn.text();
         }
 
         /**
@@ -215,20 +215,20 @@ public enum SerializationStrategies implements SerializationStrategy {
          */
         @Nullable
         @Override
-        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
-            if (bracketType != BracketType.MAP || !(o instanceof ReadMarshallable)) {
-                String text = in.text();
-                if (o != null) {
-                    EnumCache<?> cache = EnumCache.of(o.getClass());
+        public Object readUsing(Class expectedType, Object target, @NotNull ValueIn valueIn, BracketType structure) throws InvalidMarshallableException {
+            if (structure != BracketType.MAP || !(target instanceof ReadMarshallable)) {
+                String text = valueIn.text();
+                if (target != null) {
+                    EnumCache<?> cache = EnumCache.of(target.getClass());
                     Object ret = cache.valueOf(text);
                     if (ret == null)
-                        throw new IORuntimeException("No enum value '" + text + "' defined for " + o.getClass());
+                        throw new IORuntimeException("No enum value '" + text + "' defined for " + target.getClass());
                     return ret;
                 }
                 return text;
             }
-            ((ReadMarshallable) o).readMarshallable(in.wireIn());
-            return o;
+            ((ReadMarshallable) target).readMarshallable(valueIn.wireIn());
+            return target;
         }
 
         /**
@@ -284,14 +284,14 @@ public enum SerializationStrategies implements SerializationStrategy {
          * Reads a nested object or returns {@code null} if the input is null.
          */
         @Override
-        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
-            if (in.isNull()) {
+        public Object readUsing(Class expectedType, Object target, @NotNull ValueIn valueIn, BracketType structure) throws InvalidMarshallableException {
+            if (valueIn.isNull()) {
                 return null;
             }
-            if (o == null)
-                o = ObjectUtils.newInstance(clazz);
-            Wires.readMarshallable(clazz, o, in.wireIn(), true);
-            return o;
+            if (target == null)
+                target = ObjectUtils.newInstance(expectedType);
+            Wires.readMarshallable(expectedType, target, valueIn.wireIn(), true);
+            return target;
         }
 
         /**
@@ -329,15 +329,15 @@ public enum SerializationStrategies implements SerializationStrategy {
          */
         @NotNull
         @Override
-        public Object readUsing(Class clazz, Object using, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
-            if (using instanceof DemarshallableWrapper) {
-                @NotNull final DemarshallableWrapper wrapper = (DemarshallableWrapper) using;
-                wrapper.demarshallable = Demarshallable.newInstance(wrapper.type, in.wireIn());
+        public Object readUsing(Class expectedType, Object target, @NotNull ValueIn valueIn, BracketType structure) throws InvalidMarshallableException {
+            if (target instanceof DemarshallableWrapper) {
+                @NotNull final DemarshallableWrapper wrapper = (DemarshallableWrapper) target;
+                wrapper.demarshallable = Demarshallable.newInstance(wrapper.type, valueIn.wireIn());
                 return wrapper;
-            } else if (using instanceof ReadMarshallable) {
-                return in.object(using, Object.class);
+            } else if (target instanceof ReadMarshallable) {
+                return valueIn.object(target, Object.class);
             } else {
-                return Demarshallable.newInstance((Class) using.getClass(), in.wireIn());
+                return Demarshallable.newInstance((Class) target.getClass(), valueIn.wireIn());
             }
         }
 
@@ -375,10 +375,10 @@ public enum SerializationStrategies implements SerializationStrategy {
          * {@link #ANY_OBJECT}.
          */
         @Override
-        public Object readUsing(Class clazz, Object o, ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
-            SerializationStrategies strategies = o instanceof Externalizable ? EXTERNALIZABLE : ANY_OBJECT;
-            strategies.readUsing(clazz, o, in, bracketType);
-            return o;
+        public Object readUsing(Class expectedType, Object target, ValueIn valueIn, BracketType structure) throws InvalidMarshallableException {
+            SerializationStrategies strategies = target instanceof Externalizable ? EXTERNALIZABLE : ANY_OBJECT;
+            strategies.readUsing(expectedType, target, valueIn, structure);
+            return target;
         }
 
         /**
@@ -406,13 +406,13 @@ public enum SerializationStrategies implements SerializationStrategy {
          */
         @NotNull
         @Override
-        public Object readUsing(Class clazz, @NotNull Object o, @NotNull ValueIn in, BracketType bracketType) {
+        public Object readUsing(Class expectedType, @NotNull Object target, @NotNull ValueIn valueIn, BracketType structure) {
             try {
-                ((Externalizable) o).readExternal(in.wireIn().objectInput());
+                ((Externalizable) target).readExternal(valueIn.wireIn().objectInput());
             } catch (@NotNull IOException | ClassNotFoundException e) {
                 throw new IORuntimeException(e);
             }
-            return o;
+            return target;
         }
 
         /**
@@ -449,13 +449,13 @@ public enum SerializationStrategies implements SerializationStrategy {
          * map context.
          */
         @Override
-        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
-            @NotNull Map<Object, Object> map = (o == null ? new LinkedHashMap<>() : (Map<Object, Object>) o);
-            @NotNull final WireIn wireIn = in.wireIn();
+        public Object readUsing(Class expectedType, Object target, @NotNull ValueIn valueIn, BracketType structure) throws InvalidMarshallableException {
+            @NotNull Map<Object, Object> map = (target == null ? new LinkedHashMap<>() : (Map<Object, Object>) target);
+            @NotNull final WireIn wireIn = valueIn.wireIn();
             long pos = wireIn.bytes().readPosition();
-            while (in.hasNext()) {
+            while (valueIn.hasNext()) {
                 Object key = wireIn.readEvent(Object.class);
-                map.put(key, in.object());
+                map.put(key, valueIn.object());
 
                 // make sure we are progressing.
                 long pos2 = wireIn.bytes().readPosition();
@@ -505,13 +505,13 @@ public enum SerializationStrategies implements SerializationStrategy {
          * one if necessary.
          */
         @Override
-        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
-            @NotNull Set<Object> set = (o == null ? new LinkedHashSet<>() : (Set<Object>) o);
-            @NotNull final WireIn wireIn = in.wireIn();
+        public Object readUsing(Class expectedType, Object target, @NotNull ValueIn valueIn, BracketType structure) throws InvalidMarshallableException {
+            @NotNull Set<Object> set = (target == null ? new LinkedHashSet<>() : (Set<Object>) target);
+            @NotNull final WireIn wireIn = valueIn.wireIn();
             @NotNull final Bytes<?> bytes = wireIn.bytes();
             long pos = bytes.readPosition();
-            while (in.hasNextSequenceItem()) {
-                @Nullable final Object object = in.object();
+            while (valueIn.hasNextSequenceItem()) {
+                @Nullable final Object object = valueIn.object();
                 // make sure we are progressing.
                 long pos2 = bytes.readPosition();
                 if (pos2 <= pos && !Jvm.isDebug())
@@ -568,16 +568,16 @@ public enum SerializationStrategies implements SerializationStrategy {
          * possible; surplus entries are removed.
          */
         @Override
-        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
-            @NotNull List<Object> list = (o == null ? new ArrayList<>() : (List<Object>) o);
-            @NotNull final WireIn wireIn = in.wireIn();
+        public Object readUsing(Class expectedType, Object target, @NotNull ValueIn valueIn, BracketType structure) throws InvalidMarshallableException {
+            @NotNull List<Object> list = (target == null ? new ArrayList<>() : (List<Object>) target);
+            @NotNull final WireIn wireIn = valueIn.wireIn();
             long pos = wireIn.bytes().readPosition();
             int count = 0;
-            while (in.hasNextSequenceItem()) {
+            while (valueIn.hasNextSequenceItem()) {
                 if (list.size() > count) {
-                    list.set(count, in.object(list.get(count), Object.class));
+                    list.set(count, valueIn.object(list.get(count), Object.class));
                 } else {
-                    list.add(in.object());
+                    list.add(valueIn.object());
                 }
                 count++;
                 // make sure we are progressing.
@@ -638,19 +638,19 @@ public enum SerializationStrategies implements SerializationStrategy {
          */
         @NotNull
         @Override
-        public Object readUsing(Class clazz, Object using, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
-            if (using instanceof ArrayWrapper) {
-                @NotNull ArrayWrapper wrapper = (ArrayWrapper) using;
+        public Object readUsing(Class expectedType, Object target, @NotNull ValueIn valueIn, BracketType structure) throws InvalidMarshallableException {
+            if (target instanceof ArrayWrapper) {
+                @NotNull ArrayWrapper wrapper = (ArrayWrapper) target;
                 final Class componentType = wrapper.type.getComponentType();
                 @NotNull List list = new ArrayList<>();
-                while (in.hasNextSequenceItem())
-                    list.add(in.object(componentType));
+                while (valueIn.hasNextSequenceItem())
+                    list.add(valueIn.object(componentType));
                 wrapper.array = list.toArray((Object[]) Array.newInstance(componentType, list.size()));
                 return wrapper;
             } else {
                 @NotNull List list = new ArrayList<>();
-                while (in.hasNextSequenceItem())
-                    list.add(in.object());
+                while (valueIn.hasNextSequenceItem())
+                    list.add(valueIn.object());
                 return list.toArray();
             }
         }
@@ -703,13 +703,13 @@ public enum SerializationStrategies implements SerializationStrategy {
          */
         @NotNull
         @Override
-        public Object readUsing(Class clazz, Object using, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
-            @NotNull PrimArrayWrapper wrapper = (PrimArrayWrapper) using;
+        public Object readUsing(Class expectedType, Object target, @NotNull ValueIn valueIn, BracketType structure) throws InvalidMarshallableException {
+            @NotNull PrimArrayWrapper wrapper = (PrimArrayWrapper) target;
             final Class<?> componentType = wrapper.type.getComponentType();
             int i = 0;
             int len = 0;
             Object array = Array.newInstance(componentType, 0);
-            while (in.hasNextSequenceItem()) {
+            while (valueIn.hasNextSequenceItem()) {
                 if (i >= len) {
                     int len2 = len * 2 + 2;
                     Object array2 = Array.newInstance(componentType, len2);
@@ -717,7 +717,7 @@ public enum SerializationStrategies implements SerializationStrategy {
                     len = len2;
                     array = array2;
                 }
-                Array.set(array, i++, in.object(componentType));
+                Array.set(array, i++, valueIn.object(componentType));
             }
             if (i < len) {
                 Object array2 = Array.newInstance(componentType, i);
@@ -771,13 +771,13 @@ public enum SerializationStrategies implements SerializationStrategy {
      * <p>
      * Attempts to create a new instance of the given class.
      *
-     * @param type The class for which a new instance is to be created.
+     * @param targetType The class for which a new instance is to be created.
      * @return A new instance of the given class or {@code null} if the instantiation fails.
      */
     @Nullable
     @Override
-    public Object newInstanceOrNull(Class type) {
-        return ObjectUtils.newInstanceOrNull(type);
+    public Object newInstanceOrNull(Class targetType) {
+        return ObjectUtils.newInstanceOrNull(targetType);
     }
 
     /**
@@ -811,10 +811,10 @@ public enum SerializationStrategies implements SerializationStrategy {
         /**
          * Constructs an ArrayWrapper for a specified type.
          *
-         * @param type The class type of the elements in the array.
+         * @param componentType The class type of the elements in the array.
          */
-        ArrayWrapper(@NotNull Class type) {
-            this.type = type;
+        ArrayWrapper(@NotNull Class componentType) {
+            this.type = componentType;
         }
 
         /**
@@ -846,10 +846,10 @@ public enum SerializationStrategies implements SerializationStrategy {
         /**
          * Constructs a PrimArrayWrapper for a specified type.
          *
-         * @param type The class type of the elements in the primitive array.
+         * @param componentType The class type of the elements in the primitive array.
          */
-        PrimArrayWrapper(@NotNull Class type) {
-            this.type = type;
+        PrimArrayWrapper(@NotNull Class componentType) {
+            this.type = componentType;
         }
 
         /**

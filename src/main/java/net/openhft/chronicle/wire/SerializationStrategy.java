@@ -33,32 +33,32 @@ public interface SerializationStrategy {
     /**
      * Reads an object of type {@code T} from the supplied input.
      *
-     * @param clazz       expected class of the object, or {@code null} to infer
-     *                    from the wire or {@code using} instance
-     * @param using       optional instance to populate; if {@code null} this
+     * @param declaredType expected class of the object, or {@code null} to infer
+     *                    from the wire or {@code target} instance
+     * @param target       optional instance to populate; if {@code null} this
      *                    method may call {@link #newInstanceOrNull(Class)}. If
      *                    that also returns {@code null} the strategy decides
      *                    whether to return {@code null} or throw
      *                    {@link InvalidMarshallableException}
-     * @param in          source of the wire data
-     * @param bracketType hint about the expected structure such as map, sequence
+     * @param valueIn      source of the wire data
+     * @param structure   hint about the expected structure such as map, sequence
      *                    or none
      * @return the populated or newly created object, or {@code null} if no
      * instance could be obtained
      * @throws InvalidMarshallableException if the deserialisation fails
      */
     @Nullable
-    <T> T readUsing(Class<?> clazz, T using, ValueIn in, BracketType bracketType) throws InvalidMarshallableException;
+    <T> T readUsing(Class<?> declaredType, T target, ValueIn valueIn, BracketType structure) throws InvalidMarshallableException;
 
     /**
      * Attempts to create a new instance of the given type.
      * Called when {@link #readUsing} needs an object but none was supplied.
      *
-     * @param type class of object to be created
+     * @param targetType class of object to be created
      * @return newly created instance or {@code null} if construction failed
      */
     @Nullable
-    <T> T newInstanceOrNull(Class<T> type);
+    <T> T newInstanceOrNull(Class<T> targetType);
 
     /**
      * Returns the primary Java {@link Class} that this strategy deals with.

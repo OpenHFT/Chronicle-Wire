@@ -45,11 +45,11 @@ class ScalarStrategy<E> implements SerializationStrategy {
     /**
      * Constructs a new {@code ScalarStrategy} with the given type and read function.
      *
-     * @param type The class type of the scalar value.
-     * @param read The function used to read the scalar value.
+     * @param scalarType The class type of the scalar value.
+     * @param read       The function used to read the scalar value.
      */
-    ScalarStrategy(Class<E> type, @NotNull BiFunction<? super E, ValueIn, E> read) {
-        this.type = type;
+    ScalarStrategy(Class<E> scalarType, @NotNull BiFunction<? super E, ValueIn, E> read) {
+        this.type = scalarType;
         this.read = read;
     }
 
@@ -72,16 +72,16 @@ class ScalarStrategy<E> implements SerializationStrategy {
      * for text data. This strategy reads text and applies the provided function
      * to convert the text into the desired scalar type.
      *
-     * @param clazz The class type of the scalar value.
-     * @param func  The function used to convert text into the scalar value.
+     * @param targetType The class type of the scalar value.
+     * @param resolver   The function used to convert text into the scalar value.
      * @param <E>   The type of the scalar value.
      * @return A new instance of {@code ScalarStrategy} for text.
      */
     @Nullable
-    static <E > ScalarStrategy< E > text(Class< E > clazz, @NotNull Function<String, E > func) {
-        return new ScalarStrategy<>(clazz, (Object o, ValueIn in) -> {
+    static <E > ScalarStrategy< E > text(Class< E > targetType, @NotNull Function<String, E > resolver) {
+        return new ScalarStrategy<>(targetType, (Object o, ValueIn in) -> {
             @Nullable String text = in.text();
-            return text == null ? null : func.apply(text);
+            return text == null ? null : resolver.apply(text);
         });
     }
 
@@ -102,7 +102,7 @@ class ScalarStrategy<E> implements SerializationStrategy {
     @SuppressWarnings("rawtypes")
     @NotNull
     @Override
-    public <T> T newInstanceOrNull(Class<T>type) {
+    public <T> T newInstanceOrNull(Class<T> targetType) {
         return Jvm.uncheckedCast(ObjectUtils.newInstance(this.type));
     }
 
@@ -121,11 +121,11 @@ class ScalarStrategy<E> implements SerializationStrategy {
     @SuppressWarnings("unchecked")
     @Nullable
     @Override
-    public <T> T readUsing(Class<?> clazz, T using, @NotNull ValueIn in, BracketType bracketType) {
-        if (in.isNull())
+    public <T> T readUsing(Class<?> declaredType, T target, @NotNull ValueIn valueIn, BracketType structure) {
+        if (valueIn.isNull())
             return null;
 
-        return (T) read.apply((E) using, in);
+        return (T) read.apply((E) target, valueIn);
     }
 
     /**
