@@ -1,0 +1,287 @@
+= Chronicle Wire Annotations: A Comprehensive Guide
+
+:toc: 
+:source-highlighter: rouge
+
+Purpose: To provide a comprehensive user guide and reference for all standard annotations available in Chronicle Wire, detailing their purpose, usage, and impact on serialisation.
+
+== 1. Introduction
+
+Chronicle Wire leverages Java annotations to provide developers with fine-grained control over the serialisation and deserialisation process. Annotations offer a declarative way to customise data representation, optimise for performance or size, add metadata, and aid in schema evolution, often without needing to write complex custom marshalling logic.
+
+This document serves as a comprehensive guide to the standard annotations provided by Chronicle Wire. For each annotation, it details:
+
+* Its primary purpose and intended use case.
+* Where it can be applied (e.g., fields, types).
+* Any attributes or parameters it accepts.
+* Its specific behaviour and impact on different wire formats (text vs. binary).
+* Practical examples to illustrate its usage.
+
+Understanding these annotations is key to effectively tailoring Chronicle Wire to your specific application needs, whether for human readability, extreme performance, or robust data versioning. This guide aims to fulfil the requirements for such documentation by being that guide.
+
+== 2. Core Annotation Categories
+
+Chronicle Wire annotations can be broadly categorised based on their primary function:
+
+* **Data Conversion & Formatting:** These annotations alter how a Java data type is represented on the wire, often to optimise for space, performance, or human readability in text formats.
+* **Schema Definition & Metadata:** These annotations provide metadata about fields or types, which can influence how data is structured, aid in schema evolution, or add descriptive information.
+* **Marshalling Control (Less Common for Direct Wire Annotations):** While direct field inclusion/exclusion is often handled by Java's `transient` keyword or the inherent behaviour of `Marshallable`, some annotations might subtly influence what or how data is marshalled.
+
+This guide will explore annotations primarily from the first two categories.
+
+== 3. Data Conversion & Formatting Annotations
+
+These annotations are crucial for controlling the on-wire representation of your data.
+
+=== 3.1. `@LongConversion` and Derivative Converters
+
+Purpose ::
+The `@LongConversion` annotation is a powerful meta-annotation used to specify that a `long` field in Java should be converted to and from a different representation (typically a String) when serialised to text-based wire formats, while remaining a `long` in binary formats. This is extremely useful for compactly storing short textual identifiers or codes within an 8-byte long.
+
+Target:: Field (of type `long`)
+
+Attributes ::
+`value` (Class<? extends LongConverter>):: Specifies the `LongConverter` implementation class to use for the conversion.
+
+Behaviour ::
+* **Text Formats (YAML, JSON):** The `LongConverter`'s `asString(long)` method is called to produce a String representation for the output. During input, `parse(CharSequence)` is called to convert the String back to a `long`.
+* **Binary Formats:** The field is serialised directly as a standard `long` (typically 8 bytes). The conversion logic is not applied.
+
+Use Case :: Storing short alphanumeric IDs, symbols, or codes (e.g., currency pairs, stock tickers, status codes) that can be mapped to a `long` for efficient storage and processing, but need to be human-readable in configurations or logs.
+
+Example ::
+While `@LongConversion` is the base, Chronicle Wire provides several convenient pre-defined annotations that use specific converters:
+
+==== 3.1.1. `@BaseN` Converters (`@Base32`, `@Base64`, `@Base85`)
+
+Annotations :: `@Base32`, `@Base64`, `@Base85` (these are meta-annotated with `@LongConversion` pointing to respective `BaseNLongConverter` implementations).
+
+Purpose :: To store short strings (composed of characters from the respective BaseN alphabet) within a `long`.
+* `@Base32`: Uses a 32-character alphabet. Can store up to 12 characters in a `long`.
+* `@Base64`: Uses a 64-character alphabet (A-Z, a-z, 0-9, +, /). Can store up to 10 characters in a `long`.
+* `@Base85`: Uses an 85-character alphabet. Can store up to 10 (sometimes 11 depending on exact character values) characters more efficiently than Base64 for certain character sets.
+
+Example (`@Base64`) ::
+[source,java]
+----
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+import net.openhft.chronicle.wire.converter.Base64; // The annotation
+
+public class StockInfo extends SelfDescribingMarshallable {
+    @Base64
+    private long stockSymbol; // e.g., "GOOGL"
+    private double price;
+
+    public StockInfo(String symbolStr, double price) {
+        this.stockSymbol = Base64.INSTANCE.parse(symbolStr); // Use the converter instance
+        this.price = price;
+    }
+
+    public String getStockSymbol() {
+        return Base64.INSTANCE.asString(this.stockSymbol);
+    }
+    // ... price getter
+}
+
+// In YAML output:
+// !StockInfo {
+//   stockSymbol: GOOGL,
+//   price: 123.45
+// }
+// In Binary: stockSymbol is an 8-byte long
+----
+
+=== 3.2. Timestamp Converters (`@NanoTime`)
+
+Annotations :: `@NanoTime`
+
+Purpose :: To format `long` fields representing timestamps (nanoseconds or milliseconds since epoch, respectively) as human-readable ISO 8601 date-time strings in text formats, while storing them as `long` values in binary formats and in Java.
+
+Target :: Field (of type `long`)
+
+Behaviour ::
+* **Text Formats (YAML, JSON):** Converts the `long` timestamp to an ISO 8601 string (e.g., `2023-10-27T10:15:30.123456789Z`).
+* **Binary Formats:** Stores the `long` value directly.
+
+Use Case :: Storing precise timestamps efficiently while allowing easy human inspection in logs or configuration files.
+
+Example (`@NanoTime`) ::
+[source,java]
+----
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+import net.openhft.chronicle.wire.converter.NanoTime; // The annotation
+
+public class LogEntry extends SelfDescribingMarshallable {
+    @NanoTime
+    private long eventTimestamp;
+    private String message;
+
+    public LogEntry(long eventTimestamp, String message) {
+        this.eventTimestamp = eventTimestamp;
+        this.message = message;
+    }
+    // ... getters
+}
+
+// In YAML output:
+// !LogEntry {
+//   eventTimestamp: 2025-05-30T07:30:05.123456789Z,
+//   message: System initialised
+// }
+----
+
+== 4. Schema Definition & Metadata Annotations
+
+These annotations provide additional information about fields or types, primarily aiding in schema evolution, binary format stability, or human-readable documentation.
+
+=== 4.1. `@FieldNumber`
+
+Status :: Road Map
+
+Purpose :: To assign a persistent, explicit numeric identifier to a field. This is primarily used in some binary wire formats (`BINARY`, `BINARY_LIGHT`) where fields might be identified by number instead of, or in addition to, their names.
+
+Target :: Field
+
+Attributes ::
+`value` (int):: The unique numeric identifier for the field.
+
+Behaviour ::
+* **Binary Formats:** The specified field number is written to the wire instead of/alongside the field name. This allows the Java field name to be refactored (renamed) without breaking binary compatibility, as long as the `@FieldNumber` remains the same.
+* **Text Formats:** Generally has no direct effect on the output (field names are used).
+
+Use Case :: Ensuring long-term binary compatibility and allowing safe refactoring of field names in `Marshallable` classes when using number-based binary field identification.
+
+Example ::
+[source,java]
+----
+import net.openhft.chronicle.wire.FieldNumber;
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+
+public class FinancialInstrument extends SelfDescribingMarshallable {
+    @FieldNumber(1)
+    private String instrumentId; // Was perhaps "ticker" before, renamed to "instrumentId"
+
+    @FieldNumber(2)
+    private double lastPrice;
+
+    // ...
+}
+----
+
+IMPORTANT: Ensure field numbers are unique within a class hierarchy if polymorphism and shared binary formats are involved.
+
+=== 4.2. `@Comment`
+
+Purpose :: To add a descriptive comment to a field, which will be included in some text-based wire formats, typically YAML.
+
+Target :: Field
+
+Attributes ::
+`value` (String):: The comment text.
+
+Behaviour ::
+* **YAML Format:** The comment is usually rendered preceding the field.
+* **JSON/Binary Formats:** This annotation is generally ignored.
+
+Use Case :: Improving the readability and self-documentation of configuration files or data dumps generated in YAML format.
+
+Example ::
+[source,java]
+----
+import net.openhft.chronicle.wire.Comment;
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+
+public class AppConfig extends SelfDescribingMarshallable {
+    @Comment("The network port for the primary service")
+    private int servicePort;
+
+    @Comment("Connection timeout in milliseconds")
+    private int connectionTimeoutMs;
+    // ...
+}
+
+// In YAML output:
+// !AppConfig {
+//   # The network port for the primary service
+//   servicePort: 8080,
+//   # Connection timeout in milliseconds
+//   connectionTimeoutMs: 5000
+// }
+----
+
+=== 4.3. `@DefaultValue`
+
+Status :: Road Map
+
+Purpose :: To provide a textual representation of a field's default value, primarily for documentation or to give hints to code generation tools. Chronicle Wire's deserialisation typically initialises missing fields to Java's standard defaults (0, null, false). This annotation is more for conveying intent or for tools that might use it.
+
+Target :: Field
+
+Attributes ::
+`value` (String):: The string representation of the default value.
+
+Behaviour ::
+* Does not directly cause Chronicle Wire to inject this value if a field is missing during deserialisation (Java defaults are used).
+* Can be read via reflection by tools or custom logic.
+* May appear in some generated schemas or documentation if tools support it.
+
+Use Case :: Documenting expected default values alongside field definitions.
+
+Example ::
+[source,java]
+----
+import net.openhft.chronicle.wire.DefaultValue;
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+
+public class SystemSettings extends SelfDescribingMarshallable {
+    @DefaultValue("true")
+    private boolean enableMonitoring;
+
+    @DefaultValue("INFO")
+    private String logLevel;
+    // ...
+}
+----
+
+=== 4.4. `@DeprecatedWireKey` (and similar for field renaming)
+
+Status :: Road Map
+
+Purpose :: To handle field renaming gracefully, especially in text-based formats. If a field name changes in your Java class, this annotation (or a similar mechanism if the exact annotation name varies by Wire version/context) can tell Chronicle Wire to recognise an old field name from the input data and map it to the new field name.
+
+Target :: Field
+
+Attributes ::
+`value` (String[]):: An array of old (deprecated) wire keys that should map to this field.
+
+Behaviour ::
+* **Text Formats (during deserialisation):** If the wire input contains a field with one of the deprecated keys, its value will be mapped to the annotated Java field.
+* **Serialisation:** The field is typically written out using its current Java field name.
+
+Use Case :: Refactoring field names in `Marshallable` classes while maintaining backward compatibility with data serialised using older field names.
+
+Example (Conceptual - check exact annotation in your Chronicle Wire version) ::
+[source,java]
+----
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+
+public class UserDetails extends SelfDescribingMarshallable {
+    @DeprecatedWireKey("usrName") // If 'username' was previously 'usrName'
+    private String username;
+    private String email;
+
+    // ...
+}
+----
+NOTE: The exact mechanism for field renaming with backward compatibility can vary. `Wires.FIELD_RENAME_MAP` or programmatic remapping using `WireParselet` might be used. Always consult the specific Chronicle Wire version documentation for the recommended approach to field renaming.
+
+== 5. Best Practices for Using Annotations
+
+* **Be Purposeful:** Use annotations where they add clear value, such as improving readability in text formats (`@Comment`, `@NanoTime`), optimising binary size/performance (`@LongConversion`, `@FieldNumber`), or ensuring schema stability (`@FieldNumber`).
+* **Understand Format Impact:** Be aware that some annotations only affect text formats (e.g., `@Comment`), while others primarily impact binary formats (e.g., `@FieldNumber`'s core use).
+* **Consistency:** Apply annotations consistently across related `Marshallable` classes for predictable behaviour.
+* **Test Thoroughly:** When using annotations that affect data representation or schema (like `@LongConversion` or `@FieldNumber`), thoroughly test both serialisation and deserialisation, especially across different versions of your classes if schema evolution is a concern.
+* **Consult Javadoc:** The Javadoc for each annotation is the ultimate source of truth for its specific attributes and behaviour in the version of Chronicle Wire you are using.
+* **Keep it Simple:** While powerful, avoid over-using annotations if simpler solutions suffice. The default behaviour of `SelfDescribingMarshallable` is often sufficient for many use cases.
+
+This guide provides a solid foundation for understanding and utilising the annotations within Chronicle Wire to build efficient, flexible, and maintainable Java applications.
