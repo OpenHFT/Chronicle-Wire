@@ -27,25 +27,25 @@ import java.lang.reflect.Field;
 import java.util.Objects;
 
 /**
- * Represents field information for object fields, extending the generic field information capabilities
- * provided by {@link UnsafeFieldInfo}. This class offers direct memory access functionality to get and set
- * object values in objects, leveraging unsafe operations for performance enhancement.
+ * Internal {@link net.openhft.chronicle.wire.FieldInfo} for reference fields
+ * using {@link UnsafeMemory} for direct access.
  */
 public final class ObjectFieldInfo extends UnsafeFieldInfo {
 
     /**
-     * Constructs an instance of ObjectFieldInfo with the provided details about an object field.
-     *
-     * @param name        The name of the field.
-     * @param type        The type of the field.
-     * @param bracketType The bracket type associated with the field.
-     * @param field       The actual field representation.
+     * @param name        field name used in text form
+     * @param type        runtime type
+     * @param bracketType formatting hint when writing
+     * @param field       reflection field used for unsafe access
      */
     public ObjectFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         super(name, type, bracketType, field);
     }
 
     @Override
+    /**
+     * @return the field value or {@code null} if the offset could not be determined
+     */
     public @Nullable Object get(Object object) {
         try {
             return UnsafeMemory.unsafeGetObject(object, getOffset());
@@ -56,6 +56,7 @@ public final class ObjectFieldInfo extends UnsafeFieldInfo {
     }
 
     @Override
+    /** Writes the value using {@link UnsafeMemory}, converting as required. */
     public void set(Object object, Object value) throws IllegalArgumentException {
         Object value2 = ObjectUtils.convertTo(type, value);
         try {
@@ -66,11 +67,13 @@ public final class ObjectFieldInfo extends UnsafeFieldInfo {
     }
 
     @Override
+    /** Compares the object values in {@code a} and {@code b}. */
     public boolean isEqual(Object a, Object b) {
         return Objects.deepEquals(get(a), get(b));
     }
 
     @Override
+    /** Copies the object value from {@code source} to {@code destination}. */
     public void copy(Object source, Object destination) {
         set(destination, get(source));
     }

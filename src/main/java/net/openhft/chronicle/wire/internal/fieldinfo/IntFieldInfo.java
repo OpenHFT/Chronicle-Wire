@@ -24,25 +24,25 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Field;
 
 /**
- * Represents field information for integer fields, extending the generic field information capabilities
- * provided by {@link UnsafeFieldInfo}. It offers direct memory access functionality to get and set
- * integer values in objects, leveraging unsafe operations for enhanced performance.
+ * Internal {@link net.openhft.chronicle.wire.FieldInfo} for {@code int} fields
+ * using {@link UnsafeMemory} for direct access.
  */
 public final class IntFieldInfo extends UnsafeFieldInfo {
 
     /**
-     * Constructs an instance of IntFieldInfo with the provided details about an integer field.
-     *
-     * @param name        The name of the field.
-     * @param type        The type of the field.
-     * @param bracketType The bracket type associated with the field.
-     * @param field       The field object representation.
+     * @param name        field name used in text form
+     * @param type        runtime type
+     * @param bracketType formatting hint when writing
+     * @param field       reflection field used for unsafe access
      */
     public IntFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         super(name, type, bracketType, field);
     }
 
     @Override
+    /**
+     * @return the field value or {@code Integer.MIN_VALUE} if the offset is unavailable
+     */
     public int getInt(Object object) {
         try {
             return UnsafeMemory.unsafeGetInt(object, getOffset());
@@ -53,6 +53,7 @@ public final class IntFieldInfo extends UnsafeFieldInfo {
     }
 
     @Override
+    /** Writes the value using {@link UnsafeMemory}. */
     public void set(Object object, int value) throws IllegalArgumentException {
         try {
             UnsafeMemory.unsafePutInt(object, getOffset(), value);
@@ -62,11 +63,13 @@ public final class IntFieldInfo extends UnsafeFieldInfo {
     }
 
     @Override
+    /** Compares the int values in {@code a} and {@code b}. */
     public boolean isEqual(Object a, Object b) {
         return getInt(a) == getInt(b);
     }
 
     @Override
+    /** Copies the int value from {@code source} to {@code destination}. */
     public void copy(Object source, Object destination) {
         set(destination, getInt(source));
     }
