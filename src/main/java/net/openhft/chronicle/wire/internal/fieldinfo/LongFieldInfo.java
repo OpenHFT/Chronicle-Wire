@@ -33,17 +33,17 @@ public final class LongFieldInfo extends UnsafeFieldInfo {
      * @param name        field name used in text form
      * @param type        runtime type
      * @param bracketType formatting hint when writing
-     * @param field       reflection field used for unsafe access
+     * @param reflectField reflection field used for unsafe access
      */
-    public LongFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
-        super(name, type, bracketType, field);
+    public LongFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field reflectField) {
+        super(name, type, bracketType, reflectField);
     }
 
     @Override
     /**
      * @return the field value or {@code Long.MIN_VALUE} if the offset is unavailable
      */
-    public long getLong(Object object) {
+    public long getLong(Object target) {
         try {
             return UnsafeMemory.unsafeGetLong(object, getOffset());
         } catch (@NotNull NoSuchFieldException e) {
@@ -54,9 +54,9 @@ public final class LongFieldInfo extends UnsafeFieldInfo {
 
     @Override
     /** Writes the value using {@link UnsafeMemory}. */
-    public void set(Object object, long value) throws IllegalArgumentException {
+    public void set(Object target, long value) throws IllegalArgumentException {
         try {
-            UnsafeMemory.unsafePutLong(object, getOffset(), value);
+            UnsafeMemory.unsafePutLong(target, getOffset(), value);
         } catch (@NotNull NoSuchFieldException e) {
             throw new IllegalArgumentException(e);
         }
@@ -69,8 +69,8 @@ public final class LongFieldInfo extends UnsafeFieldInfo {
     }
 
     @Override
-    /** Copies the long value from {@code source} to {@code destination}. */
-    public void copy(Object source, Object destination) {
-        set(destination, getLong(source));
+    /** Copies the long value from {@code src} to {@code dst}. */
+    public void copy(Object src, Object dst) {
+        set(dst, getLong(src));
     }
 }

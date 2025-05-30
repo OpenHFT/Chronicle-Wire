@@ -42,12 +42,12 @@ public abstract class AbstractFieldInfo implements FieldInfo {
     /**
      * Creates a description of a field.
      *
-     * @param type        class used for marshalling
+     * @param fieldType   class used for marshalling
      * @param bracketType placement of start and end brackets in the wire text
      * @param name        identifier of the field
      */
-    protected AbstractFieldInfo(Class<?> type, BracketType bracketType, String name) {
-        this.type = type;
+    protected AbstractFieldInfo(Class<?> fieldType, BracketType bracketType, String name) {
+        this.type = fieldType;
         this.bracketType = bracketType;
         this.name = name;
     }

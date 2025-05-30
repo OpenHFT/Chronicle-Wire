@@ -33,10 +33,10 @@ public final class CharFieldInfo extends UnsafeFieldInfo {
      * @param name        field name used in text form
      * @param type        runtime type
      * @param bracketType formatting hint when writing
-     * @param field       reflection field used for unsafe access
+     * @param reflectField reflection field used for unsafe access
      */
-    public CharFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
-        super(name, type, bracketType, field);
+    public CharFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field reflectField) {
+        super(name, type, bracketType, reflectField);
     }
 
     @Override
@@ -44,7 +44,7 @@ public final class CharFieldInfo extends UnsafeFieldInfo {
      * @return the {@code char} value or {@link Character#MAX_VALUE} if the
      * offset could not be determined
      */
-    public char getChar(Object object) {
+    public char getChar(Object target) {
         try {
             return UnsafeMemory.unsafeGetChar(object, getOffset());
         } catch (@NotNull NoSuchFieldException e) {
@@ -55,9 +55,9 @@ public final class CharFieldInfo extends UnsafeFieldInfo {
 
     @Override
     /** Writes the value using {@link UnsafeMemory}. */
-    public void set(Object object, char value) throws IllegalArgumentException {
+    public void set(Object target, char value) throws IllegalArgumentException {
         try {
-            UnsafeMemory.unsafePutChar(object, getOffset(), value);
+            UnsafeMemory.unsafePutChar(target, getOffset(), value);
         } catch (@NotNull NoSuchFieldException e) {
             throw new IllegalArgumentException(e);
         }
@@ -70,8 +70,8 @@ public final class CharFieldInfo extends UnsafeFieldInfo {
     }
 
     @Override
-    /** Copies the character value from {@code source} to {@code destination}. */
-    public void copy(Object source, Object destination) {
-        set(destination, getChar(source));
+    /** Copies the character value from {@code src} to {@code dst}. */
+    public void copy(Object src, Object dst) {
+        set(dst, getChar(src));
     }
 }

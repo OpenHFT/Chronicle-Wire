@@ -32,7 +32,7 @@ import static net.openhft.chronicle.wire.Wires.*;
 /**
  * Represents an abstraction for the meta-information of a field within a class or interface.
  * This metadata is used by {@link WireMarshaller} and related serialisation components to read
- * and write field values. It provides a consistent way to access properties such as the field
+ * and write field newValues. It provides a consistent way to access properties such as the field
  * name, type and how it is represented in the wire format.
  */
 public interface FieldInfo {
@@ -43,40 +43,40 @@ public interface FieldInfo {
      * Other types fall back to {@link ObjectFieldInfo} or a generic implementation.
      *
      * @param name        the field's name
-     * @param type        the declared type
+     * @param fieldType   the declared type
      * @param bracketType the wire {@link BracketType}
-     * @param field       the reflective field instance
+     * @param reflectField the reflective field instance
      * @return a concrete {@code FieldInfo} for the field
      */
-    static FieldInfo createForField(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
+    static FieldInfo createForField(String name, Class<?> fieldType, BracketType bracketType, @NotNull Field reflectField) {
         // Choose the FieldInfo type based on the field's type.
-        if (!type.isPrimitive()) {
-            return new ObjectFieldInfo(name, type, bracketType, field);
-        } else if (type == int.class) {
-            return new IntFieldInfo(name, type, bracketType, field);
-        } else if (type == double.class) {
-            return new DoubleFieldInfo(name, type, bracketType, field);
-        } else if (type == long.class) {
-            return new LongFieldInfo(name, type, bracketType, field);
-        } else if (type == char.class) {
-            return new CharFieldInfo(name, type, bracketType, field);
+        if (!fieldType.isPrimitive()) {
+            return new ObjectFieldInfo(name, fieldType, bracketType, reflectField);
+        } else if (fieldType == int.class) {
+            return new IntFieldInfo(name, fieldType, bracketType, reflectField);
+        } else if (fieldType == double.class) {
+            return new DoubleFieldInfo(name, fieldType, bracketType, reflectField);
+        } else if (fieldType == long.class) {
+            return new LongFieldInfo(name, fieldType, bracketType, reflectField);
+        } else if (fieldType == char.class) {
+            return new CharFieldInfo(name, fieldType, bracketType, reflectField);
         }
         // Default case for other primitive types.
-        return new VanillaFieldInfo(name, type, bracketType, field);
+        return new VanillaFieldInfo(name, fieldType, bracketType, reflectField);
     }
 
     /**
      * Analyses the supplied class using reflection and builds a {@link FieldInfoPair}
      * describing its marshallable fields. The pair contains an unmodifiable list of
-     * {@code FieldInfo} objects and a map keyed by field name. Each field's
+     * {@code FieldInfo} targets and a map keyed by field name. Each field's
      * {@link BracketType} is derived from its {@link SerializationStrategy}.
      *
-     * @param aClass the class to inspect
+     * @param targetClass the class to inspect
      * @return an immutable {@link FieldInfoPair} describing the fields
      */
     @NotNull
-    static FieldInfoPair lookupClass(@NotNull Class<?> aClass) {
-        final SerializationStrategy ss = CLASS_STRATEGY.get(aClass);
+    static FieldInfoPair lookupClass(@NotNull Class<?> targetClass) {
+        final SerializationStrategy ss = CLASS_STRATEGY.get(targetClass);
         switch (ss.bracketType()) {
             case NONE:
             case SEQ:
@@ -91,7 +91,7 @@ public interface FieldInfo {
         }
 
         @NotNull List<FieldInfo> fields = new ArrayList<>();
-        final WireMarshaller<?> marshaller = WIRE_MARSHALLER_CL.get(aClass);
+        final WireMarshaller<?> marshaller = WIRE_MARSHALLER_CL.get(targetClass);
 
         // Process each field of the class to create its FieldInfo.
         for (@NotNull WireMarshaller.FieldAccess fa : marshaller.fields) {
@@ -109,120 +109,120 @@ public interface FieldInfo {
     }
 
     /**
-     * Returns the name of the field represented by this {@code FieldInfo} object.
+     * Returns the name of the field represented by this {@code FieldInfo} target.
      *
-     * @return the name of the field represented by this {@code FieldInfo} object.
+     * @return the name of the field represented by this {@code FieldInfo} target.
      */
     String name();
 
     /**
      * Returns a {@link Class} identifying the declared type of the field
-     * represented by this {@code FieldInfo} object.
+     * represented by this {@code FieldInfo} target.
      *
      * @return a {@link Class} identifying the declared type of the field
-     * represented by this {@code FieldInfo} object.
+     * represented by this {@code FieldInfo} target.
      */
     Class<?> type();
 
     /**
      * Returns the {@link BracketType} used by the serialization strategy associated
-     * with this {@code FieldInfo} object.
+     * with this {@code FieldInfo} target.
      *
      * @return the {@link BracketType} used by the serialization strategy associated
-     * with this {@code FieldInfo} object.
+     * with this {@code FieldInfo} target.
      */
     BracketType bracketType();
 
     /**
-     * Returns the value of the field represented by this {@code FieldInfo} object
+     * Returns the newValue of the field represented by this {@code FieldInfo} target
      * as an {@link Object}.
      *
-     * @param object the instance from which to read the field
+     * @param target the instance from which to read the field
      * @return the field value or {@code null} if it cannot be obtained
      */
     @Nullable
-    Object get(Object object);
+    Object get(Object target);
 
     /**
-     * Returns the value of the field represented by this {@code FieldInfo} object
+     * Returns the value of the field represented by this {@code FieldInfo} target
      * as a {@code long} primitive.
      *
-     * @param object the instance from which to read the field
+     * @param target the instance from which to read the field
      * @return the field value, converted to {@code long} if required
      */
-    long getLong(Object object);
+    long getLong(Object target);
 
     /**
-     * Returns the value of the field represented by this {@code FieldInfo} object
+     * Returns the value of the field represented by this {@code FieldInfo} target
      * as an {@code int} primitive.
      *
-     * @param object the instance from which to read the field
+     * @param target the instance from which to read the field
      * @return the field value, converted to {@code int} if required
      */
-    int getInt(Object object);
+    int getInt(Object target);
 
     /**
-     * Returns the value of the field represented by this {@code FieldInfo} object
+     * Returns the value of the field represented by this {@code FieldInfo} target
      * as a {@code char} primitive.
      *
-     * @param object the instance from which to read the field
+     * @param target the instance from which to read the field
      * @return the field value, converted to {@code char} if required
      */
-    char getChar(Object object);
+    char getChar(Object target);
 
     /**
-     * Returns the value of the field represented by this {@code FieldInfo} object
+     * Returns the value of the field represented by this {@code FieldInfo} target
      * as a {@code double} primitive.
      *
-     * @param object the instance from which to read the field
+     * @param target the instance from which to read the field
      * @return the field value, converted to {@code double} if required
      */
-    double getDouble(Object object);
+    double getDouble(Object target);
 
     /**
-     * Sets the value of the field represented by this {@code FieldInfo} object.
+     * Sets the value of the field represented by this {@code FieldInfo} target.
      *
-     * @param object the instance on which to set the field
-     * @param value  the new value; conversions may occur if the types differ
+     * @param target the instance on which to set the field
+     * @param newValue  the new value; conversions may occur if the types differ
      * @throws IllegalArgumentException if the assignment fails
      */
-    void set(Object object, Object value) throws IllegalArgumentException;
+    void set(Object target, Object newValue) throws IllegalArgumentException;
 
     /**
-     * Sets the value of the field represented by this {@code FieldInfo} object.
+     * Sets the value of the field represented by this {@code FieldInfo} target.
      *
-     * @param object the instance on which to set the field
+     * @param target the instance on which to set the field
      * @param value  the new {@code char} value
      * @throws IllegalArgumentException if the assignment fails
      */
-    void set(Object object, char value) throws IllegalArgumentException;
+    void set(Object target, char value) throws IllegalArgumentException;
 
     /**
-     * Sets the value of the field represented by this {@code FieldInfo} object.
+     * Sets the value of the field represented by this {@code FieldInfo} target.
      *
-     * @param object the instance on which to set the field
+     * @param target the instance on which to set the field
      * @param value  the new {@code int} value
      * @throws IllegalArgumentException if the assignment fails
      */
-    void set(Object object, int value) throws IllegalArgumentException;
+    void set(Object target, int value) throws IllegalArgumentException;
 
     /**
-     * Sets the value of the field represented by this {@code FieldInfo} object.
+     * Sets the value of the field represented by this {@code FieldInfo} target.
      *
-     * @param object the instance on which to set the field
+     * @param target the instance on which to set the field
      * @param value  the new {@code long} value
      * @throws IllegalArgumentException if the assignment fails
      */
-    void set(Object object, long value) throws IllegalArgumentException;
+    void set(Object target, long value) throws IllegalArgumentException;
 
     /**
-     * Sets the value of the field represented by this {@code FieldInfo} object.
+     * Sets the value of the field represented by this {@code FieldInfo} target.
      *
-     * @param object the instance on which to set the field
+     * @param target the instance on which to set the field
      * @param value  the new {@code double} value
      * @throws IllegalArgumentException if the assignment fails
      */
-    void set(Object object, double value) throws IllegalArgumentException;
+    void set(Object target, double value) throws IllegalArgumentException;
 
     /**
      * Returns the declared generic type of the field, for example the
@@ -234,24 +234,24 @@ public interface FieldInfo {
     Class<?> genericType(int index);
 
     /**
-     * Copies the value of the field represented by this {@code FieldInfo} object from
-     * the source object to the destination object. It's a shallow copy, so objects will be
+     * Copies the value of the field represented by this {@code FieldInfo} target from
+     * the source target to the destination target. It's a shallow copy, so targets will be
      * copied by reference.
      *
-     * @param source      The object from which the field value is to be copied.
-     * @param destination The object to which the field value is to be copied.
+     * @param src The target from which the field value is to be copied.
+     * @param dst The target to which the field value is to be copied.
      */
-    default void copy(Object source, Object destination) {
-        set(destination, get(source));
+    default void copy(Object src, Object dst) {
+        set(dst, get(src));
     }
 
     /**
-     * Compares the value of this field in two objects.
+     * Compares the value of this field in two targets.
      * Implementations may use type-specific equality checks, such as
      * {@code Double.compare} for {@code double} fields.
      *
-     * @param a first object to compare
-     * @param b second object to compare
+     * @param a first target to compare
+     * @param b second target to compare
      * @return {@code true} if the values are considered equal
      */
     boolean isEqual(Object a, Object b);

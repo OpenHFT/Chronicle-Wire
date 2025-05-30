@@ -33,17 +33,17 @@ public final class DoubleFieldInfo extends UnsafeFieldInfo {
      * @param name        field name used in text form
      * @param type        runtime type
      * @param bracketType formatting hint when writing
-     * @param field       reflection field used for unsafe access
+     * @param reflectField reflection field used for unsafe access
      */
-    public DoubleFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
-        super(name, type, bracketType, field);
+    public DoubleFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field reflectField) {
+        super(name, type, bracketType, reflectField);
     }
 
     @Override
     /**
      * @return the field value or {@code Double.NaN} if the offset is unavailable
      */
-    public double getDouble(Object object) {
+    public double getDouble(Object target) {
         try {
             return UnsafeMemory.unsafeGetDouble(object, getOffset());
         } catch (@NotNull NoSuchFieldException e) {
@@ -54,9 +54,9 @@ public final class DoubleFieldInfo extends UnsafeFieldInfo {
 
     @Override
     /** Writes the value using {@link UnsafeMemory}. */
-    public void set(Object object, double value) throws IllegalArgumentException {
+    public void set(Object target, double value) throws IllegalArgumentException {
         try {
-            UnsafeMemory.unsafePutDouble(object, getOffset(), value);
+            UnsafeMemory.unsafePutDouble(target, getOffset(), value);
         } catch (@NotNull NoSuchFieldException e) {
             throw new IllegalArgumentException(e);
         }
@@ -69,8 +69,8 @@ public final class DoubleFieldInfo extends UnsafeFieldInfo {
     }
 
     @Override
-    /** Copies the double value from {@code source} to {@code destination}. */
-    public void copy(Object source, Object destination) {
-        set(destination, getDouble(source));
+    /** Copies the double value from {@code src} to {@code dst}. */
+    public void copy(Object src, Object dst) {
+        set(dst, getDouble(src));
     }
 }

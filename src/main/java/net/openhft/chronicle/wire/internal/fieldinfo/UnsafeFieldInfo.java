@@ -44,10 +44,10 @@ class UnsafeFieldInfo extends VanillaFieldInfo {
      * @param name        textual field name
      * @param type        runtime type of the field
      * @param bracketType formatting hint used when writing
-     * @param field       reflection field from which the offset will be derived
+     * @param reflectField reflection field from which the offset will be derived
      */
-    public UnsafeFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
-        super(name, type, bracketType, field);
+    public UnsafeFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field reflectField) {
+        super(name, type, bracketType, reflectField);
     }
 
     /**

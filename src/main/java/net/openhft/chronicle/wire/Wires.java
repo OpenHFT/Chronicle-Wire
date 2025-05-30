@@ -1941,59 +1941,59 @@ public enum Wires {
          * @param o The object whose fields map needs to be fetched.
          * @return The map of fields corresponding to the object.
          */
-        private Map<String, Object> getMap(Object o) {
-            TupleInvocationHandler invocationHandler = (TupleInvocationHandler) Proxy.getInvocationHandler(o);
+        private Map<String, Object> getMap(Object target) {
+            TupleInvocationHandler invocationHandler = (TupleInvocationHandler) Proxy.getInvocationHandler(target);
             return invocationHandler.fields;
         }
 
         @Nullable
         @Override
-        public Object get(Object object) {
-            return getMap(object).get(name);
+        public Object get(Object target) {
+            return getMap(target).get(name);
         }
 
         @Override
-        public long getLong(Object object) {
-            return ObjectUtils.convertTo(Long.class, get(object));
+        public long getLong(Object target) {
+            return ObjectUtils.convertTo(Long.class, get(target));
         }
 
         @Override
-        public int getInt(Object object) {
-            return ObjectUtils.convertTo(Integer.class, get(object));
+        public int getInt(Object target) {
+            return ObjectUtils.convertTo(Integer.class, get(target));
         }
 
         @Override
-        public char getChar(Object object) {
-            return ObjectUtils.convertTo(Character.class, get(object));
+        public char getChar(Object target) {
+            return ObjectUtils.convertTo(Character.class, get(target));
         }
 
         @Override
-        public double getDouble(Object object) {
-            return ObjectUtils.convertTo(Double.class, get(object));
+        public double getDouble(Object target) {
+            return ObjectUtils.convertTo(Double.class, get(target));
         }
 
         @Override
-        public void set(Object object, Object value) throws IllegalArgumentException {
-            getMap(object).put(name, value);
+        public void set(Object target, Object newValue) throws IllegalArgumentException {
+            getMap(target).put(name, newValue);
         }
 
         @Override
-        public void set(Object object, char value) throws IllegalArgumentException {
+        public void set(Object target, char value) throws IllegalArgumentException {
             set(name, (Object) value);
         }
 
         @Override
-        public void set(Object object, int value) throws IllegalArgumentException {
+        public void set(Object target, int value) throws IllegalArgumentException {
             set(name, (Object) value);
         }
 
         @Override
-        public void set(Object object, long value) throws IllegalArgumentException {
+        public void set(Object target, long value) throws IllegalArgumentException {
             set(name, (Object) value);
         }
 
         @Override
-        public void set(Object object, double value) throws IllegalArgumentException {
+        public void set(Object target, double value) throws IllegalArgumentException {
             set(name, (Object) value);
         }
 

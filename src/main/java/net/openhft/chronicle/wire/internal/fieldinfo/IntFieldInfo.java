@@ -33,17 +33,17 @@ public final class IntFieldInfo extends UnsafeFieldInfo {
      * @param name        field name used in text form
      * @param type        runtime type
      * @param bracketType formatting hint when writing
-     * @param field       reflection field used for unsafe access
+     * @param reflectField reflection field used for unsafe access
      */
-    public IntFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
-        super(name, type, bracketType, field);
+    public IntFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field reflectField) {
+        super(name, type, bracketType, reflectField);
     }
 
     @Override
     /**
      * @return the field value or {@code Integer.MIN_VALUE} if the offset is unavailable
      */
-    public int getInt(Object object) {
+    public int getInt(Object target) {
         try {
             return UnsafeMemory.unsafeGetInt(object, getOffset());
         } catch (@NotNull NoSuchFieldException e) {
@@ -54,9 +54,9 @@ public final class IntFieldInfo extends UnsafeFieldInfo {
 
     @Override
     /** Writes the value using {@link UnsafeMemory}. */
-    public void set(Object object, int value) throws IllegalArgumentException {
+    public void set(Object target, int value) throws IllegalArgumentException {
         try {
-            UnsafeMemory.unsafePutInt(object, getOffset(), value);
+            UnsafeMemory.unsafePutInt(target, getOffset(), value);
         } catch (@NotNull NoSuchFieldException e) {
             throw new IllegalArgumentException(e);
         }
@@ -69,8 +69,8 @@ public final class IntFieldInfo extends UnsafeFieldInfo {
     }
 
     @Override
-    /** Copies the int value from {@code source} to {@code destination}. */
-    public void copy(Object source, Object destination) {
-        set(destination, getInt(source));
+    /** Copies the int value from {@code src} to {@code dst}. */
+    public void copy(Object src, Object dst) {
+        set(dst, getInt(src));
     }
 }

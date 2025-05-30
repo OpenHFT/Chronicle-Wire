@@ -36,17 +36,17 @@ public final class ObjectFieldInfo extends UnsafeFieldInfo {
      * @param name        field name used in text form
      * @param type        runtime type
      * @param bracketType formatting hint when writing
-     * @param field       reflection field used for unsafe access
+     * @param reflectField reflection field used for unsafe access
      */
-    public ObjectFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
-        super(name, type, bracketType, field);
+    public ObjectFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field reflectField) {
+        super(name, type, bracketType, reflectField);
     }
 
     @Override
     /**
      * @return the field value or {@code null} if the offset could not be determined
      */
-    public @Nullable Object get(Object object) {
+    public @Nullable Object get(Object target) {
         try {
             return UnsafeMemory.unsafeGetObject(object, getOffset());
         } catch (@NotNull NoSuchFieldException e) {
@@ -57,10 +57,10 @@ public final class ObjectFieldInfo extends UnsafeFieldInfo {
 
     @Override
     /** Writes the value using {@link UnsafeMemory}, converting as required. */
-    public void set(Object object, Object value) throws IllegalArgumentException {
-        Object value2 = ObjectUtils.convertTo(type, value);
+    public void set(Object target, Object newValue) throws IllegalArgumentException {
+        Object value2 = ObjectUtils.convertTo(type, newValue);
         try {
-            UnsafeMemory.unsafePutObject(object, getOffset(), value2);
+            UnsafeMemory.unsafePutObject(target, getOffset(), value2);
         } catch (@NotNull NoSuchFieldException e) {
             throw new IllegalArgumentException(e);
         }
@@ -73,8 +73,8 @@ public final class ObjectFieldInfo extends UnsafeFieldInfo {
     }
 
     @Override
-    /** Copies the object value from {@code source} to {@code destination}. */
-    public void copy(Object source, Object destination) {
-        set(destination, get(source));
+    /** Copies the object value from {@code src} to {@code dst}. */
+    public void copy(Object src, Object dst) {
+        set(dst, get(src));
     }
 }
