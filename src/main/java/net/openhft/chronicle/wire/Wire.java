@@ -20,15 +20,13 @@ import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.annotation.SingleThreaded;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 
 /**
- * Primary interface for sequentially writing to and reading from a Bytes stream.
+ * Primary interface for sequential writing to and reading from a {@link Bytes} stream.
  *
- * <p>This interface combines the behaviour of both {@link WireIn} and
- * {@link WireOut} and is the most common entry point for general wire
- * operations. Implementations should be single-threaded and avoid method
- * chaining.
+ * <p>The interface merges {@link WireIn} and {@link WireOut} into a bidirectional wire and
+ * forms the usual top-level entry point for general wire operations. Implementations are
+ * single-threaded and should avoid method chaining.
  */
 @SingleThreaded
 @DontChain
@@ -36,7 +34,7 @@ public interface Wire extends WireIn, WireOut {
     /**
      * Creates a YAML wire backed by on-heap bytes.
      * <p>
-     * The returned wire is configured to use text documents.
+     * The returned wire reads and writes text documents.
      *
      * @return a YamlWire configured for on-heap bytes
      */
@@ -45,11 +43,11 @@ public interface Wire extends WireIn, WireOut {
     }
 
     /**
-     * Sets the header number for this wire.
-     * Overrides {@link WireOut#headerNumber(long)}.
+     * Assigns the sequence number used when writing the next header.
+     * Overrides {@link WireCommon#headerNumber(long)} with a fluent return type.
      *
-     * @param headerNumber the header number to set
-     * @return this Wire instance
+     * @param headerNumber sequence number to set
+     * @return this wire instance
      */
     @Override
     @NotNull
