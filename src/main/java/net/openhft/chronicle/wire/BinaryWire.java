@@ -4974,3 +4974,4 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
     }
 }
+
