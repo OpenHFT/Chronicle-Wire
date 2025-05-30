@@ -32,22 +32,18 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Tokeniser for YAML documents.
- * Converts a raw YAML stream into a sequence of {@link YamlToken tokens},
- * each representing a distinct construct or symbol.
- * It is used internally by {@link YamlWire} to drive the parsing process.
+ * A tokenizer for YAML documents. The YamlTokeniser class is responsible for
+ * converting a raw YAML input into individual tokens, each representing
+ * a distinct construct or symbol in YAML. This class is integral to
+ * processes such as parsing or tokenization of YAML documents.
  */
 @SuppressWarnings({"this-escape","deprecation"})
 public class YamlTokeniser {
 
-    /**
-     * Represents an undefined or invalid indentation.
-     */
+    /** Represents an undefined or invalid indentation. */
     static final int NO_INDENT = -1;
 
-    /**
-     * Set of YAML tokens that contain no textual content.
-     */
+    /** Set of YAML tokens that don't contain any associated text content. */
     static final Set<YamlToken> NO_TEXT = EnumSet.of(
             YamlToken.SEQUENCE_START,
             YamlToken.SEQUENCE_ENTRY,
@@ -57,79 +53,46 @@ public class YamlTokeniser {
             YamlToken.MAPPING_END,
             YamlToken.DIRECTIVES_END);
 
-    /**
-     * A thread-local pool of {@link StringBuilder} instances for efficient
-     * string manipulation during tokenisation.
-     */
+    /** A pool of StringBuilders to improve efficiency and reduce memory overhead. */
     static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal(1);
 
-    /**
-     * A stack of {@link YTContext} objects describing the current nesting of
-     * YAML structures.
-     */
+    /** Stack to manage contextual information during tokenization. */
     protected final List<YTContext> contexts = new ArrayList<>();
 
-    /**
-     * The {@link BytesIn} providing the raw YAML input stream.
-     */
+    /** The input source containing the raw YAML content. */
     private final BytesIn<?> in;
 
-    /**
-     * Pool of reusable {@link YTContext} instances to reduce allocations.
-     */
+    /** A pool of reusable context objects to manage YAML structures. */
     private final List<YTContext> freeContexts = new ArrayList<>();
 
-    /**
-     * Tokens that have been pushed back and will be returned before further
-     * parsing the input.
-     */
+    /** List of tokens that have been identified but not yet processed. */
     private final List<YamlToken> pushed = new ArrayList<>();
 
-    /**
-     * Temporary buffer, often used for accumulating literal block content.
-     */
+    /** Temporary bytes buffer. */
     Bytes<?> temp = null;
 
-    /**
-     * Byte offset marking the start of the current line in {@link #in}.
-     */
+    /** Position marker for the start of a line. */
     long lineStart;
 
-    /**
-     * Byte offset for the start of the textual content of the current scalar.
-     */
+    /** Position marker for the start of a block. */
     long blockStart;
 
-    /**
-     * Byte offset for the end of the textual content of the current scalar.
-     */
+    /** Position marker for the end of a block. */
     long blockEnd;
 
-    /**
-     * Tracks the nesting depth of flow style collections ({@code {...}} or
-     * {@code [...]}).
-     */
+    /** Current depth of flow structures, like lists or maps. */
     int flowDepth = Integer.MAX_VALUE;
 
-    /**
-     * Quote character if the current scalar was quoted; {@code 0} otherwise.
-     */
+    /** Character used to denote quoting in a block. */
     char blockQuote = 0;
 
-    /**
-     * Flag used to manage implicit {@link YamlToken#SEQUENCE_ENTRY} tokens
-     * within flow sequences.
-     */
+    /** Flag to indicate if a sequence entry has been encountered. */
     boolean hasSequenceEntry;
 
-    /**
-     * Byte offset of the start of the most recently parsed mapping key.
-     */
+    /** Position marker for the last key in a key-value pair. */
     long lastKeyPosition = -1;
 
-    /**
-     * The most recently returned token.
-     */
+    /** The last token that was processed. */
     private YamlToken last = YamlToken.STREAM_START;
 
     /**
@@ -152,9 +115,8 @@ public class YamlTokeniser {
     }
 
     /**
-     * Resets the tokeniser to its initial state, clearing all contexts,
-     * buffers and flags. Prepares it to tokenise a new stream or restart
-     * from the beginning of the current input.
+     * Resets the state of the tokenizer. This method prepares the tokenizer
+     * for processing a new input or to restart the tokenization of the current input.
      */
     void reset() {
         contexts.clear();
@@ -173,31 +135,40 @@ public class YamlTokeniser {
     }
 
     /**
-     * Returns the token at the top of the context stack or
-     * {@link YamlToken#STREAM_START} if none.
+     * Returns the context of the YAML tokenization process.
+     * This method provides the top-level token context based on the tokenization history.
+     *
+     * @return The top context token if contexts are present, otherwise returns STREAM_START.
      */
     public YamlToken context() {
         return contexts.isEmpty() ? YamlToken.STREAM_START : topContext().token;
     }
 
     /**
-     * Most recent entry on the context stack.
+     * Retrieves the top context from the context stack.
+     * This method provides the most recent tokenization context.
+     *
+     * @return The top YTContext object from the context stack.
      */
     public YTContext topContext() {
         return contexts.get(contextSize() - 1);
     }
 
     /**
-     * Context entry one below the top of the stack.
+     * Retrieves the second to top context from the context stack.
+     * This method provides the tokenization context that's just below the topmost one.
+     *
+     * @return The second top YTContext object from the context stack.
      */
     public YTContext secondTopContext() {
         return contexts.get(contextSize() - 2);
     }
 
     /**
-     * Returns the last token produced by {@link #next(int)}. If the parser
-     * is at the start of the stream, calling this method will parse and return
-     * the first real token.
+     * Gets the current token in the tokenization process.
+     * If the last token was the start of the stream, this method fetches the next token.
+     *
+     * @return The current YamlToken object representing the tokenization status.
      */
     public YamlToken current() {
         if (last == YamlToken.STREAM_START)
@@ -206,19 +177,21 @@ public class YamlTokeniser {
     }
 
     /**
-     * Convenience wrapper for {@link #next(int)} using the current context
-     * indentation.
+     * Fetches the next token based on the current context's indentation.
+     *
+     * @return The next YamlToken object in line based on the current indentation context.
      */
     public YamlToken next() {
         return next(contextIndent());
     }
 
     /**
-     * Core tokenisation method. It first checks the {@link #pushed} stack and,
-     * if empty, parses the next token from the input stream via
-     * {@link #next0(int)}. The {@code minIndent} parameter is used to detect
-     * de-indentation and close block contexts. Updates {@link #last} with the
-     * produced token.
+     * Retrieves the next YAML token considering the minimum indentation provided.
+     * This method drives the core tokenization process, fetching tokens based on
+     * the minimum indentation and updating the last token processed.
+     *
+     * @param minIndent The minimum indentation to consider while tokenizing.
+     * @return The next YamlToken object based on the specified indentation.
      */
     @NotNull
     public YamlToken next(int minIndent) {
@@ -231,12 +204,13 @@ public class YamlTokeniser {
     }
 
     /**
-     * Internal tokenisation logic. Consumes leading whitespace and then
-     * examines the next character to determine the {@link YamlToken}. Handles
-     * comments, quoted strings, directives, tags, anchors, aliases, literal
-     * blocks, flow collections and plain scalars. The {@code minIndent}
-     * parameter controls when block contexts are closed due to
-     * de-indentation.
+     * Core method to tokenize the YAML content based on the given minimum indentation.
+     * The method processes the current position in the input stream and returns the
+     * next tokenized YAML construct. It utilizes the current context and the indentation
+     * level to identify and process different YAML constructs.
+     *
+     * @param minIndent The minimum indentation level to consider while tokenizing.
+     * @return The next {@link YamlToken} in the tokenization sequence.
      */
     YamlToken next0(int minIndent) {
         // Consuming any whitespace present at the start of a line
@@ -430,8 +404,11 @@ public class YamlTokeniser {
     }
 
     /**
-     * Checks whether parsing at the supplied {@code indent} would require the
-     * context stack to pop given the caller's {@code minIndent}.
+     * Determine if the current context would change given the indentation levels.
+     *
+     * @param minIndent The minimum indentation to consider.
+     * @param indent The current indentation level.
+     * @return True if context would change, false otherwise.
      */
     private boolean wouldChangeContext(int minIndent, int indent) {
         if (isInFlow())
@@ -440,8 +417,10 @@ public class YamlTokeniser {
     }
 
     /**
-     * Helper used when a peeked character should not be consumed.
-     * Unreads the character and returns {@link YamlToken#NONE}.
+     * Helper method to handle scenarios where the character shouldn't be tokenized.
+     * This method ensures the last read character is reverted back and a NONE token is returned.
+     *
+     * @return The {@link YamlToken#NONE} token.
      */
     private YamlToken dontRead() {
         unreadLast();
@@ -449,8 +428,13 @@ public class YamlTokeniser {
     }
 
     /**
-     * Pops contexts until the given start token is reached when closing a flow
-     * collection.
+     * Pop from the context stack until a specified start token is encountered.
+     * This method is useful for flow constructs where we need to determine the
+     * boundaries (like a list or map).
+     *
+     * @param start The token to identify the start of the flow construct.
+     * @param end The character representing the end of the flow construct.
+     * @return The appropriate {@link YamlToken} after popping the context.
      */
     private YamlToken flowPop(YamlToken start, char end) {
         int pos = pushed.size();
@@ -465,7 +449,11 @@ public class YamlTokeniser {
     }
 
     /**
-     * Handles opening of flow collections and manages the context stack.
+     * Handles YAML flow constructs such as sequences and maps.
+     * This method manages the context and the stack of tokens accordingly.
+     *
+     * @param token The {@link YamlToken} to be processed.
+     * @return The next token in the sequence.
      */
     private YamlToken flow(YamlToken token) {
         pushed.add(token);
@@ -528,11 +516,13 @@ public class YamlTokeniser {
     }
 
     /**
-     * Parses a YAML literal block scalar. When {@code withNewLines} is
-     * {@code true} (for the {@code |} style) newlines are kept; when
-     * {@code false} (for {@code >}) they are folded into spaces except for
-     * blank lines. Accumulates the content into {@link #temp} until a line with
-     * less indentation is encountered.
+     * Reads and processes a literal scalar block from the YAML input.
+     * In YAML, literal scalars are indicated by the pipe character '|'.
+     * This method will capture content preserving formatting and any newlines
+     * present, depending on the withNewLines flag.
+     *
+     * @param withNewLines A flag indicating if newlines should be preserved (true)
+     * or converted to spaces (false) during the read process.
      */
     private void readLiteral(boolean withNewLines) {
         readNewline(); // read to the end of the line.
@@ -615,9 +605,13 @@ public class YamlTokeniser {
     }
 
     /**
-     * Manages indentation changes. De-indentation may pop existing contexts and
-     * emit their end tokens, whilst increasing indentation pushes a new context
-     * and its start token onto {@link #pushed}.
+     * Handles and determines the indentation level and relevant token type based on context.
+     *
+     * @param indented The token for the start of indentation context.
+     * @param key The key token type.
+     * @param push The token type to be pushed to the stack.
+     * @param indent The current indentation level.
+     * @return The next token after processing the current input.
      */
     private YamlToken indent(
             YamlToken indented,
@@ -652,9 +646,10 @@ public class YamlTokeniser {
     }
 
     /**
-     * Reads a plain scalar (unquoted text). Uses {@link #readWords()} to update
-     * {@link #blockStart} and {@link #blockEnd}. If the scalar is followed by a
-     * colon it is treated as a {@link YamlToken#MAPPING_KEY}.
+     * Reads plain scalar text from the YAML input, handling mappings and sequences.
+     *
+     * @param indent2 The current indentation level.
+     * @return The token after processing the text.
      */
     private YamlToken readText(int indent2) {
         long pos = in.readPosition(); // Store the current position of input.
@@ -675,8 +670,10 @@ public class YamlTokeniser {
     }
 
     /**
-     * Helper to manage {@link YamlToken#SEQUENCE_ENTRY} tokens inside flow
-     * sequences.
+     * Handles the sequence logic within the YAML structure.
+     *
+     * @param token The current token being processed.
+     * @return A {@link YamlToken} after processing the sequence logic.
      */
     private YamlToken seq(YamlToken token) {
         // If a sequence entry has not been processed yet and the current context is a sequence start, and it's in flow
@@ -815,8 +812,7 @@ public class YamlTokeniser {
     }
 
     /**
-     * Pops the top context and adds it to {@link #freeContexts}. Emits the
-     * context's end token if present.
+     * Removes the top context from the context stack, and frees up the context.
      */
     private void contextPop() {
         YTContext context0 = contexts.remove(contextSize() - 1); // Remove the top context.
@@ -834,7 +830,9 @@ public class YamlTokeniser {
     }
 
     /**
-     * Drops contexts until the stack reaches the supplied {@code contextSize}.
+     * Reverts to a specified context level.
+     *
+     * @param contextSize The desired context level.
      */
     void revertToContext(int contextSize) {
         pushed.clear(); // Clear the pushed tokens.
@@ -848,9 +846,10 @@ public class YamlTokeniser {
     }
 
     /**
-     * Pushes a new parsing context. Inserts an implicit
-     * {@link YamlToken#DIRECTIVES_END} if starting from
-     * {@link YamlToken#STREAM_START}.
+     * Pushes a new context to the context stack.
+     *
+     * @param context The YAML token representing the context.
+     * @param indent  The indentation level for this context.
      */
     private void contextPush(YamlToken context, int indent) {
         // If we're at the start of a stream and the context isn't the end of directives,
@@ -865,9 +864,8 @@ public class YamlTokeniser {
     }
 
     /**
-     * Parses text between double quotes. Sets {@link #blockStart},
-     * {@link #blockEnd} and {@link #blockQuote} but leaves unescaping to
-     * {@link #text()}.
+     * Reads a value enclosed in double quotes from the input stream.
+     * Supports escape sequences.
      */
     private void readDoublyQuoted() {
         blockQuote = '"';
@@ -889,8 +887,8 @@ public class YamlTokeniser {
     }
 
     /**
-     * Parses text between single quotes. Consecutive quotes represent an
-     * escaped quote. Unescaping is performed in {@link #text()}.
+     * Reads a value enclosed in single quotes from the input stream.
+     * Supports consecutive single quotes as escape for a single quote.
      */
     private void readSinglyQuoted() {
         blockQuote = '\'';
@@ -916,8 +914,9 @@ public class YamlTokeniser {
     }
 
     /**
-     * Tests whether the characters after the current plain scalar form a
-     * key-value separator ({@code :}).
+     * Checks if the current position in the stream marks the end of a field (denoted by a colon).
+     *
+     * @return true if the current position is a field end, false otherwise.
      */
     private boolean isFieldEnd() {
         consumeSpaces(); // Consume any spaces or tabs.
@@ -1019,8 +1018,10 @@ public class YamlTokeniser {
     }
 
     /**
-     * Obtains a context from {@link #freeContexts} or creates one and pushes it
-     * onto the stack.
+     * Pushes a new context onto the stack, or reuses one from the freeContexts list.
+     *
+     * @param token  The YAML token for the context.
+     * @param indent The indentation level for the context.
      */
     private void pushContext0(YamlToken token, int indent) {
         YTContext context = freeContexts.isEmpty() ? new YTContext() : freeContexts.remove(freeContexts.size() - 1);
@@ -1047,11 +1048,9 @@ public class YamlTokeniser {
     }
 
     /**
-     * Returns the textual content of the last scalar token. If the token came
-     * from a literal block the data is taken from {@link #temp}; otherwise the
-     * region within {@link #in} between {@link #blockStart} and
-     * {@link #blockEnd} is used. Unescaping based on {@link #blockQuote} is
-     * applied.
+     * Used primarily for testing purposes to extract the current block's text.
+     *
+     * @return the text of the current block or an empty string if no text.
      */
     public String text() {
         try (ScopedResource<StringBuilder> sbTl = SBP.get()) {
@@ -1062,8 +1061,9 @@ public class YamlTokeniser {
     }
 
     /**
-     * Variant of {@link #text()} that appends the value to the supplied
-     * {@link StringBuilder}.
+     * Extracts the text of the current block into the provided StringBuilder.
+     *
+     * @param sb StringBuilder to which the block's text will be appended.
      */
     public void text(StringBuilder sb) {
         // If blockEnd is not set and a temporary value exists, use that.
@@ -1087,7 +1087,9 @@ public class YamlTokeniser {
     }
 
     /**
-     * Parses the text of the last scalar token as a double.
+     * Parses the current block's content as a double.
+     *
+     * @return the parsed double value.
      */
     public double parseDouble() {
         if (blockEnd < 0 && temp != null) {
@@ -1107,8 +1109,9 @@ public class YamlTokeniser {
     }
 
     /**
-     * Parses the text of the last scalar token as a long. YAML octal notation
-     * ({@code 0o...}) is supported.
+     * Parses the current block's content as a long. Handles octal numbers as well.
+     *
+     * @return the parsed long value.
      */
     public long parseLong() {
         if (blockEnd < 0 && temp != null) {
@@ -1187,8 +1190,8 @@ public class YamlTokeniser {
     }
 
     /**
-     * Represents a level in the parsing context stack, storing the structure
-     * type, its indentation and any skipped keys.
+     * Inner static class that represents the context during YAML parsing.
+     * This can include the current token, the indent level, and associated keys.
      */
     static class YTContext extends SelfDescribingMarshallable {
         YamlToken token;     // The current token in this context.
