@@ -434,14 +434,14 @@ public abstract class AbstractWire implements Wire, InternalWire {
      * Uses CAS against {@code expectedHeader} to detect concurrent modification.
      */
     @Override
-    public void updateHeader(final long position, final boolean metaData, int expectedHeader) throws StreamCorruptedException {
-        if (position <= 0)
-            invalidPosition(position);
+    public void updateHeader(final long headerPos, final boolean isMetaData, int templateHeader) throws StreamCorruptedException {
+        if (headerPos <= 0)
+            invalidPosition(headerPos);
 
         // the reason we add padding is so that a message gets sent ( this is, mostly for queue as
         // it cant handle a zero len message )
         long pos = bytes.writePosition();
-        if (pos == position + 4) {
+        if (pos == headerPos + 4) {
             addPadding(1);
             pos = bytes.writePosition();
         }
@@ -459,9 +459,9 @@ public abstract class AbstractWire implements Wire, InternalWire {
                 bytesStore.writeByte(pos + i, 0);
         }
 
-        final long value = pos - position - 4;
+        final long value = pos - headerPos - 4;
         int header = (int) value;
-        if (metaData) header |= META_DATA;
+        if (isMetaData) header |= META_DATA;
         // shouldn't happen due to padding above.
 //        assert header == UNKNOWN_LENGTH;
 
@@ -470,13 +470,13 @@ public abstract class AbstractWire implements Wire, InternalWire {
 
         assert checkNoDataAfterEnd(pos);
 
-        if (!bytes.compareAndSwapInt(position, expectedHeader, header)) {
-            unexpectedValue(position, expectedHeader);
+        if (!bytes.compareAndSwapInt(headerPos, templateHeader, header)) {
+            unexpectedValue(headerPos, templateHeader);
         }
 
         bytes.writeLimit(bytes.capacity());
-        if (!metaData)
-            incrementHeaderNumber(position);
+        if (!isMetaData)
+            incrementHeaderNumber(headerPos);
     }
 
     /**
@@ -583,15 +583,15 @@ public abstract class AbstractWire implements Wire, InternalWire {
      * Writes an END_OF_DATA marker at the end of the wire if possible.
      */
     @Override
-    public boolean writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition) {
-        return endOfWire(true, timeout, timeUnit, lastPosition) == EndOfWire.PRESENT_AFTER_UPDATE;
+    public boolean writeEndOfWire(long timeout, TimeUnit timeoutUnit, long lastPosition) {
+        return endOfWire(true, timeout, timeoutUnit, lastPosition) == EndOfWire.PRESENT_AFTER_UPDATE;
     }
 
     /**
      * Detects whether the wire has reached the END_OF_DATA marker, optionally writing one.
      */
     @Override
-    public EndOfWire endOfWire(boolean writeEOF, long timeout, TimeUnit timeUnit, long lastPosition) {
+    public EndOfWire endOfWire(boolean shouldWriteEof, long timeout, TimeUnit timeoutUnit, long lastPosition) {
 
         long pos = Math.max(lastPosition, bytes.writePosition());
         headerNumber = Long.MIN_VALUE;
@@ -603,7 +603,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
 
                 if (MEMORY.safeAlignedInt(pos)) {
                     if (bytes.readVolatileInt(pos) == 0) {
-                        if (!writeEOF)
+                        if (!shouldWriteEof)
                             return EndOfWire.NOT_PRESENT;
 
                         if (bytes.compareAndSwapInt(pos, 0, END_OF_DATA)) {
@@ -617,7 +617,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
                     // mis-aligned check, assume only one writer (best effort)
                     MEMORY.loadFence();
                     if (bytes.readInt(pos) == 0) {
-                        if (!writeEOF)
+                        if (!shouldWriteEof)
                             return EndOfWire.NOT_PRESENT;
 
                         bytes.writeInt(pos, END_OF_DATA);
@@ -632,11 +632,11 @@ public abstract class AbstractWire implements Wire, InternalWire {
                 if (header == END_OF_DATA)
                     return EndOfWire.PRESENT;
                 if (Wires.isNotComplete(header)) {
-                    if (!writeEOF)
-                        return EndOfWire.NOT_PRESENT;
+                        if (!shouldWriteEof)
+                            return EndOfWire.NOT_PRESENT;
 
                     try {
-                        acquireTimedParser().pause(timeout, timeUnit);
+                        acquireTimedParser().pause(timeout, timeoutUnit);
 
                     } catch (TimeoutException e) {
                         boolean success = bytes.compareAndSwapInt(pos, header, END_OF_DATA);

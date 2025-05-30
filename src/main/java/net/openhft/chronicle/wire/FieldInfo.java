@@ -146,7 +146,7 @@ public interface FieldInfo {
      * @return the value of the field represented by this {@code FieldInfo} object
      * as an {@code int} primitive.
      */
-    int getInt(Object object);
+    int getInt(Object instance);
 
     /**
      * Returns the value of the field represented by this {@code FieldInfo} object
@@ -173,21 +173,21 @@ public interface FieldInfo {
      * to the provided {@code value}. The provided {@code object} is used as a
      * target to the extract eh field from.
      */
-    void set(Object object, Object value) throws IllegalArgumentException;
+    void set(Object instance, Object value) throws IllegalArgumentException;
 
     /**
      * Sets the value of the field represented by this {@code FieldInfo} object
      * to the provided {@code value}. The provided {@code object} is used as a
      * target to the extract eh field from.
      */
-    void set(Object object, char value) throws IllegalArgumentException;
+    void set(Object instance, char value) throws IllegalArgumentException;
 
     /**
      * Sets the value of the field represented by this {@code FieldInfo} object
      * to the provided {@code value}. The provided {@code object} is used as a
      * target to the extract eh field from.
      */
-    void set(Object object, int value) throws IllegalArgumentException;
+    void set(Object instance, int value) throws IllegalArgumentException;
 
     /**
      * Sets the value of the field represented by this {@code FieldInfo} object
@@ -200,7 +200,7 @@ public interface FieldInfo {
      *                                  interface declaring the underlying field, or if an unwrapping
      *                                  conversion fails.
      */
-    void set(Object object, long value) throws IllegalArgumentException;
+    void set(Object instance, long value) throws IllegalArgumentException;
 
     /**
      * Sets the value of the field represented by this {@code FieldInfo} object
@@ -213,17 +213,17 @@ public interface FieldInfo {
      *                                  interface declaring the underlying field, or if an unwrapping
      *                                  conversion fails.
      */
-    void set(Object object, double value) throws IllegalArgumentException;
+    void set(Object instance, double value) throws IllegalArgumentException;
 
     /**
      * Retrieves the {@link Class} identifying the declared generic type of the
      * field represented by this {@code FieldInfo} object at the provided {@code index}.
      *
-     * @param index The index of the generic type to be retrieved.
+     * @param parameterIndex The index of the generic type to be retrieved.
      * @return a {@link Class} identifying the declared generic type of the field represented by
      * this {@code FieldInfo} object at the provided {@code index}.
      */
-    Class<?> genericType(int index);
+    Class<?> genericType(int parameterIndex);
 
     /**
      * Copies the value of the field represented by this {@code FieldInfo} object from

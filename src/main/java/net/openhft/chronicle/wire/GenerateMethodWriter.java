@@ -100,8 +100,8 @@ public class GenerateMethodWriter {
                         "}\n"));
         List<Class<?>> dcBoolean = Stream.of(DocumentContext.class, boolean.class).collect(Collectors.toList());
         TEMPLATE_METHODS.put("acquireWritingDocument",
-                singletonMap(dcBoolean, "public " + DOCUMENT_CONTEXT + " acquireWritingDocument(boolean metaData){\n" +
-                        "    return out.get().acquireWritingDocument(metaData);\n" +
+                singletonMap(dcBoolean, "public " + DOCUMENT_CONTEXT + " acquireWritingDocument(boolean includeMetaData){\n" +
+                        "    return out.get().acquireWritingDocument(includeMetaData);\n" +
                         "}\n"));
         Map<List<Class<?>>, String> wd = new LinkedHashMap<>();
         wd.put(singletonList(DocumentContext.class), "public " + DOCUMENT_CONTEXT + " writingDocument(){\n" +

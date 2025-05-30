@@ -217,7 +217,7 @@ public class TextReadDocumentContext implements ReadDocumentContext {
     }
 
     @Override
-    public long index() {
+    public long lastReadIndex() {
         return readPosition;
     }
 

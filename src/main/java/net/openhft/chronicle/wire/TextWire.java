@@ -394,10 +394,10 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     @Override
-    public DocumentContext acquireWritingDocument(boolean metaData) {
+    public DocumentContext acquireWritingDocument(boolean includeMetaData) {
         if (writeContext != null && writeContext.isOpen() && writeContext.chainedElement())
             return writeContext;
-        return writingDocument(metaData);
+        return writingDocument(includeMetaData);
     }
 
     @NotNull

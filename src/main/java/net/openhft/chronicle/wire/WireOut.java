@@ -76,19 +76,19 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * Serialises an event where the key may be an {@code enum} or arbitrary
      * object. The {@code expectedType} hints how the key should be written.
      *
-     * @param expectedType expected class of {@code eventKey}
-     * @param eventKey     the key object to serialise
+     * @param keyType expected class of {@code key}
+     * @param key     the key object to serialise
      * @return interface used to serialise the value
      * @throws InvalidMarshallableException if the key cannot be written
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    default ValueOut writeEvent(Class<?> expectedType, Object eventKey) throws InvalidMarshallableException {
-        if (eventKey instanceof WireKey)
-            return writeEventName((WireKey) eventKey);
-        if (eventKey instanceof CharSequence)
-            return writeEventName((CharSequence) eventKey);
+    default ValueOut writeEvent(Class<?> keyType, Object key) throws InvalidMarshallableException {
+        if (key instanceof WireKey)
+            return writeEventName((WireKey) key);
+        if (key instanceof CharSequence)
+            return writeEventName((CharSequence) key);
         writeStartEvent();
-        getValueOut().object(expectedType, eventKey);
+        getValueOut().object(keyType, key);
         writeEndEvent();
         return getValueOut();
     }
@@ -96,23 +96,23 @@ public interface WireOut extends WireCommon, MarshallableOut {
     /**
      * Writes a numeric event identifier for compact binary formats.
      *
-     * @param methodId numeric id representing the method/event
+     * @param eventId numeric id representing the method/event
      * @return interface used to serialise the value
      */
-    default ValueOut writeEventId(int methodId) {
-        return write(new MethodWireKey(null, methodId));
+    default ValueOut writeEventId(int eventId) {
+        return write(new MethodWireKey(null, eventId));
     }
 
     /**
      * Writes a numeric event identifier and optional textual name. Useful for
      * debugging or human readable logs.
      *
-     * @param name     event name for diagnostic output
-     * @param methodId numeric id representing the method/event
+     * @param eventName event name for diagnostic output
+     * @param eventId numeric id representing the method/event
      * @return interface used to serialise the value
      */
-    default ValueOut writeEventId(String name, int methodId) {
-        return write(new MethodWireKey(name, methodId));
+    default ValueOut writeEventId(String eventName, int eventId) {
+        return write(new MethodWireKey(eventName, eventId));
     }
 
     /**
@@ -129,10 +129,10 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * Writes a textual field name and returns a {@link ValueOut} for the
      * associated value.
      *
-     * @param key field identifier
+     * @param fieldName field identifier
      * @return interface used to serialise the value
      */
-    ValueOut write(CharSequence key);
+    ValueOut write(CharSequence fieldName);
 
     /**
      * Retrieves the interface for defining the output of a value
@@ -219,11 +219,11 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * Convenience wrapper around {@link #writingDocument(boolean)} for one off
      * writes. The document is closed automatically.
      *
-     * @param metaData write metadata rather than data
-     * @param writer   callback used to write the document body
+     * @param isMetaData write metadata rather than data
+     * @param bodyWriter   callback used to write the document body
      */
-    default void writeDocument(boolean metaData, @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
-        WireInternal.writeData(this, metaData, false, writer);
+    default void writeDocument(boolean isMetaData, @NotNull WriteMarshallable bodyWriter) throws InvalidMarshallableException {
+        WireInternal.writeData(this, isMetaData, false, bodyWriter);
     }
 
     /**
@@ -251,27 +251,27 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * Acquire a document context, reusing any that may already be active.
      * Useful when writing multiple documents in a chain.
      *
-     * @param metaData if {@code true} a metadata document is required
+     * @param includeMetaData if {@code true} a metadata document is required
      * @return context controlling the document write
      */
-    DocumentContext acquireWritingDocument(boolean metaData);
+    DocumentContext acquireWritingDocument(boolean includeMetaData);
 
     /**
      * Write a document without the usual completion marker. Originally used for
      * streaming over TCP and seldom required now.
      *
-     * @param metaData write metadata rather than data
+     * @param isMetaData write metadata rather than data
      * @param writer   callback used to write the document body
      */
-    default void writeNotCompleteDocument(boolean metaData, @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
-        WireInternal.writeData(this, metaData, true, writer);
+    default void writeNotCompleteDocument(boolean isMetaData, @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
+        WireInternal.writeData(this, isMetaData, true, writer);
     }
 
     /**
      * INTERNAL METHOD used by {@link DocumentContext}. Updates the header when
      * a document is completed.
      */
-    void updateHeader(long position, boolean metaData, int expectedHeader) throws StreamCorruptedException;
+    void updateHeader(long headerPos, boolean isMetaData, int templateHeader) throws StreamCorruptedException;
 
     /**
      * INTERNAL METHOD used by {@link DocumentContext}. Begins a document
@@ -302,11 +302,11 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * queue implementations to signal the last message.
      *
      * @param timeout      maximum time to wait
-     * @param timeUnit     unit of {@code timeout}
+     * @param timeoutUnit  unit of {@code timeout}
      * @param lastPosition position considered to be the end of the wire
      * @return {@code true} if a marker was written
      */
-    boolean writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition);
+    boolean writeEndOfWire(long timeout, TimeUnit timeoutUnit, long lastPosition);
 
     /**
      * Tests for the end of wire marker and optionally writes one. Mainly used
@@ -318,7 +318,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * @param lastPosition position considered to be the end of the wire
      * @return {@link EndOfWire} describing the marker status
      */
-    default EndOfWire endOfWire(boolean writeEOF, long timeout, TimeUnit timeUnit, long lastPosition) {
+    default EndOfWire endOfWire(boolean shouldWriteEof, long timeout, TimeUnit timeoutUnit, long lastPosition) {
         throw new UnsupportedOperationException("Optional operation, please use writeEndOfWire");
     }
 

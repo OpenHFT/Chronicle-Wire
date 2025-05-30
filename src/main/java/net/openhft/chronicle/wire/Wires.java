@@ -1958,47 +1958,47 @@ public enum Wires {
         }
 
         @Override
-        public int getInt(Object object) {
-            return ObjectUtils.convertTo(Integer.class, get(object));
+        public int getInt(Object instance) {
+            return ObjectUtils.convertTo(Integer.class, get(instance));
         }
 
         @Override
-        public char getChar(Object object) {
-            return ObjectUtils.convertTo(Character.class, get(object));
+        public char getChar(Object instance) {
+            return ObjectUtils.convertTo(Character.class, get(instance));
         }
 
         @Override
-        public double getDouble(Object object) {
-            return ObjectUtils.convertTo(Double.class, get(object));
+        public double getDouble(Object instance) {
+            return ObjectUtils.convertTo(Double.class, get(instance));
         }
 
         @Override
-        public void set(Object object, Object value) throws IllegalArgumentException {
-            getMap(object).put(name, value);
+        public void set(Object instance, Object value) throws IllegalArgumentException {
+            getMap(instance).put(name, value);
         }
 
         @Override
-        public void set(Object object, char value) throws IllegalArgumentException {
+        public void set(Object instance, char value) throws IllegalArgumentException {
             set(name, (Object) value);
         }
 
         @Override
-        public void set(Object object, int value) throws IllegalArgumentException {
+        public void set(Object instance, int value) throws IllegalArgumentException {
             set(name, (Object) value);
         }
 
         @Override
-        public void set(Object object, long value) throws IllegalArgumentException {
+        public void set(Object instance, long value) throws IllegalArgumentException {
             set(name, (Object) value);
         }
 
         @Override
-        public void set(Object object, double value) throws IllegalArgumentException {
+        public void set(Object instance, double value) throws IllegalArgumentException {
             set(name, (Object) value);
         }
 
         @Override
-        public Class<?> genericType(int index) {
+        public Class<?> genericType(int parameterIndex) {
             return Object.class;
         }
 

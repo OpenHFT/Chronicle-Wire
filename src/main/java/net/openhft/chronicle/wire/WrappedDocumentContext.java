@@ -90,8 +90,8 @@ public abstract class WrappedDocumentContext implements DocumentContext {
     }
 
     @Override
-    public long index() throws IORuntimeException {
-        return dc.index();
+    public long lastReadIndex() throws IORuntimeException {
+        return dc.lastReadIndex();
     }
 
     @Override

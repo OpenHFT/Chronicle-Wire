@@ -319,10 +319,10 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     @Override
-    public DocumentContext acquireWritingDocument(boolean metaData) {
+    public DocumentContext acquireWritingDocument(boolean includeMetaData) {
         if (writeContext.isOpen() && writeContext.chainedElement())
             return writeContext;
-        return writingDocument(metaData);
+        return writingDocument(includeMetaData);
     }
 
     @NotNull
@@ -1609,36 +1609,36 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     @Override
-    public ValueOut writeEventId(int methodId) {
-        writeCode(FIELD_NUMBER).writeStopBit(methodId);
+    public ValueOut writeEventId(int eventId) {
+        writeCode(FIELD_NUMBER).writeStopBit(eventId);
         return valueOut;
     }
 
     @Override
-    public ValueOut writeEventId(String name, int methodId) {
+    public ValueOut writeEventId(String eventName, int eventId) {
         if (bytes.retainedHexDumpDescription()) {
-            writeEventIdDescription(name, methodId);
+            writeEventIdDescription(eventName, eventId);
         }
-        writeCode(FIELD_NUMBER).writeStopBit(methodId);
+        writeCode(FIELD_NUMBER).writeStopBit(eventId);
         return valueOut;
     }
 
     /**
      * Writes a description of an event ID which consists of the event name and its corresponding method ID.
      *
-     * @param name     The name of the event.
-     * @param methodId The ID of the method associated with the event.
+     * @param eventName The name of the event.
+     * @param eventId   The ID of the method associated with the event.
      */
-    private void writeEventIdDescription(String name, int methodId) {
+    private void writeEventIdDescription(String eventName, int eventId) {
         try (ScopedResource<StringBuilder> sbTl = SBP.get()) {
             final StringBuilder sb = sbTl.get();
-            sb.append(name).append(" (");
+            sb.append(eventName).append(" (");
 
-            // Check if the methodId falls within the printable ASCII character range.
-            if (' ' < methodId && methodId <= '~')
-                sb.append('\'').append((char) methodId).append('\''); // Represent methodId as a character.
+            // Check if the eventId falls within the printable ASCII character range.
+            if (' ' < eventId && eventId <= '~')
+                sb.append('\'').append((char) eventId).append('\''); // Represent eventId as a character.
             else
-                sb.append(methodId); // Use the integer representation.
+                sb.append(eventId); // Use the integer representation.
 
             sb.append(')');
 
@@ -1671,12 +1671,12 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     @NotNull
     @Override
-    public ValueOut write(@NotNull CharSequence key) {
+    public ValueOut write(@NotNull CharSequence fieldName) {
         if (!fieldLess) {
             if (numericFields)
-                writeField(WireKey.toCode(key));
+                writeField(WireKey.toCode(fieldName));
             else
-                writeField(key);
+                writeField(fieldName);
         }
         return valueOut;
     }

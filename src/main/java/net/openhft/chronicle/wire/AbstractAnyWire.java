@@ -97,8 +97,8 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
 
     @Nullable
     @Override
-    public <K> K readEvent(Class<K> expectedClass) throws InvalidMarshallableException {
-        return wireAcquisition.acquireWire().readEvent(expectedClass);
+    public <K> K readEvent(Class<K> keyType) throws InvalidMarshallableException {
+        return wireAcquisition.acquireWire().readEvent(keyType);
     }
 
     @Override
@@ -181,13 +181,13 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
     }
 
     @Override
-    public ValueOut write(CharSequence key) {
-        return wireAcquisition.acquireWire().write(key);
+    public ValueOut write(CharSequence fieldName) {
+        return wireAcquisition.acquireWire().write(fieldName);
     }
 
     @Override
-    public ValueOut writeEvent(Class<?> expectedType, Object eventKey) throws InvalidMarshallableException {
-        return wireAcquisition.acquireWire().writeEvent(expectedType, eventKey);
+    public ValueOut writeEvent(Class<?> keyType, Object key) throws InvalidMarshallableException {
+        return wireAcquisition.acquireWire().writeEvent(keyType, key);
     }
 
     @NotNull
@@ -214,8 +214,8 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
     }
 
     @Override
-    public DocumentContext acquireWritingDocument(boolean metaData) {
-        return wireAcquisition.acquireWire().acquireWritingDocument(metaData);
+    public DocumentContext acquireWritingDocument(boolean includeMetaData) {
+        return wireAcquisition.acquireWire().acquireWritingDocument(includeMetaData);
     }
 
     @Override

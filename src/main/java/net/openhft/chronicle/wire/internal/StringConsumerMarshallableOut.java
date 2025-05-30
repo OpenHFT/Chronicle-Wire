@@ -63,14 +63,14 @@ public class StringConsumerMarshallableOut implements MarshallableOut {
     }
 
     @Override
-    public DocumentContext writingDocument(boolean metaData) throws UnrecoverableTimeoutException {
-        dcHolder.documentContext(wire.writingDocument(metaData));
+    public DocumentContext writingDocument(boolean isMetaData) throws UnrecoverableTimeoutException {
+        dcHolder.documentContext(wire.writingDocument(isMetaData));
         return dcHolder;
     }
 
     @Override
-    public DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException {
-        dcHolder.documentContext(wire.acquireWritingDocument(metaData));
+    public DocumentContext acquireWritingDocument(boolean includeMetaData) throws UnrecoverableTimeoutException {
+        dcHolder.documentContext(wire.acquireWritingDocument(includeMetaData));
         return dcHolder;
     }
 }

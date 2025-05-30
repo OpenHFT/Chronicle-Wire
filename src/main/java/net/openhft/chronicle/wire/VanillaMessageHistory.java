@@ -233,7 +233,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             @Nullable Object o = wire.parent();
             if (o instanceof SourceContext) {
                 @Nullable SourceContext dc = (SourceContext) o;
-                addSource(dc.sourceId(), dc.index());
+                addSource(dc.sourceId(), dc.lastReadIndex());
             }
 
             addTiming(nanoTime());

@@ -58,8 +58,8 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
      *
      * @param recordHistory Whether to enable history recording.
      */
-    public void recordHistory(boolean recordHistory) {
-        this.recordHistory = recordHistory;
+    public void recordHistory(boolean enableHistory) {
+        this.recordHistory = enableHistory;
     }
 
     /**

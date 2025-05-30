@@ -62,9 +62,9 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
     }
 
     @Override
-    public int getInt(Object object) {
+    public int getInt(Object instance) {
         try {
-            return getField().getInt(object);
+            return getField().getInt(instance);
         } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
             Jvm.debug().on(VanillaFieldInfo.class, e);
             return Integer.MIN_VALUE;
@@ -72,9 +72,9 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
     }
 
     @Override
-    public char getChar(Object object) {
+    public char getChar(Object instance) {
         try {
-            return getField().getChar(object);
+            return getField().getChar(instance);
         } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
             Jvm.debug().on(VanillaFieldInfo.class, e);
             return Character.MAX_VALUE;
@@ -93,46 +93,46 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void set(Object object, Object value) throws IllegalArgumentException {
+    public void set(Object instance, Object value) throws IllegalArgumentException {
         Object value2 = ObjectUtils.convertTo(type, value);
         try {
-            getField().set(object, value2);
+            getField().set(instance, value2);
         } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalArgumentException(e);
         }
     }
 
     @Override
-    public void set(Object object, int value) throws IllegalArgumentException {
+    public void set(Object instance, int value) throws IllegalArgumentException {
         try {
-            getField().setInt(object, value);
+            getField().setInt(instance, value);
         } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalArgumentException(e);
         }
     }
 
     @Override
-    public void set(Object object, char value) throws IllegalArgumentException {
+    public void set(Object instance, char value) throws IllegalArgumentException {
         try {
-            getField().setChar(object, value);
+            getField().setChar(instance, value);
         } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalArgumentException(e);
         }
     }
 
     @Override
-    public void set(Object object, long value) throws IllegalArgumentException {
+    public void set(Object instance, long value) throws IllegalArgumentException {
         try {
-            getField().setLong(object, value);
+            getField().setLong(instance, value);
         } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalArgumentException(e);
         }
     }
 
     @Override
-    public void set(Object object, double value) throws IllegalArgumentException {
+    public void set(Object instance, double value) throws IllegalArgumentException {
         try {
-            getField().setDouble(object, value);
+            getField().setDouble(instance, value);
         } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalArgumentException(e);
         }
@@ -147,9 +147,9 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
     }
 
     @Override
-    public Class<?> genericType(int index) {
+    public Class<?> genericType(int parameterIndex) {
         ParameterizedType genericType = (ParameterizedType) field.getGenericType();
-        Type type = genericType.getActualTypeArguments()[index];
+        Type type = genericType.getActualTypeArguments()[parameterIndex];
         return (Class) type;
     }
 

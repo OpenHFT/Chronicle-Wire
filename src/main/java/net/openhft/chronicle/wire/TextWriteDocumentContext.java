@@ -164,7 +164,7 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
     }
 
     @Override
-    public long index() {
+    public long lastReadIndex() {
         throw new UnsupportedOperationException();
     }
 

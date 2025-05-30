@@ -62,7 +62,7 @@ public final class ReductionUtil {
             try (final DocumentContext dc = tailer.readingDocument()) {
                 final Wire wire = dc.wire();
                 if (dc.isPresent() && wire != null) {
-                    lastIndex = dc.index();
+                    lastIndex = dc.lastReadIndex();
                     excerptListener.onExcerpt(wire, lastIndex);
                 } else {
                     end = true;

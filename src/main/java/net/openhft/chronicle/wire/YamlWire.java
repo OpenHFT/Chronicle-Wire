@@ -427,10 +427,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     @Override
-    public DocumentContext acquireWritingDocument(boolean metaData) {
+    public DocumentContext acquireWritingDocument(boolean includeMetaData) {
         if (writeContext != null && writeContext.isOpen())
             return writeContext;
-        return writingDocument(metaData);
+        return writingDocument(includeMetaData);
     }
 
     @NotNull
@@ -1148,9 +1148,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     @Override
-    public boolean readDocument(long position, @Nullable ReadMarshallable metaDataConsumer, @Nullable ReadMarshallable dataConsumer) throws InvalidMarshallableException {
+    public boolean readDocument(long startPosition, @Nullable ReadMarshallable metaDataConsumer, @Nullable ReadMarshallable dataConsumer) throws InvalidMarshallableException {
         valueIn.resetState();
-        return super.readDocument(position, metaDataConsumer, dataConsumer);
+        return super.readDocument(startPosition, metaDataConsumer, dataConsumer);
     }
 
     /**

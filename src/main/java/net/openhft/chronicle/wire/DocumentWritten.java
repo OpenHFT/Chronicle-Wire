@@ -48,9 +48,9 @@ public interface DocumentWritten {
      * or reuses an existing one. Depending on the use case, calling the close() method
      * on the context might be optional.
      *
-     * @param metaData A boolean indicating if metadata should be included during writing.
+     * @param includeMetaData A boolean indicating if metadata should be included during writing.
      * @return An existing or new {@link DocumentContext} tailored to the metadata preference.
      * @throws UnrecoverableTimeoutException If the operation times out in an unrecoverable manner.
      */
-    DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException;
+    DocumentContext acquireWritingDocument(boolean includeMetaData) throws UnrecoverableTimeoutException;
 }

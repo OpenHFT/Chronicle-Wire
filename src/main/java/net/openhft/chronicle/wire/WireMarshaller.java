@@ -2569,13 +2569,13 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected int getInt(Object o) {
-            return unsafeGetByte(o, offset) & 0xFF;
+        protected int getInt(Object instance) {
+            return unsafeGetByte(instance, offset) & 0xFF;
         }
 
         @Override
-        protected void putInt(Object o, int i) {
-            unsafePutByte(o, offset, (byte) i);
+        protected void putInt(Object instance, int i) {
+            unsafePutByte(instance, offset, (byte) i);
         }
     }
 
@@ -2593,13 +2593,13 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected int getInt(Object o) {
-            return unsafeGetShort(o, offset) & 0xFFFF;
+        protected int getInt(Object instance) {
+            return unsafeGetShort(instance, offset) & 0xFFFF;
         }
 
         @Override
-        protected void putInt(Object o, int i) {
-            unsafePutShort(o, offset, (short) i);
+        protected void putInt(Object instance, int i) {
+            unsafePutShort(instance, offset, (short) i);
         }
     }
 
@@ -2835,8 +2835,8 @@ public class WireMarshaller<T> {
          * @param o The object containing the field
          * @return  The retrieved integer value
          */
-        protected int getInt(Object o) {
-            return unsafeGetInt(o, offset);
+        protected int getInt(Object instance) {
+            return unsafeGetInt(instance, offset);
         }
 
         @Override
@@ -2852,7 +2852,7 @@ public class WireMarshaller<T> {
                     i = converter.parse(sb);
                 }
             }
-            unsafePutLong(o, offset, i);
+            unsafePutLong(instance, offset, i);
         }
 
         /**
@@ -2861,8 +2861,8 @@ public class WireMarshaller<T> {
          * @param o The object to set the value on
          * @param i The integer value to set
          */
-        protected void putInt(Object o, int i) {
-            unsafePutInt(o, offset, i);
+        protected void putInt(Object instance, int i) {
+            unsafePutInt(instance, offset, i);
         }
 
         @Override

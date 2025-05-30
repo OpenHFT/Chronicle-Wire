@@ -81,7 +81,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * call opens the context and later calls share it. The context should be
      * closed once all messages are written.
      */
-    DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException;
+    DocumentContext acquireWritingDocument(boolean includeMetaData) throws UnrecoverableTimeoutException;
 
     /**
      * @return {@code true} if callers are expected to record the history of each
@@ -276,20 +276,20 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * recording. The builder exposes further configuration such as interceptors
      * and wire type before {@code build()} is invoked.
      *
-     * @param metaData write each call as metadata if true
+     * @param isMetaData write each call as metadata if true
      * @param tClass   primary interface
      * @return configurable builder
      */
     @NotNull
-    default <T> MethodWriterBuilder<T> methodWriterBuilder(boolean metaData, @NotNull Class<T> tClass) {
+    default <T> MethodWriterBuilder<T> methodWriterBuilder(boolean isMetaData, @NotNull Class<T> tClass) {
         // Creates a new builder instance with the specified WireType and InvocationHandler
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.BINARY_LIGHT,
-                () -> new BinaryMethodWriterInvocationHandler(tClass, metaData, this));
+                () -> new BinaryMethodWriterInvocationHandler(tClass, isMetaData, this));
 
         // Configure the builder
         builder.marshallableOut(this);
-        builder.metaData(metaData);
+        builder.metaData(isMetaData);
 
         // If the current instance can be closed, set its close behavior
         if (this instanceof Closeable)

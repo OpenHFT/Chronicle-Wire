@@ -106,8 +106,8 @@ public class QueryWire extends TextWire {
 
     @NotNull
     @Override
-    public ValueOut write(@NotNull CharSequence name) {
-        return valueOut.write(name);
+    public ValueOut write(@NotNull CharSequence fieldName) {
+        return valueOut.write(fieldName);
     }
 
     @NotNull

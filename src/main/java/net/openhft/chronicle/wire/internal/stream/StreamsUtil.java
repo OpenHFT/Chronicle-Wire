@@ -323,7 +323,7 @@ public final class StreamsUtil {
                 try (final DocumentContext dc = tailer.readingDocument()) {
                     final Wire wire = dc.wire();
                     if (dc.isPresent() && wire != null) {
-                        lastIndex = dc.index();
+                        lastIndex = dc.lastReadIndex();
                         next = extractor.extract(wire, lastIndex);
                         if (next != null) {
                             return true;
@@ -388,7 +388,7 @@ public final class StreamsUtil {
                 try (final DocumentContext dc = tailer.readingDocument()) {
                     final Wire wire = dc.wire();
                     if (dc.isPresent() && wire != null) {
-                        lastIndex = dc.index();
+                        lastIndex = dc.lastReadIndex();
                         next = extractor.extractAsLong(wire, lastIndex);
                         if (next != Long.MIN_VALUE) {
                             return true;
@@ -453,7 +453,7 @@ public final class StreamsUtil {
                 try (final DocumentContext dc = tailer.readingDocument()) {
                     final Wire wire = dc.wire();
                     if (dc.isPresent() && wire != null) {
-                        lastIndex = dc.index();
+                        lastIndex = dc.lastReadIndex();
                         next = extractor.extractAsDouble(wire, lastIndex);
                         if (!Double.isNaN(next)) {
                             return true;

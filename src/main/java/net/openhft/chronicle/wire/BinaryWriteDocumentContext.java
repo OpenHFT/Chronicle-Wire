@@ -180,7 +180,7 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
     }
 
     @Override
-    public long index() {
+    public long lastReadIndex() {
         throw new UnsupportedOperationException();
     }
 

@@ -150,11 +150,11 @@ public interface WireIn extends WireCommon, MarshallableIn {
      * Commonly used when event names are enums.
      *
      * @param <K>           expected type of the event name
-     * @param expectedClass class of the expected type
+     * @param keyType class of the expected type
      * @return the converted name or {@code null} if absent
      * @throws InvalidMarshallableException if conversion fails
      */
-    @Nullable <K> K readEvent(Class<K> expectedClass) throws InvalidMarshallableException;
+    @Nullable <K> K readEvent(Class<K> keyType) throws InvalidMarshallableException;
 
     /**
      * Returns the {@link ValueIn} representing the value of the last field or event read.
@@ -246,10 +246,10 @@ public interface WireIn extends WireCommon, MarshallableIn {
      * @return {@code true} if a document was read
      * @throws InvalidMarshallableException if a marshalling error occurs
      */
-    default boolean readDocument(long position,
+    default boolean readDocument(long startPosition,
                                  @Nullable ReadMarshallable metaDataConsumer,
                                  @Nullable ReadMarshallable dataConsumer) throws InvalidMarshallableException {
-        return WireInternal.readData(position, this, metaDataConsumer, dataConsumer);
+        return WireInternal.readData(startPosition, this, metaDataConsumer, dataConsumer);
     }
 
     /**

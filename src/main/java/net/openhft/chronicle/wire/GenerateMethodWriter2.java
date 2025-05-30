@@ -67,8 +67,8 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         List<Class<?>> dcBoolean = Stream.of(DocumentContext.class, boolean.class).collect(Collectors.toList());
         TEMPLATE_METHODS.put("acquireWritingDocument",
                 singletonMap(dcBoolean, "" +
-                        "public " + DOCUMENT_CONTEXT + " acquireWritingDocument(boolean metaData) {\n" +
-                        "    return this.outSupplier.get().acquireWritingDocument(metaData);\n" +
+                        "public " + DOCUMENT_CONTEXT + " acquireWritingDocument(boolean includeMetaData) {\n" +
+                        "    return this.outSupplier.get().acquireWritingDocument(includeMetaData);\n" +
                         "}\n"));
         Map<List<Class<?>>, String> wd = new LinkedHashMap<>();
         wd.put(singletonList(DocumentContext.class), "" +

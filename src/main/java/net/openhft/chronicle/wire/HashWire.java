@@ -201,15 +201,15 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
 
     @NotNull
     @Override
-    public ValueOut write(@NotNull CharSequence name) {
-        hash += K0 + name.hashCode() * M0;
+    public ValueOut write(@NotNull CharSequence fieldName) {
+        hash += K0 + fieldName.hashCode() * M0;
         return valueOut;
     }
 
     @NotNull
     @Override
-    public ValueOut writeEvent(Class<?> ignored, @NotNull Object eventKey) {
-        hash += K0 + eventKey.hashCode() * M0;
+    public ValueOut writeEvent(Class<?> keyType, @NotNull Object key) {
+        hash += K0 + key.hashCode() * M0;
         return valueOut;
     }
 
@@ -265,7 +265,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
     }
 
     @Override
-    public DocumentContext acquireWritingDocument(boolean metaData) {
+    public DocumentContext acquireWritingDocument(boolean includeMetaData) {
         throw new UnsupportedOperationException();
     }
 
@@ -295,7 +295,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
     }
 
     @Override
-    public boolean writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition) {
+    public boolean writeEndOfWire(long timeout, TimeUnit timeoutUnit, long lastPosition) {
         throw new UnsupportedOperationException();
     }
 

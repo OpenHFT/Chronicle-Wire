@@ -705,8 +705,8 @@ public class JSONWire extends TextWire {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public ValueOut writeEvent(Class<?> expectedType, Object eventKey) throws InvalidMarshallableException {
-        return super.writeEvent(String.class, "" + eventKey);
+    public ValueOut writeEvent(Class<?> keyType, Object key) throws InvalidMarshallableException {
+        return super.writeEvent(String.class, "" + key);
     }
 
     @Override

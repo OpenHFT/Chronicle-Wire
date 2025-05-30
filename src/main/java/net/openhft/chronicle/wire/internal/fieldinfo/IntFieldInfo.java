@@ -43,9 +43,9 @@ public final class IntFieldInfo extends UnsafeFieldInfo {
     }
 
     @Override
-    public int getInt(Object object) {
+    public int getInt(Object instance) {
         try {
-            return UnsafeMemory.unsafeGetInt(object, getOffset());
+            return UnsafeMemory.unsafeGetInt(instance, getOffset());
         } catch (@NotNull NoSuchFieldException e) {
             Jvm.debug().on(IntFieldInfo.class, e);
             return Integer.MIN_VALUE;
@@ -53,9 +53,9 @@ public final class IntFieldInfo extends UnsafeFieldInfo {
     }
 
     @Override
-    public void set(Object object, int value) throws IllegalArgumentException {
+    public void set(Object instance, int value) throws IllegalArgumentException {
         try {
-            UnsafeMemory.unsafePutInt(object, getOffset(), value);
+            UnsafeMemory.unsafePutInt(instance, getOffset(), value);
         } catch (@NotNull NoSuchFieldException e) {
             throw new IllegalArgumentException(e);
         }

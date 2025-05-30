@@ -92,8 +92,8 @@ public class DocumentContextHolder implements DocumentContext, WriteDocumentCont
     }
 
     @Override
-    public long index() throws IORuntimeException {
-        return dc.index();
+    public long lastReadIndex() throws IORuntimeException {
+        return dc.lastReadIndex();
     }
 
     /**

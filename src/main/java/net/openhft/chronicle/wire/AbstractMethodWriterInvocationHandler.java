@@ -134,8 +134,8 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
     }
 
     @Override
-    public void recordHistory(boolean recordHistory) {
-        this.recordHistory = recordHistory;
+    public void recordHistory(boolean enableHistory) {
+        this.recordHistory = enableHistory;
     }
 
     @Override

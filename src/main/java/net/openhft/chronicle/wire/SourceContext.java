@@ -41,5 +41,5 @@ public interface SourceContext {
      * @return the position in implementation-defined units
      * @throws IORuntimeException if the position cannot be retrieved
      */
-    long index() throws IORuntimeException;
+    long lastReadIndex() throws IORuntimeException;
 }

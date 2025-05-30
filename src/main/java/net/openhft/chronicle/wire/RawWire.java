@@ -97,10 +97,10 @@ public class RawWire extends AbstractWire implements Wire {
     }
 
     @Override
-    public DocumentContext acquireWritingDocument(boolean metaData) {
+    public DocumentContext acquireWritingDocument(boolean includeMetaData) {
         if (writeContext.isOpen())
             return writeContext;
-        return writingDocument(metaData);
+        return writingDocument(includeMetaData);
     }
 
     @NotNull
@@ -271,7 +271,7 @@ public class RawWire extends AbstractWire implements Wire {
 
     @NotNull
     @Override
-    public ValueOut write(@NotNull CharSequence name) {
+    public ValueOut write(@NotNull CharSequence fieldName) {
         return valueOut;
     }
 

@@ -834,7 +834,7 @@ public class VanillaMethodReader implements MethodReader {
             assert context.isData();
 
             // Reset the message history with the current context's source ID and index
-            messageHistory().reset(context.sourceId(), context.index());
+            messageHistory().reset(context.sourceId(), context.lastReadIndex());
 
             // Parse the data message
             dataWireParser.accept(context.wire());

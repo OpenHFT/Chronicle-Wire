@@ -162,7 +162,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
             messageHistory = null;
         }
 
-        messageHistory().reset(context.sourceId(), context.index());
+        messageHistory().reset(context.sourceId(), context.lastReadIndex());
 
         try {
             wireIn.startEvent();
