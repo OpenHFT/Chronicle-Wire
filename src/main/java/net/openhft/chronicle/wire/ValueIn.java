@@ -61,15 +61,15 @@ public interface ValueIn {
     // ---- Text / Strings section ----
 
     /**
-     * Deserialises the current value as text and passes it to {@code ts} along
+     * Deserialises the current value as text and passes it to {@code consumer} along
      * with the supplied object.
      *
      * @return the parent {@link WireIn}
      */
     @NotNull
-    default <T> WireIn text(T t, @NotNull BiConsumer<T, String> ts) {
+    default <T> WireIn text(T target, @NotNull BiConsumer<T, String> consumer) {
         @Nullable final String text = text();
-        ts.accept(t, text);
+        consumer.accept(target, text);
         return wireIn();
     }
 
@@ -174,10 +174,10 @@ public interface ValueIn {
 
     /**
      * Compares the value’s bytes with {@code compareBytes} and passes the match
-     * result to {@code consumer}.
+     * result to {@code matchResult}.
      */
     @NotNull
-    WireIn bytesMatch(@NotNull BytesStore<?, ?> compareBytes, BooleanConsumer consumer);
+    WireIn bytesMatch(@NotNull BytesStore<?, ?> compareBytes, BooleanConsumer matchResult);
 
     /**
      * Supplies the byte stream to {@code bytesMarshallable#readMarshallable} for
@@ -237,65 +237,65 @@ public interface ValueIn {
 
     /**
      * Reads the value as a {@code boolean} and passes it, together with
-     * {@code t}, to {@code tFlag}.
+     * {@code target}, to {@code flagConsumer}.
      *
      * @param <T> type of the context object
      * @return the parent {@link WireIn}
      */
-    @NotNull <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> tFlag);
+    @NotNull <T> WireIn bool(T target, @NotNull ObjBooleanConsumer<T> flagConsumer);
 
     /**
-     * Reads the value as a signed byte and passes it to {@code tb} together with
-     * {@code t}.
+     * Reads the value as a signed byte and passes it to {@code byteConsumer} together with
+     * {@code target}.
      */
-    @NotNull <T> WireIn int8(@NotNull T t, @NotNull ObjByteConsumer<T> tb);
+    @NotNull <T> WireIn int8(@NotNull T target, @NotNull ObjByteConsumer<T> byteConsumer);
 
     /**
-     * Reads the value as an unsigned byte and passes it to {@code ti} with
-     * {@code t}.
+     * Reads the value as an unsigned byte and passes it to {@code shortConsumer} with
+     * {@code target}.
      */
-    @NotNull <T> WireIn uint8(@NotNull T t, @NotNull ObjShortConsumer<T> ti);
+    @NotNull <T> WireIn uint8(@NotNull T target, @NotNull ObjShortConsumer<T> shortConsumer);
 
     /**
-     * Reads the value as a short and passes it to {@code ti} with {@code t}.
+     * Reads the value as a short and passes it to {@code shortConsumer} with {@code target}.
      */
-    @NotNull <T> WireIn int16(@NotNull T t, @NotNull ObjShortConsumer<T> ti);
+    @NotNull <T> WireIn int16(@NotNull T target, @NotNull ObjShortConsumer<T> shortConsumer);
 
     /**
-     * Reads the value as an unsigned short and passes it to {@code ti} with
-     * {@code t}.
+     * Reads the value as an unsigned short and passes it to {@code intConsumer} with
+     * {@code target}.
      */
-    @NotNull <T> WireIn uint16(@NotNull T t, @NotNull ObjIntConsumer<T> ti);
+    @NotNull <T> WireIn uint16(@NotNull T target, @NotNull ObjIntConsumer<T> intConsumer);
 
     /**
-     * Reads the value as an {@code int} and passes it to {@code ti} with
-     * {@code t}.
+     * Reads the value as an {@code int} and passes it to {@code intConsumer} with
+     * {@code target}.
      */
-    @NotNull <T> WireIn int32(@NotNull T t, @NotNull ObjIntConsumer<T> ti);
+    @NotNull <T> WireIn int32(@NotNull T target, @NotNull ObjIntConsumer<T> intConsumer);
 
     /**
-     * Reads the value as an unsigned int and passes it to {@code tl} with
-     * {@code t}.
+     * Reads the value as an unsigned int and passes it to {@code longConsumer} with
+     * {@code target}.
      */
-    @NotNull <T> WireIn uint32(@NotNull T t, @NotNull ObjLongConsumer<T> tl);
+    @NotNull <T> WireIn uint32(@NotNull T target, @NotNull ObjLongConsumer<T> longConsumer);
 
     /**
-     * Reads the value as a {@code long} and passes it to {@code tl} with
-     * {@code t}.
+     * Reads the value as a {@code long} and passes it to {@code longConsumer} with
+     * {@code target}.
      */
-    @NotNull <T> WireIn int64(@NotNull T t, @NotNull ObjLongConsumer<T> tl);
+    @NotNull <T> WireIn int64(@NotNull T target, @NotNull ObjLongConsumer<T> longConsumer);
 
     /**
-     * Reads the value as a {@code float} and passes it to {@code tf} with
-     * {@code t}.
+     * Reads the value as a {@code float} and passes it to {@code floatConsumer} with
+     * {@code target}.
      */
-    @NotNull <T> WireIn float32(@NotNull T t, @NotNull ObjFloatConsumer<T> tf);
+    @NotNull <T> WireIn float32(@NotNull T target, @NotNull ObjFloatConsumer<T> floatConsumer);
 
     /**
-     * Reads the value as a {@code double} and passes it to {@code td} with
-     * {@code t}.
+     * Reads the value as a {@code double} and passes it to {@code doubleConsumer} with
+     * {@code target}.
      */
-    @NotNull <T> WireIn float64(@NotNull T t, @NotNull ObjDoubleConsumer<T> td);
+    @NotNull <T> WireIn float64(@NotNull T target, @NotNull ObjDoubleConsumer<T> doubleConsumer);
 
     @NotNull <T> WireIn time(@NotNull T t, @NotNull BiConsumer<T, LocalTime> setLocalTime);
 
