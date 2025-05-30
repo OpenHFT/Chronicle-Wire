@@ -24,21 +24,27 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 @SuppressWarnings("rawtypes")
 public abstract class AbstractFieldInfo implements FieldInfo {
 
-    // The name of the field
+    /**
+     * The name of the field this {@code FieldInfo} instance represents.
+     */
     protected final String name;
 
-    // The type of the field
+    /**
+     * The Java type declared for the field.
+     */
     protected final Class<?> type;
 
-    // The bracket type associated with the field
+    /**
+     * How the field is bracketed when serialised.
+     */
     protected final BracketType bracketType;
 
     /**
-     * Constructs a new AbstractFieldInfo with the provided type, bracket type, and name.
+     * Creates a description of a field.
      *
-     * @param type         The class type of the field
-     * @param bracketType  The bracket type associated with the field
-     * @param name         The name of the field
+     * @param type        class used for marshalling
+     * @param bracketType placement of start and end brackets in the wire text
+     * @param name        identifier of the field
      */
     protected AbstractFieldInfo(Class<?> type, BracketType bracketType, String name) {
         this.type = type;
@@ -46,32 +52,50 @@ public abstract class AbstractFieldInfo implements FieldInfo {
         this.name = name;
     }
 
+    /**
+     * Returns the field name.
+     */
     @Override
     public String name() {
         return name;
     }
 
+    /**
+     * Returns the declared type.
+     */
     @Override
     public Class<?> type() {
         return type;
     }
 
+    /**
+     * Returns the bracket placement style.
+     */
     @Override
     public BracketType bracketType() {
         return bracketType;
     }
 
+    /**
+     * Generates a 32-bit hash of the serialised form.
+     */
     @Override
     public int hashCode() {
         return HashWire.hash32(this);
     }
 
+    /**
+     * Compares the serialised content for equality.
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj == null) return false;
         return (this == obj || Wires.isEquals(this, obj));
     }
 
+    /**
+     * Returns a YAML style representation of this field information.
+     */
     @Override
     public String toString() {
         return TEXT.asString(this);
