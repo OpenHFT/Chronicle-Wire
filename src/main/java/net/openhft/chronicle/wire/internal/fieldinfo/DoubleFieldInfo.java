@@ -24,25 +24,25 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Field;
 
 /**
- * Internal {@link net.openhft.chronicle.wire.FieldInfo} for {@code double}
- * fields using {@link UnsafeMemory} for direct access.
+ * Represents field information for double fields, extending the generic field information capabilities
+ * provided by {@link UnsafeFieldInfo}. It offers direct memory access functionality to get and set
+ * double values in objects, leveraging unsafe operations for enhanced performance.
  */
 public final class DoubleFieldInfo extends UnsafeFieldInfo {
 
     /**
-     * @param name        field name used in text form
-     * @param type        runtime type
-     * @param bracketType formatting hint when writing
-     * @param field       reflection field used for unsafe access
+     * Constructs an instance of DoubleFieldInfo with the provided details about a double field.
+     *
+     * @param name        The name of the field.
+     * @param type        The type of the field.
+     * @param bracketType The bracket type associated with the field.
+     * @param field       The field object representation.
      */
     public DoubleFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         super(name, type, bracketType, field);
     }
 
     @Override
-    /**
-     * @return the field value or {@code Double.NaN} if the offset is unavailable
-     */
     public double getDouble(Object object) {
         try {
             return UnsafeMemory.unsafeGetDouble(object, getOffset());
@@ -53,7 +53,6 @@ public final class DoubleFieldInfo extends UnsafeFieldInfo {
     }
 
     @Override
-    /** Writes the value using {@link UnsafeMemory}. */
     public void set(Object object, double value) throws IllegalArgumentException {
         try {
             UnsafeMemory.unsafePutDouble(object, getOffset(), value);
@@ -63,13 +62,11 @@ public final class DoubleFieldInfo extends UnsafeFieldInfo {
     }
 
     @Override
-    /** Compares the double values in {@code a} and {@code b}. */
     public boolean isEqual(Object a, Object b) {
         return getDouble(a) == getDouble(b);
     }
 
     @Override
-    /** Copies the double value from {@code source} to {@code destination}. */
     public void copy(Object source, Object destination) {
         set(destination, getDouble(source));
     }

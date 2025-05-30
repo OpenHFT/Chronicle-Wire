@@ -28,45 +28,18 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Objects;
 
-/**
- * Standard reflection-backed implementation of {@link AbstractFieldInfo}.
- * The associated {@link Field} is recreated on demand so that instances
- * remain functional after deserialisation. Intended for internal marshalling
- * tasks where unsafe access is not required.
- */
 @SuppressWarnings("rawtypes")
 public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
 
-    /**
-     * Declaring class of the target field. Used to re-acquire the
-     * {@link #field} instance if needed.
-     */
     private final Class<?> parent;
-
-    /**
-     * Reflection handle to the actual field. Marked transient and looked up
-     * lazily via {@link #getField()}.
-     */
     private transient Field field;
 
-    /**
-     * Creates an instance for a specific field.
-     *
-     * @param name         textual name of the field
-     * @param type         runtime type of the field
-     * @param bracketType  bracket style used when writing
-     * @param field        reflection field for direct access
-     */
     public VanillaFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         super(type, bracketType, name);
         parent = field.getDeclaringClass();
         this.field = field;
     }
 
-    /**
-     * Retrieves the value of this field from {@code object}. The method logs
-     * and returns {@code null} if reflection fails.
-     */
     @Nullable
     @Override
     public Object get(Object object) {
@@ -78,11 +51,6 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         }
     }
 
-    /**
-     * Reads the primitive {@code long} value.
-     *
-     * @return the field value or {@code Long.MIN_VALUE} on error
-     */
     @Override
     public long getLong(Object object) {
         try {
@@ -93,11 +61,6 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         }
     }
 
-    /**
-     * Reads the primitive {@code int} value.
-     *
-     * @return the field value or {@code Integer.MIN_VALUE} on error
-     */
     @Override
     public int getInt(Object object) {
         try {
@@ -108,11 +71,6 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         }
     }
 
-    /**
-     * Reads the primitive {@code char} value.
-     *
-     * @return the field value or {@code Character.MAX_VALUE} on error
-     */
     @Override
     public char getChar(Object object) {
         try {
@@ -123,11 +81,6 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         }
     }
 
-    /**
-     * Reads the primitive {@code double} value.
-     *
-     * @return the field value or {@code Double.NaN} on error
-     */
     @Override
     public double getDouble(Object object) {
         try {
@@ -139,11 +92,6 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
     }
 
     @SuppressWarnings("unchecked")
-    /**
-     * Converts {@code value} to the field type and writes it using reflection.
-     *
-     * @throws IllegalArgumentException if the field cannot be accessed
-     */
     @Override
     public void set(Object object, Object value) throws IllegalArgumentException {
         Object value2 = ObjectUtils.convertTo(type, value);
@@ -154,11 +102,6 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         }
     }
 
-    /**
-     * Writes an {@code int} value to the field.
-     *
-     * @throws IllegalArgumentException if reflection fails
-     */
     @Override
     public void set(Object object, int value) throws IllegalArgumentException {
         try {
@@ -168,11 +111,6 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         }
     }
 
-    /**
-     * Writes a {@code char} value to the field.
-     *
-     * @throws IllegalArgumentException if reflection fails
-     */
     @Override
     public void set(Object object, char value) throws IllegalArgumentException {
         try {
@@ -182,11 +120,6 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         }
     }
 
-    /**
-     * Writes a {@code long} value to the field.
-     *
-     * @throws IllegalArgumentException if reflection fails
-     */
     @Override
     public void set(Object object, long value) throws IllegalArgumentException {
         try {
@@ -196,11 +129,6 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         }
     }
 
-    /**
-     * Writes a {@code double} value to the field.
-     *
-     * @throws IllegalArgumentException if reflection fails
-     */
     @Override
     public void set(Object object, double value) throws IllegalArgumentException {
         try {
@@ -210,12 +138,6 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         }
     }
 
-    /**
-     * Lazily retrieves the underlying {@link Field}, re-acquiring it from
-     * {@link #parent} when required.
-     *
-     * @throws NoSuchFieldException if the field does not exist on the parent
-     */
     public Field getField() throws NoSuchFieldException {
         if (field == null) {
             field = parent.getDeclaredField(name);
@@ -224,10 +146,6 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         return field;
     }
 
-    /**
-     * Returns the {@link Class} of the generic argument at the given index if
-     * this field is parameterised.
-     */
     @Override
     public Class<?> genericType(int index) {
         ParameterizedType genericType = (ParameterizedType) field.getGenericType();
@@ -235,11 +153,6 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         return (Class) type;
     }
 
-    /**
-     * Compares the value of this field in two objects. Primitive types are
-     * compared directly, otherwise {@link Objects#deepEquals(Object, Object)}
-     * is used.
-     */
     @Override
     public boolean isEqual(Object a, Object b) {
         if (type.isPrimitive()) {
