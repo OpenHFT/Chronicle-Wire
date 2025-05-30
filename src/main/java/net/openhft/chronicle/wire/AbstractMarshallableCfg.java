@@ -23,24 +23,16 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * An abstract class that represents a configuration Data Transfer Object (DTO) capable of marshalling.
- * This base class offers default implementations for reading and writing configurations through {@code WireMarshaller}.
- * Derived configuration DTOs can benefit from merging default configurations with specific configurations to enhance flexibility.
+ * Base class for configuration beans that are {@link Marshallable}.  When
+ * reading, fields not present in the input remain unchanged so a previously
+ * applied default configuration can be retained.  When writing, only fields that
+ * differ from a supplied default are emitted.
  */
 public abstract class AbstractMarshallableCfg extends SelfDescribingMarshallable {
 
     /**
-     * Reads the state of this configuration object from the given wire input.
-     * It uses the {@link WireMarshaller} corresponding to the class of the current object
-     * to perform the reading.
-     * <p>
-     * Configuration merging is supported; absent values in the wire input retain their
-     * existing state. To ensure the use of default values for any unset attributes,
-     * consider invoking {@code reset()} before this method.
-     *
-     * @param wire Wire input source for reading the configuration.
-     * @throws IORuntimeException             If there's an IO-related exception during reading.
-     * @throws InvalidMarshallableException   If a marshalling error occurs.
+     * Read configuration values from {@code wire}.  Fields not present in the
+     * input are left unchanged so defaults can be merged in.
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
@@ -54,14 +46,8 @@ public abstract class AbstractMarshallableCfg extends SelfDescribingMarshallable
     }
 
     /**
-     * Writes the state of this configuration object to the given wire output.
-     * It uses the {@link WireMarshaller} corresponding to the class of the current object
-     * to perform the writing.
-     * <p>
-     * For brevity, only fields differing from default values are written.
-     *
-     * @param wire Wire output target for writing the configuration.
-     * @throws InvalidMarshallableException If a marshalling error occurs.
+     * Write only those fields that differ from the default configuration to
+     * {@code wire}.
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
@@ -75,12 +61,8 @@ public abstract class AbstractMarshallableCfg extends SelfDescribingMarshallable
     }
 
     /**
-     * Handles the presence of unexpected fields during the reading process.
-     * A warning is logged with details of the unexpected field.
-     *
-     * @param event   The name or identifier of the unexpected field.
-     * @param valueIn The value associated with the unexpected field.
-     * @throws InvalidMarshallableException If there's an error during the processing.
+     * Log and skip any field encountered in the wire that is not defined in this
+     * configuration object.
      */
     @Override
     public void unexpectedField(Object event, ValueIn valueIn) throws InvalidMarshallableException {

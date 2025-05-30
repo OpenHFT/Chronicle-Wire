@@ -24,23 +24,19 @@ import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import java.util.List;
 
 /**
- * Represents a dynamic enumeration which can either be a traditional {@code Enum} or a class
- * possessing a {@code String name} field. The interface extends both {@link CoreDynamicEnum} and
- * {@link Marshallable}, facilitating serialization and specific dynamic enumeration operations.
+ * <b>Deprecated:</b> scheduled for removal in x.28.
+ * <p>
+ * Represents an enumeration whose values may be extended at runtime.  The
+ * underlying type may be a traditional {@code enum} or any class with a
+ * {@code String name} field.
  */
 @SuppressWarnings({"deprecation", "rawtypes", "unchecked"})
 @Deprecated(/* to be removed in x.28 */)
 public interface DynamicEnum extends CoreDynamicEnum, Marshallable {
 
     /**
-     * Refreshes the cached instance of a {@code DynamicEnum} based on the given template.
-     * This ensures that every deserialization of the enum value from its {@code name()} method
-     * is up-to-date with the most recent information.
-     * <p>
-     * Leveraging this method to update the cached enum details is essential for maintaining
-     * data consistency, especially during frequent deserialization operations.
-     *
-     * @param e The {@code DynamicEnum} template used to refresh the cached version.
+     * Refresh an enum instance held in the internal {@link EnumCache} using the
+     * supplied template {@code e}.
      */
     static <E extends DynamicEnum> void updateEnum(E e) {
         // Retrieve the enum cache corresponding to the class of the provided template
@@ -59,7 +55,7 @@ public interface DynamicEnum extends CoreDynamicEnum, Marshallable {
     }
 
     /**
-     * Not resettable, treat as immutable.
+     * Dynamic enums are treated as immutable and therefore cannot be reset.
      */
     default void reset() {
         throw new UnsupportedOperationException();

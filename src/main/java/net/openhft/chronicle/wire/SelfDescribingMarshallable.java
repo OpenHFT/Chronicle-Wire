@@ -18,9 +18,9 @@
 package net.openhft.chronicle.wire;
 
 /**
- * Represents an abstraction of marshallable objects that are self-describing by default.
- * This class extends {@code AbstractCommonMarshallable} and ensures that instances
- * inherently use self-describing messages.
+ * Base class for marshallable objects that write their type information when
+ * serialized.  This allows them to be deserialized without prior knowledge of
+ * the exact class.
  */
 public abstract class SelfDescribingMarshallable extends AbstractCommonMarshallable {
     @Override

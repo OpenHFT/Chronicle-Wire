@@ -20,13 +20,16 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Marker interface for {@link Marshallable} objects that expose a distinct key
+ * portion used for indexing or map lookups.
+ */
 public interface KeyedMarshallable {
 
     /**
-     * Writes the key of the current instance into the provided {@code Bytes} object.
-     * This default implementation utilizes the {@code Wires.writeKey} method.
-     *
-     * @param bytes The {@code Bytes} object into which the key of the current instance is written.
+     * Write the key portion of this object to {@code bytes}.  The default
+     * implementation delegates to {@link Wires#writeKey(Object, Bytes)} which
+     * typically serializes the first field or fields designated as the key.
      */
     @SuppressWarnings("rawtypes")
     default void writeKey(@NotNull Bytes<?> bytes) {

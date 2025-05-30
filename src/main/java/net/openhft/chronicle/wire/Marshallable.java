@@ -37,23 +37,25 @@ import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
 /**
- * Represents a data structure that supports both reading from and writing to marshallable
- * formats. Implementations of this interface can be converted to and from serialized forms,
- * making it suitable for storage, transmission, or other forms of data exchange.
+ * Primary interface for objects that can be written to and read from a {@link Wire}.
  * <p>
- * This interface also provides a set of static utility methods to aid in the manipulation
- * and interpretation of marshallable data, allowing for data comparison, hashing,
- * and serialization to and from string and file representations.
+ * Implementations are typically simple data transfer objects or state holders that need to
+ * be persisted or transmitted.  It combines the capabilities of
+ * {@link WriteMarshallable} and {@link ReadMarshallable} and also extends
+ * {@link net.openhft.chronicle.core.io.Resettable} so that instances can be recycled.
+ * <p>
+ * A number of convenience static methods are supplied for converting to and from textual
+ * representations and for reflective style field access.
  */
 @DontChain
 public interface Marshallable extends WriteMarshallable, ReadMarshallable, Resettable {
 
     /**
-     * Compares a given {@code WriteMarshallable} object with another object for equality.
-     *
-     * @param $this The reference {@code WriteMarshallable} object.
-     * @param o The object to compare with.
-     * @return {@code true} if both objects are equal, {@code false} otherwise.
+     * Compare two {@link WriteMarshallable} instances for equality.
+     * <p>
+     * The comparison is performed on their serialized form via
+     * {@link Wires#isEquals(Object, Object)} after verifying the other object is
+     * also a {@code WriteMarshallable}.
      */
     static boolean $equals(@NotNull WriteMarshallable $this, Object o) {
         return o instanceof WriteMarshallable &&
@@ -61,30 +63,24 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /**
-     * Generates a 32-bit hash code for a given {@code WriteMarshallable} object.
-     *
-     * @param $this The reference {@code WriteMarshallable} object.
-     * @return The 32-bit hash code.
+     * Generate a 32‑bit hash code for the provided marshallable using
+     * {@link HashWire#hash32(WriteMarshallable)}.
      */
     static int $hashCode(WriteMarshallable $this) {
         return HashWire.hash32($this);
     }
 
     /**
-     * Converts a given {@code WriteMarshallable} object into its string representation.
-     *
-     * @param $this The reference {@code WriteMarshallable} object.
-     * @return A string representation of the object.
+     * Convert the marshallable to a textual representation – typically YAML via
+     * {@link WireType#TEXT}.
      */
     static String $toString(WriteMarshallable $this) {
         return TEXT.asString($this);
     }
 
     /**
-     * Converts a {@code CharSequence} into its corresponding marshallable representation.
-     *
-     * @param cs The character sequence to convert.
-     * @return The corresponding marshallable object, or {@code null} if the conversion is not possible.
+     * Parse a textual representation (assumed {@link WireType#TEXT}) into a new
+     * instance of the appropriate type.
      */
     @Nullable
     static <T> T fromString(@NotNull CharSequence cs) throws InvalidMarshallableException {
@@ -92,12 +88,8 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /**
-     * Converts a {@code CharSequence} into its corresponding marshallable representation,
-     * expecting a specific type as the result.
-     *
-     * @param tClass The expected class of the resulting object.
-     * @param cs The character sequence to convert.
-     * @return The corresponding marshallable object of type {@code T}, or {@code null} if the conversion is not possible.
+     * Parse a textual representation (assumed {@link WireType#TEXT}) into an
+     * instance of {@code tClass}.
      */
     @Nullable
     static <T> T fromString(@NotNull Class<T> tClass, @NotNull CharSequence cs) throws InvalidMarshallableException {
@@ -105,12 +97,8 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /**
-     * Reads a file, either from the current working directory or the classpath, and interprets its
-     * content as a marshallable object. The method supports various file formats and relies on
-     * the underlying marshallable parsing logic to interpret the content.
-     *
-     * @param filename The name or path of the file to read.
-     * @return The marshallable object interpreted from the file content.
+     * Read a file (from the working directory or classpath) and deserialize its
+     * textual content (typically YAML) into a marshallable instance.
      */
     @NotNull
     static <T> T fromFile(String filename) throws IOException, InvalidMarshallableException {
@@ -118,10 +106,8 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /**
-     * Converts the content from an {@code InputStream} into its corresponding marshallable representation.
-     *
-     * @param is The input stream containing the content to convert.
-     * @return The corresponding marshallable object, or {@code null} if the conversion is not possible.
+     * Deserialize the entire contents of an {@link InputStream} using the default
+     * textual format.
      */
     static <T> T fromString(@NotNull InputStream is) throws InvalidMarshallableException {
         Scanner s = new Scanner(is).useDelimiter("\\A");
@@ -129,12 +115,8 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /**
-     * Reads a file, either from the current working directory or the classpath, and interprets its
-     * content as a marshallable object of a specific type.
-     *
-     * @param expectedType The expected type of the resulting object.
-     * @param filename The name or path of the file to read.
-     * @return The marshallable object interpreted from the file content.
+     * Read a file and deserialize it into an instance of {@code expectedType}
+     * assuming a textual wire format.
      */
     @Nullable
     static <T> T fromFile(@NotNull Class<T> expectedType, String filename) throws IOException, InvalidMarshallableException {
@@ -142,10 +124,8 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /**
-     * Streams the content of a file as marshallable objects.
-     *
-     * @param filename The name or path of the file to read.
-     * @return A stream of marshallable objects.
+     * Stream all documents contained in the given file, deserializing each using
+     * the default textual format.
      */
     @NotNull
     static <T> Stream<T> streamFromFile(String filename) throws IOException {
@@ -153,11 +133,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /**
-     * Streams the content of a file as marshallable objects of a specific type.
-     *
-     * @param expectedType The expected type of the resulting objects in the stream.
-     * @param filename The name or path of the file to read.
-     * @return A stream of marshallable objects of type {@code T}.
+     * Stream all documents in the file as instances of {@code expectedType}.
      */
     @Nullable
     static <T> Stream<T> streamFromFile(@NotNull Class<T> expectedType, String filename) throws IOException {
@@ -165,12 +141,8 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /**
-     * Retrieves the value of a specific field from the current marshallable object, expecting
-     * a certain type for the field's value.
-     *
-     * @param name The name of the field.
-     * @param tClass The expected class/type of the field's value.
-     * @return The value of the specified field.
+     * Convenience method providing reflective-style access to a field value via
+     * {@link Wires#getField(Object, String, Class)}.
      */
     @Nullable
     default <T> T getField(String name, Class<T> tClass) throws NoSuchFieldException {
@@ -178,45 +150,31 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /**
-     * Sets the value of a specific field in the current marshallable object.
-     *
-     * @param name The name of the field.
-     * @param value The new value for the specified field.
+     * Set a field value reflectively using {@link Wires#setField(Object, String, Object)}.
      */
     default void setField(String name, Object value) throws NoSuchFieldException {
         Wires.setField(this, name, value);
     }
 
     /**
-     * Retrieves the long value of a specific field from the current marshallable object.
-     *
-     * @param name The name of the field.
-     * @return The long value of the specified field.
+     * Shortcut to read a {@code long} field via {@link Wires#getLongField(Object, String)}.
      */
     default long getLongField(String name) throws NoSuchFieldException {
         return Wires.getLongField(this, name);
     }
 
     /**
-     * Sets the long value of a specific field in the current marshallable object.
-     *
-     * @param name The name of the field.
-     * @param value The new long value for the specified field.
+     * Shortcut to write a {@code long} field via {@link Wires#setLongField(Object, String, long)}.
      */
     default void setLongField(String name, long value) throws NoSuchFieldException {
         Wires.setLongField(this, name, value);
     }
 
     /**
-     * Reads the state of the Marshallable object from the given wire input. The method
-     * obtains a WireMarshaller specific to the class of the current object and delegates
-     * the reading process to that marshaller.
-     * <p>
-     * The default implementation will use a default value for each field not present
-     *
-     * @param wire The wire input source.
-     * @throws IORuntimeException           If an IO error occurs during the read operation.
-     * @throws InvalidMarshallableException If there's an error during marshalling.
+     * Read this object from {@code wire} using the
+     * {@link WireMarshaller} associated with its class.  Subclasses rarely need
+     * to override this unless they perform custom deserialization that cannot be
+     * expressed via field marshalling.
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
@@ -229,14 +187,9 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /**
-     * Writes the state of the Marshallable object to the given wire output. The method
-     * obtains a WireMarshaller specific to the class of the current object and delegates
-     * the writing process to that marshaller.
-     * <p>
-     * The default implementation will write all values even if they are a default value. c.f. readMarshallable
-     *
-     * @param wire The wire output destination.
-     * @throws InvalidMarshallableException If there's an error during marshalling.
+     * Write this object to {@code wire} using the
+     * {@link WireMarshaller} associated with its class.  Subclasses should only
+     * override if they require bespoke serialization logic.
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
@@ -249,9 +202,9 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /**
-     * Creates a deep copy of the current marshallable object.
-     *
-     * @return The deep copy of the current object.
+     * Create a deep copy by serialising this object to an in-memory binary wire
+     * and deserialising it back into a new instance of the same class.  Enum
+     * instances are returned as is.
      */
     @SuppressWarnings("unchecked")
     @NotNull
@@ -260,23 +213,18 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /**
-     * Copy fields from this to dest by marshalling out and then in. Allows copying of fields by name
-     * even if there is no type relationship between this and dest
-     *
-     * @param dest destination
-     * @return t
-     * @param <T> destination type
+     * Copy fields from this instance to {@code dest} by marshalling to a wire
+     * and then reading into the destination.  Fields are matched by name so the
+     * two objects do not need to share a type hierarchy.
      */
     default <T extends Marshallable> T copyTo(@NotNull T dest) throws InvalidMarshallableException {
         return Wires.copyTo(this, dest);
     }
 
     /**
-     * Merges the current marshallable object into a map, using a specified function to determine the key.
-     *
-     * @param map The map to merge into.
-     * @param getKey The function to determine the key for the current object in the map.
-     * @return The merged marshallable object in the map.
+     * Merge this object into {@code map}.  If an entry with the same key (as
+     * provided by {@code getKey}) exists, its fields are updated using
+     * {@link #copyTo(Marshallable)}; otherwise this instance is put into the map.
      */
     default <K, T extends Marshallable> T mergeToMap(@NotNull Map<K, T> map, @NotNull Function<T, K> getKey) {
         @NotNull @SuppressWarnings("unchecked")
@@ -286,9 +234,8 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /**
-     * Retrieves the list of field information for the current class.
-     *
-     * @return A list of field information objects.
+     * Return metadata describing the fields of this class as calculated by
+     * {@link WireMarshaller}.  Useful for reflective operations.
      */
     @NotNull
     default List<FieldInfo> $fieldInfos() {
@@ -296,25 +243,23 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /**
-     * Retrieves a map of field information for the current class, with field names as keys.
-     *
-     * @return A map with field names as keys and field information objects as values.
+     * As {@link #$fieldInfos()} but returned as a map keyed by field name.
      */
     default @NotNull Map<String, FieldInfo> $fieldInfoMap() {
         return Wires.fieldInfoMap(getClass());
     }
 
     /**
-     * Returns the alias name for the current class, if available.
-     *
-     * @return The alias name for the current class or the canonical name if no alias exists.
+     * Returns the alias for this class as registered with
+     * {@link net.openhft.chronicle.core.pool.ClassAliasPool#CLASS_ALIASES} or
+     * falls back to the canonical class name.
      */
     default String className() {
         return ClassAliasPool.CLASS_ALIASES.nameFor(getClass());
     }
 
     /**
-     * Resets the current marshallable object to its initial state.
+     * Reset this object to its default state via {@link Wires#reset(Object)}.
      */
     default void reset() {
         Wires.reset(this);

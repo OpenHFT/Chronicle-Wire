@@ -25,18 +25,19 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 /**
- * Represents a contract for objects that are designed for deserialization, with an expectation
- * that a new, potentially immutable object is instantiated during each deserialization process.
- * <p>
- * Unlike the `ReadMarshallable` pattern, the `Demarshallable` interface mandates that
- * implementing classes provide a constructor taking a `WireIn` instance to enable deserialization.
- * This approach ensures a clear mechanism to obtain a new object instance from the serialized data.
- * The interface also provides a utility to instantiate objects of implementing classes using the
- * appropriate constructor.
+ * Contract for classes that are created afresh from a {@link WireIn} rather than
+ * having an existing instance reused.  This is particularly suited to immutable
+ * objects.  Implementations must provide a constructor taking a {@code WireIn}
+ * which is used by {@link #newInstance(Class, WireIn)} to create and populate a
+ * new instance.
  */
 public interface Demarshallable {
 
-    // Holds a cache for constructors of Demarshallable implementing classes, optimized for retrieval performance.
+    /**
+     * Cache of constructors taking a single {@link WireIn} argument for each
+     * {@code Demarshallable} implementation.  Using a {@link ClassValue}
+     * avoids repeated reflective lookups when creating new instances.
+     */
     ClassValue<Constructor<Demarshallable>> DEMARSHALLABLES = new ClassValue<Constructor<Demarshallable>>() {
         @NotNull
         @Override
@@ -57,13 +58,8 @@ public interface Demarshallable {
     };
 
     /**
-     * Provides a utility method to create a new instance of a class that implements the `Demarshallable` interface.
-     * This method relies on the appropriate constructor from the cached constructors for efficient instantiation.
-     *
-     * @param clazz   The class type to be instantiated.
-     * @param wireIn  The `WireIn` parameter to be passed to the constructor for deserialization.
-     * @param <T>     The type of the object to be returned, which should implement `Demarshallable`.
-     * @return        A new instance of the specified class type.
+     * Utility method that uses the cached constructor to create a new instance
+     * of {@code clazz} and immediately populates it from {@code wireIn}.
      */
     @SuppressWarnings("unchecked")
     @NotNull

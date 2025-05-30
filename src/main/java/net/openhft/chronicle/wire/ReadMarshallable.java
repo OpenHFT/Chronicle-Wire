@@ -24,22 +24,20 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * This interface represents objects that can be reloaded from a stream by reusing an existing instance.
- * Instead of creating a new object every time the data is read from a stream, instances implementing
- * this interface can update their state based on the stream content, thereby potentially improving performance
- * and reducing garbage.
- * <p>
- * For objects which need to deserialize final fields, consider using the {@link Demarshallable} interface.
- *
- * <p>
- * Example usage might involve reading an object's state from a file or network stream
- * without allocating a new object on each read operation.
+ * Interface for objects that read their state from a {@link Wire} into an
+ * existing instance.  Reusing the same object instance can dramatically reduce
+ * allocation rates in performance critical code.  For immutable objects or
+ * those that require a fresh instance on each load see {@link Demarshallable}.
  */
 @FunctionalInterface
 @DontChain
 public interface ReadMarshallable extends CommonMarshallable {
 
-    // An instance of ReadMarshallable that doesn't perform any action when reading.
+    /**
+     * A no-op instance that simply consumes and discards input.  Useful as a
+     * placeholder when a {@code ReadMarshallable} is required but the data is
+     * intentionally ignored.
+     */
     ReadMarshallable DISCARD = w -> {};
 
     /**
@@ -54,13 +52,12 @@ public interface ReadMarshallable extends CommonMarshallable {
     void readMarshallable(@NotNull WireIn wire) throws IORuntimeException, InvalidMarshallableException;
 
     /**
-     * Handles unexpected fields encountered during the deserialization process.
-     * Default behavior is to skip the unexpected value. Override this method if a different behavior is required.
+     * Called when a field name is encountered that this object does not expect.
+     * The default implementation simply skips the value but subclasses may
+     * override to perform validation or error handling.
      *
-     * @param event   The event or field identifier that was unexpected.
-     * @param valueIn The value associated with the unexpected field.
-     *
-     * @throws InvalidMarshallableException If the unexpected field cannot be processed.
+     * @param event   typically the field name that was not recognised
+     * @param valueIn the value to skip or process
      */
     default void unexpectedField(Object event, ValueIn valueIn) throws InvalidMarshallableException {
         valueIn.skipValue();

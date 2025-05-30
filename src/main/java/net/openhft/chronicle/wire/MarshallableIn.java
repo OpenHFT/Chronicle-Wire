@@ -30,25 +30,21 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * This interface provides methods for reading marshallable objects. It defines the contract for any
- * entity that is capable of reading marshalled data. The interface incorporates default methods for
- * various reading operations to offer flexibility and extensibility to implementors.
- * <p>
- * Note: This interface assumes that you are familiar with the concept of marshallable objects,
- * which are objects that can be marshalled (converted to byte streams) and unmarshalled
- * (converted back to objects).
+ * Abstraction for any source from which {@link DocumentContext}s can be read
+ * (for example a queue tailer or network connection).
  */
 @FunctionalInterface
 public interface MarshallableIn {
 
-    // Size configuration for internal use
+    /**
+     * Maximum length of text that will be {@linkplain String#intern() interned}
+     * when read via {@link #readText()}.
+     */
     int MARSHALLABLE_IN_INTERN_SIZE = Integer.getInteger("marshallableIn.intern.size", 128);
 
     /**
-     * Provides a {@code DocumentContext} that can be used to read data from a source. The specific
-     * source and the means of reading are determined by the concrete implementation.
-     *
-     * @return A {@code DocumentContext} appropriate for reading from the underlying source.
+     * Open a {@link DocumentContext} for reading the next message.  Always use
+     * in a try-with-resources block so the context is closed correctly.
      */
     @NotNull
     DocumentContext readingDocument();
