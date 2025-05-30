@@ -167,22 +167,22 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     @Override
-    public ValueOut writeEvent(Class<?> expectedType, Object eventKey) throws InvalidMarshallableException {
-        if (eventKey instanceof WireKey)
-            return writeEventName((WireKey) eventKey);
-        if (eventKey instanceof CharSequence)
-            return writeEventName((CharSequence) eventKey);
-        if (expectedType != null && expectedType.isInstance(eventKey)) {
-            if (eventKey instanceof Enum)
-                return writeEventName(((Enum) eventKey).name());
-            if (eventKey instanceof DynamicEnum)
-                return writeEventName(((DynamicEnum) eventKey).name());
-            if (eventKey instanceof Boolean)
-                return writeEventName(eventKey.toString());
+    public ValueOut writeEvent(Class<?> keyType, Object key) throws InvalidMarshallableException {
+        if (key instanceof WireKey)
+            return writeEventName((WireKey) key);
+        if (key instanceof CharSequence)
+            return writeEventName((CharSequence) key);
+        if (keyType != null && keyType.isInstance(key)) {
+            if (key instanceof Enum)
+                return writeEventName(((Enum) key).name());
+            if (key instanceof DynamicEnum)
+                return writeEventName(((DynamicEnum) key).name());
+            if (key instanceof Boolean)
+                return writeEventName(key.toString());
         }
         boolean wasLeft = valueOut.swapLeaf(true);
         try {
-            return valueOut.write(expectedType, eventKey);
+            return valueOut.write(keyType, key);
         } finally {
             valueOut.swapLeaf(wasLeft);
         }

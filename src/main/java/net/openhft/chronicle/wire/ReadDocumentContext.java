@@ -36,9 +36,9 @@ public interface ReadDocumentContext extends DocumentContext {
      * underlying bytes if it was temporarily changed for reading the current document.
      * Not usually intended for external use.
      *
-     * @param readLimit the read limit to restore
+     * @param savedReadLimit the read limit to restore
      */
-    void closeReadLimit(long readLimit);
+    void closeReadLimit(long savedReadLimit);
 
     /**
      * Sets the read position for this {@code ReadDocumentContext}. Implementations typically
@@ -46,7 +46,7 @@ public interface ReadDocumentContext extends DocumentContext {
      * {@link net.openhft.chronicle.bytes.Bytes} object if it was advanced past the current
      * document.
      *
-     * @param readPosition the read position to restore
+     * @param savedReadPosition the read position to restore
      */
-    void closeReadPosition(long readPosition);
+    void closeReadPosition(long savedReadPosition);
 }

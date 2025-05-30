@@ -705,8 +705,8 @@ public class JSONWire extends TextWire {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public ValueOut writeEvent(Class<?> expectedType, Object eventKey) throws InvalidMarshallableException {
-        return super.writeEvent(String.class, "" + eventKey);
+    public ValueOut writeEvent(Class<?> keyType, Object key) throws InvalidMarshallableException {
+        return super.writeEvent(String.class, "" + key);
     }
 
     @Override
@@ -795,9 +795,9 @@ public class JSONWire extends TextWire {
         }
 
         @Override
-        public void start(boolean metaData) {
+        public void start(boolean isMetaData) {
             int count = this.count;
-            super.start(metaData);
+            super.start(isMetaData);
             if (count == 0) {
                 bytes.append('{');
                 start = bytes.writePosition();

@@ -25,13 +25,13 @@ public interface WriteDocumentContext extends DocumentContext {
 
     /**
      * Prepares the context to write a new document or message.
-     * If {@code metaData} is {@code true} the entry is marked as metadata,
+     * If {@code isMetaData} is {@code true} the entry is marked as metadata,
      * otherwise it is data. Implementations typically call this from
      * {@link MarshallableOut} before any bytes are written to the wire.
      *
-     * @param metaData {@code true} to mark the entry as metadata
+     * @param isMetaData {@code true} to mark the entry as metadata
      */
-    void start(boolean metaData);
+    void start(boolean isMetaData);
 
     /**
      * Indicates whether this write is part of a chained sequence.
@@ -47,9 +47,9 @@ public interface WriteDocumentContext extends DocumentContext {
      * When set to {@code true} additional writes may follow before the
      * document is finalised.
      *
-     * @param chainedElement {@code true} to enable chaining
+     * @param isChained {@code true} to enable chaining
      */
-    void chainedElement(boolean chainedElement);
+    void chainedElement(boolean isChained);
 
     /**
      * Returns {@code true} if no data has been written since

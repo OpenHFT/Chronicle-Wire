@@ -64,21 +64,21 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
      * {@link #close()}.  The {@code metaData} argument determines if the
      * metadata bit is set.
      *
-     * @param metaData true if the document carries metadata rather than user
-     *                 data
+     * @param isMetaData true if the document carries metadata rather than user
+     *                   data
      */
-    public void start(boolean metaData) {
+    public void start(boolean isMetaData) {
         count++;
         // If start() was called more than once, validate the metadata flag.
         if (count > 1) {
-            assert metaData == isMetaData();
+            assert isMetaData == isMetaData();
             return;
         }
         @NotNull Bytes<?> bytes = wire().bytes();
         bytes.writePositionForHeader(wire.usePadding());
         bytes.writeHexDumpDescription("msg-length");
         this.position = bytes.writePosition();
-        metaDataBit = metaData ? Wires.META_DATA : 0;
+        metaDataBit = isMetaData ? Wires.META_DATA : 0;
         tmpHeader = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
         bytes.writeInt(tmpHeader);
         rollback = false;
@@ -181,8 +181,8 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
     }
 
     @Override
-    public void chainedElement(boolean chainedElement) {
-        this.chainedElement = chainedElement;
+    public void chainedElement(boolean isChained) {
+        this.chainedElement = isChained;
     }
 
     @Override

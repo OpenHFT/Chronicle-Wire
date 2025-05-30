@@ -208,8 +208,8 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
 
     @NotNull
     @Override
-    public ValueOut writeEvent(Class<?> ignored, @NotNull Object eventKey) {
-        hash += K0 + eventKey.hashCode() * M0;
+    public ValueOut writeEvent(Class<?> ignoredType, @NotNull Object key) {
+        hash += K0 + key.hashCode() * M0;
         return valueOut;
     }
 

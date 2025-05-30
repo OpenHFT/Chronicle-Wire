@@ -53,7 +53,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
     /**
      * Writes a CharSequence key to the stream.
      *
-     * @param key The CharSequence key to write to the stream.
+     * @param fieldName The CharSequence key to write to the stream.
      * @return An interface to further define the output for the written value.
      */
     default ValueOut writeEventName(CharSequence key) {
@@ -63,19 +63,19 @@ public interface WireOut extends WireCommon, MarshallableOut {
     /**
      * Writes an event to the stream based on the type and event key.
      *
-     * @param expectedType The expected type of the event to write.
-     * @param eventKey The key of the event.
+     * @param keyType The expected type of the event key.
+     * @param key The key of the event.
      * @return An interface to further define the output for the written value.
      * @throws InvalidMarshallableException if there's an error marshalling the event.
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    default ValueOut writeEvent(Class<?> expectedType, Object eventKey) throws InvalidMarshallableException {
-        if (eventKey instanceof WireKey)
-            return writeEventName((WireKey) eventKey);
-        if (eventKey instanceof CharSequence)
-            return writeEventName((CharSequence) eventKey);
+    default ValueOut writeEvent(Class<?> keyType, Object key) throws InvalidMarshallableException {
+        if (key instanceof WireKey)
+            return writeEventName((WireKey) key);
+        if (key instanceof CharSequence)
+            return writeEventName((CharSequence) key);
         writeStartEvent();
-        getValueOut().object(expectedType, eventKey);
+        getValueOut().object(keyType, key);
         writeEndEvent();
         return getValueOut();
     }
@@ -83,22 +83,22 @@ public interface WireOut extends WireCommon, MarshallableOut {
     /**
      * Writes an event identifier to the stream.
      *
-     * @param methodId The ID of the method representing the event.
+     * @param eventId The ID of the event.
      * @return An interface to further define the output for the written value.
      */
-    default ValueOut writeEventId(int methodId) {
-        return write(new MethodWireKey(null, methodId));
+    default ValueOut writeEventId(int eventId) {
+        return write(new MethodWireKey(null, eventId));
     }
 
     /**
      * Writes an event identifier with a name to the stream.
      *
      * @param name The name of the event.
-     * @param methodId The ID of the method representing the event.
+     * @param eventId The ID of the event.
      * @return An interface to further define the output for the written value.
      */
-    default ValueOut writeEventId(String name, int methodId) {
-        return write(new MethodWireKey(name, methodId));
+    default ValueOut writeEventId(String name, int eventId) {
+        return write(new MethodWireKey(name, eventId));
     }
 
     /**
@@ -118,7 +118,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * @param key The CharSequence key to write to the stream.
      * @return An interface to further define the output for the written value.
      */
-    ValueOut write(CharSequence key);
+    ValueOut write(CharSequence fieldName);
 
     /**
      * Retrieves the interface for defining the output of a value

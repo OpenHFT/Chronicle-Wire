@@ -117,13 +117,13 @@ public class TextReadDocumentContext implements ReadDocumentContext {
     }
 
     @Override
-    public void closeReadPosition(long readPosition) {
-        this.readPosition = readPosition;
+    public void closeReadPosition(long savedReadPosition) {
+        this.readPosition = savedReadPosition;
     }
 
     @Override
-    public void closeReadLimit(long readLimit) {
-        this.readLimit = readLimit;
+    public void closeReadLimit(long savedReadLimit) {
+        this.readLimit = savedReadLimit;
     }
 
     @Nullable

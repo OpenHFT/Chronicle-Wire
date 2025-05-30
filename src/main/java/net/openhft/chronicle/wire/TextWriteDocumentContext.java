@@ -57,20 +57,20 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
     }
 
     /**
-     * Prepares for writing a new text document. If {@code metaData} is true a
+     * Prepares for writing a new text document. If {@code isMetaData} is true a
      * {@code "meta-data"} comment is written. Nested calls are allowed but only
      * the outermost call performs full initialisation.
      *
-     * @param metaData true if the document represents meta-data
+     * @param isMetaData true if the document represents meta-data
      */
-    public void start(boolean metaData) {
+    public void start(boolean isMetaData) {
         count++;
         if (count > 1) {
-            assert metaData == isMetaData();
+            assert isMetaData == isMetaData();
             return;
         }
-        this.metaData = metaData;
-        if (metaData)
+        this.metaData = isMetaData;
+        if (isMetaData)
             wire().writeComment("meta-data");
         notComplete = true;
         chainedElement = false;
@@ -176,8 +176,8 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
     /**
      * Sets whether this context is chained to the previous document.
      */
-    public void chainedElement(boolean chainedElement) {
-        this.chainedElement = chainedElement;
+    public void chainedElement(boolean isChained) {
+        this.chainedElement = isChained;
     }
 
     @Override
