@@ -22,11 +22,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation indicates that the associated field or parameter should be treated as
- * a {@code Marshallable} type, implying it should be serialized or deserialized accordingly.
- * It can be applied to fields or method parameters to provide metadata about their marshalling behavior.
+ * Indicates that a field or parameter should be treated as a {@link Marshallable}.
+ * <p>
+ * Useful when the declared type is an interface but the value is known to be a
+ * concrete marshallable implementation. The annotation hints to the marshalling
+ * framework that the object should be serialised or deserialised as that concrete
+ * type rather than as a proxy of the interface.
  */
-@Retention(RetentionPolicy.RUNTIME)  // Indicates that this annotation should be retained at runtime.
-@Target({ElementType.FIELD, ElementType.PARAMETER})  // Specifies that this annotation can be applied to fields and method parameters.
+@Retention(RetentionPolicy.RUNTIME) // Annotation is visible at runtime
+@Target({ElementType.FIELD, ElementType.PARAMETER}) // Applicable to fields and parameters
 public @interface AsMarshallable {
 }

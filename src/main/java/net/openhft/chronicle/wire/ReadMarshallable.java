@@ -22,27 +22,47 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Contract for objects that reuse a pre-existing instance when reading from a
- * wire.  It avoids allocation in performance critical code.  For immutable
- * objects use {@link Demarshallable} instead.
+ * Represents objects that can reload their state from a wire by reusing the
+ * current instance.  This avoids allocating a new object each time data is
+ * read and can reduce garbage collection in performance-critical code.
+ * <p>
+ * For objects which need to deserialize final fields, consider using the
+ * {@link Demarshallable} interface instead.
  */
 @FunctionalInterface
 @DontChain
 public interface ReadMarshallable extends CommonMarshallable {
 
-    /** No-op implementation that simply skips the input. */
+    /**
+     * A no-operation {@code ReadMarshallable} that consumes and discards
+     * the input from the wire.  Useful as a placeholder or when unwanted
+     * data should be skipped.
+     */
     ReadMarshallable DISCARD = w -> {};
 
     /**
-     * Update this object by reading its fields from {@code wire}.
+     * Read data from the wire and apply it to this instance.
+     * Implementations must parse the input and update their fields
+     * accordingly.
+     *
+     * @param wire the wire to read from
+     * @throws IORuntimeException         if an I/O error occurs
+     * @throws InvalidMarshallableException if the data is invalid for this type
      */
-    void readMarshallable(@NotNull WireIn wire) throws IORuntimeException, InvalidMarshallableException;
+    void readMarshallable(@NotNull WireIn wire)
+            throws IORuntimeException, InvalidMarshallableException;
 
     /**
-     * Invoked when a field is encountered that this object does not expect.
-     * The default implementation skips the value.
+     * Handles an unexpected field during deserialization.  The default
+     * implementation skips the value.
+     *
+     * @param event   the identifier of the field, typically a String or
+     *                {@code WireKey}
+     * @param valueIn the unexpected value
+     * @throws InvalidMarshallableException if the field cannot be processed
      */
-    default void unexpectedField(Object event, ValueIn valueIn) throws InvalidMarshallableException {
+    default void unexpectedField(Object event, ValueIn valueIn)
+            throws InvalidMarshallableException {
         valueIn.skipValue();
     }
 }

@@ -27,38 +27,38 @@ import java.nio.BufferUnderflowException;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
 /**
- * Represents a self-describing object that is trivially copyable, extending the functionality of {@link SelfDescribingMarshallable}.
- * The class provides mechanisms to efficiently manage the internal data layout of an instance based on various data types
- * such as longs, ints, shorts, and bytes. The layout is determined using a description integer.
+ * A self-describing object with a fixed binary layout that can be copied using
+ * trivial memory operations. Useful for high-performance scenarios where the
+ * layout is known and stable yet the object remains self-describing when
+ * marshalled.
  */
 @SuppressWarnings("this-escape")
 public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMarshallable {
 
-    // Contains the description of the data layout.
+    /** A transient integer encoding the number of longs, ints, shorts and bytes in this object's layout. */
     @FieldGroup("header")
     transient int description = $description();
 
     /**
-     * Fetches the description of the current data layout.
-     *
-     * @return An integer description of the layout.
+     * @return integer encoding of the primitive field layout
      */
     protected abstract int $description();
 
     /**
-     * Determines the starting offset for the data.
-     *
-     * @return The start offset.
+     * @return starting offset of the trivially copyable region
      */
     protected abstract int $start();
 
     /**
-     * Fetches the total length of the data based on its layout.
-     *
-     * @return The total data length.
+     * @return total length in bytes of the trivially copyable region
      */
     protected abstract int $length();
 
+    /**
+     * Reads the object's state from the bytes. If the layout description in the
+     * input matches {@link #$description()}, a fast unsafe copy is performed;
+     * otherwise {@link #carefulCopy(BytesIn, int)} handles schema differences.
+     */
     @Override
     public void readMarshallable(BytesIn<?> bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         int description0 = bytes.readInt();
@@ -69,13 +69,10 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
     }
 
     /**
-     * Performs a controlled copy of data from an input source based on the given description.
-     * The method will read data of various sizes (long, int, short, byte) based on the description
-     * and will copy this data to the current instance's memory.
-     *
-     * @param in          The input source from which data will be read.
-     * @param description0 The description integer specifying the layout of the data in the input source.
-     * @throws IllegalStateException if the description is invalid or does not match the input's content.
+     * Performs a field-by-field copy from {@code in} according to the supplied
+     * description, coping with layout differences between source and target.
+     * Extra fields present in {@code in} are skipped; missing fields leave the
+     * current value untouched.
      */
     private void carefulCopy(BytesIn<?> in, int description0) {
         // Start offset for copying data
@@ -143,6 +140,10 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
         }
     }
 
+    /**
+     * Writes the description followed by the trivially copyable fields using an
+     * unsafe memory copy.
+     */
     @Override
     public void writeMarshallable(BytesOut<?> bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
         bytes.writeInt($description());

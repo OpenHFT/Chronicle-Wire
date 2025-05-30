@@ -22,37 +22,53 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Functional interface for objects that can write their state to a
- * {@link WireOut}.  Often implemented by DTOs or other entities requiring
- * serialisation.  It also extends {@link WriteValue} and
- * {@link CommonMarshallable}.
+ * Represents an entity that can write its state to a wire.  It is a
+ * {@code @FunctionalInterface} and is commonly used by DTOs or other
+ * objects that need lightweight serialisation.  The interface extends
+ * {@link WriteValue} and {@link CommonMarshallable}.
  */
 @FunctionalInterface
 @DontChain
 public interface WriteMarshallable extends WriteValue, CommonMarshallable {
 
     /**
-     * Placeholder that writes nothing when invoked.
+     * A no-operation {@code WriteMarshallable} that writes nothing to the
+     * wire.  Useful as a placeholder.
      */
     WriteMarshallable EMPTY = wire -> {
         // nothing
     };
 
     /**
-     * Write this object's state to {@code wire}.
+     * Write this object's state to the supplied wire.
+     * Implementations should read their fields and serialise them to the
+     * given output.
+     *
+     * @param wire the wire to write to
+     * @throws InvalidMarshallableException if serialization fails
      */
-    void writeMarshallable(@NotNull WireOut wire) throws InvalidMarshallableException;
+    void writeMarshallable(@NotNull WireOut wire)
+            throws InvalidMarshallableException;
 
     /**
-     * Default implementation delegates to {@code out.marshallable(this)}.
+     * Serialises this object as a value.  The default implementation
+     * simply delegates to {@code out.marshallable(this)}.
+     *
+     * @param out the output to write to
+     * @throws InvalidMarshallableException if any error occurs
      */
     @Override
-    default void writeValue(@NotNull ValueOut out) throws InvalidMarshallableException {
+    default void writeValue(@NotNull ValueOut out)
+            throws InvalidMarshallableException {
         out.marshallable(this);
     }
 
     /**
-     * Hint for binary wire formats about the length prefix to use.
+     * Returns the length prefix to use when serialising this object.  It is
+     * mainly relevant for binary wire formats that prefix marshallable
+     * objects with their length.  See {@link BinaryLengthLength} for details.
+     *
+     * @return the assumed length prefix
      */
     default BinaryLengthLength binaryLengthLength() {
         return BinaryLengthLength.LENGTH_32BIT;
