@@ -27,39 +27,67 @@ import org.jetbrains.annotations.Nullable;
 import static net.openhft.chronicle.wire.Wires.lengthOf;
 
 /**
- * This is the BinaryReadDocumentContext class which implements the ReadDocumentContext interface.
- * It provides an implementation tailored for reading from binary document contexts and ensures
- * full read capability if required.
+ * Concrete {@link ReadDocumentContext} for reading length-prefixed messages from a
+ * {@link Wire}. It can roll back to the document start if required and was previously able
+ * to ensure a full read for delta-encoded wires.
  */
 public class BinaryReadDocumentContext implements ReadDocumentContext {
 
+    /**
+     * Stores the read position at the beginning of the current document.
+     * Used for rollbacks and diagnostics.
+     */
     public long start = -1;
+    /**
+     * Remembers the previous start position for debugging support.
+     */
     public long lastStart = -1;
+    /**
+     * Wire from which the document is read.
+     */
     @Nullable
     protected Wire wire;
+    /**
+     * True when a document is available to read.
+     */
     protected boolean present;
+    /**
+     * Indicates the header flagged NOT_COMPLETE or end of data.
+     */
     protected boolean notComplete;
+    /**
+     * Remembered read position to restore on close.
+     */
     protected long readPosition;
+    /**
+     * Limit of the bytes belonging to this message.
+     */
     protected long readLimit;
+    /**
+     * True if the message was metadata rather than user data.
+     */
     protected boolean metaData;
+    /**
+     * Marker that {@link #rollbackOnClose()} was requested.
+     */
     protected boolean rollback;
 
     /**
-     * Constructor that initializes the BinaryReadDocumentContext using the provided wire.
-     * It also determines if a full read should be ensured based on the wire type.
+     * Create a reader for the supplied wire.
      *
-     * @param wire The wire used for reading the document.
+     * @param wire wire to read from
      */
     public BinaryReadDocumentContext(@Nullable Wire wire) {
         this.wire = wire;
     }
 
     /**
-     * Constructor that initializes the BinaryReadDocumentContext using the provided wire and
-     * a flag to determine if a full read should be ensured.
+     * Deprecated constructor kept for binary compatibility. The boolean once
+     * signalled that delta encoded wires required a full read, but DeltaWire is
+     * no longer supported.
      *
-     * @param wire           The wire used for reading the document.
-     * @param ensureFullRead Flag to determine if full reading is required.
+     * @param wire           wire to read from
+     * @param ensureFullRead ignored
      */
     @Deprecated(/* to be removed in x.29 */)
     public BinaryReadDocumentContext(@Nullable Wire wire, boolean ensureFullRead) {
@@ -133,10 +161,10 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     }
 
     /**
-     * Rolls back the document context to its state before opening, if the rollback marker is set.
-     * Resets relevant attributes and updates the read position and limit accordingly.
+     * If {@link #rollbackOnClose()} was invoked, reset the bytes to the start of
+     * the current document and clear the rollback marker.
      *
-     * @return {@code true} if the context was rolled back, {@code false} otherwise.
+     * @return {@code true} when a rollback occurred
      */
     protected boolean rollbackIfNeeded() {
         if (rollback) {
@@ -151,6 +179,10 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         return false;
     }
 
+    /**
+     * Align for the header, read the length and metadata flags and adjust the
+     * byte limits to the end of the message.
+     */
     @Override
     public void start() {
         rollback = false;
@@ -213,16 +245,20 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     }
 
     /**
-     * Sets the start position of the document context and updates the last start position.
-     * This is useful to keep track of the beginning position for reading purposes.
+     * Record the starting byte position of the current document and update
+     * {@code lastStart}.
      *
-     * @param start The new starting position to set.
+     * @param start byte offset within the wire
      */
     public void setStart(long start) {
         this.start = start;
         this.lastStart = start;
     }
 
+    /**
+     * Dump the current message as a YAML string via
+     * {@link Wires#fromSizePrefixedBlobs(ReadDocumentContext)}.
+     */
     @Override
     public String toString() {
         return Wires.fromSizePrefixedBlobs(this);
