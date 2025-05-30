@@ -18,27 +18,35 @@ package net.openhft.chronicle.wire;
 /**
  * Represents a context for reading documents. This interface extends {@code DocumentContext}
  * and provides methods to manipulate the reading limits and positions within a document.
+ * Implementations are responsible for detecting document boundaries and making the
+ * content accessible through {@link #wire()}.
  */
 public interface ReadDocumentContext extends DocumentContext {
 
     /**
-     * Initiates the start of reading within the context.
+     * Attempts to locate and prepare the next document or message for reading from the
+     * underlying wire. After a successful call, {@link #isPresent()} indicates whether a
+     * document was found and {@link #wire()} provides access to its content.
      */
     void start();
 
     /**
-     * Sets the read limit for this {@code ReadDocumentContext}.
-     * This defines the boundary or endpoint within the document up to which reading should occur.
+     * Sets the read limit for this {@code ReadDocumentContext}. This is typically used by
+     * implementations during {@link #close()} to restore the previous read limit of the
+     * underlying bytes if it was temporarily changed for reading the current document.
+     * Not usually intended for external use.
      *
-     * @param readLimit The long value representing the read limit.
+     * @param readLimit the read limit to restore
      */
     void closeReadLimit(long readLimit);
 
     /**
-     * Sets the read position for this {@code ReadDocumentContext}.
-     * This defines the starting point within the document from which reading should begin.
+     * Sets the read position for this {@code ReadDocumentContext}. Implementations typically
+     * call this during {@link #close()} to restore the previous read position of the underlying
+     * {@link net.openhft.chronicle.bytes.Bytes} object if it was advanced past the current
+     * document.
      *
-     * @param readPosition The long value representing the read position.
+     * @param readPosition the read position to restore
      */
     void closeReadPosition(long readPosition);
 }
