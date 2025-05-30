@@ -19,9 +19,8 @@ package net.openhft.chronicle.wire;
 
 /**
  * Enumerates the types of quotation marks.
- * This enum represents the most common quotation marks: none, single and double.
+ * This enum represents the most common quotation marks: none, single, and double.
  * Each enumeration value is associated with its corresponding character representation.
- * Used by {@link YamlWireOut} to determine how to quote and escape strings.
  */
 enum Quotes {
 
@@ -34,10 +33,7 @@ enum Quotes {
     /** Represents a double quotation mark. */
     DOUBLE('"');
 
-    /**
-     * The character representation of the quote (for example {@code '} for
-     * SINGLE, {@code "} for DOUBLE or a space for NONE).
-     */
+    // The character representation of the quotation mark
     final char q;
 
     /**
