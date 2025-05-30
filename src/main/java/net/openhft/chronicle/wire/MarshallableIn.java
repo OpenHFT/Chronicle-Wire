@@ -87,16 +87,16 @@ public interface MarshallableIn {
     /**
      * Reads the raw bytes of the next document into the supplied {@code Bytes} instance.
      *
-     * @param using destination for the bytes
+     * @param targetBuffer destination for the bytes
      * @return {@code false} if no document was available
      */
-    default boolean readBytes(@NotNull Bytes<?> using) throws InvalidMarshallableException {
+    default boolean readBytes(@NotNull Bytes<?> targetBuffer) throws InvalidMarshallableException {
         try (@NotNull DocumentContext dc = readingDocument()) {
             if (!dc.isPresent())
                 return false;
             Bytes<?> bytes = dc.wire().bytes();
-            long len = Math.min(using.writeRemaining(), bytes.readRemaining());
-            using.write(bytes, bytes.readPosition(), len);
+            long len = Math.min(targetBuffer.writeRemaining(), bytes.readRemaining());
+            targetBuffer.write(bytes, bytes.readPosition(), len);
             bytes.readSkip(len);
         }
         return true;
@@ -127,16 +127,16 @@ public interface MarshallableIn {
     /**
      * Reads the next document into the supplied {@code StringBuilder}.
      *
-     * @param sb builder to populate
+     * @param textBuilder builder to populate
      * @return {@code false} if no document was present
      */
-    default boolean readText(@NotNull StringBuilder sb) throws InvalidMarshallableException {
+    default boolean readText(@NotNull StringBuilder textBuilder) throws InvalidMarshallableException {
         try (@NotNull DocumentContext dc = readingDocument()) {
             if (!dc.isPresent()) {
-                sb.setLength(0);
+                textBuilder.setLength(0);
                 return false;
             }
-            dc.wire().getValueIn().text(sb);
+            dc.wire().getValueIn().text(textBuilder);
         }
         return true;
     }
@@ -172,12 +172,12 @@ public interface MarshallableIn {
      * Creates a {@link MethodReader} that deserialises method calls from this input and dispatches
      * them to the supplied {@code objects}.
      *
-     * @param objects targets for the method calls
+     * @param targets targets for the method calls
      * @return a configured {@code MethodReader}
      */
     @NotNull
-    default MethodReader methodReader(Object... objects) {
-        return methodReaderBuilder().build(objects);
+    default MethodReader methodReader(Object... targets) {
+        return methodReaderBuilder().build(targets);
     }
 
     /**

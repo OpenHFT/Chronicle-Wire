@@ -54,13 +54,13 @@ public interface WriteMarshallable extends WriteValue, CommonMarshallable {
      * Serialises this object as a value.  The default implementation
      * simply delegates to {@code out.marshallable(this)}.
      *
-     * @param out the output to write to
+     * @param valueOut the output to write to
      * @throws InvalidMarshallableException if any error occurs
      */
     @Override
-    default void writeValue(@NotNull ValueOut out)
+    default void writeValue(@NotNull ValueOut valueOut)
             throws InvalidMarshallableException {
-        out.marshallable(this);
+        valueOut.marshallable(this);
     }
 
     /**

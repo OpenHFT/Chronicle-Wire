@@ -26,9 +26,9 @@ public interface WriteDocumentContext extends DocumentContext {
     /**
      * Initializes the writing context with a specific metadata status.
      *
-     * @param metaData A boolean value indicating if the context is metadata.
+     * @param isMetaData A boolean value indicating if the context is metadata.
      */
-    void start(boolean metaData);
+    void start(boolean isMetaData);
 
     /**
      * Returns {@code true} if this {@code WriteDocumentContext} is a
@@ -42,10 +42,10 @@ public interface WriteDocumentContext extends DocumentContext {
     /**
      * Marks this {@code WriteDocumentContext} as a chained element.
      *
-     * @param chainedElement A boolean value indicating if the context
+     * @param isChained A boolean value indicating if the context
      * is a chained element.
      */
-    void chainedElement(boolean chainedElement);
+    void chainedElement(boolean isChained);
 
     /**
      * Checks if the writing context is empty.

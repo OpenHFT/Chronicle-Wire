@@ -56,20 +56,20 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
      * Initializes the context for starting a new binary write.
      * This will setup necessary headers and markers to facilitate the write.
      *
-     * @param metaData A flag indicating whether the write includes metadata.
+     * @param isMetaData A flag indicating whether the write includes metadata.
      */
-    public void start(boolean metaData) {
+    public void start(boolean isMetaData) {
         count++;
         // If start() was called more than once, validate the metadata flag.
         if (count > 1) {
-            assert metaData == isMetaData();
+            assert isMetaData == isMetaData();
             return;
         }
         @NotNull Bytes<?> bytes = wire().bytes();
         bytes.writePositionForHeader(wire.usePadding());
         bytes.writeHexDumpDescription("msg-length");
         this.position = bytes.writePosition();
-        metaDataBit = metaData ? Wires.META_DATA : 0;
+        metaDataBit = isMetaData ? Wires.META_DATA : 0;
         tmpHeader = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
         bytes.writeInt(tmpHeader);
         rollback = false;
@@ -156,8 +156,8 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
     }
 
     @Override
-    public void chainedElement(boolean chainedElement) {
-        this.chainedElement = chainedElement;
+    public void chainedElement(boolean isChained) {
+        this.chainedElement = isChained;
     }
 
     @Override

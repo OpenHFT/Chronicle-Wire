@@ -79,8 +79,8 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * and returns the resulting object.
      */
     @Nullable
-    static <T> T fromString(@NotNull CharSequence cs) throws InvalidMarshallableException {
-        return TEXT.fromString(cs);
+    static <T> T fromString(@NotNull CharSequence text) throws InvalidMarshallableException {
+        return TEXT.fromString(text);
     }
 
     /**
@@ -88,8 +88,8 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * assuming the text is in the default format ({@link WireType#TEXT}).
      */
     @Nullable
-    static <T> T fromString(@NotNull Class<T> tClass, @NotNull CharSequence cs) throws InvalidMarshallableException {
-        return TEXT.fromString(tClass, cs);
+    static <T> T fromString(@NotNull Class<T> targetType, @NotNull CharSequence text) throws InvalidMarshallableException {
+        return TEXT.fromString(targetType, text);
     }
 
     /**
@@ -97,16 +97,16 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * into a marshallable object.
      */
     @NotNull
-    static <T> T fromFile(String filename) throws IOException, InvalidMarshallableException {
-        return TEXT.fromFile(filename);
+    static <T> T fromFile(String filePath) throws IOException, InvalidMarshallableException {
+        return TEXT.fromFile(filePath);
     }
 
     /**
      * Reads the entire {@link InputStream} and deserialises its textual content
      * using the default format.
      */
-    static <T> T fromString(@NotNull InputStream is) throws InvalidMarshallableException {
-        Scanner s = new Scanner(is).useDelimiter("\\A");
+    static <T> T fromString(@NotNull InputStream inputStream) throws InvalidMarshallableException {
+        Scanner s = new Scanner(inputStream).useDelimiter("\\A");
         return TEXT.fromString(s.hasNext() ? s.next() : "");
     }
 
@@ -115,8 +115,8 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * textual wire format.
      */
     @Nullable
-    static <T> T fromFile(@NotNull Class<T> expectedType, String filename) throws IOException, InvalidMarshallableException {
-        return TEXT.fromFile(expectedType, filename);
+    static <T> T fromFile(@NotNull Class<T> targetType, String filePath) throws IOException, InvalidMarshallableException {
+        return TEXT.fromFile(targetType, filePath);
     }
 
     /**
@@ -125,8 +125,8 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * format.
      */
     @NotNull
-    static <T> Stream<T> streamFromFile(String filename) throws IOException {
-        return TEXT.streamFromFile(filename);
+    static <T> Stream<T> streamFromFile(String filePath) throws IOException {
+        return TEXT.streamFromFile(filePath);
     }
 
     /**
@@ -134,8 +134,8 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * Multiple documents may be delimited according to the default text format.
      */
     @NotNull
-    static <T> Stream<T> streamFromFile(@NotNull Class<T> expectedType, String filename) throws IOException {
-        return TEXT.streamFromFile(expectedType, filename);
+    static <T> Stream<T> streamFromFile(@NotNull Class<T> targetType, String filePath) throws IOException {
+        return TEXT.streamFromFile(targetType, filePath);
     }
 
     /**
@@ -144,29 +144,29 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * code.
      */
     @Nullable
-    default <T> T getField(String name, Class<T> tClass) throws NoSuchFieldException {
-        return Wires.getField(this, name, tClass);
+    default <T> T getField(String fieldName, Class<T> tClass) throws NoSuchFieldException {
+        return Wires.getField(this, fieldName, tClass);
     }
 
     /**
      * Sets a field using the reflective utilities in {@link Wires}.
      */
-    default void setField(String name, Object value) throws NoSuchFieldException {
-        Wires.setField(this, name, value);
+    default void setField(String fieldName, Object value) throws NoSuchFieldException {
+        Wires.setField(this, fieldName, value);
     }
 
     /**
      * Convenience method to read a {@code long} field via {@link Wires}.
      */
-    default long getLongField(String name) throws NoSuchFieldException {
-        return Wires.getLongField(this, name);
+    default long getLongField(String fieldName) throws NoSuchFieldException {
+        return Wires.getLongField(this, fieldName);
     }
 
     /**
      * Convenience method to write a {@code long} field via {@link Wires}.
      */
-    default void setLongField(String name, long value) throws NoSuchFieldException {
-        Wires.setLongField(this, name, value);
+    default void setLongField(String fieldName, long value) throws NoSuchFieldException {
+        Wires.setLongField(this, fieldName, value);
     }
 
     /**

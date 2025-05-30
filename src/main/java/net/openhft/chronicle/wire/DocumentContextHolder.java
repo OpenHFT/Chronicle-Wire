@@ -108,8 +108,8 @@ public class DocumentContextHolder implements DocumentContext, WriteDocumentCont
     }
 
     @Override
-    public void start(boolean metaData) {
-        ((WriteDocumentContext) dc).start(metaData);
+    public void start(boolean isMetaData) {
+        ((WriteDocumentContext) dc).start(isMetaData);
     }
 
     @Override
@@ -118,8 +118,8 @@ public class DocumentContextHolder implements DocumentContext, WriteDocumentCont
     }
 
     @Override
-    public void chainedElement(boolean chainedElement) {
-        ((WriteDocumentContext) dc).chainedElement(chainedElement);
+    public void chainedElement(boolean isChained) {
+        ((WriteDocumentContext) dc).chainedElement(isChained);
     }
 
     @Override

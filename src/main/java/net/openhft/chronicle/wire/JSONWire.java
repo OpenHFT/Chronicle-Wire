@@ -795,9 +795,9 @@ public class JSONWire extends TextWire {
         }
 
         @Override
-        public void start(boolean metaData) {
+        public void start(boolean isMetaData) {
             int count = this.count;
-            super.start(metaData);
+            super.start(isMetaData);
             if (count == 0) {
                 bytes.append('{');
                 start = bytes.writePosition();

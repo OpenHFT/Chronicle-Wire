@@ -64,16 +64,16 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
      * this method ensures the meta-data flag is consistent. It also sets the write position
      * and other state flags to their initial values.
      *
-     * @param metaData Indicates if the data being written is meta-data
+     * @param isMetaData Indicates if the data being written is meta-data
      */
-    public void start(boolean metaData) {
+    public void start(boolean isMetaData) {
         count++;
         if (count > 1) {
-            assert metaData == isMetaData();
+            assert isMetaData == isMetaData();
             return;
         }
-        this.metaData = metaData;
-        if (metaData)
+        this.metaData = isMetaData;
+        if (isMetaData)
             wire().writeComment("meta-data");
         notComplete = true;
         chainedElement = false;
@@ -149,8 +149,8 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
     }
 
     @Override
-    public void chainedElement(boolean chainedElement) {
-        this.chainedElement = chainedElement;
+    public void chainedElement(boolean isChained) {
+        this.chainedElement = isChained;
     }
 
     @Override

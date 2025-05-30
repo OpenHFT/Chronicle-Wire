@@ -69,12 +69,12 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
     }
 
     /**
-     * Performs a field-by-field copy from {@code in} according to the supplied
+     * Performs a field-by-field copy from {@code bytesIn} according to the supplied
      * description, coping with layout differences between source and target.
-     * Extra fields present in {@code in} are skipped; missing fields leave the
+     * Extra fields present in {@code bytesIn} are skipped; missing fields leave the
      * current value untouched.
      */
-    private void carefulCopy(BytesIn<?> in, int description0) {
+    private void carefulCopy(BytesIn<?> bytesIn, int description0) {
         // Start offset for copying data
         int offset = $start();
 
@@ -88,15 +88,15 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
         int length = longs0 * 8 + ints0 * 4 + shorts0 * 2 + bytes0;
 
         // Validation: Check if the description0 is even or if the length exceeds the remaining data in the input
-        if (Integer.bitCount(description0) % 2 == 0 || length > in.readRemaining())
-            throw new IllegalStateException("Invalid description: " + Integer.toHexString(description0) + ", length: " + length + ", remaining: " + in.readRemaining());
+        if (Integer.bitCount(description0) % 2 == 0 || length > bytesIn.readRemaining())
+            throw new IllegalStateException("Invalid description: " + Integer.toHexString(description0) + ", length: " + length + ", remaining: " + bytesIn.readRemaining());
 
         // Copy long values from the input source to the object's memory
         int longs = $description() >>> 24; // max 255
         for (int i = 0; i < Math.max(longs, longs0); i++) {
             long value = 0;
             if (i < longs0)
-                value = in.readLong();
+                value = bytesIn.readLong();
             if (i < longs) {
                 MEMORY.writeLong(this, offset, value);
                 offset += 8; // Increment offset for next long value
@@ -108,7 +108,7 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
         for (int i = 0; i < Math.max(ints, ints0); i++) {
             int value = 0;
             if (i < ints0)
-                value = in.readInt();
+                value = bytesIn.readInt();
             if (i < ints) {
                 MEMORY.writeInt(this, offset, value);
                 offset += 4; // Increment offset for next int value
@@ -120,7 +120,7 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
         for (int i = 0; i < Math.max(shorts, shorts0); i++) {
             short value = 0;
             if (i < shorts0)
-                value = in.readShort();
+                value = bytesIn.readShort();
             if (i < shorts) {
                 MEMORY.writeShort(this, offset, value);
                 offset += 2; // Increment offset for next short value
@@ -132,7 +132,7 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
         for (int i = 0; i < Math.max(bytes, bytes0); i++) {
             byte value = 0;
             if (i < bytes0)
-                value = in.readByte();
+                value = bytesIn.readByte();
             if (i < bytes) {
                 MEMORY.writeByte(this, offset, value);
                 offset += 1; // Increment offset for next byte value

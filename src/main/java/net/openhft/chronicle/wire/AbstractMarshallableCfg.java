@@ -72,13 +72,13 @@ public abstract class AbstractMarshallableCfg extends SelfDescribingMarshallable
     /**
      * Logs and skips fields that are not defined in this configuration.
      *
-     * @param event   field name encountered
-     * @param valueIn value of that field
+     * @param fieldName field name encountered
+     * @param valueIn   value of that field
      * @throws InvalidMarshallableException if processing fails
      */
     @Override
-    public void unexpectedField(Object event, ValueIn valueIn) throws InvalidMarshallableException {
+    public void unexpectedField(Object fieldName, ValueIn valueIn) throws InvalidMarshallableException {
         // Log a warning about the unexpected field
-        Jvm.warn().on(getClass(), "Field " + event + " ignored, was " + valueIn.objectBestEffort());
+        Jvm.warn().on(getClass(), "Field " + fieldName + " ignored, was " + valueIn.objectBestEffort());
     }
 }

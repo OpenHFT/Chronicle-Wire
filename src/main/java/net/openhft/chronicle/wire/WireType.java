@@ -499,33 +499,33 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     /**
      * Deserializes an object of generic type from a file.
      *
-     * @param filename The path to the file containing the serialized object.
+     * @param filePath The path to the file containing the serialized object.
      * @param <T> The type of the object to be deserialized.
      * @return The deserialized object.
      * @throws IOException If there's an error reading the file.
      * @throws InvalidMarshallableException If the object cannot be properly deserialized.
      */
     @NotNull
-    public <T> T fromFile(String filename) throws IOException, InvalidMarshallableException {
-        return (T) fromFile(Marshallable.class, filename);
+    public <T> T fromFile(String filePath) throws IOException, InvalidMarshallableException {
+        return (T) fromFile(Marshallable.class, filePath);
     }
 
     /**
      * Deserializes an object of a specified type from a file.
      *
-     * @param expectedType The expected type of the object to be deserialized.
-     * @param filename The path to the file containing the serialized object.
+     * @param targetType The expected type of the object to be deserialized.
+     * @param filePath  The path to the file containing the serialized object.
      * @param <T> The type of the object to be deserialized.
      * @return The deserialized object, or null if the object could not be deserialized.
      * @throws IOException If there's an error reading the file.
      * @throws InvalidMarshallableException If the object cannot be properly deserialized.
      */
     @Nullable
-    public <T> T fromFile(@NotNull Class<T> expectedType, String filename) throws IOException, InvalidMarshallableException {
-        File file = new File(filename);
+    public <T> T fromFile(@NotNull Class<T> targetType, String filePath) throws IOException, InvalidMarshallableException {
+        File file = new File(filePath);
         URL url = null;
         if (!file.exists()) {
-            url = urlFor(expectedType, filename);
+            url = urlFor(targetType, filePath);
             file = new File(url.getFile());
         }
         //: MappedFile.readOnly(file).acquireBytesForRead(0);
@@ -534,7 +534,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         if (bytes.readRemaining() == 0)
             throw new IOException("File " + file + " was empty");
         try {
-            return apply(bytes).getValueIn().object(expectedType);
+            return apply(bytes).getValueIn().object(targetType);
         } finally {
             bytes.releaseLast();
         }
@@ -543,29 +543,29 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     /**
      * Streams objects of generic type from a file.
      *
-     * @param filename The path to the file containing the serialized objects.
+     * @param filePath The path to the file containing the serialized objects.
      * @param <T> The type of the objects to be streamed.
      * @return A stream of the deserialized objects.
      * @throws IOException If there's an error reading the file.
      */
     @NotNull
-    public <T> Stream<T> streamFromFile(String filename) throws IOException {
-        return streamFromFile((Class) Marshallable.class, filename);
+    public <T> Stream<T> streamFromFile(String filePath) throws IOException {
+        return streamFromFile((Class) Marshallable.class, filePath);
     }
 
     /**
      * Streams objects of a specified type from a file.
      *
-     * @param expectedType The expected type of the objects to be streamed.
-     * @param filename The path to the file containing the serialized objects.
+     * @param targetType The expected type of the objects to be streamed.
+     * @param filePath  The path to the file containing the serialized objects.
      * @param <T> The type of the objects to be streamed.
      * @return A stream of the deserialized objects.
      * @throws IOException If there's an error reading the file.
      */
     @NotNull
-    public <T> Stream<T> streamFromFile(@NotNull Class<T> expectedType, String filename) throws IOException {
-        Bytes<?> b = BytesUtil.readFile(filename);
-        return streamFromBytes(expectedType, b);
+    public <T> Stream<T> streamFromFile(@NotNull Class<T> targetType, String filePath) throws IOException {
+        Bytes<?> b = BytesUtil.readFile(filePath);
+        return streamFromBytes(targetType, b);
     }
 
     /**

@@ -56,12 +56,12 @@ public interface ReadMarshallable extends CommonMarshallable {
      * Handles an unexpected field during deserialization.  The default
      * implementation skips the value.
      *
-     * @param event   the identifier of the field, typically a String or
-     *                {@code WireKey}
-     * @param valueIn the unexpected value
+     * @param fieldName the identifier of the field, typically a String or
+     *                  {@code WireKey}
+     * @param valueIn   the unexpected value
      * @throws InvalidMarshallableException if the field cannot be processed
      */
-    default void unexpectedField(Object event, ValueIn valueIn)
+    default void unexpectedField(Object fieldName, ValueIn valueIn)
             throws InvalidMarshallableException {
         valueIn.skipValue();
     }
