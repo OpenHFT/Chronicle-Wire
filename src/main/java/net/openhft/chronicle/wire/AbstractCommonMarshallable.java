@@ -19,21 +19,30 @@ import net.openhft.chronicle.bytes.BytesMarshallable;
 import net.openhft.chronicle.core.io.ValidatableUtil;
 
 /**
- * This uses bytes marshallable, non self describing messages by default.
- * use {@link SelfDescribingMarshallable} or {@link BytesInBinaryMarshallable} instead
+ * Base class for marshallable objects backed by
+ * {@link net.openhft.chronicle.bytes.BytesMarshallable}.  By default it assumes
+ * the wire format is not self describing.  For self describing objects use
+ * {@link SelfDescribingMarshallable}.  For raw bytes handling consider
+ * {@link BytesInBinaryMarshallable}.
  */
 abstract class AbstractCommonMarshallable implements Marshallable, BytesMarshallable {
     @Override
+    /** Delegates to {@link Marshallable#$equals(WriteMarshallable, Object)}. */
     public boolean equals(Object o) {
         return Marshallable.$equals(this, o);
     }
 
     @Override
+    /** Delegates to {@link Marshallable#$hashCode(WriteMarshallable)}. */
     public int hashCode() {
         return Marshallable.$hashCode(this);
     }
 
     @Override
+    /**
+     * Serialises this object to text for debugging, temporarily disabling
+     * validation.
+     */
     public String toString() {
         // this allows even invalid DTOs to be written to dump on a best effort basis.
         ValidatableUtil.startValidateDisabled();
