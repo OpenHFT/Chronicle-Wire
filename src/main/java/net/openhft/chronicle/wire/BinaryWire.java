@@ -108,39 +108,61 @@ public class BinaryWire extends AbstractWire implements Wire {
     // Threshold size for compressed outputs
     private final int compressedSize;
 
-    // Context for writing to the wire
+    /**
+     * The current {@link BinaryWriteDocumentContext} managing the start and end of
+     * binary documents. Each document is typically length prefixed.
+     */
     private final WriteDocumentContext writeContext = new BinaryWriteDocumentContext(this);
 
-    // Context for reading from the wire
+    /**
+     * The current {@link BinaryReadDocumentContext} used to read length-prefixed
+     * binary documents from the underlying bytes.
+     */
     @NotNull
     private final BinaryReadDocumentContext readContext;
 
-    // String builder for various internal operations
+    /**
+     * A reusable {@link StringBuilder} for internal string manipulation. Using a
+     * single instance reduces temporary object creation.
+     */
     private final StringBuilder stringBuilder = new StringBuilder();
 
-    // Default input handler
+    /**
+     * Provides default values when a requested field is absent in the wire.
+     */
     private DefaultValueIn defaultValueIn;
+
+    /**
+     * The name of the compression algorithm ("binary" means no compression) to
+     * apply once a value exceeds {@link #compressedSize}.
+     */
     private final String compression;
+
+    /**
+     * Overrides the self-describing message flag used when objects are written.
+     * {@code null} uses the object's default, {@code true} forces self-describing
+     * output and {@code false} forces the opposite.
+     */
     private Boolean overrideSelfDescribing = null;
 
     /**
-     * Constructs a BinaryWire with default settings.
+     * Constructs a {@code BinaryWire} with standard settings.
      *
-     * @param bytes The bytes to be processed by this wire
+     * @param bytes the bytes to be wrapped by this wire
      */
     public BinaryWire(@NotNull Bytes<?> bytes) {
         this(bytes, false, false, false, Integer.MAX_VALUE, "binary", false);
     }
 
     /**
-     * Constructs a BinaryWire with specified configurations.
+     * Constructs a fully configurable {@code BinaryWire}.
      *
-     * @param bytes The bytes to be processed by this wire
-     * @param fixed Indicates whether the value output is fixed
-     * @param numericFields Indicates if fields are represented numerically
-     * @param fieldLess Indicates if fields are absent
-     * @param compressedSize Threshold size for compression
-     * @param compression Type of compression (e.g., "binary")
+     * @param bytes          the bytes to wrap
+     * @param fixed          if {@code true}, enable fixed-size encodings for some values
+     * @param numericFields  write field numbers rather than names
+     * @param fieldLess      omit field identifiers entirely
+     * @param compressedSize compress values larger than this
+     * @param compression    name of the compression algorithm
      */
     public BinaryWire(@NotNull Bytes<?> bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression) {
         super(bytes, false);
@@ -154,15 +176,16 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Constructs a BinaryWire with specified configurations.
+     * Same as the main constructor but with a legacy {@code supportDelta} parameter
+     * which is ignored as delta wire format is not supported.
      *
-     * @param bytes The bytes to be processed by this wire
-     * @param fixed Indicates whether the value output is fixed
-     * @param numericFields Indicates if fields are represented numerically
-     * @param fieldLess Indicates if fields are absent
-     * @param compressedSize Threshold size for compression
-     * @param compression Type of compression (e.g., "binary")
-     * @param supportDelta must be false
+     * @param bytes          the bytes to wrap
+     * @param fixed          if {@code true}, enable fixed-size encodings
+     * @param numericFields  write field numbers rather than names
+     * @param fieldLess      omit field identifiers entirely
+     * @param compressedSize compress values larger than this
+     * @param compression    name of the compression algorithm
+     * @param supportDelta   formerly enabled delta format; must be {@code false}
      */
     @Deprecated(/* to be removed in x.29 */)
     public BinaryWire(@NotNull Bytes<?> bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression, boolean supportDelta) {
@@ -171,10 +194,11 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Creates and returns a new instance of BinaryWire with the delta support disabled.
+     * Creates a standard {@code BinaryWire} optimised for performance. Numeric
+     * fields, field-less serialisation and value compression are disabled.
      *
-     * @param bytes The bytes to be processed by this wire
-     * @return A new instance of BinaryWire
+     * @param bytes the bytes to wrap
+     * @return a new {@code BinaryWire}
      */
     @NotNull
     public static BinaryWire binaryOnly(@NotNull Bytes<?> bytes) {
@@ -182,11 +206,11 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Determines if the provided BytesStore can be treated as textual.
-     * This method checks each byte of the BytesStore to ensure it's a printable character or a newline.
+     * Heuristically checks whether the content of a {@link BytesStore} consists
+     * solely of printable ASCII characters and newlines.
      *
-     * @param bytes The BytesStore to check
-     * @return true if the BytesStore can be treated as text, false otherwise
+     * @param bytes the store to inspect
+     * @return {@code true} if the bytes appear textual
      */
     static boolean textable(BytesStore<?, ?> bytes) {
         if (bytes == null)
@@ -200,11 +224,10 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Determines if the provided CharSequence can be treated as textual.
-     * This method checks each character of the CharSequence to ensure it's a printable character.
+     * As {@link #textable(BytesStore)} but operates on a {@link CharSequence}.
      *
-     * @param cs The CharSequence to check
-     * @return true if the CharSequence can be treated as text, false otherwise
+     * @param cs the character sequence to inspect
+     * @return {@code true} if the sequence is printable ASCII
      */
     static boolean textable(CharSequence cs) {
         if (cs == null)
@@ -218,10 +241,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Checks if the provided character is a digit (0-9).
-     *
-     * @param c The character to check
-     * @return true if the character is a digit, false otherwise
+     * Returns {@code true} if {@code c} is an ASCII digit '0' through '9'.
      */
     static boolean isDigit(char c) {
         // use underflow to make digits below '0' large.
@@ -229,6 +249,10 @@ public class BinaryWire extends AbstractWire implements Wire {
         return c <= 9;
     }
 
+    /**
+     * Resets this wire to its initial state, clearing bytes and document contexts
+     * so the instance can be reused.
+     */
     @Override
     public void reset() {
         writeContext.reset();
@@ -238,32 +262,37 @@ public class BinaryWire extends AbstractWire implements Wire {
         bytes.clear();
     }
 
+    /** @see RollbackIfNotCompleteNotifier#rollbackIfNotComplete() */
     @Override
     public void rollbackIfNotComplete() {
         writeContext.rollbackIfNotComplete();
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean isBinary() {
         return true;
     }
 
     /**
-     * Retrieves the current override setting for the self-describing nature of this BinaryWire.
-     *
-     * @return null if there's no override, true if it always uses self-describing messages,
-     *         false if it never uses self-describing messages.
+     * Returns the override flag controlling whether objects are written in
+     * self-describing form. The values mean:
+     * <ul>
+     *   <li>{@code null} &ndash; use each object's own setting</li>
+     *   <li>{@code true} &ndash; always write type information</li>
+     *   <li>{@code false} &ndash; never write type information</li>
+     * </ul>
      */
     public Boolean getOverrideSelfDescribing() {
         return overrideSelfDescribing;
     }
 
     /**
-     * Sets an override for the self-describing nature of this BinaryWire.
+     * Overrides how type information is written for objects serialised by this
+     * wire.
      *
-     * @param overrideSelfDescribing null if there's no override, true if it should always use self-describing messages,
-     *                               false if it should never use self-describing messages.
-     * @return The current instance of the BinaryWire class (following the builder pattern).
+     * @param overrideSelfDescribing see {@link #getOverrideSelfDescribing()}
+     * @return {@code this} for chaining
      */
     public BinaryWire setOverrideSelfDescribing(Boolean overrideSelfDescribing) {
         this.overrideSelfDescribing = overrideSelfDescribing;
@@ -271,10 +300,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Acquires and clears the internal StringBuilder for use. This method is used to avoid frequent
-     * instantiation of new StringBuilder objects, improving performance.
-     *
-     * @return A cleared instance of the internal StringBuilder.
+     * Returns the reusable {@link #stringBuilder} after clearing its contents.
      */
     @NotNull
     protected StringBuilder acquireStringBuilder() {
@@ -284,17 +310,18 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Provides a FixedBinaryValueOut instance based on the given boolean parameter. If 'fixed' is true,
-     * the method returns a fixed instance; otherwise, it creates and returns a new BinaryValueOut instance.
-     *
-     * @param fixed Determines which type of FixedBinaryValueOut to return.
-     * @return An instance of FixedBinaryValueOut.
+     * Factory hook for subclasses. Returns {@link #fixedValueOut} when
+     * {@code fixed} is {@code true}; otherwise a fresh {@link BinaryValueOut}.
      */
     @NotNull
     protected FixedBinaryValueOut getFixedBinaryValueOut(boolean fixed) {
         return fixed ? fixedValueOut : new BinaryValueOut();
     }
 
+    /**
+     * Clears the underlying bytes and resets {@link #valueIn} and
+     * {@link #valueOut} to their initial states.
+     */
     @Override
     public void clear() {
         bytes.clear();
@@ -303,9 +330,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Checks and returns if this BinaryWire instance is field-less.
-     *
-     * @return true if the BinaryWire is field-less, false otherwise.
+     * @return {@code true} if this wire omits field names entirely
      */
     public boolean fieldLess() {
         return fieldLess;
