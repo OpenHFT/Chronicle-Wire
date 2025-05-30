@@ -20,26 +20,31 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Represents the state associated with a particular input value.
- * This class is primarily designed to manage unexpected inputs and the position of these unexpected values.
+ * Package-private helper used by {@link ValueIn} implementations to keep track of a
+ * single value or nested structure as it is read from a wire. Any fields that appear
+ * out of order can be stored for later processing.
  */
 class ValueInState {
 
-    // A constant representing an empty array of long values
+    /** A shared, empty {@code long} array instance used as the initial state for {@link #unexpected}. */
     private static final long[] EMPTY_ARRAY = {};
 
-    // The saved position for the current state
+    /** Stores a position in the wire to return to later. */
     private long savedPosition;
 
-    // Size of the unexpected values
+    /** The number of valid entries currently in the {@link #unexpected} array. */
     private int unexpectedSize;
 
-    // An array to hold unexpected values
+    /**
+     * An array storing the starting positions of fields that were encountered in the
+     * input wire but not immediately processed.
+     */
     @NotNull
     private long[] unexpected = EMPTY_ARRAY;
 
     /**
-     * Resets the saved position and the unexpected values to their initial states.
+     * Resets this state, clearing {@link #savedPosition} and removing all
+     * recorded unexpected positions.
      */
     public void reset() {
         savedPosition = 0;
@@ -47,9 +52,10 @@ class ValueInState {
     }
 
     /**
-     * Adds an unexpected position to the list of unexpected values.
+     * Adds the given {@code position} to the list of unexpected field starts.
+     * Grows the internal array if required.
      *
-     * @param position The unexpected position to be added
+     * @param position position of an unexpected field
      */
     public void addUnexpected(long position) {
         if (unexpectedSize >= unexpected.length) {
@@ -62,46 +68,38 @@ class ValueInState {
     }
 
     /**
-     * Sets the saved position for the current state.
+     * Stores the given position for later retrieval.
      *
-     * @param savedPosition The position to be saved
+     * @param savedPosition position to save
      */
     public void savedPosition(long savedPosition) {
         this.savedPosition = savedPosition;
     }
 
     /**
-     * Retrieves the saved position for the current state.
-     *
-     * @return The saved position
+     * Returns the last saved position.
      */
     public long savedPosition() {
         return savedPosition;
     }
 
     /**
-     * Retrieves the number of unexpected positions stored.
-     *
-     * @return The size of unexpected positions
+     * Returns the current count of unexpected field positions recorded.
      */
     public int unexpectedSize() {
         return unexpectedSize;
     }
 
     /**
-     * Retrieves a specific unexpected position based on its index.
-     *
-     * @param index The index of the unexpected position
-     * @return The unexpected position at the given index
+     * Returns the wire position of the unexpected field at {@code index}.
      */
     public long unexpected(int index) {
         return unexpected[index];
     }
 
     /**
-     * Removes an unexpected position from the list based on its index.
-     *
-     * @param i The index of the unexpected position to be removed
+     * Removes the unexpected field position at index {@code i}, shifting the
+     * remaining elements down.
      */
     public void removeUnexpected(int i) {
         int length = unexpectedSize - i - 1;
