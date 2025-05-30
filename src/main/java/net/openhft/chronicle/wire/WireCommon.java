@@ -24,33 +24,31 @@ import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Defines the configuration hooks and utilities shared by every {@code Wire} implementation.
+ * <p>
+ * Methods cover class name resolution, pausing strategies, direct access to the underlying
+ * {@link Bytes} and creation of primitive references that map onto the wire.
+ */
 public interface WireCommon {
 
     /**
-     * Sets the {@link ClassLookup} implementation to be used for class lookup.
-     *
-     * @param classLookup implementation to be used for class lookup.
+     * Selects the {@link ClassLookup} used to resolve type names during deserialisation.
      */
     void classLookup(ClassLookup classLookup);
 
     /**
-     * Returns the current {@link ClassLookup} implementation being used for class lookup.
-     *
-     * @return the current {@link ClassLookup} implementation being used for class lookup
+     * Returns the {@link ClassLookup} that resolves type names when reading from the wire.
      */
     ClassLookup classLookup();
 
     /**
-     * Sets the {@link Pauser} implementation to be used for blocking operations.
-     *
-     * @param pauser implementation to be used for blocking operations.
+     * Sets the {@link Pauser} used when a read or write must wait for more data.
      */
     void pauser(Pauser pauser);
 
     /**
-     * Returns the current {@link Pauser} implementation being used for blocking operations.
-     *
-     * @return the current {@link Pauser} implementation being used for blocking operations
+     * Returns the {@link Pauser} that controls blocking behaviour.
      */
     Pauser pauser();
 
@@ -63,35 +61,25 @@ public interface WireCommon {
     Bytes<?> bytes();
 
     /**
-     * Returns the bytes() but only for comment.
-     *
-     * @return the bytes() but only for comment
+     * Returns a secondary {@link Bytes} view used for commentary when producing
+     * hex dumps.
      */
     HexDumpBytesDescription<?> bytesComment();
 
     /**
-     * Creates and returns a new {@link IntValue}. The {@link IntValue} implementation that is
-     * returned depends on the wire implementation.
-     *
-     * @return a new {@link IntValue}.
+     * Creates a wire-backed {@link IntValue} for direct integer access.
      */
     @NotNull
     IntValue newIntReference();
 
     /**
-     * Creates and returns a new {@link LongValue}. The {@link LongValue} implementation that is
-     * returned depends on the wire implementation.
-     *
-     * @return a new {@link LongValue}
+     * Creates a wire-backed {@link LongValue} for low-latency long fields.
      */
     @NotNull
     LongValue newLongReference();
 
     /**
-     * Creates and returns a new {@link TwoLongValue}. The {@link TwoLongValue} implementation that
-     * is returned depends on the wire implementation.
-     *
-     * @return a new {@link TwoLongValue}
+     * Creates a wire-backed {@link TwoLongValue}. Unsupported by some text wires.
      */
     @NotNull
     default TwoLongValue newTwoLongReference() {
@@ -99,41 +87,30 @@ public interface WireCommon {
     }
 
     /**
-     * Creates and returns a new {@link LongArrayValues}. The {@link LongArrayValues} implementation that
-     * is returned depends on the wire implementation.
-     *
-     * @return a new {@link LongArrayValues}
+     * Creates a wire-backed {@link LongArrayValues} for direct array access.
      */
     @NotNull
     LongArrayValues newLongArrayReference();
 
     /**
-     * Creates and returns a new {@link IntArrayValues}. The {@link IntArrayValues} implementation that
-     * is returned depends on the wire implementation.
-     *
-     * @return a new {@link IntArrayValues}
+     * Creates a wire-backed {@link IntArrayValues} for low-level array work.
      */
     @NotNull
     IntArrayValues newIntArrayReference();
 
     /**
-     * Resets the state of the underlying {@link Bytes} stored by the wire.
+     * Clears the underlying {@link Bytes} and resets wire state.
      */
     void clear();
 
     /**
-     * Returns the wire parent object. If the parent was not assigned, {@code null} is
-     * returned instead.
-     *
-     * @return the wire parent object or {@code null} if none was assigned.
+     * Returns the parent object if one has been associated with this wire.
      */
     @Nullable
     Object parent();
 
     /**
-     * Assigns the wire parent object for later retrieval.
-     *
-     * @param parent to set, or null if there isn't one.
+     * Associates a parent object with this wire.
      */
     void parent(Object parent);
 
@@ -150,28 +127,36 @@ public interface WireCommon {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Sets the sequence number for the next header and returns the wire.
+     */
     @NotNull
     WireOut headerNumber(long headerNumber);
 
+    /**
+     * Returns the current header sequence number.
+     */
     long headerNumber();
 
+    /**
+     * Enables or disables padding between documents for alignment.
+     */
     void usePadding(boolean usePadding);
 
+    /**
+     * Returns whether padding is currently enabled.
+     */
     boolean usePadding();
 
     /**
-     * Creates and returns a new {@link BooleanValue}. The {@link BooleanValue} implementation that is
-     * returned depends on the wire implementation.
-     *
-     * @return a new {@link BooleanValue}.
+     * Creates a wire-backed {@link BooleanValue}.
      */
     @NotNull
     BooleanValue newBooleanReference();
 
     /**
-     * Should this wire write the object as a Marshallable or BytesMarshallable
-     *
-     * @return use Marshallable
+     * Indicates whether the given object should write its type information into the wire.
+     * Typically used with {@link net.openhft.chronicle.wire.SelfDescribingMarshallable}.
      */
     boolean useSelfDescribingMessage(@NotNull CommonMarshallable object);
 
@@ -183,7 +168,7 @@ public interface WireCommon {
     boolean isBinary();
 
     /**
-     * Reset the state of the wire
+     * Reinitialises the wire and clears any cached state.
      */
     void reset();
 }
