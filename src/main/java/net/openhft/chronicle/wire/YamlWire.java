@@ -47,43 +47,39 @@ import java.util.function.*;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
 /**
- * Wire format implementation that follows YAML 1.2 more closely than
- * {@link TextWire}.  It extends {@link YamlWireOut} and parses input via
- * {@link YamlTokeniser}.  Use this when strict YAML features, such as anchors
- * and aliases, are required.
+ * Represents a YAML-based wire format designed for efficient parsing and serialization of data.
+ * The YamlWire class extends YamlWireOut and utilizes a custom tokenizer to convert YAML tokens into byte sequences.
+ * It provides utility methods to read from and write to both byte buffers and files.
  */
 @SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
 public class YamlWire extends YamlWireOut<YamlWire> {
 
-    /** YAML tag for a sequence of maps. */
+    // YAML-specific tag constants for representing special constructs.
     static final String SEQ_MAP = "!seqmap";
-    /** YAML tag for Base64 encoded binary data. */
     static final String BINARY_TAG = "!binary";
-    /** YAML tag for encoded data blocks. */
     static final String DATA_TAG = "!data";
-    /** YAML tag denoting an explicit null. */
     static final String NULL_TAG = "!null";
 
     //for (char ch : "?%&*@`0123456789+- ',#:{}[]|>!\\".toCharArray())
-    /** Primary {@link TextValueIn} instance used for deserialising values. */
+    // Internal helper for reading text-based values.
     private final TextValueIn valueIn = createValueIn();
 
-    /** Tokeniser that breaks the input YAML into tokens. */
+    // Custom tokenizer for parsing YAML tokens.
     private final YamlTokeniser yt;
 
-    /** Map of anchors ({@code &name}) to their deserialised values. */
+    // Map to store reusable content anchors defined in the YAML.
     private final Map<String, Object> anchorValues = new HashMap<>();
 
-    /** Provides default ValueIn when a field is missing. */
+    // Provides default values for reading.
     private DefaultValueIn defaultValueIn;
 
-    /** Context for writing YAML documents. */
+    // Context for writing out YAML documents.
     private WriteDocumentContext writeContext;
 
-    /** Context for reading YAML documents. */
+    // Context for reading in YAML documents.
     private ReadDocumentContext readContext;
 
-    /** Helper wire used when revisiting previously read fields. */
+    // Instance for re-reading or re-parsing scenarios.
     private YamlWire rereadWire;
 
     /**
@@ -132,11 +128,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     /**
-     * Convert any {@link Wire} into its canonical YAML representation.
+     * Converts the content of a given {@link Wire} object into its string representation.
      *
-     * @param wire the wire to serialise
-     * @return YAML string of {@code wire}
-     * @throws InvalidMarshallableException if an object could not be marshalled
+     * @param wire The {@link Wire} object whose content needs to be converted to string.
+     * @return The string representation of the wire's content.
+     * @throws InvalidMarshallableException If the given wire's content cannot be marshalled.
      */
     public static String asText(@NotNull Wire wire) throws InvalidMarshallableException {
         long pos = wire.bytes().readPosition();
@@ -147,8 +143,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     /**
-     * Unescape YAML character sequences within {@code sb} in-place.
-     * Behaviour depends on the surrounding quote character.
+     * Unescapes special characters in the provided Appendable based on the provided block quote character.
+     * This method adheres to the YAML 1.2 specification for escaped characters
+     * (see <a href="https://yaml.org/spec/1.2.2/#escaped-characters">YAML Spec 1.2.2</a>).
      *
      * @param targetBuffer The appendable containing characters to be unescaped.
      * @param blockQuoteChar The block quote character that determines the escaping scheme (' or ").
@@ -262,8 +259,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     /**
-     * Parse {@code s} as a numeric or temporal value.
-     * Handles YAML features such as {@code 0o} octal notation and underscores.
+     * Attempts to interpret the content of the given StringBuilder as a number (long, double) or
+     * as a date/time, based on the YAML specification. If none of these interpretations is successful,
+     * it returns the original string content.
      *
      * @param blockQuoteChar The block quote character (either ' or ") that initiated the string in YAML.
      * @param inputTextBuilder The StringBuilder containing the string to be interpreted.
@@ -525,11 +523,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             return bytes.toString();
     }
 
-    /**
-     * Copy remaining content to {@code wire}.  Direct byte copying is used when
-     * the target is another text based wire; otherwise elements are tokenised
-     * and written individually.
-     */
     @Override
     public void copyTo(@NotNull WireOut wire) throws InvalidMarshallableException {
         if (wire.getClass() == TextWire.class || wire.getClass() == YamlWire.class) {
@@ -547,12 +540,13 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     /**
-     * Copy one token (and any nested structure) to the target wire.
-     * Used by {@link #copyTo(WireOut)} when the destination is not a simple byte
-     * copy.
+     * Copies a single element from the current YamlWire instance to the provided wire.
+     * This is a recursive method that handles different YAML elements like mappings,
+     * sequences, and primitive values based on the current token from the YamlTokeniser (yt).
      *
-     * @param wire   target wire
-     * @param nested {@code true} if inside a map or sequence
+     * @param wire   The target wire to copy to.
+     * @param nested A flag indicating whether the current element is nested within another element.
+     * @throws InvalidMarshallableException If there's a problem during the marshalling process.
      */
     private void copyOne(WireOut wire, boolean nested) throws InvalidMarshallableException {
         ValueOut wireValueOut = wire.getValueOut();
@@ -640,9 +634,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     /**
-     * Check whether the tokeniser has reached the logical end of the document.
+     * Determines if the current YAML structure has reached the end of its document.
+     * It checks based on the current token from the YamlTokeniser.
      *
-     * @return {@code true} if no further data is present
+     * @return true if the current token represents the end of a document or the stream; false otherwise.
      */
     private boolean endOfDocument() {
         // Check if there's nothing to read
@@ -660,7 +655,13 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     /**
-     * Helper for {@link #copyOne} to copy a mapping key and its value.
+     * Copies a mapping key from the current YamlWire instance to the provided wire.
+     * This method advances through the tokens to handle nested keys and ensures
+     * the key is correctly written to the target wire.
+     *
+     * @param wire   The target wire to copy to.
+     * @param nested A flag indicating whether the current element is nested within another element.
+     * @throws InvalidMarshallableException If there's a problem during the marshalling process.
      */
     private void copyMappingKey(WireOut wire, boolean nested) throws InvalidMarshallableException {
         // Move to the next token to identify the key structure
@@ -744,9 +745,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         return targetBuffer;
     }
 
-    /**
-     * Read the next mapping key as an event name.
-     */
     @SuppressWarnings("fallthrough")
     @Nullable
     @Override
@@ -818,9 +816,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         return read(key.name().toString());
     }
 
-    /**
-     * Read the value for {@code keyName}, consulting previously skipped keys if necessary.
-     */
     @NotNull
     @Override
     public ValueIn read(String keyName) {
@@ -870,7 +865,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     /**
-     * Lazily create {@link #rereadWire} for looking back at earlier keys.
+     * Initializes 'rereadWire', skipping any preliminary tokens to get to the main content.
      */
     private void initRereadWire() {
         rereadWire = new YamlWire(bytes.bytesStore().bytesForRead());
@@ -885,7 +880,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     /**
-     * Dump the tokeniser context for debugging purposes.
+     * Produces a dump of the current parsing context. Useful for debugging.
+     *
+     * @return A string representation of the current parsing context.
      */
     public String dumpContext() {
         ValidatableUtil.startValidateDisabled();
@@ -899,7 +896,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     /**
-     * Peek the next key and return {@code true} if it matches {@code keyName}.
+     * Checks if the next token's text matches the given key name after handling any escape sequences.
+     *
+     * @param keyName The expected key name.
+     * @return true if the next token's text matches the given key name; false otherwise.
      */
     private boolean checkForMatch(@NotNull String keyName) {
         YamlToken next = yt.next();
@@ -1156,7 +1156,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     /**
-     * {@link ValueIn} implementation handling YAML scalars, tags, anchors and aliases.
+     * Implementation of the ValueIn interface for reading text-based values from YamlWire.
      */
     class TextValueIn implements ValueIn {
         @Override
@@ -1264,7 +1264,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         /**
-         * Extract the text for the current token.  Handles anchors, aliases and tags.
+         * Extracts the text from the current token and appends it to a StringBuilder.
+         * Handles various YAML tokens like TEXT, LITERAL, and TAG.
+         * @return StringBuilder containing the text.
          */
         @Nullable
         StringBuilder textTo0(@NotNull StringBuilder destinationBuilder) {
@@ -2272,7 +2274,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             return 0;
         }
 
-        /** Skip over a YAML tag if present. */
+        /**
+         * Skips over a YAML type declaration in the current stream.
+         * If the current token indicates a YAML type (i.e., a TAG), the reading position is adjusted to skip over it.
+         */
         void skipType() {
             consumePadding();
             if (yt.current() == YamlToken.TAG) {
@@ -2405,7 +2410,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         /**
-         * Read a scalar as a number, date/time or plain text.
+         * Attempts to read either a number or a textual value from the YAML stream.
+         * If the current token is a LITERAL, a StringBuilder containing the text will be returned.
+         * Otherwise, the method tries to interpret the content as a number or textual data.
+         *
+         * @return An Object which might be a StringBuilder (for text) or a numeric representation.
          */
         @Nullable
         protected Object readNumberOrText() {
@@ -2472,8 +2481,14 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         /**
-         * Handle the {@code !!binary} tag by decoding the base64 data and
-         * converting to {@code type} where possible.
+         * Decodes a Base64 encoded binary string from the YAML stream.
+         * This method first reads the object from the YAML as a String,
+         * then decodes the Base64 representation, and lastly tries to
+         * convert the decoded byte array into the desired type.
+         *
+         * @param type The expected type of the resulting object after decoding.
+         * @return The decoded object, potentially wrapped or converted according to the desired type.
+         * @throws InvalidMarshallableException If there's an error during the deserialization.
          */
         private Object decodeBinary(Class<?> type) throws InvalidMarshallableException {
             Object o = objectWithInferredType(null, SerializationStrategies.ANY_SCALAR, String.class);
@@ -2518,4 +2533,3 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         writeContext.rollbackIfNotComplete();
     }
 }
-
