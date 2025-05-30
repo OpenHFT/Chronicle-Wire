@@ -20,9 +20,9 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * This is the DocumentContextHolder class which implements both {@link DocumentContext}
- * and {@link WriteDocumentContext}. It acts as a wrapper or a delegate around an instance of
- * {@link DocumentContext}, providing methods to interact with the encapsulated context.
+ * Wrapper around a {@link DocumentContext} implementing both {@link DocumentContext}
+ * and {@link WriteDocumentContext}. Useful when behaviour of the underlying context
+ * needs to be intercepted or extended without modifying it directly.
  */
 public class DocumentContextHolder implements DocumentContext, WriteDocumentContext {
 
@@ -51,23 +51,23 @@ public class DocumentContextHolder implements DocumentContext, WriteDocumentCont
     }
 
     /**
-     * Retrieves the encapsulated {@link DocumentContext} instance.
-     *
-     * @return The current {@link DocumentContext} instance.
+     * Returns the wrapped {@link DocumentContext}.
      */
     public DocumentContext documentContext() {
         return dc;
     }
 
     /**
-     * Sets the encapsulated {@link DocumentContext} instance to the provided value.
-     *
-     * @param dc The new {@link DocumentContext} to be set.
+     * Replaces the wrapped {@link DocumentContext}.
      */
     public void documentContext(DocumentContext dc) {
         this.dc = dc;
     }
 
+    /**
+     * Delegates to the wrapped context's {@code close} method. If that context
+     * reports completion afterwards the internal reference is cleared.
+     */
     @Override
     public void close() {
         DocumentContext documentContext = this.dc;
@@ -78,6 +78,9 @@ public class DocumentContextHolder implements DocumentContext, WriteDocumentCont
             dc = null;
     }
 
+    /**
+     * Resets the wrapped context and removes the reference to it.
+     */
     @Override
     public void reset() {
         DocumentContext documentContext = this.dc;
@@ -97,11 +100,7 @@ public class DocumentContextHolder implements DocumentContext, WriteDocumentCont
     }
 
     /**
-     * Determines if the DocumentContextHolder has been closed or not.
-     * This method checks if the encapsulated {@link DocumentContext} is {@code null}, indicating a closed state.
-     *
-     * @return {@code true} if the holder is closed (i.e., the internal {@link DocumentContext} is {@code null}),
-     * {@code false} otherwise.
+     * Returns {@code true} if there is no wrapped {@link DocumentContext}.
      */
     public boolean isClosed() {
         return dc == null;
