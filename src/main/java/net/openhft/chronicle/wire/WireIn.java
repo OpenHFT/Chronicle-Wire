@@ -31,13 +31,20 @@ import java.util.function.Consumer;
 
 /**
  * Defines the standard interface for reading sequentially from a Bytes stream.
+ * <p>
+ * Typical usage:
+ * <pre>
+ *   WireIn wire = new YamlWire(Bytes.from("key: value"));
+ *   String v = wire.read("key").text();
+ * </pre>
+ * For a full example see the Chronicle Wire documentation.
  */
 @DontChain
 public interface WireIn extends WireCommon, MarshallableIn {
 
     /**
-     * Reads all available entries and populates the provided map with these entries.
-     * Each entry in the wire source is read as a key-value pair where the key is of type {@code K} and the value is of type {@code V}.
+     * Consumes the remaining entries of the current document and returns them as a map.
+     * Each entry is interpreted as a key followed by a value, typically from a YAML map or key/value event sequence.
      *
      * @param <K>     The type of keys in the map.
      * @param <V>     The type of values in the map.
@@ -62,35 +69,36 @@ public interface WireIn extends WireCommon, MarshallableIn {
     }
 
     /**
-     * Copies the content from the current WireIn source to the provided WireOut destination.
+     * Copies all remaining readable bytes from this wire to another wire.
+     * Only the unread portion of the current document is copied.
      *
-     * @param wire The WireOut instance where the content will be copied to.
-     * @throws InvalidMarshallableException If there's an error in the marshalling process.
+     * @param wire The destination to copy the data to.
+     * @throws InvalidMarshallableException If a marshalling error occurs.
      */
     void copyTo(@NotNull WireOut wire) throws InvalidMarshallableException;
 
     /**
-     * Reads the next field if present, or returns an empty string if not present.
-     *
-     * @return The value of the next field, encapsulated in a {@link ValueIn} instance.
+     * Reads the next field name and returns a {@link ValueIn} for its value.
+     * If the wire has no more fields the returned {@link ValueIn} will read a default value.
      */
     @NotNull
     ValueIn read();
 
     /**
-     * Reads the next field if present. The field should match the provided {@link WireKey}.
+     * Reads the field with the given key if present, skipping over fields that do not match.
+     * Useful for binary formats where field order is not guaranteed.
      *
-     * @param key The WireKey that should match the next field.
-     * @return The value of the matched field, encapsulated in a {@link ValueIn} instance.
+     * @param key The field name to search for.
+     * @return The {@link ValueIn} for the matched field, or an empty value if not found.
      */
     @NotNull
     ValueIn read(@NotNull WireKey key);
 
     /**
-     * Reads the next field based on the provided field name.
+     * Reads the field with the given name.
      *
-     * @param fieldName The name of the field to read.
-     * @return The value of the specified field, encapsulated in a {@link ValueIn} instance.
+     * @param fieldName The name of the field to locate.
+     * @return The {@link ValueIn} for that field.
      */
     @NotNull
     default ValueIn read(String fieldName) {
@@ -98,20 +106,19 @@ public interface WireIn extends WireCommon, MarshallableIn {
     }
 
     /**
-     * Reads the next event number. If no number is present, returns Long.MIN_VALUE.
-     *
-     * @return The next event number or Long.MIN_VALUE if no number is present.
+     * Reads the identifier of the next event as a long.
+     * Binary wires may encode method names as numbers, in which case this method returns that number,
+     * otherwise {@link Long#MIN_VALUE} is returned.
      */
     long readEventNumber();
 
     /**
-     * Reads a field or string, ensuring the value is always read.
-     * This method is specifically designed to ensure reading even for formats that might
-     * potentially omit the field, such as RAW.
+     * Reads an event or field name and always consumes a value.
+     * Useful when reading RAW wires where the name may be omitted.
      *
-     * @param name The StringBuilder that holds the name of the field or string.
-     * @return The value of the field or string, encapsulated in a {@link ValueIn} instance.
-     * @throws IORuntimeException If the bytes fail to be parsed.
+     * @param name Holds the parsed name.
+     * @return The {@link ValueIn} representing the associated value.
+     * @throws IORuntimeException If the bytes cannot be parsed.
      */
     @NotNull
     default ValueIn readEventName(@NotNull StringBuilder name) {
@@ -129,46 +136,45 @@ public interface WireIn extends WireCommon, MarshallableIn {
     }
 
     /**
-     * Reads a specific field based on the provided field name.
-     * If the field is not present, it returns an empty string.
+     * Populates {@code name} with the next field name and returns a {@link ValueIn} for its value.
+     * If there is no field to read the returned {@link ValueIn} will be empty.
      *
-     * @param name The name of the field to read.
-     * @return The value of the specified field, encapsulated in a {@link ValueIn} instance.
+     * @param name holder for the field name found on the wire
+     * @return the {@link ValueIn} of that field
      */
     @NotNull
     ValueIn read(@NotNull StringBuilder name);
 
     /**
-     * Reads a field which may contain an object of any specified type.
+     * Reads the name of the next event and converts it to the requested type.
+     * Commonly used when event names are enums.
      *
-     * @param <K>           The type of object expected.
-     * @param expectedClass The class type hint of the expected object. If no hint is available, use Object.class.
-     * @return An instance of the specified expectedClass.
-     * @throws InvalidMarshallableException If there's an error in the marshalling process.
+     * @param <K>           expected type of the event name
+     * @param expectedClass class of the expected type
+     * @return the converted name or {@code null} if absent
+     * @throws InvalidMarshallableException if conversion fails
      */
     @Nullable <K> K readEvent(Class<K> expectedClass) throws InvalidMarshallableException;
 
     /**
-     * Obtains the value associated with a field or event for more advanced use cases.
-     * Typically used after a call to {@link #readEvent(Class)}.
-     *
-     * @return The value of the field or event, encapsulated in a {@link ValueIn} instance.
+     * Returns the {@link ValueIn} representing the value of the last field or event read.
+     * Typically used after {@link #readEvent(Class)}.
      */
     @NotNull
     ValueIn getValueIn();
 
     /**
-     * Returns the ObjectInput associated with this WireIn for serialization operations.
-     *
-     * @return the ObjectInput instance.
+     * Provides a standard {@link ObjectInput} view of this wire for interoperability with
+     * libraries expecting Java serialisation APIs.
      */
     ObjectInput objectInput();
 
     /**
-     * Reads a comment from the Wire data and appends it to the provided StringBuilder.
+     * Reads a comment and appends it to {@code sb}.
+     * Useful for debugging and tooling.
      *
-     * @param sb StringBuilder to which the comment will be appended.
-     * @return the WireIn instance for method chaining.
+     * @param sb accumulator for the comment text
+     * @return this wire for chaining
      */
     @NotNull
     WireIn readComment(@NotNull StringBuilder sb);
@@ -180,22 +186,15 @@ public interface WireIn extends WireCommon, MarshallableIn {
     void clear();
 
     /**
-     * This consumes any padding before checking if readRemaining() &gt; 0 <p> NOTE: This method
-     * only works inside a document. Call it just before a document and it won't know not to read
-     * the read in case there is padding.
-     *
-     * @return if there is more data to be read in this document.
+     * Indicates whether the current document has more fields to read.
+     * Padding bytes are consumed before the check is made.
      */
     default boolean hasMore() {
         return isNotEmptyAfterPadding();
     }
 
     /**
-     * This consumes any padding before checking if readRemaining() &gt; 0 <p> NOTE: This method
-     * only works inside a document. Call it just before a document and it won't know not to read
-     * the read in case there is padding.
-     *
-     * @return if there is more data to be read in this document.
+     * Consumes any trailing padding and checks whether unread data remains in the current document.
      */
     default boolean isNotEmptyAfterPadding() {
         consumePadding();
@@ -203,20 +202,18 @@ public interface WireIn extends WireCommon, MarshallableIn {
     }
 
     /**
-     * Checks if the WireIn is empty.
-     *
-     * @return true if empty, otherwise false.
+     * Returns {@code true} if no more bytes are available to read.
      */
     default boolean isEmpty() {
         return bytes().isEmpty();
     }
 
     /**
-     * Adjusts the read position of the WireIn to align with the specified boundary.
-     * Typically used for cases where data is structured in blocks of fixed sizes, ensuring proper alignment.
+     * Skips padding bytes so the next read starts at the given alignment.
+     * Useful for binary structures that require fixed-size blocks.
      *
-     * @param alignment The byte boundary to which the read position should align.
-     * @return the WireIn instance for method chaining.
+     * @param alignment the byte boundary to align to
+     * @return this wire for chaining
      */
     @NotNull
     default WireIn readAlignTo(int alignment) {
@@ -226,12 +223,13 @@ public interface WireIn extends WireCommon, MarshallableIn {
     // TODO add a try-with-resource support for readDocument.
 
     /**
-     * Reads a document, consuming both its metadata and data sections.
+     * Reads a complete document and passes the metadata and data sections to the supplied consumers.
+     * Both consumers may be {@code null} if the caller wishes to skip that portion.
      *
-     * @param metaDataConsumer Consumer that processes the metadata section of the document.
-     * @param dataConsumer     Consumer that processes the main data section of the document.
-     * @return true if the document was successfully read, otherwise false.
-     * @throws InvalidMarshallableException if there's an error during marshalling.
+     * @param metaDataConsumer handler for metadata, may be {@code null}
+     * @param dataConsumer     handler for data, may be {@code null}
+     * @return {@code true} if a document was read
+     * @throws InvalidMarshallableException if a marshalling error occurs
      */
     default boolean readDocument(@Nullable ReadMarshallable metaDataConsumer,
                                  @Nullable ReadMarshallable dataConsumer) throws InvalidMarshallableException {
@@ -239,13 +237,14 @@ public interface WireIn extends WireCommon, MarshallableIn {
     }
 
     /**
-     * Reads a document from a specific position, consuming both its metadata and data sections.
+     * Reads a document starting at a known position.
+     * Useful when random access to a wire store is required.
      *
-     * @param position         The position from which to start reading the document.
-     * @param metaDataConsumer Consumer that processes the metadata section of the document.
-     * @param dataConsumer     Consumer that processes the main data section of the document.
-     * @return true if the document was successfully read from the given position, otherwise false.
-     * @throws InvalidMarshallableException if there's an error during marshalling.
+     * @param position         absolute position of the document header
+     * @param metaDataConsumer handler for metadata, may be {@code null}
+     * @param dataConsumer     handler for data, may be {@code null}
+     * @return {@code true} if a document was read
+     * @throws InvalidMarshallableException if a marshalling error occurs
      */
     default boolean readDocument(long position,
                                  @Nullable ReadMarshallable metaDataConsumer,
@@ -254,136 +253,127 @@ public interface WireIn extends WireCommon, MarshallableIn {
     }
 
     /**
-     * Performs a raw data read operation.
+     * Reads raw bytes into the provided {@code marshallable} without interpreting them.
      *
-     * @param marshallable Data to be read in its raw form.
-     * @throws InvalidMarshallableException if there's an error during marshalling.
+     * @param marshallable destination for the raw data
+     * @throws InvalidMarshallableException if a marshalling error occurs
      */
     default void rawReadData(@NotNull ReadMarshallable marshallable) throws InvalidMarshallableException {
         WireInternal.rawReadData(this, marshallable);
     }
 
     /**
-     * equivalent to {@link  WireIn#readDocument(net.openhft.chronicle.wire.ReadMarshallable,
-     * net.openhft.chronicle.wire.ReadMarshallable)} but with out the use of a lambda expression
-     *
-     * @return the document context
+     * Equivalent to {@link WireIn#readDocument(ReadMarshallable, ReadMarshallable)} but without lambdas.
+     * Returns a context representing the current document.
      */
     @Override
     @NotNull
     DocumentContext readingDocument();
 
     /**
-     * Provides a context for reading a document starting at a specific position.
-     *
-     * @param readLocation The position from which to start reading the document.
-     * @return the document context associated with the specific read location.
+     * Provides a {@link DocumentContext} for reading a document at {@code readLocation}.
+     * This does not change the wire position.
      */
     DocumentContext readingDocument(long readLocation);
 
     /**
-     * Consumes and discards any padding that may exist between the current read position and the next piece of meaningful data.
+     * Consumes and discards padding bytes between the current read position and the next data item.
      */
     void consumePadding();
 
     /**
-     * Sets a listener that gets notified whenever a comment is encountered during reading.
+     * Registers a listener that receives comment text encountered while reading.
      *
-     * @param commentListener The consumer that handles and processes the comments.
+     * @param commentListener consumer for comment strings
      */
     void commentListener(Consumer<CharSequence> commentListener);
 
     /**
-     * Consume a header if one is available.
+     * Consumes a data header if one is available at the current position.
+     * This is primarily used by queue and network layers to detect document boundaries.
      *
-     * @return true, if a message can be read between readPosition and readLimit, else false if no
-     * header is ready.
-     * @throws EOFException if the end of wire marker is reached.
+     * @return {@code true} if a data header was consumed
+     * @throws EOFException if the end of wire marker is reached
      */
     default boolean readDataHeader() throws EOFException {
         return readDataHeader(false) == HeaderType.DATA;
     }
 
     /**
-     * Attempts to read a header for data or metadata, based on the provided parameter.
+     * Reads a header from the wire and returns its {@link HeaderType}.
+     * Setting {@code includeMetaData} to {@code true} allows metadata headers to be consumed.
      *
-     * @param includeMetaData If true, metadata headers are included in the read attempt.
-     * @return The type of header that was read.
-     * @throws EOFException if an end-of-file marker is encountered.
+     * @param includeMetaData include metadata headers if {@code true}
+     * @return the header type read, or {@link HeaderType#NONE}
+     * @throws EOFException if an end-of-file marker is encountered
      */
     @NotNull
     HeaderType readDataHeader(boolean includeMetaData) throws EOFException;
 
     /**
-     * Reads and sets the length of the data or metadata at the specified position.
+     * Reads the length prefix at {@code position} and sets the read limit accordingly.
+     * Used by {@link DocumentContext} implementations.
      *
-     * @param position The position from which to start reading the length.
+     * @param position byte offset of the length field
      */
     void readAndSetLength(long position);
 
     /**
-     * Reads the first header in the stream with a timeout.
+     * Reads the very first header in the stream, waiting up to the given timeout.
      *
-     * @param timeout   Maximum time to wait for a header to be available.
-     * @param timeUnit  The unit of time for the timeout.
-     * @throws TimeoutException If no header is read within the given timeout.
-     * @throws StreamCorruptedException If there is an error in reading the header due to stream corruption.
+     * @param timeout  how long to wait
+     * @param timeUnit unit for the timeout
+     * @throws TimeoutException         if the header does not arrive in time
+     * @throws StreamCorruptedException if the stream is invalid
      */
     void readFirstHeader(long timeout, TimeUnit timeUnit) throws TimeoutException, StreamCorruptedException;
 
     /**
-     * Reads the first header in the stream.
+     * Reads the very first header in the stream without waiting.
      *
-     * @throws StreamCorruptedException If there is an error in reading the header due to stream corruption.
+     * @throws StreamCorruptedException if the stream contains invalid data
      */
     void readFirstHeader() throws StreamCorruptedException;
 
     /**
-     * Reads the metadata header from the current position in the stream.
+     * Consumes a metadata header at the current position.
      */
     void readMetaDataHeader();
 
     /**
-     * Peeks at the content in the current WireIn instance and returns it as a YAML string.
-     *
-     * @return A String containing a YAML representation of the peeked content.
+     * Returns a YAML formatted view of the bytes at the current position without consuming them.
+     * Intended for debugging only.
      */
     String readingPeekYaml();
 
     /**
-     * Marks the start of an event or method flow.
+     * Marks the start of a nested event block.
      */
     default void startEvent() {
     }
 
     /**
-     * Checks if the current position in the stream represents the end of an event or method flow.
-     *
-     * @return true if the current position is the end of an event, otherwise false.
+     * Returns {@code true} when the current event block has ended.
      */
     default boolean isEndEvent() {
         return false;
     }
 
     /**
-     * Marks the end of an event or method flow.
+     * Marks the end of a nested event block.
      */
     default void endEvent() {
     }
 
     /**
-     * Provides a hint about the order in which the input should be read.
-     *
-     * @return true if the input should be read in a specific order, otherwise false.
+     * Returns {@code true} if fields are expected in input order rather than random access.
      */
     default boolean hintReadInputOrder() {
         return false;
     }
 
     /**
-     * Checks if the current position in the stream has a metadata prefix.
-     *
-     * @return true if there's a metadata prefix at the current position, otherwise false.
+     * Returns {@code true} if a metadata prefix is present at the current position.
      */
     default boolean hasMetaDataPrefix() {
         return false;
