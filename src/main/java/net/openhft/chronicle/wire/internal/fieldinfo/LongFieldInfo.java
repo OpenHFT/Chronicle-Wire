@@ -24,25 +24,25 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Field;
 
 /**
- * Represents field information for long fields, extending the generic field information capabilities
- * provided by {@link UnsafeFieldInfo}. This class offers direct memory access functionality to get and set
- * long values in objects, leveraging unsafe operations for performance enhancement.
+ * Internal {@link net.openhft.chronicle.wire.FieldInfo} for {@code long} fields
+ * using {@link UnsafeMemory} for direct access.
  */
 public final class LongFieldInfo extends UnsafeFieldInfo {
 
     /**
-     * Constructs an instance of LongFieldInfo with the provided details about a long field.
-     *
-     * @param name        The name of the field.
-     * @param type        The type of the field.
-     * @param bracketType The bracket type associated with the field.
-     * @param field       The actual field representation.
+     * @param name        field name used in text form
+     * @param type        runtime type
+     * @param bracketType formatting hint when writing
+     * @param field       reflection field used for unsafe access
      */
     public LongFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         super(name, type, bracketType, field);
     }
 
     @Override
+    /**
+     * @return the field value or {@code Long.MIN_VALUE} if the offset is unavailable
+     */
     public long getLong(Object object) {
         try {
             return UnsafeMemory.unsafeGetLong(object, getOffset());
@@ -53,6 +53,7 @@ public final class LongFieldInfo extends UnsafeFieldInfo {
     }
 
     @Override
+    /** Writes the value using {@link UnsafeMemory}. */
     public void set(Object object, long value) throws IllegalArgumentException {
         try {
             UnsafeMemory.unsafePutLong(object, getOffset(), value);
@@ -62,11 +63,13 @@ public final class LongFieldInfo extends UnsafeFieldInfo {
     }
 
     @Override
+    /** Compares the long values in {@code a} and {@code b}. */
     public boolean isEqual(Object a, Object b) {
         return getLong(a) == getLong(b);
     }
 
     @Override
+    /** Copies the long value from {@code source} to {@code destination}. */
     public void copy(Object source, Object destination) {
         set(destination, getLong(source));
     }
