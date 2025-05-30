@@ -366,6 +366,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         return fieldLess;
     }
 
+    /**
+     * Begin writing a document context.
+     * See {@link WireOut#writingDocument(boolean)}.
+     * Returns a {@link BinaryWriteDocumentContext}.
+     */
     @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
@@ -373,6 +378,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         return writeContext;
     }
 
+    /**
+     * Acquire an existing document context for writing if one is open.
+     * See {@link WireOut#acquireWritingDocument(boolean)}.
+     * Returns a {@link BinaryWriteDocumentContext}.
+     */
     @Override
     public DocumentContext acquireWritingDocument(boolean metaData) {
         if (writeContext.isOpen() && writeContext.chainedElement())
@@ -380,6 +390,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         return writingDocument(metaData);
     }
 
+    /**
+     * Start a reading document context.
+     * See {@link WireIn#readingDocument()}.
+     * Returns a {@link BinaryReadDocumentContext}.
+     */
     @NotNull
     @Override
     public DocumentContext readingDocument() {
@@ -387,6 +402,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         return readContext;
     }
 
+    /**
+     * Start a reading document context from a specific position.
+     * See {@link WireIn#readingDocument(long)}.
+     * Returns a {@link BinaryReadDocumentContext}.
+     */
     @NotNull
     @Override
     public DocumentContext readingDocument(long readLocation) {
@@ -402,11 +422,9 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Typicality used for debugging, this method does not progress the read position and should
-     * only be used when inside a reading document.
-     *
-     * @return when readReading a document returns the current document as a YAML String, if you are
-     * not currently reading a document, and empty string will be return.
+     * Provides a YAML-like string of the current binary document.
+     * Useful for debugging. The document must have been started via
+     * {@link #readingDocument()}.
      */
     @Override
     @NotNull
@@ -417,6 +435,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         return Wires.fromSizePrefixedBlobs(bytes, start, usePadding());
     }
 
+    /**
+     * Efficiently copies the remaining content of this wire to {@code wire}.
+     * If {@code wire} is also a {@code BinaryWire}, bytes are copied directly;
+     * otherwise each token is decoded and re-encoded.
+     */
     @Override
     public void copyTo(@NotNull WireOut wire) throws InvalidMarshallableException {
         if (wire.getClass() == getClass()) {
@@ -433,11 +456,8 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Copies the content of this BinaryWire instance to the provided WireOut instance.
-     * It does this by copying each data point sequentially.
-     *
-     * @param wire The destination WireOut instance.
-     * @param first A flag indicating if the data point being copied is the first one.
+     * Internal helper used by {@link #copyTo(WireOut)}.
+     * Copies one top-level value and honours the {@code first} flag.
      */
     void copyTo(@NotNull WireOut wire, boolean first) {
         while (bytes.readRemaining() > 0) {
@@ -447,22 +467,14 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Copies one unit of data from this BinaryWire to the provided WireOut instance.
-     *
-     * @param wire The destination WireOut instance.
-     * @throws InvalidMarshallableException if the operation encounters an error during marshalling.
+     * Copy a single top level value to {@code wire}.
      */
     public void copyOne(@NotNull WireOut wire) throws InvalidMarshallableException {
         copyOne(wire, true);
     }
 
     /**
-     * Copies one unit of data from this BinaryWire to the provided WireOut instance,
-     * considering the provided 'first' flag.
-     *
-     * @param wire The destination WireOut instance.
-     * @param first A flag indicating if the data point being copied is the first one.
-     * @throws InvalidMarshallableException if the operation encounters an error during marshalling.
+     * Internal helper to copy a value to {@code wire}.
      */
     private void copyOne(@NotNull WireOut wire, boolean first) throws InvalidMarshallableException {
         int peekCode = peekCode();
@@ -622,6 +634,9 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
     }
 
+    /**
+     * Copy a {@link VanillaMessageHistory} message.
+     */
     private static void copyHistoryMessage(Bytes<?> bytes, @NotNull WireOut wire) {
         VanillaMessageHistory vmh = VANILLA_MESSAGE_HISTORY_TL.get();
         vmh.useBytesMarshallable(true);
@@ -631,41 +646,32 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Throws an exception indicating an unexpected code was encountered.
-     *
-     * @throws IORuntimeException Always thrown with a specific message.
+     * Throw an {@link IORuntimeException} for an unexpected binary code.
      */
     protected static void unexpectedCode() {
         throw new IORuntimeException("Unexpected code in this context");
     }
 
     /**
-     * Placeholder or handler for anchor processing in the WireOut stream.
-     * This implementation throws an exception indicating it's unexpected in this context.
-     *
-     * @param wire The wire output stream.
+     * Anchor support is not implemented for binary wires.
+     * This method always throws via {@link #unexpectedCode()}.
      */
     protected void anchor(@NotNull WireOut wire) {
         unexpectedCode();
     }
 
     /**
-     * Placeholder or handler for field anchor processing in the WireOut stream.
-     * This implementation throws an exception indicating it's unexpected in this context.
-     *
-     * @param wire The wire output stream.
+     * Field anchors are not supported for binary wires.
+     * This method always throws via {@link #unexpectedCode()}.
      */
     protected void fieldAnchor(@NotNull WireOut wire) {
         unexpectedCode();
     }
 
     /**
-     * Reads data of a specified length from the bytes stream and writes to the WireOut stream
-     * while interpreting the type of data (Map, Sequence, or Object).
-     *
-     * @param wire The wire output stream to write data to.
-     * @param len  The length of data to be read.
-     * @throws InvalidMarshallableException If there's an issue during marshalling.
+     * Read {@code len} bytes and copy them to {@code wire}.
+     * The method inspects the leading code to decide whether the block
+     * is a map, sequence or scalar value.
      */
     @SuppressWarnings("incomplete-switch")
     public void readWithLength(@NotNull WireOut wire, int len) throws InvalidMarshallableException {
@@ -710,19 +716,14 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Throws an exception indicating an unknown code was encountered.
-     *
-     * @param wire The wire output stream.
-     * @throws IllegalArgumentException with the corresponding message for the unknown code.
+     * Throw an {@link IllegalArgumentException} if a code cannot be recognised.
      */
     protected void unknownCode(@NotNull WireOut wire) {
         throw new IllegalArgumentException(stringForCode(bytes.readUnsignedByte()));
     }
 
     /**
-     * Peeks the next code from the stream and determines its corresponding bracket type.
-     *
-     * @return BracketType which could be MAP, SEQ, or NONE based on the peeked code.
+     * Determine the {@link BracketType} of the next value on the wire.
      */
     @NotNull
     private BracketType getBracketTypeNext() {
@@ -731,10 +732,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Determines the bracket type for a given code.
-     *
-     * @param peekCode The code to determine the bracket type for.
-     * @return BracketType corresponding to the provided code.
+     * Utility to map a code byte to a {@link BracketType}.
      */
     @NotNull
     BracketType getBracketTypeFor(int peekCode) {
@@ -759,12 +757,18 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
     }
 
+    /**
+     * Look up a field by name.
+     */
     @NotNull
     @Override
     public ValueIn read(@NotNull String fieldName) {
         return read(fieldName, fieldName.hashCode(), null, Function.identity());
     }
 
+    /**
+     * Read the next value when field ordering is not known.
+     */
     @NotNull
     @Override
     public ValueIn read() {
@@ -774,6 +778,9 @@ public class BinaryWire extends AbstractWire implements Wire {
                 : valueIn;
     }
 
+    /**
+     * Look up a value using a {@link WireKey}.
+     */
     @NotNull
     @Override
     public ValueIn read(@NotNull WireKey key) {
@@ -781,16 +788,8 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Attempts to read a field based on a given keyName and keyCode. If the field isn't immediately found, the method
-     * will default to the provided source and lookup function. This method manages the parsing position, and may resort
-     * to older fields if necessary.
-     *
-     * @param keyName       The name of the key to be searched for.
-     * @param keyCode       The code corresponding to the key.
-     * @param defaultSource The source to revert to if the key isn't found.
-     * @param defaultLookup The function used to derive a default value based on the defaultSource.
-     * @param <T>           The type of the default source.
-     * @return Returns a ValueIn object which represents the found or default value.
+     * Locate a field by name or code and position {@link #valueIn} at its value.
+     * Unknown fields are skipped and remembered for later passes.
      */
     private <T> ValueIn read(CharSequence keyName, int keyCode, T defaultSource, @NotNull Function<T, Object> defaultLookup) {
         ValueInState curr = valueIn.curr();
@@ -829,19 +828,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * A secondary method to continue the field search process, specifically to handle cases where the field may
-     * have been missed in a previous pass or if the field still hasn't been found. It will revert to the default
-     * value if the field cannot be located.
-     *
-     * @param keyName       The name of the key to be searched for.
-     * @param keyCode       The code corresponding to the key.
-     * @param defaultSource The source to revert to if the key isn't found.
-     * @param defaultLookup The function used to derive a default value based on the defaultSource.
-     * @param curr          The current state of ValueIn.
-     * @param sb            The StringBuilder used for string manipulations during search.
-     * @param name          The actual name of the field being sought.
-     * @param <T>           The type of the default source.
-     * @return Returns a ValueIn object which represents the found or default value.
+     * Second phase field search used when a match was not found in order.
      */
     protected <T> ValueIn read2(CharSequence keyName,
                                 int keyCode,
@@ -1243,11 +1230,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Copies special types of fields from the input wire to the output wire based on the provided peek code.
-     *
-     * @param wire     The output wire to which the field should be written.
-     * @param peekCode The peek code indicating the type of the special field to be copied.
-     * @throws InvalidMarshallableException If there's an error during the copy operation.
+     * Handles special binary codes such as comments, timestamps and type prefixes.
      */
     private void copySpecial(@NotNull WireOut wire, int peekCode) throws InvalidMarshallableException {
         // Switch based on the type of the field indicated by peekCode.
