@@ -135,10 +135,10 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
      * Appends padding (indentation) to the formatted string.
      * The number of indentations is determined by the provided indent value.
      *
-     * @param indent The number of indentations to append.
+     * @param newIndent The number of indentations to append.
      */
-    private void padding(final int indent) {
-        for (int i = 0; i < indent; i++) {
+    private void padding(final int newIndent) {
+        for (int i = 0; i < newIndent; i++) {
             formattedCode.append(indentSpaces);
         }
     }

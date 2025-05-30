@@ -405,13 +405,13 @@ public class YamlTokeniser {
      * Determine if the current context would change given the indentation levels.
      *
      * @param minIndent The minimum indentation to consider.
-     * @param indent The current indentation level.
+     * @param newIndent The current indentation level.
      * @return True if context would change, false otherwise.
      */
-    private boolean wouldChangeContext(int minIndent, int indent) {
+    private boolean wouldChangeContext(int minIndent, int newIndent) {
         if (isInFlow())
             return false;
-        return minIndent > indent;
+        return minIndent > newIndent;
     }
 
     /**
@@ -608,14 +608,14 @@ public class YamlTokeniser {
      * @param indented The token for the start of indentation context.
      * @param key The key token type.
      * @param push The token type to be pushed to the stack.
-     * @param indent The current indentation level.
+     * @param newIndent The current indentation level.
      * @return The next token after processing the current input.
      */
     private YamlToken indent(
             YamlToken indented,
             @NotNull YamlToken key,
             @NotNull YamlToken push,
-            int indent) {
+            int newIndent) {
         if (push != YamlToken.STREAM_START)
             this.pushed.add(push);
         if (isInFlow()) {
@@ -624,13 +624,13 @@ public class YamlTokeniser {
         int pos = this.pushed.size();
 
         // Pop contexts until the current indent matches the existing context.
-        while (indent < contextIndent()) {
+        while (newIndent < contextIndent()) {
             contextPop();
         }
         int contextIndent = contextIndent();
 
         // Push the indented token if we are starting a new indentation level.
-        if (indented != null && indent != contextIndent)
+        if (indented != null && newIndent != contextIndent)
             this.pushed.add(indented);
         this.pushed.add(key);
 
@@ -638,8 +638,8 @@ public class YamlTokeniser {
         reversePushed(pos);
 
         // Push a new context if we are starting a new indentation level.
-        if (indented != null && indent > contextIndent())
-            contextPush(indented, indent);
+        if (indented != null && newIndent > contextIndent())
+            contextPush(indented, newIndent);
         return popPushed();
     }
 
@@ -847,18 +847,18 @@ public class YamlTokeniser {
      * Pushes a new context to the context stack.
      *
      * @param context The YAML token representing the context.
-     * @param indent  The indentation level for this context.
+     * @param newIndent  The indentation level for this context.
      */
-    private void contextPush(YamlToken context, int indent) {
+    private void contextPush(YamlToken context, int newIndent) {
         // If we're at the start of a stream and the context isn't the end of directives,
         // we add an end of directives context before the actual context.
         if (context() == YamlToken.STREAM_START && context != YamlToken.DIRECTIVES_END) {
             pushContext0(YamlToken.DIRECTIVES_END, NO_INDENT);
-            pushContext0(context, indent);
+            pushContext0(context, newIndent);
             push(YamlToken.DIRECTIVES_END);
             return;
         }
-        pushContext0(context, indent);
+        pushContext0(context, newIndent);
     }
 
     /**
@@ -1019,12 +1019,12 @@ public class YamlTokeniser {
      * Pushes a new context onto the stack, or reuses one from the freeContexts list.
      *
      * @param token  The YAML token for the context.
-     * @param indent The indentation level for the context.
+     * @param newIndent The indentation level for the context.
      */
-    private void pushContext0(YamlToken token, int indent) {
+    private void pushContext0(YamlToken token, int newIndent) {
         YTContext context = freeContexts.isEmpty() ? new YTContext() : freeContexts.remove(freeContexts.size() - 1);
         context.token = token;
-        context.indent = indent;
+        context.indent = newIndent;
         if (context.keys != null)
             context.keys.reset(); // Reset the keys if they exist.
         contexts.add(context); // Add the new context to the list.

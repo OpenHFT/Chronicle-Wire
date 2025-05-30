@@ -42,10 +42,10 @@ public class JavaSourceCodeFormatter extends SourceCodeFormatter {
     /**
      * Constructs a new Java source code formatter with a specified initial indentation level.
      *
-     * @param indent Initial indentation level.
+     * @param newIndent Initial indentation level.
      */
-    public JavaSourceCodeFormatter(int indent) {
-        super(INDENT_SPACES, indent);
+    public JavaSourceCodeFormatter(int newIndent) {
+        super(INDENT_SPACES, newIndent);
     }
 
     /**
