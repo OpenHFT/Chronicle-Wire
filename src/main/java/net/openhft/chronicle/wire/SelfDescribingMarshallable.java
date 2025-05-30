@@ -16,11 +16,17 @@
 package net.openhft.chronicle.wire;
 
 /**
- * Represents an abstraction of marshallable objects that are self-describing by default.
- * This class extends {@code AbstractCommonMarshallable} and ensures that instances
- * inherently use self-describing messages.
+ * Base class for marshallables that include their type information when written.
+ * <p>
+ * A self-describing marshallable writes its class name (and, for text wires,
+ * the field names) into the stream so that a reader can reconstruct the object
+ * without knowing its exact type.
  */
 public abstract class SelfDescribingMarshallable extends AbstractCommonMarshallable {
+
+    /**
+     * Always returns {@code true} as these marshallables emit type metadata.
+     */
     @Override
     public boolean usesSelfDescribingMessage() {
         return true;
