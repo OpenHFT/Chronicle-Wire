@@ -618,7 +618,7 @@ public class YamlTokeniser {
      * and its start token onto {@link #pushed}.
      */
     private YamlToken indent(
-            YamlToken indented,
+            YamlToken indentToken,
             @NotNull YamlToken key,
             @NotNull YamlToken push,
             int indent) {
@@ -635,17 +635,17 @@ public class YamlTokeniser {
         }
         int contextIndent = contextIndent();
 
-        // Push the indented token if we are starting a new indentation level.
-        if (indented != null && indent != contextIndent)
-            this.pushed.add(indented);
+        // Push the indent token if we are starting a new indentation level.
+        if (indentToken != null && indent != contextIndent)
+            this.pushed.add(indentToken);
         this.pushed.add(key);
 
         // Reverse the order of the tokens in the pushed stack.
         reversePushed(pos);
 
         // Push a new context if we are starting a new indentation level.
-        if (indented != null && indent > contextIndent())
-            contextPush(indented, indent);
+        if (indentToken != null && indent > contextIndent())
+            contextPush(indentToken, indent);
         return popPushed();
     }
 
@@ -654,7 +654,7 @@ public class YamlTokeniser {
      * {@link #blockStart} and {@link #blockEnd}. If the scalar is followed by a
      * colon it is treated as a {@link YamlToken#MAPPING_KEY}.
      */
-    private YamlToken readText(int indent2) {
+    private YamlToken readText(int indent) {
         long pos = in.readPosition(); // Store the current position of input.
 
         blockQuote = 0;
@@ -664,7 +664,7 @@ public class YamlTokeniser {
         if (isFieldEnd()) {
             lastKeyPosition = pos;
             if (topContext().token != YamlToken.MAPPING_KEY)
-                return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent2);
+                return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent);
         }
 
         // By default, treat the scalar as plain text.

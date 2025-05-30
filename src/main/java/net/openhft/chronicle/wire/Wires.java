@@ -1477,7 +1477,7 @@ public enum Wires {
          * @param in The ValueIn object which contains the class name.
          * @return The Class object associated with the name.
          */
-        private static Class<?> forName(Class<?> o, ValueIn in) {
+        private static Class<?> forName(Class<?> type, ValueIn in) {
             final StringBuilder sb0 = sb.get();
 
             // Reset the StringBuilder to its initial state.
@@ -1889,12 +1889,12 @@ public enum Wires {
          * @return Boolean.TRUE if the specified object is equal to the proxy, otherwise Boolean.FALSE.
          */
         @NotNull
-        private Object equals0(Object proxy, Object o) {
-            if (proxy == o)
+        private Object equals0(Object proxy, Object other) {
+            if (proxy == other)
                 return true;
-            if (!(o instanceof Marshallable))
+            if (!(other instanceof Marshallable))
                 return false;
-            Marshallable m = (Marshallable) o;
+            Marshallable m = (Marshallable) other;
             if (!m.className().equals(typeName))
                 return false;
             if (!Proxy.isProxyClass(m.getClass()))

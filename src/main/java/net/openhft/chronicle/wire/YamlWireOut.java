@@ -728,18 +728,18 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
          * tag. When {@link #dropDefault} is true and the argument is null the
          * value is omitted.
          */
-        public T bytes(@Nullable BytesStore<?, ?> fromBytes) {
+        public T bytes(@Nullable BytesStore<?, ?> data) {
             if (dropDefault) {
-                if (fromBytes == null)
+                if (data == null)
                     return wireOut();
                 writeSavedEventName();
             }
-            if (isText(fromBytes))
-                return (T) text(fromBytes);
+            if (isText(data))
+                return (T) text(data);
 
-            int length = Maths.toInt32(fromBytes.readRemaining());
+            int length = Maths.toInt32(data.readRemaining());
             @NotNull byte[] byteArray = new byte[length];
-            fromBytes.copyTo(byteArray);
+            data.copyTo(byteArray);
 
             return bytes(byteArray);
         }
@@ -772,15 +772,15 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
          * Determines if the provided BytesStore contains textual content.
          * This function checks each byte to ensure it represents a valid textual character.
          *
-         * @param fromBytes The BytesStore object to inspect.
+         * @param data The BytesStore object to inspect.
          * @return True if the content is textual, otherwise false.
          */
-        private boolean isText(@Nullable BytesStore<?, ?> fromBytes) {
+        private boolean isText(@Nullable BytesStore<?, ?> data) {
 
-            if (fromBytes == null)
+            if (data == null)
                 return true;
-            for (long i = fromBytes.readPosition(); i < fromBytes.readLimit(); i++) {
-                int ch = fromBytes.readUnsignedByte(i);
+            for (long i = data.readPosition(); i < data.readLimit(); i++) {
+                int ch = data.readUnsignedByte(i);
                 if ((ch < ' ' && ch != '\t') || ch >= 127)
                     return false;
             }
@@ -1036,9 +1036,9 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             if (dropDefault) {
                 writeSavedEventName();
             }
-            long pos = bytes.writePosition();
+            long position = bytes.writePosition();
             TextLongArrayReference.write(bytes, capacity);
-            ((Byteable) values).bytesStore(bytes, pos, bytes.lengthWritten(pos));
+            ((Byteable) values).bytesStore(bytes, position, bytes.lengthWritten(position));
             return wireOut();
         }
 
@@ -1347,17 +1347,17 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 newLine();
             else
                 bytes.writeUnsignedByte(' ');
-            long pos = bytes.writePosition();
+            long position = bytes.writePosition();
             writer.accept(e, this);
             if (!leaf)
-                addNewLine(pos);
+                addNewLine(position);
 
             popState();
             this.leaf = leaf;
             if (!leaf)
                 indent();
             else
-                addSpace(pos);
+                addSpace(position);
             endBlock(']');
             elementSeparator();
             return wireOut();
@@ -1398,12 +1398,12 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 sep = SPACE;
             else
                 newLine();
-            long pos = bytes.readPosition();
+            long position = bytes.readPosition();
             writer.accept(e, kls, this);
             if (leaf)
-                addSpace(pos);
+                addSpace(position);
             else
-                addNewLine(pos);
+                addNewLine(position);
 
             popState();
             if (!leaf)
@@ -1426,8 +1426,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
          * Adds a newline only if content was written after {@code pos} within a
          * block.
          */
-        protected void addNewLine(long pos) {
-            if (bytes.writePosition() > pos + 1)
+        protected void addNewLine(long position) {
+            if (bytes.writePosition() > position + 1)
                 bytes.writeUnsignedByte('\n');
         }
 
@@ -1435,8 +1435,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
          * Adds a space only if content was written after {@code pos} within a
          * block.
          */
-        protected void addSpace(long pos) {
-            if (bytes.writePosition() > pos + 1)
+        protected void addSpace(long position) {
+            if (bytes.writePosition() > position + 1)
                 bytes.writeUnsignedByte(' ');
         }
 

@@ -101,32 +101,32 @@ public class GenerateJsonSchemaMain {
      * @return A string representation of the JSON schema.
      */
     String asJson() {
-        SourceCodeFormatter sb = new JsonSourceCodeFormatter();
+        SourceCodeFormatter builder = new JsonSourceCodeFormatter();
         String str = "{\n" +
                 "\"$schema\": \"http://json-schema.org/draft-07/schema#\",\n" +
                 "\"$id\": \"http://json-schema.org/draft-07/schema#\",\n" +
                 "\"title\": \"Core schema meta-schema\",\n" +
                 "\"definitions\": {\n";
-        sb.append(str);
+        builder.append(str);
         String sep = "";
         for (Map.Entry<Class<?>, String> entry : definitions.entrySet()) {
-            sb.append(sep);
-            sb.append("\"" + entry.getKey().getSimpleName() + "\": {\n");
-            sb.append(entry.getValue());
-            sb.append("}");
+            builder.append(sep);
+            builder.append("\"" + entry.getKey().getSimpleName() + "\": {\n");
+            builder.append(entry.getValue());
+            builder.append("}");
             sep = ",\n";
         }
-        sb.append("\n");
-        sb.append("},\n" +
+        builder.append("\n");
+        builder.append("},\n" +
                 "\"properties\": {\n");
         for (Map.Entry<String, String> entry : events.entrySet()) {
-            sb.append("\"" + entry.getKey() + "\": {\n");
-            sb.append(entry.getValue());
-            sb.append("},\n");
+            builder.append("\"" + entry.getKey() + "\": {\n");
+            builder.append(entry.getValue());
+            builder.append("},\n");
         }
-        sb.append("}\n" +
+        builder.append("}\n" +
                 "}\n");
-        return sb.toString();
+        return builder.toString();
     }
 
     /**
@@ -173,19 +173,19 @@ public class GenerateJsonSchemaMain {
      * The resulting JSON schema structure will encapsulate these properties within a 'properties' object.
      *
      * @param properties A map of property names to their JSON schema representations.
-     * @param sb         The StringBuilder to which the properties will be appended in JSON schema format.
+     * @param builder    The StringBuilder to which the properties will be appended in JSON schema format.
      */
-    private void addProperties(Map<String, String> properties, StringBuilder sb) {
-        sb.append("\"properties\": {");
+    private void addProperties(Map<String, String> properties, StringBuilder builder) {
+        builder.append("\"properties\": {");
         String sep = "\n";
         for (Map.Entry<String, String> entry : properties.entrySet()) {
-            sb.append(sep);
-            sb.append("\"" + entry.getKey() + "\": {\n");
-            sb.append(entry.getValue());
-            sb.append("}");
+            builder.append(sep);
+            builder.append("\"" + entry.getKey() + "\": {\n");
+            builder.append(entry.getValue());
+            builder.append("}");
             sep = ",\n";
         }
-        sb.append("\n" +
+        builder.append("\n" +
                 "}\n");
     }
 
@@ -206,7 +206,7 @@ public class GenerateJsonSchemaMain {
         aliases.put(type, "#/definitions/" + type.getSimpleName());
         Set<String> required = new LinkedHashSet<>();
         Map<String, String> properties = new LinkedHashMap<>();
-        StringBuilder sb = new StringBuilder();
+        StringBuilder builder = new StringBuilder();
         Map<String, Field> fieldMap = new LinkedHashMap<>();
         WireMarshaller.getAllField(type, fieldMap);
         for (Map.Entry<String, Field> entry : fieldMap.entrySet()) {
@@ -220,21 +220,21 @@ public class GenerateJsonSchemaMain {
                 required.add(name);
             properties.put(name, desc.toString());
         }
-        sb.append("\"type\": \"object\",\n");
+        builder.append("\"type\": \"object\",\n");
         if (!required.isEmpty()) {
-            sb.append("\"required\": [\n");
-            sb.append(required.stream()
+            builder.append("\"required\": [\n");
+            builder.append(required.stream()
                     .map(s -> '"' + s + '"')
                     .collect(Collectors.joining(",\n")));
-            sb.append("\n" +
+            builder.append("\n" +
                     "],\n");
         }
         Comment comment = Jvm.findAnnotation(type, Comment.class);
         if (comment != null)
-            sb.append("\"description\": \"" + comment.value() + "\",\n");
+            builder.append("\"description\": \"" + comment.value() + "\",\n");
 
-        addProperties(properties, sb);
-        definitions.put(type, sb.toString());
+        addProperties(properties, builder);
+        definitions.put(type, builder.toString());
     }
 
     /**

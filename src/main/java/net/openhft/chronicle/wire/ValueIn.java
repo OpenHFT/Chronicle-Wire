@@ -240,10 +240,10 @@ public interface ValueIn {
     /**
      * Puts the byte data into the provided ByteBuffer.
      *
-     * @param bb The ByteBuffer to put the byte data.
+     * @param buffer The ByteBuffer to put the byte data.
      */
-    default void byteBuffer(@NotNull ByteBuffer bb) {
-        bb.put(bytes());
+    default void byteBuffer(@NotNull ByteBuffer buffer) {
+        buffer.put(bytes());
     }
 
     /**

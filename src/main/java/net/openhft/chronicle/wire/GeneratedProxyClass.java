@@ -54,7 +54,7 @@ public enum GeneratedProxyClass {
         Set<Method> methods = new LinkedHashSet<>(16);
 
         // Builds the initial portion of the proxy class's Java code.
-        StringBuilder sb = new StringBuilder("package " + packageName + ";\n\n" +
+        StringBuilder builder = new StringBuilder("package " + packageName + ";\n\n" +
                 "import net.openhft.chronicle.core.Jvm;\n" +
                 "import net.openhft.chronicle.wire.MethodWriterInvocationHandlerSupplier;\n" +
                 "import java.lang.reflect.InvocationHandler;\n" +
@@ -63,7 +63,7 @@ public enum GeneratedProxyClass {
                 "import java.util.ArrayList;\n" +
                 "import java.util.List;\n");
 
-        sb.append("public class ")
+        builder.append("public class ")
                 .append(className)
                 .append(" implements ");
 
@@ -73,9 +73,9 @@ public enum GeneratedProxyClass {
         String sep = "";
         // create methodArray
         for (Class<?> interfaceClazz : interfaces) {
-            sb.append(sep);
+            builder.append(sep);
             String interfaceName = nameForClass(interfaceClazz);
-            sb.append(interfaceName);
+            builder.append(interfaceName);
 
             // Ensure the provided class is actually an interface
             if (!interfaceClazz.isInterface())
@@ -112,25 +112,25 @@ public enum GeneratedProxyClass {
 
             sep = ",\n              ";
         }
-        sb.append(" {\n" +
+        builder.append(" {\n" +
                 '\n');
 
         // Add fields and the constructor to the generated proxy class's code
-        addFieldsAndConstructor(maxArgs, methods, sb, className, methodArray);
+        addFieldsAndConstructor(maxArgs, methods, builder, className, methodArray);
 
         // Generate the proxy methods
-        createProxyMethods(methods, sb);
-        sb.append("}\n");
+        createProxyMethods(methods, builder);
+        builder.append("}\n");
 
         // If DUMP_CODE is true, print the generated Java code
         if (DUMP_CODE)
-            System.out.println(sb);
+            System.out.println(builder);
 
         // Attempt to load the generated proxy class
         try {
-            return Wires.loadFromJava(classLoader, packageName + '.' + className, sb.toString());
+            return Wires.loadFromJava(classLoader, packageName + '.' + className, builder.toString());
         } catch (Throwable e) {
-            throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + sb, e));
+            throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + builder, e));
         }
     }
 
@@ -152,13 +152,13 @@ public enum GeneratedProxyClass {
      *
      * @param maxArgs        The maximum number of arguments amongst the declared methods.
      * @param declaredMethods The set of methods to be proxied.
-     * @param sb             The StringBuilder to which the generated code is appended.
+     * @param builder             The StringBuilder to which the generated code is appended.
      * @param className      The name of the generated proxy class.
      * @param methodArray    A StringBuilder containing the array of declared methods.
      */
-    private static void addFieldsAndConstructor(final int maxArgs, final Set<Method> declaredMethods, final StringBuilder sb, final String className, final StringBuilder methodArray) {
+    private static void addFieldsAndConstructor(final int maxArgs, final Set<Method> declaredMethods, final StringBuilder builder, final String className, final StringBuilder methodArray) {
         // Define fields for the proxy class
-        sb.append("  private final MethodWriterInvocationHandlerSupplier handler;\n" +
+        builder.append("  private final MethodWriterInvocationHandlerSupplier handler;\n" +
                         "    private final Method[] methods = new Method[")
                 .append(declaredMethods.size())
                 .append("];\n")
@@ -179,9 +179,9 @@ public enum GeneratedProxyClass {
      * Generates the method signatures for proxy methods, including the logic to capture method arguments and invoke the actual method.
      *
      * @param declaredMethods The set of methods to be proxied.
-     * @param sb              The StringBuilder to which the generated code is appended.
+     * @param builder              The StringBuilder to which the generated code is appended.
      */
-    private static void createProxyMethods(final Set<Method> declaredMethods, final StringBuilder sb) {
+    private static void createProxyMethods(final Set<Method> declaredMethods, final StringBuilder builder) {
         int methodIndex = -1;
         for (final Method dm : declaredMethods) {
             // Get return type of the method
@@ -190,34 +190,34 @@ public enum GeneratedProxyClass {
             methodIndex++;
 
             // Append method signature to the StringBuilder
-            sb.append(createMethodSignature(dm, returnType));
-            sb.append("    Method _method_ = this.methods[").append(methodIndex).append("];\n");
-            sb.append("    Object[] _a_ = this.argsTL.get()[").append(dm.getParameterCount()).append("];\n");
+            builder.append(createMethodSignature(dm, returnType));
+            builder.append("    Method _method_ = this.methods[").append(methodIndex).append("];\n");
+            builder.append("    Object[] _a_ = this.argsTL.get()[").append(dm.getParameterCount()).append("];\n");
 
             // Assign method parameters to local array
-            assignParametersToArgs(sb, dm);
+            assignParametersToArgs(builder, dm);
             // Handle method invocation
-            callInvoke(sb, returnType);
+            callInvoke(builder, returnType);
         }
     }
 
     /**
      * Generates the method invocation logic. This includes invoking the method and handling any potential exceptions.
      *
-     * @param sb         The StringBuilder to which the generated code is appended.
+     * @param builder    The StringBuilder to which the generated code is appended.
      * @param returnType The return type of the method being invoked.
      */
-    private static void callInvoke(final StringBuilder sb, final Class<?> returnType) {
+    private static void callInvoke(final StringBuilder builder, final Class<?> returnType) {
         // Start method invocation
-        sb.append("    try {\n" +
+        builder.append("    try {\n" +
                 "      ");
 
         // Check if the method has a return type other than void
         if (returnType != void.class)
-            sb.append("return (").append(nameForClass(returnType)).append(')');
+            builder.append("return (").append(nameForClass(returnType)).append(')');
 
         // Invoke the method
-        sb.append(" handler.get().invoke(this,_method_,_a_);\n" +
+        builder.append(" handler.get().invoke(this,_method_,_a_);\n" +
                 "    } catch (Throwable throwable) {\n" +
                 // Handle exceptions by rethrowing them
                 "       throw Jvm.rethrow(throwable);\n" +
@@ -228,17 +228,17 @@ public enum GeneratedProxyClass {
     /**
      * Assigns the method parameters to a local array for future invocation.
      *
-     * @param sb The StringBuilder to which the generated code is appended.
+     * @param builder The StringBuilder to which the generated code is appended.
      * @param dm The method whose parameters need to be assigned.
      */
-    private static void assignParametersToArgs(final StringBuilder sb, final Method dm) {
+    private static void assignParametersToArgs(final StringBuilder builder, final Method dm) {
         // Get the number of parameters in the method
         final int len = dm.getParameters().length;
 
         // Iterate through each parameter and assign it to the array
         for (int j = 0; j < len; j++) {
             String paramName = dm.getParameters()[j].getName();
-            sb.append("    _a_[").append(j).append("] = ").append(paramName).append(";\n");
+            builder.append("    _a_[").append(j).append("] = ").append(paramName).append(";\n");
         }
     }
 
