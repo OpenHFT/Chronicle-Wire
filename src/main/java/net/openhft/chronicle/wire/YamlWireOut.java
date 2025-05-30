@@ -121,9 +121,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     /**
-     * Creates and returns a new instance of {@link YamlValueOut}.
-     *
-     * @return A new YamlValueOut instance.
+     * Protected factory method to create the {@link YamlValueOut} used by this wire.
      */
     @NotNull
     protected YamlValueOut createValueOut() {
