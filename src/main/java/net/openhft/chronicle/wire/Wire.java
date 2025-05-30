@@ -23,28 +23,33 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 
 /**
- * Defines the standard interface for sequentially writing to and reading from a Bytes stream.
- * Implementations of this interface should ensure single-threaded access and avoid method chaining.
+ * Primary interface for sequentially writing to and reading from a Bytes stream.
  *
- * <p>This interface combines the capabilities of both {@link WireIn} and {@link WireOut} interfaces.
+ * <p>This interface combines the behaviour of both {@link WireIn} and
+ * {@link WireOut} and is the most common entry point for general wire
+ * operations. Implementations should be single-threaded and avoid method
+ * chaining.
  */
 @SingleThreaded
 @DontChain
 public interface Wire extends WireIn, WireOut {
     /**
-     * Factory method to create a new YamlWire instance that writes to an on-heap Bytes object.
+     * Creates a YAML wire backed by on-heap bytes.
+     * <p>
+     * The returned wire is configured to use text documents.
      *
-     * @return A YamlWire instance configured to write to an on-heap Bytes object.
+     * @return a YamlWire configured for on-heap bytes
      */
     static Wire newYamlWireOnHeap() {
         return new YamlWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
     }
 
     /**
-     * Set the header number for the Wire. Concrete implementations should ensure they provide the expected behavior for this method.
+     * Sets the header number for this wire.
+     * Overrides {@link WireOut#headerNumber(long)}.
      *
-     * @param headerNumber The header number to be set.
-     * @return The current Wire instance, often for method chaining.
+     * @param headerNumber the header number to set
+     * @return this Wire instance
      */
     @Override
     @NotNull
