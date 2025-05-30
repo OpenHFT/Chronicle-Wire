@@ -675,7 +675,7 @@ public class JSONWire extends TextWire {
 
     /**
      * Escapes characters in {@code s} according to JSON string encoding rules
-     * (RFC&nbsp;7159, section&nbsp;7). Uses {@code \uXXXX} for control
+     * (RFC&nbsp;7159, section&nbsp;7). Uses {@code \\uXXXX} for control
      * characters and characters outside the printable ASCII range. Always uses
      * {@code "} as the quote character, ignoring the {@code quotes} parameter
      * from the superclass.
