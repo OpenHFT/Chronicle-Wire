@@ -20,13 +20,18 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A {@link Marshallable} that exposes a portion of its state as a key.
+ * Useful for map-like collections where objects are identified by part of their
+ * content.
+ */
 public interface KeyedMarshallable {
 
     /**
-     * Writes the key of the current instance into the provided {@code Bytes} object.
-     * This default implementation utilizes the {@code Wires.writeKey} method.
+     * Writes the key portion of this instance to the supplied bytes.
+     * The default implementation delegates to {@link Wires#writeKey(Object, Bytes)}.
      *
-     * @param bytes The {@code Bytes} object into which the key of the current instance is written.
+     * @param bytes destination buffer for the key
      */
     @SuppressWarnings("rawtypes")
     default void writeKey(@NotNull Bytes<?> bytes) {
