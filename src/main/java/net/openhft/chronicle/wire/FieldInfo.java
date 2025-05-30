@@ -27,13 +27,27 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
+import static net.openhft.chronicle.wire.Wires.*;
 
 /**
  * Represents an abstraction for the meta-information of a field within a class or interface.
- * Implementations should provide more specific details about the type, nature, and characteristics of the field.
+ * This metadata is used by {@link WireMarshaller} and related serialisation components to read
+ * and write field values. It provides a consistent way to access properties such as the field
+ * name, type and how it is represented in the wire format.
  */
 public interface FieldInfo {
 
+    /**
+     * Creates an appropriate {@code FieldInfo} implementation for the supplied field.
+     * Primitive types are mapped to specialised variants such as {@link IntFieldInfo}.
+     * Other types fall back to {@link ObjectFieldInfo} or a generic implementation.
+     *
+     * @param name        the field's name
+     * @param type        the declared type
+     * @param bracketType the wire {@link BracketType}
+     * @param field       the reflective field instance
+     * @return a concrete {@code FieldInfo} for the field
+     */
     static FieldInfo createForField(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         // Choose the FieldInfo type based on the field's type.
         if (!type.isPrimitive()) {
@@ -52,19 +66,21 @@ public interface FieldInfo {
     }
 
     /**
-     * Looks up the meta-information of the fields associated with the provided class and returns
-     * a pair of information encapsulated in {@link Wires.FieldInfoPair}.
+     * Analyses the supplied class using reflection and builds a {@link FieldInfoPair}
+     * describing its marshallable fields. The pair contains an unmodifiable list of
+     * {@code FieldInfo} objects and a map keyed by field name. Each field's
+     * {@link BracketType} is derived from its {@link SerializationStrategy}.
      *
-     * @param aClass The class for which field info needs to be retrieved.
-     * @return A {@link Wires.FieldInfoPair} representing the field information of the class.
+     * @param aClass the class to inspect
+     * @return an immutable {@link FieldInfoPair} describing the fields
      */
     @NotNull
-    static Wires.FieldInfoPair lookupClass(@NotNull Class<?> aClass) {
-        final SerializationStrategy ss = Wires.CLASS_STRATEGY.get(aClass);
+    static FieldInfoPair lookupClass(@NotNull Class<?> aClass) {
+        final SerializationStrategy ss = CLASS_STRATEGY.get(aClass);
         switch (ss.bracketType()) {
             case NONE:
             case SEQ:
-                return Wires.FieldInfoPair.EMPTY;
+                return FieldInfoPair.EMPTY;
             case MAP:
                 break;
             case HISTORY_MESSAGE:
@@ -81,13 +97,13 @@ public interface FieldInfo {
         for (@NotNull WireMarshaller.FieldAccess fa : marshaller.fields) {
             final String name = fa.field.getName();
             final Class<?> type = fa.field.getType();
-            final SerializationStrategy ss2 = Wires.CLASS_STRATEGY.get(type);
+            final SerializationStrategy ss2 = CLASS_STRATEGY.get(type);
             final BracketType bracketType = ss2.bracketType();
             fields.add(createForField(name, type, bracketType, fa.field));
         }
 
         // Return a pair of unmodifiable list of fields and a map of field names to their FieldInfo.
-        return new Wires.FieldInfoPair(
+        return new FieldInfoPair(
                 Collections.unmodifiableList(fields),
                 fields.stream().collect(Collectors.toMap(FieldInfo::name, f -> f)));
     }
@@ -119,109 +135,101 @@ public interface FieldInfo {
 
     /**
      * Returns the value of the field represented by this {@code FieldInfo} object
-     * as an {@link Object}. The provided {@code object} is used as a target to
-     * extract the field from.
-     *
-     * @return the value of the field represented by this {@code FieldInfo} object
      * as an {@link Object}.
+     *
+     * @param object the instance from which to read the field
+     * @return the field value or {@code null} if it cannot be obtained
      */
     @Nullable
     Object get(Object object);
 
     /**
      * Returns the value of the field represented by this {@code FieldInfo} object
-     * as a {@code long} primitive. The provided {@code object} is used as a target
-     * to extract the field from.
-     *
-     * @return the value of the field represented by this {@code FieldInfo} object
      * as a {@code long} primitive.
+     *
+     * @param object the instance from which to read the field
+     * @return the field value, converted to {@code long} if required
      */
     long getLong(Object object);
 
     /**
      * Returns the value of the field represented by this {@code FieldInfo} object
-     * as an {@code int} primitive. The provided {@code object} is used as a target
-     * to extract the field from.
-     *
-     * @return the value of the field represented by this {@code FieldInfo} object
      * as an {@code int} primitive.
+     *
+     * @param object the instance from which to read the field
+     * @return the field value, converted to {@code int} if required
      */
     int getInt(Object object);
 
     /**
      * Returns the value of the field represented by this {@code FieldInfo} object
-     * as a {@code char} primitive. The provided {@code object} is used as a target
-     * to extract the field from.
-     *
-     * @return the value of the field represented by this {@code FieldInfo} object
      * as a {@code char} primitive.
+     *
+     * @param object the instance from which to read the field
+     * @return the field value, converted to {@code char} if required
      */
     char getChar(Object object);
 
     /**
      * Returns the value of the field represented by this {@code FieldInfo} object
-     * as a {@code double} primitive. The provided {@code object} is used as a target
-     * to extract the field from.
-     *
-     * @return the value of the field represented by this {@code FieldInfo} object
      * as a {@code double} primitive.
+     *
+     * @param object the instance from which to read the field
+     * @return the field value, converted to {@code double} if required
      */
     double getDouble(Object object);
 
     /**
-     * Sets the value of the field represented by this {@code FieldInfo} object
-     * to the provided {@code value}. The provided {@code object} is used as a
-     * target to the extract eh field from.
+     * Sets the value of the field represented by this {@code FieldInfo} object.
+     *
+     * @param object the instance on which to set the field
+     * @param value  the new value; conversions may occur if the types differ
+     * @throws IllegalArgumentException if the assignment fails
      */
     void set(Object object, Object value) throws IllegalArgumentException;
 
     /**
-     * Sets the value of the field represented by this {@code FieldInfo} object
-     * to the provided {@code value}. The provided {@code object} is used as a
-     * target to the extract eh field from.
+     * Sets the value of the field represented by this {@code FieldInfo} object.
+     *
+     * @param object the instance on which to set the field
+     * @param value  the new {@code char} value
+     * @throws IllegalArgumentException if the assignment fails
      */
     void set(Object object, char value) throws IllegalArgumentException;
 
     /**
-     * Sets the value of the field represented by this {@code FieldInfo} object
-     * to the provided {@code value}. The provided {@code object} is used as a
-     * target to the extract eh field from.
+     * Sets the value of the field represented by this {@code FieldInfo} object.
+     *
+     * @param object the instance on which to set the field
+     * @param value  the new {@code int} value
+     * @throws IllegalArgumentException if the assignment fails
      */
     void set(Object object, int value) throws IllegalArgumentException;
 
     /**
-     * Sets the value of the field represented by this {@code FieldInfo} object
-     * to the provided {@code value} of type {@code long}. The provided {@code object} is used as a
-     * target from which the field is extracted.
+     * Sets the value of the field represented by this {@code FieldInfo} object.
      *
-     * @param object The object containing the field to be set.
-     * @param value  The value to set the field to.
-     * @throws IllegalArgumentException if the specified object is not an instance of the class or
-     *                                  interface declaring the underlying field, or if an unwrapping
-     *                                  conversion fails.
+     * @param object the instance on which to set the field
+     * @param value  the new {@code long} value
+     * @throws IllegalArgumentException if the assignment fails
      */
     void set(Object object, long value) throws IllegalArgumentException;
 
     /**
-     * Sets the value of the field represented by this {@code FieldInfo} object
-     * to the provided {@code value} of type {@code double}. The provided {@code object} is used as a
-     * target from which the field is extracted.
+     * Sets the value of the field represented by this {@code FieldInfo} object.
      *
-     * @param object The object containing the field to be set.
-     * @param value  The value to set the field to.
-     * @throws IllegalArgumentException if the specified object is not an instance of the class or
-     *                                  interface declaring the underlying field, or if an unwrapping
-     *                                  conversion fails.
+     * @param object the instance on which to set the field
+     * @param value  the new {@code double} value
+     * @throws IllegalArgumentException if the assignment fails
      */
     void set(Object object, double value) throws IllegalArgumentException;
 
     /**
-     * Retrieves the {@link Class} identifying the declared generic type of the
-     * field represented by this {@code FieldInfo} object at the provided {@code index}.
+     * Returns the declared generic type of the field, for example the
+     * element type of a {@code List<T>}.
      *
-     * @param index The index of the generic type to be retrieved.
-     * @return a {@link Class} identifying the declared generic type of the field represented by
-     * this {@code FieldInfo} object at the provided {@code index}.
+     * @param index the position of the generic parameter
+     * @return the generic argument {@link Class}
      */
     Class<?> genericType(int index);
 
@@ -238,12 +246,13 @@ public interface FieldInfo {
     }
 
     /**
-     * Compares the value of the field represented by this {@code FieldInfo} in both provided
-     * objects {@code a} and {@code b} and determines if they are equal.
+     * Compares the value of this field in two objects.
+     * Implementations may use type-specific equality checks, such as
+     * {@code Double.compare} for {@code double} fields.
      *
-     * @param a First object to compare the field's value.
-     * @param b Second object to compare the field's value.
-     * @return {@code true} if the values are equal, {@code false} otherwise.
+     * @param a first object to compare
+     * @param b second object to compare
+     * @return {@code true} if the values are considered equal
      */
     boolean isEqual(Object a, Object b);
 }
