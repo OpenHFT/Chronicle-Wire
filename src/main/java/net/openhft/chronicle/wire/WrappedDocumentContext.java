@@ -19,9 +19,8 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * This is the WrappedDocumentContext class which implements the DocumentContext interface.
- * The purpose of this class is to wrap another DocumentContext and delegate the behavior to the wrapped instance.
- * This can be used as a base for any specialized versions of DocumentContext which need to extend the default behavior.
+ * Wraps another {@link DocumentContext} and delegates all operations to it.
+ * Sub-classes extend this base to add specialised behaviour.
  */
 public abstract class WrappedDocumentContext implements DocumentContext {
 
@@ -38,67 +37,88 @@ public abstract class WrappedDocumentContext implements DocumentContext {
     }
 
     /**
-     * Getter method to retrieve the wrapped DocumentContext instance.
-     *
-     * @return The wrapped DocumentContext instance.
+     * Returns the currently wrapped {@link DocumentContext}.
      */
     public DocumentContext dc() {
         return dc;
     }
 
     /**
-     * Setter method to update the wrapped DocumentContext instance.
-     * This method is designed to follow the builder pattern, returning the current instance for chained calls.
-     *
-     * @param dc The new DocumentContext instance to be wrapped.
-     * @return The current instance of WrappedDocumentContext.
+     * Sets or replaces the {@link DocumentContext} being wrapped and returns this instance.
      */
     public WrappedDocumentContext dc(DocumentContext dc) {
         this.dc = dc;
         return this;
     }
 
+    /**
+     * Delegates to {@link DocumentContext#isMetaData()} on the wrapped instance.
+     */
     @Override
     public boolean isMetaData() {
         return dc.isMetaData();
     }
 
+    /**
+     * Delegates to {@link DocumentContext#isPresent()} on the wrapped instance.
+     */
     @Override
     public boolean isPresent() {
         return dc.isPresent();
     }
 
+    /**
+     * Delegates to {@link DocumentContext#wire()} on the wrapped instance.
+     */
     @Nullable
     @Override
     public Wire wire() {
         return dc.wire();
     }
 
+    /**
+     * Delegates to {@link DocumentContext#isNotComplete()} on the wrapped instance.
+     */
     @Override
     public boolean isNotComplete() {
         return dc.isNotComplete();
     }
 
+    /**
+     * Delegates to {@link DocumentContext#close()} on the wrapped instance.
+     */
     @Override
     public void close() {
         dc.close();
     }
 
+    /**
+     * Delegates to {@link DocumentContext#sourceId()} on the wrapped instance.
+     */
     @Override
     public int sourceId() {
         return dc.sourceId();
     }
 
+    /**
+     * Delegates to {@link DocumentContext#index()} on the wrapped instance.
+     */
     @Override
     public long index() throws IORuntimeException {
         return dc.index();
     }
 
+    /**
+     * Delegates to {@link DocumentContext#isData()} on the wrapped instance.
+     */
     @Override
     public boolean isData() {
         return dc.isData();
     }
 
+    /**
+     * Delegates to {@link DocumentContext#rollbackOnClose()} on the wrapped instance.
+     */
     @Override
     public void rollbackOnClose() {
         dc.rollbackOnClose();
