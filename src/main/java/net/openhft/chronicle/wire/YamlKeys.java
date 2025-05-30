@@ -20,26 +20,23 @@ package net.openhft.chronicle.wire;
 import java.util.Arrays;
 
 /**
- * Represents a collection of offsets used in a YAML structure.
- * The class provides mechanisms to add, retrieve, and manipulate the offsets,
- * which can be useful for various YAML parsing and generation tasks.
- *
- * <p>Internally, this class employs a dynamic array resizing strategy to accommodate
- * varying numbers of offsets without a significant overhead in space.
+ * Internal helper class for {@link YamlTokeniser} to manage a list of byte offsets.
+ * <p>
+ * These offsets mark the starting positions of YAML keys skipped during an initial
+ * parse pass. They can then be revisited without rescanning the stream.
  */
 public class YamlKeys {
+    /** A shared, empty array instance. */
     private static final long[] NO_OFFSETS = {};
 
-    // The current number of offsets stored
+    /** The number of valid offsets in {@link #offsets}. */
     int count = 0;
 
-    // The dynamic array of offsets
+    /** Array storing the offset values; resized as required. */
     long[] offsets = NO_OFFSETS;
 
     /**
-     * Adds a new offset to the collection.
-     *
-     * @param offset The offset value to be added.
+     * Adds {@code offset} to the end of the list, resizing if needed.
      */
     public void push(long offset) {
         if (count == offsets.length) {
@@ -50,37 +47,29 @@ public class YamlKeys {
     }
 
     /**
-     * Returns the current number of offsets stored in the collection.
-     *
-     * @return The count of offsets.
+     * Returns the number of stored offsets.
      */
     public int count() {
         return count;
     }
 
     /**
-     * Retrieves all the stored offsets.
-     *
-     * @return An array of stored offsets.
+     * Returns the internal array of offsets. Only the first {@link #count} values
+     * are valid.
      */
     public long[] offsets() {
         return offsets;
     }
 
     /**
-     * Resets the count of offsets to zero.
-     * This method does not clear the offset data but allows for reuse of the storage.
+     * Clears the list while retaining the underlying array for reuse.
      */
     public void reset() {
         count = 0;
     }
 
     /**
-     * Removes the offset at the specified index.
-     *
-     * <p>Subsequent offsets are shifted to the left (their indices decrease by one).
-     *
-     * @param i The index of the offset to be removed.
+     * Removes the offset at {@code i}, shifting remaining values left.
      */
     public void removeIndex(int i) {
         count--;
