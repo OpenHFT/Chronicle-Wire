@@ -50,6 +50,7 @@ import static net.openhft.chronicle.wire.SerializationStrategies.MARSHALLABLE;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface ValueIn {
     /** A constant consumer that does nothing when accepting a {@link ValueIn}. */
+    @Deprecated(/* remove in x.29 as unused */)
     Consumer<ValueIn> DISCARD = v -> {};
 
     // ---- Text / Strings section ----
