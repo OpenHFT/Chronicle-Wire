@@ -23,8 +23,8 @@ Each event type has a different method to be called which implements code for th
 [mermaid]
 ....
 graph LR
-    A(Event Source(s)) --> B(Microservice\n(Method Implementations))
-    B --> C(Event Store\n(Chronicle Queue))
+    A(Event Sources) --> B(Microservice\nMethod Implementations)
+    B --> C(Event Store\nChronicle Queue)
 ....
 
 However, messages can still be produced and processed dynamically through the use of a wildcard event callback method where the event type is passed programmatically, for example `void onEvent(String eventType, WireIn data)`.
@@ -39,9 +39,9 @@ In turn, it can produce two streams of output, one replies to the client and the
 ....
 graph LR
     C(Client) --> G(Gateway)
-    S(Internal Systems\\n(sources)) --> G
+    S(Internal Systems\\nsources) --> G
     G --> CR(Client replies)
-    G --> DS(Internal Systems\\n(downstream events))
+    G --> DS(Internal Systems\\ndownstream events)
 ....
 
 === Testing using YAML
