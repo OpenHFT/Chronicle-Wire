@@ -291,12 +291,12 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Loads an Object from a file
+     * Static utility to load and deserialise an object from a YAML-formatted file.
      *
-     * @param filename the file-path containing the object
-     * @param <T>      the type of the object to load
-     * @return an instance of the object created from the data in the file
-     * @throws IOException if the file can not be found or read
+     * @param filename file-path containing the YAML representation
+     * @param <T>      the expected object type
+     * @return deserialised instance created from the file contents
+     * @throws IOException if the file can not be read
      */
     public static <T> T load(String filename) throws IOException, InvalidMarshallableException {
         return (T) TextWire.fromFile(filename).readObject();
@@ -308,26 +308,25 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Retrieves the current strict mode setting for this TextWire instance.
-     *
-     * @return A boolean indicating whether strict mode is enabled (true) or disabled (false).
+     * Returns whether strict parsing is enabled.
      */
     public boolean strict() {
         return strict;
     }
 
     /**
-     * Sets the strict mode for this TextWire instance.
-     * When strict mode is enabled, the instance may enforce stricter parsing or serialization rules.
-     *
-     * @param strict A boolean value to set the strict mode. True to enable, false to disable.
-     * @return The current TextWire instance, allowing for method chaining.
+     * Enables or disables strict parsing mode.
      */
     public TextWire strict(boolean strict) {
         this.strict = strict;
         return this;
     }
 
+    /**
+     * Creates a method writer proxy for the given interface(s). Method calls on
+     * the proxy will be serialised to this {@code TextWire} instance using
+     * {@link WireType#TEXT}.
+     */
     @Override
     @NotNull
     public <T> T methodWriter(@NotNull Class<T> tClass, Class<?>... additional) {
@@ -342,12 +341,8 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Creates a new textual method writer invocation handler based on provided interface(s).
-     * If any of the provided interfaces have a {@link Comment} annotation,
-     * the associated comment is written to the wire.
-     *
-     * @param interfaces One or more interfaces that the created handler should be aware of.
-     * @return A newly instantiated {@link TextMethodWriterInvocationHandler} for the provided interface(s).
+     * Internal factory for creating the invocation handler used by text based
+     * method writers.
      */
     @NotNull
     TextMethodWriterInvocationHandler newTextMethodWriterInvocationHandler(Class<?>... interfaces) {
@@ -359,6 +354,10 @@ public class TextWire extends YamlWireOut<TextWire> {
         return new TextMethodWriterInvocationHandler(interfaces[0], this);
     }
 
+    /**
+     * Creates a builder for a text-based method writer. The resulting writer
+     * will serialise method calls to this {@code TextWire} instance.
+     */
     @Override
     @NotNull
     public <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
@@ -418,10 +417,8 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Configures this TextWire instance to use binary document contexts for reading and writing.
-     * This will replace the current read and write contexts with binary contexts.
-     *
-     * @return The current TextWire instance, allowing for method chaining.
+     * Switches to binary document mode where document boundaries are length
+     * prefixed and metadata is kept separate from data.
      */
     @NotNull
     public TextWire useBinaryDocuments() {
@@ -431,10 +428,8 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Configures this TextWire instance to use textual document contexts for reading and writing.
-     * This will replace the current read and write contexts with textual contexts.
-     *
-     * @return The current TextWire instance, allowing for method chaining.
+     * Switches to text document mode where documents are separated by the
+     * {@code ---} and {@code ...} markers.
      */
     @NotNull
     public TextWire useTextDocuments() {
@@ -456,10 +451,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Creates and returns a new instance of TextValueIn.
-     * This method is primarily intended for internal use to provide consistent access to TextValueIn instances.
-     *
-     * @return A new instance of TextValueIn.
+     * Protected factory method to create the {@link TextValueIn} used by this wire.
      */
     @NotNull
     protected TextValueIn createValueIn() {
@@ -467,10 +459,8 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Converts the underlying bytes of this TextWire to its string representation.
-     * For large byte sequences, only the initial part of the data is returned followed by "..".
-     *
-     * @return A string representation of the TextWire's underlying bytes.
+     * Returns the remaining readable content of the wire's buffer.
+     * If more than 1&nbsp;MiB remains only the first MiB is returned followed by "..".
      */
     public String toString() {
         if (bytes.readRemaining() > (1024 * 1024)) {
@@ -486,18 +476,14 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Converts the underlying bytes of this TextWire to its ISO-8859-1 string representation.
-     *
-     * @return A string representation of the TextWire's underlying bytes in ISO-8859-1 encoding.
+     * Returns the remaining readable content as an ISO-8859-1 string.
      */
     public String to8bitString() {
         return bytes.to8bitString();
     }
 
     /**
-     * Converts the underlying bytes of this TextWire to its UTF-8 string representation.
-     *
-     * @return A string representation of the TextWire's underlying bytes in UTF-8 encoding.
+     * Returns the remaining readable content as a UTF-8 string.
      */
     public String toUtf8String() {
         return bytes.toUtf8String();
@@ -535,11 +521,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Reads the field from the current position of the wire and appends it to the given StringBuilder.
-     * The method handles different encodings and escape sequences, and ensures correct parsing of field data.
-     *
-     * @param sb The StringBuilder to which the field value should be appended.
-     * @return The updated StringBuilder containing the field value.
+     * Reads the next field name and appends it to the provided {@code StringBuilder}.
      */
     @NotNull
     protected StringBuilder readField(@NotNull StringBuilder sb) {
@@ -597,16 +579,16 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Trims trailing whitespace from the end of the given StringBuilder.
-     * This utility method ensures that field values are read without trailing spaces.
-     *
-     * @param sb The StringBuilder to be trimmed.
+     * Internal utility to remove trailing whitespace from a {@code StringBuilder}.
      */
     private void trimTheEnd(@NotNull StringBuilder sb) {
         while (sb.length() > 0 && Character.isWhitespace(sb.charAt(sb.length() - 1)))
             sb.setLength(sb.length() - 1);
     }
 
+    /**
+     * Reads the next event key and attempts to convert it to {@code expectedClass}.
+     */
     @Nullable
     @Override
     public <K> K readEvent(@NotNull Class<K> expectedClass) throws InvalidMarshallableException {
@@ -666,10 +648,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Returns the default class to be used as a key.
-     * By default, this method returns the Object class.
-     *
-     * @return The default key class, which is {@link Object}.
+     * Specifies the default class to assume for map keys if not otherwise specified.
      */
     protected Class<?> defaultKeyClass() {
         return Object.class;
@@ -689,10 +668,8 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Retrieves the StopCharTester that determines the end of text with escaping.
-     * The tester is fetched from a thread-local storage and then reset.
-     *
-     * @return The StopCharTester for determining the end of text with escaping.
+     * Returns a thread-local {@link StopCharTester} configured for parsing text
+     * until the end of a scalar value, respecting YAML escapes.
      */
     @NotNull
     protected StopCharTester getEscapingEndOfText() {
@@ -703,10 +680,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Retrieves the StopCharsTester that determines the end of text with strict escaping.
-     * The tester is fetched from thread-local storage and is then reset.
-     *
-     * @return The StopCharsTester for determining the end of text with strict escaping.
+     * Returns a thread-local {@link StopCharsTester} for strict end-of-text detection.
      */
     @NotNull
     protected StopCharsTester getStrictEscapingEndOfText() {
@@ -716,20 +690,18 @@ public class TextWire extends YamlWireOut<TextWire> {
         return escaping;
     }
 
+    /**
+     * Returns a thread-local {@link StopCharsTester} for parsing an event name.
+     */
     @NotNull
     protected StopCharsTester getEscapingEndEventName() {
         StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT, END_EVENT_NAME_ESCAPING);
-
-        // Reset the stop characters tester to stop at space characters.
         escaping.isStopChar(' ', ' ');
         return escaping;
     }
 
     /**
-     * Retrieves the StopCharTester that determines the end of a quoted text section with escaping.
-     * The tester is fetched from thread-local storage and is then reset.
-     *
-     * @return The StopCharTester for determining the end of a quoted text section with escaping.
+     * Returns a thread-local {@link StopCharTester} for parsing a quoted section.
      */
     @Nullable
     protected StopCharTester getEscapingQuotes() {
@@ -752,11 +724,10 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     // TODO Move to valueIn
     /**
-     * Consumes padding characters from the current reading position.
-     * Padding characters include spaces, tabs, new lines, commas, and comments. This method also
-     * handles skipping over any comments encountered during this process.
-     *
-     * @param commas The number of comma characters to consume. Once this count is reached, the method will return.
+     * Consumes whitespace and comment lines. The {@code commas} parameter
+     * indicates how many comma separators are expected to be consumed as part of
+     * this padding; if more commas are found than expected and they are followed
+     * by structural characters, padding stops.
      */
     public void consumePadding(int commas) {
         for (; ; ) {
@@ -812,9 +783,8 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Consumes the start of a document in the byte stream. The start is determined by
-     * the presence of three consecutive '-' characters followed by certain words
-     * (e.g., "!!data", "!!meta-data").
+     * Consumes the YAML document start marker ({@code ---}) and any associated
+     * directives or leading whitespace/comments.
      */
     protected void consumeDocumentStart() {
         // Check if there are at least 4 bytes remaining to read.
@@ -844,18 +814,14 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Peeks the next unsigned byte from the current read position without advancing the pointer.
-     *
-     * @return The next unsigned byte as an integer.
+     * Internal method to peek the next character code without advancing.
      */
     int peekCode() {
         return bytes.peekUnsignedByte();
     }
 
     /**
-     * Peeks the unsigned byte after the current read position without advancing the pointer.
-     *
-     * @return The unsigned byte after the current read position as an integer.
+     * Internal method to peek one character ahead without advancing.
      */
     int peekCodeNext() {
         return bytes.peekUnsignedByte(bytes.readPosition() + 1);
@@ -889,9 +855,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Reads the next byte as an unsigned integer.
-     *
-     * @return The next byte if available or -1 if end-of-file.
+     * Internal method to read the next character code from the buffer.
      */
     protected int readCode() {
         if (bytes.readRemaining() < 1)
