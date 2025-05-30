@@ -16,41 +16,45 @@
 package net.openhft.chronicle.wire;
 
 /**
- * This is the WriteDocumentContext interface extending DocumentContext.
- * It defines methods related to the writing context of a document.
- * The interface offers features to determine metadata status, check if elements are chained,
- * and discern if the document context is empty or not.
+ * Extends {@link DocumentContext} with operations used when writing a document.
+ * Implementations manage the lifecycle of the write and are expected to
+ * finalise the document &ndash; for example by writing length prefixes &ndash;
+ * when {@link #close()} is called.
  */
 public interface WriteDocumentContext extends DocumentContext {
 
     /**
-     * Initializes the writing context with a specific metadata status.
+     * Prepares the context to write a new document or message.
+     * If {@code metaData} is {@code true} the entry is marked as metadata,
+     * otherwise it is data. Implementations typically call this from
+     * {@link MarshallableOut} before any bytes are written to the wire.
      *
-     * @param metaData A boolean value indicating if the context is metadata.
+     * @param metaData {@code true} to mark the entry as metadata
      */
     void start(boolean metaData);
 
     /**
-     * Returns {@code true} if this {@code WriteDocumentContext} is a
-     * chained element.
+     * Indicates whether this write is part of a chained sequence.
+     * When {@code true} closing the context may not finalise the document,
+     * allowing further appends.
      *
-     * @return {@code true} if this {@code WriteDocumentContext} is a
-     * chained element; otherwise, {@code false}.
+     * @return {@code true} if the current write is chained
      */
     boolean chainedElement();
 
     /**
-     * Marks this {@code WriteDocumentContext} as a chained element.
+     * Sets whether this write forms part of a chained sequence.
+     * When set to {@code true} additional writes may follow before the
+     * document is finalised.
      *
-     * @param chainedElement A boolean value indicating if the context
-     * is a chained element.
+     * @param chainedElement {@code true} to enable chaining
      */
     void chainedElement(boolean chainedElement);
 
     /**
-     * Checks if the writing context is empty.
-     *
-     * @return {@code true} if the context is empty; otherwise, {@code false}.
+     * Returns {@code true} if no data has been written since
+     * {@link #start(boolean)} was invoked. Headers or markers added by the
+     * implementation do not count as data.
      */
     boolean isEmpty();
 }
