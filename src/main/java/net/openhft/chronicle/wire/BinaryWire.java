@@ -59,24 +59,37 @@ import static net.openhft.chronicle.wire.BinaryWireCode.*;
 import static net.openhft.chronicle.wire.Wires.GENERATE_TUPLES;
 
 /**
- * Represents a binary translation of TextWire, which is a subset of YAML.
- * This class provides functionalities for reading from and writing to binary wire formats. It encapsulates
- * various configurations such as field representation, delta support, and compression settings.
- * Extends the `AbstractWire` and implements the `Wire` interface to ensure compatibility and a common API
- * with other wire formats.
+ * Primary implementation of the binary wire format. The binary form is
+ * optimised for performance and size, often omitting field names in favour of
+ * numeric identifiers or relying on the DTO's field order for field-less
+ * serialisation. It supports compact encodings for primitives, strings and
+ * collections. Ideal for high throughput, low latency applications,
+ * inter-process communication or persistent storage where human readability is
+ * secondary to efficiency.
  */
 @SuppressWarnings({"rawtypes", "unchecked", "this-escape", "deprecation"})
 public class BinaryWire extends AbstractWire implements Wire {
 
+    /**
+     * Thread-local pool of {@link StringBuilder} instances used for temporary
+     * string operations during parsing or formatting to reduce allocation.
+     */
     static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal();
 
-    // UTF-8 string interner for memory-efficient string operations
+    /**
+     * Static {@link UTF8StringInterner} for interning strings read from the
+     * wire, reducing the memory footprint of repeated values.
+     */
     private static final UTF8StringInterner UTF8 = new UTF8StringInterner(4096);
 
-    // 8-bit string interner for memory-efficient string operations
+    /** Static {@link Bit8StringInterner} for interning 8-bit strings. */
     private static final Bit8StringInterner BIT8 = new Bit8StringInterner(1024);
 
-    // Class value mapping to determine whether an object uses self-describing messages
+    /**
+     * Cache that reports whether a class typically uses self describing
+     * messages. Defaults to {@code true} unless a {@link Marshallable} says
+     * otherwise.
+     */
     private static final ClassValue<Boolean> USES_SELF_DESCRIBING = ClassLocal.withInitial(k -> {
         Object m = ObjectUtils.newInstance(k);
         if (m instanceof Marshallable)
@@ -84,28 +97,43 @@ public class BinaryWire extends AbstractWire implements Wire {
         return true;
     });
 
-    // Flag to control warnings related to missing classes
+    /** Atomic flag to ensure missing class warnings are logged only once. */
     private static final AtomicBoolean FIRST_WARN_MISSING_CLASS = new AtomicBoolean();
-    private static final ThreadLocal<VanillaMessageHistory> VANILLA_MESSAGE_HISTORY_TL = ThreadLocal.withInitial(VanillaMessageHistory::new);
 
-    // Output handler for fixed binary values
+    /** Thread-local storage for {@link VanillaMessageHistory}. */
+    private static final ThreadLocal<VanillaMessageHistory> VANILLA_MESSAGE_HISTORY_TL =
+            ThreadLocal.withInitial(VanillaMessageHistory::new);
+
+    /**
+     * Used when the wire is configured for fixed size output. Provides more
+     * predictable writes when value types are constrained.
+     */
     private final FixedBinaryValueOut fixedValueOut = new FixedBinaryValueOut();
 
-    // Output handler for binary values
+    /**
+     * Serialises values to this wire. The instance may use fixed or variable
+     * length encoding depending on the constructor configuration.
+     */
     @NotNull
     private final FixedBinaryValueOut valueOut;
 
-    // Input handler for binary values
+    /** Deserialises values from this wire. */
     @NotNull
     protected final BinaryValueIn valueIn;
 
-    // Indicates whether fields are represented numerically
+    /**
+     * When true field names are written and read as numeric identifiers using
+     * stop-bit encoding.
+     */
     private final boolean numericFields;
 
-    // Indicates whether fields are absent
+    /**
+     * When true field names or identifiers are omitted. Deserialisation relies
+     * solely on the field order of the DTO.
+     */
     private final boolean fieldLess;
 
-    // Threshold size for compressed outputs
+    /** Values larger than this may be compressed using {@link #compression}. */
     private final int compressedSize;
 
     // Context for writing to the wire
