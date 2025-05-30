@@ -23,10 +23,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 
 /**
- * Defines the standard interface for sequentially writing to and reading from a Bytes stream.
- * Implementations of this interface should ensure single-threaded access and avoid method chaining.
- *
- * <p>This interface combines the capabilities of both {@link WireIn} and {@link WireOut} interfaces.
+ * Primary interface for reading from and writing to a {@link Bytes} stream.
+ * Combines the {@link WireIn} and {@link WireOut} contracts.
  */
 @SingleThreaded
 @DontChain
@@ -41,10 +39,7 @@ public interface Wire extends WireIn, WireOut {
     }
 
     /**
-     * Set the header number for the Wire. Concrete implementations should ensure they provide the expected behavior for this method.
-     *
-     * @param headerNumber The header number to be set.
-     * @return The current Wire instance, often for method chaining.
+     * {@inheritDoc}
      */
     @Override
     @NotNull

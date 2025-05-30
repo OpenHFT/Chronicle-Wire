@@ -31,19 +31,15 @@ import java.util.concurrent.TimeUnit;
 @DontChain
 public interface WireOut extends WireCommon, MarshallableOut {
     /**
-     * Writes an empty field marker to the stream.
-     *
-     * @return An interface to further define the output for the written value.
+     * Writes a field marker with no name. For sequence items the returned
+     * {@link ValueOut} is used to write the value.
      */
     @NotNull
     ValueOut write();
 
     /**
-     * Writes a key to the stream. For RAW types, the label will be in text.
-     * This can be read using readEventName().
-     *
-     * @param key The key to write to the stream.
-     * @return An interface to further define the output for the written value.
+     * Writes an event key to the stream. RAW wires emit it in text so that
+     * {@link WireIn#readEventName(StringBuilder)} can later match it.
      */
     @NotNull
     default ValueOut writeEventName(WireKey key) {
@@ -51,22 +47,15 @@ public interface WireOut extends WireCommon, MarshallableOut {
     }
 
     /**
-     * Writes a CharSequence key to the stream.
-     *
-     * @param key The CharSequence key to write to the stream.
-     * @return An interface to further define the output for the written value.
+     * Writes an event key from arbitrary text.
      */
     default ValueOut writeEventName(CharSequence key) {
         return write(key);
     }
 
     /**
-     * Writes an event to the stream based on the type and event key.
-     *
-     * @param expectedType The expected type of the event to write.
-     * @param eventKey The key of the event.
-     * @return An interface to further define the output for the written value.
-     * @throws InvalidMarshallableException if there's an error marshalling the event.
+     * Writes an event key whose type is not a simple {@link WireKey}.
+     * The {@code expectedType} hints how the key should be serialised.
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
     default ValueOut writeEvent(Class<?> expectedType, Object eventKey) throws InvalidMarshallableException {
@@ -81,42 +70,27 @@ public interface WireOut extends WireCommon, MarshallableOut {
     }
 
     /**
-     * Writes an event identifier to the stream.
-     *
-     * @param methodId The ID of the method representing the event.
-     * @return An interface to further define the output for the written value.
+     * Writes a numeric event identifier for binary wires.
      */
     default ValueOut writeEventId(int methodId) {
         return write(new MethodWireKey(null, methodId));
     }
 
     /**
-     * Writes an event identifier with a name to the stream.
-     *
-     * @param name The name of the event.
-     * @param methodId The ID of the method representing the event.
-     * @return An interface to further define the output for the written value.
+     * Writes a numeric identifier along with a textual name for debugging.
      */
     default ValueOut writeEventId(String name, int methodId) {
         return write(new MethodWireKey(name, methodId));
     }
 
     /**
-     * Writes a WireKey to the stream. This method is typically used for
-     * wires that support fields with structured keys.
-     *
-     * @param key The WireKey to write to the stream.
-     * @return An interface to further define the output for the written value.
+     * Writes a structured key then returns a {@link ValueOut} for the value.
      */
     @NotNull
     ValueOut write(WireKey key);
 
     /**
-     * Writes a CharSequence key to the stream. This provides flexibility
-     * to write non-standard keys to the wire.
-     *
-     * @param key The CharSequence key to write to the stream.
-     * @return An interface to further define the output for the written value.
+     * Writes an arbitrary textual key.
      */
     ValueOut write(CharSequence key);
 
@@ -130,37 +104,24 @@ public interface WireOut extends WireCommon, MarshallableOut {
     ValueOut getValueOut();
 
     /**
-     * Get the ObjectOutput associated with this WireOut.
-     *
-     * @return The ObjectOutput associated with this WireOut.
+     * Returns a standard {@link ObjectOutput} view over this wire.
      */
     ObjectOutput objectOutput();
 
     /**
-     * Writes a comment to the wire. Comments may be useful for debugging
-     * or providing context within the wire stream.
-     *
-     * @param s The comment to be written to the stream.
-     * @return This WireOut instance for method chaining.
+     * Writes a comment for diagnostic dumps only.
      */
     @NotNull
     WireOut writeComment(CharSequence s);
 
     /**
-     * Adds padding to the wire. This is particularly useful for aligning data.
-     *
-     * @param paddingToAdd The amount of padding to add.
-     * @return This WireOut instance for method chaining.
+     * Inserts padding bytes, typically for alignment.
      */
     @NotNull
     WireOut addPadding(int paddingToAdd);
 
     /**
-     * Ensures that the wire's output aligns with cache boundaries. If the current write position
-     * is close to the end of a cache line, this method will pad the wire such that a subsequent
-     * 4-byte integer won't span across cache lines, optimizing cache performance.
-     *
-     * @return This WireOut instance for method chaining.
+     * Pads the output so the next four bytes do not straddle a cache line.
      */
     @NotNull
     default WireOut padToCacheAlign() {
@@ -177,12 +138,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
     }
 
     /**
-     * Aligns the write position to the provided alignment boundary, taking into account
-     * the specified offset (plus). Padding will be added as necessary.
-     *
-     * @param alignment The alignment boundary.
-     * @param plus Additional offset to the write position.
-     * @return This WireOut instance for method chaining.
+     * Aligns the write position to {@code alignment} bytes from the optional offset.
      */
     @NotNull
     default WireOut writeAlignTo(int alignment, int plus) {

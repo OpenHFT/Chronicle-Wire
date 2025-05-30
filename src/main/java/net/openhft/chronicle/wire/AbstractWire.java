@@ -46,10 +46,15 @@ import static net.openhft.chronicle.wire.Wires.*;
  */
 public abstract class AbstractWire implements Wire, InternalWire {
 
-    // Default padding configuration loaded from the system properties.
+    /**
+     * Default padding configuration taken from the {@code wire.usePadding}
+     * system property.
+     */
     public static final boolean DEFAULT_USE_PADDING = Jvm.getBoolean("wire.usePadding", false);
 
-    // Message used when a header is detected inside another header.
+    /**
+     * Error text used when a header is detected within another header.
+     */
     private static final String INSIDE_HEADER_MESSAGE = "you cant put a header inside a header, check that " +
             "you have not nested the documents. If you are using Chronicle-Queue please " +
             "ensure that you have a unique instance of the Appender per thread, in " +
@@ -59,21 +64,44 @@ public abstract class AbstractWire implements Wire, InternalWire {
         WireInternal.addAliases();
     }
 
-    // The underlying bytes representation used by the Wire.
+    /**
+     * Underlying byte storage.
+     */
     @NotNull
     protected final Bytes<?> bytes;
+    /**
+     * True if 8-bit encoding is permitted.
+     */
     protected final boolean use8bit;
+    /**
+     * Lookup used when resolving class aliases.
+     */
     protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
+    /**
+     * Optional parent object for nested marshallables.
+     */
     protected Object parent;
+    /**
+     * Consumer invoked when comments are parsed.
+     */
     protected Consumer<CharSequence> commentListener = IgnoringConsumer.IGNORING_CONSUMER;
+    /** Pausing strategy for blocking operations. */
     private Pauser pauser;
+    /** Lazily created pauser used with timeouts. */
     private TimingPauser timedParser;
+    /** Last header number written. */
     private long headerNumber = Long.MIN_VALUE;
+    /** Controls whether NOT_COMPLETE messages are visible. */
     private boolean notCompleteIsNotPresent;
+    /** Lazy wrapper for Java ObjectOutput. */
     private ObjectOutput objectOutput;
+    /** Lazy wrapper for Java ObjectInput. */
     private ObjectInput objectInput;
+    /** True while inside a header. */
     private boolean insideHeader;
+    /** Optional checker for header numbers. */
     private HeadNumberChecker headNumberChecker;
+    /** Whether padding is currently enabled. */
     private boolean usePadding = DEFAULT_USE_PADDING;
 
     /**
@@ -102,9 +130,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
     }
 
     /**
-     * Acquires or initializes a timed parser.
-     *
-     * @return The current instance of TimingPauser.
+     * Lazily creates a {@link TimingPauser} used when waiting for data.
      */
     @NotNull
     private TimingPauser acquireTimedParser() {
@@ -114,9 +140,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
     }
 
     /**
-     * Checks if the current Wire is inside a header.
-     *
-     * @return True if inside a header, false otherwise.
+     * Returns {@code true} if a write header has been entered but not yet updated.
      */
     public boolean isInsideHeader() {
         return this.insideHeader;
@@ -254,8 +278,10 @@ public abstract class AbstractWire implements Wire, InternalWire {
         }
     }
 
+    /**
+     * Adjusts the read position for header alignment when padding is enabled.
+     */
     private void alignForRead(Bytes<?> bytes) {
-        // move the read position
         bytes.readPositionForHeader(usePadding);
     }
 

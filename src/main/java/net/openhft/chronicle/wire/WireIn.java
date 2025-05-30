@@ -36,16 +36,8 @@ import java.util.function.Consumer;
 public interface WireIn extends WireCommon, MarshallableIn {
 
     /**
-     * Reads all available entries and populates the provided map with these entries.
-     * Each entry in the wire source is read as a key-value pair where the key is of type {@code K} and the value is of type {@code V}.
-     *
-     * @param <K>     The type of keys in the map.
-     * @param <V>     The type of values in the map.
-     * @param kClass  The class type of the key.
-     * @param vClass  The class type of the value.
-     * @param map     The map to populate with read entries.
-     * @return The populated map.
-     * @throws InvalidMarshallableException If there's an error in the marshalling process.
+     * Reads the remainder of the current document as a map.
+     * Keys and values are converted using the provided classes.
      */
     @NotNull
     default <K, V> Map<K, V> readAllAsMap(Class<K> kClass, @NotNull Class<V> vClass, @NotNull Map<K, V> map) throws InvalidMarshallableException {
@@ -62,35 +54,24 @@ public interface WireIn extends WireCommon, MarshallableIn {
     }
 
     /**
-     * Copies the content from the current WireIn source to the provided WireOut destination.
-     *
-     * @param wire The WireOut instance where the content will be copied to.
-     * @throws InvalidMarshallableException If there's an error in the marshalling process.
+     * Copies the remaining readable content of this wire to the given output.
      */
     void copyTo(@NotNull WireOut wire) throws InvalidMarshallableException;
 
     /**
-     * Reads the next field if present, or returns an empty string if not present.
-     *
-     * @return The value of the next field, encapsulated in a {@link ValueIn} instance.
+     * Reads the next field name and prepares to read its value.
      */
     @NotNull
     ValueIn read();
 
     /**
-     * Reads the next field if present. The field should match the provided {@link WireKey}.
-     *
-     * @param key The WireKey that should match the next field.
-     * @return The value of the matched field, encapsulated in a {@link ValueIn} instance.
+     * Reads the field with the given key, skipping other fields if necessary.
      */
     @NotNull
     ValueIn read(@NotNull WireKey key);
 
     /**
-     * Reads the next field based on the provided field name.
-     *
-     * @param fieldName The name of the field to read.
-     * @return The value of the specified field, encapsulated in a {@link ValueIn} instance.
+     * Reads the field with the given name.
      */
     @NotNull
     default ValueIn read(String fieldName) {
@@ -98,9 +79,8 @@ public interface WireIn extends WireCommon, MarshallableIn {
     }
 
     /**
-     * Reads the next event number. If no number is present, returns Long.MIN_VALUE.
-     *
-     * @return The next event number or Long.MIN_VALUE if no number is present.
+     * Reads the numeric event identifier used by some binary wires.
+     * Returns {@code Long.MIN_VALUE} if no number is present.
      */
     long readEventNumber();
 
@@ -129,11 +109,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
     }
 
     /**
-     * Reads a specific field based on the provided field name.
-     * If the field is not present, it returns an empty string.
-     *
-     * @param name The name of the field to read.
-     * @return The value of the specified field, encapsulated in a {@link ValueIn} instance.
+     * Reads a field matching the supplied name.
      */
     @NotNull
     ValueIn read(@NotNull StringBuilder name);
@@ -158,17 +134,12 @@ public interface WireIn extends WireCommon, MarshallableIn {
     ValueIn getValueIn();
 
     /**
-     * Returns the ObjectInput associated with this WireIn for serialization operations.
-     *
-     * @return the ObjectInput instance.
+     * Provides a standard {@link ObjectInput} view over this wire.
      */
     ObjectInput objectInput();
 
     /**
-     * Reads a comment from the Wire data and appends it to the provided StringBuilder.
-     *
-     * @param sb StringBuilder to which the comment will be appended.
-     * @return the WireIn instance for method chaining.
+     * Reads a comment from the wire into the given buffer.
      */
     @NotNull
     WireIn readComment(@NotNull StringBuilder sb);
@@ -287,9 +258,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
     void consumePadding();
 
     /**
-     * Sets a listener that gets notified whenever a comment is encountered during reading.
-     *
-     * @param commentListener The consumer that handles and processes the comments.
+     * Registers a consumer to receive comments encountered while parsing.
      */
     void commentListener(Consumer<CharSequence> commentListener);
 

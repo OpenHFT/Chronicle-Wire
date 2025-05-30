@@ -28,17 +28,16 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Supplier;
 
 /**
- * An abstract representation of a wire type that could be either {@code TextWire} or {@code BinaryWire}.
- * This class provides a generic foundation for wire types that could shift between the two mentioned types
- * based on the underlying acquisition logic.
- *
- * @author Rob Austin.
+ * Base class for wires that determine whether they are text or binary on demand.
  */
 @SuppressWarnings("rawtypes")
 public abstract class AbstractAnyWire extends AbstractWire implements Wire {
 
+    /**
+     * Strategy for lazily acquiring the concrete wire implementation.
+     */
     @NotNull
-    protected final WireAcquisition wireAcquisition;  // Responsible for acquiring the actual wire type (TextWire or BinaryWire).
+    protected final WireAcquisition wireAcquisition;
 
     /**
      * Constructs a new instance of {@code AbstractAnyWire} using the specified bytes and wire acquisition strategy.
@@ -52,10 +51,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Retrieves the underlying wire, which could be either {@code TextWire} or {@code BinaryWire},
-     * based on the acquisition strategy.
-     *
-     * @return The underlying wire type.
+     * Returns the lazily acquired underlying wire, creating it if necessary.
      */
     @Nullable
     public Wire underlyingWire() {
@@ -63,9 +59,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Provides a supplier that indicates the type of the underlying wire.
-     *
-     * @return A supplier yielding the {@code WireType}.
+     * Supplies the {@link WireType} of the underlying wire.
      */
     @NotNull
     public Supplier<WireType> underlyingType() {
@@ -146,6 +140,9 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
         return wireAcquisition.acquireWire().newIntArrayReference();
     }
 
+    /**
+     * Ensures the underlying wire has been created.
+     */
     void checkWire() {
         wireAcquisition.acquireWire();
     }
@@ -224,37 +221,29 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Represents an interface defining the strategy for acquiring and interacting with the underlying wire types.
+     * Strategy for discovering or creating the actual wire implementation.
      */
     interface WireAcquisition {
 
         /**
-         * Provides a supplier indicating the type of the underlying wire, which could be either {@code TextWire} or {@code BinaryWire}.
-         *
-         * @return A supplier yielding the {@code WireType}.
+         * Returns a supplier describing the underlying {@link WireType}.
          */
         @NotNull
         Supplier<WireType> underlyingType();
 
         /**
-         * Retrieves the actual wire type which could be either {@code TextWire} or {@code BinaryWire}.
-         *
-         * @return The acquired wire type.
+         * Acquires the actual underlying wire instance.
          */
         @Nullable
         Wire acquireWire();
 
         /**
-         * Sets the class lookup mechanism for this wire acquisition.
-         *
-         * @param classLookup The class lookup mechanism to set.
+         * Sets the class lookup to use when creating the underlying wire.
          */
         void classLookup(ClassLookup classLookup);
 
         /**
-         * Retrieves the class lookup mechanism associated with this wire acquisition.
-         *
-         * @return The class lookup mechanism.
+         * Returns the class lookup associated with this acquisition.
          */
         @Nullable
         ClassLookup classLookup();

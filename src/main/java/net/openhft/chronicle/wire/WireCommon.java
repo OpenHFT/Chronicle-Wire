@@ -24,33 +24,38 @@ import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Common configuration and factory methods shared by all wire types.
+ * These allow a wire to control class resolution, pausing behaviour and
+ * creation of low-latency value objects.
+ */
 public interface WireCommon {
 
     /**
-     * Sets the {@link ClassLookup} implementation to be used for class lookup.
+     * Sets the {@link ClassLookup} used to resolve class names during
+     * deserialisation. This comes into play when type aliases or numeric
+     * identifiers are read from the wire.
      *
-     * @param classLookup implementation to be used for class lookup.
+     * @param classLookup strategy for resolving class names
      */
     void classLookup(ClassLookup classLookup);
 
     /**
-     * Returns the current {@link ClassLookup} implementation being used for class lookup.
-     *
-     * @return the current {@link ClassLookup} implementation being used for class lookup
+     * Returns the {@link ClassLookup} currently in use for resolving class
+     * names during deserialisation.
      */
     ClassLookup classLookup();
 
     /**
-     * Sets the {@link Pauser} implementation to be used for blocking operations.
+     * Sets the {@link Pauser} controlling how read operations wait for data.
+     * Typical implementations yield or park the thread when the wire is empty.
      *
-     * @param pauser implementation to be used for blocking operations.
+     * @param pauser policy for blocking behaviour
      */
     void pauser(Pauser pauser);
 
     /**
-     * Returns the current {@link Pauser} implementation being used for blocking operations.
-     *
-     * @return the current {@link Pauser} implementation being used for blocking operations
+     * Returns the {@link Pauser} used to manage blocking behaviour.
      */
     Pauser pauser();
 
@@ -63,35 +68,27 @@ public interface WireCommon {
     Bytes<?> bytes();
 
     /**
-     * Returns the bytes() but only for comment.
-     *
-     * @return the bytes() but only for comment
+     * Returns the underlying {@link Bytes} for use in diagnostics. Implementati
+     * ons can attach textual comments to these bytes when producing hex dumps so
+     * that the main data stream is unaffected.
      */
     HexDumpBytesDescription<?> bytesComment();
 
     /**
-     * Creates and returns a new {@link IntValue}. The {@link IntValue} implementation that is
-     * returned depends on the wire implementation.
-     *
-     * @return a new {@link IntValue}.
+     * Creates an integer value bound to this wire. The concrete return type
+     * depends on whether the wire is text or binary.
      */
     @NotNull
     IntValue newIntReference();
 
     /**
-     * Creates and returns a new {@link LongValue}. The {@link LongValue} implementation that is
-     * returned depends on the wire implementation.
-     *
-     * @return a new {@link LongValue}
+     * Creates a long value bound to this wire.
      */
     @NotNull
     LongValue newLongReference();
 
     /**
-     * Creates and returns a new {@link TwoLongValue}. The {@link TwoLongValue} implementation that
-     * is returned depends on the wire implementation.
-     *
-     * @return a new {@link TwoLongValue}
+     * Creates two long values stored directly in the wire.
      */
     @NotNull
     default TwoLongValue newTwoLongReference() {
@@ -99,41 +96,31 @@ public interface WireCommon {
     }
 
     /**
-     * Creates and returns a new {@link LongArrayValues}. The {@link LongArrayValues} implementation that
-     * is returned depends on the wire implementation.
-     *
-     * @return a new {@link LongArrayValues}
+     * Creates an array of long values mapped to the wire for low latency updates.
      */
     @NotNull
     LongArrayValues newLongArrayReference();
 
     /**
-     * Creates and returns a new {@link IntArrayValues}. The {@link IntArrayValues} implementation that
-     * is returned depends on the wire implementation.
-     *
-     * @return a new {@link IntArrayValues}
+     * Creates an array of int values mapped to the wire for low latency updates.
      */
     @NotNull
     IntArrayValues newIntArrayReference();
 
     /**
-     * Resets the state of the underlying {@link Bytes} stored by the wire.
+     * Clears the wire and resets the underlying {@link Bytes} positions.
      */
     void clear();
 
     /**
-     * Returns the wire parent object. If the parent was not assigned, {@code null} is
-     * returned instead.
-     *
-     * @return the wire parent object or {@code null} if none was assigned.
+     * Returns the wire parent object used for nested marshallable structures.
+     * May be {@code null} if no parent has been set.
      */
     @Nullable
     Object parent();
 
     /**
-     * Assigns the wire parent object for later retrieval.
-     *
-     * @param parent to set, or null if there isn't one.
+     * Assigns a parent object for later retrieval.
      */
     void parent(Object parent);
 
@@ -150,40 +137,48 @@ public interface WireCommon {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Sets the header sequence number. This is typically used by queue
+     * implementations to track message order.
+     */
     @NotNull
     WireOut headerNumber(long headerNumber);
 
+    /**
+     * Returns the current header sequence number.
+     */
     long headerNumber();
 
+    /**
+     * Enables or disables padding for alignment purposes.
+     */
     void usePadding(boolean usePadding);
 
+    /**
+     * Returns whether padding is enabled.
+     */
     boolean usePadding();
 
     /**
-     * Creates and returns a new {@link BooleanValue}. The {@link BooleanValue} implementation that is
-     * returned depends on the wire implementation.
-     *
-     * @return a new {@link BooleanValue}.
+     * Creates a boolean value mapped directly to the underlying bytes.
      */
     @NotNull
     BooleanValue newBooleanReference();
 
     /**
-     * Should this wire write the object as a Marshallable or BytesMarshallable
-     *
-     * @return use Marshallable
+     * Returns {@code true} if the given object should write its type
+     * information into the wire (see {@code SelfDescribingMarshallable}).
      */
     boolean useSelfDescribingMessage(@NotNull CommonMarshallable object);
 
     /**
-     * Determine whether direct access to the underlying byte() makes sense or should it be treated as text
-     *
-     * @return Is this a binary protocol
+     * Returns {@code true} if this wire uses a binary format rather than text.
      */
     boolean isBinary();
 
     /**
-     * Reset the state of the wire
+     * Resets the wire to its initial state, clearing positions and internal
+     * buffers.
      */
     void reset();
 }
