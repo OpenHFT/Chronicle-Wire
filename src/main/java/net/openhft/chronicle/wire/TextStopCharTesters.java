@@ -25,17 +25,15 @@ import java.util.BitSet;
  * character based on various parsing contexts.
  * <p>
  * This enum primarily caters to text parsing scenarios, especially when
- * determining the end of specific types or textual blocks. These are typically
- * used with methods like
- * {@link net.openhft.chronicle.bytes.BytesIn#parseUtf8(Appendable, StopCharTester)}.
+ * determining the end of specific types or textual blocks.
  */
 enum TextStopCharTesters implements StopCharTester {
 
     /**
-     * A {@link StopCharTester} that stops parsing when a character is not a
-     * valid part of a Java identifier. Some YAML-specific characters such as
-     * {@code !}, {@code .}, {@code -}, {@code [} and {@code ]} are treated as
-     * valid within type tags.
+     * Tester for determining the end of a type.
+     * <p>
+     * This tester checks if a character is considered to be a termination
+     * point based on Java identifier rules, but with a few exceptions.
      */
     END_OF_TYPE {
         @NotNull
@@ -47,10 +45,6 @@ enum TextStopCharTesters implements StopCharTester {
             return ch >= eowLength || eow.get(ch);
         }
     },
-    /**
-     * A {@link StopCharTester} that stops parsing at structural characters such
-     * as quotes, hash, newline, closing braces, colon or comma.
-     */
     END_OF_TEXT {
         @Override
         public boolean isStopChar(int ch) throws IllegalStateException {
@@ -73,11 +67,13 @@ enum TextStopCharTesters implements StopCharTester {
     };
 
     /**
-     * Internal helper to create the {@link BitSet} used by {@link #END_OF_TYPE}.
-     * By default, it considers all non-Java identifier characters as stop
-     * characters but makes exceptions for a few YAML tag symbols.
+     * Constructs a BitSet representing characters that mark
+     * the end of a type.
+     * <p>
+     * By default, it considers all non-Java identifier characters as stop chars
+     * but makes exceptions for certain characters.
      *
-     * @return a BitSet representing the stop characters for a type
+     * @return A BitSet representing the stop characters for a type.
      */
     private static BitSet endOfTypeBitSet() {
         final BitSet eow = new BitSet();
