@@ -817,9 +817,10 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     /**
      * Acquires an instance of DefaultValueIn. If one doesn't exist, a new instance is created.
-     * Resets the default value to null each time it's acquired.
+     * Lazily initialises and returns the {@link #defaultValueIn} instance.
+     * The {@code defaultValue} field is cleared on each call.
      *
-     * @return The acquired or newly created DefaultValueIn instance.
+     * @return the cached or newly created {@code DefaultValueIn}
      */
     private DefaultValueIn acquireDefaultValueIn() {
         if (defaultValueIn == null)
@@ -828,7 +829,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         defaultValueIn.defaultValue = null;
         return defaultValueIn;
     }
-
+    /**
+     * Reads a {@link BinaryWireCode#FIELD_NUMBER} followed by a stop-bit
+     * encoded integer representing a method or event identifier. Returns
+     * {@code Long.MIN_VALUE} if the next token is not a field number.
+     */
     @Override
     public long readEventNumber() {
         int peekCode = peekCodeAfterPadding();
@@ -843,13 +848,19 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
         return Long.MIN_VALUE;
     }
-
+    /**
+     * Reads the next field identifier into {@code name}. Returns
+     * {@link #valueIn} if a field was found or {@link #defaultValueIn} if not.
+     */
     @NotNull
     @Override
     public ValueIn readEventName(@NotNull StringBuilder name) {
         return readField(name, null, ANY_CODE_MATCH.code()) == null ? acquireDefaultValueIn() : valueIn;
     }
-
+    /**
+     * Reads the next field identifier into {@code name}. Returns
+     * {@link #valueIn} if present or {@link #defaultValueIn} otherwise.
+     */
     @NotNull
     @Override
     public ValueIn read(@NotNull StringBuilder name) {
@@ -862,6 +873,10 @@ public class BinaryWire extends AbstractWire implements Wire {
         return valueIn;
     }
 
+    /**
+     * If the next token is {@link BinaryWireCode#COMMENT} the UTF-8 text is
+     * read into {@code s}; otherwise {@code s} is cleared.
+     */
     @NotNull
     @Override
     public Wire readComment(@NotNull StringBuilder s) {
@@ -892,10 +907,9 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Peeks at the next code after any padding or comments. If padding or comments are encountered,
-     * they are consumed and the method looks again for the next meaningful code.
-     *
-     * @return The code that appears after any padding or comments.
+     * Consumes {@link BinaryWireCode#PADDING},
+     * {@link BinaryWireCode#PADDING32} or {@link BinaryWireCode#COMMENT}
+     * bytes and returns the first significant code.
      */
     private int peekCodeAfterPadding() {
         // Peek at the next available code.
@@ -909,6 +923,12 @@ public class BinaryWire extends AbstractWire implements Wire {
         return peekCode;
     }
 
+    /**
+     * Reads the next event identifier, which may be encoded as a short
+     * string embedded in the field code, a longer string or a numeric ID,
+     * and converts it to {@code expectedClass}. Returns {@code null} if the
+     * stream is exhausted or the code does not denote an event key.
+     */
     @Nullable
     @Override
     public <K> K readEvent(@NotNull Class<K> expectedClass) throws InvalidMarshallableException {
@@ -931,13 +951,9 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Reads a small field based on the given peek code and converts it to the expected class type.
-     * This method is optimized for fields with a length up to 31 characters.
-     *
-     * @param peekCode      The peek code used to determine the length and type of the field.
-     * @param expectedClass The class type to which the read value should be converted.
-     * @param <K>           The type of the returned value.
-     * @return The read value converted to the expected class type.
+     * Handles short field names packed into the code byte. The lower five bits
+     * encode the length (0-31). The extracted string is interned and converted
+     * to {@code expectedClass}.
      */
     @NotNull
     private <K> K readSmallField(int peekCode, Class<K> expectedClass) {
@@ -957,14 +973,11 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Reads a special field based on the given peek code and converts it to the expected class type.
-     * This method handles special cases like field numbers, field names, events, and anchors.
-     *
-     * @param peekCode      The peek code representing the type of the field.
-     * @param expectedClass The class type to which the read value should be converted.
-     * @param <K>           The type of the returned value.
-     * @return The read value converted to the expected class type or null if the peek code doesn't match any known type.
-     * @throws InvalidMarshallableException If there's an error during the marshalling process.
+     * Parses longer field names, numeric IDs and event objects. The
+     * {@link BinaryWireCode#FIELD_NUMBER} branch reads a stop-bit integer,
+     * {@link BinaryWireCode#FIELD_NAME_ANY} and {@link BinaryWireCode#EVENT_NAME}
+     * read an 8-bit string, and {@link BinaryWireCode#EVENT_OBJECT} reads an
+     * object of the expected type.
      */
     @Nullable
     private <K> K readSpecialField(int peekCode, @NotNull Class<K> expectedClass) throws InvalidMarshallableException {
@@ -994,9 +1007,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Reads a field with an 8-bit character set encoding into a StringBuilder.
-     *
-     * @return A StringBuilder containing the read field or null if the read operation failed.
+     * Reads an 8-bit encoded string into a reusable {@link StringBuilder}.
      */
     @Nullable
     StringBuilder read8bit() {
@@ -1041,15 +1052,18 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Reads a field from the wire based on the provided peek code.
-     * This method is designed to handle different types of fields including control, special, small fields, etc.
-     *
-     * @param peekCode   The peek code indicating the type of the field to be read.
-     * @param keyName    The key name of the field to be matched against.
-     * @param keyCode    The key code of the field to be matched against.
-     * @param sb         The StringBuilder to be populated with the read field.
-     * @param missingOk  Indicates if missing fields are acceptable.
-     * @return The populated StringBuilder with the read field or null if no field matched the given keyName and keyCode.
+     * Reads the next field identifier from the wire according to
+     * {@code peekCode}.
+     * <ul>
+     *   <li>Short names ({@link BinaryWireCode#FIELD_NAME0}..{@link BinaryWireCode#FIELD_NAME31})
+     *       are decoded directly into {@code sb}.</li>
+     *   <li>{@link BinaryWireCode#FIELD_NAME_ANY} or {@link BinaryWireCode#EVENT_NAME}
+     *       cause an 8-bit string read.</li>
+     *   <li>{@link BinaryWireCode#FIELD_NUMBER} reads a stop-bit ID and, if it
+     *       matches {@code keyCode}, places {@code keyName} in {@code sb}.</li>
+     * </ul>
+     * Returns {@code sb} if a field was consumed, otherwise {@code null} unless
+     * {@code fieldLess} is true, in which case an empty {@code sb} is returned.
      */
     private StringBuilder readField(int peekCode, CharSequence keyName, int keyCode, @NotNull StringBuilder sb, boolean missingOk) {
         sb.setLength(0);
@@ -1359,10 +1373,9 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Decodes an integer from its binary representation based on a code.
-     *
-     * @param code The code that indicates the encoding.
-     * @return The decoded integer.
+     * Decodes an integer value from {@code code}. Codes below {@code 128}
+     * represent the value directly. Higher codes use formats such as
+     * {@link BinaryWireCode#INT8}, {@link BinaryWireCode#INT16} and so on.
      */
     long readInt(int code) {
         // Direct value for codes less than 128.
@@ -1394,10 +1407,10 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Decodes a floating point number from its binary representation based on a code.
-     *
-     * @param code The code that indicates the encoding.
-     * @return The decoded floating point number.
+     * Decodes a floating point number according to {@code code}. Values may be
+     * stored as {@link BinaryWireCode#FLOAT32}, {@link BinaryWireCode#FLOAT64}
+     * or as scaled integers via {@link BinaryWireCode#FLOAT_STOP_2} and
+     * similar codes.
      */
     double readFloat0(int code) {
         // Check if the high bit is set (indicating a special encoding).
@@ -1427,11 +1440,9 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Decodes a floating point number from its binary representation and boxes it as a Number.
-     * NOTE: This method boxes primitives, which might produce garbage.
-     *
-     * @param code The code indicating the encoding.
-     * @return The decoded floating point number as a Number.
+     * Variant of {@link #readFloat0(int)} that returns a boxed
+     * {@link Number}. This method allocates and should be avoided on the
+     * critical path.
      */
     // TODO: boxes and creates garbage
     private Number readFloat0bject(int code) {
@@ -1465,10 +1476,8 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Decodes an integer from its binary representation based on a code.
-     *
-     * @param code The code that indicates the encoding.
-     * @return The decoded integer.
+     * Decodes an integer value according to {@code code}. Small values are
+     * encoded directly; larger ones use widths such as 8, 16, 32 or 64 bits.
      */
     long readInt0(int code) {
         // Handle small positive integers without special encoding.
@@ -1507,11 +1516,8 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Decodes an integer value from its binary representation and boxes it as a Number.
-     * NOTE: This method boxes primitive numbers, which might introduce garbage in a garbage-collected environment.
-     *
-     * @param code The code that indicates the encoding.
-     * @return The decoded integer value as a Number.
+     * Boxed variant of {@link #readInt0(int)} returning a {@link Number}. This
+     * allocates and should only be used when an object is required.
      */
     // TODO: boxes and creates garbage
     Number readInt0object(int code) {
@@ -1551,20 +1557,17 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Determines if the given code corresponds to a small integer (7-bits).
-     *
-     * @param code The integer code.
-     * @return True if it's a small integer; false otherwise.
+     * Returns {@code true} if the high bit of {@code code} is clear,
+     * indicating a 7‑bit value encoded directly in the code byte.
      */
     private boolean isSmallInt(int code) {
         return (code & 128) == 0;
     }
 
     /**
-     * Decodes a floating point number from its binary representation.
-     *
-     * @param code The code indicating the encoding type.
-     * @return The decoded floating point value.
+     * Decodes a floating point value. Small integers are returned as doubles;
+     * otherwise the code is dispatched to {@link #readFloat0(int)} or
+     * {@link #readInt0(int)} depending on its high bits.
      */
     double readFloat(int code) {
         // If the number is a small integer, return it directly as a double.
@@ -1713,9 +1716,10 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Writes a field to the byte buffer with its name.
-     *
-     * @param name The name of the field.
+     * Writes a field identifier using its textual name. Short names are packed
+     * into a single byte code ({@link BinaryWireCode#FIELD_NAME0} + length) while
+     * longer ones use {@link BinaryWireCode#FIELD_NAME_ANY} followed by the
+     * UTF‑8 bytes.
      */
     private void writeField(@NotNull CharSequence name) {
         // If hex dump retention is enabled, write the field's name as a hex dump description.
@@ -1755,9 +1759,8 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Writes a field to the byte buffer using a numeric code representation.
-     *
-     * @param code The numeric code of the field.
+     * Writes a numeric field identifier as
+     * {@link BinaryWireCode#FIELD_NUMBER} and a stop-bit value.
      */
     private void writeField(int code) {
         // If hex dump retention is enabled, write the code as a hex dump description.
@@ -1770,10 +1773,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Writes a byte code to the byte buffer.
-     *
-     * @param code The byte code to write.
-     * @return Returns the byte buffer after writing the code.
+     * Writes a single byte code to the underlying bytes.
      */
     protected Bytes<?> writeCode(int code) {
         return bytes.writeByte((byte) code);
