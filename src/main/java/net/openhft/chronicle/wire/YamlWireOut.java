@@ -49,41 +49,27 @@ import java.util.function.BiConsumer;
 import static net.openhft.chronicle.bytes.BytesStore.empty;
 
 /**
- * Abstract base class for {@link WireOut} implementations that serialise data
- * into a YAML-like textual format. It manages indentation, separators,
- * quoting and character escaping according to YAML conventions. Concrete
- * subclasses such as {@link TextWire} and {@link YamlWire} build upon this.
+ * Provides functionality for writing data in a YAML-based wire format.
+ * This class encapsulates methods and attributes to handle data serialization into YAML format.
  *
- * @param <T> the type that extends {@code YamlWireOut}
+ * @param <T> The type that extends YamlWireOut
  */
 @SuppressWarnings({"rawtypes", "unchecked", "this-escape", "deprecation"})
 public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire {
     @Deprecated(/* to remove in x.28 */)
     private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
-    /** Marker prefix used when writing type information. */
     public static final BytesStore<?, ?> TYPE = BytesStore.from("!type ");
-    /** YAML representation for a {@code null} value. */
     static final String NULL = "!null \"\"";
-    /** Characters that require quoting when found at the start of a string. */
     static final BitSet STARTS_QUOTE_CHARS = new BitSet();
-    /** Characters that force quoting wherever they appear. */
     static final BitSet QUOTE_CHARS = new BitSet();
-    /** Separator consisting of a comma followed by a space. */
     static final BytesStore<?, ?> COMMA_SPACE = BytesStore.from(", ");
-    /** Separator consisting of a comma followed by a newline. */
     static final BytesStore<?, ?> COMMA_NEW_LINE = BytesStore.from(",\n");
-    /** A newline sequence. */
     static final BytesStore<?, ?> NEW_LINE = BytesStore.from("\n");
-    /** Placeholder for an empty value when preceded by a comment. */
-    static final BytesStore<?, ?> EMPTY_AFTER_COMMENT = BytesStore.wrap(new byte[0]);
-    /** Shared empty bytes instance. */
+    static final BytesStore<?, ?> EMPTY_AFTER_COMMENT = BytesStore.wrap(new byte[0]); // not the same as EMPTY, so we can check this value.
     static final BytesStore<?, ?> EMPTY = BytesStore.from("");
-    /** Single space bytes. */
     static final BytesStore<?, ?> SPACE = BytesStore.from(" ");
-    /** Default end-of-field marker. */
     static final BytesStore<?, ?> END_FIELD = NEW_LINE;
-    /** Hex digits used for escape sequences. */
     static final char[] HEXADECIMAL = "0123456789ABCDEF".toCharArray();
 
     // Static initializer block to configure quote characters for the YAML writer
@@ -97,17 +83,9 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         WireInternal.INTERNER.valueCount();
     }
 
-    /** The primary {@link YamlValueOut} used to serialise values. */
     protected final YamlValueOut valueOut = createValueOut();
-    /** Reusable {@link StringBuilder} for temporary conversions. */
     protected final StringBuilder sb = new StringBuilder();
-    /**
-     * If true, append a readable timestamp comment after numeric epoch values.
-     */
     private boolean addTimeStamps = false;
-    /**
-     * If true the outermost curly braces for a top level object may be omitted.
-     */
     private boolean trimFirstCurly = true;
 
     /**
@@ -122,20 +100,20 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     /**
-     * Returns whether human readable timestamp comments are emitted.
+     * Checks if timestamps should be added during serialization.
      *
-     * @return true if timestamp comments should be added
+     * @return True if timestamps should be added, otherwise false.
      */
     public boolean addTimeStamps() {
         return addTimeStamps;
     }
 
     /**
-     * Controls whether human readable timestamp comments are added after long
-     * values that look like epoch times.
+     * Configures whether to add timestamps during serialization.
+     * This method follows the builder pattern allowing chained method calls.
      *
-     * @param addTimeStamps set to true to enable timestamp comments
-     * @return this instance for chaining
+     * @param addTimeStamps Boolean indicating whether to add timestamps.
+     * @return The current instance of YamlWireOut.
      */
     public T addTimeStamps(boolean addTimeStamps) {
         this.addTimeStamps = addTimeStamps;
@@ -143,8 +121,9 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     /**
-     * Factory method used to obtain the main {@link YamlValueOut}. Subclasses
-     * may override if a specialised implementation is required.
+     * Creates and returns a new instance of {@link YamlValueOut}.
+     *
+     * @return A new YamlValueOut instance.
      */
     @NotNull
     protected YamlValueOut createValueOut() {
@@ -152,7 +131,10 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     /**
-     * Returns the reusable {@link #sb} after clearing its contents.
+     * Acquires and clears the internal StringBuilder {@code sb} for use.
+     * The method ensures the StringBuilder's count is reset to 0 before returning.
+     *
+     * @return The internal StringBuilder after it has been cleared.
      */
     @NotNull
     protected StringBuilder acquireStringBuilder() {
@@ -235,10 +217,11 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     /**
-     * Escapes {@code s} according to YAML rules. If quoting is required the
-     * chosen quote character is written around the escaped text.
+     * Escapes the given CharSequence {@code s} based on the requirements of the YAML format.
+     * If the sequence requires quotes, it will be enclosed with the appropriate quote character;
+     * otherwise, the sequence will be escaped without quotes.
      *
-     * @param s text to escape
+     * @param s The CharSequence to be escaped.
      */
     void escape(@NotNull CharSequence s) {
         @NotNull Quotes quotes = needsQuotes(s);
@@ -253,12 +236,11 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
     // https://yaml.org/spec/1.2.2/#escaped-characters
     /**
-     * Core logic used by {@link #escape(CharSequence)} to write escape
-     * sequences for control characters and Unicode using the supplied quote
-     * style.
+     * Helper method to escape special characters in the given CharSequence {@code s} based on the requirements of the YAML format.
+     * The method handles the specific escaping requirements for various control and special characters.
      *
-     * @param s      text to escape
-     * @param quotes quoting strategy
+     * @param s The CharSequence to be escaped.
+     * @param quotes The type of quotes used to determine how certain characters are escaped.
      */
     protected void escape0(@NotNull CharSequence s, @NotNull Quotes quotes) {
         for (int i = 0; i < s.length(); i++) {
@@ -336,10 +318,10 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     /**
-     * Helper for {@link #escape0(CharSequence, Quotes)} that writes a \xHH
-     * escape.
+     * Appends a 2-character hexadecimal representation of the given character {@code ch} to the output bytes.
+     * This is used for character escaping.
      *
-     * @param ch character to convert
+     * @param ch The character to be converted to hexadecimal.
      */
     private void appendX2(char ch) {
         bytes.append('\\');
@@ -349,10 +331,10 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     /**
-     * Helper for {@link #escape0(CharSequence, Quotes)} that writes a \uHHHH
-     * Unicode escape.
+     * Appends a 4-character hexadecimal Unicode representation of the given character {@code ch} to the output bytes.
+     * This is used for character escaping.
      *
-     * @param ch character to convert
+     * @param ch The character to be converted to hexadecimal Unicode representation.
      */
     protected void appendU4(char ch) {
         bytes.append('\\');
@@ -364,12 +346,11 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     /**
-     * Determines whether {@code s} needs quoting to be a valid YAML scalar.
-     * Considers leading characters, trailing whitespace and characters with
-     * special meaning.
+     * Determines the type of quotes (if any) required for the given CharSequence {@code s} based on the YAML format's escaping requirements.
+     * This method decides between using no quotes, single quotes, or double quotes.
      *
-     * @param s candidate text
-     * @return the quote style to use
+     * @param s The CharSequence to be analyzed.
+     * @return The type of quotes required.
      */
     @NotNull
     protected Quotes needsQuotes(@NotNull CharSequence s) {
@@ -410,10 +391,9 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     /**
-     * Append {@code cs} to the underlying {@link Bytes} using 8‑bit or UTF‑8
-     * encoding depending on {@link #use8bit}.
+     * Appends the given CharSequence {@code cs} to the output bytes using either an 8-bit or UTF-8 encoding, depending on {@code use8bit}.
      *
-     * @param cs text to append
+     * @param cs CharSequence to be appended.
      */
     public void append(@NotNull CharSequence cs) {
         if (use8bit)
@@ -423,11 +403,11 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     /**
-     * Append part of {@code cs} using either 8‑bit or UTF‑8 encoding.
+     * Appends a subsequence of the given CharSequence {@code cs} to the output bytes using either an 8-bit or UTF-8 encoding.
      *
-     * @param cs     source text
-     * @param offset starting index
-     * @param length number of characters
+     * @param cs     CharSequence from which a subsequence will be appended.
+     * @param offset Starting index of the subsequence.
+     * @param length Length of the subsequence.
      */
     public void append(@NotNull CharSequence cs, int offset, int length) {
         if (use8bit)
@@ -437,12 +417,10 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     /**
-     * Serialises a generic object. Iterables and maps are expanded, while other
-     * types delegate to {@link ValueOut#object(Object)} or
-     * {@link ValueOut#typedMarshallable(WriteMarshallable)} as appropriate.
+     * Writes the representation of the object {@code o} to the output. Differentiates the serialization logic based on the type of the object.
      *
-     * @param o object to serialise
-     * @throws InvalidMarshallableException if marshalling fails
+     * @param o The object to be serialized.
+     * @throws InvalidMarshallableException if an error occurs during serialization.
      */
     public void writeObject(Object o) throws InvalidMarshallableException {
         if (o instanceof Iterable) {
@@ -462,11 +440,11 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     /**
-     * Serialises {@code o} as a list item using the provided indentation.
+     * Writes the representation of the object {@code o} to the output with a specified indentation level.
      *
-     * @param o           object to serialise
-     * @param indentation indentation level in spaces
-     * @throws InvalidMarshallableException if marshalling fails
+     * @param o           The object to be serialized.
+     * @param indentation The number of spaces to use for indentation.
+     * @throws InvalidMarshallableException if an error occurs during serialization.
      */
     private void writeObject(Object o, int indentation) throws InvalidMarshallableException {
         writeTwo('-', ' ');
@@ -475,7 +453,9 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     /**
-     * Writes {@code indentation} spaces to the output.
+     * Inserts the specified number of spaces into the output bytes for indentation.
+     *
+     * @param indentation The number of spaces to insert.
      */
     private void indentation(int indentation) {
         while (indentation-- > 0)
@@ -494,10 +474,10 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     /**
-     * Helper to append two characters to the output buffer.
+     * Writes two characters to the 'bytes' object sequentially.
      *
-     * @param ch1 first character
-     * @param ch2 second character
+     * @param ch1 First character to write.
+     * @param ch2 Second character to write.
      */
     void writeTwo(char ch1, char ch2) {
         bytes.writeUnsignedByte(ch1);
@@ -505,18 +485,19 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     /**
-     * Whether the outermost braces for a top level object are omitted.
+     * Returns a flag indicating if the top-level curly brackets in the serialized YAML should be dropped.
+     *
+     * @return {@code true} if the top-level curly brackets should be dropped; {@code false} otherwise.
      */
     public boolean trimFirstCurly() {
         return trimFirstCurly;
     }
 
     /**
-     * Controls whether the outermost curly braces are written for the top level
-     * object.
+     * Sets whether the top-level curly brackets in the serialized YAML should be dropped.
      *
-     * @param trimFirstCurly set to true to omit the braces
-     * @return this instance for chaining
+     * @param trimFirstCurly {@code true} to drop the top-level curly brackets; {@code false} to include them.
+     * @return The current instance of {@code YamlWireOut} (fluent API style).
      */
     public T trimFirstCurly(boolean trimFirstCurly) {
         this.trimFirstCurly = trimFirstCurly;
@@ -524,48 +505,30 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     /**
-     * The primary {@link ValueOut} implementation for {@link YamlWireOut}.
-     * Manages YAML-specific formatting such as indentation, separators
-     * (comma or newline based on context and {@link #leaf} state), comments and
-     * block structuring ({@code {...}}, {@code [...]}).
+     * This internal class represents an output value in the YAML format. It provides functionalities related
+     * to appending separators, handling whitespace, and maintaining indentation among others.
      */
     class YamlValueOut implements ValueOut, CommentAnnotationNotifier {
-        /** Indicates that a preceding comment annotation was encountered. */
         protected boolean hasCommentAnnotation = false;
 
-        /** Current indentation level (number of 2-space indents). */
+        // The current indentation level for the value.
         protected int indentation = 0;
 
-        /**
-         * Stack of separators used when nesting structures so the parent
-         * separator can be restored.
-         */
+        // A list of separators to be used when writing the value.
         @NotNull
         protected List<BytesStore> seps = new ArrayList<>(4);
 
-        /**
-         * The separator (",", "\n", etc.) to prepend before the next value is
-         * written.
-         */
+        // The current separator being used.
         @NotNull
         protected BytesStore<?, ?> sep = BytesStore.empty();
 
-        /**
-         * True if the value being written is a simple scalar (a 'leaf' node).
-         * Leaf nodes use comma separators whereas others use newlines.
-         */
+        // Flag indicating if the value is a leaf node (i.e., doesn't have child elements).
         protected boolean leaf = false;
 
-        /**
-         * When true, fields equal to their defaults may be omitted from the
-         * output.
-         */
+        // Flag indicating if default values should be dropped from the output.
         protected boolean dropDefault = false;
 
-        /**
-         * Stores the field name when {@link #dropDefault} is true so it can be
-         * written if the following value is non-default.
-         */
+        // The name of the event associated with this value (if any).
         @Nullable
         private String eventName;
 
@@ -590,8 +553,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Writes the configured {@link #sep} to the output and then clears it
-         * so the next value can supply its own separator.
+         * Appends the current separator to the output bytes, and resets the separator.
          */
         void prependSeparator() {
             appendSep();
@@ -599,9 +561,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Writes {@link #sep}, trims any resulting double newlines and indents
-         * if the separator ended with a newline or was
-         * {@link YamlWireOut#EMPTY_AFTER_COMMENT}.
+         * Appends the current separator to the output bytes and handles any necessary whitespace trimming.
          */
         protected void appendSep() {
             append(sep);
@@ -611,19 +571,13 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Ensures there are no double newlines in the output by removing one if
-         * a <code>\n\n</code> sequence is found.
+         * Trims excessive whitespace from the output bytes, particularly to remove double newline characters.
          */
         protected void trimWhiteSpace() {
             BytesUtil.combineDoubleNewline(bytes);
         }
 
         @Override
-        /**
-         * Sets the {@link #leaf} state. If switching from leaf to non-leaf and
-         * the current separator is comma-space, the separator is changed to the
-         * appropriate element separator.
-         */
         public boolean swapLeaf(boolean isLeaf) {
             if (isLeaf == leaf)
                 return leaf;
@@ -640,8 +594,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Writes the appropriate number of spaces based on {@link #indentation}.
-         * Two spaces are emitted per level for efficiency.
+         * Indents the YAML content based on the current indentation level. It uses a trick of
+         * writing two spaces at a time to speed up the process.
          */
         protected void indent() {
             BytesUtil.combineDoubleNewline(bytes);
@@ -651,9 +605,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Sets {@link #sep} for the next element based on {@link #indentation}
-         * and {@link #leaf}. Top level or non-leaf elements use newlines; nested
-         * leaf elements use comma-space.
+         * Determines and sets the appropriate separator for the current YAML element.
+         * The separator varies based on the indentation level and whether the current value is a leaf node.
          */
         @Override
         public void elementSeparator() {
@@ -672,11 +625,6 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         @NotNull
         @Override
-        /**
-         * Writes a boolean value (true, false or !null ""). When
-         * {@link #dropDefault} is true and {@code flag} is null nothing is
-         * written.
-         */
         public T bool(@Nullable Boolean flag) {
             if (dropDefault) {
                 if (flag == null)
@@ -690,7 +638,10 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Returns the YAML string used for a null value: <code>!null ""</code>.
+         * Returns the string representation for null in YAML format.
+         * It utilizes the predefined NULL static configuration for constructing the output.
+         *
+         * @return String representation for null in YAML.
          */
         @NotNull
         public String nullOut() {
@@ -699,11 +650,6 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         @NotNull
         @Override
-        /**
-         * Writes a text value, quoting and escaping as required. If
-         * {@link #dropDefault} is set and {@code s} is null the field is
-         * omitted.
-         */
         public T text(@Nullable CharSequence s) {
             if (dropDefault) {
                 if (s == null)
@@ -722,12 +668,6 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         @NotNull
         @Override
-        /**
-         * Writes bytes. If the content looks textual it is emitted as quoted
-         * text; otherwise it is Base64 encoded with a <code>!binary</code> type
-         * tag. When {@link #dropDefault} is true and the argument is null the
-         * value is omitted.
-         */
         public T bytes(@Nullable BytesStore<?, ?> fromBytes) {
             if (dropDefault) {
                 if (fromBytes == null)
@@ -972,9 +912,11 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * If {@link YamlWireOut#addTimeStamps} is true and {@code i64} resembles
-         * an epoch time in milliseconds or nanoseconds, appends a human readable
-         * date-time comment (for example <code>, # 2023-10-26T10:30:00.123</code>).
+         * Adds a timestamp to the output in a predefined format.
+         * The method appends the timestamp as a comment in YAML, depending on the range and precision
+         * of the given timestamp value. The timestamp could be in milliseconds or with nanosecond precision.
+         *
+         * @param i64 The timestamp value to be appended.
          */
         public void addTimeStamp(long i64) {
             // Check if the timestamp is in a millisecond precision range (e.g., between 1e12 and 4.111e12)
@@ -1103,16 +1045,16 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Writes special floating point values such as NaN or Infinity. For
-         * YAML these are emitted as unquoted strings (e.g. <code>.NaN</code>).
+         * Writes a special double value, e.g. NaN, to bytes in the context of Yaml Wire. For now this
+         * remains as an unquoted string representation.
          */
         protected void writeSpecialDoubleValueToBytes(Bytes<?> bytes, double value) {
             bytes.append(Double.toString(value));
         }
 
         /**
-         * Writes special floating point values such as NaN or Infinity. For
-         * YAML these are emitted as unquoted strings (e.g. <code>.NaN</code>).
+         * Writes a special double value, e.g. NaN, to bytes in the context of Yaml Wire. For now this
+         * remains as an unquoted string representation.
          */
         protected void writeSpecialFloatValueToBytes(Bytes<?> bytes, float value) {
             bytes.append(Float.toString(value));
@@ -1151,9 +1093,12 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Converts {@code stringable} to text and writes it, applying YAML
-         * quoting rules via {@link #asTestQuoted(String, Quotes)}. When
-         * {@link #dropDefault} is true and the value is null nothing is written.
+         * Converts the provided object to its String representation and prepares it for wire output.
+         * It handles null values and applies necessary formatting based on the needsQuotes method.
+         * If the value is set to drop by default, the saved event name is written.
+         *
+         * @param stringable The object to convert to a string and process.
+         * @return An instance of T, typically representing the current wire output state.
          */
         @NotNull
         private T asText(@Nullable Object stringable) {
@@ -1188,8 +1133,12 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Writes {@code s} quoting it with {@code quotes.q} and escaping via
-         * {@link #escape0(CharSequence, Quotes)} when needed.
+         * Appends the provided string to the wire output, with or without quotes based on the provided quote preference.
+         * If the quote preference is NONE, the string is added directly to the wire output.
+         * Otherwise, the string is escaped based on the provided quote preference.
+         *
+         * @param s      The string to append.
+         * @param quotes The quote preference for the string.
          */
         protected void asTestQuoted(String s, Quotes quotes) {
             // Check if the string needs quotes
@@ -1209,10 +1158,6 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         @NotNull
         @Override
-        /**
-         * Writes a YAML type tag such as <code>!typeName</code> before the
-         * following value.
-         */
         public YamlValueOut typePrefix(@NotNull CharSequence typeName) {
             if (dropDefault) {
                 writeSavedEventName();
@@ -1364,9 +1309,11 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Writes the block start character (<code>{</code> or <code>[</code>)
-         * after dealing with any pending separator and pushing the current
-         * state for later restoration.
+         * Starts a block with the given character, typically an opening bracket or brace.
+         * Before writing the block starter, any necessary separators and whitespace are added.
+         * The method also pushes the current state to remember the context.
+         *
+         * @param c The character that starts the block.
          */
         public void startBlock(char c) {
             // If defaults are to be dropped, save the event name
@@ -1414,8 +1361,10 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Writes the closing block character and collapses any doubled newlines
-         * before it.
+         * Ends a block with the given character, typically a closing bracket or brace.
+         * Removes any double newlines to ensure a clean block closure.
+         *
+         * @param c The character that ends the block.
          */
         public void endBlock(char c) {
             BytesUtil.combineDoubleNewline(bytes);
@@ -1423,8 +1372,9 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Adds a newline only if content was written after {@code pos} within a
-         * block.
+         * Adds a newline at the specified position if applicable.
+         *
+         * @param pos The position after which the newline should be added.
          */
         protected void addNewLine(long pos) {
             if (bytes.writePosition() > pos + 1)
@@ -1432,8 +1382,9 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Adds a space only if content was written after {@code pos} within a
-         * block.
+         * Adds a space at the specified position if applicable.
+         *
+         * @param pos The position after which the space should be added.
          */
         protected void addSpace(long pos) {
             if (bytes.writePosition() > pos + 1)
@@ -1441,15 +1392,15 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Sets {@link #sep} so that the next value starts on a new line.
+         * Sets the separator to a new line for future content additions.
          */
         protected void newLine() {
             sep = NEW_LINE;
         }
 
         /**
-         * Restores the previous separator and indentation when leaving a nested
-         * structure.
+         * Reverts the current state to the previous state by popping the last saved state.
+         * This involves reverting the separator, decreasing the indentation, and resetting certain flags.
          */
         protected void popState() {
             sep = seps.remove(seps.size() - 1);
@@ -1459,8 +1410,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Saves the current separator and increases indentation for a nested
-         * structure.
+         * Pushes the current state, preserving the current context for later restoration.
+         * This involves increasing the indentation and saving the current separator.
          */
         protected void pushState() {
             indentation++;
@@ -1470,10 +1421,6 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         @NotNull
         @Override
-        /**
-         * Serialises a {@link WriteMarshallable}. Handles the outer braces and
-         * manages {@link #leaf} so leaf marshallables can be rendered inline.
-         */
         public T marshallable(@NotNull WriteMarshallable object) throws InvalidMarshallableException {
             WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(object.getClass());
             boolean wasLeaf0 = leaf;
@@ -1532,10 +1479,6 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         @NotNull
         @Override
-        /**
-         * Serialises a {@link Serializable} object using either its
-         * {@link Externalizable#writeExternal} method or default marshalling.
-         */
         public T marshallable(@NotNull Serializable object) throws InvalidMarshallableException {
             if (dropDefault) {
                 writeSavedEventName();
@@ -1606,8 +1549,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Called after a block is closed. Sets {@link #sep} to a newline and
-         * appends the current separator to the output.
+         * Performs actions after closing an element.
+         * Sets the separator to a newline and appends the current separator to the bytes.
          */
         protected void afterClose() {
             newLine();        // Set the separator to a newline
@@ -1616,8 +1559,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Called after a block is opened. The next value will follow after a
-         * space.
+         * Performs actions after opening an element.
+         * Sets the separator to a space.
          */
         protected void afterOpen() {
             sep = SPACE;      // Set the separator to a space
@@ -1634,24 +1577,24 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Sets {@link #sep} to {@link YamlWireOut#END_FIELD} (a newline) after
-         * a key–value pair.
+         * Sets the separator to denote the end of a field.
          */
         protected void endField() {
             sep = END_FIELD;
         }
 
         /**
-         * Writes the YAML key–value separator <code>:</code> followed by a
-         * space.
+         * Writes a field-value separator, which is ": ".
          */
         protected void fieldValueSeperator() {
             writeTwo(':', ' ');
         }
 
         /**
-         * Begins writing a field with no name. If {@link #dropDefault} is true
-         * the name is stored so it can be output later when a value appears.
+         * Writes an empty value to the Yaml output. If the default value is dropped,
+         * the event name is set to an empty string.
+         *
+         * @return Returns an instance of the current object, supporting chained method calls.
          */
         @NotNull
         public YamlValueOut write() {
@@ -1666,9 +1609,11 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Prepares to write a field using the supplied {@link WireKey}. When
-         * {@link #dropDefault} is true the name is saved until a non-default
-         * value is provided.
+         * Writes a given WireKey to the Yaml output. If the default value is dropped,
+         * the event name is set to the name of the key.
+         *
+         * @param key The WireKey to write.
+         * @return Returns an instance of the current object, supporting chained method calls.
          */
         @NotNull
         public YamlValueOut write(@NotNull WireKey key) {
@@ -1681,9 +1626,11 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Prepares to write a field with the provided name. If
-         * {@link #dropDefault} is true the name is stored until a value is
-         * confirmed as non-default.
+         * Writes a given CharSequence name to the Yaml output. If the default value is dropped,
+         * the event name is set to the given name.
+         *
+         * @param name The CharSequence name to write.
+         * @return Returns an instance of the current object, supporting chained method calls.
          */
         @NotNull
         public YamlValueOut write(@NotNull CharSequence name) {
@@ -1698,8 +1645,14 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Starts writing a field with {@code objectKey} as name. Non-string keys
-         * are unsupported when {@link #dropDefault} is active.
+         * Writes a given objectKey of an expected type to the Yaml output. If the default value is dropped,
+         * and the expected type is not a String, an exception is thrown. Otherwise, the event name is set
+         * to the string representation of the objectKey.
+         *
+         * @param expectedType The expected type of the objectKey.
+         * @param objectKey    The object key to write.
+         * @return Returns an instance of the current object, supporting chained method calls.
+         * @throws InvalidMarshallableException If the object cannot be serialized.
          */
         @NotNull
         public YamlValueOut write(Class<?> expectedType, @NotNull Object objectKey) throws InvalidMarshallableException {
@@ -1717,8 +1670,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Emits any field name saved due to {@link #dropDefault} being true and
-         * clears {@link #eventName}.
+         * Writes the saved event name to the output. This method escapes the event name
+         * and separates it from its value.
          */
         private void writeSavedEventName() {
             if (eventName == null)
@@ -1730,8 +1683,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Completes the key part written by {@link #writeStartEvent()} by adding
-         * the key–value separator and trimming trailing spaces.
+         * Ends the current event by checking and adjusting the position
+         * of the last byte written to the output, and appending a field value separator.
          */
         public void endEvent() {
             // Check if the last written byte is a whitespace character or less
@@ -1743,8 +1696,10 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Writes a YAML comment line. If a preceding comment annotation was
-         * detected, additional indentation is applied.
+         * Writes a comment to the Yaml output. If a comment annotation exists,
+         * specific formatting is applied. Otherwise, a standard comment format is used.
+         *
+         * @param s The comment text to write.
          */
         public void writeComment(@NotNull CharSequence s) {
 
