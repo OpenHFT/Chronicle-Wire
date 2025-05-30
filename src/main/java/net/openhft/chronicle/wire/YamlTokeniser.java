@@ -62,7 +62,7 @@ public class YamlTokeniser {
     /** The input source containing the raw YAML content. */
     private final BytesIn<?> in;
 
-    /** Pool of reusable {@link YTContext} instances to reduce allocations. */
+    /** A pool of reusable context objects to manage YAML structures. */
     private final List<YTContext> freeContexts = new ArrayList<>();
 
     /** List of tokens that have been identified but not yet processed. */
@@ -115,9 +115,8 @@ public class YamlTokeniser {
     }
 
     /**
-     * Resets the tokenizer to its initial state, clearing all contexts,
-     * buffers and flags. Prepares it to tokenize a new stream or restart
-     * from the beginning of the current input.
+     * Resets the state of the tokenizer. This method prepares the tokenizer
+     * for processing a new input or to restart the tokenization of the current input.
      */
     void reset() {
         contexts.clear();
@@ -146,14 +145,20 @@ public class YamlTokeniser {
     }
 
     /**
-     * Most recent entry on the context stack.
+     * Retrieves the top context from the context stack.
+     * This method provides the most recent tokenization context.
+     *
+     * @return The top YTContext object from the context stack.
      */
     public YTContext topContext() {
         return contexts.get(contextSize() - 1);
     }
 
     /**
-     * Context entry one below the top of the stack.
+     * Retrieves the second to top context from the context stack.
+     * This method provides the tokenization context that's just below the topmost one.
+     *
+     * @return The second top YTContext object from the context stack.
      */
     public YTContext secondTopContext() {
         return contexts.get(contextSize() - 2);
@@ -412,8 +417,10 @@ public class YamlTokeniser {
     }
 
     /**
-     * Helper used when a peeked character should not be consumed.
-     * Unreads the character and returns {@link YamlToken#NONE}.
+     * Helper method to handle scenarios where the character shouldn't be tokenized.
+     * This method ensures the last read character is reverted back and a NONE token is returned.
+     *
+     * @return The {@link YamlToken#NONE} token.
      */
     private YamlToken dontRead() {
         unreadLast();
@@ -663,8 +670,10 @@ public class YamlTokeniser {
     }
 
     /**
-     * Helper to manage {@link YamlToken#SEQUENCE_ENTRY} tokens inside flow
-     * sequences.
+     * Handles the sequence logic within the YAML structure.
+     *
+     * @param token The current token being processed.
+     * @return A {@link YamlToken} after processing the sequence logic.
      */
     private YamlToken seq(YamlToken token) {
         // If a sequence entry has not been processed yet and the current context is a sequence start, and it's in flow
@@ -803,8 +812,7 @@ public class YamlTokeniser {
     }
 
     /**
-     * Pops the top context and adds it to {@link #freeContexts}. Emits the
-     * context's end token if present.
+     * Removes the top context from the context stack, and frees up the context.
      */
     private void contextPop() {
         YTContext context0 = contexts.remove(contextSize() - 1); // Remove the top context.
@@ -822,7 +830,9 @@ public class YamlTokeniser {
     }
 
     /**
-     * Drops contexts until the stack reaches the supplied {@code contextSize}.
+     * Reverts to a specified context level.
+     *
+     * @param contextSize The desired context level.
      */
     void revertToContext(int contextSize) {
         pushed.clear(); // Clear the pushed tokens.
@@ -836,9 +846,10 @@ public class YamlTokeniser {
     }
 
     /**
-     * Pushes a new parsing context.
-     * Inserts an implicit {@link YamlToken#DIRECTIVES_END}
-     * if starting from{@link YamlToken#STREAM_START}.
+     * Pushes a new context to the context stack.
+     *
+     * @param context The YAML token representing the context.
+     * @param indent  The indentation level for this context.
      */
     private void contextPush(YamlToken context, int indent) {
         // If we're at the start of a stream and the context isn't the end of directives,
