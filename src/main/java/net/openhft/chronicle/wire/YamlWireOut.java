@@ -1,8 +1,6 @@
 /*
  * Copyright 2016-2020 chronicle.software
  *
- * https://chronicle.software
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -618,6 +616,11 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             BytesUtil.combineDoubleNewline(bytes);
         }
 
+        /**
+         * Sets the {@link #leaf} state. If switching from leaf to non-leaf and
+         * the current separator is comma-space, the separator is changed to the
+         * appropriate element separator.
+         */
         @Override
         /**
          * Sets the {@link #leaf} state. If switching from leaf to non-leaf and
@@ -670,6 +673,11 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             BytesUtil.combineDoubleNewline(bytes); // ensure no double new lines.
         }
 
+        /**
+         * Writes a boolean value (true, false or !null ""). When
+         * {@link #dropDefault} is true and {@code flag} is null nothing is
+         * written.
+         */
         @NotNull
         @Override
         /**
@@ -697,6 +705,11 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             return "!" + NULL;
         }
 
+        /**
+         * Writes a text value, quoting and escaping as required. If
+         * {@link #dropDefault} is set and {@code s} is null the field is
+         * omitted.
+         */
         @NotNull
         @Override
         /**
@@ -720,6 +733,12 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             return wireOut();
         }
 
+        /**
+         * Writes bytes. If the content looks textual it is emitted as quoted
+         * text; otherwise it is Base64 encoded with a <code>!binary</code> type
+         * tag. When {@link #dropDefault} is true and the argument is null the
+         * value is omitted.
+         */
         @NotNull
         @Override
         /**
@@ -1207,6 +1226,10 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             return typePrefix(aClass);
         }
 
+        /**
+         * Writes a YAML type tag such as <code>!typeName</code> before the
+         * following value.
+         */
         @NotNull
         @Override
         /**
@@ -1468,6 +1491,10 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             sep = EMPTY;
         }
 
+        /**
+         * Serialises a {@link WriteMarshallable}. Handles the outer braces and
+         * manages {@link #leaf} so leaf marshallables can be rendered inline.
+         */
         @NotNull
         @Override
         /**
@@ -1530,6 +1557,10 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             return wireOut();
         }
 
+        /**
+         * Serialises a {@link Serializable} object using either its
+         * {@link Externalizable#writeExternal} method or default marshalling.
+         */
         @NotNull
         @Override
         /**

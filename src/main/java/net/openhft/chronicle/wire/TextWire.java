@@ -1270,6 +1270,12 @@ public class TextWire extends YamlWireOut<TextWire> {
         bytes.clear();
     }
 
+    /**
+     * Checks whether the current wire position starts with the
+     * {@code !!meta-data} tag. If present the tag is consumed.
+     *
+     * @return {@code true} when the prefix was found and skipped
+     */
     @Override
     /**
      * Checks whether the current wire position starts with the
