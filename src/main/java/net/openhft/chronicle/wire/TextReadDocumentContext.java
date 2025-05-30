@@ -22,14 +22,17 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 /**
- * This class represents the context for reading a document in textual format.
- * It provides methods and utilities for understanding the structure and boundaries
- * of the document within a given wire format.
+ * Context for reading a document in textual format. It specifically handles
+ * text based wire formats such as YAML or JSON like text, looking for textual
+ * separators like "---" and "...". These utilities help understand the
+ * structure and boundaries of the document within a given wire format.
  */
 public class TextReadDocumentContext implements ReadDocumentContext {
 
     // Byte sequences for start and end of the document
+    /** BytesStore representing the Start-Of-Document separator ('---'). */
     public static final BytesStore<?, ?> SOD_SEP = BytesStore.from("---");
+    /** BytesStore representing the End-Of-Document separator ('...'). */
     public static final BytesStore<?, ?> EOD_SEP = BytesStore.from("...");
 
     // The wire instance this context operates on
@@ -61,10 +64,12 @@ public class TextReadDocumentContext implements ReadDocumentContext {
     }
 
     /**
-     * Consumes the bytes until the end of the message is encountered.
-     * Skips bytes that do not denote the end of the document.
+     * Static utility method to advance the read position of the supplied
+     * {@code Bytes} past the current message until an end of message separator
+     * ({@link #SOD_SEP} or {@link #EOD_SEP}) followed by white space is found or
+     * the buffer ends.
      *
-     * @param bytes The bytes to be consumed.
+     * @param bytes the bytes to be consumed
      */
     public static void consumeToEndOfMessage(Bytes<?> bytes) {
         while (bytes.readRemaining() > 0) {
@@ -78,11 +83,12 @@ public class TextReadDocumentContext implements ReadDocumentContext {
     }
 
     /**
-     * Checks if the current position in the bytes denotes the end of a message.
-     * This is done by checking if the bytes start with either the start or end document separator.
+     * Static utility to check if the current position in {@code bytes} marks
+     * the end of a text message, indicated by {@link #SOD_SEP} or
+     * {@link #EOD_SEP} followed by white space.
      *
-     * @param bytes The bytes to be checked.
-     * @return True if it's the end of a message; false otherwise.
+     * @param bytes the bytes to be checked
+     * @return {@code true} if an end of message is detected
      */
     public static boolean isEndOfMessage(Bytes<?> bytes) {
         return (bytes.startsWith(SOD_SEP) || bytes.startsWith(EOD_SEP))
@@ -90,10 +96,11 @@ public class TextReadDocumentContext implements ReadDocumentContext {
     }
 
     /**
-     * Determines if the byte at a specific position (offset by 3 from current) is a whitespace.
+     * Static utility to check if the byte three positions after the current
+     * read position is a white space character (after "---" or "...").
      *
-     * @param bytes The bytes to be checked.
-     * @return True if the byte is whitespace; false otherwise.
+     * @param bytes the bytes to be checked
+     * @return {@code true} if that byte is white space
      */
     protected static boolean isWhiteSpaceAt(Bytes<?> bytes) {
         return bytes.peekUnsignedByte(bytes.readPosition() + 3) <= ' ';
@@ -126,6 +133,12 @@ public class TextReadDocumentContext implements ReadDocumentContext {
     }
 
     @Override
+    /**
+     * Restores the saved {@code readLimit} and {@code readPosition} on the
+     * underlying bytes and, unless a rollback was requested, advances past an
+     * end of document separator if present. After closing the wire value input
+     * state is reset and {@code present} is cleared.
+     */
     public void close() {
         long readLimit = this.readLimit;
         long readPosition = this.readPosition;
@@ -167,6 +180,13 @@ public class TextReadDocumentContext implements ReadDocumentContext {
     }
 
     @Override
+    /**
+     * Locates the start of the next document by consuming padding then skipping
+     * any leading separators. It checks {@link #isEndOfMessage(Bytes)} and uses
+     * {@link Wire#hasMetaDataPrefix()} to set the metadata flag. The method
+     * adjusts the {@code readLimit} to the end of the document and marks this
+     * context as present.
+     */
     public void start() {
         wire.getValueIn().resetState();
         Bytes<?> bytes = wire.bytes();
@@ -195,10 +215,11 @@ public class TextReadDocumentContext implements ReadDocumentContext {
     }
 
     /**
-     * Skips the document separator sequence (3 bytes) in the given bytes.
-     * It also resets the state of the wire's value input and consumes any padding present.
+     * Skips the three byte document separator (for example "---" or "...") in
+     * the supplied {@code Bytes}, resets the wire value input state and consumes
+     * any following padding.
      *
-     * @param bytes The bytes in which the separator sequence should be skipped.
+     * @param bytes the bytes in which the separator should be skipped
      */
     protected void skipSep(Bytes<?> bytes) {
         // Skip 3 bytes (length of the separator sequence)
@@ -232,6 +253,10 @@ public class TextReadDocumentContext implements ReadDocumentContext {
     }
 
     @Override
+    /**
+     * Returns {@link Objects#toString(Object)} of the underlying wire which
+     * reveals its current state or content.
+     */
     public String toString() {
         return Objects.toString(wire);
     }
