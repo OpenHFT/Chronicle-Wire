@@ -28,35 +28,36 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * This interface provides methods for reading marshallable objects. It defines the contract for any
- * entity that is capable of reading marshalled data. The interface incorporates default methods for
- * various reading operations to offer flexibility and extensibility to implementors.
- * <p>
- * Note: This interface assumes that you are familiar with the concept of marshallable objects,
- * which are objects that can be marshalled (converted to byte streams) and unmarshalled
- * (converted back to objects).
+ * Abstraction for any source from which documents or messages can be read. Typical
+ * implementations include queue tailers or network sockets. Default methods are provided to
+ * make consumption convenient across different sources.
  */
 @FunctionalInterface
 public interface MarshallableIn {
 
-    // Size configuration for internal use
+    /**
+     * Maximum length of a string that will be interned when read via
+     * {@link #readText()}. Strings longer than this are returned without
+     * interning. Controlled by system property {@code marshallableIn.intern.size}.
+     */
     int MARSHALLABLE_IN_INTERN_SIZE = Integer.getInteger("marshallableIn.intern.size", 128);
 
     /**
-     * Provides a {@code DocumentContext} that can be used to read data from a source. The specific
-     * source and the means of reading are determined by the concrete implementation.
+     * Opens a {@link DocumentContext} for reading the next document or message from this input
+     * source. Always use the returned context within a try-with-resources block to ensure that it
+     * is closed.
      *
-     * @return A {@code DocumentContext} appropriate for reading from the underlying source.
+     * @return the context representing the next document
      */
     @NotNull
     DocumentContext readingDocument();
 
     /**
-     * Reads a document using the provided {@code ReadMarshallable} instance. This method
-     * simplifies the reading operation by handling the lifecycle of the {@code DocumentContext}.
+     * Convenience wrapper that opens a {@link DocumentContext}, delegates to the supplied reader to
+     * consume its contents and closes the context afterwards.
      *
-     * @param reader The mechanism to use for reading the document.
-     * @return {@code true} if the reading operation was successful, otherwise {@code false}.
+     * @param reader strategy used to read the document
+     * @return {@code false} if no document was present
      */
     default boolean readDocument(@NotNull ReadMarshallable reader) throws InvalidMarshallableException {
         try (@NotNull DocumentContext dc = readingDocument()) {
@@ -68,11 +69,11 @@ public interface MarshallableIn {
     }
 
     /**
-     * Reads bytes using the provided {@code ReadBytesMarshallable} instance. This method handles
-     * the extraction of bytes from the source and offers them to the reader for processing.
+     * Opens a {@link DocumentContext} and allows the supplied reader to read the raw bytes of the
+     * document. The context is closed once the reader has consumed the bytes.
      *
-     * @param reader The mechanism to use for reading the bytes.
-     * @return {@code true} if the reading operation was successful, otherwise {@code false}.
+     * @param reader consumer of the document bytes
+     * @return {@code false} if no document was available
      */
     default boolean readBytes(@NotNull ReadBytesMarshallable reader) throws InvalidMarshallableException {
         try (@NotNull DocumentContext dc = readingDocument()) {
@@ -84,11 +85,10 @@ public interface MarshallableIn {
     }
 
     /**
-     * Reads bytes from the source into the provided {@code Bytes} object. This method allows for
-     * direct population of a {@code Bytes} instance without additional translation or processing.
+     * Reads the raw bytes of the next document into the supplied {@code Bytes} instance.
      *
-     * @param using The {@code Bytes} object to populate with read data.
-     * @return {@code true} if the reading operation was successful, otherwise {@code false}.
+     * @param using destination for the bytes
+     * @return {@code false} if no document was available
      */
     default boolean readBytes(@NotNull Bytes<?> using) throws InvalidMarshallableException {
         try (@NotNull DocumentContext dc = readingDocument()) {
@@ -103,11 +103,10 @@ public interface MarshallableIn {
     }
 
     /**
-     * Retrieves the next available message as a {@code String} from the underlying source. This
-     * method aims to simplify string-based message reading and provides the capability to
-     * handle large messages efficiently using string interning.
+     * Reads the next document as a {@code String}. Strings shorter than
+     * {@link #MARSHALLABLE_IN_INTERN_SIZE} may be interned for reuse.
      *
-     * @return The message as a {@code String} if available, otherwise {@code null}.
+     * @return the text or {@code null} if no document was present
      */
     @Nullable
     default String readText() throws InvalidMarshallableException {
@@ -126,13 +125,10 @@ public interface MarshallableIn {
     }
 
     /**
-     * Reads the next available message and populates the provided {@code StringBuilder} with
-     * its contents. This method offers flexibility for clients that wish to control the
-     * string allocation and reuse the same {@code StringBuilder} for multiple reads.
+     * Reads the next document into the supplied {@code StringBuilder}.
      *
-     * @param sb The {@code StringBuilder} instance to populate with the message content.
-     * @return {@code true} if a message was read and the {@code StringBuilder} was populated,
-     *         otherwise {@code false}.
+     * @param sb builder to populate
+     * @return {@code false} if no document was present
      */
     default boolean readText(@NotNull StringBuilder sb) throws InvalidMarshallableException {
         try (@NotNull DocumentContext dc = readingDocument()) {
@@ -146,15 +142,11 @@ public interface MarshallableIn {
     }
 
     /**
-     * Retrieves the next available message and interprets it as a {@code Map} with key-value pairs.
-     * The method is designed to be generic, allowing clients to specify the expected key and value types
-     * at the call site. If no message is available or the content does not represent a map, appropriate
-     * fallbacks like {@code null} or an empty map are returned.
+     * Reads the next document as a map structure.
      *
-     * @param <K> The expected type of the keys in the map.
-     * @param <V> The expected type of the values in the map.
-     * @return A {@code Map} constructed from the message, {@code null} if no message is available, or
-     *         an empty map if the content does not represent a map.
+     * @param <K> expected key type
+     * @param <V> expected value type
+     * @return {@code null} if no document was present, otherwise a possibly empty map
      */
     @SuppressWarnings("unchecked")
     @Nullable
@@ -177,13 +169,11 @@ public interface MarshallableIn {
     }
 
     /**
-     * Constructs a {@code MethodReader} that can interpret and invoke methods based on the messages
-     * present in this reader. The constructed reader will interpret each message as a method call and
-     * will use the provided objects to invoke the corresponding methods.
+     * Creates a {@link MethodReader} that deserialises method calls from this input and dispatches
+     * them to the supplied {@code objects}.
      *
-     * @param objects Objects that implement the methods serialized to the file. These objects will be
-     *                used as the targets for method invocation based on the interpreted messages.
-     * @return A {@code MethodReader} set up to read and interpret method calls from this reader's messages.
+     * @param objects targets for the method calls
+     * @return a configured {@code MethodReader}
      */
     @NotNull
     default MethodReader methodReader(Object... objects) {
@@ -191,11 +181,8 @@ public interface MarshallableIn {
     }
 
     /**
-     * Provides a builder instance that can be used to construct and configure a {@code MethodReader}
-     * suitable for this reader's content. The builder offers flexibility in configuring the
-     * {@code MethodReader} to suit specific requirements.
-     *
-     * @return A {@code VanillaMethodReaderBuilder} for creating and customizing a {@code MethodReader}.
+     * Returns a {@link VanillaMethodReaderBuilder} for configuring a
+     * {@link MethodReader} to consume this input.
      */
     @NotNull
     default VanillaMethodReaderBuilder methodReaderBuilder() {
