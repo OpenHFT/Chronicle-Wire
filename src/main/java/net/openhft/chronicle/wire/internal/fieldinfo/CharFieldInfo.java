@@ -24,26 +24,25 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Field;
 
 /**
- * Internal {@link net.openhft.chronicle.wire.FieldInfo} for {@code char} fields
- * using {@link UnsafeMemory} to read and write values via memory offsets.
+ * Represents field information for character fields, extending the generic field information capabilities
+ * provided by {@link UnsafeFieldInfo}. It offers direct memory access functionality to get and set
+ * character values in objects, leveraging unsafe operations for performance.
  */
 public final class CharFieldInfo extends UnsafeFieldInfo {
 
     /**
-     * @param name        field name used in text form
-     * @param type        runtime type
-     * @param bracketType formatting hint when writing
-     * @param field       reflection field used for unsafe access
+     * Constructs an instance of CharFieldInfo with the provided details about a character field.
+     *
+     * @param name        The name of the field.
+     * @param type        The type of the field.
+     * @param bracketType The bracket type associated with the field.
+     * @param field       The field object representation.
      */
     public CharFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         super(name, type, bracketType, field);
     }
 
     @Override
-    /**
-     * @return the {@code char} value or {@link Character#MAX_VALUE} if the
-     * offset could not be determined
-     */
     public char getChar(Object object) {
         try {
             return UnsafeMemory.unsafeGetChar(object, getOffset());
@@ -54,7 +53,6 @@ public final class CharFieldInfo extends UnsafeFieldInfo {
     }
 
     @Override
-    /** Writes the value using {@link UnsafeMemory}. */
     public void set(Object object, char value) throws IllegalArgumentException {
         try {
             UnsafeMemory.unsafePutChar(object, getOffset(), value);
@@ -64,13 +62,11 @@ public final class CharFieldInfo extends UnsafeFieldInfo {
     }
 
     @Override
-    /** Compares the character values in {@code a} and {@code b}. */
     public boolean isEqual(Object a, Object b) {
         return getChar(a) == getChar(b);
     }
 
     @Override
-    /** Copies the character value from {@code source} to {@code destination}. */
     public void copy(Object source, Object destination) {
         set(destination, getChar(source));
     }
