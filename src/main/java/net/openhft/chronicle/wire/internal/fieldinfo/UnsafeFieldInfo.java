@@ -25,12 +25,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 
+/**
+ * Base class for field accessors that use {@link UnsafeMemory} to read and
+ * write values via raw memory offsets.  Intended for internal use only.
+ */
 @SuppressWarnings("deprecation" /* The parent class will either be moved to internal or cease to exist in x.26 */)
 class UnsafeFieldInfo extends VanillaFieldInfo {
-    // Offset value to indicate that it hasn't been set yet.
+    /** value indicating that the offset has not yet been determined */
     private static final long UNSET_OFFSET = Long.MAX_VALUE;
 
-    // Offset in memory where the value for this field can be found.
+    /** memory offset of the field within its declaring class */
     private transient long offset = UNSET_OFFSET;
 
     /**

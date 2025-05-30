@@ -26,9 +26,8 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Field;
 
 /**
- * Represents field information for long fields, extending the generic field information capabilities
- * provided by {@link UnsafeFieldInfo}. This class offers direct memory access functionality to get and set
- * long values in objects, leveraging unsafe operations for performance enhancement.
+ * {@link FieldInfo} specialised for {@code long} values accessed via
+ * {@link UnsafeMemory}.
  */
 public final class LongFieldInfo extends UnsafeFieldInfo {
 
@@ -44,6 +43,9 @@ public final class LongFieldInfo extends UnsafeFieldInfo {
         super(name, type, bracketType, field);
     }
 
+    /**
+     * Read the {@code long} value directly from memory.
+     */
     @Override
     public long getLong(Object object) {
         try {
@@ -54,6 +56,9 @@ public final class LongFieldInfo extends UnsafeFieldInfo {
         }
     }
 
+    /**
+     * Write a {@code long} value using an unsafe memory write.
+     */
     @Override
     public void set(Object object, long value) throws IllegalArgumentException {
         try {
@@ -63,11 +68,17 @@ public final class LongFieldInfo extends UnsafeFieldInfo {
         }
     }
 
+    /**
+     * Compare two {@code long} values for equality.
+     */
     @Override
     public boolean isEqual(Object a, Object b) {
         return getLong(a) == getLong(b);
     }
 
+    /**
+     * Copy the {@code long} value from {@code source} to {@code destination}.
+     */
     @Override
     public void copy(Object source, Object destination) {
         set(destination, getLong(source));

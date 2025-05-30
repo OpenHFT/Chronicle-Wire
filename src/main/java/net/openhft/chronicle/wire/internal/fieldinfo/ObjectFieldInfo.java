@@ -29,9 +29,8 @@ import java.lang.reflect.Field;
 import java.util.Objects;
 
 /**
- * Represents field information for object fields, extending the generic field information capabilities
- * provided by {@link UnsafeFieldInfo}. This class offers direct memory access functionality to get and set
- * object values in objects, leveraging unsafe operations for performance enhancement.
+ * {@link FieldInfo} implementation for object references using
+ * {@link UnsafeMemory} for fast access.
  */
 public final class ObjectFieldInfo extends UnsafeFieldInfo {
 
@@ -47,6 +46,9 @@ public final class ObjectFieldInfo extends UnsafeFieldInfo {
         super(name, type, bracketType, field);
     }
 
+    /**
+     * Obtain the field value using an unsafe memory read.
+     */
     @Override
     public @Nullable Object get(Object object) {
         try {
@@ -57,6 +59,9 @@ public final class ObjectFieldInfo extends UnsafeFieldInfo {
         }
     }
 
+    /**
+     * Set the field to {@code value} using an unsafe memory write.
+     */
     @Override
     public void set(Object object, Object value) throws IllegalArgumentException {
         Object value2 = ObjectUtils.convertTo(type, value);
@@ -67,11 +72,17 @@ public final class ObjectFieldInfo extends UnsafeFieldInfo {
         }
     }
 
+    /**
+     * Compare two object values using {@link Objects#deepEquals(Object, Object)}.
+     */
     @Override
     public boolean isEqual(Object a, Object b) {
         return Objects.deepEquals(get(a), get(b));
     }
 
+    /**
+     * Copy the reference from {@code source} to {@code destination}.
+     */
     @Override
     public void copy(Object source, Object destination) {
         set(destination, get(source));

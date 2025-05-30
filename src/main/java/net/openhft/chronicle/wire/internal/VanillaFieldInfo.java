@@ -30,18 +30,36 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Objects;
 
+/**
+ * Standard {@link FieldInfo} implementation based on Java reflection.  This
+ * class forms part of Chronicle Wire's internal marshalling mechanics and is
+ * used when no specialised unsafe version is available.
+ */
 @SuppressWarnings("rawtypes")
 public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
 
+    /** declaring class of the field */
     private final Class<?> parent;
+    /** reflective handle to the field, re-acquired after deserialisation */
     private transient Field field;
 
+    /**
+     * Construct using the given reflective {@link Field}.
+     *
+     * @param name        field name
+     * @param type        field type
+     * @param bracketType wire representation
+     * @param field       reflective handle to the field
+     */
     public VanillaFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         super(type, bracketType, name);
         parent = field.getDeclaringClass();
         this.field = field;
     }
 
+    /**
+     * Read the value using reflection.
+     */
     @Nullable
     @Override
     public Object get(Object object) {
@@ -140,6 +158,10 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         }
     }
 
+    /**
+     * Lazily obtain the reflective {@link Field}.  When deserialised the
+     * transient field is null and is looked up again from the declaring class.
+     */
     public Field getField() throws NoSuchFieldException {
         if (field == null) {
             field = parent.getDeclaredField(name);
@@ -148,6 +170,9 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         return field;
     }
 
+    /**
+     * Resolve the {@link Class} of the generic parameter at {@code index}.
+     */
     @Override
     public Class<?> genericType(int index) {
         ParameterizedType genericType = (ParameterizedType) field.getGenericType();
@@ -155,6 +180,9 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         return (Class) type;
     }
 
+    /**
+     * Compare field values in two objects for equality.
+     */
     @Override
     public boolean isEqual(Object a, Object b) {
         if (type.isPrimitive()) {

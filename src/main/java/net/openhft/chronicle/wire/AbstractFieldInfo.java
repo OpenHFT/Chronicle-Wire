@@ -19,28 +19,28 @@ package net.openhft.chronicle.wire;
 
 import static net.openhft.chronicle.wire.WireType.TEXT;
 /**
- * The AbstractFieldInfo class serves as an abstract foundation for field information.
- * It implements the FieldInfo interface and provides basic implementations for some of the interface's methods.
- * This class contains the core properties of a field, including its name, type, and bracket type.
+ * Abstract foundation for {@link FieldInfo} implementations.  It stores the
+ * immutable characteristics of a field and supplies basic implementations of
+ * common methods.
  */
 @SuppressWarnings("rawtypes")
 public abstract class AbstractFieldInfo implements FieldInfo {
 
-    // The name of the field
+    /** name of the field this instance represents */
     protected final String name;
 
-    // The type of the field
+    /** declared type of the field */
     protected final Class<?> type;
 
-    // The bracket type associated with the field
+    /** how the field is represented on the wire */
     protected final BracketType bracketType;
 
     /**
-     * Constructs a new AbstractFieldInfo with the provided type, bracket type, and name.
+     * Create an instance describing the given field.
      *
-     * @param type         The class type of the field
-     * @param bracketType  The bracket type associated with the field
-     * @param name         The name of the field
+     * @param type        declared type of the field
+     * @param bracketType wire representation style
+     * @param name        name of the field
      */
     protected AbstractFieldInfo(Class<?> type, BracketType bracketType, String name) {
         this.type = type;
@@ -64,17 +64,26 @@ public abstract class AbstractFieldInfo implements FieldInfo {
     }
 
     @Override
+    /**
+     * Compute a hash code based on the field metadata.
+     */
     public int hashCode() {
         return HashWire.hash32(this);
     }
 
     @Override
+    /**
+     * Equality based on the YAML representation of the field info.
+     */
     public boolean equals(Object obj) {
         if (obj == null) return false;
         return (this == obj || Wires.isEquals(this, obj));
     }
 
     @Override
+    /**
+     * Return a YAML representation of this field info.
+     */
     public String toString() {
         return TEXT.asString(this);
     }

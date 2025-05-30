@@ -26,9 +26,8 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Field;
 
 /**
- * Represents field information for character fields, extending the generic field information capabilities
- * provided by {@link UnsafeFieldInfo}. It offers direct memory access functionality to get and set
- * character values in objects, leveraging unsafe operations for performance.
+ * FieldInfo implementation for {@code char} fields using {@link UnsafeMemory}
+ * for high performance direct access.
  */
 public final class CharFieldInfo extends UnsafeFieldInfo {
 
@@ -44,6 +43,9 @@ public final class CharFieldInfo extends UnsafeFieldInfo {
         super(name, type, bracketType, field);
     }
 
+    /**
+     * Read the {@code char} value directly using an unsafe memory read.
+     */
     @Override
     public char getChar(Object object) {
         try {
@@ -54,6 +56,9 @@ public final class CharFieldInfo extends UnsafeFieldInfo {
         }
     }
 
+    /**
+     * Write a {@code char} value using an unsafe memory write.
+     */
     @Override
     public void set(Object object, char value) throws IllegalArgumentException {
         try {
@@ -63,11 +68,17 @@ public final class CharFieldInfo extends UnsafeFieldInfo {
         }
     }
 
+    /**
+     * Compare two {@code char} values for equality.
+     */
     @Override
     public boolean isEqual(Object a, Object b) {
         return getChar(a) == getChar(b);
     }
 
+    /**
+     * Copy the {@code char} value from {@code source} to {@code destination}.
+     */
     @Override
     public void copy(Object source, Object destination) {
         set(destination, getChar(source));

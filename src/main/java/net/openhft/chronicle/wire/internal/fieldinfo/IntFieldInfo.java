@@ -26,9 +26,8 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Field;
 
 /**
- * Represents field information for integer fields, extending the generic field information capabilities
- * provided by {@link UnsafeFieldInfo}. It offers direct memory access functionality to get and set
- * integer values in objects, leveraging unsafe operations for enhanced performance.
+ * {@link FieldInfo} specialised for {@code int} values accessed via
+ * {@link UnsafeMemory}.
  */
 public final class IntFieldInfo extends UnsafeFieldInfo {
 
@@ -44,6 +43,9 @@ public final class IntFieldInfo extends UnsafeFieldInfo {
         super(name, type, bracketType, field);
     }
 
+    /**
+     * Read the {@code int} value directly from memory.
+     */
     @Override
     public int getInt(Object object) {
         try {
@@ -54,6 +56,9 @@ public final class IntFieldInfo extends UnsafeFieldInfo {
         }
     }
 
+    /**
+     * Write an {@code int} value using an unsafe memory write.
+     */
     @Override
     public void set(Object object, int value) throws IllegalArgumentException {
         try {
@@ -63,11 +68,17 @@ public final class IntFieldInfo extends UnsafeFieldInfo {
         }
     }
 
+    /**
+     * Compare two {@code int} values for equality.
+     */
     @Override
     public boolean isEqual(Object a, Object b) {
         return getInt(a) == getInt(b);
     }
 
+    /**
+     * Copy the {@code int} value from {@code source} to {@code destination}.
+     */
     @Override
     public void copy(Object source, Object destination) {
         set(destination, getInt(source));

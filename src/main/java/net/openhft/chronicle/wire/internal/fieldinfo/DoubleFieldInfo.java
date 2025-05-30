@@ -26,9 +26,8 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Field;
 
 /**
- * Represents field information for double fields, extending the generic field information capabilities
- * provided by {@link UnsafeFieldInfo}. It offers direct memory access functionality to get and set
- * double values in objects, leveraging unsafe operations for enhanced performance.
+ * {@link FieldInfo} specialised for {@code double} values accessed via
+ * {@link UnsafeMemory}.
  */
 public final class DoubleFieldInfo extends UnsafeFieldInfo {
 
@@ -44,6 +43,9 @@ public final class DoubleFieldInfo extends UnsafeFieldInfo {
         super(name, type, bracketType, field);
     }
 
+    /**
+     * Read the {@code double} value directly from memory.
+     */
     @Override
     public double getDouble(Object object) {
         try {
@@ -54,6 +56,9 @@ public final class DoubleFieldInfo extends UnsafeFieldInfo {
         }
     }
 
+    /**
+     * Write a {@code double} value using an unsafe memory write.
+     */
     @Override
     public void set(Object object, double value) throws IllegalArgumentException {
         try {
@@ -63,11 +68,17 @@ public final class DoubleFieldInfo extends UnsafeFieldInfo {
         }
     }
 
+    /**
+     * Compare two {@code double} values for equality.
+     */
     @Override
     public boolean isEqual(Object a, Object b) {
         return getDouble(a) == getDouble(b);
     }
 
+    /**
+     * Copy the {@code double} value from {@code source} to {@code destination}.
+     */
     @Override
     public void copy(Object source, Object destination) {
         set(destination, getDouble(source));
