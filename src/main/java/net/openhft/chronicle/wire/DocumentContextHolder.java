@@ -22,9 +22,8 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * This is the DocumentContextHolder class which implements both {@link DocumentContext}
- * and {@link WriteDocumentContext}. It acts as a wrapper or a delegate around an instance of
- * {@link DocumentContext}, providing methods to interact with the encapsulated context.
+ * Wrapper around another {@link DocumentContext}.  Useful when behaviour needs
+ * to be decorated or intercepted.
  */
 public class DocumentContextHolder implements DocumentContext, WriteDocumentContext {
 
@@ -70,6 +69,10 @@ public class DocumentContextHolder implements DocumentContext, WriteDocumentCont
         this.dc = dc;
     }
 
+    /**
+     * Delegate closing to the wrapped context and clear the reference once the
+     * document is complete.
+     */
     @Override
     public void close() {
         DocumentContext documentContext = this.dc;
@@ -80,6 +83,9 @@ public class DocumentContextHolder implements DocumentContext, WriteDocumentCont
             dc = null;
     }
 
+    /**
+     * Reset the wrapped context and clear the reference.
+     */
     @Override
     public void reset() {
         DocumentContext documentContext = this.dc;

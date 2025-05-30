@@ -29,13 +29,14 @@ import org.jetbrains.annotations.Nullable;
 import static net.openhft.chronicle.wire.Wires.lengthOf;
 
 /**
- * This is the BinaryReadDocumentContext class which implements the ReadDocumentContext interface.
- * It provides an implementation tailored for reading from binary document contexts and ensures
- * full read capability if required.
+ * {@link ReadDocumentContext} implementation for length prefixed binary
+ * messages.
  */
 public class BinaryReadDocumentContext implements ReadDocumentContext {
 
+    /** Start position of the current document. */
     public long start = -1;
+    /** Last document start position, used for diagnostics. */
     public long lastStart = -1;
     @Nullable
     protected Wire wire;
@@ -47,21 +48,16 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     protected boolean rollback;
 
     /**
-     * Constructor that initializes the BinaryReadDocumentContext using the provided wire.
-     * It also determines if a full read should be ensured based on the wire type.
+     * Create a new context for the supplied wire.
      *
-     * @param wire The wire used for reading the document.
+     * @param wire wire to read from, may be {@code null}
      */
     public BinaryReadDocumentContext(@Nullable Wire wire) {
         this.wire = wire;
     }
 
     /**
-     * Constructor that initializes the BinaryReadDocumentContext using the provided wire and
-     * a flag to determine if a full read should be ensured.
-     *
-     * @param wire           The wire used for reading the document.
-     * @param ensureFullRead Flag to determine if full reading is required.
+     * @deprecated delta wire support removed
      */
     @Deprecated(/* to be removed in x.29 */)
     public BinaryReadDocumentContext(@Nullable Wire wire, boolean ensureFullRead) {
@@ -106,6 +102,9 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
 
     static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal(1);
 
+    /**
+     * Restore the read position/limit unless a rollback was requested.
+     */
     @Override
     public void close() {
         if (rollbackIfNeeded())
@@ -135,10 +134,10 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     }
 
     /**
-     * Rolls back the document context to its state before opening, if the rollback marker is set.
-     * Resets relevant attributes and updates the read position and limit accordingly.
+     * Roll back to the {@link #start} position if {@link #rollbackOnClose()} was
+     * called.
      *
-     * @return {@code true} if the context was rolled back, {@code false} otherwise.
+     * @return {@code true} if a rollback occurred
      */
     protected boolean rollbackIfNeeded() {
         if (rollback) {
@@ -153,6 +152,9 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         return false;
     }
 
+    /**
+     * Read the length prefix and prepare the next document for reading.
+     */
     @Override
     public void start() {
         rollback = false;
@@ -215,16 +217,17 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     }
 
     /**
-     * Sets the start position of the document context and updates the last start position.
-     * This is useful to keep track of the beginning position for reading purposes.
-     *
-     * @param start The new starting position to set.
+     * Record the starting position of the current document.
      */
     public void setStart(long start) {
         this.start = start;
         this.lastStart = start;
     }
 
+    /**
+     * Dump the current document as text via
+     * {@link Wires#fromSizePrefixedBlobs(DocumentContext)}.
+     */
     @Override
     public String toString() {
         return Wires.fromSizePrefixedBlobs(this);

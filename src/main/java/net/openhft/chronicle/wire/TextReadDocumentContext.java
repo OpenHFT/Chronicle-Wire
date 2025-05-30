@@ -24,14 +24,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 /**
- * This class represents the context for reading a document in textual format.
- * It provides methods and utilities for understanding the structure and boundaries
- * of the document within a given wire format.
+ * {@link ReadDocumentContext} implementation for textual wire formats such as
+ * YAML.  It recognises document separators ("---" and "...") and exposes the
+ * current document via the underlying {@link Wire}.
  */
 public class TextReadDocumentContext implements ReadDocumentContext {
 
-    // Byte sequences for start and end of the document
+    /** BytesStore representing the start of a document ('---'). */
     public static final BytesStore<?, ?> SOD_SEP = BytesStore.from("---");
+    /** BytesStore representing the end of a document ('...'). */
     public static final BytesStore<?, ?> EOD_SEP = BytesStore.from("...");
 
     // The wire instance this context operates on
@@ -63,10 +64,9 @@ public class TextReadDocumentContext implements ReadDocumentContext {
     }
 
     /**
-     * Consumes the bytes until the end of the message is encountered.
-     * Skips bytes that do not denote the end of the document.
-     *
-     * @param bytes The bytes to be consumed.
+     * Advance the supplied {@link Bytes} to the end of the current text message
+     * looking for a document separator ({@link #SOD_SEP} or {@link #EOD_SEP})
+     * followed by whitespace.
      */
     public static void consumeToEndOfMessage(Bytes<?> bytes) {
         while (bytes.readRemaining() > 0) {
@@ -80,11 +80,8 @@ public class TextReadDocumentContext implements ReadDocumentContext {
     }
 
     /**
-     * Checks if the current position in the bytes denotes the end of a message.
-     * This is done by checking if the bytes start with either the start or end document separator.
-     *
-     * @param bytes The bytes to be checked.
-     * @return True if it's the end of a message; false otherwise.
+     * Test whether the bytes at the current position denote the end of a text
+     * message ("---" or "...") followed by whitespace.
      */
     public static boolean isEndOfMessage(Bytes<?> bytes) {
         return (bytes.startsWith(SOD_SEP) || bytes.startsWith(EOD_SEP))
@@ -92,10 +89,8 @@ public class TextReadDocumentContext implements ReadDocumentContext {
     }
 
     /**
-     * Determines if the byte at a specific position (offset by 3 from current) is a whitespace.
-     *
-     * @param bytes The bytes to be checked.
-     * @return True if the byte is whitespace; false otherwise.
+     * Returns {@code true} if the byte three positions after the current read
+     * position is a whitespace character.
      */
     protected static boolean isWhiteSpaceAt(Bytes<?> bytes) {
         return bytes.peekUnsignedByte(bytes.readPosition() + 3) <= ' ';
@@ -127,6 +122,10 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         return wire;
     }
 
+    /**
+     * Restore the original read position/limit and skip the trailing document
+     * separator if present.
+     */
     @Override
     public void close() {
         long readLimit = this.readLimit;
@@ -168,6 +167,11 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         rollback = false;
     }
 
+    /**
+     * Locate the next text document, set {@link #isPresent()} accordingly and
+     * adjust {@link Bytes#readLimit(long)} so only this document is visible for
+     * reading.
+     */
     @Override
     public void start() {
         wire.getValueIn().resetState();
@@ -197,10 +201,8 @@ public class TextReadDocumentContext implements ReadDocumentContext {
     }
 
     /**
-     * Skips the document separator sequence (3 bytes) in the given bytes.
-     * It also resets the state of the wire's value input and consumes any padding present.
-     *
-     * @param bytes The bytes in which the separator sequence should be skipped.
+     * Skip the 3-byte document separator in the supplied bytes and consume any
+     * following padding.
      */
     protected void skipSep(Bytes<?> bytes) {
         // Skip 3 bytes (length of the separator sequence)
@@ -233,6 +235,10 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         return notComplete;
     }
 
+    /**
+     * Delegates to {@code Objects.toString(wire)} so the underlying wire's
+     * textual representation is returned.
+     */
     @Override
     public String toString() {
         return Objects.toString(wire);

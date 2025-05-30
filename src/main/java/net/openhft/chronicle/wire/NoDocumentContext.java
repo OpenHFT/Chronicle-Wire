@@ -18,59 +18,63 @@
 package net.openhft.chronicle.wire;
 
 /**
- * An enumeration implementation of the {@link DocumentContext} interface.
- * This context represents a non-existent or uninitialized document context,
- * hence all its methods return default or null values.
- *
- * <p>This can be useful as a sentinel value or placeholder to avoid null checks in code
- * that works with document contexts. Using `NoDocumentContext.INSTANCE` denotes
- * a guaranteed uninitialized state for a document context.
+ * {@link DocumentContext} implementation that represents the absence of a
+ * document.  All methods return default values.
  */
 public enum NoDocumentContext implements DocumentContext {
-    /** The singleton instance of the NoDocumentContext */
+    /** Singleton instance. */
     INSTANCE;
 
     @Override
+    /** Always {@code false}. */
     public boolean isMetaData() {
         return false;
     }
 
     @Override
+    /** Always {@code false}. */
     public boolean isPresent() {
         return false;
     }
 
     @Override
+    /** Always {@code false}. */
     public boolean isData() {
         return false;
     }
 
     @Override
+    /** Always {@code null}. */
     public Wire wire() {
         return null;
     }
 
     @Override
+    /** Always {@code -1}. */
     public int sourceId() {
         return -1;
     }
 
     @Override
+    /** Always {@link Long#MIN_VALUE}. */
     public long index() {
         return Long.MIN_VALUE;
     }
 
     @Override
+    /** Always {@code false}. */
     public boolean isNotComplete() {
         return false;
     }
 
     @Override
+    /** No-op. */
     public void close() {
         // Do nothing
     }
 
     @Override
+    /** No-op. */
     public void reset() {
         close();
     }

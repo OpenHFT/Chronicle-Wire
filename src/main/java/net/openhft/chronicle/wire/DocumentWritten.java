@@ -19,10 +19,9 @@
 package net.openhft.chronicle.wire;
 
 /**
- * Represents an entity that supports writing documents. The interface provides methods
- * to initiate and manage the context in which documents are written. It is crucial
- * to manage the lifecycle of the {@link DocumentContext} correctly, either by using
- * try-with-resources or explicitly invoking the close() method.
+ * Factory for obtaining {@link DocumentContext}s used when writing documents to
+ * a wire.  The returned context must always be closed to finalise or roll back
+ * the document.
  */
 public interface DocumentWritten {
     /**

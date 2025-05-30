@@ -22,34 +22,30 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Provides a concrete implementation of the {@link WriteDocumentContext} for text-based wire representations.
- * This class manages and tracks the state of the document being written and contains functionalities
- * for starting a new write transaction in the document.
- * <p>
- * While writing, it can be ensured that meta-data is correctly specified, and the position of the write
- * operation is recorded.
+ * {@link WriteDocumentContext} for text based wires such as YAML.  It writes
+ * document separators and tracks whether the document has been completed.
  */
 public class TextWriteDocumentContext implements WriteDocumentContext {
 
-    // The wire used for writing.
+    /** Wire used for output. */
     protected Wire wire;
 
-    // Flag to check if the current data being written is meta-data.
+    /** Whether the document is metadata. */
     private boolean metaData;
 
-    // Indicates if the write operation is completed.
+    /** True while the document is still open. */
     private volatile boolean notComplete;
 
-    // Maintains the count of start operations.
+    /** Nesting count for {@link #start(boolean)} calls. */
     protected int count = 0;
 
-    // Indicates if the current element is chained to the previous one.
+    /** Whether this document is part of a chained write sequence. */
     private boolean chainedElement;
 
-    // Indicates if the current write operation should be rolled back.
+    /** If true the document will be rolled back on close. */
     private boolean rollback;
 
-    // Maintains the current position of the write operation.
+    /** Position where the document started. */
     protected long position;
 
     /**
@@ -62,11 +58,9 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
     }
 
     /**
-     * Starts a new write transaction in the document. If a transaction is already in progress,
-     * this method ensures the meta-data flag is consistent. It also sets the write position
-     * and other state flags to their initial values.
-     *
-     * @param metaData Indicates if the data being written is meta-data
+     * Begin writing a new text document.  Nested calls are allowed but only the
+     * outermost call performs the initialisation.  The starting write position
+     * is recorded so that the document can be rolled back if required.
      */
     public void start(boolean metaData) {
         count++;
@@ -83,6 +77,10 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         position = wire().bytes().writePosition();
     }
 
+    /**
+     * Returns {@code true} if no bytes have been written since the document was
+     * {@link #start(boolean) started}.
+     */
     @Override
     public boolean isEmpty() {
         return wire().bytes().writePosition() == position;
@@ -93,6 +91,10 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         return metaData;
     }
 
+    /**
+     * Finalise the document.  If the context is part of a chained call the
+     * close is ignored until the final call closes it.
+     */
     @Override
     public void close() {
         if (chainedElement)
@@ -119,6 +121,9 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         wire().getValueOut().resetBetweenDocuments();
     }
 
+    /**
+     * Roll back the document if it has not yet been completed.
+     */
     @Override
     public void rollbackIfNotComplete() {
         if (!notComplete) return;
@@ -128,11 +133,17 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         close();
     }
 
+    /**
+     * Mark the document for rollback when {@link #close()} is called.
+     */
     @Override
     public void rollbackOnClose() {
         rollback = true;
     }
 
+    /**
+     * Reset internal state so this context can be reused.
+     */
     @Override
     public void reset() {
         chainedElement = false;

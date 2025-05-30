@@ -18,29 +18,26 @@
 package net.openhft.chronicle.wire;
 
 /**
- * Represents a context for reading documents. This interface extends {@code DocumentContext}
- * and provides methods to manipulate the reading limits and positions within a document.
+ * A {@link DocumentContext} specialised for reading.  Implementations detect
+ * the next document boundary and expose the document's bytes via
+ * {@link #wire()}.
  */
 public interface ReadDocumentContext extends DocumentContext {
 
     /**
-     * Initiates the start of reading within the context.
+     * Locate and prepare the next document in the underlying {@link Wire}.  On
+     * return {@link #isPresent()} indicates if a document was found.
      */
     void start();
 
     /**
-     * Sets the read limit for this {@code ReadDocumentContext}.
-     * This defines the boundary or endpoint within the document up to which reading should occur.
-     *
-     * @param readLimit The long value representing the read limit.
+     * Restore the read limit of the underlying bytes when closing.  Generally
+     * used by the implementation rather than user code.
      */
     void closeReadLimit(long readLimit);
 
     /**
-     * Sets the read position for this {@code ReadDocumentContext}.
-     * This defines the starting point within the document from which reading should begin.
-     *
-     * @param readPosition The long value representing the read position.
+     * Restore the read position of the underlying bytes on close.
      */
     void closeReadPosition(long readPosition);
 }

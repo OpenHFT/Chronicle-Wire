@@ -24,24 +24,21 @@ import org.jetbrains.annotations.NotNull;
 import static net.openhft.chronicle.wire.Wires.toIntU30;
 
 /**
- * A context used for writing documents in a binary format.
- * This class provides facilities to start, query, and manage the state of binary
- * documents that are currently being written. The binary format uses headers to
- * denote metadata, data length, and completion status.
+ * {@link WriteDocumentContext} for binary length prefixed messages.
  */
 public class BinaryWriteDocumentContext implements WriteDocumentContext {
 
-    // The wire instance used for the binary writing process
+    /** Wire the document is written to. */
     protected Wire wire;
     protected long position = 0;
     protected int tmpHeader;
-    // Count of how many times the start() method was invoked
+    /** Nesting depth of {@link #start(boolean)} calls. */
     protected int count = 0;
-    // Bit representing whether meta data is present
+    /** Bit mask for metadata in the header. */
     private int metaDataBit;
-    // Flag to indicate if the document write is complete
+    /** True while the document is still open. */
     private volatile boolean notComplete;
-    // Flag to check if the current element is chained
+    /** Part of a chained write. */
     private boolean chainedElement;
     private boolean rollback;
 
@@ -55,10 +52,7 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
     }
 
     /**
-     * Initializes the context for starting a new binary write.
-     * This will setup necessary headers and markers to facilitate the write.
-     *
-     * @param metaData A flag indicating whether the write includes metadata.
+     * Begin writing a new binary document by writing a placeholder header.
      */
     public void start(boolean metaData) {
         count++;
@@ -79,6 +73,10 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         chainedElement = false;
     }
 
+    /**
+     * Returns {@code true} if no data beyond the 4 byte header has been
+     * written.
+     */
     @Override
     public boolean isEmpty() {
         return notComplete && wire().bytes().writePosition() == position + 4;
@@ -89,6 +87,10 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         return metaDataBit != 0;
     }
 
+    /**
+     * Finalise the header with the actual length unless this context was rolled
+     * back.
+     */
     @Override
     public void close() {
         if (chainedElement)
@@ -119,6 +121,9 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         wire().getValueOut().resetBetweenDocuments();
     }
 
+    /**
+     * Roll back the current document if it has not been completed yet.
+     */
     @Override
     public void rollbackIfNotComplete() {
         if (!notComplete) return;
@@ -128,11 +133,17 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         close();
     }
 
+    /**
+     * Mark the document for rollback when {@link #close()} is invoked.
+     */
     @Override
     public void rollbackOnClose() {
         rollback = true;
     }
 
+    /**
+     * Reset all state so the context may be reused.
+     */
     @Override
     public void reset() {
         chainedElement = false;
@@ -173,9 +184,7 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
     }
 
     /**
-     * Retrieves the current position in the wire where the document starts.
-     *
-     * @return The position in the wire where the current document starts.
+     * Position where the header for the current document was written.
      */
     protected long position() {
         return position;

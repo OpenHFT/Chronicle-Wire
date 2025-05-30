@@ -23,89 +23,106 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Closeable;
 
 /**
- * Represents a context that governs the interactions and state management for a document.
- * It provides methods to interrogate and manipulate the state of the associated document,
- * ensuring consistent and safe operations. This interface offers checks for metadata,
- * presence, and completion status of the document, as well as operations to manage the context's
- * lifecycle such as open, close, and reset.
+ * Represents a context for interacting with a single "document" (message) on a
+ * {@link Wire}.  A document can either be data or metadata and may be in a
+ * partially written state until {@link #close()} is invoked.
  * <p>
- * Implementations must ensure proper handling of resources and consistency of the document state.
+ * Implementations manage the lifecycle of the document and typically should be
+ * used in a try-with-resources block:
+ *
+ * <pre>{@code
+ *   try (DocumentContext dc = wire.writingDocument()) {
+ *       // write fields
+ *   }
+ * }</pre>
+ *
+ * Closing the context finalises or rolls back the document depending on the
+ * implementation.  The interface exposes flags to query whether the document is
+ * metadata, present and/or complete.
  */
 public interface DocumentContext extends Closeable, SourceContext {
+    /**
+     * A no-op implementation useful as a default or for testing.  All method
+     * calls on this instance are ignored.
+     */
     DocumentContext NOOP = Mocker.ignored(DocumentContext.class);
 
     /**
-     * Checks it the {@code DocumentContext} is metadata. If it is, {@code true} is
-     * returned, otherwise {@code false}.
+     * Indicates whether this document represents metadata as opposed to regular
+     * user data.  Metadata documents are typically used for control messages or
+     * headers within a wire.
      *
-     * @return true if the entry is metadata
+     * @return {@code true} if the document is metadata
      */
     boolean isMetaData();
 
     /**
-     * Checks if the {@code DocumentContext} is present. If it is, {@code true} is returned,
-     * otherwise {@code false}.
+     * For a reading context this returns {@code true} if a document was found
+     * and is available for reading.  For a writing context it is usually
+     * {@code true} while the context is open.
      *
-     * @return true if the entry is present
+     * @return {@code true} if the document is available
      */
     boolean isPresent();
 
     /**
-     * Determines if the {@code DocumentContext} is in an open state.
-     * This method essentially checks the inverse of the completion status of the context.
-     *
-     * @return {@code true} if the context is open (i.e., the NOT_COMPLETE flag is set),
-     * {@code false} otherwise.
+     * Convenience method returning {@code true} if the document is present and
+     * not metadata.  Equivalent to {@code isPresent() && !isMetaData()}.
      */
     default boolean isData() {
         return isPresent() && !isMetaData();
     }
 
     /**
-     * Returns the {@link Wire} associated with the {@code Document}. It is possible that
-     * {@code null} is returned, depending on the implementation.
-     *
-     * @return the {@link Wire} associated with the {@code Document}.
+     * Returns the {@link Wire} this document is read from or written to.  May be
+     * {@code null} for specialised implementations.
      */
     @Nullable
     Wire wire();
 
     /**
-     * @return whether the NOT_COMPLETE flag has been set.
+     * Indicates whether the {@code NOT_COMPLETE} flag is currently set on the
+     * document.  For writers this means the document length has not yet been
+     * finalised.
      */
     boolean isNotComplete();
 
+    /**
+     * Convenience synonym for {@link #isNotComplete()}.
+     */
     default boolean isOpen() {
         return isNotComplete();
     }
 
     /**
-     * Invoked to signal an error condition in the current context.
-     * This ensures that upon closing the context, any changes made during its lifecycle
-     * are rolled back rather than committing a potentially erroneous state.
+     * Invoked to signal an error condition in the current context so that when
+     * {@link #close()} is called the document is rolled back instead of
+     * committed.  Typically used in a {@code catch} block while writing.
      */
     default void rollbackOnClose() {
     }
 
     /**
-     * Call this if any incomplete message should be rolled back at this point, it it wasn't complete by now.
+     * Explicitly roll back the current document if it is still marked as
+     * {@link #isNotComplete() not complete}.  Some implementations may throw
+     * {@link UnsupportedOperationException} if rollback is not supported.
      */
     default void rollbackIfNotComplete() {
         throw new UnsupportedOperationException(getClass().getName());
     }
 
     /**
-     * Closes the {@code DocumentContext} and releases any held resources.
-     * It is crucial to ensure that this method is invoked after the context's operations are completed
-     * to prevent any potential resource leaks or data corruption.
+     * Close the context and finalise the document.  Always call this method,
+     * ideally via try-with-resources, to ensure resources are released and any
+     * length prefixes are written.
      */
     @Override
     void close();
 
     /**
-     * Cleans up the {@code DocumentContext} by invoking the close method, then discarding
-     * any lingering state associated with it. This provides a way to ensure the context
-     * is in a fresh state and free of any residual data or settings.
+     * Reset the context to its initial state after closing.  Implementations may
+     * reuse instances so this clears any internal state ready for another
+     * document.
      */
     void reset();
 }

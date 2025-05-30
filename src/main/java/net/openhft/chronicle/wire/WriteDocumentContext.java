@@ -18,41 +18,34 @@
 package net.openhft.chronicle.wire;
 
 /**
- * This is the WriteDocumentContext interface extending DocumentContext.
- * It defines methods related to the writing context of a document.
- * The interface offers features to determine metadata status, check if elements are chained,
- * and discern if the document context is empty or not.
+ * A {@link DocumentContext} specialised for writing.  Implementations manage
+ * the process of starting a new document, writing data and finalising the
+ * length prefix when {@link #close()} is called.
  */
 public interface WriteDocumentContext extends DocumentContext {
 
     /**
-     * Initializes the writing context with a specific metadata status.
+     * Prepare this context to write a new document.  Called by the owning
+     * {@link MarshallableOut} before any data is written.
      *
-     * @param metaData A boolean value indicating if the context is metadata.
+     * @param metaData {@code true} if the document represents metadata
      */
     void start(boolean metaData);
 
     /**
-     * Returns {@code true} if this {@code WriteDocumentContext} is a
-     * chained element.
-     *
-     * @return {@code true} if this {@code WriteDocumentContext} is a
-     * chained element; otherwise, {@code false}.
+     * Whether this write is part of a chained sequence of method calls where
+     * the document is not finalised until the chain completes.
      */
     boolean chainedElement();
 
     /**
-     * Marks this {@code WriteDocumentContext} as a chained element.
-     *
-     * @param chainedElement A boolean value indicating if the context
-     * is a chained element.
+     * Mark this context as part of a chained write.
      */
     void chainedElement(boolean chainedElement);
 
     /**
-     * Checks if the writing context is empty.
-     *
-     * @return {@code true} if the context is empty; otherwise, {@code false}.
+     * Returns {@code true} if no actual data has been written since
+     * {@link #start(boolean)} was invoked.
      */
     boolean isEmpty();
 }
