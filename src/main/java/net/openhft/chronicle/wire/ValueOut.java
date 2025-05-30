@@ -153,13 +153,13 @@ public interface ValueOut {
     /**
      * Writes {@code x} as a signed 8‑bit value, checking the range.
      *
-     * @param x value to write
+     * @param value value to write
      * @return parent wire for chaining
      * @throws ArithmeticException if {@code x} does not fit in a byte
      */
     @NotNull
-    default WireOut int8(long x) {
-        return int8(Maths.toInt8(x));
+    default WireOut int8(long value) {
+        return int8(Maths.toInt8(value));
     }
 
     /**
@@ -193,14 +193,14 @@ public interface ValueOut {
     }
 
     /**
-     * Writes a typed byte sequence using {@code type} as the type name.
+     * Writes a typed byte sequence using {@code typeName} as the type name.
      *
-     * @param type      type identifier
-     * @param fromBytes bytes to write
+     * @param typeName type identifier
+     * @param data bytes to write
      * @return parent wire for chaining
      */
     @NotNull
-    WireOut bytes(String type, @Nullable BytesStore<?, ?> fromBytes);
+    WireOut bytes(String typeName, @Nullable BytesStore<?, ?> data);
 
     /**
      * Writes {@code value} directly with minimal encoding.
@@ -242,14 +242,14 @@ public interface ValueOut {
     WireOut bytes(byte[] fromBytes);
 
     /**
-     * Writes the byte array {@code fromBytes} with a type identifier.
+     * Writes the byte array {@code data} with a type identifier.
      *
-     * @param type      type identifier
-     * @param fromBytes bytes to write
+     * @param typeName type identifier
+     * @param data bytes to write
      * @return parent wire for chaining
      */
     @NotNull
-    WireOut bytes(String type, byte[] fromBytes);
+    WireOut bytes(String typeName, byte[] data);
 
     /**
      * Writes {@code x} as an unsigned 8‑bit integer, checking the range.
@@ -264,10 +264,10 @@ public interface ValueOut {
     }
 
     /**
-     * Writes {@code u8} as an unsigned 8‑bit integer without additional checks.
+     * Writes {@code unsignedByte} as an unsigned 8‑bit integer without additional checks.
      */
     @NotNull
-    WireOut uint8checked(int u8);
+    WireOut uint8checked(int unsignedByte);
 
     /**
      * Writes {@code x} as a signed 16‑bit integer, checking the range.
@@ -305,7 +305,7 @@ public interface ValueOut {
      * Writes a single Unicode code point as UTF-8.
      */
     @NotNull
-    WireOut utf8(int codepoint);
+    WireOut utf8(int unicodeCodePoint);
 
     /**
      * Writes {@code x} as a signed 32‑bit integer, checking the range.
@@ -365,7 +365,7 @@ public interface ValueOut {
      * Writes two longs and binds them to {@code value} for direct access.
      */
     @NotNull
-    WireOut int128forBinding(long i64x0, long i64x1, TwoLongValue value);
+    WireOut int128forBinding(long highBits, long lowBits, TwoLongValue value);
 
     /**
      * Writes {@code i64} in hexadecimal form when the wire is textual.

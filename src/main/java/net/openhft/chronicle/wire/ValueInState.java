@@ -50,19 +50,19 @@ class ValueInState {
     }
 
     /**
-     * Adds the given {@code position} to the list of unexpected field starts.
+     * Adds the given {@code wirePosition} to the list of unexpected field starts.
      * Grows the internal array if required.
      *
-     * @param position position of an unexpected field
+     * @param wirePosition position of an unexpected field
      */
-    public void addUnexpected(long position) {
+    public void addUnexpected(long wirePosition) {
         if (unexpectedSize >= unexpected.length) {
             int newSize = unexpected.length * 3 / 2 + 8;
             @NotNull long[] unexpected2 = new long[newSize];
             System.arraycopy(unexpected, 0, unexpected2, 0, unexpected.length);
             unexpected = unexpected2;
         }
-        unexpected[unexpectedSize++] = position;
+        unexpected[unexpectedSize++] = wirePosition;
     }
 
     /**
