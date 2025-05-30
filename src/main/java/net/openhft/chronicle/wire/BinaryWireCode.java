@@ -22,31 +22,32 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Field;
 
 /**
- * Enumerates the predefined byte codes for the Binary YAML wire format.
- * Each constant in this class provides a specific purpose when working with the wire format,
- * enabling efficient serialization and deserialization processes.
+ * Defines the integer codes used by {@link BinaryWire} to denote data types and
+ * control sequences. The first byte of each value is one of these constants
+ * indicating how the following bytes are to be interpreted.
  */
 public enum BinaryWireCode {
     ; // Indicates no default enum instances
 
     // Definitions for sequence lengths:
     /**
-     * Sequence length 0 to 255 bytes.
+     * Indicates that an unsigned byte follows containing the length (0-255) of
+     * a byte sequence.
      */
     public static final int BYTES_LENGTH8 = 0x80;
 
     /**
-     * Sequence length 0 to 2^16-1 bytes.
+     * Indicates a two byte length field storing 0 to 2^16-1 bytes.
      */
     public static final int BYTES_LENGTH16 = 0x81;
 
     /**
-     * Sequence length 0 to 2^32-1 bytes.
+     * Indicates a four byte length field storing up to 2^32-1 bytes.
      */
     public static final int BYTES_LENGTH32 = 0x82;
 
     /**
-     * Indicates a HistoryMessage follows. was BYTES_MARSHALLABLE, but only used for this purpose
+     * Indicates that a {@link VanillaMessageHistory} follows in its compact form.
      */
     public static final int HISTORY_MESSAGE = 0x86;
 
@@ -90,42 +91,42 @@ public enum BinaryWireCode {
     public static final int PADDING = 0x8F;
 
     /**
-     * Represents a 32-bit floating-point number.
+     * A 32 bit IEEE-754 floating point value.
      */
     public static final int FLOAT32 = 0x90;
 
     /**
-     * Represents a 64-bit floating-point number (double precision).
+     * A 64 bit IEEE-754 floating point value.
      */
     public static final int FLOAT64 = 0x91;
 
     /**
-     * Floating-point number with 2 decimal places optimized for storage.
+     * Floating point encoded with 2 decimal places using stop bit compression.
      */
     public static final int FLOAT_STOP_2 = 0x92;
 
     /**
-     * Floating-point number with 4 decimal places optimized for storage.
+     * Floating point encoded with 4 decimal places using stop bit compression.
      */
     public static final int FLOAT_STOP_4 = 0x94;
 
     /**
-     * Floating-point number with 6 decimal places optimized for storage.
+     * Floating point encoded with 6 decimal places using stop bit compression.
      */
     public static final int FLOAT_STOP_6 = 0x96;
 
     /**
-     * Floating-point number rounded to the nearest whole number.
+     * Floating point rounded to the nearest whole number for compact storage.
      */
     public static final int FLOAT_SET_LOW_0 = 0x9A;
 
     /**
-     * Floating-point number rounded to 2 decimal places for compact storage.
+     * Floating point rounded to two decimal places.
      */
     public static final int FLOAT_SET_LOW_2 = 0x9B;
 
     /**
-     * Floating-point number rounded to 4 decimal places for compact storage.
+     * Floating point rounded to four decimal places.
      */
     public static final int FLOAT_SET_LOW_4 = 0x9C;
 
@@ -224,71 +225,74 @@ public enum BinaryWireCode {
     public static final int TYPE_PREFIX = 0xB6;
 
     /**
-     * A field name of any length.
+     * Indicates a field name of variable length encoded as an 8 bit string.
      */
     public static final int FIELD_NAME_ANY = 0xB7;
 
     /**
-     * A String of any length
+     * Indicates an arbitrary length UTF-8 string.
      */
     public static final int STRING_ANY = 0xB8;
 
     /**
-     * A field of any length, marked as an event name.
+     * Field name used to denote an event, length encoded as an 8 bit string.
      */
     public static final int EVENT_NAME = 0xB9;
 
     /**
-     * Represents a numerical field number instead of a name.
+     * Field identifier stored as an unsigned integer rather than text.
      */
     public static final int FIELD_NUMBER = 0xBA;
     /**
-     * Code representing a null value in the serialized data.
+     * Represents the {@code null} value.
      */
     public static final int NULL = 0xBB;
 
     /**
-     * Represents a type literal.
+     * Encodes a class literal as an 8 bit length followed by the UTF-8 text.
      */
     public static final int TYPE_LITERAL = 0xBC;
 
     /**
-     * Indicates an event object instead of the typical string.
+     * Signifies that an event payload follows rather than a simple string name.
      */
     public static final int EVENT_OBJECT = 0xBD;
 
     /**
-     * Marks a comment, not intended for parsing as part of the data structure.
+     * Marks a comment that should be ignored by parsers.
      */
     public static final int COMMENT = 0xBE;
 
     /**
-     * Provides a hint for serialization or deserialization processes, possibly affecting how data is interpreted.
+     * Hint used by the wire layer; consumers may ignore it.
      */
     public static final int HINT = 0xBF;
 
     /**
-     * Starting code for predefined field names of length 0, 1, 2 ... 31.
+     * Start of the compact field name range. Codes {@code FIELD_NAME0} to
+     * {@code FIELD_NAME31} represent names of length 0 to 31.
      */
     public static final int FIELD_NAME0 = 0xC0;
 
     /**
-     * Ending code for predefined field names.
+     * End of the compact field name range.
      */
     public static final int FIELD_NAME31 = 0xDF;
 
     /**
-     * Starting code for compact string representation of length 0, 1, 2 ... 31.
+     * Start of the compact string range. Values {@code STRING_0} to {@code STRING_31}
+     * encode text of length 0 to 31.
      */
     public static final int STRING_0 = 0xE0;
 
     /**
-     * Ending code for compact string representation.
+     * End of the compact string range.
      */
     public static final int STRING_31 = 0xFF;
 
     /**
-     * Array storing the string representations for each binary wire code, facilitating easier debugging and logging.
+     * Lookup table mapping a byte code to its mnemonic name. Used for debugging
+     * and diagnostic output.
      */
     public static final String[] STRING_FOR_CODE = new String[256];
 
@@ -317,10 +321,8 @@ public enum BinaryWireCode {
     }
 
     /**
-     * Determines if the provided code corresponds to a field name.
-     *
-     * @param code The binary wire code value.
-     * @return True if the code corresponds to a field, false otherwise.
+     * Returns {@code true} if the code denotes any form of field identifier
+     * (numeric or textual).
      */
     public static boolean isFieldCode(int code) {
         return code == FIELD_NAME_ANY ||
@@ -329,10 +331,8 @@ public enum BinaryWireCode {
     }
 
     /**
-     * Retrieves the string representation of a binary wire code.
-     *
-     * @param code The binary wire code value.
-     * @return The string representation for the given code.
+     * Returns a human readable name for the supplied code using
+     * {@link #STRING_FOR_CODE}. A code of {@code -1} maps to "EndOfFile".
      */
     @NotNull
     public static String stringForCode(int code) {

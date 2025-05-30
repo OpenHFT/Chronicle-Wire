@@ -2631,6 +2631,10 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
+        /**
+         * Writes a sequence of values preceded by a 32 bit length.
+         * The {@code writer} is invoked to emit each item within the block.
+         */
         @NotNull
         @Override
         public <T> WireOut sequence(T t, @NotNull BiConsumer<T, ValueOut> writer) {
@@ -2669,6 +2673,10 @@ public class BinaryWire extends AbstractWire implements Wire {
             bytes.writeInt(position, length);
         }
 
+        /**
+         * Writes a length prefixed block and lets the {@code writer}
+         * serialise items of type {@code K}.
+         */
         @NotNull
         @Override
         public <T, K> WireOut sequence(T t, K kls, @NotNull TriConsumer<T, K, ValueOut> writer) throws InvalidMarshallableException {
@@ -3615,8 +3623,14 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Override
+        /**
+         * Reads the length of the next value based on the current code.
+         * <p>
+         * Handles length prefixes such as {@link BinaryWireCode#BYTES_LENGTH8}
+         * and also infers the size for fixed-width primitives. Returns {@code -1}
+         * if the code is not recognised.
+         */
         public long readLength() {
-            // TODO handle non length types as well.
 
             int code = peekCode();
             if ((code & 0x80) == 0)
@@ -3716,6 +3730,13 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
         }
 
+        /**
+         * Skips the value at the current read position.
+         * <p>
+         * The method reads the length of the item and moves the read pointer
+         * past that many bytes. If the length cannot be determined the value is
+         * consumed using {@link #objectBestEffort()}.
+         */
         @NotNull
         @Override
         public WireIn skipValue() {
@@ -4097,6 +4118,10 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
+        /**
+         * Reads a length prefixed sequence and invokes the supplied
+         * {@code tReader} on each item.
+         */
         @Override
         public <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
             if (isNull())
@@ -4117,6 +4142,10 @@ public class BinaryWire extends AbstractWire implements Wire {
             return true;
         }
 
+        /**
+         * Reads a sequence into {@code list} using a temporary buffer. The block
+         * length is read from the wire before items are processed.
+         */
         @Override
         public <T> boolean sequence(@NotNull List<T> list,
                                     @NotNull List<T> buffer,
@@ -4125,6 +4154,10 @@ public class BinaryWire extends AbstractWire implements Wire {
             return sequence(list, buffer, bufferAdd, reader0field);
         }
 
+        /**
+         * Reads a sequence using a caller supplied reader.
+         * The length prefix is honoured before delegating to {@code tReader}.
+         */
         @Override
         public <T> boolean sequence(List<T> list,
                                     @NotNull List<T> buffer,
@@ -4148,6 +4181,10 @@ public class BinaryWire extends AbstractWire implements Wire {
             return true;
         }
 
+        /**
+         * Reads a length-prefixed block and passes a {@link ValueIn} for each entry
+         * to the supplied {@code tReader}.
+         */
         @NotNull
         @Override
         public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) throws InvalidMarshallableException {
@@ -4264,13 +4301,12 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         /**
-         * Tries to deserialize a typed Marshallable object from the current state of the wire.
-         * The method identifies the type of the Marshallable object by reading a UTF-8 encoded class name
-         * and then instantiates and initializes the object accordingly.
+         * Handles a {@link BinaryWireCode#TYPE_PREFIX} by reading the class name,
+         * creating an instance and unmarshalling into it.
          *
-         * @param <T> Type of the expected return object.
-         * @return The deserialized Marshallable object or null if the UTF-8 encoded class name is not found.
-         * @throws InvalidMarshallableException If the deserialization encounters any issues.
+         * @param <T> expected type
+         * @return a new instance populated from the wire or {@code null} if no class name is present
+         * @throws InvalidMarshallableException if deserialisation fails
          */
         @Nullable
         protected <T> T typedMarshallable0() throws InvalidMarshallableException {
@@ -4316,6 +4352,10 @@ public class BinaryWire extends AbstractWire implements Wire {
             return object(null, aClass);
         }
 
+        /**
+         * If the next code is {@link BinaryWireCode#TYPE_PREFIX} this reads the
+         * class name and resolves it.
+         */
         @Override
         public Class<?> typePrefix() {
             int code = peekCode();
@@ -4333,6 +4373,10 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
         }
 
+        /**
+         * Variation of {@link #typePrefix()} used by generated DTOs to read the
+         * class name or return a tuple if the type is missing.
+         */
         @Override
         public Object typePrefixOrObject(Class<?> tClass) {
             int code = peekCode();
@@ -4424,14 +4468,10 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         /**
-         * Marshalls the given object and can optionally overwrite existing values.
-         *
-         * @param object The object to be marshalled.
-         * @param overwrite Determines if the existing values should be overwritten.
-         * @return True if the operation is successful.
-         * @throws BufferUnderflowException If there's not enough data available in the buffer.
-         * @throws IORuntimeException If there's a general IO error.
-         * @throws InvalidMarshallableException If there's an error specific to marshalling.
+         * Reads a length prefixed binary block into {@code object}.
+         * The {@code overwrite} flag controls whether existing state is replaced.
+         * The method respects {@link WireIn#useSelfDescribingMessage(CommonMarshallable)}
+         * to decide which read method to invoke.
          */
         public boolean marshallable(@NotNull ReadMarshallable object, boolean overwrite)
                 throws BufferUnderflowException, IORuntimeException, InvalidMarshallableException {
@@ -4507,12 +4547,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         /**
-         * Deserializes an object of the given class from the wire data.
-         *
-         * @param clazz Class to be deserialized.
-         * @return An instance of the provided class.
-         * @throws BufferUnderflowException if there's not enough data in the buffer.
-         * @throws IORuntimeException for general IO issues.
+         * Instantiates and populates a new object of {@code clazz} from a
+         * length-prefixed block.
          */
         @Nullable
         public Demarshallable demarshallable(@NotNull Class<? extends Demarshallable> clazz) throws BufferUnderflowException, IORuntimeException {
@@ -4536,14 +4572,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         /**
-         * Reads a text from the wire and attempts to convert it into a long value.
-         * If the text is not a valid representation of a long, tries to parse it as a double
-         * and then rounds to the nearest long.
-         *
-         * @param otherwise Default value to return if the conversion fails.
-         * @return Parsed long value or the provided default value.
-         * @throws IORuntimeException for general IO issues.
-         * @throws BufferUnderflowException if there's not enough data in the buffer.
+         * Parses the previously read text as a {@code long} with a numeric fallback.
+         * If parsing fails the supplied {@code otherwise} value is returned.
          */
         private long readTextAsLong(long otherwise) throws IORuntimeException, BufferUnderflowException {
             bytes.uncheckedReadSkipBackOne();  // Go back one position.
@@ -4563,11 +4593,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         /**
-         * Reads a text from the wire and attempts to convert it into a double value.
-         *
-         * @return Parsed double value or NaN if the conversion fails.
-         * @throws IORuntimeException for general IO issues.
-         * @throws BufferUnderflowException if there's not enough data in the buffer.
+         * Parses the previously read text as a {@code double}.
+         * Returns {@code NaN} on failure.
          */
         private double readTextAsDouble() throws IORuntimeException, BufferUnderflowException {
             bytes.uncheckedReadSkipBackOne();  // Go back one position.
@@ -4741,16 +4768,18 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         /**
-         * Throws an exception indicating that reading the provided code is not supported.
-         *
-         * @param code The unsupported code.
-         * @return A runtime exception (never actually returned since an exception is always thrown).
+         * Convenience method used when an unexpected code is encountered.
+         * Always throws {@link UnsupportedOperationException}.
          */
         @NotNull
         private RuntimeException cantRead(int code) {
             throw new UnsupportedOperationException(stringForCode(code));
         }
 
+        /**
+         * Core logic used when the exact field type is not known in advance.
+         * The wire code is inspected to decide how the value should be read.
+         */
         @Override
         public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class<?> type) throws InvalidMarshallableException {
             int code = peekCode();
@@ -4911,10 +4940,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         /**
-         * Consumes the next set of bytes based on the provided code.
-         * The method moves the reader pointer after the current item or structure.
-         *
-         * @throws InvalidMarshallableException If there's an error while marshalling.
+         * Skips the current value by decoding its length and type without
+         * fully deserialising it.
          */
         void consumeNext() throws InvalidMarshallableException {
             // Peek at the next byte to determine the code.
