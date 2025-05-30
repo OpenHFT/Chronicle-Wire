@@ -39,28 +39,30 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.*;
 /**
- * This class provides the default implementation for the {@link ValueIn} interface. It's primarily designed
- * to handle default values, converting them into various formats such as text and bytes.
- * The default value is retrieved from an underlying {@link WireIn} source.
+ * An implementation of {@link ValueIn} used when a requested field is not
+ * present on the wire. It returns either {@code null}, a primitive zero or the
+ * value configured by the {@link WireMarshaller}. This allows optional fields
+ * to be skipped without breaking deserialisation.
  */
 @SuppressWarnings("rawtypes")
 public class DefaultValueIn implements ValueIn {
 
-    // The underlying WireIn source for fetching default values
+    /** The parent {@link WireIn} this instance belongs to. */
     private final WireIn wireIn;
 
-    // The stored default value, fetched from the WireIn source
+    /** Value returned by the read methods when no field is present. */
     Object defaultValue;
 
     /**
-     * Constructs a new instance of DefaultValueIn with a given {@link WireIn} source.
-     *
-     * @param wireIn The WireIn source to fetch default values from.
+     * Creates a {@code DefaultValueIn} bound to the supplied wire.
      */
     DefaultValueIn(WireIn wireIn) {
         this.wireIn = wireIn;
     }
 
+    /**
+     * Returns {@link #defaultValue} as a string.
+     */
     @Nullable
     @Override
     public String text() {
@@ -68,6 +70,10 @@ public class DefaultValueIn implements ValueIn {
         return o == null ? null : o.toString();
     }
 
+    /**
+     * Appends the string form of {@link #defaultValue} to {@code sb}.
+     * Returns {@code null} if no value is configured.
+     */
     @Nullable
     @Override
     public StringBuilder textTo(@NotNull StringBuilder sb) {
@@ -78,6 +84,10 @@ public class DefaultValueIn implements ValueIn {
         return sb;
     }
 
+    /**
+     * Writes the string form of {@link #defaultValue} to the supplied bytes.
+     * Returns {@code null} when the value is absent.
+     */
     @Nullable
     @Override
     public Bytes<?> textTo(@NotNull Bytes<?> bytes) {
@@ -88,6 +98,10 @@ public class DefaultValueIn implements ValueIn {
         return bytes;
     }
 
+    /**
+     * Writes {@link #defaultValue} to {@code toBytes} and returns the parent
+     * wire.
+     */
     @NotNull
     @Override
     public WireIn bytes(@NotNull BytesOut<?> toBytes) {
@@ -99,6 +113,10 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Copies {@link #defaultValue} into a {@link PointerBytesStore}. If absent
+     * an empty store is set.
+     */
     @Nullable
     @Override
     public WireIn bytesSet(@NotNull PointerBytesStore toBytes) {
@@ -112,6 +130,10 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Compares {@link #defaultValue} with {@code compareBytes} and passes the
+     * result to {@code consumer}.
+     */
     @NotNull
     @Override
     public WireIn bytesMatch(@NotNull BytesStore<?, ?> compareBytes, @NotNull BooleanConsumer consumer) {
@@ -121,6 +143,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Supplies {@link #defaultValue} to a {@link ReadBytesMarshallable}.
+     */
     @NotNull
     @Override
     public WireIn bytes(@NotNull ReadBytesMarshallable wireInConsumer) {
@@ -134,28 +159,43 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Returns the backing byte array.
+     */
     @Override
     public byte @NotNull [] bytes(byte[] using) {
         return (byte[]) defaultValue;
     }
 
+    /**
+     * Returns the parent {@link WireIn}.
+     */
     @NotNull
     @Override
     public WireIn wireIn() {
         return wireIn;
     }
 
+    /**
+     * Always returns {@code 0} as no bytes are consumed.
+     */
     @Override
     public long readLength() {
         return 0;
     }
 
+    /**
+     * No value is read so the parent wire is returned.
+     */
     @NotNull
     @Override
     public WireIn skipValue() {
         return wireIn();
     }
 
+    /**
+     * Passes {@link #defaultValue} to {@code tFlag} and returns the parent wire.
+     */
     @NotNull
     @Override
     public <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> tFlag) {
@@ -164,6 +204,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Supplies the byte value of {@link #defaultValue} to {@code tb}.
+     */
     @NotNull
     @Override
     public <T> WireIn int8(@NotNull T t, @NotNull ObjByteConsumer<T> tb) {
@@ -173,6 +216,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Supplies the unsigned byte value of {@link #defaultValue}.
+     */
     @NotNull
     @Override
     public <T> WireIn uint8(@NotNull T t, @NotNull ObjShortConsumer<T> ti) {
@@ -182,6 +228,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Supplies the short value of {@link #defaultValue}.
+     */
     @NotNull
     @Override
     public <T> WireIn int16(@NotNull T t, @NotNull ObjShortConsumer<T> ti) {
@@ -191,6 +240,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Supplies the unsigned short value of {@link #defaultValue}.
+     */
     @NotNull
     @Override
     public <T> WireIn uint16(@NotNull T t, @NotNull ObjIntConsumer<T> ti) {
@@ -200,6 +252,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Supplies the int value of {@link #defaultValue}.
+     */
     @NotNull
     @Override
     public <T> WireIn int32(@NotNull T t, @NotNull ObjIntConsumer<T> ti) {
@@ -209,6 +264,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Supplies the unsigned int value of {@link #defaultValue}.
+     */
     @NotNull
     @Override
     public <T> WireIn uint32(@NotNull T t, @NotNull ObjLongConsumer<T> tl) {
@@ -218,6 +276,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Supplies the long value of {@link #defaultValue}.
+     */
     @NotNull
     @Override
     public <T> WireIn int64(@NotNull T t, @NotNull ObjLongConsumer<T> tl) {
@@ -227,6 +288,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Supplies the float value of {@link #defaultValue}.
+     */
     @NotNull
     @Override
     public <T> WireIn float32(@NotNull T t, @NotNull ObjFloatConsumer<T> tf) {
@@ -236,6 +300,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Supplies the double value of {@link #defaultValue}.
+     */
     @NotNull
     @Override
     public <T> WireIn float64(@NotNull T t, @NotNull ObjDoubleConsumer<T> td) {
@@ -245,6 +312,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Passes the {@link LocalTime} held in {@link #defaultValue}.
+     */
     @NotNull
     @Override
     public <T> WireIn time(@NotNull T t, @NotNull BiConsumer<T, LocalTime> setLocalTime) {
@@ -253,6 +323,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Passes the {@link ZonedDateTime} held in {@link #defaultValue}.
+     */
     @NotNull
     @Override
     public <T> WireIn zonedDateTime(@NotNull T t, @NotNull BiConsumer<T, ZonedDateTime> tZonedDateTime) {
@@ -261,6 +334,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Passes the {@link LocalDate} held in {@link #defaultValue}.
+     */
     @NotNull
     @Override
     public <T> WireIn date(@NotNull T t, @NotNull BiConsumer<T, LocalDate> tLocalDate) {
@@ -269,16 +345,25 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Always {@code false} as no sequence exists.
+     */
     @Override
     public boolean hasNext() {
         return false;
     }
 
+    /**
+     * Always {@code false} as no sequence exists.
+     */
     @Override
     public boolean hasNextSequenceItem() {
         return false;
     }
 
+    /**
+     * Supplies the {@link UUID} from {@link #defaultValue}.
+     */
     @NotNull
     @Override
     public <T> WireIn uuid(@NotNull T t, @NotNull BiConsumer<T, UUID> tuuid) {
@@ -287,12 +372,18 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Not implemented for default values.
+     */
     @NotNull
     @Override
     public <T> WireIn int64array(@Nullable LongArrayValues values, T t, @NotNull BiConsumer<T, LongArrayValues> setter) {
         throw new UnsupportedOperationException("todo");
     }
 
+    /**
+     * Sets {@code value} from {@link #defaultValue}.
+     */
     @NotNull
     @Override
     public WireIn int64(@NotNull LongValue value) {
@@ -302,6 +393,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Sets {@code value} from {@link #defaultValue}.
+     */
     @NotNull
     @Override
     public WireIn int32(@NotNull IntValue value) {
@@ -311,11 +405,17 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Not implemented for default values.
+     */
     @Override
     public WireIn bool(@NotNull final BooleanValue ret) {
         throw new UnsupportedOperationException("todo");
     }
 
+    /**
+     * Provides {@link #defaultValue} to {@code setter}.
+     */
     @NotNull
     @Override
     public <T> WireIn int64(@Nullable LongValue value, T t, @NotNull BiConsumer<T, LongValue> setter) {
@@ -326,6 +426,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Provides {@link #defaultValue} to {@code setter}.
+     */
     @NotNull
     @Override
     public <T> WireIn int32(@Nullable IntValue value, T t, @NotNull BiConsumer<T, IntValue> setter) {
@@ -336,16 +439,25 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Always returns {@code false} as there is no sequence.
+     */
     @Override
     public <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
         return false;
     }
 
+    /**
+     * Always returns {@code false}; there is no data to read.
+     */
     @Override
     public <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0) {
         return false;
     }
 
+    /**
+     * Invokes {@code tReader} with {@code kls} and this instance.
+     */
     @NotNull
     @Override
     public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) throws InvalidMarshallableException {
@@ -368,6 +480,9 @@ public class DefaultValueIn implements ValueIn {
         return (T) defaultValue;
     }
 
+    /**
+     * Supplies a {@code null} type prefix.
+     */
     @NotNull
     @Override
     public <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts) {
@@ -375,6 +490,9 @@ public class DefaultValueIn implements ValueIn {
         return this;
     }
 
+    /**
+     * Supplies a {@code null} type prefix to {@code ts} and returns the wire.
+     */
     @NotNull
     @Override
     public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> ts) throws IORuntimeException, BufferUnderflowException {
@@ -382,22 +500,34 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Delegates to the parent wire.
+     */
     @Override
     public ClassLookup classLookup() {
         return wireIn.classLookup();
     }
 
+    /**
+     * Returns {@link #defaultValue} unchanged.
+     */
     @Nullable
     @Override
     public Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
         return defaultValue;
     }
 
+    /**
+     * Returns {@code true} if {@link #defaultValue} is {@code Boolean.TRUE}.
+     */
     @Override
     public boolean bool() throws IORuntimeException {
         return defaultValue == Boolean.TRUE;
     }
 
+    /**
+     * Returns the byte value of {@link #defaultValue}.
+     */
     @Override
     public byte int8() {
         @Nullable Number o = (Number) defaultValue;
@@ -405,6 +535,9 @@ public class DefaultValueIn implements ValueIn {
         return o.byteValue();
     }
 
+    /**
+     * Returns the short value of {@link #defaultValue}.
+     */
     @Override
     public short int16() {
         @NotNull Number o = (Number) defaultValue;
@@ -412,6 +545,9 @@ public class DefaultValueIn implements ValueIn {
         return o.shortValue();
     }
 
+    /**
+     * Returns the unsigned short value of {@link #defaultValue}.
+     */
     @Override
     public int uint16() {
         @Nullable Number o = (Number) defaultValue;
@@ -419,6 +555,9 @@ public class DefaultValueIn implements ValueIn {
         return o.intValue();
     }
 
+    /**
+     * Returns the int value of {@link #defaultValue}.
+     */
     @Override
     public int int32() {
         @NotNull Number o = (Number) defaultValue;
@@ -426,6 +565,9 @@ public class DefaultValueIn implements ValueIn {
         return o.intValue();
     }
 
+    /**
+     * Returns the long value of {@link #defaultValue}.
+     */
     @Override
     public long int64() {
         @NotNull Number o = (Number) defaultValue;
@@ -433,6 +575,9 @@ public class DefaultValueIn implements ValueIn {
         return o.longValue();
     }
 
+    /**
+     * Returns the double value of {@link #defaultValue}.
+     */
     @Override
     public double float64() {
         @NotNull Number o = (Number) defaultValue;
@@ -440,6 +585,9 @@ public class DefaultValueIn implements ValueIn {
         return o.doubleValue();
     }
 
+    /**
+     * Returns the float value of {@link #defaultValue}.
+     */
     @Override
     public float float32() {
         @NotNull Number o = (Number) defaultValue;
@@ -447,37 +595,58 @@ public class DefaultValueIn implements ValueIn {
         return o.floatValue();
     }
 
+    /**
+     * Returns {@link #defaultValue} as a type literal.
+     */
     @Override
     public Type typeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
         return (Type) defaultValue;
     }
 
+    /**
+     * Always {@link BracketType#NONE} as no value is read.
+     */
     @NotNull
     @Override
     public BracketType getBracketType() {
         return BracketType.NONE;
     }
 
+    /**
+     * Returns {@code true} when {@link #defaultValue} is {@code null}.
+     */
     @Override
     public boolean isNull() {
         return defaultValue == null;
     }
 
+    /**
+     * Returns {@link #defaultValue}.
+     */
     @Override
     public Object objectWithInferredType(Object using, SerializationStrategy strategy, Class<?> type) {
         return defaultValue;
     }
 
+    /**
+     * Always {@code false}; nothing was found on the wire.
+     */
     @Override
     public boolean isPresent() {
         return false;
     }
 
+    /**
+     * Always {@code false}.
+     */
     @Override
     public boolean isTyped() {
         return false;
     }
 
+    /**
+     * Returns the class of {@link #defaultValue} or {@code void.class}.
+     */
     @Override
     public Class<?> typePrefix() {
         @Nullable Object o = defaultValue;
@@ -485,6 +654,9 @@ public class DefaultValueIn implements ValueIn {
         return o.getClass();
     }
 
+    /**
+     * Nothing to reset.
+     */
     @Override
     public void resetState() {
         // Do nothing
