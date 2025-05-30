@@ -26,9 +26,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Supplier;
 
 /**
- * Represents a wire type that can be either {@code TextWire} or {@code BinaryWire}.
- * The specific wire type is determined dynamically based on the provided bytes.
- * This class provides flexibility in reading from wires that could be in either format.
+ * A {@link Wire} that inspects the supplied bytes to decide whether they
+ * represent text or binary wire format.  The underlying type is discovered only
+ * on first access.  This class is primarily intended for reading from an
+ * unknown source, although once the type is known it will delegate any write
+ * operations to the resolved wire.
  */
 public class ReadAnyWire extends AbstractAnyWire implements Wire {
 
@@ -42,6 +44,14 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
         super(bytes, new ReadAnyWireAcquisition(bytes));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>
+     * Returns {@code false} until the initial bytes are inspected and the
+     * underlying wire type is known.
+     * </p>
+     */
     @Override
     public boolean isBinary() {
         return false; // as we don't know
@@ -87,9 +97,9 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
     }
 
     /**
-     * Represents a mechanism to acquire the correct wire type based on provided bytes.
-     * This class is responsible for dynamically determining whether the bytes
-     * correspond to a {@code TextWire} or a {@code BinaryWire}.
+     * Implements the {@link WireAcquisition} strategy for {@link ReadAnyWire}.
+     * It peeks at the initial bytes of the stream to decide whether the data is
+     * text, binary or fieldless binary format.
      */
     static class ReadAnyWireAcquisition implements WireAcquisition {
         private final Bytes<?> bytes;
@@ -125,6 +135,16 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
             return () -> wireType;
         }
 
+        /**
+         * Lazily determines and returns the resolved wire.
+         * <p>
+         * If the wire type has not been resolved, this method peeks at the
+         * first eight bytes.  When all of those bytes have the top bit clear it
+         * assumes {@link WireType#TEXT}.  If the first byte indicates a
+         * {@link BinaryWireCode#FIELD_NUMBER} it uses
+         * {@link WireType#FIELDLESS_BINARY}; otherwise {@link WireType#BINARY}
+         * is chosen.  The resulting wire is cached for future calls.
+         */
         @Override
         @Nullable
         public Wire acquireWire() {
@@ -153,6 +173,9 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
             return null;
         }
 
+        /**
+         * Returns the {@link Bytes} instance being inspected.
+         */
         public Bytes<?> bytes() {
             return bytes;
         }
