@@ -41,39 +41,59 @@ import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.wire.Wires.*;
 
 /**
- * Represents the AbstractWire class which serves as a base for all Wire implementations.
- * This class provides fundamental shared behaviors, configurations, and initializations for Wire types.
+ * Base implementation used by most {@link Wire} variants.
+ * Maintains shared state such as {@link ClassLookup}, {@link Pauser}, padding
+ * and header tracking.
  */
 public abstract class AbstractWire implements Wire, InternalWire {
 
-    // Default padding configuration loaded from the system properties.
+    /**
+     * Default padding configuration from the system property {@code wire.usePadding}.
+     * Padding can be used for data alignment.
+     */
     public static final boolean DEFAULT_USE_PADDING = Jvm.getBoolean("wire.usePadding", false);
 
-    // Message used when a header is detected inside another header.
+    /**
+     * Error message produced when a header is found within another header.
+     */
     private static final String INSIDE_HEADER_MESSAGE = "you cant put a header inside a header, check that " +
             "you have not nested the documents. If you are using Chronicle-Queue please " +
             "ensure that you have a unique instance of the Appender per thread, in " +
             "other-words you can not share appenders across threads.";
 
     static {
+        // early registration of common class aliases used by all wires
         WireInternal.addAliases();
     }
 
-    // The underlying bytes representation used by the Wire.
+    /** underlying bytes store used for all read/write operations */
     @NotNull
     protected final Bytes<?> bytes;
+    /** true if 8-bit encoding is permitted */
     protected final boolean use8bit;
+    /** lookup of class aliases, defaults to {@link ClassAliasPool#CLASS_ALIASES} */
     protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
+    /** optional parent of this wire */
     protected Object parent;
+    /** listener for any comments encountered */
     protected Consumer<CharSequence> commentListener = IgnoringConsumer.IGNORING_CONSUMER;
+    /** pauser returned from {@link #pauser()} */
     private Pauser pauser;
+    /** lazily created timed pauser used for read timeouts */
     private TimingPauser timedParser;
+    /** last header number written or read */
     private long headerNumber = Long.MIN_VALUE;
+    /** treat NOT_COMPLETE as not present when reading */
     private boolean notCompleteIsNotPresent;
+    /** lazy ObjectOutput used by marshalling */
     private ObjectOutput objectOutput;
+    /** lazy ObjectInput used by unmarshalling */
     private ObjectInput objectInput;
+    /** set when between enterHeader and updateHeader */
     private boolean insideHeader;
+    /** optional checker for header sequence consistency */
     private HeadNumberChecker headNumberChecker;
+    /** whether to pad messages for alignment */
     private boolean usePadding = DEFAULT_USE_PADDING;
 
     /**
@@ -102,9 +122,9 @@ public abstract class AbstractWire implements Wire, InternalWire {
     }
 
     /**
-     * Acquires or initializes a timed parser.
+     * Lazily initialises the {@link TimingPauser} used for timeout handling.
      *
-     * @return The current instance of TimingPauser.
+     * @return current {@link TimingPauser} instance
      */
     @NotNull
     private TimingPauser acquireTimedParser() {
@@ -114,9 +134,11 @@ public abstract class AbstractWire implements Wire, InternalWire {
     }
 
     /**
-     * Checks if the current Wire is inside a header.
+     * Indicates whether a header has been started but not yet updated.
+     * The flag is set in {@link #enterHeader(long)} and cleared in
+     * {@link #updateHeader(long, boolean, int)}.
      *
-     * @return True if inside a header, false otherwise.
+     * @return {@code true} if within a header
      */
     public boolean isInsideHeader() {
         return this.insideHeader;
@@ -143,11 +165,11 @@ public abstract class AbstractWire implements Wire, InternalWire {
     }
 
     /**
-     * Internal method to set the header number at a specific position.
+     * Sets the current header number, validating via {@link #checkHeader(long, long)}.
      *
-     * @param position      The position in the bytes representation.
-     * @param headerNumber  The header number to set.
-     * @return The current Wire instance.
+     * @param position     byte position used for validation
+     * @param headerNumber value to store
+     * @return this wire instance
      */
     @NotNull
     private Wire headerNumber(long position, long headerNumber) {
@@ -156,11 +178,11 @@ public abstract class AbstractWire implements Wire, InternalWire {
     }
 
     /**
-     * Checks if the header at the given position and header number is valid.
+     * Uses {@link HeadNumberChecker} to validate a header if one has been set.
      *
-     * @param position      The position in the bytes representation.
-     * @param headerNumber  The header number to check.
-     * @return True if the header is valid, false otherwise.
+     * @param position     position of the header
+     * @param headerNumber expected header number
+     * @return {@code true} if the checker allows the header
      */
     private boolean checkHeader(long position, long headerNumber) {
         return headNumberChecker == null
@@ -174,10 +196,10 @@ public abstract class AbstractWire implements Wire, InternalWire {
     }
 
     /**
-     * Internal method to directly set the header number.
+     * Stores the given header number without performing any validation.
      *
-     * @param headerNumber The header number to set.
-     * @return The current Wire instance.
+     * @param headerNumber number to store
+     * @return this wire instance
      */
     @NotNull
     private Wire headerNumber0(long headerNumber) {
@@ -186,9 +208,9 @@ public abstract class AbstractWire implements Wire, InternalWire {
     }
 
     /**
-     * Sets the HeadNumberChecker instance for this Wire.
+     * Assigns a {@link HeadNumberChecker} used to validate header sequences.
      *
-     * @param headNumberChecker The HeadNumberChecker instance to set.
+     * @param headNumberChecker strategy invoked by {@link #checkHeader(long, long)}
      */
     public void headNumberCheck(HeadNumberChecker headNumberChecker) {
         this.headNumberChecker = headNumberChecker;
@@ -225,6 +247,10 @@ public abstract class AbstractWire implements Wire, InternalWire {
         this.commentListener = commentListener;
     }
 
+    /**
+     * Peeks the next header and returns its type. If {@code includeMetaData}
+     * is false, meta-data messages are skipped.
+     */
     @NotNull
     @Override
     public HeaderType readDataHeader(boolean includeMetaData) {
@@ -254,11 +280,18 @@ public abstract class AbstractWire implements Wire, InternalWire {
         }
     }
 
+    /**
+     * Positions the underlying bytes so that the next read starts at a header
+     * boundary, applying padding rules if required.
+     */
     private void alignForRead(Bytes<?> bytes) {
-        // move the read position
         bytes.readPositionForHeader(usePadding);
     }
 
+    /**
+     * Reads the header at {@code position} and sets the read limit to the end
+     * of that message.
+     */
     @Override
     public void readAndSetLength(long position) {
         alignForRead(bytes);
@@ -273,6 +306,9 @@ public abstract class AbstractWire implements Wire, InternalWire {
         throwISE();
     }
 
+    /**
+     * Helper to throw an {@link IllegalStateException} when a header is not ready.
+     */
     private void throwISE() {
         throw new IllegalStateException();
     }
@@ -292,11 +328,18 @@ public abstract class AbstractWire implements Wire, InternalWire {
         throw new IllegalStateException("Meta data not ready " + Integer.toHexString(header));
     }
 
+    /**
+     * Adjusts the read limit to the end of the current message and skips the header bytes.
+     */
     private void setLimitPosition(int header) {
         bytes.readLimit(bytes.readPosition() + lengthOf(header) + SPB_HEADER_SIZE)
                 .readSkip(SPB_HEADER_SIZE);
     }
 
+    /**
+     * Reads the first header of a data stream. The call expects the header to be
+     * ready and throws {@link StreamCorruptedException} if not.
+     */
     @Override
     public void readFirstHeader() throws StreamCorruptedException {
         int header;
@@ -313,6 +356,10 @@ public abstract class AbstractWire implements Wire, InternalWire {
         }
     }
 
+    /**
+     * Version of {@link #readFirstHeader()} that waits up to the given timeout
+     * for the first header to become ready.
+     */
     @Override
     public void readFirstHeader(long timeout, TimeUnit timeUnit) throws TimeoutException, StreamCorruptedException {
         int header;
@@ -340,6 +387,11 @@ public abstract class AbstractWire implements Wire, InternalWire {
         bytes.readPositionRemaining(SPB_HEADER_SIZE, len);
     }
 
+    /**
+     * Reserves space for a new message header and returns its position. The
+     * header is marked {@code NOT_INITIALIZED} and {@link #isInsideHeader()} is
+     * set to true.
+     */
     @Override
     public long enterHeader(long safeLength) {
         if (safeLength > bytes.writeRemaining()) {
@@ -377,6 +429,10 @@ public abstract class AbstractWire implements Wire, InternalWire {
         return pos;
     }
 
+    /**
+     * Writes the final header length at {@code position} and clears the inside-header state.
+     * Uses CAS against {@code expectedHeader} to detect concurrent modification.
+     */
     @Override
     public void updateHeader(final long position, final boolean metaData, int expectedHeader) throws StreamCorruptedException {
         if (position <= 0)
@@ -488,6 +544,9 @@ public abstract class AbstractWire implements Wire, InternalWire {
             headerNumber(pos, headerNumber + 1);
     }
 
+    /**
+     * CAS based initial write of the stream header.
+     */
     @Override
     public boolean writeFirstHeader() {
         boolean cas = bytes.compareAndSwapInt(0L, 0, NOT_COMPLETE_UNKNOWN_LENGTH);
@@ -496,6 +555,9 @@ public abstract class AbstractWire implements Wire, InternalWire {
         return cas;
     }
 
+    /**
+     * Writes the length of the first header using the current write position.
+     */
     @Override
     public void updateFirstHeader() {
         // header should use wire format so can add padding for cache alignment
@@ -504,6 +566,9 @@ public abstract class AbstractWire implements Wire, InternalWire {
         updateFirstHeader(pos);
     }
 
+    /**
+     * Updates the first header with a specific end position.
+     */
     @Override
     public void updateFirstHeader(long headerEndPos) {
         long actualLength = headerEndPos - SPB_HEADER_SIZE;
@@ -514,11 +579,17 @@ public abstract class AbstractWire implements Wire, InternalWire {
             throw new IllegalStateException("Data at 0 overwritten? Expected: " + Integer.toHexString(NOT_COMPLETE_UNKNOWN_LENGTH) + " was " + Integer.toHexString(bytes.readVolatileInt(0L)));
     }
 
+    /**
+     * Writes an END_OF_DATA marker at the end of the wire if possible.
+     */
     @Override
     public boolean writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition) {
         return endOfWire(true, timeout, timeUnit, lastPosition) == EndOfWire.PRESENT_AFTER_UPDATE;
     }
 
+    /**
+     * Detects whether the wire has reached the END_OF_DATA marker, optionally writing one.
+     */
     @Override
     public EndOfWire endOfWire(boolean writeEOF, long timeout, TimeUnit timeUnit, long lastPosition) {
 
@@ -618,6 +689,9 @@ public abstract class AbstractWire implements Wire, InternalWire {
         this.notCompleteIsNotPresent = notCompleteIsNotPresent;
     }
 
+    /**
+     * Lazily creates and returns a standard {@link ObjectOutput} wrapper.
+     */
     @Override
     public ObjectOutput objectOutput() {
         if (objectOutput == null)
@@ -625,6 +699,9 @@ public abstract class AbstractWire implements Wire, InternalWire {
         return objectOutput;
     }
 
+    /**
+     * Lazily creates and returns a standard {@link ObjectInput} wrapper.
+     */
     @Override
     public ObjectInput objectInput() {
         if (objectInput == null)
@@ -632,13 +709,17 @@ public abstract class AbstractWire implements Wire, InternalWire {
         return objectInput;
     }
 
+    /**
+     * Default implementation returns {@link Long#MIN_VALUE}. Binary wires may override.
+     */
     @Override
     public long readEventNumber() {
         return Long.MIN_VALUE;
     }
 
     /**
-     * used by write bytes when doing a rollback
+     * Clears the inside-header flag without writing a header. Used during
+     * rollbacks or error recovery.
      */
     @Override
     public void forceNotInsideHeader() {
@@ -651,9 +732,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
     }
 
     /**
-     * Gets the current state of the usePadding property.
-     *
-     * @return True if padding is used, false otherwise.
+     * Returns whether message padding is currently enabled.
      */
     public boolean usePadding() {
         return usePadding;
