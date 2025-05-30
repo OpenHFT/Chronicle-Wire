@@ -157,7 +157,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * @param filename The name or path of the file to read.
      * @return A stream of marshallable objects of type {@code T}.
      */
-    @Nullable
+    @NotNull
     static <T> Stream<T> streamFromFile(@NotNull Class<T> expectedType, String filename) throws IOException {
         return TEXT.streamFromFile(expectedType, filename);
     }
