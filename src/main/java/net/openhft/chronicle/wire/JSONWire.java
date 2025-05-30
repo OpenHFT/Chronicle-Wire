@@ -143,13 +143,8 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * Determines if a given class is a wrapper type in Java.
-     * <p>
-     * This is useful for handling certain JSON conversion scenarios where
-     * native types have wrapper counterparts, such as int and Integer.
-     *
-     * @param type The class to be checked.
-     * @return {@code true} if the class is a Java wrapper type, otherwise {@code false}.
+     * Internal utility to check if the given {@code Class} is a Java primitive
+     * wrapper type, for example {@link Integer} or {@link Boolean}.
      */
     static boolean isWrapper(Class<?> type) {
         return type == Integer.class || type == Long.class || type == Float.class ||
@@ -157,16 +152,19 @@ public class JSONWire extends TextWire {
                 type == Byte.class || type == Boolean.class || type == Void.class;
     }
 
+    /**
+     * Returns {@code String.class} as JSON object keys are always strings.
+     */
     @Override
     protected Class<?> defaultKeyClass() {
         return String.class;
     }
 
     /**
-     * Enables or disables type information in the JSON output and input.
+     * Configures whether this wire should emit and expect explicit type information.
+     * Returns this instance for chaining.
      *
-     * @param outputTypes true to include type hints
-     * @return this instance for chaining
+     * @param outputTypes true to include '{@literal @}type' metadata
      */
     public JSONWire useTypes(boolean outputTypes) {
         this.useTypes = outputTypes;
@@ -174,12 +172,15 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * Returns whether type hints are emitted and parsed.
+     * Returns {@code true} if this wire expects explicit type hints.
      */
     public boolean useTypes() {
         return useTypes;
     }
 
+    /**
+     * Configures document contexts for text-based JSON streams.
+     */
     @Override
     public @NotNull TextWire useTextDocuments() {
         readContext = new JSONReadDocumentContext(this);
@@ -189,12 +190,18 @@ public class JSONWire extends TextWire {
         return this;
     }
 
+    /**
+     * Factory for the {@link JSONValueOut} used by this wire.
+     */
     @NotNull
     @Override
     protected JSONValueOut createValueOut() {
         return new JSONValueOut();
     }
 
+    /**
+     * Factory for the JSON-specific {@link TextValueIn} implementation.
+     */
     @NotNull
     @Override
     protected TextValueIn createValueIn() {
@@ -225,6 +232,10 @@ public class JSONWire extends TextWire {
         };
     }
 
+    /**
+     * Copies the remaining JSON from this wire into {@code wire}, trimming outer
+     * braces when required.
+     */
     @Override
     public void copyTo(@NotNull WireOut wire) throws InvalidMarshallableException {
         if (wire.getClass() == getClass()) {
@@ -243,6 +254,9 @@ public class JSONWire extends TextWire {
         }
     }
 
+    /**
+     * Removes the outermost curly braces from the buffer when present.
+     */
     private void trimCurlyBrackets() {
         // If the next byte is a closing curly bracket
         if (peekNextByte() == '}') {
@@ -265,9 +279,7 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * Peeks the previous byte from the current read position without moving the read pointer.
-     *
-     * @return The byte value just before the current read position.
+     * Peeks at the byte immediately before the current read limit.
      */
     private int peekPreviousByte() {
         // Return the byte just before the current read limit
@@ -275,14 +287,11 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * Copies one segment of data from this wire to the given wire output.
-     * The segment copied depends on the first character encountered (e.g., '{' indicates a map).
-     * This method understands JSON structural elements and translates them appropriately.
+     * Recursively copies one JSON element from this wire to {@code wire}.
      *
-     * @param wire The wire output to copy the data to.
-     * @param expectKeyValues Flag indicating if the current position is inside a map structure.
-     * @param topLevel Flag indicating if this is the topmost level of the copy operation.
-     * @throws InvalidMarshallableException if there's a problem with copying the data.
+     * @param wire            destination wire
+     * @param expectKeyValues true if a key is expected next
+     * @param topLevel        true if copying the outer element
      */
     public void copyOne(@NotNull WireOut wire, boolean expectKeyValues, boolean topLevel) throws InvalidMarshallableException {
         consumePadding();
@@ -370,6 +379,10 @@ public class JSONWire extends TextWire {
         throw new IORuntimeException("Unexpected chars '" + bytes.parse8bit(StopCharTesters.CONTROL_STOP) + "'");
     }
 
+    /**
+     * Compares the remaining characters in {@code in} with {@code s}, consuming
+     * them if they match and ensuring the next char is not alphanumeric.
+     */
     static boolean compareRest(@NotNull StreamingDataInput<?> in, @NotNull Bytes<?> s)
             throws BufferUnderflowException, ClosedIllegalStateException {
         if (s.length() > in.readRemaining())
@@ -395,12 +408,8 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * Copies a type prefix from the input to the given wire output.
-     * The type prefix is assumed to be a text value prefixed with '@'. This method will extract
-     * the type prefix and pass it on to the wire output.
-     *
-     * @param wire The wire output to copy the type prefix to.
-     * @throws InvalidMarshallableException if there's a problem with copying the data.
+     * Helper for {@link #copyOne} that reads a JSON '@type' prefix and writes it
+     * using {@link ValueOut#typePrefix(CharSequence)} on {@code wire}.
      */
     private void copyTypePrefix(WireOut wire) throws InvalidMarshallableException {
         final StringBuilder sb = acquireStringBuilder();
@@ -428,10 +437,7 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * Determines if the current position in the byte buffer represents a type prefix.
-     * A type prefix is recognized by a leading '"' character followed by '@'.
-     *
-     * @return True if the current position indicates a type prefix, false otherwise.
+     * Checks if the next bytes form a JSON '@type' prefix.
      */
     private boolean isTypePrefix() {
         final long rp = bytes.readPosition();
@@ -440,14 +446,12 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * Copies a quoted string value from the input to the given wire output.
-     * This method handles escaped characters within the quoted string.
+     * Copies a JSON string value, unescaping it before writing to {@code wire}.
      *
-     * @param wire The wire output to copy the quoted string to.
-     * @param ch The starting quote character (either single or double quote).
-     * @param inMap Flag indicating if the current position is inside a map structure.
-     * @param topLevel Flag indicating if this is the topmost level of the copy operation.
-     * @throws InvalidMarshallableException if there's a problem with copying the data.
+     * @param wire     destination wire
+     * @param ch       opening quote character
+     * @param inMap    true if reading a map key
+     * @param topLevel true if copying the outer element
      */
     private void copyQuote(WireOut wire, int ch, boolean inMap, boolean topLevel) throws InvalidMarshallableException {
         final StringBuilder sb = acquireStringBuilder();
@@ -477,11 +481,8 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * Copies a map structure from the input to the given wire output.
-     * A map is assumed to be a set of key-value pairs enclosed in curly braces '{}'.
-     *
-     * @param wire The wire output to copy the map structure to.
-     * @throws InvalidMarshallableException if there's a problem with copying the data.
+     * Internal helper for {@link #copyOne} that copies a JSON object ({@code {...}})
+     * to {@code wire} by recursively invoking {@link #copyOne} for each entry.
      */
     private void copyMap(WireOut wire) throws InvalidMarshallableException {
         wire.getValueOut().marshallable(out -> {
