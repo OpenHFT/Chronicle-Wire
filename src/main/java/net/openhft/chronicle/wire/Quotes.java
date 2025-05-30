@@ -43,9 +43,9 @@ enum Quotes {
     /**
      * Constructs a new instance of {@code Quotes} with the provided character representation.
      *
-     * @param q The character representation of the quotation mark.
+     * @param quoteCharacter The character representation of the quotation mark.
      */
-    Quotes(char q) {
-        this.q = q;
+    Quotes(char quoteCharacter) {
+        this.q = quoteCharacter;
     }
 }

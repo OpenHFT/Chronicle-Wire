@@ -45,8 +45,8 @@ enum TextStopCharTesters implements StopCharTester {
         private final int eowLength = eow.length();
 
         @Override
-        public boolean isStopChar(int ch) {
-            return ch >= eowLength || eow.get(ch);
+        public boolean isStopChar(int characterCode) {
+            return characterCode >= eowLength || eow.get(characterCode);
         }
     },
     /**
@@ -55,8 +55,8 @@ enum TextStopCharTesters implements StopCharTester {
      */
     END_OF_TEXT {
         @Override
-        public boolean isStopChar(int ch) throws IllegalStateException {
-            switch (ch) {
+        public boolean isStopChar(int characterCode) throws IllegalStateException {
+            switch (characterCode) {
                 // one character stop.
                 case '"':
                 case '#':
