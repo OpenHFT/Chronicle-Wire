@@ -888,12 +888,19 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Reads the value associated with a given key name, code, and provides a default value.
+     * Core implementation used by the various {@code read} overloads. The
+     * method first checks any previously parsed fields stored in the current
+     * {@link ValueInState}. New fields are then read from the wire until a match
+     * for {@code keyName} is found. If the name matches (case-insensitive) the
+     * associated value becomes available via the returned {@link ValueIn}.
+     * Fields that do not match are remembered in the state so that a later read
+     * with a different key may pick them up. If no match is found a
+     * {@link DefaultValueIn} initialised with {@code defaultValue} is returned.
      *
-     * @param keyName The name of the key.
-     * @param keyCode The code for the key.
-     * @param defaultValue The default value to return if the key isn't found.
-     * @return The value associated with the given key or the default value if not found.
+     * @param keyName      the name of the field to search for
+     * @param keyCode      identifier used when marshalling numbers
+     * @param defaultValue default value to supply when the field is absent
+     * @return a {@link ValueIn} positioned on the matched value or a default one
      */
     private ValueIn read(@NotNull CharSequence keyName, int keyCode, Object defaultValue) {
         consumePadding();
@@ -938,16 +945,20 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Attempts to read the value of a given key, continuing the read operation from the primary `read` method.
-     * If the current and old fields do not match the specified key, the default value is returned.
+     * Continuation of the named-field lookup used by {@link #read(WireKey)}. It
+     * scans any positions remembered as out-of-order by {@code curr}. When a
+     * remembered field matches {@code keyName} its value is returned and the
+     * remembered position removed. If none of the stored positions match the
+     * search key a {@link DefaultValueIn} containing {@code defaultValue} is
+     * returned.
      *
-     * @param keyName       The name of the key for which the value needs to be read.
-     * @param keyCode       The code for the key.
-     * @param defaultValue  The default value to return if the key isn't found.
-     * @param curr          The current state of the ValueIn.
-     * @param sb            The StringBuilder used to capture the field name.
-     * @param name          The name of the key (same as keyName, possibly added for clarity in some cases).
-     * @return              The value associated with the key or the default value if the key is not found.
+     * @param keyName      field name being searched for
+     * @param keyCode      identifier used when marshalling numbers
+     * @param defaultValue default value to supply when the field is absent
+     * @param curr         state tracking previously read fields
+     * @param sb           scratch buffer used for name comparison
+     * @param name         same as {@code keyName}; retained for compatibility
+     * @return a {@link ValueIn} positioned on the matched value or a default one
      */
     protected ValueIn read2(CharSequence keyName, int keyCode, Object defaultValue, @NotNull ValueInState curr, @NotNull StringBuilder sb, @NotNull CharSequence name) {
         final long position2 = bytes.readPosition();
@@ -1050,21 +1061,21 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Parses a word from the current byte position until it encounters a space or stop character.
-     * The parsed word is then appended to the provided StringBuilder.
+     * Parses a single word from the wire and appends it to {@code sb}. A word is
+     * delimited by whitespace.
      *
-     * @param sb The StringBuilder to which the parsed word will be appended.
+     * @param sb destination for the parsed characters
      */
     public void parseWord(@NotNull StringBuilder sb) {
         parseUntil(sb, StopCharTesters.SPACE_STOP);
     }
 
     /**
-     * Parses characters from the current byte position until one of the specified stop characters
-     * in the tester is encountered. The parsed characters are then appended to the provided StringBuilder.
+     * Parses text from the wire into {@code sb} until {@code testers} signals a
+     * stop.
      *
-     * @param sb       The StringBuilder to which the parsed characters will be appended.
-     * @param testers  A StopCharTester which determines which characters should stop the parsing.
+     * @param sb      destination for the parsed characters
+     * @param testers stop condition
      */
     public void parseUntil(@NotNull StringBuilder sb, @NotNull StopCharTester testers) {
         if (use8bit)
@@ -1074,12 +1085,10 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Clears the StringBuilder and then parses characters from the current byte position
-     * until one of the specified stop characters in the tester is encountered.
-     * The parsed characters are then appended to the provided StringBuilder.
+     * Clears {@code sb} and parses text until {@code testers} requests a stop.
      *
-     * @param sb       The StringBuilder to which the parsed characters will be appended.
-     * @param testers  A StopCharsTester which determines which characters should stop the parsing.
+     * @param sb      destination builder that will be cleared before use
+     * @param testers stop condition operating on multiple characters
      */
     public void parseUntil(@NotNull StringBuilder sb, @NotNull StopCharsTester testers) {
         sb.setLength(0);
@@ -1091,11 +1100,12 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Reads and returns an object from the current position in the bytes stream.
-     * Any padding and document start metadata are consumed before attempting to read the object.
+     * Attempts to parse the next YAML structure from the wire. Document start
+     * markers and indentation are consumed before delegating to
+     * {@link #getValueIn()}.
      *
-     * @return An instance of the read object, or null if the end of the stream is reached.
-     * @throws InvalidMarshallableException If the object could not be properly unmarshalled.
+     * @return the parsed object or {@code null} if at end of data
+     * @throws InvalidMarshallableException if the structure cannot be read
      */
     @Nullable
     public Object readObject() throws InvalidMarshallableException {
@@ -1105,14 +1115,14 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Attempts to read an object from the current position in the bytes stream based on its
-     * detected type (e.g., list, map, typed object). The type of the object is inferred from
-     * the current and next code. The method also considers the given indentation for nested structures.
+     * Variant of {@link #readObject()} that expects nested structures indented
+     * at the supplied level. The method inspects the next character to decide
+     * whether a list, map, typed object or scalar should be parsed.
      *
-     * @param indentation The current indentation level to handle nested objects.
-     * @return An instance of the read object, `NoObject.NO_OBJECT` if the object denotes
-     *         an end of block or structure, or null if the end of the stream is reached.
-     * @throws InvalidMarshallableException If the object could not be properly unmarshalled.
+     * @param indentation indentation level of the current block
+     * @return the parsed object, {@link NoObject#NO_OBJECT} when a closing token
+     *         is encountered, or {@code null} at end of data
+     * @throws InvalidMarshallableException if the structure cannot be read
      */
     @Nullable
     Object readObject(int indentation) throws InvalidMarshallableException {
@@ -1155,11 +1165,11 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Reads a typed object from the current position in the bytes stream. The type
-     * of the object is determined by the bytes' content.
+     * Helper for {@link #readObject(int)} that processes a {@code !type} entry.
+     * The next value is read with the explicit type from the text.
      *
-     * @return An instance of the read object.
-     * @throws InvalidMarshallableException If the object could not be properly unmarshalled.
+     * @return the typed object
+     * @throws InvalidMarshallableException if marshalling fails
      */
     @Nullable
     private Object readTypedObject() throws InvalidMarshallableException {
@@ -1167,12 +1177,11 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Attempts to read a list from the current position in the bytes stream. This method
-     * currently throws an UnsupportedOperationException, indicating that reading lists
-     * directly is not supported in this context.
+     * Parses a bracketed list such as {@code [a, b]}. The text wire does not yet
+     * support this syntax so the method always throws.
      *
-     * @return This method does not currently return a value due to the exception.
-     * @throws UnsupportedOperationException Always thrown since this method is not supported.
+     * @return never returns
+     * @throws UnsupportedOperationException always
      */
     @NotNull
     private List readList() {
@@ -1180,15 +1189,13 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Reads a list of objects from the current position in the bytes stream.
-     * The method consumes lines starting with '-' as list elements, and utilizes
-     * the provided indentation to understand nested structures.
+     * Reads a YAML sequence where each item is denoted by {@code -}. Parsing
+     * continues until the indentation drops below {@code indentation}.
      *
-     * @param indentation The current indentation level to handle nested list items.
-     * @param elementType The expected type of elements within the list. Used when inferring
-     *                    the type of the read object.
-     * @return A list containing objects read from the bytes stream.
-     * @throws InvalidMarshallableException If any object within the list could not be properly unmarshalled.
+     * @param indentation indentation level marking list items
+     * @param elementType expected element class or {@code null}
+     * @return list of parsed elements
+     * @throws InvalidMarshallableException if an element cannot be parsed
      */
     @NotNull
     List readList(int indentation, Class<?> elementType) throws InvalidMarshallableException {
@@ -1215,15 +1222,15 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Reads a map of key-value pairs from the current position in the bytes stream.
-     * This method utilizes the provided indentation to understand nested structures.
-     * Each key is followed by its value. If a key named "..." is encountered, the parsing breaks.
+     * Reads a YAML mapping at the supplied indentation. Keys are parsed as
+     * strings followed by values obtained via {@link ValueIn#object(Class)}.
+     * Parsing stops when the indentation decreases or the special key
+     * {@code ...} is encountered.
      *
-     * @param indentation The current indentation level to handle nested key-value pairs.
-     * @param valueType The expected type of values within the map. Used when inferring
-     *                  the type of the read object.
-     * @return A map containing key-value pairs read from the bytes stream.
-     * @throws InvalidMarshallableException If any key-value pair within the map could not be properly unmarshalled.
+     * @param indentation indentation level marking map entries
+     * @param valueType   expected value class or {@code null}
+     * @return the populated map
+     * @throws InvalidMarshallableException if a value cannot be parsed
      */
     @NotNull
     private Map readMap(int indentation, Class<?> valueType) throws InvalidMarshallableException {
@@ -1262,6 +1269,12 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     @Override
+    /**
+     * Checks whether the current wire position starts with the
+     * {@code !!meta-data} tag. If present the tag is consumed.
+     *
+     * @return {@code true} when the prefix was found and skipped
+     */
     public boolean hasMetaDataPrefix() {
         if (bytes.startsWith(META_DATA)
                 && bytes.peekUnsignedByte(bytes.readPosition() + 11) <= ' ') {
