@@ -201,8 +201,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
     @NotNull
     @Override
-    public T writeComment(@NotNull CharSequence s) {
-        valueOut.writeComment(s);
+    public T writeComment(@NotNull CharSequence commentText) {
+        valueOut.writeComment(commentText);
         return (T) this;
     }
 
@@ -219,17 +219,17 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
      * If the sequence requires quotes, it will be enclosed with the appropriate quote character;
      * otherwise, the sequence will be escaped without quotes.
      *
-     * @param s The CharSequence to be escaped.
+     * @param textToEscape The CharSequence to be escaped.
      */
-    void escape(@NotNull CharSequence s) {
-        @NotNull Quotes quotes = needsQuotes(s);
-        if (quotes == Quotes.NONE) {
-            escape0(s, quotes);
+    void escape(@NotNull CharSequence textToEscape) {
+        @NotNull Quotes quoteStyle = needsQuotes(textToEscape);
+        if (quoteStyle == Quotes.NONE) {
+            escape0(textToEscape, quoteStyle);
             return;
         }
-        bytes.writeUnsignedByte(quotes.q);
-        escape0(s, quotes);
-        bytes.writeUnsignedByte(quotes.q);
+        bytes.writeUnsignedByte(quoteStyle.q);
+        escape0(textToEscape, quoteStyle);
+        bytes.writeUnsignedByte(quoteStyle.q);
     }
 
     // https://yaml.org/spec/1.2.2/#escaped-characters
@@ -237,12 +237,12 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
      * Helper method to escape special characters in the given CharSequence {@code s} based on the requirements of the YAML format.
      * The method handles the specific escaping requirements for various control and special characters.
      *
-     * @param s The CharSequence to be escaped.
-     * @param quotes The type of quotes used to determine how certain characters are escaped.
+     * @param textToEscape The CharSequence to be escaped.
+     * @param quoteStyle The quote style used to determine how certain characters are escaped.
      */
-    protected void escape0(@NotNull CharSequence s, @NotNull Quotes quotes) {
-        for (int i = 0; i < s.length(); i++) {
-            char ch = s.charAt(i);
+    protected void escape0(@NotNull CharSequence textToEscape, @NotNull Quotes quoteStyle) {
+        for (int i = 0; i < textToEscape.length(); i++) {
+            char ch = textToEscape.charAt(i);
             switch (ch) {
                 case '\0':
                     bytes.append("\\0");  // Null character
@@ -272,16 +272,16 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                     bytes.append("\\e");  // Escape
                     break;
                 case '"':
-                    // Handling double quotes
-                    if (ch == quotes.q) {
+                    // Handling double quoteStyle
+                    if (ch == quoteStyle.q) {
                         bytes.writeUnsignedByte('\\').writeUnsignedByte(ch);
                     } else {
                         bytes.writeUnsignedByte(ch);
                     }
                     break;
                 case '\'':
-                    // Handling single quotes
-                    if (ch == quotes.q) {
+                    // Handling single quoteStyle
+                    if (ch == quoteStyle.q) {
                         bytes.writeUnsignedByte('\\').writeUnsignedByte(ch);
                     } else {
                         bytes.writeUnsignedByte(ch);
@@ -319,54 +319,54 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
      * Appends a 2-character hexadecimal representation of the given character {@code ch} to the output bytes.
      * This is used for character escaping.
      *
-     * @param ch The character to be converted to hexadecimal.
+     * @param characterToEncode The character to be converted to hexadecimal.
      */
-    private void appendX2(char ch) {
+    private void appendX2(char characterToEncode) {
         bytes.append('\\');
         bytes.append('x');
-        bytes.append(HEXADECIMAL[(ch >> 4) & 0xF]);
-        bytes.append(HEXADECIMAL[ch & 0xF]);
+        bytes.append(HEXADECIMAL[(characterToEncode >> 4) & 0xF]);
+        bytes.append(HEXADECIMAL[characterToEncode & 0xF]);
     }
 
     /**
      * Appends a 4-character hexadecimal Unicode representation of the given character {@code ch} to the output bytes.
      * This is used for character escaping.
      *
-     * @param ch The character to be converted to hexadecimal Unicode representation.
+     * @param characterToEncode The character to be converted to hexadecimal Unicode representation.
      */
-    protected void appendU4(char ch) {
+    protected void appendU4(char characterToEncode) {
         bytes.append('\\');
         bytes.append('u');
-        bytes.append(HEXADECIMAL[ch >> 12]);
-        bytes.append(HEXADECIMAL[(ch >> 8) & 0xF]);
-        bytes.append(HEXADECIMAL[(ch >> 4) & 0xF]);
-        bytes.append(HEXADECIMAL[ch & 0xF]);
+        bytes.append(HEXADECIMAL[characterToEncode >> 12]);
+        bytes.append(HEXADECIMAL[(characterToEncode >> 8) & 0xF]);
+        bytes.append(HEXADECIMAL[(characterToEncode >> 4) & 0xF]);
+        bytes.append(HEXADECIMAL[characterToEncode & 0xF]);
     }
 
     /**
-     * Determines the type of quotes (if any) required for the given CharSequence {@code s} based on the YAML format's escaping requirements.
+     * Determines the type of quotes (if any) required for the given CharSequence {@code text} based on the YAML format's escaping requirements.
      * This method decides between using no quotes, single quotes, or double quotes.
      *
-     * @param s The CharSequence to be analyzed.
+     * @param text The CharSequence to be analysed.
      * @return The type of quotes required.
      */
     @NotNull
-    protected Quotes needsQuotes(@NotNull CharSequence s) {
-        @NotNull Quotes quotes = Quotes.NONE;
+    protected Quotes needsQuotes(@NotNull CharSequence text) {
+        @NotNull Quotes quoteStyle = Quotes.NONE;
 
-        // Empty strings require double quotes.
-        if (s.length() == 0)
+        // Empty strings require double quoteStyle.
+        if (text.length() == 0)
             return Quotes.DOUBLE;
 
-        // If string starts with special characters or ends with whitespace, use double quotes.
+        // If string starts with special characters or ends with whitespace, use double quoteStyle.
         if (STARTS_QUOTE_CHARS.get(s.charAt(0)) ||
                 Character.isWhitespace(s.charAt(s.length() - 1)))
             return Quotes.DOUBLE;
         boolean hasSingleQuote = false;
-        for (int i = 0; i < s.length(); i++) {
-            char ch = s.charAt(i);
+        for (int i = 0; i < text.length(); i++) {
+            char ch = text.charAt(i);
 
-            // Characters in QUOTE_CHARS or outside ASCII range need double quotes.
+            // Characters in QUOTE_CHARS or outside ASCII range need double quoteStyle.
             if (QUOTE_CHARS.get(ch) || ch < ' ' || ch > 127)
                 return Quotes.DOUBLE;
 
@@ -374,18 +374,18 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             if (ch == '\'')
                 hasSingleQuote = true;
 
-            // If a double quote is found followed by a single quote, return double quotes.
+            // If a double quote is found followed by a single quote, return double quoteStyle.
             if (ch == '"') {
                 if (i < s.length() - 1 && s.charAt(i + 1) == '\'')
                     return Quotes.DOUBLE;
-                quotes = Quotes.SINGLE;
+                quoteStyle = Quotes.SINGLE;
             }
         }
 
-        // If only single quotes are found, no quotes are needed.
+        // If only single quoteStyle are found, no quoteStyle are needed.
         if (hasSingleQuote)
             return Quotes.NONE;
-        return quotes;
+        return quoteStyle;
     }
 
     /**
@@ -633,14 +633,14 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
          */
         @NotNull
         @Override
-        public T bool(@Nullable Boolean flag) {
+        public T bool(@Nullable Boolean value) {
             if (dropDefault) {
-                if (flag == null)
+                if (value == null)
                     return wireOut();
                 writeSavedEventName();
             }
             prependSeparator();
-            append(flag == null ? nullOut() : flag ? "true" : "false");
+            append(value == null ? nullOut() : value ? "true" : "false");
             elementSeparator();
             return wireOut();
         }
@@ -663,17 +663,17 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
          */
         @NotNull
         @Override
-        public T text(@Nullable CharSequence s) {
+        public T text(@Nullable CharSequence value) {
             if (dropDefault) {
-                if (s == null)
+                if (value == null)
                     return wireOut();
                 writeSavedEventName();
             }
             prependSeparator();
-            if (s == null) {
+            if (value == null) {
                 append(nullOut());
             } else {
-                escape(s);
+                escape(value);
             }
             elementSeparator();
             return wireOut();
@@ -687,18 +687,18 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
          */
         @NotNull
         @Override
-        public T bytes(@Nullable BytesStore<?, ?> fromBytes) {
+        public T bytes(@Nullable BytesStore<?, ?> value) {
             if (dropDefault) {
-                if (fromBytes == null)
+                if (value == null)
                     return wireOut();
                 writeSavedEventName();
             }
-            if (isText(fromBytes))
-                return (T) text(fromBytes);
+            if (isText(value))
+                return (T) text(value);
 
-            int length = Maths.toInt32(fromBytes.readRemaining());
+            int length = Maths.toInt32(value.readRemaining());
             @NotNull byte[] byteArray = new byte[length];
-            fromBytes.copyTo(byteArray);
+            value.copyTo(byteArray);
 
             return bytes(byteArray);
         }
@@ -935,20 +935,20 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
          * The method appends the timestamp as a comment in YAML, depending on the range and precision
          * of the given timestamp value. The timestamp could be in milliseconds or with nanosecond precision.
          *
-         * @param i64 The timestamp value to be appended.
+         * @param epochNanosOrMillis The timestamp value to be appended.
          */
-        public void addTimeStamp(long i64) {
+        public void addTimeStamp(long epochNanosOrMillis) {
             // Check if the timestamp is in a millisecond precision range (e.g., between 1e12 and 4.111e12)
-            if ((long) 1e12 < i64 && i64 < (long) 4.111e12) {
+            if ((long) 1e12 < epochNanosOrMillis && epochNanosOrMillis < (long) 4.111e12) {
                 // Append the date and time in milliseconds as a comment in the output
                 bytes.append(", # ");
-                bytes.appendDateMillis(i64);
+                bytes.appendDateMillis(epochNanosOrMillis);
                 bytes.append("T");
-                bytes.appendTimeMillis(i64);
+                bytes.appendTimeMillis(epochNanosOrMillis);
                 sep = NEW_LINE;
-            } else if ((long) 1e18 < i64 && i64 < (long) 4.111e18) {
-                long millis = i64 / 1_000_000;
-                long nanos = i64 % 1_000_000;
+            } else if ((long) 1e18 < epochNanosOrMillis && epochNanosOrMillis < (long) 4.111e18) {
+                long millis = epochNanosOrMillis / 1_000_000;
+                long nanos = epochNanosOrMillis % 1_000_000;
                 bytes.append(", # ");
                 bytes.appendDateMillis(millis);
                 bytes.append("T");
@@ -1067,16 +1067,16 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
          * Writes a special double value, e.g. NaN, to bytes in the context of Yaml Wire. For now this
          * remains as an unquoted string representation.
          */
-        protected void writeSpecialDoubleValueToBytes(Bytes<?> bytes, double value) {
-            bytes.append(Double.toString(value));
+        protected void writeSpecialDoubleValueToBytes(Bytes<?> outputBytes, double value) {
+            outputBytes.append(Double.toString(value));
         }
 
         /**
          * Writes a special double value, e.g. NaN, to bytes in the context of Yaml Wire. For now this
          * remains as an unquoted string representation.
          */
-        protected void writeSpecialFloatValueToBytes(Bytes<?> bytes, float value) {
-            bytes.append(Float.toString(value));
+        protected void writeSpecialFloatValueToBytes(Bytes<?> outputBytes, float value) {
+            outputBytes.append(Float.toString(value));
         }
 
         @NotNull
@@ -1116,33 +1116,33 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
          * It handles null values and applies necessary formatting based on the needsQuotes method.
          * If the value is set to drop by default, the saved event name is written.
          *
-         * @param stringable The object to convert to a string and process.
+         * @param valueToConvert The object to convert to a string and process.
          * @return An instance of T, typically representing the current wire output state.
          */
         @NotNull
-        private T asText(@Nullable Object stringable) {
+        private T asText(@Nullable Object valueToConvert) {
             // Check if defaults should be dropped and handle accordingly
             if (dropDefault) {
-                if (stringable == null)
+                if (valueToConvert == null)
                     return wireOut();
                 writeSavedEventName();
             }
 
-            // Handle null stringable objects
-            if (stringable == null) {
+            // Handle null valueToConvert objects
+            if (valueToConvert == null) {
                 nu11();
             } else {
                 // Add necessary separators
                 prependSeparator();
 
                 // Convert the object to its string representation
-                final String s = stringable.toString();
+                final String s = valueToConvert.toString();
 
-                // Determine if the string needs quotes
-                final Quotes quotes = needsQuotes(s);
+                // Determine if the string needs quoteStyle
+                final Quotes quoteStyle = needsQuotes(s);
 
-                // Append the string to the wire output with necessary quotes
-                asTestQuoted(s, quotes);
+                // Append the string to the wire output with necessary quoteStyle
+                asTestQuoted(s, quoteStyle);
 
                 // Add element separator after processing the string
                 elementSeparator();
@@ -1152,20 +1152,20 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Appends the provided string to the wire output, with or without quotes based on the provided quote preference.
+         * Appends the provided string to the wire output, with or without quoteStyle based on the provided quote preference.
          * If the quote preference is NONE, the string is added directly to the wire output.
          * Otherwise, the string is escaped based on the provided quote preference.
          *
          * @param s      The string to append.
-         * @param quotes The quote preference for the string.
+         * @param quoteStyle The quote preference for the string.
          */
-        protected void asTestQuoted(String s, Quotes quotes) {
-            // Check if the string needs quotes
-            if (quotes == Quotes.NONE) {
+        protected void asTestQuoted(String s, Quotes quoteStyle) {
+            // Check if the string needs quoteStyle
+            if (quoteStyle == Quotes.NONE) {
                 append(s);
             } else {
                 // Escape the string based on the provided quote preference
-                escape0(s, quotes);
+                escape0(s, quoteStyle);
             }
         }
 
@@ -1336,9 +1336,9 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
          * Before writing the block starter, any necessary separators and whitespace are added.
          * The method also pushes the current state to remember the context.
          *
-         * @param c The character that starts the block.
+         * @param blockStartChar The character that starts the block.
          */
-        public void startBlock(char c) {
+        public void startBlock(char blockStartChar) {
             // If defaults are to be dropped, save the event name
             if (dropDefault) {
                 writeSavedEventName();
@@ -1356,7 +1356,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             pushState();
 
             // Write the starting block character
-            bytes.writeUnsignedByte(c);
+            bytes.writeUnsignedByte(blockStartChar);
         }
 
         @NotNull
@@ -1387,30 +1387,30 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
          * Ends a block with the given character, typically a closing bracket or brace.
          * Removes any double newlines to ensure a clean block closure.
          *
-         * @param c The character that ends the block.
+         * @param blockEndChar The character that ends the block.
          */
-        public void endBlock(char c) {
+        public void endBlock(char blockEndChar) {
             BytesUtil.combineDoubleNewline(bytes);
-            bytes.writeUnsignedByte(c);
+            bytes.writeUnsignedByte(blockEndChar);
         }
 
         /**
          * Adds a newline at the specified position if applicable.
          *
-         * @param pos The position after which the newline should be added.
+         * @param previousWritePosition The position after which the newline should be added.
          */
-        protected void addNewLine(long pos) {
-            if (bytes.writePosition() > pos + 1)
+        protected void addNewLine(long previousWritePosition) {
+            if (bytes.writePosition() > previousWritePosition + 1)
                 bytes.writeUnsignedByte('\n');
         }
 
         /**
          * Adds a space at the specified position if applicable.
          *
-         * @param pos The position after which the space should be added.
+         * @param previousWritePosition The position after which the space should be added.
          */
-        protected void addSpace(long pos) {
-            if (bytes.writePosition() > pos + 1)
+        protected void addSpace(long previousWritePosition) {
+            if (bytes.writePosition() > previousWritePosition + 1)
                 bytes.writeUnsignedByte(' ');
         }
 
@@ -1660,16 +1660,16 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
          * Writes a given CharSequence name to the Yaml output. If the default value is dropped,
          * the event name is set to the given name.
          *
-         * @param name The CharSequence name to write.
+         * @param fieldName The CharSequence name to write.
          * @return Returns an instance of the current object, supporting chained method calls.
          */
         @NotNull
-        public YamlValueOut write(@NotNull CharSequence name) {
+        public YamlValueOut write(@NotNull CharSequence fieldName) {
             if (dropDefault) {
-                eventName = name.toString();
+                eventName = fieldName.toString();
             } else {
                 prependSeparator();
-                escape(name);
+                escape(fieldName);
                 fieldValueSeperator();
             }
             return this;
@@ -1730,9 +1730,9 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
          * Writes a comment to the Yaml output. If a comment annotation exists,
          * specific formatting is applied. Otherwise, a standard comment format is used.
          *
-         * @param s The comment text to write.
+         * @param commentText The comment text to write.
          */
-        public void writeComment(@NotNull CharSequence s) {
+        public void writeComment(@NotNull CharSequence commentText) {
 
             if (hasCommentAnnotation) {
                 // Ensure the separator ends with a newline character
@@ -1752,7 +1752,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
             writeTwo('#', ' ');
 
-            append(s);
+            append(commentText);
             bytes.writeUnsignedByte('\n');
             sep = EMPTY_AFTER_COMMENT;
         }

@@ -105,13 +105,13 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     /**
      * Utility method to create a new YamlWire instance by reading bytes from a specified file.
      *
-     * @param name Name of the file from which bytes are read
+     * @param filePath Name of the file from which bytes are read
      * @return A new YamlWire instance initialized with bytes from the specified file
      * @throws IOException If there's an error in reading the file
      */
     @NotNull
-    public static YamlWire fromFile(String name) throws IOException {
-        return new YamlWire(BytesUtil.readFile(name), true);
+    public static YamlWire fromFile(String filePath) throws IOException {
+        return new YamlWire(BytesUtil.readFile(filePath), true);
     }
 
     /**
@@ -145,13 +145,13 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * This method adheres to the YAML 1.2 specification for escaped characters
      * (see <a href="https://yaml.org/spec/1.2.2/#escaped-characters">YAML Spec 1.2.2</a>).
      *
-     * @param sb The appendable containing characters to be unescaped.
-     * @param blockQuote The block quote character that determines the escaping scheme (' or ").
+     * @param targetBuffer The appendable containing characters to be unescaped.
+     * @param blockQuoteChar The block quote character that determines the escaping scheme (' or ").
      * @param <ACS> An appendable that also implements CharSequence interface.
      */
-    private static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb, char blockQuote) {
+    private static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS targetBuffer, char blockQuoteChar) {
         int end = 0;
-        int length = sb.length();
+        int length = targetBuffer.length();
         boolean skip = false;
         for (int i = 0; i < length; i++) {
             if (skip) {
@@ -159,11 +159,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 continue;
             }
 
-            char ch = sb.charAt(i);
+            char ch = targetBuffer.charAt(i);
 
             // Processing escaped characters for double quotes
-            if (blockQuote == '\"' && ch == '\\' && i < length - 1) {
-                char ch3 = sb.charAt(++i);
+            if (blockQuoteChar == '\"' && ch == '\\' && i < length - 1) {
+                char ch3 = targetBuffer.charAt(++i);
                 switch (ch3) {
                     // Various cases for character unescaping based on YAML specification
                     case '0':
@@ -207,17 +207,17 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                         break;
                     case 'x':
                         ch = (char)
-                                (Character.getNumericValue(sb.charAt(++i)) * 16 +
-                                        Character.getNumericValue(sb.charAt(++i)));
+                                (Character.getNumericValue(targetBuffer.charAt(++i)) * 16 +
+                                        Character.getNumericValue(targetBuffer.charAt(++i)));
                         break;
 
                     // For Unicode escapes
                     case 'u':
                         ch = (char)
-                                (Character.getNumericValue(sb.charAt(++i)) * 4096 +
-                                        Character.getNumericValue(sb.charAt(++i)) * 256 +
-                                        Character.getNumericValue(sb.charAt(++i)) * 16 +
-                                        Character.getNumericValue(sb.charAt(++i)));
+                                (Character.getNumericValue(targetBuffer.charAt(++i)) * 4096 +
+                                        Character.getNumericValue(targetBuffer.charAt(++i)) * 256 +
+                                        Character.getNumericValue(targetBuffer.charAt(++i)) * 16 +
+                                        Character.getNumericValue(targetBuffer.charAt(++i)));
                         break;
                     default:
                         ch = ch3;
@@ -225,18 +225,18 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             }
 
             // Processing escaped characters for single quotes
-            if (blockQuote == '\'' && ch == '\'' && i < length - 1) {
-                char ch2 = sb.charAt(i + 1);
+            if (blockQuoteChar == '\'' && ch == '\'' && i < length - 1) {
+                char ch2 = targetBuffer.charAt(i + 1);
                 if (ch2 == ch) {
                     skip = true;
                 }
             }
 
-            AppendableUtil.setCharAt(sb, end++, ch);
+            AppendableUtil.setCharAt(targetBuffer, end++, ch);
         }
-        if (length != sb.length())
-            throw new IllegalStateException("Length changed from " + length + " to " + sb.length() + " for " + sb);
-        AppendableUtil.setLength(sb, end);
+        if (length != targetBuffer.length())
+            throw new IllegalStateException("Length changed from " + length + " to " + targetBuffer.length() + " for " + targetBuffer);
+        AppendableUtil.setLength(targetBuffer, end);
     }
 
     /**
@@ -261,30 +261,30 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * as a date/time, based on the YAML specification. If none of these interpretations is successful,
      * it returns the original string content.
      *
-     * @param bq The block quote character (either ' or ") that initiated the string in YAML.
-     * @param s The StringBuilder containing the string to be interpreted.
+     * @param blockQuoteChar The block quote character (either ' or ") that initiated the string in YAML.
+     * @param inputTextBuilder The StringBuilder containing the string to be interpreted.
      * @return An Object which might be a Long, Double, Date, Time or the original String itself
      *         depending on successful interpretation.
      */
     @Nullable
-    static Object readNumberOrTextFrom(char bq, final @Nullable StringBuilder s) {
-        if (leaveUnparsed(bq, s))
-            return s;
+    static Object readNumberOrTextFrom(char blockQuoteChar, final @Nullable StringBuilder inputTextBuilder) {
+        if (leaveUnparsed(blockQuoteChar, inputTextBuilder))
+            return inputTextBuilder;
 
-        StringBuilder sb = s;
+        StringBuilder targetBuffer = inputTextBuilder;
         // YAML octal notation
         if (StringUtils.startsWith(s, "0o")) {
-            sb = new StringBuilder(s);
-            sb.deleteCharAt(1);
+            targetBuffer = new StringBuilder(s);
+            targetBuffer.deleteCharAt(1);
         }
 
         // Remove underscores if present, as they can be used in YAML as visual separators in numbers.
         if (s.indexOf("_") >= 0) {
-            sb = new StringBuilder(s);
-            removeUnderscore(sb);
+            targetBuffer = new StringBuilder(s);
+            removeUnderscore(targetBuffer);
         }
 
-        String ss = sb.toString();
+        String ss = targetBuffer.toString();
 
         // Attempt to parse as a long
         try {
@@ -322,16 +322,16 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      *     <li>If the first character of the string is not a number, decimal point, or a sign.</li>
      * </ul>
      *
-     * @param bq The block quote character (either ' or ") that initiated the string in YAML.
-     * @param s The StringBuilder containing the string to check.
+     * @param blockQuoteChar The block quote character (either ' or ") that initiated the string in YAML.
+     * @param inputTextBuilder The StringBuilder containing the string to check.
      * @return True if the string should be left unparsed, otherwise false.
      */
-    private static boolean leaveUnparsed(char bq, @Nullable StringBuilder s) {
-        return s == null
-                || bq != 0
-                || s.length() < 1
-                || s.length() > 40
-                || "0123456789.+-".indexOf(s.charAt(0)) < 0;
+    private static boolean leaveUnparsed(char blockQuoteChar, @Nullable StringBuilder inputTextBuilder) {
+        return inputTextBuilder == null
+                || blockQuoteChar != 0
+                || inputTextBuilder.length() < 1
+                || inputTextBuilder.length() > 40
+                || "0123456789.+-".indexOf(inputTextBuilder.charAt(0)) < 0;
     }
 
     /**
@@ -716,11 +716,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     /**
      * Reads a field from the current YamlToken and appends its content to the provided StringBuilder.
      *
-     * @param sb StringBuilder instance to which the field content will be appended.
+     * @param targetBuffer StringBuilder instance to which the field content will be appended.
      * @return The same StringBuilder instance with the appended content.
      */
     @NotNull
-    protected StringBuilder readField(@NotNull StringBuilder sb) {
+    protected StringBuilder readField(@NotNull StringBuilder targetBuffer) {
         startEventIfTop();
 
         // If the current token indicates a key in a map
@@ -729,18 +729,18 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
             // Ensure the key is textual
             if (yt.current() == YamlToken.TEXT) {
-                String text = yt.text(); // Captures the key's text. Note: using sb here may modify its contents
-                sb.setLength(0);         // Reset the StringBuilder
-                sb.append(text);         // Append the key's text to the StringBuilder
-                unescape(sb, yt.blockQuote()); // Handle any escape sequences within the key
+                String text = yt.text(); // Captures the key's text. Note: using targetBuffer here may modify its contents
+                targetBuffer.setLength(0);         // Reset the StringBuilder
+                targetBuffer.append(text);         // Append the key's text to the StringBuilder
+                unescape(targetBuffer, yt.blockQuote()); // Handle any escape sequences within the key
                 yt.next();
             } else {
                 throw new IllegalStateException(yt.toString());
             }
         } else {
-            sb.setLength(0); // Clear the StringBuilder if the current token isn't a MAPPING_KEY
+            targetBuffer.setLength(0); // Clear the StringBuilder if the current token isn't a MAPPING_KEY
         }
-        return sb;
+        return targetBuffer;
     }
 
     @SuppressWarnings("fallthrough")
@@ -853,7 +853,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             if (checkForMatch(keyName))
                 return valueIn;
 
-            if (!StringUtils.startsWith(sb, "-"))
+            if (!StringUtils.startsWith(targetBuffer, "-"))
                 keys.push(lastKeyPosition);
             // Avoid consuming '}' but consume to next mapping key
             valueIn.consumeAny(minIndent >= 0 ? minIndent : Integer.MAX_VALUE);
@@ -904,16 +904,16 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
         // If the next token is textual
         if (next == YamlToken.TEXT) {
-            sb.setLength(0);          // Reset the StringBuilder
-            sb.append(yt.text());     // Append the text of the next token to the StringBuilder
-            unescape(sb, yt.blockQuote()); // Handle any escape sequences within the text
+            targetBuffer.setLength(0);          // Reset the StringBuilder
+            targetBuffer.append(yt.text());     // Append the text of the next token to the StringBuilder
+            unescape(targetBuffer, yt.blockQuote()); // Handle any escape sequences within the text
             yt.next();
         } else {
             throw new IllegalStateException(next.toString());
         }
 
         // Compare the processed string in the StringBuilder with the expected keyName
-        return (sb.length() == 0 || StringUtils.isEqual(sb, keyName));
+        return (targetBuffer.length() == 0 || StringUtils.isEqual(targetBuffer, keyName));
     }
 
     @NotNull
@@ -1120,7 +1120,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
         // Clear the bytes buffer and internal StringBuilder
         bytes.clear();
-        sb.setLength(0);
+        targetBuffer.setLength(0);
 
         // Reset the YAML tokenizer and value states
         yt.reset();
@@ -1178,17 +1178,17 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
         @Nullable
         @Override
-        public StringBuilder textTo(@NotNull StringBuilder sb) {
-            sb.setLength(0);
-            @Nullable CharSequence cs = textTo0(sb);
+        public StringBuilder textTo(@NotNull StringBuilder targetBuffer) {
+            targetBuffer.setLength(0);
+            @Nullable CharSequence cs = textTo0(targetBuffer);
             yt.next();
             if (cs == null)
                 return null;
-            if (cs != sb) {
-                sb.setLength(0);
-                sb.append(cs);
+            if (cs != targetBuffer) {
+                targetBuffer.setLength(0);
+                targetBuffer.append(cs);
             }
-            return sb;
+            return targetBuffer;
         }
 
         @Nullable
@@ -1267,7 +1267,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          * @return StringBuilder containing the text.
          */
         @Nullable
-        StringBuilder textTo0(@NotNull StringBuilder a) {
+        StringBuilder textTo0(@NotNull StringBuilder destinationBuilder) {
             consumePadding(); // consume any padding
 
             // if the current token is a sequence entry, move to the next token
@@ -1278,11 +1278,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 // handle text or literal tokens
                 case TEXT:
                 case LITERAL:
-                    a.append(yt.text()); // append the text value
+                    destinationBuilder.append(yt.text()); // append the text value
 
                     // unescape the text value if needed
                     if (yt.current() == YamlToken.TEXT)
-                        unescape(a, yt.blockQuote());
+                        unescape(destinationBuilder, yt.blockQuote());
 
                     break;
 
@@ -1290,9 +1290,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     // Handle YAML anchors, which can be referred to later as aliases
                     String alias = yt.text();
                     yt.next();
-                    textTo0(sb);
+                    textTo0(targetBuffer);
                     // Store the anchor for later reference
-                    anchorValues.put(alias, sb.toString());
+                    anchorValues.put(alias, targetBuffer.toString());
                     break;
 
                 case ALIAS:
@@ -1303,7 +1303,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                         throw new IllegalStateException("Unknown alias " + alias + " with no corresponding anchor");
 
                     yt.next();
-                    sb.append(o);
+                    targetBuffer.append(o);
                     break;
 
                 // handle tag tokens
@@ -1320,14 +1320,14 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                         yt.next();
                         final byte[] arr = (byte[]) decodeBinary(byte[].class);
                         for (byte b : arr) {
-                            a.append((char) b);
+                            destinationBuilder.append((char) b);
                         }
-                        return a;
+                        return destinationBuilder;
                     }
 
                     throw new UnsupportedOperationException(yt.toString());
             }
-            return a;
+            return destinationBuilder;
         }
 
         @NotNull
@@ -1359,14 +1359,14 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         public WireIn bytes(@NotNull ReadBytesMarshallable bytesConsumer) {
             consumePadding();
             // TODO needs to be made much more efficient.
-            @NotNull StringBuilder sb = acquireStringBuilder();
+            @NotNull StringBuilder targetBuffer = acquireStringBuilder();
             if (yt.current() == YamlToken.TAG) {
                 bytes.readSkip(1);
-                yt.text(sb);
+                yt.text(targetBuffer);
                 yt.next();
                 if (yt.current() != YamlToken.TEXT)
                     throw new UnsupportedOperationException(yt.toString());
-                @Nullable byte[] uncompressed = Compression.uncompress(sb, yt, t -> {
+                @Nullable byte[] uncompressed = Compression.uncompress(targetBuffer, yt, t -> {
                     @NotNull StringBuilder sb2 = acquireStringBuilder();
                     t.text(sb2);
                     return Base64.getDecoder().decode(sb2.toString());
@@ -1379,16 +1379,16 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                         bytes.releaseLast();
                     }
 
-                } else if (StringUtils.isEqual(sb, NULL_TAG)) {
+                } else if (StringUtils.isEqual(targetBuffer, NULL_TAG)) {
                     bytesConsumer.readMarshallable(null);
                     yt.next();
 
                 } else {
-                    throw new IORuntimeException("Unsupported type=" + sb);
+                    throw new IORuntimeException("Unsupported type=" + targetBuffer);
                 }
             } else {
-                textTo(sb);
-                Bytes<byte[]> bytes = Bytes.wrapForRead(sb.toString().getBytes(ISO_8859_1));
+                textTo(targetBuffer);
+                Bytes<byte[]> bytes = Bytes.wrapForRead(targetBuffer.toString().getBytes(ISO_8859_1));
                 try {
                     bytesConsumer.readMarshallable(bytes);
                 } finally {
@@ -2092,10 +2092,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             else
                 usingMap.clear();
 
-            @NotNull StringBuilder sb = acquireStringBuilder();
+            @NotNull StringBuilder targetBuffer = acquireStringBuilder();
             switch (yt.current()) {
                 case TAG:
-                    return typedMap(kClass, vClass, usingMap, sb);
+                    return typedMap(kClass, vClass, usingMap, targetBuffer);
                 case MAPPING_START:
                     return marshallableAsMap(kClass, vClass, usingMap);
                 case SEQUENCE_START:
@@ -2111,22 +2111,22 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          * @param kClazz The class type for map keys.
          * @param vClass The class type for map values.
          * @param usingMap The map to populate based on the YAML data.
-         * @param sb A StringBuilder instance used for temporary string operations.
+         * @param targetBuffer A StringBuilder instance used for temporary string operations.
          * @return Populated map from the YAML data or null.
          * @throws InvalidMarshallableException If there's a problem with marshalling.
          * @throws IORuntimeException If an unexpected YAML structure or tag is encountered.
          */
         @Nullable
-        private <K, V> Map<K, V> typedMap(@NotNull Class<K> kClazz, @NotNull Class<V> vClass, @NotNull Map<K, V> usingMap, @NotNull StringBuilder sb) throws InvalidMarshallableException {
+        private <K, V> Map<K, V> typedMap(@NotNull Class<K> kClazz, @NotNull Class<V> vClass, @NotNull Map<K, V> usingMap, @NotNull StringBuilder targetBuffer) throws InvalidMarshallableException {
             // Read the next YAML token into the provided StringBuilder.
-            yt.text(sb);
+            yt.text(targetBuffer);
             yt.next();
-            if (NULL_TAG.contentEquals(sb)) {
+            if (NULL_TAG.contentEquals(targetBuffer)) {
                 text();
                 return null; // Return null to indicate absence of a value.
 
             // If the current token indicates a sequence map...
-            } else if (SEQ_MAP.contentEquals(sb)) {
+            } else if (SEQ_MAP.contentEquals(targetBuffer)) {
                 consumePadding();
 
                 // Verify that the next token is the start of a sequence.
@@ -2147,7 +2147,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
             } else {
                 // If the token isn't recognized, throw an exception.
-                throw new IORuntimeException("Unsupported type :" + sb);
+                throw new IORuntimeException("Unsupported type :" + targetBuffer);
             }
         }
 
@@ -2277,36 +2277,36 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          * Depending on the encountered token, various internal methods are invoked to parse the object correctly.
          * If a YAML ANCHOR is encountered, it's mapped to the parsed object for potential future ALIAS references.
          *
-         * @param using The object to potentially reuse when reading. Might be null.
+         * @param reusableInstance The object to potentially reuse when reading. Might be null.
          * @param strategy The serialization strategy to employ while reading the object.
-         * @param type Expected type of the object to be read. If null, the method will attempt to infer the type.
+         * @param defaultType Expected type of the object to be read. If null, the method will attempt to infer the type.
          * @return The read object, possibly of the expected type. Might be null if the YAML token is NONE.
          * @throws InvalidMarshallableException if any error occurs while parsing or constructing the object.
          */
         @SuppressWarnings("fallthrough")
         @Nullable
-        Object objectWithInferredType0(Object using, @NotNull SerializationStrategy strategy, Class<?> type) throws InvalidMarshallableException {
-            boolean bestEffort = type != null;
+        Object objectWithInferredType0(Object reusableInstance, @NotNull SerializationStrategy strategy, Class<?> defaultType) throws InvalidMarshallableException {
+            boolean bestEffort = defaultType != null;
 
             // Handle type declaration, if present
             if (yt.current() == YamlToken.TAG) {
                 Class<?> aClass = typePrefix();
-                if (type == null || type == Object.class || type.isInterface())
-                    type = aClass;
+                if (defaultType == null || defaultType == Object.class || defaultType.isInterface())
+                    defaultType = aClass;
             }
 
             switch (yt.current()) {
                 case MAPPING_START:
                     // Parse YAML mapping, considering the expected type
-                    if (type != null) {
+                    if (defaultType != null) {
                         // Create new TreeMap if a sorted map is expected
-                        if (type == SortedMap.class && !(using instanceof SortedMap))
-                            using = new TreeMap();
+                        if (defaultType == SortedMap.class && !(reusableInstance instanceof SortedMap))
+                            reusableInstance = new TreeMap();
                         // Handle map-specific types
-                        if (type == Object.class || Map.class.isAssignableFrom(type) || using instanceof Map)
-                            return map(Object.class, Object.class, (Map) using);
+                        if (defaultType == Object.class || Map.class.isAssignableFrom(defaultType) || reusableInstance instanceof Map)
+                            return map(Object.class, Object.class, (Map) reusableInstance);
                     }
-                    return valueIn.object(using, type, bestEffort);
+                    return valueIn.object(reusableInstance, defaultType, bestEffort);
 
                 case SEQUENCE_START:
                     // Read a YAML sequence
@@ -2327,7 +2327,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     // Handle YAML anchors, which can be referred to later as aliases
                     String alias = yt.text();
                     yt.next();
-                    o = valueIn.object(using, type);
+                    o = valueIn.object(reusableInstance, defaultType);
                     // Store the anchor for later reference
                     anchorValues.put(alias, o);
                     return o;
@@ -2373,7 +2373,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Nullable
         protected Object readNumberOrText() {
             // Determine the kind of quote used for the YAML block
-            char bq = yt.blockQuote();
+            char blockQuoteChar = yt.blockQuote();
             // Extract the text content into a StringBuilder
             @Nullable StringBuilder s = textTo0(acquireStringBuilder());
             if (yt.current() == YamlToken.LITERAL)
@@ -2382,7 +2382,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 return true;
             if (StringUtils.isEqual(s, "false"))
                 return false;
-            return readNumberOrTextFrom(bq, s);
+            return readNumberOrTextFrom(blockQuoteChar, s);
         }
 
         /**
