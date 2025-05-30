@@ -1316,3 +1316,4 @@ public class JSONWire extends TextWire {
         return toUtf8String();
     }
 }
+
