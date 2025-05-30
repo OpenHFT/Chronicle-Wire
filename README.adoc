@@ -66,7 +66,7 @@ Chronicle Wire also supports hybrid wire formats, for example one format embedde
 
 == Support
 
-This library requires Java 8. Support for `C++` and `C#` is planned.
+This library requires Java 8. Support for `C++`, `ruby` and `python` is available in Chronicle Queue Enterprise.
 
 == Text Formats
 
