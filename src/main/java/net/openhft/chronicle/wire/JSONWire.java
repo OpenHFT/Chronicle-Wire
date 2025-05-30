@@ -41,41 +41,52 @@ import java.util.function.Supplier;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
 /**
- * Represents the JSON wire format.
+ * Provides a {@link Wire} implementation for serialising and deserialising data in
+ * JavaScript Object Notation (JSON). It extends {@link TextWire} and adapts its behaviour
+ * for JSON specific syntax.
  * <p>
- * This class provides functionality for managing JSON data in a wire format.
- * It currently provides a subset of functionalities similar to the YAML wire format.
- * The core capability of this class is to handle JSON data structures as {@code Bytes}
- * objects, allowing for efficient manipulation and parsing.
+ * While sharing much of the base behaviour with text based wires such as YAML,
+ * {@code JSONWire} ensures compliance with the JSON standard. Strings are always
+ * double quoted and optional type information can be emitted via
+ * {@link #useTypes(boolean)}.
+ * <p>
+ * Key features include configurable type output and control over trimming the outer
+ * curly braces with {@link #trimFirstCurly(boolean)}.
+ * Suitable for interoperability with systems expecting JSON, for web based APIs or
+ * where human readable configuration in JSON is preferred.
  */
 @SuppressWarnings("this-escape")
 public class JSONWire extends TextWire {
 
-    // The rest of null
+    /** Internal bytes for the tail of the literal "null". */
     private static final @NotNull Bytes<byte[]> _ULL = Bytes.from("ull");
+    /** @deprecated use {@link #_ULL} */
     @Deprecated(/* to be removed in x.28 */)
     public static final @NotNull Bytes<byte[]> ULL = _ULL;
-    // the rest of true
+    /** Internal bytes for the tail of "true". */
     private static final @NotNull Bytes<byte[]> _RUE = Bytes.from("rue");
-    // the rest of false
+    /** Internal bytes for the tail of "false". */
     private static final @NotNull Bytes<byte[]> _ALSE = Bytes.from("alse");
 
-    // Bytes for comma, commonly used as JSON separator.
+    /** Bytes store for the comma separator. */
     @SuppressWarnings("rawtypes")
     static final BytesStore<?, ?> COMMA = BytesStore.from(",");
 
-    // A thread-local variable to store a reference to the stop characters tester for JSON parsing.
+    /** Thread local cache for a JSON aware {@link StopCharsTester}. */
     static final ThreadLocal<WeakReference<StopCharsTester>> STRICT_ESCAPED_END_OF_TEXT_JSON = new ThreadLocal<>();
 
-    // Supplier for stop character tester for strict JSON text that escapes specific characters.
+    /** Supplier for {@link #STRICT_ESCAPED_END_OF_TEXT_JSON}. */
     static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_JSON_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT_JSON::escaping;
 
-    // Flag to determine whether to use types or not during parsing.
+    /** When true, type information is written and expected during parsing. */
     boolean useTypes;
+    /** Helper used when writing type prefixes. */
     private JSONValueOutFromStart valueOutFromStart;
 
     /**
-     * Default constructor, initializes with elastic bytes allocated on heap.
+     * Creates a JSONWire backed by an elastic on heap buffer. The
+     * instance uses {@code use8bit=false} and {@link #trimFirstCurly(boolean)}
+     * defaults to {@code false}.
      */
     @SuppressWarnings("rawtypes")
     public JSONWire() {
@@ -83,10 +94,10 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * Constructs a JSONWire with the given bytes and a flag for using 8-bit.
+     * Wraps the given bytes.
      *
-     * @param bytes   The bytes to be used for initializing.
-     * @param use8bit Flag indicating whether to use 8-bit representation.
+     * @param bytes   buffer to use
+     * @param use8bit inherited flag controlling character encoding
      */
     public JSONWire(@NotNull Bytes<?> bytes, boolean use8bit) {
         super(bytes, use8bit);
@@ -94,9 +105,9 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * Constructs a JSONWire with the given bytes.
+     * Wraps the given bytes using {@code use8bit=false}.
      *
-     * @param bytes The bytes to be used for initializing.
+     * @param bytes buffer to use
      */
     @SuppressWarnings("rawtypes")
     public JSONWire(@NotNull Bytes<?> bytes) {
@@ -104,10 +115,10 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * Static method to construct a JSONWire from a string representation of JSON.
+     * Creates a new instance initialised with the supplied JSON string.
      *
-     * @param text The string containing JSON data.
-     * @return A new instance of JSONWire.
+     * @param text JSON data
+     * @return wire ready for reading
      */
     @NotNull
     public static JSONWire from(@NotNull String text) {
@@ -115,11 +126,12 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * Converts the content of the provided wire to a JSON string.
+     * Returns the content of any wire as a JSON string.
+     * Useful when converting between formats or for debugging.
      *
-     * @param wire The wire instance to be converted.
-     * @return The string representation of the JSON content.
-     * @throws InvalidMarshallableException If there's an error during conversion.
+     * @param wire source wire
+     * @return JSON representation of the source
+     * @throws InvalidMarshallableException if marshalling fails
      */
     public static String asText(@NotNull Wire wire) throws InvalidMarshallableException {
         long pos = wire.bytes().readPosition();
@@ -151,12 +163,10 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * Sets the flag to determine whether to use types during the JSON parsing or not.
-     * <p>
-     * This method is designed to follow the builder pattern, allowing it to be chained with other method calls on the {@code JSONWire} object.
+     * Enables or disables type information in the JSON output and input.
      *
-     * @param outputTypes A boolean value indicating whether to use types.
-     * @return The current instance of the {@code JSONWire} class.
+     * @param outputTypes true to include type hints
+     * @return this instance for chaining
      */
     public JSONWire useTypes(boolean outputTypes) {
         this.useTypes = outputTypes;
@@ -164,9 +174,7 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * Gets the current setting for the use of types during JSON parsing.
-     *
-     * @return {@code true} if types are being used in the current instance, otherwise {@code false}.
+     * Returns whether type hints are emitted and parsed.
      */
     public boolean useTypes() {
         return useTypes;
