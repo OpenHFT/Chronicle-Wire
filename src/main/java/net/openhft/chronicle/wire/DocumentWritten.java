@@ -17,40 +17,38 @@
 package net.openhft.chronicle.wire;
 
 /**
- * Represents an entity that supports writing documents. The interface provides methods
- * to initiate and manage the context in which documents are written. It is crucial
- * to manage the lifecycle of the {@link DocumentContext} correctly, either by using
- * try-with-resources or explicitly invoking the close() method.
+ * Entry point for obtaining a {@link DocumentContext} used when writing a document.
+ * Implementations act as factories, returning contexts that must be closed to
+ * release any associated locks or buffers.
  */
 public interface DocumentWritten {
     /**
-     * Creates a new {@link DocumentContext} for writing a document.
-     * This context is designed for use within a try-with-resource block to ensure
-     * proper resource management.
+     * Starts a write operation.
+     * <p>
+     * Always close the returned context, preferably via try-with-resources,
+     * otherwise locks may be held.
      *
-     * @return A fresh {@link DocumentContext} for writing.
+     * @return a new {@link DocumentContext} for this write
      */
     DocumentContext writingDocument();
 
     /**
-     * Initiates a new {@link DocumentContext} for writing, with an option to include
-     * metadata. It is imperative to always invoke the close() method on the context
-     * after completing the write operation.
+     * Starts a write operation with optional metadata.
      *
-     * @param metaData A boolean indicating if metadata should be included during writing.
-     * @return A fresh {@link DocumentContext} tailored to the metadata preference.
-     * @throws UnrecoverableTimeoutException If the operation times out in an unrecoverable manner.
+     * @param metaData include metadata if {@code true}
+     * @return a new {@link DocumentContext} for this write
+     * @throws UnrecoverableTimeoutException if an unrecoverable timeout occurs
      */
     DocumentContext writingDocument(boolean metaData) throws UnrecoverableTimeoutException;
 
     /**
-     * Obtains a {@link DocumentContext} for writing. This method either initiates a new context
-     * or reuses an existing one. Depending on the use case, calling the close() method
-     * on the context might be optional.
+     * Obtains a {@link DocumentContext} for writing. Depending on the implementation
+     * this may be a fresh context or a reusable instance and closing may be optional
+     * for chained writes.
      *
-     * @param metaData A boolean indicating if metadata should be included during writing.
-     * @return An existing or new {@link DocumentContext} tailored to the metadata preference.
-     * @throws UnrecoverableTimeoutException If the operation times out in an unrecoverable manner.
+     * @param metaData include metadata if {@code true}
+     * @return a {@link DocumentContext} ready for use
+     * @throws UnrecoverableTimeoutException if an unrecoverable timeout occurs
      */
     DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException;
 }
