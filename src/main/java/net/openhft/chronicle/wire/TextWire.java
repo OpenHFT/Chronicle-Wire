@@ -174,13 +174,13 @@ public class TextWire extends YamlWireOut<TextWire> {
      * Returns a new {@code TextWire} initialised with the contents of the named
      * file.
      *
-     * @param filePath Name of the file.
-     * @return A new instance of `TextWire`.
-     * @throws IOException if any I/O error occurs.
+     * @param name file path
+     * @return wire over the file contents
+     * @throws IOException if the file cannot be read
      */
     @NotNull
-    public static TextWire fromFile(String filePath) throws IOException {
-        return new TextWire(BytesUtil.readFile(filePath), true);
+    public static TextWire fromFile(String name) throws IOException {
+        return new TextWire(BytesUtil.readFile(name), true);
     }
 
     /**
