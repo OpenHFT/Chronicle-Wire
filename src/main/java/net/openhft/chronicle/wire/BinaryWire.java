@@ -1818,12 +1818,15 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Reads and decodes binary data based on a given code into a textual form.
+     * Decodes a textual value from the wire based on {@code code} into the
+     * appendable {@code sb}. Handles {@link BinaryWireCode#NULL}, string codes,
+     * timestamps, booleans, numbers and type literals by converting them to
+     * their string form.
      *
-     * @param code The code indicating the type of data to be read.
-     * @param sb   An appendable and char sequence target where the decoded text will be appended.
-     * @param <T>  A type that extends both Appendable and CharSequence.
-     * @return Returns the passed-in appendable populated with decoded text or null.
+     * @param code the code indicating the wire encoding
+     * @param sb   the appendable that receives the decoded text
+     * @param <T>  appendable and char sequence type
+     * @return {@code sb} populated with decoded text or {@code null}
      */
     @Nullable <T extends Appendable & CharSequence> T readText(int code, @NotNull T sb) {
 
@@ -1917,13 +1920,11 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Generates an UnsupportedOperationException when an unknown code is encountered.
-     * <p>
-     * The function formats the provided code to a hexadecimal string and
-     * includes it in the exception message.
+     * Throws an {@link UnsupportedOperationException} indicating the given
+     * {@code code} is not recognised in the current context.
      *
-     * @param code The code that was not recognized or understood.
-     * @return A new UnsupportedOperationException initialized with a message detailing the unknown code.
+     * @param code the unrecognised code
+     * @return the exception to be thrown
      */
     @NotNull
     private UnsupportedOperationException unknownCode(int code) {
@@ -1932,15 +1933,9 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Reads a code from the byte storage without checks.
-     * <p>
-     * This method retrieves a code that indicates the format or type of the next data
-     * to be read from the bytes storage.
-     *
-     * @return The code retrieved from the byte storage.
+     * Reads and returns the next unsigned byte from the wire, consuming it.
      */
     int readCode() {
-        // Use unchecked method to read the next unsigned byte as code.
         return bytes.uncheckedReadUnsignedByte();
     }
 
@@ -2008,13 +2003,11 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Determines whether a given object should use the self-describing message format.
-     * <p>
-     * This method first checks if an override value for self-describing is set. If not,
-     * it uses the self-describing value from the provided object.
+     * Determines if {@code object} should be serialised with self-describing
+     * messages, respecting {@link #overrideSelfDescribing}.
      *
-     * @param object The object whose self-describing status needs to be checked.
-     * @return true if the object should use the self-describing message format, false otherwise.
+     * @param object the object to check
+     * @return {@code true} if the object should use the self-describing format
      */
     public boolean useSelfDescribingMessage(@NotNull CommonMarshallable object) {
         // Check for override or get the value from the object.
@@ -2027,8 +2020,8 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Enum representing any code match within the WireKey interface.
-     * This enum is designed to provide a specific code that represents any possible match.
+     * Internal {@link WireKey} used as a sentinel to indicate that any field
+     * code should be matched during field lookup.
      */
     enum AnyCodeMatch implements WireKey {
         ANY_CODE_MATCH;
@@ -2040,12 +2033,16 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Implementation of the ValueOut interface, providing methods to write values in a fixed binary format.
-     * This inner class offers various methods to output values in a binary format that retains its order.
+     * Provides methods to write various data types to the {@code BinaryWire}
+     * using fixed-width or specific binary encodings.
      */
     protected class FixedBinaryValueOut implements ValueOut {
 
         @NotNull
+        /**
+         * Writes {@link BinaryWireCode#TRUE} or {@link BinaryWireCode#FALSE}.
+         * A {@code null} value is encoded with {@link BinaryWireCode#NULL}.
+         */
         @Override
         public WireOut bool(@Nullable Boolean flag) {
             if (bytes.retainedHexDumpDescription())
@@ -2065,6 +2062,11 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
+        /**
+         * Writes UTF-8 text. Small strings use {@code STRING_0 + len}; larger
+         * ones use {@link BinaryWireCode#STRING_ANY}. {@code null} is encoded
+         * via {@link #nu11()}.
+         */
         @NotNull
         @Override
         public WireOut text(@Nullable CharSequence s) {
@@ -2086,6 +2088,11 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
+        /**
+         * Writes a {@link String} using the compact form if it fits, otherwise
+         * writes {@link BinaryWireCode#STRING_ANY}. {@code null} is encoded with
+         * {@link BinaryWireCode#NULL}.
+         */
         @NotNull
         @Override
         public WireOut text(@Nullable String s) {
@@ -2134,6 +2141,10 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
+        /**
+         * Writes a length-prefixed byte array. The data is prefixed with
+         * {@link BinaryWireCode#U8_ARRAY} unless compression is applied.
+         */
         @NotNull
         @Override
         public WireOut bytes(@Nullable BytesStore<?, ?> fromBytes) {
@@ -2194,6 +2205,11 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
+        /**
+         * Writes a length prefix using {@link BinaryWireCode#BYTES_LENGTH8},
+         * {@link BinaryWireCode#BYTES_LENGTH16} or
+         * {@link BinaryWireCode#BYTES_LENGTH32} depending on {@code length}.
+         */
         @Override
         @NotNull
         public ValueOut writeLength(long length) {
@@ -2246,6 +2262,9 @@ public class BinaryWire extends AbstractWire implements Wire {
             return fixedInt8(i8);
         }
 
+        /**
+         * Writes {@link BinaryWireCode#INT8} followed by the 1‑byte value.
+         */
         @Override
         @NotNull
         public WireOut fixedInt8(byte i8) {
@@ -2346,6 +2365,10 @@ public class BinaryWire extends AbstractWire implements Wire {
             return fixedInt64(i64);
         }
 
+        /**
+         * Writes {@link BinaryWireCode#INT64} followed by the 8‑byte long
+         * value.
+         */
         @Override
         @NotNull
         public WireOut fixedInt64(long i64) {
@@ -2440,6 +2463,10 @@ public class BinaryWire extends AbstractWire implements Wire {
             return fixedFloat64(d);
         }
 
+        /**
+         * Writes {@link BinaryWireCode#FLOAT64} followed by the 8‑byte
+         * double value.
+         */
         @Override
         @NotNull
         public WireOut fixedFloat64(double d) {
@@ -2743,8 +2770,8 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Extends the FixedBinaryValueOut class to support binary value outputs with additional logic for converting
-     * and writing different types of numbers, namely integers and longs.
+     * Extends {@link FixedBinaryValueOut} to provide optimised, often
+     * variable-width encodings for numbers based on their magnitude.
      */
      protected class BinaryValueOut extends FixedBinaryValueOut {
         @Override
@@ -2774,11 +2801,9 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         /**
-         * Writes a number (long value) in an optimized binary format based on the value's size.
-         * Uses the number of leading zeros to determine the smallest binary representation
-         * that can accommodate the given value.
-         *
-         * @param l The number (long value) to be written.
+         * Chooses the most compact binary representation for the number based
+         * on its magnitude (e.g. using {@link BinaryWireCode#UINT8} if it fits
+         * or {@link BinaryWireCode#FLOAT_STOP_6} for suitable floats).
          */
         void writeNumber(long l) {
             // Check the number of leading zeros to determine the best representation.
@@ -2836,11 +2861,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         /**
-         * Writes an integer number in an optimized binary format based on the value's size.
-         * Uses the number of leading zeros to determine the smallest binary representation
-         * that can accommodate the given value.
-         *
-         * @param l The number (int value) to be written.
+         * As {@link #writeNumber(long)} but for ints, selecting the most compact
+         * form.
          */
         void writeNumber(int l) {
             // Offset leading zeros count for an integer to align with the long representation logic
@@ -2879,9 +2901,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         /**
-         * Writes a float number either as a float or as an integer based on its value.
-         *
-         * @param l The float number to be written.
+         * Selects an int or float encoding for {@code l} depending on whether
+         * it has a fractional part.
          */
         void writeNumber(float l) {
             boolean canOnlyBeRepresentedAsFloatingPoint = ((long) l) != l;
@@ -2893,9 +2914,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         /**
-         * Writes a double number either as a float or as an integer based on its value.
-         *
-         * @param l The double number to be written.
+         * Selects an int, float or double encoding for {@code l} depending on
+         * its value.
          */
         void writeNumber(double l) {
             boolean canOnlyBeRepresentedAsFloatingPoint = ((long) l) != l;
@@ -3142,16 +3162,16 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Represents a binary input value and provides methods to read and manage the state
-     * of this binary input. The class encapsulates a stack for managing multiple states
-     * and a reader for handling the binary data.
+     * The {@link ValueIn} implementation for {@link BinaryWire}. Provides
+     * methods to read various data types by interpreting binary codes and
+     * decoding subsequent bytes.
      */
     protected class BinaryValueIn implements ValueIn {
 
-        // Stack for managing the state of the binary input
+        /** Maintains nested parse state during sequence and map traversal. */
         final ValueInStack stack = new ValueInStack();
 
-        // The reader responsible for handling the binary data
+        /** Delegate used when reading the first field of a sequence. */
         final Reader reader0field = this::reader0;
 
         @Override
@@ -3259,6 +3279,9 @@ public class BinaryWire extends AbstractWire implements Wire {
                     (code >= STRING_0 && code <= STRING_31);
         }
 
+        /**
+         * Reads a binary encoded string into {@code sb}.
+         */
         @Nullable
         @Override
         public StringBuilder textTo(@NotNull StringBuilder sb) {
@@ -3276,6 +3299,9 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
         }
 
+        /**
+         * Reads a binary encoded string into the provided {@link Bytes}.
+         */
         @Nullable
         @Override
         public Bytes<?> textTo(@NotNull Bytes<?> bytes) {
@@ -3432,6 +3458,11 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         }
 
+        /**
+         * Reads a length-prefixed byte array (expected to be
+         * {@link BinaryWireCode#U8_ARRAY} or a typed/compressed variant) and
+         * returns it as a {@link BytesStore}.
+         */
         @Override
         @Nullable
         public BytesStore<?, ?> bytesStore() {
@@ -4551,6 +4582,10 @@ public class BinaryWire extends AbstractWire implements Wire {
             return Double.parseDouble(text);  // Try to parse the text as a double.
         }
 
+        /**
+         * Reads the leading code and decodes a boolean. Text codes are parsed
+         * as "true" or "false". Padding is skipped recursively.
+         */
         @Override
         public boolean bool() throws IORuntimeException {
             int code = readCode();
@@ -4573,6 +4608,11 @@ public class BinaryWire extends AbstractWire implements Wire {
             throw new IORuntimeException(stringForCode(code));
         }
 
+        /**
+         * Reads the leading code and returns a byte value. If the code is less
+         * than {@code 128} the code itself is the value; otherwise it is
+         * decoded via {@link #int8b(int)}.
+         */
         @Override
         public byte int8() {
             int code = readCode();
@@ -4688,6 +4728,10 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
         }
 
+        /**
+         * Reads the next code and returns a double. Float codes are decoded
+         * directly; text codes are parsed as numbers.
+         */
         @Override
         public double float64() {
             int code = readCode();
