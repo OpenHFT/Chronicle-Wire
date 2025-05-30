@@ -6,9 +6,8 @@ Chronicle Software
 :icons: font
 :source-highlighter: rouge
 
-image:https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire/badge.svg[caption="",link=https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire]
+image:https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire/badge.svg[link=https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire]
 image:https://javadoc.io/badge2/net.openhft/chronicle-wire/javadoc.svg[link="https://www.javadoc.io/doc/net.openhft/chronicle-wire/latest/index.html"]
-//image:https://javadoc-badge.appspot.com/net.openhft/chronicle-wire.svg?label=javadoc[JavaDoc, link=https://www.javadoc.io/doc/net.openhft/chronicle-wire]
 image:https://img.shields.io/github/license/OpenHFT/Chronicle-Wire[GitHub]
 image:https://img.shields.io/badge/release%20notes-subscribe-brightgreen[link="https://chronicle.software/release-notes/"]
 image:https://sonarcloud.io/api/project_badges/measure?project=OpenHFT_Chronicle-Wire&metric=alert_status[link="https://sonarcloud.io/dashboard?id=OpenHFT_Chronicle-Wire"]
@@ -17,33 +16,32 @@ image::images/Wire_line.png[width=20%]
 
 toc::[]
 
-== About
+== Introduction
 
-Chronicle Wire is a Wire Format abstraction library, The purpose of Chronicle Wire is to address the following concerns in a consistent manner:
+Chronicle Wire is a high-performance, zero-GC serialisation library built on top of the Chronicle stack.
+It abstracts the underlying wire format, letting you use human readable text or compact binary interchangeably while retaining a common API.
+Typical use cases include configuration files, persistence of in-memory state, and extremely fast IPC between JVMs.
 
-- Application configuration. (Using YAML)
-- Data serialization (YAML, binary YAML, JSON, Raw binary data, CSV)
-- Accessing off-heap memory in a thread-safe manner. (Bind to shared off-heap memory)
-- High performance data exchange using binary formats. Only include as much meta data as you need.
+== Key Features
 
-== Design
-
-Chronicle Wire uses Chronicle Bytes for bytes manipulation, and Chronicle Core for low level JVM access.
-
-=== Why are these concerns conflated?
+* Multiple wire formats (YAML, JSON, CSV, binary variants)
+* Schema evolution with optional field handling
+* Low-latency, low-allocation serialisation of `Marshallable` POJOs
+* Automatic conversion between formats
+* Integration with other Chronicle components === Why are these concerns conflated?
 
 Often you want to use these interchangeably.
 
-- Configuration includes aliased type information.
+* Configuration includes aliased type information.
 This supports easy extension by adding new classes/versions, and cross-platform using type aliasing.
-- By supporting types, a configuration file can bootstrap itself.
+* By supporting types, a configuration file can bootstrap itself.
 You control how the configuration file is decoded.
 See link:src/test/resources/docs/qe_cfg.yaml[example Queue Enterprise config].
-- To send the configuration of a server to a client, or from a client to a server.
-- To store the configuration of a data store in its header.
-- In configuration, to be able to create any object or component.
-- Save a configuration after you have changed it.
-- To be able to share data in memory between processes in a thread-safe manner.
+* To send the configuration of a server to a client, or from a client to a server.
+* To store the configuration of a data store in its header.
+* In configuration, to be able to create any object or component.
+* Save a configuration after you have changed it.
+* To be able to share data in memory between processes in a thread-safe manner.
 
 === Features
 
@@ -58,7 +56,7 @@ It should make reasonable attempts to handle:
 * fields that the consumer doesn't expect; optionally parsing them, or ignoring them
 * more or less data than expected; in field-less formats
 * reading a different type to the one written
-* updating fixed-length fields, automatically where possible using a `bound` data structure.
+* updating fixed-length fields, automatically where possible using a `bound` data structure
 * dynamic updates of Enums or objects passed-by-name
 
 Chronicle Wire will also be efficient where any, or all, of the following points are true:
@@ -67,7 +65,7 @@ Chronicle Wire will also be efficient where any, or all, of the following points
 * fields are the type expected
 * fields names/numbers are not used
 * self-describing types are not needed
-* random access of data values is supported.
+* random access of data values is supported
 
 Chronicle Wire is designed to make it easy to convert from one wire format to another.
 For example, you can use fixed-width binary data in memory for performance, and variable-width or text over the network.
@@ -102,7 +100,7 @@ To support wire format discovery, the first byte should be in the `ASCII` range;
 
 The binary formats include:
 
-* binary YAML.
+* binary YAML
 * typed data without fields
 * raw untyped fieldless data
 * Trivially Copyable Objects (lowest latency)
@@ -118,6 +116,36 @@ Options for Binary format:
 Note: Chronicle Wire supports debug/transparent combinations like self-describing data with zero copy support.
 
 To support wire format discovery, the first bytes should have the top bit set.
+
+== Getting Started
+
+Add the dependency to your project.
+
+.Maven
+[source,xml]
+----
+<dependency>
+    <groupId>net.openhft</groupId>
+    <artifactId>chronicle-wire</artifactId>
+    <version>REPLACE_WITH_VERSION</version>
+</dependency>
+----
+
+.Gradle
+[source,groovy]
+----
+implementation 'net.openhft:chronicle-wire:REPLACE_WITH_VERSION'
+----
+
+.Simple Example
+[source,java]
+----
+Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+Wire wire = WireType.TEXT.apply(bytes);
+
+wire.write("message").text("Hello World");
+System.out.println(bytes.toString());
+----
 
 == WireType Overview
 
@@ -215,7 +243,7 @@ prints
 Using `RawWire` strips away all the meta data to reduce the size of the message, and improves speed.
 The down-side is that we cannot easily see what the message contains.
 
-[source, Java]
+[source,Java]
 ----
 // The same code for RawWire
 wire3.write("message").text("Hello World")
@@ -228,7 +256,7 @@ System.out.println(bytes3.toHexString());
 
 prints in `RawWire`.
 
-[source, text]
+[source,text]
 ----
 00000000 0b 48 65 6c 6c 6f 20 57  6f 72 6c 64 d2 02 96 49 ·Hello W orld···I
 00000010 00 00 00 00 07 53 45 43  4f 4e 44 53 00 00 00 00 ·····SEC ONDS····
@@ -238,7 +266,9 @@ prints in `RawWire`.
 //For more examples see https://github.com/OpenHFT/Chronicle-Wire/blob/master/README-Chapter1.md[Examples Chapter1]
 === link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Example2.java[Simple example with a data type]
 
-This example is much the same as the previous section, with the code required wrapped in a method. See Section "The code for the class Data" for the code for Data.
+This example is much the same as the previous section, with the code required wrapped in a method.
+See Section "The code for the class Data" for the code for Data.
+
 [source,Java]
 ----
 // Bytes which wraps a ByteBuffer which is resized as needed.
@@ -320,7 +350,7 @@ System.out.println(data2);
 
 prints
 
-[source, yaml]
+[source,yaml]
 ----
 mydata: {
   message: Hello World,
@@ -1566,15 +1596,17 @@ NOTE: For more information see link:https://docs.spring.io/spring-boot/docs/curr
 
 == Using MethodWriter and MethodReader
 
-Chronicle Wire's `MethodWriter` is used for writing data, and `MethodReader` is used for then reading this data. However,
-there are many use cases for them. One of many benefits to these are their ease of use.
+Chronicle Wire's `MethodWriter` is used for writing data, and `MethodReader` is used for then reading this data.
+However, there are many use cases for them.
+One of many benefits to these are their ease of use.
 
 In particular, link:https://vanilla-java.github.io/2016/03/23/Microservices-in-the-Chronicle-world-Part-1.html[this article] captures the simplicity of using `MethodWriter` and `MethodReader`.
 
 In another example, link:https://dzone.com/articles/java-how-to-leverage-method-chaining-to-add-smart[here], we can see how written data could be sent as a streaming event over an Event-Driven architecture, and then a `MethodReader` could be used to read these streaming events.
 
-These are also not limited to being used only within Chronicle Wire. With Chronicle Queue for instance, another example would be to have a `MethodWriter` that serialises and writes a method call to the out queue,
-and a `MethodReader` that reads in the in queue for any methods implemented. For more detail about this example, see link:https://github.com/OpenHFT/Chronicle-Queue-Demo/blob/c1e128545e8f219daa186836ca58a07047436084/md-pipeline/src/main/java/org/trading/Runner.java[here].
+These are also not limited to being used only within Chronicle Wire.
+With Chronicle Queue for instance, another example would be to have a `MethodWriter` that serialises and writes a method call to the out queue, and a `MethodReader` that reads in the in queue for any methods implemented.
+For more detail about this example, see link:https://github.com/OpenHFT/Chronicle-Queue-Demo/blob/c1e128545e8f219daa186836ca58a07047436084/md-pipeline/src/main/java/org/trading/Runner.java[here].
 
 == Uses of Chronicle Wire
 
@@ -1590,7 +1622,8 @@ Chronicle Wire can be used for:
 
 === Simple Binary Encoding (SBE)
 
-Simple Binary Encoding (SBE) is designed to be a more efficient replacement for FIX. It is not limited to FIX protocols, and can be easily extended by updating an XML schema.
+Simple Binary Encoding (SBE) is designed to be a more efficient replacement for FIX.
+It is not limited to FIX protocols, and can be easily extended by updating an XML schema.
 It is simple, binary, and it supports C++ and Java.
 
 XML, when it first started, did not use XML for its own schema files, and it is not insignificant that SBE does not use SBE for its schema either.
@@ -1719,7 +1752,8 @@ This is also supported.
 
 === Object-maximumLimit RPC system
 
-Chronicle Wire supports references based on name, number, or UUID. This is useful when including a reference to an object that the reader should look up by other means.
+Chronicle Wire supports references based on name, number, or UUID.
+This is useful when including a reference to an object that the reader should look up by other means.
 
 A common case is if you have a proxy to a remote object, and you want to pass or return this in an RPC call.
 
@@ -1789,6 +1823,7 @@ Marshallable objects have been designed to allow you to
 - copying and conversion of data from one type to another
 
 == Pojo LongConversionExample
+
 The following is a simple example of a POJO with a nested data type in a List.
 
 .A Simple Pojo without needing to define toString/hashCode/equals
@@ -1818,12 +1853,10 @@ class MyPojos extends SelfDescribingMarshallable {
 }
 ----
 
-By extending `SelfDescribingMarshallable` the class has an implementation
-for `readMarshallable(WireIn)`, `writeMarshallable(WireOut)` and from these
-`toString()`, `hashCode()` and `equals(Object)`.  You only need to define the method
-yourself for improved efficiency.  These default implementations can give you
-2/3rds of the performance of hand coding but save time and potential errors
-writing them yourself.
+By extending `SelfDescribingMarshallable` the class has an implementation for `readMarshallable(WireIn)`, `writeMarshallable(WireOut)` and from these
+`toString()`, `hashCode()` and `equals(Object)`.
+You only need to define the method yourself for improved efficiency.
+These default implementations can give you 2/3rds of the performance of hand coding but save time and potential errors writing them yourself.
 
 === The toString()
 
@@ -1832,7 +1865,7 @@ The object can be reconstructed from the output of the `toString()` method.
 This is useful for building sample data in unit tests for from a file.
 It also means that you can take the dump of an object in a log file and reconstruct the original object.
 
-[source, java]
+[source,java]
 ----
 MyPojos mps = new MyPojos("test-list");
 mps.myPojos.add(new MyPojo("text1", 1, 1.1));
@@ -1840,11 +1873,12 @@ mps.myPojos.add(new MyPojo("text2", 2, 2.2));
 
 System.out.println(mps); // <1>
 ----
+
 <1> Uses the default `toString()` provided.
 
 prints
 
-[source, yaml]
+[source,yaml]
 ----
 !MyPojos {
   name: test-list,
@@ -1857,7 +1891,7 @@ prints
 
 You can take the same output and reconstruct the original object.
 
-[source, java]
+[source,java]
 ----
 MyPojos mps2 = Marshallable.fromString(mps.toString());
 assertEquals(mps, mps2); // <1>
@@ -1872,11 +1906,12 @@ String text = "!MyPojos {\n" +
 MyPojos mps3 = Marshallable.fromString(text);
 assertEquals(mps, mps3); // <1>
 ----
+
 <1> `SelfDescribingMarshallable` also provides a default `equals(Object)` and `hashCode()`
 
 Finally, you can take data from a file and build the object.
 
-[source, java]
+[source,java]
 ----
 MyPojos mps4 = Marshallable.fromFile("my-pojos.yaml");
 assertEquals(mps, mps4);
@@ -2093,3 +2128,22 @@ try (ChronicleContext context = ChronicleContext.newContext(url)) {
 
 ----
 
+== Documentation
+
+* link:src/main/adoc/wire-architecture.adoc[Architectural Overview]
+* link:src/main/adoc/wire-schema-evolution.adoc[Schema Evolution Deep Dive]
+* link:src/main/adoc/wire-cookbook.adoc[Cookbook]
+* link:src/main/adoc/wire-faq.adoc[FAQ]
+* link:src/main/adoc/wire-glossary.adoc[Glossary]
+* link:EventsByMethod.adoc[Events by Method]
+* link:YAML2SpecificationCompliance.adoc[YAML 1.2 Compliance]
+* link:systemProperties.adoc[System Properties Guide]
+
+== Community and Support
+
+Issues and pull requests are welcome on the link:https://github.com/OpenHFT/Chronicle-Wire[GitHub repository].
+For commercial support and additional information visit https://chronicle.software/.
+
+== License
+
+Chronicle Wire is released under the link:LICENSE[Apache 2.0 License].
