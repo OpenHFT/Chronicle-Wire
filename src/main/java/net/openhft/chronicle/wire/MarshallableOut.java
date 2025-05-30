@@ -29,42 +29,35 @@ import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 /**
- * Defines the contract for objects that can write out Marshallable objects.
- * Implementing classes or interfaces should provide concrete means to serialize and write Marshallable objects.
- * <p>
- * Use the {@link #builder(URL)} method to create an instance of {@link MarshallableOutBuilder} to help construct
- * appropriate implementations based on provided URLs.
+ * Represents a destination to which marshallable messages are written.
+ * Typical implementors are queue appenders or {@code WireOut} variants such as
+ * file or HTTP writers. Use {@link #builder(URL)} to create a suitable
+ * implementation based on a given URL.
  */
 @DontChain
 public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteNotifier {
 
     /**
-     * Creates and returns a new instance of {@link MarshallableOutBuilder} initialized with the provided URL.
+     * Creates a builder using the supplied URL. The URL scheme chooses the
+     * implementation, for example {@code file:} or {@code http:}.
      *
-     * @param url The URL which will dictate the specific type of {@code MarshallableOut} to create.
-     * @return A new instance of {@code MarshallableOutBuilder}.
+     * @param url destination URL
+     * @return builder for the chosen output type
      */
     static MarshallableOutBuilder builder(URL url) {
         return new MarshallableOutBuilder(url);
     }
 
     /**
-     * Start a document which is completed when DocumentContext.close() is called. You can use a
-     * <pre>
-     * try(DocumentContext dc = appender.writingDocument()) {
-     *      dc.wire().write("message").text("Hello World");
-     * }
-     * </pre>
-     * <p>
-     * WARNING : any data written inside the writingDocument(), should be performed as quickly as
-     * possible because a write lock is held until the DocumentContext is closed by the
-     * try-with-resources.
-     * For thread safe implementation such as Queue this blocks other appenders. Tailers are never blocked.
+     * Begins a document that completes when the returned context is closed. It
+     * should always be used within a try-with-resources block:
      * <pre>
      * try (DocumentContext dc = appender.writingDocument()) {
-     *      // this should be performed as quickly as possible for implementations that support cocurrent writers
+     *     dc.wire().write("message").text("Hello World");
      * }
      * </pre>
+     * Some implementations hold a write lock until {@code close()}, so keep the
+     * body brief. Queue appenders may block each other while tailers continue.
      */
     @NotNull
     default DocumentContext writingDocument() throws UnrecoverableTimeoutException {
@@ -72,33 +65,38 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     }
 
     /**
-     * Begins a new document-writing session with the option to include meta-data.
-     * It is crucial to always close the returned {@link DocumentContext} once done writing.
+     * Opens a document for writing and optionally marks it as meta-data. The
+     * context must be closed, ideally using try-with-resources. Locking
+     * behaviour is the same as {@link #writingDocument()}.
      *
-     * @param metaData Indicates if meta-data should be included in the document.
-     * @return A new instance of {@code DocumentContext}.
-     * @throws UnrecoverableTimeoutException if the operation times out in an unrecoverable manner.
+     * @param metaData true to mark the document as meta-data
+     * @return the opened {@code DocumentContext}
+     * @throws UnrecoverableTimeoutException if the operation times out
      */
     DocumentContext writingDocument(boolean metaData) throws UnrecoverableTimeoutException;
 
     /**
-     * Start or reuse an existing a DocumentContext, optionally call close() when done.
+     * Returns a {@code DocumentContext}, reusing one if the caller already holds
+     * it. This is used by chained {@link MethodWriter} calls where the first
+     * call opens the context and later calls share it. The context should be
+     * closed once all messages are written.
      */
     DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException;
 
     /**
-     * @return true if this output is configured to expect the history of the message to be written
-     * to.
+     * @return {@code true} if callers are expected to record the history of each
+     * message. This is used for tracing or debugging across systems.
      */
     default boolean recordHistory() {
         return false;
     }
 
     /**
-     * Write a key and value which could be a scalar or a marshallable.
+     * Writes a complete message consisting of a key and value.
+     * The value may be a scalar or another marshallable object.
      *
-     * @param key   to write
-     * @param value to write with it.
+     * @param key   field name for the value
+     * @param value data to write
      */
     default void writeMessage(WireKey key, Object value) throws UnrecoverableTimeoutException {
         @NotNull DocumentContext dc = writingDocument();
@@ -114,13 +112,12 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     }
 
     /**
-     * Writes a message with a specified event name and associated object value.
-     * The method manages the lifecycle of the {@link DocumentContext}, ensuring it's closed after the
-     * message is written or if any exception occurs.
+     * Writes an event name and value as a self-contained message.
+     * The context is closed after the write even if an exception occurs.
      *
-     * @param eventName The name of the event associated with the message.
-     * @param value The object value to be written as part of the message.
-     * @throws UnrecoverableTimeoutException if the operation times out in an unrecoverable manner.
+     * @param eventName name of the event
+     * @param value data to write
+     * @throws UnrecoverableTimeoutException if the operation times out
      */
     default void writeMessage(String eventName, Object value) throws UnrecoverableTimeoutException {
         @NotNull DocumentContext dc = writingDocument();
@@ -136,12 +133,12 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     }
 
     /**
-     * Writes a Marshallable object as a document or message. This method manages the lifecycle of the
-     * {@link DocumentContext}, ensuring it's closed after the document is written or if any exception occurs.
+     * Writes the supplied {@link WriteMarshallable} as a complete document. The
+     * context is closed after the write even on error.
      *
-     * @param writer An instance of {@code WriteMarshallable} that knows how to serialize the object.
-     * @throws UnrecoverableTimeoutException if the operation times out in an unrecoverable manner.
-     * @throws InvalidMarshallableException if the object cannot be serialized properly.
+     * @param writer marshallable to write
+     * @throws UnrecoverableTimeoutException if the operation times out
+     * @throws InvalidMarshallableException  if serialization fails
      */
     default void writeDocument(@NotNull WriteMarshallable writer) throws UnrecoverableTimeoutException, InvalidMarshallableException {
         try (@NotNull DocumentContext dc = writingDocument(false)) {
@@ -156,12 +153,12 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     }
 
     /**
-     * Serializes a Marshallable object directly to bytes. This method manages the lifecycle of the
-     * {@link DocumentContext}, ensuring it's closed after the serialization is done or if any exception occurs.
+     * Serialises an object that implements {@link WriteBytesMarshallable} using
+     * its own byte-level format. The context is closed after the write.
      *
-     * @param marshallable An instance of {@code WriteBytesMarshallable} that knows how to serialize the object to bytes.
-     * @throws UnrecoverableTimeoutException if the operation times out in an unrecoverable manner.
-     * @throws InvalidMarshallableException if the object cannot be serialized properly.
+     * @param marshallable object responsible for writing its bytes
+     * @throws UnrecoverableTimeoutException if the operation times out
+     * @throws InvalidMarshallableException  if serialisation fails
      */
     default void writeBytes(@NotNull WriteBytesMarshallable marshallable) throws UnrecoverableTimeoutException, InvalidMarshallableException {
         @NotNull DocumentContext dc = writingDocument();
@@ -176,16 +173,18 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     }
 
     /**
-     * Writes a provided object using a custom marshalling mechanism specified by a {@link BiConsumer}.
-     * This method allows clients to have custom serialization logic for any object.
-     * The method also manages the lifecycle of the {@link DocumentContext}, ensuring it's closed after the object is
-     * written or if any exception occurs.
+     * Writes an object using a caller supplied lambda to perform the
+     * serialisation. Useful for types that are not {@link WriteMarshallable}.
+     * Example:
+     * <pre>
+     * out.writeDocument(o, (v, obj) -> v.text(obj.toString()));
+     * </pre>
      *
-     * @param t      The object to be serialized.
-     * @param writer A {@code BiConsumer} that contains the custom serialization logic.
-     * @param <T>    The type of the object to be serialized.
-     * @throws UnrecoverableTimeoutException if the operation times out in an unrecoverable manner.
-     * @throws InvalidMarshallableException if the object cannot be serialized properly.
+     * @param t      object to be serialised
+     * @param writer callback that writes the object to the {@link ValueOut}
+     * @param <T>    object type
+     * @throws UnrecoverableTimeoutException if the operation times out
+     * @throws InvalidMarshallableException  if the callback fails
      */
     default <T> void writeDocument(T t, @NotNull BiConsumer<ValueOut, T> writer) throws UnrecoverableTimeoutException, InvalidMarshallableException {
         @NotNull DocumentContext dc = writingDocument();
@@ -201,11 +200,10 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     }
 
     /**
-     * Writes a provided text message into the underlying {@link DocumentContext}. The method manages the lifecycle
-     * of the context, ensuring it's closed after the text is written or if any exception occurs.
+     * Writes the supplied text as a single document.
      *
-     * @param text The text message to be written.
-     * @throws UnrecoverableTimeoutException if the operation times out in an unrecoverable manner.
+     * @param text the text to write
+     * @throws UnrecoverableTimeoutException if the operation times out
      */
     default void writeText(@NotNull CharSequence text) throws UnrecoverableTimeoutException {
         @NotNull DocumentContext dc = writingDocument();
@@ -220,12 +218,10 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     }
 
     /**
-     * Writes a provided map into the underlying {@link DocumentContext} as a marshallable object. Each key-value
-     * pair in the map is serialized individually. The method manages the lifecycle of the context, ensuring it's
-     * closed after the map is written or if any exception occurs.
+     * Writes the given map as key/value pairs within a document.
      *
-     * @param map The map to be serialized and written.
-     * @throws UnrecoverableTimeoutException if the operation times out in an unrecoverable manner.
+     * @param map map to serialise
+     * @throws UnrecoverableTimeoutException if the operation times out
      */
     default void writeMap(@NotNull Map<?, ?> map) throws UnrecoverableTimeoutException {
         @NotNull DocumentContext dc = writingDocument();
@@ -244,14 +240,14 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     }
 
     /**
-     * Creates a proxy of the specified interfaces, where each method call on the proxy is written for replay.
-     * The primary interface is always implemented by the proxy, whereas any additional interfaces have to be cast
-     * to be accessed on the proxy.
+     * Creates a dynamic proxy for the supplied interfaces. Invoking a method on
+     * the proxy serialises that call to this {@code MarshallableOut}.
+     * The returned proxy always implements {@code tClass}; optional extra
+     * interfaces must be cast before use.
      *
      * @param tClass     primary interface
-     * @param additional any additional interfaces
-     * @return a proxy which implements the primary interface (additional interfaces have to be
-     * cast)
+     * @param additional further interfaces
+     * @return proxy implementing the given interfaces
      */
     @SuppressWarnings("rawtypes")
     @NotNull
@@ -263,12 +259,12 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     }
 
     /**
-     * Returns a {@code MethodWriterBuilder} that can be used to create a proxy for an interface.
-     * Each message called on the proxy will be written for replay. This is a convenience method
-     * that assumes metadata is not required.
+     * Convenience method returning a {@link MethodWriterBuilder} for the given
+     * interface. All method calls made via the built proxy are written to this
+     * output.
      *
-     * @param tClass The primary interface that the builder will cater to.
-     * @return A {@code MethodWriterBuilder} tailored for the given interface class.
+     * @param tClass primary interface
+     * @return configured builder
      */
     @NotNull
     default <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
@@ -276,13 +272,13 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     }
 
     /**
-     * Returns a {@code MethodWriterBuilder} that can be used to create a proxy for an interface.
-     * Depending on the {@code metaData} parameter, every method may be written as metadata. Each
-     * message called on the proxy will be written to a file for method replay.
+     * Returns a builder for a method writer proxy with optional metadata
+     * recording. The builder exposes further configuration such as interceptors
+     * and wire type before {@code build()} is invoked.
      *
-     * @param metaData If set to true, every method call will be written as metadata.
-     * @param tClass   The primary interface that the builder will cater to.
-     * @return A {@code MethodWriterBuilder} tailored for the given interface class and metadata preference.
+     * @param metaData write each call as metadata if true
+     * @param tClass   primary interface
+     * @return configurable builder
      */
     @NotNull
     default <T> MethodWriterBuilder<T> methodWriterBuilder(boolean metaData, @NotNull Class<T> tClass) {
