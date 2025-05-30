@@ -44,27 +44,33 @@ import java.util.stream.Stream;
 import static net.openhft.chronicle.core.UnsafeMemory.*;
 
 /**
- * The WireMarshaller class is responsible for marshalling and unmarshalling of objects of type T.
- * This class provides an efficient mechanism for serialization/deserialization using wire protocols.
- * It utilizes field accessors to read and write values directly to and from the fields of the object.
+ * Responsible for marshalling and unmarshalling objects of type {@code T} using
+ * the Chronicle Wire framework.  Instances of this class are typically cached
+ * per target class (see {@link #WIRE_MARSHALLER_CL}) and use reflection only at
+ * construction time to discover the fields.  Subsequent reads and writes use
+ * optimised {@link FieldAccess} objects for performance.
  *
  * @param <T> The type of the object to be marshalled/unmarshalled.
  */
 @SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public class WireMarshaller<T> {
+    /** Parameter types for a potential {@code unexpectedField(Object, ValueIn)} method. */
     private static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
+    /** Empty field array used when a class has no marshallable fields. */
     private static final FieldAccess[] NO_FIELDS = {};
+    /** Reflection accessor for {@link Class#isRecord()} on Java&nbsp;14+. */
     private static Method isRecord;
+    /** Accessors for all marshallable fields of {@code T}. */
     @NotNull
     final FieldAccess[] fields;
 
-    // Map for quick field look-up based on their names.
+    /** Map for quick field look-up based on field name. */
     final TreeMap<CharSequence, FieldAccess> fieldMap = new TreeMap<>(WireMarshaller::compare);
 
-    // Flag to determine if this marshaller is for a leaf class.
+    /** Indicates whether {@code T} is considered a leaf object in the object graph. */
     private final boolean isLeaf;
 
-    // Default value for the type T.
+    /** Pre-created default instance used for comparison and defaulting missing fields. */
     @Nullable
     private final T defaultValue;
 
@@ -78,18 +84,22 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * Constructs a new instance of the WireMarshaller with the specified parameters.
+     * Protected constructor.  Use {@link #of(Class)} or
+     * {@link #WIRE_MARSHALLER_CL} to obtain instances in normal use.
      *
      * @param tClass  The class of the object to be marshalled.
-     * @param fields  An array of field accessors that provide access to the fields of the object.
+     * @param fields  An array of field accessors for the class.
      * @param isLeaf  Indicates if the marshaller is for a leaf class.
      */
     protected WireMarshaller(@NotNull Class<T> tClass, @NotNull FieldAccess[] fields, boolean isLeaf) {
         this(fields, isLeaf, defaultValueForType(tClass));
     }
 
-    // A class-local storage for caching WireMarshallers for different types.
-    // Depending on the type of class, it either creates a marshaller for exceptions or a generic one.
+    /**
+     * Cache of {@link WireMarshaller} instances keyed by class.  When first
+     * accessed the appropriate marshaller is created – specialised for
+     * {@link Throwable} subclasses or generic otherwise.
+     */
     public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial
             (tClass ->
                     Throwable.class.isAssignableFrom(tClass)
@@ -97,6 +107,7 @@ public class WireMarshaller<T> {
                             : WireMarshaller.of(tClass)
             );
 
+    /** Internal constructor used by the factory methods. */
     WireMarshaller(@NotNull FieldAccess[] fields, boolean isLeaf, @Nullable T defaultValue) {
         this.fields = fields;
         this.isLeaf = isLeaf;
@@ -231,6 +242,10 @@ public class WireMarshaller<T> {
         }
     }
 
+    /**
+     * Creates a default instance for the given type if possible.  Used for
+     * delta encoding and for populating missing fields during read.
+     */
     static <T> T defaultValueForType(@NotNull Class<T> tClass) {
 //        tClass = ObjectUtils.implementationToUse(tClass);
         if (ObjectUtils.isConcreteClass(tClass)
@@ -432,9 +447,9 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * Writes the values of the fields from the provided object (DTO) to the output. Before writing,
-     * the object is validated. The method also supports optional copying of the values
-     * from the source object to a previous instance.
+     * Writes all fields of {@code t} to the {@code out}.  If {@code copy} is
+     * {@code true} the written values are also copied into the {@link #defaultValue}
+     * instance so that subsequent delta writes can compare against it.
      *
      * @param t    Object whose field values are to be written.
      * @param out  Output destination where the field values are written to.
@@ -475,12 +490,9 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * Reads and populates the DTO based on the provided order.
-     *
-     * @param t         Target object to populate with read values.
-     * @param in        Input source from which values are read.
-     * @param overwrite Flag indicating whether to overwrite the existing value in the target object.
-     * @throws InvalidMarshallableException If there is an error during marshalling.
+     * Reads the fields in the order they are defined in the DTO class.
+     * If a field is not present in the input and {@code overwrite} is true the
+     * value from {@link #defaultValue} is applied.
      */
     public void readMarshallableDTOOrder(T t, @NotNull WireIn in, boolean overwrite) throws InvalidMarshallableException {
         try {
@@ -495,12 +507,11 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * Reads and populates the DTO based on the input's order.
-     *
-     * @param t         Target object to populate with read values.
-     * @param in        Input source from which values are read.
-     * @param overwrite Flag indicating whether to overwrite the existing value in the target object.
-     * @throws InvalidMarshallableException If there is an error during marshalling.
+     * Reads fields in the order they appear in the input wire.  If a field is
+     * missing and {@code overwrite} is true the value from {@link #defaultValue}
+     * is applied after reading all input fields. Unknown fields are skipped or
+     * delegated to {@link ReadMarshallable#unexpectedField(Object, ValueIn)} if
+     * implemented by {@code t}.
      */
     public void readMarshallableInputOrder(T t, @NotNull WireIn in, boolean overwrite) throws InvalidMarshallableException {
         try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {

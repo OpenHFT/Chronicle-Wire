@@ -23,15 +23,19 @@ import net.openhft.chronicle.core.scoped.ScopedResource;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * This class extends the WireMarshaller and provides the ability to handle unexpected fields.
- * It maps fields by their name (both in their original form and lower-cased) for easy access.
- * It overrides the method to read marshallable objects and provides specialized logic to
- * handle unexpected fields that might be present in the data source.
+ * Extension of {@link WireMarshaller} that can delegate unknown fields to the
+ * target object's {@link ReadMarshallable#unexpectedField(Object, ValueIn)}
+ * method. Field names are stored in a {@link CharSequenceObjectMap} for quick
+ * case-insensitive lookup.
  */
 public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
-    // Map for storing fields based on their names.
+    /** Map for storing fields by name (original and lower case). */
     final CharSequenceObjectMap<FieldAccess> fieldMap;
 
+    /**
+     * Creates a marshaller capable of reporting unexpected fields to the target
+     * object.
+     */
     public WireMarshallerForUnexpectedFields(@NotNull FieldAccess[] fields, boolean isLeaf, T defaultValue) {
         super(fields, isLeaf, defaultValue);
         fieldMap = new CharSequenceObjectMap<>(fields.length * 3);
@@ -41,6 +45,11 @@ public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
         }
     }
 
+    /**
+     * Overrides the normal deserialization to invoke
+     * {@link ReadMarshallable#unexpectedField(Object, ValueIn)} when an input
+     * field name does not match any known field.
+     */
     @Override
     public void readMarshallable(T t, @NotNull WireIn in, boolean overwrite) throws InvalidMarshallableException {
         try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {

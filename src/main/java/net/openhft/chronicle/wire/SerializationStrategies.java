@@ -41,8 +41,10 @@ import java.util.*;
 import static net.openhft.chronicle.wire.BracketType.UNKNOWN;
 
 /**
- * Enumerates the available serialization strategies, each implementing the {@link SerializationStrategy} interface.
- * These strategies cater to different serialization requirements and support specific object types.
+ * Enumerates the available serialization strategies, each implementing the
+ * {@link SerializationStrategy} interface.  These built-in strategies cover a
+ * range of common Java types and provide the default behaviour used by the wire
+ * layer when no explicit strategy is supplied.
  */
 @SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public enum SerializationStrategies implements SerializationStrategy {
@@ -96,8 +98,9 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * A serialization strategy that supports any object type.
-     * This strategy infers the object type during deserialization.
+     * A general purpose strategy that can deserialize any object.  The
+     * concrete type is inferred from the wire and, once determined, the call is
+     * delegated to the appropriate strategy (often {@link #ANY_NESTED}).
      */
     ANY_OBJECT {
         /**
@@ -136,8 +139,9 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * A serialization strategy that supports any scalar value.
-     * Scalar values are typically primitive types or their boxed equivalents.
+     * A strategy for scalar values such as primitives or boxed primitives.  In
+     * wire formats these values are typically written without enclosing map or
+     * sequence brackets.
      */
     ANY_SCALAR {
         /**
@@ -175,7 +179,8 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * A serialization strategy specifically designed for handling enumerations (enums).
+     * Strategy for standard Java {@link Enum} types.  Values are typically
+     * serialised using their {@link Enum#name()} representation.
      */
     ENUM {
         /**
@@ -213,10 +218,10 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * A serialization strategy designed for handling dynamic enumerations (enums).
-     * Dynamic enums are enums whose values can be altered or enhanced at runtime.
-     * This strategy incorporates custom handling to ensure proper deserialization
-     * of dynamic enums from the input source.
+     * Strategy for {@link DynamicEnum} values whose set of constants may be
+     * extended at runtime.  The {@link #readUsing} method understands both a
+     * simple textual name and a map based representation when the enum also
+     * implements {@link ReadMarshallable}.
      */
     DYNAMIC_ENUM {
 
@@ -293,10 +298,9 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * A serialization strategy designed for handling nested objects.
-     * This strategy reads nested objects without explicitly knowing
-     * their exact type, treating them as generic objects and performing
-     * a generic deserialization.
+     * Strategy for nested objects when their exact class is not known at compile
+     * time.  Objects are treated generically and deserialized as map-like
+     * structures.
      */
     ANY_NESTED {
 
@@ -341,9 +345,9 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * A serialization strategy specifically designed for handling
-     * {@link Demarshallable} objects. {@link Demarshallable} represents
-     * an object that can be deserialized from a wire format.
+     * Strategy for {@link Demarshallable} objects.  During reading a
+     * {@link DemarshallableWrapper} is created which later resolves to the
+     * actual instance via its {@link ReadResolvable#readResolve()} method.
      */
     DEMARSHALLABLE {
 
@@ -392,11 +396,10 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * A serialization strategy for handling objects that implement the
-     * {@link java.io.Serializable} interface. This strategy checks if the object
-     * is also an instance of {@link Externalizable}, and if so, uses the
-     * {@link #EXTERNALIZABLE} strategy. Otherwise, it defaults to the
-     * {@link #ANY_OBJECT} strategy.
+     * Strategy for objects implementing {@link Serializable}.  If the object is
+     * also {@link Externalizable} it delegates to {@link #EXTERNALIZABLE};
+     * otherwise the object is treated as a normal bean and the type is inferred
+     * in the same manner as {@link #ANY_OBJECT}.
      */
     SERIALIZABLE {
 
@@ -428,9 +431,10 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * A serialization strategy specifically designed for handling
-     * {@link Externalizable} objects. Externalizable objects provide their
-     * own custom serialization mechanism that this strategy leverages.
+     * Strategy for {@link Externalizable} objects which use the standard
+     * Java {@code Externalizable} hooks.  During reading the object's
+     * {@link java.io.Externalizable#readExternal(java.io.ObjectInput)} method is
+     * invoked via an {@link java.io.ObjectInput} facade over the wire data.
      */
     EXTERNALIZABLE {
 
@@ -476,9 +480,8 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * A serialization strategy for handling objects that implement the
-     * {@link java.util.Map} interface. This strategy deserializes a sequence
-     * of key-value pairs into a Map instance.
+     * Strategy for {@link Map} types.  Key/value pairs are read from the wire
+     * until no more entries are present and are placed into the target map.
      */
     MAP {
 
@@ -536,9 +539,8 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * A serialization strategy for handling objects that implement the
-     * {@link java.util.Set} interface. This strategy deserializes a sequence
-     * of items into a Set instance.
+     * Strategy for {@link Set} implementations.  Items are read from the
+     * sequence one by one and added to the target set.
      */
     SET {
 
@@ -603,9 +605,9 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * A serialization strategy for handling objects that implement the
-     * {@link java.util.List} interface. This strategy deserializes a sequence
-     * of items into a List instance.
+     * Strategy for {@link List} implementations.  Items are read sequentially
+     * and placed into the list; existing elements are reused where possible and
+     * the list is trimmed or expanded to match the input size.
      */
     LIST {
 
@@ -675,8 +677,9 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * A serialization strategy for handling arrays. This strategy deserializes
-     * a sequence of items into an array instance.
+     * Strategy for object arrays.  Items are read into a temporary list and then
+     * converted to an array.  When the target {@code using} object is an
+     * {@link ArrayWrapper}, its component type guides the conversion.
      */
     ARRAY {
 
@@ -747,9 +750,9 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * A serialization strategy for handling primitive arrays. This strategy
-     * deserializes a sequence of items into an array instance, dynamically
-     * resizing the array as required during deserialization.
+     * Strategy for arrays of primitive types.  Elements are read into a
+     * {@link PrimArrayWrapper} which grows as needed and is trimmed to the
+     * correct length once reading completes.
      */
     PRIM_ARRAY {
 
@@ -854,8 +857,10 @@ public enum SerializationStrategies implements SerializationStrategy {
     }
 
     /**
-     * A wrapper class for arrays which provides a mechanism for deserialization
-     * by resolving the actual array when being read from a serialized source.
+     * Wrapper used during deserialization of arrays.  It implements
+     * {@link ReadResolvable} so that when read back via
+     * {@link ValueIn#object(Class)} the {@link #readResolve()} method returns the
+     * real array instance.
      */
     static class ArrayWrapper implements ReadResolvable<Object[]> {
 
@@ -893,12 +898,9 @@ public enum SerializationStrategies implements SerializationStrategy {
     }
 
     /**
-     * The following classes are wrappers that facilitate deserialization processes for
-     * specific types of objects. They implement the ReadResolvable interface to define
-     * the deserialization mechanism.
-     * <p>
-     * A wrapper class for primitive arrays which provides a mechanism for deserialization
-     * by resolving the actual array when being read from a serialized source.
+     * Wrapper used for primitive arrays during deserialization.  It grows as data
+     * arrives and its {@link #readResolve()} method exposes the final primitive
+     * array to the caller.
      */
     static class PrimArrayWrapper implements ReadResolvable<Object> {
 
@@ -936,8 +938,9 @@ public enum SerializationStrategies implements SerializationStrategy {
     }
 
     /**
-     * A wrapper class for Demarshallable objects which provides a mechanism for deserialization
-     * by resolving the actual Demarshallable object when being read from a serialized source.
+     * Wrapper used when reading {@link Demarshallable} objects.  The wrapper is
+     * returned during the initial read and later resolves to the actual object
+     * via {@link #readResolve()}.
      */
     static class DemarshallableWrapper implements ReadResolvable<Demarshallable> {
 

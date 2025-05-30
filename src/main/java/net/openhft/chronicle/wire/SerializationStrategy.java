@@ -23,19 +23,29 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents a strategy for serializing and deserializing objects of type {@code T}.
- * Implementations of this interface define methods for reading, instantiating,
- * and providing metadata about the serialized format.
+ * <p>
+ * Each implementation typically targets a particular Java type (for example
+ * {@link Enum enums}, {@link java.util.List lists} or {@link Marshallable} objects)
+ * and defines how instances of that type are converted to and from a wire
+ * representation.  See {@link SerializationStrategies} for the common built-in
+ * strategies.
  */
 public interface SerializationStrategy {
 
     /**
      * Reads an object of type {@code T} from the provided input source and populates
-     * the given 'using' object, if not null. The method uses the given {@link BracketType}
-     * to aid in the deserialization.
+     * the given {@code using} instance if one is supplied.  The {@code clazz}
+     * parameter describes the expected type.  It may be a super type of the
+     * actual object being read if the concrete type can be inferred from the
+     * wire data.  If {@code using} is {@code null}, the implementation may call
+     * {@link #newInstanceOrNull(Class)} to obtain a new instance.  The provided
+     * {@link BracketType} hints at the structural representation (map, sequence
+     * or none) of the value being read.
      *
-     * @param clazz The class type to be deserialized.
-     * @param using An optional object of type {@code T} that can be populated with the read data.
-     *              If null, a new object will be created or an exception might be thrown depending on implementation.
+     * @param clazz       the expected class of the object to read.  May be {@code null}
+     *                    if the type is to be inferred by the strategy.
+     * @param using       an optional existing instance to populate.  If {@code null}
+     *                    the strategy may create a new instance.
      * @param in The input source containing serialized data.
      * @param bracketType The type of bracket used in the serialized format.
      * @return The populated or newly created object of type {@code T}.
@@ -45,28 +55,30 @@ public interface SerializationStrategy {
     <T> T readUsing(Class<?> clazz, T using, ValueIn in, BracketType bracketType) throws InvalidMarshallableException;
 
     /**
-     * Constructs and returns a new instance of the provided {@code type}
-     * as a reference. If the instance cannot be constructed for any reason,
-     * {@code null} is returned.
+     * Constructs and returns a new instance of the provided {@code type}.  This
+     * method is used by the deserialization process when no existing instance is
+     * supplied via the {@code using} parameter of {@link #readUsing}.  If a new
+     * instance cannot be constructed (for example the type is an interface or
+     * abstract class) {@code null} is returned.
      *
-     * @param type The class type for which a new instance is required.
-     * @return A new instance of the provided {@code type} or {@code null} if instantiation is not possible.
+     * @param type The class for which a new instance is required.
+     * @return a new instance or {@code null} if instantiation is not possible.
      */
     @Nullable
     <T> T newInstanceOrNull(Class<T> type);
 
     /**
-     * Returns the class type of objects this serialization strategy is designed to handle.
-     *
-     * @return The class type of objects this strategy can serialize and deserialize.
+     * Returns the primary Java {@link Class} that this strategy serializes and
+     * deserializes.  This may be a concrete class, an interface or a more
+     * generic type such as {@link Object}.
      */
     Class<?> type();
 
     /**
-     * Provides the bracket type used in the serialized format, which might
-     * give hints or constraints on how the data is structured.
-     *
-     * @return the {@link BracketType} used by this serialization strategy.
+     * Returns the {@link BracketType} associated with this strategy.  This
+     * describes the structural form expected when reading or writing a value –
+     * for example {@link BracketType#MAP} for objects, {@link BracketType#SEQ}
+     * for collections or {@link BracketType#NONE} for scalar values.
      */
     @NotNull
     BracketType bracketType();

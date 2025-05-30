@@ -26,15 +26,17 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
- * Implements the {@link SerializationStrategy} for scalar data types.
- * This strategy is designed for simple types and provides mechanisms for reading
- * them using provided functions.
+ * Implementation of {@link SerializationStrategy} for simple scalar values.  It
+ * is typically used for primitive wrappers or other types that appear in the
+ * wire as single values without any surrounding structure
+ * ({@link BracketType#NONE}).
  *
  * @param <E> The type of the scalar value that this strategy handles.
  */
 class ScalarStrategy<E> implements SerializationStrategy {
+    /** Function used to read the value from a {@link ValueIn}. */
     final BiFunction<? super E, ValueIn, E> read;
-    // The class type of the scalar value
+    /** The scalar value type. */
     private final Class<E> type;
 
     /**
@@ -83,13 +85,18 @@ class ScalarStrategy<E> implements SerializationStrategy {
     @NotNull
     @Override
     public BracketType bracketType() {
+        // scalar values are typically written without any brackets
         return BracketType.NONE;
     }
 
+    /**
+     * Creates a new instance of the scalar type when no existing object is
+     * supplied to {@link #readUsing}. Utilises {@link ObjectUtils#newInstance(Class)}.
+     */
     @SuppressWarnings("rawtypes")
     @NotNull
     @Override
-    public <T> T newInstanceOrNull(Class<T>type) {
+    public <T> T newInstanceOrNull(Class<T> type) {
         return Jvm.uncheckedCast(ObjectUtils.newInstance(this.type));
     }
 
@@ -101,6 +108,10 @@ class ScalarStrategy<E> implements SerializationStrategy {
     @SuppressWarnings("unchecked")
     @Nullable
     @Override
+    /**
+     * Reads the scalar value using the configured {@link #read} function.
+     * Returns {@code null} if {@link ValueIn#isNull()}.
+     */
     public <T> T readUsing(Class<?> clazz, T using, @NotNull ValueIn in, BracketType bracketType) {
         if (in.isNull())
             return null;
@@ -110,6 +121,9 @@ class ScalarStrategy<E> implements SerializationStrategy {
 
     @NotNull
     @Override
+    /**
+     * @return a textual representation including the scalar type name.
+     */
     public String toString() {
         return "ScalarStrategy<" + type.getName() + ">";
     }
