@@ -49,43 +49,68 @@ import static net.openhft.chronicle.wire.TextStopCharTesters.END_OF_TYPE;
 import static net.openhft.chronicle.wire.Wires.*;
 
 /**
- * A representation of the YAML-based wire format. `TextWire` provides functionalities
- * for reading and writing objects in a YAML-based format, and encapsulates various characteristics
- * of the YAML text format.
+ * A representation of Chronicle's text based wire format.  It reads and writes a
+ * YAML inspired dialect and is commonly used for human readable configurations or
+ * when interoperability with YAML tools is required.
  *
- * <p>This class utilizes bit sets, thread locals, and regular expressions to efficiently handle
- * the YAML formatting nuances.
+ * <p>The implementation is heavily optimised for performance and makes extensive
+ * use of {@link BitSet}, {@link ThreadLocal} caches and regular expressions when
+ * parsing or emitting text.  While compatible with YAML in most cases, it is not
+ * a full YAML 1.2 implementation and favours speed over supporting every edge
+ * case of the specification.</p>
  *
- * <p><b>Important:</b> Some configurations and methods in this class are marked as deprecated
- * and are slated for removal in future versions, suggesting that its behavior might evolve in future releases.
+ * <p><b>Note:</b> A number of fields and methods are deprecated and may be removed
+ * in a future release.</p>
  */
 @SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
 public class TextWire extends YamlWireOut<TextWire> {
 
-    // Constants representing specific textual constructs in YAML.
+    /** YAML tag used when serialising raw binary data. */
     public static final BytesStore<?, ?> BINARY = BytesStore.from("!!binary");
+
+    /** Prefix used for a type declaration, e.g. <code>!type Foo</code>. */
     public static final @NotNull Bytes<byte[]> TYPE_STR = Bytes.from("type ");
+
+    /**
+     * Tag employed internally to represent a sequence of maps. It is not part
+     * of the standard YAML specification.
+     */
     static final String SEQ_MAP = "!seqmap";
 
-    // A set of characters considered as "end characters" in this wire format.
+    /**
+     * Characters which terminate an unquoted text token when parsing.  The set
+     * is initialised in a static block.
+     */
     static final BitSet END_CHARS = new BitSet();
 
     // Thread locals for stop char testers that might need escaping in specific contexts.
     // They are weakly referenced to avoid potential memory leaks in multithreaded environments.
-    static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_QUOTES = new ThreadLocal<>();//ThreadLocal.withInitial(StopCharTesters.QUOTES::escaping);
-    static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_SINGLE_QUOTES = new ThreadLocal<>();//ThreadLocal.withInitial(() -> StopCharTesters.SINGLE_QUOTES.escaping());
-    static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_END_OF_TEXT = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
-    static final ThreadLocal<WeakReference<StopCharsTester>> STRICT_ESCAPED_END_OF_TEXT = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
+    /** Cached tester for quoted strings. */
+    static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_QUOTES = new ThreadLocal<>();
+
+    /** Cached tester for single quoted strings. */
+    static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_SINGLE_QUOTES = new ThreadLocal<>();
+
+    /** Cached tester that honours YAML escaping rules when reading text. */
+    static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_END_OF_TEXT = new ThreadLocal<>();
+
+    /** Strict variant used when parsing event names. */
+    static final ThreadLocal<WeakReference<StopCharsTester>> STRICT_ESCAPED_END_OF_TEXT = new ThreadLocal<>();
     static final Pattern REGX_PATTERN = Pattern.compile("\\.|\\$");
 
     // Suppliers for various stop char testers.
     static final Supplier<StopCharTester> QUOTES_ESCAPING = StopCharTesters.QUOTES::escaping;
     static final Supplier<StopCharTester> SINGLE_QUOTES_ESCAPING = StopCharTesters.SINGLE_QUOTES::escaping;
+    /** Supplier for the standard end of text tester. */
     static final Supplier<StopCharTester> END_OF_TEXT_ESCAPING = TextStopCharTesters.END_OF_TEXT::escaping;
+
+    /** Supplier for a stricter variant used while parsing field names. */
     static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT::escaping;
+
+    /** Supplier used when reading event names. */
     static final Supplier<StopCharsTester> END_EVENT_NAME_ESCAPING = TextStopCharsTesters.END_EVENT_NAME::escaping;
 
-    // Metadata representation in bytes.
+    /** Byte sequence used when writing or detecting the <code>!!meta-data</code> tag. */
     static final Bytes<?> META_DATA = Bytes.from("!!meta-data");
 
     static {
@@ -99,62 +124,62 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Input value parser specifically for text-based wire format.
+     * Primary {@link ValueIn} instance used to deserialize values from this
+     * wire.  Subclasses may override {@link #createValueIn()} to supply a
+     * specialised implementation.
      */
     protected final TextValueIn valueIn = createValueIn();
 
     /**
-     * Represents the start of the current line being processed in the wire format.
+     * Byte offset marking the start of the line currently being parsed.  Used
+     * for indentation calculations.
      */
     protected long lineStart = 0;
 
     /**
-     * Default value input utility.
+     * Helper {@link ValueIn} returned when a requested field is missing.
      */
     private DefaultValueIn defaultValueIn;
 
-    /**
-     * Context for writing documents in the wire format.
-     */
+    /** Current document writing context. */
     protected WriteDocumentContext writeContext;
 
-    /**
-     * Context for reading documents from the wire format.
-     */
+    /** Current document reading context. */
     protected ReadDocumentContext readContext;
 
     /**
-     * Flag to determine if strict parsing rules are applied.
+     * If set, parsing is less tolerant of deviations from the expected
+     * format.  Disabled by default.
      */
     private boolean strict = false;
 
     /**
-     * Constructor to initialize the `TextWire` with a specific bytes representation
-     * and a flag to determine if 8-bit encoding is to be used.
+     * Creates a new instance backed by the provided bytes.
      *
-     * @param bytes   Bytes representation.
-     * @param use8bit Flag to determine if 8-bit encoding is to be used.
+     * @param bytes   underlying data buffer
+     * @param use8bit if {@code true} strings are written using ISO-8859-1 rather
+     *                than UTF‑8
      */
     public TextWire(@NotNull Bytes<?> bytes, boolean use8bit) {
         super(bytes, use8bit);
     }
 
     /**
-     * Constructor that initializes the `TextWire` with bytes representation
-     * with default 8-bit encoding turned off.
+     * Creates a new instance using UTF‑8 by default.
      *
-     * @param bytes Bytes representation.
+     * @param bytes buffer to wrap
      */
     public TextWire(@NotNull Bytes<?> bytes) {
         this(bytes, false);
     }
 
     /**
-     * Factory method to create a `TextWire` from a file.
+     * Create a new {@code TextWire} initialised with the contents of the given
+     * file.
      *
-     * @param name Name of the file.
-     * @return A new instance of `TextWire`.
-     * @throws IOException if any I/O error occurs.
+     * @param name path to the file to read
+     * @return a new instance populated with the file contents
+     * @throws IOException if the file cannot be read
      */
     @NotNull
     public static TextWire fromFile(String name) throws IOException {
@@ -162,10 +187,10 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Factory method to create a `TextWire` from a string representation.
+     * Parse a text string to create a new instance.
      *
-     * @param text String representation of the wire format.
-     * @return A new instance of `TextWire`.
+     * @param text YAML text
+     * @return newly created instance
      */
     @NotNull
     public static TextWire from(@NotNull String text) {
@@ -173,10 +198,8 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Converts any wire format into a text representation.
-     *
-     * @param wire The wire format to be converted.
-     * @return The text representation of the wire format.
+     * Utility that converts any given {@link Wire} into its textual
+     * representation.  Useful for logging or debugging.
      */
     public static String asText(@NotNull Wire wire) {
         NativeBytes<Void> bytes = nativeBytes();
@@ -195,12 +218,11 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     // https://yaml.org/spec/1.2.2/#escaped-characters
     /**
-     * Processes and unescapes the provided {@link CharSequence} containing escaped sequences.
-     * For instance, "\\n" is converted to a newline character, "\\t" to a tab, etc.
-     * This method modifies the given sequence directly and adjusts its length if needed.
-     *
-     * @param sb A {@link CharSequence} that is also an {@link Appendable}, containing potentially escaped sequences.
-     *           This sequence will be modified directly.
+     * Unescapes YAML escape sequences in {@code sb} in-place. Examples such as
+     * <code>\n</code> or <code>\t</code> are converted to their character
+     * equivalents. The implementation follows the
+     * <a href="https://yaml.org/spec/1.2.2/#escaped-characters">YAML&nbsp;1.2
+     * specification</a>.
      */
     public static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb) {
         int end = 0;
@@ -277,11 +299,8 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Acquires a {@link StopCharTester} instance related to escaping single quotes.
-     * This method utilizes thread-local storage to ensure that the returned instance is thread-safe.
-     *
-     * @return A {@link StopCharTester} instance specifically designed for escaping single quotes,
-     *         or null if such an instance could not be acquired.
+     * Returns a thread local instance used when parsing text within single
+     * quotes.  The tester is reset on each call to avoid additional allocations.
      */
     @Nullable
     static StopCharTester getEscapingSingleQuotes() {
@@ -293,12 +312,12 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Loads an Object from a file
+     * Convenience method to deserialize an object from a YAML file.
      *
-     * @param filename the file-path containing the object
-     * @param <T>      the type of the object to load
-     * @return an instance of the object created from the data in the file
-     * @throws IOException if the file can not be found or read
+     * @param filename path to the YAML file
+     * @param <T>      expected object type
+     * @return deserialized object instance
+     * @throws IOException if the file cannot be read
      */
     public static <T> T load(String filename) throws IOException, InvalidMarshallableException {
         return (T) TextWire.fromFile(filename).readObject();

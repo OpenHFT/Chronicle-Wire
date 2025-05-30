@@ -47,39 +47,46 @@ import java.util.function.*;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
 /**
- * Represents a YAML-based wire format designed for efficient parsing and serialization of data.
- * The YamlWire class extends YamlWireOut and utilizes a custom tokenizer to convert YAML tokens into byte sequences.
- * It provides utility methods to read from and write to both byte buffers and files.
+ * Wire implementation that aims to follow the YAML&nbsp;1.2 specification more
+ * closely than {@link TextWire}.  It uses {@link YamlTokeniser} for parsing and
+ * supports anchors, aliases and other YAML features.  This comes at the cost of
+ * being slightly stricter and slower than the lighter weight {@code TextWire}.
  */
 @SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
 public class YamlWire extends YamlWireOut<YamlWire> {
 
-    // YAML-specific tag constants for representing special constructs.
+    /** Tag representing a sequence of maps used internally. */
     static final String SEQ_MAP = "!seqmap";
+
+    /** YAML tag for binary data. */
     static final String BINARY_TAG = "!binary";
+
+    /** Tag used for pre-encoded data blocks. */
     static final String DATA_TAG = "!data";
+
+    /** YAML null tag. */
     static final String NULL_TAG = "!null";
 
     //for (char ch : "?%&*@`0123456789+- ',#:{}[]|>!\\".toCharArray())
-    // Internal helper for reading text-based values.
+    /** Value reader used to deserialize YAML scalars and structures. */
     private final TextValueIn valueIn = createValueIn();
 
-    // Custom tokenizer for parsing YAML tokens.
+    /** Tokeniser driving the parsing process. */
     private final YamlTokeniser yt;
 
-    // Map to store reusable content anchors defined in the YAML.
+    /** Storage for objects defined via YAML anchors. */
     private final Map<String, Object> anchorValues = new HashMap<>();
 
-    // Provides default values for reading.
+    /** {@link ValueIn} returned when a field is missing. */
     private DefaultValueIn defaultValueIn;
 
-    // Context for writing out YAML documents.
+    /** Document writing context. */
     private WriteDocumentContext writeContext;
 
-    // Context for reading in YAML documents.
+    /** Document reading context. */
     private ReadDocumentContext readContext;
 
-    // Instance for re-reading or re-parsing scenarios.
+    /** Helper used for revisiting skipped fields. */
     private YamlWire rereadWire;
 
     /**
@@ -128,11 +135,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     /**
-     * Converts the content of a given {@link Wire} object into its string representation.
-     *
-     * @param wire The {@link Wire} object whose content needs to be converted to string.
-     * @return The string representation of the wire's content.
-     * @throws InvalidMarshallableException If the given wire's content cannot be marshalled.
+     * Convenience helper that copies the supplied {@link Wire} into a temporary
+     * {@code YamlWire} and returns the textual form.  Useful when debugging a
+     * wire of a different type.
      */
     public static String asText(@NotNull Wire wire) throws InvalidMarshallableException {
         long pos = wire.bytes().readPosition();

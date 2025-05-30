@@ -185,18 +185,21 @@ public enum YamlLogging {
      * The levels include OFF (no logging), DEBUG_ONLY (logs only when in debug mode), and ON (always logs).
      */
     public enum YamlLoggingLevel {
+        /** Logging is disabled. */
         OFF {
             @Override
             public boolean isSet() {
                 return false;
             }
         },
+        /** Logging is enabled only when {@link Jvm#isDebug()} is {@code true}. */
         DEBUG_ONLY {
             @Override
             public boolean isSet() {
                 return Jvm.isDebug();
             }
         },
+        /** Logging is always enabled. */
         ON {
             @Override
             public boolean isSet() {

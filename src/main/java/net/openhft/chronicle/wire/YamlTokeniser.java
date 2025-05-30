@@ -32,10 +32,10 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A tokenizer for YAML documents. The YamlTokeniser class is responsible for
- * converting a raw YAML input into individual tokens, each representing
- * a distinct construct or symbol in YAML. This class is integral to
- * processes such as parsing or tokenization of YAML documents.
+ * A tokenizer for YAML documents. It converts a raw character stream into a
+ * sequence of {@link YamlToken tokens} which are then consumed by
+ * {@link YamlWire}.  The class is optimised for speed and reuses internal
+ * buffers to minimise allocations.
  */
 @SuppressWarnings({"this-escape","deprecation"})
 public class YamlTokeniser {

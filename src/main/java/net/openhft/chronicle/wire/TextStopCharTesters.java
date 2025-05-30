@@ -47,6 +47,7 @@ enum TextStopCharTesters implements StopCharTester {
             return ch >= eowLength || eow.get(ch);
         }
     },
+    /** Stops at common YAML end-of-text characters such as quotes, commas or newlines. */
     END_OF_TEXT {
         @Override
         public boolean isStopChar(int ch) throws IllegalStateException {

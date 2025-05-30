@@ -28,12 +28,13 @@ import java.util.Arrays;
  * varying numbers of offsets without a significant overhead in space.
  */
 public class YamlKeys {
+    /** Shared empty array used when no offsets are stored. */
     private static final long[] NO_OFFSETS = {};
 
-    // The current number of offsets stored
+    /** Number of valid entries currently in {@link #offsets}. */
     int count = 0;
 
-    // The dynamic array of offsets
+    /** Array of byte offsets for keys.  Grows as required. */
     long[] offsets = NO_OFFSETS;
 
     /**

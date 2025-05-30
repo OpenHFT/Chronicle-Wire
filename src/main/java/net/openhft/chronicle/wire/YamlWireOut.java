@@ -49,27 +49,43 @@ import java.util.function.BiConsumer;
 import static net.openhft.chronicle.bytes.BytesStore.empty;
 
 /**
- * Provides functionality for writing data in a YAML-based wire format.
- * This class encapsulates methods and attributes to handle data serialization into YAML format.
+ * Abstract base class for wires that serialise data using a YAML like
+ * representation.  It manages indentation, separators and string escaping while
+ * delegating the actual value formatting to {@link YamlValueOut}.
  *
- * @param <T> The type that extends YamlWireOut
+ * @param <T> concrete subclass type
  */
 @SuppressWarnings({"rawtypes", "unchecked", "this-escape", "deprecation"})
 public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire {
     @Deprecated(/* to remove in x.28 */)
     private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
+    /** Prefix written before a type name when emitting typed objects. */
     public static final BytesStore<?, ?> TYPE = BytesStore.from("!type ");
+
+    /** Representation of a YAML null value. */
     static final String NULL = "!null \"\"";
+
+    /** Characters which require quoting when appearing at the start of a string. */
     static final BitSet STARTS_QUOTE_CHARS = new BitSet();
+
+    /** Characters which force double quoting within a string. */
     static final BitSet QUOTE_CHARS = new BitSet();
+    /** Separator used between elements when rendering a sequence inline. */
     static final BytesStore<?, ?> COMMA_SPACE = BytesStore.from(", ");
+
+    /** Separator used when an element is followed by a newline. */
     static final BytesStore<?, ?> COMMA_NEW_LINE = BytesStore.from(",\n");
+
+    /** New line bytes. */
     static final BytesStore<?, ?> NEW_LINE = BytesStore.from("\n");
-    static final BytesStore<?, ?> EMPTY_AFTER_COMMENT = BytesStore.wrap(new byte[0]); // not the same as EMPTY, so we can check this value.
+
+    /** Marker inserted when a comment occupies an otherwise empty line. */
+    static final BytesStore<?, ?> EMPTY_AFTER_COMMENT = BytesStore.wrap(new byte[0]);
     static final BytesStore<?, ?> EMPTY = BytesStore.from("");
     static final BytesStore<?, ?> SPACE = BytesStore.from(" ");
     static final BytesStore<?, ?> END_FIELD = NEW_LINE;
+    /** Lookup table for writing hexadecimal escapes. */
     static final char[] HEXADECIMAL = "0123456789ABCDEF".toCharArray();
 
     // Static initializer block to configure quote characters for the YAML writer
@@ -505,30 +521,31 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     /**
-     * This internal class represents an output value in the YAML format. It provides functionalities related
-     * to appending separators, handling whitespace, and maintaining indentation among others.
+     * Implementation of {@link ValueOut} used by YAML based wires.  It keeps
+     * track of indentation and chooses appropriate separators (comma or newline)
+     * based on whether the value being written is a scalar or a complex block.
      */
     class YamlValueOut implements ValueOut, CommentAnnotationNotifier {
         protected boolean hasCommentAnnotation = false;
 
-        // The current indentation level for the value.
+        /** Current indentation level (in spaces). */
         protected int indentation = 0;
 
-        // A list of separators to be used when writing the value.
+        /** Stack of separators for nested structures. */
         @NotNull
         protected List<BytesStore> seps = new ArrayList<>(4);
 
-        // The current separator being used.
+        /** Separator to insert before the next value. */
         @NotNull
         protected BytesStore<?, ?> sep = BytesStore.empty();
 
-        // Flag indicating if the value is a leaf node (i.e., doesn't have child elements).
+        /** If true the current value is a scalar and separators are commas. */
         protected boolean leaf = false;
 
-        // Flag indicating if default values should be dropped from the output.
+        /** Whether default values should be omitted when marshalling. */
         protected boolean dropDefault = false;
 
-        // The name of the event associated with this value (if any).
+        /** Field name cached when {@link #dropDefault} is active. */
         @Nullable
         private String eventName;
 
