@@ -89,21 +89,21 @@ classDiagram
     WireType --> Wire : creates
 ----
 
-== 3. Serialization and Deserialization Process
+== 3. Serialisation and Deserialisation Process
 
 [mermaid]
 ----
 graph TD
-    subgraph "Serialization Process"
+    subgraph "Serialisation Process"
         A[Java Object] -->|"implements Marshallable"| B[Marshallable Object]
         B -->|"writeMarshallable()"| C[Wire]
         C -->|"WireType (YAML, JSON, Binary)"| D[Bytes]
         D -->|"Store/Transmit"| E[Persistence/Network]
     end
     
-    subgraph "Deserialization Process"
+    subgraph "Deserialisation Process"
         F[Persistence/Network] -->|"Read"| G[Bytes]
-        G -->|"WireType (same as serialization)"| H[Wire]
+        G -->|"WireType (same as serialisation)"| H[Wire]
         H -->|"readMarshallable()"| I[Marshallable Object]
         I -->|"Field Population"| J[Java Object]
     end
@@ -182,7 +182,7 @@ graph TD
 
 * link:wire-architecture.adoc[Architecture Overview] - Understand the internal architecture of Chronicle Wire
 * link:wire-cookbook.adoc[Cookbook] - Practical recipes for using Chronicle Wire
-* link:wire-annotations.adoc[Annotations Guide] - Learn about annotations for fine-tuning serialization
+* link:wire-annotations.adoc[Annotations Guide] - Learn about annotations for fine-tuning serialisation
 * link:wire-schema-evolution.adoc[Schema Evolution] - How to evolve your data structures over time
 * link:wire-error-handling.adoc[Error Handling and Diagnostics] - Troubleshooting and error handling
 * link:wire-faq.adoc[FAQ] - Answers to frequently asked questions

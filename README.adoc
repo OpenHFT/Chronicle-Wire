@@ -73,8 +73,8 @@ This library requires Java 8. Support for `C++`, `ruby` and `python` is availabl
 The text formats include:
 
 * `YAML` - subset of mapping structures included
-* `JSON` - superset to support serialization
-* `CSV` - superset to support serialization
+* `JSON` - superset to support serialisation
+* `CSV` - superset to support serialisation
 * `XML` - planned
 
 Options include:
@@ -121,11 +121,15 @@ Add the dependency to your project.
 </dependency>
 ----
 
+Replace `REPLACE_WITH_VERSION` with the latest version published to Maven Central.
+
 .Gradle
 [source,groovy]
 ----
 implementation 'net.openhft:chronicle-wire:REPLACE_WITH_VERSION'
 ----
+
+Replace `REPLACE_WITH_VERSION` with the latest version published to Maven Central.
 
 .Simple Example
 [source,java]
@@ -144,8 +148,10 @@ System.out.println(bytes.toString());
 |WireType |Human Readable |Self Describing |Typical Use |Notes
 |TEXT |Yes |Partial |Debugging, simple configs |YAML based
 |YAML |Yes |Yes |Full YAML subset |Retains types
+|YAML_RETAIN_TYPE |Yes |Yes |YAML with explicit type tags |Polymorphic data
 |YAML_ONLY |Yes |Yes |Pure YAML output |No envelopes
 |JSON |Yes |Yes |JSON interop |Web friendly
+|JSON_RETAIN_TYPE |Yes |Yes |JSON with explicit type tags |Polymorphic data
 |JSON_ONLY |Yes |Yes |JSON without envelopes |
 |BINARY |No |Yes |General binary |Good balance
 |BINARY_LIGHT |No |Yes |Optimised binary |Common default

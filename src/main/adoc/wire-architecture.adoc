@@ -7,11 +7,11 @@ Purpose: To provide a comprehensive understanding of the internal architecture o
 
 == 1. Introduction
 
-Chronicle Wire is a high-performance, low-latency serialization and deserialization library, forming a foundational part of the OpenHFT (Open High-Frequency Trading) ecosystem. Its architecture is meticulously designed to support demanding applications that require minimal garbage collection, high throughput, and flexible data representation. This document outlines the key architectural components, design principles, and interactions within Chronicle Wire.
+Chronicle Wire is a high-performance, low-latency serialisation and deserialisation library, forming a foundational part of the OpenHFT (Open High-Frequency Trading) ecosystem. Its architecture is meticulously designed to support demanding applications that require minimal garbage collection, high throughput, and flexible data representation. This document outlines the key architectural components, design principles, and interactions within Chronicle Wire.
 
 The primary architectural goals of Chronicle Wire are:
 
-* **Performance:** Achieve extremely low latency and high throughput for data serialization and deserialization, minimizing CPU overhead and GC pauses.
+* **Performance:** Achieve extremely low latency and high throughput for data serialisation and deserialisation, minimizing CPU overhead and GC pauses.
 * **Flexibility:** Support multiple data formats (e.g., YAML, JSON, Binary) through a unified API, allowing developers to switch formats without code changes.
 * **Extensibility:** Provide mechanisms for custom data type handling and new wire format implementations.
 * **Schema Evolution:** Offer robust support for evolving data schemas over time without breaking compatibility.
@@ -20,9 +20,9 @@ The primary architectural goals of Chronicle Wire are:
 
 The architecture of Chronicle Wire is guided by several core design principles:
 
-* **Zero/Minimal Garbage Creation:** Extensive use of off-heap memory (`Chronicle Bytes`) and object pooling/reuse techniques to avoid generating garbage during critical serialization/deserialization paths.
+* **Zero/Minimal Garbage Creation:** Extensive use of off-heap memory (`Chronicle Bytes`) and object pooling/reuse techniques to avoid generating garbage during critical serialisation/deserialisation paths.
 * **Direct Memory Access:** Leverage `sun.misc.Unsafe` (where available and appropriate) for direct memory operations, bypassing Java heap overhead for raw data handling.
-* **Format Agnosticism:** Abstract the serialization logic from the specific data format. The application interacts with a common `Wire` API, while the underlying implementation handles the format-specific encoding/decoding.
+* **Format Agnosticism:** Abstract the serialisation logic from the specific data format. The application interacts with a common `Wire` API, while the underlying implementation handles the format-specific encoding/decoding.
 * **Self-Describing Data (Optional):** Support for both self-describing formats (which include field names or identifiers, aiding schema evolution and debugging) and more compact, non-self-describing formats (for maximum performance where schemas are implicitly shared).
 * **Streaming API:** Provide a streaming approach to reading and writing data, allowing for efficient processing of large data structures or sequences of messages.
 
@@ -59,13 +59,13 @@ Application Layer ::
 Chronicle Wire API Layer ::
 * This is the primary interface for developers interacting with the library.
 * Key components:
-** `Marshallable`: An interface (or its base class `SelfDescribingMarshallable`) that domain objects implement to enable automatic serialization of their fields.
-** `BytesMarshallable`: A lower-level interface for objects that manage their own serialization directly to/from `Bytes`.
+** `Marshallable`: An interface (or its base class `SelfDescribingMarshallable`) that domain objects implement to enable automatic serialisation of their fields.
+** `BytesMarshallable`: A lower-level interface for objects that manage their own serialisation directly to/from `Bytes`.
 ** `Wire`: The central interface for reading and writing structured data. It provides methods to obtain `ValueIn` (for reading) and `ValueOut` (for writing).
 ** `WireIn` / `WireOut`: Interfaces defining methods for reading/writing various data types and structures (e.g., `read("fieldName")`, `write("fieldName")`).
 ** `ValueIn` / `ValueOut`: Fluent APIs for reading/writing individual values or nested structures.
 ** `DocumentContext`: Manages the boundaries of a "document" or "message" on the wire, crucial for streaming multiple messages.
-** `WireType`: An enum that specifies the desired serialization format (e.g., `YAML`, `BINARY`, `JSON`). This determines which concrete `Wire` implementation is used.
+** `WireType`: An enum that specifies the desired serialisation format (e.g., `YAML`, `BINARY`, `JSON`). This determines which concrete `Wire` implementation is used.
 
 Wire Format Implementation Layer ::
 * This layer contains concrete implementations of the `Wire` interface for each supported data format.
@@ -157,12 +157,13 @@ classDiagram
 // Example: Obtaining a YAML Wire
 Bytes<?> bytes = Bytes.elasticByteBuffer();
 Wire yamlWire = WireType.YAML_RETAIN_TYPE.apply(bytes);
+// YAML_RETAIN_TYPE is the standard YAML configuration with type hints enabled.
 
 // Example: Obtaining a Binary Wire
 Wire binaryWire = WireType.BINARY_LIGHT.apply(bytes);
 ----
 
-The `WireType` enum acts as a factory and configuration point for different wire formats. It allows the application to easily switch between, for example, human-readable YAML for debugging and compact Binary for production performance, using the same serialization logic.
+The `WireType` enum acts as a factory and configuration point for different wire formats. It allows the application to easily switch between, for example, human-readable YAML for debugging and compact Binary for production performance, using the same serialisation logic.
 
 === 4.3. `Marshallable`
 
@@ -173,7 +174,7 @@ The `Marshallable` interface is a marker interface that, when implemented by a P
 
 Often, developers extend `SelfDescribingMarshallable`, which provides default implementations for these methods (using reflection or generated code) and also includes helpful `toString()`, `equals()`, and `hashCode()` methods based on the object's serialized form.
 
-For performance-critical scenarios where reflection or default marshalling overhead is too high, `BytesMarshallable` allows direct control over byte-level serialization.
+For performance-critical scenarios where reflection or default marshalling overhead is too high, `BytesMarshallable` allows direct control over byte-level serialisation.
 
 === 4.4. `DocumentContext`
 
@@ -206,7 +207,7 @@ wire.write("trade")
 ----
 * This provides fine-grained control and is useful for dynamic schemas or when not using `Marshallable` POJOs.
 
-== 6. Serialization Formats (`WireType`) and Flexibility
+== 6. Serialisation Formats (`WireType`) and Flexibility
 
 [mermaid]
 ----
@@ -235,7 +236,7 @@ graph LR
 
 The power of Chronicle Wire's architecture lies in its ability to switch `WireType` implementations transparently. The same `Marshallable` object or the same sequence of fluent API calls will produce different byte outputs (YAML, JSON, Binary) depending on the `Wire` instance used.
 
-* **Text Formats (YAML, JSON, TEXT):** Human-readable, self-describing. Excellent for debugging, configuration, and interoperability where performance is less critical. `YAML_RETAIN_TYPE` and `JSON_RETAIN_TYPE` include type information (e.g., `!Car {}`) allowing for polymorphic deserialization.
+* **Text Formats (YAML, JSON, TEXT):** Human-readable, self-describing. Excellent for debugging, configuration, and interoperability where performance is less critical. `YAML_RETAIN_TYPE` and `JSON_RETAIN_TYPE` are configurations of YAML and JSON that include type information (e.g., `!Car {}`) allowing for polymorphic deserialisation.
 * **Binary Formats (`BINARY`, `BINARY_LIGHT`, `FIELDLESS_BINARY`, `RAW`):**
 ** `BINARY_LIGHT` (and `BINARY`): Compact, efficient, self-describing to a degree (field numbers or names can be included). Good balance of performance and schema flexibility.
 ** `FIELDLESS_BINARY`: Extremely compact as it omits field names/numbers, relying on the reader and writer agreeing on the field order. Highest performance for stable, internal schemas.
@@ -248,7 +249,7 @@ Chronicle Wire's architecture supports schema evolution primarily through its se
 
 * **Adding Fields:** New fields added to a `Marshallable` class will be written by new writers. Older readers will ignore these new fields if they are not present in their class definition.
 * **Removing Fields:** Fields removed from a `Marshallable` class will not be written by new writers. Older readers expecting these fields will typically see them as `null` or default values if the data was written by a newer writer.
-* **Reordering Fields:** In text formats (YAML, JSON) and binary formats that use field names, the order of fields generally does not matter for deserialization.
+* **Reordering Fields:** In text formats (YAML, JSON) and binary formats that use field names, the order of fields generally does not matter for deserialisation.
 * **Field Numbers (`@FieldNumber`):** For binary formats, annotating fields with stable `@FieldNumber` allows renaming fields in the Java class without breaking wire compatibility, as the numeric tag remains the same.
 
 `FIELDLESS_BINARY` is an exception; it is very sensitive to schema changes (field order, type, and count must match).
@@ -258,10 +259,10 @@ Chronicle Wire's architecture supports schema evolution primarily through its se
 Several architectural choices contribute to Chronicle Wire's high performance:
 
 * **`Chronicle Bytes`:** Off-heap storage and direct memory access via `Bytes` minimizes GC overhead.
-* **Specialized `Wire` Implementations:** Each format has an optimized encoder/decoder. Binary formats, in particular, use techniques like stop-bit encoding for integers to reduce data size without CPU-intensive compression.
+* **Specialized `Wire` Implementations:** Each format has an optimised encoder/decoder. Binary formats, in particular, use techniques like stop-bit encoding for integers to reduce data size without CPU-intensive compression.
 * **Code Generation for `Marshallable`:** Avoids reflection overhead in critical paths.
 * **Object Reuse:** `DocumentContext` and other internal components are often pooled or designed for reuse. `Marshallable` objects can implement `reset()` methods for pooling.
-* **Minimal Abstraction Overhead:** While providing a clean API, the internal paths are optimized to reduce layers of indirection during actual data processing.
+* **Minimal Abstraction Overhead:** While providing a clean API, the internal paths are optimised to reduce layers of indirection during actual data processing.
 
 == 9. Integration with OpenHFT Ecosystem
 
@@ -281,7 +282,7 @@ graph TD
     end
 ----
 
-Chronicle Wire is the serialization backbone for many other OpenHFT libraries:
+Chronicle Wire is the serialisation backbone for many other OpenHFT libraries:
 
 * **Chronicle Queue:** Uses Wire to serialize messages into queue excerpts. The `MethodWriter` and `MethodReader` patterns in Chronicle Queue are built on top of Wire's ability to serialize method calls and their arguments.
 * **Chronicle Map:** Uses Wire to serialize keys and values for storage in its off-heap hash map.
@@ -297,7 +298,7 @@ Chronicle Wire's architecture is a sophisticated blend of flexibility and high-p
 == Related Topics
 
 * link:wire-cookbook.adoc[Cookbook] - Practical recipes for using Chronicle Wire
-* link:wire-annotations.adoc[Annotations Guide] - Learn about annotations for fine-tuning serialization
+* link:wire-annotations.adoc[Annotations Guide] - Learn about annotations for fine-tuning serialisation
 * link:wire-schema-evolution.adoc[Schema Evolution] - How to evolve your data structures over time
 * link:wire-glossary.adoc[Glossary] - Definitions of key terms used in this document
 * link:wire-visual-guide.adoc[Visual Guide] - Diagrams and visual aids for understanding Chronicle Wire
