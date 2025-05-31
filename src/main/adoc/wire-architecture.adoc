@@ -199,3 +199,11 @@ This tight integration ensures that the performance benefits of Wire are propaga
 == 10. Conclusion
 
 Chronicle Wire's architecture is a sophisticated blend of flexibility and high-performance engineering. By abstracting data formats behind a unified `Wire` API, leveraging `Chronicle Bytes` for efficient memory management, and providing robust marshalling capabilities for POJOs, it serves as a critical enabling technology for low-latency Java applications. Its design prioritizes minimizing garbage collection and CPU overhead, making it suitable for the most demanding use cases in financial systems and other real-time data processing environments. Understanding its layered architecture and core abstractions is key to effectively utilizing its power.
+
+== Related Topics
+
+* link:wire-cookbook.adoc[Cookbook] - Practical recipes for using Chronicle Wire
+* link:wire-annotations.adoc[Annotations Guide] - Learn about annotations for fine-tuning serialization
+* link:wire-schema-evolution.adoc[Schema Evolution] - How to evolve your data structures over time
+* link:wire-glossary.adoc[Glossary] - Definitions of key terms used in this document
+* link:index.adoc[Documentation Home] - Return to the main documentation page
