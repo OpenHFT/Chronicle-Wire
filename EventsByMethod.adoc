@@ -1,10 +1,8 @@
 = Events by Method
 Peter Lawrey
-
+:sectnums:
 :toc:
-:toclevels: 2
 :source-highlighter: rouge
-:icons: font
 
 Chronicle favours modelling events as asynchronous method calls.
 This document explores the 'Events by Method' paradigm in Chronicle Wire, demonstrating how to model, process and test events represented as asynchronous Java method calls, and how to leverage different wire formats for these events.

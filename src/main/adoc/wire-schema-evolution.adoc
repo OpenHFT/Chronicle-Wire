@@ -3,8 +3,9 @@
 :source-highlighter: rouge
 
 Purpose: To provide an in-depth exploration of schema evolution capabilities and mechanisms within Chronicle Wire, including implementation details and advanced strategies.
+:sectnums:
 
-== 1. Introduction to Schema Evolution in Chronicle Wire
+== Introduction to Schema Evolution in Chronicle Wire
 
 Schema evolution is the ability of a system to handle changes in data structures over time. As applications evolve, their data models (schemas) often need to change – fields might be added, removed, renamed, or have their types altered. For systems that store data long-term or communicate across different service versions, managing these changes without breaking compatibility or losing data is crucial.
 
@@ -15,7 +16,7 @@ Chronicle Wire's approach to schema evolution is rooted in its flexible, format-
 
 This document delves into the mechanisms Chronicle Wire employs for schema evolution, the role of different wire formats and annotations, and strategies for managing data model changes effectively.
 
-== 2. Mechanisms in Self-Describing Formats
+== Mechanisms in Self-Describing Formats
 
 [mermaid]
 ----
@@ -40,7 +41,7 @@ graph TD
 
 Self-describing formats are key to Chronicle Wire's schema evolution capabilities. These include text formats (YAML, JSON) and binary formats that embed field identifiers (like `BINARY_LIGHT`).
 
-=== 2.1. Field Identification
+=== Field Identification
 
 The ability to identify fields within the serialised data stream independently of their physical order in the class definition is fundamental.
 
@@ -75,7 +76,7 @@ graph TD
     end
 ----
 
-=== 2.2. Handling Unknown Fields (Forward Compatibility)
+=== Handling Unknown Fields (Forward Compatibility)
 
 *Forward compatibility* means that older code (a reader with an older schema version) can process data written by newer code (a writer with a newer schema version that includes additional fields).
 
@@ -89,7 +90,7 @@ Mechanism ::
 
 Impact :: This allows older services to continue functioning even when new fields are introduced by other services, promoting interoperability in evolving distributed systems. Performance impact of skipping is generally minimal unless there are very many large unknown fields.
 
-=== 2.3. Handling Missing Fields (Backward Compatibility)
+=== Handling Missing Fields (Backward Compatibility)
 
 *Backward compatibility* means that newer code (a reader with a newer schema version that expects more fields) can process data written by older code (a writer with an older schema version that omits some of these fields).
 
@@ -115,11 +116,11 @@ if (this.myList == null) {
 }
 ----
 
-=== 2.4. Reordering Fields
+=== Reordering Fields
 
 In self-describing formats (text or binary with field names/numbers), the physical order of fields in the serialised data stream generally does *not* need to match the declaration order in the Java class. Deserialisation maps fields based on their identified names or numbers. This provides flexibility in how data is written or how classes are refactored.
 
-=== 2.5. Changing Field Types (The Most Challenging Aspect)
+=== Changing Field Types (The Most Challenging Aspect)
 
 Changing the data type of an existing field is the most complex part of schema evolution and often requires careful planning and potentially custom code. Chronicle Wire provides limited automatic coercion.
 
@@ -147,7 +148,7 @@ Strategy :: When a field type must change, the safest approach is often to:
 . Eventually, phase out the old field after all data has been migrated and all readers understand the new field.
 . Alternatively, implement custom logic in `readMarshallable` to handle the conversion.
 
-== 3. `FIELDLESS_BINARY` and Schema (In)flexibility
+== `FIELDLESS_BINARY` and Schema (In)flexibility
 
 The `FIELDLESS_BINARY` `WireType` is designed for extreme performance and compactness by omitting all field names and numbers.
 
@@ -184,11 +185,11 @@ Separate Data Stores :: Use different Chronicle Queues, Chronicle Maps, or files
 Deployment Strategies :: Use blue/green deployments or similar techniques to switch over to new versions of services and their data formats simultaneously.
 
 [[role_of_annotations_in_schema_evolution]]
-== 4. Role of Annotations in Schema Evolution
+== Role of Annotations in Schema Evolution
 
 Annotations provide metadata that Chronicle Wire uses to manage schema evolution.
 
-=== 4.1. `@FieldNumber(int value)`
+=== `@FieldNumber(int value)`
 
 Status:: Road Map
 
@@ -197,7 +198,7 @@ Status:: Road Map
 * **Benefit:** This decouples the on-wire field identifier from the Java field's textual name, allowing the Java field to be renamed without breaking binary compatibility. The numeric ID remains the contract.
 * **Requirement:** Field numbers must be unique within the scope of the class being serialised.
 
-=== 4.2. `@DeprecatedWireKey(String[] oldKeys)` (and alternatives like `Wires.FIELD_RENAME_MAP`)
+=== `@DeprecatedWireKey(String[] oldKeys)` (and alternatives like `Wires.FIELD_RENAME_MAP`)
 
 Status:: Road Map
 
@@ -207,13 +208,13 @@ Status:: Road Map
 * **Benefit:** Allows graceful renaming of fields in Java code while still being able to read older data that uses the previous field names.
 * **Note:** When writing, the *current* Java field name is typically used.
 
-=== 4.3. `@DefaultValue(String value)`
+=== `@DefaultValue(String value)`
 
 Status:: Road Map
 
 * **Reiteration:** As stated before, this is largely documentary. It does *not* cause Chronicle Wire's core deserialisation logic to parse this string and inject it if a field is missing. Java's default initialisation (`0`, `null`, `false`) applies to missing fields. Custom logic in `readMarshallable` or a post-deserialisation step is needed to use this annotation's value.
 
-== 5. Advanced Strategies and Implementation Considerations
+== Advanced Strategies and Implementation Considerations
 
 For complex schema migrations beyond simple field additions/removals or renames supported by annotations, more advanced strategies are required.
 
@@ -264,7 +265,7 @@ Diagnostic Flags (e.g., `Wires.WARN_ON_UNUSED_NOTES`) ::
 ClassAlias` and Evolution ::
 ** When class names or packages are refactored, `Wires.CLASS_ALIASES.addAlias(NewClass.class, "OldSerializedName")` or `Wires.CLASS_ALIASES.addAlias(NewClass.class, OldClass.class.getName())` allows data serialised with the old class name (if the name was embedded, e.g., in YAML with type retention) to be deserialised into the new class. This decouples the on-wire type identifier from the physical Java class name.
 
-== 6. Best Practices for Evolvable Schemas
+== Best Practices for Evolvable Schemas
 
 Prefer Self-Describing Formats :: For data that is expected to evolve or be long-lived, use self-describing `WireType`s (YAML, JSON, `BINARY_LIGHT`). Avoid `FIELDLESS_BINARY` unless the schema is extremely stable and performance is paramount.
 
@@ -284,7 +285,7 @@ Idempotent `readMarshallable` :: If implementing custom logic, strive to make `r
 
 Document Your Schemas and Changes :: Maintain clear documentation (even if informal) about your `Marshallable` object structures and how they are intended to evolve.
 
-== 7. Limitations
+== Limitations
 
 While Chronicle Wire offers considerable flexibility, it's important to understand its limitations regarding automatic schema evolution:
 
