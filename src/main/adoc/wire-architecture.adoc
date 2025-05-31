@@ -99,6 +99,59 @@ The `Bytes` abstraction is fundamental. It provides a mutable, resizable view ov
 
 The `Wire` interface abstracts the process of serializing and deserializing structured data. An application obtains a `Wire` instance, typically specifying a `WireType` and providing a `Bytes` buffer.
 
+[mermaid]
+----
+classDiagram
+    class Wire {
+        <<interface>>
+        +getValueIn() ValueIn
+        +getValueOut() ValueOut
+        +read() WireIn
+        +write() WireOut
+        +writingDocument() DocumentContext
+        +readingDocument() DocumentContext
+    }
+
+    class WireType {
+        <<enum>>
+        YAML
+        YAML_ONLY
+        JSON
+        JSON_ONLY
+        BINARY
+        BINARY_LIGHT
+        FIELDLESS_BINARY
+        RAW
+        TEXT
+        CSV
+        READ_ANY
+        +apply(Bytes) Wire
+    }
+
+    class YamlWire {
+        -bytes Bytes
+        +getValueIn() ValueIn
+        +getValueOut() ValueOut
+    }
+
+    class BinaryWire {
+        -bytes Bytes
+        +getValueIn() ValueIn
+        +getValueOut() ValueOut
+    }
+
+    class JSONWire {
+        -bytes Bytes
+        +getValueIn() ValueIn
+        +getValueOut() ValueOut
+    }
+
+    Wire <|.. YamlWire
+    Wire <|.. BinaryWire
+    Wire <|.. JSONWire
+    WireType --> Wire : creates
+----
+
 [source,java]
 ----
 // Example: Obtaining a YAML Wire
@@ -155,6 +208,31 @@ wire.write("trade")
 
 == 6. Serialization Formats (`WireType`) and Flexibility
 
+[mermaid]
+----
+graph LR
+    subgraph "Wire Format Comparison"
+        A[Wire Formats] --> B[Text Formats]
+        A --> C[Binary Formats]
+
+        B --> D[YAML]
+        B --> E[JSON]
+        B --> F[TEXT]
+
+        C --> G[BINARY_LIGHT]
+        C --> H[FIELDLESS_BINARY]
+        C --> I[RAW]
+
+        D --> J["Human-readable<br>Self-describing<br>Type retention (optional)"]
+        E --> J
+        F --> J
+
+        G --> K["Compact<br>Self-describing<br>Good schema evolution"]
+        H --> L["Most compact<br>Fastest<br>Schema-sensitive"]
+        I --> M["Raw bytes<br>For BytesMarshallable<br>No framing"]
+    end
+----
+
 The power of Chronicle Wire's architecture lies in its ability to switch `WireType` implementations transparently. The same `Marshallable` object or the same sequence of fluent API calls will produce different byte outputs (YAML, JSON, Binary) depending on the `Wire` instance used.
 
 * **Text Formats (YAML, JSON, TEXT):** Human-readable, self-describing. Excellent for debugging, configuration, and interoperability where performance is less critical. `YAML_RETAIN_TYPE` and `JSON_RETAIN_TYPE` include type information (e.g., `!Car {}`) allowing for polymorphic deserialization.
@@ -187,6 +265,22 @@ Several architectural choices contribute to Chronicle Wire's high performance:
 
 == 9. Integration with OpenHFT Ecosystem
 
+[mermaid]
+----
+graph TD
+    subgraph "OpenHFT Ecosystem"
+        A[Chronicle Wire] --> B[Chronicle Queue]
+        A --> C[Chronicle Map]
+        A --> D[Chronicle Network]
+        A --> E[Chronicle Services]
+
+        B -->|"Serializes messages<br>MethodWriter/Reader"| F[Queue Excerpts]
+        C -->|"Serializes keys/values"| G[Off-heap Map]
+        D -->|"Marshals data"| H[Network Communication]
+        E -->|"Defines/serializes events"| I[Event-driven Architecture]
+    end
+----
+
 Chronicle Wire is the serialization backbone for many other OpenHFT libraries:
 
 * **Chronicle Queue:** Uses Wire to serialize messages into queue excerpts. The `MethodWriter` and `MethodReader` patterns in Chronicle Queue are built on top of Wire's ability to serialize method calls and their arguments.
@@ -206,4 +300,5 @@ Chronicle Wire's architecture is a sophisticated blend of flexibility and high-p
 * link:wire-annotations.adoc[Annotations Guide] - Learn about annotations for fine-tuning serialization
 * link:wire-schema-evolution.adoc[Schema Evolution] - How to evolve your data structures over time
 * link:wire-glossary.adoc[Glossary] - Definitions of key terms used in this document
+* link:wire-visual-guide.adoc[Visual Guide] - Diagrams and visual aids for understanding Chronicle Wire
 * link:index.adoc[Documentation Home] - Return to the main documentation page
