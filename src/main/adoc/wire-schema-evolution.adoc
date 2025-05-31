@@ -59,7 +59,7 @@ Text Formats (YAML, JSON, TEXT) ::
 ----
 graph TD
     subgraph "Field Identification in Different Formats"
-        A[Java Class Definition] --> B[Serialization]
+        A[Java Class Definition] --> B[Serialisation]
         B --> C{Wire Format}
         C -->|YAML/JSON| D[Text Format]
         C -->|BINARY_LIGHT| E[Binary Format]
@@ -296,7 +296,7 @@ By understanding these mechanisms, limitations, and best practices, developers c
 == Related Topics
 
 * link:wire-architecture.adoc[Architecture Overview] - Understand the internal architecture of Chronicle Wire
-* link:wire-annotations.adoc[Annotations Guide] - Learn about annotations for fine-tuning serialization
+* link:wire-annotations.adoc[Annotations Guide] - Learn about annotations for fine-tuning serialisation
 * link:wire-cookbook.adoc#_4_schema_evolution[Schema Evolution Examples] - Practical examples of schema evolution
 * link:wire-error-handling.adoc[Error Handling and Diagnostics] - Troubleshooting and error handling
 * link:wire-visual-guide.adoc#_5_schema_evolution[Visual Guide: Schema Evolution] - Diagrams illustrating schema evolution concepts
