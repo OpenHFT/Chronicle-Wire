@@ -5,6 +5,7 @@
 :source-highlighter: rouge
 :icons: font
 
+:sectnums:
 Purpose: To provide clear definitions for common terms and concepts used in Chronicle Wire and its related ecosystem.
 
 [glossary]

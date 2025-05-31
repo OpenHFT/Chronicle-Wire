@@ -1,14 +1,15 @@
 = Project Requirements: Chronicle Wire Documentation Enhancement
 :toc:
 :source-highlighter: rouge
+:sectnums:
 
 To outline the detailed requirements for creating comprehensive and technically rich documentation for the Chronicle Wire library, aimed at improving user understanding, adoption, and effective utilization.
 
-== 1. Introduction
+== Introduction
 
 This document specifies the detailed requirements for a significant enhancement of the documentation for the Chronicle Wire library. Chronicle Wire is a foundational component within the OpenHFT (Open High-Frequency Trading) ecosystem, designed for high-performance, low-latency data serialisation and deserialisation. The current initiative aims to produce documentation that is technically deep, practically useful, and addresses the needs of a diverse developer audience. This enhancement will be based on an exhaustive technical review of Chronicle Wire, covering its architecture, features, diverse use cases within OpenHFT (including inter-process communication (IPC), object serialisation, low-latency systems design, and data persistence strategies), and a thorough comparative analysis against other prominent serialisation libraries. The ultimate goal is to establish this documentation as the authoritative resource for Chronicle Wire.
 
-== 2. Goals
+== Goals
 
 The overarching goals for this documentation enhancement are:
 
@@ -36,11 +37,11 @@ Maximized Accessibility and User Experience ::
 * Ensure the documentation is structured logically and is easily navigable for developers with varying levels of familiarity with OpenHFT, Java, and serialisation technologies.
 * Cater to different learning styles by incorporating diagrams, flowcharts, and concise summaries alongside detailed explanations.
 
-== 3. Scope of Documentation
+== Scope of Documentation
 
 The documentation shall comprehensively cover the following key areas:
 
-=== 3.1. Core Chronicle Wire Concepts
+=== Core Chronicle Wire Concepts
 
 Comprehensive Overview ::
 * **Introduction:** What Chronicle Wire is, its origin within OpenHFT, and the core problems it solves (e.g., performance bottlenecks of standard Java serialisation, need for format flexibility).
@@ -97,7 +98,7 @@ Low-Latency and High-Performance Features ::
 * **`SingleThreadedChecked`:** Explanation of its role and how to ensure thread safety when using Wire and related components.
 * **Trivially Copyable Objects:** Explanation and use cases for this optimisation.
 
-=== 3.2. Chronicle Wire Usage in OpenHFT Ecosystem Components
+=== Chronicle Wire Usage in OpenHFT Ecosystem Components
 
 
 *Chronicle Queue (v5.x and relevant versions) ::
@@ -134,7 +135,7 @@ Chronicle Services ::
 * **State Aggregation and Replay:** How services deserialize events using Wire to reconstruct state or replay business logic.
 * **Conceptual Example:** A detailed walkthrough of a simple event-sourced service (e.g., an "Order Management" service with `OrderCreated`, `OrderUpdated` events defined as `Marshallable` objects), showing event definition, publishing to a queue, and a handler processing these events.
 
-=== 3.3. Rich Code Examples and Tutorials
+=== Rich Code Examples and Tutorials
 
 Variety and Scope ::
 * **Basic Serialisation:** Simple POJOs with various `WireType`s (YAML, JSON, Binary).
@@ -153,7 +154,7 @@ Best Practices Integration :: Code examples should subtly (or explicitly) demons
 
 Runnable Format :: Provide examples as complete, runnable Java files or easily copy-pasteable snippets that can be integrated into a user's project. Accompanying `pom.xml` dependencies for OpenHFT components should be noted.
 
-=== 3.4. Comprehensive Comparison with Other Serialisation Libraries
+=== Comprehensive Comparison with Other Serialization Libraries
 
 Detailed Comparison Aspects (for each library vs. Chronicle Wire) ::
 * **Data Format & Flexibility:**
@@ -197,7 +198,7 @@ Presentation Format ::
 * **Structured Tables:** Use detailed comparison tables for a clear, side-by-side view of features, performance metrics, and qualitative aspects.
 * **Narrative Summaries:** Accompany tables with narrative explanations highlighting key differences and trade-offs.
 
-== 4. Non-Functional Requirements
+== Non-Functional Requirements
 
 Accuracy and Currency ::
 * All technical information, API descriptions, and code examples must be rigorously verified for accuracy against the latest stable release of Chronicle Wire and relevant OpenHFT components.
@@ -224,7 +225,7 @@ Maintainability and Extensibility ::
 
 Consistency :: Maintain consistent terminology, formatting, and style throughout the documentation.
 
-== 5. Deliverables
+== Deliverables
 
 Primary AsciiDoc Document(s) ::
 * A main AsciiDoc files `src/main/adoc` serving as the entry point and containing the overall structure.
@@ -240,7 +241,7 @@ Diagrams and Illustrations ::
 Comparison Data ::
 * Clearly presented comparison tables and benchmark summaries within the AsciiDoc.
 
-== 6. Target Audience
+== Target Audience
 
 The documentation should cater to a diverse technical audience, including:
 
@@ -259,7 +260,7 @@ Performance Engineers ::
 Developers Evaluating Serialisation Libraries ::
 * **Goal:** Obtain a balanced, technically sound comparison to make an informed choice for their specific project needs.
 
-== 7. Assumptions
+== Assumptions
 
 Reader's Background :: The documentation will assume readers have a solid understanding of Java programming concepts. Familiarity with general serialisation concepts is helpful but not strictly required for introductory sections.
 

@@ -159,3 +159,15 @@ section:: Top Level Section
 ### Emphasis and Bold Text
 
 In AsciiDoc, an underscore `_` is _emphasis_; `*text*` is *bold*.
+
+### Section Numbering
+
+Use automatic section numbering for all `.adoc` files.
+
+* Add `:sectnums:` to the document header.
+* Do not prefix section titles with manual numbers.
+
+```asciidoc
+= Document Title
+:sectnums:
+```

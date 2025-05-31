@@ -3,9 +3,10 @@
 :toc: 
 :source-highlighter: rouge
 
+:sectnums:
 Purpose: To provide a comprehensive user guide and reference for all standard annotations available in Chronicle Wire, detailing their purpose, usage, and impact on serialisation.
 
-== 1. Introduction
+== Introduction
 
 Chronicle Wire leverages Java annotations to provide developers with fine-grained control over the serialisation and deserialisation process. Annotations offer a declarative way to customise data representation, optimise for performance or size, add metadata, and aid in schema evolution, often without needing to write complex custom marshalling logic.
 
@@ -19,7 +20,7 @@ This document serves as a comprehensive guide to the standard annotations provid
 
 Understanding these annotations is key to effectively tailoring Chronicle Wire to your specific application needs, whether for human readability, extreme performance, or robust data versioning. This guide aims to fulfil the requirements for such documentation by being that guide.
 
-== 2. Core Annotation Categories
+== Core Annotation Categories
 
 Chronicle Wire annotations can be broadly categorised based on their primary function:
 
@@ -29,11 +30,11 @@ Chronicle Wire annotations can be broadly categorised based on their primary fun
 
 This guide will explore annotations primarily from the first two categories.
 
-== 3. Data Conversion & Formatting Annotations
+== Data Conversion & Formatting Annotations
 
 These annotations are crucial for controlling the on-wire representation of your data.
 
-=== 3.1. `@LongConversion` and Derivative Converters
+=== `@LongConversion` and Derivative Converters
 
 Purpose ::
 The `@LongConversion` annotation is a powerful meta-annotation used to specify that a `long` field in Java should be converted to and from a different representation (typically a String) when serialised to text-based wire formats, while remaining a `long` in binary formats. This is extremely useful for compactly storing short textual identifiers or codes within an 8-byte long.
@@ -52,7 +53,7 @@ Use Case :: Storing short alphanumeric IDs, symbols, or codes (e.g., currency pa
 Example ::
 While `@LongConversion` is the base, Chronicle Wire provides several convenient pre-defined annotations that use specific converters:
 
-==== 3.1.1. `@BaseN` Converters (`@Base32`, `@Base64`, `@Base85`)
+==== `@BaseN` Converters (`@Base32`, `@Base64`, `@Base85`)
 
 Annotations :: `@Base32`, `@Base64`, `@Base85` (these are meta-annotated with `@LongConversion` pointing to respective `BaseNLongConverter` implementations).
 
@@ -91,7 +92,7 @@ public class StockInfo extends SelfDescribingMarshallable {
 // In Binary: stockSymbol is an 8-byte long
 ----
 
-==== 3.1.2. `@ShortText`
+==== `@ShortText`
 
 Status :: Stable
 
@@ -124,7 +125,7 @@ public class Order extends SelfDescribingMarshallable {
 }
 ----
 
-=== 3.2. Timestamp Converters (`@NanoTime`)
+=== Timestamp Converters (`@NanoTime`)
 
 Annotations :: `@NanoTime`
 
@@ -163,11 +164,11 @@ public class LogEntry extends SelfDescribingMarshallable {
 // }
 ----
 
-== 4. Schema Definition & Metadata Annotations
+== Schema Definition & Metadata Annotations
 
 These annotations provide additional information about fields or types, primarily aiding in schema evolution, binary format stability, or human-readable documentation.
 
-=== 4.1. `@FieldNumber`
+=== `@FieldNumber`
 
 Status :: Road Map
 
@@ -203,7 +204,7 @@ public class FinancialInstrument extends SelfDescribingMarshallable {
 
 IMPORTANT: Ensure field numbers are unique within a class hierarchy if polymorphism and shared binary formats are involved.
 
-=== 4.2. `@Comment`
+=== `@Comment`
 
 Purpose :: To add a descriptive comment to a field, which will be included in some text-based wire formats, typically YAML.
 
@@ -242,7 +243,7 @@ public class AppConfig extends SelfDescribingMarshallable {
 // }
 ----
 
-=== 4.3. `@DefaultValue`
+=== `@DefaultValue`
 
 Status :: Road Map
 
@@ -276,7 +277,7 @@ public class SystemSettings extends SelfDescribingMarshallable {
 }
 ----
 
-=== 4.4. `@DeprecatedWireKey` (and similar for field renaming)
+=== `@DeprecatedWireKey` (and similar for field renaming)
 
 Status :: Road Map
 
@@ -308,7 +309,7 @@ public class UserDetails extends SelfDescribingMarshallable {
 ----
 NOTE: The exact mechanism for field renaming with backward compatibility can vary. `Wires.FIELD_RENAME_MAP` or programmatic remapping using `WireParselet` might be used. Always consult the specific Chronicle Wire version documentation for the recommended approach to field renaming.
 
-== 5. Best Practices for Using Annotations
+== Best Practices for Using Annotations
 
 * **Be Purposeful:** Use annotations where they add clear value, such as improving readability in text formats (`@Comment`, `@NanoTime`), optimising binary size/performance (`@LongConversion`, `@FieldNumber`), or ensuring schema stability (`@FieldNumber`).
 * **Understand Format Impact:** Be aware that some annotations only affect text formats (e.g., `@Comment`), while others primarily impact binary formats (e.g., `@FieldNumber`'s core use).

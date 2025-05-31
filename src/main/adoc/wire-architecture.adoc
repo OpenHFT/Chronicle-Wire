@@ -3,9 +3,10 @@
 :toc:
 :source-highlighter: rouge
 
+:sectnums:
 Purpose: To provide a comprehensive understanding of the internal architecture of the Chronicle Wire library, its components, and design principles.
 
-== 1. Introduction
+== Introduction
 
 Chronicle Wire is a high-performance, low-latency serialisation and deserialisation library, forming a foundational part of the OpenHFT (Open High-Frequency Trading) ecosystem. Its architecture is meticulously designed to support demanding applications that require minimal garbage collection, high throughput, and flexible data representation. This document outlines the key architectural components, design principles, and interactions within Chronicle Wire.
 
@@ -16,7 +17,7 @@ The primary architectural goals of Chronicle Wire are:
 * **Extensibility:** Provide mechanisms for custom data type handling and new wire format implementations.
 * **Schema Evolution:** Offer robust support for evolving data schemas over time without breaking compatibility.
 
-== 2. Core Design Principles
+== Core Design Principles
 
 The architecture of Chronicle Wire is guided by several core design principles:
 
@@ -26,7 +27,7 @@ The architecture of Chronicle Wire is guided by several core design principles:
 * **Self-Describing Data (Optional):** Support for both self-describing formats (which include field names or identifiers, aiding schema evolution and debugging) and more compact, non-self-describing formats (for maximum performance where schemas are implicitly shared).
 * **Streaming API:** Provide a streaming approach to reading and writing data, allowing for efficient processing of large data structures or sequences of messages.
 
-== 3. Architectural Layers and Components
+== Architectural Layers and Components
 
 Chronicle Wire's architecture can be conceptualized in several layers, with well-defined components interacting across these layers.
 
@@ -89,13 +90,13 @@ Underlying I/O or Storage Layer ::
 ** Memory-mapped files (as used by Chronicle Queue for persistence).
 ** Network sockets (as used by Chronicle Network for IPC).
 
-== 4. Key Abstractions in Detail
+== Key Abstractions in Detail
 
-=== 4.1. `Bytes` and `BytesStore`
+=== `Bytes` and `BytesStore`
 
 The `Bytes` abstraction is fundamental. It provides a mutable, resizable view over a `BytesStore`. `Wire` implementations use `Bytes` to read from and write to the underlying byte sequence without needing to know if it's on-heap, off-heap, or file-backed. This decoupling is crucial for performance and flexibility.
 
-=== 4.2. `Wire` and `WireType`
+=== `Wire` and `WireType`
 
 The `Wire` interface abstracts the process of serializing and deserializing structured data. An application obtains a `Wire` instance, typically specifying a `WireType` and providing a `Bytes` buffer.
 
@@ -165,7 +166,7 @@ Wire binaryWire = WireType.BINARY_LIGHT.apply(bytes);
 
 The `WireType` enum acts as a factory and configuration point for different wire formats. It allows the application to easily switch between, for example, human-readable YAML for debugging and compact Binary for production performance, using the same serialisation logic.
 
-=== 4.3. `Marshallable`
+=== `Marshallable`
 
 The `Marshallable` interface is a marker interface that, when implemented by a POJO, allows Chronicle Wire to automatically serialize its fields.
 
@@ -176,11 +177,11 @@ Often, developers extend `SelfDescribingMarshallable`, which provides default im
 
 For performance-critical scenarios where reflection or default marshalling overhead is too high, `BytesMarshallable` allows direct control over byte-level serialisation.
 
-=== 4.4. `DocumentContext`
+=== `DocumentContext`
 
 When streaming multiple objects or messages, `DocumentContext` is used to manage the boundaries and metadata of each individual "document" written to or read from the wire.
 
-== 5. Marshalling Process
+== Marshalling Process
 
 Chronicle Wire supports two main ways to marshal data:
 
@@ -207,7 +208,7 @@ wire.write("trade")
 ----
 * This provides fine-grained control and is useful for dynamic schemas or when not using `Marshallable` POJOs.
 
-== 6. Serialisation Formats (`WireType`) and Flexibility
+== Serialization Formats (`WireType`) and Flexibility
 
 [mermaid]
 ----
@@ -243,7 +244,7 @@ The power of Chronicle Wire's architecture lies in its ability to switch `WireTy
 ** `RAW`: Essentially a "pass-through" for raw byte sequences, often used with `BytesMarshallable`.
 * `READ_ANY`: A special `WireType` that can attempt to detect and read data from any of the known formats, useful for flexible consumers.
 
-== 7. Schema Evolution
+== Schema Evolution
 
 Chronicle Wire's architecture supports schema evolution primarily through its self-describing formats:
 
@@ -254,7 +255,7 @@ Chronicle Wire's architecture supports schema evolution primarily through its se
 
 `FIELDLESS_BINARY` is an exception; it is very sensitive to schema changes (field order, type, and count must match).
 
-== 8. Performance in Architecture
+== Performance in Architecture
 
 Several architectural choices contribute to Chronicle Wire's high performance:
 
@@ -264,7 +265,7 @@ Several architectural choices contribute to Chronicle Wire's high performance:
 * **Object Reuse:** `DocumentContext` and other internal components are often pooled or designed for reuse. `Marshallable` objects can implement `reset()` methods for pooling.
 * **Minimal Abstraction Overhead:** While providing a clean API, the internal paths are optimised to reduce layers of indirection during actual data processing.
 
-== 9. Integration with OpenHFT Ecosystem
+== Integration with OpenHFT Ecosystem
 
 [mermaid]
 ----
@@ -291,7 +292,7 @@ Chronicle Wire is the serialisation backbone for many other OpenHFT libraries:
 
 This tight integration ensures that the performance benefits of Wire are propagated throughout the OpenHFT stack.
 
-== 10. Conclusion
+== Conclusion
 
 Chronicle Wire's architecture is a sophisticated blend of flexibility and high-performance engineering. By abstracting data formats behind a unified `Wire` API, leveraging `Chronicle Bytes` for efficient memory management, and providing robust marshalling capabilities for POJOs, it serves as a critical enabling technology for low-latency Java applications. Its design prioritizes minimizing garbage collection and CPU overhead, making it suitable for the most demanding use cases in financial systems and other real-time data processing environments. Understanding its layered architecture and core abstractions is key to effectively utilizing its power.
 
