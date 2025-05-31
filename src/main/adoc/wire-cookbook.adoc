@@ -8,6 +8,26 @@ Purpose :: To provide a collection of practical recipes for common tasks and adv
 
 This cookbook offers a series of focused, problem-solution style recipes to help you effectively use Chronicle Wire. Each recipe addresses a specific task or challenge, providing code examples and explanations. Whether you're new to Chronicle Wire or looking for advanced techniques, these recipes aim to provide quick and actionable guidance.
 
+[mermaid]
+----
+graph TD
+    subgraph "Serialization Process"
+        A[Java Object] -->|"implements Marshallable"| B[Marshallable Object]
+        B -->|"writeMarshallable()"| C[Wire]
+        C -->|"WireType (YAML, JSON, Binary)"| D[Bytes]
+        D -->|"Store/Transmit"| E[Persistence/Network]
+    end
+
+    subgraph "Deserialization Process"
+        F[Persistence/Network] -->|"Read"| G[Bytes]
+        G -->|"WireType (same as serialization)"| H[Wire]
+        H -->|"readMarshallable()"| I[Marshallable Object]
+        I -->|"Field Population"| J[Java Object]
+    end
+----
+
+The diagram above illustrates the basic serialization and deserialization process in Chronicle Wire. Objects implementing the `Marshallable` interface can be written to a `Wire` instance, which uses a specific `WireType` to determine the format (YAML, JSON, Binary, etc.). The data is then stored in a `Bytes` buffer, which can be persisted or transmitted. The deserialization process reverses these steps.
+
 TIP: For a foundational understanding of Chronicle Wire's architecture and core concepts, please refer to the main Chronicle Wire documentation and architectural overview.
 
 == 2. Basic Serialization and Deserialization
