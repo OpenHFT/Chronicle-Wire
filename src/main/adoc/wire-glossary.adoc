@@ -1,0 +1,298 @@
+
+= Chronicle Wire Glossary
+:toc:
+:toclevels: 2
+:source-highlighter: rouge
+:icons: font
+
+:sectnums:
+Purpose: To provide clear definitions for common terms and concepts used in Chronicle Wire and its related ecosystem.
+
+[glossary]
+== A
+
+[glossaryentry]
+Annotation ::
+In Java, a form of metadata that can be added to code elements (classes, methods, fields). Chronicle Wire uses annotations (e.g., `@LongConversion`, `@NanoTime`, `@FieldNumber`) to declaratively control serialisation behaviour.
+
+[glossaryentry]
+ASCII-7 ::
+A 7-bit character encoding standard representing 128 characters, primarily English letters, digits, and common punctuation. Relevant for ensuring text-based wire formats are universally readable.
+
+[glossaryentry]
+AtomicLong ::
+A Java class (`java.util.concurrent.atomic.AtomicLong`) that provides atomic operations on a `long` value, often used for generating unique identifiers or sequence numbers in high-performance, concurrent systems.
+
+== B
+
+[glossaryentry]
+Base64 / Base85 ::
+Encoding schemes that represent binary data in an ASCII string format. In Chronicle Wire, `@Base64` and `@Base85` annotations (via `@LongConversion`) allow short strings to be compactly stored in `long` fields.
+
+[glossaryentry]
+Binary Format ::
+A data representation that stores information as sequences of bytes, not directly human-readable without tools. Chronicle Wire offers several binary formats (e.g., `BINARY_LIGHT`, `FIELDLESS_BINARY`) optimised for performance and compactness.
+
+[glossaryentry]
+`Bytes` ::
+A core abstraction from the `chronicle-bytes` library representing a sequence of bytes. It can wrap on-heap byte arrays, off-heap direct memory, or memory-mapped files. All `Wire` implementations operate on a `Bytes` instance.
+
+[glossaryentry]
+`BytesMarshallable` ::
+An interface in Chronicle Wire that allows objects to have complete control over their serialisation and deserialisation logic directly at the `Bytes` level. This is used for maximum performance or when a very specific binary layout is required.
+
+[glossaryentry]
+`BytesStore` ::
+An interface from `chronicle-bytes` representing the underlying storage for a `Bytes` object (e.g., a `ByteBuffer`, native memory block).
+
+== C
+
+[glossaryentry]
+Chronicle Bytes ::
+A low-level Java library from OpenHFT providing high-performance, off-heap and on-heap byte buffer manipulation capabilities. It's a foundational component for Chronicle Wire.
+
+[glossaryentry]
+Chronicle Map ::
+An OpenHFT library providing an off-heap, persisted, and optionally IPC-shared key-value store (a concurrent hash map). Chronicle Wire is often used to serialise keys and values for Chronicle Map.
+
+[glossaryentry]
+Chronicle Queue ::
+An OpenHFT library providing a persisted, low-latency, high-throughput messaging queue. Chronicle Wire is its internal serialisation engine for messages (excerpts).
+
+[glossaryentry]
+Chronicle Wire ::
+The subject of this glossary; a high-performance Java serialisation and deserialisation library supporting multiple data formats and focusing on low latency and minimal garbage creation.
+
+[glossaryentry]
+Class Alias ::
+A mechanism in Chronicle Wire (e.g., via `Wires.CLASS_ALIASES`) to use a short, custom name in the serialised output (especially YAML/JSON) to represent a fully qualified Java class name, making the output cleaner and more resilient to refactoring.
+
+[glossaryentry]
+Compactness ::
+Refers to how little space the serialised data occupies. Binary formats are generally more compact than text formats.
+
+[glossaryentry]
+Converter (`LongConverter`, etc.) ::
+A component in Chronicle Wire used with annotations like `@LongConversion` to transform a Java data type (e.g., a `long`) into a different representation for text formats (e.g., a Base85 string) while keeping its original type for binary formats.
+
+== D
+
+[glossaryentry]
+Deserialisation ::
+The process of converting data from a serialised format (e.g., a byte stream, JSON string) back into an in-memory object representation.
+
+[glossaryentry]
+`DocumentContext` ::
+An interface in Chronicle Wire used to manage the boundaries of individual messages or "documents" when streaming multiple items. It ensures messages are correctly framed and provides metadata about the current document.
+
+[glossaryentry]
+DTO (Data Transfer Object) ::
+A simple object used to pass data between layers or components. `Marshallable` POJOs in Chronicle Wire often serve as DTOs.
+
+== E
+
+[glossaryentry]
+Elastic Bytes ::
+Refers to `Bytes` instances that can automatically resize (expand) as more data is written to them, e.g., `Bytes.elasticByteBuffer()`.
+
+[glossaryentry]
+Excerpt ::
+A term used in Chronicle Queue representing a single message or record within the queue. Each excerpt's content is serialised using Chronicle Wire.
+
+== F
+
+[glossaryentry]
+`FIELDLESS_BINARY` ::
+A `WireType` in Chronicle Wire that produces an extremely compact binary representation by omitting all field names or identifiers. It requires the reader and writer to have an identical, fixed schema.
+
+[glossaryentry]
+Fluent API ::
+A style of object-oriented API design where method calls are chained together (e.g., `object.setA(1).setB("text").setC(true)`), often with methods returning the instance itself (`this`). Chronicle Wire's `ValueIn` and `ValueOut` provide a fluent API.
+
+[glossaryentry]
+Format Agnosticism ::
+A key feature of Chronicle Wire where the application's serialisation logic (e.g., `Marshallable` classes) remains independent of the chosen on-wire data format (YAML, JSON, Binary, etc.).
+
+== G
+
+[glossaryentry]
+Garbage Collection (GC) ::
+The process by which a Java Virtual Machine (JVM) automatically reclaims memory occupied by objects that are no longer in use. Chronicle Wire is designed to minimise GC overhead.
+
+== H
+
+[glossaryentry]
+Human-Readable Format ::
+A data format (like YAML or JSON) that can be easily read and understood by humans without special tools.
+
+== I
+
+[glossaryentry]
+Inter-Process Communication (IPC) ::
+Mechanisms that allow different processes, potentially running on the same machine, to exchange data and synchronise. Chronicle Queue (using Wire) is a common tool for high-performance IPC.
+
+[glossaryentry]
+ISO 8601 ::
+An international standard for representing dates and times as strings, commonly used by Chronicle Wire's timestamp annotations (e.g., `@NanoTime`) for text formats.
+
+== J
+
+[glossaryentry]
+JSON (JavaScript Object Notation) ::
+A lightweight, human-readable data-interchange format. Chronicle Wire supports JSON as a `WireType`.
+
+== L
+
+[glossaryentry]
+Latency ::
+The time delay between a cause and its effect. In serialisation, it can refer to the time taken to convert an object to bytes or vice-versa. Chronicle Wire aims for very low latency.
+
+[glossaryentry]
+`LongConversion` ::
+An annotation in Chronicle Wire used to specify that a `long` field should be converted to/from another representation (often a String) in text formats, while remaining a `long` in binary.
+
+== M
+
+[glossaryentry]
+`Marshallable` ::
+An interface in Chronicle Wire that objects implement to indicate they can be serialised and deserialised. It defines `readMarshallable(WireIn)` and `writeMarshallable(WireOut)` methods.
+
+[glossaryentry]
+Marshalling ::
+Another term for serialisation; the process of transforming an in-memory object into a format suitable for storage or transmission.
+
+[glossaryentry]
+Memory-Mapped File ::
+A segment of virtual memory that has been assigned a direct byte-for-byte correlation with some portion of a file or file-like resource. Used by Chronicle Queue for persistence and efficient I/O.
+
+[glossaryentry]
+`MethodReader` ::
+A component in Chronicle Queue that reads messages (serialised method calls) from the queue using Chronicle Wire and dispatches them as method invocations on a target object.
+
+[glossaryentry]
+`MethodWriter` ::
+A component in Chronicle Queue that intercepts method calls on an interface and serialises them as messages into the queue using Chronicle Wire.
+
+== N
+
+[glossaryentry]
+`NanoTime` ::
+An annotation in Chronicle Wire used to format a `long` timestamp (representing nanoseconds since epoch) as a human-readable ISO 8601 string in text formats.
+
+[glossaryentry]
+Null Safety ::
+Handling of null values during serialisation and deserialisation. Chronicle Wire can represent nulls.
+
+== O
+
+[glossaryentry]
+Off-Heap Memory ::
+Memory allocated outside the standard JVM garbage-collected heap, typically using `java.nio.ByteBuffer.allocateDirect()` or similar. Chronicle Wire extensively uses off-heap memory via `chronicle-bytes` to reduce GC pauses.
+
+[glossaryentry]
+OpenHFT (Open High-Frequency Trading) ::
+The open-source project and community that develops Chronicle Wire and other related high-performance Java libraries.
+
+== P
+
+[glossaryentry]
+POJO (Plain Old Java Object) ::
+A simple Java object not bound by any special restriction or framework other than those of the Java Language Specification itself. `Marshallable` objects are often POJOs.
+
+[glossaryentry]
+Polymorphism ::
+The ability of an object to take on many forms. In serialisation, this relates to deserialising data into the correct concrete subclass when the exact type is not known beforehand. `YAML_RETAIN_TYPE` or `JSON_RETAIN_TYPE` help with this.
+
+== R
+
+[glossaryentry]
+`RAW` (WireType) ::
+A `WireType` that performs minimal framing, often used with `BytesMarshallable` objects where the object itself controls the entire byte layout.
+
+[glossaryentry]
+`READ_ANY` (WireType) ::
+A special `WireType` that attempts to heuristically detect and read data from any of the known Chronicle Wire formats.
+
+[glossaryentry]
+Reflection ::
+A Java API that allows a program to inspect and manipulate its own structure (classes, methods, fields) at runtime. Chronicle Wire can use reflection for default marshalling but often prefers code generation for performance.
+
+== S
+
+[glossaryentry]
+@ShortText  ::
+An annotation in Chronicle Wire that indicates a `String` field should be serialised as a short text representation, typically used for compactness in binary formats.
+
+[glossaryentry]
+Schema ::
+The structure or definition of data, including field names, types, and order.
+
+[glossaryentry]
+Schema Evolution ::
+The ability to change the schema of data over time (e.g., add or remove fields) while maintaining compatibility between different versions of software reading and writing that data.
+
+[glossaryentry]
+`SelfDescribingMarshallable` ::
+A convenient abstract base class in Chronicle Wire that implements `Marshallable`. It provides automatic field serialisation and default `toString()`, `equals()`, and `hashCode()` methods.
+
+[glossaryentry]
+Self-Describing Format ::
+A data format where metadata (like field names or type information) is included alongside the data itself. This aids in schema evolution and human readability. YAML, JSON, and some Chronicle Wire binary formats are self-describing.
+
+[glossaryentry]
+Serialisation ::
+The process of converting an in-memory object into a stream of bytes or a textual representation for storage or transmission.
+
+[glossaryentry]
+Stop-Bit Encoding (VarInts/VarLongs) ::
+A variable-length encoding scheme for integers where smaller numeric values use fewer bytes. Used in Chronicle Wire binary formats for efficiency.
+
+[glossaryentry]
+Streaming API ::
+An API that processes data as a continuous flow or sequence of items, rather than loading everything into memory at once. Chronicle Wire's `DocumentContext` supports a streaming model for messages.
+
+== T
+
+[glossaryentry]
+Text Format ::
+A data format that represents information as human-readable text, like YAML or JSON.
+
+[glossaryentry]
+Throughput ::
+The rate at which data can be processed, often measured in messages per second or bytes per second for serialisation systems.
+
+[glossaryentry]
+Trivially Copyable Object ::
+An object whose in-memory representation can be directly copied to its serialised form (and vice-versa) with minimal transformation, typically involving only primitive fields. This is an advanced optimisation.
+
+== V
+
+[glossaryentry]
+`ValueIn` / `ValueOut` ::
+Fluent API interfaces provided by `Wire` for reading (`ValueIn`) and writing (`ValueOut`) individual values, nested objects, and sequences in a structured manner.
+
+== W
+
+[glossaryentry]
+`Wire` ::
+The central interface in Chronicle Wire for reading and writing structured data in a specific format. Concrete implementations include `YamlWire`, `BinaryWire`, etc.
+
+[glossaryentry]
+`WireType` ::
+An enum in Chronicle Wire that defines and acts as a factory for different serialisation formats (e.g., `YAML_ONLY`, `BINARY_LIGHT`, `FIELDLESS_BINARY`).
+
+== Y
+
+[glossaryentry]
+YAML (YAML Ain't Markup Language) ::
+A human-friendly data serialisation standard for all programming languages. Chronicle Wire supports YAML as a `WireType`.
+
+== Z
+
+[glossaryentry]
+Zero-Copy ::
+A technique that aims to eliminate memory copying when transferring data between different parts of a system (e.g., from a file to a network socket, or between kernel space and user space). Chronicle Wire's use of off-heap memory and direct buffers facilitates zero-copy principles in conjunction with libraries like Chronicle Queue.
+
+[glossaryentry]
+Zero GC / Minimal GC ::
+A design goal to create as little garbage as possible during program execution to minimise the frequency and duration of Garbage Collection pauses, crucial for low-latency applications. Chronicle Wire is designed with this principle in mind.
