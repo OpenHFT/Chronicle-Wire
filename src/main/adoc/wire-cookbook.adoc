@@ -3,8 +3,9 @@
 :source-highlighter: rouge
 
 Purpose :: To provide a collection of practical recipes for common tasks and advanced techniques when using the Chronicle Wire library.
+:sectnums:
 
-== 1. Introduction
+== Introduction
 
 This cookbook offers a series of focused, problem-solution style recipes to help you effectively use Chronicle Wire. Each recipe addresses a specific task or challenge, providing code examples and explanations. Whether you're new to Chronicle Wire or looking for advanced techniques, these recipes aim to provide quick and actionable guidance.
 
@@ -30,9 +31,9 @@ The diagram above illustrates the basic serialization and deserialization proces
 
 TIP: For a foundational understanding of Chronicle Wire's architecture and core concepts, please refer to the main Chronicle Wire documentation and architectural overview.
 
-== 2. Basic Serialization and Deserialization
+== Basic Serialization and Deserialization
 
-=== 2.1. Recipe: Serializing a Simple POJO to Various Formats
+=== Recipe: Serializing a Simple POJO to Various Formats
 
 *Problem:*
 You have a simple Plain Old Java Object (POJO) and you want to serialize it into different formats like YAML, JSON, and Binary using Chronicle Wire.
@@ -113,7 +114,7 @@ public class BasicSerializationDemo {
 Discussion ::
 `SelfDescribingMarshallable` automatically handles the serialization of fields. By simply changing the `WireType` (e.g., `YAML_ONLY`, `JSON_ONLY`, `BINARY_LIGHT`), you can control the output format without altering the `MyData` class or the core serialization call (`getValueOut().object(data)`). `*_ONLY` variants like `YAML_ONLY` or `JSON_ONLY` are often preferred for cleaner output when not needing to retain full type information for dynamic deserialization into differing types (though `YAML` and `JSON` wire types can be configured to include type information if needed).
 
-=== 2.2. Recipe: Deserializing Data into a POJO
+=== Recipe: Deserializing Data into a POJO
 
 *Problem:*
 You have serialized data (e.g., in YAML or Binary format) and want to deserialize it back into an instance of your POJO.
@@ -176,9 +177,9 @@ public class BasicDeserializationDemo {
 `getValueIn().object(MyData.class)` is the key call for deserialization. Chronicle Wire reads the data and populates a new instance of `MyData`. For text formats like YAML, the `!MyData` type hint helps in identifying the target class, though providing the class explicitly in `object()` is robust. For binary formats, if type information isn't inherently part of the stream for the specific `WireType` chosen, providing the target class is essential. `SelfDescribingMarshallable` with `BINARY_LIGHT` typically includes type information or field names/numbers allowing for successful deserialization.
 
 [[working_with_annotations]]
-== 3. Working with Annotations
+== Working with Annotations
 
-=== 3.1. Recipe: Using `@LongConversion` for Compact String Storage
+=== Recipe: Using `@LongConversion` for Compact String Storage
 
 *Problem:*
 You have a short string identifier (e.g., a symbol or ID up to 10-11 characters using a Base85-like alphabet) that you want to represent as a `long` in your Java object for efficiency, but display as a String in human-readable formats (like YAML).
@@ -266,7 +267,7 @@ public class LongConversionDemo {
 Discussion ::
 In the YAML output, `symbol` appears as a string "AAPL". However, in the `CompactIdData` object and in the binary wire format, it's stored as an 8-byte `long`. This technique is excellent for performance-sensitive applications that deal with many short textual identifiers, saving space and potentially speeding up comparisons/hashing if the `long` form is used internally. Chronicle Wire provides several built-in converters (`Base32`, `Base64`, `Base85`, etc.).
 
-=== 3.2. Recipe: Formatting Timestamps with `@NanoTime`
+=== Recipe: Formatting Timestamps with `@NanoTime`
 
 *Problem:*
 You want to store a timestamp as a `long` (nanoseconds since epoch) for precision and performance, but have it automatically formatted as a human-readable ISO date-time string in text-based wire formats.
@@ -331,9 +332,9 @@ public class NanoTimeDemo {
 The `@NanoTime` annotation (and similarly `@MillisTime` for millisecond precision) ensures that the `long` timestamp is converted to/from a standard ISO 8601 string representation in text formats like YAML or JSON, while remaining a `long` in binary formats and in the Java object. This provides both human readability for logs/configs and numerical efficiency for processing.
 
 [[schema_evolution]]
-== 4. Schema Evolution
+== Schema Evolution
 
-=== 4.1. Recipe: Adding a New Field (Backward Compatibility)
+=== Recipe: Adding a New Field (Backward Compatibility)
 
 *Problem:*
 You have an existing `Marshallable` class and need to add a new field. You want older versions of your application (that don't know about the new field) to still be able to read data written by the new version, and new versions to read old data.
@@ -445,9 +446,9 @@ public class SchemaEvolutionDemo {
 *Discussion:*
 When new code reads old data (V1 data into `VersionedDataV2`), the `newField` in `VersionedDataV2` will be initialized to its Java default value (0 for `int`, `null` for objects, `false` for `boolean`). When old code (expecting `VersionedDataV1`) reads data written by new code (V2 data), it will simply ignore the `newField` it doesn't recognize. This works seamlessly for most self-describing `WireType`s. Using consistent class aliasing (e.g., `Wires.CLASS_ALIASES.addAlias(VersionedDataV2.class, "VersionedData")`) can be important if you rely on type information in the stream (like `!VersionedData`) rather than always specifying the concrete class on deserialization.
 
-== 5. Working with `DocumentContext`
+== Working with `DocumentContext`
 
-=== 5.1. Recipe: Writing and Reading Multiple Documents
+=== Recipe: Writing and Reading Multiple Documents
 
 *Problem:*
 You need to write a sequence of distinct messages or objects to a single `Bytes` buffer or stream, and then read them back one by one.
@@ -528,9 +529,9 @@ public class MultiDocumentDemo {
 *Discussion:*
 The `try-with-resources` block ensures that each `DocumentContext` is properly closed. When `writingDocument()`'s context is closed, metadata (like message length) is written, allowing the reader to correctly identify document boundaries. `readingDocument()` returns a context; `dc.isPresent()` tells you if a document was found. `dc.isData()` or `dc.isMetaData()` can be used to distinguish message types, a pattern heavily used by Chronicle Queue.
 
-== 6. Advanced & Performance
+== Advanced & Performance
 
-=== 6.1. Recipe: Implementing `BytesMarshallable` for Maximum Control
+=== Recipe: Implementing `BytesMarshallable` for Maximum Control
 
 *Problem:*
 You need the absolute best performance or have a very specific binary layout in mind, and the overhead of `Marshallable` (even with code generation) is too much, or you need to interact with raw `Bytes` directly.

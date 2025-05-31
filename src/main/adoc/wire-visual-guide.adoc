@@ -3,14 +3,15 @@
 :source-highlighter: rouge
 
 Purpose: To provide visual representations of key concepts, processes, and components in the Chronicle Wire library.
+:sectnums:
 
-== 1. Introduction
+== Introduction
 
 This document contains diagrams and visual aids to help understand the Chronicle Wire library. It complements the text-based documentation by providing visual representations of key concepts, processes, and components.
 
-== 2. Architectural Overview
+== Architectural Overview
 
-=== 2.1. Layered Architecture
+=== Layered Architecture
 
 [mermaid]
 ----
@@ -34,7 +35,7 @@ graph TD
     class E ioLayer;
 ----
 
-=== 2.2. Core Components
+=== Core Components
 
 [mermaid]
 ----
@@ -89,7 +90,7 @@ classDiagram
     WireType --> Wire : creates
 ----
 
-== 3. Serialization and Deserialization Process
+== Serialization and Deserialization Process
 
 [mermaid]
 ----
@@ -109,7 +110,7 @@ graph TD
     end
 ----
 
-== 4. Wire Format Comparison
+== Wire Format Comparison
 
 [mermaid]
 ----
@@ -137,7 +138,7 @@ graph LR
 ----
 
 [[schema_evolution]]
-== 5. Schema Evolution
+== Schema Evolution
 
 [mermaid]
 ----
@@ -160,7 +161,7 @@ graph TD
     end
 ----
 
-== 6. Integration with OpenHFT Ecosystem
+== Integration with OpenHFT Ecosystem
 
 [mermaid]
 ----
