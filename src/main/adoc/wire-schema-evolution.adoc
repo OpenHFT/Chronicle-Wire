@@ -59,7 +59,7 @@ Text Formats (YAML, JSON, TEXT) ::
 ----
 graph TD
     subgraph "Field Identification in Different Formats"
-        A[Java Class Definition] --> B[Serialization]
+        A[Java Class Definition] --> B[Serialisation]
         B --> C{Wire Format}
         C -->|YAML/JSON| D[Text Format]
         C -->|BINARY_LIGHT| E[Binary Format]
