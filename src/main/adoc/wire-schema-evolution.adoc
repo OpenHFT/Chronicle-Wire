@@ -183,6 +183,7 @@ Separate Data Stores :: Use different Chronicle Queues, Chronicle Maps, or files
 
 Deployment Strategies :: Use blue/green deployments or similar techniques to switch over to new versions of services and their data formats simultaneously.
 
+[[role_of_annotations_in_schema_evolution]]
 == 4. Role of Annotations in Schema Evolution
 
 Annotations provide metadata that Chronicle Wire uses to manage schema evolution.
@@ -297,7 +298,7 @@ By understanding these mechanisms, limitations, and best practices, developers c
 
 * link:wire-architecture.adoc[Architecture Overview] - Understand the internal architecture of Chronicle Wire
 * link:wire-annotations.adoc[Annotations Guide] - Learn about annotations for fine-tuning serialization
-* link:wire-cookbook.adoc#_4_schema_evolution[Schema Evolution Examples] - Practical examples of schema evolution
+* link:wire-cookbook.adoc#schema_evolution[Schema Evolution Examples] - Practical examples of schema evolution
 * link:wire-error-handling.adoc[Error Handling and Diagnostics] - Troubleshooting and error handling
-* link:wire-visual-guide.adoc#_5_schema_evolution[Visual Guide: Schema Evolution] - Diagrams illustrating schema evolution concepts
+* link:wire-visual-guide.adoc#schema_evolution[Visual Guide: Schema Evolution] - Diagrams illustrating schema evolution concepts
 * link:index.adoc[Documentation Home] - Return to the main documentation page
