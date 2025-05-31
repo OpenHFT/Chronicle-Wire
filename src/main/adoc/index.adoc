@@ -1,107 +1,33 @@
+:doctype: book
 = Chronicle Wire Documentation
 :toc: left
-:toclevels: 3
+:toclevels: 2
 :source-highlighter: rouge
-:doctype: book
 
-== Introduction
+Chronicle Wire is a high-performance, low-latency serialisation library that forms part of the OpenHFT stack. This index links to the documentation set.
 
-Chronicle Wire is a high-performance, low-latency serialization and deserialization library, forming a foundational part of the OpenHFT (Open High-Frequency Trading) ecosystem. This documentation provides comprehensive information about Chronicle Wire, from basic concepts to advanced usage patterns.
+== Documentation Index
 
-== How to Use This Documentation
+link:wire-architecture.adoc[Chronicle Wire: Architectural Overview] ::
+  Summarises the internal architecture, components and design principles.
 
-This documentation is organized to support different learning paths depending on your needs:
+link:wire-cookbook.adoc[Chronicle Wire Cookbook: Practical Recipes] ::
+  Offers practical recipes for common tasks and advanced techniques.
 
-* **New to Chronicle Wire?** Start with the <<Architecture Overview>> to understand the core concepts, then move to the <<Cookbook>> for practical examples.
-* **Looking for specific features?** Check the <<Annotations Guide>> or <<Schema Evolution>> sections.
-* **Troubleshooting issues?** The <<Error Handling and Diagnostics>> section provides guidance on common problems.
-* **Need quick answers?** Refer to the <<FAQ>> for frequently asked questions.
+link:wire-annotations.adoc[Chronicle Wire Annotations: A Comprehensive Guide] ::
+  Describes the standard annotations and how they influence serialisation.
 
-== Documentation Sections
+link:wire-schema-evolution.adoc[Chronicle Wire: Schema Evolution Deep Dive] ::
+  Explains mechanisms for managing schema changes over time.
 
-=== Architecture Overview
+link:wire-error-handling.adoc[Chronicle Wire: Error Handling and Diagnostics Guide] ::
+  Covers diagnosing issues and dealing with errors.
 
-The link:wire-architecture.adoc[Architecture Overview] provides a comprehensive understanding of the internal architecture of Chronicle Wire, its components, and design principles. This is an excellent starting point for understanding how Chronicle Wire works.
+link:wire-faq.adoc[Chronicle Wire FAQ: Common Questions Answered] ::
+  Provides answers to frequent questions.
 
-[.lead]
-link:wire-architecture.adoc[Read the Architecture Overview →]
+link:wire-glossary.adoc[Chronicle Wire Glossary] ::
+  Defines key terms used across the documentation.
 
-=== Cookbook
-
-The link:wire-cookbook.adoc[Cookbook] offers a collection of practical recipes for common tasks and advanced techniques when using Chronicle Wire. If you're looking for code examples and practical guidance, start here.
-
-[.lead]
-link:wire-cookbook.adoc[Explore the Cookbook →]
-
-=== Annotations Guide
-
-The link:wire-annotations.adoc[Annotations Guide] provides a comprehensive reference for all standard annotations available in Chronicle Wire, detailing their purpose, usage, and impact on serialization.
-
-[.lead]
-link:wire-annotations.adoc[Learn about Annotations →]
-
-=== Schema Evolution
-
-The link:wire-schema-evolution.adoc[Schema Evolution] guide provides an in-depth exploration of schema evolution capabilities and mechanisms within Chronicle Wire, including implementation details and advanced strategies.
-
-[.lead]
-link:wire-schema-evolution.adoc[Understand Schema Evolution →]
-
-=== Error Handling and Diagnostics
-
-The link:wire-error-handling.adoc[Error Handling and Diagnostics] guide covers handling errors, diagnosing issues, and debugging when using Chronicle Wire.
-
-[.lead]
-link:wire-error-handling.adoc[Master Error Handling →]
-
-=== FAQ
-
-The link:wire-faq.adoc[FAQ] provides answers to frequently asked questions about Chronicle Wire.
-
-[.lead]
-link:wire-faq.adoc[Read the FAQ →]
-
-=== Glossary
-
-The link:wire-glossary.adoc[Glossary] provides clear definitions for common terms and concepts used in Chronicle Wire and its related ecosystem.
-
-[.lead]
-link:wire-glossary.adoc[Browse the Glossary →]
-
-== Learning Paths
-
-=== For Beginners
-
-1. link:wire-architecture.adoc[Architecture Overview] - Understand the basics
-2. link:wire-cookbook.adoc#_2_basic_serialization_and_deserialization[Basic Serialization and Deserialization] - Learn the fundamentals
-3. link:wire-glossary.adoc[Glossary] - Familiarize yourself with terminology
-4. link:wire-faq.adoc#_basics_core_concepts[FAQ: Basics & Core Concepts] - Get answers to common questions
-
-=== For Intermediate Users
-
-1. link:wire-cookbook.adoc#_3_working_with_annotations[Working with Annotations] - Learn about annotations
-2. link:wire-annotations.adoc[Annotations Guide] - Dive deeper into annotations
-3. link:wire-schema-evolution.adoc#_2_mechanisms_in_self_describing_formats[Schema Evolution: Self-Describing Formats] - Understand schema evolution
-4. link:wire-error-handling.adoc[Error Handling and Diagnostics] - Learn to troubleshoot issues
-
-=== For Advanced Users
-
-1. link:wire-cookbook.adoc#_6_advanced_performance[Advanced & Performance] - Optimize your code
-2. link:wire-schema-evolution.adoc#_5_advanced_strategies_and_implementation_considerations[Advanced Schema Evolution Strategies] - Master schema evolution
-3. link:wire-faq.adoc#_advanced_topics[FAQ: Advanced Topics] - Explore advanced concepts
-
-== Integration with OpenHFT Ecosystem
-
-Chronicle Wire is a foundational component of the OpenHFT ecosystem. Learn how it integrates with other OpenHFT libraries:
-
-* **Chronicle Queue**: Wire is used to serialize messages into queue excerpts
-* **Chronicle Map**: Wire serializes keys and values for storage
-* **Chronicle Network**: Wire marshals data for transmission over TCP/IP
-
-== Project Documentation
-
-The link:project-requirements.adoc[Project Requirements] document outlines the detailed requirements for the Chronicle Wire documentation enhancement project.
-
-== Improvement Plan
-
-The link:plan.md[Improvement Plan] outlines the strategy for enhancing the Chronicle Wire documentation.
+link:project-requirements.adoc[Project Requirements: Chronicle Wire Documentation Enhancement] ::
+  Outlines the requirements for improving this documentation set.
