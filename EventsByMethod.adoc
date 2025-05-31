@@ -1,7 +1,9 @@
 = Events by Method
 Peter Lawrey
-
 :sectnums:
+:toc:
+:source-highlighter: rouge
+
 Chronicle favours modelling events as asynchronous method calls.
 This document explores the 'Events by Method' paradigm in Chronicle Wire, demonstrating how to model, process and test events represented as asynchronous Java method calls, and how to leverage different wire formats for these events.
 This has a number of advantages:
@@ -90,7 +92,7 @@ Some advantages of Binary YAML are:
 
 Some advantages of Trivially Copyable Objects
 
-. Raw memory copy for serialization/deserialization.
+. Raw memory copy for serialisation/deserialisation.
 . Compact memory structure provided fields don't vary in size much.
 . Works provided the writer/reader arrange the fields the same way.
 . Better performance than Binary YAML (about half the latency).

@@ -92,6 +92,39 @@ public class StockInfo extends SelfDescribingMarshallable {
 // In Binary: stockSymbol is an 8-byte long
 ----
 
+==== `@ShortText`
+
+Status :: Stable
+
+Purpose :: Provides a concise way to convert short strings (up to ten
+characters) to and from a `long` using the `ShortTextLongConverter`. It is a
+specialised form of `@LongConversion` and internally relies on the same
+Base85-based encoding as `@Base85`.
+
+The difference between `@ShortText` and `@Base85` is that `@ShortText` truncates leading spaces and `@Base85` truncates leading zeros. e.g.
+`@ShortText` will convert "   123" to "123" and `@Base85` will convert "000123" to "123".
+
+Target :: Field (of type `long`)
+
+Behaviour ::
+* **Text Formats:** Values appear as Base85 strings.
+* **Binary Formats:** Values are stored as eight-byte longs.
+
+Use Case :: Compact storage of short identifiers or codes while keeping them
+readable in YAML/JSON. It acts as a shorthand for
+`@LongConversion(ShortTextLongConverter.class)`.
+
+Example ::
+[source,java]
+----
+import net.openhft.chronicle.wire.converter.ShortText;
+
+public class Order extends SelfDescribingMarshallable {
+    @ShortText
+    private long market;
+}
+----
+
 === Timestamp Converters (`@NanoTime`)
 
 Annotations :: `@NanoTime`

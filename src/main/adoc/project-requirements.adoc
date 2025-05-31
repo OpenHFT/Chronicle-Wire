@@ -7,14 +7,14 @@ To outline the detailed requirements for creating comprehensive and technically 
 
 == Introduction
 
-This document specifies the detailed requirements for a significant enhancement of the documentation for the Chronicle Wire library. Chronicle Wire is a foundational component within the OpenHFT (Open High-Frequency Trading) ecosystem, designed for high-performance, low-latency data serialization and deserialization. The current initiative aims to produce documentation that is technically deep, practically useful, and addresses the needs of a diverse developer audience. This enhancement will be based on an exhaustive technical review of Chronicle Wire, covering its architecture, features, diverse use cases within OpenHFT (including inter-process communication (IPC), object serialization, low-latency systems design, and data persistence strategies), and a thorough comparative analysis against other prominent serialization libraries. The ultimate goal is to establish this documentation as the authoritative resource for Chronicle Wire.
+This document specifies the detailed requirements for a significant enhancement of the documentation for the Chronicle Wire library. Chronicle Wire is a foundational component within the OpenHFT (Open High-Frequency Trading) ecosystem, designed for high-performance, low-latency data serialisation and deserialisation. The current initiative aims to produce documentation that is technically deep, practically useful, and addresses the needs of a diverse developer audience. This enhancement will be based on an exhaustive technical review of Chronicle Wire, covering its architecture, features, diverse use cases within OpenHFT (including inter-process communication (IPC), object serialisation, low-latency systems design, and data persistence strategies), and a thorough comparative analysis against other prominent serialisation libraries. The ultimate goal is to establish this documentation as the authoritative resource for Chronicle Wire.
 
 == Goals
 
 The overarching goals for this documentation enhancement are:
 
 Unparalleled Clarity and Technical Depth ::
-* Provide exhaustive, unambiguous explanations of Chronicle Wire's internal architecture, fundamental concepts (e.g., `Wire`, `Bytes`, `Marshallable`), and the nuances of each supported serialization format.
+* Provide exhaustive, unambiguous explanations of Chronicle Wire's internal architecture, fundamental concepts (e.g., `Wire`, `Bytes`, `Marshallable`), and the nuances of each supported serialisation format.
 * Elucidate the "why" behind design decisions, not just the "how."
 
 Actionable Practical Guidance ::
@@ -30,11 +30,11 @@ Comprehensive Use Case Illustration ::
 ** Configuration management using YAML/JSON wire formats.
 
 Insightful Comparative Analysis ::
-* Deliver a detailed, evidence-based comparison of Chronicle Wire with other leading serialization libraries (Kryo, Google Protocol Buffers, Jackson, Java Built-in Serialization).
+* Deliver a detailed, evidence-based comparison of Chronicle Wire with other leading serialisation libraries (Kryo, Google Protocol Buffers, Jackson, Java Built-in Serialisation).
 * Focus on quantitative (performance benchmarks) and qualitative (usability, schema evolution, integration) aspects to help users make informed decisions.
 
 Maximized Accessibility and User Experience ::
-* Ensure the documentation is structured logically and is easily navigable for developers with varying levels of familiarity with OpenHFT, Java, and serialization technologies.
+* Ensure the documentation is structured logically and is easily navigable for developers with varying levels of familiarity with OpenHFT, Java, and serialisation technologies.
 * Cater to different learning styles by incorporating diagrams, flowcharts, and concise summaries alongside detailed explanations.
 
 == Scope of Documentation
@@ -44,11 +44,11 @@ The documentation shall comprehensively cover the following key areas:
 === Core Chronicle Wire Concepts
 
 Comprehensive Overview ::
-* **Introduction:** What Chronicle Wire is, its origin within OpenHFT, and the core problems it solves (e.g., performance bottlenecks of standard Java serialization, need for format flexibility).
+* **Introduction:** What Chronicle Wire is, its origin within OpenHFT, and the core problems it solves (e.g., performance bottlenecks of standard Java serialisation, need for format flexibility).
 * **Design Philosophy:** In-depth discussion of low latency, minimal garbage creation, off-heap memory utilization, format agnosticism, and schema flexibility as primary design tenets.
 * **Key Abstractions:** Detailed explanation of `Bytes`, `Wire`, `WireIn`, `WireOut`, `DocumentContext`, `Marshallable`, `SelfDescribingMarshallable`, and `BytesMarshallable`.
 
-Supported Serialization Formats (`WireType`) ::
+Supported Serialisation Formats (`WireType`) ::
 * For each `WireType` (YAML, JSON, JSON_ONLY, BINARY, BINARY_LIGHT, FIELDLESS_BINARY, TEXT, RAW, CSV, READ_ANY):
 ** **Detailed Explanation:** Underlying structure, specific features (e.g., human readability, self-description, compactness). For binary formats, discuss aspects like stop-bit encoding for integers.
 ** **Instantiation and Usage:** How to create and use each `Wire` type with `Bytes`.
@@ -60,9 +60,9 @@ Supported Serialization Formats (`WireType`) ::
 The `Marshallable` Ecosystem ::
 * **`Marshallable` Interface:** Deep dive into how to implement it, the role of `readMarshallable` and `writeMarshallable` methods (both explicit and default-generated).
 * **`SelfDescribingMarshallable`:** Benefits of extending this class (automatic `toString()`, `equals()`, `hashCode()`, schema information in text formats), and how these methods are generated from the serialized form.
-* **`BytesMarshallable`:** When and how to use it for finer-grained control over serialization, direct `Bytes` manipulation, and potential performance gains/trade-offs compared to `Marshallable`. Examples of manual field writing/reading.
-* **Automatic Serialization:** Explanation of the mechanisms used (reflection, runtime code generation via `WireMarshaller`) and their performance characteristics.
-* **Object Graph Serialization:** How Chronicle Wire handles nested `Marshallable` objects, collections of `Marshallable` objects, and object references (if applicable, or limitations thereof).
+* **`BytesMarshallable`:** When and how to use it for finer-grained control over serialisation, direct `Bytes` manipulation, and potential performance gains/trade-offs compared to `Marshallable`. Examples of manual field writing/reading.
+* **Automatic Serialisation:** Explanation of the mechanisms used (reflection, runtime code generation via `WireMarshaller`) and their performance characteristics.
+* **Object Graph Serialisation:** How Chronicle Wire handles nested `Marshallable` objects, collections of `Marshallable` objects, and object references (if applicable, or limitations thereof).
 
 Schema Evolution and Versioning ::
 * **Detailed Mechanisms:** How Chronicle Wire supports schema changes (adding, removing, reordering fields) in self-describing formats.
@@ -73,11 +73,11 @@ Schema Evolution and Versioning ::
 * **Limitations:** Any scenarios where schema evolution might be problematic or require manual intervention (e.g., changing field types significantly).
 * **Comparison:** Explicit comparison of Wire's schema evolution capabilities with those of Protobuf and Avro.
 
-Annotations for Fine-Grained Control and Customization ::
+Annotations for Fine-Grained Control and Customisation ::
 * For each key annotation (e.g., `@LongConversion`, `@NanoTime`, `@Base64`, `@Base85`, `@ShortText`, `@MaxUtf8Len`, `@Comment`, `@DeprecatedWireBy`, `@FieldNumber`, `@ForceMicroTimestamp`, `@DefaultValue`):
 ** **Purpose and Functionality:** Clear explanation of what the annotation does.
 ** **Parameters:** Description of any parameters the annotation takes.
-** **Impact:** How it affects serialization in different `WireType`s (e.g., text vs. binary representation).
+** **Impact:** How it affects serialisation in different `WireType`s (e.g., text vs. binary representation).
 ** **Use Cases:** Practical examples illustrating when and how to use the annotation.
 ** **Example Code:** Snippets demonstrating its application.
 * **Custom Converters:** Detailed guide on creating and using custom `LongConverter` implementations or other relevant converters.
@@ -96,7 +96,7 @@ Low-Latency and High-Performance Features ::
 * **Object Reuse:** Advanced patterns for object pooling and reuse with `Marshallable.reset()` or similar techniques to reduce allocations in critical loops.
 * **Flyweights and `Chronicle-Values`:** If applicable, how Chronicle Wire can interact with or support `Chronicle-Values` for ultra-low-latency access to off-heap data structures.
 * **`SingleThreadedChecked`:** Explanation of its role and how to ensure thread safety when using Wire and related components.
-* **Trivially Copyable Objects:** Explanation and use cases for this optimization.
+* **Trivially Copyable Objects:** Explanation and use cases for this optimisation.
 
 === Chronicle Wire Usage in OpenHFT Ecosystem Components
 
@@ -107,7 +107,7 @@ Low-Latency and High-Performance Features ::
 * **`MethodWriter` and `MethodReader` Deep Dive:**
 ** **Mechanism:** How interfaces are proxied, method calls are intercepted, method names/IDs and arguments are serialized to the queue.
 ** **Method ID Generation:** How method identifiers are derived and used.
-** **Argument/Return Type Handling:** Supported types, serialization of complex `Marshallable` arguments.
+** **Argument/Return Type Handling:** Supported types, serialisation of complex `Marshallable` arguments.
 ** **Exception Handling:** How exceptions on the writer or reader side are propagated or handled.
 ** **Use Cases:** Building high-performance event-driven systems, microservices communication, task distribution.
 ** **Code Examples:** Comprehensive examples of defining service interfaces, `Marshallable` DTOs, and implementing writers and readers.
@@ -115,7 +115,7 @@ Low-Latency and High-Performance Features ::
 * **Inspection and Debugging:** How tools (like queue dumpers) use Chronicle Wire's flexibility to read binary queue data and display it in human-readable formats (e.g., YAML).
 
 Chronicle Map (v3.x and relevant versions) ::
-* **Key/Value Serialization:** How Chronicle Wire is used for serializing custom Java objects used as keys or values when storing them off-heap.
+* **Key/Value Serialisation:** How Chronicle Wire is used for serializing custom Java objects used as keys or values when storing them off-heap.
 * **Integration with `ChronicleMapBuilder`:** Specifying `Marshallable` types for keys/values.
 * **`BytesMarshallable` vs. `Marshallable`:**
 ** **Detailed Comparison:** Performance characteristics, storage efficiency, ease of use, schema evolution capabilities for each in the context of Chronicle Map.
@@ -130,7 +130,7 @@ Chronicle Network (and related TCP/UDP libraries) ::
 * **Low-Latency Network Messaging:** Achieving high throughput and low latency in networked applications using Chronicle Wire.
 
 Chronicle Services ::
-* **Event Serialization:** How `Marshallable` objects are used to define and serialize domain events in event sourcing architectures.
+* **Event Serialisation:** How `Marshallable` objects are used to define and serialize domain events in event sourcing architectures.
 * **Event Storage:** Leveraging Chronicle Queue (and thus Wire) for persisting event streams.
 * **State Aggregation and Replay:** How services deserialize events using Wire to reconstruct state or replay business logic.
 * **Conceptual Example:** A detailed walkthrough of a simple event-sourced service (e.g., an "Order Management" service with `OrderCreated`, `OrderUpdated` events defined as `Marshallable` objects), showing event definition, publishing to a queue, and a handler processing these events.
@@ -138,17 +138,17 @@ Chronicle Services ::
 === Rich Code Examples and Tutorials
 
 Variety and Scope ::
-* **Basic Serialization:** Simple POJOs with various `WireType`s (YAML, JSON, Binary).
-* **Complex Objects:** Serialization of objects with nested `Marshallable` instances, collections (lists, maps) of primitives and `Marshallable` types.
+* **Basic Serialisation:** Simple POJOs with various `WireType`s (YAML, JSON, Binary).
+* **Complex Objects:** Serialisation of objects with nested `Marshallable` instances, collections (lists, maps) of primitives and `Marshallable` types.
 * **`MethodWriter`/`Reader`:** End-to-end examples for IPC with Chronicle Queue.
 * **Custom Converters and Annotations:** Demonstrating practical use of `@LongConversion`, `@NanoTime`, etc.
 * **Schema Evolution:** Examples showing how to add, remove, or reorder fields in a `Marshallable` class and still read old data or allow new clients to read old data.
-* **Off-Heap Serialization:** Examples of writing/reading `Marshallable` objects directly to/from off-heap `Bytes`.
-* **Error Handling:** Demonstrating how to handle common serialization/deserialization exceptions.
+* **Off-Heap Serialisation:** Examples of writing/reading `Marshallable` objects directly to/from off-heap `Bytes`.
+* **Error Handling:** Demonstrating how to handle common serialisation/deserialisation exceptions.
 
 Clarity and Readability :: All examples must be well-commented, self-contained where possible, and focused on illustrating specific concepts.
 
-Completeness :: Provide both the serialization (writing) and deserialization (reading) parts of the code.
+Completeness :: Provide both the serialisation (writing) and deserialisation (reading) parts of the code.
 
 Best Practices Integration :: Code examples should subtly (or explicitly) demonstrate recommended patterns and best practices.
 
@@ -163,11 +163,11 @@ Detailed Comparison Aspects (for each library vs. Chronicle Wire) ::
 ** Cross-language interoperability and support.
 ** Ease of switching between different representations (e.g., binary for speed, text for debug).
 * **Performance & Efficiency (Quantitative):**
-** **Serialization Speed:** Time taken to serialize objects (e.g., ns/op, msgs/sec). Specify object complexity (simple POJO, complex graph).
-** **Deserialization Speed:** Time taken to deserialize objects.
+** **Serialisation Speed:** Time taken to serialize objects (e.g., ns/op, msgs/sec). Specify object complexity (simple POJO, complex graph).
+** **Deserialisation Speed:** Time taken to deserialize objects.
 ** **Serialized Output Size:** Compactness of the serialized form in bytes for typical objects.
-** **CPU Usage:** Relative CPU cycles consumed during serialization/deserialization.
-** **GC Impact:** Allocation rates, frequency and duration of GC pauses attributable to serialization activity.
+** **CPU Usage:** Relative CPU cycles consumed during serialisation/deserialisation.
+** **GC Impact:** Allocation rates, frequency and duration of GC pauses attributable to serialisation activity.
 _Data should be sourced from existing reputable benchmarks (e.g., Sumit Mundra blog, Micronaut SerDe, InfoQ, Alibaba Cloud) with clear attribution and discussion of test conditions and object models used. Acknowledge that a single definitive benchmark for all aspects across all libraries may not exist._
 * **Schema Definition & Evolution:**
 ** **Schema Definition:** How the data structure is defined (e.g., Java class, .proto IDL, JSON Schema).
@@ -175,7 +175,7 @@ _Data should be sourced from existing reputable benchmarks (e.g., Sumit Mundra b
 ** **Backward Compatibility:** Ability of new code to read old data.
 ** **Forward Compatibility:** Ability of old code to read new data (or ignore new fields).
 ** **Ease of Evolving Schemas:** Process and complexity of adding, removing, renaming, or retyping fields.
-** **Handling of Unknown/Missing Fields:** Default behavior.
+** **Handling of Unknown/Missing Fields:** Default behaviour.
 * **Ease of Use & Developer Experience:**
 ** **API Intuitiveness and Verbosity:** How straightforward the API is for common tasks.
 ** **Learning Curve:** Time and effort required for a developer to become proficient.
@@ -189,7 +189,7 @@ _Data should be sourced from existing reputable benchmarks (e.g., Sumit Mundra b
 ** **Compatibility with Popular Java Frameworks:** Ease of integration with frameworks like Spring, Guice, etc.
 ** **Ecosystem Tools:** Availability of supporting tools for schema management, debugging, etc.
 * **Debugging and Diagnostics:**
-** **Ease of Troubleshooting:** How easy it is to diagnose serialization errors (e.g., malformed data, version mismatches).
+** **Ease of Troubleshooting:** How easy it is to diagnose serialisation errors (e.g., malformed data, version mismatches).
 ** **Exception Clarity:** Informativeness of exceptions thrown.
 * **Specific Strengths and Weaknesses:** Summary of unique advantages and disadvantages.
 * **Best Use Cases/Niches:** Typical scenarios where each library excels.
@@ -246,23 +246,23 @@ Comparison Data ::
 The documentation should cater to a diverse technical audience, including:
 
 Java Developers New to OpenHFT ::
-* **Goal:** Understand Chronicle Wire's purpose, basic usage for serialization, and how it compares to libraries they already know (like Jackson or Java Serializable).
+* **Goal:** Understand Chronicle Wire's purpose, basic usage for serialisation, and how it compares to libraries they already know (like Jackson or Java Serializable).
 
 Experienced OpenHFT Users (Chronicle Queue/Map Developers) ::
-* **Goal:** Gain deeper insights into the underlying serialization mechanisms (Wire) they are implicitly using, learn advanced customization techniques, and optimize Wire usage for performance.
+* **Goal:** Gain deeper insights into the underlying serialisation mechanisms (Wire) they are implicitly using, learn advanced customisation techniques, and optimise Wire usage for performance.
 
 System Architects and Technical Leads ::
 * **Goal:** Evaluate Chronicle Wire for new projects, understand its performance characteristics, schema evolution capabilities, and suitability for low-latency, high-throughput distributed systems.
 
 Performance Engineers ::
-* **Goal:** Understand low-level details of Wire's performance features, GC implications, and how to use it for extreme optimization.
+* **Goal:** Understand low-level details of Wire's performance features, GC implications, and how to use it for extreme optimisation.
 
-Developers Evaluating Serialization Libraries ::
+Developers Evaluating Serialisation Libraries ::
 * **Goal:** Obtain a balanced, technically sound comparison to make an informed choice for their specific project needs.
 
 == Assumptions
 
-Reader's Background :: The documentation will assume readers have a solid understanding of Java programming concepts. Familiarity with general serialization concepts is helpful but not strictly required for introductory sections.
+Reader's Background :: The documentation will assume readers have a solid understanding of Java programming concepts. Familiarity with general serialisation concepts is helpful but not strictly required for introductory sections.
 
 Access to Resources :: Development of this documentation will have access to the Chronicle Wire source code, existing (even if sparse) documentation, community forums, and potentially core OpenHFT developers for clarification.
 
