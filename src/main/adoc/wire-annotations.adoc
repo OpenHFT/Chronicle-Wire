@@ -289,7 +289,7 @@ This guide provides a solid foundation for understanding and utilising the annot
 == Related Topics
 
 * link:wire-architecture.adoc[Architecture Overview] - Understand the internal architecture of Chronicle Wire
-* link:wire-cookbook.adoc#_3_working_with_annotations[Working with Annotations] - Practical examples of using annotations
-* link:wire-schema-evolution.adoc#_4_role_of_annotations_in_schema_evolution[Role of Annotations in Schema Evolution] - How annotations help with schema evolution
+* link:wire-cookbook.adoc#working_with_annotations[Working with Annotations] - Practical examples of using annotations
+* link:wire-schema-evolution.adoc#role_of_annotations_in_schema_evolution[Role of Annotations in Schema Evolution] - How annotations help with schema evolution
 * link:wire-error-handling.adoc[Error Handling and Diagnostics] - Troubleshooting and error handling
 * link:index.adoc[Documentation Home] - Return to the main documentation page
