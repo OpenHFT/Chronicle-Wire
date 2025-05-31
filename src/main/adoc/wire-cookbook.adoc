@@ -175,6 +175,7 @@ public class BasicDeserializationDemo {
 *Discussion:*
 `getValueIn().object(MyData.class)` is the key call for deserialization. Chronicle Wire reads the data and populates a new instance of `MyData`. For text formats like YAML, the `!MyData` type hint helps in identifying the target class, though providing the class explicitly in `object()` is robust. For binary formats, if type information isn't inherently part of the stream for the specific `WireType` chosen, providing the target class is essential. `SelfDescribingMarshallable` with `BINARY_LIGHT` typically includes type information or field names/numbers allowing for successful deserialization.
 
+[[working_with_annotations]]
 == 3. Working with Annotations
 
 === 3.1. Recipe: Using `@LongConversion` for Compact String Storage
@@ -329,6 +330,7 @@ public class NanoTimeDemo {
 *Discussion:*
 The `@NanoTime` annotation (and similarly `@MillisTime` for millisecond precision) ensures that the `long` timestamp is converted to/from a standard ISO 8601 string representation in text formats like YAML or JSON, while remaining a `long` in binary formats and in the Java object. This provides both human readability for logs/configs and numerical efficiency for processing.
 
+[[schema_evolution]]
 == 4. Schema Evolution
 
 === 4.1. Recipe: Adding a New Field (Backward Compatibility)
