@@ -412,8 +412,8 @@ public class SchemaEvolutionDemo {
         com.example.evo.VersionedDataV2 dataV2 = new com.example.evo.VersionedDataV2("test", 100);
         Bytes<?> bytesV2 = Bytes.elasticByteBuffer();
         Wire wireWriteV2 = WireType.YAML_ONLY.apply(bytesV2);
-        // Wires. ጣCLASS_ALIASES.addAlias(com.example.evo.VersionedDataV2.class, "VersionedData");
-        // Wires. ጣCLASS_ALIASES.addAlias(com.example.evo.VersionedDataV1.class, "VersionedData");
+        ClassAliasPool.CLASS_ALIASES.addAlias(com.example.evo.VersionedDataV2.class, "VersionedData");
+        ClassAliasPool.CLASS_ALIASES.addAlias(com.example.evo.VersionedDataV1.class, "VersionedData");
         wireWriteV2.write("yaml").object(dataV2);
         String v2DataAsString = bytesV2.toString();
         System.out.println("Data written by V2:\n" + v2DataAsString);
