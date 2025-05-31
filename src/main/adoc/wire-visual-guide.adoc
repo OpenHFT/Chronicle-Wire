@@ -1,0 +1,190 @@
+= Chronicle Wire: Visual Guide
+:toc:
+:source-highlighter: rouge
+
+Purpose: To provide visual representations of key concepts, processes, and components in the Chronicle Wire library.
+:sectnums:
+
+== Introduction
+
+This document contains diagrams and visual aids to help understand the Chronicle Wire library. It complements the text-based documentation by providing visual representations of key concepts, processes, and components.
+
+== Architectural Overview
+
+=== Layered Architecture
+
+[mermaid]
+----
+graph TD
+    A[Application Code] -->|Interacts via| B[Chronicle Wire API Layer]
+    B -->|Selects and dispatches to| C[Wire Format Implementation Layer]
+    C -->|Operates on / Uses| D[Chronicle Bytes Layer]
+    D -->|Reads from / Writes to| E[Underlying I/O or Storage Layer]
+
+    %% Optional Styling for better visual separation
+    classDef appLayer fill:#e6ffe6,stroke:#333,stroke-width:2px,color:#000
+    classDef apiLayer fill:#e6f3ff,stroke:#333,stroke-width:2px,color:#000
+    classDef formatLayer fill:#fff0e6,stroke:#333,stroke-width:2px,color:#000
+    classDef bytesLayer fill:#f9e6ff,stroke:#333,stroke-width:2px,color:#000
+    classDef ioLayer fill:#f2f2f2,stroke:#333,stroke-width:2px,color:#000
+
+    class A appLayer;
+    class B apiLayer;
+    class C formatLayer;
+    class D bytesLayer;
+    class E ioLayer;
+----
+
+=== Core Components
+
+[mermaid]
+----
+classDiagram
+    class Wire {
+        <<interface>>
+        +getValueIn() ValueIn
+        +getValueOut() ValueOut
+        +read() WireIn
+        +write() WireOut
+        +writingDocument() DocumentContext
+        +readingDocument() DocumentContext
+    }
+    
+    class WireType {
+        <<enum>>
+        YAML
+        YAML_ONLY
+        JSON
+        JSON_ONLY
+        BINARY
+        BINARY_LIGHT
+        FIELDLESS_BINARY
+        RAW
+        TEXT
+        CSV
+        READ_ANY
+        +apply(Bytes) Wire
+    }
+    
+    class YamlWire {
+        -bytes Bytes
+        +getValueIn() ValueIn
+        +getValueOut() ValueOut
+    }
+    
+    class BinaryWire {
+        -bytes Bytes
+        +getValueIn() ValueIn
+        +getValueOut() ValueOut
+    }
+    
+    class JSONWire {
+        -bytes Bytes
+        +getValueIn() ValueIn
+        +getValueOut() ValueOut
+    }
+    
+    Wire <|.. YamlWire
+    Wire <|.. BinaryWire
+    Wire <|.. JSONWire
+    WireType --> Wire : creates
+----
+
+== Serialization and Deserialization Process
+
+[mermaid]
+----
+graph TD
+    subgraph "Serialisation Process"
+        A[Java Object] -->|"implements Marshallable"| B[Marshallable Object]
+        B -->|"writeMarshallable()"| C[Wire]
+        C -->|"WireType (YAML, JSON, Binary)"| D[Bytes]
+        D -->|"Store/Transmit"| E[Persistence/Network]
+    end
+    
+    subgraph "Deserialisation Process"
+        F[Persistence/Network] -->|"Read"| G[Bytes]
+        G -->|"WireType (same as serialisation)"| H[Wire]
+        H -->|"readMarshallable()"| I[Marshallable Object]
+        I -->|"Field Population"| J[Java Object]
+    end
+----
+
+== Wire Format Comparison
+
+[mermaid]
+----
+graph LR
+    subgraph "Wire Format Comparison"
+        A[Wire Formats] --> B[Text Formats]
+        A --> C[Binary Formats]
+        
+        B --> D[YAML]
+        B --> E[JSON]
+        B --> F[TEXT]
+        
+        C --> G[BINARY_LIGHT]
+        C --> H[FIELDLESS_BINARY]
+        C --> I[RAW]
+        
+        D --> J["Human-readable<br>Self-describing<br>Type retention (optional)"]
+        E --> J
+        F --> J
+        
+        G --> K["Compact<br>Self-describing<br>Good schema evolution"]
+        H --> L["Most compact<br>Fastest<br>Schema-sensitive"]
+        I --> M["Raw bytes<br>For BytesMarshallable<br>No framing"]
+    end
+----
+
+[[schema_evolution]]
+== Schema Evolution
+
+[mermaid]
+----
+graph TD
+    subgraph "Schema Evolution Overview"
+        A[Schema Changes] --> B{Type of Change}
+        B -->|Add Field| C[Forward Compatible]
+        B -->|Remove Field| D[Backward Compatible]
+        B -->|Rename Field| E[Needs Special Handling]
+        B -->|Change Type| F[Complex - May Need Custom Logic]
+        
+        C -->|"Older Reader"| G[Ignores Unknown Fields]
+        D -->|"Newer Reader"| H[Uses Default Values]
+        E -->|"@FieldNumber or Rename Map"| I[Maps Old Name to New]
+        F -->|"Custom readMarshallable"| J[Custom Conversion Logic]
+        
+        K[Wire Format] --> L{Compatibility Level}
+        L -->|"YAML/JSON/BINARY_LIGHT"| M[Good Schema Evolution]
+        L -->|"FIELDLESS_BINARY"| N[Limited/No Evolution]
+    end
+----
+
+== Integration with OpenHFT Ecosystem
+
+[mermaid]
+----
+graph TD
+    subgraph "OpenHFT Ecosystem"
+        A[Chronicle Wire] --> B[Chronicle Queue]
+        A --> C[Chronicle Map]
+        A --> D[Chronicle Network]
+        A --> E[Chronicle Services]
+        
+        B -->|"Serializes messages<br>MethodWriter/Reader"| F[Queue Excerpts]
+        C -->|"Serializes keys/values"| G[Off-heap Map]
+        D -->|"Marshals data"| H[Network Communication]
+        E -->|"Defines/serializes events"| I[Event-driven Architecture]
+    end
+----
+
+== Related Topics
+
+* link:wire-architecture.adoc[Architecture Overview] - Understand the internal architecture of Chronicle Wire
+* link:wire-cookbook.adoc[Cookbook] - Practical recipes for using Chronicle Wire
+* link:wire-annotations.adoc[Annotations Guide] - Learn about annotations for fine-tuning serialisation
+* link:wire-schema-evolution.adoc[Schema Evolution] - How to evolve your data structures over time
+* link:wire-error-handling.adoc[Error Handling and Diagnostics] - Troubleshooting and error handling
+* link:wire-faq.adoc[FAQ] - Answers to frequently asked questions
+* link:index.adoc[Documentation Home] - Return to the main documentation page

@@ -2,6 +2,7 @@
 :toc: manual
 :css-signature: demo
 :toc-placement: preamble
+:sectnums:
 
 == YAML 1.2 Specification Compliance
 
