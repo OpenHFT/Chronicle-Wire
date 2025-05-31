@@ -1,0 +1,633 @@
+= Chronicle Wire Cookbook: Practical Recipes
+:toc:
+:source-highlighter: rouge
+
+Purpose :: To provide a collection of practical recipes for common tasks and advanced techniques when using the Chronicle Wire library.
+:sectnums:
+
+== Introduction
+
+This cookbook offers a series of focused, problem-solution style recipes to help you effectively use Chronicle Wire. Each recipe addresses a specific task or challenge, providing code examples and explanations. Whether you're new to Chronicle Wire or looking for advanced techniques, these recipes aim to provide quick and actionable guidance.
+
+[mermaid]
+----
+graph TD
+    subgraph "Serialisation Process"
+        A[Java Object] -->|"implements Marshallable"| B[Marshallable Object]
+        B -->|"writeMarshallable()"| C[Wire]
+        C -->|"WireType (YAML, JSON, Binary)"| D[Bytes]
+        D -->|"Store/Transmit"| E[Persistence/Network]
+    end
+
+    subgraph "Deserialisation Process"
+        F[Persistence/Network] -->|"Read"| G[Bytes]
+        G -->|"WireType (same as serialisation)"| H[Wire]
+        H -->|"readMarshallable()"| I[Marshallable Object]
+        I -->|"Field Population"| J[Java Object]
+    end
+----
+
+The diagram above illustrates the basic serialisation and deserialisation process in Chronicle Wire. Objects implementing the `Marshallable` interface can be written to a `Wire` instance, which uses a specific `WireType` to determine the format (YAML, JSON, Binary, etc.). The data is then stored in a `Bytes` buffer, which can be persisted or transmitted. The deserialisation process reverses these steps.
+
+TIP: For a foundational understanding of Chronicle Wire's architecture and core concepts, please refer to the main Chronicle Wire documentation and architectural overview.
+
+== Basic Serialization and Deserialization
+
+=== Recipe: Serializing a Simple POJO to Various Formats
+
+*Problem:*
+You have a simple Plain Old Java Object (POJO) and you want to serialize it into different formats like YAML, JSON, and Binary using Chronicle Wire.
+
+*Solution:*
+First, make your POJO implement `net.openhft.chronicle.wire.SelfDescribingMarshallable`. Then, use different `WireType` instances to serialize it.
+
+NOTE: Chronicle favours fluent property accessors (like `message()`, `number()`, `value()`) over traditional getters/setters. This is not strictly required but is a common practice in Chronicle Wire to enhance readability, maintainability, and reduce token count.
+
+. Define your `Marshallable` POJO:
++
+[source,java]
+----
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+
+public class MyData extends SelfDescribingMarshallable {
+    private String message;
+    private int number;
+    private double value;
+
+    // Constructor for easy initialization
+    public MyData(String message, int number, double value) {
+        this.message = message;
+        this.number = number;
+        this.value = value;
+    }
+
+    // Getters are good practice, though not strictly required for basic serialisation
+    // if fields are public or Wire has access. Private fields with no access
+    // might require getters/setters or specific configuration.
+    public String message() { return message; }
+    public int number() { return number; }
+    public double value() { return value; }
+}
+----
+
+. Serialize to YAML, JSON, and Binary Light:
++
+[source,java]
+----
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireType;
+
+public class BasicSerialisationDemo {
+    public static void main(String[] args) {
+        MyData data = new MyData("Hello Wire!", 123, 45.67);
+
+        // Serialize to YAML
+        Bytes<?> yamlBytes = Bytes.elasticByteBuffer();
+        Wire yamlWire = WireType.YAML_ONLY.apply(yamlBytes); // YAML_ONLY for pure YAML output
+        yamlWire.getValueOut().object(data);
+        System.out.println("YAML Output:\n" + yamlBytes);
+        yamlBytes.releaseLast();
+
+        // Serialize to JSON
+        Bytes<?> jsonBytes = Bytes.elasticByteBuffer();
+        Wire jsonWire = WireType.JSON_ONLY.apply(jsonBytes); // JSON_ONLY for pure JSON output
+        jsonWire.getValueOut().object(data);
+        System.out.println("\nJSON Output:\n" + jsonBytes);
+        jsonBytes.releaseLast();
+
+        // Serialize to Binary Light (common for performance)
+        Bytes<?> binaryBytes = Bytes.elasticByteBuffer();
+        Wire binaryWire = WireType.BINARY_LIGHT.apply(binaryBytes);
+        binaryWire.getValueOut().object(data);
+        System.out.println("\nBinary Light Output (hex):\n" + binaryBytes.toHexString());
+        // For demonstration, let's see how it would look if read back as YAML
+        // (This requires the binary data to be self-describing enough, BINARY_LIGHT is)
+        Wire binaryAsYaml = WireType.YAML_ONLY.apply(binaryBytes.readPosition(0)); // Reset read position
+        System.out.println("\nBinary Light (interpreted as YAML):\n" + binaryAsYaml.read().object());
+        binaryBytes.releaseLast();
+        binaryAsYaml.bytes().releaseLast(); // Release the Bytes underlying binaryAsYaml
+    }
+}
+----
+
+Discussion ::
+`SelfDescribingMarshallable` automatically handles the serialisation of fields. By simply changing the `WireType` (e.g., `YAML_ONLY`, `JSON_ONLY`, `BINARY_LIGHT`), you can control the output format without altering the `MyData` class or the core serialisation call (`getValueOut().object(data)`). `*_ONLY` variants like `YAML_ONLY` or `JSON_ONLY` are often preferred for cleaner output when not needing to retain full type information for dynamic deserialisation into differing types (though `YAML` and `JSON` wire types can be configured to include type information if needed).
+
+=== Recipe: Deserializing Data into a POJO
+
+*Problem:*
+You have serialized data (e.g., in YAML or Binary format) and want to deserialize it back into an instance of your POJO.
+
+*Solution:*
+Use the appropriate `Wire` instance to read the data and convert it back to your object type.
+
+. Assuming `MyData` class from the previous recipe.
+. Deserialize from YAML and Binary:
++
+[source,java]
+----
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireType;
+
+public class BasicDeserialisationDemo {
+    public static void main(String[] args) {
+        // --- YAML Example ---
+        String yamlInput = "!MyData {\n" +
+                           "  message: From YAML,\n" +
+                           "  number: 789,\n" +
+                           "  value: 12.34\n" +
+                           "}\n";
+        Bytes<?> yamlBytesIn = Bytes.fromString(yamlInput);
+        Wire yamlWireIn = WireType.YAML_ONLY.apply(yamlBytesIn);
+        MyData dataFromYaml = yamlWireIn.getValueIn().object(MyData.class);
+
+        System.out.println("Deserialized from YAML:");
+        System.out.println("  Message: " + dataFromYaml.message());
+        System.out.println("  Number: " + dataFromYaml.number());
+        System.out.println("  Value: " + dataFromYaml.value());
+        yamlBytesIn.releaseLast();
+
+        // --- Binary Light Example ---
+        // First, serialize to get some binary data
+        MyData originalData = new MyData("From Binary", 101, 1.01);
+        Bytes<?> binaryBytesOut = Bytes.elasticByteBuffer();
+        Wire binaryWireOut = WireType.BINARY_LIGHT.apply(binaryBytesOut);
+        binaryWireOut.getValueOut().object(originalData);
+
+        // Now, deserialize it
+        // Note: For BINARY_LIGHT to deserialize to a specific class,
+        // the class might need to be registered or type info written.
+        // If type info wasn't written, you might need to provide the class explicitly.
+        // SelfDescribingMarshallable with BINARY_LIGHT usually writes enough for this to work.
+        Wire binaryWireIn = WireType.BINARY_LIGHT.apply(binaryBytesOut.readPosition(0)); // Reset read position
+        MyData dataFromBinary = binaryWireIn.getValueIn().object(MyData.class);
+
+        System.out.println("\nDeserialized from Binary Light:");
+        System.out.println("  Message: " + dataFromBinary.message());
+        System.out.println("  Number: " + dataFromBinary.number());
+        System.out.println("  Value: " + dataFromBinary.value());
+        binaryBytesOut.releaseLast(); // Releases the underlying BytesStore
+    }
+}
+----
+
+*Discussion:*
+`getValueIn().object(MyData.class)` is the key call for deserialisation. Chronicle Wire reads the data and populates a new instance of `MyData`. For text formats like YAML, the `!MyData` type hint helps in identifying the target class, though providing the class explicitly in `object()` is robust. For binary formats, if type information isn't inherently part of the stream for the specific `WireType` chosen, providing the target class is essential. `SelfDescribingMarshallable` with `BINARY_LIGHT` typically includes type information or field names/numbers allowing for successful deserialisation.
+
+[[working_with_annotations]]
+== Working with Annotations
+
+=== Recipe: Using `@LongConversion` for Compact String Storage
+
+*Problem:*
+You have a short string identifier (e.g., a symbol or ID up to 10-11 characters using a Base85-like alphabet) that you want to represent as a `long` in your Java object for efficiency, but display as a String in human-readable formats (like YAML).
+
+*Solution:*
+Use the `@LongConversion` annotation with a suitable converter, like `Base85LongConverter`. Chronicle Wire provides shorthand annotations like `@Base85`.
+
+. Define your `Marshallable` POJO with an annotated field:
++
+[source,java]
+----
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+import net.openhft.chronicle.wire.converter.ShortText; // Shorthand annotation
+
+public class CompactIdData extends SelfDescribingMarshallable {
+    @ShortText
+    private long symbol; // Stored as long, represented as Base85 string in text
+
+    private double price;
+
+    // Constructor for convenience
+    public CompactIdData(String symbolStr, double price) {
+        this.symbol = ShortText.INSTANCE.parse(symbolStr);
+        this.price = price;
+    }
+
+    // Getter that converts long back to String for application use
+    public String getSymbol() {
+        return Base85.INSTANCE.asString(this.symbol);
+    }
+
+    public double getPrice() {
+        return price;
+    }
+}
+----
+
+. Serialize and observe the output:
++
+[source,java]
+----
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireType;
+
+public class LongConversionDemo {
+    public static void main(String[] args) {
+        CompactIdData trade = new CompactIdData("AAPL", 175.50);
+
+        // Serialize to YAML
+        Bytes<?> yamlBytes = Bytes.elasticByteBuffer();
+        Wire yamlWire = WireType.YAML_ONLY.apply(yamlBytes);
+        yamlWire.getValueOut().object(trade);
+        System.out.println("YAML Output:\n" + yamlBytes);
+        yamlBytes.releaseLast();
+
+        // Serialize to Binary Light
+        Bytes<?> binaryBytes = Bytes.elasticByteBuffer();
+        Wire binaryWire = WireType.BINARY_LIGHT.apply(binaryBytes);
+        binaryWire.getValueOut().object(trade);
+        System.out.println("\nBinary Output (hex):\n" + binaryBytes.toHexString());
+        // The 'symbol' field will be stored as an 8-byte long in binary.
+        binaryBytes.releaseLast();
+
+        // Deserialize
+        Wire binaryWireIn = WireType.BINARY_LIGHT.apply(binaryBytes.readPosition(0));
+        CompactIdData deserializedTrade = binaryWireIn.getValueIn().object(CompactIdData.class);
+        System.out.println("\nDeserialized Symbol: " + deserializedTrade.symbol());
+        System.out.println("Deserialized Price: " + deserializedTrade.price());
+        binaryBytes.releaseLast(); // Original binaryBytes was already released, this is for the new one.
+                                  // Better: use a new Bytes object for binaryWireIn.
+    }
+}
+----
+*Output (YAML):*
++
+[source,yaml]
+----
+!CompactIdData {
+    symbol: AAPL,
+    price: 175.5
+}
+----
+
+Discussion ::
+In the YAML output, `symbol` appears as a string "AAPL". However, in the `CompactIdData` object and in the binary wire format, it's stored as an 8-byte `long`. This technique is excellent for performance-sensitive applications that deal with many short textual identifiers, saving space and potentially speeding up comparisons/hashing if the `long` form is used internally. Chronicle Wire provides several built-in converters (`Base32`, `Base64`, `Base85`, etc.).
+
+=== Recipe: Formatting Timestamps with `@NanoTime`
+
+*Problem:*
+You want to store a timestamp as a `long` (nanoseconds since epoch) for precision and performance, but have it automatically formatted as a human-readable ISO date-time string in text-based wire formats.
+
+*Solution:*
+Use the `@NanoTime` annotation.
+
+. Define your `Marshallable` POJO:
++
+[source,java]
+----
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+import net.openhft.chronicle.wire.converter.NanoTime; // Shorthand annotation
+
+public class EventData extends SelfDescribingMarshallable {
+    @NanoTime
+    private long timestampNanos;
+    private String eventName;
+
+    public EventData(long timestampNanos, String eventName) {
+        this.timestampNanos = timestampNanos;
+        this.eventName = eventName;
+    }
+
+    public long timestampNanos() { return timestampNanos; }
+    public String eventName() { return eventName; }
+}
+----
+
+. Serialize and observe:
++
+[source,java]
+----
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireType;
+import java.time.Instant;
+
+public class NanoTimeDemo {
+    public static void main(String[] args) {
+        long nowNanos = SystemTimeProvider.CLOCK.currentTimeNanos();
+        EventData event = new EventData(nowNanos, "SystemStart");
+
+        Bytes<?> yamlBytes = Bytes.elasticByteBuffer();
+        Wire yamlWire = WireType.YAML_ONLY.apply(yamlBytes);
+        yamlWire.getValueOut().object(event);
+        System.out.println("YAML Output:\n" + yamlBytes);
+        yamlBytes.releaseLast();
+
+        // Deserialize (timestamp will be read back as long)
+        Bytes<?> yamlBytesIn = Bytes.fromString(yamlBytes.toString()); // Create new Bytes from string for deserialisation
+        Wire yamlWireIn = WireType.YAML_ONLY.apply(yamlBytesIn);
+        EventData deserializedEvent = yamlWireIn.getValueIn().object(EventData.class);
+        System.out.println("\nDeserialized Timestamp (long): " + deserializedEvent.timestampNanos());
+        System.out.println("As Instant: " + NanoTime.INSTANCE.asString(deserializedEvent.timestampNanos()));
+        yamlBytesIn.releaseLast();
+    }
+}
+----
+
+*Discussion:*
+The `@NanoTime` annotation (and similarly `@MillisTime` for millisecond precision) ensures that the `long` timestamp is converted to/from a standard ISO 8601 string representation in text formats like YAML or JSON, while remaining a `long` in binary formats and in the Java object. This provides both human readability for logs/configs and numerical efficiency for processing.
+
+[[schema_evolution]]
+== Schema Evolution
+
+=== Recipe: Adding a New Field (Backward Compatibility)
+
+*Problem:*
+You have an existing `Marshallable` class and need to add a new field. You want older versions of your application (that don't know about the new field) to still be able to read data written by the new version, and new versions to read old data.
+
+*Solution:*
+Simply add the new field to your class. Chronicle Wire's self-describing formats (like YAML, JSON, and `BINARY_LIGHT`) handle this gracefully.
+
+. Original class `VersionedDataV1`:
++
+[source,java]
+----
+package com.example.evo; // Assuming a package for clarity in evolution
+
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+
+public class VersionedDataV1 extends SelfDescribingMarshallable {
+    String existingField;
+
+    public VersionedDataV1(String existingField) {
+        this.existingField = existingField;
+    }
+
+    public String existingField() { return existingField; }
+}
+----
+
+. New class `VersionedDataV2` with an added field:
++
+[source,java]
+----
+package com.example.evo;
+
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+
+public class VersionedDataV2 extends SelfDescribingMarshallable {
+    String existingField;
+    int newField; // New field added
+
+    // Constructor for V2
+    public VersionedDataV2(String existingField, int newField) {
+        this.existingField = existingField;
+        this.newField = newField;
+    }
+
+    // Constructor to simulate reading V1 data (newField gets default)
+    public VersionedDataV2(String existingField) {
+        this(existingField, 0); // Default value for newField
+    }
+
+
+    public String existingField() { return existingField; }
+    public int newField() { return newField; }
+}
+----
+
+IMPORTANT: For Chronicle Wire to map `com.example.evo.VersionedDataV1` to `com.example.evo.VersionedDataV2` when reading old data, you would typically ensure they have the same class alias if using `WireType.YAML` (which uses type info). If you are deserializing into a specific class `VersionedDataV2.class`, then the type alias in the data is less critical, as Wire will try to map fields by name.
+
+. Demonstration:
++
+[source,java]
+----
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireType;
+import net.openhft.chronicle.wire.Wires;
+// Assuming VersionedDataV1 and VersionedDataV2 are in com.example.evo package
+// and class aliasing is set up if needed, or you deserialize to explicit class.
+
+public class SchemaEvolutionDemo {
+    public static void main(String[] args) {
+        // Scenario 1: New code writes V2, old code (conceptually) reads V1
+        // (We'll simulate old code reading by attempting to read V2 data as V1 structure if possible,
+        //  or more practically, new code reading old V1 data)
+
+        // Data written by V2 component
+        com.example.evo.VersionedDataV2 dataV2 = new com.example.evo.VersionedDataV2("test", 100);
+        Bytes<?> bytesV2 = Bytes.elasticByteBuffer();
+        Wire wireWriteV2 = WireType.YAML_ONLY.apply(bytesV2);
+        ClassAliasPool.CLASS_ALIASES.addAlias(com.example.evo.VersionedDataV2.class, "VersionedData");
+        ClassAliasPool.CLASS_ALIASES.addAlias(com.example.evo.VersionedDataV1.class, "VersionedData");
+        wireWriteV2.write("yaml").object(dataV2);
+        String v2DataAsString = bytesV2.toString();
+        System.out.println("Data written by V2:\n" + v2DataAsString);
+
+        // Scenario 2: New code (expecting V2) reads data written by V1 component
+        com.example.evo.VersionedDataV1 dataV1 = new com.example.evo.VersionedDataV1("old data");
+        Bytes<?> bytesV1 = Bytes.elasticByteBuffer();
+        Wire wireWriteV1 = WireType.YAML_ONLY.apply(bytesV1);
+        // If VersionedDataV1 was aliased to "VersionedData"
+        wireWriteV1.write("yaml").object(dataV1);
+        String v1DataAsString = bytesV1.toString();
+        System.out.println("\nData written by V1:\n" + v1DataAsString);
+
+        // New code reads V1 data
+        Bytes<?> bytesV1toRead = Bytes.fromString(v1DataAsString);
+        Wire wireReadV1AsV2 = WireType.YAML_ONLY.apply(bytesV1toRead);
+        com.example.evo.VersionedDataV2 readAsV2 = wireReadV1AsV2.getValueIn().object(com.example.evo.VersionedDataV2.class);
+        System.out.println("\nNew code (V2) reading V1 data:");
+        System.out.println("  ExistingField: " + readAsV2.existingField());
+        System.out.println("  NewField: " + readAsV2.newField() + " (gets default int value 0)");
+
+        bytesV1.releaseLast();
+        bytesV2.releaseLast();
+        bytesV1toRead.releaseLast();
+    }
+}
+----
+
+*Discussion:*
+When new code reads old data (V1 data into `VersionedDataV2`), the `newField` in `VersionedDataV2` will be initialized to its Java default value (0 for `int`, `null` for objects, `false` for `boolean`). When old code (expecting `VersionedDataV1`) reads data written by new code (V2 data), it will simply ignore the `newField` it doesn't recognize. This works seamlessly for most self-describing `WireType`s. Using consistent class aliasing (e.g., `Wires.CLASS_ALIASES.addAlias(VersionedDataV2.class, "VersionedData")`) can be important if you rely on type information in the stream (like `!VersionedData`) rather than always specifying the concrete class on deserialisation.
+
+== Working with `DocumentContext`
+
+=== Recipe: Writing and Reading Multiple Documents
+
+*Problem:*
+You need to write a sequence of distinct messages or objects to a single `Bytes` buffer or stream, and then read them back one by one.
+
+*Solution:*
+Use `DocumentContext` to demarcate each message. This is fundamental to how Chronicle Queue works.
+
+. Writing multiple documents:
++
+[source,java]
+----
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.wire.DocumentContext;
+import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireType;
+
+public class MultiDocumentDemo {
+
+    static class SimpleMessage extends SelfDescribingMarshallable {
+        String content;
+        public SimpleMessage(String content) { this.content = content; }
+        public String getContent() { return content; }
+    }
+
+    public static void main(String[] args) {
+        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Wire wire = WireType.BINARY_LIGHT.apply(bytes); // Binary is common for this
+
+        // Write first document
+        try (DocumentContext dc = wire.writingDocument()) {
+            dc.wire().write("msg").object(new SimpleMessage("Message One"));
+        } // DocumentContext is closed, message is finalized
+
+        // Write second document
+        try (DocumentContext dc = wire.writingDocument()) {
+            dc.wire().write("msg").object(new SimpleMessage("Message Two"));
+        }
+
+        // Write a third document with metadata (example for Chronicle Queue)
+        try (DocumentContext dc = wire.writingDocument(true)) { // true for metadata
+            dc.wire().write("header").text("Control Message");
+        }
+        try (DocumentContext dc = wire.writingDocument(false)) { // false for data
+             dc.wire().write("msg").object(new SimpleMessage("Message Three (data part)"));
+        }
+
+
+        System.out.println("Bytes buffer size after writing: " + bytes.writePosition());
+        System.out.println("Hex dump of buffer:\n" + bytes.toHexString());
+
+        // Reading multiple documents
+        System.out.println("\nReading documents back:");
+        bytes.readPosition(0); // Reset position for reading
+
+        while (true) {
+            try (DocumentContext dc = wire.readingDocument()) {
+                if (!dc.isPresent()) {
+                    System.out.println("No more documents.");
+                    break;
+                }
+                if (dc.isData()) { // Check if it's a data message
+                    SimpleMessage msg = dc.wire().read("msg").object(SimpleMessage.class);
+                    System.out.println("Read data message: " + msg.getContent());
+                } else if (dc.isMetaData()) { // Check if it's metadata
+                    String header = dc.wire().read("header").text();
+                    System.out.println("Read metadata message: Header = " + header);
+                } else {
+                    String name = dc.wire().readEvent(String.class);
+                    System.out.println("Read an empty or unknown document type. Skipping " + name);
+                }
+            }
+        }
+        bytes.releaseLast();
+    }
+}
+----
+
+*Discussion:*
+The `try-with-resources` block ensures that each `DocumentContext` is properly closed. When `writingDocument()`'s context is closed, metadata (like message length) is written, allowing the reader to correctly identify document boundaries. `readingDocument()` returns a context; `dc.isPresent()` tells you if a document was found. `dc.isData()` or `dc.isMetaData()` can be used to distinguish message types, a pattern heavily used by Chronicle Queue.
+
+== Advanced & Performance
+
+=== Recipe: Implementing `BytesMarshallable` for Maximum Control
+
+*Problem:*
+You need the absolute best performance or have a very specific binary layout in mind, and the overhead of `Marshallable` (even with code generation) is too much, or you need to interact with raw `Bytes` directly.
+
+*Solution:*
+Implement `net.openhft.chronicle.bytes.BytesMarshallable`.
+
+. Define your `BytesMarshallable` class:
++
+[source,java]
+----
+import net.openhft.chronicle.bytes.BytesIn;
+import net.openhft.chronicle.bytes.BytesMarshallable;
+import net.openhft.chronicle.bytes.BytesOut;
+import net.openhft.chronicle.core.io. zowel;
+
+public class PerfCriticalData implements BytesMarshallable {
+    private int id;
+    private long value; // Using 8 bytes
+
+    // For reading
+    public PerfCriticalData() {}
+
+    public PerfCriticalData(int id, long value) {
+        this.id = id;
+        this.value = value;
+    }
+
+    @Override
+    public void readMarshallable(BytesIn<?> bytes) throws IllegalStateException {
+        id = bytes.readInt();
+        value = bytes.readLong();
+    }
+
+    @Override
+    public void writeMarshallable(BytesOut<?> bytes) {
+        bytes.writeInt(id);
+        bytes.writeLong(value);
+    }
+
+    // Getters for verification
+    public int id() { return id; }
+    public long value() { return value; }
+
+    @Override
+    public String toString() {
+        return "PerfCriticalData{" +
+                "id=" + id +
+                ", value=0x" + Long.toHexString(value) +
+                '}';
+    }
+}
+----
+
+. Serialize and deserialize using a `Wire` (even though it's `BytesMarshallable`, Wire can handle it):
+
+[source,java]
+----
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireType;
+
+public class BytesMarshallableDemo {
+    public static void main(String[] args) {
+        PerfCriticalData dataOut = new PerfCriticalData(777, 0x123456789ABCDEF0L);
+
+        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        // Using RAW wire is common for BytesMarshallable if no other wire framing is needed
+        Wire rawWire = WireType.RAW.apply(bytes);
+
+        // Write it (RAW wire will delegate to BytesMarshallable's methods)
+        rawWire.getValueOut().object(dataOut);
+        System.out.println("BytesMarshallable RAW Hex: " + bytes.toHexString());
+
+        // Read it back
+        bytes.readPosition(0);
+        PerfCriticalData dataIn = rawWire.getValueIn().object(new PerfCriticalData(), PerfCriticalData.class);
+        // For BytesMarshallable, often you pass an instance to be populated.
+
+        System.out.println("Read back: " + dataIn);
+
+        bytes.releaseLast();
+    }
+}
+----
+
+*Discussion:*
+`BytesMarshallable` gives you direct access to the `BytesIn` and `BytesOut` objects. You are responsible for reading and writing all fields in the correct order and format. This offers maximum performance by bypassing much of Wire's higher-level machinery but requires more manual effort and is more brittle to schema changes if not managed carefully. `WireType.RAW` is often used with `BytesMarshallable` as it does minimal framing. When deserializing, you might pass a pre-allocated instance to `object(instance, class)` to encourage object reuse.
+
+NOTE: This cookbook provides a starting point. Many more recipes can be developed for specific use cases and advanced features of Chronicle Wire. Refer to the main documentation for comprehensive details on each feature.
+
+== Related Topics
+
+* link:wire-architecture.adoc[Architecture Overview] - Understand the internal architecture of Chronicle Wire
+* link:wire-annotations.adoc[Annotations Guide] - Learn about annotations for fine-tuning serialisation
+* link:wire-schema-evolution.adoc[Schema Evolution] - How to evolve your data structures over time
+* link:wire-error-handling.adoc[Error Handling and Diagnostics] - Troubleshooting and error handling
+* link:wire-faq.adoc[FAQ] - Answers to frequently asked questions
+* link:index.adoc[Documentation Home] - Return to the main documentation page
