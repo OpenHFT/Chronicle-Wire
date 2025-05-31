@@ -163,6 +163,7 @@ System.out.println(bytes.toString());
 
 == Documentation
 
+* link:src/main/adoc/index.adoc[Documentation Index]
 * link:src/main/adoc/wire-architecture.adoc[Architectural Overview]
 * link:src/main/adoc/wire-schema-evolution.adoc[Schema Evolution Deep Dive]
 * link:src/main/adoc/wire-cookbook.adoc[Cookbook]
