@@ -17,6 +17,27 @@ This document delves into the mechanisms Chronicle Wire employs for schema evolu
 
 == 2. Mechanisms in Self-Describing Formats
 
+[mermaid]
+----
+graph TD
+    subgraph "Schema Evolution Overview"
+        A[Schema Changes] --> B{Type of Change}
+        B -->|Add Field| C[Forward Compatible]
+        B -->|Remove Field| D[Backward Compatible]
+        B -->|Rename Field| E[Needs Special Handling]
+        B -->|Change Type| F[Complex - May Need Custom Logic]
+
+        C -->|"Older Reader"| G[Ignores Unknown Fields]
+        D -->|"Newer Reader"| H[Uses Default Values]
+        E -->|"@FieldNumber or Rename Map"| I[Maps Old Name to New]
+        F -->|"Custom readMarshallable"| J[Custom Conversion Logic]
+
+        K[Wire Format] --> L{Compatibility Level}
+        L -->|"YAML/JSON/BINARY_LIGHT"| M[Good Schema Evolution]
+        L -->|"FIELDLESS_BINARY"| N[Limited/No Evolution]
+    end
+----
+
 Self-describing formats are key to Chronicle Wire's schema evolution capabilities. These include text formats (YAML, JSON) and binary formats that embed field identifiers (like `BINARY_LIGHT`).
 
 === 2.1. Field Identification
@@ -33,6 +54,26 @@ Text Formats (YAML, JSON, TEXT) ::
 * **Field Numbers:** When field numbers are used (often via the `@FieldNumber` annotation), a compact representation of this number (e.g., stop-bit encoded for small numbers) is written to the wire preceding the field's data. This numeric tag uniquely identifies the field.
 * **Field Names:** If full field names are used, they are typically written as length-prefixed UTF-8 strings.
 * Each field entry generally consists of this identifier (name or number), potentially some type information or length indication for the data itself, followed by the serialised field value.
+
+[mermaid]
+----
+graph TD
+    subgraph "Field Identification in Different Formats"
+        A[Java Class Definition] --> B[Serialization]
+        B --> C{Wire Format}
+        C -->|YAML/JSON| D[Text Format]
+        C -->|BINARY_LIGHT| E[Binary Format]
+        C -->|FIELDLESS_BINARY| F[Compact Binary]
+
+        D -->|"fieldName: value"| G[Field Names as Keys]
+        E -->|"fieldNumber + value"| H[Field Numbers or Names]
+        F -->|"value1, value2, ..."| I[Position-Based, No Names]
+
+        G --> J[Order Independent]
+        H --> K[Order Independent]
+        I --> L[Order Dependent]
+    end
+----
 
 === 2.2. Handling Unknown Fields (Forward Compatibility)
 
@@ -258,4 +299,5 @@ By understanding these mechanisms, limitations, and best practices, developers c
 * link:wire-annotations.adoc[Annotations Guide] - Learn about annotations for fine-tuning serialization
 * link:wire-cookbook.adoc#_4_schema_evolution[Schema Evolution Examples] - Practical examples of schema evolution
 * link:wire-error-handling.adoc[Error Handling and Diagnostics] - Troubleshooting and error handling
+* link:wire-visual-guide.adoc#_5_schema_evolution[Visual Guide: Schema Evolution] - Diagrams illustrating schema evolution concepts
 * link:index.adoc[Documentation Home] - Return to the main documentation page
