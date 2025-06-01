@@ -26,31 +26,41 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * An abstract handler for method writer invocations that provides a base implementation.
- * It manages the invocation by mapping methods to their respective parameter holders and writing them to wires.
- * This class can handle both regular and generic events and supports method IDs for binary output.
+ * Abstract base for {@link MethodWriterInvocationHandler}s. It intercepts method
+ * calls on a proxy and serialises them to a {@link Wire}. Parameter writers
+ * ({@link ParameterHolderSequenceWriter}) are cached for reuse. Subclasses
+ * implement {@link #handleInvoke(Method, Object[])} to obtain the target wire
+ * and perform the actual write.
  */
 public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvocationHandler implements MethodWriterInvocationHandler {
 
-    // Map to cache the parameter holders for method invocations
+    /** Cache of analysed parameter writers keyed by method. */
     private final Map<Method, ParameterHolderSequenceWriter> parameterMap = new ConcurrentHashMap<>();
+
+    /** If true a {@link MessageHistory} is written before each event. */
     protected boolean recordHistory;
 
-    // Name for the generic event, if any. A generic event take the event name as the first argument
+    /**
+     * Name of the method used for generic events. The first argument becomes
+     * the event name on the wire.
+     */
     protected String genericEvent = "";
 
-    // Flag to determine if method IDs should be used in binary output
+    /** Use numeric {@link MethodId} values when writing to binary wires. */
     private boolean useMethodIds;
 
     /**
-     * Constructor accepting the type of class the handler operates on.
-     *
-     * @param tClass The class type this handler is designed for.
+     * @param tClass the primary interface handled by this instance
      */
     protected AbstractMethodWriterInvocationHandler(Class<?> tClass) {
         super(tClass);
     }
 
+    /**
+     * Invoked by the proxy for every method call. Delegates to
+     * {@link #handleInvoke(Method, Object[])} and returns the proxy when the
+     * method itself returns an interface, enabling chaining.
+     */
     @Override
     protected Object doInvoke(Object proxy, Method method, Object[] args) {
         handleInvoke(method, args);
@@ -58,27 +68,29 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
         return method.getReturnType().isInterface() ? proxy : null;
     }
 
+    /**
+     * Configures which method acts as the generic event dispatcher.
+     */
     @Override
     public void genericEvent(String genericEvent) {
         this.genericEvent = genericEvent;
     }
 
     /**
-     * Abstract method to handle a method invocation with its respective arguments.
-     *
-     * @param method The method being invoked.
-     * @param args   Arguments provided for the method invocation.
+     * Obtains a {@link WireOut} or {@link DocumentContext} and delegates to
+     * {@link #handleInvoke(Method, Object[], Wire)}.
      */
     protected abstract void handleInvoke(Method method, Object[] args);
 
     /**
-     * Handles the method invocation, writes the event details to the provided wire,
-     * and supports optional recording of method history.
+     * Core logic for writing a method call to the supplied wire. Writes
+     * {@link MessageHistory} when {@link #recordHistory} is true and then
+     * serialises either a generic or regular event.
      *
-     * @param method The method being invoked.
-     * @param args   Arguments provided for the method invocation.
-     * @param wire   The wire output to write the event details.
-     * @throws InvalidMarshallableException If there's an error during marshalling.
+     * @param method the method being invoked
+     * @param args   arguments for the invocation
+     * @param wire   target wire
+     * @throws InvalidMarshallableException if an argument cannot be written
      */
     protected void handleInvoke(@NotNull Method method, Object[] args, Wire wire) throws InvalidMarshallableException {
         if (recordHistory) {
@@ -95,21 +107,32 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
         writeEvent(wire, method, methodName, args);
     }
 
-    // Helper to write a regular event to the wire
+    /**
+     * Serialises a regular method invocation.
+     */
     private void writeEvent(Wire wire, @NotNull Method method, String methodName, Object[] args) throws InvalidMarshallableException {
         writeEvent0(wire, method, args, methodName, 0);
     }
 
-    // Helper to write a generic event to the wire
+    /**
+     * Handles the generic event case where the first argument supplies the event name.
+     */
     private void writeGenericEvent(Wire wire, @NotNull Method method, Object[] args) throws InvalidMarshallableException {
         String methodName = args[0].toString();
         writeEvent0(wire, method, args, methodName, 1);
     }
 
-    // Core logic to write events to the wire, distinguishing between methods with and without arguments
+    /**
+     * Writes the event name or ID followed by the parameters.
+     *
+     * @param wire      target wire
+     * @param method    source method
+     * @param args      arguments array
+     * @param methodName resolved name to write
+     * @param oneParam   index offset when the first argument is the event name
+     */
     @SuppressWarnings("unchecked")
     private void writeEvent0(Wire wire, @NotNull Method method, Object[] args, String methodName, int oneParam) throws InvalidMarshallableException {
-        // Fetch or compute the parameter holder for the method
         final ParameterHolderSequenceWriter phsw = parameterMap.computeIfAbsent(method, ParameterHolderSequenceWriter::new);
         boolean useMethodId = useMethodIds && phsw.methodId >= 0 && wire.getValueOut().isBinary();
         ValueOut valueOut = useMethodId
@@ -133,11 +156,17 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
         }
     }
 
+    /**
+     * Enables or disables writing of {@link MessageHistory} before each event.
+     */
     @Override
     public void recordHistory(boolean recordHistory) {
         this.recordHistory = recordHistory;
     }
 
+    /**
+     * Controls whether numeric {@link MethodId} values are emitted rather than names.
+     */
     @Override
     public void useMethodIds(boolean useMethodIds) {
         this.useMethodIds = useMethodIds;
