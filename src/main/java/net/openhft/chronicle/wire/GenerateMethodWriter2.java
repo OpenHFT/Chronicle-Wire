@@ -32,11 +32,12 @@ import java.util.stream.Stream;
 import static java.util.Arrays.stream;
 import static java.util.Collections.*;
 /**
- * The {@code GenerateMethodWriter2} class is responsible for generating method writers based on the provided metadata.
+ * Lightweight generator for method writer proxies.
  * <p>
- * It extends the {@link AbstractClassGenerator} with metadata type {@link GMWMetaData}. This class internally maintains
- * a set of template methods that help in the method writer generation. These templates are based on certain method names
- * and parameter types, which define their structure.
+ * This implementation extends {@link AbstractClassGenerator} and emits a
+ * minimal proxy that serialises method calls to a {@link MarshallableOut}
+ * sink.  It is kept deliberately simple compared with
+ * {@link GenerateMethodWriter} and is suited to binary wire use.
  */
 @SuppressWarnings("this-escape")
 public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethodWriter2.GMWMetaData> {
@@ -45,8 +46,9 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     private static final String DOCUMENT_CONTEXT = DocumentContext.class.getSimpleName();
 
     /**
-     * Holds the predefined templates for methods. The outer map's key is the method name, while the inner map
-     * has the method parameter types as the key and the method body as the value.
+     * Internal snippets for well-known interface methods.  The first key is the
+     * method name and the second is the parameter list used to locate the code
+     * body.
      */
     private static final Map<String, Map<List<Class<?>>, String>> TEMPLATE_METHODS = new LinkedHashMap<>();
 
@@ -82,11 +84,15 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         TEMPLATE_METHODS.put("writingDocument", wd);
     }
 
-    // Maintains a mapping of method writers based on their respective classes.
+    /**
+     * Cache for chained method writers.  Each entry maps an interface to the
+     * generated {@code ThreadLocal} field name.
+     */
     private final Map<Class<?>, String> methodWritersMap = new LinkedHashMap<>();
 
     /**
-     * Default constructor that initializes the metadata and sets up necessary imports.
+     * Creates a new generator with default {@link GMWMetaData} and registers
+     * the imports required by the generated code.
      */
     public GenerateMethodWriter2() {
         super(new GMWMetaData());
@@ -97,15 +103,8 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     }
 
     /**
-     * Retrieves the method template for a given method name, return type, and parameter types.
-     * <p>
-     * The method looks up the template from the predefined {@code TEMPLATE_METHODS}. If no matching template is
-     * found, it returns {@code null}.
-     *
-     * @param name The method name to look up
-     * @param returnType The return type of the method
-     * @param pts The parameter types of the method
-     * @return The method template as a string, or {@code null} if not found
+     * Returns the canned code for the supplied signature or {@code null} when
+     * no template exists.
      */
     private static String templateFor(String name, Class<?> returnType, Class<?>[] pts) {
         Map<List<Class<?>>, String> map = TEMPLATE_METHODS.get(name);
@@ -118,13 +117,8 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     }
 
     /**
-     * Converts a given {@link Class} type to a corresponding string representation.
-     * <p>
-     * This method provides string representations for various primitive types, {@link CharSequence}, and
-     * {@link Marshallable}. If the type does not match any predefined types, it defaults to returning "object".
-     *
-     * @param type The class type to convert
-     * @return The corresponding string representation of the type
+     * Maps primitive and common types to the {@code ValueOut} method name used
+     * when writing arguments.
      */
     private static CharSequence asString(Class<?> type) {
         if (boolean.class.equals(type)) {
@@ -152,6 +146,11 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     }
 
     @Override
+    /**
+     * Adds fields used by the generated proxy such as the {@code Closeable},
+     * optional {@link UpdateInterceptor} and the supplier of
+     * {@link MarshallableOut} instances.
+     */
     protected void generateFields(SourceCodeFormatter mainCode) {
         super.generateFields(mainCode);
         withLineNumber(mainCode)
@@ -164,6 +163,10 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     }
 
     @Override
+    /**
+     * Emits a constructor that initialises the output supplier, the optional
+     * interceptor and the associated {@link Closeable}.
+     */
     protected void generateConstructors(SourceCodeFormatter mainCode) {
         super.generateConstructors(mainCode);
         withLineNumber(mainCode)
@@ -179,6 +182,12 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     }
 
     @Override
+    /**
+     * Generates the body of a proxied method.  It opens a
+     * {@link WriteDocumentContext}, writes the event name or ID and serialises
+     * the arguments.  The return type dictates whether the call is terminating
+     * or part of a fluent API.
+     */
     protected void generateMethod(Method method, StringBuilder params, List<String> paramList, SourceCodeFormatter mainCode) {
         String name = method.getName();
         Class<?> returnType = method.getReturnType();
@@ -228,6 +237,10 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     }
 
     @Override
+    /**
+     * Declares any {@code ThreadLocal} fields required for chained writers at
+     * the end of code generation.
+     */
     protected void generateEnd(SourceCodeFormatter mainCode) {
         super.generateEnd(mainCode);
         for (Map.Entry<Class<?>, String> e : methodWritersMap.entrySet()) {
@@ -237,13 +250,9 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     }
 
     /**
-     * Writes the event name or ID associated with the provided method.
-     * If a {@code MethodId} annotation is present, the method writes the event using its value.
-     * Otherwise, it simply writes the event name.
-     *
-     * @param method    The method whose event information needs to be written.
-     * @param body      The code formatter to which the write operation should be appended.
-     * @param eventName The name of the event.
+     * Emits a call to write the event identifier.  When
+     * {@link MethodId} is present and enabled the numeric id is used,
+     * otherwise the textual name is written.
      */
     private void writeEventNameOrId(final Method method, final SourceCodeFormatter body, final String eventName) {
         // Check if using method IDs is required and find any @MethodId annotation present
@@ -265,12 +274,8 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     }
 
     /**
-     * Writes the array of parameters for the provided method.
-     * Handles primitive types and CharSequences directly, while delegating non-primitive types to {@code writeValue}.
-     *
-     * @param dm     The method whose parameters are to be written.
-     * @param body   The code formatter to which the write operations should be appended.
-     * @param startJ The starting index for parameters.
+     * Serialises the method arguments.  Multiple parameters are wrapped in an
+     * array block.
      */
     private void writeArrayOfParameters(final Method dm, final SourceCodeFormatter body, final int startJ) {
         // Check if there are multiple parameters
@@ -296,13 +301,7 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     }
 
     /**
-     * Writes the value of a given parameter.
-     * The parameter is written as an object with its associated class name and name.
-     *
-     * @param dm     The method to which the parameter belongs.
-     * @param body   The code formatter to which the write operation should be appended.
-     * @param startJ The starting index for parameters.
-     * @param p      The parameter whose value needs to be written.
+     * Writes a single parameter using {@code ValueOut.object}.
      */
     private void writeValue(final Method dm, final SourceCodeFormatter body, final int startJ, final Parameter p) {
         // Retrieve class name, replacing inner class '$' with '.'
@@ -319,13 +318,7 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     }
 
     /**
-     * Handles the return value for a provided method.
-     * Determines the return value based on the method's return type and available interfaces.
-     * The method ensures that the correct return type or default value is appended to the result.
-     *
-     * @param result         The code formatter to which the return value should be appended.
-     * @param method         The method whose return value needs to be determined.
-     * @param interfaceClases Set of interfaces to determine if the return type matches any.
+     * Emits the appropriate return statement for the generated method.
      */
     private void methodReturn(SourceCodeFormatter result, final Method method, final Set<Class<?>> interfaceClases) {
         Class<?> returnType = method.getReturnType();
@@ -356,8 +349,7 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     }
 
     /**
-     * Metadata associated with the {@code GenerateMethodWriter2} class.
-     * Provides options like use of method IDs, metadata, and generic events.
+     * Meta-data controlling the generated writer behaviour.
      */
     public static class GMWMetaData extends AbstractClassGenerator.MetaData<GMWMetaData> {
         private boolean metaData;
@@ -365,19 +357,14 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         private String genericEvent;
 
         /**
-         * Gets the meta data usage status.
-         *
-         * @return {@code true} if metadata is to be used; {@code false} otherwise.
+         * Whether each method call should include meta-data.
          */
         public boolean metaData() {
             return metaData;
         }
 
         /**
-         * Sets the meta data usage status.
-         *
-         * @param metaData Whether to use metadata.
-         * @return The updated metadata instance.
+         * Enables or disables meta-data writing.
          */
         public GMWMetaData metaData(boolean metaData) {
             this.metaData = metaData;
@@ -385,19 +372,14 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         }
 
         /**
-         * Gets the method IDs usage status.
-         *
-         * @return {@code true} if method IDs are to be used; {@code false} otherwise.
+         * Returns true when numeric {@link MethodId} values should be written.
          */
         public boolean useMethodIds() {
             return useMethodIds;
         }
 
         /**
-         * Sets the method IDs usage status.
-         *
-         * @param useMethodIds Whether to use method IDs.
-         * @return The updated metadata instance.
+         * Enables numeric {@link MethodId} handling.
          */
         public GMWMetaData useMethodIds(boolean useMethodIds) {
             this.useMethodIds = useMethodIds;
@@ -405,19 +387,14 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         }
 
         /**
-         * Gets the generic event.
-         *
-         * @return The generic event string.
+         * Name of the catch-all method for generic events.
          */
         public String genericEvent() {
             return genericEvent;
         }
 
         /**
-         * Sets the generic event.
-         *
-         * @param genericEvent The generic event string.
-         * @return The updated metadata instance.
+         * Sets the method name to be treated as a generic event.
          */
         public GMWMetaData genericEvent(String genericEvent) {
             this.genericEvent = genericEvent;
