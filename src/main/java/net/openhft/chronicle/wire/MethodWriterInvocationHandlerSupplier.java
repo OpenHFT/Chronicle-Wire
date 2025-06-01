@@ -21,87 +21,90 @@ import net.openhft.chronicle.core.io.Closeable;
 import java.util.function.Supplier;
 
 /**
- * The {@code MethodWriterInvocationHandlerSupplier} class is an implementation of the {@link Supplier} interface
- * for providing instances of {@link MethodWriterInvocationHandler}. This supplier offers a series of
- * configurations which influence the behavior of the generated {@link MethodWriterInvocationHandler} instances.
- * Configurable behaviors include thread safety, recording history, and more.
+ * Configurable factory for {@link MethodWriterInvocationHandler} instances. It
+ * wraps a delegate supplier and applies common options such as history
+ * recording, close behaviour, generic event name, method ID usage and
+ * thread-safety mode.  Instances are lazily created and cached per thread unless
+ * thread safety is explicitly disabled.
+ * <p>
+ * This supplier is primarily used by
+ * {@link VanillaMethodWriterBuilder} when generating method writer proxies.
  */
 public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWriterInvocationHandler> {
 
-    // The main supplier delegate that provides the base MethodWriterInvocationHandler instances.
+    /**
+     * Delegate supplier returning raw handler instances, typically a
+     * {@link BinaryMethodWriterInvocationHandler} or
+     * {@link TextMethodWriterInvocationHandler}.
+     */
     private final Supplier<MethodWriterInvocationHandler> supplier;
 
-    // Configuration fields
+    /** whether created handlers should record invocation history */
     private boolean recordHistory;
+    /** optional resource to close when the handler is closed */
     private Closeable closeable;
+    /** if true a single non-thread-safe instance will be reused */
     private boolean disableThreadSafe;
+    /** event name used when the method writer is generic */
     private String genericEvent;
+    /** if false the handler avoids writing method identifiers */
     private boolean useMethodIds = true;
 
-    // A thread-local handler for thread-safe operations
-    private final ThreadLocal<MethodWriterInvocationHandler> handlerTL = ThreadLocal.withInitial(this::newHandler);
+    /** thread-local cache for handlers when thread safety is enabled */
+    private final ThreadLocal<MethodWriterInvocationHandler> handlerTL =
+            ThreadLocal.withInitial(this::newHandler);
 
-    // A non-thread safe handler instance
+    /** shared instance used when thread safety is disabled */
     private MethodWriterInvocationHandler handler;
 
     /**
-     * Constructs a new {@code MethodWriterInvocationHandlerSupplier} with a delegate supplier.
+     * Creates a supplier that wraps the provided delegate.
      *
-     * @param supplier The delegate supplier that provides base instances of {@link MethodWriterInvocationHandler}.
+     * @param supplier delegate supplier, commonly returning either a
+     *                 {@link BinaryMethodWriterInvocationHandler} or a
+     *                 {@link TextMethodWriterInvocationHandler}
      */
     public MethodWriterInvocationHandlerSupplier(Supplier<MethodWriterInvocationHandler> supplier) {
         this.supplier = supplier;
     }
 
     /**
-     * Sets the configuration for recording history.
-     *
-     * @param recordHistory Whether to enable history recording.
+     * Enable or disable invocation history recording on new handlers.
      */
     public void recordHistory(boolean recordHistory) {
         this.recordHistory = recordHistory;
     }
 
     /**
-     * Sets a {@link Closeable} instance to be invoked when closing.
-     *
-     * @param closeable The Closeable instance.
+     * Assign a resource to be closed when the handler closes.
      */
     public void onClose(Closeable closeable) {
         this.closeable = closeable;
     }
 
     /**
-     * Sets the configuration for thread safety.
-     *
-     * @param disableThreadSafe Whether to disable thread safety.
+     * If true a single handler is reused instead of one per thread.
      */
     public void disableThreadSafe(boolean disableThreadSafe) {
         this.disableThreadSafe = disableThreadSafe;
     }
 
     /**
-     * Sets the generic event to be associated with the handler.
-     *
-     * @param genericEvent The generic event as a string.
+     * Set the event name used by generic method writers.
      */
     public void genericEvent(String genericEvent) {
         this.genericEvent = genericEvent;
     }
 
     /**
-     * Configures whether to use method IDs.
-     *
-     * @param useMethodIds Whether to enable method IDs.
+     * Determines whether method identifiers are emitted.
      */
     public void useMethodIds(boolean useMethodIds) {
         this.useMethodIds = useMethodIds;
     }
 
     /**
-     * Creates and initializes a new {@link MethodWriterInvocationHandler} using the current configurations.
-     *
-     * @return A newly initialized MethodWriterInvocationHandler.
+     * Internal helper to create a new handler and apply all configured options.
      */
     private MethodWriterInvocationHandler newHandler() {
         MethodWriterInvocationHandler h = supplier.get();
@@ -112,6 +115,11 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
         return h;
     }
 
+    /**
+     * Returns a configured handler.  A thread-local instance is supplied by
+     * default; when {@link #disableThreadSafe} is true a shared instance is
+     * returned.  Each instance is created lazily via {@link #newHandler()}.
+     */
     @Override
     public MethodWriterInvocationHandler get() {
         if (disableThreadSafe) {
