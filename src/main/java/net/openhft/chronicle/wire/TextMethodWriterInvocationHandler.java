@@ -15,6 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.MethodWriterInvocationHandler;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.util.Mocker;
