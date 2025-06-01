@@ -17,20 +17,22 @@
 package net.openhft.chronicle.wire;
 
 /**
- * The {@code MethodWriter} interface defines the contract for classes that have the capability to
- * output their data in a marshallable format using the {@link MarshallableOut} interface.
- * Implementers of this interface are expected to provide the logic to transform or serialize their internal
- * state to a format supported by the {@link MarshallableOut} instance provided.
+ * Defines a contract for components that can serialise method calls to a {@link MarshallableOut} target.
+ * Typically implemented by proxies created via {@link MarshallableOut#methodWriter(Class, Class...)} or
+ * {@link VanillaMethodWriterBuilder}. Implementations should ensure that method
+ * invocations on the writer result in corresponding messages being written to the configured {@code MarshallableOut}.
+ *
+ * @see MarshallableOut#methodWriter(Class, Class...)
+ * @see VanillaMethodWriterBuilder
  */
 public interface MethodWriter {
 
     /**
-     * Transforms or serializes the internal state of the implementer to the provided
-     * {@link MarshallableOut} instance. Implementers should handle the logic for
-     * extracting their state and using the methods available on the {@code out} parameter
-     * to output this state in the appropriate format.
+     * Re-targets this writer to the given {@link MarshallableOut}.
+     * Subsequent method calls will be serialised to that destination and the writer's
+     * internal state is typically updated to reflect the new sink.
      *
-     * @param out The {@link MarshallableOut} instance to which the implementer's state should be written.
+     * @param out new sink for future method call serialisations; must not be null
      */
     void marshallableOut(MarshallableOut out);
 }
