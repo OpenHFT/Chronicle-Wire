@@ -82,8 +82,8 @@ public class QueryWire extends TextWire {
     }
 
     /**
-     * Reads the next field name into {@code sb} stopping at '=' or '&'.
-     * If an '&' has been consumed it is rewound.
+     * Reads the next field name into {@code sb} stopping at '=' or '&amp;'.
+     * If an '&amp;' has been consumed it is rewound.
      */
     @Override
     @NotNull
