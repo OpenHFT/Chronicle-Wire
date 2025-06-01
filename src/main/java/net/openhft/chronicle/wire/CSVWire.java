@@ -112,8 +112,6 @@ public class CSVWire extends TextWire {
         return escaping;
     }
 
-    @NotNull
-    @Override
     /**
      * Factory for {@link CSVValueOut} instances used when writing values.
      */
