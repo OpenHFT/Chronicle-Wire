@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2025 chronicle.software
+ * Copyright (c) 2016-2020 chronicle.software
  */
 
 package net.openhft.chronicle.wire.marshallable;
