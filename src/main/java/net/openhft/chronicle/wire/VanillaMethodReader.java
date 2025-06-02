@@ -41,26 +41,55 @@ import java.util.function.Supplier;
 import static net.openhft.chronicle.wire.VanillaWireParser.SKIP_READABLE_BYTES;
 
 /**
- * This is the VanillaMethodReader class implementing the MethodReader interface.
- * The class primarily handles reading methods from a MarshallableIn source and provides related utilities.
- * It works with WireParselet, MethodReaderInterceptorReturns, and other constructs to facilitate the reading process.
+ * Deserialises messages from a {@link MarshallableIn} source and dispatches each
+ * one as a method call on the supplied handler objects. A {@link WireParser}
+ * maps event names or method identifiers to the correct handler method.
+ * <p>
+ * The reader can operate either via a slower reflection proxy (deprecated) or
+ * a generated high-performance implementation, see {@link GenerateMethodReader}.
+ * Use {@link VanillaMethodReaderBuilder} to configure instances.
+ * <p>
+ * Supports interception via {@link MethodReaderInterceptorReturns} and custom
+ * parsing through {@link WireParselet} and {@link FieldNumberParselet}.
  */
 @SuppressWarnings({"rawtypes","this-escape"})
 public class VanillaMethodReader implements MethodReader {
 
     // beware enabling DEBUG_ENABLED as logMessage will not work unless Wire marshalling used - https://github.com/ChronicleEnterprise/Chronicle-Services/issues/240
+    /**
+     * Flag to enable debug logging of messages being read. Controlled by the
+     * system property {@code wire.mr.debug}. When true, messages are logged via
+     * {@link Jvm#debug()} and performance may suffer.
+     */
     public static final boolean DEBUG_ENABLED = Jvm.isDebugEnabled(VanillaMethodReader.class) && Jvm.getBoolean("wire.mr.debug");
+
+    /** Shared empty {@code Object} array used to invoke methods with no arguments. */
     static final Object[] NO_ARGS = {};
-    static final Object IGNORED = new Object(); // object used to flag that the call should be ignored.
+
+    /** Sentinel used internally with {@link MethodFilterOnFirstArg} to skip a call. */
+    static final Object IGNORED = new Object();
+
+    /** The {@link MarshallableIn} source of messages. */
     private final MarshallableIn in;
+
+    /** Parser used for metadata messages. */
     @NotNull
     private final WireParser metaWireParser;
+    /** Parser used for data messages. */
     private final WireParser dataWireParser;
+    /** Optional interceptor for dispatched method calls. */
     private final MethodReaderInterceptorReturns methodReaderInterceptorReturns;
+
+    /** Predicate controlling whether a message is processed. */
     private final Predicate<MethodReader> predicate;
 
+    /** Lazily initialised history for the current message. */
     private MessageHistory messageHistory;
+
+    /** When true the {@link #in} is closed when this reader is closed. */
     private boolean closeIn = false;
+
+    /** Flag set once {@link #close()} has been called. */
     private boolean closed;
 
     /**
