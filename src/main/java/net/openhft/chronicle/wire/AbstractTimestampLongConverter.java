@@ -97,10 +97,15 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
     }
 
     /**
-     * Constructs a new {@code AbstractTimestampLongConverter} with the specified zone ID and time unit.
+     * Constructs a new {@code AbstractTimestampLongConverter} with the specified
+     * zone ID and time unit.
      *
-     * @param zoneId   the zone ID to be used for the conversion of long values
-     * @param timeUnit the time unit for the conversion of long values
+     * @param zoneId   The string representation of the {@link ZoneId} (for
+     *                 example "UTC" or "Europe/London") used when a parsed date
+     *                 does not contain its own offset. All internal long values
+     *                 are treated as UTC based.
+     * @param timeUnit The {@link TimeUnit} defining the precision of the long
+     *                 timestamp values handled by this converter.
      */
     protected AbstractTimestampLongConverter(String zoneId, TimeUnit timeUnit) {
         this.zoneId = ZoneId.of(zoneId);
@@ -117,10 +122,13 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
 
     /**
      * Parses the provided text and converts it into a long timestamp.
-     * The text can be an ISO date or a timestamp. If the text includes a timezone, it's used for conversion;
-     * otherwise, the converter's timezone is used.
+     * The input may be an ISO-8601 date, a date-time with or without a zone, or
+     * a plain numeric timestamp. When no zone is present, the converter's
+     * {@link ZoneId} is assumed.
      *
-     * @param text the text to be parsed
+     * @param text The character sequence representing a date, timestamp or
+     *             numeric value to be parsed into a UTC long in this
+     *             converter's {@link TimeUnit}.
      * @return a long value representing the parsed timestamp
      */
     @Override
@@ -146,17 +154,22 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
     }
 
     /**
-     * Interpret formatted date
+     * Interpret a formatted date that has already been normalised to UTC.
      *
-     * @param value The parsed formatted date (in UTC zone)
+     * @param value The {@link ZonedDateTime} parsed from the text and adjusted
+     *              to UTC. The implementation extracts the epoch based long in
+     *              this converter's {@link TimeUnit}.
      * @return The value as a long timestamp
      */
     protected abstract long parseFormattedDate(ZonedDateTime value);
 
     /**
-     * Interpret long timestamp
+     * Interpret a long value that has been parsed directly from the input text.
      *
-     * @param value The parsed timestamp
+     * @param value The numeric value extracted from {@code text} before any unit
+     *              conversion is applied.
+     * @param text  The original character sequence. Implementations may use it
+     *              for logging or context when the conversion is ambiguous.
      * @return The value as a long timestamp
      */
     protected abstract long parseTimestamp(long value, CharSequence text);
@@ -188,12 +201,20 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
     }
 
     /**
-     * Appends the fraction of the second to the provided {@code DateTimeFormatterBuilder}.
+     * Append the fraction-of-second pattern to the formatter builder.
      *
-     * @param builder The builder after the initial date format has been added
+     * @param builder The {@link DateTimeFormatterBuilder} after the basic date
+     *                and time pattern has been added.
      */
     protected abstract void appendFraction(DateTimeFormatterBuilder builder);
 
+    /**
+     * Format the timestamp value and append it to the supplied {@link Appendable}.
+     *
+     * @param text  The destination for the formatted date-time, such as a
+     *              {@link StringBuilder} or {@link Bytes} instance.
+     * @param value The UTC timestamp in this converter's {@link TimeUnit}.
+     */
     public void append(Appendable text, long value) {
         if (value <= 0) {
             AppendableUtil.append(text, value);
@@ -212,10 +233,10 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
     }
 
     /**
-     * Appends the provided long value to the given {@code StringBuilder}. This method delegates to {@code append(Appendable, long)}.
+     * Convenience overload that delegates to {@link #append(Appendable, long)}.
      *
-     * @param text  the {@code StringBuilder} to append to
-     * @param value the long value to be appended
+     * @param text  The {@link StringBuilder} to receive the formatted value.
+     * @param value The UTC timestamp in this converter's {@link TimeUnit}.
      */
     @Override
     public void append(StringBuilder text, long value) {
@@ -223,10 +244,10 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
     }
 
     /**
-     * Appends the provided long value to the given {@code Bytes}. This method delegates to {@code append(Appendable, long)}.
+     * Convenience overload for appending to a {@link Bytes} instance.
      *
-     * @param bytes the {@code Bytes} to append to
-     * @param value the long value to be appended
+     * @param bytes The {@link Bytes} sink for the formatted value.
+     * @param value The UTC timestamp in this converter's {@link TimeUnit}.
      */
     @Override
     public void append(Bytes<?> bytes, long value) {

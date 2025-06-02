@@ -46,7 +46,9 @@ public class NanoTimestampLongConverter extends AbstractTimestampLongConverter {
     /**
      * Constructs a new {@code NanoTimestampLongConverter} with the specified zone ID.
      *
-     * @param zoneId the zone ID to be used for the conversion of long values
+     * @param zoneId The string representation of the {@link java.time.ZoneId}
+     *               used for formatting and parsing. Nanosecond precision is
+     *               supported.
      */
     public NanoTimestampLongConverter(String zoneId) {
         super(zoneId, TimeUnit.NANOSECONDS);
