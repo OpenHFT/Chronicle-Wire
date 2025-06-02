@@ -64,93 +64,99 @@ public class VanillaMethodReader implements MethodReader {
     private boolean closed;
 
     /**
-     * Constructor for creating an instance of VanillaMethodReader with specified parameters.
-     * It uses default values for certain parameters like SKIP_READABLE_BYTES and creates the instance accordingly.
+     * Convenience constructor used by generated code.
      *
-     * @param in The MarshallableIn source from which methods are read.
-     * @param ignoreDefault Flag to determine if defaults should be ignored.
-     * @param defaultParselet The default parselet to use.
-     * @param methodReaderInterceptorReturns The interceptor for method reading.
-     * @param metaDataHandler Metadata handler array.
-     * @param objects Varargs for additional parameters.
+     * @param in       source of wire messages
+     * @param ignoreDefault if true default interface methods are skipped
+     * @param defaultParselet parselet for unknown events
+     * @param methodReaderInterceptorReturns optional interceptor
+     * @param metadataHandlers handlers for metadata messages
+     * @param handlers handler instances for data messages
      */
     @UsedViaReflection
     public VanillaMethodReader(MarshallableIn in,
                                boolean ignoreDefault,
                                WireParselet defaultParselet,
                                MethodReaderInterceptorReturns methodReaderInterceptorReturns,
-                               Object[] metaDataHandler,
-                               @NotNull Object... objects) {
-        this(in, ignoreDefault, defaultParselet, SKIP_READABLE_BYTES, methodReaderInterceptorReturns, metaDataHandler, objects);
-    }
-
-    @UsedViaReflection
-    public VanillaMethodReader(MarshallableIn in,
-                               boolean ignoreDefault,
-                               WireParselet defaultParselet,
-                               FieldNumberParselet fieldNumberParselet,
-                               MethodReaderInterceptorReturns methodReaderInterceptorReturns,
-                               @NotNull Object... objects) {
-        this(in, ignoreDefault, defaultParselet, fieldNumberParselet, methodReaderInterceptorReturns, null, objects);
+                               Object[] metadataHandlers,
+                               @NotNull Object... handlers) {
+        this(in, ignoreDefault, defaultParselet, SKIP_READABLE_BYTES, methodReaderInterceptorReturns, metadataHandlers, handlers);
     }
 
     /**
-     * This constructor is an overloaded version of the primary VanillaMethodReader constructor.
-     * It initializes the reader with default predicate logic (always true) and delegates the initialization
-     * to the primary constructor.
+     * Convenience constructor used by generated code.
      *
-     * @param in The MarshallableIn source from which methods are read.
-     * @param ignoreDefault Flag to determine if defaults should be ignored.
-     * @param defaultParselet The default parselet to be used for parsing.
-     * @param fieldNumberParselet Custom parselet for handling field numbers.
-     * @param methodReaderInterceptorReturns Interceptor for reading methods.
-     * @param metaDataHandler Metadata handler array.
-     * @param objects Varargs for additional parameters, including custom parselets.
+     * @param in       source of wire messages
+     * @param ignoreDefault if true default interface methods are skipped
+     * @param defaultParselet parselet for unknown events
+     * @param fieldNumberParselet parselet for numeric ids
+     * @param methodReaderInterceptorReturns optional interceptor
+     * @param handlers handler instances for data messages
+     */
+    @UsedViaReflection
+    public VanillaMethodReader(MarshallableIn in,
+                               boolean ignoreDefault,
+                               WireParselet defaultParselet,
+                               FieldNumberParselet fieldNumberParselet,
+                               MethodReaderInterceptorReturns methodReaderInterceptorReturns,
+                               @NotNull Object... handlers) {
+        this(in, ignoreDefault, defaultParselet, fieldNumberParselet, methodReaderInterceptorReturns, null, handlers);
+    }
+
+    /**
+     * Constructor that defaults the predicate to always true.
+     * It ultimately calls the primary constructor.
+     *
+     * @param in       source of wire messages
+     * @param ignoreDefault if true default interface methods are skipped
+     * @param defaultParselet parselet for unknown events
+     * @param fieldNumberParselet parselet for numeric ids
+     * @param methodReaderInterceptorReturns optional interceptor
+     * @param metadataHandlers handlers for metadata messages
+     * @param handlers handler instances for data messages
      */
     public VanillaMethodReader(MarshallableIn in,
                                boolean ignoreDefault,
                                WireParselet defaultParselet,
                                FieldNumberParselet fieldNumberParselet,
                                MethodReaderInterceptorReturns methodReaderInterceptorReturns,
-                               Object[] metaDataHandler,
-                               @NotNull Object... objects) {
+                               Object[] metadataHandlers,
+                               @NotNull Object... handlers) {
         this(in,
                 ignoreDefault,
                 defaultParselet,
                 fieldNumberParselet,
-                methodReaderInterceptorReturns, metaDataHandler,
-                x -> true, objects);
+                methodReaderInterceptorReturns, metadataHandlers,
+                x -> true, handlers);
     }
 
     /**
-     * This is the primary constructor for the VanillaMethodReader class. It initializes the reader
-     * with a provided input source, parsing strategies, interceptors, metadata handlers, and other configurations.
-     * It supports a comprehensive configuration by accepting multiple parameters and sets up parsers accordingly.
+     * Primary constructor configuring parsers and interceptors.
      *
-     * @param in The MarshallableIn source from which methods are read.
-     * @param ignoreDefault Flag to determine if defaults should be ignored.
-     * @param defaultParselet The default parselet to be used for parsing.
-     * @param fieldNumberParselet Custom parselet for handling field numbers.
-     * @param methodReaderInterceptorReturns Interceptor for reading methods.
-     * @param metaDataHandler Metadata handler array.
-     * @param predicate Predicate for filtering.
-     * @param objects Varargs for additional parameters, including custom parselets.
+     * @param in       source of wire messages
+     * @param ignoreDefault if true default interface methods are skipped
+     * @param defaultParselet parselet for unknown events
+     * @param fieldNumberParselet parselet for numeric ids
+     * @param methodReaderInterceptorReturns optional interceptor
+     * @param metadataHandlers handlers for metadata messages
+     * @param predicate predicate controlling readOne execution
+     * @param handlers handler instances for data messages
      */
     public VanillaMethodReader(MarshallableIn in,
                                boolean ignoreDefault,
                                WireParselet defaultParselet,
                                FieldNumberParselet fieldNumberParselet,
                                MethodReaderInterceptorReturns methodReaderInterceptorReturns,
-                               Object[] metaDataHandler,
+                               Object[] metadataHandlers,
                                Predicate<MethodReader> predicate,
-                               @NotNull Object... objects) {
+                               @NotNull Object... handlers) {
         this.in = in;
         this.methodReaderInterceptorReturns = methodReaderInterceptorReturns;
         this.predicate = predicate;
 
         // If the first object in the varargs is of type WireParselet, set it as the default parselet
-        if (objects[0] instanceof WireParselet)
-            defaultParselet = (WireParselet) objects[0];
+        if (handlers[0] instanceof WireParselet)
+            defaultParselet = (WireParselet) handlers[0];
 
         // Set up wire parsers with default actions and strategies
         metaWireParser = WireParser.wireParser((s, in0) -> in0.skipValue());
@@ -158,8 +164,8 @@ public class VanillaMethodReader implements MethodReader {
 
         // Add parsers for components based on provided configurations and objects
         addParsersForComponents(metaWireParser, ignoreDefault,
-                addObjectsToMetaDataHandlers(metaDataHandler, objects));
-        addParsersForComponents(dataWireParser, ignoreDefault, objects);
+                addObjectsToMetaDataHandlers(metadataHandlers, handlers));
+        addParsersForComponents(dataWireParser, ignoreDefault, handlers);
 
         // Add a parser for the message history if not already present
         if (dataWireParser.lookup(HISTORY) == null) {
@@ -168,14 +174,11 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     /**
-     * Fetches the LongConversion annotation for the first parameter of the provided method.
-     * If no such annotation exists, it returns null.
-     *
-     * @param m The method whose parameter annotations are to be checked.
-     * @return The LongConversion annotation for the first parameter or null if not present.
+     * Finds a {@link LongConversion} on the first parameter of {@code method}.
+     * Returns {@code null} when no annotation is present.
      */
-    private static LongConversion longConversionForFirstParam(Method m) {
-        Annotation[][] annotations = m.getParameterAnnotations();
+    private static LongConversion longConversionForFirstParam(Method method) {
+        Annotation[][] annotations = method.getParameterAnnotations();
         // Check if there are any annotations for the first parameter
         if (annotations.length < 1 || annotations[0].length < 1)
             return null;
@@ -188,39 +191,39 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     /**
-     * Invokes the provided method with a single long argument, which is parsed or converted based on certain conditions.
-     * Provides support for debug logging, context updates, method interception, and exception handling.
+     * Invokes {@code m} on {@code o} (or {@code context[0]}) with one long argument.
+     * The argument is read from {@code v}, applying any {@link LongConversion}.
      *
-     * @param o The object on which the method is to be invoked.
-     * @param context The context of the method invocation.
-     * @param m The method to be invoked.
-     * @param name Name of the method (currently unused but might be useful for future logging or debugging).
-     * @param mh Optional MethodHandle for invoking the method (may be null).
-     * @param argArr Arguments array for the method.
-     * @param s The CharSequence input (used for logging in debug mode).
-     * @param v ValueIn from which the long argument is extracted.
-     * @param methodReaderInterceptor Interceptor for the method invocation.
+     * @param target       handler when {@code context[0]} is null
+     * @param contextHolder invocation context array
+     * @param method       method to call
+     * @param methodName   method name for logging
+     * @param methodHandle optional bound MethodHandle
+     * @param argHolder    scratch array for the argument
+     * @param eventName    event name being read
+     * @param valueIn      value reader
+     * @param interceptor  optional interceptor
      */
-    private static void invokeMethodWithOneLong(Object o, Object[] context, @NotNull Method m, String name, MethodHandle mh, Object[] argArr, CharSequence s, ValueIn v, MethodReaderInterceptorReturns methodReaderInterceptor) {
+    private static void invokeMethodWithOneLong(Object target, Object[] contextHolder, @NotNull Method method, String methodName, MethodHandle methodHandle, Object[] argHolder, CharSequence eventName, ValueIn valueIn, MethodReaderInterceptorReturns interceptor) {
         try {
             // Log the message if debugging is enabled
             if (Jvm.isDebug())
-                logMessage(s, v);
+                logMessage(eventName, valueIn);
 
             // Update the context if it's null
-            if (context[0] == null)
-                updateContext(context, o);
+            if (contextHolder[0] == null)
+                updateContext(contextHolder, target);
 
             // Parse or convert the argument from the input ValueIn
             long arg = 0;
-            if (v.isBinary()) {
-                arg = v.int64();
+            if (valueIn.isBinary()) {
+                arg = valueIn.int64();
             } else {
-                LongConversion lc = longConversionForFirstParam(m);
+                LongConversion lc = longConversionForFirstParam(method);
                 if (lc == null) {
-                    arg = v.int64();
+                    arg = valueIn.int64();
                 } else {
-                    String text = v.text();
+                    String text = valueIn.text();
                     if (text != null && !text.isEmpty()) {
                         LongConverter longConverter = (LongConverter) ObjectUtils.newInstance(lc.value());
                         arg = longConverter.parse(text);
@@ -229,21 +232,21 @@ public class VanillaMethodReader implements MethodReader {
             }
 
             // Handle method interception
-            if (methodReaderInterceptor != null) {
-                argArr[0] = arg;
-                Object intercept = methodReaderInterceptor.intercept(m, context[0], argArr, VanillaMethodReader::actualInvoke);
-                updateContext(context, intercept);
+            if (interceptor != null) {
+                argHolder[0] = arg;
+                Object intercept = interceptor.intercept(method, contextHolder[0], argHolder, VanillaMethodReader::actualInvoke);
+                updateContext(contextHolder, intercept);
             } else {
-                if (mh == null) {
-                    argArr[0] = arg;
-                    updateContext(context, m.invoke(context[0], argArr));
+                if (methodHandle == null) {
+                    argHolder[0] = arg;
+                    updateContext(contextHolder, method.invoke(contextHolder[0], argHolder));
                 } else {
                     try {
-                        if (m.getReturnType() == void.class) {
-                            mh.invokeExact(arg);
-                            updateContext(context, null);
+                        if (method.getReturnType() == void.class) {
+                            methodHandle.invokeExact(arg);
+                            updateContext(contextHolder, null);
                         } else {
-                            updateContext(context, mh.invokeExact(arg));
+                            updateContext(contextHolder, methodHandle.invokeExact(arg));
                         }
                     } catch (Throwable t) {
                         throw new InvocationTargetException(t);
@@ -253,73 +256,58 @@ public class VanillaMethodReader implements MethodReader {
         } catch (InvocationTargetException e) {
             throw new InvocationTargetRuntimeException(e);
         } catch (Throwable e) {
-            String msg = "Failure to dispatch message: " + m.getName() + " " + Arrays.asList(argArr);
-            Jvm.warn().on(o.getClass(), msg, e);
+            String msg = "Failure to dispatch message: " + method.getName() + " " + Arrays.asList(argHolder);
+            Jvm.warn().on(target.getClass(), msg, e);
         }
     }
 
     /**
-     * Updates the provided context with the intercepted object.
-     *
-     * @param context The array containing the context that will be updated.
-     * @param intercept The intercepted object that will be set as the new context.
+     * Replace {@code context[0]} with the supplied object.
+     * Used to support chained calls where methods return a new handler.
      */
-    private static void updateContext(Object[] context, Object intercept) {
+    private static void updateContext(Object[] contextHolder, Object intercept) {
 //        System.err.println("context: " + (intercept == null ? null : intercept.getClass()));
-        context[0] = intercept;
+        contextHolder[0] = intercept;
     }
 
     /**
-     * Invokes the specified method on the provided object with the given arguments.
-     *
-     * @param method The method to be invoked.
-     * @param o The object on which the method is to be invoked.
-     * @param objects The arguments for the method.
-     * @return The result of the method invocation.
-     * @throws InvocationTargetException if the method invocation fails.
+     * Performs the actual reflective call.
+     * Used by the interceptor when present.
      */
-    private static Object actualInvoke(Method method, Object o, Object[] objects) throws InvocationTargetException {
+    private static Object actualInvoke(Method method, Object target, Object[] args) throws InvocationTargetException {
         try {
-            return method.invoke(o, objects);
+            return method.invoke(target, args);
         } catch (IllegalAccessException iae) {
             throw Jvm.rethrow(iae);
         }
     }
 
     /**
-     * Logs a message if the debug mode is enabled.
-     *
-     * @param s A CharSequence representing part of the message.
-     * @param v The ValueIn associated with the message.
+     * Write a debug log entry for the incoming event.
      */
-    public static void logMessage(@NotNull CharSequence s, @NotNull ValueIn v) {
+    public static void logMessage(@NotNull CharSequence eventName, @NotNull ValueIn valueIn) {
         if (!DEBUG_ENABLED) {
             return;
         }
 
-        Jvm.debug().on(VanillaMethodReader.class, logMessage0(s, v));
+        Jvm.debug().on(VanillaMethodReader.class, logMessage0(eventName, valueIn));
     }
 
     /**
-     * Constructs a log message based on the provided CharSequence and ValueIn.
-     * Converts binary messages to text for better logging.
-     *
-     * @param s A CharSequence representing part of the message.
-     * @param v The ValueIn associated with the message.
-     * @return A constructed log message.
+     * Format the debug message, converting binary to text when required.
      */
     // package local for testing
-    static @NotNull String logMessage0(@NotNull CharSequence s, @NotNull ValueIn v) {
+    static @NotNull String logMessage0(@NotNull CharSequence eventName, @NotNull ValueIn valueIn) {
         try {
             String rest;
 
             // Convert binary to text for logging, or retrieve the string representation
-            if (v.wireIn().isBinary()) {
-                final Bytes<?> bytes0 = v.wireIn().bytes();
+            if (valueIn.wireIn().isBinary()) {
+                final Bytes<?> bytes0 = valueIn.wireIn().bytes();
                 Bytes<?> bytes = Bytes.allocateElasticOnHeap((int) (bytes0.readRemaining() * 3 / 2 + 64));
                 long pos = bytes0.readPosition();
                 try {
-                    v.wireIn().copyTo(WireType.TEXT.apply(bytes));
+                    valueIn.wireIn().copyTo(WireType.TEXT.apply(bytes));
                     rest = bytes.toString();
                 } catch (Exception t) {
                     rest = bytes0.toHexString(pos, bytes0.readLimit() - pos);
@@ -328,54 +316,47 @@ public class VanillaMethodReader implements MethodReader {
                     bytes.releaseLast();
                 }
             } else {
-                rest = v.toString();
+                rest = valueIn.toString();
             }
 
             // Remove any newline characters from the end of the text representation
             if (rest.endsWith("\n"))
                 rest = rest.substring(0, rest.length() - 1);
-            return "read " + s + " - " + rest;
+            return "read " + eventName + " - " + rest;
         } catch (Exception e) {
-            return "read " + s + " - " + e;
+            return "read " + eventName + " - " + e;
         }
     }
 
     /**
-     * Merges the given metaDataHandler and objects arrays, ensuring no duplicates and
-     * maintaining the original order. If the metaDataHandler is null, it returns the objects array.
+     * Combine explicit metadata handlers with the general handler list.
      *
-     * @param metaDataHandler The initial metadata handlers to be merged.
-     * @param objects The objects to be added to the metadata handlers.
-     * @return A merged array containing unique entries from both arrays.
+     * @param metadataHandlers handlers dedicated to metadata messages
+     * @param handlers general handler objects
+     * @return merged array of metadata handlers
      */
-    private Object[] addObjectsToMetaDataHandlers(Object[] metaDataHandler, @NotNull Object @NotNull [] objects) {
-        if (metaDataHandler == null) {
-            metaDataHandler = objects;
+    private Object[] addObjectsToMetaDataHandlers(Object[] metadataHandlers, @NotNull Object @NotNull [] handlers) {
+        if (metadataHandlers == null) {
+            metadataHandlers = handlers;
         } else {
-            Set<Object> metaDataHandlerSet = new LinkedHashSet<>();
-            Collections.addAll(metaDataHandlerSet, metaDataHandler);
-            Collections.addAll(metaDataHandlerSet, objects);
-            metaDataHandler = metaDataHandlerSet.toArray();
+            Set<Object> metaHandlerSet = new LinkedHashSet<>();
+            Collections.addAll(metaHandlerSet, metadataHandlers);
+            Collections.addAll(metaHandlerSet, handlers);
+            metadataHandlers = metaHandlerSet.toArray();
         }
-        return metaDataHandler;
+        return metadataHandlers;
     }
 
     /**
-     * Configures the provided WireParser with parselets based on the provided objects.
-     * This ensures that each method signature is only added once and that only one filter
-     * on the first argument is supported. Interfaces implemented by each object are examined
-     * to define these parselets.
-     *
-     * @param wireParser The WireParser to be configured.
-     * @param ignoreDefault If true, defaults are ignored.
-     * @param objects The objects that provide the necessary information for configuring the parser.
+     * Populate a {@link WireParser} by reflecting on the supplied handlers.
+     * Each public method becomes a parselet unless already registered.
      */
-    private void addParsersForComponents(WireParser wireParser, boolean ignoreDefault, @NotNull Object @NotNull [] objects) {
+    private void addParsersForComponents(WireParser wireParser, boolean ignoreDefault, @NotNull Object @NotNull [] handlers) {
         // Sets to keep track of method signatures and names that are already handled.
         @NotNull Set<String> methodsSignaturesHandled = new HashSet<>();
         @NotNull Set<String> methodsNamesHandled = new HashSet<>();
         MethodFilterOnFirstArg methodFilterOnFirstArg = null;
-        for (@NotNull Object o : objects) {
+        for (@NotNull Object o : handlers) {
             if (o instanceof MethodFilterOnFirstArg) {
                 if (methodFilterOnFirstArg != null)
                     Jvm.warn().on(getClass(), "Multiple filters on first arg not supported, only the first one is applied.");
@@ -396,32 +377,18 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     /**
-     * Configures the provided WireParser with parselets based on the methods found in the given class.
-     * This method is recursive and also evaluates interfaces that the given class might extend or implement.
-     * The main focus is to ensure each method signature is only added once, and to properly handle methods
-     * with varying numbers of arguments.
-     *
-     * @param wireParser           The WireParser to be configured.
-     * @param interfaces           A set of interfaces that have already been processed. Used to avoid cyclic processing.
-     * @param oClass               The class or interface to evaluate for methods.
-     * @param ignoreDefault        If true, methods from default interfaces are ignored.
-     * @param methodNamesHandled   A set of method names that have already been handled.
-     * @param methodsSignaturesHandled A set of method signatures that have already been handled.
-     * @param methodFilterOnFirstArg   Optional filter that can be applied on methods based on their first argument.
-     * @param o                    The original object that the method might be invoked on.
-     * @param context              The context in which the method will be invoked.
-     * @param contextSupplier      Provides the current context.
-     * @param nextContext          Provides the next context in which the method will be invoked.
+     * Recursive helper used by {@link #addParsersForComponents}.
+     * It walks the interface hierarchy, registering parselets and enforcing no overloading.
      */
-    private void addParsletsFor(WireParser wireParser, Set<Class> interfaces, Class<?> oClass, boolean ignoreDefault, Set<String> methodNamesHandled, Set<String> methodsSignaturesHandled, MethodFilterOnFirstArg methodFilterOnFirstArg, Object o, Object[] context, Supplier contextSupplier, Supplier nextContext) {
-        if (!oClass.isInterface() || Jvm.dontChain(oClass)) {
+    private void addParsletsFor(WireParser wireParser, Set<Class> interfaces, Class<?> handlerClass, boolean ignoreDefault, Set<String> methodNamesHandled, Set<String> methodsSignaturesHandled, MethodFilterOnFirstArg methodFilterOnFirstArg, Object handler, Object[] contextHolder, Supplier contextSupplier, Supplier nextContextSupplier) {
+        if (!handlerClass.isInterface() || Jvm.dontChain(handlerClass)) {
             return;
         }
-        if (!interfaces.add(oClass))
+        if (!interfaces.add(handlerClass))
             return;
 
         // Evaluate each method of the class or interface.
-        for (@NotNull Method m : oClass.getMethods()) {
+        for (@NotNull Method m : handlerClass.getMethods()) {
             // Basic filtering of methods that should not be processed.
             Class<?> declaringClass = m.getDeclaringClass();
             if (declaringClass == Object.class)
@@ -454,45 +421,36 @@ public class VanillaMethodReader implements MethodReader {
             // Add the method to the WireParser based on its number of parameters.
             switch (parameterTypes.length) {
                 case 0:
-                    addParseletForMethod(wireParser, o, context, contextSupplier, m);
+                    addParseletForMethod(wireParser, handler, contextHolder, contextSupplier, m);
                     break;
                 case 1:
-                    addParseletForMethod(wireParser, o, context, contextSupplier, m, parameterTypes[0]);
+                    addParseletForMethod(wireParser, handler, contextHolder, contextSupplier, m, parameterTypes[0]);
                     break;
                 default:
                     if (methodFilterOnFirstArg == null)
-                        addParseletForMethod(wireParser, o, context, contextSupplier, m, parameterTypes);
+                        addParseletForMethod(wireParser, handler, contextHolder, contextSupplier, m, parameterTypes);
                     else
-                        addParseletForMethod(wireParser, o, context, contextSupplier, m, parameterTypes, methodFilterOnFirstArg);
+                        addParseletForMethod(wireParser, handler, contextHolder, contextSupplier, m, parameterTypes, methodFilterOnFirstArg);
                     break;
             }
         }
 
         // Recursive step: also process interfaces that the current class or interface extends or implements.
-        for (@NotNull Method m : oClass.getMethods()) {
+        for (@NotNull Method m : handlerClass.getMethods()) {
             Class<?> returnType = m.getReturnType();
-            addParsletsFor(wireParser, interfaces, returnType, ignoreDefault, methodNamesHandled, methodsSignaturesHandled, methodFilterOnFirstArg, o, context, nextContext, nextContext);
+            addParsletsFor(wireParser, interfaces, returnType, ignoreDefault, methodNamesHandled, methodsSignaturesHandled, methodFilterOnFirstArg, handler, contextHolder, nextContextSupplier, nextContextSupplier);
         }
     }
 
     /**
-     * Returns a unique signature for the given method, encapsulating its return type, name, and parameter types.
-     * The signature is helpful in differentiating between overloaded methods and for debugging purposes.
-     *
-     * @param m The method for which the signature needs to be generated
-     * @return The signature in the format: return_type method_name [param_types]
+     * Build a string signature of {@code method} including return and parameter types.
      */
-    private String signature(Method m) {
-        return m.getReturnType() + " " + m.getName() + " " + Arrays.toString(m.getParameterTypes());
+    private String signature(Method method) {
+        return method.getReturnType() + " " + method.getName() + " " + Arrays.toString(method.getParameterTypes());
     }
 
     /**
-     * Sets the closeIn state of the VanillaMethodReader. When closeIn is true, the reader will be
-     * automatically closed after reading, otherwise, it remains open for further operations.
-     *
-     * @param closeIn The new closeIn state to be set
-     * @return The current instance of the VanillaMethodReader for chaining method calls
-     * @throws IllegalStateException if the VanillaMethodReader is already closed
+     * Control whether {@link #close()} also closes the input.
      */
     @NotNull
     public VanillaMethodReader closeIn(boolean closeIn) {
@@ -503,9 +461,7 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     /**
-     * Checks if the VanillaMethodReader is closed.
-     *
-     * @throws IllegalStateException if the VanillaMethodReader is closed
+     * Throw {@link IllegalStateException} if this reader has been closed.
      */
     public void throwExceptionIfClosed() {
         if (isClosed())
@@ -513,131 +469,98 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     /**
-     * Registers a method with the provided WireParser, enabling parsing of wire messages to trigger method invocations.
-     * The method is made accessible, and various checks and optimizations are performed based on the parameter type
-     * of the method to determine the most efficient way to handle parsing and invocation.
-     *
-     * @param wireParser      The WireParser to which the method will be registered
-     * @param o2              The object on which the method should be invoked
-     * @param context         The current context for method invocation
-     * @param contextSupplier Supplies the context for method invocation
-     * @param m               The method to be registered
-     * @param parameterType   The parameter type of the method being registered
-     * @throws IllegalStateException if the VanillaMethodReader is closed
+     * Register a single argument method with {@code wireParser}.
+     * Optimised for primitive {@code long} parameters.
      */
-    public void addParseletForMethod(WireParser wireParser, Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m, Class<?> parameterType) {
+    public void addParseletForMethod(WireParser wireParser, Object target, Object[] contextHolder, Supplier contextSupplier, @NotNull Method method, Class<?> parameterType) {
         throwExceptionIfClosed();
 
         // Make the method accessible to bypass security checks for faster invocations
-        Jvm.setAccessible(m);
-        String name = m.getName();
+        Jvm.setAccessible(method);
+        String name = method.getName();
         Class<?> parameterType2 = ObjectUtils.implementationToUse(parameterType);
-        if (parameterType == long.class && o2 != null) {
+        if (parameterType == long.class && target != null) {
             try {
-                MethodHandle mh = m.getDeclaringClass().isInstance(o2) ? MethodHandles.lookup().unreflect(m).bindTo(o2) : null;
+                MethodHandle mh = method.getDeclaringClass().isInstance(target) ? MethodHandles.lookup().unreflect(method).bindTo(target) : null;
                 @NotNull Object[] argArr = {null};
-                MethodWireKey key = createWireKey(m, name);
-                wireParser.registerOnce(key, (s, v) -> invokeMethodWithOneLong(o2, context, m, name, mh, argArr, s, v, methodReaderInterceptorReturns));
+                MethodWireKey key = createWireKey(method, name);
+                wireParser.registerOnce(key, (s, v) -> invokeMethodWithOneLong(target, contextHolder, method, name, mh, argArr, s, v, methodReaderInterceptorReturns));
             } catch (IllegalAccessException e) {
-                Jvm.warn().on(o2.getClass(), "Unable to unreflect " + m, e);
+                Jvm.warn().on(target.getClass(), "Unable to unreflect " + method, e);
             }
         } else if (parameterType.isPrimitive() || parameterType2.isInterface() || !ReadMarshallable.class.isAssignableFrom(parameterType2)) {
             @NotNull Object[] argArr = {null};
-            MethodWireKey key = createWireKey(m, name);
+            MethodWireKey key = createWireKey(method, name);
             wireParser.registerOnce(key, (s, v) -> {
                 if (Jvm.isDebug())
                     logMessage(s, v);
 
                 argArr[0] = v.object(checkRecycle(argArr[0]), parameterType2);
-                if (context[0] == null)
-                    updateContext(context, o2);
-                Object invoke = invoke(context[0], m, argArr);
-                updateContext(context, invoke);
+                if (contextHolder[0] == null)
+                    updateContext(contextHolder, target);
+                Object invoke = invoke(contextHolder[0], method, argArr);
+                updateContext(contextHolder, invoke);
             });
 
         } else {
             ReadMarshallable arg = (ReadMarshallable) ObjectUtils.newInstance(parameterType2);
             @NotNull ReadMarshallable[] argArr = {arg};
-            MethodWireKey key = createWireKey(m, name);
+            MethodWireKey key = createWireKey(method, name);
             wireParser.registerOnce(key, (s, v) -> {
                 if (Jvm.isDebug())
                     logMessage(s, v);
 
                 //noinspection ConstantConditions
                 argArr[0] = v.object(checkRecycle(argArr[0]), Jvm.uncheckedCast(parameterType2));
-                if (context[0] == null)
-                    updateContext(context, o2);
-                Object invoke = invoke(contextSupplier.get(), m, argArr);
-                updateContext(context, invoke);
+                if (contextHolder[0] == null)
+                    updateContext(contextHolder, target);
+                Object invoke = invoke(contextSupplier.get(), method, argArr);
+                updateContext(contextHolder, invoke);
             });
         }
     }
 
     /**
-     * Registers a method with no arguments with the provided WireParser.
-     * When a wire message is parsed that matches this method, the method will be invoked without arguments.
-     *
-     * @param wireParser      The WireParser to which the method will be registered
-     * @param o2              The object on which the method should be invoked
-     * @param context         The current context for method invocation
-     * @param contextSupplier Supplies the context for method invocation
-     * @param m               The method to be registered
-     * @throws IllegalStateException if the VanillaMethodReader is closed
+     * Register a zero argument method with {@code wireParser}.
      */
-    public void addParseletForMethod(WireParser wireParser, Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m) {
+    public void addParseletForMethod(WireParser wireParser, Object target, Object[] contextHolder, Supplier contextSupplier, @NotNull Method method) {
         throwExceptionIfClosed();
 
-        Jvm.setAccessible(m); // turn of security check to make a little faster
-        String name = m.getName();
-        MethodWireKey key = createWireKey(m, name);
+        Jvm.setAccessible(method); // turn of security check to make a little faster
+        String name = method.getName();
+        MethodWireKey key = createWireKey(method, name);
         wireParser.registerOnce(key, (s, v) -> {
             if (Jvm.isDebug())
                 logMessage(s, v);
 
             v.skipValue();
 
-            Object invoke = invoke(contextSupplier.get(), m, NO_ARGS);
+            Object invoke = invoke(contextSupplier.get(), method, NO_ARGS);
             if (invoke != null)
-                updateContext(context, invoke);
-            else if (o2 != null)
-                updateContext(context, o2);
+                updateContext(contextHolder, invoke);
+            else if (target != null)
+                updateContext(contextHolder, target);
         });
     }
 
     /**
-     * Creates a MethodWireKey for a given method. This key is used for method registration and matching during parsing.
-     * If the method has a MethodId annotation, the key will be based on the annotation's value, otherwise, it will be based
-     * on the method's name's hash code.
-     *
-     * @param m    The method for which the key is being generated
-     * @param name The name of the method
-     * @return A MethodWireKey uniquely representing the method
+     * Build the {@link MethodWireKey} for {@code method} using {@link MethodId} when present.
      */
     @NotNull
-    protected MethodWireKey createWireKey(@NotNull Method m, String name) {
-        MethodId annotation = Jvm.findAnnotation(m, MethodId.class);
+    protected MethodWireKey createWireKey(@NotNull Method method, String name) {
+        MethodId annotation = Jvm.findAnnotation(method, MethodId.class);
         return new MethodWireKey(name, annotation == null
                 ? name.hashCode()
                 : Maths.toInt32(annotation.value()));
     }
 
     /**
-     * Registers a method with multiple arguments with the provided WireParser.
-     * The method's arguments are read from the wire message using a sequence reader, which ensures
-     * each argument is correctly parsed and matched to its corresponding parameter type.
-     *
-     * @param wireParser      The WireParser to which the method will be registered
-     * @param o2              The object on which the method should be invoked
-     * @param context         The current context for method invocation
-     * @param contextSupplier Supplies the context for method invocation
-     * @param m               The method to be registered
-     * @param parameterTypes  The array of parameter types for the method
-     * @throws IllegalStateException if the VanillaMethodReader is closed
+     * Register a multi argument method with {@code wireParser}.
      */
-    public void addParseletForMethod(WireParser wireParser, Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m, @NotNull Class[] parameterTypes) {
+    public void addParseletForMethod(WireParser wireParser, Object target, Object[] contextHolder, Supplier contextSupplier, @NotNull Method method, @NotNull Class[] parameterTypes) {
         throwExceptionIfClosed();
 
-        Jvm.setAccessible(m); // turn of security check to make a little faster
+        Jvm.setAccessible(method); // turn of security check to make a little faster
         @NotNull Object[] args = new Object[parameterTypes.length];
         @NotNull BiConsumer<Object[], ValueIn> sequenceReader = (a, v) -> {
             int i = 0;
@@ -646,66 +569,50 @@ public class VanillaMethodReader implements MethodReader {
                 i++;
             }
         };
-        String name = m.getName();
-        MethodWireKey key = createWireKey(m, name);
+        String name = method.getName();
+        MethodWireKey key = createWireKey(method, name);
         wireParser.registerOnce(key, (s, v) -> {
             if (Jvm.isDebug())
                 logMessage(s, v);
 
             v.sequence(args, sequenceReader);
 
-            Object invoke = invoke(contextSupplier.get(), m, args);
+            Object invoke = invoke(contextSupplier.get(), method, args);
             if (invoke != null)
-                updateContext(context, invoke);
-            else if (o2 != null)
-                updateContext(context, o2);
+                updateContext(contextHolder, invoke);
+            else if (target != null)
+                updateContext(contextHolder, target);
         });
     }
 
     /**
-     * Checks if the given object can be recycled. For collections, it clears the collection and returns the same instance.
-     * If the object is an instance of Marshallable, it returns the same object; otherwise, it returns null.
-     *
-     * @param <T> The type of the object
-     * @param o   The object to check
-     * @return The original object if it can be recycled, otherwise null
+     * Prepare {@code o} for reuse when possible.
      */
-    private <T> T checkRecycle(T o) {
-        if (o instanceof Collection<?>) {
-            ((Collection<?>) o).clear();
-            return o;
+    private <T> T checkRecycle(T instance) {
+        if (instance instanceof Collection<?>) {
+            ((Collection<?>) instance).clear();
+            return instance;
         }
-        if (o instanceof Map) {
-            ((Map<?, ?>) o).clear();
-            return o;
+        if (instance instanceof Map) {
+            ((Map<?, ?>) instance).clear();
+            return instance;
         }
         // For objects of type AbstractMarshallableCfg, reset them to their default state.
-        if (o instanceof AbstractMarshallableCfg) {
-            ((AbstractMarshallableCfg) o).reset();
+        if (instance instanceof AbstractMarshallableCfg) {
+            ((AbstractMarshallableCfg) instance).reset();
         }
-        return o instanceof Marshallable ? o : null;
+        return instance instanceof Marshallable ? instance : null;
     }
 
     /**
-     * Registers a method with multiple arguments with the provided WireParser, applying a filter on the first argument.
-     * If the filter determines that the method should be ignored based on its first argument,
-     * the method will not be executed and subsequent arguments will be skipped.
-     *
-     * @param wireParser              The WireParser to which the method will be registered
-     * @param o2                      The object on which the method should be invoked
-     * @param context                 The current context for method invocation
-     * @param contextSupplier         Supplies the context for method invocation
-     * @param m                       The method to be registered
-     * @param parameterTypes          The array of parameter types for the method
-     * @param methodFilterOnFirstArg  The filter that decides if the method should be ignored based on its first argument
-     * @throws IllegalStateException  If the VanillaMethodReader is closed
+     * Register a multi argument method that may be skipped based on its first parameter.
      */
     @SuppressWarnings("unchecked")
-    public void addParseletForMethod(WireParser wireParser, Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m, @NotNull Class[] parameterTypes, MethodFilterOnFirstArg methodFilterOnFirstArg) {
+    public void addParseletForMethod(WireParser wireParser, Object target, Object[] contextHolder, Supplier contextSupplier, @NotNull Method method, @NotNull Class[] parameterTypes, MethodFilterOnFirstArg methodFilterOnFirstArg) {
         // Ensure the reader is not closed
         throwExceptionIfClosed();
 
-        Jvm.setAccessible(m);
+        Jvm.setAccessible(method);
 
         // Create an array to store the arguments
         @NotNull Object[] args = new Object[parameterTypes.length];
@@ -722,7 +629,7 @@ public class VanillaMethodReader implements MethodReader {
                     // Read the object and check if it can be recycled
                     a[i] = v.object(checkRecycle(a[i]), clazz);
                 }
-                if (i == 0 && methodFilterOnFirstArg.ignoreMethodBasedOnFirstArg(m.getName(), a[0])) {
+                if (i == 0 && methodFilterOnFirstArg.ignoreMethodBasedOnFirstArg(method.getName(), a[0])) {
                     // If the first argument causes the method to be ignored, set the flag
                     a[0] = IGNORED;
                     ignored = true;
@@ -732,10 +639,10 @@ public class VanillaMethodReader implements MethodReader {
         };
 
         // Get the method name
-        String name = m.getName();
+        String name = method.getName();
 
         // Create a unique key for the method
-        MethodWireKey key = createWireKey(m, name);
+        MethodWireKey key = createWireKey(method, name);
 
         // Register the method with the WireParser
         wireParser.registerOnce(key, (s, v) -> {
@@ -752,53 +659,42 @@ public class VanillaMethodReader implements MethodReader {
             }
 
             // Invoke the method and update the context if needed
-            Object invoke = invoke(contextSupplier.get(), m, args);
+            Object invoke = invoke(contextSupplier.get(), method, args);
             if (invoke != null)
-                updateContext(context, invoke);
-            else if (o2 != null)
-                updateContext(context, o2);
+                updateContext(contextHolder, invoke);
+            else if (target != null)
+                updateContext(contextHolder, target);
         });
     }
 
     /**
-     * Invokes a method on an object with the provided arguments. If an interceptor is provided,
-     * it will use the interceptor to invoke the method.
-     * If any exceptions are encountered during the invocation, appropriate warnings or exceptions are raised.
-     *
-     * @param o     The object on which to invoke the method
-     * @param m     The method to invoke
-     * @param args  The arguments to pass to the method
-     * @return      The result of the method invocation
-     * @throws InvocationTargetRuntimeException if the invoked method itself throws an exception
+     * Invoke {@code m} on {@code o}, honouring the interceptor if present.
      */
-    protected Object invoke(Object o, @NotNull Method m, Object[] args) throws InvocationTargetRuntimeException {
+    protected Object invoke(Object target, @NotNull Method method, Object[] args) throws InvocationTargetRuntimeException {
         try {
             // If an interceptor is provided, use it to invoke the method
             if (methodReaderInterceptorReturns != null)
-                return methodReaderInterceptorReturns.intercept(m, o, args, VanillaMethodReader::actualInvoke);
+                return methodReaderInterceptorReturns.intercept(method, target, args, VanillaMethodReader::actualInvoke);
             else
                 // Otherwise, directly invoke the method
-                return m.invoke(o, args);
+                return method.invoke(target, args);
         } catch (InvocationTargetException e) {
             // If the invoked method throws an exception, wrap it in a custom runtime exception
             throw new InvocationTargetRuntimeException(e.getCause());
         } catch (IllegalAccessException e) {
             // If we don't have access to the method, log a warning
             Throwable cause = e.getCause();
-            String msg = "Failure to dispatch message: " + m.getName() + " " + Arrays.asList(args);
+            String msg = "Failure to dispatch message: " + method.getName() + " " + Arrays.asList(args);
             if (cause instanceof IllegalArgumentException)
-                Jvm.warn().on(o.getClass(), msg + " " + cause);
+                Jvm.warn().on(target.getClass(), msg + " " + cause);
             else
-                Jvm.warn().on(o.getClass(), msg, cause);
+                Jvm.warn().on(target.getClass(), msg, cause);
             return null;
         }
     }
 
     /**
-     * Reads a single message. If the message is metadata, it returns true even if it's ignored.
-     *
-     * @return true if a message was read or if metadata was ignored; false if no more data is available
-     * @throws InvocationTargetRuntimeException if an exception occurs during message reading
+     * Read and dispatch a single message.
      */
     public boolean readOne() throws InvocationTargetRuntimeException {
         // Ensure that the reader isn't closed
@@ -813,10 +709,7 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     /**
-     * Internal method to read a single message. This handles reading metadata messages
-     * and data messages, and also manages the message history.
-     *
-     * @return true if a message was read; false otherwise
+     * Core logic for {@link #readOne()} handling metadata and message history.
      */
     private boolean readOne0() {
         try (DocumentContext context = in.readingDocument()) {
@@ -845,10 +738,7 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     /**
-     * Retrieves the current message history instance. If it doesn't exist,
-     * it initializes and retrieves the global message history.
-     *
-     * @return The current message history instance
+     * Lazily obtain the {@link MessageHistory} used for this read cycle.
      */
     private MessageHistory messageHistory() {
         if (messageHistory == null) messageHistory = MessageHistory.get();
@@ -868,11 +758,7 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     /**
-     * Retrieves the current method reader interceptor.
-     * The interceptor can be used to alter the behavior of method invocation.
-     *
-     * @return The current {@link MethodReaderInterceptorReturns} instance.
-     * @throws IllegalStateException if the method reader is closed.
+     * Return the configured {@link MethodReaderInterceptorReturns} if any.
      */
     public MethodReaderInterceptorReturns methodReaderInterceptorReturns() {
         throwExceptionIfClosed();
