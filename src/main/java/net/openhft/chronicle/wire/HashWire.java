@@ -125,25 +125,25 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         // Do nothing
     }
 
-    @Override
     /**
      * Always returns {@link ClassAliasPool#CLASS_ALIASES} as type
      * resolution is still required for consistent hashing.
      */
+    @Override
     public ClassLookup classLookup() {
         return ClassAliasPool.CLASS_ALIASES;
     }
 
-    @Override
     /** Reset the accumulated {@link #hash}. */
+    @Override
     public void clear() {
         hash = 0;
     }
 
-    @Override
     /**
      * Alias for {@link #clear()}.
      */
+    @Override
     public void reset() {
         clear();
     }
@@ -186,9 +186,9 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         return (int) (h ^ (h >>> 32));
     }
 
+    /** Hashes an anonymous value field. */
     @NotNull
     @Override
-    /** Hashes an anonymous value field. */
     public ValueOut write() {
         hash += K0;
         return valueOut;
@@ -200,17 +200,17 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         return write(key.name());
     }
 
+    /** Hashes the field name before returning {@link #valueOut}. */
     @NotNull
     @Override
-    /** Hashes the field name before returning {@link #valueOut}. */
     public ValueOut write(@NotNull CharSequence name) {
         hash += K0 + name.hashCode() * M0;
         return valueOut;
     }
 
+    /** Hashes the event key and returns {@link #valueOut}. */
     @NotNull
     @Override
-    /** Hashes the event key and returns {@link #valueOut}. */
     public ValueOut writeEvent(Class<?> ignored, @NotNull Object eventKey) {
         hash += K0 + eventKey.hashCode() * M0;
         return valueOut;
@@ -238,16 +238,16 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         return new WireObjectOutput(this);
     }
 
+    /** Comments do not affect the hash. */
     @NotNull
     @Override
-    /** Comments do not affect the hash. */
     public WireOut writeComment(CharSequence s) {
         return this;
     }
 
+    /** Padding is ignored for hashing. */
     @NotNull
     @Override
-    /** Padding is ignored for hashing. */
     public WireOut addPadding(int paddingToAdd) {
         return this;
     }
@@ -304,38 +304,38 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         throw new UnsupportedOperationException();
     }
 
-    @NotNull
-    @Override
     /**
      * Unsupported as {@code HashWire} does not hold an output buffer.
      */
+    @NotNull
+    @Override
     public Bytes<?> bytes() {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     /** Not applicable; returns {@code this} for chaining. */
+    @Override
     public HexDumpBytesDescription<?> bytesComment() {
         return this;
     }
 
+    /** Not supported. */
     @NotNull
     @Override
-    /** Not supported. */
     public IntValue newIntReference() {
         throw new UnsupportedOperationException();
     }
 
+    /** Not supported. */
     @NotNull
     @Override
-    /** Not supported. */
     public LongValue newLongReference() {
         throw new UnsupportedOperationException();
     }
 
+    /** Not supported. */
     @NotNull
     @Override
-    /** Not supported. */
     public BooleanValue newBooleanReference() {
         throw new UnsupportedOperationException();
     }
@@ -350,28 +350,28 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         return true; // text wire is orders of magnitude slower
     }
 
+    /** Not supported. */
     @NotNull
     @Override
-    /** Not supported. */
     public LongArrayValues newLongArrayReference() {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     /** Not supported. */
+    @Override
     public @NotNull IntArrayValues newIntArrayReference() {
         throw new UnsupportedOperationException();
     }
 
+    /** Unsupported by {@code HashWire}. */
     @NotNull
     @Override
-    /** Unsupported by {@code HashWire}. */
     public Pauser pauser() {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     /** Not supported. */
+    @Override
     public void pauser(Pauser pauser) {
         throw new UnsupportedOperationException();
     }

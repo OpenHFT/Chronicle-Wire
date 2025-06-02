@@ -379,11 +379,11 @@ public class RawWire extends AbstractWire implements Wire {
      */
     class RawValueOut implements ValueOut {
 
-        @NotNull
         /**
          * Writes a boolean value directly to the stream. A {@code null} value
          * is encoded using {@link BinaryWireCode#NULL}.
          */
+        @NotNull
         @Override
         public WireOut bool(@Nullable Boolean flag) {
             if (flag == null)
