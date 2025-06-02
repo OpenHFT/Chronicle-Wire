@@ -25,10 +25,15 @@ import net.openhft.chronicle.wire.Wire;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Simple Example with a nested data type.
- * In this example the data is marshalled as a nested data structure.
+ * Shows how to marshal a {@link Data} object as a nested document within a
+ * parent wire, using both text and binary formats.
  */
 public class Example3 {
+    /**
+     * Runs the demo.
+     *
+     * @param args command line arguments (not used in this example)
+     */
     public static void main(String[] args) {
 
         // Bytes what wraps a resized byte[]
