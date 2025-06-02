@@ -21,14 +21,15 @@ import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import java.lang.reflect.Method;
 
 /**
- * <p>This interface is a version of method reader interceptor that allows to change the logic of
- * {@link net.openhft.chronicle.bytes.MethodReader} without overhead provided by reflexive calls.
+ * Version of {@link MethodReaderInterceptorReturns} that lets generated
+ * readers inline custom logic without reflection overhead.
  *
  * <p>Code returned by {@link #codeBeforeCall(Method, String, String[])} and
- * {@link #codeAfterCall(Method, String, String[])} will be added before and after actual method call in the generated
- * source code of the method reader. It's possible to use original call arguments and object instance in the added code.
+ * {@link #codeAfterCall(Method, String, String[])} is inserted before and after
+ * the actual invocation in the generated reader.  The snippets may reference
+ * the deserialised argument variables and the target object instance.
  *
- * <p>Simple example that allows to skip call of method "foo" in case its second argument is null:
+ * <p>Simple example that skips the call of method "foo" when its second argument is null:
  * <pre>{@code
  *     public String codeBeforeCall(Method m, String objectName, String[] argumentNames) {
  *         if (m.getName().equals("foo"))
@@ -45,9 +46,10 @@ import java.lang.reflect.Method;
  *     }
  * }</pre>
  *
- * <p>Please mind that if provided code fails to compile, reflexive method call will be delegated to the interceptor
- * with {@link #intercept(Method, Object, Object[], Invocation)}, like it happens with a regular
- * {@link MethodReaderInterceptorReturns}.
+ * <p>This mechanism is used by {@link GenerateMethodReader} to weave logic
+ * directly into the generated class.  If the supplied code fails to compile,
+ * the call falls back to {@link #intercept(Method, Object, Object[], Invocation)}
+ * as it would with a reflective interceptor.
  */
 public interface GeneratingMethodReaderInterceptorReturns extends MethodReaderInterceptorReturns {
     /**
@@ -57,23 +59,23 @@ public interface GeneratingMethodReaderInterceptorReturns extends MethodReaderIn
      * Provided ID will be used in the classname of a generated method reader to ensure re-compilation when a new
      * generator is passed.
      *
-     * @return ID of this generator.
+     * @return a unique string ID for this generator implementation. This ID influences the generated class name.
      */
     String generatorId();
 
     /**
-     * @param m             Calling method.
-     * @param objectName    Object instance name.
-     * @param argumentNames Call argument names.
-     * @return Source code to add before the method call.
+     * @param m             the {@link Method} being intercepted
+     * @param objectName    name of the variable holding the target instance in the generated code
+     * @param argumentNames variable names of the deserialised arguments in the generated code
+     * @return Java source code to insert before the actual call, or {@code null} if nothing should be added
      */
     String codeBeforeCall(Method m, String objectName, String[] argumentNames);
 
     /**
-     * @param m             Calling method.
-     * @param objectName    Object instance name.
-     * @param argumentNames Call argument names.
-     * @return Source code to add after the method call.
+     * @param m             the {@link Method} being intercepted
+     * @param objectName    name of the variable holding the target instance in the generated code
+     * @param argumentNames variable names of the deserialised arguments in the generated code
+     * @return Java source code to insert after the actual call, or {@code null} if nothing should be added
      */
     String codeAfterCall(Method m, String objectName, String[] argumentNames);
 }
