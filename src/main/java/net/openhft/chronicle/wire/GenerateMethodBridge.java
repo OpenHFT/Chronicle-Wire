@@ -26,28 +26,37 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * This is the GenerateMethodBridge class, extending AbstractClassGenerator with MethodBridgeMetaData.
- * The primary purpose of this class is to generate a bridge for a given method, helping in the dynamic creation of objects.
+ * Dynamically creates a class that implements a destination interface and
+ * forwards method calls to a collection of handler objects. Each handler may
+ * only implement a subset of the interface methods. When a method on the
+ * generated bridge is invoked the call is dispatched to every handler that
+ * declares a matching method. This allows one interface to be implemented by a
+ * composition of several partial implementations, or for multiple listeners to
+ * react to the same call.
  */
 public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodBridge.MethodBridgeMetaData> {
 
-    // List containing the field names.
+    /**
+     * Generated field names for the handler instances. Each name corresponds
+     * to one entry in {@link MethodBridgeMetaData#invokes} and is used when
+     * emitting the bridge source code.
+     */
     private List<String> fnameList;
 
     /**
-     * Default constructor initializing with new MethodBridgeMetaData.
+     * Constructs a new instance with a fresh {@link MethodBridgeMetaData}.
      */
     public GenerateMethodBridge() {
         super(new MethodBridgeMetaData());
     }
 
     /**
-     * Creates a bridge for the provided destination type.
+     * Builds and instantiates a method bridge for the supplied interface.
      *
-     * @param destType    The class type for which a bridge is to be created.
-     * @param toInvoke    List of objects to be invoked.
-     * @param ui          The UpdateInterceptor instance, it can be null.
-     * @return The created bridge object for the specified destination type.
+     * @param destType  the primary interface the bridge will implement
+     * @param toInvoke  handler instances to receive forwarded calls
+     * @param ui        optional {@link UpdateInterceptor} applied to bridge invocations
+     * @return a new instance of the generated bridge class
      */
     public static Object bridgeFor(Class<?> destType, List<Object> toInvoke, UpdateInterceptor ui) {
         GenerateMethodBridge gmb = new GenerateMethodBridge();
@@ -73,10 +82,9 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
     }
 
     /**
-     * Finds and returns the first interface implemented by the object, or its class type if none.
-     *
-     * @param o The object whose class or interface type is to be found.
-     * @return The found class or interface type.
+     * Determines the most suitable type for declaring the handler field.
+     * Returns the first interface implemented by {@code o} if present,
+     * otherwise {@code o.getClass()}.
      */
     private static Class<?> findClass(Object o) {
         Class<?> aClass = o.getClass();
@@ -86,6 +94,11 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
         return aClass;
     }
 
+    /**
+     * Emits field declarations for all handler objects defined in the
+     * metadata. Field names are derived via {@link #fieldCase(Class)} and
+     * made unique if necessary.
+     */
     @Override
     protected void generateFields(SourceCodeFormatter mainCode) {
         MethodBridgeMetaData md = metaData();
@@ -103,6 +116,10 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
         }
     }
 
+    /**
+     * Generates the bridge constructor which initialises all handler fields and
+     * optionally stores an {@link UpdateInterceptor}.
+     */
     @Override
     protected void generateConstructors(SourceCodeFormatter mainCode) {
         MethodBridgeMetaData md = metaData();
@@ -123,14 +140,10 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
     }
 
     /**
-     * This method is responsible for generating the code for a given method.
-     * The method checks if the provided method exists in each of the handler classes from the metaData.
-     * If the method exists in a handler class, the corresponding code is generated and appended to the mainCode.
-     *
-     * @param method     The method for which the code needs to be generated.
-     * @param params     The parameters of the method, formatted as a StringBuilder.
-     * @param paramList  The list of parameters of the method.
-     * @param mainCode   The SourceCodeFormatter where the generated code will be appended.
+     * Emits the body for a single destination method. For each handler class a
+     * reflective check is performed to see if a method with the same signature
+     * exists. Calls are generated for all matching handlers in the order they
+     * were supplied.
      */
     protected void generateMethod(Method method, StringBuilder params, List<String> paramList, SourceCodeFormatter mainCode) {
         MethodBridgeMetaData md = metaData();
@@ -155,31 +168,28 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
     }
 
     /**
-     * This is the MethodBridgeMetaData inner class, extending AbstractClassGenerator.MetaData with MethodBridgeMetaData type.
-     * This class encapsulates metadata related to the method bridge generation, particularly holding a list of classes
-     * (handlers) that the bridge method may invoke.
+     * Metadata specific to {@link GenerateMethodBridge}. Stores the handler
+     * classes that the generated bridge will dispatch to.
      */
     static final class MethodBridgeMetaData extends AbstractClassGenerator.MetaData<MethodBridgeMetaData> {
 
-        // List containing classes that the bridge method may invoke.
+        /**
+         * Types of the handler objects to which calls will be forwarded.
+         */
         private List<Class<?>> invokes = new ArrayList<>();
 
         /**
-         * Getter for the invokes list.
-         *
-         * @return The list of classes (handlers) that the bridge method may invoke.
+         * Returns the handler types.
          */
         public List<Class<?>> invokes() {
             return invokes;
         }
 
         /**
-         * Setter for the invokes list.
-         * This method sets the provided list of classes to the invokes list and returns the current instance.
-         * It follows the builder pattern for chaining method calls.
+         * Sets the handler types.
          *
-         * @param handlers The list of classes to be set in invokes list.
-         * @return The current instance of the MethodBridgeMetaData class.
+         * @param handlers list of classes representing the handlers
+         * @return {@code this} for chaining
          */
         public MethodBridgeMetaData invokes(List<Class<?>> handlers) {
             this.invokes = handlers;
