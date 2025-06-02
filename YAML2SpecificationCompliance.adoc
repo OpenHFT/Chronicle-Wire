@@ -4,9 +4,18 @@
 :toc-placement: preamble
 :sectnums:
 
+== Overview
+
+Chronicle Wire implements YAML parsing primarily through `YamlWire` and `TextWire`.
+This document outlines the level of compliance with the YAML 1.2.2 specification
+and highlights any deviations. It is intended for developers who require
+interoperability information.
+
+link:https://yaml.org/spec/1.2.2/[YAML 1.2.2 specification]
+
 == YAML 1.2.2 Specification Compliance
 
-Chronicle Wire's `YAML` wire type aims to parse a significant portion of the YAML 1.2.2 specification, focusing on features commonly found in real‑world YAML documents and those necessary for robust data serialisation. While the `TEXT` wire type supports a narrower subset suitable for simple Wire object graphs, this document describes the YAML 1.2.2 features that are supported and notes how Chronicle Wire provides equivalent functionality or handles specific YAML features where behaviour differs.
+Chronicle Wire's `YAML` wire type aims to parse a significant portion of the YAML 1.2.2 specification, focusing on features commonly found in real-world YAML documents and those necessary for robust data serialisation. While the `TEXT` wire type supports a narrower subset suitable for simple Wire object graphs, this document describes the YAML 1.2.2 features that are supported and notes how Chronicle Wire provides equivalent functionality or handles specific YAML features where behaviour differs.
 
 === YAML 1.2.2 features supported in Chronicle Wire
 
@@ -29,10 +38,21 @@ NOTE: The numbers refer to the example sections in the YAML 1.2.2 specification.
 | Quoted Scalars (single `'` and double `"`) | 7.3.1, Example 2.17 | **Yes** | Escape sequences handled in double quotes.
 | Integers | 10.3.2, Example 2.19 | **Yes** | Decimal, hexadecimal `0x`, and octal `0o` numbers supported.
 | Floating-Point Numbers | 10.3.2, Example 2.20 | Partial | Standard floating-point numbers supported. Parsing of `.inf`, `-.inf`, and `.nan` limited.
-| Timestamps | 10.3.2, Example 2.22 | **Yes** | ISO‑8601 timestamps supported, can be used with `@NanoTime` or `@MillisTime`.
+| Timestamps | 10.3.2, Example 2.22 | **Yes** | ISO-8601 timestamps supported, can be used with `@NanoTime` or `@MillisTime`.
 | Unordered Sets (`!!set`) | 10.3.2, Example 2.25 | No | Deserialised as `LinkedHashMap` or `List`. Convert to a `Set` in application code if needed.
 | Ordered Mappings (`!!omap`) | 10.3.2, Example 2.26 | No | Deserialised as `LinkedHashMap` which preserves insertion order.
-| Complex Examples (`Invoice`, `LogFile`) | 2.27–2.28 | Partial | Standard structures supported; custom tags may require custom `Marshallable` implementations.
+| Complex Examples (`Invoice`, `LogFile`) | 2.27-2.28 | Partial | Standard structures supported; custom tags may require custom `Marshallable` implementations.
 |===
+
+=== Deviations
+
+* Complex mapping keys are not supported; mapping keys must be scalars.
+* `!!set` and `!!omap` are read as `LinkedHashMap` or `List`.
+* Special floating-point values such as `.inf` and `.nan` are only partially recognised.
+* Multi-line flow scalars may need quoting to parse correctly.
+
+=== Extensions
+
+Chronicle Wire does not introduce YAML extensions. Custom tags can map to application-specific classes via `Marshallable` implementations.
 
 https://github.com/OpenHFT/Chronicle-Wire[Back to Chronicle Wire project]
