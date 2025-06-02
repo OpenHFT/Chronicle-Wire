@@ -59,7 +59,9 @@ public class MicroTimestampLongConverter extends AbstractTimestampLongConverter 
     /**
      * Constructs a new {@code MicroTimestampLongConverter} with the specified zone ID.
      *
-     * @param zoneId the zone ID to be used for the conversion of long values
+     * @param zoneId The string representation of the ZoneId (e.g., "UTC", "Europe/London")
+     *               to be used for formatting date-time strings. This converter
+     *               handles timestamps with microsecond precision.
      */
     public MicroTimestampLongConverter(String zoneId) {
         super(zoneId, TimeUnit.MICROSECONDS);
