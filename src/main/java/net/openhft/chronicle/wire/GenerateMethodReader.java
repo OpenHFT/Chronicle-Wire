@@ -40,15 +40,23 @@ import static net.openhft.chronicle.core.util.GenericReflection.*;
 import static net.openhft.chronicle.wire.GenerateMethodWriter.isSynthetic;
 
 /**
- * Responsible for code generation and its runtime compilation of custom {@link MethodReader}s.
- * The class dynamically generates Java source code based on the provided configurations and compiles them at runtime.
- * It offers the flexibility to create custom MethodReaders tailored to specific needs without manual coding.
+ * Responsible for code generation and runtime compilation of custom {@link MethodReader}s.
+ * The class dynamically generates Java source code based on the provided configurations and compiles it on the fly.
+ * Generated readers extend {@link AbstractGeneratedMethodReader} for faster dispatch than reflection and are used
+ * internally by {@link VanillaMethodReaderBuilder}.
  */
 public class GenerateMethodReader {
 
-    // Configuration flag for dumping the generated code.
+    /**
+     * System property ({@code dumpCode}) flag. If {@code true}, the generated Java source
+     * code for the method reader will be printed to {@code System.out}.
+     */
     private static final boolean DUMP_CODE = Jvm.getBoolean("dumpCode");
-    // Set of interfaces that are not meant to be processed.
+    /**
+     * A {@link Set} of common Chronicle Wire and Java interfaces (e.g. {@link Marshallable},
+     * {@link DocumentContext}) that should be ignored when searching for methods to generate
+     * reader logic for. This avoids creating readers for utility or infrastructure methods.
+     */
     private static final Set<Class<?>> IGNORED_INTERFACES = new LinkedHashSet<>();
 
     static {
