@@ -21,13 +21,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * The Comment annotation represents a way to attach user-defined comments to elements
- * such as fields, parameters or types. This can be especially useful for documenting
- * the intention, usage or any other information about the annotated element at
- * runtime. Being retained at runtime, it can be inspected via reflection to influence
- * behaviour based on the comment's content. For example, a {@link WireOut}
- * implementation might choose to write the comment's value into the serialised output
- * if the wire format supports comments (for example YAML).
+ * The Comment annotation represents a way to attach user-defined comments to elements like fields,
+ * parameters, or types. This can be especially useful for documenting the intention, usage, or any other
+ * relevant information about the annotated element at runtime.
+ * <p>
+ * Being retained at runtime, it can be inspected via reflection to influence behavior based on the comment's content.
  */
 @Retention(RetentionPolicy.RUNTIME)  // This annotation is available at runtime.
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})  // Specifies the kinds of elements this annotation can be applied to.
