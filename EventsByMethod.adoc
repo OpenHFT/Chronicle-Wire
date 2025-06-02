@@ -1,8 +1,5 @@
 = Events by Method
 Peter Lawrey
-:sectnums:
-:toc:
-:source-highlighter: rouge
 
 Chronicle favours modelling events as asynchronous method calls.
 This has a number of advantages
