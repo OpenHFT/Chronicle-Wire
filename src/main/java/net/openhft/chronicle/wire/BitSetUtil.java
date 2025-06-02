@@ -24,30 +24,24 @@ import java.util.BitSet;
 
 /**
  * Utility class to access and manipulate the internals of the {@link BitSet} class.
- *
  * This class provides methods to directly interact with the underlying word storage
- * and related metadata of a BitSet. It leverages reflection to access private fields.
- * <b>This class relies on reflection of private fields of {@link java.util.BitSet}
- * and may break with different Java versions or JDK implementations. Use with extreme
- * caution and only when direct access to {@code BitSet} internals is absolutely necessary.</b>
+ * and related metadata of a BitSet. It leverages reflection to access private fields
+ * and therefore, should be used with caution.
  */
 final class BitSetUtil {
 
-    /** Private static final {@link Field} reference for the 'words' field within
-     * {@link java.util.BitSet}. Initialised reflectively and made accessible. */
+    // Reflective field reference to the 'words' field in BitSet
     private static final Field wordsField;
-    /** Private static final {@link Field} reference for the 'wordsInUse' field within
-     * {@link java.util.BitSet}. Initialised reflectively and made accessible. */
+    // Reflective field reference to the 'wordsInUse' field in BitSet
     private static final Field wordsInUse;
-    /** Private static final {@link Field} reference for the 'sizeIsSticky' field within
-     * {@link java.util.BitSet}. Initialised reflectively and made accessible. */
+    // Reflective field reference to the 'sizeIsSticky' field in BitSet
     private static final Field sizeIsSticky;
 
     // Private constructor to prevent instantiation of utility class
     private BitSetUtil() {
     }
 
-    // Static block to initialise reflective fields
+    // Static block to initialize reflective fields
     static {
         try {
             wordsField = BitSet.class.getDeclaredField("words");
@@ -66,10 +60,9 @@ final class BitSetUtil {
     /**
      * Retrieves the word from a {@link BitSet} at the given index.
      *
-     * @param bs    The {@link java.util.BitSet} instance from which to retrieve the word.
-     * @param index The zero-based index of the internal {@code long} word to retrieve.
-     * @return The {@code long} value of the word at the specified {@code index}.
-     * @throws RuntimeException wrapping {@link IllegalAccessException} if reflective access fails.
+     * @param bs    The target BitSet.
+     * @param index The index of the word to retrieve.
+     * @return The word (as a long value) at the given index in the BitSet.
      */
     static long getWord(BitSet bs, int index) {
         try {
@@ -82,14 +75,11 @@ final class BitSetUtil {
     }
 
     /**
-     * Directly sets the internal 'words' array of the {@code using} {@link java.util.BitSet}
-     * to the provided {@code words} array. Also updates the 'wordsInUse' field to
-     * {@code words.length} and 'sizeIsSticky' to {@code false} to reflect the change.
+     * Sets the underlying words of a {@link BitSet} and updates related metadata.
      *
-     * @param using  The {@link java.util.BitSet} instance to modify.
-     * @param words  The new {@code long[]} array to set as the internal bit storage.
-     * @return The modified {@code using} {@link java.util.BitSet} instance.
-     * @throws RuntimeException wrapping {@link IllegalAccessException} if reflective access fails.
+     * @param using The BitSet to modify.
+     * @param words The new words to set in the BitSet.
+     * @return The modified BitSet.
      */
     static BitSet set(final BitSet using, final long[] words) {
         try {
