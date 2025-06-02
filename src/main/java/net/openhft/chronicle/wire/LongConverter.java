@@ -25,11 +25,21 @@ import static java.lang.Math.log;
 import static java.text.MessageFormat.format;
 
 /**
- * Provides an abstraction for converting between long values and their string representations,
- * potentially based on a custom character or symbol set.
- * <p>
- * The conversion allows encoding long values into compact, human-readable strings and vice versa,
- * useful in contexts where storage efficiency or readability is a concern.
+ * Defines a contract for converting {@code long} values to and from textual
+ * representations. Implementations are typically triggered by annotations such
+ * as {@link LongConversion} to encode or decode fields using formats like
+ * hexadecimal, base64 or symbolic alphabets.
+ *
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * LongConverter converter = LongConverter.forSymbols("0123456789ABCDEF");
+ * long value = converter.parse("1A");
+ * StringBuilder out = new StringBuilder();
+ * converter.append(out, value);
+ * }</pre>
+ *
+ * @see LongConversion
+ * @see AbstractLongConverter
  */
 public interface LongConverter {
 
@@ -58,13 +68,15 @@ public interface LongConverter {
     }
 
     /**
-     * Parses the provided {@link CharSequence} and returns the parsed results as a
-     * {@code long} primitive.
+     * Parses the given character sequence, which represents a long value in a
+     * specific format, into its numeric form.
      *
-     * @return the parsed {@code text} as an {@code long} primitive.
-     * @throws IllegalArgumentException if the text length is outside of range accepted by a specific converter.
+     * @param textToParse the character sequence to parse; must not be {@code null}
+     * @return the {@code long} value represented by the text
+     * @throws IllegalArgumentException if the text cannot be parsed according to
+     *         the converter's rules
      */
-    long parse(CharSequence text);
+    long parse(CharSequence textToParse);
 
     /**
      * Parses a part of the provided {@link CharSequence} and returns the parsed results as a
@@ -72,36 +84,38 @@ public interface LongConverter {
      * <p>
      * The default implementation is garbage-producing and an implementing class is supposed to reimplement this method.
      *
-     * @param text character sequence containing the string representation of the value.
-     * @param beginIndex the beginning index, inclusive.
-     * @param endIndex the ending index, exclusive.
+     * @param textToParse character sequence containing the string representation of the value
+     * @param beginIndex  the beginning index, inclusive
+     * @param endIndex    the ending index, exclusive
      *
-     * @return the parsed {@code text} as an {@code long} primitive.
-     * @throws IllegalArgumentException if any of the indices are invalid or the sub-sequence length is
-     *      outside of range accepted by a specific converter.
+     * @return the {@code long} value represented by the specified sub-sequence
+     * @throws IllegalArgumentException if any of the indices are invalid or the
+     *      sub-sequence length is outside the range accepted by a specific converter
      */
-    default long parse(CharSequence text, int beginIndex, int endIndex) {
-        return parse(text.toString().substring(beginIndex, endIndex));
+    default long parse(CharSequence textToParse, int beginIndex, int endIndex) {
+        return parse(textToParse.toString().substring(beginIndex, endIndex));
     }
 
     /**
-     * Converts the given long value to a string and appends it to the provided StringBuilder.
+     * Appends the textual form of the provided {@code long} to the given
+     * {@link StringBuilder} using the converter's formatting rules.
      *
-     * @param text  The StringBuilder to which the converted value is appended.
-     * @param value The long value to convert.
+     * @param outputBuilder the destination for the formatted value; must not be
+     *                      {@code null}
+     * @param numericValue  the value to convert and append
      */
-    void append(StringBuilder text, long value);
+    void append(StringBuilder outputBuilder, long numericValue);
 
     /**
      * Converts the given long value to a string and appends it to the provided Bytes object.
      *
-     * @param bytes The Bytes object to which the converted value is appended.
-     * @param value The long value to convert.
+     * @param bytes        the Bytes object to which the formatted value is appended
+     * @param numericValue the value to convert
      */
-    default void append(Bytes<?> bytes, long value) {
+    default void append(Bytes<?> bytes, long numericValue) {
         try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
             final StringBuilder sb = stlSb.get();
-            append(sb, value);
+            append(sb, numericValue);
             bytes.append(sb);
         }
     }
