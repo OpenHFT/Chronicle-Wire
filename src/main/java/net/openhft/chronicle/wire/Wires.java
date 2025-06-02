@@ -59,76 +59,30 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 import static net.openhft.chronicle.wire.WireType.YAML_ONLY;
 
 /**
- * Utility holder for low-level wire constants and helper methods.
- * <p>
- * This enum does not contain any enumeration values.  It acts as a
- * central hub for header flags and masks, static utility methods for
- * common wire operations, and management of reusable resources such as
- * {@link StringBuilder} pools and {@link net.openhft.compiler.CachedCompiler}
- * instances.
+ * The {@code Wires} enum encapsulates constants and utility methods related to wire operations.
+ * It defines flags, masks, and utility methods that facilitate operations on wires.
+ * For example, it provides constants like {@code NOT_COMPLETE} to indicate a wire message's completeness status.
+ * This enum doesn't have any specific enumeration values but provides a utility-based structure.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum Wires {
     ; // No specific enumeration values
 
-    /**
-     * Mask for extracting the length from a 4&nbsp;byte header.
-     * Only the lower 30&nbsp;bits are used for the length value.
-     */
+    // Constants defining various masks and flags for wire operations
     public static final int LENGTH_MASK = -1 >>> 2;
-
-    /**
-     * Flag ({@code 0x8000_0000}) indicating that the following message is not yet complete.
-     * Used in the length prefix of a size-prefixed blob.
-     */
     public static final int NOT_COMPLETE = 0x8000_0000;
-
-    /**
-     * Flag ({@code 0x4000_0000}) marking the document as meta-data rather than data.
-     */
     public static final int META_DATA = 1 << 30;
-
-    /**
-     * Value representing an unknown length ({@code 0}).
-     */
     public static final int UNKNOWN_LENGTH = 0x0;
-
-    /**
-     * Combination of {@link #NOT_COMPLETE} and {@link #UNKNOWN_LENGTH} for incomplete messages
-     * of unknown size.
-     */
+    // value to use when the message is not ready and of an unknown length
     public static final int NOT_COMPLETE_UNKNOWN_LENGTH = NOT_COMPLETE;
-
-    /**
-     * Combination of {@link #NOT_COMPLETE} and {@link #META_DATA} used to indicate no more data
-     * is expected, for example at end of a roll.
-     */
+    // value to use when no more data is possible e.g. on a roll.
     public static final int END_OF_DATA = NOT_COMPLETE | META_DATA;
-
-    /**
-     * Value used for an uninitialised header ({@code 0}).
-     */
     public static final int NOT_INITIALIZED = 0x0;
-
-    /**
-     * Shared immutable {@link Bytes} instance representing an empty buffer.
-     */
     public static final Bytes<?> NO_BYTES = BytesStore.empty().bytesForRead();
-
-    /**
-     * Size in bytes of a Size-Prefixed Blob (SPB) header.
-     */
+    // Size of the SPB header
     public static final int SPB_HEADER_SIZE = 4;
-
-    /**
-     * Registry of functions that determine the {@link SerializationStrategy} for a class.
-     */
     public static final List<Function<Class<?>, SerializationStrategy>> CLASS_STRATEGY_FUNCTIONS = new CopyOnWriteArrayList<>();
 
-    /**
-     * Cache mapping classes to their {@link SerializationStrategy}.
-     * Strategies are resolved via {@link #CLASS_STRATEGY_FUNCTIONS}.
-     */
     static final ClassLocal<SerializationStrategy> CLASS_STRATEGY = ClassLocal.withInitial(c -> {
         for (@NotNull Function<Class<?>, SerializationStrategy> func : CLASS_STRATEGY_FUNCTIONS) {
             final SerializationStrategy strategy = func.apply(c);
@@ -138,15 +92,10 @@ public enum Wires {
         return ANY_OBJECT;
     });
 
-    /**
-     * Cache of {@link FieldInfoPair} describing marshallable fields for each class.
-     */
+    // Class local storage for field information lookup based on class
     static final ClassLocal<FieldInfoPair> FIELD_INFOS = ClassLocal.withInitial(FieldInfo::lookupClass);
 
-    /**
-     * Provides a function that can create proxy {@link Marshallable} implementations
-     * for tuple-like interfaces.
-     */
+    // Function to produce Marshallable objects based on a given class type
     static final ClassLocal<Function<String, Marshallable>> MARSHALLABLE_FUNCTION = ClassLocal.withInitial(tClass -> {
         Class[] interfaces = {Marshallable.class, tClass};
         if (tClass == Marshallable.class)
@@ -161,51 +110,21 @@ public enum Wires {
             throw new IllegalStateException(e);
         }
     });
-    /**
-     * Thread-local pool of {@link StringBuilder} instances to reduce allocations.
-     */
     static final ScopedResourcePool<StringBuilder> STRING_BUILDER_SCOPED_RESOURCE_POOL = StringBuilderPool.createThreadLocal();
-
-    /**
-     * Thread-local {@link BinaryWire} used for temporary read or write operations.
-     */
+    // Thread local storage for BinaryWire instances
     static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(Bytes.allocateElasticOnHeap()));
-
-    /**
-     * Flag derived from the {@code dumpCodeToTarget} system property or {@link Jvm#isDebug()}.
-     * When true, generated Java source is written to the build target directory.
-     */
+    // Flag to determine if code dump is enabled
     static final boolean DUMP_CODE_TO_TARGET = Jvm.getBoolean("dumpCodeToTarget", Jvm.isDebug());
-
-    /**
-     * Mask for embedding a thread identifier within a header.
-     */
+    // Constants related to thread identifiers
     private static final int TID_MASK = 0b00111111_11111111_11111111_11111111;
-
-    /**
-     * Inverse of {@link #TID_MASK} for removing a masked thread identifier.
-     */
     private static final int INVERSE_TID_MASK = ~TID_MASK;
-
-    /**
-     * Flag indicating whether tuple generation is permitted via the
-     * {@code wire.generate.tuples} system property.
-     */
+    // Flag to enable tuple generation
     public static boolean GENERATE_TUPLES = Jvm.getBoolean("wire.generate.tuples");
-
-    /**
-     * Used to ensure an untyped bytes warning is logged only once.
-     */
+    // Flags to assist with state management and logging
     static volatile boolean warnedUntypedBytesOnce = false;
-
-    /**
-     * Legacy thread-local {@link StringBuilder}. Prefer {@link #STRING_BUILDER_SCOPED_RESOURCE_POOL}.
-     */
+    // Thread local storage for string builders
     static ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
-
-    /**
-     * Shared {@link net.openhft.compiler.CachedCompiler} for dynamic class generation.
-     */
+    // Compiler cache for dynamic code generation
     static CachedCompiler CACHED_COMPILER = null;
 
     /**
@@ -271,58 +190,60 @@ public enum Wires {
     }
 
     /**
-     * Dumps a sequence of size-prefixed binary messages as a human readable
-     * string.  The first four bytes of each message contain the length and
-     * status flags.  See the <a href="https://github.com/OpenHFT/RFC/tree/master/Size-Prefixed-Blob">Size Prefixed Blob</a>
-     * specification.
+     * This decodes some Bytes where the first 4-bytes is the length.  e.g. Wire.writeDocument wrote
+     * it. <a href="https://github.com/OpenHFT/RFC/tree/master/Size-Prefixed-Blob">Size Prefixed
+     * Blob</a>
      *
-     * @param bytes the bytes containing the size-prefixed data
-     * @return the dump in text form
+     * @param bytes to decode
+     * @return as String
      */
     public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes) {
         return WireDumper.of(bytes).asString();
     }
 
     /**
-     * Dumps aligned size-prefixed blobs.  Alignment means each record may have
-     * padding between messages.
+     * Converts the provided bytes, which represent aligned size-prefixed blobs,
+     * into a readable string format.
      *
-     * @param bytes the bytes containing the aligned blobs
-     * @return textual dump of the messages
+     * @param bytes the bytes representing aligned size-prefixed blobs
+     * @return the readable string representation of the blobs
      */
     public static String fromAlignedSizePrefixedBlobs(@NotNull Bytes<?> bytes) {
         return WireDumper.of(bytes, true).asString();
     }
 
     /**
-     * Dumps size-prefixed blobs with optional abbreviation of long content.
+     * Converts the provided bytes, representing size-prefixed blobs,
+     * into a readable string format with the option to abbreviate.
      *
-     * @param bytes  the bytes containing the messages
-     * @param abbrev if {@code true} long fields are abbreviated
-     * @return textual dump of the blobs
+     * @param bytes   the bytes representing size-prefixed blobs
+     * @param abbrev  if {@code true}, the output string will be abbreviated
+     * @return the readable string representation of the blobs
      */
     public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, boolean abbrev) {
         return WireDumper.of(bytes).asString(abbrev);
     }
 
     /**
-     * Dumps size-prefixed blobs starting at a given position.
+     * Converts the provided bytes, representing size-prefixed blobs,
+     * into a readable string format from the specified position.
      *
-     * @param bytes    the bytes containing the messages
-     * @param position the offset in {@code bytes} to begin dumping
-     * @return textual dump of the remaining messages
+     * @param bytes    the bytes representing size-prefixed blobs
+     * @param position the position in bytes from which the conversion starts
+     * @return the readable string representation of the blobs from the specified position
      */
     public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, long position) {
         return fromSizePrefixedBlobs(bytes, position, false);
     }
 
     /**
-     * Dumps size-prefixed blobs from a given position with optional padding.
+     * Converts the provided bytes, representing size-prefixed blobs,
+     * into a readable string format from a specified position and with the option to pad.
      *
-     * @param bytes    the bytes containing the messages
-     * @param position start position in {@code bytes}
-     * @param padding  whether message boundaries are padded
-     * @return textual dump of the blobs
+     * @param bytes    the bytes representing size-prefixed blobs
+     * @param position the position in bytes from which the conversion starts
+     * @param padding  if {@code true}, the output string will have padding
+     * @return the readable string representation of the blobs from the specified position
      */
     public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, long position, boolean padding) {
         final long limit = bytes.readLimit();
@@ -332,24 +253,25 @@ public enum Wires {
     }
 
     /**
-     * Dumps size-prefixed blobs with control over padding and abbreviation.
+     * Converts the provided bytes, which represent size-prefixed blobs,
+     * into a readable string format with options for padding and abbreviation.
      *
-     * @param bytes   the bytes containing the messages
-     * @param padding whether message boundaries are padded
-     * @param abbrev  whether long content should be abbreviated
-     * @return textual dump of the blobs
+     * @param bytes   the bytes representing size-prefixed blobs
+     * @param padding if {@code true}, the output string will have padding
+     * @param abbrev  if {@code true}, the output string will be abbreviated
+     * @return the readable string representation of the blobs
      */
     public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, boolean padding, boolean abbrev) {
         return WireDumper.of(bytes, padding).asString(abbrev);
     }
 
     /**
-     * Dumps the current document of the supplied {@link DocumentContext} as a
-     * sequence of size-prefixed blobs.  Both {@link TextWire} and
-     * {@link BinaryWire} contexts are supported.
+     * Converts the contents of the provided {@code DocumentContext}
+     * which represent size-prefixed blobs into a readable string format.
+     * The method supports handling of both TextWire and BinaryWire types.
      *
-     * @param dc the document context whose content should be dumped
-     * @return textual dump of the blobs
+     * @param dc the {@code DocumentContext} holding the wire data
+     * @return the readable string representation of the blobs
      */
     public static String fromSizePrefixedBlobs(@NotNull DocumentContext dc) {
         Wire wire = dc.wire();
@@ -415,33 +337,29 @@ public enum Wires {
     }
 
     /**
-     * Dumps the messages from a {@link WireIn} as a human readable string.
+     * Converts the contents of the provided {@code WireIn}
+     * which represent size-prefixed blobs into a readable string format.
      *
-     * @param wireIn the input wire
-     * @return textual dump of the blobs
+     * @param wireIn the {@code WireIn} instance holding the wire data
+     * @return the readable string representation of the blobs
      */
     public static String fromSizePrefixedBlobs(@NotNull WireIn wireIn) {
         return fromSizePrefixedBlobs(wireIn, false);
     }
 
     /**
-     * Dumps the messages from a {@link WireIn} with optional abbreviation.
+     * Converts the contents of the provided {@code WireIn}
+     * which represent size-prefixed blobs into a readable string format,
+     * with the option to abbreviate the output.
      *
-     * @param wireIn the input wire
-     * @param abbrev whether long content should be abbreviated
-     * @return textual dump of the blobs
+     * @param wireIn the {@code WireIn} instance holding the wire data
+     * @param abbrev  if {@code true}, the output string will be abbreviated
+     * @return the readable string representation of the blobs
      */
     public static String fromSizePrefixedBlobs(@NotNull WireIn wireIn, boolean abbrev) {
         return WireDumper.of(wireIn).asString(abbrev);
     }
 
-    /**
-     * Converts the contents of {@code wireIn} to a text (YAML-like) representation.
-     *
-     * @param wireIn the source wire
-     * @param output buffer to receive the text
-     * @return {@code output} containing the textual form
-     */
     @NotNull
     public static CharSequence asText(@NotNull WireIn wireIn, Bytes<?> output) {
         ValidatableUtil.startValidateDisabled();
@@ -462,9 +380,6 @@ public enum Wires {
         return new JSONWire(bytes).useTypes(true).trimFirstCurly(false).useTextDocuments();
     }
 
-    /**
-     * Copies the contents of {@code wireIn} into {@code output} using a binary wire.
-     */
     public static Bytes<?> asBinary(@NotNull WireIn wireIn, Bytes<?> output) throws InvalidMarshallableException {
         return asType(wireIn, BinaryWire::new, output);
     }
@@ -487,9 +402,6 @@ public enum Wires {
         }
     }
 
-    /**
-     * Converts {@code wireIn} to JSON and writes the result into {@code output}.
-     */
     public static Bytes<?> asJson(@NotNull WireIn wireIn, Bytes<?> output) throws InvalidMarshallableException {
         return asType(wireIn, Wires::newJsonWire, output);
     }
@@ -504,78 +416,97 @@ public enum Wires {
         return new TextWire(bytes).addTimeStamps(true);
     }
 
-    /**
-     * Obtains a {@link StringBuilder} from the thread-local pool wrapped in a
-     * {@link ScopedResource} so it is automatically returned when the scope is closed.
-     */
     public static ScopedResource<StringBuilder> acquireStringBuilderScoped() {
         return STRING_BUILDER_SCOPED_RESOURCE_POOL.get();
     }
 
     /**
-     * Extracts the pure length from a 4&nbsp;byte header value, removing
-     * flags such as {@link #NOT_COMPLETE} and {@link #META_DATA}.
+     * Extracts the length from the given length value.
+     *
+     * @param len the encoded length
+     * @return the decoded length
      */
     public static int lengthOf(int len) {
         return len & LENGTH_MASK;
     }
 
     /**
-     * Returns {@code true} if the header denotes a complete document.
+     * Checks if the given header is ready (complete and not zero).
+     *
+     * @param header the input header
+     * @return true if the header is ready, false otherwise
      */
     public static boolean isReady(int header) {
         return (header & NOT_COMPLETE) == 0 && header != 0;
     }
 
     /**
-     * Returns {@code true} if the header indicates an incomplete document or zero length.
+     * Checks if the given header is not complete or zero.
+     *
+     * @param header the input header
+     * @return true if the header is not complete or zero, false otherwise
      */
     public static boolean isNotComplete(int header) {
         return (header & NOT_COMPLETE) != 0 || header == 0;
     }
 
     /**
-     * Tests whether a header represents completed data (not meta-data) and is non-zero.
+     * Checks if the given header represents ready data (neither meta-data nor incomplete) and is not zero.
+     *
+     * @param header the input header
+     * @return true if the header represents ready data, false otherwise
      */
     public static boolean isReadyData(int header) {
         return ((header & (META_DATA | NOT_COMPLETE)) == 0) && (header != 0);
     }
 
     /**
-     * Returns {@code true} if the header denotes data rather than meta-data.
+     * Checks if the given length represents data and not meta-data.
+     *
+     * @param len the encoded length
+     * @return true if the length represents data, false otherwise
      */
     public static boolean isData(int len) {
         return (len & META_DATA) == 0;
     }
 
     /**
-     * Returns {@code true} if the header is marked as meta-data and the document is complete.
+     * Checks if the given length represents ready meta-data.
+     *
+     * @param len the encoded length
+     * @return true if the length represents ready meta-data, false otherwise
      */
     public static boolean isReadyMetaData(int len) {
         return (len & (META_DATA | NOT_COMPLETE)) == META_DATA;
     }
 
     /**
-     * Returns {@code true} if the header has a definite length value.
+     * Checks if the given length represents a known length (neither unknown nor meta-data).
+     *
+     * @param len the encoded length
+     * @return true if the length is known, false otherwise
      */
     public static boolean isKnownLength(int len) {
         return (len & (META_DATA | LENGTH_MASK)) != UNKNOWN_LENGTH;
     }
 
     /**
-     * Returns {@code true} if the header has not been initialised.
+     * Checks if the given length is not initialized.
+     *
+     * @param len the encoded length
+     * @return true if the length is not initialized, false otherwise
      */
     public static boolean isNotInitialized(int len) {
         return len == NOT_INITIALIZED;
     }
 
     /**
-     * Converts {@code l} to a 30&nbsp;bit unsigned int.
+     * Converts a long value to an int, ensuring it falls within the 30-bit range.
      *
-     * @param l     the value to convert
-     * @param error error message used if {@code l} is outside {@code 0}..{@link #LENGTH_MASK}
-     * @return {@code l} as an int
-     * @throws IllegalStateException if {@code l} is out of range
+     * @param l     the input long value
+     * @param error the error message template in case of an out-of-range value
+     * @return the converted int value
+     * @throws IllegalStateException if the value is out of the 30-bit range
      */
     public static int toIntU30(long l, @NotNull String error) {
         if (l < 0 || l > LENGTH_MASK)
@@ -584,12 +515,11 @@ public enum Wires {
     }
 
     /**
-     * Attempts to claim a 4&nbsp;byte header by atomically swapping
-     * {@link #NOT_INITIALIZED} with {@link #NOT_COMPLETE}.
+     * Acquires a lock on the given BytesStore at the specified position.
      *
-     * @param store    bytes containing the header
-     * @param position offset of the header
-     * @return {@code true} if the lock was acquired
+     * @param store    the byte store to lock
+     * @param position the position at which to lock
+     * @return true if the lock was successfully acquired, false otherwise
      */
     public static boolean acquireLock(@NotNull BytesStore<?, ?> store, long position) {
         return store.compareAndSwapInt(position, NOT_INITIALIZED, NOT_COMPLETE);
@@ -657,20 +587,11 @@ public enum Wires {
         return bytes;
     }
 
-    /**
-     * Provides a pooled {@link Bytes} instance wrapped in a {@link ScopedResource}.
-     *
-     * @return the scoped bytes
-     */
     @NotNull
     public static ScopedResource<Bytes<Void>> acquireBytesScoped() {
         return WireInternal.BYTES_SCOPED_THREAD_LOCAL.get();
     }
 
-    /**
-     * Obtains a pooled {@link BinaryWire} wrapped in a {@link ScopedResource}
-     * for temporary serialisation tasks.
-     */
     public static ScopedResource<Wire> acquireBinaryWireScoped() {
         return WireInternal.BINARY_WIRE_SCOPED_TL.get();
     }
@@ -879,7 +800,10 @@ public enum Wires {
     }
 
     /**
-     * Returns {@code true} if the supplied header value denotes end of data.
+     * Checks if a given integer represents the end of file marker.
+     *
+     * @param num Integer to check
+     * @return true if the integer represents end of file, false otherwise
      */
     public static boolean isEndOfFile(int num) {
         return num == END_OF_DATA;
@@ -1320,8 +1244,12 @@ public enum Wires {
     }
 
     /**
-     * Provides a thread-local {@link BinaryWire} configured to read from the supplied
-     * byte store.  The returned wire shares the underlying bytes; no copy is made.
+     * Creates a BinaryWire for reading with the given input, position, and length.
+     *
+     * @param in        The input bytes.
+     * @param position  The starting position.
+     * @param length    The length of data to read.
+     * @return A BinaryWire configured for reading.
      */
     @NotNull
     public static BinaryWire binaryWireForRead(Bytes<?> in, long position, long length) {
@@ -1333,8 +1261,12 @@ public enum Wires {
     }
 
     /**
-     * Provides a thread-local {@link BinaryWire} configured for writing to the supplied
-     * byte store.  The returned wire views the given bytes without copying.
+     * Creates a BinaryWire for writing with the given input, position, and length.
+     *
+     * @param in        The input bytes.
+     * @param position  The starting position.
+     * @param length    The length of data to write.
+     * @return A BinaryWire configured for writing.
      */
     @NotNull
     public static BinaryWire binaryWireForWrite(Bytes<?> in, long position, long length) {
@@ -1346,9 +1278,15 @@ public enum Wires {
     }
 
     /**
-     * Dynamically compiles and loads a class from its source code.
-     * The {@link #CACHED_COMPILER} is created lazily and may write generated
-     * files to the build directory when {@link #DUMP_CODE_TO_TARGET} is set.
+     * Loads a Java class from the given source code string using the specified class loader.
+     * If a cached compiler is not initialized, it initializes one either with default settings
+     * or specific directories if they exist and `DUMP_CODE_TO_TARGET` is true.
+     *
+     * @param classLoader The class loader to use for loading the class.
+     * @param className   The name of the class to be loaded.
+     * @param code        The Java source code for the class.
+     * @return The loaded class.
+     * @throws ClassNotFoundException If the class could not be found or loaded.
      */
     static synchronized Class<?> loadFromJava(ClassLoader classLoader, String className, String code) throws ClassNotFoundException {
         if (CACHED_COMPILER == null) {
