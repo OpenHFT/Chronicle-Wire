@@ -1,5 +1,7 @@
 /*
- * Copyright 2016-2025 chronicle.software
+ * Copyright 2016-2020 chronicle.software
+ *
+ *       https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +20,20 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 
 /**
- * Functional interface invoked when a field name is parsed.
- * It is typically registered with a {@link WireParser} to define how to
- * deserialise the value associated with a specific field name.
+ * Represents a functional interface that can process wire input based on a given
+ * character sequence key and a value input. The `WireParselet` can be seen as a
+ * specific action or handler for a particular key found in the wire input.
  */
 @FunctionalInterface
 public interface WireParselet {
 
     /**
-     * Invoked with the field name and corresponding value.
+     * Consumes and processes a wire input based on a given character sequence
+     * and a value input.
      *
-     * @param s   the field name that matched this parselet
-     * @param in  the {@link ValueIn} positioned at the value for {@code s}. Use it to
-     *            deserialise the value
-     * @throws InvalidMarshallableException if the value cannot be processed
+     * @param s The character sequence (usually representing a key) from the wire input.
+     * @param in The value associated with the key in the wire input.
+     * @throws InvalidMarshallableException If there's an issue with processing the data.
      */
     void accept(CharSequence s, ValueIn in) throws InvalidMarshallableException;
 }
