@@ -171,8 +171,8 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         this.addSourceDetails = addSourceDetails;
     }
 
-    @Override
     /** Clears all recorded entries. */
+    @Override
     public void reset() {
         sources = timings = 0;
     }
@@ -184,13 +184,13 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         return addSourceDetails;
     }
 
-    @Override
     /**
      * Initialise the history with the given source and current time.
      *
      * @param sourceId    source identifier
      * @param sourceIndex index from the calling component
      */
+    @Override
     public void reset(int sourceId, long sourceIndex) {
         sources = 1;
         sourceIdArray[0] = sourceId;
@@ -199,60 +199,60 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         timingsArray[0] = nanoTime();
     }
 
-    @Override
     /**
      * @return source id of the most recent entry or {@code -1} if none
      */
+    @Override
     public int lastSourceId() {
         return sources <= 0 ? -1 : sourceIdArray[sources - 1];
     }
 
-    @Override
     /**
      * @return source index of the most recent entry or {@code -1} if none
      */
+    @Override
     public long lastSourceIndex() {
         return sources <= 0 ? -1 : sourceIndexArray[sources - 1];
     }
 
-    @Override
     /**
      * @return number of timing entries recorded
      */
+    @Override
     public int timings() {
         return timings;
     }
 
-    @Override
     /**
      * @param n index of the entry
      * @return raw timestamp value
      */
+    @Override
     public long timing(int n) {
         return timingsArray[n];
     }
 
-    @Override
     /**
      * @return number of source entries recorded
      */
+    @Override
     public int sources() {
         return sources;
     }
 
-    @Override
     /**
      * @param n index of the entry
      * @return source id stored at that position
      */
+    @Override
     public int sourceId(int n) {
         return sourceIdArray[n];
     }
 
-    @Override
     /**
      * @return {@code true} if the recorded source ids end with the given array
      */
+    @Override
     public boolean sourceIdsEndsWith(int[] sourceIds) {
         int start = sources - sourceIds.length;
         if (start < 0)
@@ -265,22 +265,22 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         return true;
     }
 
-    @Override
     /**
      * @param n index of the entry
      * @return source index stored at that position
      */
+    @Override
     public long sourceIndex(int n) {
         return sourceIndexArray[n];
     }
 
-    @Override
     /**
      * Deserialises this history from a {@link WireIn}. Binary wires may hold a
      * compact representation starting with {@link BinaryWireCode#HISTORY_MESSAGE}.
      * Structured wires read 'sources' and 'timings' fields. If
      * {@link #addSourceDetails} is true the caller is appended as another hop.
      */
+    @Override
     public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException, InvalidMarshallableException {
         Bytes<?> bytes = wire.bytes();
         if (bytes.peekUnsignedByte() == BinaryWireCode.HISTORY_MESSAGE) {
@@ -307,12 +307,12 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         }
     }
 
-    @Override
     /**
      * Serialises this history to the given wire. Uses the compact binary form
      * when {@link #useBytesMarshallable} is true and the wire is binary,
      * otherwise writes 'sources' and 'timings' sequences. Resets the dirty flag.
      */
+    @Override
     public void writeMarshallable(@NotNull WireOut wire) {
         if (useBytesMarshallable && wire.isBinary()) {
             wire.bytes().writeUnsignedByte(BinaryWireCode.HISTORY_MESSAGE);
@@ -325,7 +325,9 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     }
 
     /**
-     * Deserialises the compact binary representation from {@code bytes}.
+     * Reads the message history data from the provided bytes input.
+     *
+     * @param bytes Input bytes to read the data from.
      */
     @Override
     public void readMarshallable(@NotNull BytesIn<?> bytes) throws IORuntimeException {
@@ -374,10 +376,10 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             timingsArray[i] = bytes.readLong();
     }
 
-    @Override
     /**
      * Serialises to the compact binary representation.
      */
+    @Override
     public void writeMarshallable(@NotNull BytesOut<?> b) {
         if (b.canWriteDirect(MAX_LENGTH)) {
             writeMarshallableDirect(b);

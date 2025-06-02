@@ -43,60 +43,58 @@ public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMar
     // Defaults to an empty string.
     private String serviceId = "";
 
-    @NotNull
-    @Override
-    // to be removed in x.25
     /**
      * Returns the unique identifier for this event.
      *
      * @return the current event ID
      */
+    @NotNull
+    @Override
     public String eventId() {
         return eventId;
     }
 
-    @Override
-    // to be removed in x.25
     /**
      * Sets a new identifier for this event.
      *
      * @param eventId the unique identifier to assign; must not be null
      * @return this instance for chaining
      */
+    @Override
     public E eventId(@NotNull CharSequence eventId) {
         this.eventId = eventId.toString();
         return (E) this;
     }
 
-    @Override
     /**
      * Returns the timestamp associated with this event.
      *
      * @return the event time in the unit defined by
      *         {@link ServicesTimestampLongConverter}
      */
+    @Override
     public long eventTime() {
         return eventTime;
     }
 
-    @Override
     /**
      * Sets the timestamp for this event.
      *
      * @param eventTime the new timestamp, typically in nanoseconds
      * @return this instance for chaining
      */
+    @Override
     public E eventTime(long eventTime) {
         this.eventTime = eventTime;
         return (E) this;
     }
 
-    @Override
     /**
      * Updates the event time with the current system time.
      *
      * @return this instance for chaining
      */
+    @Override
     public E eventTimeNow() {
         return this.eventTime(ServicesTimestampLongConverter.currentTime());
     }
