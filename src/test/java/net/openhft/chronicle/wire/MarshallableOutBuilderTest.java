@@ -198,7 +198,8 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
                 queue.add(bytes.toHexString());
             else
                 queue.add(bytes.toString());
-            xchg.sendResponseHeaders(202, 0);
+            // use -1 to indicate not response as 0 allows an arbitrary length
+            xchg.sendResponseHeaders(202, -1);
         }
     }
 
