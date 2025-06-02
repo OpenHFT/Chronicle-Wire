@@ -1,4 +1,4 @@
-# Copyright 2021-2025 chronicle.software
+# Copyright 2021 - http://chronicle.software
 {
   services: {
     fix-web-gateway: {
