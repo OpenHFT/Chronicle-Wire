@@ -1,5 +1,7 @@
 /*
- * Copyright 2016-2025 chronicle.software
+ * Copyright 2016-2020 chronicle.software
+ *
+ *       https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +22,11 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@SuppressWarnings("rawtypes")
 /**
  * The WireDumper class provides utility methods to obtain a human-readable dump representation of {@link WireIn} content.
  * This class can operate on different WireIn or Bytes inputs and is designed to facilitate debugging and logging.
  */
-@SuppressWarnings("rawtypes")
 public class WireDumper {
 
     // Instance of WireIn to read from
