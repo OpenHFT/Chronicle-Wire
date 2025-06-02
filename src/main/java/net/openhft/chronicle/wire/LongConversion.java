@@ -33,6 +33,7 @@ import java.lang.annotation.Target;
  * @Retention(RetentionPolicy.RUNTIME)
  * @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
  * public @interface MyHexFormat {
+ *    LongConverter INSTANCE = new MyHexFormatConverter("0123456789ABCDEF");
  * }
  * }</pre>
  *
@@ -43,10 +44,14 @@ import java.lang.annotation.Target;
 public @interface LongConversion {
 
     /**
-     * Specifies the {@link LongConverter} class that provides the logic for
-     * converting the value to and from text.
+     * Returns the class responsible for converting the long value or an annotation with an INSTANCE of one.
+     *<p>
+     * The {@link LongConverter} class to be used for conversion.
+     * The class specified should either have a static final field named INSTANCE,
+     * or a constructor that takes a single string parameter for initialization.
      *
-     * @return the {@link LongConverter} implementation class
+     * @return The implementing class which either contains a static final field named `INSTANCE`
+     *         or provides a constructor that takes a string for initialization.
      */
-    Class<? extends LongConverter> value();
+    Class<?> value();
 }
