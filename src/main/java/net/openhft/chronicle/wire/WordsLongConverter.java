@@ -25,6 +25,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The {@code WordsLongConverter} class implements the LongConverter interface.
@@ -48,9 +50,17 @@ public class WordsLongConverter implements LongConverter {
     // Static block to load words from the 'common-words.txt' file into the WORDS array and the WORD_ID map.
     static {
         try {
-            // Load the words from a resource file.
-            String[] words = new String(IOTools.readFile(WordsLongConverter.class, "common-words.txt"), StandardCharsets.ISO_8859_1).split("\\s+");
-            WORDS = words;
+            // Load the words from the resource file, ignoring comment lines.
+            String content = new String(IOTools.readFile(WordsLongConverter.class, "common-words.txt"), StandardCharsets.ISO_8859_1);
+            String[] lines = content.split("\\R");
+            List<String> list = new ArrayList<>();
+            for (String line : lines) {
+                String t = line.trim();
+                if (t.isEmpty() || t.startsWith("#"))
+                    continue;
+                list.add(t);
+            }
+            WORDS = list.toArray(new String[0]);
 
             // Populate the WORD_ID map.
             for (int i = 0; i < WORDS.length; i++) {

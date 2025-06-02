@@ -17,18 +17,12 @@
  */
 
 /**
- * This package and any and all sub-packages contains strictly internal classes for this Chronicle library.
- * Internal classes shall <em>never</em> be used directly.
+ * Provides internal utility classes and implementation details for the Chronicle Wire library.
  * <p>
- *  Specifically, the following actions (including, but not limited to) are not allowed
- *  on internal classes and packages:
- *  <ul>
- *      <li>Casting to</li>
- *      <li>Reflection of any kind</li>
- *      <li>Explicit Serialize/deserialize</li>
- *  </ul>
- * <p>
- * The classes in this package and any sub-package are subject to
- * changes at any time for any reason.
+ * Classes here are not part of the public API and may change without notice. They underpin
+ * wire implementations, marshalling and code generation.
+ *
+ * @see net.openhft.chronicle.wire.Wire
+ * @see net.openhft.chronicle.wire.Marshallable
  */
 package net.openhft.chronicle.wire.internal;
