@@ -46,13 +46,13 @@ public class SizeLongConverter implements LongConverter {
      *                               a valid long number or if the text is empty.
      */
     @Override
-    public long parse(CharSequence text) throws NumberFormatException {
-        int length = text.length();
+    public long parse(CharSequence textToParse) throws NumberFormatException {
+        int length = textToParse.length();
         if (length < 1)
             throw new NumberFormatException("Empty string");
 
         int shift;
-        switch (text.charAt(length - 1)) {
+        switch (textToParse.charAt(length - 1)) {
             case 't':
             case 'T':
                 shift = 40;
@@ -75,11 +75,11 @@ public class SizeLongConverter implements LongConverter {
         }
         if (shift != 0) {
             if (length < 2)
-                throw new NumberFormatException("No number for prefix '" + text + "'");
-            text = text.subSequence(0, length - 1);
+                throw new NumberFormatException("No number for prefix '" + textToParse + "'");
+            textToParse = textToParse.subSequence(0, length - 1);
         }
 
-        return Long.parseLong(text.toString()) << shift;
+        return Long.parseLong(textToParse.toString()) << shift;
     }
 
     /**
@@ -88,23 +88,23 @@ public class SizeLongConverter implements LongConverter {
      * (kilo, mega, giga, tera, respectively). If the value does not match
      * one of these categories, it is converted to a string without a suffix.
      *
-     * @param text  The {@link StringBuilder} to which the converted value
+     * @param outputBuilder  The {@link StringBuilder} to which the converted value
      *              and suffix are appended.
-     * @param value The long value to be converted.
+     * @param numericValue The long value to be converted.
      */
     @Override
-    public void append(StringBuilder text, long value) {
-        if (value == 0)
-            text.append('0');
-        else if (value >> 40 << 40 == value)
-            text.append(value >> 40).append('T');
-        else if (value >> 30 << 30 == value)
-            text.append(value >> 30).append('G');
-        else if (value >> 20 << 20 == value)
-            text.append(value >> 20).append('M');
-        else if (value >> 10 << 10 == value)
-            text.append(value >> 10).append('K');
+    public void append(StringBuilder outputBuilder, long numericValue) {
+        if (numericValue == 0)
+            outputBuilder.append('0');
+        else if (numericValue >> 40 << 40 == numericValue)
+            outputBuilder.append(numericValue >> 40).append('T');
+        else if (numericValue >> 30 << 30 == numericValue)
+            outputBuilder.append(numericValue >> 30).append('G');
+        else if (numericValue >> 20 << 20 == numericValue)
+            outputBuilder.append(numericValue >> 20).append('M');
+        else if (numericValue >> 10 << 10 == numericValue)
+            outputBuilder.append(numericValue >> 10).append('K');
         else
-            text.append(value);
+            outputBuilder.append(numericValue);
     }
 }

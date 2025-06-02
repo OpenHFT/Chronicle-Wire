@@ -26,14 +26,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation used to signify that the annotated field or parameter represents an identifier,
- * specifically as a Nanosecond resolution timestamp from epoch.
- * <p>
- * This annotation could be used in scenarios where the system wants to generate
- * unique identifiers based on the precise timestamp at which they are created.
- * <p>
- * The INSTANCE field is a singleton instance of the IdentifierLongConverter class,
- * which is used to perform the conversion between long values and the nanosecond timestamp.
+ * Indicates that the associated {@code long} value should be rendered as a compact
+ * identifier-like string. The default implementation uses
+ * {@link IdentifierLongConverter} which falls back to a timestamp when the
+ * value cannot be expressed as a short identifier.
+ *
+ * @see LongConversion
+ * @see IdentifierLongConverter
+ * @see LongConverter
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})

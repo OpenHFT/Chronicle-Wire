@@ -59,15 +59,15 @@ public class IdentifierLongConverter implements LongConverter {
      * @return The parsed long identifier representation.
      */
     @Override
-    public long parse(CharSequence text) {
-        return parse(text, 0, text.length());
+    public long parse(CharSequence textToParse) {
+        return parse(textToParse, 0, textToParse.length());
     }
 
     /**
      * Parses a part of the provided {@link CharSequence} into a long identifier.
      * The parsing behavior changes depending on the difference between indices.
      *
-     * @param text the CharSequence to parse.
+     * @param textToParse the CharSequence to parse.
      * @param beginIndex the beginning index, inclusive.
      * @param endIndex the ending index, exclusive.
      * @return the parsed long identifier
@@ -75,44 +75,44 @@ public class IdentifierLongConverter implements LongConverter {
      *      outside of range accepted by the converter.
      */
     @Override
-    public long parse(CharSequence text, int beginIndex, int endIndex) {
+    public long parse(CharSequence textToParse, int beginIndex, int endIndex) {
         return (endIndex - beginIndex) <= 10
-                ? SMALL_POSITIVE.parse(text, beginIndex, endIndex)
-                : NanoTimestampLongConverter.INSTANCE.parse(text, beginIndex, endIndex);
+                ? SMALL_POSITIVE.parse(textToParse, beginIndex, endIndex)
+                : NanoTimestampLongConverter.INSTANCE.parse(textToParse, beginIndex, endIndex);
     }
 
     /**
      * Appends a long identifier to a provided {@link StringBuilder} instance.
      * The behavior changes depending on the magnitude of the identifier.
      *
-     * @param text the StringBuilder to append the identifier to
-     * @param value the long identifier
+     * @param outputBuilder the StringBuilder to append the identifier to
+     * @param numericValue the long identifier
      */
     @Override
-    public void append(StringBuilder text, long value) {
-        if (value < 0)
-            throw new IllegalArgumentException("value: " + value); // reserved
-        if (value <= MAX_SMALL_ID)
-            SMALL_POSITIVE.append(text, value);
+    public void append(StringBuilder outputBuilder, long numericValue) {
+        if (numericValue < 0)
+            throw new IllegalArgumentException("value: " + numericValue); // reserved
+        if (numericValue <= MAX_SMALL_ID)
+            SMALL_POSITIVE.append(outputBuilder, numericValue);
         else
-            NanoTimestampLongConverter.INSTANCE.append(text, value);
+            NanoTimestampLongConverter.INSTANCE.append(outputBuilder, numericValue);
     }
 
     /**
      * Appends a long identifier to a provided {@link Bytes} instance.
      * The behavior changes depending on the magnitude of the identifier.
      *
-     * @param bytes the Bytes to append the identifier to
-     * @param value the long identifier
+     * @param outputBytes the Bytes to append the identifier to
+     * @param numericValue the long identifier
      */
     @Override
-    public void append(Bytes<?> bytes, long value) {
-        if (value < 0)
-            throw new IllegalArgumentException("value: " + value); // reserved
-        if (value <= MAX_SMALL_ID)
-            SMALL_POSITIVE.append(bytes, value);
+    public void append(Bytes<?> outputBytes, long numericValue) {
+        if (numericValue < 0)
+            throw new IllegalArgumentException("value: " + numericValue); // reserved
+        if (numericValue <= MAX_SMALL_ID)
+            SMALL_POSITIVE.append(outputBytes, numericValue);
         else
-            NanoTimestampLongConverter.INSTANCE.append(bytes, value);
+            NanoTimestampLongConverter.INSTANCE.append(outputBytes, numericValue);
     }
 
     /**

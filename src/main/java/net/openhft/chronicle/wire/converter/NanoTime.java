@@ -26,28 +26,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation to indicate that a given field or parameter, represented as a long value,
- * should be treated as a timestamp with nanosecond resolution, based from the epoch.
- * <p>
- * The epoch, typically referred to as "UNIX epoch," is the point in time when time starts,
- * and is represented as "1970-01-01 00:00:00 UTC". A value annotated with {@code NanoTime}
- * counts the number of nanoseconds since the epoch. For instance, a value of 1,000,000,000
- * would indicate 1 second past the epoch.
- * <p>
- * When this annotation is applied to a field or parameter, it provides a hint about the
- * expected format and representation of the data, allowing for potential encoding, decoding,
- * and date-time operations based on nanosecond resolution timestamps.
- * <p>
- * The provided {@link #INSTANCE} is a default converter specifically crafted for
- * operations relevant to the nanosecond timestamp format.
- * <b>Example:</b>
- * <pre>
- * {@code @NanoTime}
- * private long timestamp;
- * </pre>
+ * Indicates that the associated {@code long} value represents epoch nanoseconds.
+ * Chronicle Wire will use {@link NanoTimestampLongConverter} to render the value
+ * as a human-readable timestamp and to parse such strings back to a long.
  *
- * @see LongConverter
+ * @see LongConversion
  * @see NanoTimestampLongConverter
+ * @see LongConverter
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})

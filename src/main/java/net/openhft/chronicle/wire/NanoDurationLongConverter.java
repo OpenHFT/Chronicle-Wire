@@ -28,12 +28,12 @@ public class NanoDurationLongConverter implements LongConverter {
     /**
      * Parses the provided {@link CharSequence} into a duration and returns the equivalent duration in nanoseconds.
      *
-     * @param text the {@link CharSequence} to parse
+     * @param textToParse the {@link CharSequence} to parse
      * @return the parsed duration as a long value in nanoseconds
      */
     @Override
-    public long parse(CharSequence text) {
-        final Duration parse = Duration.parse(text);
+    public long parse(CharSequence textToParse) {
+        final Duration parse = Duration.parse(textToParse);
         return parse.getSeconds() * 1_000_000_000L + parse.getNano();
     }
 
@@ -51,22 +51,22 @@ public class NanoDurationLongConverter implements LongConverter {
     /**
      * Appends a {@link Duration} representation of the provided long value (in nanoseconds) to the provided {@link StringBuilder}.
      *
-     * @param text the {@link StringBuilder} to append to
-     * @param value the duration as a long value in nanoseconds
+     * @param outputBuilder the {@link StringBuilder} to append to
+     * @param numericValue the duration as a long value in nanoseconds
      */
     @Override
-    public void append(StringBuilder text, long value) {
-        text.append(duration(value));
+    public void append(StringBuilder outputBuilder, long numericValue) {
+        outputBuilder.append(duration(numericValue));
     }
 
     /**
      * Appends a {@link Duration} representation of the provided long value (in nanoseconds) to the provided {@link Bytes}.
      *
-     * @param bytes the {@link Bytes} object to append to
-     * @param value the duration as a long value in nanoseconds
+     * @param outputBytes the {@link Bytes} object to append to
+     * @param numericValue the duration as a long value in nanoseconds
      */
     @Override
-    public void append(Bytes<?> bytes, long value) {
-        bytes.append(duration(value).toString());
+    public void append(Bytes<?> outputBytes, long numericValue) {
+        outputBytes.append(duration(numericValue).toString());
     }
 }

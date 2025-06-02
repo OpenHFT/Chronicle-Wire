@@ -26,25 +26,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation to indicate that a given field or parameter, represented as a long value,
- * should be treated as a string containing 0 to 10 characters in Base85 format. This truncated leading spaces, but preserves leading zero c.f. {@link Base85}
- * <p>
- * Base85, also known as Ascii85, is a binary-to-ASCII encoding scheme that provides
- * an efficient way to encode binary data for transport over text-based protocols.
- * <p>
- * When this annotation is applied to a field or parameter, it provides a hint about the expected format
- * and representation of the data, allowing for potential encoding and decoding operations based on Base85.
- * <p>
- * The provided {@link #INSTANCE} is a default converter that can be used for operations relevant to the Base85 format.
- * <b>Usage Example:</b>
- * <pre>
- * {@code @ShortText}
- * private long encodedText;
- * </pre>
+ * Marks a {@code long} field or parameter that uses the compact "short text" Base85
+ * representation. Leading spaces are discarded but leading zero is retained.
+ * The {@link ShortTextLongConverter} performs the conversion.
  *
- * @see LongConverter
- * @see Base85
+ * @see LongConversion
  * @see ShortTextLongConverter
+ * @see Base85
+ * @see LongConverter
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})

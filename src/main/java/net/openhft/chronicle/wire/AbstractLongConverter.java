@@ -61,46 +61,46 @@ public abstract class AbstractLongConverter implements LongConverter {
     /**
      * Parses the provided text using the underlying converter.
      *
-     * @param text the text to parse.
+     * @param textToParse the text to parse.
      * @return the parsed long value.
      */
     @Override
-    public long parse(CharSequence text) {
-        return converter.parse(text);
+    public long parse(CharSequence textToParse) {
+        return converter.parse(textToParse);
     }
 
     /**
      * Parses a part of the provided text using the underlying converter.
      *
-     * @param text the text to parse.
+     * @param textToParse the text to parse.
      * @param beginIndex the beginning index, inclusive.
      * @param endIndex the ending index, exclusive.
      * @return the parsed long value.
      */
     @Override
-    public long parse(CharSequence text, int beginIndex, int endIndex) {
-        return converter.parse(text, beginIndex, endIndex);
+    public long parse(CharSequence textToParse, int beginIndex, int endIndex) {
+        return converter.parse(textToParse, beginIndex, endIndex);
     }
 
     /**
      * Appends the provided long value to the provided {@code StringBuilder} text.
      *
-     * @param text the StringBuilder to append to.
-     * @param value the long value to convert and append.
+     * @param outputBuilder the StringBuilder to append to.
+     * @param numericValue the long value to convert and append.
      */
     @Override
-    public void append(StringBuilder text, long value) {
-        converter.append(text, value);
+    public void append(StringBuilder outputBuilder, long numericValue) {
+        converter.append(outputBuilder, numericValue);
     }
 
     /**
      * Appends the provided long value to the provided {@code Bytes} text.
      *
-     * @param bytes the Bytes object to append to.
-     * @param value the long value to convert and append.
+     * @param outputBytes the Bytes object to append to.
+     * @param numericValue the long value to convert and append.
      */
     @Override
-    public void append(Bytes<?> bytes, long value) {
-        converter.append(bytes, value);
+    public void append(Bytes<?> outputBytes, long numericValue) {
+        converter.append(outputBytes, numericValue);
     }
 }

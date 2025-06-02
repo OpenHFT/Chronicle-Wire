@@ -118,47 +118,47 @@ public class ServicesTimestampLongConverter implements LongConverter {
 
     /**
      * Parses the provided {@link CharSequence} into a timestamp in the configured time unit.
-     * @param text The text to parse.
+     * @param textToParse The text to parse.
      * @return The parsed timestamp as a long value in the configured time unit.
      */
     @Override
-    public long parse(CharSequence text) {
-        return underlying.parse(text);
+    public long parse(CharSequence textToParse) {
+        return underlying.parse(textToParse);
     }
 
     /**
      * Parses a part of the provided {@link CharSequence} using the underlying converter.
      *
-     * @param text the text to parse.
+     * @param textToParse the text to parse.
      * @param beginIndex the beginning index, inclusive.
      * @param endIndex the ending index, exclusive.
      * @return the parsed timestamp as a long value in the configured time unit.
      */
     @Override
-    public long parse(CharSequence text, int beginIndex, int endIndex) {
-        return underlying.parse(text, beginIndex, endIndex);
+    public long parse(CharSequence textToParse, int beginIndex, int endIndex) {
+        return underlying.parse(textToParse, beginIndex, endIndex);
     }
 
     /**
      * Appends a representation of the provided long timestamp (in the system-configured time unit) to the provided {@link StringBuilder}.
      *
-     * @param text  The StringBuilder to which the timestamp representation will be appended.
-     * @param value The timestamp as a long value in the system-configured time unit.
+     * @param outputBuilder  The StringBuilder to which the timestamp representation will be appended.
+     * @param numericValue The timestamp as a long value in the system-configured time unit.
      */
     @Override
-    public void append(StringBuilder text, long value) {
-        underlying.append(text, value);
+    public void append(StringBuilder outputBuilder, long numericValue) {
+        underlying.append(outputBuilder, numericValue);
     }
 
     /**
      * Appends a representation of the provided long timestamp (in the system-configured time unit) to the provided {@link Bytes}.
      *
-     * @param bytes The Bytes object to which the timestamp representation will be appended.
-     * @param value The timestamp as a long value in the system-configured time unit.
+     * @param outputBytes The Bytes object to which the timestamp representation will be appended.
+     * @param numericValue The timestamp as a long value in the system-configured time unit.
      */
     @Override
-    public void append(Bytes<?> bytes, long value) {
-        underlying.append(bytes, value);
+    public void append(Bytes<?> outputBytes, long numericValue) {
+        underlying.append(outputBytes, numericValue);
     }
 
     /**

@@ -25,16 +25,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation for fields or parameters to indicate that the annotated long value
- * represents a string of 0 to 16 characters encoded in Base16.
- * <p>
- * This allows for consistent, self-descriptive annotations in fields or parameters,
- * guiding developers and API users about the intended format of the long value.
- * <p>
- * The Base16 format is often used for representing binary data in an ASCII string format,
- * and this annotation helps in ensuring that the long value adheres to this representation.
+ * Indicates that the associated {@code long} value is encoded as hexadecimal (Base16)
+ * text when written to or read from a textual wire format.
+ * Applying this annotation selects the {@link PowerOfTwoLongConverter} for the
+ * conversion process.
  *
+ * @see LongConversion
  * @see PowerOfTwoLongConverter
+ * @see LongConverter
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})

@@ -120,17 +120,17 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
      * The text can be an ISO date or a timestamp. If the text includes a timezone, it's used for conversion;
      * otherwise, the converter's timezone is used.
      *
-     * @param text the text to be parsed
+     * @param textToParse the text to be parsed
      * @return a long value representing the parsed timestamp
      */
     @Override
-    public long parse(CharSequence text) {
-        if (text == null || text.length() == 0)
+    public long parse(CharSequence textToParse) {
+        if (textToParse == null || textToParse.length() == 0)
             return 0;
         try {
-            if (text.length() > 4 && text.charAt(4) == '/')
-                text = text.toString().replace('/', '-');
-            final TemporalAccessor parse = formatterForParsing.parse(text);
+            if (textToParse.length() > 4 && textToParse.charAt(4) == '/')
+                textToParse = textToParse.toString().replace('/', '-');
+            final TemporalAccessor parse = formatterForParsing.parse(textToParse);
             if (parse.query(TemporalQueries.zoneId()) != null) {
                 return parseFormattedDate(ZonedDateTime.from(parse).withZoneSameInstant(UTC));
             } else {
@@ -214,22 +214,22 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
     /**
      * Appends the provided long value to the given {@code StringBuilder}. This method delegates to {@code append(Appendable, long)}.
      *
-     * @param text  the {@code StringBuilder} to append to
-     * @param value the long value to be appended
+     * @param outputBuilder  the {@code StringBuilder} to append to
+     * @param numericValue the long value to be appended
      */
     @Override
-    public void append(StringBuilder text, long value) {
-        append((Appendable) text, value);
+    public void append(StringBuilder outputBuilder, long numericValue) {
+        append((Appendable) outputBuilder, numericValue);
     }
 
     /**
      * Appends the provided long value to the given {@code Bytes}. This method delegates to {@code append(Appendable, long)}.
      *
-     * @param bytes the {@code Bytes} to append to
-     * @param value the long value to be appended
+     * @param outputBytes the {@code Bytes} to append to
+     * @param numericValue the long value to be appended
      */
     @Override
-    public void append(Bytes<?> bytes, long value) {
-        append((Appendable) bytes, value);
+    public void append(Bytes<?> outputBytes, long numericValue) {
+        append((Appendable) outputBytes, numericValue);
     }
 }

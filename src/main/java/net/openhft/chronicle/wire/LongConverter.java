@@ -61,10 +61,10 @@ public interface LongConverter {
      * Parses the provided {@link CharSequence} and returns the parsed results as a
      * {@code long} primitive.
      *
-     * @return the parsed {@code text} as an {@code long} primitive.
+     * @return the parsed {@code textToParse} as a {@code long} primitive.
      * @throws IllegalArgumentException if the text length is outside of range accepted by a specific converter.
      */
-    long parse(CharSequence text);
+    long parse(CharSequence textToParse);
 
     /**
      * Parses a part of the provided {@link CharSequence} and returns the parsed results as a
@@ -72,37 +72,37 @@ public interface LongConverter {
      * <p>
      * The default implementation is garbage-producing and an implementing class is supposed to reimplement this method.
      *
-     * @param text character sequence containing the string representation of the value.
+     * @param textToParse character sequence containing the string representation of the value.
      * @param beginIndex the beginning index, inclusive.
      * @param endIndex the ending index, exclusive.
      *
-     * @return the parsed {@code text} as an {@code long} primitive.
+     * @return the parsed {@code textToParse} as a {@code long} primitive.
      * @throws IllegalArgumentException if any of the indices are invalid or the sub-sequence length is
      *      outside of range accepted by a specific converter.
      */
-    default long parse(CharSequence text, int beginIndex, int endIndex) {
-        return parse(text.toString().substring(beginIndex, endIndex));
+    default long parse(CharSequence textToParse, int beginIndex, int endIndex) {
+        return parse(textToParse.toString().substring(beginIndex, endIndex));
     }
 
     /**
      * Converts the given long value to a string and appends it to the provided StringBuilder.
      *
-     * @param text  The StringBuilder to which the converted value is appended.
-     * @param value The long value to convert.
+     * @param outputBuilder The StringBuilder to which the converted value is appended.
+     * @param numericValue  The long value to convert.
      */
-    void append(StringBuilder text, long value);
+    void append(StringBuilder outputBuilder, long numericValue);
 
     /**
      * Converts the given long value to a string and appends it to the provided Bytes object.
      *
-     * @param bytes The Bytes object to which the converted value is appended.
-     * @param value The long value to convert.
+     * @param outputBytes The Bytes object to which the converted value is appended.
+     * @param numericValue The long value to convert.
      */
-    default void append(Bytes<?> bytes, long value) {
+    default void append(Bytes<?> outputBytes, long numericValue) {
         try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
             final StringBuilder sb = stlSb.get();
-            append(sb, value);
-            bytes.append(sb);
+            append(sb, numericValue);
+            outputBytes.append(sb);
         }
     }
 
@@ -150,24 +150,24 @@ public interface LongConverter {
     /**
      * Checks that the length of the provided text does not exceed the allowable maximum.
      *
-     * @param text The text to check.
+     * @param textToCheck The text to check.
      * @throws IllegalArgumentException if the text length exceeds the maximum allowable length.
      */
-    default void lengthCheck(CharSequence text) {
-        if (text.length() > maxParseLength())
-            throw new IllegalArgumentException(format("text={0} exceeds the maximum allowable length of {1}", text, maxParseLength()));
+    default void lengthCheck(CharSequence textToCheck) {
+        if (textToCheck.length() > maxParseLength())
+            throw new IllegalArgumentException(format("text={0} exceeds the maximum allowable length of {1}", textToCheck, maxParseLength()));
     }
 
     /**
      * Checks that the length of the provided text does not exceed the allowable maximum.
      *
-     * @param text The text to check.
+     * @param textToCheck The text to check.
      * @param beginIndex the beginning index, inclusive.
      * @param endIndex   the ending index, exclusive.
      * @throws IllegalArgumentException if the text length exceeds the maximum allowable length.
      */
-    default void lengthCheck(CharSequence text, int beginIndex, int endIndex) {
-        if ((beginIndex | endIndex | (endIndex - beginIndex) | (text.length() - endIndex + beginIndex) | (maxParseLength() - endIndex + beginIndex)) < 0)
+    default void lengthCheck(CharSequence textToCheck, int beginIndex, int endIndex) {
+        if ((beginIndex | endIndex | (endIndex - beginIndex) | (textToCheck.length() - endIndex + beginIndex) | (maxParseLength() - endIndex + beginIndex)) < 0)
             throw new IllegalArgumentException(format("range [{0}, {1}) exceeds the maximum allowable length of {2}",
                     beginIndex, endIndex, maxParseLength()));
     }

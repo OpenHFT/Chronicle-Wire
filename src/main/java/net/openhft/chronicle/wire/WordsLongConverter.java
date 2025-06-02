@@ -83,13 +83,13 @@ public class WordsLongConverter implements LongConverter {
     /**
      * Parses the provided text to produce a long value.
      *
-     * @param text The sequence of words to parse.
+     * @param textToParse The sequence of words to parse.
      * @return The long value corresponding to the given word sequence.
      * @throws IllegalArgumentException If a word in the sequence is not recognized.
      */
     @Override
-    public long parse(CharSequence text) {
-        String[] split = NON_LETTER.split(text.toString().trim(), 0);
+    public long parse(CharSequence textToParse) {
+        String[] split = NON_LETTER.split(textToParse.toString().trim(), 0);
         long value = 0;
         int shift = 0;
         for (String s : split) {
@@ -105,34 +105,34 @@ public class WordsLongConverter implements LongConverter {
     /**
      * Appends the word representation of the given long value to the provided StringBuilder.
      *
-     * @param text The StringBuilder to append to.
-     * @param value The long value to be converted and appended.
+     * @param outputBuilder The StringBuilder to append to.
+     * @param numericValue The long value to be converted and appended.
      */
     @Override
-    public void append(StringBuilder text, long value) {
+    public void append(StringBuilder outputBuilder, long numericValue) {
         String asep = "";
         do {
-            text.append(asep);
-            text.append(WORDS[(int) (value & 2047)]);
-            value >>>= 11;
+            outputBuilder.append(asep);
+            outputBuilder.append(WORDS[(int) (numericValue & 2047)]);
+            numericValue >>>= 11;
             asep = this.sep;
-        } while (value > 0);
+        } while (numericValue > 0);
     }
 
     /**
      * Appends the word representation of the given long value to the provided Bytes object.
      *
-     * @param bytes The Bytes object to append to.
-     * @param value The long value to be converted and appended.
+     * @param outputBytes The Bytes object to append to.
+     * @param numericValue The long value to be converted and appended.
      */
     @Override
-    public void append(Bytes<?> bytes, long value) {
+    public void append(Bytes<?> outputBytes, long numericValue) {
         String asep = "";
         do {
-            bytes.append(asep);
-            bytes.append(WORDS[(int) (value & 2047)]);
-            value >>>= 11;
+            outputBytes.append(asep);
+            outputBytes.append(WORDS[(int) (numericValue & 2047)]);
+            numericValue >>>= 11;
             asep = this.sep;
-        } while (value > 0);
+        } while (numericValue > 0);
     }
 }

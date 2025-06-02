@@ -71,22 +71,22 @@ public class SymbolsLongConverter implements LongConverter {
     /**
      * Parses a sequence of characters into a long value.
      *
-     * @param text the character sequence to parse.
+     * @param textToParse the character sequence to parse.
      * @return the parsed long value.
      * @throws IllegalArgumentException if the character sequence contains unexpected characters or
      *      its length exceeds the maximum allowable length.
      */
     @Override
-    public long parse(CharSequence text) {
-        lengthCheck(text);
+    public long parse(CharSequence textToParse) {
+        lengthCheck(textToParse);
 
-        return parse0(text, 0, text.length());
+        return parse0(textToParse, 0, textToParse.length());
     }
 
     /**
      * Parses a part of a sequence of characters into a long value.
      *
-     * @param text the character sequence to parse.
+     * @param textToParse the character sequence to parse.
      * @param beginIndex the beginning index, inclusive.
      * @param endIndex the ending index, exclusive.
      * @return the parsed long value.
@@ -94,20 +94,20 @@ public class SymbolsLongConverter implements LongConverter {
      *      indices are invalid or the sub-sequence length exceeds the maximum allowable length.
      */
     @Override
-    public long parse(CharSequence text, int beginIndex, int endIndex) {
-        lengthCheck(text, beginIndex, endIndex);
+    public long parse(CharSequence textToParse, int beginIndex, int endIndex) {
+        lengthCheck(textToParse, beginIndex, endIndex);
 
-        return parse0(text, beginIndex, endIndex);
+        return parse0(textToParse, beginIndex, endIndex);
     }
 
-    private long parse0(CharSequence text, int beginIndex, int endIndex) {
+    private long parse0(CharSequence textToParse, int beginIndex, int endIndex) {
         long v = 0;
         for (int i = beginIndex; i < endIndex; i++) {
-            final char ch = text.charAt(i);
+            final char ch = textToParse.charAt(i);
 
             // Check for characters outside of the encoding range or not present in the encoding map.
             if (ch >= encode.length || encode[ch] < 0)
-                throw new IllegalArgumentException("Unexpected character '" + ch + "' in \"" + text + "\"");
+                throw new IllegalArgumentException("Unexpected character '" + ch + "' in \"" + textToParse + "\"");
 
             // Convert the character into its corresponding long value.
             v = v * factor + encode[ch];
@@ -118,62 +118,62 @@ public class SymbolsLongConverter implements LongConverter {
     /**
      * Appends a long value to a StringBuilder.
      *
-     * @param text the StringBuilder to append to
-     * @param value the long value to append
+     * @param outputBuilder the StringBuilder to append to
+     * @param numericValue the long value to append
      */
     @Override
-    public void append(StringBuilder text, long value) {
-        final int start = text.length();
+    public void append(StringBuilder outputBuilder, long numericValue) {
+        final int start = outputBuilder.length();
 
         // Handle negative values by converting them using unsigned operations.
-        if (value < 0) {
-            int v = (int) Long.remainderUnsigned(value, factor);
-            value = Long.divideUnsigned(value, factor);
-            text.append(decode[v]);
+        if (numericValue < 0) {
+            int v = (int) Long.remainderUnsigned(numericValue, factor);
+            numericValue = Long.divideUnsigned(numericValue, factor);
+            outputBuilder.append(decode[v]);
         }
 
-        while (value != 0) {
-            int v = (int) (value % factor);
-            value /= factor;
-            text.append(decode[v]);
+        while (numericValue != 0) {
+            int v = (int) (numericValue % factor);
+            numericValue /= factor;
+            outputBuilder.append(decode[v]);
         }
 
-        StringUtils.reverse(text, start); // Reverse the result since it's constructed backward.
+        StringUtils.reverse(outputBuilder, start); // Reverse the result since it's constructed backward.
 
-        if (text.length() > start + maxParseLength()) {
+        if (outputBuilder.length() > start + maxParseLength()) {
             Jvm.warn().on(getClass(), "truncated because the value was too large");
-            text.setLength(start + maxParseLength());
+            outputBuilder.setLength(start + maxParseLength());
         }
     }
 
     /**
      * Appends a long value to a Bytes object.
      *
-     * @param text the Bytes object to append to
-     * @param value the long value to append
+     * @param outputBytes the Bytes object to append to
+     * @param numericValue the long value to append
      */
     @Override
-    public void append(Bytes<?> text, long value) {
-        final int start = text.length();
+    public void append(Bytes<?> outputBytes, long numericValue) {
+        final int start = outputBytes.length();
 
         // Handle negative values in bytes format.
-        if (value < 0) {
-            int v = (int) Long.remainderUnsigned(value, factor);
-            value = Long.divideUnsigned(value, factor);
-            text.append(decode[v]);
+        if (numericValue < 0) {
+            int v = (int) Long.remainderUnsigned(numericValue, factor);
+            numericValue = Long.divideUnsigned(numericValue, factor);
+            outputBytes.append(decode[v]);
         }
 
-        while (value != 0) {
-            int v = (int) (value % factor);
-            value /= factor;
-            text.append(decode[v]);
+        while (numericValue != 0) {
+            int v = (int) (numericValue % factor);
+            numericValue /= factor;
+            outputBytes.append(decode[v]);
         }
 
-        BytesUtil.reverse(text, start); // Reverse the result for bytes.
+        BytesUtil.reverse(outputBytes, start); // Reverse the result for bytes.
 
-        if (text.length() > start + maxParseLength()) {
+        if (outputBytes.length() > start + maxParseLength()) {
             Jvm.warn().on(getClass(), "truncated because the value was too large");
-            text.readLimit((long) start + maxParseLength());
+            outputBytes.readLimit((long) start + maxParseLength());
         }
     }
 

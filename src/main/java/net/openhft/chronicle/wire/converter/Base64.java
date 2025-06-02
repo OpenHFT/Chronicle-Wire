@@ -25,21 +25,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation to indicate that a given field or parameter, represented as a long value,
- * should be treated as a string containing 0 to 10 characters in Base64 format.
- * <p>
- * When this annotation is applied to a field or parameter, it provides a hint about the expected format
- * and representation of the data, allowing for potential encoding and decoding operations based on Base64.
- * <p>
- * The provided {@link #INSTANCE} is a default converter that can be used for operations relevant to the Base64 format.
- * <b>Example:</b>
- * <pre>
- * {@code @Base64}
- * private long encodedData;
- * </pre>
+ * Indicates that the associated {@code long} value is encoded using standard Base64
+ * when persisted in textual wire formats. The {@link PowerOfTwoLongConverter}
+ * performs the actual conversion.
  *
- * @see LongConverter
+ * @see LongConversion
  * @see PowerOfTwoLongConverter
+ * @see LongConverter
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
