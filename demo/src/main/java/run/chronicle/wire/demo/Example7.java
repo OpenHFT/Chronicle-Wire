@@ -22,7 +22,11 @@ import net.openhft.chronicle.wire.WireType;
 
 import java.io.IOException;
 
-//This example shows how to use alias names for classes
+/**
+ * Example of using class aliases for YAML files. {@link Data1} is registered
+ * with the alias pool while {@link Data2} is not, so its full class name is
+ * emitted in the output.
+ */
 public class Example7 {
 
     //Data1.class is added to Alias pool but Data2.class is not
@@ -30,6 +34,11 @@ public class Example7 {
         ClassAliasPool.CLASS_ALIASES.addAlias(Data1.class);
     }
 
+    /**
+     * Runs the demo.
+     *
+     * @param args command line arguments (not used in this example)
+     */
     public static void main(String[] args) throws IOException {
 
         Data1 data1 = new Data1();

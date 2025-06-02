@@ -18,10 +18,16 @@ package run.chronicle.wire.demo.mapreuse;
 
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
+/**
+ * DTO representing a financial security used in the map reuse example.
+ */
 public final class Security extends SelfDescribingMarshallable {
 
+    /** security identifier */
     private int id;
+    /** averaged price for the example */
     private long averagePrice;
+    /** trade count */
     private long count;
 
     public Security(int id, long price, long count) {

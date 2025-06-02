@@ -25,12 +25,16 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This is a simple example with a data type.
- * See Data.java for the code for Data type. This Example is much the same as Example1, with the
- * code required wrapped in a method.
+ * Demonstrates marshalling of a {@link Data} object using both
+ * {@link TextWire} and {@link BinaryWire}.
  */
 public class Example2 {
 
+    /**
+     * Runs the demo.
+     *
+     * @param args command line arguments (not used in this example)
+     */
     public static void main(String[] args) {
 
         // Bytes which wraps a ByteBuffer which is resized as needed.

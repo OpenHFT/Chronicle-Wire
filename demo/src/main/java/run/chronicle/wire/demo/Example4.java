@@ -26,12 +26,15 @@ import net.openhft.chronicle.wire.Wire;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Simple example with a data type with a type.
- * In this example, the type is encoded with the data. Instead of showing the entire package name
- * which will almost certainly not work on any other platform, an alias for the type is used.
- * It also means the message is shorter and faster.
+ * Demonstrates the use of class aliases so that type information is written as
+ * a short token rather than a full package name.
  */
 public class Example4 {
+    /**
+     * Runs the demo.
+     *
+     * @param args command line arguments (not used in this example)
+     */
     public static void main(String[] args) {
 
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap());

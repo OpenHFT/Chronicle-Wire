@@ -22,7 +22,17 @@ import net.openhft.chronicle.wire.*;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Demonstrates how different {@link Wire} implementations encode a simple set
+ * of fields. The example writes the same data using TextWire, BinaryWire and
+ * RawWire and prints the result of each.
+ */
 public class Example1 {
+    /**
+     * Runs the demo.
+     *
+     * @param args command line arguments (not used in this example)
+     */
     public static void main(String[] args) {
 
         // Bytes which wraps a ByteBuffer which is resized as needed.
