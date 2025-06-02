@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,7 +198,8 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
                 queue.add(bytes.toHexString());
             else
                 queue.add(bytes.toString());
-            xchg.sendResponseHeaders(202, 0);
+            // use -1 to indicate not response as 0 allows an arbitrary length
+            xchg.sendResponseHeaders(202, -1);
         }
     }
 

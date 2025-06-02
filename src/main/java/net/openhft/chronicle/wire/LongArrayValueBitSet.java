@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2021 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,27 +33,29 @@ import java.util.stream.StreamSupport;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
 /**
- * This {@code ChronicleBitSet} is intended to be shared between processes. To minimize locking constraints, it is implemented as a lock-free solution
- * without support for resizing.
+ * A {@link ChronicleBitSet} backed by a {@link net.openhft.chronicle.core.values.LongArrayValues}.
+ * The backing array can reside off-heap, allowing multiple processes to share the same state.
+ * All updates rely on compare‑and‑swap operations and therefore do not require explicit locks.
+ * <b>Note:</b> the capacity is fixed when the instance is created and cannot later be expanded.
  */
 @SuppressWarnings("this-escape")
 public class LongArrayValueBitSet extends AbstractCloseable implements Marshallable, ChronicleBitSet {
 
-    /* Used to shift left or right for a partial word mask */
+    /** Internal constant used when masking partial words. */
     private static final long WORD_MASK = ~0L;
 
-    // Pauser object used for managing concurrent access (assuming based on its name, actual use needs context)
+    /** Lazily created {@link Pauser} used during CAS spin loops. */
     private transient Pauser pauser;
 
     /**
-     * The internal field corresponding to the serialField "bits".
+     * Holds the 64-bit words representing the bits. Each index is one word in the
+     * underlying {@link LongArrayValues} instance.
      */
     private LongArrayValues words;
 
     /**
-     * Constructs a new {@code LongArrayValueBitSet} with the given maximum number of bits.
-     *
-     * @param maxNumberOfBits Maximum number of bits that the bit set can handle.
+     * Create a bit set capable of holding {@code maxNumberOfBits} bits.
+     * The backing {@link BinaryLongArrayReference} is sized once during construction.
      */
     public LongArrayValueBitSet(final long maxNumberOfBits) {
         words = new BinaryLongArrayReference((maxNumberOfBits + BITS_PER_WORD - 1) / BITS_PER_WORD);
@@ -63,10 +63,9 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Constructs a new {@code LongArrayValueBitSet} with the given maximum number of bits and initializes it with the given {@code Wire}.
-     *
-     * @param maxNumberOfBits Maximum number of bits that the bit set can handle.
-     * @param w               The {@code Wire} object to be used for initialization.
+     * Create a bit set of {@code maxNumberOfBits} bits and immediately marshal its state
+     * to and from the provided {@link Wire}. The {@link #words} field is initialised using
+     * a {@link BinaryLongArrayReference} before marshalling occurs.
      */
     public LongArrayValueBitSet(final long maxNumberOfBits, Wire w) {
         this(maxNumberOfBits);
@@ -75,11 +74,9 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Calculates the word index in the internal storage corresponding to a given bit index.
+     * Locate the word containing {@code bitIndex}.
      *
-     * @param bitIndex The bit index for which to find the word index.
-     * @return The word index containing the given bit index.
-     * @throws IndexOutOfBoundsException if the provided bitIndex is negative.
+     * @throws IndexOutOfBoundsException if {@code bitIndex} is negative
      */
     private static int wordIndex(int bitIndex) {
         if (bitIndex < 0)
@@ -89,17 +86,14 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Constructs and returns a new {@code BitSet} using the bits from the provided byte array.
-     *
-     * @param bytes The byte array to be used for constructing the {@code BitSet}.
-     * @return A new {@code BitSet} containing all bits from the given byte array.
+     * Utility method matching {@link BitSet#valueOf(byte[])} for convenience.
      */
     public static BitSet valueOf(byte[] bytes) {
         return BitSet.valueOf(ByteBuffer.wrap(bytes));
     }
 
     /**
-     * Checks that fromIndex ... toIndex is a valid range of bit indices.
+     * Validate that {@code fromIndex}..{@code toIndex} forms a non‑empty range.
      */
     private static void checkRange(int fromIndex, int toIndex) {
         if (fromIndex < 0)
@@ -111,11 +105,18 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
                     " > toIndex: " + toIndex);
     }
 
+    /**
+     * Return the value of the word at {@code wordIndex} or zero if beyond {@link #getWordsInUse()}.
+     */
     @Override
     public long getWord(int wordIndex) {
         return wordIndex < getWordsInUse() ? words.getValueAt(wordIndex) : 0;
     }
 
+    /**
+     * Store {@code bits} at the given {@code wordIndex}. The backing {@link LongArrayValues}
+     * is expanded to the index if needed.
+     */
     @Override
     public void setWord(int wordIndex, long bits) {
         expandTo(wordIndex);
@@ -128,22 +129,15 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Retrieves the number of words that are currently in use by this bit set.
-     * This indicates the number of long values that are currently utilized to represent bits in the bit set.
-     *
-     * @return The number of words in use, converted to an integer.
+     * Number of words currently used as reported by {@link LongArrayValues#getUsed()}.
      */
     public int getWordsInUse() {
         return Math.toIntExact(words.getUsed());
     }
 
     /**
-     * Sets a specific word in this bit set using a provided function and parameter.
-     * This method is lock-free and uses CAS operations to safely update the word value.
-     *
-     * @param wordIndex The index of the word to set.
-     * @param param     The parameter to pass to the function.
-     * @param function  The function to compute the new word value based on the old value and the provided parameter.
+     * Atomically update the word at {@code wordIndex} using {@code function}.
+     * The function receives the current value and {@code param} and returns the new value.
      */
     public void set(int wordIndex, long param, LongFunction function) {
         throwExceptionIfClosed();
@@ -162,9 +156,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Retrieves or initializes the internal {@code Pauser}, which is used to manage pauses during lock-free operations.
-     *
-     * @return The {@code Pauser} instance associated with this object.
+     * Lazily create a {@link Pauser} for CAS retry loops.
      */
     private Pauser pauser() {
         if (this.pauser == null)
@@ -173,11 +165,8 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Sets a new value for a given word in this bit set.
-     * This method is lock-free and uses CAS operations to safely set the new word value.
-     *
-     * @param word     The {@code LongValue} instance representing the word to set.
-     * @param newValue The new value to set for the word.
+     * Atomically set an external {@link LongValue} to {@code newValue}.
+     * This helper does not access {@link #words}; it is provided for convenience.
      */
     public void set(LongValue word, long newValue) {
         throwExceptionIfClosed();
@@ -190,10 +179,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Converts the bits in this bit set to a byte array.
-     * This allows the bit set to be easily serialized or transferred.
-     *
-     * @return A byte array containing all the bits in this bit set.
+     * Serialise the currently used words into a little‑endian byte array.
      */
     public byte[] toByteArray() {
         throwExceptionIfClosed();
@@ -209,9 +195,8 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Ensures that the ChronicleBitSet can accommodate a given wordIndex.
-     *
-     * @param wordIndex the index to be accommodated.
+     * Ensure the backing store can address {@code wordIndex}. Throws if the requested index
+     * exceeds the initial capacity.
      */
     private void expandTo(int wordIndex) {
         int wordsRequired = wordIndex + 1;
@@ -940,17 +925,12 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Represents a functional interface for a long-to-long function.
-     * This can be useful for operations that require transforming or manipulating long values.
+     * Simple long-to-long function used by CAS helpers.
      */
     @FunctionalInterface
     interface LongFunction {
         /**
-         * Applies the function on the given long values.
-         *
-         * @param oldValue The old value.
-         * @param param The parameter value.
-         * @return The result of applying the function.
+         * Compute a new value from {@code oldValue} and {@code param}.
          */
         long apply(long oldValue, long param);
     }
