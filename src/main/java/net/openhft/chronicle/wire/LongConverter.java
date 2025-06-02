@@ -25,11 +25,21 @@ import static java.lang.Math.log;
 import static java.text.MessageFormat.format;
 
 /**
- * Provides an abstraction for converting between long values and their string representations,
- * potentially based on a custom character or symbol set.
- * <p>
- * The conversion allows encoding long values into compact, human-readable strings and vice versa,
- * useful in contexts where storage efficiency or readability is a concern.
+ * Defines a contract for converting {@code long} values to and from textual
+ * representations. Implementations are typically triggered by annotations such
+ * as {@link LongConversion} to encode or decode fields using formats like
+ * hexadecimal, base64 or symbolic alphabets.
+ *
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * LongConverter converter = LongConverter.forSymbols("0123456789ABCDEF");
+ * long value = converter.parse("1A");
+ * StringBuilder out = new StringBuilder();
+ * converter.append(out, value);
+ * }</pre>
+ *
+ * @see LongConversion
+ * @see AbstractLongConverter
  */
 public interface LongConverter {
 
@@ -58,11 +68,13 @@ public interface LongConverter {
     }
 
     /**
-     * Parses the provided {@link CharSequence} and returns the parsed results as a
-     * {@code long} primitive.
+     * Parses the given character sequence, which represents a long value in a
+     * specific format, into its numeric form.
      *
-     * @return the parsed {@code textToParse} as a {@code long} value
-     * @throws IllegalArgumentException if the text length is outside of range accepted by a specific converter.
+     * @param textToParse the character sequence to parse; must not be {@code null}
+     * @return the {@code long} value represented by the text
+     * @throws IllegalArgumentException if the text cannot be parsed according to
+     *         the converter's rules
      */
     long parse(CharSequence textToParse);
 
@@ -85,7 +97,8 @@ public interface LongConverter {
     }
 
     /**
-     * Converts the given long value to a string and appends it to the provided StringBuilder.
+     * Appends the textual form of the provided {@code long} to the given
+     * {@link StringBuilder} using the converter's formatting rules.
      *
      * @param destinationBuilder the builder to append to
      * @param numericValue the long value to convert

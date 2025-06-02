@@ -19,13 +19,23 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
 /**
- * Annotation to specify the conversion strategy for a `long` value.
- * <p>
- * This annotation can be applied to fields, parameters, or other annotations to define
- * a custom conversion strategy using a specific {@link LongConverter} implementation.
- * The referenced converter annotation should either have a static final instance named
- * `INSTANCE` or should be a {@link LongConverter}
+ * Meta-annotation used to associate a concrete {@link LongConverter}
+ * implementation with another annotation. Custom marker annotations (for
+ * example {@code @Hexadecimal} or {@code @Base64}) can declare which converter
+ * should be applied when serialising or deserialising {@code long} fields or
+ * parameters.
+ *
+ * <p>Example:</p>
+ * <pre>{@code
+ * @LongConversion(HexadecimalLongConverter.class)
+ * @Retention(RetentionPolicy.RUNTIME)
+ * @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
+ * public @interface MyHexFormat {
+ *    LongConverter INSTANCE = new MyHexFormatConverter("0123456789ABCDEF");
+ * }
+ * }</pre>
  *
  * @see LongConverter
  */
