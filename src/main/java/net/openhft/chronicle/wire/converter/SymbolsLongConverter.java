@@ -71,33 +71,33 @@ public class SymbolsLongConverter implements LongConverter {
     /**
      * Parses a sequence of characters into a long value.
      *
-     * @param text the character sequence to parse.
+     * @param textToParse the character sequence to parse
      * @return the parsed long value.
      * @throws IllegalArgumentException if the character sequence contains unexpected characters or
      *      its length exceeds the maximum allowable length.
      */
     @Override
-    public long parse(CharSequence text) {
-        lengthCheck(text);
+    public long parse(CharSequence textToParse) {
+        lengthCheck(textToParse);
 
-        return parse0(text, 0, text.length());
+        return parse0(textToParse, 0, textToParse.length());
     }
 
     /**
      * Parses a part of a sequence of characters into a long value.
      *
-     * @param text the character sequence to parse.
-     * @param beginIndex the beginning index, inclusive.
-     * @param endIndex the ending index, exclusive.
+     * @param textToParse the character sequence to parse
+     * @param beginIndex  the beginning index, inclusive
+     * @param endIndex    the ending index, exclusive
      * @return the parsed long value.
      * @throws IllegalArgumentException if the character sequence contains unexpected characters, or if any of the
      *      indices are invalid or the sub-sequence length exceeds the maximum allowable length.
      */
     @Override
-    public long parse(CharSequence text, int beginIndex, int endIndex) {
-        lengthCheck(text, beginIndex, endIndex);
+    public long parse(CharSequence textToParse, int beginIndex, int endIndex) {
+        lengthCheck(textToParse, beginIndex, endIndex);
 
-        return parse0(text, beginIndex, endIndex);
+        return parse0(textToParse, beginIndex, endIndex);
     }
 
     private long parse0(CharSequence text, int beginIndex, int endIndex) {
@@ -118,62 +118,62 @@ public class SymbolsLongConverter implements LongConverter {
     /**
      * Appends a long value to a StringBuilder.
      *
-     * @param text the StringBuilder to append to
-     * @param value the long value to append
+     * @param destinationBuilder the StringBuilder to append to
+     * @param numericValue the long value to append
      */
     @Override
-    public void append(StringBuilder text, long value) {
-        final int start = text.length();
+    public void append(StringBuilder destinationBuilder, long numericValue) {
+        final int start = destinationBuilder.length();
 
         // Handle negative values by converting them using unsigned operations.
-        if (value < 0) {
-            int v = (int) Long.remainderUnsigned(value, factor);
-            value = Long.divideUnsigned(value, factor);
-            text.append(decode[v]);
+        if (numericValue < 0) {
+            int v = (int) Long.remainderUnsigned(numericValue, factor);
+            numericValue = Long.divideUnsigned(numericValue, factor);
+            destinationBuilder.append(decode[v]);
         }
 
-        while (value != 0) {
-            int v = (int) (value % factor);
-            value /= factor;
-            text.append(decode[v]);
+        while (numericValue != 0) {
+            int v = (int) (numericValue % factor);
+            numericValue /= factor;
+            destinationBuilder.append(decode[v]);
         }
 
-        StringUtils.reverse(text, start); // Reverse the result since it's constructed backward.
+        StringUtils.reverse(destinationBuilder, start); // Reverse the result since it's constructed backward.
 
-        if (text.length() > start + maxParseLength()) {
+        if (destinationBuilder.length() > start + maxParseLength()) {
             Jvm.warn().on(getClass(), "truncated because the value was too large");
-            text.setLength(start + maxParseLength());
+            destinationBuilder.setLength(start + maxParseLength());
         }
     }
 
     /**
      * Appends a long value to a Bytes object.
      *
-     * @param text the Bytes object to append to
-     * @param value the long value to append
+     * @param destination the Bytes object to append to
+     * @param numericValue the long value to append
      */
     @Override
-    public void append(Bytes<?> text, long value) {
-        final int start = text.length();
+    public void append(Bytes<?> destination, long numericValue) {
+        final int start = destination.length();
 
         // Handle negative values in bytes format.
-        if (value < 0) {
-            int v = (int) Long.remainderUnsigned(value, factor);
-            value = Long.divideUnsigned(value, factor);
-            text.append(decode[v]);
+        if (numericValue < 0) {
+            int v = (int) Long.remainderUnsigned(numericValue, factor);
+            numericValue = Long.divideUnsigned(numericValue, factor);
+            destination.append(decode[v]);
         }
 
-        while (value != 0) {
-            int v = (int) (value % factor);
-            value /= factor;
-            text.append(decode[v]);
+        while (numericValue != 0) {
+            int v = (int) (numericValue % factor);
+            numericValue /= factor;
+            destination.append(decode[v]);
         }
 
-        BytesUtil.reverse(text, start); // Reverse the result for bytes.
+        BytesUtil.reverse(destination, start); // Reverse the result for bytes.
 
-        if (text.length() > start + maxParseLength()) {
+        if (destination.length() > start + maxParseLength()) {
             Jvm.warn().on(getClass(), "truncated because the value was too large");
-            text.readLimit((long) start + maxParseLength());
+            destination.readLimit((long) start + maxParseLength());
         }
     }
 
