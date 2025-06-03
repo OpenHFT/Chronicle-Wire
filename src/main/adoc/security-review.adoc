@@ -111,3 +111,14 @@ Mitigations ::
 * Ensure `reset()` (or `clear()`) nulls/zeroes *all* mutable fields.
 * Add JMH or junit-stress tests with parallel writers/readers.
 
+== Configuration Property Expansion
+
+Why ::
+Provides flexible deployment by replacing `${property}` tokens.
+
+Risks ::
+* Newline characters in a property value may inject extra YAML lines.
+
+Mitigations ::
+* `ConfigLoader` rejects property values containing line breaks.
+
