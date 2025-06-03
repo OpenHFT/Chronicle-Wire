@@ -44,27 +44,49 @@ import java.util.stream.Stream;
 import static net.openhft.chronicle.core.UnsafeMemory.*;
 
 /**
- * The WireMarshaller class is responsible for marshalling and unmarshalling of objects of type T.
- * This class provides an efficient mechanism for serialization/deserialization using wire protocols.
- * It utilizes field accessors to read and write values directly to and from the fields of the object.
+ * Engine for marshalling and unmarshalling objects based on their field
+ * definitions. Each {@code WireMarshaller} is typically cached per class via
+ * {@link #WIRE_MARSHALLER_CL}. Reflection is used once to discover the fields
+ * and then optimised {@link FieldAccess} instances perform subsequent read and
+ * write operations.
  *
- * @param <T> The type of the object to be marshalled/unmarshalled.
+ * @param <T> the type handled by this marshaller
  */
 @SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public class WireMarshaller<T> {
     private static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
+    /**
+     * An empty array of {@link FieldAccess}, used for classes that have no
+     * marshallable fields such as interfaces or some enum types.
+     */
     private static final FieldAccess[] NO_FIELDS = {};
+    /**
+     * Reflection accessor for {@link Class#isRecord()} available on Java 14+.
+     */
     private static Method isRecord;
+    /**
+     * One entry per marshallable field of {@code T}. The ordering is preserved
+     * so that field writers can honour input order hints if provided.
+     */
     @NotNull
     final FieldAccess[] fields;
 
-    // Map for quick field look-up based on their names.
+    /**
+     * Map for quick field look-up based on the name. Implemented as a
+     * {@link TreeMap} to allow ordered iteration and case-insensitive searches.
+     */
     final TreeMap<CharSequence, FieldAccess> fieldMap = new TreeMap<>(WireMarshaller::compare);
 
-    // Flag to determine if this marshaller is for a leaf class.
+    /**
+     * Indicates if {@code T} is considered a leaf in the object graph. Leaf
+     * types may be treated more compactly by some wire formats.
+     */
     private final boolean isLeaf;
 
-    // Default value for the type T.
+    /**
+     * Pre-instantiated default instance used to identify unchanged fields and
+     * to populate missing values during read operations.
+     */
     @Nullable
     private final T defaultValue;
 
@@ -90,8 +112,11 @@ public class WireMarshaller<T> {
         this(fields, isLeaf, defaultValueForType(tClass));
     }
 
-    // A class-local storage for caching WireMarshallers for different types.
-    // Depending on the type of class, it either creates a marshaller for exceptions or a generic one.
+    /**
+     * A class-local cache of {@code WireMarshaller} instances. {@link Throwable}
+     * types receive a specialised marshaller that handles their field discovery
+     * slightly differently, while all other classes use the generic variant.
+     */
     public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial
             (tClass ->
                     Throwable.class.isAssignableFrom(tClass)
