@@ -111,3 +111,19 @@ Mitigations ::
 * Ensure `reset()` (or `clear()`) nulls/zeroes *all* mutable fields.
 * Add JMH or junit-stress tests with parallel writers/readers.
 
+== Verbose Logging & Error Handling
+
+Why ::
+Useful for debugging and tracing configuration issues.
+
+Risks ::
+* `AbstractMarshallableCfg.unexpectedField` logs ignored values via `valueIn.objectBestEffort()`. Malicious inputs could appear in logs.
+* `VanillaMethodReader.logMessage0` prints message payloads when `DEBUG_ENABLED` is true.
+* `YamlLogging` flags may expose sensitive data if enabled in production.
+* Unchecked input that is then logged compounds the issue.
+
+Mitigations ::
+* Restrict verbose logging to trusted environments.
+* Scrub or truncate data written to logs.
+* Document recommended production log settings.
+
