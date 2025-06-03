@@ -111,6 +111,17 @@ Mitigations ::
 * Ensure `reset()` (or `clear()`) nulls/zeroes *all* mutable fields.
 * Add JMH or junit-stress tests with parallel writers/readers.
 
+== Configuration Property Expansion
+
+Why ::
+Provides flexible deployment by replacing `${property}` tokens.
+
+Risks ::
+* Newline characters in a property value are rejected, however other malicous injected YAML might have an impact.
+
+Mitigations ::
+* `ConfigLoader` rejects property values containing line breaks.
+
 == Verbose Logging & Error Handling
 
 Why ::
@@ -126,4 +137,3 @@ Mitigations ::
 * Restrict verbose logging to trusted environments.
 * Scrub or truncate data written to logs.
 * Document recommended production log settings.
-
