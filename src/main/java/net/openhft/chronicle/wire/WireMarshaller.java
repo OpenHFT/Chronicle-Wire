@@ -639,8 +639,8 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * Provides a field accessor that's specialized for handling fields which require
-     * conversion between integer values and string representations using a LongConverter.
+     * Field access for values annotated with {@link LongConversion}.
+     * Converts between the numeric value stored in the object and its text representation.
      */
     static class LongConverterFieldAccess extends FieldAccess {
 
@@ -678,11 +678,11 @@ public class WireMarshaller<T> {
         }
 
         /**
-         * Reads the long value from an object and writes it using the provided ValueOut writer.
+         * Writes the long value using {@link LongConverter} when text is required.
          *
-         * @param o        The source object.
-         * @param write    The writer for output.
-         * @param previous The previous value (currently not used).
+         * @param o        source object
+         * @param write    destination
+         * @param previous ignored previous value
          */
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
@@ -809,8 +809,8 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * Abstract class to manage access to fields of objects.
-     * This class provides utility methods to read and write fields from/to objects.
+     * Base class that performs low level field access for marshalling.
+     * Implementations specialise the handling for the field's type.
      */
     abstract static class FieldAccess {
         @NotNull
@@ -823,19 +823,19 @@ public class WireMarshaller<T> {
         Boolean isLeaf;
 
         /**
-         * Constructor initializing field with given value.
+         * Creates an accessor for {@code field}.
          *
-         * @param field Field to be accessed.
+         * @param field the field being accessed
          */
         FieldAccess(@NotNull Field field) {
             this(field, null);
         }
 
         /**
-         * Constructor initializing field and isLeaf with given values.
+         * Creates an accessor for {@code field}.
          *
-         * @param field  Field to be accessed.
-         * @param isLeaf Flag to indicate whether the field is a leaf node.
+         * @param field  the field being accessed
+         * @param isLeaf whether this field should be treated as a leaf. {@code null} for auto-detect
          */
         FieldAccess(@NotNull Field field, Boolean isLeaf) {
             this.field = field;
@@ -853,10 +853,13 @@ public class WireMarshaller<T> {
         // ... (code continues)
 
         /**
-         * Create a specific FieldAccess object based on the field type.
+         * Builds a {@link FieldAccess} suited to {@code field}'s type.
+         * Handles primitives, strings, collections, maps, enum sets and fields
+         * annotated with {@link LongConversion}.
          *
-         * @param field Field for which FieldAccess object is created.
-         * @return FieldAccess object specific to the field type.
+         * @param field         field to create an accessor for
+         * @param defaultObject optional default instance used for Resettable fields
+         * @return an accessor for the given field
          */
         @Nullable
         public static Object create(@NotNull Field field, @Nullable Object defaultObject) {
@@ -955,13 +958,11 @@ public class WireMarshaller<T> {
         }
 
         /**
-         * Acquires a LongConverter instance associated with a given field, if available.
-         * <p>
-         * This method checks if the provided field has a LongConversion annotation. If present,
-         * it retrieves the corresponding LongConverter using the LongConverterFieldAccess helper class.
-                 *
-         * @param field The field for which the LongConverter needs to be obtained
-         * @return The associated LongConverter instance, or null if not present
+         * Helper to obtain a {@link LongConverter} for {@code field} when annotated
+         * with {@link LongConversion}.
+         *
+         * @param field field being inspected
+         * @return converter instance or {@code null} if not annotated
          */
         @Nullable
         private static LongConverter acquireLongConverter(@NotNull Field field) {
@@ -973,13 +974,11 @@ public class WireMarshaller<T> {
         }
 
         /**
-         * Extracts the raw Class type from a given Type object.
-         * <p>
-         * This method aims to handle various Type representations, like Class or ParameterizedType,
-         * and return the underlying Class representation.
-                 *
-         * @param type0 The type from which the class should be extracted
-         * @return The extracted Class representation
+         * Returns the raw {@link Class} for the supplied {@link Type}.
+         * Handles {@link ParameterizedType} by returning its raw type.
+         *
+         * @param type0 input type
+         * @return resolved class or {@link Object} if unknown
          */
         @NotNull
         static Class<?> extractClass(Type type0) {
@@ -1001,16 +1000,13 @@ public class WireMarshaller<T> {
         }
 
         /**
-         * Writes the value of a given object's field to a provided WireOut instance.
-         * <p>
-         * This method serializes the value of the specified object's field and writes it to
-         * the WireOut. If the field has a Comment annotation, a special processing is done
-         * using the CommentAnnotationNotifier.
-                 *
-         * @param o    The object containing the field to be written
-         * @param out  The WireOut instance to write the field value to
-         * @throws IllegalAccessException If the field cannot be accessed
-         * @throws InvalidMarshallableException If the object cannot be marshalled
+         * Writes this field from {@code o} to {@code out}.
+         * If a {@link Comment} annotation is present the comment is emitted after the value.
+         *
+         * @param o   source object
+         * @param out target wire
+         * @throws IllegalAccessException        if field access fails
+         * @throws InvalidMarshallableException  if a value cannot be marshalled
          */
         void write(Object o, @NotNull WireOut out) throws IllegalAccessException, InvalidMarshallableException {
 
@@ -1026,17 +1022,13 @@ public class WireMarshaller<T> {
         }
 
         /**
-         * Retrieves the value of the provided object's field and writes it to the provided WireOut instance,
-         * appending a comment based on the associated Comment annotation.
-         * <p>
-         * If the field has a Comment annotation, its value is formatted using the field's value and appended as a comment.
-         * The CommentAnnotationNotifier is used to indicate that the written value is preceded by a comment.
-                 *
-         * @param o         The object containing the field whose value needs to be retrieved
-         * @param out       The WireOut instance to which the value and the comment are written
-         * @param valueOut  The ValueOut instance representing the field's value
-         * @throws IllegalAccessException If the field cannot be accessed
-         * @throws InvalidMarshallableException If the object cannot be marshalled
+         * Writes the field value followed by its {@link Comment} text.
+         *
+         * @param o        source object
+         * @param out      target wire
+         * @param valueOut {@code out} wrapper for the value
+         * @throws IllegalAccessException       if reflection fails
+         * @throws InvalidMarshallableException if marshalling fails
          */
         private void getValueCommentAnnotated(Object o, @NotNull WireOut out, ValueOut valueOut) throws IllegalAccessException, InvalidMarshallableException {
             CommentAnnotationNotifier notifier = (CommentAnnotationNotifier) valueOut;
@@ -1050,16 +1042,15 @@ public class WireMarshaller<T> {
         }
 
         /**
-         * Writes the value of the field from the provided object to the output. If the value is the same
-         * as the previous value, it skips the writing. If the copy flag is set, it also copies the value
-         * from the source object to the previous object.
+         * Writes this field to {@code out} if it differs from {@code previous}.
+         * When {@code copy} is true the written value is also copied into {@code previous}.
          *
-         * @param o        Object from which the field value is fetched.
-         * @param out      Output destination where the value is written to.
-         * @param previous Previous object to compare for sameness and optionally copy to.
-         * @param copy     Flag indicating whether to copy the value from source to the previous object.
-         * @throws IllegalAccessException       If there's an access violation when fetching the field value.
-         * @throws InvalidMarshallableException If there's an error during marshalling.
+         * @param o        source object
+         * @param out      target wire
+         * @param previous object containing the last written value
+         * @param copy     copy the new value into {@code previous} after writing
+         * @throws IllegalAccessException       if reflection fails
+         * @throws InvalidMarshallableException on marshalling error
          */
         void write(Object o, @NotNull WireOut out, Object previous, boolean copy) throws IllegalAccessException, InvalidMarshallableException {
             // Check if the current and previous values are the same
@@ -1076,12 +1067,12 @@ public class WireMarshaller<T> {
         }
 
         /**
-         * Check if the values of a field in two objects are the same.
+         * Tests whether this field holds equal values in {@code o} and {@code o2}.
          *
-         * @param o  First object.
-         * @param o2 Second object.
-         * @return true if values are the same, false otherwise.
-         * @throws IllegalAccessException If unable to access the field.
+         * @param o  first object
+         * @param o2 second object
+         * @return {@code true} if the values are equal
+         * @throws IllegalAccessException if reflection fails
          */
         protected boolean sameValue(Object o, Object o2) throws IllegalAccessException {
             final Object v1 = field.get(o);
@@ -1092,11 +1083,11 @@ public class WireMarshaller<T> {
         }
 
         /**
-         * Copies the value of a field from one object to another.
+         * Copies this field from {@code from} to {@code to}.
          *
-         * @param from Source object.
-         * @param to   Destination object.
-         * @throws IllegalAccessException If unable to access the field.
+         * @param from source object
+         * @param to   destination object
+         * @throws IllegalAccessException if reflection fails
          */
         protected void copy(Object from, Object to) throws IllegalAccessException {
             ObjectUtils.requireNonNull(from);
@@ -1106,25 +1097,27 @@ public class WireMarshaller<T> {
         }
 
         /**
-         * Abstract method to get the value of a field from an object.
+         * Writes this field from {@code o} to {@code write}.
+         * Implementations may use {@code previous} for delta encoding.
          *
-         * @param o        Object from which to get the value.
-         * @param write    Output destination.
-         * @param previous Previous object for comparison.
-         * @throws IllegalAccessException       If unable to access the field.
-         * @throws InvalidMarshallableException If marshalling fails.
+         * @param o        source object
+         * @param write    destination
+         * @param previous previous state or {@code null}
+         * @throws IllegalAccessException       if reflection fails
+         * @throws InvalidMarshallableException on marshalling error
          */
         protected abstract void getValue(Object o, ValueOut write, Object previous) throws IllegalAccessException, InvalidMarshallableException;
 
         /**
-         * Reads the value of a field from an input and sets it in an object.
+         * Reads the field value from {@code read} and applies it to {@code o}.
+         * If the value is absent and {@code overwrite} is true the value from {@code defaults} is used.
          *
-         * @param o         Object to set the value in.
-         * @param defaults  Default values.
-         * @param read      Input source.
-         * @param overwrite Whether to overwrite existing value.
-         * @throws IllegalAccessException       If unable to access the field.
-         * @throws InvalidMarshallableException If marshalling fails.
+         * @param o         target object
+         * @param defaults  object providing default values
+         * @param read      source of data
+         * @param overwrite whether an absent value should reset to default
+         * @throws IllegalAccessException       if reflection fails
+         * @throws InvalidMarshallableException on parsing error
          */
         protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException, InvalidMarshallableException {
             if (!read.isPresent()) {
@@ -1149,42 +1142,41 @@ public class WireMarshaller<T> {
         }
 
         /**
-         * Abstract method to set the value of a field in an object.
+         * Reads this field from {@code read} and updates {@code o}.
          *
-         * @param o         Object to set the value in.
-         * @param read      Input source.
-         * @param overwrite Whether to overwrite existing value.
-         * @throws IllegalAccessException If unable to access the field.
+         * @param o         target object
+         * @param read      wire input
+         * @param overwrite if false a missing value leaves the field unchanged
+         * @throws IllegalAccessException if reflection fails
          */
         protected abstract void setValue(Object o, ValueIn read, boolean overwrite) throws IllegalAccessException;
 
         /**
-         * Abstract method to reset the value of a field in an object to default value.
-         * The default value is the one present in objects of that class after no-argument constructor.
-         * Where possible, existing data structures should be preserved without reallocation to avoid garbage.
+         * Resets this field on {@code o} using the value from {@code defaultObject}.
+         * Existing objects are reused where possible to avoid allocation.
          *
-         * @param defaultObject A reference unmodified instance of this class.
-         * @param o             Object to reset the value in.
+         * @param defaultObject reference instance containing default values
+         * @param o             target object
          */
         protected void setDefaultValue(Object defaultObject, Object o) throws IllegalAccessException {
             copy(defaultObject, o);
         }
 
         /**
-         * Abstract method to convert the value of a field in an object to bytes.
+         * Writes the value of this field to {@code bytes} in binary form.
          *
-         * @param o     Object containing the field.
-         * @param bytes Destination to write the bytes to.
-         * @throws IllegalAccessException If unable to access the field.
+         * @param o     source object
+         * @param bytes destination buffer
+         * @throws IllegalAccessException if reflection fails
          */
         public abstract void getAsBytes(Object o, Bytes<?> bytes) throws IllegalAccessException;
 
         /**
-         * Checks whether the values of a field in two objects are equal.
+         * Compares this field in {@code o1} and {@code o2} for equality.
          *
-         * @param o1 First object.
-         * @param o2 Second object.
-         * @return true if the values are equal, false otherwise.
+         * @param o1 first object
+         * @param o2 second object
+         * @return {@code true} if the values match
          */
         public boolean isEqual(Object o1, Object o2) {
             try {
@@ -1196,8 +1188,7 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * This is a specialized FieldAccess implementation for fields of type IntValue.
-     * It provides implementations for reading and writing the IntValue from and to various sources.
+     * Field access for {@link IntValue} references.
      */
     static class IntValueAccess extends FieldAccess {
 
@@ -1234,8 +1225,7 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * This is a specialized FieldAccess implementation for fields of type LongValue.
-     * It provides implementations for reading and writing the LongValue from and to various sources.
+     * Field access for {@link LongValue} references.
      */
     static class LongValueAccess extends FieldAccess {
 
@@ -1272,9 +1262,7 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * This is a specialized FieldAccess implementation for generic object fields.
-     * It provides methods for reading and writing object fields from and to various sources,
-     * taking into account special cases where the field may be marshaled differently based on annotations.
+     * Field access for arbitrary object references. Supports {@link AsMarshallable}.
      */
     static class ObjectFieldAccess extends FieldAccess {
         private final Class<?> type; // Type of the object field
@@ -1560,12 +1548,7 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * The ArrayFieldAccess class extends FieldAccess to provide specialized access
-     * and manipulation methods for fields that are arrays.
-     * <p>
-     * It calculates the component type of the array and retrieves its equivalent object type
-     * for ease of use. The class is designed to handle arrays in a generic manner and
-     * use the provided methods of the superclass for actual field manipulation.
+     * Field access for array fields.
      */
     static class ArrayFieldAccess extends FieldAccess {
         private final Class<?> componentType;
@@ -1643,11 +1626,7 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * The ByteArrayFieldAccess class extends FieldAccess to provide specialized access
-     * and manipulation methods for fields that are byte arrays.
-     * <p>
-     * The class is optimized for reading and writing byte arrays to and from a wire format
-     * while preserving encapsulation and supporting null values.
+     * Field access for {@code byte[]} fields.
      */
     static class ByteArrayFieldAccess extends FieldAccess {
 
@@ -1704,11 +1683,7 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * The EnumSetFieldAccess class extends FieldAccess to provide specialized access and manipulation methods
-     * for fields that are of type {@link EnumSet}.
-     * <p>
-     * This class allows efficient reading and writing of EnumSet fields to and from a wire format while
-     * preserving encapsulation and supporting null values.
+     * Field access for {@link EnumSet} fields.
      */
     static class EnumSetFieldAccess extends FieldAccess {
 
@@ -1855,11 +1830,7 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * The CollectionFieldAccess class extends FieldAccess to provide specialized access and manipulation methods
-     * for fields that are of type {@link Collection}.
-     * <p>
-     * It is optimized to handle both random-access and non-random-access collections efficiently. Additionally,
-     * the class provides flexibility by allowing users to supply custom collection creation logic if needed.
+     * Field access for {@link Collection} types.
      */
     static class CollectionFieldAccess extends FieldAccess {
 
@@ -2032,11 +2003,7 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * The StringCollectionFieldAccess class extends FieldAccess to provide specialized access and manipulation methods
-     * for fields that are of type {@link Collection} where the elements of the collection are {@link String} instances.
-     * <p>
-     * This extension particularly manages the parsing of strings from the given input and offers utility functions
-     * for instantiation of the correct {@link Collection} type.
+     * Field access for collections of {@link String} values.
      */
     static class StringCollectionFieldAccess extends FieldAccess {
 
@@ -2153,11 +2120,7 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * The MapFieldAccess class extends FieldAccess to provide specialized access and manipulation methods
-     * for fields that are of type {@link Map}.
-     * <p>
-     * This extension is designed to manage the parsing and instantiation of the correct {@link Map} type
-     * and provides functionality to work with the key-value pairs within the map.
+     * Field access for {@link Map} types.
      */
     static class MapFieldAccess extends FieldAccess {
 
@@ -2262,11 +2225,7 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * The BooleanFieldAccess class extends FieldAccess to provide specialized access and manipulation methods
-     * for fields that are of type boolean or {@link Boolean}.
-     * <p>
-     * This extension uses unsafe operations to get and set the boolean value efficiently without invoking reflection
-     * on each operation.
+     * Field access for {@code boolean} fields.
      */
     static class BooleanFieldAccess extends FieldAccess {
         BooleanFieldAccess(@NotNull Field field) {
@@ -2300,11 +2259,7 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * The ByteFieldAccess class extends FieldAccess to provide specialized access and manipulation methods
-     * for fields that are of type byte or {@link Byte}.
-     * <p>
-     * This extension leverages unsafe operations to get and set the byte value directly without the need for
-     * reflective access each time, ensuring better performance.
+     * Field access for {@code byte} fields.
      */
     static class ByteFieldAccess extends FieldAccess {
         ByteFieldAccess(@NotNull Field field) {
@@ -2338,11 +2293,7 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * The ShortFieldAccess class extends FieldAccess to provide specialized access and manipulation methods
-     * for fields that are of type short or {@link Short}.
-     * <p>
-     * This extension leverages unsafe operations to get and set the short value directly without the need for
-     * reflective access each time, ensuring optimal performance.
+     * Field access for {@code short} fields.
      */
     static class ShortFieldAccess extends FieldAccess {
         ShortFieldAccess(@NotNull Field field) {
@@ -2376,11 +2327,7 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * The CharFieldAccess class extends FieldAccess to provide specialized access and manipulation methods
-     * for fields that are of type char or {@link Character}.
-     * <p>
-     * This extension leverages unsafe operations to get and set the character value directly without the need for
-     * reflective access each time, ensuring optimal performance.
+     * Field access for {@code char} fields.
      */
     static class CharFieldAccess extends FieldAccess {
 
@@ -2436,11 +2383,7 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * The IntegerFieldAccess class extends FieldAccess to provide specialized access and manipulation methods
-     * for fields that are of type int or {@link Integer}.
-     * <p>
-     * This extension leverages unsafe operations to get and set the integer value directly without the need for
-     * reflective access each time, ensuring optimal performance.
+     * Field access for {@code int} fields.
      */
     static class IntegerFieldAccess extends FieldAccess {
         IntegerFieldAccess(@NotNull Field field) {
@@ -2809,9 +2752,7 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * The FloatFieldAccess class extends the FieldAccess class, providing specialized access
-     * to float fields of an object. This class supports reading and writing float values,
-     * considering a potential "previous" value for optimized serialization or other comparative tasks.
+     * Field access for {@code float} fields.
      */
     static class FloatFieldAccess extends FieldAccess {
         FloatFieldAccess(@NotNull Field field) {
@@ -2849,10 +2790,7 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * The LongFieldAccess class extends FieldAccess to provide specialized access
-     * to long fields of an object. It supports reading and writing long values,
-     * considering a potential "previous" value for optimized serialization or other
-     * comparative tasks.
+     * Field access for {@code long} fields.
      */
     static class LongFieldAccess extends FieldAccess {
         LongFieldAccess(@NotNull Field field) {
@@ -2890,10 +2828,7 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * The DoubleFieldAccess class extends FieldAccess to provide specialized access
-     * to double fields of an object. It supports reading and writing double values,
-     * considering a potential "previous" value for optimized serialization or other
-     * comparative tasks.
+     * Field access for {@code double} fields.
      */
     static class DoubleFieldAccess extends FieldAccess {
         DoubleFieldAccess(@NotNull Field field) {
