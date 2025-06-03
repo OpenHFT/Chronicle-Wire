@@ -56,6 +56,7 @@ public class MarshallableOutBuilder implements Supplier<MarshallableOut> {
             case "tcp":
                 throw new UnsupportedOperationException("Direct TCP connection not implemented");
             case "file":
+                validateFileUrl(url);
                 if (wireType != null && wireType != WireType.YAML_ONLY)
                     throw new IllegalArgumentException("Unsupported wireType; " + wireType);
                 // URL file protocol doesn't support writing...
@@ -78,6 +79,21 @@ public class MarshallableOutBuilder implements Supplier<MarshallableOut> {
      */
     private WireType wireTypeOr(WireType wireType) {
         return this.wireType == null ? wireType : this.wireType;
+    }
+
+    /**
+     * Performs a sanity check on file URLs to reduce the risk of path traversal.
+     * Only absolute paths without parent directory references are allowed.
+     *
+     * @param url the file URL to validate
+     * @throws IllegalArgumentException if the path contains ".." or is empty
+     */
+    private static void validateFileUrl(URL url) {
+        String path = url.getPath();
+        if (path == null || path.isEmpty())
+            throw new IllegalArgumentException("File URL must contain a path");
+        if (path.contains(".."))
+            throw new IllegalArgumentException("Parent directory references are not permitted: " + path);
     }
 
     /**

@@ -90,6 +90,9 @@ public class FileMarshallableOut implements MarshallableOut {
     public FileMarshallableOut(MarshallableOutBuilder builder, WireType wireType) throws InvalidMarshallableException {
         this.url = builder.url();
         assert url.getProtocol().equals("file"); // Ensure the protocol is "file"
+        String path = url.getPath();
+        if (path == null || path.isEmpty() || path.contains(".."))
+            throw new IllegalArgumentException("Invalid file path: " + path);
 
         // If there's a query in the URL, parse and set the options
         final String query = url.getQuery();
