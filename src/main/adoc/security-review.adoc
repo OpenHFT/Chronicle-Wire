@@ -1,0 +1,113 @@
+= Chronicle Wire: Security Review & Known Trade-offs
+:toc:
+:sectnums:
+
+== Introduction
+
+This document provides an overview of known security considerations and deliberate trade-offs made within the Chronicle Wire library. Chronicle libraries prioritize very low-latency and high-throughput performance, which sometimes necessitates design choices that diverge from typical enterprise software where safety and security checks might take precedence over raw speed.
+
+The purpose of this document is to:
+
+* Clearly articulate these known trade-offs and their rationale.
+* Highlight potential security implications if assumptions underpinning these trade-offs are violated.
+* Guide developers and reviewers in identifying areas requiring particular scrutiny during security reviews.
+* Make it easier to spot *unexpected* security issues by understanding what is *expected* and deliberate.
+
+This document should be reviewed periodically and updated as the library evolves.
+
+== Minimal Validation on Hot Paths
+
+Why ::
+Each additional branch disrupts the CPU’s branch-predictor; trimming checks typically saves *10 ns* per primitive read.
+
+Risks ::
+* Malformed / hostile input reaches unchecked code paths.
+* Integer length or offset fields trigger huge allocations or OOB access.
+
+Mitigations ::
+* Validate at the perimeter (network ingress, IPC boundary).
+* Enforce a *max-message-size* guard.
+* Fuzz the binary and text wire readers.
+
+Watch for ::
+`bytes.readInt()` (or similar) used straight from the wire without a sanity bound.
+
+== Unsafe & Off-Heap Access
+
+Why ::
+Avoids GC pressure and eliminates array-bounds checks.
+
+Risks ::
+* Memory corruption / JVM `SIGSEGV`.
+* Sensitive data left in pooled native buffers.
+
+Mitigations ::
+* Saturate calculated lengths (`Math.min(requested, MAX)`).
+* Zero or overwrite buffers in `release()` / `close()`.
+* Code review every `OS.memory().write…`, `UnsafeMemory.unsafe…` call.
+
+== Dynamic Typing & Deserialisation
+
+Why ::
+Allows schema evolution and polymorphic DTOs.
+
+Risks ::
+* Deserialisation gadget chains ⇒ RCE.
+* "Bomb" objects allocating GBs or spinning CPUs in constructors.
+
+Mitigations ::
+* Default *deny-list*: reject `!type` tags outside `net.openhft.*`.
+* Keep a fuzz corpus exercising unknown tags / prefixes.
+
+== Field-less / Numeric Binary Wire
+
+Why ::
+Removes field names -> smaller messages & faster parse.
+
+Risks ::
+* *Schema drift*: sender/receiver field order mismatch corrupts data.
+* Debugging & diffing become harder.
+
+Mitigations ::
+* Integration tests using *old* and *new* DTO versions.
+* Add a *version byte* prefix when formats change.
+
+== Thread-Local Caches
+
+Why ::
+Cut allocation on ultra-hot paths.
+
+Risks ::
+* Cross-tenant data leakage if thread pools are reused.
+* Retained-heap blow-ups on long-lived threads.
+
+Mitigations ::
+* Use `ScopedResourcePool` wherever available.
+* Call `ThreadLocal.remove()` (or the pool’s `close()`) at end-of-task.
+
+== Runtime Code Generation / Reflection
+
+Why ::
+Generates bytecode once -> zero reflection overhead at runtime.
+
+Risks ::
+* Identifier injection if attacker controls class/method names.
+* `setAccessible(true)` bypasses encapsulation.
+
+Mitigations ::
+* Accept identifiers matching regex `[A-Za-z_][A-Za-z0-9_]*` only.
+* Emit generated source into `target/generated-sources` for audit.
+
+== Mutable Object Re-use
+
+Why ::
+Reduces GC churn and allocation latency.
+
+Risks ::
+* Stale data if `reset()` is incomplete.
+* Race conditions when reused across threads.
+
+Mitigations ::
+* Ensure `reset()` (or `clear()`) nulls/zeroes *all* mutable fields.
+* Add JMH or junit-stress tests with parallel writers/readers.
+
