@@ -28,6 +28,7 @@ Mitigations ::
 * Validate at the perimeter (network ingress, IPC boundary).
 * Enforce a *max-message-size* guard.
 * Fuzz the binary and text wire readers.
+* Reject descriptions with more than 256 primitive fields.
 
 Watch for ::
 `bytes.readInt()` (or similar) used straight from the wire without a sanity bound.

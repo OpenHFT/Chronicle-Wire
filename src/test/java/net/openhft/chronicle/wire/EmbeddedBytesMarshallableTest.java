@@ -151,6 +151,21 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         ebm.readMarshallable(bytes);
     }
 
+    // Test deserialization with field counts exceeding FIELD_COUNT_LIMIT (256).
+    // Expected to throw an IllegalStateException.
+    @Test(expected = IllegalStateException.class)
+    public void excessiveFieldCounts() {
+        int desc = (200 << 24) | (200 << 16) | 1;
+        int length = 200 * 8 + 200 * 4 + 1;
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(length + 8);
+        bytes.writeInt(desc);
+        for (int i = 0; i < length; i++)
+            bytes.writeByte((byte) 0);
+        bytes.readLimit(bytes.writePosition());
+        EBM1 ebm1 = new EBM1();
+        ebm1.readMarshallable(bytes);
+    }
+
     // A class representing a Marshallable object with fields grouped into embedded Bytes.
     // This class extends SelfDescribingTriviallyCopyable, indicating that it can describe its own serialization format.
     static class EBM extends SelfDescribingTriviallyCopyable {

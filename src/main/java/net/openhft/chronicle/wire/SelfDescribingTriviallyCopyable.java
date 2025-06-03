@@ -36,6 +36,12 @@ import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 @SuppressWarnings("this-escape")
 public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMarshallable {
 
+    /**
+     * Combined limit for primitive fields to avoid unreasonable copies.
+     * A description requesting more fields than this is rejected.
+     */
+    private static final int FIELD_COUNT_LIMIT = 256;
+
     // Contains the description of the data layout.
     @FieldGroup("header")
     transient int description = $description();
@@ -88,6 +94,10 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
         int ints0 = (description0 >>> 16) & 0xFF;
         int shorts0 = (description0 >>> 8) & 0x7F;
         int bytes0 = description0 & 0xFF;
+
+        if (longs0 + ints0 + shorts0 + bytes0 > FIELD_COUNT_LIMIT)
+            throw new IllegalStateException("Excessive field count in description: " +
+                    Integer.toHexString(description0));
 
         // Calculate the total length required based on data types
         int length = longs0 * 8 + ints0 * 4 + shorts0 * 2 + bytes0;
