@@ -36,6 +36,9 @@ public class MarshallableOutBuilder implements Supplier<MarshallableOut> {
     // The WireType configuration for the MarshallableOut.
     private WireType wireType;
 
+    // Flag to permit HTTP connections to localhost or site-local addresses
+    private boolean allowLocalhost;
+
     /**
      * Constructs a new {@code MarshallableOutBuilder} with the specified URL.
      *
@@ -94,5 +97,24 @@ public class MarshallableOutBuilder implements Supplier<MarshallableOut> {
     public MarshallableOutBuilder wireType(WireType wireType) {
         this.wireType = wireType;
         return this;
+    }
+
+    /**
+     * Allows HTTP connections to localhost or site-local addresses. Use with
+     * caution as it bypasses SSRF checks.
+     *
+     * @return this builder instance
+     */
+    public MarshallableOutBuilder allowLocalhost() {
+        this.allowLocalhost = true;
+        return this;
+    }
+
+    /**
+     * Exposes whether localhost URLs are permitted. Intended for
+     * internal use.
+     */
+    public boolean allowLocalhostEnabled() {
+        return allowLocalhost;
     }
 }
