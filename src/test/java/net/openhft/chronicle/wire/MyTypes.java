@@ -20,7 +20,7 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 
 // Class representing a collection of various data types, extending SelfDescribingMarshallable for serialization support
-class MyTypes extends SelfDescribingMarshallable {
+public class MyTypes extends SelfDescribingMarshallable {
 
     // StringBuilder instance to hold and manipulate string data efficiently
     final StringBuilder text = new StringBuilder();
