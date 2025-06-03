@@ -577,6 +577,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
                                 "header: " + Integer.toHexString(header) +
                                 ", pos: " + pos +
                                 ", success: " + success);
+
                         // FIXME Should return something here?
                     }
                     continue;
