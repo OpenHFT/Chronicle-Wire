@@ -53,6 +53,14 @@ mvn -q verify
 * Does the commit point back to the relevant requirement or decision tag?
 * Would an example or small diagram help future maintainers?
 
+### Security checklist (review **after every change**)
+
+**Run a security review on *every* PR**: Walk through the diff looking for input validation, authentication, authorisation, encoding/escaping, overflow, resource exhaustion and timing-attack issues.
+
+**Never commit secrets or credentials**: tokens, passwords, private keys, TLS materials, internal hostnames, Use environment variables, HashiCorp Vault, AWS/GCP Secret Manager, etc.
+
+**Document security trade-offs**: Chronicle prioritises low-latency systems; sometimes we relax safety checks for specific reasons. Future maintainers must find these hot-spots quickly, In Javadoc and `.adoc` files call out *why* e.g. "Unchecked cast for performance - assumes trusted input".
+
 ## Project requirements
 
 See the [Decision Log](src/main/adoc/decision-log.adoc) for the latest project decisions.
