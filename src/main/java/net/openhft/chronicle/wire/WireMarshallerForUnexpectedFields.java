@@ -23,15 +23,24 @@ import net.openhft.chronicle.core.scoped.ScopedResource;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * This class extends the WireMarshaller and provides the ability to handle unexpected fields.
- * It maps fields by their name (both in their original form and lower-cased) for easy access.
- * It overrides the method to read marshallable objects and provides specialized logic to
- * handle unexpected fields that might be present in the data source.
+ * Extends {@link WireMarshaller} to provide custom handling for unexpected fields during
+ * deserialisation. Used when the target class overrides
+ * {@link ReadMarshallable#unexpectedField(CharSequence, ValueIn)} to gain control of unknown
+ * data.
  */
 public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
-    // Map for storing fields based on their names.
+    /**
+     * A {@link CharSequenceObjectMap} for efficient lookup of {@link FieldAccess} objects by
+     * field name, supporting both original and lower-cased names for flexibility in matching
+     * fields from the input wire.
+     */
     final CharSequenceObjectMap<FieldAccess> fieldMap;
 
+    /**
+     * Constructs a marshaller that can delegate to
+     * {@link ReadMarshallable#unexpectedField(CharSequence, ValueIn)} if unknown fields are
+     * encountered. Initialises the internal field map for quick lookups.
+     */
     public WireMarshallerForUnexpectedFields(@NotNull FieldAccess[] fields, boolean isLeaf, T defaultValue) {
         super(fields, isLeaf, defaultValue);
         fieldMap = new CharSequenceObjectMap<>(fields.length * 3);
@@ -41,6 +50,15 @@ public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
         }
     }
 
+    /**
+     * Overrides the default deserialisation logic to handle unexpected fields. When a field name
+     * read from {@code WireIn} is not found in the known {@link #fields} (even after
+     * case-insensitive matching), it calls
+     * {@link ReadMarshallable#unexpectedField(CharSequence, ValueIn)} on object {@code t} if
+     * possible. Known fields are processed as usual. The check
+     * {@code sb.length() == 0 && vin.isPresent()} optimises for DTO-order field reading by using
+     * the next field directly. Ensures progress is made during parsing to avoid infinite loops.
+     */
     @Override
     public void readMarshallable(T t, @NotNull WireIn in, boolean overwrite) throws InvalidMarshallableException {
         try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
