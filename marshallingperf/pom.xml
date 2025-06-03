@@ -72,6 +72,10 @@
             <groupId>net.openhft</groupId>
             <artifactId>jlbh</artifactId>
         </dependency>
+        <dependency>
+            <groupId>net.openhft</groupId>
+            <artifactId>chronicle-test-framework</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>

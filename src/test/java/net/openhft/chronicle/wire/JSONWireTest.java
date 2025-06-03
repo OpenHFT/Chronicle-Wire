@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
@@ -356,7 +357,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     public void testArrayInDictionary() {
-        String text = "[320,{\"as\":[1,2,3]}]"; // Define a string with a list that contains an integer and a dictionary
+        String text = "[320 , {\"as\":[1 ,\n2\n, 3]}]"; // Define a string with a list that contains an integer and a dictionary
         final JSONWire jsonWire = new JSONWire(Bytes.from(text)); // Create a new JSONWire with the given text
         final Object list = jsonWire.getValueIn().object(); // Extract the object from the JSONWire
         assertEquals("[320, {as=[1, 2, 3]}]", "" + list); // Assert that the extracted object matches the expected format
@@ -412,11 +413,11 @@ public class JSONWireTest extends WireTestCommon {
         // Create a JSON string with different field types
         final Bytes<byte[]> data = Bytes.allocateElasticOnHeap();
         data.append("{\n" +
-                "  \"field1\": 1234,\n" +
-                "  \"field2\": 456,\n" +
-                "  \"field3\": [ ],\n" +
+                "  \"field1\": 1234 , " +
+                "  \"field2\": 456\n,\n" +
+                "  \"field3\": [ ] ,\n" +
                 "  \"field4\": [\n" +
-                "    \"abc\",\n" +
+                "    \"abc\" ,\n" +
                 "    \"xyz\"\n" +
                 "  ]\n" +
                 "}");
@@ -662,6 +663,19 @@ public class JSONWireTest extends WireTestCommon {
     private static class DtoWithClassReference extends SelfDescribingMarshallable {
         private Class<?> implClass;
         private boolean bool;
+    }
+
+    @Test
+    public void testNullListCollectionWithMultipleFieldsJson() {
+        ClassAliasPool.CLASS_ALIASES.addAlias(CollectionContainer.class);
+        CollectionContainer container = WireType.JSON_ONLY.fromString("{ \"@CollectionContainer\": { \"collection\": [null, \"testValue\"] } }");
+        Object[] array = container.collection.toArray();
+        Assert.assertNull(array[0]);
+        Assert.assertEquals("testValue", array[1]);
+    }
+
+    private static class CollectionContainer {
+        private Collection<String> collection;
     }
 
 }

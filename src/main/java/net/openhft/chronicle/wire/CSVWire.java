@@ -166,6 +166,11 @@ public class CSVWire extends TextWire {
         }
     }
 
+    @Override
+    public void consumePadding(int commas) {
+        consumePadding();
+    }
+
     @NotNull
     @Override
     public ValueIn read(@NotNull WireKey key) {
