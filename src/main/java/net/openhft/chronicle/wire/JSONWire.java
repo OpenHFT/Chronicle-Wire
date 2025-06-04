@@ -202,18 +202,7 @@ public class JSONWire extends TextWire {
                 if (isNull())
                     return Double.NaN;
 
-                final double v = isNull ? Double.NaN : bytes.parseDouble();
-                if (sep != 0) {
-                    int end = peekBack();
-                    if (end != sep)
-                        throw new IORuntimeException("Expected " + (char) sep + " but was " + (char) end);
-                    consumePadding();
-                    if (peekCode() == ',')
-                        bytes.readSkip(1);
-                } else {
-                    checkRewindDouble();
-                }
-                return v;
+                return super.float64();
             }
 
             @Override
