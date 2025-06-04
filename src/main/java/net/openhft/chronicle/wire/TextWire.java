@@ -1962,13 +1962,11 @@ public class TextWire extends YamlWireOut<TextWire> {
          */
         long getALong() {
             final int code = peekCode();
-            int checkForChar = 0;
             switch (code) {
                 case '"':
                 case '\'':
                     // Skip quote characters if present around a number (e.g., "123")
                     bytes.readSkip(1);
-                    checkForChar = code;
                     break;
 
                 case 't':
@@ -1989,21 +1987,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             }
 
             // Read and return the long value from the stream
-            long l = bytes.parseLong();
-            // if an end character was expected, check for it
-            if (checkForChar != 0)
-                readCheckForChar(checkForChar);
-            return l;
-        }
-
-        private void readCheckForChar(int checkForChar) {
-            int lastWas = bytes.readByte(bytes.readPosition() - 1);
-            if (lastWas != checkForChar) {
-                throw new IORuntimeException("Expected a " + (char) checkForChar + " but was " + (char) lastWas);
-            }
-            consumePadding();
-            if (peekCode() == ',')
-                bytes.readSkip(1);
+            return bytes.parseLong();
         }
 
         /**
