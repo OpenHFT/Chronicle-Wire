@@ -763,6 +763,69 @@ with the following table:
 | Float.NEGATIVE_INFINITY  | "-Infinity"
 |=================================================
 
+== YAML Anchors and Aliases
+
+Chronicle Wire supports YAML anchors (`&`) and aliases (`*`) which allow you to reuse values within a YAML document. This feature is particularly useful for configuration files where you want to share common values across multiple sections.
+
+=== Basic Usage
+
+Anchors are defined using `&anchorName` and referenced using `*anchorName`:
+
+[source,yaml]
+----
+database: !DatabaseConfig {
+  host: &dbHost "production.example.com",
+  port: &dbPort 5432,
+  username: admin
+}
+
+cache: !CacheConfig {
+  host: *dbHost,        # Reuses the same host
+  port: 6379,
+  timeout: 30
+}
+
+backup: !BackupConfig {
+  host: *dbHost,        # Reuses the same host  
+  port: *dbPort,        # Reuses the same port
+  schedule: "0 2 * * *"
+}
+----
+
+=== Code Example
+
+==== Data Classes
+
+[source,java]
+----
+include::src/test/java/net/openhft/chronicle/wire/YamlAnchorExamplesTest.java[tags=database-config-classes]
+----
+
+==== Basic Field Anchors
+
+[source,java]
+----
+include::src/test/java/net/openhft/chronicle/wire/YamlAnchorExamplesTest.java[tags=basic-yaml-example]
+----
+
+=== Object Anchors
+
+You can also anchor entire objects:
+
+==== Server Config Classes
+
+[source,java]
+----
+include::src/test/java/net/openhft/chronicle/wire/YamlAnchorExamplesTest.java[tags=server-config-classes]
+----
+
+==== Object Anchor Example
+
+[source,java]
+----
+include::src/test/java/net/openhft/chronicle/wire/YamlAnchorExamplesTest.java[tags=object-anchor-example]
+----
+
 == LongConverter
 
 Provides an abstraction for converting between long values and their string representations,
