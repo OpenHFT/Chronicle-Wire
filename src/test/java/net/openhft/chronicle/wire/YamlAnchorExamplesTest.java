@@ -1,9 +1,6 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
 import org.junit.Test;
-
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -12,37 +9,25 @@ import static org.junit.Assert.assertSame;
  * Examples of YAML anchor usage in Chronicle Wire.
  * These examples are referenced in the README.adoc documentation.
  */
-public class YamlAnchorExamplesTest {
+public class YamlAnchorExamplesTest extends WireTestCommon {
 
     // tag::database-config-classes[]
     static class DatabaseConfig extends SelfDescribingMarshallable {
         String host;
         int port;
         String username;
-        
-        public DatabaseConfig() {}
-        
-        public DatabaseConfig(String host, int port, String username) {
-            this.host = host;
-            this.port = port;
-            this.username = username;
-        }
     }
 
     static class CacheConfig extends SelfDescribingMarshallable {
         String host;
         int port;
         int timeout;
-        
-        public CacheConfig() {}
     }
 
     static class BackupConfig extends SelfDescribingMarshallable {
         String host;
         int port;
         String schedule;
-        
-        public BackupConfig() {}
     }
 
     static class SystemConfig extends SelfDescribingMarshallable {
@@ -57,21 +42,11 @@ public class YamlAnchorExamplesTest {
         int timeout;
         int retries;
         String logLevel;
-        
-        public ServerConfig() {}
-        
-        public ServerConfig(int timeout, int retries, String logLevel) {
-            this.timeout = timeout;
-            this.retries = retries;
-            this.logLevel = logLevel;
-        }
     }
 
     static class MonitorConfig extends SelfDescribingMarshallable {
         ServerConfig server;
         int interval;
-        
-        public MonitorConfig() {}
     }
 
     static class ServerSystemConfig extends SelfDescribingMarshallable {
@@ -83,84 +58,66 @@ public class YamlAnchorExamplesTest {
     // end::server-config-classes[]
 
     @Test
-    public void testBasicYamlAnchors() {
+    public void testBasicYamlFieldAnchors() {
         // tag::basic-yaml-example[]
-        String yaml = "config: !net.openhft.chronicle.wire.YamlAnchorExamplesTest$DatabaseConfig\n" +
-                      "  host: &sharedHost \"production.example.com\"\n" +
-                      "  port: 5432\n" +
-                      "  username: admin\n" +
-                      "backup: !net.openhft.chronicle.wire.YamlAnchorExamplesTest$DatabaseConfig\n" +
-                      "  host: *sharedHost\n" +
-                      "  port: 5433\n" +
-                      "  username: backup_user\n";
+        String yaml = "" +
+                "database: {\n" +
+                "  host: &dbHost \"production.example.com\",\n" +
+                "  port: 5432,\n" +
+                "  username: admin\n" +
+                "}\n" +
+                "cache: {\n" +
+                "  host: *dbHost,\n" +
+                "  port: 6379,\n" +
+                "  timeout: 30\n" +
+                "}\n" +
+                "backup: {\n" +
+                "  host: *dbHost,\n" +
+                "  port: 5432,\n" +
+                "  schedule: \"0 2 * * *\"\n" +
+                "}\n";
 
-        Wire wire = new YamlWire(Bytes.wrapForRead(yaml.getBytes()));
-        Map<String, Object> parsed = wire.getValueIn().typedMarshallable();
+        // Deserialize directly to the SystemConfig DTO
+        SystemConfig systemConfig = WireType.YAML.fromString(SystemConfig.class, yaml);
 
-        // Access the parsed configuration
-        DatabaseConfig config = (DatabaseConfig) parsed.get("config");
-        DatabaseConfig backup = (DatabaseConfig) parsed.get("backup");
-
-        // Verify anchor reference worked for string values
-        assertEquals("production.example.com", config.host);
-        assertEquals("production.example.com", backup.host);  // Same host via anchor!
-        
-        // Note: The field parsing may have some issues, but the anchor worked
-        System.out.println("Config host: " + config.host);
-        System.out.println("Backup host: " + backup.host);
-        System.out.println("Anchor reference successful: " + config.host.equals(backup.host));
+        assertEquals("production.example.com", systemConfig.database.host);
+        assertSame(systemConfig.cache.host, systemConfig.database.host);
+        assertSame(systemConfig.backup.host, systemConfig.database.host);
         // end::basic-yaml-example[]
+
+        assertEquals(5432, systemConfig.database.port);
+        assertEquals(5432, systemConfig.backup.port);
     }
 
     @Test
     public void testObjectAnchors() {
         // tag::object-anchor-example[]
-        String yaml = "defaults: &defaultServer !net.openhft.chronicle.wire.YamlAnchorExamplesTest$ServerConfig\n" +
-                      "  timeout: 30\n" +
-                      "  retries: 3\n" +
-                      "  logLevel: INFO\n" +
-                      "primary: *defaultServer\n" +
-                      "secondary: *defaultServer\n" +
-                      "monitoring: !net.openhft.chronicle.wire.YamlAnchorExamplesTest$MonitorConfig\n" +
-                      "  server: *defaultServer\n" +
-                      "  interval: 60\n";
+        String yaml = "" +
+                "defaults: &defaultServer !net.openhft.chronicle.wire.YamlAnchorExamplesTest$ServerConfig {\n" +
+                "  timeout: 30,\n" +
+                "  retries: 3,\n" +
+                "  logLevel: INFO\n" +
+                "}\n" +
+                "primary: *defaultServer\n" +
+                "secondary: *defaultServer\n" +
+                "monitoring: {\n" +
+                "  server: *defaultServer,\n" +
+                "  interval: 60\n" +
+                "}\n";
 
-        Wire wire = new YamlWire(Bytes.wrapForRead(yaml.getBytes()));
-        Map<String, Object> config = wire.getValueIn().typedMarshallable();
-
-        // Access the parsed configuration
-        ServerConfig defaults = (ServerConfig) config.get("defaults");
-        ServerConfig primary = (ServerConfig) config.get("primary");
-        ServerConfig secondary = (ServerConfig) config.get("secondary");
-        MonitorConfig monitoring = (MonitorConfig) config.get("monitoring");
+        // Deserialize directly to the top-level object
+        ServerSystemConfig config = WireType.YAML.fromString(ServerSystemConfig.class, yaml);
 
         // Verify object references work - they should be the same object instance
-        assertSame("primary should be same object as defaults", defaults, primary);
-        assertSame("secondary should be same object as defaults", defaults, secondary);
-        assertSame("monitoring.server should be same object as defaults", defaults, monitoring.server);
+        assertSame("primary should be same object as defaults", config.defaults, config.primary);
+        assertSame("secondary should be same object as defaults", config.defaults, config.secondary);
+        assertSame("monitoring.server should be same object as defaults", config.defaults, config.monitoring.server);
 
         // Verify the values
-        assertEquals(30, defaults.timeout);
-        assertEquals(3, defaults.retries);
-        assertEquals("INFO", defaults.logLevel);
-        assertEquals(60, monitoring.interval);
+        assertEquals(30, config.defaults.timeout);
+        assertEquals(3, config.defaults.retries);
+        assertEquals("INFO", config.defaults.logLevel);
+        assertEquals(60, config.monitoring.interval);
         // end::object-anchor-example[]
-    }
-
-    @Test  
-    public void demonstrateYamlAnchorsForDocumentation() {
-        System.out.println("=== YAML Anchors Example Output ===");
-        
-        // Test basic field anchors
-        testBasicYamlAnchors();
-        System.out.println("✅ Basic field anchors test passed");
-        
-        // Test object anchors  
-        testObjectAnchors();
-        System.out.println("✅ Object anchors test passed");
-        
-        System.out.println("\n📚 YAML anchor examples work correctly!");
-        System.out.println("These examples demonstrate Chronicle Wire's YAML anchor support.");
-        System.out.println("Note: String anchors work reliably, numeric/complex anchors may have limitations.");
     }
 }
