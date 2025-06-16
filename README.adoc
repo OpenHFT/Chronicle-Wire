@@ -4,6 +4,7 @@ Chronicle Software
 :toc: macro
 :toclevels: 2
 :icons: font
+:source-highlighter: rouge
 
 image:https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire/badge.svg[caption="",link=https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire]
 image:https://javadoc.io/badge2/net.openhft/chronicle-wire/javadoc.svg[link="https://www.javadoc.io/doc/net.openhft/chronicle-wire/latest/index.html"]
@@ -762,6 +763,155 @@ with the following table:
 | Float.POSITIVE_INFINITY  | "Infinity"
 | Float.NEGATIVE_INFINITY  | "-Infinity"
 |=================================================
+
+=== YAML Anchors and Aliases
+
+Chronicle Wire supports YAML anchors (`&`) and aliases (`*`) which allow you to reuse values within a YAML document. This feature is particularly useful for configuration files where you want to share common values across multiple sections.
+
+=== Basic Usage
+
+Anchors are defined using `&anchorName` and referenced using `*anchorName`. The following example demonstrates sharing a hostname across multiple service configurations.
+
+[source,yaml]
+----
+database:
+  host: &dbHost "production.example.com"
+  port: 5432
+  username: admin
+cache:
+  host: *dbHost        # Reuses the same host
+  port: 6379
+  timeout: 30
+backup:
+  host: *dbHost        # Reuses the same host
+  port: 5432           # The port is not anchored, so it's a separate value
+  schedule: "0 2 * * *"
+----
+
+=== Code Example
+
+==== Data Classes
+
+These are the simple DTO (Data Transfer Object) classes used for deserializing the YAML.
+
+[source,java]
+----
+static class DatabaseConfig extends SelfDescribingMarshallable {
+    String host;
+    int port;
+    String username;
+}
+
+static class CacheConfig extends SelfDescribingMarshallable {
+    String host;
+    int port;
+    int timeout;
+}
+
+static class BackupConfig extends SelfDescribingMarshallable {
+    String host;
+    int port;
+    String schedule;
+}
+
+static class SystemConfig extends SelfDescribingMarshallable {
+    DatabaseConfig database;
+    CacheConfig cache;
+    BackupConfig backup;
+}
+----
+
+==== Basic Field Anchors
+
+This test shows how a string value for `host` is defined once with an anchor (`&dbHost`) and reused twice with an alias (`*dbHost`). Chronicle Wire ensures that the reused string is the same instance in memory.
+
+[source,java]
+----
+String yaml = "" +
+        "database: {\n" +
+        "  host: &dbHost \"production.example.com\",\n" +
+        "  port: 5432,\n" +
+        "  username: admin\n" +
+        "}\n" +
+        "cache: {\n" +
+        "  host: *dbHost,\n" +
+        "  port: 6379,\n" +
+        "  timeout: 30\n" +
+        "}\n" +
+        "backup: {\n" +
+        "  host: *dbHost,\n" +
+        "  port: 5432,\n" +
+        "  schedule: \"0 2 * * *\"\n" +
+        "}\n";
+
+// Deserialize directly to the SystemConfig DTO
+SystemConfig systemConfig = WireType.YAML.fromString(SystemConfig.class, yaml);
+
+assertEquals("production.example.com", systemConfig.database.host);
+assertSame(systemConfig.cache.host, systemConfig.database.host);
+assertSame(systemConfig.backup.host, systemConfig.database.host);
+----
+
+=== Object Anchors
+
+You can also anchor and reuse entire objects, not just scalar values. This is powerful for defining default configurations that can be applied to multiple components.
+
+==== Server Config Classes
+
+[source,java]
+----
+static class ServerConfig extends SelfDescribingMarshallable {
+    int timeout;
+    int retries;
+    String logLevel;
+}
+
+static class MonitorConfig extends SelfDescribingMarshallable {
+    ServerConfig server;
+    int interval;
+}
+
+static class ServerSystemConfig extends SelfDescribingMarshallable {
+    ServerConfig defaults;
+    ServerConfig primary;
+    ServerConfig secondary;
+    MonitorConfig monitoring;
+}
+----
+
+==== Object Anchor Example
+
+In this example, a complete `ServerConfig` object is defined and anchored as `&defaultServer`. This exact same object instance is then referenced for the `primary`, `secondary`, and `monitoring` server configurations.
+
+[source,java]
+----
+String yaml = "" +
+        "defaults: &defaultServer !net.openhft.chronicle.wire.YamlAnchorExamplesTest$ServerConfig {\n" +
+        "  timeout: 30,\n" +
+        "  retries: 3,\n" +
+        "  logLevel: INFO\n" +
+        "}\n" +
+        "primary: *defaultServer\n" +
+        "secondary: *defaultServer\n" +
+        "monitoring: {\n" +
+        "  server: *defaultServer,\n" +
+        "  interval: 60\n" +
+        "}\n";
+
+// Deserialize directly to the top-level object
+ServerSystemConfig config = WireType.YAML.fromString(ServerSystemConfig.class, yaml);
+
+// Verify object references work - they should be the same object instance
+assertSame("primary should be same object as defaults", config.defaults, config.primary);
+assertSame("secondary should be same object as defaults", config.defaults, config.secondary);
+assertSame("monitoring.server should be same object as defaults", config.defaults, config.monitoring.server);
+
+// Verify the values
+assertEquals(30, config.defaults.timeout);
+assertEquals(3, config.defaults.retries);
+assertEquals("INFO", config.defaults.logLevel);
+assertEquals(60, config.monitoring.interval);
+----
 
 == LongConverter
 
