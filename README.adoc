@@ -764,35 +764,6 @@ with the following table:
 | Float.NEGATIVE_INFINITY  | "-Infinity"
 |=================================================
 
-== YAML Anchors and Aliases
-
-Chronicle Wire supports YAML anchors (`&`) and aliases (`*`) which allow you to reuse values within a YAML document. This feature is particularly useful for configuration files where you want to share common values across multiple sections.
-
-=== Basic Usage
-
-Anchors are defined using `&anchorName` and referenced using `*anchorName`:
-
-[source,yaml]
-----
-database: !DatabaseConfig {
-  host: &dbHost "production.example.com",
-  port: &dbPort 5432,
-  username: admin
-}
-
-cache: !CacheConfig {
-  host: *dbHost,        # Reuses the same host
-  port: 6379,
-  timeout: 30
-}
-
-backup: !BackupConfig {
-  host: *dbHost,        # Reuses the same host  
-  port: *dbPort,        # Reuses the same port
-  schedule: "0 2 * * *"
-}
-----
-
 === YAML Anchors and Aliases
 
 Chronicle Wire supports YAML anchors (`&`) and aliases (`*`) which allow you to reuse values within a YAML document. This feature is particularly useful for configuration files where you want to share common values across multiple sections.
