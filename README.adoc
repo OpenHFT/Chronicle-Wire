@@ -4,6 +4,7 @@ Chronicle Software
 :toc: macro
 :toclevels: 2
 :icons: font
+:source-highlighter: rouge
 
 image:https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire/badge.svg[caption="",link=https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire]
 image:https://javadoc.io/badge2/net.openhft/chronicle-wire/javadoc.svg[link="https://www.javadoc.io/doc/net.openhft/chronicle-wire/latest/index.html"]
@@ -798,14 +799,14 @@ backup: !BackupConfig {
 
 [source,java]
 ----
-include::src/test/java/net/openhft/chronicle/wire/YamlAnchorExamplesTest.java[tags=database-config-classes]
+include::src/test/java/net/openhft/chronicle/wire/YamlAnchorExamplesTest.java[tags=database-config-classes, indent=0]
 ----
 
 ==== Basic Field Anchors
 
 [source,java]
 ----
-include::src/test/java/net/openhft/chronicle/wire/YamlAnchorExamplesTest.java[tags=basic-yaml-example]
+include::src/test/java/net/openhft/chronicle/wire/YamlAnchorExamplesTest.java[tags=basic-yaml-example, indent=0]
 ----
 
 === Object Anchors
@@ -816,14 +817,14 @@ You can also anchor entire objects:
 
 [source,java]
 ----
-include::src/test/java/net/openhft/chronicle/wire/YamlAnchorExamplesTest.java[tags=server-config-classes]
+include::src/test/java/net/openhft/chronicle/wire/YamlAnchorExamplesTest.java[tags=server-config-classes, indent=0]
 ----
 
 ==== Object Anchor Example
 
 [source,java]
 ----
-include::src/test/java/net/openhft/chronicle/wire/YamlAnchorExamplesTest.java[tags=object-anchor-example]
+include::src/test/java/net/openhft/chronicle/wire/YamlAnchorExamplesTest.java[tags=object-anchor-example, indent=0]
 ----
 
 == LongConverter
