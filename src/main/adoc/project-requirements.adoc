@@ -1,7 +1,7 @@
 = Project Requirements: Chronicle Wire Documentation Enhancement
 :toc:
-:source-highlighter: rouge
 :sectnums:
+:source-highlighter: rouge
 
 To outline the detailed requirements for creating comprehensive and technically rich documentation for the Chronicle Wire library, aimed at improving user understanding, adoption, and effective utilization.
 
