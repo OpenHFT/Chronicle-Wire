@@ -1,5 +1,6 @@
 = Chronicle Wire: Schema Evolution Deep Dive
-:toc: 
+:toc:
+:sectnums:
 :source-highlighter: rouge
 
 Purpose: To provide an in-depth exploration of schema evolution capabilities and mechanisms within Chronicle Wire, including implementation details and advanced strategies.
