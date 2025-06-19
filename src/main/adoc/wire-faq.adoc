@@ -1,9 +1,9 @@
 = Chronicle Wire FAQ: Common Questions Answered
 :toc:
+:sectnums:
 :source-highlighter: rouge
 
 Purpose: To provide answers to frequently asked questions about the Chronicle Wire library.
-:sectnums:
 
 [qanda]
 == Basics & Core Concepts
