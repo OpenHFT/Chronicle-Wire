@@ -549,8 +549,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     private void copyOne(WireOut wire, boolean nested) throws InvalidMarshallableException {
         ValueOut wireValueOut = wire.getValueOut();
         switch (yt.current()) {
-            case NONE:
-                break;
             case COMMENT:
                 wire.writeComment(yt.text());
                 break;
@@ -564,10 +562,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 yt.next();
                 copyOne(wire, true);
                 valueOut2.endTypePrefix();
-                break;
-            case DIRECTIVE:
-                break;
-            case DOCUMENT_END:
                 break;
             case DIRECTIVES_END:
                 yt.next();
@@ -593,10 +587,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 }
                 break;
             }
-            case SEQUENCE_END:
-                break;
-            case SEQUENCE_ENTRY:
-                break;
             case SEQUENCE_START: {
                 yt.next();
                 YamlWire yw = this;
@@ -618,15 +608,17 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             case LITERAL:
                 wireValueOut.text(yt.text());
                 break;
+            case NONE:
+            case DIRECTIVE:
+            case DOCUMENT_END:
+            case SEQUENCE_END:
+            case SEQUENCE_ENTRY:
             case ANCHOR:
-                break;
             case ALIAS:
-                break;
             case RESERVED:
-                break;
             case STREAM_END:
-                break;
             case STREAM_START:
+            default:
                 break;
         }
     }
@@ -1302,7 +1294,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     if (o == null)
                         throw new IllegalStateException("Unknown alias " + alias + " with no corresponding anchor");
 
-                    yt.next();
                     sb.append(o);
                     break;
 
@@ -1461,9 +1452,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                         consumeAny(minIndent);
                     break;
                 case SEQUENCE_END:
-                    yt.next(minIndent);
-                    break;
                 case TEXT:
+                case ALIAS:
                     yt.next(minIndent);
                     break;
                 case MAPPING_END:
