@@ -178,7 +178,7 @@ static class MyTypes extends SelfDescribingMarshallable {
     float f;
     double d;
     long l;
-
+}
 ----
 
 Chained events are useful for composing events.
@@ -209,7 +209,7 @@ interface DestinationTimedSaying extends Destination<TimedSaying> { }
 A producer can use the fluent API as follows:
 [source,java]
 ----
-DestinationTimedSaying writer = /* MethodWriter instance */;
+DestinationTimedSaying writer = wire.methodWriter(DestinationTimedSaying.class);
 writer.via("targetQueue")
       .at(System.nanoTime())
       .say("Hello Composed World");
