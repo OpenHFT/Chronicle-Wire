@@ -1,6 +1,5 @@
 = Chronicle Wire: Visual Guide
 :toc:
-:sectnums:
 :source-highlighter: rouge
 
 Purpose: To provide visual representations of key concepts, processes, and components in the Chronicle Wire library.
@@ -91,7 +90,7 @@ classDiagram
     WireType --> Wire : creates
 ----
 
-=== Serialization and Deserialization Process
+== Serialization and Deserialization Process
 
 [mermaid]
 ----
@@ -111,7 +110,7 @@ graph TD
     end
 ----
 
-=== Wire Format Comparison
+== Wire Format Comparison
 
 [mermaid]
 ----
@@ -139,30 +138,30 @@ graph LR
 ----
 
 [[schema_evolution]]
-=== Schema Evolution
+== Schema Evolution
 
 [mermaid]
 ----
 graph TD
     subgraph "Schema Evolution Overview"
-        A[Schema<br/> Changes] --> B{Type of<br/> Change}
-        B -->|Add Field| C[Forward<br/> Compatible]
-        B -->|Remove Field| D[Backward<br/> Compatible]
-        B -->|Rename Field| E[Needs Special<br/> Handling]
-        B -->|Change Type| F[Complex -<br/> May Need Custom Logic]
+        A[Schema Changes] --> B{Type of Change}
+        B -->|Add Field| C[Forward Compatible]
+        B -->|Remove Field| D[Backward Compatible]
+        B -->|Rename Field| E[Needs Special Handling]
+        B -->|Change Type| F[Complex - May Need Custom Logic]
         
-        C -->|"Older<br/> Reader"| G[Ignores <br/>Unknown Fields]
-        D -->|"Newer<br/> Reader"| H[Uses <br/>Default Values]
-        E -->|"@FieldNumber or<br/> Rename Map"| I[Maps Old <br/>Name to New]
-        F -->|"Custom <br/>readMarshallable"| J[Custom <br/>Conversion Logic]
+        C -->|"Older Reader"| G[Ignores Unknown Fields]
+        D -->|"Newer Reader"| H[Uses Default Values]
+        E -->|"@FieldNumber or Rename Map"| I[Maps Old Name to New]
+        F -->|"Custom readMarshallable"| J[Custom Conversion Logic]
         
-        K[Wire Format] --> L{Compatibility<br/> Level}
-        L -->|"YAML/JSON/<br/>BINARY_LIGHT"| M[Good Schema<br/> Evolution]
-        L -->|"FIELDLESS_BINARY"| N[Limited/<br/>No Evolution]
+        K[Wire Format] --> L{Compatibility Level}
+        L -->|"YAML/JSON/BINARY_LIGHT"| M[Good Schema Evolution]
+        L -->|"FIELDLESS_BINARY"| N[Limited/No Evolution]
     end
 ----
 
-=== Integration with OpenHFT Ecosystem
+== Integration with OpenHFT Ecosystem
 
 [mermaid]
 ----
