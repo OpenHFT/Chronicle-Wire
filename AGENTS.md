@@ -106,7 +106,7 @@ This tight loop informs the AI accurately and creates immediate clarity for all 
 When using AI agents to assist with development, please adhere to the following guidelines:
 
 * **Respect the Language & Character-set Policy**: Ensure all AI-generated content follows the British English and ASCII-7 guidelines outlined above.
-  Focus on Clarity: AI-generated documentation should be clear and concise and add value beyond what is already present in the code or existing documentation.
+Focus on Clarity: AI-generated documentation should be clear and concise and add value beyond what is already present in the code or existing documentation.
 * **Avoid Redundancy**: Do not generate content that duplicates existing documentation or code comments unless it provides additional context or clarification.
 * **Review AI Outputs**: Always review AI-generated content for accuracy, relevance, and adherence to the project's documentation standards before committing it to the repository.
 
@@ -139,13 +139,12 @@ To improve traceability, we adopt the Nine-Box taxonomy for requirement and deci
 ```asciidoc
 === [Identifier] Title of Decision
 
-Date:: YYYY-MM-DD
-Context::
+Date :: YYYY-MM-DD
+Context ::
 * What is the issue that this decision addresses?
 * What are the driving forces, constraints, and requirements?
-Decision Statement::
-* What is the change that is being proposed or was decided?
-Alternatives Considered::
+Decision Statement :: What is the change that is being proposed or was decided?
+Alternatives Considered ::
 * [Alternative 1 Name/Type]:
 ** *Description:* Brief description of the alternative.
 ** *Pros:* ...
@@ -154,14 +153,14 @@ Alternatives Considered::
 ** *Description:* Brief description of the alternative.
 ** *Pros:* ...
 ** *Cons:* ...
-Rationale for Decision::
+Rationale for Decision ::
 * Why was the chosen decision selected?
 * How does it address the context and outweigh the cons of alternatives?
-Impact & Consequences::
+Impact & Consequences ::
 * What are the positive and negative consequences of this decision?
 * How does this decision affect the system, developers, users, or operations?
 - What are the trade-offs made?
-Notes/Links::
+Notes/Links ::
 ** (Optional: Links to relevant issues, discussions, documentation, proof-of-concepts)
 ```
 
@@ -172,7 +171,7 @@ Notes/Links::
 Do not rely on indentation for list items in AsciiDoc documents. Use the following pattern instead:
 
 ```asciidoc
-section:: Top Level Section
+section :: Top Level Section (Optional)
 * first level
   ** nested level
 ```
@@ -186,9 +185,17 @@ In AsciiDoc, an underscore `_` is _emphasis_; `*text*` is *bold*.
 Use automatic section numbering for all `.adoc` files.
 
 * Add `:sectnums:` to the document header.
-* Do not prefix section titles with manual numbers.
+* Do not prefix section titles with manual numbers to avoid duplication.
 
 ```asciidoc
 = Document Title
+Chronicle Software
+:toc:
 :sectnums:
+:lang: en-GB
+:source-highlighter: rouge
+
+The document overview goes here.
+
+== Section 1 Title
 ```
