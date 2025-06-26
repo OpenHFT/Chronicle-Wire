@@ -54,8 +54,8 @@ ifdef::env-github[[source,mermaid]]
 ifndef::env-github[[mermaid]]
 ----
 graph LR
-    A(Event Sources) --> B(Microservice\nMethod Implementations)
-    B --> C(Event Store\nChronicle Queue)
+    A(Event Sources) --> B(Microservice<br/>Method Implementations)
+    B --> C(Event Store<br/>Chronicle Queue)
 ----
 
 However, messages can still be produced and processed dynamically through the use of a wildcard event callback method where the event type is passed programmatically, for example `void onEvent(String eventType, WireIn data)`.
