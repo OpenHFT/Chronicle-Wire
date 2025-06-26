@@ -2206,12 +2206,32 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             if (yt.current() == YamlToken.SEQUENCE_ENTRY)
                 yt.next();
             valueIn.skipType();
-            if (yt.current() != YamlToken.TEXT) {
-                Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a long.");
-                return 0;
+            switch (yt.current()) {
+                case ALIAS:
+                    // Retrieve the actual object that an alias refers to
+                    String alias = yt.text();
+                    Object o = anchorValues.get(alias);
+                    if (o == null)
+                        throw new IllegalStateException("Unknown alias " + alias + " with no corresponding anchor");
+                    if (o instanceof Number)
+                        return ((Number) o).longValue();
+                    //noinspection DataFlowIssue
+                    return ObjectUtils.convertTo(Long.class, o);
+                case ANCHOR:
+                    // Handle YAML anchors, which can be referred to later as aliases
+                    String alias2 = yt.text();
+                    yt.next();
+                    long ret = getALong();
+                    // Store the anchor for later reference
+                    anchorValues.put(alias2, ret);
+                    return ret;
+                case TEXT:
+                    return getALong();
+                default:
+                    break;
             }
-
-            return getALong();
+            Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a long.");
+            return 0;
         }
 
         @Override
@@ -2225,7 +2245,32 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a double.");
                 return 0;
             }
-            return getADouble();
+            switch (yt.current()) {
+                case ALIAS:
+                    // Retrieve the actual object that an alias refers to
+                    String alias = yt.text();
+                    Object o = anchorValues.get(alias);
+                    if (o == null)
+                        throw new IllegalStateException("Unknown alias " + alias + " with no corresponding anchor");
+                    if (o instanceof Number)
+                        return ((Number) o).doubleValue();
+                    //noinspection DataFlowIssue
+                    return ObjectUtils.convertTo(Double.class, o);
+                case ANCHOR:
+                    // Handle YAML anchors, which can be referred to later as aliases
+                    String alias2 = yt.text();
+                    yt.next();
+                    double ret = getADouble();
+                    // Store the anchor for later reference
+                    anchorValues.put(alias2, ret);
+                    return ret;
+                case TEXT:
+                    return getADouble();
+                default:
+                    break;
+            }
+            Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a double.");
+            return 0;
         }
 
         /**
