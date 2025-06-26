@@ -18,7 +18,8 @@ This document delves into the mechanisms Chronicle Wire employs for schema evolu
 
 == Mechanisms in Self-Describing Formats
 
-[mermaid]
+ifdef::env-github[[source,mermaid]]
+ifndef::env-github[[mermaid]]
 ----
 graph TD
     subgraph "Schema Evolution Overview"
@@ -56,7 +57,8 @@ Text Formats (YAML, JSON, TEXT) ::
 * **Field Names:** If full field names are used, they are typically written as length-prefixed UTF-8 strings.
 * Each field entry generally consists of this identifier (name or number), potentially some type information or length indication for the data itself, followed by the serialised field value.
 
-[mermaid]
+ifdef::env-github[[source,mermaid]]
+ifndef::env-github[[mermaid]]
 ----
 graph TD
     subgraph "Field Identification in Different Formats"

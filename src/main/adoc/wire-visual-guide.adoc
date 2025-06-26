@@ -13,7 +13,8 @@ This document contains diagrams and visual aids to help understand the Chronicle
 
 === Layered Architecture
 
-[mermaid]
+ifdef::env-github[[source,mermaid]]
+ifndef::env-github[[mermaid]]
 ----
 graph TD
     A[Application Code] -->|Interacts via| B[Chronicle Wire API Layer]
@@ -37,7 +38,8 @@ graph TD
 
 === Core Components
 
-[mermaid]
+ifdef::env-github[[source,mermaid]]
+ifndef::env-github[[mermaid]]
 ----
 classDiagram
     class Wire {
@@ -92,7 +94,8 @@ classDiagram
 
 == Serialization and Deserialization Process
 
-[mermaid]
+ifdef::env-github[[source,mermaid]]
+ifndef::env-github[[mermaid]]
 ----
 graph TD
     subgraph "Serialisation Process"
@@ -112,7 +115,8 @@ graph TD
 
 == Wire Format Comparison
 
-[mermaid]
+ifdef::env-github[[source,mermaid]]
+ifndef::env-github[[mermaid]]
 ----
 graph LR
     subgraph "Wire Format Comparison"
@@ -140,7 +144,8 @@ graph LR
 [[schema_evolution]]
 == Schema Evolution
 
-[mermaid]
+ifdef::env-github[[source,mermaid]]
+ifndef::env-github[[mermaid]]
 ----
 graph TD
     subgraph "Schema Evolution Overview"
@@ -163,7 +168,8 @@ graph TD
 
 == Integration with OpenHFT Ecosystem
 
-[mermaid]
+ifdef::env-github[[source,mermaid]]
+ifndef::env-github[[mermaid]]
 ----
 graph TD
     subgraph "OpenHFT Ecosystem"
