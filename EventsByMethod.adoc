@@ -68,13 +68,13 @@ In turn, it can produce two streams of output, one replies to the client and the
 
 ifdef::env-github[[source,mermaid]]
 ifndef::env-github[[mermaid]]
-....
+----
 graph LR
     C(Client) --> G(Gateway)
     S(Internal Systems<br/>sources) --> G
     G --> CR(Client replies)
     G --> DS(Internal Systems<br/>downstream events)
-....
+----
 
 === Testing using YAML
 
