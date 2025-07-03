@@ -61,7 +61,7 @@ public class WireBug37Test extends WireTestCommon {
         assertEquals(obj1, obj2);
 
         // Serialize obj2 into bytes using the TEXT WireType
-        final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
+        final Bytes<?> bytes = Bytes.allocateElastic();
         obj2.writeMarshallable(wireType.apply(bytes));
 
         // Convert the bytes back to string

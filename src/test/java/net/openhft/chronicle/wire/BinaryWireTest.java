@@ -49,6 +49,7 @@ import java.util.stream.Stream;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 @RunWith(value = Parameterized.class)
 public class BinaryWireTest extends WireTestCommon {
@@ -1600,7 +1601,7 @@ public class BinaryWireTest extends WireTestCommon {
     @Test
     public void testUsingEvents() throws Exception {
         // Creating a wire instance with binary format
-        final Wire w = WireType.BINARY.apply(Bytes.elasticByteBuffer());
+        final Wire w = WireType.BINARY.apply(Bytes.allocateElastic());
         w.usePadding(true);
 
         // Writing three events with DTOs to the wire
@@ -1727,6 +1728,8 @@ public class BinaryWireTest extends WireTestCommon {
 
     @Test
     public void writeEndOfWireDoesNotUpdateModifiedTimeOnNoOpWhenUnderlyingBytesIsFile() throws IOException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Create a temporary file for the test
         final File tempFile = IOTools.createTempFile("test-lastModified-endOfWire");
         final AtomicLong endOfWirePosition = new AtomicLong();

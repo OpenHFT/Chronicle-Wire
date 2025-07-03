@@ -40,7 +40,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
         testMarshallable.setName("hello world");
 
         // Create a ByteBuffer to hold the serialized data
-        Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer();
+        Bytes<?> byteBufferBytes = Bytes.allocateElastic();
 
         // Initialize a Wire object with TEXT type
         @NotNull Wire wire = WireType.TEXT.apply(byteBufferBytes);
@@ -77,7 +77,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
 
         // Create a ByteBuffer to hold the serialized data
         @SuppressWarnings("rawtypes")
-        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.allocateElastic();
 
         // Initialize a Wire object with BINARY type
         @NotNull Wire wire = new BinaryWire(bytes);
@@ -106,7 +106,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
     @Test
     public void test() {
 
-        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.allocateElastic();
         Wire wire = WireType.BINARY.apply(bytes);
         @NotNull MarshableFilter expected = new MarshableFilter("hello", "world");
 
@@ -195,7 +195,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
     }
 
     // Class representing a filter with sorting details for processing data.
-    static class SortedFilter extends SelfDescribingMarshallable {
+    public static class SortedFilter extends SelfDescribingMarshallable {
         // Index from which the filtering should start.
         public long fromIndex;
 

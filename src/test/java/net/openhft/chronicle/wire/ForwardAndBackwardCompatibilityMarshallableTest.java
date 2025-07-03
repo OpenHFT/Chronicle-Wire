@@ -38,7 +38,7 @@ import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCommon {
 
     private final WireType wireType;
-    private Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
+    private Bytes<?> bytes = Bytes.allocateElastic();
 
     public ForwardAndBackwardCompatibilityMarshallableTest(WireType wireType) {
         this.wireType = wireType;

@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +26,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assume.assumeFalse;
 
 // This class provides tests for default marshaller functionalities.
 public class DefaultMarshallerTest extends WireTestCommon {
@@ -32,6 +34,8 @@ public class DefaultMarshallerTest extends WireTestCommon {
     // Test the deserialization process with nested arrays.
     @Test
     public void testDeserializeWithNestedArray() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Adding class alias for NestedEnum
         ClassAliasPool.CLASS_ALIASES.addAlias(NestedEnum.class);
         DMOuterClassWithEmbeddedArray dmOuterClass = ObjectUtils.newInstance(DMOuterClassWithEmbeddedArray.class);
@@ -67,6 +71,8 @@ public class DefaultMarshallerTest extends WireTestCommon {
     // Test the deserialization process.
     @Test
     public void testDeserialize() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Adding class alias for DMNestedClass
         ClassAliasPool.CLASS_ALIASES.addAlias(DMNestedClass.class);
         DMOuterClass dmOuterClass = ObjectUtils.newInstance(DMOuterClass.class);

@@ -33,10 +33,10 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 public class Nested implements Serializable, Validatable {
     private static final long serialVersionUID = 0L;
     // Fields of various types including a custom class, collections, and a map
-    ScalarValues values;
-    List<String> strings;
-    Set<Integer> ints;
-    Map<String, List<Double>> map;
+    public ScalarValues values;
+    public List<String> strings;
+    public Set<Integer> ints;
+    public Map<String, List<Double>> map;
 
     // Default constructor
     public Nested() {

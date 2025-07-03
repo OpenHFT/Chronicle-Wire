@@ -121,6 +121,6 @@ public class PrimArraysTest extends WireTestCommon {
 
     // Helper method to create a wire instance
     private Wire createWire() {
-        return wireType.apply(Bytes.elasticByteBuffer());
+        return wireType.apply(Bytes.allocateElastic());
     }
 }

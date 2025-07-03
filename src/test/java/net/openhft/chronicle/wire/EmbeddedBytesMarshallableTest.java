@@ -70,6 +70,8 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     // Test serialization and deserialization with certain expected output.
     @Test
     public void ebm() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Register the alias for the class.
         ClassAliasPool.CLASS_ALIASES.addAlias(EBM.class);
 

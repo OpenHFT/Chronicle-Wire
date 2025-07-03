@@ -19,6 +19,7 @@
 package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.wire.RawWire;
 import net.openhft.chronicle.wire.Wire;
@@ -29,6 +30,7 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * This class tests the marshalling and unmarshalling of objects using ByteBuffers.
@@ -42,6 +44,8 @@ public class ByteBufferMarshallingTest extends WireTestCommon {
      */
     @Test
     public void writeReadByteBuffer() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Initialize an elastic ByteBuffer and create a Wire for it
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         Wire wire = new RawWire(bytes);
@@ -66,6 +70,8 @@ public class ByteBufferMarshallingTest extends WireTestCommon {
      */
     @Test
     public void writeReadViaByteBuffer() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Initialize an elastic ByteBuffer and create a Wire for it
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         Wire wire = new RawWire(bytes);
@@ -112,6 +118,8 @@ public class ByteBufferMarshallingTest extends WireTestCommon {
      */
     @Test
     public void writeReadBytesViaByteBuffer() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Initialize an elastic ByteBuffer
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 

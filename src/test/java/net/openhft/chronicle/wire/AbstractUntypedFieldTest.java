@@ -106,11 +106,11 @@ class AbstractUntypedFieldTest extends WireTestCommon {
     }
 
     // Implementation of the abstract base class
-    private static final class AImpl extends A {
+    public static final class AImpl extends A {
     }
 
     // Holder class to hold instances of type A
-    private static final class Holder {
+    public static final class Holder {
         A a;
     }
 }

@@ -55,7 +55,7 @@ public class ChronicleWireMethodExample {
         MyService service = new MyServiceImpl();
 
         // Initialize the Bytes buffer and obtain a MethodWriter for the MyService interface
-        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.allocateElastic();
         Wire wire = WireType.BINARY.apply(bytes);
         MyService writer = wire.methodWriter(MyService.class);
 

@@ -49,15 +49,15 @@ public class NanoLongConverterTest extends WireTestCommon {
     }
 
     // Define a nested static class, Data, to represent the timestamp and duration in nanoseconds.
-    static class Data extends SelfDescribingMarshallable {
+    public static class Data extends SelfDescribingMarshallable {
         // The `@LongConversion` annotation tells the deserializer to use the NanoTimestampLongConverter class
         // to convert the timestamp string to a long value representing nanoseconds.
         @LongConversion(NanoTimestampLongConverter.class)
-        long time;
+        public long time;
 
         // Similarly, the `@LongConversion` annotation for ttl indicates that the NanoDurationLongConverter class
         // should be used to convert the duration string into a long value.
         @LongConversion(NanoDurationLongConverter.class)
-        long ttl;
+        public long ttl;
     }
 }

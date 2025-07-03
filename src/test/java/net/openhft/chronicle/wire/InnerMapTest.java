@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,11 +28,15 @@ import org.junit.Test;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static org.junit.Assume.assumeFalse;
+
 public class InnerMapTest extends WireTestCommon {
 
     // A test case to verify the marshaling and demarshaling of the `MyMarshable` class
     @Test
     public void testMyInnnerMap() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Create a new instance of MyMarshable and set its properties
         @NotNull MyMarshable myMarshable = new MyMarshable().name("rob");
         myMarshable.commission().put("hello", 123.4);
@@ -52,7 +57,7 @@ public class InnerMapTest extends WireTestCommon {
 
         // Allocate elastic byte buffer to hold serialized data
         @SuppressWarnings("rawtypes")
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.allocateElastic();
 
         // Create a binary wire object for serialization; note the comment about binary vs text
         @NotNull Wire w = new BinaryWire(b);

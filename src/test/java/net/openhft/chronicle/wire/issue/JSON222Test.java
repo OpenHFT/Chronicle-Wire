@@ -95,12 +95,12 @@ public class JSON222Test extends WireTestCommon {
         // Convert byte array to Bytes object for further processing
         Bytes<?> b = Bytes.wrapForRead(bytes);
         @NotNull Wire wire = new JSONWire(b);
-        Bytes<?> bytes2 = Bytes.elasticByteBuffer();
+        Bytes<?> bytes2 = Bytes.allocateElastic();
         @NotNull Wire out = wireType.apply(bytes2);
 
         // Flag to determine if this test iteration is expected to fail
         boolean fail = file.getName().startsWith("n");
-        Bytes<?> bytes3 = Bytes.elasticByteBuffer();
+        Bytes<?> bytes3 = Bytes.allocateElastic();
         try {
             @NotNull List<Object> list = new ArrayList<>();
             do {

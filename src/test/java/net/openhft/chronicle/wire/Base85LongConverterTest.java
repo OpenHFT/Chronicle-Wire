@@ -101,7 +101,7 @@ public class Base85LongConverterTest extends WireTestCommon {
     @Test
     public void testAppend() {
         // Create an elastic byte buffer
-        final Bytes<?> b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.allocateElastic();
         try {
             // Obtain the singleton instance of Base85LongConverter
             final Base85LongConverter idLongConverter = Base85LongConverter.INSTANCE;
@@ -121,7 +121,7 @@ public class Base85LongConverterTest extends WireTestCommon {
     @Test
     public void testAppendWithExistingData() {
         // Create an elastic byte buffer and append "hello" to it
-        final Bytes<?> b = Bytes.elasticByteBuffer().append("hello");
+        final Bytes<?> b = Bytes.allocateElastic().append("hello");
         try {
             // Obtain the singleton instance of Base85LongConverter
             final Base85LongConverter idLongConverter = Base85LongConverter.INSTANCE;

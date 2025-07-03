@@ -34,7 +34,7 @@ public class ClusterCommand extends SelfDescribingMarshallable {
     private Service service;
 
     // The service ID in bytes format, initialized as an elastic byte buffer
-    private final Bytes<?> serviceId = Bytes.elasticByteBuffer();
+    private final Bytes<?> serviceId = Bytes.allocateElastic();
 
     /**
      * Constructs a ClusterCommand with the given cycle and Service.

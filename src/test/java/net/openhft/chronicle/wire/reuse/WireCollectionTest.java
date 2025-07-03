@@ -92,7 +92,7 @@ public class WireCollectionTest extends WireTestCommon {
      */
     @Test
     public void testMultipleReads() {
-        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.allocateElastic();
         Wire wire = wireType.apply(bytes);
 
         // Writing the collection to the wire

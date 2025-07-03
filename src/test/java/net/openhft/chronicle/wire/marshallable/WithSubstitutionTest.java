@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.wire.marshallable;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
@@ -27,6 +28,7 @@ import org.junit.Test;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Test class for functionality related to substitutions in wire operations.
@@ -41,6 +43,8 @@ public class WithSubstitutionTest extends WireTestCommon {
      */
     @Test
     public void subs() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Expect exceptions related to invalid number substitutions
         expectException("Cannot read ${num} as a number, treating as 0");
         expectException("Cannot read ${num2} as a number, treating as 0");

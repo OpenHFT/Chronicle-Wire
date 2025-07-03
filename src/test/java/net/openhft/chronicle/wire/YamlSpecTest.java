@@ -29,7 +29,7 @@ public class YamlSpecTest extends WireTestCommon {
     static String DIR = "/yaml/spec/";
 
     public static void doTest(String file, String expected) {
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.allocateElastic();
         try {
             InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + file);
@@ -46,7 +46,7 @@ public class YamlSpecTest extends WireTestCommon {
 
     @Test
     public void test2_18Multi_lineFlowScalarsFixed() {
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.allocateElastic();
         try {
             InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_18Multi_lineFlowScalarsFixed.yaml");

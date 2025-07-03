@@ -77,7 +77,7 @@ public class JSON222IndividualTest extends WireTestCommon {
 
     // Helper method to check serialization of an object into JSON representation
     void checkSerialized(@NotNull String expected, Object o) {
-        @NotNull Wire wire = WireType.TEXT.apply(Bytes.elasticByteBuffer());
+        @NotNull Wire wire = WireType.TEXT.apply(Bytes.allocateElastic());
         try {
             wire.getValueOut()
                     .object(o);

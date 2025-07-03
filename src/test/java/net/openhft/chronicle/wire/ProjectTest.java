@@ -17,6 +17,7 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -28,6 +29,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.junit.Assume.assumeFalse;
 
 // This class tests the functionalities related to the projection of wire data.
 public class ProjectTest extends WireTestCommon {
@@ -54,6 +57,8 @@ public class ProjectTest extends WireTestCommon {
     @SuppressWarnings("unchecked")
     @Test
     public void testProject() throws Exception {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Initialize the first DTO with sample data
         @NotNull Dto1 dto1 = new Dto1();
         dto1.m.put("some", "data");
@@ -73,6 +78,8 @@ public class ProjectTest extends WireTestCommon {
     // Test case to verify the projection functionality with nested marshallable objects.
     @Test
     public void testProjectWithNestedMarshallable() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Initialize the simple object with a nested inner object and sample data
         @NotNull final Simple simple = new Simple();
         @NotNull final Inner inner = new Inner();

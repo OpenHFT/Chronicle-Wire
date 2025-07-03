@@ -43,7 +43,7 @@ public class KubernetesYamlTest extends WireTestCommon {
      */
     public static void doTest(String file, String... expected) {
         // Bytes buffer to be used for reading
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.allocateElastic();
         try {
             // Reading the YAML file into a stream
             InputStream is = KubernetesYamlTest.class.getResourceAsStream(DIR + file);

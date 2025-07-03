@@ -19,11 +19,13 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Test;
 
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class OutOfOrderTest extends WireTestCommon {
     // Define JSON snippets to be used in tests
@@ -34,6 +36,8 @@ public class OutOfOrderTest extends WireTestCommon {
 
     @Test
     public void outOfOrder() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Test JSON with just the start and end
         doTest(start + end, "{\"a\":1,\"b\":null,\"records\":null,\"z\":99}");
         // Test JSON with all segments included

@@ -146,10 +146,10 @@ public class CopyTest extends WireTestCommon {
 
     // Class representing the data structure to be used in the copy test
     @SuppressWarnings("unused")
-    private static class AClass extends SelfDescribingMarshallable {
-        Map<CcyPair, String> map;
-        String[] array;
-        int intValue;
-        double value;
+    public static class AClass extends SelfDescribingMarshallable {
+        public Map<CcyPair, String> map;
+        public String[] array;
+        public int intValue;
+        public double value;
     }
 }

@@ -18,21 +18,28 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ReadResolvable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Tests for marshalling and unmarshalling of Enum using Wire.
  */
 public class EnumTest extends WireTestCommon {
+    @Before
+    public void hasDirect() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+    }
 
     /**
      * Tests serialization and deserialization of the TestEnum enumeration.

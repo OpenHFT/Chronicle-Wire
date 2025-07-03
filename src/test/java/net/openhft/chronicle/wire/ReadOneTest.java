@@ -20,10 +20,12 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * This class is used to test the functionality related to reading individual messages and snapshots
@@ -63,12 +65,16 @@ public class ReadOneTest extends WireTestCommon {
     // Basic test for reading without scanning the wire
     @Test
     public void test() throws InterruptedException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         doTest(false);
     }
 
     // Test for reading the wire using scanning
     @Test
     public void testScanning() throws InterruptedException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         doTest(true);
     }
 

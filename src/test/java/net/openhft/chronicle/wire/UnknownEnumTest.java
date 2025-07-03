@@ -19,6 +19,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import org.junit.Test;
 
@@ -29,6 +30,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 // Class to test behavior of Wire in the context of Enums, especially unknown Enums
 public class UnknownEnumTest extends WireTestCommon {
@@ -49,6 +51,8 @@ public class UnknownEnumTest extends WireTestCommon {
     // Test to check how the Wire handles an unknown dynamic Enum
     @Test
     public void testUnknownDynamicEnum() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Wire wire = createWire();
         wire.write("value").text("Maybe");
 

@@ -92,7 +92,7 @@ public class MapWireTest extends WireTestCommon {
     @Test
     public void writeMap() {
         // Create an elastic buffer to hold serialized data
-        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.allocateElastic();
 
         // Apply the wire type to the bytes buffer
         Wire wire = wireType.apply(bytes);

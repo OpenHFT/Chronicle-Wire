@@ -32,6 +32,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assume.assumeFalse;
 
 public class NullFieldMarshallingTest extends WireTestCommon {
     protected Map<ExceptionKey, Integer> exceptions;
@@ -56,6 +57,8 @@ public class NullFieldMarshallingTest extends WireTestCommon {
 
     @Test
     public void testAbstractNullFieldUnmarshalledCorrectlyText() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         VO object = new VO();
 
         String val = Marshallable.$toString(object);
@@ -67,9 +70,11 @@ public class NullFieldMarshallingTest extends WireTestCommon {
 
     @Test
     public void testAbstractNullFieldUnmarshalledCorrectlyBinary() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         VO object = new VO();
 
-        final Wire wire = WireType.BINARY.apply(Bytes.elasticByteBuffer());
+        final Wire wire = WireType.BINARY.apply(Bytes.allocateElastic());
         wire.write().typedMarshallable(object);
 
         VO object2 = wire.read().typedMarshallable();

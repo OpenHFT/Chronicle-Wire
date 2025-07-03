@@ -1,9 +1,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -11,6 +13,8 @@ import org.junit.runners.Parameterized;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+
+import static org.junit.Assume.assumeFalse;
 
 @RunWith(value = Parameterized.class)
 public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
@@ -30,6 +34,11 @@ public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chro
     public VanillaMethodWriterBuilderVerboseTypesTest(boolean verboseTypes, String expects) {
         this.verboseTypes = verboseTypes;
         this.expects = expects;
+    }
+
+    @Before
+    public void hasDirect() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     // Provide different combinations of parameters for the test runs

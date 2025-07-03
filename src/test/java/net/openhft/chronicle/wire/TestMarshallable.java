@@ -26,10 +26,10 @@ public class TestMarshallable extends SelfDescribingMarshallable {
     // Defining a non-null StringBuilder field named 'name' to store a name value,
     // initializing it to an empty StringBuilder instance
     @NotNull
-    private StringBuilder name = new StringBuilder();
+    public StringBuilder name = new StringBuilder();
 
     // Defining an integer field named 'count' to store a count value
-    private int count;
+    public int count;
 
     // Overriding the readMarshallable method from the parent class to customize
     // how the instance should read its state from a WireIn instance

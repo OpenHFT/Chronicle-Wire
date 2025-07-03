@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -26,6 +27,7 @@ import org.junit.Test;
 import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.wire.WireType.*;
+import static org.junit.Assume.assumeFalse;
 
 // This class is for testing different wire formats
 public class ReadAnyWireTest extends WireTestCommon {
@@ -33,6 +35,8 @@ public class ReadAnyWireTest extends WireTestCommon {
     // A test case to test the TEXT wire format
     @Test
     public void testReadAny() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Create a buffer to hold wire data
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
@@ -50,6 +54,8 @@ public class ReadAnyWireTest extends WireTestCommon {
     // Another test for the TEXT wire format
     @Test
     public void testCreateReadAnyFirstTextWire() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         @NotNull final String expected = "world";
         TEXT.apply(bytes).write((() -> "hello")).text(expected);
@@ -60,6 +66,8 @@ public class ReadAnyWireTest extends WireTestCommon {
     // Test the BINARY wire format
     @Test
     public void testCreateReadAnyFirstBinaryWire() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         @NotNull final String expected = "world";
         BINARY.apply(bytes).write((() -> "hello")).text(expected);
@@ -70,6 +78,8 @@ public class ReadAnyWireTest extends WireTestCommon {
     // Test the JSON wire format
     @Test
     public void testCreateReadAnyFirstJSONWire() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         @NotNull final String expected = "world";
         JSON.apply(bytes).write((() -> "hello")).text(expected);
@@ -81,6 +91,8 @@ public class ReadAnyWireTest extends WireTestCommon {
     @Test
     @Ignore("TODO FIX")
     public void testCreateReadAnyFirstFIELDLESS_BINARYWire() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         @NotNull final String expected = "world";
         FIELDLESS_BINARY.apply(bytes).write((() -> "hello")).text(expected);

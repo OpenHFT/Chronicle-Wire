@@ -31,9 +31,9 @@ public class TestJsonIssue467 {
 
     public static class ResponseItem467 extends SelfDescribingMarshallable {
         @NotNull
-        String index;
-        private final Bytes<?> key = Bytes.elasticByteBuffer();
-        private Object payload;
+        public String index;
+        public final Bytes<?> key = Bytes.allocateElastic();
+        public Object payload;
     }
 
 

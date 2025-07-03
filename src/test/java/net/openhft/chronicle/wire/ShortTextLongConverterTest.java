@@ -97,7 +97,7 @@ public class ShortTextLongConverterTest extends WireTestCommon {
 
     @Test
     public void testAppend() {
-        final Bytes<?> b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.allocateElastic();
         try {
             final LongConverter idLongConverter = ShortTextLongConverter.INSTANCE;
             final long helloWorld = idLongConverter.parse(TEST_STRING);
@@ -110,7 +110,7 @@ public class ShortTextLongConverterTest extends WireTestCommon {
 
     @Test
     public void testAppendWithExistingData() {
-        final Bytes<?> b = Bytes.elasticByteBuffer().append("hello");
+        final Bytes<?> b = Bytes.allocateElastic().append("hello");
         try {
             final LongConverter idLongConverter = ShortTextLongConverter.INSTANCE;
             final long helloWorld = idLongConverter.parse(TEST_STRING);

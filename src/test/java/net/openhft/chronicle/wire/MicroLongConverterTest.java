@@ -46,11 +46,11 @@ public class MicroLongConverterTest extends WireTestCommon {
     /**
      * Data class with fields representing time and duration, both using custom LongConverters.
      */
-    static class Data extends SelfDescribingMarshallable {
+    public static class Data extends SelfDescribingMarshallable {
         @LongConversion(MicroTimestampLongConverter.class)
-        long time;  // Timestamp in microseconds
+        public long time;  // Timestamp in microseconds
 
         @LongConversion(MicroDurationLongConverter.class)
-        long ttl;   // Duration in microseconds
+        public long ttl;   // Duration in microseconds
     }
 }

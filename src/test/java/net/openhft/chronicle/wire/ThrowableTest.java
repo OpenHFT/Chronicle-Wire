@@ -19,10 +19,12 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 // This test class focuses on handling Throwable objects with different WireTypes.
 public class ThrowableTest extends WireTestCommon {
@@ -47,6 +49,7 @@ public class ThrowableTest extends WireTestCommon {
             else
                 System.out.println(wire.bytes().toHexString()+"\n"+Wires.fromSizePrefixedBlobs(wire.bytes()));*/
 
+            assumeFalse(Jvm.maxDirectMemory() == 0);
             // Read the written Throwable and validate its content
             try (DocumentContext dc = wire.readingDocument()) {
                 Throwable t = (Throwable) dc.wire().getValueIn().object();

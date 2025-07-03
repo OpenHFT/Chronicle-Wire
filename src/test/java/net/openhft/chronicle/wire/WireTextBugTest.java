@@ -34,11 +34,13 @@ package net.openhft.chronicle.wire;/*
  */
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * @author Rob Austin
@@ -48,11 +50,13 @@ public class WireTextBugTest extends WireTestCommon {
     @org.junit.Test
     // Test for handling text within the Wire framework
     public void testText() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Adding alias for the Bug class
         ClassAliasPool.CLASS_ALIASES.addAlias(Bug.class);
 
         // Create a BinaryWire object with specific settings
-        @NotNull Wire encodeWire = new BinaryWire(Bytes.elasticByteBuffer(), false, true, false, Integer.MAX_VALUE, "lzw");
+        @NotNull Wire encodeWire = new BinaryWire(Bytes.allocateElastic(), false, true, false, Integer.MAX_VALUE, "lzw");
 
         // Create a Bug object and set its clOrdID field
         @NotNull Bug b = new Bug();

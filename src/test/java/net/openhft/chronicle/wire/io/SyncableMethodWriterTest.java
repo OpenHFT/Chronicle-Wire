@@ -21,6 +21,7 @@ package net.openhft.chronicle.wire.io;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MappedBytes;
 import net.openhft.chronicle.bytes.OnHeapBytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.Syncable;
@@ -33,6 +34,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon {
 
@@ -87,6 +89,7 @@ public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTes
     // Test the say and sync operations but this time with a MappedBytes instance which maps bytes to a file
     @Test
     public void sayAndSyncMappedBytes() throws FileNotFoundException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
         final File file = IOTools.createTempFile("sayAndSyncMappedBytes");
         file.deleteOnExit();
         try (MappedBytes mb = MappedBytes.mappedBytes(file, OS.pageSize())) {

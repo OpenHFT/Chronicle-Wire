@@ -28,7 +28,7 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 public class Group extends SelfDescribingMarshallable {
 
     // The field associated with this group
-    private final Field field;
+    public Field field;
 
     /**
      * Constructs a Group with the specified field.

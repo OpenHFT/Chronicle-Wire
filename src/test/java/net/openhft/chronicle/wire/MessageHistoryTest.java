@@ -21,12 +21,14 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.junit.Test;
 
 import static net.openhft.chronicle.bytes.MethodReader.MESSAGE_HISTORY_METHOD_ID;
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 public class MessageHistoryTest extends WireTestCommon {
 
@@ -51,6 +53,8 @@ public class MessageHistoryTest extends WireTestCommon {
     // Test the deep copy functionality of the VanillaMessageHistory.
     @Test
     public void checkDeepCopy() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Initialize a new history and add sources and timings.
         VanillaMessageHistory history = new VanillaMessageHistory();
         initExampleMessageHistory(history);

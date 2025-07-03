@@ -32,7 +32,7 @@ import java.util.List;
  * and an optional text field. It extends SelfDescribingMarshallable for serialization and
  * deserialization using the Chronicle Wire library.
  */
-class ThreeSequence extends SelfDescribingMarshallable {
+public class ThreeSequence extends SelfDescribingMarshallable {
 
     // Transient buffers to temporarily hold data during the marshalling process.
     // These buffers are not serialized because of the 'transient' modifier.
