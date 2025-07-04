@@ -2043,13 +2043,13 @@ public class YamlWireTest extends WireTestCommon {
     }
 
     // Test for Special Characters in Strings
+    @SuppressWarnings("UnnecessaryUnicodeEscape")
     @Test
     public void testSpecialCharactersInStrings() {
         Wire wire = createWire();
         wire.bytes().append("text: \"Line1\\nLine2\\tTabbed\\u263A\"");
-        assertEquals("Line1\nLine2\tTabbed☺", wire.read("text").text());
+        assertEquals("Line1\nLine2\tTabbed\u263A", wire.read("text").text());
     }
-
 
     enum BWKey implements WireKey {
         field1, field2, field3
