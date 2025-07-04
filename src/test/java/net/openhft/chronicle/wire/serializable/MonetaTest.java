@@ -19,6 +19,7 @@
 package net.openhft.chronicle.wire.serializable;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.Wire;
 import org.jetbrains.annotations.NotNull;
@@ -30,12 +31,15 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 @SuppressWarnings("unchecked")
 public class MonetaTest extends net.openhft.chronicle.wire.WireTestCommon {
     // Test method for serialization and deserialization of a SortedSet with custom Comparable objects
     @Test
     public void monetary() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Create a sorted set of NonScalarComparable objects
         SortedSet<NonScalarComparable> set = new TreeSet<>();
         // Add currency instances to the set
@@ -62,7 +66,7 @@ public class MonetaTest extends net.openhft.chronicle.wire.WireTestCommon {
     public static class NonScalarComparable implements Serializable, Comparable<NonScalarComparable> {
         private static final long serialVersionUID = 0L;
         // Currency instance
-        final Currency currency;
+        public final Currency currency;
 
         // Constructor accepting a Currency instance
         public NonScalarComparable(Currency currency) {

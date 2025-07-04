@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MappedBytes;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
@@ -28,6 +29,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 public class ReadDocumentContextTest extends WireTestCommon {
 
@@ -36,7 +38,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
     public void testWritingNotCompleteDocument() {
 
         // Create an elastic byte buffer
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
 
         // Assert that memory is not shared
         assertFalse(b.sharedMemory());
@@ -80,6 +82,8 @@ public class ReadDocumentContextTest extends WireTestCommon {
     // Test for writing a document that's not complete using shared memory
     @Test
     public void testWritingNotCompleteDocumentShared() throws IOException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Create a MappedBytes buffer with shared memory from a temp file
         @NotNull MappedBytes b = MappedBytes.mappedBytes(File.createTempFile("delete", "me"), 64 << 10);
 
@@ -138,7 +142,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
     @Test
     public void testEmptyMessage() {
         // Create an elastic byte buffer
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
 
         // Apply the TEXT wire type to the buffer
         Wire textWire = WireType.TEXT.apply(b);
@@ -170,7 +174,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
     @Test
     public void testReadingADocumentThatHasNotBeenFullyReadFromTheTcpSocketAt2Bytes() throws Exception {
         // Create an elastic byte buffer
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
 
         // Apply the TEXT wire type to the buffer
         Wire textWire = WireType.TEXT.apply(b);
@@ -226,7 +230,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
     @Test
     public void testReadingADocumentThatHasNotBeenFullyReadFromTheTcpSocketAt5Bytes() {
         // Create an elastic byte buffer
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
 
         // Apply the TEXT wire type to the buffer
         Wire wire = WireType.TEXT.apply(b);

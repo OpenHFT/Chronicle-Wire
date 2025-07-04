@@ -18,11 +18,13 @@
 
 package net.openhft.chronicle.wire.marshallable;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Unit test for the ThreeSequence class.
@@ -34,6 +36,8 @@ public class ThreeSequenceTest extends WireTestCommon {
      */
     @Test
     public void testThree() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Deserialize the YAML string into a ThreeSequence object
         ThreeSequence ts = Marshallable.fromString("!" + ThreeSequence.class.getName() + " {\n" +
                 "  a: [\n" +

@@ -1,12 +1,14 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assume.assumeFalse;
 
 public class AbstractMarshallableCfgTest extends WireTestCommon{
     static class MyAMC extends AbstractMarshallableCfg {
@@ -33,6 +35,8 @@ public class AbstractMarshallableCfgTest extends WireTestCommon{
     // Test the string representation of the MyAMC configuration
     @Test
     public void asString() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         MyAMC myAMC = new MyAMC();
 
         // Verify default string representation
@@ -64,6 +68,8 @@ public class AbstractMarshallableCfgTest extends WireTestCommon{
     // Test the deep copy functionality
     @Test
     public void deepCopy() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         MyAMC myAMC = new MyAMC();
 
         // Create a deep copy of the MyAMC instance

@@ -40,6 +40,8 @@ public class MarshallingEventGroupTest extends WireTestCommon {
      */
     @Test
     public void test() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Skip this test if JVM is running in debug mode, as it could lead to longer timeouts
         assumeFalse(Jvm.isDebug());
 

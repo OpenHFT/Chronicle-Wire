@@ -69,11 +69,11 @@ public class HashWireTest extends WireTestCommon {
     }
 
     // A static inner class representing a Field with properties and behaviors
-    static class Field extends SelfDescribingMarshallable implements Cloneable {
-        private final String name; // The name of the field
-        private final Map<String, Required> required = new HashMap<>(); // Map to store required field information
-        private final List<EnumValue> values = new ArrayList<>(); // List to store enum values
-        private boolean used = false; // Flag to check if the field is used
+    public static class Field extends SelfDescribingMarshallable implements Cloneable {
+        public final String name; // The name of the field
+        public final Map<String, Required> required = new HashMap<>(); // Map to store required field information
+        public final List<EnumValue> values = new ArrayList<>(); // List to store enum values
+        public boolean used = false; // Flag to check if the field is used
 
         // Constructor to initialize a Field with a given name
         public Field(String name) {

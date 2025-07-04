@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
@@ -25,11 +26,14 @@ import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
+import static org.junit.Assume.assumeFalse;
+
 // Test class focusing on the functionality of elastic byte buffers with wire operations.
 public class ElasticByteBufferTest extends WireTestCommon {
 
     @Test
     public void testElasticByteBufferWithWire() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Initialize an elastic byte buffer with initial size of 10.
         Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer(10);

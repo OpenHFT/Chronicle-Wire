@@ -27,7 +27,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -38,7 +37,7 @@ import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCommon {
 
     private final WireType wireType;
-    private Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
+    private Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
     public ForwardAndBackwardCompatibilityMarshallableTest(WireType wireType) {
         this.wireType = wireType;

@@ -43,6 +43,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assume.assumeFalse;
 
 public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireTestCommon {
 
@@ -56,6 +57,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     // Test appending data to a file
     @Test
     public void fileAppend() throws IOException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
         final String expected = "" +
                 "mid: mid\n" +
                 "next: 1\n" +

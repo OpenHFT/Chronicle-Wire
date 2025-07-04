@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.StringWriter;
@@ -33,9 +34,14 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class GenerateMethodDelegateTest extends WireTestCommon {
 
+    @Before
+    public void hasDirect() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+    }
     // Test the validity of class naming conventions
     @Test(expected = IllegalArgumentException.class)
     public void testInvalidName() {

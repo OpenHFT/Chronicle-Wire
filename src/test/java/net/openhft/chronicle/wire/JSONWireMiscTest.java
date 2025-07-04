@@ -19,6 +19,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +32,7 @@ import java.time.LocalTime;
 import java.util.*;
 
 import static net.openhft.chronicle.wire.JsonUtil.assertBalancedBrackets;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/324
@@ -218,6 +220,8 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
     // Test to write a serializable class instance to the wire and verify the written content
     @Test
     public void serializable() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         final Ser s = new Ser();
         wire.getValueOut().object(s);
         final String actual = wire.toString();

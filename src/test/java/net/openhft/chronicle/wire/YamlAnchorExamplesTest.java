@@ -1,9 +1,12 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Examples of YAML anchor usage in Chronicle Wire.
@@ -56,6 +59,11 @@ public class YamlAnchorExamplesTest extends WireTestCommon {
         MonitorConfig monitoring;
     }
     // end::server-config-classes[]
+
+    @Before
+    public void hasDirect() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+    }
 
     @Test
     public void testBasicYamlFieldAnchors() {

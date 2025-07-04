@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * This class tests the behavior of BinaryWire with mapped bytes.
@@ -50,6 +51,7 @@ public class BinaryWireWithMappedBytesTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testRefAtStart() throws FileNotFoundException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Define the file for the test and ensure its deletion if it already exists
         @NotNull File file = new File(OS.getTarget(), "testRefAtStart.map");

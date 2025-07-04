@@ -17,6 +17,7 @@
 
 package net.openhft.chronicle.wire.marshallable;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.FieldInfo;
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
@@ -31,6 +32,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
+
 // Runner to enable parameterized tests for the FieldInfoTest class
 @RunWith(value = Parameterized.class)
 public class FieldInfoTest extends WireTestCommon {
@@ -279,6 +282,8 @@ public class FieldInfoTest extends WireTestCommon {
     // Test method to ensure the field information from the Marshallable object matches the expected value
     @Test
     public void fieldInfo() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         @NotNull List<FieldInfo> infos = m.$fieldInfos();
         assertEquals(fieldInfos, infos.toString());
     }

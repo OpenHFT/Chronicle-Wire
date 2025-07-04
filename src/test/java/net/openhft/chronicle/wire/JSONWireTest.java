@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
@@ -39,6 +40,7 @@ import static junit.framework.TestCase.assertNull;
 import static net.openhft.chronicle.wire.WireType.JSON;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assume.assumeFalse;
 
 public class JSONWireTest extends WireTestCommon {
 
@@ -167,6 +169,8 @@ public class JSONWireTest extends WireTestCommon {
     // Test for verifying how lists are formatted in JSONWire
     @Test
     public void testListFormatting() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         @NotNull Wire wire = createWire();
 
         @NotNull List<Item> items = new ArrayList<>();
@@ -189,6 +193,8 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     public void testNullString() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Create a new wire instance
         @NotNull Wire w = createWire();
 
@@ -211,6 +217,8 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     public void testBytes() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Create a new wire instance
         @NotNull Wire w = createWire();
 
@@ -237,6 +245,8 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     public void testFloatFromJson() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Create a new FooEvent and set its foo value
         FooEvent foo = new FooEvent();
         foo.foo = 0.1f;
@@ -251,6 +261,8 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     public void testMarshallableWithTwoLists() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Create a new wire instance
         @NotNull Wire wire = createWire();
 
@@ -298,6 +310,8 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     public void testMapOfNamedKeys() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         MapHolder mh = new MapHolder(); // Create a new MapHolder object
         Map<RetentionPolicy, Double> map = Collections.singletonMap(RetentionPolicy.CLASS, 0.1); // Define a map with a single entry
         mh.map = map; // Assign the created map to the map attribute of MapHolder
@@ -324,6 +338,8 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     public void testDate() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Dates dates = new Dates(); // Create a new Dates object
         dates.date = LocalDate.of(2021, 5, 28); // Set specific LocalDate
         dates.dateTime = LocalDateTime.of(2020, 4, 26, 6, 35, 11); // Set specific LocalDateTime
@@ -365,6 +381,8 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     public void testDateNull() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Dates dates = new Dates(); // Create a new Dates object with presumably null fields
         @NotNull CharSequence str = WireType.JSON.asString(dates); // Convert the Dates object to a JSON string
         // Assert that all date fields in the JSON string are null
@@ -387,6 +405,8 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     public void testArrayDelimiterNoSpace() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // A complex JSON string causing some parsing issues
         String str = "[320,{\"as\":[[\"32905.50000\",\"1.60291699\",\"1625822573.857656\"],[\"32905.60000\",\"0.10415889\",\"1625822573.194909\"]],\"bs\":[[\"32893.60000\",\"0.15042948\",\"1625822574.220475\"]]},\"book-10\"]";
 
@@ -410,6 +430,8 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     public void testQuotedFieldsEmptySequence() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Create a JSON string with different field types
         final Bytes<byte[]> data = Bytes.allocateElasticOnHeap();
         data.append("{\n" +
@@ -439,6 +461,8 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     public void nestedMapWithIntegerKeys() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         MapWithIntegerKeysHolder mh = new MapWithIntegerKeysHolder(); // Create an instance of MapWithIntegerKeysHolder
         // Populate the maps inside the MapWithIntegerKeysHolder object with test data
         mh.intMap.put(1111, "ones");
@@ -461,6 +485,8 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     public void testWritingLayout() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         final Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(1024); // Create an elastic byte buffer
         final JSONWire wire = new JSONWire(bytes, true); // Create a JSONWire object
 
@@ -643,6 +669,8 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     public void typeLiteral1() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         String expected = "{\"@net.openhft.chronicle.wire.JSONWireTest$DtoWithClassReference\":{\"implClass\":{\"@type\":\"net.openhft.chronicle.wire.JSONWireTest\"},\"bool\":false}}";
         Object o = WireType.JSON_ONLY.fromString(expected);
         String json = WireType.JSON_ONLY.asString(o);
@@ -651,6 +679,8 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     public void typeLiteralTest2() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         DtoWithClassReference dtoWithClassReference = new DtoWithClassReference();
         dtoWithClassReference.implClass = this.getClass();
         String json = WireType.JSON_ONLY.asString(dtoWithClassReference);
@@ -667,6 +697,8 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     public void testNullListCollectionWithMultipleFieldsJson() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         ClassAliasPool.CLASS_ALIASES.addAlias(CollectionContainer.class);
         CollectionContainer container = WireType.JSON_ONLY.fromString("{ \"@CollectionContainer\": { \"collection\": [null, \"testValue\"] } }");
         Object[] array = container.collection.toArray();

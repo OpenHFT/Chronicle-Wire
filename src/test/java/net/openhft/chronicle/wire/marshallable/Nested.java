@@ -31,19 +31,19 @@ import java.util.Set;
 public class Nested extends SelfDescribingMarshallable {
 
     // Holds scalar values
-    ScalarValues values;
+    public ScalarValues values;
 
     // A list of strings
-    List<String> strings;
+    public List<String> strings;
 
     // A set of integers
-    Set<Integer> ints;
+    public Set<Integer> ints;
 
     // A map with string keys and lists of doubles as values
-    Map<String, List<Double>> map;
+    public Map<String, List<Double>> map;
 
     // An array of strings
-    String[] array;
+    public String[] array;
 
     /**
      * Default constructor.

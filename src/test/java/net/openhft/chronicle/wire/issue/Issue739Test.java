@@ -19,12 +19,14 @@
 package net.openhft.chronicle.wire.issue;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.*;
 import org.junit.Test;
 
 import java.util.Map;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * see https://github.com/OpenHFT/Chronicle-Wire/issues/739
@@ -62,6 +64,8 @@ public class Issue739Test extends WireTestCommon {
 
     @Test
     public void fieldAnchorAlias() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Wire wire = new YamlWire(Bytes.wrapForRead(("three: !net.openhft.chronicle.wire.issue.Issue739Test$Three\n" +
                 "  one: &first\n" +
                 "    text: hello\n" +
@@ -77,6 +81,8 @@ public class Issue739Test extends WireTestCommon {
 
     @Test
     public void interfaceFieldAnchorAlias() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Wire wire = new YamlWire(Bytes.wrapForRead(("three: !net.openhft.chronicle.wire.issue.Issue739Test$IThree\n" +
                 "  one: &first !net.openhft.chronicle.wire.issue.Issue739Test$One\n" +
                 "    text: hello\n" +
@@ -92,6 +98,8 @@ public class Issue739Test extends WireTestCommon {
 
     @Test
     public void anchorOfTextField() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Wire wire = new YamlWire(Bytes.wrapForRead(("three: !net.openhft.chronicle.wire.issue.Issue739Test$IThree\n" +
                 "  one: &first !net.openhft.chronicle.wire.issue.Issue739Test$One\n" +
                 "    text: &msg hello\n" +

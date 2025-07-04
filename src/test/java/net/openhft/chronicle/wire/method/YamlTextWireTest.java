@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire.method;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.TextWire;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Parameterized test class extending WireTestCommon to validate the consistency
@@ -115,6 +117,8 @@ public class YamlTextWireTest extends WireTestCommon {
      */
     @Test
     public void orderTest() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Parse the text using YamlWire and TextWire, and create Fields objects
         Fields yw = YamlWire.from(s).getValueIn().object(Fields.class);
         Fields tw = TextWire.from(s).getValueIn().object(Fields.class);

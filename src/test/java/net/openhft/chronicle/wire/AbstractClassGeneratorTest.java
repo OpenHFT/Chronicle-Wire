@@ -31,6 +31,7 @@ import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 // Generator for simple classes based on SimpleMetaData
 class SimpleClassGenerator extends AbstractClassGenerator<SimpleMetaData> {
@@ -96,6 +97,8 @@ public class AbstractClassGeneratorTest extends WireTestCommon {
     // Test case to validate the SimpleClassGenerator's functionality
     @Test
     public void simpleGenerator() throws Exception {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         doTest("Hello World");
         doTest("Bye now");
         doTest("The time is " + LocalDateTime.now());
@@ -122,6 +125,8 @@ public class AbstractClassGeneratorTest extends WireTestCommon {
     // Test case to validate the interceptor's functionality in the UIClassGenerator
     @Test
     public void useInterceptor() throws Exception {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // StringWriter to capture the interceptor's output
         StringWriter sw = new StringWriter();
 

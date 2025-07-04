@@ -31,7 +31,7 @@ public class FloatDtoTest extends WireTestCommon {
     public void test() {
         // Creating a 'Value' instance with specific values
         @NotNull final Value value = new Value(99, 2000f);
-        final Bytes<?> bytes = Bytes.elasticByteBuffer();
+        final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         final Wire w = WireType.BINARY.apply(bytes);
 
         // Serializing the 'value' object to the wire

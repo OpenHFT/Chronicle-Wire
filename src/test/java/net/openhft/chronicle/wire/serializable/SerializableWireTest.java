@@ -88,7 +88,7 @@ public class SerializableWireTest extends WireTestCommon {
         // Ignore exceptions for certain test cases
         if (ime) // TODO Fix to be expected
             ignoreException(ek -> ek.throwable instanceof InvalidMarshallableException, "IME");
-        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         try {
             // Apply wire type to bytes
             Wire wire = wireType.apply(bytes);
@@ -132,7 +132,7 @@ public class SerializableWireTest extends WireTestCommon {
     }
 
     public static class TextContainer extends SelfDescribingMarshallable {
-        StringBuilder[] innerBuilders; // Represents inner StringBuilders
+        public StringBuilder[] innerBuilders; // Represents inner StringBuilders
     }
 
 }
