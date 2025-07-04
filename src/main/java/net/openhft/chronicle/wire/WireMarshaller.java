@@ -1631,7 +1631,7 @@ public class WireMarshaller<T> {
                 return;
 
             } else if (toBytes == null) {
-                toBytes = Bytes.allocateElastic();
+                toBytes = Bytes.allocateElasticOnHeap();
                 unsafePutObject(to, offset, toBytes);
             }
             toBytes.clear();

@@ -306,7 +306,7 @@ public class TextWireTest extends WireTestCommon {
     @Test
     public void testWriteToBinaryAndTriesToConvertToText() {
 
-        Bytes<?> b = Bytes.allocateElastic();
+        Bytes<?> b = allocateElasticOnHeap();
         Wire wire = WireType.BINARY.apply(b);
         wire.usePadding(true);
 
@@ -2640,9 +2640,8 @@ public class TextWireTest extends WireTestCommon {
     static class ABCD extends SelfDescribingMarshallable implements Monitorable {
         Bytes<?> A = Bytes.allocateElasticDirect();
         Bytes<?> B = Bytes.allocateDirect(64);
-        Bytes<?> C = Bytes.allocateElastic();
+        Bytes<?> C = Bytes.allocateElasticOnHeap();
         Bytes<?> D = Bytes.allocateElasticOnHeap(1);
-
 
         // Method to release all byte buffers
         void releaseAll() {

@@ -96,7 +96,7 @@ public class MarshallableWireTest extends WireTestCommon {
     public void writeMarshallable() {
 
         // Allocate memory for writing data
-        Bytes<?> bytes = Bytes.allocateElastic();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
         // Apply the specific WireType to the allocated memory
         Wire wire = wireType.apply(bytes);

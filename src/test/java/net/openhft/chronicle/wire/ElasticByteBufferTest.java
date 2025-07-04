@@ -35,7 +35,6 @@ public class ElasticByteBufferTest extends WireTestCommon {
     public void testElasticByteBufferWithWire() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-
         // Initialize an elastic byte buffer with initial size of 10.
         Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer(10);
 

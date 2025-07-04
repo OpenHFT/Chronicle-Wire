@@ -189,7 +189,7 @@ public class BinaryWire2Test extends WireTestCommon {
         @NotNull Wire wire = createWire();
         wire.write().object(Bytes.from("Hello"));
 
-        Bytes<?> b = Bytes.allocateElastic();
+        Bytes<?> b = allocateElasticOnHeap();
         wire.read().bytes(b);
         assertEquals("Hello", b.toString());
         b.releaseLast();
@@ -352,7 +352,7 @@ public class BinaryWire2Test extends WireTestCommon {
                         "]\n",
                 Wires.fromSizePrefixedBlobs(wire));
 
-        @NotNull Wire twire = WireType.TEXT.apply(Bytes.allocateElastic());
+        @NotNull Wire twire = WireType.TEXT.apply(allocateElasticOnHeap());
         writeMessage(twire);
         assertEquals("" +
                         "--- !!meta-data\n" +
@@ -423,7 +423,7 @@ public class BinaryWire2Test extends WireTestCommon {
                         "e7 76 61 6c 75 65 2d 32                         # value-2\n",
                 wire.bytes().toHexString());
 
-        @NotNull Wire twire = WireType.TEXT.apply(Bytes.allocateElastic());
+        @NotNull Wire twire = WireType.TEXT.apply(allocateElasticOnHeap());
         writeMessageContext(twire);
 
         // Expected textual representation of the written data
@@ -639,7 +639,7 @@ public class BinaryWire2Test extends WireTestCommon {
 
         // Convert the compressed content to plain text format and validate
         wire.bytes().readPosition(0);
-        Bytes<?> asText = Bytes.allocateElastic();
+        Bytes<?> asText = allocateElasticOnHeap();
         wire.copyTo(WireType.TEXT.apply(asText));
         assertEquals("message: # gzip\n" + s +
                 "\n", asText.toString());
@@ -837,7 +837,7 @@ public class BinaryWire2Test extends WireTestCommon {
     public void testBytesLiteral() {
         assumeFalse(usePadding);  // Skip this test if padding is used
 
-        @NotNull Wire wire = new BinaryWire(Bytes.allocateElastic());
+        @NotNull Wire wire = new BinaryWire(allocateElasticOnHeap());
         wire.write("test").text("Hello World");
 
         @NotNull final BinaryWire wire1 = createWire();

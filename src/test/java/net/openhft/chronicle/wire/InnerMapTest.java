@@ -57,7 +57,7 @@ public class InnerMapTest extends WireTestCommon {
 
         // Allocate elastic byte buffer to hold serialized data
         @SuppressWarnings("rawtypes")
-        Bytes<?> b = Bytes.allocateElastic();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
 
         // Create a binary wire object for serialization; note the comment about binary vs text
         @NotNull Wire w = new BinaryWire(b);

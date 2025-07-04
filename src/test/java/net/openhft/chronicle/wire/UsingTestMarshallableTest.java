@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +39,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
         testMarshallable.setName("hello world");
 
         // Create a ByteBuffer to hold the serialized data
-        Bytes<?> byteBufferBytes = Bytes.allocateElastic();
+        Bytes<?> byteBufferBytes = Bytes.allocateElasticOnHeap();
 
         // Initialize a Wire object with TEXT type
         @NotNull Wire wire = WireType.TEXT.apply(byteBufferBytes);
@@ -77,7 +76,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
 
         // Create a ByteBuffer to hold the serialized data
         @SuppressWarnings("rawtypes")
-        Bytes<?> bytes = Bytes.allocateElastic();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
         // Initialize a Wire object with BINARY type
         @NotNull Wire wire = new BinaryWire(bytes);
@@ -106,7 +105,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
     @Test
     public void test() {
 
-        Bytes<?> bytes = Bytes.allocateElastic();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.BINARY.apply(bytes);
         @NotNull MarshableFilter expected = new MarshableFilter("hello", "world");
 

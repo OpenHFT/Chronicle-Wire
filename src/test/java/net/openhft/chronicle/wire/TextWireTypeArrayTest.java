@@ -29,7 +29,7 @@ public class TextWireTypeArrayTest extends WireTestCommon {
     @Test
     public void shouldUnmarshalArrayOfType() {
         // Initialize the byte storage
-        final Bytes<?> bytes = Bytes.allocateElastic();
+        final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
         // Create a TextWire instance with the provided bytes
         final Wire wire = WireType.TEXT.apply(bytes);

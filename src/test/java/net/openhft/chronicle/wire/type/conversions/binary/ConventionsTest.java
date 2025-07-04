@@ -27,7 +27,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
-import java.nio.ByteBuffer;
 
 import static org.junit.Assume.assumeFalse;
 
@@ -141,7 +140,7 @@ public class ConventionsTest extends WireTestCommon {
     @Nullable
     public <T> T test(Object source, @NotNull Class<T> destinationType) {
         // Method to test conversion of objects to different types using Chronicle Wire
-        Bytes<?> bytes = Bytes.allocateElastic();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         try {
             @NotNull final BinaryWire wire = new BinaryWire(bytes);
 

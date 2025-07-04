@@ -28,7 +28,7 @@ public class JSONNanTest extends WireTestCommon {
     @Test
     public void writeNaNs() {
         // Allocate a new elastic byte buffer
-        Bytes<?> b = Bytes.allocateElastic();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             // Apply JSON wire type to the byte buffer
             Wire wire = WireType.JSON.apply(b);

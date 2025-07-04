@@ -1148,7 +1148,6 @@ public class BinaryWire extends AbstractWire implements Wire {
         return null;
     }
 
-
     /**
      * Reads a field number from the wire and populates the provided StringBuilder.
      *

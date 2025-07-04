@@ -38,7 +38,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
     public void testWritingNotCompleteDocument() {
 
         // Create an elastic byte buffer
-        Bytes<?> b = Bytes.allocateElastic();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
 
         // Assert that memory is not shared
         assertFalse(b.sharedMemory());
@@ -142,7 +142,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
     @Test
     public void testEmptyMessage() {
         // Create an elastic byte buffer
-        Bytes<?> b = Bytes.allocateElastic();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
 
         // Apply the TEXT wire type to the buffer
         Wire textWire = WireType.TEXT.apply(b);
@@ -174,7 +174,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
     @Test
     public void testReadingADocumentThatHasNotBeenFullyReadFromTheTcpSocketAt2Bytes() throws Exception {
         // Create an elastic byte buffer
-        Bytes<?> b = Bytes.allocateElastic();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
 
         // Apply the TEXT wire type to the buffer
         Wire textWire = WireType.TEXT.apply(b);
@@ -230,7 +230,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
     @Test
     public void testReadingADocumentThatHasNotBeenFullyReadFromTheTcpSocketAt5Bytes() {
         // Create an elastic byte buffer
-        Bytes<?> b = Bytes.allocateElastic();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
 
         // Apply the TEXT wire type to the buffer
         Wire wire = WireType.TEXT.apply(b);

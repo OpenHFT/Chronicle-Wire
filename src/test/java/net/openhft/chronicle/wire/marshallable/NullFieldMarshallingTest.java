@@ -74,7 +74,7 @@ public class NullFieldMarshallingTest extends WireTestCommon {
 
         VO object = new VO();
 
-        final Wire wire = WireType.BINARY.apply(Bytes.allocateElastic());
+        final Wire wire = WireType.BINARY.apply(Bytes.allocateElasticOnHeap());
         wire.write().typedMarshallable(object);
 
         VO object2 = wire.read().typedMarshallable();

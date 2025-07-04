@@ -59,7 +59,7 @@ public class EnumWireTest extends WireTestCommon {
 
     // Helper method that serializes a given marshallable object (like Person) using the provided wire strategy.
     private static Wire serialise(@NotNull Function<Bytes<?>, Wire> createWire, @NotNull Marshallable person) {
-        Wire wire = createWire.apply(Bytes.allocateElastic());
+        Wire wire = createWire.apply(Bytes.allocateElasticOnHeap());
         person.writeMarshallable(wire);
         return wire;
     }

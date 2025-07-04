@@ -59,7 +59,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO1 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO2");
 
         // Creating a Wire instance based on the provided WireType
-        final Wire wire = wireType.apply(Bytes.allocateElastic());
+        final Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(wire.isBinary());
         CLASS_ALIASES.addAlias(DTO1.class, "DTO");
 
@@ -93,7 +93,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO2 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO1");
 
         // Creating a Wire instance based on the provided WireType
-        final Wire wire = wireType.apply(Bytes.allocateElastic());
+        final Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(wire.isBinary());
         CLASS_ALIASES.addAlias(DTO2.class, "DTO");
 
@@ -122,7 +122,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     @Test
     public void testCheckThatNewDataAddedToADocumentDoesNotEffectOldReads() {
 
-        Bytes<?> b = Bytes.allocateElastic();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             // Creating a Wire instance
             Wire w = WireType.FIELDLESS_BINARY.apply(b);

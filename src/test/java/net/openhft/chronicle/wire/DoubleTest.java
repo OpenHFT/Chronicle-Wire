@@ -68,7 +68,7 @@ public class DoubleTest extends WireTestCommon {
     @Test
     public void testManyDoubles() {
         // Create an elastic buffer for serialization
-        final Bytes<?> bytes = Bytes.allocateElastic();
+        final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
         // Iterate over a range of double values and check serialization format
         for (double aDouble = -1; aDouble < 1; aDouble += 0.00001) {

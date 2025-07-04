@@ -266,7 +266,7 @@ public class NestedMapsTest extends WireTestCommon {
     @Test
     public void testMapReadAndWrite() {
         // Create a byte buffer and initialize the wire
-        Bytes<?> bytes = Bytes.allocateElastic();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
         wire.usePadding(wire.isBinary());
 

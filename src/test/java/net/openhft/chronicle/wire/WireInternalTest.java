@@ -83,7 +83,7 @@ public class WireInternalTest extends WireTestCommon {
     // Test the conversion of a size-prefixed binary message to text using Wire.
     @Test
     public void testFromSizePrefixedBinaryToText() {
-        Bytes<?> bytes = Bytes.allocateElastic();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         @NotNull Wire wire = new BinaryWire(bytes);
         wire.usePadding(true);
 

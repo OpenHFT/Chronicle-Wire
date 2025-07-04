@@ -22,7 +22,6 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.internal.NoBytesStore;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.TextWireTest.ABCD;
 import net.openhft.chronicle.wire.converter.NanoTime;
@@ -1886,7 +1885,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testDoublePrecisionOverYamlWire() {
-        final Bytes<?> bytes = Bytes.allocateElastic();
+        final Bytes<?> bytes = allocateElasticOnHeap();
 
         final Wire wire = WireType.YAML.apply(bytes);
         final double d = 0.000212345678901;

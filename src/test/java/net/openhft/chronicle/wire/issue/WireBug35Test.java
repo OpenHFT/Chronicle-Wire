@@ -56,7 +56,7 @@ public class WireBug35Test extends WireTestCommon {
 
     @Test
     public void objectsInSequenceBinaryWire() {
-        final Bytes<?> bytes = Bytes.allocateElastic();
+        final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         final Wire wire = WireType.BINARY.apply(bytes);
         wire.write(() -> "seq").sequence(seq -> {
             seq.marshallable(obj -> obj.write(() -> "key").text("value"));
