@@ -54,20 +54,19 @@ import java.util.stream.Stream;
 import static net.openhft.chronicle.wire.Wires.isScalar;
 
 /**
- * After a field name is written by {@link WireOut#write(CharSequence)}, a
- * {@code ValueOut} serialises the value.  Implementations usually write a
- * single value and support many primitive and object types.
+ * Defines an interface for writing out values after writing a field.
+ * Implementations of this interface should provide methods to handle writing various data types.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface ValueOut {
 
     /**
-     * Thread-local {@link MapMarshaller} for efficient, thread-safe map serialisation.
+     * Thread-local {@link MapMarshaller} to support thread-safe marshalling operations.
      */
     ThreadLocal<MapMarshaller> MM_TL = ThreadLocal.withInitial(MapMarshaller::new);
 
     /**
-     * Threshold in bytes below which {@link #compress(String, Bytes)} may skip compression.
+     * Defines a threshold for small messages.
      */
     int SMALL_MESSAGE = 64;
 
@@ -85,7 +84,7 @@ public interface ValueOut {
     }
 
     /**
-     * Writes {@code flag} as this field's boolean value.
+     * Write a boolean value.
      *
      * @param flag value to write
      * @return parent wire for chaining
@@ -94,7 +93,7 @@ public interface ValueOut {
     WireOut bool(Boolean flag);
 
     /**
-     * Writes the text value {@code s}.
+     * Write a text value.
      *
      * @param s text to write
      * @return parent wire for chaining
@@ -111,9 +110,9 @@ public interface ValueOut {
     }
 
     /**
-     * Writes a null representation for this field.
+     * Write a null value.
      *
-     * @return parent wire for chaining
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     default WireOut nu11() {
@@ -121,10 +120,10 @@ public interface ValueOut {
     }
 
     /**
-     * Writes the single character {@code c} as text.
+     * Write a text value that's made up of a single character.
      *
-     * @param c character to write
-     * @return parent wire for chaining
+     * @param c The character to be written as text.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     default WireOut text(char c) {
@@ -142,10 +141,11 @@ public interface ValueOut {
     }
 
     /**
-     * Writes the content of {@code s} as text.
+     * Write a text value based on the contents of a {@link BytesStore} object.
+     * The method casts the BytesStore to a CharSequence for processing.
      *
-     * @param s bytes to write
-     * @return parent wire for chaining
+     * @param s The BytesStore whose contents are to be written as text.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     default WireOut text(@Nullable BytesStore<?, ?> s) {
@@ -153,7 +153,8 @@ public interface ValueOut {
     }
 
     /**
-     * Writes {@code x} as a signed 8‑bit value, checking the range.
+     * Write a signed 8-bit integer value. The provided long value is first checked
+     * to ensure it fits within the bounds of a signed 8-bit integer.
      *
      * @param value value to write
      * @return parent wire for chaining
@@ -165,29 +166,29 @@ public interface ValueOut {
     }
 
     /**
-     * Writes the byte {@code i8} as the current value.
+     * Write a signed 8-bit integer value.
      *
-     * @param i8 byte to write
-     * @return parent wire for chaining
+     * @param i8 The byte value representing the 8-bit integer to be written.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     WireOut int8(byte i8);
 
     /**
-     * Writes the content of {@code fromBytes} as bytes.
+     * Write a sequence of bytes based on the content of a {@link BytesStore} object.
      *
-     * @param fromBytes bytes to write
-     * @return parent wire for chaining
+     * @param fromBytes The BytesStore containing the byte sequence to be written.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     WireOut bytes(@Nullable BytesStore<?, ?> fromBytes);
 
     /**
-     * Writes {@code fromBytes} as a literal byte sequence when the wire supports it.
-     * Falls back to {@link #bytes(BytesStore)} otherwise.
+     * Write a sequence of bytes from a {@link BytesStore} object as a literal value,
+     * if supported by the wire type. If not supported, this method defaults to {@link #bytes(BytesStore)}.
      *
-     * @param fromBytes bytes to write
-     * @return parent wire for chaining
+     * @param fromBytes The BytesStore containing the byte sequence to be written as a literal.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     default WireOut bytesLiteral(@Nullable BytesStore<?, ?> fromBytes) {
@@ -195,29 +196,30 @@ public interface ValueOut {
     }
 
     /**
-     * Writes a typed byte sequence using {@code typeName} as the type name.
+     * Write a typed sequence of bytes based on the content of a {@link BytesStore} object.
      *
-     * @param typeName type identifier
-     * @param data bytes to write
-     * @return parent wire for chaining
+     * @param type       The string representing the type of byte sequence.
+     * @param fromBytes  The BytesStore containing the byte sequence to be written.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
-    WireOut bytes(String typeName, @Nullable BytesStore<?, ?> data);
+    WireOut bytes(String type, @Nullable BytesStore<?, ?> fromBytes);
 
     /**
-     * Writes {@code value} directly with minimal encoding.
+     * Write a raw sequence of bytes. The exact behavior of this method depends on the implementation.
      *
-     * @param value bytes to write
-     * @return parent wire for chaining
+     * @param value  The array of bytes to be written.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     WireOut rawBytes(byte[] value);
 
     /**
-     * Writes {@code value} with minimal encoding, falling back to {@link #text(CharSequence)} if unsupported.
+     * Write a raw text value. The exact behavior of this method depends on the implementation.
+     * If not supported, this method defaults to {@link #text(CharSequence)}.
      *
-     * @param value text to write
-     * @return parent wire for chaining
+     * @param value  The CharSequence representing the text to be written.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     default WireOut rawText(CharSequence value) {
@@ -225,40 +227,40 @@ public interface ValueOut {
     }
 
     /**
-     * Writes a length prefix and returns this {@code ValueOut} to continue writing
-     * the content.
+     * Write the length of a value if supported by the implementing class.
      *
-     * @param remaining number of bytes or elements to follow
-     * @return this instance for chaining
+     * @param remaining  The length of the value to be written.
+     * @return A ValueOut instance for chained calls.
      */
     @NotNull
     ValueOut writeLength(long remaining);
 
     /**
-     * Writes the byte array {@code fromBytes}.
+     * Write a sequence of bytes.
      *
-     * @param fromBytes bytes to write
-     * @return parent wire for chaining
+     * @param fromBytes  The array of bytes to be written.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     WireOut bytes(byte[] fromBytes);
 
     /**
-     * Writes the byte array {@code data} with a type identifier.
+     * Write a typed sequence of bytes.
      *
-     * @param typeName type identifier
-     * @param data bytes to write
-     * @return parent wire for chaining
+     * @param type       The string representing the type of byte sequence.
+     * @param fromBytes  The array of bytes to be written.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
-    WireOut bytes(String typeName, byte[] data);
+    WireOut bytes(String type, byte[] fromBytes);
 
     /**
-     * Writes {@code x} as an unsigned 8‑bit integer, checking the range.
+     * Write an unsigned 8-bit integer value. The provided integer value is first checked
+     * to ensure it fits within the bounds of an unsigned 8-bit integer.
      *
-     * @param x value to write
-     * @return parent wire for chaining
-     * @throws ArithmeticException if {@code x} is out of range
+     * @param x  The integer value to be written as an unsigned 8-bit integer.
+     * @return The WireOut instance for chained calls.
+     * @throws ArithmeticException if the supplied argument does not fit in an unsigned 8-bit integer.
      */
     @NotNull
     default WireOut uint8(int x) {
@@ -266,17 +268,22 @@ public interface ValueOut {
     }
 
     /**
-     * Writes {@code unsignedByte} as an unsigned 8‑bit integer without additional checks.
+     * Write an unsigned 8-bit integer value. This method assumes the argument is within the
+     * correct bounds of an unsigned 8-bit integer and doesn't perform any additional checks.
+     *
+     * @param u8  The unsigned 8-bit integer value to be written.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
-    WireOut uint8checked(int unsignedByte);
+    WireOut uint8checked(int u8);
 
     /**
-     * Writes {@code x} as a signed 16‑bit integer, checking the range.
+     * Write a signed 16-bit integer value. The provided long value is first checked
+     * to ensure it fits within the bounds of a signed 16-bit integer.
      *
-     * @param x value to write
-     * @return parent wire for chaining
-     * @throws ArithmeticException if {@code x} is out of range
+     * @param x  The long value to be written as a signed 16-bit integer.
+     * @return The WireOut instance for chained calls.
+     * @throws ArithmeticException if the supplied argument does not fit in a signed 16-bit integer.
      */
     @NotNull
     default WireOut int16(long x) {
@@ -284,13 +291,21 @@ public interface ValueOut {
     }
 
     /**
-     * Writes the short {@code i16} without extra range checking.
+     * Write a signed 16-bit integer value. This method assumes the argument is within the
+     * correct bounds of a signed 16-bit integer and doesn't perform any additional checks.
+     *
+     * @param i16  The signed 16-bit integer value to be written.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     WireOut int16(short i16);
 
     /**
-     * Writes {@code x} as an unsigned 16‑bit integer.
+     * Write an unsigned 16-bit integer value. The provided long value is directly cast to an integer
+     * and passed to {@link #uint16checked(int)} without additional range checks.
+     *
+     * @param x  The long value to be written as an unsigned 16-bit integer.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     default WireOut uint16(long x) {
@@ -298,23 +313,31 @@ public interface ValueOut {
     }
 
     /**
-     * Writes {@code u16} as an unsigned 16‑bit integer without extra checks.
+     * Write an unsigned 16-bit integer value. This method assumes the argument is within the
+     * correct bounds of an unsigned 16-bit integer and doesn't perform any additional checks.
+     *
+     * @param u16  The unsigned 16-bit integer value to be written.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     WireOut uint16checked(int u16);
 
     /**
-     * Writes a single Unicode code point as UTF-8.
+     * Write a single 16-bit Unicode codepoint as UTF-8. The exact behavior of this method depends on the implementation.
+     *
+     * @param codepoint  The 16-bit Unicode codepoint to be written as UTF-8.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
-    WireOut utf8(int unicodeCodePoint);
+    WireOut utf8(int codepoint);
 
     /**
-     * Writes {@code x} as a signed 32‑bit integer, checking the range.
+     * Write a signed 32-bit integer value. The provided long value is first checked
+     * to ensure it fits within the bounds of a signed 32-bit integer.
      *
-     * @param x value to write
-     * @return parent wire for chaining
-     * @throws ArithmeticException if {@code x} is out of range
+     * @param x The long value to be written as a signed 32-bit integer.
+     * @return The WireOut instance for chained calls.
+     * @throws ArithmeticException if the supplied argument does not fit in a signed 32-bit integer.
      */
     @NotNull
     default WireOut int32(long x) {
@@ -322,13 +345,22 @@ public interface ValueOut {
     }
 
     /**
-     * Writes the int {@code i32} without extra range checking.
+     * Write a signed 32-bit integer value. This method assumes the argument is within the
+     * correct bounds of a signed 32-bit integer and doesn't perform any additional checks.
+     *
+     * @param i32 The signed 32-bit integer value to be written.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     WireOut int32(int i32);
 
     /**
-     * Writes {@code i32}, ignoring {@code previous} unless the wire supports delta encoding.
+     * Write a signed 32-bit integer value. This overloaded method accepts a previous value, but
+     * currently ignores it and delegates to the simpler {@link #int32(int)} method.
+     *
+     * @param i32 The signed 32-bit integer value to be written.
+     * @param previous The previous value, currently not used in this method.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     default WireOut int32(int i32, int previous) {
@@ -336,7 +368,11 @@ public interface ValueOut {
     }
 
     /**
-     * Writes {@code x} as an unsigned 32‑bit integer.
+     * Write an unsigned 32-bit integer value. The provided long value is directly passed
+     * to {@link #uint32checked(long)} without additional range checks.
+     *
+     * @param x The long value to be written as an unsigned 32-bit integer.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     default WireOut uint32(long x) {
@@ -344,19 +380,31 @@ public interface ValueOut {
     }
 
     /**
-     * Writes {@code u32} as an unsigned 32‑bit integer without extra checks.
+     * Write an unsigned 32-bit integer value. This method assumes the argument is within the
+     * correct bounds of an unsigned 32-bit integer and doesn't perform any additional checks.
+     *
+     * @param u32 The unsigned 32-bit integer value to be written.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     WireOut uint32checked(long u32);
 
     /**
-     * Writes {@code i64} as a signed 64‑bit integer.
+     * Write a signed 64-bit integer value.
+     *
+     * @param i64 The signed 64-bit integer value to be written.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     WireOut int64(long i64);
 
     /**
-     * Writes {@code i64}, ignoring {@code previous} unless the wire supports delta encoding.
+     * Write a signed 64-bit integer value. This overloaded method accepts a previous value, but
+     * currently ignores it and delegates to the simpler {@link #int64(long)} method.
+     *
+     * @param i64 The signed 64-bit integer value to be written.
+     * @param previous The previous value, currently not used in this method.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     default WireOut int64(long i64, long previous) {
@@ -364,43 +412,72 @@ public interface ValueOut {
     }
 
     /**
-     * Writes two longs and binds them to {@code value} for direct access.
+     * Write two signed 64-bit integer values bound to a TwoLongValue object.
+     *
+     * @param i64x0 The first 64-bit integer value.
+     * @param i64x1 The second 64-bit integer value.
+     * @param value The TwoLongValue object to which the values are bound.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
-    WireOut int128forBinding(long highBits, long lowBits, TwoLongValue value);
+    WireOut int128forBinding(long i64x0, long i64x1, TwoLongValue value);
 
     /**
-     * Writes {@code i64} in hexadecimal form when the wire is textual.
+     * Write a signed 64-bit integer value as a hexadecimal representation. The behavior
+     * of this method might differ based on the wire type in use.
+     *
+     * @param i64 The 64-bit integer value to be written in hexadecimal format.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     WireOut int64_0x(long i64);
 
     /**
-     * Prepares space for a 64‑bit integer array of {@code capacity} elements.
+     * Allocate space for writing an array of 64-bit integers. The exact behavior might
+     * vary depending on the wire type or the underlying implementation.
+     *
+     * @param capacity The desired capacity of the 64-bit integer array.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     WireOut int64array(long capacity);
 
     /**
-     * Writes an array of longs bound to {@code values} for direct access.
+     * Write a sequence of 64-bit integers into an array, using the provided LongArrayValues
+     * object as the source of the values.
+     *
+     * @param capacity The desired capacity of the 64-bit integer array.
+     * @param values The LongArrayValues object containing the 64-bit integers to be written.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     WireOut int64array(long capacity, LongArrayValues values);
 
     /**
-     * Writes {@code f} as a 32‑bit floating‑point number.
+     * Write a 32-bit floating-point value.
+     *
+     * @param f The 32-bit float value to be written.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     WireOut float32(float f);
 
     /**
-     * Writes {@code d} as a 64‑bit floating‑point number.
+     * Write a 64-bit floating-point value, also known as a double.
+     *
+     * @param d The 64-bit double value to be written.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     WireOut float64(double d);
 
     /**
-     * Writes {@code f}, ignoring {@code previous} unless the wire supports delta encoding.
+     * Write a 32-bit floating-point value. This overloaded method accepts a previous value,
+     * but currently ignores it and delegates to the simpler {@link #float32(float)} method.
+     *
+     * @param f The 32-bit float value to be written.
+     * @param previous The previous float value, currently not used in this method.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     default WireOut float32(float f, float previous) {
@@ -408,7 +485,12 @@ public interface ValueOut {
     }
 
     /**
-     * Writes {@code d}, ignoring {@code previous} unless the wire supports delta encoding.
+     * Write a 64-bit floating-point value. This overloaded method accepts a previous value,
+     * but currently ignores it and delegates to the simpler {@link #float64(double)} method.
+     *
+     * @param d The 64-bit double value to be written.
+     * @param previous The previous double value, currently not used in this method.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     default WireOut float64(double d, double previous) {
@@ -416,37 +498,61 @@ public interface ValueOut {
     }
 
     /**
-     * Writes the {@link LocalTime} value.
+     * Write a local time value. The exact format and representation might vary depending
+     * on the wire type or the underlying implementation.
+     *
+     * @param localTime The LocalTime instance to be written.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     WireOut time(LocalTime localTime);
 
     /**
-     * Writes the {@link ZonedDateTime} value.
+     * Write a zoned date-time value, which includes information about date, time, and the
+     * associated time zone.
+     *
+     * @param zonedDateTime The ZonedDateTime instance to be written.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     WireOut zonedDateTime(ZonedDateTime zonedDateTime);
 
     /**
-     * Writes the {@link LocalDate} value.
+     * Write a date value. The exact format and representation might vary depending on the
+     * wire type or the underlying implementation.
+     *
+     * @param localDate The LocalDate instance to be written.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     WireOut date(LocalDate localDate);
 
     /**
-     * Writes the {@link LocalDateTime} value.
+     * Write a local date-time value, which represents both date and time without a time zone.
+     * The exact format and representation might vary depending on the wire type or the underlying implementation.
+     *
+     * @param localDateTime The LocalDateTime instance to be written.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     WireOut dateTime(LocalDateTime localDateTime);
 
     /**
-     * Writes a type prefix such as {@code !com.acme.MyClass}.
+     * Write a prefix that denotes a type for the upcoming value. This is useful for
+     * wire formats that include type information, allowing for dynamic deserialization.
+     *
+     * @param typeName The name of the type as a CharSequence.
+     * @return The ValueOut instance for chained calls.
      */
     @NotNull
     ValueOut typePrefix(CharSequence typeName);
 
     /**
-     * Convenience overload for {@link #typePrefix(CharSequence)}.
+     * Write a type prefix for a specified {@link Class} object. If the class object is null,
+     * no action is taken; otherwise, it fetches the type name from a lookup method.
+     *
+     * @param type The Class object representing the type.
+     * @return The ValueOut instance for chained calls.
      */
     @NotNull
     default ValueOut typePrefix(Class<?> type) {

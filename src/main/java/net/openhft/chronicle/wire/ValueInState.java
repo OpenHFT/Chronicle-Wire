@@ -20,9 +20,8 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Package-private helper used by {@link ValueIn} implementations to keep track of a
- * single value or nested structure as it is read from a wire. Any fields that appear
- * out of order can be stored for later processing.
+ * Represents the state associated with a particular input value.
+ * This class is primarily designed to manage unexpected inputs and the position of these unexpected values.
  */
 class ValueInState {
 
@@ -77,29 +76,37 @@ class ValueInState {
     }
 
     /**
-     * Returns the last saved position.
+     * Retrieves the saved position for the current state.
+     *
+     * @return The saved position
      */
     public long savedPosition() {
         return savedPosition;
     }
 
     /**
-     * Returns the current count of unexpected field positions recorded.
+     * Retrieves the number of unexpected positions stored.
+     *
+     * @return The size of unexpected positions
      */
     public int unexpectedSize() {
         return unexpectedSize;
     }
 
     /**
-     * Returns the wire position of the unexpected field at {@code index}.
+     * Retrieves a specific unexpected position based on its index.
+     *
+     * @param index The index of the unexpected position
+     * @return The unexpected position at the given index
      */
     public long unexpected(int index) {
         return unexpected[index];
     }
 
     /**
-     * Removes the unexpected field position at index {@code i}, shifting the
-     * remaining elements down.
+     * Removes an unexpected position from the list based on its index.
+     *
+     * @param i The index of the unexpected position to be removed
      */
     public void removeUnexpected(int i) {
         int length = unexpectedSize - i - 1;

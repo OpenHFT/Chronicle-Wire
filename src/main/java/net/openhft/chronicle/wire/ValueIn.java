@@ -43,11 +43,11 @@ import java.util.function.*;
 import static net.openhft.chronicle.wire.SerializationStrategies.MARSHALLABLE;
 
 /**
- * Represents the value component of a key–value pair being read from a wire.
- * After a field name is consumed via {@link WireIn#read()}, a {@code ValueIn}
- * instance is used to deserialize that field’s value.  A {@code ValueIn}
- * instance is normally consumed once for a single field; the next field will
- * supply a fresh instance from the parent {@link WireIn}.
+ * Represents an interface for reading values in various formats from a serialized data source.
+ * This interface is part of the Chronicle Wire library, which is designed for high-performance
+ * serialization and deserialization of data. It provides methods to read data types like text,
+ * binary, numeric, and temporal values, as well as support for more complex types like collections
+ * and marshallable objects.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface ValueIn {
@@ -74,9 +74,10 @@ public interface ValueIn {
     }
 
     /**
-     * Reads the value as text and appends it to {@code sb}.  If the wire value
-     * is {@code null}, {@code sb} is cleared.  Using a reusable
-     * {@link StringBuilder} can reduce allocation.
+     * Reads text data and appends it to the given StringBuilder. If the data is null, the StringBuilder is cleared.
+     *
+     * @param sb The StringBuilder to append the text data to.
+     * @return The current WireIn instance.
      */
     @NotNull
     default WireIn text(@NotNull StringBuilder sb) {
@@ -86,8 +87,9 @@ public interface ValueIn {
     }
 
     /**
-     * Reads the value as text and returns its first character.  Returns the null
-     * character ({@code '\u0000'}) if the text is absent or empty.
+     * Reads text data and returns the first character. If the data is null or empty, a null character is returned.
+     *
+     * @return The first character of the text data or '\u0000' if none.
      */
     default char character() {
         try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
@@ -100,7 +102,10 @@ public interface ValueIn {
     }
 
     /**
-     * Reads the value as text into {@code sdo}, clearing it first.
+     * Reads text data into the provided Bytes object, which is then cleared.
+     *
+     * @param sdo The Bytes object to store the text data.
+     * @return The current WireIn instance.
      */
     @NotNull
     default WireIn text(@NotNull Bytes<?> sdo) {
@@ -110,37 +115,46 @@ public interface ValueIn {
     }
 
     /**
-     * Reads and returns the value as a {@link String}.  May return
-     * {@code null} if the wire representation is null.
+     * Reads and returns the text data.
+     *
+     * @return The text data or null.
      */
     @Nullable
     String text();
 
     /**
-     * Populates {@code sb} with the text form of the value.
+     * Reads text data and appends it to the given StringBuilder.
      *
-     * @return {@code sb}, or {@code null} if the value is null on the wire
+     * @param sb The StringBuilder to append the text data to.
+     * @return The StringBuilder with appended text or null.
      */
     @Nullable
     StringBuilder textTo(@NotNull StringBuilder sb);
 
     /**
-     * Writes the value’s textual form to {@code bytes}, which is cleared first.
+     * Reads text data into the provided Bytes object.
      *
-     * @return {@code bytes}, or {@code null} if the value is null
+     * @param bytes The Bytes object to store the text data.
+     * @return The Bytes object with the text data or null.
      */
     @Nullable
     Bytes<?> textTo(@NotNull Bytes<?> bytes);
 
     /**
-     * Reads the value as a sequence of bytes into {@code toBytes}.
+     * Reads byte data into the provided BytesOut object.
+     *
+     * @param toBytes The BytesOut object to store the byte data.
+     * @return The current WireIn instance.
      */
     @NotNull
     WireIn bytes(@NotNull BytesOut<?> toBytes);
 
     /**
-     * Variant of {@link #bytes(BytesOut)} that clears {@code toBytes} first when
-     * {@code clearBytes} is {@code true}.
+     * Reads byte data into the provided BytesOut object with an option to clear the BytesOut before reading.
+     *
+     * @param toBytes The BytesOut object to store the byte data.
+     * @param clearBytes If true, the BytesOut object will be cleared before reading.
+     * @return The current WireIn instance.
      */
     default WireIn bytes(@NotNull BytesOut<?> toBytes, boolean clearBytes) {
         if (clearBytes)
@@ -149,8 +163,11 @@ public interface ValueIn {
     }
 
     /**
-     * Reads the raw byte sequence for this value into {@code toBytes}.  This is
-     * an alias of {@link #bytes(BytesOut)}.
+     * Reads byte data into the provided BytesOut object.
+     * This method acts as a semantic alias for {@link #bytes(BytesOut)} method.
+     *
+     * @param toBytes The BytesOut object to store the byte data.
+     * @return The current WireIn instance.
      */
     @NotNull
     default WireIn bytesLiteral(@NotNull BytesOut<?> toBytes) {
@@ -158,7 +175,10 @@ public interface ValueIn {
     }
 
     /**
-     * Returns the raw byte sequence for this value as a new {@link BytesStore}.
+     * Retrieves the byte data as a BytesStore object.
+     * This method acts as a semantic alias for {@link #bytesStore()} method.
+     *
+     * @return The BytesStore object or null.
      */
     @Nullable
     default BytesStore<?, ?> bytesLiteral() {
@@ -166,18 +186,23 @@ public interface ValueIn {
     }
 
     /**
-     * Sets {@code toBytes} to point directly at the underlying data for this
-     * value when supported, avoiding a copy.
+     * Sets byte data to the provided PointerBytesStore.
+     *
+     * @param toBytes The PointerBytesStore to set the byte data.
+     * @return The current WireIn instance.
      */
     @Nullable
     WireIn bytesSet(@NotNull PointerBytesStore toBytes);
 
     /**
-     * Compares the value’s bytes with {@code compareBytes} and passes the match
-     * result to {@code matchResult}.
+     * Compares byte data with the provided BytesStore and uses the given BooleanConsumer based on the result.
+     *
+     * @param compareBytes The BytesStore to compare with.
+     * @param consumer     The BooleanConsumer to be called based on the comparison result.
+     * @return The current WireIn instance.
      */
     @NotNull
-    WireIn bytesMatch(@NotNull BytesStore<?, ?> compareBytes, BooleanConsumer matchResult);
+    WireIn bytesMatch(@NotNull BytesStore<?, ?> compareBytes, BooleanConsumer consumer);
 
     /**
      * Supplies the byte stream to {@code bytesMarshallable#readMarshallable} for
@@ -187,8 +212,9 @@ public interface ValueIn {
     WireIn bytes(@NotNull ReadBytesMarshallable bytesMarshallable);
 
     /**
-     * Returns the value’s bytes as a new array, or {@code null} when the wire
-     * representation is null.
+     * Retrieves the byte data as an array.
+     *
+     * @return The byte data as an array or null.
      */
     default byte @Nullable [] bytes() {
         return bytes((byte[]) null);
@@ -211,26 +237,33 @@ public interface ValueIn {
     }
 
     /**
-     * Copies the value’s bytes into {@code bb}.
+     * Puts the byte data into the provided ByteBuffer.
+     *
+     * @param bb The ByteBuffer to put the byte data.
      */
     default void byteBuffer(@NotNull ByteBuffer bb) {
         bb.put(bytes());
     }
 
     /**
-     * Returns the parent {@link WireIn} that provided this instance.
+     * Provides the current WireIn instance.
+     *
+     * @return The current WireIn instance.
      */
     @NotNull
     WireIn wireIn();
 
     /**
-     * Returns the length in bytes of this value as it appears on the wire,
-     * including any type or length prefix.
+     * Retrieves the length of the field in bytes, inclusive of any encoding and header character.
+     *
+     * @return The length of the field in bytes.
      */
     long readLength();
 
     /**
-     * Consumes and discards the current value, advancing the read position.
+     * Skips the current value while reading.
+     *
+     * @return The current WireIn instance.
      */
     @NotNull
     WireIn skipValue();

@@ -21,8 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Package-private class that manages a stack of {@link ValueInState} objects.
- * Used by {@link ValueIn} implementations when reading nested data structures.
+ * Represents a stack structure specifically designed to manage {@link ValueInState} instances.
+ * The primary purpose of this class is to provide an organized way to manage and retrieve states
+ * at different levels, and efficiently reuse them without constant instantiation.
  */
 class ValueInStack {
 
@@ -32,19 +33,18 @@ class ValueInStack {
      */
     final List<ValueInState> freeList = new ArrayList<>();
 
-    /** The current depth or level of the stack. {@code level = 0} is the base. */
+    // Represents the current level of the stack
     int level = 0;
 
     /**
-     * Initialises the stack and pre-allocates the first {@link ValueInState} at level 0.
+     * Constructs a new ValueInStack and adds the first ValueInState to the free list.
      */
     public ValueInStack() {
         addOne();
     }
 
     /**
-     * Resets the stack to its initial state: {@link #level} is set to 0 and the
-     * root {@link ValueInState} is reset.
+     * Resets the current level to the initial state and clears the state of the first ValueInState.
      */
     public void reset() {
         level = 0;
@@ -73,8 +73,9 @@ class ValueInStack {
     }
 
     /**
-     * Returns the {@link ValueInState} for the current {@link #level}. Extra
-     * entries are added to {@link #freeList} if needed.
+     * Retrieves the {@link ValueInState} at the current level. If none exists, new instances are added until one does.
+     *
+     * @return The ValueInState at the current stack level
      */
     public ValueInState curr() {
         while (freeList.size() <= level)
