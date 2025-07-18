@@ -28,8 +28,7 @@ import java.util.function.Function;
 /**
  * Implements the {@link SerializationStrategy} for scalar data types.
  * This strategy is designed for simple types and provides mechanisms for reading
- * them using provided functions. It typically uses {@link BracketType#NONE} as
- * scalar values are usually not enclosed in map or sequence brackets.
+ * them using provided functions.
  *
  * @param <E> The type of the scalar value that this strategy handles.
  */

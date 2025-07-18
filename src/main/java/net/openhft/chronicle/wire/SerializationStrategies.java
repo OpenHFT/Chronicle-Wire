@@ -48,14 +48,16 @@ import static net.openhft.chronicle.wire.BracketType.UNKNOWN;
 public enum SerializationStrategies implements SerializationStrategy {
 
     /**
-     * Strategy for objects implementing {@link Marshallable}.
-     * Supports both self-describing and raw byte forms.
+     * A serialization strategy for objects implementing the {@link Marshallable} interface.
+     * This strategy supports both self-describing messages and raw byte data serialization.
      */
     MARSHALLABLE {
         /**
-         * Reads the object either via {@link ReadMarshallable#readMarshallable(WireIn)}
-         * or {@link ReadBytesMarshallable#readMarshallable(Bytes)}. The choice is
-         * governed by {@link WireIn#useSelfDescribingMessage(CommonMarshallable)}.
+         * Reads an object from the provided input source using a wire format.
+         * The object can be deserialized either as a self-describing message or as raw byte data,
+         * based on its type.
+         *
+         * @return The populated object.
          */
         @NotNull
         @Override
@@ -81,7 +83,10 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Returns {@code null} for interfaces or abstract types.
+         * Creates a new instance of the specified type.
+         * If the type represents an interface or an abstract class, {@code null} is returned.
+         *
+         * @return A new instance of the provided type or {@code null} if the type is an interface or abstract.
          */
         @Nullable
         @Override
@@ -91,13 +96,15 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * Handles objects of any type. The actual strategy is chosen at read time
-     * once the type has been inferred from the wire.
+     * A serialization strategy that supports any object type.
+     * This strategy infers the object type during deserialization.
      */
     ANY_OBJECT {
         /**
-         * Infers the type from the wire and then delegates to {@link #ANY_NESTED}
-         * or another appropriate strategy.
+         * Reads an object from the provided input source, inferring its type.
+         * The type is not explicitly described in the serialized data.
+         *
+         * @return The populated object with its type inferred from the input.
          */
         @Nullable
         @Override
@@ -129,12 +136,14 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * Handles scalar values such as primitives and boxed types. Scalars are
-     * written without explicit map or list brackets.
+     * A serialization strategy that supports any scalar value.
+     * Scalar values are typically primitive types or their boxed equivalents.
      */
     ANY_SCALAR {
         /**
-         * Reads a scalar value and infers the target type from the wire.
+         * Reads a scalar object from the provided input source, inferring its type.
+         *
+         * @return The populated scalar object with its type inferred from the input.
          */
         @Nullable
         @Override
@@ -166,11 +175,13 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * Strategy for standard {@link Enum} types. Values are written as their {@code name()}.
+     * A serialization strategy specifically designed for handling enumerations (enums).
      */
     ENUM {
         /**
-         * Reads an enum by consuming its textual name.
+         * Reads an enum value from the provided input source, represented as text.
+         *
+         * @return The textual representation of the enum value.
          */
         @Nullable
         @Override
@@ -202,18 +213,23 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * Supports dynamic enums whose values may change at run time. Special logic
-     * deals with both simple text forms and map based representations.
+     * A serialization strategy designed for handling dynamic enumerations (enums).
+     * Dynamic enums are enums whose values can be altered or enhanced at runtime.
+     * This strategy incorporates custom handling to ensure proper deserialization
+     * of dynamic enums from the input source.
      */
     DYNAMIC_ENUM {
 
         // Reflective field access to the ordinal of the Enum class
-        private final Field ordinal = Jvm.getField(Enum.class, "ordinal");
+        private Field ordinal = Jvm.getField(Enum.class, "ordinal");
 
         /**
-         * Reads a dynamic enum. A plain text name is resolved via {@link EnumCache}.
-         * If {@code o} implements {@link ReadMarshallable} and a map is present,
-         * that map is read into the instance.
+         * Reads a dynamic enum value from the provided input source.
+         * This method accounts for multiple input representations,
+         * such as direct textual names or custom serialized formats
+         * for more complex dynamic enums.
+         *
+         * @return The deserialized dynamic enum object or its textual representation.
          */
         @Nullable
         @Override
@@ -277,13 +293,19 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * Deserialises nested objects without knowing the target type. Data is
-     * typically encoded in a map style structure.
+     * A serialization strategy designed for handling nested objects.
+     * This strategy reads nested objects without explicitly knowing
+     * their exact type, treating them as generic objects and performing
+     * a generic deserialization.
      */
     ANY_NESTED {
 
         /**
-         * Reads a nested object or returns {@code null} if the input is null.
+         * Reads the nested object from the provided input source.
+         * If the input is null, it returns null. Otherwise, it
+         * deserializes the object and returns the constructed instance.
+         *
+         * @return The deserialized nested object.
          */
         @Override
         public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
@@ -319,15 +341,18 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * Handles {@link Demarshallable} objects. A wrapper may be used during
-     * reading to defer construction until {@link #readUsing} is invoked.
+     * A serialization strategy specifically designed for handling
+     * {@link Demarshallable} objects. {@link Demarshallable} represents
+     * an object that can be deserialized from a wire format.
      */
     DEMARSHALLABLE {
 
         /**
-         * Reads a {@link Demarshallable}. If {@code using} is a
-         * {@link DemarshallableWrapper}, a new instance is created and stored in
-         * the wrapper. Otherwise the existing object is populated.
+         * Reads the {@link Demarshallable} object from the provided input source.
+         * This method has logic to handle multiple formats of input including
+         * wrapped objects and direct serialized formats.
+         *
+         * @return The deserialized {@link Demarshallable} object or wrapper.
          */
         @NotNull
         @Override
@@ -355,8 +380,9 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Returns a {@link DemarshallableWrapper} used as a temporary holder
-         * until the real object is read.
+         * Constructs a new instance of a {@link Demarshallable} wrapped in a {@link DemarshallableWrapper}.
+         *
+         * @return The constructed {@link DemarshallableWrapper}.
          */
         @NotNull
         @Override
@@ -366,15 +392,20 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * Handles {@link Serializable} objects. If an instance is also
-     * {@link Externalizable} its own read logic is used, otherwise the data is
-     * read via {@link #ANY_OBJECT}.
+     * A serialization strategy for handling objects that implement the
+     * {@link java.io.Serializable} interface. This strategy checks if the object
+     * is also an instance of {@link Externalizable}, and if so, uses the
+     * {@link #EXTERNALIZABLE} strategy. Otherwise, it defaults to the
+     * {@link #ANY_OBJECT} strategy.
      */
     SERIALIZABLE {
 
         /**
-         * Delegates to {@link #EXTERNALIZABLE} when required, otherwise to
-         * {@link #ANY_OBJECT}.
+         * Reads the {@link Serializable} object from the provided input source.
+         * Delegates the deserialization to the appropriate strategy based on
+         * whether the object is an instance of {@link Externalizable}.
+         *
+         * @return The deserialized {@link Serializable} object.
          */
         @Override
         public Object readUsing(Class clazz, Object o, ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
@@ -397,14 +428,17 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * Handles {@link Externalizable} objects and calls their
-     * {@link java.io.Externalizable#readExternal(java.io.ObjectInput)} method.
+     * A serialization strategy specifically designed for handling
+     * {@link Externalizable} objects. Externalizable objects provide their
+     * own custom serialization mechanism that this strategy leverages.
      */
     EXTERNALIZABLE {
 
         /**
-         * Delegates to {@link java.io.Externalizable#readExternal(java.io.ObjectInput)}
-         * using an {@link java.io.ObjectInput} facade over the wire.
+         * Reads the {@link Externalizable} object from the provided input source
+         * using the object's custom serialization logic.
+         *
+         * @return The deserialized {@link Externalizable} object.
          */
         @NotNull
         @Override
@@ -442,13 +476,17 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * Reads key value pairs into a {@link Map}.
+     * A serialization strategy for handling objects that implement the
+     * {@link java.util.Map} interface. This strategy deserializes a sequence
+     * of key-value pairs into a Map instance.
      */
     MAP {
 
         /**
-         * Consumes key value pairs until no more entries remain in the current
-         * map context.
+         * Reads the {@link Map} object from the provided input source, mapping
+         * each key-value pair in the sequence.
+         *
+         * @return The deserialized {@link Map} object.
          */
         @Override
         public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
@@ -498,13 +536,17 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * Reads a sequence of items into a {@link Set} implementation.
+     * A serialization strategy for handling objects that implement the
+     * {@link java.util.Set} interface. This strategy deserializes a sequence
+     * of items into a Set instance.
      */
     SET {
 
         /**
-         * Consumes items from the wire and adds them to the given set, creating
-         * one if necessary.
+         * Reads the {@link Set} object from the provided input source, adding
+         * each item in the sequence to the set.
+         *
+         * @return The deserialized {@link Set} object.
          */
         @Override
         public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
@@ -561,13 +603,17 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * Reads a sequence of items into a {@link List} implementation.
+     * A serialization strategy for handling objects that implement the
+     * {@link java.util.List} interface. This strategy deserializes a sequence
+     * of items into a List instance.
      */
     LIST {
 
         /**
-         * Populates the supplied list. Existing entries are reused where
-         * possible; surplus entries are removed.
+         * Reads the {@link List} object from the provided input source, adding
+         * each item in the sequence to the list.
+         *
+         * @return The deserialized {@link List} object.
          */
         @Override
         public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
@@ -629,14 +675,21 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * Reads a sequence of items into an array. Uses {@link ArrayWrapper} when
-     * the target type is known at construction time.
+     * A serialization strategy for handling arrays. This strategy deserializes
+     * a sequence of items into an array instance.
      */
     ARRAY {
 
         /**
-         * Collects items into a list and then converts that list to an array or
-         * populates the supplied {@link ArrayWrapper}.
+         * Reads an array object from the provided input source, adding each
+         * item in the sequence to a list, which is then converted into an array.
+         * <p>
+         * If the 'using' parameter is an instance of ArrayWrapper, the method
+         * first deserializes items into a list and then wraps them into an array
+         * with the correct component type. Otherwise, it deserializes items into
+         * a list and then converts that list into an array.
+         *
+         * @return The deserialized array or an ArrayWrapper containing the array.
          */
         @NotNull
         @Override
@@ -694,14 +747,21 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     /**
-     * Reads primitive arrays using a {@link PrimArrayWrapper}. The array grows
-     * as items are read and is trimmed to size when complete.
+     * A serialization strategy for handling primitive arrays. This strategy
+     * deserializes a sequence of items into an array instance, dynamically
+     * resizing the array as required during deserialization.
      */
     PRIM_ARRAY {
 
         /**
-         * Reads items into the primitive array held by the wrapper, expanding the
-         * array when it becomes full and finally shrinking it to the exact length.
+         * Reads a primitive array object from the provided input source,
+         * dynamically resizing the array during the deserialization process.
+         * <p>
+         * The method starts with an empty array and doubles its size as needed
+         * to accommodate the incoming data. After all items have been read,
+         * the array is resized to fit the number of items that were read.
+         *
+         * @return The PrimArrayWrapper containing the deserialized primitive array.
          */
         @NotNull
         @Override
@@ -794,8 +854,8 @@ public enum SerializationStrategies implements SerializationStrategy {
     }
 
     /**
-     * Temporary holder for arrays during deserialization. {@link #readResolve()}
-     * returns the actual array so callers see only the final result.
+     * A wrapper class for arrays which provides a mechanism for deserialization
+     * by resolving the actual array when being read from a serialized source.
      */
     static class ArrayWrapper implements ReadResolvable<Object[]> {
 
@@ -820,7 +880,10 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * {@inheritDoc}
+         * Provides a deserialization mechanism which returns the actual array
+         * when this wrapper is being read from a serialized source.
+         *
+         * @return The actual array wrapped by this wrapper.
          */
         @NotNull
         @Override
@@ -830,7 +893,12 @@ public enum SerializationStrategies implements SerializationStrategy {
     }
 
     /**
-     * Temporary holder for primitive arrays during deserialization.
+     * The following classes are wrappers that facilitate deserialization processes for
+     * specific types of objects. They implement the ReadResolvable interface to define
+     * the deserialization mechanism.
+     * <p>
+     * A wrapper class for primitive arrays which provides a mechanism for deserialization
+     * by resolving the actual array when being read from a serialized source.
      */
     static class PrimArrayWrapper implements ReadResolvable<Object> {
 
@@ -855,7 +923,10 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * {@inheritDoc}
+         * Provides a deserialization mechanism which returns the actual primitive array
+         * when this wrapper is being read from a serialized source.
+         *
+         * @return The actual primitive array wrapped by this wrapper.
          */
         @NotNull
         @Override
@@ -865,7 +936,8 @@ public enum SerializationStrategies implements SerializationStrategy {
     }
 
     /**
-     * Wrapper used when reading {@link Demarshallable} objects lazily.
+     * A wrapper class for Demarshallable objects which provides a mechanism for deserialization
+     * by resolving the actual Demarshallable object when being read from a serialized source.
      */
     static class DemarshallableWrapper implements ReadResolvable<Demarshallable> {
 
@@ -890,7 +962,10 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * {@inheritDoc}
+         * Provides a deserialization mechanism which returns the actual Demarshallable object
+         * when this wrapper is being read from a serialized source.
+         *
+         * @return The actual Demarshallable object wrapped by this wrapper.
          */
         @NotNull
         @Override
