@@ -33,15 +33,14 @@ import org.jetbrains.annotations.Nullable;
 public interface SerializationStrategy {
 
     /**
-     * Reads an object of type {@code T} from the supplied input.
+     * Reads an object of type {@code T} from the provided input source and populates
+     * the given 'using' object, if not null. The method uses the given {@link BracketType}
+     * to aid in the deserialization.
      *
      * @param clazz       expected class of the object, or {@code null} to infer
      *                    from the wire or {@code using} instance
-     * @param using       optional instance to populate; if {@code null} this
-     *                    method may call {@link #newInstanceOrNull(Class)}. If
-     *                    that also returns {@code null} the strategy decides
-     *                    whether to return {@code null} or throw
-     *                    {@link InvalidMarshallableException}
+     * @param using       An optional object of type {@code T} that can be populated with the read data.
+     *      *              If null, a new object will be created or an exception might be thrown depending on implementation.
      * @param in          source of the wire data
      * @param bracketType hint about the expected structure such as map, sequence
      *                    or none
@@ -53,11 +52,12 @@ public interface SerializationStrategy {
     <T> T readUsing(Class<?> clazz, T using, ValueIn in, BracketType bracketType) throws InvalidMarshallableException;
 
     /**
-     * Attempts to create a new instance of the given type.
-     * Called when {@link #readUsing} needs an object but none was supplied.
+     * Constructs and returns a new instance of the provided {@code type}
+     * as a reference. If the instance cannot be constructed for any reason,
+     * {@code null} is returned.
      *
-     * @param type class of object to be created
-     * @return newly created instance or {@code null} if construction failed
+     * @param type The class type for which a new instance is required.
+     * @return A new instance of the provided {@code type} or {@code null} if instantiation is not possible.
      */
     @Nullable
     <T> T newInstanceOrNull(Class<T> type);
@@ -70,12 +70,10 @@ public interface SerializationStrategy {
     Class<?> type();
 
     /**
-     * The bracket type expected in the wire representation.
-     * For example {@link BracketType#MAP} for key-value pairs,
-     * {@link BracketType#SEQ} for sequences or {@link BracketType#NONE} for
-     * scalar values.
+     * Provides the bracket type used in the serialized format, which might
+     * give hints or constraints on how the data is structured.
      *
-     * @return the {@link BracketType} used by this strategy
+     * @return the {@link BracketType} used by this serialization strategy.
      */
     @NotNull
     BracketType bracketType();
