@@ -29,30 +29,36 @@ import java.nio.BufferUnderflowException;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
 /**
- * A self-describing object with a fixed binary layout that can be copied using
- * trivial memory operations. Useful for high-performance scenarios where the
- * layout is known and stable yet the object remains self-describing when
- * marshalled.
+ * Represents a self-describing object that is trivially copyable, extending the functionality of {@link SelfDescribingMarshallable}.
+ * The class provides mechanisms to efficiently manage the internal data layout of an instance based on various data types
+ * such as longs, ints, shorts, and bytes. Useful for high-performance scenarios where the layout determined using a
+ * {@code description} integer is known and stable yet the object remains self-describing when marshalled.
  */
 @SuppressWarnings("this-escape")
 public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMarshallable {
 
-    /** A transient integer encoding the number of longs, ints, shorts and bytes in this object's layout. */
+    // Contains the description of the data layout.
     @FieldGroup("header")
     transient int description = $description();
 
     /**
-     * @return integer encoding of the primitive field layout
+     * Fetches the description of the current data layout.
+     *
+     * @return An integer description of the layout.
      */
     protected abstract int $description();
 
     /**
-     * @return starting offset of the trivially copyable region
+     * Determines the starting offset for the data.
+     *
+     * @return The start offset.
      */
     protected abstract int $start();
 
     /**
-     * @return total length in bytes of the trivially copyable region
+     * Fetches the total length of the data based on its layout.
+     *
+     * @return The total data length.
      */
     protected abstract int $length();
 
@@ -71,10 +77,13 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
     }
 
     /**
-     * Performs a field-by-field copy from {@code in} according to the supplied
-     * description, coping with layout differences between source and target.
-     * Extra fields present in {@code in} are skipped; missing fields leave the
-     * current value untouched.
+     * Performs a controlled copy of data from an input source based on the given description.
+     * The method will read data of various sizes (long, int, short, byte) based on the description
+     * and will copy this data to the current instance's memory.
+     *
+     * @param in          The input source from which data will be read.
+     * @param description0 The description integer specifying the layout of the data in the input source.
+     * @throws IllegalStateException if the description is invalid or does not match the input's content.
      */
     private void carefulCopy(BytesIn<?> in, int description0) {
         // Start offset for copying data

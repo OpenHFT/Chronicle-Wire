@@ -28,10 +28,10 @@ import org.jetbrains.annotations.NotNull;
 public interface KeyedMarshallable {
 
     /**
-     * Writes the key portion of this instance to the supplied bytes.
-     * The default implementation delegates to {@link Wires#writeKey(Object, Bytes)}.
+     * Writes the key of the current instance into the provided {@code Bytes} object.
+     * This default implementation utilizes the {@code Wires.writeKey} method.
      *
-     * @param bytes destination buffer for the key
+     * @param bytes The {@code Bytes} object into which the key of the current instance is written.
      */
     @SuppressWarnings("rawtypes")
     default void writeKey(@NotNull Bytes<?> bytes) {

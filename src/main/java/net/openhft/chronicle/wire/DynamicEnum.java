@@ -35,11 +35,14 @@ import java.util.List;
 public interface DynamicEnum extends CoreDynamicEnum, Marshallable {
 
     /**
-     * <b>Deprecated.</b> Refreshes a cached dynamic enum using the supplied template.
-     * It updates the cached instance with the same name so that subsequent lookups
-     * via {@link EnumCache#valueOf(String)} return the latest data.
+     * Refreshes the cached instance of a {@code DynamicEnum} based on the given template.
+     * This ensures that every deserialization of the enum value from its {@code name()} method
+     * is up-to-date with the most recent information.
+     * <p>
+     * Leveraging this method to update the cached enum details is essential for maintaining
+     * data consistency, especially during frequent deserialization operations.
      *
-     * @param e the template used to update the cached version
+     * @param e The {@code DynamicEnum} template used to refresh the cached version.
      */
     static <E extends DynamicEnum> void updateEnum(E e) {
         // Retrieve the enum cache corresponding to the class of the provided template
@@ -58,7 +61,7 @@ public interface DynamicEnum extends CoreDynamicEnum, Marshallable {
     }
 
     /**
-     * <b>Deprecated.</b> Dynamic enums are treated as immutable and this
+     * Dynamic enums are treated as immutable and this
      * default implementation always throws {@link UnsupportedOperationException}.
      */
     default void reset() {
