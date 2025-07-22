@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.Wire;
@@ -105,6 +106,7 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
         StringWriter sw = new StringWriter();
         final MethodReader reader = wire.methodReaderBuilder()
                 .scanning(scanning)
+                .exceptionHandlerOnUnknownMethod(Jvm.debug())
                 .metaDataHandler(Mocker.logging(MetaMethod.class, "M ", sw))
                 .build(Mocker.logging(DataMethod.class, "D ", sw));
 
@@ -203,6 +205,7 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
         StringWriter sw = new StringWriter();
         final MethodReader reader = wire.methodReaderBuilder()
                 .scanning(scanning)
+                .exceptionHandlerOnUnknownMethod(Jvm.debug())
                 .metaDataHandler(Mocker.logging(MetaMethod.class, "M ", sw))
                 .build(Mocker.logging(DataMethod.class, "D ", sw));
 

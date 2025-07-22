@@ -65,6 +65,7 @@ public class MarshallableMethodReaderTest extends net.openhft.chronicle.wire.Wir
 
     // Helper method to test ignoring methods with or without scanning
     public void doIgnoredMethods(boolean scanning) {
+        expectException("Unknown method-name='bye' called on class net.openhft.chronicle.wire.method.MarshallableMethodReaderTest$SayingMicroservice");
         // Creates a new YAML based Wire instance
         Wire wire = Wire.newYamlWireOnHeap();
 
