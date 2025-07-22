@@ -67,7 +67,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     private Object[] metaDataHandler = null;
 
     // The exception handler to use when a method is not recognized.
-    private ExceptionHandler exceptionHandlerOnUnknownMethod = Jvm.debug();
+    private ExceptionHandler exceptionHandlerOnUnknownMethod = Jvm.getBoolean("chronicle.methodReader.warn") ? Jvm.warn() : Jvm.debug();
 
     // A predicate to further filter method calls.
     private Predicate<MethodReader> predicate = x -> true;
@@ -96,8 +96,22 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
      * @param exceptionHandlerOnUnknownMethod The exception handler to use when a method is not recognized.
      * @return A {@link WireParselet} that logs or handles unrecognized methods.
      */
+    @Deprecated(/* to be removed in x.29 */)
     @NotNull
     public static WireParselet createDefaultParselet(ExceptionHandler exceptionHandlerOnUnknownMethod) {
+        return createDefaultParselet(exceptionHandlerOnUnknownMethod, null);
+    }
+
+    /**
+     * Creates a default {@link WireParselet} that handles unrecognized methods.
+     * When an unrecognized method is encountered, it logs a warning or uses
+     * the provided exception handler, depending on the method name's length.
+     *
+     * @param exceptionHandlerOnUnknownMethod The exception handler to use when a method is not recognized.
+     * @param clazz The class on which the method was called, used for logging purposes.
+     * @return A {@link WireParselet} that logs or handles unrecognized methods.
+     */
+    public static WireParselet createDefaultParselet(ExceptionHandler exceptionHandlerOnUnknownMethod, Class<?> clazz) {
         return (s, v) -> {
             MessageHistory history = MessageHistory.get();
             long sourceIndex = history.lastSourceIndex();
@@ -106,7 +120,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
                     ? Jvm.warn()
                     : exceptionHandlerOnUnknownMethod;
             if (eh.isEnabled(VanillaMethodReader.class)) {
-                eh.on(VanillaMethodReader.class, errorMsg(s, history, sourceIndex));
+                eh.on(VanillaMethodReader.class, errorMsg(s, history, sourceIndex, clazz));
             }
         };
     }
@@ -120,11 +134,16 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
      * @return A formatted error message for unrecognized methods or method IDs.
      */
     @NotNull
-    private static String errorMsg(CharSequence s, MessageHistory history, long sourceIndex) {
+    private static String errorMsg(CharSequence s, MessageHistory history, long sourceIndex, @Nullable Class<?> clazz) {
 
         // Determine whether the provided sequence is a method name or a method ID based on its first character.
         final String identifierType = s.length() != 0 && Character.isDigit(s.charAt(0)) ? "@MethodId" : "method-name";
         String msg = "Unknown " + identifierType + "='" + s + "'";
+        if (clazz != null) {
+            if (clazz.getName().contains("Proxy$") || clazz.getName().contains("$Lambda"))
+                clazz = clazz.getInterfaces()[0];
+            msg += " called on " + clazz;
+        }
         if (history.lastSourceId() >= 0)
             msg += " from " + history.lastSourceId() + " at " +
                     Long.toHexString(sourceIndex) + " ~ " + (int) sourceIndex;
@@ -290,8 +309,9 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     @NotNull
     public MethodReader build(Object... impls) {
         if (this.defaultParselet == null)
-            this.defaultParselet = createDefaultParselet(exceptionHandlerOnUnknownMethod);
+            this.defaultParselet = createDefaultParselet(exceptionHandlerOnUnknownMethod, impls.length > 0 ? impls[0].getClass() : null);
 
+        @SuppressWarnings("resource")
         final MethodReader generatedInstance = createGeneratedInstance(impls);
 
         // If the generated instance isn't available, use the default vanilla method reader.

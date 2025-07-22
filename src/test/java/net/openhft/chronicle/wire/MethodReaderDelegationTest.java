@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import net.openhft.chronicle.core.util.Mocker;
 import org.junit.Test;
@@ -102,6 +103,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
 
     // A helper method to test if unsuccessful method calls are properly delegated
     private void doTestUnsuccessfulCallIsDelegated(Wire wire, boolean scanning) {
+        ignoreException("Unknown method-name='myFall' called on class");
         // Reset the wire and enable padding
         wire.reset();
         wire.usePadding(true);
@@ -221,6 +223,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
             // Set up the MethodReader to read methods from the wire
             final MethodReader reader = wire.methodReaderBuilder()
                     .scanning(scanning)
+                    .exceptionHandlerOnUnknownMethod(Jvm.debug())
                     .build(Mocker.intercepting(MyInterface.class, "*", sb::append));
 
             // Verify that the first method can be read
