@@ -128,9 +128,10 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     /**
      * Returns an error message based on the given parameters.
      *
-     * @param s             The sequence that represents either a method name or a method ID.
-     * @param history       The message history for the current method call.
-     * @param sourceIndex   The index of the source from where the method call was read.
+     * @param s           The sequence that represents either a method name or a method ID.
+     * @param history     The message history for the current method call.
+     * @param sourceIndex The index of the source from where the method call was read.
+     * @param clazz       The class on which the method was called, used for logging purposes.
      * @return A formatted error message for unrecognized methods or method IDs.
      */
     @NotNull
@@ -138,16 +139,19 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
         // Determine whether the provided sequence is a method name or a method ID based on its first character.
         final String identifierType = s.length() != 0 && Character.isDigit(s.charAt(0)) ? "@MethodId" : "method-name";
-        String msg = "Unknown " + identifierType + "='" + s + "'";
+        StringBuilder msg = new StringBuilder()
+                .append("Unknown ").append(identifierType)
+                .append("='").append(s).append("'");
         if (clazz != null) {
             if (clazz.getName().contains("Proxy$") || clazz.getName().contains("$Lambda"))
                 clazz = clazz.getInterfaces()[0];
-            msg += " called on " + clazz;
+            msg.append(" called on ").append(clazz);
         }
         if (history.lastSourceId() >= 0)
-            msg += " from " + history.lastSourceId() + " at " +
-                    Long.toHexString(sourceIndex) + " ~ " + (int) sourceIndex;
-        return msg;
+            msg.append(" from ").append(history.lastSourceId())
+                    .append(" at ").append(Long.toHexString(sourceIndex))
+                    .append(" ~ ").append((int) sourceIndex);
+        return msg.toString();
     }
 
     public WireParselet defaultParselet() {
