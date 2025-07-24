@@ -67,7 +67,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     private Object[] metaDataHandler = null;
 
     // The exception handler to use when a method is not recognized.
-    private ExceptionHandler exceptionHandlerOnUnknownMethod = Jvm.getBoolean("chronicle.methodReader.warn") ? Jvm.warn() : Jvm.debug();
+    private ExceptionHandler exceptionHandlerOnUnknownMethod = Jvm.debug();
 
     // A predicate to further filter method calls.
     private Predicate<MethodReader> predicate = x -> true;
