@@ -55,6 +55,10 @@ public class MilliTimestampLongConverterTest extends WireTestCommon {
     public void parse2() {
         assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456"),
                 INSTANCE.parse("2020-09-18T01:02:03.456"));
+        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456"),
+                INSTANCE.parse("2020-09-18T01:02:03.456789"));
+        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456"),
+                INSTANCE.parse("2020-09-18T01:02:03.456789012"));
     }
 
     // Test if trailing 'Z' in the timestamp does not affect parsing
