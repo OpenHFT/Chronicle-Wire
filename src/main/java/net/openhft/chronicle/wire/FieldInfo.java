@@ -128,7 +128,7 @@ public interface FieldInfo {
      * as an {@link Object}.
      */
     @Nullable
-    Object get(Object instance);
+    Object get(Object object);
 
     /**
      * Returns the value of the field represented by this {@code FieldInfo} object
@@ -138,7 +138,7 @@ public interface FieldInfo {
      * @return the value of the field represented by this {@code FieldInfo} object
      * as a {@code long} primitive.
      */
-    long getLong(Object instance);
+    long getLong(Object object);
 
     /**
      * Returns the value of the field represented by this {@code FieldInfo} object
@@ -148,7 +148,7 @@ public interface FieldInfo {
      * @return the value of the field represented by this {@code FieldInfo} object
      * as an {@code int} primitive.
      */
-    int getInt(Object instance);
+    int getInt(Object object);
 
     /**
      * Returns the value of the field represented by this {@code FieldInfo} object
@@ -158,7 +158,7 @@ public interface FieldInfo {
      * @return the value of the field represented by this {@code FieldInfo} object
      * as a {@code char} primitive.
      */
-    char getChar(Object instance);
+    char getChar(Object object);
 
     /**
      * Returns the value of the field represented by this {@code FieldInfo} object
@@ -168,54 +168,54 @@ public interface FieldInfo {
      * @return the value of the field represented by this {@code FieldInfo} object
      * as a {@code double} primitive.
      */
-    double getDouble(Object instance);
+    double getDouble(Object object);
 
     /**
      * Sets the value of the field represented by this {@code FieldInfo} object
      * to the provided {@code value}. The provided {@code object} is used as a
      * target to the extract eh field from.
      */
-    void set(Object instance, Object value) throws IllegalArgumentException;
+    void set(Object object, Object value) throws IllegalArgumentException;
 
     /**
      * Sets the value of the field represented by this {@code FieldInfo} object
      * to the provided {@code value}. The provided {@code object} is used as a
      * target to the extract eh field from.
      */
-    void set(Object instance, char value) throws IllegalArgumentException;
+    void set(Object object, char value) throws IllegalArgumentException;
 
     /**
      * Sets the value of the field represented by this {@code FieldInfo} object
      * to the provided {@code value}. The provided {@code object} is used as a
      * target to the extract eh field from.
      */
-    void set(Object instance, int value) throws IllegalArgumentException;
+    void set(Object object, int value) throws IllegalArgumentException;
 
     /**
      * Sets the value of the field represented by this {@code FieldInfo} object
      * to the provided {@code value} of type {@code long}. The provided {@code object} is used as a
      * target from which the field is extracted.
      *
-     * @param instance The object containing the field to be set.
+     * @param object The object containing the field to be set.
      * @param value  The value to set the field to.
      * @throws IllegalArgumentException if the specified object is not an instance of the class or
      *                                  interface declaring the underlying field, or if an unwrapping
      *                                  conversion fails.
      */
-    void set(Object instance, long value) throws IllegalArgumentException;
+    void set(Object object, long value) throws IllegalArgumentException;
 
     /**
      * Sets the value of the field represented by this {@code FieldInfo} object
      * to the provided {@code value} of type {@code double}. The provided {@code object} is used as a
      * target from which the field is extracted.
      *
-     * @param instance The object containing the field to be set.
+     * @param object The object containing the field to be set.
      * @param value  The value to set the field to.
      * @throws IllegalArgumentException if the specified object is not an instance of the class or
      *                                  interface declaring the underlying field, or if an unwrapping
      *                                  conversion fails.
      */
-    void set(Object instance, double value) throws IllegalArgumentException;
+    void set(Object object, double value) throws IllegalArgumentException;
 
     /**
      * Retrieves the {@link Class} identifying the declared generic type of the
@@ -243,9 +243,9 @@ public interface FieldInfo {
      * Compares the value of the field represented by this {@code FieldInfo} in both provided
      * objects {@code a} and {@code b} and determines if they are equal.
      *
-     * @param instanceA First object to compare the field's value.
-     * @param instanceB Second object to compare the field's value.
+     * @param objectA First object to compare the field's value.
+     * @param objectB Second object to compare the field's value.
      * @return {@code true} if the values are equal, {@code false} otherwise.
      */
-    boolean isEqual(Object instanceA, Object instanceB);
+    boolean isEqual(Object objectA, Object objectB);
 }
