@@ -100,6 +100,6 @@ public class MilliTimestampLongConverter extends AbstractTimestampLongConverter 
      */
     @Override
     protected void appendFraction(DateTimeFormatterBuilder builder) {
-        builder.appendFraction(ChronoField.MILLI_OF_SECOND, 0, 3, true);
+        builder.appendFraction(ChronoField.MILLI_OF_SECOND, 0, 9, true);
     }
 }

@@ -69,7 +69,7 @@ public class MicroTimestampLongConverter extends AbstractTimestampLongConverter 
 
     @Override
     protected void appendFraction(DateTimeFormatterBuilder builder) {
-        builder.appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true);
+        builder.appendFraction(ChronoField.MICRO_OF_SECOND, 0, 9, true);
     }
 
     /**
