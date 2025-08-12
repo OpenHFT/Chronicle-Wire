@@ -18,72 +18,65 @@
 package net.openhft.chronicle.wire;
 
 /**
- * Defines constants representing the high four bits of a
- * {@link BinaryWireCode} byte. These high codes group the binary
- * wire codes into broad types such as Control, Float, Integer,
- * Special, Field, or String. This allows a parser to dispatch
- * efficiently, for example by switching on {@code code >> 4}.
+ * Enum to represent various high-level codes used in the binary wire protocol.
+ * Each constant in this enum serves as a marker to categorize the range of values
+ * used for decoding in the binary wire format. Although the enum itself does not
+ * contain any instances (indicated by the empty enum body), it does define several
+ * static final fields that serve as unique identifiers for each type of high-level code.
  */
 public enum BinaryWireHighCode {
     ; // none
 
-    /**
-     * Represents the end of the data stream. The value is {@code -1} and is not
-     * a high code.
-     */
+    /** Indicates the end of the data stream. */
     static final int END_OF_STREAM = -1;
 
-    /**
-     * Legacy high code for numerical values. Codes {@code 0x00-0x7F} normally
-     * hold single-byte positive integers.
-     */
+    /** Represents numerical values, no longer in use. */
     static final int NUM0 = 0x0;
 
-    /** See {@link #NUM0}. */
+    /** Represents numerical values, no longer in use. */
     static final int NUM1 = 0x1;
 
-    /** See {@link #NUM0}. */
+    /** Represents numerical values, no longer in use. */
     static final int NUM2 = 0x2;
 
-    /** See {@link #NUM0}. */
+    /** Represents numerical values, no longer in use. */
     static final int NUM3 = 0x3;
 
-    /** See {@link #NUM0}. */
+    /** Represents numerical values, no longer in use. */
     static final int NUM4 = 0x4;
 
-    /** See {@link #NUM0}. */
+    /** Represents numerical values, no longer in use. */
     static final int NUM5 = 0x5;
 
-    /** See {@link #NUM0}. */
+    /** Represents numerical values, no longer in use. */
     static final int NUM6 = 0x6;
 
-    /** See {@link #NUM0}. */
+    /** Represents numerical values, no longer in use. */
     static final int NUM7 = 0x7;
 
     /**
-     * High code {@code 0x80} for control sequences such as byte length
+     * High code for control sequences such as byte length
      * prefixes, padding and anchors.
      */
     static final int CONTROL = 0x8;
 
     /**
-     * High code {@code 0x90} for floating-point numbers such as
+     * High code for floating-point numbers such as
      * {@link BinaryWireCode#FLOAT32} or {@link BinaryWireCode#FLOAT_STOP_6}.
      */
     static final int FLOAT = 0x9;
 
     /**
-     * High code {@code 0xA0} for integer types such as
+     * High code for integer types such as
      * {@link BinaryWireCode#INT32}, {@link BinaryWireCode#UINT8} and
      * {@link BinaryWireCode#UUID}.
      */
     static final int INT = 0xA;
 
     /**
-     * High code {@code 0xB0} for special values such as
-     * {@link BinaryWireCode#NULL}, {@link BinaryWireCode#TRUE},
-     * {@link BinaryWireCode#TYPE_PREFIX}, {@link BinaryWireCode#FIELD_NAME_ANY}
-     * or {@link BinaryWireCode#EVENT_NAME}.
+     * High code for special values such as
+     * {@link BinaryWireCode#NULL}, {@link BinaryWireCode#TRUE} or
+     * {@link BinaryWireCode#TYPE_PREFIX}.
      */
     static final int SPECIAL = 0xB;
 

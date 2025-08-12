@@ -64,10 +64,7 @@ import static net.openhft.chronicle.wire.Wires.GENERATE_TUPLES;
  * Primary implementation of the binary wire format. The binary form is
  * optimised for performance and size, often omitting field names in favour of
  * numeric identifiers or relying on the DTO's field order for field-less
- * serialisation. It supports compact encodings for primitives, strings and
- * collections. Ideal for high throughput, low latency applications,
- * inter-process communication or persistent storage where human readability is
- * secondary to efficiency.
+ * serialisation.
  */
 @SuppressWarnings({"rawtypes", "unchecked", "this-escape", "deprecation"})
 public class BinaryWire extends AbstractWire implements Wire {
@@ -89,7 +86,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     /**
      * Cache that reports whether a class typically uses self describing
-     * messages. Defaults to {@code true} unless a {@link Marshallable} says
+     * messages. Defaults to {@code true} unless a {@link Marshallable} describes
      * otherwise.
      */
     private static final ClassValue<Boolean> USES_SELF_DESCRIBING = ClassLocal.withInitial(k -> {
@@ -103,8 +100,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     private static final AtomicBoolean FIRST_WARN_MISSING_CLASS = new AtomicBoolean();
 
     /** Thread-local storage for {@link VanillaMessageHistory}. */
-    private static final ThreadLocal<VanillaMessageHistory> VANILLA_MESSAGE_HISTORY_TL =
-            ThreadLocal.withInitial(VanillaMessageHistory::new);
+    private static final ThreadLocal<VanillaMessageHistory> VANILLA_MESSAGE_HISTORY_TL = ThreadLocal.withInitial(VanillaMessageHistory::new);
 
     /**
      * Used when the wire is configured for fixed size output. Provides more
@@ -176,23 +172,23 @@ public class BinaryWire extends AbstractWire implements Wire {
     private Boolean overrideSelfDescribing = null;
 
     /**
-     * Constructs a {@code BinaryWire} with standard settings.
+     * Constructs a {@code BinaryWire} with default settings.
      *
-     * @param bytes the bytes to be wrapped by this wire
+     * @param bytes the bytes to be processed by this wire
      */
     public BinaryWire(@NotNull Bytes<?> bytes) {
         this(bytes, false, false, false, Integer.MAX_VALUE, "binary", false);
     }
 
     /**
-     * Constructs a fully configurable {@code BinaryWire}.
+     * Constructs a BinaryWire with specified configurations.
      *
-     * @param bytes          the bytes to wrap
-     * @param fixed          if {@code true}, enable fixed-size encodings for some values
-     * @param numericFields  write field numbers rather than names
-     * @param fieldLess      omit field identifiers entirely
-     * @param compressedSize compress values larger than this
-     * @param compression    name of the compression algorithm
+     * @param bytes The bytes to be processed by this wire
+     * @param fixed Indicates whether the value output is fixed
+     * @param numericFields Indicates if fields are represented numerically
+     * @param fieldLess Indicates if fields are absent
+     * @param compressedSize Threshold size for compression
+     * @param compression Type of compression (e.g., "binary")
      */
     public BinaryWire(@NotNull Bytes<?> bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression) {
         super(bytes, false);
@@ -209,13 +205,13 @@ public class BinaryWire extends AbstractWire implements Wire {
      * Same as the main constructor but with a legacy {@code supportDelta} parameter
      * which is ignored as delta wire format is not supported.
      *
-     * @param bytes          the bytes to wrap
-     * @param fixed          if {@code true}, enable fixed-size encodings
-     * @param numericFields  write field numbers rather than names
-     * @param fieldLess      omit field identifiers entirely
-     * @param compressedSize compress values larger than this
-     * @param compression    name of the compression algorithm
-     * @param supportDelta   formerly enabled delta format; must be {@code false}
+     * @param bytes The bytes to be processed by this wire
+     * @param fixed Indicates whether the value output is fixed
+     * @param numericFields Indicates if fields are represented numerically
+     * @param fieldLess Indicates if fields are absent
+     * @param compressedSize Threshold size for compression
+     * @param compression Type of compression (e.g., "binary")
+     * @param supportDelta must be false
      */
     @Deprecated(/* to be removed in x.29 */)
     public BinaryWire(@NotNull Bytes<?> bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression, boolean supportDelta) {
@@ -224,11 +220,10 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Creates a standard {@code BinaryWire} optimised for performance. Numeric
-     * fields, field-less serialisation and value compression are disabled.
+     * Creates and returns a new instance of BinaryWire with the delta support disabled.
      *
-     * @param bytes the bytes to wrap
-     * @return a new {@code BinaryWire}
+     * @param bytes The bytes to be processed by this wire
+     * @return A new instance of BinaryWire
      */
     @NotNull
     public static BinaryWire binaryOnly(@NotNull Bytes<?> bytes) {
@@ -236,11 +231,11 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Heuristically checks whether the content of a {@link BytesStore} consists
-     * solely of printable ASCII characters and newlines.
+     * Determines if the provided BytesStore can be treated as textual.
+     * This method checks each byte of the BytesStore to ensure it's a printable character or a newline.
      *
-     * @param bytes the store to inspect
-     * @return {@code true} if the bytes appear textual
+     * @param bytes The BytesStore to check
+     * @return true if the BytesStore can be treated as text, false otherwise
      */
     static boolean textable(BytesStore<?, ?> bytes) {
         if (bytes == null)
@@ -254,10 +249,11 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * As {@link #textable(BytesStore)} but operates on a {@link CharSequence}.
+     * Determines if the provided CharSequence can be treated as textual.
+     * This method checks each character of the CharSequence to ensure it's a printable character.
      *
-     * @param cs the character sequence to inspect
-     * @return {@code true} if the sequence is printable ASCII
+     * @param cs The CharSequence to check
+     * @return true if the CharSequence can be treated as text, false otherwise
      */
     static boolean textable(CharSequence cs) {
         if (cs == null)
@@ -271,7 +267,10 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Returns {@code true} if {@code c} is an ASCII digit '0' through '9'.
+     * Checks if the provided character is a digit (0-9).
+     *
+     * @param c The character to check
+     * @return true if the character is a digit, false otherwise
      */
     static boolean isDigit(char c) {
         // use underflow to make digits below '0' large.
@@ -292,7 +291,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         bytes.clear();
     }
 
-    /** @see RollbackIfNotCompleteNotifier#rollbackIfNotComplete() */
+    /** {@inheritDoc} */
     @Override
     public void rollbackIfNotComplete() {
         writeContext.rollbackIfNotComplete();
@@ -330,7 +329,10 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Returns the reusable {@link #stringBuilder} after clearing its contents.
+     * Acquires and clears the internal StringBuilder for use. This method is used to avoid frequent
+     * instantiation of new StringBuilder objects, improving performance.
+     *
+     * @return A cleared instance of the internal StringBuilder.
      */
     @NotNull
     protected StringBuilder acquireStringBuilder() {
@@ -360,7 +362,9 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * @return {@code true} if this wire omits field names entirely
+     * Checks and returns if this BinaryWire instance is field-less.
+     *
+     * @return true if the BinaryWire is field-less, false otherwise.
      */
     public boolean fieldLess() {
         return fieldLess;
@@ -422,9 +426,11 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Provides a YAML-like string of the current binary document.
-     * Useful for debugging. The document must have been started via
-     * {@link #readingDocument()}.
+     * Typicality used for debugging, this method does not progress the read position and should
+     * only be used when inside a reading document.
+     *
+     * @return when readReading a document returns the current document as a YAML String, if you are
+     * not currently reading a document, and empty string will be return.
      */
     @Override
     @NotNull
@@ -436,7 +442,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Efficiently copies the remaining content of this wire to {@code wire}.
+     * Efficiently copies the remaining content.
      * If {@code wire} is also a {@code BinaryWire}, bytes are copied directly;
      * otherwise each token is decoded and re-encoded.
      */
@@ -456,8 +462,11 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Internal helper used by {@link #copyTo(WireOut)}.
-     * Copies one top-level value and honours the {@code first} flag.
+     * Copies the content of this BinaryWire instance to the provided WireOut instance.
+     * It does this by copying each data point sequentially.
+     *
+     * @param wire The destination WireOut instance.
+     * @param first A flag indicating if the data point being copied is the first one.
      */
     void copyTo(@NotNull WireOut wire, boolean first) {
         while (bytes.readRemaining() > 0) {
@@ -467,14 +476,22 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Copy a single top level value to {@code wire}.
+     * Copies one unit of data from this BinaryWire to the provided WireOut instance.
+     *
+     * @param wire The destination WireOut instance.
+     * @throws InvalidMarshallableException if the operation encounters an error during marshalling.
      */
     public void copyOne(@NotNull WireOut wire) throws InvalidMarshallableException {
         copyOne(wire, true);
     }
 
     /**
-     * Internal helper to copy a value to {@code wire}.
+     * Copies one unit of data from this BinaryWire to the provided WireOut instance,
+     * considering the provided 'first' flag.
+     *
+     * @param wire The destination WireOut instance.
+     * @param first A flag indicating if the data point being copied is the first one.
+     * @throws InvalidMarshallableException if the operation encounters an error during marshalling.
      */
     private void copyOne(@NotNull WireOut wire, boolean first) throws InvalidMarshallableException {
         int peekCode = peekCode();
@@ -634,9 +651,6 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
     }
 
-    /**
-     * Copy a {@link VanillaMessageHistory} message.
-     */
     private static void copyHistoryMessage(Bytes<?> bytes, @NotNull WireOut wire) {
         VanillaMessageHistory vmh = VANILLA_MESSAGE_HISTORY_TL.get();
         vmh.useBytesMarshallable(true);
@@ -646,7 +660,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Throw an {@link IORuntimeException} for an unexpected binary code.
+     * Throw an {@link IORuntimeException} for an unexpected code.
      */
     protected static void unexpectedCode() {
         throw new IORuntimeException("Unexpected code in this context");
@@ -655,23 +669,30 @@ public class BinaryWire extends AbstractWire implements Wire {
     /**
      * Anchor support is not implemented for binary wires.
      * This method always throws via {@link #unexpectedCode()}.
+     *
+     * @param wire The wire output stream.
      */
     protected void anchor(@NotNull WireOut wire) {
         unexpectedCode();
     }
 
     /**
-     * Field anchors are not supported for binary wires.
-     * This method always throws via {@link #unexpectedCode()}.
+     * Placeholder or handler for field anchor processing in the WireOut stream.
+     * This implementation throws an exception indicating it's unexpected in this context.
+     *
+     * @param wire The wire output stream.
      */
     protected void fieldAnchor(@NotNull WireOut wire) {
         unexpectedCode();
     }
 
     /**
-     * Read {@code len} bytes and copy them to {@code wire}.
-     * The method inspects the leading code to decide whether the block
-     * is a map, sequence or scalar value.
+     * Reads data of a specified length from the bytes stream and writes to the WireOut stream
+     * while interpreting the type of data (Map, Sequence, or Object).
+     *
+     * @param wire The wire output stream to write data to.
+     * @param len  The length of data to be read.
+     * @throws InvalidMarshallableException If there's an issue during marshalling.
      */
     @SuppressWarnings("incomplete-switch")
     public void readWithLength(@NotNull WireOut wire, int len) throws InvalidMarshallableException {
@@ -723,7 +744,9 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Determine the {@link BracketType} of the next value on the wire.
+     * Peeks the next code from the stream and determines its corresponding bracket type.
+     *
+     * @return BracketType which could be MAP, SEQ, or NONE based on the peeked code.
      */
     @NotNull
     private BracketType getBracketTypeNext() {
@@ -732,7 +755,10 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Utility to map a code byte to a {@link BracketType}.
+     * Determines the bracket type for a given code.
+     *
+     * @param peekCode The code to determine the bracket type for.
+     * @return BracketType corresponding to the provided code.
      */
     @NotNull
     BracketType getBracketTypeFor(int peekCode) {
@@ -788,8 +814,16 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Locate a field by name or code and position {@link #valueIn} at its value.
-     * Unknown fields are skipped and remembered for later passes.
+     * Attempts to read a field based on a given keyName and keyCode. If the field isn't immediately found, the method
+     * will default to the provided source and lookup function. This method manages the parsing position, and may resort
+     * to older fields if necessary.
+     *
+     * @param keyName       The name of the key to be searched for.
+     * @param keyCode       The code corresponding to the key.
+     * @param defaultSource The source to revert to if the key isn't found.
+     * @param defaultLookup The function used to derive a default value based on the defaultSource.
+     * @param <T>           The type of the default source.
+     * @return Returns a ValueIn object which represents the found or default value.
      */
     private <T> ValueIn read(CharSequence keyName, int keyCode, T defaultSource, @NotNull Function<T, Object> defaultLookup) {
         ValueInState curr = valueIn.curr();
@@ -828,7 +862,19 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Second phase field search used when a match was not found in order.
+     * A secondary method to continue the field search process, specifically to handle cases where the field may
+     * have been missed in a previous pass or if the field still hasn't been found. It will revert to the default
+     * value if the field cannot be located.
+     *
+     * @param keyName       The name of the key to be searched for.
+     * @param keyCode       The code corresponding to the key.
+     * @param defaultSource The source to revert to if the key isn't found.
+     * @param defaultLookup The function used to derive a default value based on the defaultSource.
+     * @param curr          The current state of ValueIn.
+     * @param sb            The StringBuilder used for string manipulations during search.
+     * @param name          The actual name of the field being sought.
+     * @param <T>           The type of the default source.
+     * @return Returns a ValueIn object which represents the found or default value.
      */
     protected <T> ValueIn read2(CharSequence keyName,
                                 int keyCode,
@@ -949,9 +995,10 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Consumes {@link BinaryWireCode#PADDING},
-     * {@link BinaryWireCode#PADDING32} or {@link BinaryWireCode#COMMENT}
-     * bytes and returns the first significant code.
+     * Peeks at the next code after any padding or comments. If padding or comments are encountered,
+     * they are consumed and the method looks again for the next meaningful code.
+     *
+     * @return The code that appears after any padding or comments.
      */
     private int peekCodeAfterPadding() {
         // Peek at the next available code.
@@ -993,9 +1040,13 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Handles short field names packed into the code byte. The lower five bits
-     * encode the length (0-31). The extracted string is interned and converted
-     * to {@code expectedClass}.
+     * Reads a small field based on the given peek code and converts it to the expected class type.
+     * This method is optimized for fields with a length up to 31 characters.
+     *
+     * @param peekCode      The peek code used to determine the length and type of the field.
+     * @param expectedClass The class type to which the read value should be converted.
+     * @param <K>           The type of the returned value.
+     * @return The read value converted to the expected class type.
      */
     @NotNull
     private <K> K readSmallField(int peekCode, Class<K> expectedClass) {
@@ -1015,11 +1066,14 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Parses longer field names, numeric IDs and event objects. The
-     * {@link BinaryWireCode#FIELD_NUMBER} branch reads a stop-bit integer,
-     * {@link BinaryWireCode#FIELD_NAME_ANY} and {@link BinaryWireCode#EVENT_NAME}
-     * read an 8-bit string, and {@link BinaryWireCode#EVENT_OBJECT} reads an
-     * object of the expected type.
+     * Reads a special field based on the given peek code and converts it to the expected class type.
+     * This method handles special cases like field numbers, field names, events, and anchors.
+     *
+     * @param peekCode      The peek code representing the type of the field.
+     * @param expectedClass The class type to which the read value should be converted.
+     * @param <K>           The type of the returned value.
+     * @return The read value converted to the expected class type or null if the peek code doesn't match any known type.
+     * @throws InvalidMarshallableException If there's an error during the marshalling process.
      */
     @Nullable
     private <K> K readSpecialField(int peekCode, @NotNull Class<K> expectedClass) throws InvalidMarshallableException {
@@ -1049,7 +1103,9 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Reads an 8-bit encoded string into a reusable {@link StringBuilder}.
+     * Reads a field with an 8-bit character set encoding into a StringBuilder.
+     *
+     * @return A StringBuilder containing the read field or null if the read operation failed.
      */
     @Nullable
     StringBuilder read8bit() {
@@ -1094,18 +1150,15 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Reads the next field identifier from the wire according to
-     * {@code peekCode}.
-     * <ul>
-     *   <li>Short names ({@link BinaryWireCode#FIELD_NAME0}..{@link BinaryWireCode#FIELD_NAME31})
-     *       are decoded directly into {@code sb}.</li>
-     *   <li>{@link BinaryWireCode#FIELD_NAME_ANY} or {@link BinaryWireCode#EVENT_NAME}
-     *       cause an 8-bit string read.</li>
-     *   <li>{@link BinaryWireCode#FIELD_NUMBER} reads a stop-bit ID and, if it
-     *       matches {@code keyCode}, places {@code keyName} in {@code sb}.</li>
-     * </ul>
-     * Returns {@code sb} if a field was consumed, otherwise {@code null} unless
-     * {@code fieldLess} is true, in which case an empty {@code sb} is returned.
+     * Reads a field from the wire based on the provided peek code.
+     * This method is designed to handle different types of fields including control, special, small fields, etc.
+     *
+     * @param peekCode   The peek code indicating the type of the field to be read.
+     * @param keyName    The key name of the field to be matched against.
+     * @param keyCode    The key code of the field to be matched against.
+     * @param sb         The StringBuilder to be populated with the read field.
+     * @param missingOk  Indicates if missing fields are acceptable.
+     * @return The populated StringBuilder with the read field or null if no field matched the given keyName and keyCode.
      */
     private StringBuilder readField(int peekCode, CharSequence keyName, int keyCode, @NotNull StringBuilder sb, boolean missingOk) {
         sb.setLength(0);
@@ -1244,7 +1297,11 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Handles special binary codes such as comments, timestamps and type prefixes.
+     * Copies special types of fields from the input wire to the output wire based on the provided peek code.
+     *
+     * @param wire     The output wire to which the field should be written.
+     * @param peekCode The peek code indicating the type of the special field to be copied.
+     * @throws InvalidMarshallableException If there's an error during the copy operation.
      */
     private void copySpecial(@NotNull WireOut wire, int peekCode) throws InvalidMarshallableException {
         // Switch based on the type of the field indicated by peekCode.
@@ -1411,9 +1468,11 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Decodes an integer value from {@code code}. Codes below {@code 128}
-     * represent the value directly. Higher codes use formats such as
-     * {@link BinaryWireCode#INT8}, {@link BinaryWireCode#INT16} and so on.
+     * Decodes an integer from its binary representation based on a {@code code}.
+     * Codes below {@code 128} represent the value directly. Higher codes use {@link BinaryWireCode} formats
+     *
+     * @param code The code that indicates the encoding.
+     * @return The decoded integer.
      */
     long readInt(int code) {
         // Direct value for codes less than 128.
@@ -1445,10 +1504,10 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Decodes a floating point number according to {@code code}. Values may be
-     * stored as {@link BinaryWireCode#FLOAT32}, {@link BinaryWireCode#FLOAT64}
-     * or as scaled integers via {@link BinaryWireCode#FLOAT_STOP_2} and
-     * similar codes.
+     * Decodes a floating point number from its binary representation based on a code.
+     *
+     * @param code The code that indicates the encoding.
+     * @return The decoded floating point number.
      */
     double readFloat0(int code) {
         // Check if the high bit is set (indicating a special encoding).
@@ -1478,9 +1537,11 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Variant of {@link #readFloat0(int)} that returns a boxed
-     * {@link Number}. This method allocates and should be avoided on the
-     * critical path.
+     * Decodes a floating point number from its binary representation and boxes it as a Number.
+     * NOTE: This method boxes primitives, which might produce garbage.
+     *
+     * @param code The code indicating the encoding.
+     * @return The decoded floating point number as a Number.
      */
     // TODO: boxes and creates garbage
     private Number readFloat0bject(int code) {
@@ -1514,8 +1575,11 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Decodes an integer value according to {@code code}. Small values are
+     * Decodes an integer from its binary representation based on {@code code}. Small values are
      * encoded directly; larger ones use widths such as 8, 16, 32 or 64 bits.
+     *
+     * @param code The code that indicates the encoding.
+     * @return The decoded integer.
      */
     long readInt0(int code) {
         // Handle small positive integers without special encoding.
@@ -1554,8 +1618,11 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Boxed variant of {@link #readInt0(int)} returning a {@link Number}. This
-     * allocates and should only be used when an object is required.
+     * Decodes an integer value from its binary representation and boxes it as a Number.
+     * NOTE: This method boxes primitive numbers, which might introduce garbage in a garbage-collected environment.
+     *
+     * @param code The code that indicates the encoding.
+     * @return The decoded integer value as a Number.
      */
     // TODO: boxes and creates garbage
     Number readInt0object(int code) {
@@ -1595,17 +1662,20 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Returns {@code true} if the high bit of {@code code} is clear,
-     * indicating a 7‑bit value encoded directly in the code byte.
+     * Determines if the given code corresponds to a small integer (7-bits).
+     *
+     * @param code The integer code.
+     * @return True if it's a small integer; false otherwise.
      */
     private boolean isSmallInt(int code) {
         return (code & 128) == 0;
     }
 
     /**
-     * Decodes a floating point value. Small integers are returned as doubles;
-     * otherwise the code is dispatched to {@link #readFloat0(int)} or
-     * {@link #readInt0(int)} depending on its high bits.
+     * Decodes a floating point number from its binary representation.
+     *
+     * @param code The code indicating the encoding type.
+     * @return The decoded floating point value.
      */
     double readFloat(int code) {
         // If the number is a small integer, return it directly as a double.
@@ -1797,7 +1867,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Writes a numeric field identifier as
+     * Writes a numeric field identifier to the byte buffer as
      * {@link BinaryWireCode#FIELD_NUMBER} and a stop-bit value.
      */
     private void writeField(int code) {
@@ -1811,7 +1881,10 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Writes a single byte code to the underlying bytes.
+     * Writes a byte code to the byte buffer.
+     *
+     * @param code The byte code to write.
+     * @return Returns the byte buffer after writing the code.
      */
     protected Bytes<?> writeCode(int code) {
         return bytes.writeByte((byte) code);
@@ -1920,11 +1993,13 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Throws an {@link UnsupportedOperationException} indicating the given
-     * {@code code} is not recognised in the current context.
+     * Generates an UnsupportedOperationException when an unknown code is encountered.
+     * <p>
+     * The function formats the provided code to a hexadecimal string and
+     * includes it in the exception message.
      *
-     * @param code the unrecognised code
-     * @return the exception to be thrown
+     * @param code The code that was not recognized or understood.
+     * @return A new UnsupportedOperationException initialized with a message detailing the unknown code.
      */
     @NotNull
     private UnsupportedOperationException unknownCode(int code) {
@@ -1933,9 +2008,15 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Reads and returns the next unsigned byte from the wire, consuming it.
+     * Reads a code from the byte storage without checks.
+     * <p>
+     * This method retrieves a code that indicates the format or type of the next data
+     * to be read from the bytes storage.
+     *
+     * @return The code retrieved from the byte storage.
      */
     int readCode() {
+        // Use unchecked method to read the next unsigned byte as code.
         return bytes.uncheckedReadUnsignedByte();
     }
 
@@ -2003,11 +2084,13 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Determines if {@code object} should be serialised with self-describing
-     * messages, respecting {@link #overrideSelfDescribing}.
+     * Determines whether a given object should use the self-describing message format.
+     * <p>
+     * This method first checks if an override value for self-describing is set. If not,
+     * it uses the self-describing value from the provided object.
      *
-     * @param object the object to check
-     * @return {@code true} if the object should use the self-describing format
+     * @param object The object whose self-describing status needs to be checked.
+     * @return true if the object should use the self-describing message format, false otherwise.
      */
     public boolean useSelfDescribingMessage(@NotNull CommonMarshallable object) {
         // Check for override or get the value from the object.
@@ -2020,8 +2103,8 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Internal {@link WireKey} used as a sentinel to indicate that any field
-     * code should be matched during field lookup.
+     * Enum representing any code match within the WireKey interface.
+     * This enum is designed to provide a specific code that represents any possible match.
      */
     enum AnyCodeMatch implements WireKey {
         ANY_CODE_MATCH;
@@ -2033,16 +2116,12 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Provides methods to write various data types to the {@code BinaryWire}
-     * using fixed-width or specific binary encodings.
+     * Implementation of the ValueOut interface, providing methods to write values in a fixed binary format.
+     * This inner class offers various methods to output values in a binary format that retains its order.
      */
     protected class FixedBinaryValueOut implements ValueOut {
 
         @NotNull
-        /**
-         * Writes {@link BinaryWireCode#TRUE} or {@link BinaryWireCode#FALSE}.
-         * A {@code null} value is encoded with {@link BinaryWireCode#NULL}.
-         */
         @Override
         public WireOut bool(@Nullable Boolean flag) {
             if (bytes.retainedHexDumpDescription())
@@ -2062,11 +2141,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
-        /**
-         * Writes UTF-8 text. Small strings use {@code STRING_0 + len}; larger
-         * ones use {@link BinaryWireCode#STRING_ANY}. {@code null} is encoded
-         * via {@link #nu11()}.
-         */
         @NotNull
         @Override
         public WireOut text(@Nullable CharSequence s) {
@@ -2088,11 +2162,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
-        /**
-         * Writes a {@link String} using the compact form if it fits, otherwise
-         * writes {@link BinaryWireCode#STRING_ANY}. {@code null} is encoded with
-         * {@link BinaryWireCode#NULL}.
-         */
         @NotNull
         @Override
         public WireOut text(@Nullable String s) {
@@ -2141,10 +2210,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
-        /**
-         * Writes a length-prefixed byte array. The data is prefixed with
-         * {@link BinaryWireCode#U8_ARRAY} unless compression is applied.
-         */
         @NotNull
         @Override
         public WireOut bytes(@Nullable BytesStore<?, ?> fromBytes) {
@@ -2205,11 +2270,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
-        /**
-         * Writes a length prefix using {@link BinaryWireCode#BYTES_LENGTH8},
-         * {@link BinaryWireCode#BYTES_LENGTH16} or
-         * {@link BinaryWireCode#BYTES_LENGTH32} depending on {@code length}.
-         */
         @Override
         @NotNull
         public ValueOut writeLength(long length) {
@@ -2365,10 +2425,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             return fixedInt64(i64);
         }
 
-        /**
-         * Writes {@link BinaryWireCode#INT64} followed by the 8‑byte long
-         * value.
-         */
         @Override
         @NotNull
         public WireOut fixedInt64(long i64) {
@@ -2463,10 +2519,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             return fixedFloat64(d);
         }
 
-        /**
-         * Writes {@link BinaryWireCode#FLOAT64} followed by the 8‑byte
-         * double value.
-         */
         @Override
         @NotNull
         public WireOut fixedFloat64(double d) {
@@ -2631,10 +2683,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
-        /**
-         * Writes a sequence of values preceded by a 32 bit length.
-         * The {@code writer} is invoked to emit each item within the block.
-         */
         @NotNull
         @Override
         public <T> WireOut sequence(T t, @NotNull BiConsumer<T, ValueOut> writer) {
@@ -2673,10 +2721,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             bytes.writeInt(position, length);
         }
 
-        /**
-         * Writes a length prefixed block and lets the {@code writer}
-         * serialise items of type {@code K}.
-         */
         @NotNull
         @Override
         public <T, K> WireOut sequence(T t, K kls, @NotNull TriConsumer<T, K, ValueOut> writer) throws InvalidMarshallableException {
@@ -2778,8 +2822,8 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Extends {@link FixedBinaryValueOut} to provide optimised, often
-     * variable-width encodings for numbers based on their magnitude.
+     * Extends the FixedBinaryValueOut class to support binary value outputs with additional logic for converting
+     * and writing different types of numbers, namely integers and longs.
      */
      protected class BinaryValueOut extends FixedBinaryValueOut {
         @Override
@@ -2809,9 +2853,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         /**
-         * Chooses the most compact binary representation for the number based
-         * on its magnitude (e.g. using {@link BinaryWireCode#UINT8} if it fits
-         * or {@link BinaryWireCode#FLOAT_STOP_6} for suitable floats).
+         * Writes a number (long value) in an optimized binary format based on the value's size.
+         * Uses the number of leading zeros to determine the smallest binary representation
+         * that can accommodate the given value.
+         *
+         * @param l The number (long value) to be written.
          */
         void writeNumber(long l) {
             // Check the number of leading zeros to determine the best representation.
@@ -2869,8 +2915,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         /**
-         * As {@link #writeNumber(long)} but for ints, selecting the most compact
-         * form.
+         * Writes an integer number in an optimized binary format based on the value's size.
+         * Uses the number of leading zeros to determine the smallest binary representation
+         * that can accommodate the given value.
+         *
+         * @param l The number (int value) to be written.
          */
         void writeNumber(int l) {
             // Offset leading zeros count for an integer to align with the long representation logic
@@ -2911,6 +2960,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         /**
          * Selects an int or float encoding for {@code l} depending on whether
          * it has a fractional part.
+         *
+         * @param l The float number to be written.
          */
         void writeNumber(float l) {
             boolean canOnlyBeRepresentedAsFloatingPoint = ((long) l) != l;
@@ -2922,8 +2973,9 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         /**
-         * Selects an int, float or double encoding for {@code l} depending on
-         * its value.
+         * Writes a double number either as a float or as an integer based on its value.
+         *
+         * @param l The double number to be written.
          */
         void writeNumber(double l) {
             boolean canOnlyBeRepresentedAsFloatingPoint = ((long) l) != l;
@@ -3170,16 +3222,16 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * The {@link ValueIn} implementation for {@link BinaryWire}. Provides
-     * methods to read various data types by interpreting binary codes and
-     * decoding subsequent bytes.
+     * Represents a binary input value and provides methods to read and manage the state
+     * of this binary input. The class encapsulates a stack for managing multiple states
+     * and a reader for handling the binary data.
      */
     protected class BinaryValueIn implements ValueIn {
 
-        /** Maintains nested parse state during sequence and map traversal. */
+        // Stack for managing the state of the binary input
         final ValueInStack stack = new ValueInStack();
 
-        /** Delegate used when reading the first field of a sequence. */
+        // The reader responsible for handling the binary data
         final Reader reader0field = this::reader0;
 
         @Override
@@ -3287,9 +3339,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                     (code >= STRING_0 && code <= STRING_31);
         }
 
-        /**
-         * Reads a binary encoded string into {@code sb}.
-         */
         @Nullable
         @Override
         public StringBuilder textTo(@NotNull StringBuilder sb) {
@@ -3307,9 +3356,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
         }
 
-        /**
-         * Reads a binary encoded string into the provided {@link Bytes}.
-         */
         @Nullable
         @Override
         public Bytes<?> textTo(@NotNull Bytes<?> bytes) {
@@ -3466,11 +3512,6 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         }
 
-        /**
-         * Reads a length-prefixed byte array (expected to be
-         * {@link BinaryWireCode#U8_ARRAY} or a typed/compressed variant) and
-         * returns it as a {@link BytesStore}.
-         */
         @Override
         @Nullable
         public BytesStore<?, ?> bytesStore() {
@@ -3623,14 +3664,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Override
-        /**
-         * Reads the length of the next value based on the current code.
-         * <p>
-         * Handles length prefixes such as {@link BinaryWireCode#BYTES_LENGTH8}
-         * and also infers the size for fixed-width primitives. Returns {@code -1}
-         * if the code is not recognised.
-         */
         public long readLength() {
+            // TODO handle non length types as well.
 
             int code = peekCode();
             if ((code & 0x80) == 0)
@@ -3730,13 +3765,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
         }
 
-        /**
-         * Skips the value at the current read position.
-         * <p>
-         * The method reads the length of the item and moves the read pointer
-         * past that many bytes. If the length cannot be determined the value is
-         * consumed using {@link #objectBestEffort()}.
-         */
         @NotNull
         @Override
         public WireIn skipValue() {
@@ -4142,10 +4170,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             return true;
         }
 
-        /**
-         * Reads a sequence into {@code list} using a temporary buffer. The block
-         * length is read from the wire before items are processed.
-         */
         @Override
         public <T> boolean sequence(@NotNull List<T> list,
                                     @NotNull List<T> buffer,
@@ -4154,10 +4178,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             return sequence(list, buffer, bufferAdd, reader0field);
         }
 
-        /**
-         * Reads a sequence using a caller supplied reader.
-         * The length prefix is honoured before delegating to {@code tReader}.
-         */
         @Override
         public <T> boolean sequence(List<T> list,
                                     @NotNull List<T> buffer,
@@ -4181,10 +4201,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             return true;
         }
 
-        /**
-         * Reads a length-prefixed block and passes a {@link ValueIn} for each entry
-         * to the supplied {@code tReader}.
-         */
         @NotNull
         @Override
         public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) throws InvalidMarshallableException {
@@ -4301,12 +4317,13 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         /**
-         * Handles a {@link BinaryWireCode#TYPE_PREFIX} by reading the class name,
-         * creating an instance and unmarshalling into it.
+         * Tries to deserialize a typed Marshallable object from the current state of the wire.
+         * The method identifies the type of the Marshallable object by reading a UTF-8 encoded class name
+         * and then instantiates and initializes the object accordingly.
          *
-         * @param <T> expected type
-         * @return a new instance populated from the wire or {@code null} if no class name is present
-         * @throws InvalidMarshallableException if deserialisation fails
+         * @param <T> Type of the expected return object.
+         * @return The deserialized Marshallable object or null if the UTF-8 encoded class name is not found.
+         * @throws InvalidMarshallableException If the deserialization encounters any issues.
          */
         @Nullable
         protected <T> T typedMarshallable0() throws InvalidMarshallableException {
@@ -4352,10 +4369,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             return object(null, aClass);
         }
 
-        /**
-         * If the next code is {@link BinaryWireCode#TYPE_PREFIX} this reads the
-         * class name and resolves it.
-         */
         @Override
         public Class<?> typePrefix() {
             int code = peekCode();
@@ -4373,10 +4386,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
         }
 
-        /**
-         * Variation of {@link #typePrefix()} used by generated DTOs to read the
-         * class name or return a tuple if the type is missing.
-         */
         @Override
         public Object typePrefixOrObject(Class<?> tClass) {
             int code = peekCode();
@@ -4468,10 +4477,14 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         /**
-         * Reads a length prefixed binary block into {@code object}.
-         * The {@code overwrite} flag controls whether existing state is replaced.
-         * The method respects {@link WireIn#useSelfDescribingMessage(CommonMarshallable)}
-         * to decide which read method to invoke.
+         * Marshalls the given object and can optionally overwrite existing values.
+         *
+         * @param object The object to be marshalled.
+         * @param overwrite Determines if the existing values should be overwritten.
+         * @return True if the operation is successful.
+         * @throws BufferUnderflowException If there's not enough data available in the buffer.
+         * @throws IORuntimeException If there's a general IO error.
+         * @throws InvalidMarshallableException If there's an error specific to marshalling.
          */
         public boolean marshallable(@NotNull ReadMarshallable object, boolean overwrite)
                 throws BufferUnderflowException, IORuntimeException, InvalidMarshallableException {
@@ -4547,8 +4560,12 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         /**
-         * Instantiates and populates a new object of {@code clazz} from a
-         * length-prefixed block.
+         * Deserializes an object of the given class from the wire data.
+         *
+         * @param clazz Class to be deserialized.
+         * @return An instance of the provided class.
+         * @throws BufferUnderflowException if there's not enough data in the buffer.
+         * @throws IORuntimeException for general IO issues.
          */
         @Nullable
         public Demarshallable demarshallable(@NotNull Class<? extends Demarshallable> clazz) throws BufferUnderflowException, IORuntimeException {
@@ -4572,8 +4589,14 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         /**
-         * Parses the previously read text as a {@code long} with a numeric fallback.
-         * If parsing fails the supplied {@code otherwise} value is returned.
+         * Reads a text from the wire and attempts to convert it into a long value.
+         * If the text is not a valid representation of a long, tries to parse it as a double
+         * and then rounds to the nearest long.
+         *
+         * @param otherwise Default value to return if the conversion fails.
+         * @return Parsed long value or the provided default value.
+         * @throws IORuntimeException for general IO issues.
+         * @throws BufferUnderflowException if there's not enough data in the buffer.
          */
         private long readTextAsLong(long otherwise) throws IORuntimeException, BufferUnderflowException {
             bytes.uncheckedReadSkipBackOne();  // Go back one position.
@@ -4593,8 +4616,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         /**
-         * Parses the previously read text as a {@code double}.
-         * Returns {@code NaN} on failure.
+         * Reads a text from the wire and attempts to convert it into a double value.
+         *
+         * @return Parsed double value or NaN if the conversion fails.
+         * @throws IORuntimeException for general IO issues.
+         * @throws BufferUnderflowException if there's not enough data in the buffer.
          */
         private double readTextAsDouble() throws IORuntimeException, BufferUnderflowException {
             bytes.uncheckedReadSkipBackOne();  // Go back one position.
@@ -4609,10 +4635,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             return Double.parseDouble(text);  // Try to parse the text as a double.
         }
 
-        /**
-         * Reads the leading code and decodes a boolean. Text codes are parsed
-         * as "true" or "false". Padding is skipped recursively.
-         */
         @Override
         public boolean bool() throws IORuntimeException {
             int code = readCode();
@@ -4635,11 +4657,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             throw new IORuntimeException(stringForCode(code));
         }
 
-        /**
-         * Reads the leading code and returns a byte value. If the code is less
-         * than {@code 128} the code itself is the value; otherwise it is
-         * decoded via {@link #int8b(int)}.
-         */
         @Override
         public byte int8() {
             int code = readCode();
@@ -4755,10 +4772,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
         }
 
-        /**
-         * Reads the next code and returns a double. Float codes are decoded
-         * directly; text codes are parsed as numbers.
-         */
         @Override
         public double float64() {
             int code = readCode();
@@ -4768,18 +4781,16 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         /**
-         * Convenience method used when an unexpected code is encountered.
-         * Always throws {@link UnsupportedOperationException}.
+         * Throws an exception indicating that reading the provided code is not supported.
+         *
+         * @param code The unsupported code.
+         * @return A runtime exception (never actually returned since an exception is always thrown).
          */
         @NotNull
         private RuntimeException cantRead(int code) {
             throw new UnsupportedOperationException(stringForCode(code));
         }
 
-        /**
-         * Core logic used when the exact field type is not known in advance.
-         * The wire code is inspected to decide how the value should be read.
-         */
         @Override
         public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class<?> type) throws InvalidMarshallableException {
             int code = peekCode();
@@ -4940,8 +4951,10 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         /**
-         * Skips the current value by decoding its length and type without
-         * fully deserialising it.
+         * Consumes the next set of bytes based on the provided code.
+         * The method moves the reader pointer after the current item or structure.
+         *
+         * @throws InvalidMarshallableException If there's an error while marshalling.
          */
         void consumeNext() throws InvalidMarshallableException {
             // Peek at the next byte to determine the code.
@@ -5083,4 +5096,3 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
     }
 }
-
