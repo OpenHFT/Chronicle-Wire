@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * A {@code MilliTimestampLongConverter} is an implementation of {@code AbstractTimestampLongConverter}
  * which handles conversions between long timestamps and date-time strings.
- * The precision of this converter is to the millisecond.
+ * The precision of this converter is to the millisecond, extra precision is ignored.
  * This converter is singleton, the instance can be accessed using the public field INSTANCE.
  */
 public class MilliTimestampLongConverter extends AbstractTimestampLongConverter {
