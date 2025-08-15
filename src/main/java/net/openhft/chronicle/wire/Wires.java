@@ -930,9 +930,6 @@ public enum Wires {
             strategy = MAP;
 
         // If no object is provided to populate, instantiate a new one using the strategy.
-//        if (using == null) {
-//            using = strategy.newInstanceOrNull((Class<E>) clazz);
-//        }
 
         if (Demarshallable.class.isAssignableFrom(clazz) || using == null) {
             using = (E) strategy.newInstanceOrNull(clazz);
