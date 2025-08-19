@@ -1,5 +1,7 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.annotation.UsedViaReflection;
+
 public class SelfDescribingDemarshallableObject extends SelfDescribingMarshallable implements Demarshallable {
 
     String name = null;
@@ -10,6 +12,8 @@ public class SelfDescribingDemarshallableObject extends SelfDescribingMarshallab
         this.value = value;
     }
 
+    @SuppressWarnings("this-escape")
+    @UsedViaReflection
     public SelfDescribingDemarshallableObject(WireIn wire) {
         readMarshallable(wire);
     }

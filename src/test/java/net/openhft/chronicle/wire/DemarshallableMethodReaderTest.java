@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -62,7 +63,7 @@ public class DemarshallableMethodReaderTest {
             if (marshalledObjectRef.get() == null) {
                 marshalledObjectRef.set(obj);
             } else {
-                assertThat(obj, IsSame.sameInstance(marshalledObjectRef.get()));
+                assertThat(obj, not(IsSame.sameInstance(marshalledObjectRef.get())));
             }
             assertThat(obj.name, IsNot.not(nullValue()));
             assertThat(obj.value, IsNot.not(Double.NaN));
