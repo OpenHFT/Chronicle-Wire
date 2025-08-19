@@ -179,7 +179,7 @@ public enum Wires {
      *
      * @param file the name of the input Yaml file containing serialized method calls
      * @param obj  the target object that the method calls will be replayed on
-     * @throws IOException                  is thrown if there's an error reading the file
+     * @throws IOException is thrown if there's an error reading the file
      * @throws InvalidMarshallableException is thrown if the serialized data is invalid or corrupted
      */
     public static void replay(String file, Object obj) throws IOException, InvalidMarshallableException {
@@ -218,8 +218,8 @@ public enum Wires {
      * Converts the provided bytes, representing size-prefixed blobs,
      * into a readable string format with the option to abbreviate.
      *
-     * @param bytes  the bytes representing size-prefixed blobs
-     * @param abbrev if {@code true}, the output string will be abbreviated
+     * @param bytes   the bytes representing size-prefixed blobs
+     * @param abbrev  if {@code true}, the output string will be abbreviated
      * @return the readable string representation of the blobs
      */
     public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, boolean abbrev) {
@@ -355,7 +355,7 @@ public enum Wires {
      * with the option to abbreviate the output.
      *
      * @param wireIn the {@code WireIn} instance holding the wire data
-     * @param abbrev if {@code true}, the output string will be abbreviated
+     * @param abbrev  if {@code true}, the output string will be abbreviated
      * @return the readable string representation of the blobs
      */
     public static String fromSizePrefixedBlobs(@NotNull WireIn wireIn, boolean abbrev) {
@@ -389,7 +389,7 @@ public enum Wires {
     /**
      * Converts the given WireIn instance into a specified wire type representation.
      *
-     * @param wireIn       the input wire
+     * @param wireIn the input wire
      * @param wireProvider a function that provides a specific type of wire based on bytes
      * @return the representation of the wire data in the specified type
      * @throws InvalidMarshallableException if marshalling fails
@@ -556,8 +556,8 @@ public enum Wires {
     /**
      * Reads data from a WireIn up to a specified size using a ReadMarshallable instance.
      *
-     * @param wireIn           the source from which data is read
-     * @param size             the maximum size of data to be read
+     * @param wireIn          the source from which data is read
+     * @param size            the maximum size of data to be read
      * @param readMarshallable the ReadMarshallable instance to interpret the data
      * @return the position in the bytes after reading
      * @throws InvalidMarshallableException if there's an issue during marshalling
@@ -930,9 +930,8 @@ public enum Wires {
             strategy = MAP;
 
         // If no object is provided to populate, instantiate a new one using the strategy.
-
-        if (Demarshallable.class.isAssignableFrom(clazz) || using == null) {
-            using = (E) strategy.newInstanceOrNull(clazz);
+        if (using == null) {
+            using = strategy.newInstanceOrNull((Class<E>) clazz);
         }
 
         // If the class represents a Throwable, deserialize it using a special method.
@@ -970,7 +969,7 @@ public enum Wires {
     /**
      * Obtains the name of the given object if it's either a CoreDynamicEnum or an Enum.
      *
-     * @param e   Object whose name is to be retrieved
+     * @param e Object whose name is to be retrieved
      * @param <E> Type of the object
      * @return The name of the object or null if the object is neither a CoreDynamicEnum nor an Enum
      */
@@ -1212,9 +1211,9 @@ public enum Wires {
     /**
      * Returns a tuple for the specified class and type name.
      *
-     * @param <T>      The type parameter.
-     * @param tClass   The class type for which the tuple is required.
-     * @param typeName The type name.
+     * @param <T>       The type parameter.
+     * @param tClass    The class type for which the tuple is required.
+     * @param typeName  The type name.
      * @return A tuple of type T or null if not possible to create.
      */
     @Nullable
@@ -1254,9 +1253,9 @@ public enum Wires {
     /**
      * Creates a BinaryWire for reading with the given input, position, and length.
      *
-     * @param in       The input bytes.
-     * @param position The starting position.
-     * @param length   The length of data to read.
+     * @param in        The input bytes.
+     * @param position  The starting position.
+     * @param length    The length of data to read.
      * @return A BinaryWire configured for reading.
      */
     @NotNull
@@ -1271,9 +1270,9 @@ public enum Wires {
     /**
      * Creates a BinaryWire for writing with the given input, position, and length.
      *
-     * @param in       The input bytes.
-     * @param position The starting position.
-     * @param length   The length of data to write.
+     * @param in        The input bytes.
+     * @param position  The starting position.
+     * @param length    The length of data to write.
      * @return A BinaryWire configured for writing.
      */
     @NotNull
@@ -1397,7 +1396,7 @@ public enum Wires {
             return out.writeString(format);
         }
 
-        /**
+                /**
          * Attempts to parse a date string from a ValueIn object and return a corresponding Date object.
          *
          * @param in The ValueIn object containing the date string.
@@ -1476,7 +1475,7 @@ public enum Wires {
         /**
          * Fetches the Class object associated with the name retrieved from the given ValueIn.
          *
-         * @param o  The object for which the class needs to be determined. (This parameter is unused in the method.)
+         * @param o The object for which the class needs to be determined. (This parameter is unused in the method.)
          * @param in The ValueIn object which contains the class name.
          * @return The Class object associated with the name.
          */
@@ -1503,7 +1502,7 @@ public enum Wires {
                     return ScalarStrategy.of(StringBuilder.class, (o, in) -> {
                         StringBuilder builder;
                         try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
-                            builder = (o == null)
+                             builder = (o == null)
                                     ? stlSb.get()
                                     : o;
                             in.textTo(builder);
