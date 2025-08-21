@@ -2090,5 +2090,6 @@ try (ChronicleContext context = ChronicleContext.newContext(url)) {
     // check it matches
     assertEquals("say: Bye now", event + ": " + text2);
 }
+
 ----
 
