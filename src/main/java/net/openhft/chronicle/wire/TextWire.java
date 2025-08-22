@@ -152,7 +152,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     /**
      * Factory method to create a `TextWire` from a file.
      *
-     * @param name Name of the file.
+     * @param filePath Name of the file.
      * @return A new instance of `TextWire`.
      * @throws IOException if any I/O error occurs.
      */

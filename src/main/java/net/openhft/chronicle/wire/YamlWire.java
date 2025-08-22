@@ -802,10 +802,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
     }
 
-    @OverrideBuffer);
-                    // Store the anchor for later reference
-                    anchorValues.put(alias, targetBuffer.toString());
-                    break;
+    @Override
     @NotNull
     public String readingPeekYaml() {
         return "todo";
