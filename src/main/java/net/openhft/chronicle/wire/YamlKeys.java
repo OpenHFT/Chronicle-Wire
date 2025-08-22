@@ -33,7 +33,7 @@ public class YamlKeys {
     // The current number of offsets stored
     int count = 0;
 
-    // The dynamic array of offsets
+    /** The dynamic array of offsets. */
     long[] offsets = NO_OFFSETS;
 
     /**
@@ -50,9 +50,7 @@ public class YamlKeys {
     }
 
     /**
-     * Returns the current number of offsets stored in the collection.
-     *
-     * @return The count of offsets.
+     * Returns the number of stored offsets in the collection.
      */
     public int count() {
         return count;
@@ -76,11 +74,7 @@ public class YamlKeys {
     }
 
     /**
-     * Removes the offset at the specified index.
-     *
-     * <p>Subsequent offsets are shifted to the left (their indices decrease by one).
-     *
-     * @param i The index of the offset to be removed.
+     * Removes the offset at {@code i}, shifting remaining values left by one.
      */
     public void removeIndex(int i) {
         count--;

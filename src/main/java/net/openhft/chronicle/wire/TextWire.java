@@ -199,17 +199,17 @@ public class TextWire extends YamlWireOut<TextWire> {
      * For instance, "\\n" is converted to a newline character, "\\t" to a tab, etc.
      * This method modifies the given sequence directly and adjusts its length if needed.
      *
-     * @param targetBuffer A {@link CharSequence} that is also an {@link Appendable}, containing potentially escaped sequences.
-     *                     This sequence will be modified directly.
+     * @param sb A {@link CharSequence} that is also an {@link Appendable}, containing potentially escaped sequences.
+     *           This sequence will be modified directly.
      */
-    public static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS targetBuffer) {
+    public static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb) {
         int end = 0;
-        int length = targetBuffer.length();
+        int length = sb.length();
         for (int i = 0; i < length; i++) {
-            char ch = targetBuffer.charAt(i);
+            char ch = sb.charAt(i);
             // Check if the character is an escape character and if there's a character after it
             if (ch == '\\' && i < length - 1) {
-                char ch3 = targetBuffer.charAt(++i);
+                char ch3 = sb.charAt(++i);
                 // Handle different escaped characters
                 switch (ch3) {
                     case '0':
@@ -253,27 +253,27 @@ public class TextWire extends YamlWireOut<TextWire> {
                         break;
                     case 'x':
                         ch = (char)
-                                (Character.getNumericValue(targetBuffer.charAt(++i)) * 16 +
-                                        Character.getNumericValue(targetBuffer.charAt(++i)));
+                                (Character.getNumericValue(sb.charAt(++i)) * 16 +
+                                        Character.getNumericValue(sb.charAt(++i)));
                         break;
                     case 'u':
                         ch = (char)
-                                (Character.getNumericValue(targetBuffer.charAt(++i)) * 4096 +
-                                        Character.getNumericValue(targetBuffer.charAt(++i)) * 256 +
-                                        Character.getNumericValue(targetBuffer.charAt(++i)) * 16 +
-                                        Character.getNumericValue(targetBuffer.charAt(++i)));
+                                (Character.getNumericValue(sb.charAt(++i)) * 4096 +
+                                        Character.getNumericValue(sb.charAt(++i)) * 256 +
+                                        Character.getNumericValue(sb.charAt(++i)) * 16 +
+                                        Character.getNumericValue(sb.charAt(++i)));
                         break;
                     default:
                         ch = ch3;
                 }
             }
             // Set the unescaped character into the sequence
-            AppendableUtil.setCharAt(targetBuffer, end++, ch);
+            AppendableUtil.setCharAt(sb, end++, ch);
         }
         // Validate the length consistency after unescaping
-        if (length != targetBuffer.length())
-            throw new IllegalStateException("Length changed from " + length + " to " + targetBuffer.length() + " for " + targetBuffer);
-        AppendableUtil.setLength(targetBuffer, end);
+        if (length != sb.length())
+            throw new IllegalStateException("Length changed from " + length + " to " + sb.length() + " for " + sb);
+        AppendableUtil.setLength(sb, end);
     }
 
     /**
@@ -682,12 +682,12 @@ public class TextWire extends YamlWireOut<TextWire> {
      * The content of the StringBuilder is interned before the conversion.
      *
      * @param expectedClass The class to which the StringBuilder's content should be converted.
-     * @param keyTextBuilder The StringBuilder containing the data to be converted.
+     * @param sb The StringBuilder containing the data to be converted.
      * @return An instance of the expected class, converted from the StringBuilder's content.
      */
     @Nullable
-    private <K> K toExpected(Class<K> expectedClass, StringBuilder keyTextBuilder) {
-        return ObjectUtils.convertTo(expectedClass, WireInternal.INTERNER.intern(keyTextBuilder));
+    private <K> K toExpected(Class<K> expectedClass, StringBuilder sb) {
+        return ObjectUtils.convertTo(expectedClass, WireInternal.INTERNER.intern(sb));
     }
 
     /**
@@ -866,11 +866,11 @@ public class TextWire extends YamlWireOut<TextWire> {
     /**
      * returns {@code true} if the next string is {@code str}
      *
-     * @param expectedString string
+     * @param source string
      * @return true if the strings are the same
      */
-    protected boolean peekStringIgnoreCase(@NotNull final String expectedString) {
-        if (expectedString.isEmpty())
+    protected boolean peekStringIgnoreCase(@NotNull final String source) {
+        if (source.isEmpty())
             return true;
 
         if (bytes.readRemaining() < 1)
@@ -879,8 +879,8 @@ public class TextWire extends YamlWireOut<TextWire> {
         long pos = bytes.readPosition();
 
         try {
-            for (int i = 0; i < expectedString.length(); i++) {
-                if (Character.toLowerCase(expectedString.charAt(i)) != Character.toLowerCase(bytes.readByte()))
+            for (int i = 0; i < source.length(); i++) {
+                if (Character.toLowerCase(source.charAt(i)) != Character.toLowerCase(bytes.readByte()))
                     return false;
             }
         } finally {
@@ -1073,24 +1073,24 @@ public class TextWire extends YamlWireOut<TextWire> {
      * Parses a word from the current byte position until it encounters a space or stop character.
      * The parsed word is then appended to the provided StringBuilder.
      *
-     * @param outputBuilder The StringBuilder to which the parsed word will be appended.
+     * @param sb The StringBuilder to which the parsed word will be appended.
      */
-    public void parseWord(@NotNull StringBuilder outputBuilder) {
-        parseUntil(outputBuilder, StopCharTesters.SPACE_STOP);
+    public void parseWord(@NotNull StringBuilder sb) {
+        parseUntil(sb, StopCharTesters.SPACE_STOP);
     }
 
     /**
      * Parses characters from the current byte position until one of the specified stop characters
      * in the tester is encountered. The parsed characters are then appended to the provided StringBuilder.
      *
-     * @param outputBuilder       The StringBuilder to which the parsed characters will be appended.
+     * @param sb       The StringBuilder to which the parsed characters will be appended.
      * @param stopTester  A StopCharTester which determines which characters should stop the parsing.
      */
-    public void parseUntil(@NotNull StringBuilder outputBuilder, @NotNull StopCharTester stopTester) {
+    public void parseUntil(@NotNull StringBuilder sb, @NotNull StopCharTester stopTester) {
         if (use8bit)
-            bytes.parse8bit(outputBuilder, stopTester);
+            bytes.parse8bit(sb, stopTester);
         else
-            bytes.parseUtf8(outputBuilder, stopTester);
+            bytes.parseUtf8(sb, stopTester);
     }
 
     /**
@@ -1098,15 +1098,15 @@ public class TextWire extends YamlWireOut<TextWire> {
      * until one of the specified stop characters in the tester is encountered.
      * The parsed characters are then appended to the provided StringBuilder.
      *
-     * @param outputBuilder       The StringBuilder to which the parsed characters will be appended.
+     * @param sb       The StringBuilder to which the parsed characters will be appended.
      * @param stopTester  A StopCharsTester which determines which characters should stop the parsing.
      */
-    public void parseUntil(@NotNull StringBuilder outputBuilder, @NotNull StopCharsTester stopTester) {
-        outputBuilder.setLength(0);
+    public void parseUntil(@NotNull StringBuilder sb, @NotNull StopCharsTester stopTester) {
+        sb.setLength(0);
         if (use8bit) {
-            AppendableUtil.read8bitAndAppend(bytes, outputBuilder, stopTester);
+            AppendableUtil.read8bitAndAppend(bytes, sb, stopTester);
         } else {
-            AppendableUtil.readUTFAndAppend(bytes, outputBuilder, stopTester);
+            AppendableUtil.readUTFAndAppend(bytes, sb, stopTester);
         }
     }
 
@@ -1281,12 +1281,6 @@ public class TextWire extends YamlWireOut<TextWire> {
         bytes.clear();
     }
 
-    /**
-     * Checks whether the current wire position starts with the
-     * {@code !!meta-data} tag. If present the tag is consumed.
-     *
-     * @return {@code true} when the prefix was found and skipped
-     */
     @Override
     public boolean hasMetaDataPrefix() {
         if (bytes.startsWith(META_DATA)
@@ -1305,6 +1299,9 @@ public class TextWire extends YamlWireOut<TextWire> {
     /**
      * Represents a textual input value for deserialization. It manages a stack
      * of states, allowing for nested or sequential value reading.
+     * Provides the {@link ValueIn} implementation for {@link TextWire},
+     * handling deserialisation of values in a YAML-like text format.
+     * It manages a stack of states, allowing for nested or sequential value reading.
      */
     public class TextValueIn implements ValueIn {
 
@@ -1405,6 +1402,11 @@ public class TextWire extends YamlWireOut<TextWire> {
             }
         }
 
+        /**
+         * Core logic for reading a textual value into {@code destination}. Handles quoted
+         * strings, unquoted text, YAML tags such as {@code !null} and
+         * {@code !binary}, and resolves anchors or aliases.
+         */
         @SuppressWarnings("fallthrough")
         @Nullable <ACS extends Appendable & CharSequence> CharSequence textTo0(@NotNull ACS destination) {
             consumePadding();
@@ -1510,7 +1512,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         /**
          * Called when a variable substitution such as {@code ${name}} is
          * encountered but not expanded. A warning is logged and the literal
-         * characters are copied into {@code a}.
+         * characters are copied into {@code destination}.
          */
         private <ACS extends Appendable & CharSequence> void unsubstitutedString(@NotNull ACS destination) {
             String text = bytes.toString();
@@ -2921,12 +2923,12 @@ public class TextWire extends YamlWireOut<TextWire> {
          *
          * @param reusableInstance An object to potentially reuse during deserialization for efficiency.
          * @param strategy The serialization strategy to be applied during deserialization.
-         * @param defaultType The expected type of the resulting object.
+         * @param type The expected type of the resulting object.
          * @return The deserialized object.
          * @throws InvalidMarshallableException If any issues are encountered during the deserialization process.
          */
         @Nullable
-        Object objectWithInferredType0(Object reusableInstance, @NotNull SerializationStrategy strategy, Class<?> defaultType) throws InvalidMarshallableException {
+        Object objectWithInferredType0(Object reusableInstance, @NotNull SerializationStrategy strategy, Class<?> type) throws InvalidMarshallableException {
             int code = peekCode();
             switch (code) {
                 // Different cases for different object types or data representations.
@@ -2934,7 +2936,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                 case '?':
                     return map(Object.class, Object.class, (Map) reusableInstance);
                 case '!':
-                    return object(reusableInstance, defaultType);
+                    return object(reusableInstance, type);
                 case '-':
                     if (peekCodeNext() == ' ')
                         return readList(indentation(), null);
@@ -3058,13 +3060,13 @@ public class TextWire extends YamlWireOut<TextWire> {
          * If the class type isn't one of the recognized specialized types, an
          * {@link UnsupportedOperationException} will be thrown.
          *
-         * @param targetSequenceType The expected type of the sequence to be read.
+         * @param clazz The expected type of the sequence to be read.
          * @return An array or collection representing the read sequence.
          * @throws UnsupportedOperationException if the provided class type isn't supported.
          */
         @NotNull
-        private Object readSequence(@NotNull Class<?> targetSequenceType) {
-            if (targetSequenceType == Object[].class || targetSequenceType == Object.class) {
+        private Object readSequence(@NotNull Class<?> clazz) {
+            if (clazz == Object[].class || clazz == Object.class) {
                 // TODO: Consider using reflection to handle all array types.
                 @NotNull List<Object> list = new ArrayList<>();
                 sequence(list, (l, v) -> {
@@ -3072,10 +3074,10 @@ public class TextWire extends YamlWireOut<TextWire> {
                         l.add(v.object(Object.class));
                     }
                 });
-                return targetSequenceType == Object[].class ? list.toArray() : list;
+                return clazz == Object[].class ? list.toArray() : list;
 
             // Handle sequences expected to be of type String[].
-            } else if (targetSequenceType == String[].class) {
+            } else if (clazz == String[].class) {
                 @NotNull List<String> list = new ArrayList<>();
                 sequence(list, (l, v) -> {
                     while (v.hasNextSequenceItem()) {
@@ -3085,7 +3087,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                 return list.toArray(new String[0]);
 
             // Handle sequences expected to be of type List.
-            } else if (targetSequenceType == List.class) {
+            } else if (clazz == List.class) {
                 @NotNull List<String> list = new ArrayList<>();
                 sequence(list, (l, v) -> {
                     while (v.hasNextSequenceItem()) {
@@ -3095,7 +3097,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                 return list;
 
             // Handle sequences expected to be of type Set.
-            } else if (targetSequenceType == Set.class) {
+            } else if (clazz == Set.class) {
                 @NotNull Set<String> list = new HashSet<>();
                 sequence(list, (l, v) -> {
                     while (v.hasNextSequenceItem()) {
@@ -3107,7 +3109,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             // Throw an exception if the class type is unsupported.
             } else {
                 throw new UnsupportedOperationException("Arrays of type "
-                        + targetSequenceType + " not supported.");
+                        + clazz + " not supported.");
             }
         }
 

@@ -56,10 +56,10 @@ public enum YamlLogging {
     /**
      * Sets the logging flags for all message types (reads/writes for both client and server).
      *
-     * @param enable The boolean value to set for all logging flags.
+     * @param flag The boolean value to set for all logging flags.
      */
-    public static void setAll(boolean enable) {
-        showServerReads = showServerWrites = clientWrites = clientReads = enable;
+    public static void setAll(boolean flag) {
+        showServerReads = showServerWrites = clientWrites = clientReads = flag;
     }
 
     /**
@@ -92,10 +92,10 @@ public enum YamlLogging {
     /**
      * Sets the flag to determine whether server writes should be logged.
      *
-     * @param enable {@code true} to enable logging for server writes; {@code false} to disable.
+     * @param flag {@code true} to enable logging for server writes; {@code false} to disable.
      */
-    public static void showServerWrites(boolean enable) {
-        showServerWrites = enable;
+    public static void showServerWrites(boolean flag) {
+        showServerWrites = flag;
     }
 
     /**
@@ -138,28 +138,28 @@ public enum YamlLogging {
     /**
      * Sets the flag to determine whether heartbeats should be logged.
      *
-     * @param enable {@code true} to enable heartbeat logging; {@code false} to disable.
+     * @param flag {@code true} to enable heartbeat logging; {@code false} to disable.
      */
-    public static void showHeartBeats(boolean enable) {
-        showHeartBeats = enable;
+    public static void showHeartBeats(boolean flag) {
+        showHeartBeats = flag;
     }
 
     /**
      * Sets the flag to determine whether client writes should be logged.
      *
-     * @param enable {@code true} to enable logging for client writes; {@code false} to disable.
+     * @param flag {@code true} to enable logging for client writes; {@code false} to disable.
      */
-    public static void showClientWrites(boolean enable) {
-        clientWrites = enable;
+    public static void showClientWrites(boolean flag) {
+        clientWrites = flag;
     }
 
     /**
      * Sets the flag to determine whether client reads should be logged.
      *
-     * @param enable {@code true} to enable logging for client reads; {@code false} to disable.
+     * @param flag {@code true} to enable logging for client reads; {@code false} to disable.
      */
-    public static void showClientReads(boolean enable) {
-        clientReads = enable;
+    public static void showClientReads(boolean flag) {
+        clientReads = flag;
     }
 
     /**
@@ -174,10 +174,10 @@ public enum YamlLogging {
     /**
      * Sets the flag to determine whether server reads should be logged.
      *
-     * @param enable {@code true} to enable logging for server reads; {@code false} to disable.
+     * @param flag {@code true} to enable logging for server reads; {@code false} to disable.
      */
-    public static void showServerReads(boolean enable) {
-        showServerReads = enable;
+    public static void showServerReads(boolean flag) {
+        showServerReads = flag;
     }
 
     /**
