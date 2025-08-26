@@ -273,19 +273,20 @@ public class JSONWire extends TextWire {
      * The segment copied depends on the first character encountered (e.g., '{' indicates a map).
      * This method understands JSON structural elements and translates them appropriately.
      *
-     * @param destWire  destination wire
-     * @param inObject  true if a key is expected next
-     * @param isRoot    true if copying the outer element
+     * @param destWire  destination wire to copy the data to.
+     * @param expectKeyValues Flag indicating if the current position is inside a map structure.
+     * @param topLevel Flag indicating if this is the topmost level of the copy operation.
+     * @throws InvalidMarshallableException if there's a problem with copying the data.
      */
-    public void copyOne(@NotNull WireOut destWire, boolean inObject, boolean isRoot) throws InvalidMarshallableException {
+    public void copyOne(@NotNull WireOut destWire, boolean expectKeyValues, boolean topLevel) throws InvalidMarshallableException {
         consumePadding();
         int ch = bytes.readUnsignedByte();
         switch (ch) {
             case '\'':
             case '"':
                 // Handle quoted values
-                copyQuote(destWire, ch, inObject, isRoot);
-                if (inObject) {
+                copyQuote(destWire, ch, expectKeyValues, topLevel);
+                if (expectKeyValues) {
                     // For key-value pairs, consume any padding and expect a colon (:) separator
                     consumePadding();
                     int ch2 = bytes.readUnsignedByte();
@@ -392,8 +393,12 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * Helper for {@link #copyOne} that reads a JSON '@type' prefix and writes it
-     * using {@link ValueOut#typePrefix(CharSequence)} on {@code destWire}.
+     * Copies a type prefix from the input to the given wire output.
+     * The type prefix is assumed to be a text value prefixed with '@'. This method will extract
+     * the type prefix and pass it on to the wire output.
+     *
+     * @param destWire The wire output to copy the type prefix to.
+     * @throws InvalidMarshallableException if there's a problem with copying the data.
      */
     private void copyTypePrefix(WireOut destWire) throws InvalidMarshallableException {
         final StringBuilder sb = acquireStringBuilder();
@@ -438,10 +443,11 @@ public class JSONWire extends TextWire {
      *
      * @param destWire  destination wire
      * @param quoteChar opening quote character
-     * @param parsingKey true if reading a map key
-     * @param isRoot    true if copying the outer element
+     * @param inMap Flag indicating if the current position is inside a map structure.
+     * @param topLevel Flag indicating if this is the topmost level of the copy operation.
+     * @throws InvalidMarshallableException if there's a problem with copying the data.
      */
-    private void copyQuote(WireOut destWire, int quoteChar, boolean parsingKey, boolean isRoot) throws InvalidMarshallableException {
+    private void copyQuote(WireOut destWire, int quoteChar, boolean inMap, boolean topLevel) throws InvalidMarshallableException {
         final StringBuilder sb = acquireStringBuilder();
         // Extract the quoted text
         while (bytes.readRemaining() > 0) {
@@ -459,9 +465,9 @@ public class JSONWire extends TextWire {
         unescape(sb);
 
         // Determine how to write the text to the wire based on the provided flags
-        if (isRoot) {
+        if (topLevel) {
             destWire.writeEvent(String.class, sb);
-        } else if (parsingKey) {
+        } else if (inMap) {
             destWire.write(sb);
         } else {
             destWire.getValueOut().text(sb);
@@ -469,8 +475,11 @@ public class JSONWire extends TextWire {
     }
 
     /**
-     * Internal helper for {@link #copyOne} that copies a JSON object ({@code {...}})
-     * to {@code destWire} by recursively invoking {@link #copyOne} for each entry.
+     * Copies a map structure from the input to the given wire output.
+     * A map is assumed to be a set of key-value pairs enclosed in curly braces '{}'.
+     *
+     * @param destWire The wire output to copy the map structure to.
+     * @throws InvalidMarshallableException if there's a problem with copying the data.
      */
     private void copyMap(WireOut destWire) throws InvalidMarshallableException {
         destWire.getValueOut().marshallable(out -> {
@@ -522,7 +531,7 @@ public class JSONWire extends TextWire {
      * Copies a sequence structure from the input to the given wire output.
      * A sequence is assumed to be a list of values enclosed in square brackets '[]'.
      *
-     * @param wire The wire output to copy the sequence to.
+     * @param destWire The wire output to copy the sequence to.
      */
     private void copySequence(WireOut destWire) {
         destWire.getValueOut().sequence(out -> {
@@ -1215,32 +1224,31 @@ public class JSONWire extends TextWire {
          * override with that. If the provided class or object instance is incompatible with the
          * type definition, it will throw a ClassCastException.
          *
-         * @param using       the object instance to reuse, or {@code null}
-         * @param targetType  the class expected, or {@code null}
-         * @param lenient     whether to attempt deserialisation even if partially incorrect
-         * @return the parsed object
-         * @throws InvalidMarshallableException if unmarshalling fails
-         * @throws ClassCastException           if the parsed type is incompatible
-         *                                      with {@code clazz} or {@code using}
+         * @param using The object instance to use, or null if not provided.
+         * @param clazz The class to parse the object as, or null if not provided.
+         * @param bestEffort Indicates whether to give a best effort attempt to parse the object even if it's partially incorrect.
+         * @return The parsed object.
+         * @throws InvalidMarshallableException If there's an issue with unmarshalling the data.
+         * @throws ClassCastException If there's a type mismatch between the provided class or instance and the type definition.
          */
-        private <E> E parseType(@Nullable E using, @Nullable Class<? extends E> targetType, boolean lenient) throws InvalidMarshallableException {
+        private <E> E parseType(@Nullable E using, @Nullable Class<? extends E> clazz, boolean bestEffort) throws InvalidMarshallableException {
 
             Type aClass = consumeTypeLiteral(null);
             if (aClass != null)
                 return Jvm.uncheckedCast(aClass);
 
             if (!hasTypeDefinition()) {
-                return super.object(using, targetType, lenient);
+                return super.object(using, clazz, bestEffort);
             } else {
                 final StringBuilder sb = acquireStringBuilder();
                 sb.setLength(0);
                 readTypeDefinition(sb);
                 final Class<E> overrideClass = Jvm.uncheckedCast(classLookup().forName(sb.subSequence(1, sb.length())));
-                if (targetType != null && !targetType.isAssignableFrom(overrideClass))
-                    throw new ClassCastException("Unable to cast " + overrideClass.getName() + " to " + targetType.getName());
+                if (clazz != null && !clazz.isAssignableFrom(overrideClass))
+                    throw new ClassCastException("Unable to cast " + overrideClass.getName() + " to " + clazz.getName());
                 if (using != null && !overrideClass.isInstance(using))
                     throw new ClassCastException("Unable to reuse a " + using.getClass().getName() + " as a " + overrideClass.getName());
-                final E result = super.object(using, overrideClass, lenient);
+                final E result = super.object(using, overrideClass, bestEffort);
 
                 // remove the closing bracket from the type definition
                 consumePadding();
@@ -1280,15 +1288,15 @@ public class JSONWire extends TextWire {
          * It assumes that the current position in the bytes stream is the start of the type
          * definition and consumes characters until it encounters a colon (":").
          *
-         * @param typeBuffer the destination buffer
-         * @throws IORuntimeException if the expected opening brace is missing
+         * @param sb The StringBuilder to which the type definition will be appended.
+         * @throws IORuntimeException If the expected opening bracket "{" is not found.
          */
-        void readTypeDefinition(StringBuilder typeBuffer) {
+        void readTypeDefinition(StringBuilder sb) {
             consumePadding();
             if (bytes.readChar() != '{')
                 throw new IORuntimeException("Expected { but got " + bytes);
             consumePadding();
-            text(typeBuffer);
+            text(sb);
             consumePadding();
             final char colon = bytes.readChar();
             assert colon == ':' : "Expected : but got " + colon;
