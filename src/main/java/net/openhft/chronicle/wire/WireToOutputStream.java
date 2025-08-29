@@ -28,43 +28,24 @@ import java.nio.ByteBuffer;
  * Provides a bridge to write structured data in Chronicle Wire format to a
  * standard Java {@link OutputStream}.
  * <p>
- * Data is first serialised into an internal {@link Wire} backed by an
- * in-memory {@link Bytes} buffer. When {@link #flush()} is invoked the content
- * of this buffer is written as one binary message to the wrapped output
- * stream. The message is prefixed with its length as a four byte integer.
- * <p>
- * This is useful when integrating Chronicle Wire with sinks such as network
- * sockets or files that require messages framed with explicit length
- * prefixes. The provided {@link OutputStream} is not closed by this class;
- * managing its lifecycle is the caller's responsibility.
- *
- * @see Wire
- * @see OutputStream
- * @see DataOutputStream
+ * The class facilitates writing data to an OutputStream using the Wire format. It uses
+ * an intermediate {@link Bytes} buffer to temporarily hold data in the Wire format
+ * before flushing it to the actual OutputStream. The provided {@link OutputStream} is not
+ * closed by this class
  */
 public class WireToOutputStream {
 
-    /**
-     * Internal, elastically-sized heap {@link Bytes} buffer that backs the
-     * {@link #wire}. Data is serialised into this buffer before being flushed.
-     */
+    // Internal byte buffer to temporarily hold data in Wire format.
     private final Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(128);
 
-    /**
-     * The internal {@link Wire} instance into which data is serialised. Its
-     * type is determined by the {@code wireType} passed to the constructor.
-     */
+    // The Wire object responsible for handling the data.
     private final Wire wire;
 
-    /**
-     * The {@link DataOutputStream} wrapping the user-provided
-     * {@link OutputStream}, used for conveniently writing primitive data such as
-     * the message length.
-     */
+    // The DataOutputStream to which the data in Wire format is written.
     private final DataOutputStream dos;
 
     /**
-     * Creates a new bridge for the given wire type and output stream.
+     * Constructs a new instance with the specified WireType and OutputStream.
      *
      * @param wireType the {@link WireType} used to serialise data into the
      *                 internal buffer (for example Binary, Text or JSON).
@@ -91,11 +72,10 @@ public class WireToOutputStream {
     }
 
     /**
-     * Writes the data currently in the wire buffer to the underlying output
-     * stream.
+     * Flushes the data in Wire format to the underlying OutputStream.
      * <p>
-     * A four byte length is written first, followed by the serialised bytes.
-     * The content remains in the buffer until {@link #getWire()} is called.
+     * The method writes the length of the data followed by the actual data to
+     * the OutputStream. After the flush, the internal buffer is ready to hold new data.
      *
      * @throws IOException if an I/O error occurs while writing.
      */

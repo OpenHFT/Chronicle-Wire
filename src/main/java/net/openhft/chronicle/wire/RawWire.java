@@ -109,10 +109,6 @@ public class RawWire extends AbstractWire implements Wire {
         return true;
     }
 
-    /**
-     * Begins a document for raw value writing. The {@code metaData} flag is
-     * ignored as this format stores no metadata.
-     */
     @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
@@ -134,10 +130,6 @@ public class RawWire extends AbstractWire implements Wire {
         return readContext;
     }
 
-    /**
-     * Starts reading at the specified position of the underlying bytes.
-     * This method assumes the caller knows the location of a document.
-     */
     @NotNull
     @Override
     public DocumentContext readingDocument(long readLocation) {
@@ -150,10 +142,6 @@ public class RawWire extends AbstractWire implements Wire {
         return readContext;
     }
 
-    /**
-     * No padding bytes are expected in this format, so this method does
-     * nothing.
-     */
     @Override
     public void consumePadding() {
         // Do nothing
@@ -168,10 +156,6 @@ public class RawWire extends AbstractWire implements Wire {
         return Wires.fromSizePrefixedBlobs(bytes, start);
     }
 
-    /**
-     * Copies the underlying bytes to another wire. Only safe when the target is
-     * also a {@code RawWire} as no metadata accompanies the data.
-     */
     @Override
     public void copyTo(@NotNull WireOut wire) {
         if (wire instanceof RawWire) {
@@ -189,10 +173,6 @@ public class RawWire extends AbstractWire implements Wire {
         return valueIn;
     }
 
-    /**
-     * Returns the input for the next value. The key is ignored because no field
-     * names are stored.
-     */
     @NotNull
     @Override
     public ValueIn read(@NotNull WireKey key) {
@@ -200,10 +180,6 @@ public class RawWire extends AbstractWire implements Wire {
         return valueIn;
     }
 
-    /**
-     * Reads the next event name as text. Since names are written without a
-     * prefix, the caller must know an event is expected.
-     */
     @NotNull
     @Override
     public ValueIn readEventName(@NotNull StringBuilder name) {
@@ -221,10 +197,6 @@ public class RawWire extends AbstractWire implements Wire {
         return valueIn.object(expectedClass);
     }
 
-    /**
-     * Returns the input for the next value and stores the name locally for
-     * possible nested objects. The name itself is not read from the wire.
-     */
     @NotNull
     @Override
     public ValueIn read(@NotNull StringBuilder name) {
@@ -285,9 +257,6 @@ public class RawWire extends AbstractWire implements Wire {
         return valueOut;
     }
 
-    /**
-     * Prepares to write an event name. The supplied key is ignored.
-     */
     @NotNull
     @Override
     public ValueOut writeEventName(@NotNull WireKey key) {
@@ -314,18 +283,12 @@ public class RawWire extends AbstractWire implements Wire {
         // Do nothing
     }
 
-    /**
-     * Returns the output for the next value. The key parameter is ignored.
-     */
     @NotNull
     @Override
     public ValueOut write(@NotNull WireKey key) {
         return valueOut;
     }
 
-    /**
-     * Returns the output for the next value. The name is not written.
-     */
     @NotNull
     @Override
     public ValueOut write(@NotNull CharSequence name) {
@@ -381,10 +344,6 @@ public class RawWire extends AbstractWire implements Wire {
      */
     class RawValueOut implements ValueOut {
 
-        /**
-         * Writes a boolean value directly to the stream. A {@code null} value
-         * is encoded using {@link BinaryWireCode#NULL}.
-         */
         @NotNull
         @Override
         public WireOut bool(@Nullable Boolean flag) {
@@ -395,10 +354,6 @@ public class RawWire extends AbstractWire implements Wire {
             return RawWire.this;
         }
 
-        /**
-         * Writes text directly to the stream without a field name. Encoding is
-         * determined by the {@code use8bit} flag.
-         */
         @NotNull
         @Override
         public WireOut text(@Nullable CharSequence s) {
@@ -775,9 +730,10 @@ public class RawWire extends AbstractWire implements Wire {
     }
 
     /**
-     * {@link ValueIn} implementation that reads values in the order they were
-     * written, without field names or type codes. A small state stack helps with
-     * nested marshallables.
+     * The {@code RawValueIn} class implements the {@link ValueIn} interface,
+     * providing functionality for reading values from a binary wire format.
+     * Internally, it maintains a state stack that facilitates tracking
+     * and managing nested serialized objects or contexts.
      */
     class RawValueIn implements ValueIn {
         final ValueInStack stack = new ValueInStack();

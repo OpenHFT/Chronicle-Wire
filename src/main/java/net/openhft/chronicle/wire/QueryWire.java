@@ -39,10 +39,10 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 /**
- * Parses a URL query string such as {@code "a=1&b=2"}.
- * The bytes are treated as UTF-8 text and are not percent-decoded.
- * Extends {@link TextWire} and supplies {@link QueryValueIn} and
- * {@link QueryValueOut} for query specific value handling.
+ * This class represents a wire format designed to decode URL query strings.
+ * It extends the TextWire class and provides custom implementations for reading fields and consuming padding
+ * in the context of URL query strings. Specialized value input and output handlers, namely {@code QueryValueIn}
+ * and {@code QueryValueOut}, are used to manage the specific intricacies of the query string format.
  */
 @SuppressWarnings("rawtypes")
 public class QueryWire extends TextWire {
@@ -54,7 +54,7 @@ public class QueryWire extends TextWire {
     final QueryValueIn valueIn = new QueryValueIn();
 
     /**
-     * Creates a wire over the supplied bytes which must contain a query
+     * Creates a {@code QueryWire} over the supplied bytes which must contain a query
      * string, for example {@code "key=val&flag=true"}.
      *
      * @param bytes buffer holding the UTF-8 query text
@@ -63,28 +63,18 @@ public class QueryWire extends TextWire {
         super(bytes);
     }
 
-    /**
-     * Returns a writer that formats values as query parameters.
-     */
     @NotNull
     @Override
     protected QueryValueOut createValueOut() {
         return new QueryValueOut();
     }
 
-    /**
-     * Returns a reader that parses query parameter values.
-     */
     @NotNull
     @Override
     protected TextValueIn createValueIn() {
         return new QueryValueIn();
     }
 
-    /**
-     * Reads the next field name into {@code sb} stopping at '=' or '&amp;'.
-     * If an '&amp;' has been consumed it is rewound.
-     */
     @Override
     @NotNull
     protected StringBuilder readField(@NotNull StringBuilder sb) {
@@ -95,9 +85,6 @@ public class QueryWire extends TextWire {
         return sb;
     }
 
-    /**
-     * Skips any leading whitespace from the current read position.
-     */
     @Override
     @ForceInline
     public void consumePadding() {
@@ -108,30 +95,18 @@ public class QueryWire extends TextWire {
         }
     }
 
-    /**
-     * Query strings do not support unnamed writes.
-     * Always throws UnsupportedOperationException.
-     */
     @NotNull
     @Override
     public ValueOut write() {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * Starts a query parameter using the supplied key.
-     * The value is written when a primitive writer is invoked.
-     */
     @NotNull
     @Override
     public ValueOut write(@NotNull WireKey key) {
         return valueOut.write(key);
     }
 
-    /**
-     * Starts a query parameter using the supplied key.
-     * The value is written when a primitive writer is invoked.
-     */
     @NotNull
     @Override
     public ValueOut write(@NotNull CharSequence name) {
@@ -168,28 +143,24 @@ public class QueryWire extends TextWire {
         return bytes.readUnsignedByte(bytes.readPosition() - 1);
     }
 
-    /** Unsupported for query strings. */
     @NotNull
     @Override
     public LongValue newLongReference() {
         throw new UnsupportedOperationException();
     }
 
-    /** Unsupported for query strings. */
     @NotNull
     @Override
     public IntValue newIntReference() {
         throw new UnsupportedOperationException();
     }
 
-    /** Unsupported for query strings. */
     @NotNull
     @Override
     public BinaryLongArrayReference newLongArrayReference() {
         throw new UnsupportedOperationException();
     }
 
-    /** Unsupported for query strings. */
     @Override
     public @NotNull IntArrayValues newIntArrayReference() {
         throw new UnsupportedOperationException();
@@ -201,7 +172,7 @@ public class QueryWire extends TextWire {
     enum QueryStopCharTesters implements StopCharTester {
 
         /**
-         * Terminates a field name at '&', '=' or end of input.
+         * Terminates a field name at '&' (delimiter), '=' (assignment) or end of input.
          */
         QUERY_FIELD_NAME {
             @Override
@@ -211,7 +182,7 @@ public class QueryWire extends TextWire {
         },
 
         /**
-         * Terminates a value at '&' or end of input.
+         * Terminates a value at '&' (delimiter) or end of input.
          */
         QUERY_VALUE {
             @Override
@@ -222,22 +193,20 @@ public class QueryWire extends TextWire {
     }
 
     /**
-     * {@link ValueOut} implementation for query strings.
-     * Builds fragments such as {@code &key=value}.
+     * Represents an output handler specialized for writing values in the context of URL query strings.
+     * This class extends the {@code YamlValueOut} and provides custom implementations for
+     * appending values to the wire with appropriate separators and field assignments.
      */
     class QueryValueOut extends YamlValueOut {
 
-        /** Next separator to write. */
+        // The separator to prepend before writing the next value.
         @NotNull
         String sep = "";
 
-        /** Field name awaiting a value. */
+        // The field name to prepend before writing the next value.
         @Nullable
         CharSequence fieldName = null;
 
-        /**
-         * Writes the current separator and pending field name.
-         */
         @Override
         void prependSeparator() {
             bytes.appendUtf8(sep);
@@ -253,9 +222,6 @@ public class QueryWire extends TextWire {
             sep = "&";
         }
 
-        /**
-         * Writes the flag if non-null, encoding it as {@code true} or {@code false}.
-         */
         @NotNull
         @Override
         public QueryWire bool(@Nullable Boolean flag) {
@@ -267,9 +233,6 @@ public class QueryWire extends TextWire {
             return QueryWire.this;
         }
 
-        /**
-         * Writes the text value if it is not {@code null}.
-         */
         @NotNull
         @Override
         public QueryWire text(@Nullable CharSequence s) {
@@ -281,9 +244,6 @@ public class QueryWire extends TextWire {
             return QueryWire.this;
         }
 
-        /**
-         * Writes the byte value in decimal form.
-         */
         @NotNull
         @Override
         public QueryWire int8(byte i8) {
@@ -293,16 +253,12 @@ public class QueryWire extends TextWire {
             return QueryWire.this;
         }
 
-        /** Unsupported for query strings. */
         @NotNull
         @Override
         public QueryWire bytes(@Nullable BytesStore<?, ?> fromBytes) {
             throw new UnsupportedOperationException("todo");
         }
 
-        /**
-         * Writes the raw bytes as-is.
-         */
         @NotNull
         @Override
         public QueryWire rawBytes(@Nullable byte[] value) {
@@ -314,9 +270,6 @@ public class QueryWire extends TextWire {
             return QueryWire.this;
         }
 
-        /**
-         * Writes the byte array as a Base64 string.
-         */
         @NotNull
         @Override
         public QueryWire bytes(byte[] byteArray) {
@@ -327,23 +280,18 @@ public class QueryWire extends TextWire {
             return QueryWire.this;
         }
 
-        /** Unsupported for query strings. */
         @NotNull
         @Override
         public QueryWire int64array(long capacity) {
             throw new UnsupportedOperationException();
         }
 
-        /** Unsupported for query strings. */
         @NotNull
         @Override
         public QueryWire int64array(long capacity, @NotNull LongArrayValues values) {
             throw new UnsupportedOperationException();
         }
 
-        /**
-         * Writes a type prefix followed by a space.
-         */
         @NotNull
         @Override
         public QueryValueOut typePrefix(@NotNull CharSequence typeName) {
@@ -353,49 +301,42 @@ public class QueryWire extends TextWire {
             return this;
         }
 
-        /** Unsupported for query strings. */
         @NotNull
         @Override
         public QueryWire typeLiteral(@Nullable CharSequence type) {
             throw new UnsupportedOperationException();
         }
 
-        /** Unsupported for query strings. */
         @NotNull
         @Override
         public QueryWire typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @NotNull Class<?> type) {
             throw new UnsupportedOperationException();
         }
 
-        /** Unsupported for query strings. */
         @NotNull
         @Override
         public QueryWire int32forBinding(int value) {
             throw new UnsupportedOperationException();
         }
 
-        /** Unsupported for query strings. */
         @NotNull
         @Override
         public QueryWire int32forBinding(int value, @NotNull IntValue intValue) {
             throw new UnsupportedOperationException();
         }
 
-        /** Unsupported for query strings. */
         @NotNull
         @Override
         public QueryWire int64forBinding(long value) {
             throw new UnsupportedOperationException();
         }
 
-        /** Unsupported for query strings. */
         @NotNull
         @Override
         public QueryWire int64forBinding(long value, @NotNull LongValue longValue) {
             throw new UnsupportedOperationException();
         }
 
-        /** Writes a sequence using comma separated values. */
         @NotNull
         @Override
         public <T> QueryWire sequence(T t, @NotNull BiConsumer<T, ValueOut> writer) {
@@ -414,7 +355,6 @@ public class QueryWire extends TextWire {
             return QueryWire.this;
         }
 
-        /** Writes a sequence with a provided class. */
         @NotNull
         @Override
         public <T, K> QueryWire sequence(T t, K kls, @NotNull TriConsumer<T, K, ValueOut> writer) throws InvalidMarshallableException {
@@ -441,7 +381,6 @@ public class QueryWire extends TextWire {
         protected void pushState() {
         }
 
-        /** Writes a marshallable object in braces. */
         @NotNull
         @Override
         public QueryWire marshallable(@NotNull WriteMarshallable object) throws InvalidMarshallableException {
@@ -460,14 +399,12 @@ public class QueryWire extends TextWire {
             return QueryWire.this;
         }
 
-        /** Unsupported for query strings. */
         @NotNull
         @Override
         public QueryWire map(@NotNull final Map map) {
             throw new UnsupportedOperationException();
         }
 
-        /** Unsupported for query strings. */
         @Override
         @NotNull
         public QueryValueOut write() {
@@ -490,10 +427,11 @@ public class QueryWire extends TextWire {
     }
 
     /**
-     * {@link ValueIn} implementation for query strings.
+     * Represents an input handler specialized for reading values in the context of URL query strings.
+     * This class extends the {@code TextValueIn} and provides custom implementations for
+     * extracting text values from the wire with appropriate handling of separators and encodings.
      */
     class QueryValueIn extends TextValueIn {
-        /** Returns the value text of the current parameter. */
         @Override
         public String text() {
             try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
@@ -501,9 +439,6 @@ public class QueryWire extends TextWire {
             }
         }
 
-        /**
-         * Reads the value text up to '&' and appends it to {@code a}.
-         */
         @Nullable
         @Override
         public StringBuilder textTo(@NotNull StringBuilder a) {
@@ -512,9 +447,6 @@ public class QueryWire extends TextWire {
             return a;
         }
 
-        /**
-         * Reads the value text up to '&' and appends it to {@code a}.
-         */
         @Nullable
         @Override
         public Bytes<?> textTo(@NotNull Bytes<?> a) {
@@ -523,9 +455,6 @@ public class QueryWire extends TextWire {
             return a;
         }
 
-        /**
-         * Passes the value text to {@code classNameConsumer} as a type name.
-         */
         @Override
         @NotNull
         public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer) {
@@ -537,9 +466,6 @@ public class QueryWire extends TextWire {
             return wireIn();
         }
 
-        /**
-         * Returns the class for the value text using the wire's class lookup.
-         */
         @Override
         public Type typeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
             try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
@@ -549,9 +475,6 @@ public class QueryWire extends TextWire {
             }
         }
 
-        /**
-         * Checks for another item in a comma separated list.
-         */
         @Override
         public boolean hasNextSequenceItem() {
             consumePadding();

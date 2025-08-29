@@ -50,10 +50,7 @@ public class InputStreamToWire {
      */
     private final Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(128);
 
-    /**
-     * The {@link Wire} instance that represents the data of the current message
-     * according to the {@code wireType} supplied at construction time.
-     */
+    // Wire object responsible for representing the data in wire format
     private final Wire wire;
 
     /**
@@ -63,13 +60,11 @@ public class InputStreamToWire {
     private final DataInputStream dis;
 
     /**
-     * Creates a new instance configured with the given wire type and input
-     * stream.
+     * Constructor for the InputStreamToWire class, initializing it with the specified WireType and InputStream.
      *
      * @param wireType the {@link WireType} used to interpret the message
      *                 payloads
-     * @param is       the {@link InputStream} supplying length-prefixed binary
-     *                 data; it is not closed by this class
+     * @param is       the {@link InputStream} from which data will be read.
      */
     public InputStreamToWire(WireType wireType, InputStream is) {
         wire = wireType.apply(bytes);
@@ -77,18 +72,14 @@ public class InputStreamToWire {
     }
 
     /**
-     * Reads the next length-prefixed message from the input stream and makes
-     * it available through the internal {@link Wire} instance. The wire and its
-     * backing buffer are cleared before reading the 4-byte length header. A
-     * negative length results in a {@link StreamCorruptedException}. After the
-     * bytes are read, the wire is positioned at the start of the message
-     * payload.
+     * Reads data from the encapsulated DataInputStream and populates the Wire object with it.
+     * The method first clears any existing data in the wire, then reads the data's length from the stream.
+     * It then ensures sufficient capacity in the bytes object, reads the binary data into the bytes, and sets the
+     * appropriate read position. Finally, it returns the populated wire.
      *
-     * @return the internal {@link Wire} ready for deserialisation; the same
-     *         instance is reused for each call
-     * @throws IOException              if an I/O error occurs
-     * @throws java.io.EOFException     if the stream ends unexpectedly
-     * @throws StreamCorruptedException if a negative length is encountered
+     * @return The populated Wire object.
+     * @throws IOException If any I/O errors occur.
+     * @throws StreamCorruptedException If the read data length is negative, indicating a corrupted stream.
      */
     public Wire readOne() throws IOException {
         wire.clear();
