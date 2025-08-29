@@ -35,17 +35,27 @@ import java.nio.ByteBuffer;
  */
 public class WireToOutputStream {
 
-    // Internal byte buffer to temporarily hold data in Wire format.
+    /**
+     * Internal, elastically-sized heap {@link Bytes} buffer that backs the
+     * {@link #wire}. Data is serialised into this buffer before being flushed.
+     */
     private final Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(128);
 
-    // The Wire object responsible for handling the data.
+    /**
+     * The internal {@link Wire} instance into which data is serialised. Its
+     * type is determined by the {@code wireType} passed to the constructor.
+     */
     private final Wire wire;
 
-    // The DataOutputStream to which the data in Wire format is written.
+    /**
+     * The {@link DataOutputStream} wrapping the user-provided
+     * {@link OutputStream}, used for conveniently writing primitive data such as
+     * the message length.
+     */
     private final DataOutputStream dos;
 
     /**
-     * Constructs a new instance with the specified WireType and OutputStream.
+     * Creates a new bridge for the given wire type and output stream.
      *
      * @param wireType the {@link WireType} used to serialise data into the
      *                 internal buffer (for example Binary, Text or JSON).
@@ -72,10 +82,11 @@ public class WireToOutputStream {
     }
 
     /**
-     * Flushes the data in Wire format to the underlying OutputStream.
+     * Writes the data currently in the wire buffer to the underlying output
+     * stream.
      * <p>
-     * The method writes the length of the data followed by the actual data to
-     * the OutputStream. After the flush, the internal buffer is ready to hold new data.
+     * A four byte length is written first, followed by the serialised bytes.
+     * The content remains in the buffer until {@link #getWire()} is called.
      *
      * @throws IOException if an I/O error occurs while writing.
      */

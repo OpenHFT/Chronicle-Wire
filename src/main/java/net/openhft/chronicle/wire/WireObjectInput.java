@@ -26,18 +26,22 @@ import java.io.IOException;
 import java.io.ObjectInput;
 
 /**
- * This is the WireObjectInput class that implements the ObjectInput interface.
- * It is designed to read objects and data from a WireIn instance. The class provides
- * methods to read an object, bytes, and other basic data types, ensuring that the data is
- * retrieved correctly from the underlying wire instance.
+ * Adapts a {@link WireIn} source to the {@link ObjectInput} API.
+ * Useful when Chronicle Wire data must be consumed via {@code ObjectInput}.
+ * Methods delegate to the underlying {@code WireIn} and its {@link ValueIn}.
+ * Behaviour may differ from standard Java serialisation depending on the wire format.
+ *
+ * <p>This class is package-private and used internally.</p>
  */
 class WireObjectInput implements ObjectInput {
     private final WireIn wire;
-
     WireObjectInput(WireIn wire) {
         this.wire = wire;
     }
 
+    /**
+     * Delegates to {@link ValueIn#object()}.
+     */
     @Nullable
     @Override
     public Object readObject() throws ClassNotFoundException, IOException {
@@ -56,6 +60,10 @@ class WireObjectInput implements ObjectInput {
         return read(b, 0, b.length);
     }
 
+    /**
+     * Reads up to {@code len} bytes starting at {@code off};
+     * throws {@link EOFException} if no data remain.
+     */
     @Override
     public int read(@NotNull byte[] b, int off, int len) throws IOException {
         final long remaining = wire.bytes().readRemaining();
@@ -70,6 +78,9 @@ class WireObjectInput implements ObjectInput {
         return (int) (bytes.lengthWritten(off));
     }
 
+    /**
+     * Skips up to {@code n} bytes and may rewind if negative.
+     */
     @Override
     public long skip(long n) throws IOException {
         @NotNull final Bytes<?> bytes = wire.bytes();
@@ -79,25 +90,32 @@ class WireObjectInput implements ObjectInput {
         return len;
     }
 
+    /**
+     * Estimate of readable bytes.
+     */
     @Override
     public int available() throws IOException {
         return (int) Math.min(Integer.MAX_VALUE, wire.bytes().readRemaining());
     }
 
+    /** No-op: lifecycle managed externally. */
     @Override
     public void close() throws IOException {
     }
 
+    /** Fills the array or throws {@link EOFException}. */
     @Override
     public void readFully(byte[] b) throws IOException {
         readFully(b, 0, b.length);
     }
 
+    /** Unsupported. */
     @Override
     public void readFully(byte[] b, int off, int len) throws IOException {
         throw new UnsupportedOperationException("TODO");
     }
 
+    /** Unsupported. */
     @Override
     public int skipBytes(int n) throws IOException {
         throw new UnsupportedOperationException();
