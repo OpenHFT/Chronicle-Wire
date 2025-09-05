@@ -30,11 +30,12 @@ package net.openhft.chronicle.wire;
 public interface MethodWriter {
 
     /**
-     * Re-targets this writer to the given {@link MarshallableOut}.
-     * Subsequent method calls will be serialised to that destination and the writer's
-     * internal state is typically updated to reflect the new sink.
+     * Transforms or serializes the internal state of the implementer to the provided
+     * {@link MarshallableOut} instance. Implementers should handle the logic for
+     * extracting their state and using the methods available on the {@code out} parameter
+     * to output this state in the appropriate format.
      *
-     * @param out new sink for future method call serialisations; must not be null
+     * @param out The {@link MarshallableOut} instance to which the implementer's state should be written.
      */
     void marshallableOut(MarshallableOut out);
 }

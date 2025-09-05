@@ -39,6 +39,7 @@ import java.util.function.Supplier;
  * {@link LongConverter}.
  */
 public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvocationHandler {
+
     /** Supplier for the target {@link MarshallableOut}. */
     @NotNull
     private final Supplier<MarshallableOut> marshallableOutSupplier;
@@ -48,8 +49,8 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
     /**
      * Creates a handler bound to the supplied interface and target.
      *
-     * @param tClass          primary interface for the method writer
-     * @param marshallableOut destination for text wire output
+     * @param tClass           The class for which this invocation handler is being used.
+     * @param marshallableOut  The MarshallableOut instance used for data serialization.
      */
     TextMethodWriterInvocationHandler(Class<?> tClass, @NotNull MarshallableOut marshallableOut) {
         this(tClass, () -> marshallableOut);
@@ -136,14 +137,16 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
     }
 
     /**
-     * Creates a consumer that converts the first argument to
-     * {@link RawText} using the provided {@link LongConverter} type.
-     * The type may expose a static {@code INSTANCE} or be
-     * instantiated reflectively.
+     * Creates a long converter based on the provided class. The converter will convert the input
+     * object to its long representation using the provided LongConverter. It primarily focuses on
+     * handling the conversion of numbers to their textual representation in the format dictated by
+     * the provided LongConverter.
      *
-     * @param value {@link LongConverter} class or annotation holding one
-     * @return argument consumer applying the conversion
-     * @throws RuntimeException if reflection fails
+     * @param value The class representing the desired LongConverter. The class should ideally have
+     *              a public static field named "INSTANCE" which holds a pre-created instance of
+     *              the converter. If not, a new instance is created using reflection.
+     * @return A Consumer that takes in an Object array and performs the long conversion on its first element.
+     * @throws RuntimeException If there is an IllegalAccessException when accessing the "INSTANCE" field.
      */
     @NotNull
     private Consumer<Object[]> buildLongConverter(Class<?> value) {

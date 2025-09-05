@@ -24,7 +24,7 @@ import java.lang.reflect.Method;
 import java.util.function.BiConsumer;
 
 /**
- * Internal helper for generated method writers.
+ * Internal helper for writing sequences of method parameters into a given output format.
  *
  * <p>This class analyses a {@link Method}'s parameter types once and builds
  * {@link BiConsumer} instances that write the arguments to a
@@ -34,8 +34,6 @@ import java.util.function.BiConsumer;
  *
  * <p>This was previously implemented with a lambda which produced
  * garbage.
- *
- * @implNote For internal use only and not part of the public API.
  */
 class ParameterHolderSequenceWriter {
 
@@ -43,22 +41,20 @@ class ParameterHolderSequenceWriter {
     @SuppressWarnings("rawtypes")
     final Class[] parameterTypes;
 
-    /** Serialises every argument to the provided {@link ValueOut}. */
+    /** Serialises every argument sequence to the provided {@link ValueOut}. */
     final BiConsumer<Object[], ValueOut> from0;
 
-    /** Serialises arguments from index {@code 1} onwards. */
+    /** Serialises every argument sequence to the provided {@link ValueOut} from index {@code 1} onwards. */
     final BiConsumer<Object[], ValueOut> from1;
 
     /** MethodId value or {@code Long.MIN_VALUE} when absent. */
     final long methodId;
 
     /**
-     * Creates a writer for the given method.
-     * <p>
-     * Parameter types are cached and the consumer functions are built.
-     * The {@link MethodId} value is read if present.
+     * Initializes the `ParameterHolderSequenceWriter` with the provided method. The method's parameters are extracted,
+     * and appropriate serialization consumers (`from0` and `from1`) are initialized based on the parameters.
      *
-     * @param method the method to analyse
+     * @param method The method whose parameters are to be serialized.
      */
     @SuppressWarnings("unchecked")
     protected ParameterHolderSequenceWriter(Method method) {

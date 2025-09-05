@@ -127,13 +127,13 @@ public class GenerateMethodWriter {
         TEMPLATE_METHODS.put("writingDocument", wd);
     }
 
-    /** true if the generated writer marks messages as metadata. */
+    /** true if metadata is included in the generated method writer */
     private final boolean metaData;
 
     /** whether numeric {@link MethodId}s should be emitted. */
     private final boolean useMethodId;
 
-    /** target package for the generated class. */
+    /** target package for the generated method writer. */
     private final String packageName;
 
     /** interfaces that the generated class will implement. */
@@ -169,6 +169,17 @@ public class GenerateMethodWriter {
     /**
      * Internal constructor used by {@link #newClass}.
      * All parameters configure a single proxy generation run.
+     *
+     * @param packageName         The package name for the generated method writer.
+     * @param interfaces          The interfaces to be implemented by the generated method writer.
+     * @param className           The name of the generated class.
+     * @param classLoader         The class loader to use.
+     * @param wireType            The wire type for serialization.
+     * @param genericEvent        The generic event type.
+     * @param metaData            Indicates if metadata should be included.
+     * @param useMethodId         Indicates if method ID should be used.
+     * @param useUpdateInterceptor Indicates if the update interceptor should be used.
+     * @param verboseTypes        Indicates if verbose types should be used.
      */
     private GenerateMethodWriter(final String packageName,
                                  final Set<Class<?>> interfaces,
@@ -194,18 +205,19 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Creates and compiles a new method writer class.
+     * Creates and compiles a new method writer class based on the provided interface class.
      *
-     * @param fullClassName fully qualified name for the class to generate
-     * @param interfaces    interfaces that the new class must implement
-     * @param classLoader   loader used to define the resulting class
-     * @param wireType      target wire format
-     * @param genericEvent  optional generic event method name
-     * @param metaData      write metadata documents if true
-     * @param useMethodId   use numeric {@link MethodId} annotations when possible
-     * @param useUpdateInterceptor call {@link UpdateInterceptor} if true
-     * @param verboseTypes  include explicit types in the output
-     * @return the generated class or {@code null} on failure
+     * @param fullClassName         Fully qualified class name for the generated proxy class.
+     * @param interfaces            A set of interface classes that the generated proxy class will implement.
+     * @param classLoader           The class loader to use for generating the proxy class.
+     * @param wireType              The wire type for serialization.
+     * @param genericEvent          The generic event type.
+     * @param metaData              Indicates if metadata should be included.
+     * @param useMethodId           Indicates if {@link MethodId} should be used.
+     * @param useUpdateInterceptor  Indicates if the {@link UpdateInterceptor} should be used.
+     * @param verboseTypes          Indicates if verbose types should be used.
+     * @return                      A generated proxy class based on the provided interface class,
+     *                              or {@code null} if it can't be created.
      */
     @Nullable
     public static Class<?> newClass(String fullClassName,
@@ -235,6 +247,11 @@ public class GenerateMethodWriter {
     /**
      * Utility to obtain a {@link DocumentContext} either from a cached holder or
      * from the supplied {@link MarshallableOut}.
+     *
+     * @param metaData            Indicates if metadata should be included in the {@link DocumentContext}.
+     * @param documentContextTL   The thread-local holder of the {@link DocumentContext}.
+     * @param out                 The output where the document will be written.
+     * @return                    An instance of {@link DocumentContext}.
      */
     @SuppressWarnings("unused")
     public static DocumentContext acquireDocumentContext(boolean metaData,
@@ -249,8 +266,11 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Maps common primitive and {@link Marshallable} types to the matching
-     * {@link ValueOut} method suffix used in generated code.
+     * Converts common primitive and {@link Marshallable} types into a representative string.
+     * For types not explicitly mapped, a default representation is returned.
+     *
+     * @param type   The class type to be converted.
+     * @return       A representative string for the given class type.
      */
     private static CharSequence toString(Class<?> type) {
         if (boolean.class.equals(type)) {
@@ -278,7 +298,10 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Returns the canonical class name with inner classes separated by '.'.
+     * Retrieves the full canonical name of a class, with any '$' characters replaced by '.'.
+     *
+     * @param type   The class for which the name is required.
+     * @return       The full name of the class with '$' characters replaced.
      */
     @NotNull
     private static String nameForClass(Class<?> type) {
@@ -286,7 +309,13 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Returns a simple name if the class is imported or in {@code java.lang}; otherwise the canonical name.
+     * Retrieves the name for a class, considering any imports and package details.
+     * If the type is part of the provided import set, or if it belongs to the "java.lang" package,
+     * only the simple name of the class is returned. Otherwise, the full canonical name is returned.
+     *
+     * @param importSet   A set of class names or package patterns that have been imported.
+     * @param type        The class for which the name is required.
+     * @return            The appropriate name of the class based on the import context.
      */
     @NotNull
     private static String nameForClass(Set<String> importSet, Class<?> type) {
@@ -303,7 +332,12 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Creates a unique signature string for the supplied method relative to the given type.
+     * Constructs a method signature string for a given method and type.
+     * The signature string includes the return type, method name, and parameter types.
+     *
+     * @param m     The method for which the signature is to be generated.
+     * @param type  The type that might contain the method.
+     * @return      A string representing the method signature.
      */
     private static String signature(Method m, Type type) {
         final Type returnType = GenericReflection.getReturnType(m, type);
@@ -317,7 +351,13 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Builds the parameter list for a generated method, honouring {@link LongConversion} annotations.
+     * Constructs the method signature for a method, considering its annotations,
+     * parameters, and the provided import set.
+     *
+     * @param importSet       The set of imported classes or packages.
+     * @param dm              The method for which the signature is required.
+     * @param parameterTypes  The parameter types for the method.
+     * @return                An {@link Appendable} containing the method signature.
      */
     @NotNull
     private Appendable methodSignature(SortedSet<String> importSet, final Method dm, Type[] parameterTypes) {
@@ -348,8 +388,23 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Generates the Java source for the proxy, compiles it and loads the resulting class.
-     * When {@link #DUMP_CODE} is true the source is printed for debugging.
+     * Generates and loads a Java class based on provided interfaces. This method dynamically constructs
+     * a new Java class that implements the specified interfaces and the {@link MethodWriter} interface.
+     * The generated class will reside in the specified package and will import necessary dependencies
+     * from various packages, especially from the `net.openhft.chronicle.bytes` and `net.openhft.chronicle.wire` packages.
+     *
+     * <p>The method primarily works in the following steps:
+     * <ol>
+     *     <li>Generates the class header, including the package declaration and required imports.</li>
+     *     <li>Processes each method from the provided interfaces and generates an appropriate method body.</li>
+     *     <li>Attempts to load the newly created class using the generated source code.</li>
+     * </ol>
+     *
+     * <p><b>Debugging:</b> If the static field `DUMP_CODE` is set to {@code true}, the generated Java code
+     * will be printed to the standard output. This can be useful for debugging purposes.
+     *
+     * @return The {@link Class} object representing the dynamically generated class.
+     * @throws MethodWriterValidationException If there's an issue validating methods during the code generation.
      */
     @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
     private Class<?> createClass() {
@@ -491,8 +546,14 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Resolves the concrete return {@link Class} for the supplied method relative to the given interface.
-     */
+     * Determines the return type of the provided method relative to a given interface class.
+     * It makes use of {@code GenericReflection} to get the return type and, if the return type isn't a class instance,
+     * it attempts to resolve it as a generic declaration.
+     *
+     * @param dm            The method whose return type needs to be determined.
+     * @param interfaceClazz The interface class relative to which the method's return type is evaluated.
+     * @return The class type of the method's return type.
+         */
     private Class<?> returnType(Method dm, Class<?> interfaceClazz) {
         Type returnType = GenericReflection.getReturnType(dm, interfaceClazz);
         if (!(returnType instanceof Class))
@@ -501,7 +562,12 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Returns a source template for the supplied method if one exists.
+     * Looks up a template for a given method and interface type.
+     * The method searches for predefined templates using the method's name.
+     *
+     * @param dm           The method for which a template is required.
+     * @param interfaceType The interface type in which the method is defined.
+     * @return The template string if found, otherwise {@code null}.
      */
     private String templateFor(Method dm, Class<?> interfaceType) {
         Map<List<Class<?>>, String> map = TEMPLATE_METHODS.get(dm.getName());
@@ -516,7 +582,10 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Appends the {@code marshallableOut} method implementation to the generated source.
+     * Generates code for the `marshallableOut` method.
+     * The method updates the internal state of the generated class.
+     *
+     * @param codeFormatter The formatter that helps structure the generated code.
      */
     private void addMarshallableOut(SourceCodeFormatter codeFormatter) {
         codeFormatter.append("@Override\n");
@@ -530,7 +599,13 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Adds field declarations and the constructor to the generated class body.
+     * Constructs the source code for class fields and the class constructor.
+     * The method defines the state of the generated class and provides a constructor to initialize this state.
+     *
+     * @param importSet     The set of classes that need to be imported.
+     * @param className     The name of the generated class.
+     * @param result        The formatter that helps structure the generated source code.
+     * @return The structured source code containing the fields and constructor for the generated class.
      */
     private CharSequence constructorAndFields(Set<String> importSet, final String className, SourceCodeFormatter result) {
 
@@ -566,7 +641,13 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Generates the source for a single proxied method.
+     * Creates the method writer code for a given method.
+     *
+     * @param importSet The set of imports required for the method
+     * @param dm The method for which the writer code is to be generated
+     * @param interfaceClazz The class of the interface being processed
+     * @param methodIds The set of method IDs to track the generated methods
+     * @return A CharSequence containing the generated method writer code
      */
     private CharSequence createMethod(SortedSet<String> importSet, final Method dm, final Class<?> interfaceClazz, Set<String> methodIds) {
 
@@ -680,7 +761,10 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Returns the code snippet for the default value of the given return type.
+     * Determines the default return value for a given return type.
+     *
+     * @param returnType The return type of a method
+     * @return A string representing the default value for the specified return type
      */
     private String returnDefault(final Class<?> returnType) {
 
@@ -697,7 +781,13 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Emits code to write either the method name or its {@link MethodId} value.
+     * Writes the event name or ID for a given method. Determines whether to use the event name
+     * or ID based on the wire type and the presence of a MethodId annotation.
+     *
+     * @param dm        The method in question.
+     * @param body      The StringBuilder used to build the body of the method writer.
+     * @param eventName The name of the event.
+     * @return The method ID as a string, or an empty string if there's none.
      */
     private String writeEventNameOrId(final Method dm, final StringBuilder body, final String eventName) {
         String methodID = "";
@@ -714,7 +804,14 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Writes all method arguments to the {@code ValueOut} instance.
+     * Writes out the parameters for a given method in the desired format. Handles
+     * different parameter types and annotations to generate the appropriate method writer code.
+     *
+     * @param dm   The method whose parameters need to be written out.
+     * @param parameterTypes An array of the types of the method's parameters.
+     * @param len  The length of the parameters array.
+     * @param body The StringBuilder used to build the body of the method writer.
+     * @param startJ Starting index to loop through the parameters.
      */
     private void writeArrayOfParameters(final Method dm, Type[] parameterTypes, final int len, final StringBuilder body, final int startJ) {
         final int parameterCount = dm.getParameterCount();
@@ -747,7 +844,13 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Writes a single argument value to the generated code.
+     * Writes the value of a parameter to the method body, handling various types of parameter values.
+     *
+     * @param dm       The method whose parameter value needs to be written.
+     * @param type     The type of the parameter.
+     * @param body     The StringBuilder used to build the body of the method writer.
+     * @param startJ   The starting index to check if the current parameter is among multiple arguments.
+     * @param p        The parameter whose value is being written.
      */
     private void writeValue(final Method dm, Class<?> type, final StringBuilder body, final int startJ, final Parameter p) {
         final String name = p.getName();
@@ -783,7 +886,12 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Emits the appropriate return statement for the proxied method.
+     * Generates the return statement for a given method based on its return type. This method
+     * deals with various return types, such as Void, interface types, and primitive types.
+     *
+     * @param dm             The method for which the return statement is being generated.
+     * @param interfaceClazz The class or interface being implemented.
+     * @return A StringBuilder containing the return statement for the method.
      */
     private StringBuilder methodReturn(final Method dm, final Class<?> interfaceClazz) {
         final StringBuilder result = new StringBuilder();

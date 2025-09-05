@@ -48,7 +48,8 @@ import java.util.function.Supplier;
  */
 @SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
 public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBuilder<T> {
-    /** System property to disable byte-code generation. */
+
+    /** System property to disable proxy code generation. */
     public static final String DISABLE_WRITER_PROXY_CODEGEN = "disableProxyCodegen";
 
     /** Marker inserted into {@link #classCache} when compilation fails. */
@@ -106,10 +107,12 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     private boolean verboseTypes;
 
     /**
-     * @param tClass          primary interface to implement
-     * @param wireType        associated {@link WireType}
-     * @param handlerSupplier supplies the {@link MethodWriterInvocationHandler}
-     *                        used to process method calls
+     * Constructs an instance of VanillaMethodWriterBuilder with the specified class type, wire type,
+     * and an invocation handler supplier.
+     *
+     * @param tClass The class type that the builder will be working on.
+     * @param wireType The wire type to be used for the method writer.
+     * @param handlerSupplier Supplier to provide invocation handlers for the method writer.
      */
     public VanillaMethodWriterBuilder(@NotNull Class<T> tClass,
                                       WireType wireType,
@@ -126,9 +129,10 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     }
 
     /**
-     * Uses the supplied class loader when defining generated classes.
+     * Configures the class loader to be used for dynamic class generation and loading.
      *
-     * @return this builder for chaining
+     * @param classLoader The class loader to be set.
+     * @return The current instance of VanillaMethodWriterBuilder for chaining method calls.
      */
     @NotNull
     public MethodWriterBuilder<T> classLoader(ClassLoader classLoader) {
@@ -159,13 +163,15 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     }
 
     /**
-     * Adds an additional interface that the writer proxy should implement. The
-     * interface must not belong to {@link #invalidSuperInterfaces}.
-     * Any non standard interface return types are also added recursively.
+     * Adds an interface to the set of interfaces managed by this builder.
+     * This method ensures that the provided interface does not violate any constraints (like
+     * {@link #invalidSuperInterfaces}) and adds it to the internal collection. Additionally, it
+     * recursively processes return types of the methods in the provided interface and adds them
+     * if they are also interfaces.
      *
-     * @param additionalClass interface to add
-     * @return this builder
-     * @throws IllegalArgumentException if {@code additionalClass} is not allowed
+     * @param additionalClass The interface to be added.
+     * @return The current instance of VanillaMethodWriterBuilder for chaining method calls.
+     * @throws IllegalArgumentException if the provided interface is deemed invalid.
      */
     @NotNull
     public MethodWriterBuilder<T> addInterface(Class<?> additionalClass) {
@@ -215,9 +221,11 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     }
 
     /**
-     * Adds a resource to close when the writer or its handler is closed.
+     * Registers a closeable resource with the method writer invocation handler.
+     * This closeable will be invoked when the handler's close method is called.
      *
-     * @return this builder
+     * @param closeable The closeable resource to be registered.
+     * @return The current instance of VanillaMethodWriterBuilder for chaining method calls.
      */
     @NotNull
     public MethodWriterBuilder<T> onClose(Closeable closeable) {
@@ -286,8 +294,14 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     }
 
     /**
-     * Tries to instantiate a previously generated writer class, generating it if
-     * necessary. Returns {@code null} when generation fails.
+     * Attempts to create a new instance of the method writer by compiling or fetching the
+     * appropriate class from cache, and then instantiating it.
+     * <p>
+     * First, the method tries to fetch the class by name. If the class is not found,
+     * it attempts to generate a new class. In case of a failure during the class generation,
+     * a warning is logged, and a proxy method writer is used as a fallback.
+     *
+     * @return A newly created instance of the method writer or {@code null} if the instance couldn't be created.
      */
     @Nullable
     private T createInstance() {
@@ -319,8 +333,15 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     }
 
     /**
-     * Creates and compiles the writer class with the supplied name using the appropriate
-     * code generator.
+     * Generates a new method writer class with the given fully qualified class name. Depending on
+     * the wire type and system settings, either the version 1 or version 2 of the method writer
+     * generator is used to create the class.
+     * <p>
+     * The method configures the class generator with various settings, such as package name,
+     * base class name, interfaces, event types, and other configuration parameters.
+     *
+     * @param fullClassName The fully qualified name of the class to be generated.
+     * @return The generated class, or {@code COMPILE_FAILED} if class generation failed.
      */
     private Class<?> newClass(final String fullClassName) {
         if (wireType.isText() || !Jvm.getBoolean("wire.generator.v2"))
@@ -349,7 +370,17 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     }
 
     /**
-     * Instantiates the generated writer class via its expected constructor.
+     * Creates a new instance of the given class. The expected class should have a constructor
+     * that takes in an outSupplier, a closeable, and an updateInterceptor.
+     * <p>
+     * Before the instantiation, it checks if the outSupplier is set and whether it records
+     * history. If the outSupplier does record history, it enables recordHistory for the
+     * handlerSupplier as well.
+     *
+     * @param aClass The class for which a new instance is to be created.
+     * @return A newly created object of the provided class.
+     * @throws NullPointerException if the outSupplier is not set.
+     * @throws RuntimeException if any other exception occurs during instantiation.
      */
     private Object newInstance(final Class<?> aClass) {
         try {
@@ -371,10 +402,10 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     }
 
     /**
-     * Treats calls to {@code genericEvent} specially, using the first argument
-     * as the event name on the wire.
+     * A generic event treats the first argument as the eventName
      *
-     * @return this builder
+     * @param genericEvent name
+     * @return this
      */
     public MethodWriterBuilder<T> genericEvent(String genericEvent) {
         handlerSupplier.genericEvent(genericEvent);
@@ -399,7 +430,10 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     }
 
     /**
-     * Marks all written documents as meta-data when {@code true}.
+     * Specifies whether the builder should include metadata or not.
+     *
+     * @param metaData A boolean indicating whether to include metadata.
+     * @return The current instance of the {@link MethodWriterBuilder}, allowing chained method calls.
      */
     @Override
     public MethodWriterBuilder<T> metaData(final boolean metaData) {
@@ -415,10 +449,11 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     }
 
     /**
-     * Uses the supplied class instead of generating one.
-     * The class must not be an interface.
+     * Sets the proxy class to be used by the builder. The provided class must not be an interface.
      *
-     * @return this builder
+     * @param proxyClass The class to be set as the proxy class.
+     * @return The current instance of the {@link MethodWriterBuilder}, allowing chained method calls.
+     * @throws IllegalArgumentException If the provided class is an interface.
      */
     public MethodWriterBuilder<T> proxyClass(Class<?> proxyClass) {
         // Check if the provided class is an interface.

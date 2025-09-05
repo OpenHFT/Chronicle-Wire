@@ -34,11 +34,7 @@ import java.util.function.Supplier;
  */
 public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWriterInvocationHandler> {
 
-    /**
-     * Delegate supplier returning raw handler instances, typically a
-     * {@link BinaryMethodWriterInvocationHandler} or
-     * {@link TextMethodWriterInvocationHandler}.
-     */
+    // The main supplier delegate that provides the base MethodWriterInvocationHandler instances.
     private final Supplier<MethodWriterInvocationHandler> supplier;
 
     /** whether created handlers should record invocation history */
@@ -85,7 +81,7 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
     }
 
     /**
-     * If true a single handler is reused instead of one per thread.
+     * Sets the configuration for thread safety.
      */
     public void disableThreadSafe(boolean disableThreadSafe) {
         this.disableThreadSafe = disableThreadSafe;

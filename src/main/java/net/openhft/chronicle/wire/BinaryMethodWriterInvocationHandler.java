@@ -33,30 +33,30 @@ import java.util.function.Supplier;
  * depending on the {@link #metaData} flag.
  */
 public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInvocationHandler {
+
     /** Supplier for the target {@link MarshallableOut} used to serialise method calls. */
     @NotNull
     private final Supplier<MarshallableOut> marshallableOutSupplier;
-    /**
-     * When {@code true} each call is written as metadata rather than data.
-     */
+
+    /** Flag to determine if metadata should be written. */
     private final boolean metaData;
 
     /**
      * Create a handler bound to a single {@link MarshallableOut} instance.
      *
-     * @param tClass          primary interface of the proxy
-     * @param metaData        whether messages are written as metadata
-     * @param marshallableOut destination for serialised calls
+     * @param tClass           The class type associated with this handler.
+     * @param metaData         Flag to determine if metadata is to be written.
+     * @param marshallableOut  The MarshallableOut instance for binary writing.
      */
     BinaryMethodWriterInvocationHandler(Class<?> tClass, final boolean metaData, @NotNull MarshallableOut marshallableOut) {
         this(tClass, metaData, () -> marshallableOut);
     }
 
     /**
-     * Create a handler that fetches the target {@link MarshallableOut} from the given supplier.
+     * Create a handler using the given class, metadata flag and a supplier of MarshallableOut.
      *
      * @param tClass                  primary interface of the proxy
-     * @param metaData                whether messages are written as metadata
+     * @param metaData                Flag to determine if metadata is to be written.
      * @param marshallableOutSupplier supplier of the destination for serialised calls
      */
     public BinaryMethodWriterInvocationHandler(Class<?> tClass, final boolean metaData, Supplier<MarshallableOut> marshallableOutSupplier) {
@@ -81,9 +81,9 @@ public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInv
     }
 
     /**
-     * Returns whether this handler writes messages as metadata documents.
+     * Gets the current metadata setting for this handler.
      *
-     * @return {@code true} when messages are metadata
+     * @return {@code true} if metadata is enabled, {@code false} otherwise.
      */
     public boolean metaData() {
         return metaData;
@@ -92,9 +92,9 @@ public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInv
     /**
      * Serialises the given {@code method} call with {@code args} to the configured output.
      * Each invocation acquires a new {@link WriteDocumentContext} which is marked
-     * as data or metadata according to {@link #metaData}. If the return type of the
-     * method is an interface the document context is marked as {@code chained} so
-     * subsequent calls may share the same context.
+     * to possibly hold metadata according to {@link #metaData}.
+     * If the return type of the method is an interface the document context is marked as
+     * {@code chained} so subsequent calls may share the same context.
      */
     @Override
     protected void handleInvoke(Method method, Object[] args) {
