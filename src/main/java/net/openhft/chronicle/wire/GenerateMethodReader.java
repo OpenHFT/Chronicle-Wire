@@ -883,7 +883,7 @@ public class GenerateMethodReader {
             final String typeName = argumentType.getCanonicalName();
             boolean multipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes(argumentType);
             if (!Modifier.isFinal(argumentType.getModifiers()) && multipleNonMarshallableParamTypes) {
-                return format("%s = %s.object(%s, %s.class); %sInstances.put(%s.getClass(), %s);\n", argumentName, valueInName, argumentName + "Func", typeName, argumentName, argumentName, argumentName);
+                return format("%s = %s.object(%s, %s.class);\nif (!(%s instanceof Demarshallable)) {\n%sInstances.put(%s.getClass(), %s);\n}\n", argumentName, valueInName, argumentName + "Func", typeName, argumentName, argumentName, argumentName, argumentName);
             }
             if (isRecyclable(argumentType)) {
                 return format("%s = %s.object(checkRecycle(%s), %s.class);\n", argumentName, valueInName, argumentName, typeName);

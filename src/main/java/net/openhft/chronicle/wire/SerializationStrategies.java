@@ -362,7 +362,8 @@ public enum SerializationStrategies implements SerializationStrategy {
                 wrapper.demarshallable = Demarshallable.newInstance(wrapper.type, in.wireIn());
                 return wrapper;
             } else if (using instanceof ReadMarshallable) {
-                return in.object(using, Object.class);
+                ((ReadMarshallable) using).readMarshallable(in.wireIn());
+                return using;
             } else {
                 return Demarshallable.newInstance((Class) using.getClass(), in.wireIn());
             }
