@@ -721,7 +721,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 return true;
             for (long i = fromBytes.readPosition(); i < fromBytes.readLimit(); i++) {
                 int ch = fromBytes.readUnsignedByte(i);
-                if ((ch < ' ' && ch != '\t') || ch >= 127)
+                if (ch <= 0|| ch >= 127)
                     return false;
             }
             return true;
