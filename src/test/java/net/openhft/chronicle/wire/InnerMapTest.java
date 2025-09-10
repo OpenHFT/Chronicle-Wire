@@ -38,7 +38,7 @@ public class InnerMapTest extends WireTestCommon {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Create a new instance of MyMarshable and set its properties
-        @NotNull MyMarshable myMarshable = new MyMarshable().name("rob");
+        @NotNull MyMarshable myMarshable = new MyMarshable("rob");
         myMarshable.commission().put("hello", 123.4);
         myMarshable.nested = new MyNested("text");
 
@@ -91,7 +91,8 @@ public class InnerMapTest extends WireTestCommon {
         }
 
         // Default constructor
-        public MyMarshable() {
+        public MyMarshable(String name) {
+            this.name = name;
             this.commission = new LinkedHashMap<>();
         }
 
