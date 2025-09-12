@@ -170,9 +170,8 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
     }
 
     /**
-     * This is the MethodBridgeMetaData inner class, extending AbstractClassGenerator.MetaData with MethodBridgeMetaData type.
-     * This class encapsulates metadata related to the method bridge generation, particularly holding a list of classes
-     * (handlers) that the bridge method may invoke.
+     * Metadata specific to {@link GenerateMethodBridge}. Stores the handler
+     * classes that the generated bridge will dispatch to.
      */
     static final class MethodBridgeMetaData extends AbstractClassGenerator.MetaData<MethodBridgeMetaData> {
 

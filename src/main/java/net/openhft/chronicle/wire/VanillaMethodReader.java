@@ -95,8 +95,7 @@ public class VanillaMethodReader implements MethodReader {
     private boolean closed;
 
     /**
-     * Constructor for creating an instance of VanillaMethodReader with specified parameters.
-     * It uses default values for certain parameters like SKIP_READABLE_BYTES and creates the instance accordingly.
+     * Convenience constructor used by generated code.
      *
      * @param in       source of wire messages
      * @param ignoreDefault if true default interface methods are skipped
@@ -305,7 +304,7 @@ public class VanillaMethodReader implements MethodReader {
     /**
      * Performs the actual reflective call.
      * Used by the interceptor when present.
-     * 
+     *
      * @return The result of the method invocation.
      * @throws InvocationTargetException if the method invocation fails.
      */
@@ -364,8 +363,7 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     /**
-     * Merges the given metaDataHandler and objects arrays, ensuring no duplicates and
-     * maintaining the original order. If the metaDataHandler is null, it returns the objects array.
+     * Combine explicit metadata handlers with the general handler list.
      *
      * @param metadataHandlers handlers dedicated to metadata messages
      * @param handlers general handler objects
@@ -510,12 +508,7 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     /**
-     * Sets the closeIn state of the VanillaMethodReader. When closeIn is true, the reader will be
-     * automatically closed after reading, otherwise, it remains open for further operations.
-     *
-     * @param closeIn The new closeIn state to be set
-     * @return The current instance of the VanillaMethodReader for chaining method calls
-     * @throws IllegalStateException if the VanillaMethodReader is already closed
+     * Control whether {@link #close()} also closes the input.
      */
     @NotNull
     public VanillaMethodReader closeIn(boolean closeIn) {
@@ -808,10 +801,7 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     /**
-     * Reads a single message. If the message is metadata, it returns true even if it's ignored.
-     *
-     * @return true if a message was read or if metadata was ignored; false if no more data is available
-     * @throws InvocationTargetRuntimeException if an exception occurs during message reading
+     * Read and dispatch a single message.
      */
     public boolean readOne() throws InvocationTargetRuntimeException {
         // Ensure that the reader isn't closed
