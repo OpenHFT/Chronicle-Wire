@@ -53,10 +53,6 @@ public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMetho
         return super.acquireClass(classLoader);
     }
 
-    /**
-     * Creates the generic type signature in the form
-     * {@code <OUT extends Object & Interface1 & Interface2 & MethodDelegate<OUT>>}.
-     */
     @Override
     protected String generateGenericType() {
         return "OUT extends Object & " + metaData().interfaces().stream()
@@ -65,24 +61,15 @@ public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMetho
                 .collect(Collectors.joining(" & "));
     }
 
-    /**
-     * Emits the field that stores the current delegate instance.
-     */
     @Override
     protected void generateFields(SourceCodeFormatter mainCode) {
         mainCode.append("private ").append(getDelegateType()).append(" delegate;\n");
     }
 
-    /**
-     * Returns the name used for the delegate type in generated code.
-     */
     protected String getDelegateType() {
         return "OUT";
     }
 
-    /**
-     * Uses the implicit no-arg constructor; no constructors are generated.
-     */
     @Override
     protected void generateConstructors(SourceCodeFormatter mainCode) {
     }
@@ -105,10 +92,6 @@ public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMetho
         }
     }
 
-    /**
-     * Writes the body of a delegated method. The parameters and their list are
-     * passed in so the invocation can be constructed correctly.
-     */
     @Override
     protected void generateMethod(Method method, StringBuilder params, List<String> paramList, SourceCodeFormatter mainCode) {
         if (method.getReturnType() != void.class)
@@ -129,6 +112,6 @@ public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMetho
      * {@link AbstractClassGenerator.MetaData} without extra fields.
      */
     public static class GMDMetaData extends AbstractClassGenerator.MetaData<GMDMetaData> {
-        // Intentionally left blank
+        // This class serves as a metadata container with no additional methods or attributes.
     }
 }

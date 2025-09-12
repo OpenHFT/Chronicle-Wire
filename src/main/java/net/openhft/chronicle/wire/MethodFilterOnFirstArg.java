@@ -18,11 +18,11 @@
 package net.openhft.chronicle.wire;
 
 /**
- * Functional interface for filtering method invocations by examining the first argument.
+ * Functional interface for filtering method invocations by examining the first argument out of multiple.
  * Implementors decide, based on that argument, whether the rest of the call should be ignored.
  * This can save processing time when not every event needs to be handled.
  *
- * @param <T> type of the first argument
+ * @param <T> type of the first argument that the method receives
  */
 @FunctionalInterface
 public interface MethodFilterOnFirstArg<T> {

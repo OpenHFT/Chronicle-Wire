@@ -40,13 +40,13 @@ import static net.openhft.chronicle.wire.WireParser.SKIP_READABLE_BYTES;
  */
 public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
-    /** System property name to disable proxy generation. */
+    // System property name to disable proxy generation.
     public static final String DISABLE_READER_PROXY_CODEGEN = "disableReaderProxyCodegen";
 
-    /** Cache of generated reader classes keyed by name. */
+    // Cache of generated reader classes keyed by name.
     private static final Map<String, Class<?>> classCache = new ConcurrentHashMap<>();
 
-    /** Marker stored in {@link #classCache} when generation fails. */
+    // Marker stored in {@link #classCache} when generation fails.
     private static final Class<?> COMPILE_FAILED = ClassNotFoundException.class;
 
     // The input from which method calls are read.
