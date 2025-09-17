@@ -28,7 +28,7 @@ import java.time.Duration;
 public class NanoDurationLongConverter implements LongConverter {
 
     /**
-     * Parses the provided {@link CharSequence} into a duration and returns the equivalent duration in nanoseconds.
+     * Parse a duration in ISO-8601 format and return the equivalent value in nanoseconds.
      *
      * @param text The character sequence representing a duration in ISO-8601 format (e.g., "PT20.345S") to be parsed into total nanoseconds.
      * @return the parsed duration as a long value in nanoseconds
@@ -42,7 +42,7 @@ public class NanoDurationLongConverter implements LongConverter {
     /**
      * Convert a number of nanoseconds to a {@link Duration}.
      *
-     * @param value the duration as a long value in nanoseconds
+     * @param value The duration expressed as a total number of nanoseconds.
      * @return a {@link Duration} representing the same duration
      */
     private Duration duration(long value) {
@@ -51,7 +51,7 @@ public class NanoDurationLongConverter implements LongConverter {
     }
 
     /**
-     * Appends a {@link Duration} representation of the provided long value (in nanoseconds) to the provided {@link StringBuilder}.
+     * Append the ISO-8601 form of the given duration to the supplied {@link StringBuilder}.
      *
      * @param text The {@link StringBuilder} to which the ISO-8601 string representation of the duration {@code value} will be appended.
      * @param value The duration, expressed as a total number of nanoseconds, to be formatted and appended.
@@ -62,7 +62,7 @@ public class NanoDurationLongConverter implements LongConverter {
     }
 
     /**
-     * Appends a {@link Duration} representation of the provided long value (in nanoseconds) to the provided {@link Bytes}.
+     * Append the ISO-8601 form of the given duration to the supplied {@link Bytes}.
      *
      * @param bytes The {@link net.openhft.chronicle.bytes.Bytes} instance to which the ISO-8601 string representation of the duration {@code value} will be appended.
      * @param value The duration, expressed as a total number of nanoseconds, to be formatted and appended.

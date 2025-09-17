@@ -81,7 +81,7 @@ public class ServicesTimestampLongConverter implements LongConverter {
     }
 
     /**
-     * Converts the given long value to the configured time unit.
+     * Converts a timestamp to the service's configured time unit.
      *
      * @param arg The timestamp value, typically nanoseconds since epoch (from
      *            {@link System#nanoTime()} or
@@ -177,9 +177,7 @@ public class ServicesTimestampLongConverter implements LongConverter {
     }
 
     /**
-     * This is the longFunction interface. It's a functional interface designed to perform operations
-     * on long values and return a long result. It is used internally in ServicesTimestampLongConverter
-     * to abstract the conversion logic based on the system-configured time unit.
+     * Functional interface used internally to convert timestamp values.
      */
     interface longFunction {
         /**
