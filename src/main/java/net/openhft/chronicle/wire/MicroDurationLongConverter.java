@@ -44,7 +44,7 @@ public class MicroDurationLongConverter implements LongConverter {
     /**
      * Converts a duration represented in microseconds to a {@link Duration} object.
      *
-     * @param value The duration expressed as a total number of microseconds
+     * @param value the duration as a long value in microseconds
      * @return a {@link Duration} representing the same duration
      */
     private Duration duration(long value) {

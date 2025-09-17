@@ -203,7 +203,7 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
     }
 
     /**
-     * Append the fraction-of-second pattern to the formatter builder.
+     * Appends the fraction of the second to the provided {@code DateTimeFormatterBuilder}.
      *
      * @param builder The {@link DateTimeFormatterBuilder} after the basic date
      *                and time pattern has been added.
