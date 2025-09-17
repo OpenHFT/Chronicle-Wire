@@ -86,7 +86,7 @@ public abstract class AbstractLongConverter implements LongConverter {
     }
 
     /**
-     * Appends the provided long value to the destination builder.
+     * Appends the provided long value to the destination {@code StringBuilder}.
      *
      * @param destinationBuilder the builder receiving the formatted value
      * @param numericValue the long value to convert and append

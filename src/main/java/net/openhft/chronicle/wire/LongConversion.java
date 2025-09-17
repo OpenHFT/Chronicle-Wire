@@ -27,17 +27,18 @@ import java.lang.annotation.Target;
  * implementation with another annotation. Custom marker annotations (for
  * example {@code @Hexadecimal} or {@code @Base64}) can declare which converter
  * should be applied when serialising or deserialising {@code long} fields or
- * parameters.
+ * parameters. The referenced converter annotation should either have a static
+ * final instance named `INSTANCE` or should be a {@link LongConverter}
  *
- * <p>Example:</p>
- * <pre>{@code
- * @LongConversion(HexadecimalLongConverter.class)
- * @Retention(RetentionPolicy.RUNTIME)
- * @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
- * public @interface MyHexFormat {
- *    LongConverter INSTANCE = new MyHexFormatConverter("0123456789ABCDEF");
+ * <p>Example usage:</p>
+ * <pre><code>
+ * &#64;LongConversion(HexadecimalLongConverter.class)
+ * &#64;Retention(RetentionPolicy.RUNTIME)
+ * &#64;Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
+ * public &#64;interface MyHexFormat {
+ *     LongConverter INSTANCE = new MyHexFormatConverter("0123456789ABCDEF");
  * }
- * }</pre>
+ * </code></pre>
  *
  * @see LongConverter
  */
