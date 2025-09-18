@@ -106,14 +106,11 @@ public interface WireParser extends Consumer<WireIn> {
      * parselet is found the {@link #getDefaultConsumer()} or its numbered
      * counterpart is used.
      *
-     * @param wireIn the wire input source
-     * @throws InvocationTargetRuntimeException if invoking the target action
-     *                                          fails
-     * @throws InvalidMarshallableException     if the value cannot be
-     *                                          deserialised
+     * @param wireIn The wire input source.
+     * @throws InvocationTargetRuntimeException When there's a failure invoking the target action for a field.
+     * @throws InvalidMarshallableException     When the wire data cannot be marshaled into the desired format.
      */
-    void parseOne(@NotNull WireIn wireIn)
-            throws InvocationTargetRuntimeException, InvalidMarshallableException;
+    void parseOne(@NotNull WireIn wireIn) throws InvocationTargetRuntimeException, InvalidMarshallableException;
 
     /**
      * Processes an entire document or event from {@code wireIn}. The default
@@ -143,18 +140,17 @@ public interface WireParser extends Consumer<WireIn> {
     }
 
     /**
-     * Searches for the {@link WireParselet} associated with the given field
-     * name.
+     * Searches for a {@link WireParselet} associated with a given name.
      *
-     * @param name the field name whose parselet is to be retrieved
-     * @return the matching {@link WireParselet}, or {@code null} if none exists
+     * @param name The name to search the associated {@link WireParselet} for.
+     * @return The found {@link WireParselet}, or {@code null} if not found.
      */
     WireParselet lookup(CharSequence name);
 
     /**
-     * Attempts to register a new {@link WireParselet} for the supplied key. If a
-     * parselet is already registered for that key a warning is emitted and the
-     * new registration is ignored.
+     * Attempts to register a new {@link WireParselet} for a given key. If a parselet
+     * is already registered with the same key, a warning is emitted and the new
+     * registration is ignored.
      *
      * @param key            the {@link WireKey} (providing both name and code)
      *                       to associate with the parselet

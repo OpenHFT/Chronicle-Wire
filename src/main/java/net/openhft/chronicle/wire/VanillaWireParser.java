@@ -78,7 +78,7 @@ public class VanillaWireParser implements WireParser {
     private long lastStart = 0;
 
     /**
-     * Creates a parser using the supplied handlers.
+     * Constructs a new VanillaWireParser with the specified default consumer and field number parselet.
      *
      * @param defaultConsumer      consumer for unregistered named fields. Must not be {@code null}.
      * @param fieldNumberParselet  handler for unregistered numeric ids. Must not be {@code null}.
@@ -220,7 +220,9 @@ public class VanillaWireParser implements WireParser {
     }
 
     /**
-     * Internal helper that stores the mapping in both the named and numbered maps.
+     * Registers a WireParselet with a given keyName and code.
+     * The keyName is stored in the namedConsumer map and the code
+     * with its corresponding keyName in the numberedConsumer map.
      *
      * @param keyName         textual name of the field
      * @param code            numeric id of the field
