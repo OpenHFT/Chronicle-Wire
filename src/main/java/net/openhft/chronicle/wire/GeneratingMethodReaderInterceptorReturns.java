@@ -46,12 +46,12 @@ import java.lang.reflect.Method;
  *     }
  * }</pre>
  *
- * <p>This mechanism is used by {@link GenerateMethodReader} to weave logic
- * directly into the generated class.  If the supplied code fails to compile,
- * the call falls back to {@link #intercept(Method, Object, Object[], Invocation)}
- * as it would with a reflective interceptor.
+ * <p>Please mind that if provided code fails to compile, reflexive method call will be delegated to the interceptor
+ * with {@link #intercept(Method, Object, Object[], Invocation)}, like it happens with a regular
+ * {@link MethodReaderInterceptorReturns}.
  */
 public interface GeneratingMethodReaderInterceptorReturns extends MethodReaderInterceptorReturns {
+
     /**
      * Specifies ID of this generating interceptor.<br>
      * Contract: if the code provided by generating interceptor differs from the code provided by another generating
@@ -59,23 +59,23 @@ public interface GeneratingMethodReaderInterceptorReturns extends MethodReaderIn
      * Provided ID will be used in the classname of a generated method reader to ensure re-compilation when a new
      * generator is passed.
      *
-     * @return a unique string ID for this generator implementation. This ID influences the generated class name.
+     * @return a unique string ID for this generator implementation.
      */
     String generatorId();
 
     /**
-     * @param m             the {@link Method} being intercepted
-     * @param objectName    name of the variable holding the target instance in the generated code
-     * @param argumentNames variable names of the deserialised arguments in the generated code
-     * @return Java source code to insert before the actual call, or {@code null} if nothing should be added
+     * @param m             Calling method.
+     * @param objectName    Object instance name.
+     * @param argumentNames Call argument names.
+     * @return Source code to add before the method call.
      */
     String codeBeforeCall(Method m, String objectName, String[] argumentNames);
 
     /**
-     * @param m             the {@link Method} being intercepted
-     * @param objectName    name of the variable holding the target instance in the generated code
-     * @param argumentNames variable names of the deserialised arguments in the generated code
-     * @return Java source code to insert after the actual call, or {@code null} if nothing should be added
+     * @param m             Calling method.
+     * @param objectName    Object instance name.
+     * @param argumentNames Call argument names.
+     * @return Source code to add after the method call.
      */
     String codeAfterCall(Method m, String objectName, String[] argumentNames);
 }

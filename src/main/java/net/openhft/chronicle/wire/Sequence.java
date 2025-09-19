@@ -35,18 +35,16 @@ public interface Sequence {
     long NOT_FOUND = -1;
 
     /**
-     * Gets the sequence number for the supplied write position. This method is
-     * typically used with the last write position and may not be suitable for
-     * arbitrary positions.
+     * gets the sequence for a writePosition
+     * <p>
+     * This method will only return a valid sequence number of the write position if the write position is the
+     * last write position in the queue. YOU CAN NOT USE THIS METHOD TO LOOK UP RANDOM SEQUENCES FOR ANY WRITE POSITION.
+     * NOT_FOUND_RETRY will be return if a sequence number can not be found  ( so retry )
+     * or NOT_FOUND if you should not retry
      *
-     * @param forWritePosition The write position (for example an excerpt's
-     *                         starting offset) for which the sequence number is
-     *                         requested. This is usually the most recently
-     *                         written position.
-     * @return The sequence number for {@code forWritePosition}, or
-     *         {@link #NOT_FOUND_RETRY} if the lookup should be retried, or
-     *         {@link #NOT_FOUND} if the position does not map to a sequence
-     *         number.
+     * @param forWritePosition the last write position, expected to be the end of queue
+     * @return NOT_FOUND_RETRY if the sequence for this write position can not be found (you can retry), or
+     * NOT_FOUND if it can't be found and there is no point in retrying
      */
     long getSequence(long forWritePosition);
 

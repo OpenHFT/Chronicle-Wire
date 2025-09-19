@@ -27,14 +27,16 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 public interface SourceContext {
 
     /**
-     * The identifier of the source from which the message originated.
+     * Retrieves the identifier of the source from which the message originated.
      *
      * @return unique identifier for this context, or {@code -1} if not available or not applicable
      */
     int sourceId();
 
     /**
-     * Index of the current document or message within its source.
+     * Obtains the index of the last read operation from this source context.
+     * This is particularly useful to track the reading progress and can act as a checkpoint or reference point.
+     * Note: This method is specifically intended for read contexts and might not be relevant for other context types.
      *
      * @return index of the current entry, for example the queue index
      * @throws IORuntimeException if the index cannot be determined

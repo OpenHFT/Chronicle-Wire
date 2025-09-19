@@ -30,13 +30,8 @@ import net.openhft.chronicle.core.util.StringUtils;
  */
 public class CharSequenceObjectMap<T> {
 
-    /**
-     * Multiplier used in {@link #hashFor(CharSequence)} to improve hash code distribution.
-     */
+    /** Constants used in {@link #hashFor(CharSequence)} for improved distribution. */
     private static final int K0 = 0x6d0f27bd;
-    /**
-     * Second multiplier used in {@link #hashFor(CharSequence)} for better distribution.
-     */
     @SuppressWarnings("unused")
     private static final int M0 = 0x5bc80bad;
 

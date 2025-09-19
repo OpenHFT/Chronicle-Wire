@@ -29,7 +29,7 @@ import org.jetbrains.annotations.NotNull;
 public interface MarshallableParser<T> {
 
     /**
-     * Create an instance of {@code T} from the supplied wire representation.
+     * Parses the provided {@code ValueIn} into an instance of type {@code T}.
      *
      * @param valueIn the {@link ValueIn} holding the serialised form
      * @return non-null instance of {@code T} deserialised from {@code valueIn}

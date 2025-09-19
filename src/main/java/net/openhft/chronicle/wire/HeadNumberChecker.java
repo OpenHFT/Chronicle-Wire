@@ -33,7 +33,7 @@ public interface HeadNumberChecker {
      *
      * @param headerNumber The header number read from the wire.
      * @param position     The byte position in the wire where this header number was encountered.
-     *                      This can be used for context or logging.
+     *                     This can be used for context or logging.
      * @return {@code true} if the header number is considered valid according to the implementation's
      * logic, {@code false} otherwise (which might lead to an error or retry).
      */
