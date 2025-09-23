@@ -119,18 +119,18 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     private boolean addSourceDetails = false;
 
     /**
-     * Implementation of {@link MessageHistory#get()}.
+     * Returns the thread-local instance of {@link MessageHistory}.
      *
-     * @return the current thread's history instance
+     * @return Current thread's {@code MessageHistory} instance.
      */
     static MessageHistory getThreadLocal() {
         return THREAD_LOCAL.get();
     }
 
     /**
-     * Implementation of {@link MessageHistory#set(MessageHistory)}.
+     * Sets the thread-local instance of {@link MessageHistory}.
      *
-     * @param md history instance to associate with the current thread
+     * @param md The {@code MessageHistory} instance to be set for the current thread.
      */
     static void setThreadLocal(MessageHistory md) {
         if (md == null)
@@ -140,32 +140,38 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     }
 
     /**
-     * Internal helper for deserialising the {@code sources} sequence.
+     * Accepts sources from the input stream and updates the message history.
      *
-     * @param t  the history instance to populate
-     * @param in source sequence to read
+     * @param t  The instance of VanillaMessageHistory to update.
+     * @param in The input stream containing source data.
      */
     private static void acceptSourcesRead(VanillaMessageHistory t, ValueIn in) {
-        while (in.hasNextSequenceItem())
+        // Read each sequence item from the input stream
+        while (in.hasNextSequenceItem()) {
+            // Add the source details (ID and Index) to the message history
             t.addSource(in.int32(), in.int64());
+        }
     }
 
     /**
-     * Internal helper for deserialising the {@code timings} sequence.
+     * Accepts timings from the input stream and updates the message history.
      *
-     * @param t  the history instance to populate
-     * @param in timing sequence to read
+     * @param t  The instance of VanillaMessageHistory to update.
+     * @param in The input stream containing timing data.
      */
     private static void acceptTimingsRead(VanillaMessageHistory t, ValueIn in) {
-        while (in.hasNextSequenceItem())
+        // Read each sequence item from the input stream
+        while (in.hasNextSequenceItem()) {
+            // Add the timing detail to the message history
             t.addTiming(in.int64());
+        }
     }
 
     /**
-     * Controls whether a new history entry is appended when
-     * {@link #readMarshallable(WireIn)} is called.
+     * Sets whether the MessageHistory should automatically add a timestamp on read.
+     * Useful for utilities that expect to read MessageHistory without mutation.
      *
-     * @param addSourceDetails true to add the calling component as a hop
+     * @param addSourceDetails True if source details should be added, false otherwise.
      */
     public void addSourceDetails(boolean addSourceDetails) {
         this.addSourceDetails = addSourceDetails;
@@ -178,7 +184,10 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     }
 
     /**
-     * @return {@code true} if {@link #readMarshallable(WireIn)} auto-appends a history entry
+     * Gets the flag that determines whether the MessageHistory should automatically
+     * add a timestamp on read.
+     *
+     * @return True if source details are being added, false otherwise.
      */
     public boolean addSourceDetails() {
         return addSourceDetails;
@@ -440,8 +449,8 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     }
 
     /**
-     * Internal consumer for writing the {@code sources} sequence during
-     * {@link #writeMarshallable(WireOut)}.
+     * Internal consumer for writing the {@code sources} sequence from the
+     * {@code VanillaMessageHistory} during {@link #writeMarshallable(WireOut)}.
      */
     private void acceptSources(VanillaMessageHistory t, ValueOut out) {
         HexDumpBytesDescription<?> b = bytesComment(out);
@@ -470,8 +479,8 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     }
 
     /**
-     * Helper to obtain a {@link HexDumpBytesDescription} for adding comments to
-     * hex dumps when the wire supports it.
+     * Helper to obtain a {@link HexDumpBytesDescription} if available for adding comment
+     * to hex dumps when the wire supports it.
      */
     @Nullable
     private HexDumpBytesDescription<?> bytesComment(ValueOut out) {
@@ -515,8 +524,11 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     }
 
     /**
-     * Custom {@code toString()} avoids invoking {@code writeMarshallable} which
-     * would append timing entries.
+     * We need a custom toString as the base class toString calls writeMarshallable which does not mutate this,
+     * but will display a different result every time you toString the object as it outputs System.nanoTime
+     * or Wall Clock in NS if the wall.clock.message.history system property is set
+     *
+     * @return String representation
      */
     @Override
     public String toString() {
@@ -528,7 +540,9 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     }
 
     /**
-     * Creates a deep copy without adding an extra timing entry.
+     * Override deepCopy as writeMarshallable adds a timing every time it is called. See also {@link #toString()}
+     *
+     * @return copy of this
      */
     @Override
     public @NotNull <T> T deepCopy() throws InvalidMarshallableException {

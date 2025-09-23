@@ -53,6 +53,9 @@ public class MessagePathClassifier implements IntSupplier {
     /**
      * Registers a path ID for message histories that end with the supplied
      * sequence of source IDs.
+     * <p>
+     * This method enables the user to define how the classifier should categorize certain patterns
+     * of message history.
      *
      * @param pathId  the identifier to associate with this pattern
      * @param sources the sequence of source IDs that must appear at the end of

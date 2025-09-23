@@ -38,9 +38,8 @@ public interface MessageHistory extends Marshallable {
     /**
      * You only need to call this if you wish to override its behaviour.
      *
-     * @param md the history instance to use for this thread, or {@code null}
-     *           to clear the thread local so {@link #get()} will create a new
-     *           default instance
+     * @param md to change to the default implementation for this thread. Null to clear the thread local
+     *           and force withInitial to be called again
      */
     static void set(MessageHistory md) {
         VanillaMessageHistory.setThreadLocal(md);
@@ -89,40 +88,48 @@ public interface MessageHistory extends Marshallable {
     }
 
     /**
-     * Returns the count of timing entries recorded in this history.
+     * Returns the number of timings contained in this {@code MessageHistory}.
      *
-     * @return the number of timings
+     * @return the number of timings contained in this {@code MessageHistory}.
      */
     int timings();
 
     /**
-     * @param n zero-based index of the timing entry to read
-     * @return the timestamp recorded at index {@code n}
+     * Returns a timing at a position specified by the input {@code n}.
+     *
+     * @return a timing at a position specified by the input {@code n}.
      */
     long timing(int n);
 
     /**
-     * Returns the count of source entries recorded in this history.
+     * Returns the number of sources contained in this {@code MessageHistory}.
      *
-     * @return the number of sources
+     * @return the number of sources contained in this {@code MessageHistory}.
      */
     int sources();
 
     /**
-     * @param n zero-based index of the source entry
-     * @return the identifier of the source recorded at index {@code n}
+     * Returns the source id at a position specified by the input {@code n}.
+     *
+     * @return the source id at a position specified by the input {@code n}.
      */
     int sourceId(int n);
 
     /**
-     * @param sourceIds sequence of IDs to check against the end of this history
-     * @return {@code true} if the IDs match the end of the stored list
+     * Returns {@code true} if the source ids contained in this
+     * {@code MessageHistory} end with the provided {@code sourceIds}.
+     *
+     * @return {@code true} if the source ids contained in this
+     * {@code MessageHistory} end with the provided {@code sourceIds}.
      */
     boolean sourceIdsEndsWith(int[] sourceIds);
 
     /**
-     * @param n zero-based index of the source entry
-     * @return the index within the source component recorded at index {@code n}
+     * Returns the index of the source at a position specified by the
+     * input {@code n}.
+     *
+     * @return the index of the source at a position specified by the
+     * input {@code n}.
      */
     long sourceIndex(int n);
 
@@ -133,28 +140,28 @@ public interface MessageHistory extends Marshallable {
     void reset();
 
     /**
-     * Clears existing entries and initialises this history with a single source
-     * and the current time.
-     *
-     * @param sourceId    identifier of the initial source component
-     * @param sourceIndex index within that source
+     * Resets the {@code MessageHistory} with the provided {@code sourceId}
+     * and {@code sourceIndex} as a starting point.
      */
     void reset(int sourceId, long sourceIndex);
 
     /**
-     * Returns the ID of the most recently added source or {@code -1} if none.
+     * Returns the last source id contained in this {@code MessageHistory}.
+     *
+     * @return the last source id contained in this {@code MessageHistory}.
      */
     int lastSourceId();
 
     /**
-     * Returns the index of the most recently added source or {@code -1} if none.
+     * Returns the last source index contained in this {@code MessageHistory}.
+     *
+     * @return the last source index contained in this {@code MessageHistory}.
      */
     long lastSourceIndex();
 
     /**
-     * Indicates if new entries were added since the last write or reset.
-     *
-     * @return {@code true} if the history has unwritten changes
+     * @return {@code true} if the message history has not been written using
+     * {@link Marshallable#writeMarshallable(net.openhft.chronicle.wire.WireOut)}
      */
     boolean isDirty();
 }
