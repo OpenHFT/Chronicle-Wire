@@ -52,6 +52,7 @@ public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMar
      */
     @NotNull
     @Override
+    // to be removed in x.25
     public String eventId() {
         return eventId;
     }
@@ -63,6 +64,7 @@ public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMar
      * @return this instance for chaining
      */
     @Override
+    // to be removed in x.25
     public E eventId(@NotNull CharSequence eventId) {
         this.eventId = eventId.toString();
         return (E) this;
@@ -114,7 +116,7 @@ public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMar
     }
 
     /**
-     * Associates the given service identifier with this event.
+     * This method sets the provided service ID to the instance variable.
      *
      * @param serviceId the service ID to set; may be empty if not applicable
      * @return this instance for chaining
@@ -127,9 +129,8 @@ public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMar
     /**
      * Checks if this event is intended for the given destination service.
      *
-     * @param destServiceId the destination service ID to check
-     * @return {@code true} if {@link #serviceId()} is null, empty or matches
-     *         {@code destServiceId}
+     * @param destServiceId The destination service ID to check against
+     * @return true if the event is routed to the specified service, false otherwise
      */
     public boolean routedTo(String destServiceId) {
         return this.serviceId == null || this.serviceId().isEmpty() || this.serviceId().equals(destServiceId);

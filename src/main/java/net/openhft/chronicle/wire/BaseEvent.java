@@ -6,7 +6,7 @@ package net.openhft.chronicle.wire;
 
 /**
  * Represents a timed event and extends {@link Marshallable} so that the event can
- * be serialised or de-serialised.
+ * be serialised or de-serialised. This interface provides methods to manage that associated time
  * <p>
  * Typically used for events generated outside the system that carry a timestamp.
  * The time unit defaults to nanoseconds but can be overridden globally with the
@@ -16,16 +16,15 @@ package net.openhft.chronicle.wire;
  */
 public interface BaseEvent<E extends BaseEvent<E>> extends Marshallable {
     /**
-     * Returns the timestamp of when the event occurred or was generated.
-     * The unit is controlled by the system-wide service time unit, defaulting to
-     * nanoseconds (see {@link ServicesTimestampLongConverter}).
+     * Returns the time at which the event which triggered this was generated (e.g. the time
+     * an event generated externally to the system first entered the system).
      *
-     * @return the event time in the configured unit
+     * @return the time at which the event which triggered this was generated.
      */
     long eventTime();
 
     /**
-     * Assigns the timestamp for this event.
+     * Sets the timestamp for this event.
      *
      * @param eventTime the time to store, expressed in the service time unit
      *                  (see {@link ServicesTimestampLongConverter}).
