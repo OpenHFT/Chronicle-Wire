@@ -34,11 +34,6 @@ public class Example7 {
         ClassAliasPool.CLASS_ALIASES.addAlias(Data1.class);
     }
 
-    /**
-     * Runs the demo.
-     *
-     * @param args command line arguments (not used in this example)
-     */
     public static void main(String[] args) throws IOException {
 
         Data1 data1 = new Data1();

@@ -34,11 +34,6 @@ import java.util.stream.Stream;
  * document.
  */
 public class Example6 {
-    /**
-     * Runs the demo.
-     *
-     * @param args command line arguments (not used in this example)
-     */
     public static void main(String[] args) {
 
         // Bytes which wraps a ByteBuffer which is resized as needed

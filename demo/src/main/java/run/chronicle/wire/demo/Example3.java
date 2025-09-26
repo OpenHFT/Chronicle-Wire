@@ -29,11 +29,6 @@ import java.util.concurrent.TimeUnit;
  * parent wire, using both text and binary formats.
  */
 public class Example3 {
-    /**
-     * Runs the demo.
-     *
-     * @param args command line arguments (not used in this example)
-     */
     public static void main(String[] args) {
 
         // Bytes what wraps a resized byte[]

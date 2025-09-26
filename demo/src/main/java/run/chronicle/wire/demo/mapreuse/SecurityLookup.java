@@ -20,16 +20,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Demonstrates object reuse when looking up {@link Security} instances from a
- * sorted list, simulating a mapping from security IDs to reusable objects.
+ * This example shows how a List can be sorted and used for looking up keys
+ * so that no Maps need to be created. The standard Map implementations create
+ * a lot of extra objects when values are put into the Map.
+ * <p>
+ * The sorted List can be reused over and over again.
  */
 public class SecurityLookup {
 
-    /**
-     * Runs the demo.
-     *
-     * @param args command line arguments (not used in this example)
-     */
     public static void main(String[] args) {
 
         // These can be reused

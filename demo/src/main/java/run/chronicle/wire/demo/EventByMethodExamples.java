@@ -39,8 +39,6 @@ public class EventByMethodExamples {
 
     /**
      * Runs all demo scenarios.
-     *
-     * @param args command line arguments (not used in this example)
      */
     public static void main(String[] args) {
         helloWorld();

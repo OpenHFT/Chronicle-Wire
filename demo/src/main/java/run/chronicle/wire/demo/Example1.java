@@ -28,11 +28,6 @@ import java.util.concurrent.TimeUnit;
  * RawWire and prints the result of each.
  */
 public class Example1 {
-    /**
-     * Runs the demo.
-     *
-     * @param args command line arguments (not used in this example)
-     */
     public static void main(String[] args) {
 
         // Bytes which wraps a ByteBuffer which is resized as needed.

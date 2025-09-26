@@ -1,7 +1,6 @@
-# Configuration for Example7's Data2 class
+# Example configuration used by Example7
 !run.chronicle.wire.demo.Example7$Data2 {
-  name: Helen,
-  age: 19,
+  name: Helen,      # Person's forename
+  age: 19,          # Age in years
   address: "15 Royal Way, Liverpool"
 }
-

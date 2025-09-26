@@ -28,13 +28,9 @@ import java.util.concurrent.TimeUnit;
  * simple fields can be marshalled with Chronicle Wire.
  */
 class Data extends SelfDescribingMarshallable {
-    /** text message to be serialised */
     private String message;
-    /** arbitrary numeric value */
     private long number;
-    /** time unit associated with the value */
     private TimeUnit timeUnit;
-    /** monetary amount or price */
     private double price;
 
     public Data() {

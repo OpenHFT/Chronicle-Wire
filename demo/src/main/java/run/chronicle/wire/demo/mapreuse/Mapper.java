@@ -55,12 +55,6 @@ public class Mapper<K, V> extends SelfDescribingMarshallable {
         this.values.sort(comparing(extractor, comparator));
     }
 
-    /**
-     * Looks up a value by key, reusing an existing instance if present.
-     *
-     * @param key the key to find
-     * @return the mapped value or {@code null} if absent
-     */
     public V get(K key) {
         int index = binarySearch(key);
         if (index >= 0)

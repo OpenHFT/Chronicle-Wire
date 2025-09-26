@@ -27,16 +27,13 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Demonstrates size prefixed documents which allow the reader to wait until a
- * full message has been written before processing it.
+ * Write a message with a thread safe size prefix.
+ * The benefits of using this approach are that:
+ * - The reader (tailer) is blocked until the message is completely written.
+ * - Wire by default is single writer, implementations such as Queue can add support for concurrent writers
  */
 
 public class Example5 {
-    /**
-     * Runs the demo.
-     *
-     * @param args command line arguments (not used in this example)
-     */
     public static void main(String[] args) {
 
         // Bytes which wraps a ByteBuffer which is resized as needed.

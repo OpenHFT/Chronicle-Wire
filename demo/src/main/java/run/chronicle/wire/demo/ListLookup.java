@@ -27,16 +27,14 @@ import java.util.function.Function;
 import static java.util.Comparator.comparing;
 
 /**
- * Demonstrates looking up items in a sorted list of {@link Data} objects rather
- * than using a map. The list can be re-used to avoid allocation.
+ * This example shows how a List can be sorted and used for looking up keys
+ * so that no Maps need to be created. The standard Map implementations create
+ * a lot of extra objects when values are put into the Map.
+ * <p>
+ * The sorted List can be reused over and over again.
  */
 public class ListLookup {
 
-    /**
-     * Runs the demo.
-     *
-     * @param args command line arguments (not used in this example)
-     */
     public static void main(String[] args) {
 
         // These can be reused
@@ -65,9 +63,6 @@ public class ListLookup {
         }
     }
 
-    /**
-     * DTO holding minimal fields for the lookup example.
-     */
     private static final class Data extends SelfDescribingMarshallable {
 
         // Ids can be reused/internalized
