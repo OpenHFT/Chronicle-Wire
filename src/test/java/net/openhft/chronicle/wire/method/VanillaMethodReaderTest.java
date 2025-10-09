@@ -229,10 +229,9 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     public void testNestedUnknownClass() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        Wires.GENERATE_TUPLES = true;
-
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
-                .useTextDocuments();
+                .useTextDocuments()
+                .generateTuples(true);
         MRTListener writer2 = wire2.methodWriter(MRTListener.class);
 
         String text = "unknown: {\n" +
@@ -244,7 +243,8 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 "}\n" +
                 "...\n";
         Wire wire = TextWire.from(text)
-                .useTextDocuments();
+                .useTextDocuments()
+                .generateTuples(true);
         MethodReader reader = wire.methodReader(writer2);
         checkReaderType(reader);
         assertTrue(reader.readOne());
@@ -256,10 +256,9 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     public void testUnknownClassDoesntThrow() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        Wires.GENERATE_TUPLES = true;
-
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
-                .useTextDocuments();
+                .useTextDocuments()
+                .generateTuples(true);
         MRTListener writer2 = wire2.methodWriter(MRTListener.class);
 
         String text = "top: !UnknownClass {\n" +
@@ -275,7 +274,8 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 "}\n" +
                 "...\n";
         Wire wire = TextWire.from(text)
-                .useTextDocuments();
+                .useTextDocuments()
+                .generateTuples(true);
         MethodReader reader = wire.methodReader(writer2);
         checkReaderType(reader);
         assertTrue(reader.readOne());
@@ -288,10 +288,9 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     public void testUnknownClassThrow() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        Wires.GENERATE_TUPLES = false;
-
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
-                .useTextDocuments();
+                .useTextDocuments()
+                .generateTuples(false);
         MRTListener writer2 = wire2.methodWriter(MRTListener.class);
 
         String text = "top: !UnknownClass {\n" +
@@ -307,7 +306,8 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 "}\n" +
                 "...\n";
         Wire wire = TextWire.from(text)
-                .useTextDocuments();
+                .useTextDocuments()
+                .generateTuples(false);
         MethodReader reader = wire.methodReader(writer2);
         checkReaderType(reader);
         assertTrue(reader.readOne());
@@ -340,11 +340,6 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         } finally {
             MessageHistory.clear();
         }
-    }
-
-    @After
-    public void resetGenerateTuples() {
-        Wires.GENERATE_TUPLES = false;
     }
 
     @Test(expected = IllegalStateException.class)
