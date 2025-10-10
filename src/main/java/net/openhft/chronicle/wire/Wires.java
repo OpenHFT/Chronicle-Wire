@@ -1210,6 +1210,7 @@ public enum Wires {
 
     /**
      * Returns a tuple for the specified class and type name.
+     * The caller must check whether tuples are enabled before calling this method.
      *
      * @param <T>       The type parameter.
      * @param tClass    The class type for which the tuple is required.
@@ -1218,12 +1219,6 @@ public enum Wires {
      */
     @Nullable
     public static <T> T tupleFor(Class<T> tClass, String typeName) {
-        // Check if tuple generation is enabled.
-        if (!GENERATE_TUPLES) {
-            Jvm.warn().on(Wires.class, "Cannot find a class for " + typeName + " are you missing an alias?");
-            return null;
-        }
-
         // Set default class if not provided or provided as Object.
         if (tClass == null || tClass == Object.class)
             tClass = (Class<T>) Marshallable.class;

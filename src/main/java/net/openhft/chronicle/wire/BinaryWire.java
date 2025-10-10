@@ -48,7 +48,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -4277,7 +4276,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             try {
                 return sb == null ? null : classLookup().forName(sb);
             } catch (ClassNotFoundRuntimeException e) {
-                if (Wires.dtoInterface(tClass) && GENERATE_TUPLES) {
+                if (Wires.dtoInterface(tClass) && generateTuples()) {
                     return Wires.tupleFor(tClass, sb.toString());
                 }
                 throw e;

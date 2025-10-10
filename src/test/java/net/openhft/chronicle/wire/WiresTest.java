@@ -151,8 +151,6 @@ public class WiresTest extends WireTestCommon {
     public void unknownType() throws NoSuchFieldException {
         Assume.assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        Wires.GENERATE_TUPLES = true;
-
         Marshallable marshallable = Wires.tupleFor(Marshallable.class, "UnknownType");
         marshallable.setField("one", 1);
         marshallable.setField("two", 2.2);
@@ -163,6 +161,9 @@ public class WiresTest extends WireTestCommon {
                 "  two: 2.2,\n" +
                 "  three: three\n" +
                 "}\n", toString);
+
+        Wires.GENERATE_TUPLES = true;
+
         Object o = Marshallable.fromString(toString);
         assertEquals(toString, o.toString());
     }
