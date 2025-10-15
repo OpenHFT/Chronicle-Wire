@@ -46,40 +46,52 @@ import static java.util.Collections.*;
 import static net.openhft.chronicle.core.util.GenericReflection.erase;
 import static net.openhft.chronicle.core.util.GenericReflection.getParameterTypes;
 /**
- * This is the GenerateMethodWriter class responsible for generating method writer code.
- * It provides utility methods and configurations to facilitate the dynamic generation of method writers.
+ * Dynamically generates and compiles Java code for method writer proxies.  The
+ * generated proxy serialises invocations to a {@link MarshallableOut}
+ * destination using a chosen {@link WireType}.
+ * <p>
+ * Each target interface is inspected and an implementation is produced that
+ * forwards calls to the matching {@link ValueOut} method on a {@link Wire}.
+ * The resulting class is compiled and loaded at runtime.  It is primarily used
+ * by {@link VanillaMethodWriterBuilder} when code generation is enabled.
+ * <p>
+ * This implementation predates {@link GenerateMethodWriter2} and exists for
+ * specific use cases.
+ *
+ * @see VanillaMethodWriterBuilder
+ * @see MethodWriter
  */
 @SuppressWarnings("deprecation")
 public class GenerateMethodWriter {
 
-    // Constants for class names to be used in the generated method writer code
+    /** Simple name of {@link UpdateInterceptor} used in generated code. */
     public static final String UPDATE_INTERCEPTOR = UpdateInterceptor.class.getSimpleName();
 
-    // Constant for the DocumentContext class's simple name
+    /** Simple name of {@link DocumentContext}. */
     private static final String DOCUMENT_CONTEXT = DocumentContext.class.getSimpleName();
 
-    // Constant for the WriteDocumentContext class's simple name
+    /** Simple name of {@link WriteDocumentContext}. */
     private static final String WRITE_DOCUMENT_CONTEXT = WriteDocumentContext.class.getSimpleName();
 
-    // Constant for the MarshallableOut class's simple name
+    /** Simple name of {@link MarshallableOut}. */
     private static final String MARSHALLABLE_OUT = MarshallableOut.class.getSimpleName();
 
-    // Constant for the MethodId class's simple name
+    /** Simple name of {@link MethodId}. */
     private static final String METHOD_ID = MethodId.class.getSimpleName();
 
-    // Constant for the ValueOut class's simple name
+    /** Simple name of {@link ValueOut}. */
     private static final String VALUE_OUT = ValueOut.class.getSimpleName();
 
-    // Constant for the Closeable class's simple name
+    /** Simple name of {@link Closeable}. */
     private static final String CLOSEABLE = Closeable.class.getSimpleName();
 
-    // Constant field name for the UpdateInterceptor class
+    /** Field name used for the generated {@link UpdateInterceptor} reference. */
     private static final String UPDATE_INTERCEPTOR_FIELD = "updateInterceptor";
 
-    // Indicates whether to dump the generated code or not
+    /** When true the generated source is printed for debugging. */
     static final boolean DUMP_CODE = Jvm.getBoolean("dumpCode");
 
-    // Map to hold template methods for generating method writer code
+    /** Predefined source templates for common interface methods. */
     private static final Map<String, Map<List<Class<?>>, String>> TEMPLATE_METHODS = new LinkedHashMap<>();
     private static final int SYNTHETIC = 0x00001000;
 
@@ -113,43 +125,48 @@ public class GenerateMethodWriter {
         TEMPLATE_METHODS.put("writingDocument", wd);
     }
 
-    // Indicates if metadata is included in the generated method writer
+    /** true if metadata is included in the generated method writer */
     private final boolean metaData;
 
-    // Indicates if a method ID is used in the generated method writer
+    /** whether numeric {@link MethodId}s should be emitted. */
     private final boolean useMethodId;
 
-    // Package name for the generated method writer
+    /** target package for the generated method writer. */
     private final String packageName;
 
-    // Set of interfaces to be implemented by the generated method writer
+    /** interfaces that the generated class will implement. */
     private final Set<Class<?>> interfaces;
 
-    // Name of the generated class
+    /** simple name of the generated class. */
     private final String className;
 
-    // Class loader used for the generated method writer
+    /** class loader used to define the generated class. */
     private final ClassLoader classLoader;
 
-    // Wire type for serialization in the generated method writer
+    /** wire format used for serialisation. */
     private final WireType wireType;
 
-    // Generic event type used in the generated method writer
+    /** optional name of a generic event dispatcher method. */
     private final String genericEvent;
 
-    // Indicates if the update interceptor is used in the generated method writer
+    /**
+     * when true the proxy calls an {@link UpdateInterceptor} before each write.
+     */
     private final boolean useUpdateInterceptor;
 
-    // Concurrent map to cache method writers
+    /** caches the names of thread local method writers for return types. */
     private final ConcurrentMap<Class<?>, String> methodWritersMap = new ConcurrentHashMap<>();
-    // AtomicInteger to manage indentation in the generated code
+    /**
+     * tracks indentation when building the Java source; shared with
+     * {@link SourceCodeFormatter}.
+     */
     final private AtomicInteger indent = new AtomicInteger();
-    // Indicates if verbose types are used in the generated method writer
+    /** include explicit type information in writes when true. */
     private final boolean verboseTypes;
 
     /**
-     * Constructor for the GenerateMethodWriter class.
-     * Initializes all the required fields for the code generation process.
+     * Internal constructor used by {@link #newClass}.
+     * All parameters configure a single proxy generation run.
      *
      * @param packageName         The package name for the generated method writer.
      * @param interfaces          The interfaces to be implemented by the generated method writer.
@@ -186,7 +203,7 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Generates a proxy class based on the provided interface class.
+     * Creates and compiles a new method writer class based on the provided interface class.
      *
      * @param fullClassName         Fully qualified class name for the generated proxy class.
      * @param interfaces            A set of interface classes that the generated proxy class will implement.
@@ -194,11 +211,11 @@ public class GenerateMethodWriter {
      * @param wireType              The wire type for serialization.
      * @param genericEvent          The generic event type.
      * @param metaData              Indicates if metadata should be included.
-     * @param useMethodId           Indicates if method ID should be used.
-     * @param useUpdateInterceptor  Indicates if the update interceptor should be used.
+     * @param useMethodId           Indicates if {@link MethodId} should be used.
+     * @param useUpdateInterceptor  Indicates if the {@link UpdateInterceptor} should be used.
      * @param verboseTypes          Indicates if verbose types should be used.
      * @return                      A generated proxy class based on the provided interface class,
-     *                              or null if it can't be created.
+     *                              or {@code null} if it can't be created.
      */
     @Nullable
     public static Class<?> newClass(String fullClassName,
@@ -226,8 +243,8 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Acquires a {@link DocumentContext} instance, either by reusing the existing one from the thread-local
-     * context holder if it's not closed or by creating a new one using the provided output.
+     * Utility to obtain a {@link DocumentContext} either from a cached holder or
+     * from the supplied {@link MarshallableOut}.
      *
      * @param metaData            Indicates if metadata should be included in the {@link DocumentContext}.
      * @param documentContextTL   The thread-local holder of the {@link DocumentContext}.
@@ -247,7 +264,7 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Converts a class type into a representative string, e.g., int to "int32", boolean to "bool", etc.
+     * Converts common primitive and {@link Marshallable} types into a representative string.
      * For types not explicitly mapped, a default representation is returned.
      *
      * @param type   The class type to be converted.
@@ -326,12 +343,7 @@ public class GenerateMethodWriter {
         return returnType + " " + m.getName() + " " + Arrays.toString(parameterTypes);
     }
 
-    /**
-     * Checks if a given modifier represents a synthetic entity.
-     *
-     * @param modifiers  The modifiers to check.
-     * @return           True if the modifier is synthetic, false otherwise.
-     */
+    /** returns true if the supplied modifiers include the synthetic flag. */
     static boolean isSynthetic(int modifiers) {
         return (modifiers & SYNTHETIC) != 0;  // Check the SYNTHETIC flag in the modifiers
     }
