@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
+import static net.openhft.chronicle.wire.Wires.*;
 
 /**
  * Represents an abstraction for the meta-information of a field within a class or interface.
@@ -55,18 +56,18 @@ public interface FieldInfo {
 
     /**
      * Looks up the meta-information of the fields associated with the provided class and returns
-     * a pair of information encapsulated in {@link Wires.FieldInfoPair}.
+     * a pair of information encapsulated in {@link FieldInfoPair}.
      *
      * @param aClass The class for which field info needs to be retrieved.
-     * @return A {@link Wires.FieldInfoPair} representing the field information of the class.
+     * @return A {@link FieldInfoPair} representing the field information of the class.
      */
     @NotNull
-    static Wires.FieldInfoPair lookupClass(@NotNull Class<?> aClass) {
-        final SerializationStrategy ss = Wires.CLASS_STRATEGY.get(aClass);
+    static FieldInfoPair lookupClass(@NotNull Class<?> aClass) {
+        final SerializationStrategy ss = CLASS_STRATEGY.get(aClass);
         switch (ss.bracketType()) {
             case NONE:
             case SEQ:
-                return Wires.FieldInfoPair.EMPTY;
+                return FieldInfoPair.EMPTY;
             case MAP:
                 break;
             case HISTORY_MESSAGE:
@@ -83,13 +84,13 @@ public interface FieldInfo {
         for (@NotNull WireMarshaller.FieldAccess fa : marshaller.fields) {
             final String name = fa.field.getName();
             final Class<?> type = fa.field.getType();
-            final SerializationStrategy ss2 = Wires.CLASS_STRATEGY.get(type);
+            final SerializationStrategy ss2 = CLASS_STRATEGY.get(type);
             final BracketType bracketType = ss2.bracketType();
             fields.add(createForField(name, type, bracketType, fa.field));
         }
 
         // Return a pair of unmodifiable list of fields and a map of field names to their FieldInfo.
-        return new Wires.FieldInfoPair(
+        return new FieldInfoPair(
                 Collections.unmodifiableList(fields),
                 fields.stream().collect(Collectors.toMap(FieldInfo::name, f -> f)));
     }
