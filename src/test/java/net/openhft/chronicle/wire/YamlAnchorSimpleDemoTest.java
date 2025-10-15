@@ -10,15 +10,15 @@ import static org.junit.Assert.assertSame;
  */
 public class YamlAnchorSimpleDemoTest extends WireTestCommon {
 
-    public static class Config extends SelfDescribingMarshallable {
-        public String text;
-        public int value;
+    static class Config extends SelfDescribingMarshallable {
+        String text;
+        int value;
     }
 
-    public static class MultiConfig extends SelfDescribingMarshallable {
-        public Config first;
-        public Config second;
-        public Config third;
+    static class MultiConfig extends SelfDescribingMarshallable {
+        Config first;
+        Config second;
+        Config third;
     }
 
     @Test

@@ -25,6 +25,7 @@ import net.openhft.chronicle.core.io.Closeable;
  * {@link LongValueBitSet} and {@link LongArrayValueBitSet}.
  */
 public interface ChronicleBitSet extends Marshallable, Closeable {
+
     /** The number of bits in a {@code long} word (64). */
     long BITS_PER_WORD = Long.BYTES * 8L;
 
@@ -104,6 +105,17 @@ public interface ChronicleBitSet extends Marshallable, Closeable {
     /**
      * Finds the index of the next set bit between {@code fromIndex} and
      * {@code toIndex} inclusive.
+     *
+     * <p>To iterate over the {@code true} bits in a {@code ChronicleBitSet},
+     * use the following loop:
+     *
+     * <pre> {@code
+     * for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1,to)) {
+     *     // operate on index i here
+     *     if (i == Integer.MAX_VALUE) {
+     *         break; // or (i+1) would overflow
+     *     }
+     * }}</pre>
      *
      * @param fromIndex zero-based index to begin searching (inclusive)
      * @param toIndex   maximum index to examine (inclusive)

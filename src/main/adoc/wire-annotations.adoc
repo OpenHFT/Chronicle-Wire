@@ -38,7 +38,7 @@ These annotations are crucial for controlling the on-wire representation of your
 Purpose ::
 The `@LongConversion` annotation is a powerful meta-annotation used to specify that a `long` field in Java should be converted to and from a different representation (typically a String) when serialised to text-based wire formats, while remaining a `long` in binary formats. This is extremely useful for compactly storing short textual identifiers or codes within an 8-byte long.
 
-Target :: Field (of type `long`)
+Target:: Field (of type `long`)
 
 Attributes ::
 `value` (Class<? extends LongConverter>):: Specifies the `LongConverter` implementation class to use for the conversion.
@@ -56,16 +56,16 @@ While `@LongConversion` is the base, Chronicle Wire provides several convenient 
 
 Annotations :: `@Base32`, `@Base64`, `@Base85` (these are meta-annotated with `@LongConversion` pointing to respective `BaseNLongConverter` implementations).
 
-Purpose :: To store short strings (composed of characters from the respective BaseN alphabet) within a `int`, up to 5 characters, or `long` upt o 10 characters.
+Purpose :: To store short strings (composed of characters from the respective BaseN alphabet) within a `long`.
 * `@Base32`: Uses a 32-character alphabet. Can store up to 12 characters in a `long`.
 * `@Base64`: Uses a 64-character alphabet (A-Z, a-z, 0-9, +, /). Can store up to 10 characters in a `long`.
 * `@Base85`: Uses an 85-character alphabet. Can store up to 10 (sometimes 11 depending on exact character values) characters more efficiently than Base64 for certain character sets.
 
-.Example (`@Base64`)
+Example (`@Base64`) ::
 [source,java]
 ----
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
-import net.openhft.chronicle.wire.converter.Base64;
+import net.openhft.chronicle.wire.converter.Base64; // The annotation
 
 public class StockInfo extends SelfDescribingMarshallable {
     @Base64
@@ -82,15 +82,13 @@ public class StockInfo extends SelfDescribingMarshallable {
     }
     // ... price getter
 }
-----
 
-[source,yaml]
-----
-# In YAML output:
-!StockInfo {
-  symbol: GOOGL, // ShortText encoded as Base 85
-  price: 123.45  // 64-bit floating point
-}
+// In YAML output:
+// !StockInfo {
+//   stockSymbol: GOOGL,
+//   price: 123.45
+// }
+// In Binary: stockSymbol is an 8-byte long
 ----
 
 ==== `@ShortText`
@@ -98,22 +96,24 @@ public class StockInfo extends SelfDescribingMarshallable {
 Status :: Stable
 
 Purpose :: Provides a concise way to convert short strings (up to ten
-characters) to and from a  `int` up to 5 characters, or `long` up to 10 characters. using the `ShortTextLongConverter`.
-It is a specialised form of `@LongConversion` and internally relies on the same Base85-based encoding as `@Base85`.
+characters) to and from a `long` using the `ShortTextLongConverter`. It is a
+specialised form of `@LongConversion` and internally relies on the same
+Base85-based encoding as `@Base85`.
 
-The difference between `@ShortText` and `@Base85` is that `@ShortText` truncates leading spaces and `@Base85` truncates leading zeros.
-e.g. `@ShortText` will convert "   123" to "123" and `@Base85` will convert "000123" to "123".
+The difference between `@ShortText` and `@Base85` is that `@ShortText` truncates leading spaces and `@Base85` truncates leading zeros. e.g.
+`@ShortText` will convert "   123" to "123" and `@Base85` will convert "000123" to "123".
 
 Target :: Field (of type `long`)
 
 Behaviour ::
-* **Text Formats:** Values appear as Base 85 strings.
+* **Text Formats:** Values appear as Base85 strings.
 * **Binary Formats:** Values are stored as eight-byte longs.
 
-Use Case :: Compact storage of short identifiers or codes while keeping them readable in YAML/JSON. It acts as a shorthand for
+Use Case :: Compact storage of short identifiers or codes while keeping them
+readable in YAML/JSON. It acts as a shorthand for
 `@LongConversion(ShortTextLongConverter.class)`.
 
-.Example (`@ShortText`)
+Example ::
 [source,java]
 ----
 import net.openhft.chronicle.wire.converter.ShortText;
@@ -138,7 +138,7 @@ Behaviour ::
 
 Use Case :: Storing precise timestamps efficiently while allowing easy human inspection in logs or configuration files.
 
-.Example (`@NanoTime`)
+Example (`@NanoTime`) ::
 [source,java]
 ----
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
@@ -155,14 +155,12 @@ public class LogEntry extends SelfDescribingMarshallable {
     }
     // ... getters
 }
-----
 
-[source,yaml]
-----
-!LogEntry {
-  eventTimestamp: 2025-05-30T07:30:05.123456789Z, // ISO 8601 format
-  message: System initialised
-}
+// In YAML output:
+// !LogEntry {
+//   eventTimestamp: 2025-05-30T07:30:05.123456789Z,
+//   message: System initialised
+// }
 ----
 
 == Schema Definition & Metadata Annotations
@@ -234,16 +232,14 @@ public class AppConfig extends SelfDescribingMarshallable {
     private int connectionTimeoutMs;
     // ...
 }
-----
 
-[source,yaml]
-----
-AppConfig {
-  # The network port for the primary service
-  servicePort: 8080,
-  # Connection timeout in milliseconds
-  connectionTimeoutMs: 5000
-}
+// In YAML output:
+// !AppConfig {
+//   # The network port for the primary service
+//   servicePort: 8080,
+//   # Connection timeout in milliseconds
+//   connectionTimeoutMs: 5000
+// }
 ----
 
 === `@DefaultValue`

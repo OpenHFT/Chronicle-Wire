@@ -100,6 +100,7 @@ Low-Latency and High-Performance Features ::
 
 === Chronicle Wire Usage in OpenHFT Ecosystem Components
 
+
 *Chronicle Queue (v5.x and relevant versions) ::
 * **Internal Data Format:** Detailed explanation of how Chronicle Wire (typically `BINARY_LIGHT` or `FIELDLESS_BINARY`) is used to serialize each message/document within queue excerpts.
 * **`ExcerptAppender` and `ExcerptTailer`:** How `Wire` instances are obtained and used for writing and reading queue entries.
