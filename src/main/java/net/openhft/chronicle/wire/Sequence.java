@@ -16,10 +16,22 @@
 package net.openhft.chronicle.wire;
 
 /**
- * This is used in Chronicle-Queue to map a position to a sequence number.
+ * Defines a contract for mapping a write position (typically in a persistent
+ * store such as Chronicle Queue) to a logical sequence number, and vice versa.
+ * This is crucial for systems that need to assign ordered sequence numbers to
+ * messages or events written at potentially non-contiguous positions.
  */
 public interface Sequence {
+    /**
+     * Returned by {@link #getSequence(long)} when a sequence number cannot be
+     * found for the given position but the operation may succeed if retried.
+     */
     long NOT_FOUND_RETRY = Long.MIN_VALUE;
+
+    /**
+     * Returned by {@link #getSequence(long)} when a sequence number cannot be
+     * found for the given position and retrying is unlikely to succeed.
+     */
     long NOT_FOUND = -1;
 
     /**
@@ -37,14 +49,31 @@ public interface Sequence {
     long getSequence(long forWritePosition);
 
     /**
-     * sets the sequence number for a writePosition
+     * Sets the sequence number for the given write position.
      *
-     * @param sequence the sequence number
-     * @param position the write position
+     * @param sequence The sequence number to associate with the position.
+     * @param position The write position for which the sequence number should be
+     *                 recorded.
      */
     void setSequence(long sequence, long position);
 
+    /**
+     * Combines a {@code headerNumber} (such as a cycle count) and a
+     * {@code sequence} within that header into a single index value.
+     *
+     * @param headerNumber The higher-order part of the index, for example a
+     *                     cycle number.
+     * @param sequence The lower-order sequence number within the header.
+     * @return A combined index representing the header and sequence.
+     */
     long toIndex(long headerNumber, long sequence);
 
+    /**
+     * Extracts the lower-order sequence number from an index previously created
+     * by {@link #toIndex(long, long)}.
+     *
+     * @param index The combined index.
+     * @return The sequence number extracted from the index.
+     */
     long toSequenceNumber(long index);
 }
