@@ -12,9 +12,7 @@ import static net.openhft.chronicle.bytes.util.PropertyReplacer.replaceTokensWit
 /**
  * Utility class for loading configuration files in YAML format. The class provides methods to load configuration
  * files in YAML format from the classpath and convert them to Java objects. The class will replace
- * tokens in the format {@code ${property}} within strings with System properties
- * or supplied properties. Values containing line breaks are rejected to protect
- * the YAML structure.
+ * tokens in the format {@code ${property}} within strings with System properties or supplied properties.
  * <p>
  * Files must be in YAML format that conform to WireType.TEXT. For example:
  * <pre>{@code
@@ -53,28 +51,13 @@ public enum ConfigLoader {
         return loadWithProperties(loadFile(classLoader, filename), properties);
     }
 
-    /**
-     * Fail fast if any supplied property contains a carriage return or line feed.
-     */
-    private static void validateNoNewLines(Properties properties) {
-        properties.forEach((k, v) -> {
-            if (v != null) {
-                String s = v.toString();
-                if (s.contains("\n") || s.contains("\r"))
-                    throw new IllegalArgumentException("Property " + k + " contains line breaks");
-            }
-        });
-    }
-
     @SuppressWarnings("unchecked")
     public static <T> T load(String fileAsString) {
-        validateNoNewLines(System.getProperties());
         return  (T) TextWire.from(replaceTokensWithProperties(fileAsString)).readObject();
     }
 
     @SuppressWarnings("unchecked")
     public static <T> T loadWithProperties(String fileAsString, Properties properties) {
-        validateNoNewLines(properties);
         return (T) TextWire.from(replaceTokensWithProperties(fileAsString, properties)).readObject();
     }
 }
