@@ -26,17 +26,12 @@ graph TD
         A[Schema Changes] --> B{Type of Change}
         B -->|Add Field| C[Forward Compatible]
         B -->|Remove Field| D[Backward Compatible]
-        B -->|Rename Field| E[Needs Special Handling]
-        B -->|Change Type| F[Complex - May Need Custom Logic]
+        B -->|Rename Field| E[Needs Custom Logic]
+        B -->|Change Type| F[Converts Where Possible - May Need Custom Logic]
 
-        C -->|"Older Reader"| G[Ignores Unknown Fields]
-        D -->|"Newer Reader"| H[Uses Default Values]
-        E -->|"@FieldNumber or Rename Map"| I[Maps Old Name to New]
-        F -->|"Custom readMarshallable"| J[Custom Conversion Logic]
-
-        K[Wire Format] --> L{Compatibility Level}
-        L -->|"YAML/JSON/BINARY_LIGHT"| M[Good Schema Evolution]
-        L -->|"FIELDLESS_BINARY"| N[Limited/No Evolution]
+        C -->|Older Reader| G[Ignores Unknown Fields]
+        D -->|Newer Reader| H[Uses Default Values]
+        F -->|Custom readMarshallable| J[Custom Conversion Logic]
     end
 ----
 
@@ -66,10 +61,10 @@ graph TD
         B --> C{Wire Format}
         C -->|YAML/JSON| D[Text Format]
         C -->|BINARY_LIGHT| E[Binary Format]
-        C -->|FIELDLESS_BINARY| F[Compact Binary]
+        C -->|FIELDLESS_BINARY /RAW| F[Compact Binary]
 
         D -->|"fieldName: value"| G[Field Names as Keys]
-        E -->|"fieldNumber + value"| H[Field Numbers or Names]
+        E -->|"fieldName + value"| H[Field Numbers or Names]
         F -->|"value1, value2, ..."| I[Position-Based, No Names]
 
         G --> J[Order Independent]
@@ -97,7 +92,7 @@ Impact :: This allows older services to continue functioning even when new field
 *Backward compatibility* means that newer code (a reader with a newer schema version that expects more fields) can process data written by older code (a writer with an older schema version that omits some of these fields).
 
 Primary Mechanism :: A default constructor is used.
-* When there is a default constructor for the Java class, a sample instance is created to define the default value for each field. If a field is missing in the input stream, the reader will use the default value defined in the class.
+* When there is a default constructor for the Java class, a sample instance is created to define the default value for each field. If a field is missing in the input stream, the reader will copy the default value defined in the class.
 
 Secondary Mechanism :: When there is no default constructor.
 * When a Chronicle Wire reader is populating an object and does not find a field in the input stream that _is_ present in its Java class definition, that field in the newly created Java object will retain its standard Java default initialised value:
@@ -106,7 +101,7 @@ Secondary Mechanism :: When there is no default constructor.
 ** `'\0'` for `char`
 ** `null` for object reference types (including `String`, collections, nested `Marshallable` objects).
 
-Role of `@DefaultValue` :: The `@DefaultValue` annotation is primarily for documentation or for use by external tools/code generators. Chronicle Wire itself does *not* automatically parse the string in `@DefaultValue` and inject it during deserialisation if a field is missing from the stream. Custom logic in `readMarshallable` or a post-processing step would be needed to implement such behaviour.
+// Role of `@DefaultValue` :: The `@DefaultValue` annotation is primarily for documentation or for use by external tools/code generators. Chronicle Wire itself does *not* automatically parse the string in `@DefaultValue` and inject it during deserialisation if a field is missing from the stream. Custom logic in `readMarshallable` or a post-processing step would be needed to implement such behaviour.
 
 *Collections :: If a `List` or `Map` field is defined in the Java class but missing in the input stream, it will be initialised to `null`. It is the responsibility of the application logic (e.g., in a constructor or a custom `readMarshallable` method) to initialise it to an empty collection if that's the desired default behaviour.
 +
@@ -210,11 +205,15 @@ Status :: Road Map
 * **Benefit:** Allows graceful renaming of fields in Java code while still being able to read older data that uses the previous field names.
 * **Note:** When writing, the *current* Java field name is typically used.
 
+
+////
 === `@DefaultValue(String value)`
 
 Status :: Road Map
 
 * **Reiteration:** As stated before, this is largely documentary. It does *not* cause Chronicle Wire's core deserialisation logic to parse this string and inject it if a field is missing. Java's default initialisation (`0`, `null`, `false`) applies to missing fields. Custom logic in `readMarshallable` or a post-deserialisation step is needed to use this annotation's value.
+////
+
 
 == Advanced Strategies and Implementation Considerations
 
