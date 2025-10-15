@@ -54,27 +54,53 @@ public enum BinaryWireHighCode {
     /** Represents numerical values, no longer in use. */
     static final int NUM7 = 0x7;
 
-    /** Indicates a control sequence. */
+    /**
+     * High code for control sequences such as byte length
+     * prefixes, padding and anchors.
+     */
     static final int CONTROL = 0x8;
 
-    /** Indicates a floating-point number. */
+    /**
+     * High code for floating-point numbers such as
+     * {@link BinaryWireCode#FLOAT32} or {@link BinaryWireCode#FLOAT_STOP_6}.
+     */
     static final int FLOAT = 0x9;
 
-    /** Indicates an integer value. */
+    /**
+     * High code for integer types such as
+     * {@link BinaryWireCode#INT32}, {@link BinaryWireCode#UINT8} and
+     * {@link BinaryWireCode#UUID}.
+     */
     static final int INT = 0xA;
 
-    /** Indicates a special type. */
+    /**
+     * High code for special values such as
+     * {@link BinaryWireCode#NULL}, {@link BinaryWireCode#TRUE} or
+     * {@link BinaryWireCode#TYPE_PREFIX}.
+     */
     static final int SPECIAL = 0xB;
 
-    /** Represents fields of length 0 to 15. */
+    /**
+     * High code {@code 0xC0} for compact field name strings of length 0-15
+     * (codes {@code 0xC0-0xCF}).
+     */
     static final int FIELD0 = 0xC;
 
-    /** Represents fields of length 16 to 31. */
+    /**
+     * High code {@code 0xD0} for compact field name strings of length 16-31
+     * (codes {@code 0xD0-0xDF}).
+     */
     static final int FIELD1 = 0xD;
 
-    /** Represents strings of 0 to 15. */
+    /**
+     * High code {@code 0xE0} for general strings of UTF-8 length 0-15
+     * (codes {@code 0xE0-0xEF}).
+     */
     static final int STR0 = 0xE;
 
-    /** Represents strings of 16 to 31. */
+    /**
+     * High code {@code 0xF0} for general strings of UTF-8 length 16-31
+     * (codes {@code 0xF0-0xFF}).
+     */
     static final int STR1 = 0xF;
 }

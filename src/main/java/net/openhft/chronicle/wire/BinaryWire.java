@@ -61,24 +61,34 @@ import static net.openhft.chronicle.wire.BinaryWireCode.*;
 import static net.openhft.chronicle.wire.Wires.GENERATE_TUPLES;
 
 /**
- * Represents a binary translation of TextWire, which is a subset of YAML.
- * This class provides functionalities for reading from and writing to binary wire formats. It encapsulates
- * various configurations such as field representation, delta support, and compression settings.
- * Extends the `AbstractWire` and implements the `Wire` interface to ensure compatibility and a common API
- * with other wire formats.
+ * Primary implementation of the binary wire format. The binary form is
+ * optimised for performance and size, often omitting field names in favour of
+ * numeric identifiers or relying on the DTO's field order for field-less
+ * serialisation.
  */
 @SuppressWarnings({"rawtypes", "unchecked", "this-escape", "deprecation"})
 public class BinaryWire extends AbstractWire implements Wire {
 
+    /**
+     * Thread-local pool of {@link StringBuilder} instances used for temporary
+     * string operations during parsing or formatting to reduce allocation.
+     */
     static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal();
 
-    // UTF-8 string interner for memory-efficient string operations
+    /**
+     * Static {@link UTF8StringInterner} for interning strings read from the
+     * wire, reducing the memory footprint of repeated values.
+     */
     private static final UTF8StringInterner UTF8 = new UTF8StringInterner(4096);
 
-    // 8-bit string interner for memory-efficient string operations
+    /** Static {@link Bit8StringInterner} for interning 8-bit strings. */
     private static final Bit8StringInterner BIT8 = new Bit8StringInterner(1024);
 
-    // Class value mapping to determine whether an object uses self-describing messages
+    /**
+     * Cache that reports whether a class typically uses self describing
+     * messages. Defaults to {@code true} unless a {@link Marshallable} describes
+     * otherwise.
+     */
     private static final ClassValue<Boolean> USES_SELF_DESCRIBING = ClassLocal.withInitial(k -> {
         Object m = ObjectUtils.newInstance(k);
         if (m instanceof Marshallable)
@@ -86,49 +96,85 @@ public class BinaryWire extends AbstractWire implements Wire {
         return true;
     });
 
-    // Flag to control warnings related to missing classes
+    /** Atomic flag to ensure missing class warnings are logged only once. */
     private static final AtomicBoolean FIRST_WARN_MISSING_CLASS = new AtomicBoolean();
+
+    /** Thread-local storage for {@link VanillaMessageHistory}. */
     private static final ThreadLocal<VanillaMessageHistory> VANILLA_MESSAGE_HISTORY_TL = ThreadLocal.withInitial(VanillaMessageHistory::new);
 
-    // Output handler for fixed binary values
+    /**
+     * Used when the wire is configured for fixed size output. Provides more
+     * predictable writes when value types are constrained.
+     */
     private final FixedBinaryValueOut fixedValueOut = new FixedBinaryValueOut();
 
-    // Output handler for binary values
+    /**
+     * Serialises values to this wire. The instance may use fixed or variable
+     * length encoding depending on the constructor configuration.
+     */
     @NotNull
     private final FixedBinaryValueOut valueOut;
 
-    // Input handler for binary values
+    /** Deserialises values from this wire. */
     @NotNull
     protected final BinaryValueIn valueIn;
 
-    // Indicates whether fields are represented numerically
+    /**
+     * When true field names are written and read as numeric identifiers using
+     * stop-bit encoding.
+     */
     private final boolean numericFields;
 
-    // Indicates whether fields are absent
+    /**
+     * When true field names or identifiers are omitted. Deserialisation relies
+     * solely on the field order of the DTO.
+     */
     private final boolean fieldLess;
 
-    // Threshold size for compressed outputs
+    /** Values larger than this may be compressed using {@link #compression}. */
     private final int compressedSize;
 
-    // Context for writing to the wire
+    /**
+     * The current {@link BinaryWriteDocumentContext} managing the start and end of
+     * binary documents. Each document is typically length prefixed.
+     */
     private final WriteDocumentContext writeContext = new BinaryWriteDocumentContext(this);
 
-    // Context for reading from the wire
+    /**
+     * The current {@link BinaryReadDocumentContext} used to read length-prefixed
+     * binary documents from the underlying bytes.
+     */
     @NotNull
     private final BinaryReadDocumentContext readContext;
 
-    // String builder for various internal operations
+    /**
+     * A reusable {@link StringBuilder} for internal string manipulation. Using a
+     * single instance reduces temporary object creation.
+     */
     private final StringBuilder stringBuilder = new StringBuilder();
 
-    // Default input handler
+    /**
+     * Provides default values when a requested field is absent in the wire.
+     */
     private DefaultValueIn defaultValueIn;
+
+    /**
+     * The name of the compression algorithm ("binary" means no compression) to
+     * apply once a value exceeds {@link #compressedSize}.
+     */
     private final String compression;
+
+    /**
+     * Overrides the self-describing message flag used when objects are written.
+     * {@code null} uses the object's default, {@code true} forces self-describing
+     * output and {@code false} forces the opposite.
+     */
     private Boolean overrideSelfDescribing = null;
 
     /**
-     * Constructs a BinaryWire with default settings.
+     * Constructs a {@code BinaryWire} with default settings.
      *
-     * @param bytes The bytes to be processed by this wire
+     * @param bytes the bytes to be processed by this wire
      */
     public BinaryWire(@NotNull Bytes<?> bytes) {
         this(bytes, false, false, false, Integer.MAX_VALUE, "binary", false);
@@ -156,7 +202,8 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Constructs a BinaryWire with specified configurations.
+     * Same as the main constructor but with a legacy {@code supportDelta} parameter
+     * which is ignored as delta wire format is not supported.
      *
      * @param bytes The bytes to be processed by this wire
      * @param fixed Indicates whether the value output is fixed
@@ -231,6 +278,10 @@ public class BinaryWire extends AbstractWire implements Wire {
         return c <= 9;
     }
 
+    /**
+     * Resets this wire to its initial state, clearing bytes and document contexts
+     * so the instance can be reused.
+     */
     @Override
     public void reset() {
         writeContext.reset();
@@ -240,32 +291,37 @@ public class BinaryWire extends AbstractWire implements Wire {
         bytes.clear();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void rollbackIfNotComplete() {
         writeContext.rollbackIfNotComplete();
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean isBinary() {
         return true;
     }
 
     /**
-     * Retrieves the current override setting for the self-describing nature of this BinaryWire.
-     *
-     * @return null if there's no override, true if it always uses self-describing messages,
-     *         false if it never uses self-describing messages.
+     * Returns the override flag controlling whether objects are written in
+     * self-describing form. The values mean:
+     * <ul>
+     *   <li>{@code null} &ndash; use each object's own setting</li>
+     *   <li>{@code true} &ndash; always write type information</li>
+     *   <li>{@code false} &ndash; never write type information</li>
+     * </ul>
      */
     public Boolean getOverrideSelfDescribing() {
         return overrideSelfDescribing;
     }
 
     /**
-     * Sets an override for the self-describing nature of this BinaryWire.
+     * Overrides how type information is written for objects serialised by this
+     * wire.
      *
-     * @param overrideSelfDescribing null if there's no override, true if it should always use self-describing messages,
-     *                               false if it should never use self-describing messages.
-     * @return The current instance of the BinaryWire class (following the builder pattern).
+     * @param overrideSelfDescribing see {@link #getOverrideSelfDescribing()}
+     * @return {@code this} for chaining
      */
     public BinaryWire setOverrideSelfDescribing(Boolean overrideSelfDescribing) {
         this.overrideSelfDescribing = overrideSelfDescribing;
@@ -286,17 +342,18 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Provides a FixedBinaryValueOut instance based on the given boolean parameter. If 'fixed' is true,
-     * the method returns a fixed instance; otherwise, it creates and returns a new BinaryValueOut instance.
-     *
-     * @param fixed Determines which type of FixedBinaryValueOut to return.
-     * @return An instance of FixedBinaryValueOut.
+     * Factory hook for subclasses. Returns {@link #fixedValueOut} when
+     * {@code fixed} is {@code true}; otherwise a fresh {@link BinaryValueOut}.
      */
     @NotNull
     protected FixedBinaryValueOut getFixedBinaryValueOut(boolean fixed) {
         return fixed ? fixedValueOut : new BinaryValueOut();
     }
 
+    /**
+     * Clears the underlying bytes and resets {@link #valueIn} and
+     * {@link #valueOut} to their initial states.
+     */
     @Override
     public void clear() {
         bytes.clear();
@@ -313,6 +370,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         return fieldLess;
     }
 
+    /**
+     * Begin writing a document context.
+     * See {@link WireOut#writingDocument(boolean)}.
+     * Returns a {@link BinaryWriteDocumentContext}.
+     */
     @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
@@ -320,6 +382,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         return writeContext;
     }
 
+    /**
+     * Acquire an existing document context for writing if one is open.
+     * See {@link WireOut#acquireWritingDocument(boolean)}.
+     * Returns a {@link BinaryWriteDocumentContext}.
+     */
     @Override
     public DocumentContext acquireWritingDocument(boolean metaData) {
         if (writeContext.isOpen() && writeContext.chainedElement())
@@ -327,6 +394,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         return writingDocument(metaData);
     }
 
+    /**
+     * Start a reading document context.
+     * See {@link WireIn#readingDocument()}.
+     * Returns a {@link BinaryReadDocumentContext}.
+     */
     @NotNull
     @Override
     public DocumentContext readingDocument() {
@@ -334,6 +406,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         return readContext;
     }
 
+    /**
+     * Start a reading document context from a specific position.
+     * See {@link WireIn#readingDocument(long)}.
+     * Returns a {@link BinaryReadDocumentContext}.
+     */
     @NotNull
     @Override
     public DocumentContext readingDocument(long readLocation) {
@@ -364,6 +441,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         return Wires.fromSizePrefixedBlobs(bytes, start, usePadding());
     }
 
+    /**
+     * Efficiently copies the remaining content.
+     * If {@code wire} is also a {@code BinaryWire}, bytes are copied directly;
+     * otherwise each token is decoded and re-encoded.
+     */
     @Override
     public void copyTo(@NotNull WireOut wire) throws InvalidMarshallableException {
         if (wire.getClass() == getClass()) {
@@ -578,17 +660,15 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Throws an exception indicating an unexpected code was encountered.
-     *
-     * @throws IORuntimeException Always thrown with a specific message.
+     * Throw an {@link IORuntimeException} for an unexpected code.
      */
     protected static void unexpectedCode() {
         throw new IORuntimeException("Unexpected code in this context");
     }
 
     /**
-     * Placeholder or handler for anchor processing in the WireOut stream.
-     * This implementation throws an exception indicating it's unexpected in this context.
+     * Anchor support is not implemented for binary wires.
+     * This method always throws via {@link #unexpectedCode()}.
      *
      * @param wire The wire output stream.
      */
@@ -657,10 +737,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Throws an exception indicating an unknown code was encountered.
-     *
-     * @param wire The wire output stream.
-     * @throws IllegalArgumentException with the corresponding message for the unknown code.
+     * Throw an {@link IllegalArgumentException} if a code cannot be recognised.
      */
     protected void unknownCode(@NotNull WireOut wire) {
         throw new IllegalArgumentException(stringForCode(bytes.readUnsignedByte()));
@@ -706,12 +783,18 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
     }
 
+    /**
+     * Look up a field by name.
+     */
     @NotNull
     @Override
     public ValueIn read(@NotNull String fieldName) {
         return read(fieldName, fieldName.hashCode(), null, Function.identity());
     }
 
+    /**
+     * Read the next value when field ordering is not known.
+     */
     @NotNull
     @Override
     public ValueIn read() {
@@ -721,6 +804,9 @@ public class BinaryWire extends AbstractWire implements Wire {
                 : valueIn;
     }
 
+    /**
+     * Look up a value using a {@link WireKey}.
+     */
     @NotNull
     @Override
     public ValueIn read(@NotNull WireKey key) {
@@ -819,9 +905,10 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     /**
      * Acquires an instance of DefaultValueIn. If one doesn't exist, a new instance is created.
-     * Resets the default value to null each time it's acquired.
+     * Lazily initialises and returns the {@link #defaultValueIn} instance.
+     * The {@code defaultValue} field is cleared on each call.
      *
-     * @return The acquired or newly created DefaultValueIn instance.
+     * @return the cached or newly created {@code DefaultValueIn}
      */
     private DefaultValueIn acquireDefaultValueIn() {
         if (defaultValueIn == null)
@@ -830,7 +917,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         defaultValueIn.defaultValue = null;
         return defaultValueIn;
     }
-
+    /**
+     * Reads a {@link BinaryWireCode#FIELD_NUMBER} followed by a stop-bit
+     * encoded integer representing a method or event identifier. Returns
+     * {@code Long.MIN_VALUE} if the next token is not a field number.
+     */
     @Override
     public long readEventNumber() {
         int peekCode = peekCodeAfterPadding();
@@ -845,13 +936,19 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
         return Long.MIN_VALUE;
     }
-
+    /**
+     * Reads the next field identifier into {@code name}. Returns
+     * {@link #valueIn} if a field was found or {@link #defaultValueIn} if not.
+     */
     @NotNull
     @Override
     public ValueIn readEventName(@NotNull StringBuilder name) {
         return readField(name, null, ANY_CODE_MATCH.code()) == null ? acquireDefaultValueIn() : valueIn;
     }
-
+    /**
+     * Reads the next field identifier into {@code name}. Returns
+     * {@link #valueIn} if present or {@link #defaultValueIn} otherwise.
+     */
     @NotNull
     @Override
     public ValueIn read(@NotNull StringBuilder name) {
@@ -864,6 +961,10 @@ public class BinaryWire extends AbstractWire implements Wire {
         return valueIn;
     }
 
+    /**
+     * If the next token is {@link BinaryWireCode#COMMENT} the UTF-8 text is
+     * read into {@code s}; otherwise {@code s} is cleared.
+     */
     @NotNull
     @Override
     public Wire readComment(@NotNull StringBuilder s) {
@@ -911,6 +1012,12 @@ public class BinaryWire extends AbstractWire implements Wire {
         return peekCode;
     }
 
+    /**
+     * Reads the next event identifier, which may be encoded as a short
+     * string embedded in the field code, a longer string or a numeric ID,
+     * and converts it to {@code expectedClass}. Returns {@code null} if the
+     * stream is exhausted or the code does not denote an event key.
+     */
     @Nullable
     @Override
     public <K> K readEvent(@NotNull Class<K> expectedClass) throws InvalidMarshallableException {
@@ -1361,7 +1468,8 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Decodes an integer from its binary representation based on a code.
+     * Decodes an integer from its binary representation based on a {@code code}.
+     * Codes below {@code 128} represent the value directly. Higher codes use {@link BinaryWireCode} formats
      *
      * @param code The code that indicates the encoding.
      * @return The decoded integer.
@@ -1467,7 +1575,8 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Decodes an integer from its binary representation based on a code.
+     * Decodes an integer from its binary representation based on {@code code}. Small values are
+     * encoded directly; larger ones use widths such as 8, 16, 32 or 64 bits.
      *
      * @param code The code that indicates the encoding.
      * @return The decoded integer.
@@ -1715,9 +1824,10 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Writes a field to the byte buffer with its name.
-     *
-     * @param name The name of the field.
+     * Writes a field identifier using its textual name. Short names are packed
+     * into a single byte code ({@link BinaryWireCode#FIELD_NAME0} + length) while
+     * longer ones use {@link BinaryWireCode#FIELD_NAME_ANY} followed by the
+     * UTF‑8 bytes.
      */
     private void writeField(@NotNull CharSequence name) {
         // If hex dump retention is enabled, write the field's name as a hex dump description.
@@ -1757,9 +1867,8 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Writes a field to the byte buffer using a numeric code representation.
-     *
-     * @param code The numeric code of the field.
+     * Writes a numeric field identifier to the byte buffer as
+     * {@link BinaryWireCode#FIELD_NUMBER} and a stop-bit value.
      */
     private void writeField(int code) {
         // If hex dump retention is enabled, write the code as a hex dump description.
@@ -1782,12 +1891,15 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Reads and decodes binary data based on a given code into a textual form.
+     * Decodes a textual value from the wire based on {@code code} into the
+     * appendable {@code sb}. Handles {@link BinaryWireCode#NULL}, string codes,
+     * timestamps, booleans, numbers and type literals by converting them to
+     * their string form.
      *
-     * @param code The code indicating the type of data to be read.
-     * @param sb   An appendable and char sequence target where the decoded text will be appended.
-     * @param <T>  A type that extends both Appendable and CharSequence.
-     * @return Returns the passed-in appendable populated with decoded text or null.
+     * @param code the code indicating the wire encoding
+     * @param sb   the appendable that receives the decoded text
+     * @param <T>  appendable and char sequence type
+     * @return {@code sb} populated with decoded text or {@code null}
      */
     @Nullable <T extends Appendable & CharSequence> T readText(int code, @NotNull T sb) {
 
@@ -2210,6 +2322,9 @@ public class BinaryWire extends AbstractWire implements Wire {
             return fixedInt8(i8);
         }
 
+        /**
+         * Writes {@link BinaryWireCode#INT8} followed by the 1‑byte value.
+         */
         @Override
         @NotNull
         public WireOut fixedInt8(byte i8) {
@@ -2843,7 +2958,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         /**
-         * Writes a float number either as a float or as an integer based on its value.
+         * Selects an int or float encoding for {@code l} depending on whether
+         * it has a fractional part.
          *
          * @param l The float number to be written.
          */
@@ -4030,6 +4146,10 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
+        /**
+         * Reads a length prefixed sequence and invokes the supplied
+         * {@code tReader} on each item.
+         */
         @Override
         public <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
             if (isNull())
