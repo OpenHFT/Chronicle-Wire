@@ -47,7 +47,9 @@ public class MilliTimestampLongConverter extends AbstractTimestampLongConverter 
     /**
      * Constructs a new {@code MilliTimestampLongConverter} with the specified zone ID.
      *
-     * @param zoneId the zone ID to be used for the conversion of long values
+     * @param zoneId The string representation of the ZoneId (e.g., "UTC", "Europe/London")
+     *               to be used for formatting date-time strings. This converter
+     *               handles timestamps with millisecond precision.
      */
     public MilliTimestampLongConverter(String zoneId) {
         super(zoneId, TimeUnit.MILLISECONDS);
