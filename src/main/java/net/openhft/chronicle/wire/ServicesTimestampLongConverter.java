@@ -81,9 +81,12 @@ public class ServicesTimestampLongConverter implements LongConverter {
     }
 
     /**
-     * Converts the given long value to the configured time unit.
+     * Converts a timestamp to the service's configured time unit.
      *
-     * @param arg The long value to convert.
+     * @param arg The timestamp value, typically nanoseconds since epoch (from
+     *            {@link System#nanoTime()} or
+     *            {@link net.openhft.chronicle.core.time.TimeProvider#currentTimeNanos()}),
+     *            to be converted to the service time unit.
      * @return The converted long value based on the system-configured time unit.
      */
     public static long toTime(long arg) {
@@ -102,7 +105,8 @@ public class ServicesTimestampLongConverter implements LongConverter {
     /**
      * Fetches the current time in the system-configured time unit using the provided TimeProvider.
      *
-     * @param clock The TimeProvider to fetch the current time.
+     * @param clock The {@link net.openhft.chronicle.core.time.TimeProvider} instance used to obtain
+     *              the current time. This allows for custom time sources, for example in tests.
      * @return The current time in the system-configured time unit.
      */
     public static long currentTime(TimeProvider clock) {
@@ -120,7 +124,10 @@ public class ServicesTimestampLongConverter implements LongConverter {
 
     /**
      * Parses the provided {@link CharSequence} into a timestamp in the configured time unit.
-     * @param text The text to parse.
+     * @param text The character sequence representing a date-time string, which will be parsed by
+     *             the underlying timestamp converter (for example
+     *             {@link NanoTimestampLongConverter} or {@link MicroTimestampLongConverter}) based
+     *             on the service time unit configuration.
      * @return The parsed timestamp as a long value in the configured time unit.
      */
     @Override
@@ -131,9 +138,9 @@ public class ServicesTimestampLongConverter implements LongConverter {
     /**
      * Parses a part of the provided {@link CharSequence} using the underlying converter.
      *
-     * @param text the text to parse.
-     * @param beginIndex the beginning index, inclusive.
-     * @param endIndex the ending index, exclusive.
+     * @param text The character sequence containing the date-time string to parse.
+     * @param beginIndex The starting index (inclusive) of the subsequence in {@code text} to be parsed.
+     * @param endIndex The ending index (exclusive) of the subsequence in {@code text} to be parsed.
      * @return the parsed timestamp as a long value in the configured time unit.
      */
     @Override
@@ -144,8 +151,11 @@ public class ServicesTimestampLongConverter implements LongConverter {
     /**
      * Appends a representation of the provided long timestamp (in the system-configured time unit) to the provided {@link StringBuilder}.
      *
-     * @param text  The StringBuilder to which the timestamp representation will be appended.
-     * @param value The timestamp as a long value in the system-configured time unit.
+     * @param text  The {@link StringBuilder} to which the formatted string representation of the
+     *              timestamp {@code value} will be appended, using the service's configured time
+     *              unit and associated formatter.
+     * @param value The timestamp value, in the service's configured time unit, to be formatted and
+     *              appended.
      */
     @Override
     public void append(StringBuilder text, long value) {
@@ -155,8 +165,11 @@ public class ServicesTimestampLongConverter implements LongConverter {
     /**
      * Appends a representation of the provided long timestamp (in the system-configured time unit) to the provided {@link Bytes}.
      *
-     * @param bytes The Bytes object to which the timestamp representation will be appended.
-     * @param value The timestamp as a long value in the system-configured time unit.
+     * @param bytes The {@link net.openhft.chronicle.bytes.Bytes} instance to which the formatted
+     *              string representation of the timestamp {@code value} will be appended, using the
+     *              service's configured time unit and associated formatter.
+     * @param value The timestamp value, in the service's configured time unit, to be formatted and
+     *              appended.
      */
     @Override
     public void append(Bytes<?> bytes, long value) {
@@ -164,11 +177,15 @@ public class ServicesTimestampLongConverter implements LongConverter {
     }
 
     /**
-     * This is the longFunction interface. It's a functional interface designed to perform operations
-     * on long values and return a long result. It is used internally in ServicesTimestampLongConverter
-     * to abstract the conversion logic based on the system-configured time unit.
+     * Functional interface used internally to convert timestamp values.
      */
     interface longFunction {
+        /**
+         * Processes a long value and returns the result.
+         *
+         * @param value The input long value to be processed by the function.
+         * @return The processed value.
+         */
         long apply(long value);
     }
 }
