@@ -35,6 +35,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <!-- Inherit common dependency versions from the Chronicle BOMs -->
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -55,6 +56,7 @@
         </dependencies>
     </dependencyManagement>
 
+    <!-- Core libraries required by the demo code -->
     <dependencies>
         <dependency>
             <groupId>net.openhft</groupId>
@@ -87,7 +89,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-
+                <!-- Allows Maven to run the examples directly -->
                 <executions>
                     <execution>
                         <id>Example1</id>
