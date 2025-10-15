@@ -50,12 +50,13 @@ Chronicle Services added configuration of multiple microservices services, queue
 
 Each event type has a different method to be called which implements code for that event type.
 
-[mermaid]
-....
+ifdef::env-github[[source,mermaid]]
+ifndef::env-github[[mermaid]]
+----
 graph LR
-    A(Event Sources) --> B(Microservice\nMethod Implementations)
-    B --> C(Event Store\nChronicle Queue)
-....
+    A(Event Sources) --> B(Microservice<br/>Method Implementations)
+    B --> C(Event Store<br/>Chronicle Queue)
+----
 
 However, messages can still be produced and processed dynamically through the use of a wildcard event callback method where the event type is passed programmatically, for example `void onEvent(String eventType, WireIn data)`.
 
@@ -65,14 +66,15 @@ A gateway handles information on behalf of remote clients.
 It has two main inputs: data from the client and data from the systems it talks to.
 In turn, it can produce two streams of output, one replies to the client and the other passes on data to internal systems.
 
-[mermaid]
-....
+ifdef::env-github[[source,mermaid]]
+ifndef::env-github[[mermaid]]
+----
 graph LR
     C(Client) --> G(Gateway)
-    S(Internal Systems\\nsources) --> G
+    S(Internal Systems<br/>sources) --> G
     G --> CR(Client replies)
-    G --> DS(Internal Systems\\ndownstream events)
-....
+    G --> DS(Internal Systems<br/>downstream events)
+----
 
 === Testing using YAML
 
@@ -176,7 +178,7 @@ static class MyTypes extends SelfDescribingMarshallable {
     float f;
     double d;
     long l;
-
+}
 ----
 
 Chained events are useful for composing events.
@@ -207,7 +209,7 @@ interface DestinationTimedSaying extends Destination<TimedSaying> { }
 A producer can use the fluent API as follows:
 [source,java]
 ----
-DestinationTimedSaying writer = /* MethodWriter instance */;
+DestinationTimedSaying writer = wire.methodWriter(DestinationTimedSaying.class);
 writer.via("targetQueue")
       .at(System.nanoTime())
       .say("Hello Composed World");

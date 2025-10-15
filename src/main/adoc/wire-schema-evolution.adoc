@@ -1,6 +1,5 @@
 = Chronicle Wire: Schema Evolution Deep Dive
-:toc:
-:sectnums:
+:toc: 
 :source-highlighter: rouge
 
 Purpose: To provide an in-depth exploration of schema evolution capabilities and mechanisms within Chronicle Wire, including implementation details and advanced strategies.
@@ -19,7 +18,8 @@ This document delves into the mechanisms Chronicle Wire employs for schema evolu
 
 == Mechanisms in Self-Describing Formats
 
-[mermaid]
+ifdef::env-github[[source,mermaid]]
+ifndef::env-github[[mermaid]]
 ----
 graph TD
     subgraph "Schema Evolution Overview"
@@ -57,7 +57,8 @@ Text Formats (YAML, JSON, TEXT) ::
 * **Field Names:** If full field names are used, they are typically written as length-prefixed UTF-8 strings.
 * Each field entry generally consists of this identifier (name or number), potentially some type information or length indication for the data itself, followed by the serialised field value.
 
-[mermaid]
+ifdef::env-github[[source,mermaid]]
+ifndef::env-github[[mermaid]]
 ----
 graph TD
     subgraph "Field Identification in Different Formats"
@@ -192,7 +193,7 @@ Annotations provide metadata that Chronicle Wire uses to manage schema evolution
 
 === `@FieldNumber(int value)`
 
-Status:: Road Map
+Status :: Road Map
 
 * **Deep Dive:** When using `BINARY_LIGHT` or `BINARY` wire that supports numbered fields, this annotation assigns a persistent numeric ID to a Java field. The wire format will store this number instead of (or sometimes alongside) the textual field name.
 * **Mechanism:** During serialisation, the `WireMarshaller` looks for this annotation. If present, it instructs the binary `Wire` implementation to write the specified number as the field tag. During deserialisation, the binary `Wire` reads the numeric tag and the `WireMarshaller` uses an internal map (numeric tag -> Java Field object) to find the corresponding field to populate.
@@ -201,7 +202,7 @@ Status:: Road Map
 
 === `@DeprecatedWireKey(String[] oldKeys)` (and alternatives like `Wires.FIELD_RENAME_MAP`)
 
-Status:: Road Map
+Status :: Road Map
 
 * **Deep Dive:** This addresses field renaming primarily for *text-based* formats (YAML, JSON) or binary formats that store textual field names.
 * **Mechanism (Conceptual for `@DeprecatedWireKey`):** During deserialisation, if the `WireMarshaller` encounters a field name in the input stream that matches one of the `oldKeys` specified in an `@DeprecatedWireKey` annotation on a field, it will map the value to that annotated Java field (which now has a new name).
@@ -211,7 +212,7 @@ Status:: Road Map
 
 === `@DefaultValue(String value)`
 
-Status:: Road Map
+Status :: Road Map
 
 * **Reiteration:** As stated before, this is largely documentary. It does *not* cause Chronicle Wire's core deserialisation logic to parse this string and inject it if a field is missing. Java's default initialisation (`0`, `null`, `false`) applies to missing fields. Custom logic in `readMarshallable` or a post-deserialisation step is needed to use this annotation's value.
 
