@@ -60,7 +60,7 @@ import static net.openhft.chronicle.wire.Wires.isScalar;
 public interface ValueOut {
 
     /**
-     * Thread local instance for MapMarshaller to support thread-safe marshalling operations.
+     * Thread-local {@link MapMarshaller} to support thread-safe marshalling operations.
      */
     ThreadLocal<MapMarshaller> MM_TL = ThreadLocal.withInitial(MapMarshaller::new);
 
@@ -70,15 +70,12 @@ public interface ValueOut {
     int SMALL_MESSAGE = 64;
 
     /**
-     * Represents a 64-character sequence of zeros.
+     * Utility string of sixty-four zeros, often used when commenting binary output.
      */
     String ZEROS_64 = "0000000000000000000000000000000000000000000000000000000000000000";
 
     /**
-     * Checks if the provided object is an instance of Enum or DynamicEnum.
-     *
-     * @param v Object to be checked.
-     * @return {@code true} if the object is an instance of Enum or DynamicEnum; {@code false} otherwise.
+     * Utility to check whether {@code v} is a standard {@link Enum} or a {@link DynamicEnum}.
      */
     @SuppressWarnings("deprecation")
     static boolean isAnEnum(Object v) {
@@ -88,8 +85,8 @@ public interface ValueOut {
     /**
      * Write a boolean value.
      *
-     * @param flag The boolean value to be written.
-     * @return The WireOut instance for chained calls.
+     * @param flag value to write
+     * @return parent wire for chaining
      */
     @NotNull
     WireOut bool(Boolean flag);
@@ -97,17 +94,14 @@ public interface ValueOut {
     /**
      * Write a text value.
      *
-     * @param s The CharSequence containing the text to be written.
-     * @return The WireOut instance for chained calls.
+     * @param s text to write
+     * @return parent wire for chaining
      */
     @NotNull
     WireOut text(@Nullable CharSequence s);
 
     /**
-     * Write a text value. This method delegates the writing to {@link #text(CharSequence)}.
-     *
-     * @param s The String containing the text to be written.
-     * @return The WireOut instance for chained calls.
+     * Convenience overload for {@link #text(CharSequence)}.
      */
     @NotNull
     default WireOut text(@Nullable String s) {
@@ -138,10 +132,7 @@ public interface ValueOut {
     }
 
     /**
-     * Write a character value as text. This method delegates its functionality to {@link #text(char)}.
-     *
-     * @param c The character to be written.
-     * @return The WireOut instance for chained calls.
+     * Alias for {@link #text(char)}.
      */
     @NotNull
     default WireOut character(char c) {
@@ -164,13 +155,13 @@ public interface ValueOut {
      * Write a signed 8-bit integer value. The provided long value is first checked
      * to ensure it fits within the bounds of a signed 8-bit integer.
      *
-     * @param x The long value to be written as an 8-bit integer.
-     * @return The WireOut instance for chained calls.
-     * @throws ArithmeticException if the supplied argument does not fit in an unsigned 8-bit integer.
+     * @param value value to write
+     * @return parent wire for chaining
+     * @throws ArithmeticException if {@code x} does not fit in a byte
      */
     @NotNull
-    default WireOut int8(long x) {
-        return int8(Maths.toInt8(x));
+    default WireOut int8(long value) {
+        return int8(Maths.toInt8(value));
     }
 
     /**
