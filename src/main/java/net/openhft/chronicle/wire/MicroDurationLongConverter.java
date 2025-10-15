@@ -30,7 +30,9 @@ public class MicroDurationLongConverter implements LongConverter {
     /**
      * Parses the provided {@link CharSequence} into a duration and returns the equivalent duration in microseconds.
      *
-     * @param text the {@link CharSequence} to parse
+     * @param text The character sequence representing a duration in ISO-8601
+     *             format (e.g., "PT20.345S") to be parsed into total
+     *             microseconds.
      * @return the parsed duration as a long value in microseconds
      */
     @Override
@@ -42,7 +44,7 @@ public class MicroDurationLongConverter implements LongConverter {
     /**
      * Converts a duration represented in microseconds to a {@link Duration} object.
      *
-     * @param value the duration as a long value in microseconds
+     * @param value The duration expressed as a total number of microseconds
      * @return a {@link Duration} representing the same duration
      */
     private Duration duration(long value) {
@@ -53,8 +55,11 @@ public class MicroDurationLongConverter implements LongConverter {
     /**
      * Appends a {@link Duration} representation of the provided long value (in microseconds) to the provided {@link StringBuilder}.
      *
-     * @param text the {@link StringBuilder} to append to
-     * @param value the duration as a long value in microseconds
+     * @param text  The {@link StringBuilder} to which the ISO-8601 string
+     *              representation of the duration {@code value} will be
+     *              appended.
+     * @param value The duration, expressed as a total number of microseconds,
+     *              to be formatted and appended
      */
     @Override
     public void append(StringBuilder text, long value) {
@@ -64,8 +69,11 @@ public class MicroDurationLongConverter implements LongConverter {
     /**
      * Appends a {@link Duration} representation of the provided long value (in microseconds) to the provided {@link Bytes}.
      *
-     * @param bytes the {@link Bytes} object to append to
-     * @param value the duration as a long value in microseconds
+     * @param bytes The {@link net.openhft.chronicle.bytes.Bytes} instance to
+     *              which the ISO-8601 string representation of the duration
+     *              {@code value} will be appended
+     * @param value The duration, expressed as a total number of microseconds,
+     *              to be formatted and appended
      */
     @Override
     public void append(Bytes<?> bytes, long value) {
