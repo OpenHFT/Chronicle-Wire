@@ -29,7 +29,8 @@ public class UnexpectedFieldHandlingException extends RuntimeException {
     /**
      * Constructs a new UnexpectedFieldHandlingException with the provided underlying cause.
      *
-     * @param cause The root cause of this exception, typically originating from
+     * @param cause The root cause of this exception, often an exception thrown
+     *              from within an implementation of
      *              {@link ReadMarshallable#unexpectedField(Object, ValueIn)}.
      */
     public UnexpectedFieldHandlingException(Throwable cause) {
