@@ -273,19 +273,19 @@ public class JSONWire extends TextWire {
      * The segment copied depends on the first character encountered (e.g., '{' indicates a map).
      * This method understands JSON structural elements and translates them appropriately.
      *
-     * @param wire The wire output to copy the data to.
+     * @param destWire  destination wire to copy the data to.
      * @param expectKeyValues Flag indicating if the current position is inside a map structure.
      * @param topLevel Flag indicating if this is the topmost level of the copy operation.
      * @throws InvalidMarshallableException if there's a problem with copying the data.
      */
-    public void copyOne(@NotNull WireOut wire, boolean expectKeyValues, boolean topLevel) throws InvalidMarshallableException {
+    public void copyOne(@NotNull WireOut destWire, boolean expectKeyValues, boolean topLevel) throws InvalidMarshallableException {
         consumePadding();
         int ch = bytes.readUnsignedByte();
         switch (ch) {
             case '\'':
             case '"':
                 // Handle quoted values
-                copyQuote(wire, ch, expectKeyValues, topLevel);
+                copyQuote(destWire, ch, expectKeyValues, topLevel);
                 if (expectKeyValues) {
                     // For key-value pairs, consume any padding and expect a colon (:) separator
                     consumePadding();
@@ -294,21 +294,21 @@ public class JSONWire extends TextWire {
                         throw new IORuntimeException("Expected a ':' but got a '" + (char) ch);
 
                     // Recursively copy the associated value after the colon
-                    copyOne(wire, false, false);
+                    copyOne(destWire, false, false);
                 }
                 return;
 
             case '{':
                 // Determine if this is a type prefix or a standard map, and copy accordingly
                 if (isTypePrefix())
-                    copyTypePrefix(wire);
+                    copyTypePrefix(destWire);
                 else
-                    copyMap(wire);
+                    copyMap(destWire);
                 return;
 
             case '[':
                 // Handle sequences or arrays
-                copySequence(wire);
+                copySequence(destWire);
                 return;
 
             case '+':
@@ -325,14 +325,14 @@ public class JSONWire extends TextWire {
             case '9':
             case '.':
                 // Handle numeric values
-                copyNumber(wire);
+                copyNumber(destWire);
                 return;
 
             case 'N':
             case 'n':
                 // Special handling for the 'null' value
                 if (compareRest(bytes, _ULL)) {
-                    wire.getValueOut().nu11();
+                    destWire.getValueOut().nu11();
                     return;
                 }
                 break;
@@ -341,7 +341,7 @@ public class JSONWire extends TextWire {
             case 'F':
                 // Special handling for the 'false' value
                 if (compareRest(bytes, _ALSE)) {
-                    wire.getValueOut().bool(false);
+                    destWire.getValueOut().bool(false);
                     return;
                 }
                 break;
@@ -350,7 +350,7 @@ public class JSONWire extends TextWire {
             case 'T':
                 // Special handling for the 'true' value
                 if (compareRest(bytes, _RUE)) {
-                    wire.getValueOut().bool(true);
+                    destWire.getValueOut().bool(true);
                     return;
                 }
                 break;
@@ -364,25 +364,29 @@ public class JSONWire extends TextWire {
         throw new IORuntimeException("Unexpected chars '" + bytes.parse8bit(StopCharTesters.CONTROL_STOP) + "'");
     }
 
-    static boolean compareRest(@NotNull StreamingDataInput<?> in, @NotNull Bytes<?> s)
+    /**
+     * Compares the remaining characters in {@code source} with {@code expected}, consuming
+     * them if they match and ensuring the next char is not alphanumeric.
+     */
+    static boolean compareRest(@NotNull StreamingDataInput<?> source, @NotNull Bytes<?> expected)
             throws BufferUnderflowException, ClosedIllegalStateException {
-        if (s.length() > in.readRemaining())
+        if (expected.length() > source.readRemaining())
             return false;
-        long position = in.readPosition();
-        for (int i = 0; i < s.length(); i++) {
-            if (in.readUnsignedByte() != s.charAt(i)) {
-                in.readPosition(position);
+        long position = source.readPosition();
+        for (int i = 0; i < expected.length(); i++) {
+            if (source.readUnsignedByte() != expected.charAt(i)) {
+                source.readPosition(position);
                 return false;
             }
         }
-        int ch = in.peekUnsignedByte();
+        int ch = source.peekUnsignedByte();
         if (Character.isLetterOrDigit(ch)) {
-            in.readPosition(position);
+            source.readPosition(position);
             return false;
         }
         while (ch > 0 && ch <= ' ') {
-            in.readSkip(1);
-            ch = in.peekUnsignedByte();
+            source.readSkip(1);
+            ch = source.peekUnsignedByte();
         }
 
         return true;
@@ -393,10 +397,10 @@ public class JSONWire extends TextWire {
      * The type prefix is assumed to be a text value prefixed with '@'. This method will extract
      * the type prefix and pass it on to the wire output.
      *
-     * @param wire The wire output to copy the type prefix to.
+     * @param destWire The wire output to copy the type prefix to.
      * @throws InvalidMarshallableException if there's a problem with copying the data.
      */
-    private void copyTypePrefix(WireOut wire) throws InvalidMarshallableException {
+    private void copyTypePrefix(WireOut destWire) throws InvalidMarshallableException {
         final StringBuilder sb = acquireStringBuilder();
 
         // Extract the type literal
@@ -404,7 +408,7 @@ public class JSONWire extends TextWire {
 
         // Remove the '@' prefix from the type literal
         sb.deleteCharAt(0);
-        wire.getValueOut().typePrefix(sb);
+        destWire.getValueOut().typePrefix(sb);
 
         // Consume any padding characters (e.g., whitespace)
         consumePadding();
@@ -413,7 +417,7 @@ public class JSONWire extends TextWire {
             throw new IORuntimeException("Expected a ':' after the type " + sb + " but got a " + (char) ch);
 
         // Recursively copy the associated value after the colon
-        copyOne(wire, false, false);
+        copyOne(destWire, false, false);
 
         consumePadding();
         int ch2 = bytes.readUnsignedByte();
@@ -437,18 +441,18 @@ public class JSONWire extends TextWire {
      * Copies a quoted string value from the input to the given wire output.
      * This method handles escaped characters within the quoted string.
      *
-     * @param wire The wire output to copy the quoted string to.
-     * @param ch The starting quote character (either single or double quote).
+     * @param destWire  destination wire
+     * @param quoteChar opening quote character
      * @param inMap Flag indicating if the current position is inside a map structure.
      * @param topLevel Flag indicating if this is the topmost level of the copy operation.
      * @throws InvalidMarshallableException if there's a problem with copying the data.
      */
-    private void copyQuote(WireOut wire, int ch, boolean inMap, boolean topLevel) throws InvalidMarshallableException {
+    private void copyQuote(WireOut destWire, int quoteChar, boolean inMap, boolean topLevel) throws InvalidMarshallableException {
         final StringBuilder sb = acquireStringBuilder();
         // Extract the quoted text
         while (bytes.readRemaining() > 0) {
             int ch2 = bytes.readUnsignedByte();
-            if (ch2 == ch)
+            if (ch2 == quoteChar)
                 break;
             sb.append((char) ch2);
 
@@ -462,11 +466,11 @@ public class JSONWire extends TextWire {
 
         // Determine how to write the text to the wire based on the provided flags
         if (topLevel) {
-            wire.writeEvent(String.class, sb);
+            destWire.writeEvent(String.class, sb);
         } else if (inMap) {
-            wire.write(sb);
+            destWire.write(sb);
         } else {
-            wire.getValueOut().text(sb);
+            destWire.getValueOut().text(sb);
         }
     }
 
@@ -474,11 +478,11 @@ public class JSONWire extends TextWire {
      * Copies a map structure from the input to the given wire output.
      * A map is assumed to be a set of key-value pairs enclosed in curly braces '{}'.
      *
-     * @param wire The wire output to copy the map structure to.
+     * @param destWire The wire output to copy the map structure to.
      * @throws InvalidMarshallableException if there's a problem with copying the data.
      */
-    private void copyMap(WireOut wire) throws InvalidMarshallableException {
-        wire.getValueOut().marshallable(out -> {
+    private void copyMap(WireOut destWire) throws InvalidMarshallableException {
+        destWire.getValueOut().marshallable(out -> {
             consumePadding();
 
             // Process each key-value pair within the map until the end is reached or the buffer is exhausted
@@ -492,7 +496,7 @@ public class JSONWire extends TextWire {
                 }
 
                 // Process one key-value pair within the map
-                copyOne(wire, true, false);
+                copyOne(destWire, true, false);
 
                 // After processing a key-value pair, expect either a comma (next pair) or the end of the map
                 expectComma('}');
@@ -503,14 +507,15 @@ public class JSONWire extends TextWire {
     /**
      * Consumes padding and expects either a comma (indicating another entry) or a given end character.
      *
-     * @param end The expected end character (e.g., '}' for maps or ']' for sequences).
+     * @param closingChar the terminating character that indicates the end of the current
+     *                    structure
      */
-    private void expectComma(char end) {
+    private void expectComma(char closingChar) {
         consumePadding();
         final int ch = peekNextByte();
 
         // If we've reached the expected end character, simply return
-        if (ch == end)
+        if (ch == closingChar)
             return;
 
         // If a comma is found, move past it and consume any subsequent padding
@@ -518,7 +523,7 @@ public class JSONWire extends TextWire {
             bytes.readSkip(1);
             consumePadding();
         } else {
-            throw new IORuntimeException("Expected a comma or '" + end + "' not a '" + (char) ch + "'");
+            throw new IORuntimeException("Expected a comma or '" + closingChar + "' not a '" + (char) ch + "'");
         }
     }
 
@@ -526,10 +531,10 @@ public class JSONWire extends TextWire {
      * Copies a sequence structure from the input to the given wire output.
      * A sequence is assumed to be a list of values enclosed in square brackets '[]'.
      *
-     * @param wire The wire output to copy the sequence to.
+     * @param destWire The wire output to copy the sequence to.
      */
-    private void copySequence(WireOut wire) {
-        wire.getValueOut().sequence(out -> {
+    private void copySequence(WireOut destWire) {
+        destWire.getValueOut().sequence(out -> {
             // Consume any padding characters (e.g., whitespace) before the sequence content
             consumePadding();
 
@@ -544,7 +549,7 @@ public class JSONWire extends TextWire {
                 }
 
                 // Process one value within the sequence
-                copyOne(wire, false, false);
+                copyOne(destWire, false, false);
 
                 // After processing a value, expect either a comma (next value) or the end of the sequence
                 expectComma(']');
