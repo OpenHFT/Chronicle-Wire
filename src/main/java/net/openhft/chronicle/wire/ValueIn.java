@@ -51,23 +51,25 @@ import static net.openhft.chronicle.wire.SerializationStrategies.MARSHALLABLE;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface ValueIn {
-    /** A constant consumer that does nothing when accepting a {@link ValueIn}. */
+    /**
+     * A {@link Consumer} that ignores the supplied {@code ValueIn}.  Useful as a
+     * no-op placeholder.
+     */
+    @Deprecated(/* remove in x.29 as unused */)
     Consumer<ValueIn> DISCARD = v -> {};
 
     // ---- Text / Strings section ----
 
     /**
-     * Reads text data and applies a given bi-consumer to the text data and the provided object.
+     * Deserialises the current value as text and passes it to {@code consumer} along
+     * with the supplied object.
      *
-     * @param t  The target object.
-     * @param ts The bi-consumer that accepts the target object and the read text.
-     * @param <T> Type of the target object.
-     * @return The current WireIn instance.
+     * @return the parent {@link WireIn}
      */
     @NotNull
-    default <T> WireIn text(T t, @NotNull BiConsumer<T, String> ts) {
+    default <T> WireIn text(T target, @NotNull BiConsumer<T, String> consumer) {
         @Nullable final String text = text();
-        ts.accept(t, text);
+        consumer.accept(target, text);
         return wireIn();
     }
 
@@ -203,10 +205,8 @@ public interface ValueIn {
     WireIn bytesMatch(@NotNull BytesStore<?, ?> compareBytes, BooleanConsumer consumer);
 
     /**
-     * Reads byte data using the provided ReadBytesMarshallable.
-     *
-     * @param bytesMarshallable The ReadBytesMarshallable to read the byte data.
-     * @return The current WireIn instance.
+     * Supplies the byte stream to {@code bytesMarshallable#readMarshallable} for
+     * custom deserialisation.
      */
     @NotNull
     WireIn bytes(@NotNull ReadBytesMarshallable bytesMarshallable);
@@ -221,17 +221,14 @@ public interface ValueIn {
     }
 
     /**
-     * Retrieves the byte data as an array with the option to reuse an existing byte array.
-     *
-     * @param using The existing byte array to use or null.
-     * @return The byte data as an array or null.
+     * Populates {@code using} with the value’s bytes when possible to avoid
+     * allocation.  Returns the array containing the data, or {@code null} if the
+     * value is null.
      */
     byte @Nullable [] bytes(byte[] using);
 
     /**
-     * Retrieves the byte data as a BytesStore object.
-     *
-     * @return The BytesStore object or null.
+     * Wraps the value’s byte array in a new {@link BytesStore}.
      */
     @Nullable
     default BytesStore<?, ?> bytesStore() {
@@ -272,104 +269,66 @@ public interface ValueIn {
     WireIn skipValue();
 
     /**
-     * Reads a boolean value and applies it to the provided consumer.
+     * Reads the value as a {@code boolean} and passes it, together with
+     * {@code target}, to {@code flagConsumer}.
      *
-     * @param t     The target object.
-     * @param tFlag The consumer that accepts the target object and the read boolean value.
-     * @return The current WireIn instance.
-     * @param <T>   The type of the target object.
+     * @param <T> type of the context object
+     * @return the parent {@link WireIn}
      */
-    @NotNull <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> tFlag);
+    @NotNull <T> WireIn bool(T target, @NotNull ObjBooleanConsumer<T> flagConsumer);
 
     /**
-     * Reads an 8-bit integer (byte) value and applies an ObjByteConsumer with the provided object and the read value.
-     *
-     * @param <T> The type of object to be passed to the ObjByteConsumer.
-     * @param t   The object to be passed to the ObjByteConsumer.
-     * @param tb  The ObjByteConsumer that accepts the object and the read 8-bit integer value.
-     * @return The WireIn instance for method chaining.
+     * Reads the value as a signed byte and passes it to {@code byteConsumer} together with
+     * {@code target}.
      */
-    @NotNull <T> WireIn int8(@NotNull T t, @NotNull ObjByteConsumer<T> tb);
+    @NotNull <T> WireIn int8(@NotNull T target, @NotNull ObjByteConsumer<T> byteConsumer);
 
     /**
-     * Reads an unsigned 8-bit integer (short) value and applies an ObjShortConsumer with the provided object and the read value.
-     *
-     * @param <T> The type of object to be passed to the ObjShortConsumer.
-     * @param t   The object to be passed to the ObjShortConsumer.
-     * @param ti  The ObjShortConsumer that accepts the object and the read unsigned 8-bit integer value.
-     * @return The WireIn instance for method chaining.
+     * Reads the value as an unsigned byte and passes it to {@code shortConsumer} with
+     * {@code target}.
      */
-    @NotNull <T> WireIn uint8(@NotNull T t, @NotNull ObjShortConsumer<T> ti);
+    @NotNull <T> WireIn uint8(@NotNull T target, @NotNull ObjShortConsumer<T> shortConsumer);
 
     /**
-     * Reads a 16-bit integer (short) value and applies an ObjShortConsumer with the provided object and the read value.
-     *
-     * @param <T> The type of object to be passed to the ObjShortConsumer.
-     * @param t   The object to be passed to the ObjShortConsumer.
-     * @param ti  The ObjShortConsumer that accepts the object and the read 16-bit integer value.
-     * @return The WireIn instance for method chaining.
+     * Reads the value as a short and passes it to {@code shortConsumer} with {@code target}.
      */
-    @NotNull <T> WireIn int16(@NotNull T t, @NotNull ObjShortConsumer<T> ti);
+    @NotNull <T> WireIn int16(@NotNull T target, @NotNull ObjShortConsumer<T> shortConsumer);
 
     /**
-     * Reads an unsigned 16-bit integer (int) value and applies an ObjIntConsumer with the provided object and the read value.
-     *
-     * @param <T> The type of object to be passed to the ObjIntConsumer.
-     * @param t   The object to be passed to the ObjIntConsumer.
-     * @param ti  The ObjIntConsumer that accepts the object and the read unsigned 16-bit integer value.
-     * @return The WireIn instance for method chaining.
+     * Reads the value as an unsigned short and passes it to {@code intConsumer} with
+     * {@code target}.
      */
-    @NotNull <T> WireIn uint16(@NotNull T t, @NotNull ObjIntConsumer<T> ti);
+    @NotNull <T> WireIn uint16(@NotNull T target, @NotNull ObjIntConsumer<T> intConsumer);
 
     /**
-     * Reads a 32-bit integer (int) value and applies an ObjIntConsumer with the provided object and the read value.
-     *
-     * @param <T> The type of object to be passed to the ObjIntConsumer.
-     * @param t   The object to be passed to the ObjIntConsumer.
-     * @param ti  The ObjIntConsumer that accepts the object and the read 32-bit integer value.
-     * @return The WireIn instance for method chaining.
+     * Reads the value as an {@code int} and passes it to {@code intConsumer} with
+     * {@code target}.
      */
-    @NotNull <T> WireIn int32(@NotNull T t, @NotNull ObjIntConsumer<T> ti);
+    @NotNull <T> WireIn int32(@NotNull T target, @NotNull ObjIntConsumer<T> intConsumer);
 
     /**
-     * Reads an unsigned 32-bit integer (long) value and applies an ObjLongConsumer with the provided object and the read value.
-     *
-     * @param <T> The type of object to be passed to the ObjLongConsumer.
-     * @param t   The object to be passed to the ObjLongConsumer.
-     * @param tl  The ObjLongConsumer that accepts the object and the read unsigned 32-bit integer value.
-     * @return The WireIn instance for method chaining.
+     * Reads the value as an unsigned int and passes it to {@code longConsumer} with
+     * {@code target}.
      */
-    @NotNull <T> WireIn uint32(@NotNull T t, @NotNull ObjLongConsumer<T> tl);
+    @NotNull <T> WireIn uint32(@NotNull T target, @NotNull ObjLongConsumer<T> longConsumer);
 
     /**
-     * Reads a 64-bit integer (long) value and applies an ObjLongConsumer with the provided object and the read value.
-     *
-     * @param <T> The type of object to be passed to the ObjLongConsumer.
-     * @param t   The object to be passed to the ObjLongConsumer.
-     * @param tl  The ObjLongConsumer that accepts the object and the read 64-bit integer value.
-     * @return The WireIn instance for method chaining.
+     * Reads the value as a {@code long} and passes it to {@code longConsumer} with
+     * {@code target}.
      */
-    @NotNull <T> WireIn int64(@NotNull T t, @NotNull ObjLongConsumer<T> tl);
+    @NotNull <T> WireIn int64(@NotNull T target, @NotNull ObjLongConsumer<T> longConsumer);
 
     /**
-     * Reads a 32-bit floating-point (float) value and applies an ObjFloatConsumer with the provided object and the read value.
-     *
-     * @param <T> The type of object to be passed to the ObjFloatConsumer.
-     * @param t   The object to be passed to the ObjFloatConsumer.
-     * @param tf  The ObjFloatConsumer that accepts the object and the read 32-bit floating-point value.
-     * @return The WireIn instance for method chaining.
+     * Reads the value as a {@code float} and passes it to {@code floatConsumer} with
+     * {@code target}.
      */
-    @NotNull <T> WireIn float32(@NotNull T t, @NotNull ObjFloatConsumer<T> tf);
+    @NotNull <T> WireIn float32(@NotNull T target, @NotNull ObjFloatConsumer<T> floatConsumer);
 
     /**
-     * Reads a 64-bit floating-point (double) value and applies an ObjDoubleConsumer with the provided object and the read value.
-     *
-     * @param <T> The type of object to be passed to the ObjDoubleConsumer.
-     * @param t   The object to be passed to the ObjDoubleConsumer.
-     * @param td  The ObjDoubleConsumer that accepts the object and the read 64-bit floating-point value.
-     * @return The WireIn instance for method chaining.
+     * Reads the value as a {@code double} and passes it to {@code doubleConsumer} with
+     * {@code target}.
      */
-    @NotNull <T> WireIn float64(@NotNull T t, @NotNull ObjDoubleConsumer<T> td);
+    @NotNull <T> WireIn float64(@NotNull T target, @NotNull ObjDoubleConsumer<T> doubleConsumer);
 
     @NotNull <T> WireIn time(@NotNull T t, @NotNull BiConsumer<T, LocalTime> setLocalTime);
 
