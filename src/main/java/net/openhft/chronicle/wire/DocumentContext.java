@@ -75,6 +75,9 @@ public interface DocumentContext extends Closeable, SourceContext {
      */
     boolean isNotComplete();
 
+    /**
+     * @return {@code true} if the context is complete, {@code false} otherwise.
+     */
     default boolean isOpen() {
         return isNotComplete();
     }
