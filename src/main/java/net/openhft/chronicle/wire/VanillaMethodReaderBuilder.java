@@ -32,18 +32,19 @@ import java.util.function.Predicate;
 import static net.openhft.chronicle.wire.WireParser.SKIP_READABLE_BYTES;
 
 /**
- * The {@code VanillaMethodReaderBuilder} class implements the {@link MethodReaderBuilder} interface.
- * It provides a mechanism to create a method reader for deserializing method calls from a wire input.
+ * Builder for {@link VanillaMethodReader}. Implements {@link MethodReaderBuilder} and
+ * allows configuration of default parsing behaviour, exception handling, method
+ * interception and use of generated proxies.
  */
 public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
-    // A constant representing the configuration property to disable reader proxy code generation.
+    // System property name to disable proxy generation.
     public static final String DISABLE_READER_PROXY_CODEGEN = "disableReaderProxyCodegen";
 
-    // Cache for storing classes associated with their names for optimization.
+    // Cache of generated reader classes keyed by name.
     private static final Map<String, Class<?>> classCache = new ConcurrentHashMap<>();
 
-    // A sentinel value indicating a failed compilation attempt.
+    // Marker stored in {@link #classCache} when generation fails.
     private static final Class<?> COMPILE_FAILED = ClassNotFoundException.class;
 
     // The input from which method calls are read.
