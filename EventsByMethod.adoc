@@ -2,11 +2,42 @@
 Peter Lawrey
 
 Chronicle favours modelling events as asynchronous method calls.
-This has a number of advantages
+This document explains the *events by method* pattern used by Chronicle Wire.
+An event is defined as a Java interface method which is written to a `Wire` by a
+`MethodWriter` and dispatched to a handler by a `MethodReader`.
 
-- the simplest way to pass data between components is a method call. i.e. no actual transport
-- asynchronous method calls can be easily modelled into data structures.
-- events as method calls lead to a natural association of an action with an event type.
+Advantages of this pattern include:
+
+* Direct method calls remain the simplest form of communication when the
+  producer and consumer are in the same JVM.
+* Interfaces describing events become easy to serialise as data structures
+  for persistence or testing.
+* Generated proxies minimise allocation and provide type safety.
+
+== Core components
+
+. Event interface :: A plain Java interface whose methods represent event types.
+. Handler implementation :: A class that implements the event interface to
+  process events locally.
+. `MethodWriter` :: Generates a proxy that serialises method calls onto a `Wire`.
+. `MethodReader` :: Reads method calls from a `Wire` and invokes them on a
+  handler.
+. Wire format :: YAML, JSON or binary encodings used to store or transmit the
+  events.
+
+[mermaid]
+....
+sequenceDiagram
+    caller->>MethodWriter: invoke method
+    MethodWriter->>Wire: serialised call
+    MethodReader->>Handler: dispatch method
+....
+
+Typical use cases include:
+
+* High performance inter-process messaging.
+* Recording events to disk for replay during testing.
+* Converting asynchronous network traffic into method calls.
 
 == Event processing
 
@@ -19,64 +50,96 @@ Chronicle Services added configuration of multiple microservices services, queue
 
 Each event type has a different method to be called which implements code for that event type.
 
-TBD: Add a diagram here
+[mermaid]
+....
+graph LR
+    A(Event Sources) --> B(Microservice\nMethod Implementations)
+    B --> C(Event Store\nChronicle Queue)
+....
 
-However, messages can still be produced and processed dynamically through the use of a wildcard event callback method where the event type is passed programmatically.
+However, messages can still be produced and processed dynamically through the use of a wildcard event callback method where the event type is passed programmatically, for example `void onEvent(String eventType, WireIn data)`.
 
 === Gateways using an input/outputs architecture
 
 A gateway handles information on behalf of remote clients.
-It is two main inputs, data from the client, plus data from systems it talks to.
+It has two main inputs: data from the client and data from the systems it talks to.
 In turn, it can produce two streams of output, one replies to the client and the other passes on data to internal systems.
 
-TBD: Add a diagram here
+[mermaid]
+....
+graph LR
+    C(Client) --> G(Gateway)
+    S(Internal Systems\\nsources) --> G
+    G --> CR(Client replies)
+    G --> DS(Internal Systems\\ndownstream events)
+....
 
 === Testing using YAML
 
-In both cases, these components can be tested using events stored in YAML files modelled as keys to a scalar, a list or a DTO represented as a mapping.
+In both cases, these components can be tested using events stored in YAML files.  Events appear as method names with their arguments, which may be simple scalars, a list of values or a DTO represented as a mapping.
+
+[source,yaml]
+----
+# tiny illustration
+myEvent: { someField: 1 }
+anotherEvent: simpleValue
+----
+
+=== Example on the wire
+
+The same call written using `TextWire` would appear in a log or queue as:
+
+[source,yaml]
+----
+myEvent:
+  someField: 1
+----
 
 === Mix wire formats as needed
 
-Depending on your use case, you can write YAML, JSON, Binary YAML, raw bytes or trivially copied objects as needed on a class by class basis.
+Depending on your use case, you can write YAML, JSON, Binary YAML (the `BINARY` or `BINARY_LIGHT` wire types), raw bytes or trivially copied objects as needed on a class by class basis.
 It is common for most of the DTOs to have relatively low volumes and leaving them in the format easiest to work with is more maintainable, however the small number of high volume objects can be optimised as much as you need to meet your performance requirements.
 
 Some advantages of YAML are:
 
-- human-readable, more so than JSON.
-- more compact than JSON
-- supports type and comments
-- useful for configuration
-- interchangeable with other YAML libraries in other languages
-- microsecond latencies
+. Human-readable, more so than JSON.
+. More compact than JSON.
+. Supports type and comments.
+. Useful for configuration.
+. Interchangeable with other YAML libraries in other languages.
+. Capable of microsecond latencies for small messages.
 
 Some advantages of JSON are:
 
-- Supported by browsers
-- somewhat human-readable
-- support for types have been added
-- interchangeable with other JSON libraries in other languages
-- microsecond latencies
+. Supported by browsers.
+. Somewhat human-readable.
+. Type support has been added in Chronicle Wire (`JSON_RETAIN_TYPE`).
+. Interchangeable with other JSON libraries in other languages.
+. Microsecond latencies are achievable.
 
 Some advantages of Binary YAML are:
 
-- natural arrangement for Java objects
-- support for schema changes, rearrange/remove fields, changing the type of fields.
-- compacting variable length data
-- support type information
-- implicitly add comments to make it easier to decode hex dumps
-- better performance than YAML (about half the latency)
-- works provided the writer/reader have the Chronicle Wire library
+. Natural arrangement for Java objects.
+. Support for schema changes, rearranging or removing fields and, with care, changing field types.
+. Compacts variable length data.
+. Supports type information.
+. Implicitly adds comments to help decode hex dumps.
+. Better performance than YAML (about half the latency).
+. Works provided the writer/reader have the Chronicle Wire library.
 
 Some advantages of Trivially Copyable Objects
 
-- raw memory copy for serialization/deserialization
-- compact memory structure provided fields don't vary in size much
-- works provided the writer/reader arrange the fields the same way.
-- better performance than Binary YAML (above half the latency)
+. Raw memory copy for serialisation/deserialisation.
+. Compact memory structure provided fields don't vary in size much.
+. Works provided the writer/reader arrange the fields the same way.
+. Better performance than Binary YAML (about half the latency).
 
 === Processing events
 
-Events can be passed on by either processing the raw message or invoking the same method downstream.
+Events received by a component can be handled in two main ways:
+
+1. *Raw Message Forwarding* - the raw `Bytes` or `DocumentContext` can be forwarded to another queue or network channel without deserialising the message fully.  This is efficient for routers or filters that only inspect metadata.
+2. *Full Deserialisation and Re-invocation* - the event is deserialised and the corresponding method invoked locally; as part of the processing logic the same (or another) method can then be invoked downstream via a `MethodWriter`.
 
 == Modelling simple asynchronous method calls
 
@@ -90,7 +153,7 @@ interface Examples {
 
     void primArg(double value);
 
-    @MethodId(12) // use a method number instead of a method name i.e. 12
+    @MethodId(12) // use a compact method number instead of the method name
     void withMethodId(long value);
 
     void twoPrimArg(char ch, long value);
@@ -117,7 +180,7 @@ static class MyTypes extends SelfDescribingMarshallable {
 ----
 
 Chained events are useful for composing events.
-Routing, timestamp and metadata can be preprended to the event and removed as needed without alterting the API of the underlying message.
+Routing, timestamp and metadata can be prepended to the event and removed as needed without altering the API of the underlying message.
 
 In this example, routing information and a timestamp are added, but the underlying event isn't altered to support this.
 
@@ -141,6 +204,15 @@ interface Destination<T> {
 interface DestinationTimedSaying extends Destination<TimedSaying> { }
 ----
 
+A producer can use the fluent API as follows:
+[source,java]
+----
+DestinationTimedSaying writer = /* MethodWriter instance */;
+writer.via("targetQueue")
+      .at(System.nanoTime())
+      .say("Hello Composed World");
+----
+
 === Filtering messages with chained calls
 
 A `MethodReader` recognises implementations that extends the marker interface `@IgnoresEverything` as one which doesn't need to the called.
@@ -160,6 +232,7 @@ class MyTimedSaying implements TimedSaying {
     }
 }
 ----
+This pattern skips deserialisation of the remaining message when an early filter indicates the event should be ignored, saving processing time for irrelevant data.
 
 === Say one text message
 
