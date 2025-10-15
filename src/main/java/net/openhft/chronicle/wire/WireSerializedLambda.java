@@ -28,46 +28,58 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Helper class to support the serialization of lambda expressions in Wire formats.
+ * Helper class to support the serialisation of lambda expressions in Wire formats.
  * <p>
- * This class provides functionalities to check if a class is a serializable lambda and
- * serialize it using the Wire format. It uses Java's {@link SerializedLambda} mechanism
- * to capture details about the lambda and then writes those details to a Wire format.
+ * This allows lambdas that are {@link java.io.Serializable} to be written to and read
+ * from a {@link Wire}, preserving their capturing arguments and target functional
+ * interface method. It effectively mimics Java's built-in lambda serialisation
+ * mechanism for Chronicle Wire.
  */
 @SuppressWarnings("rawtypes")
 public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
 
+    /** The class that captured the lambda. */
     private Class<?> capturingClass;
+    /** Fully qualified name of the functional interface. */
     private String functionalInterfaceClass;
+    /** Name of the functional interface method. */
     private String functionalInterfaceMethodName;
+    /** Method signature of the functional interface method. */
     private String functionalInterfaceMethodSignature;
+    /** Implementation class containing the lambda body. */
     private String implClass;
+    /** Name of the implementation method. */
     private String implMethodName;
+    /** Signature of the implementation method. */
     private String implMethodSignature;
+    /** Kind of the implementation method as defined by {@link SerializedLambda}. */
     private int implMethodKind;
+    /** Instantiated method type descriptor. */
     private String instantiatedMethodType;
+    /** List of arguments captured by the lambda. */
     @NotNull
     private List<Object> capturedArgs = new ArrayList<>();
 
     /**
-     * Determines if the provided class is a serializable lambda.
+     * Checks whether {@code clazz} represents a lambda class that also implements
+     * {@link java.io.Serializable}.
      *
-     * @param clazz The class to be checked.
-     * @return {@code true} if the class is a serializable lambda, {@code false} otherwise.
+     * @param clazz class to check
+     * @return {@code true} if {@code clazz} is a serialisable lambda
      */
     public static boolean isSerializableLambda(@NotNull Class<?> clazz) {
         return Serializable.class.isAssignableFrom(clazz) && Jvm.isLambdaClass(clazz);
     }
 
     /**
-     * Serializes the given lambda to a Wire format using the provided {@link ValueOut} instance.
+     * Writes a serialisable lambda to the supplied {@link ValueOut}.
      * <p>
-     * This method fetches the details of the lambda using the {@link SerializedLambda} mechanism
-     * and then writes these details to the provided Wire format.
+     * The lambda's {@code writeReplace} method yields a {@link SerializedLambda},
+     * which is written as a {@code WireSerializedLambda}.
      *
-     * @param <L> The type of the lambda to be serialized.
-     * @param lambda The lambda instance to be serialized.
-     * @param valueOut The {@link ValueOut} instance to which the lambda should be serialized.
+     * @param <L>      the type of the lambda expression
+     * @param lambda   the serialisable lambda instance
+     * @param valueOut target for the lambda's serialised form
      */
     public static <L> void write(@NotNull L lambda, @NotNull ValueOut valueOut) {
         try {
@@ -95,6 +107,10 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
         }
     }
 
+    /**
+     * Deserialises this {@code WireSerializedLambda} from the given wire.
+     * All fields corresponding to {@link SerializedLambda} properties are read.
+     */
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IllegalStateException {
         capturedArgs = new ArrayList<>();
@@ -115,6 +131,10 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
 
     }
 
+    /**
+     * Recreates the original lambda instance from the deserialised state.
+     * Called after all fields have been populated via {@link #readMarshallable(WireIn)}.
+     */
     @NotNull
     @Override
     public Object readResolve() {
