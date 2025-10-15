@@ -22,9 +22,11 @@ import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import java.util.List;
 
 /**
- * Represents a dynamic enumeration which can either be a traditional {@code Enum} or a class
- * possessing a {@code String name} field. The interface extends both {@link CoreDynamicEnum} and
- * {@link Marshallable}, facilitating serialization and specific dynamic enumeration operations.
+ * <b>Deprecated:</b> scheduled for removal in version x.28.
+ * Represents an enumeration whose values may not be fixed at compile time.
+ * Implementations can be either a traditional {@code Enum} or a class
+ * with a {@code String name} field. The interface extends
+ * {@link CoreDynamicEnum} and {@link Marshallable}.
  */
 @SuppressWarnings({"deprecation", "rawtypes", "unchecked"})
 @Deprecated(/* to be removed in x.28 */)
@@ -57,7 +59,8 @@ public interface DynamicEnum extends CoreDynamicEnum, Marshallable {
     }
 
     /**
-     * Not resettable, treat as immutable.
+     * Dynamic enums are treated as immutable and this
+     * default implementation always throws {@link UnsupportedOperationException}.
      */
     default void reset() {
         throw new UnsupportedOperationException();

@@ -35,13 +35,14 @@ import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
 /**
- * Represents a data structure that supports both reading from and writing to marshallable
- * formats. Implementations of this interface can be converted to and from serialized forms,
- * making it suitable for storage, transmission, or other forms of data exchange.
- * <p>
- * This interface also provides a set of static utility methods to aid in the manipulation
- * and interpretation of marshallable data, allowing for data comparison, hashing,
- * and serialization to and from string and file representations.
+ * A cornerstone interface for objects that need to be serialised to and
+ * deserialised from a wire format.  It combines the ability to {@link
+ * WriteMarshallable write} and {@link ReadMarshallable read} and also extends
+ * {@link Resettable} so that implementations may be reused.  Typical
+ * implementations are data transfer objects or stateful components that must be
+ * persisted or transmitted.  A set of utility methods is provided for common
+ * operations such as comparison, hashing and conversion to and from textual
+ * forms.
  */
 @DontChain
 public interface Marshallable extends WriteMarshallable, ReadMarshallable, Resettable {
@@ -186,20 +187,14 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /**
-     * Retrieves the long value of a specific field from the current marshallable object.
-     *
-     * @param name The name of the field.
-     * @return The long value of the specified field.
+     * Convenience method to read a {@code long} field via {@link Wires}.
      */
     default long getLongField(String name) throws NoSuchFieldException {
         return Wires.getLongField(this, name);
     }
 
     /**
-     * Sets the long value of a specific field in the current marshallable object.
-     *
-     * @param name The name of the field.
-     * @param value The new long value for the specified field.
+     * Convenience method to write a {@code long} field via {@link Wires}.
      */
     default void setLongField(String name, long value) throws NoSuchFieldException {
         Wires.setLongField(this, name, value);
@@ -270,11 +265,9 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /**
-     * Merges the current marshallable object into a map, using a specified function to determine the key.
-     *
-     * @param map The map to merge into.
-     * @param getKey The function to determine the key for the current object in the map.
-     * @return The merged marshallable object in the map.
+     * Merges this object into {@code map}.  If an entry with the same key exists
+     * the existing value is updated via {@link #copyTo(Marshallable)}, otherwise
+     * this instance is added.
      */
     default <K, T extends Marshallable> T mergeToMap(@NotNull Map<K, T> map, @NotNull Function<T, K> getKey) {
         @NotNull @SuppressWarnings("unchecked")
@@ -303,9 +296,9 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /**
-     * Returns the alias name for the current class, if available.
-     *
-     * @return The alias name for the current class or the canonical name if no alias exists.
+     * Returns the alias for this class as registered with
+     * {@link ClassAliasPool#CLASS_ALIASES}, or the canonical name if no alias is
+     * present.
      */
     default String className() {
         return ClassAliasPool.CLASS_ALIASES.nameFor(getClass());
