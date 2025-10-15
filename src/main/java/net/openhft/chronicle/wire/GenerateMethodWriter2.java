@@ -82,11 +82,15 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         TEMPLATE_METHODS.put("writingDocument", wd);
     }
 
-    // Maintains a mapping of method writers based on their respective classes.
+    /**
+     * Cache for chained method writers.  Each entry maps an interface to the
+     * generated {@code ThreadLocal} field name.
+     */
     private final Map<Class<?>, String> methodWritersMap = new LinkedHashMap<>();
 
     /**
-     * Default constructor that initializes the metadata and sets up necessary imports.
+     * Creates a new generator with default {@link GMWMetaData} and registers
+     * the imports required by the generated code.
      */
     public GenerateMethodWriter2() {
         super(new GMWMetaData());
@@ -152,6 +156,11 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     }
 
     @Override
+    /**
+     * Adds fields used by the generated proxy such as the {@code Closeable},
+     * optional {@link UpdateInterceptor} and the supplier of
+     * {@link MarshallableOut} instances.
+     */
     protected void generateFields(SourceCodeFormatter mainCode) {
         super.generateFields(mainCode);
         withLineNumber(mainCode)
@@ -164,6 +173,10 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     }
 
     @Override
+    /**
+     * Emits a constructor that initialises the output supplier, the optional
+     * interceptor and the associated {@link Closeable}.
+     */
     protected void generateConstructors(SourceCodeFormatter mainCode) {
         super.generateConstructors(mainCode);
         withLineNumber(mainCode)
@@ -179,6 +192,12 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     }
 
     @Override
+    /**
+     * Generates the body of a proxied method.  It opens a
+     * {@link WriteDocumentContext}, writes the event name or ID and serialises
+     * the arguments.  The return type dictates whether the call is terminating
+     * or part of a fluent API.
+     */
     protected void generateMethod(Method method, StringBuilder params, List<String> paramList, SourceCodeFormatter mainCode) {
         String name = method.getName();
         Class<?> returnType = method.getReturnType();
@@ -228,6 +247,10 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     }
 
     @Override
+    /**
+     * Declares any {@code ThreadLocal} fields required for chained writers at
+     * the end of code generation.
+     */
     protected void generateEnd(SourceCodeFormatter mainCode) {
         super.generateEnd(mainCode);
         for (Map.Entry<Class<?>, String> e : methodWritersMap.entrySet()) {
