@@ -1,3 +1,8 @@
+# Words used by net.openhft.chronicle.wire.WordsLongConverter
+# for compact string representation.
+# Words must be unique and their order is significant.
+# One word per line.
+
 act
 aid
 aim
