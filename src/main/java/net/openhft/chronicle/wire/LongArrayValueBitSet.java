@@ -33,29 +33,27 @@ import java.util.stream.StreamSupport;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
 /**
- * A {@link ChronicleBitSet} backed by a {@link net.openhft.chronicle.core.values.LongArrayValues}.
- * The backing array can reside off-heap, allowing multiple processes to share the same state.
- * All updates rely on compare‑and‑swap operations and therefore do not require explicit locks.
- * <b>Note:</b> the capacity is fixed when the instance is created and cannot later be expanded.
+ * This {@code ChronicleBitSet} is intended to be shared between processes. To minimize locking constraints, it is implemented as a lock-free solution
+ * without support for resizing.
  */
 @SuppressWarnings("this-escape")
 public class LongArrayValueBitSet extends AbstractCloseable implements Marshallable, ChronicleBitSet {
 
-    /** Internal constant used when masking partial words. */
+    /* Used to shift left or right for a partial word mask */
     private static final long WORD_MASK = ~0L;
 
-    /** Lazily created {@link Pauser} used during CAS spin loops. */
+    // Pauser object used for managing concurrent access (assuming based on its name, actual use needs context)
     private transient Pauser pauser;
 
     /**
-     * Holds the 64-bit words representing the bits. Each index is one word in the
-     * underlying {@link LongArrayValues} instance.
+     * The internal field corresponding to the serialField "bits".
      */
     private LongArrayValues words;
 
     /**
-     * Create a bit set capable of holding {@code maxNumberOfBits} bits.
-     * The backing {@link BinaryLongArrayReference} is sized once during construction.
+     * Constructs a new {@code LongArrayValueBitSet} with the given maximum number of bits.
+     *
+     * @param maxNumberOfBits Maximum number of bits that the bit set can handle.
      */
     public LongArrayValueBitSet(final long maxNumberOfBits) {
         words = new BinaryLongArrayReference((maxNumberOfBits + BITS_PER_WORD - 1) / BITS_PER_WORD);
@@ -63,9 +61,10 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Create a bit set of {@code maxNumberOfBits} bits and immediately marshal its state
-     * to and from the provided {@link Wire}. The {@link #words} field is initialised using
-     * a {@link BinaryLongArrayReference} before marshalling occurs.
+     * Constructs a new {@code LongArrayValueBitSet} with the given maximum number of bits and initializes it with the given {@code Wire}.
+     *
+     * @param maxNumberOfBits Maximum number of bits that the bit set can handle.
+     * @param w               The {@code Wire} object to be used for initialization.
      */
     public LongArrayValueBitSet(final long maxNumberOfBits, Wire w) {
         this(maxNumberOfBits);
@@ -74,9 +73,11 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Locate the word containing {@code bitIndex}.
+     * Calculates the word index in the internal storage corresponding to a given bit index.
      *
-     * @throws IndexOutOfBoundsException if {@code bitIndex} is negative
+     * @param bitIndex The bit index for which to find the word index.
+     * @return The word index containing the given bit index.
+     * @throws IndexOutOfBoundsException if the provided bitIndex is negative.
      */
     private static int wordIndex(int bitIndex) {
         if (bitIndex < 0)
@@ -86,14 +87,17 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Utility method matching {@link BitSet#valueOf(byte[])} for convenience.
+     * Constructs and returns a new {@code BitSet} using the bits from the provided byte array.
+     *
+     * @param bytes The byte array to be used for constructing the {@code BitSet}.
+     * @return A new {@code BitSet} containing all bits from the given byte array.
      */
     public static BitSet valueOf(byte[] bytes) {
         return BitSet.valueOf(ByteBuffer.wrap(bytes));
     }
 
     /**
-     * Validate that {@code fromIndex}..{@code toIndex} forms a non‑empty range.
+     * Checks that fromIndex ... toIndex is a valid range of bit indices.
      */
     private static void checkRange(int fromIndex, int toIndex) {
         if (fromIndex < 0)
@@ -105,18 +109,11 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
                     " > toIndex: " + toIndex);
     }
 
-    /**
-     * Return the value of the word at {@code wordIndex} or zero if beyond {@link #getWordsInUse()}.
-     */
     @Override
     public long getWord(int wordIndex) {
         return wordIndex < getWordsInUse() ? words.getValueAt(wordIndex) : 0;
     }
 
-    /**
-     * Store {@code bits} at the given {@code wordIndex}. The backing {@link LongArrayValues}
-     * is expanded to the index if needed.
-     */
     @Override
     public void setWord(int wordIndex, long bits) {
         expandTo(wordIndex);
@@ -165,8 +162,11 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Atomically set an external {@link LongValue} to {@code newValue}.
-     * This helper does not access {@link #words}; it is provided for convenience.
+     * Sets a new value for a given word in this bit set.
+     * This method is lock-free and uses CAS operations to safely set the new word value.
+     *
+     * @param word     The {@code LongValue} instance representing the word to set.
+     * @param newValue The new value to set for the word.
      */
     public void set(LongValue word, long newValue) {
         throwExceptionIfClosed();
@@ -195,8 +195,9 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Ensure the backing store can address {@code wordIndex}. Throws if the requested index
-     * exceeds the initial capacity.
+     * Ensures that the ChronicleBitSet can accommodate a given wordIndex.
+     *
+     * @param wordIndex the index to be accommodated.
      */
     private void expandTo(int wordIndex) {
         int wordsRequired = wordIndex + 1;
