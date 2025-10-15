@@ -5,56 +5,51 @@
 package net.openhft.chronicle.wire;
 
 /**
- * This interface represents a timed event, providing methods to manage and access the time associated with the event.
- * It is typically used for events that have a specific timestamp, such as those generated externally and captured by the system.
+ * Represents a timed event and extends {@link Marshallable} so that the event can
+ * be serialised or de-serialised. This interface provides methods to manage that associated time
  * <p>
- * The event time is generally represented in nanoseconds. However, this can be adjusted if needed through the system property 'service.time.unit'.
+ * Typically used for events generated outside the system that carry a timestamp.
+ * The time unit defaults to nanoseconds but can be overridden globally with the
+ * {@code service.time.unit} system property.
  *
- * @param <E> The type of the implementing event class
+ * @param <E> type of the implementing event
  */
 public interface BaseEvent<E extends BaseEvent<E>> extends Marshallable {
     /**
      * Returns the time at which the event which triggered this was generated (e.g. the time
      * an event generated externally to the system first entered the system).
-     * <p>
-     * By default, the time is represented in nanoseconds. System property 'service.time.unit'
-     * can be changed in order to represent time in different units.
      *
      * @return the time at which the event which triggered this was generated.
      */
     long eventTime();
 
     /**
-     * Sets the time at which the event which triggered this was generated (e.g. the time
-     * an event generated externally to the system first entered the system).
-     * <p>
-     * By default, the time is represented in nanoseconds. System property 'service.time.unit'
-     * can be changed in order to represent time in different units.
+     * Sets the timestamp for this event.
      *
-     * @param eventTime The timestamp to set for the event, in the configured time unit.
-     * @return The current instance of the implementing class.
-     * @throws UnsupportedOperationException if the method is not overridden.
+     * @param eventTime the time to store, expressed in the service time unit
+     *                  (see {@link ServicesTimestampLongConverter}).
+     * @return this event instance for chaining
+     * @throws UnsupportedOperationException if not overridden to store the value
      */
     default E eventTime(final long eventTime) {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * Sets the time at which the event which triggered this was generated (e.g. the time
-     * an event generated externally to the system first entered the system) to the
-     * current time.
-     * <p>
-     * By default, the time is represented in nanoseconds. System property 'service.time.unit'
-     * can be changed in order to represent time in different units.
+     * Convenience method that sets {@link #eventTime(long)} to the current time
+     * via {@link ServicesTimestampLongConverter#currentTime()}.
      *
-     * @return this
+     * @return this event instance
      */
     default E eventTimeNow() {
         return eventTime(ServicesTimestampLongConverter.currentTime());
     }
 
     /**
-     * Updates event's time with the current time if it hasn't been set.
+     * Sets the event time to the current time via {@link #eventTimeNow()} if the
+     * existing {@link #eventTime()} is not positive.
+     *
+     * @return this event instance
      */
     @SuppressWarnings("unchecked")
     default E updateEvent() {

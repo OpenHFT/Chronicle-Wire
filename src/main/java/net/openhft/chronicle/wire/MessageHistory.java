@@ -21,15 +21,17 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 
 /**
- * This is the {@code MessageHistory} interface, which extends {@link Marshallable}.
- * It provides functionalities related to managing the history of messages.
+ * Records the path a message takes as it moves through components.
+ * Each processing step may append its source identifier and timestamp,
+ * allowing tracing and latency analysis in distributed systems.
  */
 public interface MessageHistory extends Marshallable {
 
     /**
-     * Returns the {@code MessageHistory} to update it or read it.
+     * Retrieves the thread-local {@code MessageHistory} instance for the
+     * message being processed.
      *
-     * @return the MessageHistory for the current Excerpt.
+     * @return the history associated with the current excerpt.
      */
     static MessageHistory get() {
         return VanillaMessageHistory.getThreadLocal();
@@ -46,19 +48,27 @@ public interface MessageHistory extends Marshallable {
     }
 
     /**
-     * Clears the {@code MessageHistory} for the current thread.
+     * Effectively calls {@code set(null)} removing the current thread-local
+     * history.
      */
     static void clear() {
         VanillaMessageHistory.setThreadLocal(null);
     }
 
     /**
-     * Sets an empty history the {@code MessageHistory} for the current thread.
+     * Sets the current thread-local history to a new empty
+     * {@link VanillaMessageHistory}.
      */
     static void emptyHistory() {
         VanillaMessageHistory.setThreadLocal(new VanillaMessageHistory());
     }
 
+    /**
+     * Writes the current thread's history to the given document if the
+     * document is empty.
+     *
+     * @param dc the {@link DocumentContext} to write the history to
+     */
     @UsedViaReflection
     static void writeHistory(DocumentContext dc) {
         if (((WriteDocumentContext) dc).isEmpty()) { // only add to the start of a message. i.e. for chained calls.
@@ -67,6 +77,14 @@ public interface MessageHistory extends Marshallable {
     }
 
     // needed by NoMessageHistory in Queue
+    /**
+     * Default implementation for recording history into the supplied
+     * {@link DocumentContext}. It writes an event named
+     * {@link net.openhft.chronicle.bytes.MethodReader#HISTORY} with this history
+     * as the value.
+     *
+     * @param dc the document to append the history to
+     */
     default void doWriteHistory(DocumentContext dc) {
         dc.wire().writeEventName(MethodReader.HISTORY).marshallable(get());
     }
@@ -118,7 +136,7 @@ public interface MessageHistory extends Marshallable {
     long sourceIndex(int n);
 
     /**
-     * Clears all data contained in this {@code MessageHistory}
+     * Clears all recorded source and timing entries.
      */
     @Override
     void reset();
