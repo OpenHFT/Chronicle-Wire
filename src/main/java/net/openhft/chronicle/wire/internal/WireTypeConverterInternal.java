@@ -50,11 +50,12 @@ public class WireTypeConverterInternal {
     }
 
     /**
-     * Adds the class alias to the {@link net.openhft.chronicle.core.pool.ClassLookup}
-     * of both {@link #jsonWire} and {@link #yamlWire}.
+     * Adds aliasing support for type leniency. This facilitates the serialization and deserialization
+     * of objects whose class names might have changed. By providing an alias, the system can recognize
+     * and handle the renamed class seamlessly.
      *
-     * @param newClass   the class the alias maps to
-     * @param oldTypeName the legacy type name
+     * @param newClass    The new class type to use for serialization and deserialization.
+     * @param oldTypeName The old type name that this new class is an alias for.
      */
     public void addAlias(Class<?> newClass, String oldTypeName) {
         jsonWire.classLookup().addAlias(newClass, oldTypeName);

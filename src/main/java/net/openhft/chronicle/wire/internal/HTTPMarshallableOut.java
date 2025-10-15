@@ -141,8 +141,10 @@ public class HTTPMarshallableOut implements MarshallableOut {
      */
     static void validateUrl(URL url, boolean allowLocalhost) {
         try {
+            if (allowLocalhost)
+                return;
             InetAddress addr = InetAddress.getByName(url.getHost());
-            if (!allowLocalhost && (addr.isAnyLocalAddress() || addr.isLoopbackAddress() || addr.isSiteLocalAddress() || addr.isLinkLocalAddress()))
+            if (addr.isAnyLocalAddress() || addr.isLoopbackAddress() || addr.isSiteLocalAddress() || addr.isLinkLocalAddress())
                 throw new IllegalArgumentException("Refusing to connect to local address: " + url);
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException("Unknown host: " + url, e);
