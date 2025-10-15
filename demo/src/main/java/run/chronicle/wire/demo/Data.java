@@ -91,10 +91,10 @@ class Data extends SelfDescribingMarshallable {
                 .write("price").float64(price);
     }
 
-    @Override
     /**
      * Returns a string containing all field values for debugging purposes.
      */
+    @Override
     public String toString() {
         return "Data{" +
                 "message='" + message + '\'' +
