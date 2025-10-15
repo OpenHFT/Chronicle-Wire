@@ -5,12 +5,42 @@ Peter Lawrey
 :source-highlighter: rouge
 
 Chronicle favours modelling events as asynchronous method calls.
-This document explores the 'Events by Method' paradigm in Chronicle Wire, demonstrating how to model, process and test events represented as asynchronous Java method calls, and how to leverage different wire formats for these events.
-This has a number of advantages:
+This document explains the *events by method* pattern used by Chronicle Wire.
+An event is defined as a Java interface method which is written to a `Wire` by a
+`MethodWriter` and dispatched to a handler by a `MethodReader`.
 
-. The simplest way to pass data between components is a method call (no actual transport).
-. Asynchronous method calls can be easily modelled into data structures.
-. Events as method calls lead to a natural association of an action with an event type.
+Advantages of this pattern include:
+
+* Direct method calls remain the simplest form of communication when the
+  producer and consumer are in the same JVM.
+* Interfaces describing events become easy to serialise as data structures
+  for persistence or testing.
+* Generated proxies minimise allocation and provide type safety.
+
+== Core components
+
+. Event interface :: A plain Java interface whose methods represent event types.
+. Handler implementation :: A class that implements the event interface to
+  process events locally.
+. `MethodWriter` :: Generates a proxy that serialises method calls onto a `Wire`.
+. `MethodReader` :: Reads method calls from a `Wire` and invokes them on a
+  handler.
+. Wire format :: YAML, JSON or binary encodings used to store or transmit the
+  events.
+
+[mermaid]
+....
+sequenceDiagram
+    caller->>MethodWriter: invoke method
+    MethodWriter->>Wire: serialised call
+    MethodReader->>Handler: dispatch method
+....
+
+Typical use cases include:
+
+* High performance inter-process messaging.
+* Recording events to disk for replay during testing.
+* Converting asynchronous network traffic into method calls.
 
 == Event processing
 
@@ -56,6 +86,16 @@ In both cases, these components can be tested using events stored in YAML files.
 # tiny illustration
 myEvent: { someField: 1 }
 anotherEvent: simpleValue
+----
+
+=== Example on the wire
+
+The same call written using `TextWire` would appear in a log or queue as:
+
+[source,yaml]
+----
+myEvent:
+  someField: 1
 ----
 
 === Mix wire formats as needed
@@ -130,7 +170,7 @@ interface Examples {
 }
 
 static class MyTypes extends SelfDescribingMarshallable {
-    String text;
+    final StringBuilder text = new StringBuilder();
     boolean flag;
     byte b;
     short s;
