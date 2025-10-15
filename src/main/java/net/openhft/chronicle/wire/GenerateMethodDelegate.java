@@ -116,7 +116,11 @@ public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMetho
     }
 
     /**
-     * Appends the expression used to access the current delegate.
+     * Appends the delegate to the main code.
+     *
+     * @param mainCode The SourceCodeFormatter to append the delegate.
+     * @param method The associated method.
+     * @return Updated SourceCodeFormatter with delegate appended.
      */
     protected SourceCodeFormatter getDelegate(SourceCodeFormatter mainCode, Method method) {
         return mainCode.append("this.delegate");

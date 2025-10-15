@@ -25,12 +25,13 @@ import net.openhft.chronicle.core.io.Closeable;
  * {@link LongValueBitSet} and {@link LongArrayValueBitSet}.
  */
 public interface ChronicleBitSet extends Marshallable, Closeable {
+
     /** The number of bits in a {@code long} word (64). */
     long BITS_PER_WORD = Long.BYTES * 8L;
 
     /**
-     * Returns the number of addressable bits in this set. The highest valid bit
-     * index is {@code size() - 1}.
+     * Returns the number of bits of space actually in use by this {@code ChronicleBitSet} to represent bit values.
+     * The maximum element in the set is the size - 1st element.
      *
      * @return the current capacity of this bit set
      */
@@ -270,6 +271,4 @@ public interface ChronicleBitSet extends Marshallable, Closeable {
      * @param bitSet source bit set
      */
     void copyFrom(ChronicleBitSet bitSet);
-
-//    ChronicleBitSet get(int rangeStart, int rangeEnd);
 }

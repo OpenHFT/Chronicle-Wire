@@ -49,11 +49,7 @@ import java.util.function.BiConsumer;
  */
 @SuppressWarnings("rawtypes")
 public class HashWire implements WireOut, HexDumpBytesDescription {
-
-    /**
-     * Thread-local storage of hasher instances. The hash field is
-     * cleared each time {@link ThreadLocal#get()} is called.
-     */
+    // Thread-local storage for HashWire instances.
     private static final ThreadLocal<HashWire> hwTL = new ThreadLocal<HashWire>() {
         @Override
         protected HashWire initialValue() {
@@ -68,34 +64,34 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         }
     };
 
-    /** Internal constants used by the mixing algorithm. */
+    // Internal constants used by the mixing algorithm
     private static final int K0 = 0x6d0f27bd;
-    /** see {@link #K0} */
     private static final int M0 = 0x5bc80bad;
-    /** see {@link #K0} */
     private static final int M1 = 0xea7585d7;
-    /** see {@link #K0} */
     private static final int M2 = 0x7a646e19;
-    /** see {@link #K0} */
     private static final int M3 = 0x855dd4db;
 
-    /** The {@link ValueOut} that updates {@link #hash}. */
+    // Value output for hashing.
     private final ValueOut valueOut = new HashValueOut();
 
-    /** Accumulated raw hash value. */
+    // Accumulated raw hash value
     long hash = 0;
 
     /**
-     * Utility to hash a {@link WriteMarshallable} into a 64‑bit value.
-     * The object is written to a thread‑local instance which updates
-     * the rolling hash.
+     * Computes a 64-bit hash for the provided {@link WriteMarshallable} value.
+     *
+     * @param value The {@link WriteMarshallable} value to be hashed.
+     * @return The 64-bit hash value.
      */
     public static long hash64(WriteMarshallable value) {
         return hash64((Object) value);
     }
 
     /**
-     * Computes a 64‑bit hash for any object
+     * Computes a 64-bit hash for the provided object.
+     *
+     * @param value The object to be hashed.
+     * @return The 64-bit hash value.
      */
     public static long hash64(Object value) {
         @NotNull HashWire hashWire = hwTL.get();
@@ -169,16 +165,24 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
     }
 
     /**
-     * Returns the final 64‑bit hash produced from all data written since the
-     * last {@link #clear()}.
+     * Computes and returns the 64-bit hash value.
+     * <p>
+     * This method uses the current hash value and applies an agitation function to provide
+     * a consistent and dispersed 64-bit hash result.
+     *
+     * @return The 64-bit agitated hash value.
      */
     public long hash64() {
         return Maths.agitate(hash);
     }
 
     /**
-     * Returns a 32‑bit hash derived from {@link #hash64()} by XORing the
-     * upper and lower halves.
+     * Computes and returns the 32-bit hash value.
+     * <p>
+     * This method derives the 32-bit hash from the 64-bit hash value. The derived hash is
+     * the result of XOR-ing the high and low 32-bits of the 64-bit hash.
+     *
+     * @return The derived 32-bit hash value.
      */
     public int hash32() {
         long h = hash64();
@@ -376,9 +380,13 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
     }
 
     /**
-     * {@link ValueOut} implementation that updates {@link HashWire#hash}.
-     * Each write method mixes the supplied value into the running total.
-     */
+     * The {@code HashValueOut} class is responsible for updating the hash value of
+     * the {@link HashWire} based on the type of value being processed.
+     * <p>
+     * The class implements the {@link ValueOut} interface, providing methods to handle
+     * various data types like booleans, text, bytes, etc., and updating the hash
+     * value accordingly.
+         */
     class HashValueOut implements ValueOut {
         /** Mixes {@link #M2} or {@link #M3} depending on the flag. */
         @NotNull

@@ -224,8 +224,10 @@ public class CSVWire extends TextWire {
     }
 
     /**
-     * {@link ValueOut} implementation for CSV. Complex types are not supported
-     * and will throw {@link UnsupportedOperationException}.
+     * Represents the value output functionality specific to the CSV format.
+     * It extends the YamlValueOut class to handle specific behaviors associated with
+     * writing values in CSV. This includes certain restrictions, such as not supporting
+     * type literals and serializable objects in CSV format.
      */
     class CSVValueOut extends YamlValueOut {
         /**
@@ -254,8 +256,9 @@ public class CSVWire extends TextWire {
     }
 
     /**
-     * {@link ValueIn} implementation for CSV that understands quoting and
-     * escaping rules for comma separated text.
+     * Represents the value input functionality specific to the CSV format.
+     * It extends the TextValueIn class to handle specific behaviors associated with
+     * reading values from CSV. This includes handling CSV specific escape sequences and delimiters.
      */
     class CSVValueIn extends TextValueIn {
 

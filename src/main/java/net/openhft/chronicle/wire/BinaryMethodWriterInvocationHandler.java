@@ -32,11 +32,11 @@ import java.util.function.Supplier;
  */
 public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInvocationHandler {
 
-    /** Supplier for the target {@link MarshallableOut} used to serialise method calls. */
+    // Supplier for the target {@link MarshallableOut} used to serialise method calls
     @NotNull
     private final Supplier<MarshallableOut> marshallableOutSupplier;
 
-    /** Flag to determine if metadata should be written. */
+    // Flag to determine if metadata should be written
     private final boolean metaData;
 
     /**

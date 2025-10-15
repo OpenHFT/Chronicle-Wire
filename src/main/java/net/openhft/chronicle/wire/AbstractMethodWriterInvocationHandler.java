@@ -33,10 +33,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvocationHandler implements MethodWriterInvocationHandler {
 
-    /** Cache of analysed parameter writers keyed by method. */
+    // Cache of analysed parameter writers keyed by method
     private final Map<Method, ParameterHolderSequenceWriter> parameterMap = new ConcurrentHashMap<>();
 
-    /** If true a {@link MessageHistory} is written before each event. */
+    // If true a {@link MessageHistory} is written before each event
     protected boolean recordHistory;
 
     /**
@@ -45,7 +45,7 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
      */
     protected String genericEvent = "";
 
-    /** Use numeric {@link MethodId} values when writing to binary wires. */
+    // Use numeric {@link MethodId} values when writing to binary wires
     private boolean useMethodIds;
 
     /**
@@ -73,7 +73,7 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
      * Abstract method to handle a method invocation with its respective arguments.
      *
      * @param method The method being invoked.
-     * @param args   Arguments provided for the method invocation sometimes a {@link DocumentContext}.
+     * @param args   Arguments provided for the method invocation.
      */
     protected abstract void handleInvoke(Method method, Object[] args);
 

@@ -129,8 +129,7 @@ public class GenerateMethodReader {
      *
      * @param wireType                     target wire format
      * @param interceptor                  optional interceptor for return values
-     * @param multipleNonMarshallableParamTypes if {@code Boolean#TRUE} support multiple concrete parameter types,
-     *                                          {@code Boolean#FALSE} forces a single type, {@code null} chooses automatically
+     * @param multipleNonMarshallableParamTypes if {@code Boolean#TRUE} support multiple concrete parameter types, {@code Boolean#FALSE} forces a single type, {@code null} chooses automatically
      * @param metaDataHandler              array of meta-data handlers, may be {@code null}
      * @param instances                    handlers that dictate the structure of the generated MethodReader
      */
@@ -456,10 +455,31 @@ public class GenerateMethodReader {
     }
 
     /**
-     * Recursively processes {@code anInterface} and its parents (unless listed in
-     * {@link #IGNORED_INTERFACES} or {@link Jvm#dontChain(Class)}). Each eligible
-     * method is forwarded to {@link #handleMethod(Method, Class, String, boolean, SourceCodeFormatter, SourceCodeFormatter)}.
-     * {@code instanceFieldName} names the handler field in the generated class.
+     * This method is used to generate code for handling all method calls of a given interface.
+     * It processes the methods recursively in case of chained methods.
+     *
+     * <p>It first checks if the given interface should be chained using {@code Jvm.dontChain()} method.
+     * If not, it immediately returns without executing further. It also checks whether the interface
+     * has already been processed. If yes, it immediately returns.
+     *
+     * <p>Then it proceeds to process all non-static, non-synthetic methods declared in the given
+     * interface but not in {@code java.lang.Object}.
+     * If a method has already been processed, it's skipped.
+     *
+     * <p>It also validates that the method isn't one of those defined in {@code java.lang.Object},
+     * if it is, it's skipped.
+     *
+     * <p>If a method name has already been processed before, it throws an {@code IllegalStateException}.
+     * This is because MethodReader does not support overloaded methods.
+     *
+     * <p>Finally, it calls {@code handleMethod()} on the current method if it passed all the above checks.
+     *
+     * @param anInterface          The interface being processed.
+     * @param instanceFieldName    In the generated code, methods are executed on a field with this name.
+     * @param methodFilter         Indicates if the passed interface is marked with {@link MethodFilterOnFirstArg}. If true, only certain methods are processed.
+     * @param eventNameSwitchBlock The block of code that handles the switching of event names.
+     * @param eventIdSwitchBlock   The block of code that handles the switching of event IDs.
+     * @ blocks based on method event IDs.
      */
     private void handleInterface(Class<?> anInterface, String instanceFieldName, boolean methodFilter, SourceCodeFormatter eventNameSwitchBlock, SourceCodeFormatter eventIdSwitchBlock) {
         if (Jvm.dontChain(anInterface))
@@ -499,14 +519,33 @@ public class GenerateMethodReader {
     }
 
     /**
-     * Generates switch cases to dispatch {@code m}.
-     * <ol>
-     * <li>Creates fields for arguments and {@link LongConverter}s.</li>
-     * <li>Emits code to read arguments via {@link #argumentRead(Method, int, boolean, Type[])}.</li>
-     * <li>If {@code methodFilter} is true, inserts {@link MethodFilterOnFirstArg#ignoreMethodBasedOnFirstArg(String, Object)} logic.</li>
-     * <li>Invokes the method via {@link #methodCall(Method, String, String, Class)}.</li>
-     * <li>For chainable return types, recursively calls {@link #handleInterface(Class, String, boolean, SourceCodeFormatter, SourceCodeFormatter)}.</li>
-     * </ol>
+     * This method generates code for handling the call of a specific method. It sets up necessary fields and structures,
+     * prepares parameters, and constructs a switch block for method calls.
+     *
+     * <p>Initially, it ensures that the method is accessible and obtains its parameter types and return type.
+     * It processes the method parameters and creates fields for storing them. It also checks if the return type of the method
+     * is chainable and updates the state accordingly.
+     *
+     * <p>If a real interceptor is returned by the method, it creates an array field to store the interceptor's arguments
+     * and also adds a static field to hold a reference to the method itself.
+     *
+     * <p>Furthermore, if the method is annotated with {@code MethodId}, it extracts the method ID from the annotation
+     * and adds a switch case for this ID to the {@code eventIdSwitchBlock}.
+     *
+     * <p>Then, it builds a case for the method in the {@code eventNameSwitchBlock}. The structure of this case varies
+     * depending on the number of parameters the method has and if it's marked with {@code MethodFilterOnFirstArg}.
+     *
+     * <p>If the method's return type is {@code DocumentContext}, it also adds code to copy the method's result to the wire
+     * and close it.
+     *
+     * <p>Finally, if the method's return type is chainable, it calls {@code handleInterface()} on it.
+     *
+     * @param m                    The method for which code is generated.
+     * @param anInterface          The interface containing the method.
+     * @param instanceFieldName    In the generated code, this method is executed on a field with this name.
+     * @param methodFilter         Indicates if the passed interface is marked with {@link MethodFilterOnFirstArg}. If true, only certain methods are processed.
+     * @param eventIdSwitchBlock   The block of code that handles the switching of event IDs.
+     * @param eventNameSwitchBlock The block of code that handles the switching of event names.
      */
     private void handleMethod(Method m, Class<?> anInterface, String instanceFieldName, boolean methodFilter, SourceCodeFormatter eventNameSwitchBlock, SourceCodeFormatter eventIdSwitchBlock) {
         Jvm.setAccessible(m);
@@ -639,8 +678,13 @@ public class GenerateMethodReader {
     }
 
     /**
-     * Adds a {@code case} for {@code methodId} to {@code eventIdSwitchBlock} so that
-     * numeric identifiers map to textual method names.
+     * Creates a switch block in the provided SourceCodeFormatter for a given method ID.
+     * This method facilitates the dynamic selection of methods based on their assigned IDs, allowing
+     * efficient routing and method invocation.
+     *
+     * @param methodName         The name of the method for which the switch case is generated.
+     * @param methodId           The ID assigned to the method.
+     * @param eventIdSwitchBlock Code block where the generated switch case is appended.
      */
     private void addMethodIdSwitch(String methodName, int methodId, SourceCodeFormatter eventIdSwitchBlock) {
         // Append the switch case based on method ID
@@ -652,10 +696,13 @@ public class GenerateMethodReader {
     }
 
     /**
-     * Generates the snippet that invokes {@code m} on {@code instanceFieldName} with its deserialised
-     * arguments. A {@link GeneratingMethodReaderInterceptorReturns} may wrap the call with custom
-     * code, otherwise a standard {@link MethodReaderInterceptorReturns} is used if present.
-     * {@code chainedCallPrefix} prefixes the call when the result must be stored for chaining.
+     * Generates code that invokes passed method, saves method return value (in case it's a chained call)
+     * and handles {@link MethodReaderInterceptorReturns} if it's specified.
+     *
+     * @param m                 Method that is being processed.
+     * @param instanceFieldName In generated code, method is executed on field with this name.
+     * @param chainedCallPrefix Prefix for method call statement, passed in order to save method result for chaining.
+     * @return Code that performs a method call.
      */
     private String methodCall(Method m, String instanceFieldName, String chainedCallPrefix, @Nullable Class<?> returnType) {
         StringBuilder res = new StringBuilder();
@@ -724,10 +771,19 @@ public class GenerateMethodReader {
     }
 
     /**
-     * Creates the code fragment that reads the argument at {@code argIndex} from a
-     * {@link ValueIn}. Handles primitives, {@link CharSequence}, {@link Bytes} and
-     * object types. Applies {@link LongConversion} where present when the wire type
-     * supports text.
+     * Generates code for reading an argument of a method from a {@link ValueIn} object.
+     * The argument's index and type, and whether it is read in a lambda function,
+     * influence the generated code. If {@link LongConversion}
+     * annotations are present on the argument, a converter field is registered.
+     *
+     * @param m              Method for which an argument is read.
+     * @param argIndex       Index of an argument to be read.
+     * @param inLambda       {@code true} if argument is read in a lambda passed to a
+     *                       {@link ValueIn#sequence(Object, BiConsumer)} call.
+     * @param parameterTypes The types of the method parameters.
+     * @return Code in the form of a String that retrieves the specified argument from {@link ValueIn} input.
+     * @see LongConversion
+     * @see ValueIn
      */
     private String argumentRead(Method m, int argIndex, boolean inLambda, Type[] parameterTypes) {
         Class<?> numericConversionClass = null;
@@ -864,16 +920,19 @@ public class GenerateMethodReader {
     }
 
     /**
-     * @return {@code true} if a non-generating {@link MethodReaderInterceptorReturns}
-     * is configured.
+     * Checks if a real interceptor is present that returns.
+     *
+     * @return {@code true} if there's a real interceptor present, {@code false} otherwise.
      */
     private boolean hasRealInterceptorReturns() {
         return interceptor != null && !(interceptor instanceof GeneratingMethodReaderInterceptorReturns);
     }
 
     /**
-     * Package of the generated class, derived from the first handler and
-     * {@link ReflectionUtil#generatedPackageName(String)}.
+     * Retrieves the package name for the generated class.
+     * The package name is determined based on the class name of the first instance.
+     *
+     * @return The package name of the generated class.
      */
     public String packageName() {
         Class<?> firstClass = instances[0].getClass();
@@ -883,16 +942,21 @@ public class GenerateMethodReader {
     }
 
     /**
-     * @return simple name of the generated reader class.
+     * Gets the simple name of the generated class.
+     *
+     * @return The simple name of the generated class.
      */
     public String generatedClassName() {
         return generatedClassName;
     }
 
     /**
-     * Builds the unique class name from handler names, metadata handlers, wire type,
-     * interceptor configuration and {@link #multipleNonMarshallableParamTypes}.
-     * Slashes are replaced to support lambdas and inner classes.
+     * Constructs the generated class name using various components such as
+     * the names of instances, metadata handlers, wire type, support for interchangeable marshallable/non-marshallable
+     * ([T]rue, [F]alse or [A]uto) and potential interceptor.
+     * Special characters, such as underscores and slashes, are handled to format the class name.
+     *
+     * @return The constructed name for the generated class.
      */
     @NotNull
     private String generatedClassName0() {
@@ -930,8 +994,16 @@ public class GenerateMethodReader {
     }
 
     /**
-     * Appends a short name for {@code i}'s class to {@code sb}. Proxy and lambda
-     * classes are handled specially so the result forms part of the generated class name.
+     * Appends the simplified name of the instance's class to the provided StringBuilder.
+     * The method takes into account various scenarios including:
+     * - If the class is a proxy class.
+     * - If the class is enclosed within another class.
+     * - If the class is synthetic, anonymous, or local.
+     * The method aims to provide a more concise and meaningful name for the instance's class
+     * that can be used in contexts like generating a class name.
+     *
+     * @param sb The StringBuilder to which the instance name should be appended.
+     * @param i  The instance for which the class name is determined.
      */
     private void appendInstanceName(StringBuilder sb, Object i) {
         Class<?> aClass = i.getClass();

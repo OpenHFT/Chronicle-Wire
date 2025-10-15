@@ -64,34 +64,34 @@ import static net.openhft.chronicle.core.util.GenericReflection.getParameterType
 @SuppressWarnings("deprecation")
 public class GenerateMethodWriter {
 
-    /** Simple name of {@link UpdateInterceptor} used in generated code. */
+    // Constants for class names to be used in the generated method writer code
     public static final String UPDATE_INTERCEPTOR = UpdateInterceptor.class.getSimpleName();
 
-    /** Simple name of {@link DocumentContext}. */
+    // Constant for the DocumentContext class's simple name
     private static final String DOCUMENT_CONTEXT = DocumentContext.class.getSimpleName();
 
-    /** Simple name of {@link WriteDocumentContext}. */
+    // Constant for the WriteDocumentContext class's simple name
     private static final String WRITE_DOCUMENT_CONTEXT = WriteDocumentContext.class.getSimpleName();
 
-    /** Simple name of {@link MarshallableOut}. */
+    // Constant for the MarshallableOut class's simple name
     private static final String MARSHALLABLE_OUT = MarshallableOut.class.getSimpleName();
 
-    /** Simple name of {@link MethodId}. */
+    // Constant for the MethodId class's simple name
     private static final String METHOD_ID = MethodId.class.getSimpleName();
 
-    /** Simple name of {@link ValueOut}. */
+    // Constant for the ValueOut class's simple name
     private static final String VALUE_OUT = ValueOut.class.getSimpleName();
 
-    /** Simple name of {@link Closeable}. */
+    // Constant for the Closeable class's simple name
     private static final String CLOSEABLE = Closeable.class.getSimpleName();
 
-    /** Field name used for the generated {@link UpdateInterceptor} reference. */
+    // Constant field name for the UpdateInterceptor class
     private static final String UPDATE_INTERCEPTOR_FIELD = "updateInterceptor";
 
-    /** When true the generated source is printed for debugging. */
+    // Indicates whether to dump the generated code or not
     static final boolean DUMP_CODE = Jvm.getBoolean("dumpCode");
 
-    /** Predefined source templates for common interface methods. */
+    // Map to hold template methods for generating method writer code
     private static final Map<String, Map<List<Class<?>>, String>> TEMPLATE_METHODS = new LinkedHashMap<>();
     private static final int SYNTHETIC = 0x00001000;
 
@@ -125,43 +125,38 @@ public class GenerateMethodWriter {
         TEMPLATE_METHODS.put("writingDocument", wd);
     }
 
-    /** true if metadata is included in the generated method writer */
+    // Indicates if metadata is included in the generated method writer
     private final boolean metaData;
 
-    /** whether numeric {@link MethodId}s should be emitted. */
+    // Indicates if a method ID is used in the generated method writer
     private final boolean useMethodId;
 
-    /** target package for the generated method writer. */
+    // Package name for the generated method writer
     private final String packageName;
 
-    /** interfaces that the generated class will implement. */
+    // Set of interfaces to be implemented by the generated method writer
     private final Set<Class<?>> interfaces;
 
-    /** simple name of the generated class. */
+    // Name of the generated class
     private final String className;
 
-    /** class loader used to define the generated class. */
+    // Class loader used for the generated method writer
     private final ClassLoader classLoader;
 
-    /** wire format used for serialisation. */
+    // Wire type for serialization in the generated method writer
     private final WireType wireType;
 
-    /** optional name of a generic event dispatcher method. */
+    // Generic event type used in the generated method writer
     private final String genericEvent;
 
-    /**
-     * when true the proxy calls an {@link UpdateInterceptor} before each write.
-     */
+    // Indicates if the update interceptor is used in the generated method writer
     private final boolean useUpdateInterceptor;
 
-    /** caches the names of thread local method writers for return types. */
+    // Concurrent map to cache method writers
     private final ConcurrentMap<Class<?>, String> methodWritersMap = new ConcurrentHashMap<>();
-    /**
-     * tracks indentation when building the Java source; shared with
-     * {@link SourceCodeFormatter}.
-     */
+    // AtomicInteger to manage indentation in the generated code
     final private AtomicInteger indent = new AtomicInteger();
-    /** include explicit type information in writes when true. */
+    // Indicates if verbose types are used in the generated method writer
     private final boolean verboseTypes;
 
     /**
@@ -243,8 +238,8 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Utility to obtain a {@link DocumentContext} either from a cached holder or
-     * from the supplied {@link MarshallableOut}.
+     * Acquires a {@link DocumentContext} instance, either by reusing the existing one from the thread-local
+     * context holder if it's not closed or by creating a new one using the provided output.
      *
      * @param metaData            Indicates if metadata should be included in the {@link DocumentContext}.
      * @param documentContextTL   The thread-local holder of the {@link DocumentContext}.
@@ -264,7 +259,7 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Converts common primitive and {@link Marshallable} types into a representative string.
+     * Converts a class type into a representative string, e.g., int to "int32", boolean to "bool", etc.
      * For types not explicitly mapped, a default representation is returned.
      *
      * @param type   The class type to be converted.
@@ -343,7 +338,12 @@ public class GenerateMethodWriter {
         return returnType + " " + m.getName() + " " + Arrays.toString(parameterTypes);
     }
 
-    /** returns true if the supplied modifiers include the synthetic flag. */
+    /**
+     * Checks if a given modifier represents a synthetic entity.
+     *
+     * @param modifiers  The modifiers to check.
+     * @return           True if the modifier is synthetic, false otherwise.
+     */
     static boolean isSynthetic(int modifiers) {
         return (modifiers & SYNTHETIC) != 0;  // Check the SYNTHETIC flag in the modifiers
     }

@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
  * a {@code Marshallable} type, implying it should be serialized or deserialized accordingly.
  * It can be applied to fields or method parameters to provide metadata about their marshalling behavior.
  */
-@Retention(RetentionPolicy.RUNTIME) // Annotation is visible at runtime
-@Target({ElementType.FIELD, ElementType.PARAMETER}) // Applicable to fields and parameters
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.PARAMETER})
 public @interface AsMarshallable {
 }

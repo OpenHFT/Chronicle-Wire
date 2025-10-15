@@ -55,7 +55,6 @@ import java.util.function.*;
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.BinaryWire.AnyCodeMatch.ANY_CODE_MATCH;
 import static net.openhft.chronicle.wire.BinaryWireCode.*;
-import static net.openhft.chronicle.wire.Wires.GENERATE_TUPLES;
 
 /**
  * Primary implementation of the binary wire format. The binary form is
@@ -72,20 +71,13 @@ public class BinaryWire extends AbstractWire implements Wire {
      */
     static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal();
 
-    /**
-     * Static {@link UTF8StringInterner} for interning strings read from the
-     * wire, reducing the memory footprint of repeated values.
-     */
+    // UTF-8 string interner for memory-efficient string operations
     private static final UTF8StringInterner UTF8 = new UTF8StringInterner(4096);
 
-    /** Static {@link Bit8StringInterner} for interning 8-bit strings. */
+    // 8-bit string interner for memory-efficient string operations
     private static final Bit8StringInterner BIT8 = new Bit8StringInterner(1024);
 
-    /**
-     * Cache that reports whether a class typically uses self describing
-     * messages. Defaults to {@code true} unless a {@link Marshallable} describes
-     * otherwise.
-     */
+    // Class value mapping to determine whether an object uses self-describing messages
     private static final ClassValue<Boolean> USES_SELF_DESCRIBING = ClassLocal.withInitial(k -> {
         Object m = ObjectUtils.newInstance(k);
         if (m instanceof Marshallable)
@@ -93,10 +85,10 @@ public class BinaryWire extends AbstractWire implements Wire {
         return true;
     });
 
-    /** Atomic flag to ensure missing class warnings are logged only once. */
+    // Flag to control warnings related to missing classes
     private static final AtomicBoolean FIRST_WARN_MISSING_CLASS = new AtomicBoolean();
 
-    /** Thread-local storage for {@link VanillaMessageHistory}. */
+    // Thread-local storage for {@link VanillaMessageHistory}
     private static final ThreadLocal<VanillaMessageHistory> VANILLA_MESSAGE_HISTORY_TL = ThreadLocal.withInitial(VanillaMessageHistory::new);
 
     /**
@@ -112,60 +104,36 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     private final FixedBinaryValueOut valueOut;
 
-    /** Deserialises values from this wire. */
+    // Deserialises values from this wire
     @NotNull
     protected final BinaryValueIn valueIn;
 
-    /**
-     * When true field names are written and read as numeric identifiers using
-     * stop-bit encoding.
-     */
+    // When true field names are written and read as numeric identifiers using stop-bit encoding
     private final boolean numericFields;
 
-    /**
-     * When true field names or identifiers are omitted. Deserialisation relies
-     * solely on the field order of the DTO.
-     */
+    // When true field names or identifiers are omitted. Deserialisation relies solely on the field order of the DTO
     private final boolean fieldLess;
 
-    /** Values larger than this may be compressed using {@link #compression}. */
+    // Values larger than this may be compressed using {@link #compression}
     private final int compressedSize;
 
-    /**
-     * The current {@link BinaryWriteDocumentContext} managing the start and end of
-     * binary documents. Each document is typically length prefixed.
-     */
+    // Context for writing to the wire
     private final WriteDocumentContext writeContext = new BinaryWriteDocumentContext(this);
 
-    /**
-     * The current {@link BinaryReadDocumentContext} used to read length-prefixed
-     * binary documents from the underlying bytes.
-     */
+    // Context for reading from the wire
     @NotNull
     private final BinaryReadDocumentContext readContext;
 
-    /**
-     * A reusable {@link StringBuilder} for internal string manipulation. Using a
-     * single instance reduces temporary object creation.
-     */
+    // String builder for various internal operations
     private final StringBuilder stringBuilder = new StringBuilder();
 
-    /**
-     * Provides default values when a requested field is absent in the wire.
-     */
+    // Default input handler
     private DefaultValueIn defaultValueIn;
 
-    /**
-     * The name of the compression algorithm ("binary" means no compression) to
-     * apply once a value exceeds {@link #compressedSize}.
-     */
+    // The name of the compression algorithm ("binary" means no compression) to apply once a value exceeds {@link #compressedSize}
     private final String compression;
 
-    /**
-     * Overrides the self-describing message flag used when objects are written.
-     * {@code null} uses the object's default, {@code true} forces self-describing
-     * output and {@code false} forces the opposite.
-     */
+    // Overrides the self-describing message flag used when objects are written. true forces self-describing output and false forces the opposite.
     private Boolean overrideSelfDescribing = null;
 
     /**
@@ -288,13 +256,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         bytes.clear();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void rollbackIfNotComplete() {
         writeContext.rollbackIfNotComplete();
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean isBinary() {
         return true;
@@ -659,7 +625,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     /**
      * Throw an {@link IORuntimeException} for an unexpected code.
      */
-    protected static void unexpectedCode() {
+    protected static void unexpectedCode() throws IORuntimeException{
         throw new IORuntimeException("Unexpected code in this context");
     }
 
@@ -736,7 +702,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     /**
      * Throw an {@link IllegalArgumentException} if a code cannot be recognised.
      */
-    protected void unknownCode(@NotNull WireOut wire) {
+    protected void unknownCode(@NotNull WireOut wire) throws IllegalArgumentException{
         throw new IllegalArgumentException(stringForCode(bytes.readUnsignedByte()));
     }
 
@@ -914,6 +880,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         defaultValueIn.defaultValue = null;
         return defaultValueIn;
     }
+
     /**
      * Reads a {@link BinaryWireCode#FIELD_NUMBER} followed by a stop-bit
      * encoded integer representing a method or event identifier. Returns
@@ -933,6 +900,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
         return Long.MIN_VALUE;
     }
+
     /**
      * Reads the next field identifier into {@code name}. Returns
      * {@link #valueIn} if a field was found or {@link #defaultValueIn} if not.
@@ -942,6 +910,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     public ValueIn readEventName(@NotNull StringBuilder name) {
         return readField(name, null, ANY_CODE_MATCH.code()) == null ? acquireDefaultValueIn() : valueIn;
     }
+
     /**
      * Reads the next field identifier into {@code name}. Returns
      * {@link #valueIn} if present or {@link #defaultValueIn} otherwise.

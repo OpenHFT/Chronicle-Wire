@@ -104,27 +104,27 @@ public enum BinaryWireCode {
     public static final int FLOAT_STOP_2 = 0x92;
 
     /**
-     * Floating-point number with 4 decimal places.
+     * Floating-point number with 4 decimal places optimized for storage.
      */
     public static final int FLOAT_STOP_4 = 0x94;
 
     /**
-     * Floating-point number with 6 decimal places.
+     * Floating-point number with 6 decimal places optimized for storage.
      */
     public static final int FLOAT_STOP_6 = 0x96;
 
     /**
-     * Floating point rounded to the nearest whole number for compact storage.
+     * Floating-point rounded to the nearest whole number for compact storage.
      */
     public static final int FLOAT_SET_LOW_0 = 0x9A;
 
     /**
-     * Floating point rounded to two decimal places.
+     * Floating-point number rounded to 2 decimal places for compact storage.
      */
     public static final int FLOAT_SET_LOW_2 = 0x9B;
 
     /**
-     * Floating point rounded to four decimal places.
+     * Floating-point number rounded to 4 decimal places for compact storage.
      */
     public static final int FLOAT_SET_LOW_4 = 0x9C;
 

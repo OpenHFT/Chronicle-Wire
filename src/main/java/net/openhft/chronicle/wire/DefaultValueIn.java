@@ -45,14 +45,16 @@ import java.util.function.*;
 @SuppressWarnings("rawtypes")
 public class DefaultValueIn implements ValueIn {
 
-    /** The parent {@link WireIn} this instance belongs to. */
+    // The underlying WireIn source for fetching default values
     private final WireIn wireIn;
 
-    /** Value returned by the read methods when no field is present. */
+    // The stored default value, fetched from the WireIn source
     Object defaultValue;
 
     /**
-     * Creates a {@code DefaultValueIn} bound to the supplied wire.
+     * Constructs a new instance of DefaultValueIn with a given {@link WireIn} source.
+     *
+     * @param wireIn The WireIn source to fetch default values from.
      */
     DefaultValueIn(WireIn wireIn) {
         this.wireIn = wireIn;

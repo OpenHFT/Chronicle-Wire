@@ -22,7 +22,7 @@ import java.util.BitSet;
 
 /**
  * Utility class to access and manipulate the internals of the {@link BitSet} class.
- *
+ * <p>
  * This class provides methods to directly interact with the underlying word storage
  * and related metadata of a BitSet. It leverages reflection to access private fields.
  * <b>This class relies on reflection of private fields of {@link java.util.BitSet}
@@ -31,14 +31,11 @@ import java.util.BitSet;
  */
 final class BitSetUtil {
 
-    /** Private static final {@link Field} reference for the 'words' field within
-     * {@link java.util.BitSet}. Initialised reflectively and made accessible. */
+    // Reflective field reference to the 'words' field in BitSet
     private static final Field wordsField;
-    /** Private static final {@link Field} reference for the 'wordsInUse' field within
-     * {@link java.util.BitSet}. Initialised reflectively and made accessible. */
+    // Reflective field reference to the 'wordsInUse' field in BitSet
     private static final Field wordsInUse;
-    /** Private static final {@link Field} reference for the 'sizeIsSticky' field within
-     * {@link java.util.BitSet}. Initialised reflectively and made accessible. */
+    // Reflective field reference to the 'sizeIsSticky' field in BitSet
     private static final Field sizeIsSticky;
 
     // Private constructor to prevent instantiation of utility class

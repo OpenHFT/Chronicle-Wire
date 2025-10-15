@@ -30,23 +30,18 @@ import net.openhft.chronicle.core.util.StringUtils;
  */
 public class CharSequenceObjectMap<T> {
 
-    /** Constants used in {@link #hashFor(CharSequence)} for improved distribution. */
+    // Constants used in hashFor(CharSequence) for improved distribution
     private static final int K0 = 0x6d0f27bd;
     @SuppressWarnings("unused")
     private static final int M0 = 0x5bc80bad;
 
-    /**
-     * Array storing the string representations of the keys.
-     * {@code null} entries indicate empty slots.
-     */
+    // Array storing the string representations of the keys. null entries indicate empty slots
     final String[] keys;
-    /**
-     * Array storing the values associated with the keys at the same index.
-     */
+
+    // Array storing the values associated with the keys at the same index.
     final T[] values;
-    /**
-     * Mask used for mapping hash codes to array indices. Equal to the array length minus one.
-     */
+
+    // Mask used for mapping hash codes to array indices. Equal to the array length minus one
     final int mask;
 
     /**
@@ -105,7 +100,8 @@ public class CharSequenceObjectMap<T> {
     }
 
     /**
-     * Compute a hash code for a {@link CharSequence} using the internal multipliers.
+     * Generates a hash code for the given CharSequence using a custom hash function.
+     * This custom function is designed to produce well-distributed hash codes for CharSequence inputs.
      *
      * @param name the {@link CharSequence} to hash
      * @return an int masked to the current table size
