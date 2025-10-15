@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +38,8 @@ public class MarshallingEventGroupTest extends WireTestCommon {
      */
     @Test
     public void test() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Skip this test if JVM is running in debug mode, as it could lead to longer timeouts
         assumeFalse(Jvm.isDebug());
 

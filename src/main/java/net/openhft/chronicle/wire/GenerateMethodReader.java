@@ -490,7 +490,7 @@ public class GenerateMethodReader {
             if (handledMethodNames.containsKey(methodName)) {
                 throw new IllegalStateException("MethodReader does not support overloaded methods. " +
                         "Method: " + handledMethodNames.get(methodName) +
-                        ", and: " + signature);
+                        ", and: " + declaringClass + " " + signature);
             }
             handledMethodNames.put(methodName, signature);
 
