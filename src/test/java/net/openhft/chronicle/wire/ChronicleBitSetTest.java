@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  *       https://chronicle.software
  *
@@ -18,7 +18,7 @@
 
 package net.openhft.chronicle.wire;
 /*
- * Copyright 2016-2021 chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  *       https://chronicle.software
  *
