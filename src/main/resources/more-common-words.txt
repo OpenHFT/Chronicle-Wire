@@ -1,3 +1,8 @@
+# Additional words used by net.openhft.chronicle.wire.WordsLongConverter
+# for compact string representation.
+# This file contains more frequently used words.
+# One word per line.
+
 credit
 opinion
 version
