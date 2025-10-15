@@ -1,5 +1,7 @@
+# Example configuration used by Example6
 !Data1 {
-  name: Tom,
-  age: 25,
+  name: Tom,        # Person's forename
+  age: 25,          # Age in years
   address: "21 High street, Liverpool"
 }
+
