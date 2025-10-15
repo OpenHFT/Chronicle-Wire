@@ -4,7 +4,6 @@ Per Minborg
 :toc: macro
 :toclevels: 3
 :icons: font
-:sectnums:
 
 toc::[]
 
