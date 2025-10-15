@@ -25,7 +25,9 @@ import net.openhft.chronicle.wire.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 
@@ -97,6 +99,7 @@ public class HTTPMarshallableOut implements MarshallableOut {
      */
     public HTTPMarshallableOut(MarshallableOutBuilder builder, WireType wireType) {
         this.url = builder.url();
+        validateUrl(url, builder.allowLocalhostEnabled());
 
         if (wireType == WireType.JSON)
             this.wire = new JSONWire(allocateElasticOnHeap()).useTypes(true).trimFirstCurly(true).useTextDocuments();
@@ -130,5 +133,19 @@ public class HTTPMarshallableOut implements MarshallableOut {
     public DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException {
         dcHolder.documentContext(wire.acquireWritingDocument(metaData));
         return dcHolder;
+    }
+
+    /**
+     * Validate that the supplied URL does not resolve to a local or site-local
+     * address unless explicitly allowed.
+     */
+    static void validateUrl(URL url, boolean allowLocalhost) {
+        try {
+            InetAddress addr = InetAddress.getByName(url.getHost());
+            if (!allowLocalhost && (addr.isAnyLocalAddress() || addr.isLoopbackAddress() || addr.isSiteLocalAddress() || addr.isLinkLocalAddress()))
+                throw new IllegalArgumentException("Refusing to connect to local address: " + url);
+        } catch (UnknownHostException e) {
+            throw new IllegalArgumentException("Unknown host: " + url, e);
+        }
     }
 }

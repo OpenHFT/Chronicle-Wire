@@ -1,5 +1,8 @@
 = Chronicle Wire Documentation
-:doctype: book
+:toc: left
+:toclevels: 2
+:source-highlighter: rouge
+:sectnums:
 
 Chronicle Wire is a high-performance, low-latency serialisation library that forms part of the OpenHFT stack. This index links to the documentation set.
 
@@ -28,6 +31,9 @@ link:wire-glossary.adoc[Chronicle Wire Glossary] ::
 
 link:project-requirements.adoc[Project Requirements: Chronicle Wire Documentation Enhancement] ::
   Outlines the requirements for improving this documentation set.
+
+link:security-review.adoc[Chronicle Wire Security Review] ::
+  Discusses known security considerations and trade-offs in the library.
 
 link:../../EventsByMethod.adoc[Events by Method Guide] ::
   Explains the event-driven approach via asynchronous method calls.
