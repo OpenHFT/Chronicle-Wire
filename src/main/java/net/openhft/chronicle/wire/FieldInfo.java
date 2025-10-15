@@ -243,9 +243,9 @@ public interface FieldInfo {
      * Compares the value of the field represented by this {@code FieldInfo} in both provided
      * objects {@code a} and {@code b} and determines if they are equal.
      *
-     * @param a First object to compare the field's value.
-     * @param b Second object to compare the field's value.
+     * @param objectA First object to compare the field's value.
+     * @param objectB Second object to compare the field's value.
      * @return {@code true} if the values are equal, {@code false} otherwise.
      */
-    boolean isEqual(Object a, Object b);
+    boolean isEqual(Object objectA, Object objectB);
 }

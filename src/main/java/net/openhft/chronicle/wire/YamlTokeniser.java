@@ -62,7 +62,7 @@ public class YamlTokeniser {
     /** The input source containing the raw YAML content. */
     private final BytesIn<?> in;
 
-    /** A pool of reusable context objects to manage YAML structures. */
+    /** Pool of reusable {@link YTContext} instances to reduce allocations. */
     private final List<YTContext> freeContexts = new ArrayList<>();
 
     /** List of tokens that have been identified but not yet processed. */
@@ -98,11 +98,11 @@ public class YamlTokeniser {
     /**
      * Constructs a new YAML tokenizer with the specified input.
      *
-     * @param in The input source containing raw YAML content.
+     * @param inputStream The input source containing raw YAML content.
      */
-    public YamlTokeniser(BytesIn<?> in) {
+    public YamlTokeniser(BytesIn<?> inputStream) {
         reset();
-        this.in = in;
+        this.in = inputStream;
     }
 
     /**
@@ -115,8 +115,9 @@ public class YamlTokeniser {
     }
 
     /**
-     * Resets the state of the tokenizer. This method prepares the tokenizer
-     * for processing a new input or to restart the tokenization of the current input.
+     * Resets the tokenizer to its initial state, clearing all contexts,
+     * buffers and flags. Prepares it to tokenize a new stream or restart
+     * from the beginning of the current input.
      */
     void reset() {
         contexts.clear();
@@ -145,20 +146,14 @@ public class YamlTokeniser {
     }
 
     /**
-     * Retrieves the top context from the context stack.
-     * This method provides the most recent tokenization context.
-     *
-     * @return The top YTContext object from the context stack.
+     * Most recent entry on the context stack.
      */
     public YTContext topContext() {
         return contexts.get(contextSize() - 1);
     }
 
     /**
-     * Retrieves the second to top context from the context stack.
-     * This method provides the tokenization context that's just below the topmost one.
-     *
-     * @return The second top YTContext object from the context stack.
+     * Context entry one below the top of the stack.
      */
     public YTContext secondTopContext() {
         return contexts.get(contextSize() - 2);
@@ -417,10 +412,8 @@ public class YamlTokeniser {
     }
 
     /**
-     * Helper method to handle scenarios where the character shouldn't be tokenized.
-     * This method ensures the last read character is reverted back and a NONE token is returned.
-     *
-     * @return The {@link YamlToken#NONE} token.
+     * Helper used when a peeked character should not be consumed.
+     * Unreads the character and returns {@link YamlToken#NONE}.
      */
     private YamlToken dontRead() {
         unreadLast();
@@ -432,15 +425,15 @@ public class YamlTokeniser {
      * This method is useful for flow constructs where we need to determine the
      * boundaries (like a list or map).
      *
-     * @param start The token to identify the start of the flow construct.
-     * @param end The character representing the end of the flow construct.
+     * @param flowStartToken The token to identify the start of the flow construct.
+     * @param flowEndChar The character representing the end of the flow construct.
      * @return The appropriate {@link YamlToken} after popping the context.
      */
-    private YamlToken flowPop(YamlToken start, char end) {
+    private YamlToken flowPop(YamlToken flowStartToken, char flowEndChar) {
         int pos = pushed.size();
-        while (context() != start) {
+        while (context() != flowStartToken) {
             if (contextSize() <= 1)
-                throw new IllegalArgumentException("Unexpected '" + end + '\'');
+                throw new IllegalArgumentException("Unexpected '" + flowEndChar + '\'');
             contextPop();
         }
         contextPop();
@@ -607,51 +600,50 @@ public class YamlTokeniser {
     /**
      * Handles and determines the indentation level and relevant token type based on context.
      *
-     * @param indented The token for the start of indentation context.
-     * @param key The key token type.
-     * @param push The token type to be pushed to the stack.
-     * @param indent The current indentation level.
+     * @param currentIndentedContextToken The token for the start of indentation context.
+     * @param keyDefinitionToken The key token type.
+     * @param nextTokenToParse The token type to be pushed to the stack.
+     * @param currentIndentLevel The current indentation level.
      * @return The next token after processing the current input.
      */
     private YamlToken indent(
-            YamlToken indented,
-            @NotNull YamlToken key,
-            @NotNull YamlToken push,
-            int indent) {
-        if (push != YamlToken.STREAM_START)
-            this.pushed.add(push);
+            YamlToken currentIndentedContextToken,
+            @NotNull YamlToken keyDefinitionToken,
+            @NotNull YamlToken nextTokenToParse,
+            int currentIndentLevel) {
+        if (nextTokenToParse != YamlToken.STREAM_START)
+            this.pushed.add(nextTokenToParse);
         if (isInFlow()) {
-            return key; // If we are inside a flow structure, return the key token.
+            return keyDefinitionToken; // If we are inside a flow structure, return the key token.
         }
         int pos = this.pushed.size();
 
         // Pop contexts until the current indent matches the existing context.
-        while (indent < contextIndent()) {
+        while (currentIndentLevel < contextIndent()) {
             contextPop();
         }
         int contextIndent = contextIndent();
 
         // Push the indented token if we are starting a new indentation level.
-        if (indented != null && indent != contextIndent)
-            this.pushed.add(indented);
-        this.pushed.add(key);
+        if (currentIndentedContextToken != null && currentIndentLevel != contextIndent)
+            this.pushed.add(currentIndentedContextToken);
+        this.pushed.add(keyDefinitionToken);
 
         // Reverse the order of the tokens in the pushed stack.
         reversePushed(pos);
 
         // Push a new context if we are starting a new indentation level.
-        if (indented != null && indent > contextIndent())
-            contextPush(indented, indent);
+        if (currentIndentedContextToken != null && currentIndentLevel > contextIndent())
+            contextPush(currentIndentedContextToken, currentIndentLevel);
         return popPushed();
     }
 
     /**
-     * Reads plain scalar text from the YAML input, handling mappings and sequences.
-     *
-     * @param indent2 The current indentation level.
-     * @return The token after processing the text.
+     * Reads a plain scalar (unquoted text). Uses {@link #readWords()} to update
+     * {@link #blockStart} and {@link #blockEnd}. If the scalar is followed by a
+     * colon it is treated as a {@link YamlToken#MAPPING_KEY}.
      */
-    private YamlToken readText(int indent2) {
+    private YamlToken readText(int currentIndentLevel) {
         long pos = in.readPosition(); // Store the current position of input.
 
         blockQuote = 0;
@@ -661,7 +653,7 @@ public class YamlTokeniser {
         if (isFieldEnd()) {
             lastKeyPosition = pos;
             if (topContext().token != YamlToken.MAPPING_KEY)
-                return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent2);
+                return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, currentIndentLevel);
         }
 
         // By default, treat the scalar as plain text.
@@ -670,10 +662,8 @@ public class YamlTokeniser {
     }
 
     /**
-     * Handles the sequence logic within the YAML structure.
-     *
-     * @param token The current token being processed.
-     * @return A {@link YamlToken} after processing the sequence logic.
+     * Helper to manage {@link YamlToken#SEQUENCE_ENTRY} tokens inside flow
+     * sequences.
      */
     private YamlToken seq(YamlToken token) {
         // If a sequence entry has not been processed yet and the current context is a sequence start, and it's in flow
@@ -812,7 +802,8 @@ public class YamlTokeniser {
     }
 
     /**
-     * Removes the top context from the context stack, and frees up the context.
+     * Pops the top context and adds it to {@link #freeContexts}. Emits the
+     * context's end token if present.
      */
     private void contextPop() {
         YTContext context0 = contexts.remove(contextSize() - 1); // Remove the top context.
@@ -830,9 +821,7 @@ public class YamlTokeniser {
     }
 
     /**
-     * Reverts to a specified context level.
-     *
-     * @param contextSize The desired context level.
+     * Drops contexts until the stack reaches the supplied {@code contextSize}.
      */
     void revertToContext(int contextSize) {
         pushed.clear(); // Clear the pushed tokens.
@@ -846,10 +835,9 @@ public class YamlTokeniser {
     }
 
     /**
-     * Pushes a new context to the context stack.
-     *
-     * @param context The YAML token representing the context.
-     * @param indent  The indentation level for this context.
+     * Pushes a new parsing context.
+     * Inserts an implicit {@link YamlToken#DIRECTIVES_END}
+     * if starting from{@link YamlToken#STREAM_START}.
      */
     private void contextPush(YamlToken context, int indent) {
         // If we're at the start of a stream and the context isn't the end of directives,
@@ -1063,15 +1051,15 @@ public class YamlTokeniser {
     /**
      * Extracts the text of the current block into the provided StringBuilder.
      *
-     * @param sb StringBuilder to which the block's text will be appended.
+     * @param outputBuilder StringBuilder to which the block's text will be appended.
      */
-    public void text(StringBuilder sb) {
+    public void text(StringBuilder outputBuilder) {
         // If blockEnd is not set and a temporary value exists, use that.
         if (blockEnd < 0 && temp != null) {
-            sb.append(temp);
+            outputBuilder.append(temp);
             return;
         }
-        sb.setLength(0);  // Clear the StringBuilder.
+        outputBuilder.setLength(0);  // Clear the StringBuilder.
 
         // Return if there is no text to parse or if last token doesn't allow text extraction.
         if (blockStart == blockEnd || NO_TEXT.contains(last))
@@ -1079,7 +1067,7 @@ public class YamlTokeniser {
         long pos = in.readPosition();
         try {
             in.readPosition(blockStart);
-            in.parseUtf8(sb, Math.toIntExact(blockEnd - blockStart));
+            in.parseUtf8(outputBuilder, Math.toIntExact(blockEnd - blockStart));
         } finally {
             // Reset the reading position.
             in.readPosition(pos);

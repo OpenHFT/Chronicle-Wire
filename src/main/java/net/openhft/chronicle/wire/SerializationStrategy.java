@@ -22,9 +22,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Represents a strategy for serializing and deserializing objects of type {@code T}.
- * Implementations of this interface define methods for reading, instantiating,
- * and providing metadata about the serialized format.
+ * Strategy for serialising and deserialising objects of type {@code T}.
+ * Implementations read data from a {@link ValueIn}, create instances as
+ * required and describe the wire format used. A strategy usually targets a
+ * particular Java type or category such as enums, {@link Marshallable}
+ * objects or collections. It dictates how objects are converted to and from a
+ * wire representation. See {@link SerializationStrategies} for the common
+ * built-in strategies.
  */
 public interface SerializationStrategy {
 
@@ -33,13 +37,16 @@ public interface SerializationStrategy {
      * the given 'using' object, if not null. The method uses the given {@link BracketType}
      * to aid in the deserialization.
      *
-     * @param clazz The class type to be deserialized.
-     * @param using An optional object of type {@code T} that can be populated with the read data.
-     *              If null, a new object will be created or an exception might be thrown depending on implementation.
-     * @param in The input source containing serialized data.
-     * @param bracketType The type of bracket used in the serialized format.
-     * @return The populated or newly created object of type {@code T}.
-     * @throws InvalidMarshallableException If an error occurs during the deserialization process.
+     * @param clazz       expected class of the object, or {@code null} to infer
+     *                    from the wire or {@code using} instance
+     * @param using       An optional object of type {@code T} that can be populated with the read data.
+     *      *              If null, a new object will be created or an exception might be thrown depending on implementation.
+     * @param in          source of the wire data
+     * @param bracketType hint about the expected structure such as map, sequence
+     *                    or none
+     * @return the populated or newly created object, or {@code null} if no
+     * instance could be obtained
+     * @throws InvalidMarshallableException if the deserialisation fails
      */
     @Nullable
     <T> T readUsing(Class<?> clazz, T using, ValueIn in, BracketType bracketType) throws InvalidMarshallableException;
@@ -56,9 +63,9 @@ public interface SerializationStrategy {
     <T> T newInstanceOrNull(Class<T> type);
 
     /**
-     * Returns the class type of objects this serialization strategy is designed to handle.
-     *
-     * @return The class type of objects this strategy can serialize and deserialize.
+     * Returns the primary Java {@link Class} that this strategy deals with.
+     * It may be a concrete type, an interface or a broad category such as
+     * {@code java.lang.Enum}.
      */
     Class<?> type();
 

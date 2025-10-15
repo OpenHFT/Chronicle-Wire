@@ -29,7 +29,11 @@ import org.jetbrains.annotations.NotNull;
  * handle unexpected fields that might be present in the data source.
  */
 public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
-    // Map for storing fields based on their names.
+    /**
+     * A {@link CharSequenceObjectMap} for efficient lookup of {@link FieldAccess} objects by
+     * field name, supporting both original and lower-cased names for flexibility in matching
+     * fields from the input wire.
+     */
     final CharSequenceObjectMap<FieldAccess> fieldMap;
 
     public WireMarshallerForUnexpectedFields(@NotNull FieldAccess[] fields, boolean isLeaf, T defaultValue) {
@@ -41,6 +45,15 @@ public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
         }
     }
 
+    /**
+     * Overrides the default deserialisation logic to handle unexpected fields. When a field name
+     * read from {@code WireIn} is not found in the known {@link #fields} (even after
+     * case-insensitive matching), it calls
+     * {@link ReadMarshallable#unexpectedField(Object, ValueIn)} on object {@code t} if
+     * possible. Known fields are processed as usual. The check
+     * {@code sb.length() == 0 && vin.isPresent()} optimises for DTO-order field reading by using
+     * the next field directly. Ensures progress is made during parsing to avoid infinite loops.
+     */
     @Override
     public void readMarshallable(T t, @NotNull WireIn in, boolean overwrite) throws InvalidMarshallableException {
         try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
