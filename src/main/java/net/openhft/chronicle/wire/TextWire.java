@@ -3127,3 +3127,4 @@ public class TextWire extends YamlWireOut<TextWire> {
         writeContext.rollbackIfNotComplete();
     }
 }
+
