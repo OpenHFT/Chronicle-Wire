@@ -20,6 +20,11 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A {@link Marshallable} that exposes a portion of its state as a key.
+ * Useful for map-like collections where objects are identified by part of their
+ * content.
+ */
 public interface KeyedMarshallable {
 
     /**

@@ -31,7 +31,8 @@ import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 /**
  * Represents a self-describing object that is trivially copyable, extending the functionality of {@link SelfDescribingMarshallable}.
  * The class provides mechanisms to efficiently manage the internal data layout of an instance based on various data types
- * such as longs, ints, shorts, and bytes. The layout is determined using a description integer.
+ * such as longs, ints, shorts, and bytes. Useful for high-performance scenarios where the layout determined using a
+ * {@code description} integer is known and stable yet the object remains self-describing when marshalled.
  */
 @SuppressWarnings("this-escape")
 public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMarshallable {
@@ -61,6 +62,11 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
      */
     protected abstract int $length();
 
+    /**
+     * Reads the object's state from the bytes. If the layout description in the
+     * input matches {@link #$description()}, a fast unsafe copy is performed;
+     * otherwise {@link #carefulCopy(BytesIn, int)} handles schema differences.
+     */
     @Override
     public void readMarshallable(BytesIn<?> bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         int description0 = bytes.readInt();
@@ -145,6 +151,10 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
         }
     }
 
+    /**
+     * Writes the description followed by the trivially copyable fields using an
+     * unsafe memory copy.
+     */
     @Override
     public void writeMarshallable(BytesOut<?> bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
         bytes.writeInt($description());

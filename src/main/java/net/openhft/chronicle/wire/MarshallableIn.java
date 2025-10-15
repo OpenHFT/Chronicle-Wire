@@ -41,7 +41,11 @@ import java.util.Map;
 @FunctionalInterface
 public interface MarshallableIn {
 
-    // Size configuration for internal use
+    /**
+     * Maximum length of a string that will be interned when read via
+     * {@link #readText()}. Strings longer than this are returned without
+     * interning. Controlled by system property {@code marshallableIn.intern.size}.
+     */
     int MARSHALLABLE_IN_INTERN_SIZE = Integer.getInteger("marshallableIn.intern.size", 128);
 
     /**
@@ -54,11 +58,11 @@ public interface MarshallableIn {
     DocumentContext readingDocument();
 
     /**
-     * Reads a document using the provided {@code ReadMarshallable} instance. This method
-     * simplifies the reading operation by handling the lifecycle of the {@code DocumentContext}.
+     * Convenience wrapper that opens a {@link DocumentContext} using the provided {@code ReadMarshallable}
+     * instance, delegates to the supplied reader to consume its contents and closes the context afterwards.
      *
-     * @param reader The mechanism to use for reading the document.
-     * @return {@code true} if the reading operation was successful, otherwise {@code false}.
+     * @param reader strategy used to read the document
+     * @return {@code false} if no document was present
      */
     default boolean readDocument(@NotNull ReadMarshallable reader) throws InvalidMarshallableException {
         try (@NotNull DocumentContext dc = readingDocument()) {

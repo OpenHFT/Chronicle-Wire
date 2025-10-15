@@ -39,7 +39,11 @@ import org.jetbrains.annotations.NotNull;
 @DontChain
 public interface ReadMarshallable extends CommonMarshallable {
 
-    // An instance of ReadMarshallable that doesn't perform any action when reading.
+    /**
+     * A no-operation {@code ReadMarshallable} that consumes and discards
+     * the input from the wire.  Useful as a placeholder or when unwanted
+     * data should be skipped.
+     */
     ReadMarshallable DISCARD = w -> {};
 
     /**
