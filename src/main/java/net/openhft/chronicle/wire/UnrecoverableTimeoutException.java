@@ -34,7 +34,8 @@ public class UnrecoverableTimeoutException extends IllegalStateException {
      * exception as the cause.
      * The message from the underlying exception is propagated to this exception.
      *
-     * @param e The underlying exception that caused this timeout exception.
+     * @param e The underlying {@link Exception} that represents the original
+     *          timeout or related error condition.
      */
     @SuppressWarnings("this-escape")
     public UnrecoverableTimeoutException(@NotNull Exception e) {
