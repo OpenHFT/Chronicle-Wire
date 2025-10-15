@@ -30,7 +30,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 /**
- * Write a message with a sequence of records.
+ * Shows how Chronicle Wire encodes a sequence (list) of objects inside a
+ * document.
  */
 public class Example6 {
     public static void main(String[] args) {

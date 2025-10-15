@@ -24,6 +24,10 @@ import java.util.stream.Stream;
 
 import static java.util.Comparator.comparing;
 
+/**
+ * Generic mapper that uses a sorted list to map keys to values, allowing value
+ * instances to be reused when deserialising.
+ */
 public class Mapper<K, V> extends SelfDescribingMarshallable {
 
     private final List<V> values = new ArrayList<>();
