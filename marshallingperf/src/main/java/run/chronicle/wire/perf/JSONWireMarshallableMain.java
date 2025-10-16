@@ -23,7 +23,7 @@ public class JSONWireMarshallableMain {
      *
      * <p>Iterations with a negative index warm the JVM. After warm up the
      * program measures the time to write and read an {@link Example} instance.
-     * Results are printed as latency histograms.</p>
+     * Results are printed as latency histograms.
      *
      * @param args Command line arguments (not used).
      */

@@ -19,7 +19,7 @@ public class PrimitivesInBytesMarshallableMain {
      * Executes the primitive field benchmark.
      *
      * <p>A warm up is followed by measured iterations. Latency for each
-     * serialisation and deserialisation is stored in histograms.</p>
+     * serialisation and deserialisation is stored in histograms.
      *
      * @param args Command line arguments (not used).
      */

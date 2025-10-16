@@ -29,7 +29,7 @@ public class StringsInBytesMarshallableMain {
      * Runs the string field benchmark.
      *
      * <p>Negative iterations act as warm up before timings are captured.
-     * Histograms of read and write latency are printed.</p>
+     * Histograms of read and write latency are printed.
      *
      * @param args Command line arguments (not used).
      */

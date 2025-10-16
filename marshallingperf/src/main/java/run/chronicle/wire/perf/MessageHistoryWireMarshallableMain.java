@@ -26,7 +26,7 @@ public class MessageHistoryWireMarshallableMain {
      *
      * <p>After a warm up phase the latency of writing and reading a
      * {@link MessageHistoryBytesMarshallableMain.SetTimeMessageHistory} is recorded.
-     * Histograms are printed at the end.</p>
+     * Histograms are printed at the end.
      *
      * @param args Command line arguments (not used).
      */

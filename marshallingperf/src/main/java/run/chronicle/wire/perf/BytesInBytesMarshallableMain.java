@@ -24,7 +24,7 @@ write: 50/90 97/99 99.7/99.9 99.97/99.99 99.997/99.999 99.9997/99.9999 - worst w
  * a direct {@link Bytes} buffer.
  *
  * <p>Latency for each read and write operation is recorded in a {@link Histogram}.
- * After a warm up phase the results are printed as histograms.</p>
+ * After a warm up phase the results are printed as histograms.
  */
 public class BytesInBytesMarshallableMain {
 
@@ -33,7 +33,7 @@ public class BytesInBytesMarshallableMain {
      *
      * <p>The first twenty thousand iterations act as a warm up. Subsequent
      * iterations record the time to write and then read the test object.
-     * Latency results are printed as histograms.</p>
+     * Latency results are printed as histograms.
      *
      * @param args Command line arguments (not used).
      */

@@ -23,7 +23,7 @@ public class MessageHistoryBytesMarshallableMain {
      * Runs the benchmark.
      *
      * <p>A short warm up precedes measurement of read and write latency for a
-     * {@link SetTimeMessageHistory} instance. Results are output as histograms.</p>
+     * {@link SetTimeMessageHistory} instance. Results are output as histograms.
      *
      * @param args Command line arguments (not used).
      */
