@@ -1,3 +1,7 @@
+/*
+ * Copyright 2016-2025 chronicle.software
+ */
+
 package run.chronicle.wire.perf;
 
 import net.openhft.affinity.AffinityLock;
