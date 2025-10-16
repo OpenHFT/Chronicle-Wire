@@ -22,7 +22,8 @@ import java.lang.reflect.Field;
 /**
  * Enumerates the predefined byte codes for the Binary YAML wire format.
  * Each constant in this class provides a specific purpose when working with the wire format,
- * enabling efficient serialization and deserialization processes.
+ * enabling efficient serialization and deserialization processes. The first byte of each value
+ * is one of these constants indicating how the following bytes are to be interpreted.
  */
 public enum BinaryWireCode {
     ; // Indicates no default enum instances
@@ -113,7 +114,7 @@ public enum BinaryWireCode {
     public static final int FLOAT_STOP_6 = 0x96;
 
     /**
-     * Floating-point number rounded to the nearest whole number.
+     * Floating-point rounded to the nearest whole number for compact storage.
      */
     public static final int FLOAT_SET_LOW_0 = 0x9A;
 
@@ -241,7 +242,7 @@ public enum BinaryWireCode {
      */
     public static final int FIELD_NUMBER = 0xBA;
     /**
-     * Code representing a null value in the serialized data.
+     * Represents the {@code null} value.
      */
     public static final int NULL = 0xBB;
 
@@ -256,7 +257,7 @@ public enum BinaryWireCode {
     public static final int EVENT_OBJECT = 0xBD;
 
     /**
-     * Marks a comment, not intended for parsing as part of the data structure.
+     * Marks a comment that should be ignored by parsers.
      */
     public static final int COMMENT = 0xBE;
 

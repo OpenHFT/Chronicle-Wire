@@ -8,6 +8,11 @@ import net.openhft.chronicle.wire.WireType;
 import static run.chronicle.wire.perf.BytesInBytesMarshallableMain.histoOut;
 import static run.chronicle.wire.perf.MessageHistoryBytesMarshallableMain.createMessageHistory;
 
+/**
+ * Benchmarks the performance of serialising and deserialising
+ * {@link net.openhft.chronicle.wire.VanillaMessageHistory} using the standard
+ * {@link net.openhft.chronicle.wire.WireMarshaller} mechanism (field by field).
+ */
 /*
 .2.21.ea207
 read: 50/90 97/99 99.7/99.9 99.97/99.99 99.997/99.999 99.9997/99.9999 - worst was 0.120 / 0.130  0.131 / 0.140  0.150 / 0.230  0.251 / 0.281  1.134 / 4.22  5.53 / 9.84 - 29.5
@@ -16,6 +21,15 @@ write: 50/90 97/99 99.7/99.9 99.97/99.99 99.997/99.999 99.9997/99.9999 - worst w
 */
 public class MessageHistoryWireMarshallableMain {
 
+    /**
+     * Runs the benchmark using the wire marshaller.
+     *
+     * <p>After a warm up phase the latency of writing and reading a
+     * {@link MessageHistoryBytesMarshallableMain.SetTimeMessageHistory} is recorded.
+     * Histograms are printed at the end.
+     *
+     * @param args Command line arguments (not used).
+     */
     public static void main(String... args) {
 
         Histogram readHist = new Histogram();
@@ -26,6 +40,7 @@ public class MessageHistoryWireMarshallableMain {
         Bytes<?> bytes = Bytes.allocateElasticDirect(128);
         Wire bw = WireType.BINARY.apply(bytes);
 
+        // Warm up then measure read and write latency
         for (int i = -20_000; i < 100_000_000; i++) {
             bytes.clear();
             long start = System.nanoTime();
@@ -36,6 +51,7 @@ public class MessageHistoryWireMarshallableMain {
             n2.readMarshallable(bw);
             end = System.nanoTime();
             readHist.sample(end - start);
+            // Reset histograms once warm up completes
             if (i == 0) {
                 readHist.reset();
                 writeHist.reset();

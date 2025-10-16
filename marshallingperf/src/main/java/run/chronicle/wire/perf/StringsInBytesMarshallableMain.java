@@ -8,6 +8,10 @@ import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
 
 import static run.chronicle.wire.perf.BytesInBytesMarshallableMain.histoOut;
+/**
+ * Benchmarks the performance of serialising and deserialising an object
+ * containing string fields using {@link net.openhft.chronicle.bytes.BytesMarshallable}.
+ */
 
 /*
 .2.21ea74
@@ -21,6 +25,14 @@ write: 50/90 97/99 99.7/99.9 99.97/99.99 99.997/99.999 99.9997/99.9999 - worst w
 
 public class StringsInBytesMarshallableMain {
 
+    /**
+     * Runs the string field benchmark.
+     *
+     * <p>Negative iterations act as warm up before timings are captured.
+     * Histograms of read and write latency are printed.
+     *
+     * @param args Command line arguments (not used).
+     */
     public static void main(String... args) {
 
         Histogram readHist = new Histogram();
@@ -31,6 +43,7 @@ public class StringsInBytesMarshallableMain {
         WithStrings n2 = new WithStrings();
         Bytes<?> bytes = Bytes.allocateElasticDirect(128);
 
+        // Warm up then measure serialisation costs
         for (int i = -20_000; i < 100_000_000; i++) {
             bytes.clear();
             long start = System.nanoTime();
@@ -41,6 +54,7 @@ public class StringsInBytesMarshallableMain {
             n2.readMarshallable(bytes);
             end = System.nanoTime();
             readHist.sample(end - start);
+            // Begin measurements once warm up completes
             if (i == 0) {
                 readHist.reset();
                 writeHist.reset();
@@ -53,12 +67,21 @@ public class StringsInBytesMarshallableMain {
         histoOut("write", StringsInBytesMarshallableMain.class, writeHist);
     }
 
+    /**
+     * Simple object holding eight strings for the benchmark.
+     */
     static class WithStrings extends BytesInBinaryMarshallable {
         String a, b, c, d, e, f, g, h;
 
+        /**
+         * Default constructor used when reading from bytes.
+         */
         public WithStrings() {
         }
 
+        /**
+         * Creates an instance populated with the provided strings.
+         */
         public WithStrings(String a, String b, String c, String d, String e, String f, String g, String h) {
             this.a = a;
             this.b = b;

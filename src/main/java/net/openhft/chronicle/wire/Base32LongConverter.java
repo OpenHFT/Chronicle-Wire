@@ -33,9 +33,7 @@ public class Base32LongConverter extends AbstractLongConverter {
      */
     public static final Base32LongConverter INSTANCE = new Base32LongConverter();
 
-    /**
-     * The character set used for base32 encoding.
-     */
+    // The character set used for base32 encoding
     private static final String CHARS = "234567ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     /**

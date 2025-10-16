@@ -31,9 +31,7 @@ public class HexadecimalLongConverter extends AbstractLongConverter {
      */
     public static final LongConverter INSTANCE = new HexadecimalLongConverter();
 
-    /**
-     * The character set used for hexadecimal encoding.
-     */
+    // The character set used for hexadecimal encoding
     private static final String CHARS = "0123456789abcdef";
 
     /**

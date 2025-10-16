@@ -42,27 +42,32 @@ import java.util.stream.Stream;
 import static net.openhft.chronicle.core.UnsafeMemory.*;
 
 /**
- * The WireMarshaller class is responsible for marshalling and unmarshalling of objects of type T.
- * This class provides an efficient mechanism for serialization/deserialization using wire protocols.
- * It utilizes field accessors to read and write values directly to and from the fields of the object.
+ * Engine for marshalling and unmarshalling objects based on their field
+ * definitions. Each {@code WireMarshaller} is typically cached per class via
+ * {@link #WIRE_MARSHALLER_CL}. Reflection is used once to discover the fields
+ * and then optimised {@link FieldAccess} instances perform subsequent read and
+ * write operations.
  *
- * @param <T> The type of the object to be marshalled/unmarshalled.
+ * @param <T> the type handled by this marshaller
  */
 @SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public class WireMarshaller<T> {
     private static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
+    // An empty array of {@link FieldAccess}, used for classes that have no marshallable fields such as interfaces or some enum types
     private static final FieldAccess[] NO_FIELDS = {};
+    // Reflection accessor for {@link Class#isRecord()} available on Java 14+
     private static Method isRecord;
+    // One entry per marshallable field of {@code T}. The ordering is preserved so that field writers can honour input order hints if provided
     @NotNull
     final FieldAccess[] fields;
 
-    // Map for quick field look-up based on their names.
+    // Map for quick field look-up based on the name. Implemented as a TreeMap to allow ordered iteration and case-insensitive searches
     final TreeMap<CharSequence, FieldAccess> fieldMap = new TreeMap<>(WireMarshaller::compare);
 
-    // Flag to determine if this marshaller is for a leaf class.
+    // Indicates if {@code T} is considered a leaf in the object graph. Leaf types may be treated more compactly by some wire formats
     private final boolean isLeaf;
 
-    // Default value for the type T.
+    // Pre-instantiated default instance used to identify unchanged fields and to populate missing values during read operations
     @Nullable
     private final T defaultValue;
 
@@ -76,18 +81,23 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * Constructs a new instance of the WireMarshaller with the specified parameters.
+     * Protected constructor used by factory methods.
+     * Prefer {@link #of(Class)} or {@link #WIRE_MARSHALLER_CL} to obtain
+     * instances.
      *
-     * @param tClass  The class of the object to be marshalled.
-     * @param fields  An array of field accessors that provide access to the fields of the object.
-     * @param isLeaf  Indicates if the marshaller is for a leaf class.
+     * @param tClass the type being marshalled
+     * @param fields fields to marshall
+     * @param isLeaf whether the type is considered a leaf
      */
     protected WireMarshaller(@NotNull Class<T> tClass, @NotNull FieldAccess[] fields, boolean isLeaf) {
         this(fields, isLeaf, defaultValueForType(tClass));
     }
 
-    // A class-local storage for caching WireMarshallers for different types.
-    // Depending on the type of class, it either creates a marshaller for exceptions or a generic one.
+    /**
+     * A class-local cache of {@code WireMarshaller} instances. {@link Throwable}
+     * types receive a specialised marshaller that handles their field discovery
+     * slightly differently, while all other classes use the generic variant.
+     */
     public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial
             (tClass ->
                     Throwable.class.isAssignableFrom(tClass)
@@ -95,6 +105,9 @@ public class WireMarshaller<T> {
                             : WireMarshaller.of(tClass)
             );
 
+    /**
+     * Internal constructor used by the factory methods.
+     */
     WireMarshaller(@NotNull FieldAccess[] fields, boolean isLeaf, @Nullable T defaultValue) {
         this.fields = fields;
         this.isLeaf = isLeaf;
@@ -156,10 +169,11 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * Determines if the provided class overrides the "unexpectedField" method from the ReadMarshallable interface.
+     * Checks whether {@code tClass} supplies its own
+     * {@link ReadMarshallable#unexpectedField(Object, ValueIn)} implementation.
      *
-     * @param tClass The class type to be checked.
-     * @return {@code true} if the class overrides the "unexpectedField" method, {@code false} otherwise.
+     * @param tClass the type to check
+     * @return true if {@code tClass} overrides the method
      */
     private static <T> boolean overridesUnexpectedFields(Class<T> tClass) {
         try {
@@ -229,6 +243,12 @@ public class WireMarshaller<T> {
         }
     }
 
+    /**
+     * Creates a default instance for {@code tClass} when possible.
+     * Concrete, non-Java-core classes get an empty instance. For
+     * {@link DynamicEnum} types a special '[unset]' constant is produced.
+     * Returns {@code null} for primitives, arrays and interfaces.
+     */
     static <T> T defaultValueForType(@NotNull Class<T> tClass) {
 //        tClass = ObjectUtils.implementationToUse(tClass);
         if (ObjectUtils.isConcreteClass(tClass)
@@ -708,9 +728,7 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * Checks if the current WireMarshaller is a leaf.
-     *
-     * @return true if the WireMarshaller is a leaf, false otherwise.
+     * @return true if this marshaller is for a leaf type
      */
     public boolean isLeaf() {
         return isLeaf;
@@ -1132,12 +1150,12 @@ public class WireMarshaller<T> {
          * as the previous value, it skips the writing. If the copy flag is set, it also copies the value
          * from the source object to the previous object.
          *
-         * @param o        Object from which the field value is fetched.
-         * @param out      Output destination where the value is written to.
-         * @param previous Previous object to compare for sameness and optionally copy to.
-         * @param copy     Flag indicating whether to copy the value from source to the previous object.
-         * @throws IllegalAccessException       If there's an access violation when fetching the field value.
-         * @throws InvalidMarshallableException If there's an error during marshalling.
+         * @param o        source object
+         * @param out      target wire
+         * @param previous object containing the last written value
+         * @param copy     copy the new value into {@code previous} after writing
+         * @throws IllegalAccessException       if reflection fails
+         * @throws InvalidMarshallableException on marshalling error
          */
         void write(Object o, @NotNull WireOut out, Object previous, boolean copy) throws IllegalAccessException, InvalidMarshallableException {
             // Check if the current and previous values are the same
@@ -1195,14 +1213,15 @@ public class WireMarshaller<T> {
         protected abstract void getValue(Object o, ValueOut write, Object previous) throws IllegalAccessException, InvalidMarshallableException;
 
         /**
-         * Reads the value of a field from an input and sets it in an object.
+         * Reads the field value from {@code read} and applies it to {@code o}.
+         * If the value is absent and {@code overwrite} is true the value from {@code defaults} is used.
          *
-         * @param o         Object to set the value in.
-         * @param defaults  Default values.
-         * @param read      Input source.
-         * @param overwrite Whether to overwrite existing value.
-         * @throws IllegalAccessException       If unable to access the field.
-         * @throws InvalidMarshallableException If marshalling fails.
+         * @param o         target object
+         * @param defaults  object providing default values
+         * @param read      source of data
+         * @param overwrite whether an absent value should reset to default
+         * @throws IllegalAccessException       if reflection fails
+         * @throws InvalidMarshallableException on parsing error
          */
         protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException, InvalidMarshallableException {
             if (!read.isPresent()) {
@@ -1258,11 +1277,11 @@ public class WireMarshaller<T> {
         public abstract void getAsBytes(Object o, Bytes<?> bytes) throws IllegalAccessException;
 
         /**
-         * Checks whether the values of a field in two objects are equal.
+         * Compares this field in {@code o1} and {@code o2} for equality.
          *
-         * @param o1 First object.
-         * @param o2 Second object.
-         * @return true if the values are equal, false otherwise.
+         * @param o1 first object
+         * @param o2 second object
+         * @return {@code true} if the values match
          */
         public boolean isEqual(Object o1, Object o2) {
             try {

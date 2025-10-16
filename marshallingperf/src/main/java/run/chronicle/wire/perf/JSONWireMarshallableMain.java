@@ -11,8 +11,22 @@ import net.openhft.chronicle.wire.*;
 
 import static run.chronicle.wire.perf.BytesInBytesMarshallableMain.histoOut;
 
+/**
+ * Benchmarks the performance of marshalling and unmarshalling objects using
+ * {@link JSONWire}. The {@link Example} class exercises several primitive and
+ * string fields.
+ */
 public class JSONWireMarshallableMain {
 
+    /**
+     * Executes the JSON wire benchmark.
+     *
+     * <p>Iterations with a negative index warm the JVM. After warm up the
+     * program measures the time to write and read an {@link Example} instance.
+     * Results are printed as latency histograms.
+     *
+     * @param args Command line arguments (not used).
+     */
     public static void main(String... args) {
 
         Histogram readHist = new Histogram();
@@ -24,6 +38,7 @@ public class JSONWireMarshallableMain {
         Wire wire = WireType.JSON.apply(Bytes.allocateElasticDirect(128));
 
         try (AffinityLock lock = AffinityLock.acquireLock()) {
+            // Warm up with negative iterations then record timings
             for (int i = -100_000; i < 50_000_000; i++) {
                 wire.clear();
                 long start = System.nanoTime();
@@ -50,6 +65,9 @@ public class JSONWireMarshallableMain {
         histoOut("write", JSONWireMarshallableMain.class, writeHist);
     }
 
+    /**
+     * Simple data holder used to exercise JSON serialisation of various field types.
+     */
     static class Example extends SelfDescribingMarshallable {
         int smallInt = 0;
         long longInt = 0;
@@ -57,6 +75,9 @@ public class JSONWireMarshallableMain {
         boolean flag = false;
         String text;
 
+        /**
+         * Creates an example populated with provided values.
+         */
         Example(int smallInt, long longInt, double price, boolean flag, String text) {
             this.smallInt = smallInt;
             this.longInt = longInt;
@@ -65,6 +86,9 @@ public class JSONWireMarshallableMain {
             this.text = text;
         }
 
+        /**
+         * Creates an empty instance for reading into.
+         */
         public Example() {
         }
 

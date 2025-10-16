@@ -24,7 +24,8 @@ import net.openhft.chronicle.wire.WireOut;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This is the code for the data type Data, used in the Examples.
+ * A small data transfer object used throughout the demo examples to show how
+ * simple fields can be marshalled with Chronicle Wire.
  */
 class Data extends SelfDescribingMarshallable {
     private String message;
@@ -90,6 +91,9 @@ class Data extends SelfDescribingMarshallable {
                 .write("price").float64(price);
     }
 
+    /**
+     * Returns a string containing all field values for debugging purposes.
+     */
     @Override
     public String toString() {
         return "Data{" +

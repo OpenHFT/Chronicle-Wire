@@ -86,7 +86,8 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     private final Map<Class<?>, String> methodWritersMap = new LinkedHashMap<>();
 
     /**
-     * Default constructor that initializes the metadata and sets up necessary imports.
+     * Creates a new generator with default {@link GMWMetaData} and registers
+     * the imports required by the generated code.
      */
     public GenerateMethodWriter2() {
         super(new GMWMetaData());
@@ -151,6 +152,11 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         return "object";
     }
 
+    /**
+     * Adds fields used by the generated proxy such as the {@code Closeable},
+     * optional {@link UpdateInterceptor} and the supplier of
+     * {@link MarshallableOut} instances.
+     */
     @Override
     protected void generateFields(SourceCodeFormatter mainCode) {
         super.generateFields(mainCode);
@@ -163,6 +169,10 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
                 .append(nameForClass(Supplier.class)).append("<").append(nameForClass(MarshallableOut.class)).append("> outSupplier;\n");
     }
 
+    /**
+     * Emits a constructor that initialises the output supplier, the optional
+     * interceptor and the associated {@link Closeable}.
+     */
     @Override
     protected void generateConstructors(SourceCodeFormatter mainCode) {
         super.generateConstructors(mainCode);
@@ -178,6 +188,12 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         mainCode.append("}\n");
     }
 
+    /**
+     * Generates the body of a proxied method.  It opens a
+     * {@link WriteDocumentContext}, writes the event name or ID and serialises
+     * the arguments.  The return type dictates whether the call is terminating
+     * or part of a fluent API.
+     */
     @Override
     protected void generateMethod(Method method, StringBuilder params, List<String> paramList, SourceCodeFormatter mainCode) {
         String name = method.getName();
@@ -227,6 +243,10 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         methodReturn(mainCode, method, metaData().interfaces());
     }
 
+    /**
+     * Declares any {@code ThreadLocal} fields required for chained writers at
+     * the end of code generation.
+     */
     @Override
     protected void generateEnd(SourceCodeFormatter mainCode) {
         super.generateEnd(mainCode);

@@ -35,6 +35,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <!-- Import BOMs so dependency versions remain consistent across projects -->
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -55,6 +56,7 @@
         </dependencies>
     </dependencyManagement>
 
+    <!-- Libraries used by the performance benchmarks -->
     <dependencies>
         <dependency>
             <groupId>net.openhft</groupId>
@@ -97,6 +99,7 @@
         </plugins>
     </build>
 
+    <!-- Optional profiles to test alternative versions or run the benchmarks -->
     <profiles>
         <profile>
             <id>latest</id>
@@ -121,6 +124,7 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
+                        <!-- Runs the micro-benchmarks during the test phase -->
 
                         <configuration>
                             <systemProperties>

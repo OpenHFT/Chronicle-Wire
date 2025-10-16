@@ -41,6 +41,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assume.assumeFalse;
 
 public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireTestCommon {
@@ -98,7 +99,9 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
 
     // Write messages to the specified URL with a given WireType
     private void writeMessages(URL url, WireType wireType) {
-        final MarshallableOut out = MarshallableOut.builder(url).wireType(wireType).get();
+        final MarshallableOut out = MarshallableOut.builder(url)
+                .wireType(wireType)
+                .get();
         ITop top = out.methodWriter(ITop.class);
         top.mid("mid")
                 .next(1)
@@ -201,7 +204,8 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
                 queue.add(bytes.toHexString());
             else
                 queue.add(bytes.toString());
-            xchg.sendResponseHeaders(202, 0);
+            // use -1 to indicate not response as 0 allows an arbitrary length
+            xchg.sendResponseHeaders(202, -1);
         }
     }
 
@@ -235,7 +239,9 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
                 server.start();
                 @SuppressWarnings("deprecation")
                 final URL url = new URL("http://localhost:" + PORT + "/bench");
-                MarshallableOut out = MarshallableOut.builder(url).wireType(WireType.JSON_ONLY).get();
+                MarshallableOut out = MarshallableOut.builder(url)
+                        .wireType(WireType.JSON_ONLY)
+                        .get();
                 timed = out.methodWriter(Timed.class);
             } catch (IOException ioe) {
                 throw Jvm.rethrow(ioe);

@@ -1,0 +1,45 @@
+= Chronicle Wire Documentation
+:toc: left
+:toclevels: 2
+:source-highlighter: rouge
+:sectnums:
+
+Chronicle Wire is a high-performance, low-latency serialisation library that forms part of the OpenHFT stack. This index links to the documentation set.
+
+== Documentation Index
+
+link:wire-architecture.adoc[Chronicle Wire: Architectural Overview] ::
+  Summarises the internal architecture, components and design principles.
+
+link:wire-cookbook.adoc[Chronicle Wire Cookbook: Practical Recipes] ::
+  Offers practical recipes for common tasks and advanced techniques.
+
+link:wire-annotations.adoc[Chronicle Wire Annotations: A Comprehensive Guide] ::
+  Describes the standard annotations and how they influence serialisation.
+
+link:wire-schema-evolution.adoc[Chronicle Wire: Schema Evolution Deep Dive] ::
+  Explains mechanisms for managing schema changes over time.
+
+link:wire-error-handling.adoc[Chronicle Wire: Error Handling and Diagnostics Guide] ::
+  Covers diagnosing issues and dealing with errors.
+
+link:wire-faq.adoc[Chronicle Wire FAQ: Common Questions Answered] ::
+  Provides answers to frequent questions.
+
+link:wire-glossary.adoc[Chronicle Wire Glossary] ::
+  Defines key terms used across the documentation.
+
+link:project-requirements.adoc[Project Requirements: Chronicle Wire Documentation Enhancement] ::
+  Outlines the requirements for improving this documentation set.
+
+link:security-review.adoc[Chronicle Wire Security Review] ::
+  Discusses known security considerations and trade-offs in the library.
+
+link:../../EventsByMethod.adoc[Events by Method Guide] ::
+  Explains the event-driven approach via asynchronous method calls.
+
+link:../../YAML2SpecificationCompliance.adoc[YAML 1.2 Compliance Notes] ::
+  Details how Chronicle Wire aligns with the YAML 1.2 specification.
+
+link:../../systemProperties.adoc[System Properties Guide] ::
+  Lists Java system properties influencing Chronicle components.
