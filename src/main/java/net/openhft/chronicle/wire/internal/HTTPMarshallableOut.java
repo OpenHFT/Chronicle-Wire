@@ -99,7 +99,6 @@ public class HTTPMarshallableOut implements MarshallableOut {
      */
     public HTTPMarshallableOut(MarshallableOutBuilder builder, WireType wireType) {
         this.url = builder.url();
-        validateUrl(url, builder.allowLocalhostEnabled());
 
         if (wireType == WireType.JSON)
             this.wire = new JSONWire(allocateElasticOnHeap()).useTypes(true).trimFirstCurly(true).useTextDocuments();
@@ -133,21 +132,5 @@ public class HTTPMarshallableOut implements MarshallableOut {
     public DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException {
         dcHolder.documentContext(wire.acquireWritingDocument(metaData));
         return dcHolder;
-    }
-
-    /**
-     * Validate that the supplied URL does not resolve to a local or site-local
-     * address unless explicitly allowed.
-     */
-    static void validateUrl(URL url, boolean allowLocalhost) {
-        try {
-            if (allowLocalhost)
-                return;
-            InetAddress addr = InetAddress.getByName(url.getHost());
-            if (addr.isAnyLocalAddress() || addr.isLoopbackAddress() || addr.isSiteLocalAddress() || addr.isLinkLocalAddress())
-                throw new IllegalArgumentException("Refusing to connect to local address: " + url);
-        } catch (UnknownHostException e) {
-            throw new IllegalArgumentException("Unknown host: " + url, e);
-        }
     }
 }

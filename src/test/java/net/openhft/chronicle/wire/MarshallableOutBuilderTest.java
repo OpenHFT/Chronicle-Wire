@@ -100,7 +100,6 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     // Write messages to the specified URL with a given WireType
     private void writeMessages(URL url, WireType wireType) {
         final MarshallableOut out = MarshallableOut.builder(url)
-                .allowLocalhost()
                 .wireType(wireType)
                 .get();
         ITop top = out.methodWriter(ITop.class);
@@ -182,23 +181,6 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
         }
     }
 
-    // Validate that localhost URLs are rejected by default
-    @Test(expected = IllegalArgumentException.class)
-    public void urlValidationRejectsLocalhost() throws Exception {
-        @SuppressWarnings("deprecation")
-        URL url = new URL("http://localhost:1234/");
-        MarshallableOut.builder(url).get();
-    }
-
-    // Validate that the override allows localhost
-    @Test
-    public void urlValidationAllowLocalhost() throws Exception {
-        @SuppressWarnings("deprecation")
-        URL url = new URL("http://localhost:1234/");
-        MarshallableOut out = MarshallableOut.builder(url).allowLocalhost().get();
-        assertNotNull(out);
-    }
-
     // Interface representing a timed event.
     interface Timed {
         void time(long timeNS);
@@ -258,7 +240,6 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
                 @SuppressWarnings("deprecation")
                 final URL url = new URL("http://localhost:" + PORT + "/bench");
                 MarshallableOut out = MarshallableOut.builder(url)
-                        .allowLocalhost()
                         .wireType(WireType.JSON_ONLY)
                         .get();
                 timed = out.methodWriter(Timed.class);
