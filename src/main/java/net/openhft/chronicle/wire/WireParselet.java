@@ -26,7 +26,8 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 public interface WireParselet {
 
     /**
-     * Invoked with the field name and corresponding value.
+     * Consumes and processes a wire input based on a given character sequence
+     * and a value input.
      *
      * @param s   the field name that matched this parselet
      * @param in  the {@link ValueIn} positioned at the value for {@code s}. Use it to

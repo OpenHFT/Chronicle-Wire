@@ -59,25 +59,25 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     static final String NULL_TAG = "!null";
 
     //for (char ch : "?%&*@`0123456789+- ',#:{}[]|>!\\".toCharArray())
-    /** Primary {@link TextValueIn} instance used for deserialising values. */
+    // Primary {@link TextValueIn} instance used for deserialising values
     private final TextValueIn valueIn = createValueIn();
 
-    /** Tokeniser that breaks the input YAML into tokens. */
+    // Tokeniser that breaks the input YAML into tokens
     private final YamlTokeniser yt;
 
-    /** Map of anchors ({@code &name}) to their deserialised values. */
+    // Map of anchors ({@code &name}) to their deserialised values
     private final Map<String, Object> anchorValues = new HashMap<>();
 
-    /** Provides default ValueIn when a field is missing. */
+    // Provides default ValueIn when a field is missing
     private DefaultValueIn defaultValueIn;
 
-    /** Context for writing YAML documents. */
+    // Context for writing YAML documents
     private WriteDocumentContext writeContext;
 
-    /** Context for reading YAML documents. */
+    // Context for reading YAML documents
     private ReadDocumentContext readContext;
 
-    /** Helper wire used when revisiting previously read fields. */
+    // Helper wire used when revisiting previously read fields
     private YamlWire rereadWire;
 
     /**

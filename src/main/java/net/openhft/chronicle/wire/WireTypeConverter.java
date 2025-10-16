@@ -3,8 +3,8 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.wire.internal.WireTypeConverterInternal;
 
 /**
- * Converts data between wire types such as JSON and YAML.
- * The work is delegated to {@link WireTypeConverterInternal}.
+ * This is the WireTypeConverter class responsible for converting between different wire types such as JSON and YAML.
+ * Internally, it utilizes a delegate pattern with {@link WireTypeConverterInternal} to handle the actual conversion processes.
  */
 public class WireTypeConverter {
 

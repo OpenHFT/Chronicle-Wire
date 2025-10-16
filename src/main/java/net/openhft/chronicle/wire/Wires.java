@@ -138,15 +138,10 @@ public enum Wires {
         return ANY_OBJECT;
     });
 
-    /**
-     * Cache of {@link FieldInfoPair} describing marshallable fields for each class.
-     */
+    // Cache of {@link FieldInfoPair} describing marshallable fields for each class
     static final ClassLocal<FieldInfoPair> FIELD_INFOS = ClassLocal.withInitial(FieldInfo::lookupClass);
 
-    /**
-     * Provides a function that can create proxy {@link Marshallable} implementations
-     * for tuple-like interfaces.
-     */
+    // Provides a function that can create proxy {@link Marshallable} implementations for tuple-like interfaces
     static final ClassLocal<Function<String, Marshallable>> MARSHALLABLE_FUNCTION = ClassLocal.withInitial(tClass -> {
         Class[] interfaces = {Marshallable.class, tClass};
         if (tClass == Marshallable.class)
@@ -166,25 +161,16 @@ public enum Wires {
      */
     static final ScopedResourcePool<StringBuilder> STRING_BUILDER_SCOPED_RESOURCE_POOL = StringBuilderPool.createThreadLocal();
 
-    /**
-     * Thread-local {@link BinaryWire} used for temporary read or write operations.
-     */
+    // Thread-local {@link BinaryWire} used for temporary read or write operations
     static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(Bytes.allocateElasticOnHeap()));
 
-    /**
-     * Flag derived from the {@code dumpCodeToTarget} system property or {@link Jvm#isDebug()}.
-     * When true, generated Java source is written to the build target directory.
-     */
+    // Flag derived from the {@code dumpCodeToTarget} system property or {@link Jvm#isDebug()}. When true, generated Java source is written to the build target directory
     static final boolean DUMP_CODE_TO_TARGET = Jvm.getBoolean("dumpCodeToTarget", Jvm.isDebug());
 
-    /**
-     * Mask for embedding a thread identifier within a header.
-     */
+    // Mask for embedding a thread identifier within a header
     private static final int TID_MASK = 0b00111111_11111111_11111111_11111111;
 
-    /**
-     * Inverse of {@link #TID_MASK} for removing a masked thread identifier.
-     */
+    // Inverse of {@link #TID_MASK} for removing a masked thread identifier
     private static final int INVERSE_TID_MASK = ~TID_MASK;
 
     /**
@@ -193,19 +179,13 @@ public enum Wires {
      */
     public static boolean GENERATE_TUPLES = Jvm.getBoolean("wire.generate.tuples");
 
-    /**
-     * Used to ensure an untyped bytes warning is logged only once.
-     */
+    // Used to ensure an untyped bytes warning is logged only once
     static volatile boolean warnedUntypedBytesOnce = false;
 
-    /**
-     * Legacy thread-local {@link StringBuilder}. Prefer {@link #STRING_BUILDER_SCOPED_RESOURCE_POOL}.
-     */
+    // Legacy thread-local {@link StringBuilder}. Prefer {@link #STRING_BUILDER_SCOPED_RESOURCE_POOL}
     static ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
 
-    /**
-     * Shared {@link net.openhft.compiler.CachedCompiler} for dynamic class generation.
-     */
+    // Shared {@link net.openhft.compiler.CachedCompiler} for dynamic class generation
     static CachedCompiler CACHED_COMPILER = null;
 
     /**

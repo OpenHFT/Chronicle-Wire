@@ -53,38 +53,21 @@ import static net.openhft.chronicle.core.UnsafeMemory.*;
 @SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public class WireMarshaller<T> {
     private static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
-    /**
-     * An empty array of {@link FieldAccess}, used for classes that have no
-     * marshallable fields such as interfaces or some enum types.
-     */
+    // An empty array of {@link FieldAccess}, used for classes that have no marshallable fields such as interfaces or some enum types
     private static final FieldAccess[] NO_FIELDS = {};
-    /**
-     * Reflection accessor for {@link Class#isRecord()} available on Java 14+.
-     */
+    // Reflection accessor for {@link Class#isRecord()} available on Java 14+
     private static Method isRecord;
-    /**
-     * One entry per marshallable field of {@code T}. The ordering is preserved
-     * so that field writers can honour input order hints if provided.
-     */
+    // One entry per marshallable field of {@code T}. The ordering is preserved so that field writers can honour input order hints if provided
     @NotNull
     final FieldAccess[] fields;
 
-    /**
-     * Map for quick field look-up based on the name. Implemented as a
-     * {@link TreeMap} to allow ordered iteration and case-insensitive searches.
-     */
+    // Map for quick field look-up based on the name. Implemented as a TreeMap to allow ordered iteration and case-insensitive searches
     final TreeMap<CharSequence, FieldAccess> fieldMap = new TreeMap<>(WireMarshaller::compare);
 
-    /**
-     * Indicates if {@code T} is considered a leaf in the object graph. Leaf
-     * types may be treated more compactly by some wire formats.
-     */
+    // Indicates if {@code T} is considered a leaf in the object graph. Leaf types may be treated more compactly by some wire formats
     private final boolean isLeaf;
 
-    /**
-     * Pre-instantiated default instance used to identify unchanged fields and
-     * to populate missing values during read operations.
-     */
+    // Pre-instantiated default instance used to identify unchanged fields and to populate missing values during read operations
     @Nullable
     private final T defaultValue;
 
@@ -608,7 +591,12 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * Compares two objects field by field.
+     * Compares two objects field by field to determine their equality.
+     * Uses each field's {@link FieldAccess} to perform the equality check.
+     *
+     * @param o1 The first object to compare.
+     * @param o2 The second object to compare.
+     * @return True if all fields of both objects are equal; False if at least one field differs.
      */
     public boolean isEqual(Object o1, Object o2) {
         for (@NotNull FieldAccess field : fields) {
@@ -619,7 +607,12 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * Returns the named field value using {@link FieldAccess}.
+     * Fetches the value of the specified field from the provided object.
+     *
+     * @param o    The object from which the field value needs to be fetched.
+     * @param name The name of the field whose value is to be fetched.
+     * @return The value of the specified field from the object.
+     * @throws NoSuchFieldException If no field with the specified name is found in the object.
      */
     public Object getField(Object o, String name) throws NoSuchFieldException {
         try {
@@ -1153,8 +1146,9 @@ public class WireMarshaller<T> {
         }
 
         /**
-         * Writes this field to {@code out} if it differs from {@code previous}.
-         * When {@code copy} is true the written value is also copied into {@code previous}.
+         * Writes the value of the field from the provided object to the output. If the value is the same
+         * as the previous value, it skips the writing. If the copy flag is set, it also copies the value
+         * from the source object to the previous object.
          *
          * @param o        source object
          * @param out      target wire

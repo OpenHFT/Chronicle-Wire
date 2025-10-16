@@ -31,7 +31,7 @@ public class YamlKeys {
     // The current number of offsets stored
     int count = 0;
 
-    /** The dynamic array of offsets. */
+    // The dynamic array of offsets
     long[] offsets = NO_OFFSETS;
 
     /**

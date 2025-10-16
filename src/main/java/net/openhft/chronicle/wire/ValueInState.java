@@ -23,19 +23,16 @@ import org.jetbrains.annotations.NotNull;
  */
 class ValueInState {
 
-    /** A shared, empty {@code long} array instance used as the initial state for {@link #unexpected}. */
+    // A constant representing an empty array of long values
     private static final long[] EMPTY_ARRAY = {};
 
-    /** Stores a position in the wire to return to later. */
+    // The saved position for the current state
     private long savedPosition;
 
-    /** The number of valid entries currently in the {@link #unexpected} array. */
+    // Size of the unexpected values
     private int unexpectedSize;
 
-    /**
-     * An array storing the starting positions of fields that were encountered in the
-     * input wire but not immediately processed.
-     */
+    // An array to hold unexpected values
     @NotNull
     private long[] unexpected = EMPTY_ARRAY;
 

@@ -105,9 +105,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      */
     protected long lineStart = 0;
 
-    /**
-     * Default value input utility.
-     */
+    // Default value input utility
     private DefaultValueIn defaultValueIn;
 
     /**
@@ -120,9 +118,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      */
     protected ReadDocumentContext readContext;
 
-    /**
-     * Flag to determine if strict parsing rules are applied.
-     */
+    // Flag to determine if strict parsing rules are applied
     private boolean strict = false;
 
     /**
@@ -1322,14 +1318,10 @@ public class TextWire extends YamlWireOut<TextWire> {
          */
         final ValueInStack stack = new ValueInStack();
 
-        /**
-         * Limit for sequence reading.
-         */
+        // Limit for sequence reading
         int sequenceLimit = 0;
 
-        /**
-         * Flag to denote if any kind of reading should be consumed.
-         */
+        // Flag to denote if any kind of reading should be consumed
         private boolean consumeAny;
 
         @Override

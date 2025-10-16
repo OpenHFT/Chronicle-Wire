@@ -27,15 +27,15 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("rawtypes")
 public class WireDumper {
 
-    /** The {@link WireIn} source whose content is being dumped. */
+    // The WireIn source whose content is being dumped
     @NotNull
     private final WireIn wireIn;
 
-    /** The underlying {@link Bytes} instance from {@link #wireIn}. */
+    // The underlying Bytes instance from {@link #wireIn}
     @NotNull
     private final Bytes<?> bytes;
 
-    /** Internal counter for tracking header/document numbers in the dump output. */
+    // Internal counter for tracking header/document numbers in the dump output
     private long headerNumber = -1;
 
     /**
@@ -96,9 +96,10 @@ public class WireDumper {
     }
 
     /**
-     * Dumps the entire readable content of the wire as a string.
+     * Obtains a string representation of the entire content present in the bytes.
+     * This method uses default abbreviated format.
      *
-     * @return A string representation of the wire content
+     * @return String representation of the content
      */
     @NotNull
     public String asString() {
@@ -106,10 +107,11 @@ public class WireDumper {
     }
 
     /**
-     * Dumps the entire readable content of the wire as a string.
+     * Obtains a string representation of the content from the current read position.
+     * The length of content to be represented is determined by the remaining bytes to be read.
      *
-     * @param abbrev If true, long content within individual messages might be abbreviated
-     * @return A string representation of the wire content
+     * @param abbrev Boolean value indicating whether to use abbreviated format
+     * @return String representation of the content from the current read position
      */
     @NotNull
     public String asString(boolean abbrev) {
@@ -318,8 +320,9 @@ public class WireDumper {
     }
 
     /**
-     * Dumps the content of the byte buffer as a hexadecimal representation into
-     * the provided {@code sb}.
+     * Dumps the content of the byte buffer as a hexadecimal representation into the provided StringBuilder.
+     * It positions the bytes at the specified read position, converts the content to hexadecimal, and sets
+     * the resulting string to the StringBuilder.
      *
      * @param sb          The {@link StringBuilder} to append the hexadecimal dump to
      * @param len         The number of bytes to read from {@link #bytes} and dump

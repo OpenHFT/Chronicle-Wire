@@ -60,7 +60,7 @@ import static net.openhft.chronicle.wire.Wires.isScalar;
 public interface ValueOut {
 
     /**
-     * Thread-local {@link MapMarshaller} to support thread-safe marshalling operations.
+     * Thread local {@link MapMarshaller} to support thread-safe marshalling operations.
      */
     ThreadLocal<MapMarshaller> MM_TL = ThreadLocal.withInitial(MapMarshaller::new);
 
@@ -101,7 +101,10 @@ public interface ValueOut {
     WireOut text(@Nullable CharSequence s);
 
     /**
-     * Convenience overload for {@link #text(CharSequence)}.
+     * Write a text value. This method delegates the writing to {@link #text(CharSequence)}.
+     *
+     * @param s The String containing the text to be written.
+     * @return The WireOut instance for chained calls.
      */
     @NotNull
     default WireOut text(@Nullable String s) {

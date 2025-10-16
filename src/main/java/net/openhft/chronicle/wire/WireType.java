@@ -437,11 +437,12 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     }
 
     /**
-     * Serialises the supplied object using this wire type and returns the
-     * resulting text (or hex) representation.
+     * Converts a given marshallable object to its string representation.
+     * This method ensures the object is first converted to a byte buffer,
+     * and then the buffer's contents are returned as a string.
      *
-     * @param marshallable object to encode
-     * @return the string representation
+     * @param marshallable The object to be converted to string.
+     * @return The string representation of the object.
      */
     public String asString(Object marshallable) {
         ValidatableUtil.startValidateDisabled();
@@ -455,12 +456,13 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     }
 
     /**
-     * Serialises {@code marshallable} using this wire type into the supplied
-     * {@link Bytes} buffer. Maps, iterables and other common types are handled
-     * transparently.
+     * Converts the given marshallable object to a {@link Bytes} buffer.
+     * This method uses various strategies to serialize different types of
+     * objects to a byte buffer, e.g., WriteMarshallable, Map, Iterable, etc.
      *
-     * @param marshallable the object to serialise
-     * @throws InvalidMarshallableException if the object cannot be encoded
+     * @param marshallable The object to be converted to bytes.
+     * @return A Bytes buffer containing the serialized form of the object.
+     * @throws InvalidMarshallableException If the object cannot be serialized properly.
      */
     @NotNull
     private void asBytes(Object marshallable, Bytes<?> bytes) throws InvalidMarshallableException {
@@ -746,7 +748,10 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     }
 
     /**
-     * Returns {@code true} if this wire type is text based.
+     * Indicates if this WireType is of a textual nature.
+     * This implementation returns false, indicating it's not textual.
+     *
+     * @return true if the WireType is textual; false otherwise.
      */
     public boolean isText() {
         return false;

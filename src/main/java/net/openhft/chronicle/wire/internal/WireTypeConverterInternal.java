@@ -11,9 +11,9 @@ import net.openhft.chronicle.wire.WireType;
  * {@link net.openhft.chronicle.wire.WireIn#copyTo(net.openhft.chronicle.wire.WireOut)} to serialise to the other.
  */
 public class WireTypeConverterInternal {
-    /** Internal {@link Wire} instance configured for YAML processing using an elastic on-heap buffer. */
+    // Internal {@link Wire} instance configured for YAML processing using an elastic on-heap buffer
     private final Wire yamlWire = WireType.YAML_ONLY.apply(Bytes.allocateElasticOnHeap());
-    /** Internal {@link Wire} instance configured for JSON processing using an elastic on-heap buffer. */
+    // Internal {@link Wire} instance configured for JSON processing using an elastic on-heap buffer
     private final Wire jsonWire = WireType.JSON_ONLY.apply(Bytes.allocateElasticOnHeap());
 
     /**

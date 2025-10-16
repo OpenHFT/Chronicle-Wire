@@ -33,23 +33,13 @@ import java.nio.ByteBuffer;
  */
 public class WireToOutputStream {
 
-    /**
-     * Internal, elastically-sized heap {@link Bytes} buffer that backs the
-     * {@link #wire}. Data is serialised into this buffer before being flushed.
-     */
+    // Internal, elastically-sized heap {@link Bytes} buffer that backs the {@link #wire}. Data is serialised into this buffer before being flushed
     private final Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(128);
 
-    /**
-     * The internal {@link Wire} instance into which data is serialised. Its
-     * type is determined by the {@code wireType} passed to the constructor.
-     */
+    // The internal {@link Wire} instance into which data is serialised. Its type is determined by the {@code wireType} passed to the constructor
     private final Wire wire;
 
-    /**
-     * The {@link DataOutputStream} wrapping the user-provided
-     * {@link OutputStream}, used for conveniently writing primitive data such as
-     * the message length.
-     */
+    // The {@link DataOutputStream} wrapping the user-provided {@link OutputStream}, used for conveniently writing primitive data such as the message length
     private final DataOutputStream dos;
 
     /**

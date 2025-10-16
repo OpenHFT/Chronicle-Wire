@@ -47,16 +47,16 @@ import java.util.function.Supplier;
 @SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
 public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBuilder<T> {
 
-    /** System property to disable proxy code generation. */
+    // System property to disable proxy code generation
     public static final String DISABLE_WRITER_PROXY_CODEGEN = "disableProxyCodegen";
 
-    /** Marker inserted into {@link #classCache} when compilation fails. */
+    // Marker inserted into {@link #classCache} when compilation fails
     private static final Class<?> COMPILE_FAILED = ClassNotFoundException.class;
 
-    /** Cache of generated writer classes keyed by name. */
+    // Cache of generated writer classes keyed by name
     private static final Map<String, Class> classCache = new ConcurrentHashMap<>();
 
-    /** Interfaces that must not be implemented by writer proxies. */
+    // Interfaces that must not be implemented by writer proxies
     private static final List<Class> invalidSuperInterfaces = Arrays.asList(
             ReadBytesMarshallable.class,
             WriteBytesMarshallable.class,
@@ -108,8 +108,8 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * Constructs an instance of VanillaMethodWriterBuilder with the specified class type, wire type,
      * and an invocation handler supplier.
      *
-     * @param tClass The class type that the builder will be working on.
-     * @param wireType The wire type to be used for the method writer.
+     * @param tClass          The class type that the builder will be working on.
+     * @param wireType        The wire type to be used for the method writer.
      * @param handlerSupplier Supplier to provide invocation handlers for the method writer.
      */
     public VanillaMethodWriterBuilder(@NotNull Class<T> tClass,
@@ -378,7 +378,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * @param aClass The class for which a new instance is to be created.
      * @return A newly created object of the provided class.
      * @throws NullPointerException if the outSupplier is not set.
-     * @throws RuntimeException if any other exception occurs during instantiation.
+     * @throws RuntimeException     if any other exception occurs during instantiation.
      */
     private Object newInstance(final Class<?> aClass) {
         try {

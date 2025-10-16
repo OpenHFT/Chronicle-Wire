@@ -36,45 +36,28 @@ import java.util.TreeMap;
  */
 public class VanillaWireParser implements WireParser {
 
-    /**
-     * {@link TreeMap} of field names to parselets. {@link CharSequenceComparator#INSTANCE}
-     * provides stable ordering and lookup semantics.
-     */
+    // Map of field names to parselets. {@link CharSequenceComparator#INSTANCE} provides stable ordering and lookup semantics
     private final Map<CharSequence, WireParselet> namedConsumer = new TreeMap<>(CharSequenceComparator.INSTANCE);
 
-    /**
-     * {@link HashMap} of numeric field ids to the original name and parselet.
-     */
+    // Map of numeric field ids to the original name and parselet
     private final Map<Integer, Map.Entry<String, WireParselet>> numberedConsumer = new HashMap<>();
 
-    /**
-     * Invoked when a field name is not present in {@link #namedConsumer}.
-     */
+    // Invoked when a field name is not present in {@link #namedConsumer}
     private final WireParselet defaultConsumer;
 
-    /**
-     * Reusable buffer for reading textual field names.
-     */
+    // Reusable buffer for reading textual field names.
     private final StringBuilder sb = new StringBuilder(128);
 
-    /**
-     * Caches the most recently parsed field name.
-     */
+    // Caches the most recently parsed field name
     private final StringBuilder lastEventName = new StringBuilder(128);
 
-    /**
-     * Called when a numeric field id is not mapped in {@link #numberedConsumer}.
-     */
+    // Called when a numeric field id is not mapped in {@link #numberedConsumer}
     private FieldNumberParselet fieldNumberParselet;
 
-    /**
-     * Cache of the parselet associated with {@link #lastEventName}.
-     */
+    // Cache of the parselet associated with {@link #lastEventName}
     private WireParselet lastParslet = null;
 
-    /**
-     * Start position of the last parsed event for debugging purposes.
-     */
+    // Start position of the last parsed event for debugging purposes
     private long lastStart = 0;
 
     /**

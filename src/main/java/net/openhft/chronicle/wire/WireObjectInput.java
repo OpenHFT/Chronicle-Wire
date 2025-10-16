@@ -28,8 +28,8 @@ import java.io.ObjectInput;
  * Useful when Chronicle Wire data must be consumed via {@code ObjectInput}.
  * Methods delegate to the underlying {@code WireIn} and its {@link ValueIn}.
  * Behaviour may differ from standard Java serialisation depending on the wire format.
- *
- * <p>This class is package-private and used internally.</p>
+ * <p>
+ * This class is package-private and used internally.
  */
 class WireObjectInput implements ObjectInput {
     private final WireIn wire;

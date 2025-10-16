@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  * parameters. The referenced converter annotation should either have a static
  * final instance named `INSTANCE` or should be a {@link LongConverter}
  *
- * <p>Example usage:</p>
+ * <p>Example usage:
  * <pre><code>
  * &#64;LongConversion(HexadecimalLongConverter.class)
  * &#64;Retention(RetentionPolicy.RUNTIME)

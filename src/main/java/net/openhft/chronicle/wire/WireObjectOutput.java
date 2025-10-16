@@ -23,15 +23,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Adapter that writes data to a {@link WireOut} using the
- * {@link java.io.ObjectOutput} API.
+ * Adapter that writes data to a {@link WireOut} using the {@link java.io.ObjectOutput} API.
  * <p>
  * Calls are forwarded to {@link WireOut#getValueOut()} and encoded according to
  * the underlying wire type. This class is package-private and intended for
  * internal use when third‑party code expects an {@code ObjectOutput}.
  */
 class WireObjectOutput implements ObjectOutput {
-    /** The target wire for all writes. */
+    // The target wire for all writes
     private final WireOut wire;
 
     /**

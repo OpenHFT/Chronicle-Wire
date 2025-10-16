@@ -30,7 +30,7 @@ import static java.text.MessageFormat.format;
  * as {@link LongConversion} to encode or decode fields using formats like
  * hexadecimal, base64 or symbolic alphabets.
  *
- * <p>Example usage:</p>
+ * <p>Example usage:
  * <pre>{@code
  * LongConverter converter = LongConverter.forSymbols("0123456789ABCDEF");
  * long value = converter.parse("1A");

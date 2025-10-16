@@ -83,39 +83,35 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
      */
     private static final boolean HISTORY_WALL_CLOCK = Jvm.getBoolean("history.wall.clock");
 
-    /** Instance flag mirroring the {@code history.as.bytes} property. */
+    // Instance flag mirroring the {@code history.as.bytes} property
     private boolean useBytesMarshallable = HISTORY_AS_BYTES;
-    /** Instance flag mirroring the {@code history.wall.clock} property. */
+    // Instance flag mirroring the {@code history.wall.clock} property
     private boolean historyWallClock = HISTORY_WALL_CLOCK;
 
-    /** Internal arrays to store source IDs. */
+    // Internal arrays to store source IDs
     @NotNull
     private final int[] sourceIdArray = new int[MESSAGE_HISTORY_LENGTH];
 
-    /** Internal arrays to store source indices. */
+    // Array to hold source indices
     @NotNull
     private final long[] sourceIndexArray = new long[MESSAGE_HISTORY_LENGTH];
 
-    /** Internal arrays to store processing timestamps. */
+    // Array to hold timings information
     @NotNull
     private final long[] timingsArray = new long[MESSAGE_HISTORY_LENGTH * 2];
 
-    /** Pre-allocated consumers used during {@link #writeMarshallable(WireOut)}. */
+    // Consumers for accepting sources and timings, defined to avoid lambda allocations
     private final transient BiConsumer<VanillaMessageHistory, ValueOut> acceptSourcesConsumer = this::acceptSources;
     private final transient BiConsumer<VanillaMessageHistory, ValueOut> acceptTimingsConsumer = this::acceptTimings;
 
-    /** Transient flag, true if new entries have been added since the last write or reset. */
+    // Flag to check if the current history entry is updated
     private transient boolean dirty;
 
-    /** Current number of source entries. */
+    // Count of sources and timings
     private int sources;
-    /** Current number of timing entries. */
     private int timings;
 
-    /**
-     * If true, a new source/timing entry is added on {@link #readMarshallable(WireIn)}
-     * from the current {@link SourceContext}.
-     */
+    // Flag to decide if source details should be added or not
     private boolean addSourceDetails = false;
 
     /**

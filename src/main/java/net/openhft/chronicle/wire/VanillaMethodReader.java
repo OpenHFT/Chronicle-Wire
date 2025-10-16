@@ -63,33 +63,33 @@ public class VanillaMethodReader implements MethodReader {
      */
     public static final boolean DEBUG_ENABLED = Jvm.isDebugEnabled(VanillaMethodReader.class) && Jvm.getBoolean("wire.mr.debug");
 
-    /** Shared empty {@code Object} array used to invoke methods with no arguments. */
+    // Shared empty {@code Object} array used to invoke methods with no arguments
     static final Object[] NO_ARGS = {};
 
-    /** Sentinel used internally with {@link MethodFilterOnFirstArg} to skip a call. */
+    // Sentinel used internally with {@link MethodFilterOnFirstArg} to skip a call
     static final Object IGNORED = new Object();
 
-    /** The {@link MarshallableIn} source of messages. */
+    // The {@link MarshallableIn} source of messages
     private final MarshallableIn in;
 
-    /** Parser used for metadata messages. */
+    // Parser used for metadata messages
     @NotNull
     private final WireParser metaWireParser;
-    /** Parser used for data messages. */
+    // Parser used for data messages
     private final WireParser dataWireParser;
-    /** Optional interceptor for dispatched method calls. */
+    // Optional interceptor for dispatched method calls
     private final MethodReaderInterceptorReturns methodReaderInterceptorReturns;
 
-    /** Predicate controlling whether a message is processed. */
+    // Predicate controlling whether a message is processed
     private final Predicate<MethodReader> predicate;
 
-    /** Lazily initialised history for the current message. */
+    // Lazily initialised history for the current message
     private MessageHistory messageHistory;
 
-    /** When true the {@link #in} is closed when this reader is closed. */
+    // When true the {@link #in} is closed when this reader is closed
     private boolean closeIn = false;
 
-    /** Flag set once {@link #close()} has been called. */
+    // Flag set once {@link #close()} has been called
     private boolean closed;
 
     /**
@@ -303,6 +303,9 @@ public class VanillaMethodReader implements MethodReader {
      * Performs the actual reflective call.
      * Used by the interceptor when present.
      *
+     * @param method The method to be invoked.
+     * @param target The object on which the method is to be invoked.
+     * @param args The arguments for the method.
      * @return The result of the method invocation.
      * @throws InvocationTargetException if the method invocation fails.
      */

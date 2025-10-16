@@ -56,34 +56,22 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
      */
     public static final String TIMESTAMP_LONG_CONVERTERS_ZONE_ID_SYSTEM_PROPERTY = "timestampLongConverters.zoneId";
 
-    /**
-     * The specific timezone used by this converter.
-     */
+    // The specific timezone used by this converter
     private final ZoneId zoneId;
 
-    /**
-     * Formatter used for parsing timestamps.
-     */
+    // Formatter used for parsing timestamps
     private final DateTimeFormatter formatterForParsing;
 
-    /**
-     * Formatter used for formatting timestamps.
-     */
+    // Formatter used for formatting timestamps
     private final DateTimeFormatter formatterForFormatting;
 
-    /**
-     * Flag to indicate if UTC dates are written without a suffix.
-     */
+    // Flag to indicate if UTC dates are written without a suffix
     private final boolean writingUtcDatesWithNoSuffix;
 
-    /**
-     * The amount of timestamps that fits in a second.
-     */
+    // The amount of timestamps that fits in a second
     private final long amountPerSecond;
 
-    /**
-     * The equivalent nanoseconds for a timestamp.
-     */
+    // The equivalent nanoseconds for a timestamp
     private final long nanosPerAmount;
 
     /**

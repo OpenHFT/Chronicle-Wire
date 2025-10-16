@@ -38,10 +38,10 @@ import java.util.Set;
 @SuppressWarnings({"this-escape","deprecation"})
 public class YamlTokeniser {
 
-    /** Represents an undefined or invalid indentation. */
+    // Represents an undefined or invalid indentation
     static final int NO_INDENT = -1;
 
-    /** Set of YAML tokens that don't contain any associated text content. */
+    // Set of YAML tokens that don't contain any associated text content
     static final Set<YamlToken> NO_TEXT = EnumSet.of(
             YamlToken.SEQUENCE_START,
             YamlToken.SEQUENCE_ENTRY,
@@ -51,46 +51,46 @@ public class YamlTokeniser {
             YamlToken.MAPPING_END,
             YamlToken.DIRECTIVES_END);
 
-    /** A pool of StringBuilders to improve efficiency and reduce memory overhead. */
+    // A pool of StringBuilders to improve efficiency and reduce memory overhead
     static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal(1);
 
-    /** Stack to manage contextual information during tokenization. */
+    // Stack to manage contextual information during tokenization
     protected final List<YTContext> contexts = new ArrayList<>();
 
-    /** The input source containing the raw YAML content. */
+    // The input source containing the raw YAML content
     private final BytesIn<?> in;
 
-    /** Pool of reusable {@link YTContext} instances to reduce allocations. */
+    // Pool of reusable {@link YTContext} instances to reduce allocations
     private final List<YTContext> freeContexts = new ArrayList<>();
 
-    /** List of tokens that have been identified but not yet processed. */
+    // List of tokens that have been identified but not yet processed
     private final List<YamlToken> pushed = new ArrayList<>();
 
-    /** Temporary bytes buffer. */
+    // Temporary bytes buffer
     Bytes<?> temp = null;
 
-    /** Position marker for the start of a line. */
+    // Position marker for the start of a line
     long lineStart;
 
-    /** Position marker for the start of a block. */
+    // Position marker for the start of a block
     long blockStart;
 
-    /** Position marker for the end of a block. */
+    // Position marker for the end of a block
     long blockEnd;
 
-    /** Current depth of flow structures, like lists or maps. */
+    // Current depth of flow structures, like lists or maps
     int flowDepth = Integer.MAX_VALUE;
 
-    /** Character used to denote quoting in a block. */
+    // Character used to denote quoting in a block
     char blockQuote = 0;
 
-    /** Flag to indicate if a sequence entry has been encountered. */
+    // Flag to indicate if a sequence entry has been encountered
     boolean hasSequenceEntry;
 
-    /** Position marker for the last key in a key-value pair. */
+    // Position marker for the last key in a key-value pair
     long lastKeyPosition = -1;
 
-    /** The last token that was processed. */
+    // The last token that was processed
     private YamlToken last = YamlToken.STREAM_START;
 
     /**
@@ -144,14 +144,20 @@ public class YamlTokeniser {
     }
 
     /**
-     * Most recent entry on the context stack.
+     * Retrieves the top context from the context stack.
+     * This method provides the most recent tokenization context.
+     *
+     * @return The top YTContext object from the context stack.
      */
     public YTContext topContext() {
         return contexts.get(contextSize() - 1);
     }
 
     /**
-     * Context entry one below the top of the stack.
+     * Retrieves the second to top context from the context stack.
+     * This method provides the tokenization context that's just below the topmost one.
+     *
+     * @return The second top YTContext object from the context stack.
      */
     public YTContext secondTopContext() {
         return contexts.get(contextSize() - 2);
@@ -410,8 +416,10 @@ public class YamlTokeniser {
     }
 
     /**
-     * Helper used when a peeked character should not be consumed.
-     * Unreads the character and returns {@link YamlToken#NONE}.
+     * Helper method to handle scenarios where the character shouldn't be tokenized.
+     * This method ensures the last read character is reverted back and a NONE token is returned.
+     *
+     * @return The {@link YamlToken#NONE} token.
      */
     private YamlToken dontRead() {
         unreadLast();

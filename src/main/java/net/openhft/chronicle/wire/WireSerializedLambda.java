@@ -36,25 +36,25 @@ import java.util.List;
 @SuppressWarnings("rawtypes")
 public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
 
-    /** The class that captured the lambda. */
+    // The class that captured the lambda
     private Class<?> capturingClass;
-    /** Fully qualified name of the functional interface. */
+    // Fully qualified name of the functional interface
     private String functionalInterfaceClass;
-    /** Name of the functional interface method. */
+    // Name of the functional interface method
     private String functionalInterfaceMethodName;
-    /** Method signature of the functional interface method. */
+    // Method signature of the functional interface method
     private String functionalInterfaceMethodSignature;
-    /** Implementation class containing the lambda body. */
+    // Implementation class containing the lambda body
     private String implClass;
-    /** Name of the implementation method. */
+    // Name of the implementation method
     private String implMethodName;
-    /** Signature of the implementation method. */
+    // Signature of the implementation method
     private String implMethodSignature;
-    /** Kind of the implementation method as defined by {@link SerializedLambda}. */
+    // Kind of the implementation method as defined by {@link SerializedLambda}
     private int implMethodKind;
-    /** Instantiated method type descriptor. */
+    // Instantiated method type descriptor
     private String instantiatedMethodType;
-    /** List of arguments captured by the lambda. */
+    // List of arguments captured by the lambda
     @NotNull
     private List<Object> capturedArgs = new ArrayList<>();
 
