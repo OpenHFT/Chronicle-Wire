@@ -25,10 +25,7 @@ import java.util.List;
  */
 class ValueInStack {
 
-    /**
-     * A list of {@link ValueInState} objects that can be reused to reduce
-     * allocation. Acts as the underlying storage for the stack.
-     */
+    // A list of {@link ValueInState} objects that can be reused to reduce allocation. Acts as the underlying storage for the stack
     final List<ValueInState> freeList = new ArrayList<>();
 
     // Represents the current level of the stack

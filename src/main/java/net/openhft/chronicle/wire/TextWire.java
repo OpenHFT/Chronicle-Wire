@@ -44,7 +44,6 @@ import java.util.regex.Pattern;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.wire.TextStopCharTesters.END_OF_TYPE;
-import static net.openhft.chronicle.wire.Wires.*;
 
 /**
  * A representation of the YAML-based wire format. `TextWire` provides functionalities
@@ -902,18 +901,17 @@ public class TextWire extends YamlWireOut<TextWire> {
     @NotNull
     @Override
     public ValueIn read(@NotNull WireKey key) {
-        return read(key.name(), key.code(), key.defaultValue());
+        return read(key.name(), key.defaultValue());
     }
 
     /**
      * Reads the value associated with a given key name, code, and provides a default value.
      *
      * @param keyName The name of the key.
-     * @param keyCode The code for the key.
      * @param defaultValue The default value to return if the key isn't found.
      * @return The value associated with the given key or the default value if not found.
      */
-    private ValueIn read(@NotNull CharSequence keyName, int keyCode, Object defaultValue) {
+    private ValueIn read(@NotNull CharSequence keyName, Object defaultValue) {
         consumePadding();
         ValueInState curr = valueIn.curr();
         final StringBuilder stringBuilder = acquireStringBuilder();
@@ -952,7 +950,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         // Continuation of the read operation (possibly handles edge cases or fallbacks).
-        return read2(keyName, keyCode, defaultValue, curr, stringBuilder, keyName);
+        return read2(defaultValue, curr, stringBuilder, keyName);
     }
 
     /**
@@ -967,7 +965,22 @@ public class TextWire extends YamlWireOut<TextWire> {
      * @param name          The name of the key (same as keyName, possibly added for clarity in some cases).
      * @return              The value associated with the key or the default value if the key is not found.
      */
+    @Deprecated(/* to be removed in x.29 */)
     protected ValueIn read2(CharSequence keyName, int keyCode, Object defaultValue, @NotNull ValueInState currentState, @NotNull StringBuilder tempNameBuilder, @NotNull CharSequence name) {
+        return read2(defaultValue, currentState, tempNameBuilder, name);
+    }
+
+    /**
+     * Attempts to read the value, continuing the read operation from the primary `read` method.
+     * If the current and old fields do not match the specified key, the default value is returned.
+     *
+     * @param defaultValue  The default value to return if the key isn't found.
+     * @param currentState  The current state of the ValueIn.
+     * @param tempNameBuilder            The StringBuilder used to capture the field name.
+     * @param name          The name of the key (same as keyName, possibly added for clarity in some cases).
+     * @return              The value associated with the key or the default value if the key is not found.
+     */
+    protected ValueIn read2(Object defaultValue, @NotNull ValueInState currentState, @NotNull StringBuilder tempNameBuilder, @NotNull CharSequence name) {
         final long position2 = bytes.readPosition();
 
         // if not a match go back and look at old fields.
@@ -3127,4 +3140,3 @@ public class TextWire extends YamlWireOut<TextWire> {
         writeContext.rollbackIfNotComplete();
     }
 }
-

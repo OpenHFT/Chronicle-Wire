@@ -35,22 +35,22 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
     // The main supplier delegate that provides the base MethodWriterInvocationHandler instances.
     private final Supplier<MethodWriterInvocationHandler> supplier;
 
-    /** whether created handlers should record invocation history */
+    // whether created handlers should record invocation history
     private boolean recordHistory;
-    /** optional resource to close when the handler is closed */
+    // optional resource to close when the handler is closed
     private Closeable closeable;
-    /** if true a single non-thread-safe instance will be reused */
+    // if true a single non-thread-safe instance will be reused
     private boolean disableThreadSafe;
-    /** event name used when the method writer is generic */
+    // event name used when the method writer is generic
     private String genericEvent;
-    /** if false the handler avoids writing method identifiers */
+    // if false the handler avoids writing method identifiers
     private boolean useMethodIds = true;
 
-    /** thread-local cache for handlers when thread safety is enabled */
+    // thread-local cache for handlers when thread safety is enabled
     private final ThreadLocal<MethodWriterInvocationHandler> handlerTL =
             ThreadLocal.withInitial(this::newHandler);
 
-    /** shared instance used when thread safety is disabled */
+    // shared instance used when thread safety is disabled
     private MethodWriterInvocationHandler handler;
 
     /**

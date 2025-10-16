@@ -46,13 +46,13 @@ import java.util.function.*;
 
 /**
  * Wire implementation that serialises values in sequence without any field names.
- *
- * <p>The reader must know the exact order and types of values because
+ * <p>
+ * The reader must know the exact order and types of values because
  * {@code RawWire} omits all metadata. This yields a compact byte stream but
- * leaves little room for schema evolution.</p>
- *
- * <p>Used for performance-critical exchanges where writer and reader share a
- * fixed layout. Unlike {@link BinaryWire} no field identifiers are emitted.</p>
+ * leaves little room for schema evolution
+ * <p>
+ * Used for performance-critical exchanges where writer and reader share a
+ * fixed layout. Unlike {@link BinaryWire} no field identifiers are emitted
  */
 @SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
 public class RawWire extends AbstractWire implements Wire {

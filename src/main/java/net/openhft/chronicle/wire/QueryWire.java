@@ -45,10 +45,10 @@ import java.util.function.BiFunction;
 @SuppressWarnings("rawtypes")
 public class QueryWire extends TextWire {
 
-    /** Helper used to write query parameters. */
+    // The specialized output handler for query string values.
     final QueryValueOut valueOut = new QueryValueOut();
 
-    /** Helper used to read query parameters. */
+    // The specialized input handler for query string values.
     final QueryValueIn valueIn = new QueryValueIn();
 
     /**
@@ -225,11 +225,11 @@ public class QueryWire extends TextWire {
      */
     class QueryValueOut extends YamlValueOut {
 
-        /** Next separator to write. */
+        // The separator to prepend before writing the next value.
         @NotNull
         String sep = "";
 
-        /** Field name awaiting a value. */
+        // The field name to prepend before writing the next value.
         @Nullable
         CharSequence fieldName = null;
 

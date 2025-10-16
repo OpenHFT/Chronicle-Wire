@@ -187,14 +187,20 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /**
-     * Convenience method to read a {@code long} field via {@link Wires}.
+     * Retrieves the long value of a specific field from the current marshallable object.
+     *
+     * @param name The name of the field.
+     * @return The long value of the specified field.
      */
     default long getLongField(String name) throws NoSuchFieldException {
         return Wires.getLongField(this, name);
     }
 
     /**
-     * Convenience method to write a {@code long} field via {@link Wires}.
+     * Sets the long value of a specific field in the current marshallable object.
+     *
+     * @param name The name of the field.
+     * @param value The new long value for the specified field.
      */
     default void setLongField(String name, long value) throws NoSuchFieldException {
         Wires.setLongField(this, name, value);
@@ -265,9 +271,11 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /**
-     * Merges this object into {@code map}.  If an entry with the same key exists
-     * the existing value is updated via {@link #copyTo(Marshallable)}, otherwise
-     * this instance is added.
+     * Merges the current marshallable object into a map, using a specified function to determine the key.
+     *
+     * @param map The map to merge into.
+     * @param getKey The function to determine the key for the current object in the map.
+     * @return The merged marshallable object in the map.
      */
     default <K, T extends Marshallable> T mergeToMap(@NotNull Map<K, T> map, @NotNull Function<T, K> getKey) {
         @NotNull @SuppressWarnings("unchecked")
@@ -296,9 +304,9 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /**
-     * Returns the alias for this class as registered with
-     * {@link ClassAliasPool#CLASS_ALIASES}, or the canonical name if no alias is
-     * present.
+     * Returns the alias name for the current class, if available.
+     *
+     * @return The alias name for the current class or the canonical name if no alias exists.
      */
     default String className() {
         return ClassAliasPool.CLASS_ALIASES.nameFor(getClass());

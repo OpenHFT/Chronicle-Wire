@@ -41,16 +41,13 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 @SuppressWarnings("this-escape")
 public class LongArrayValueBitSet extends AbstractCloseable implements Marshallable, ChronicleBitSet {
 
-    /** Internal constant used when masking partial words. */
+    /* Used to shift left or right for a partial word mask */
     private static final long WORD_MASK = ~0L;
 
-    /** Lazily created {@link Pauser} used during CAS spin loops. */
+    // Pauser object used for managing concurrent access (assuming based on its name, actual use needs context)
     private transient Pauser pauser;
 
-    /**
-     * Holds the 64-bit words representing the bits. Each index is one word in the
-     * underlying {@link LongArrayValues} instance.
-     */
+    // Holds the 64-bit words representing the bits. Each index is one word in the underlying {@link LongArrayValues} instance
     private LongArrayValues words;
 
     /**
@@ -74,9 +71,11 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Locate the word containing {@code bitIndex}.
+     * Calculates the word index in the internal storage corresponding to a given bit index.
      *
-     * @throws IndexOutOfBoundsException if {@code bitIndex} is negative
+     * @param bitIndex The bit index for which to find the word index.
+     * @return The word index containing the given bit index.
+     * @throws IndexOutOfBoundsException if the provided bitIndex is negative.
      */
     private static int wordIndex(int bitIndex) {
         if (bitIndex < 0)
@@ -86,7 +85,10 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Utility method matching {@link BitSet#valueOf(byte[])} for convenience.
+     * Constructs and returns a new {@code BitSet} using the bits from the provided byte array.
+     *
+     * @param bytes The byte array to be used for constructing the {@code BitSet}.
+     * @return A new {@code BitSet} containing all bits from the given byte array.
      */
     public static BitSet valueOf(byte[] bytes) {
         return BitSet.valueOf(ByteBuffer.wrap(bytes));
@@ -129,15 +131,22 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Number of words currently used as reported by {@link LongArrayValues#getUsed()}.
+     * Retrieves the number of words that are currently in use by this bit set.
+     * This indicates the number of long values that are currently utilized to represent bits in the bit set.
+     *
+     * @return The number of words in use, converted to an integer.
      */
     public int getWordsInUse() {
         return Math.toIntExact(words.getUsed());
     }
 
     /**
-     * Atomically update the word at {@code wordIndex} using {@code function}.
-     * The function receives the current value and {@code param} and returns the new value.
+     * Sets a specific word in this bit set using a provided function and parameter.
+     * This method is lock-free and uses CAS operations to safely update the word value.
+     *
+     * @param wordIndex The index of the word to set.
+     * @param param     The parameter to pass to the function.
+     * @param function  The function to compute the new word value based on the old value and the provided parameter.
      */
     public void set(int wordIndex, long param, LongFunction function) {
         throwExceptionIfClosed();
@@ -156,7 +165,9 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Lazily create a {@link Pauser} for CAS retry loops.
+     * Retrieves or initializes the internal {@code Pauser}, which is used to manage pauses during lock-free operations.
+     *
+     * @return The {@code Pauser} instance associated with this object.
      */
     private Pauser pauser() {
         if (this.pauser == null)
@@ -165,8 +176,11 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Atomically set an external {@link LongValue} to {@code newValue}.
-     * This helper does not access {@link #words}; it is provided for convenience.
+     * Sets a new value for a given word in this bit set.
+     * This method is lock-free and uses CAS operations to safely set the new word value.
+     *
+     * @param word     The {@code LongValue} instance representing the word to set.
+     * @param newValue The new value to set for the word.
      */
     public void set(LongValue word, long newValue) {
         throwExceptionIfClosed();
@@ -179,7 +193,10 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Serialise the currently used words into a little‑endian byte array.
+     * Converts the bits in this bit set to a byte array.
+     * This allows the bit set to be easily serialized or transferred.
+     *
+     * @return A byte array containing all the bits in this bit set.
      */
     public byte[] toByteArray() {
         throwExceptionIfClosed();
@@ -195,8 +212,9 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Ensure the backing store can address {@code wordIndex}. Throws if the requested index
-     * exceeds the initial capacity.
+     * Ensures that the ChronicleBitSet can accommodate a given wordIndex.
+     *
+     * @param wordIndex the index to be accommodated.
      */
     private void expandTo(int wordIndex) {
         int wordsRequired = wordIndex + 1;
@@ -925,12 +943,17 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     }
 
     /**
-     * Simple long-to-long function used by CAS helpers.
+     * Represents a functional interface for a long-to-long function.
+     * This can be useful for operations that require transforming or manipulating long values.
      */
     @FunctionalInterface
     interface LongFunction {
         /**
-         * Compute a new value from {@code oldValue} and {@code param}.
+         * Applies the function on the given long values.
+         *
+         * @param oldValue The old value.
+         * @param param The parameter value.
+         * @return The result of applying the function.
          */
         long apply(long oldValue, long param);
     }

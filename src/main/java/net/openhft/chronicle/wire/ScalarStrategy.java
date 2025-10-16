@@ -37,8 +37,7 @@ class ScalarStrategy<E> implements SerializationStrategy {
      * and returns the deserialized value.
      */
     final BiFunction<? super E, ValueIn, E> read;
-
-    /** The class type of the scalar value. */
+    // The class type of the scalar value
     private final Class<E> type;
 
     /**

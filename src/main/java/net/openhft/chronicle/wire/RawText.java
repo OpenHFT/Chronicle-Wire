@@ -24,7 +24,7 @@ package net.openhft.chronicle.wire;
  * intended for internal use within the Chronicle Wire framework.
  */
 class RawText {
-    /** The raw text content, stored as a {@link String}. */
+    // The encapsulated raw textual data
     String text;
 
     /**

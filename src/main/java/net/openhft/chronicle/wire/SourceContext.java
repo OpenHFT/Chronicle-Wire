@@ -27,7 +27,9 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 public interface SourceContext {
 
     /**
-     * Retrieves the identifier of the source from which the message originated.
+     * Retrieves the source ID associated with this context.
+     * A unique identifier that represents the source from which data or operations might be fetched or to which data
+     * might be written. If a valid source ID has not been established or isn't available, it defaults to returning -1.
      *
      * @return unique identifier for this context, or {@code -1} if not available or not applicable
      */

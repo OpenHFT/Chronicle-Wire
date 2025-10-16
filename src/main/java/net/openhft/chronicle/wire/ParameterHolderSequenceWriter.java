@@ -35,17 +35,17 @@ import java.util.function.BiConsumer;
  */
 class ParameterHolderSequenceWriter {
 
-    /** The cached parameter types of the target method. */
+    // The cached parameter types of the target method
     @SuppressWarnings("rawtypes")
     final Class[] parameterTypes;
 
-    /** Serialises every argument sequence to the provided {@link ValueOut}. */
+    // Serialises every argument sequence to the provided {@link ValueOut}
     final BiConsumer<Object[], ValueOut> from0;
 
-    /** Serialises every argument sequence to the provided {@link ValueOut} from index {@code 1} onwards. */
+    // Serialises every argument sequence to the provided {@link ValueOut} from index {@code 1} onwards
     final BiConsumer<Object[], ValueOut> from1;
 
-    /** MethodId value or {@code Long.MIN_VALUE} when absent. */
+    // MethodId value or {@code Long.MIN_VALUE} when absent
     final long methodId;
 
     /**

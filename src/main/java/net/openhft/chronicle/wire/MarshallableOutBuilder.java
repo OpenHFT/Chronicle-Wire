@@ -36,9 +36,6 @@ public class MarshallableOutBuilder implements Supplier<MarshallableOut> {
     // The WireType configuration for the MarshallableOut.
     private WireType wireType;
 
-    // Flag to permit HTTP connections to localhost or site-local addresses
-    private boolean allowLocalhost;
-
     /**
      * Constructs a new {@code MarshallableOutBuilder} with the specified URL.
      *
@@ -54,7 +51,6 @@ public class MarshallableOutBuilder implements Supplier<MarshallableOut> {
             case "tcp":
                 throw new UnsupportedOperationException("Direct TCP connection not implemented");
             case "file":
-                validateFileUrl(url);
                 if (wireType != null && wireType != WireType.YAML_ONLY)
                     throw new IllegalArgumentException("Unsupported wireType; " + wireType);
                 // URL file protocol doesn't support writing...
@@ -80,21 +76,6 @@ public class MarshallableOutBuilder implements Supplier<MarshallableOut> {
     }
 
     /**
-     * Performs a sanity check on file URLs to reduce the risk of path traversal.
-     * Only absolute paths without parent directory references are allowed.
-     *
-     * @param url the file URL to validate
-     * @throws IllegalArgumentException if the path contains ".." or is empty
-     */
-    private static void validateFileUrl(URL url) {
-        String path = url.getPath();
-        if (path == null || path.isEmpty())
-            throw new IllegalArgumentException("File URL must contain a path");
-        if (path.contains(".."))
-            throw new IllegalArgumentException("Parent directory references are not permitted: " + path);
-    }
-
-    /**
      * Returns the URL set for this builder.
      *
      * @return the set URL.
@@ -113,24 +94,5 @@ public class MarshallableOutBuilder implements Supplier<MarshallableOut> {
     public MarshallableOutBuilder wireType(WireType wireType) {
         this.wireType = wireType;
         return this;
-    }
-
-    /**
-     * Allows HTTP connections to localhost or site-local addresses. Use with
-     * caution as it bypasses SSRF checks.
-     *
-     * @return this builder instance
-     */
-    public MarshallableOutBuilder allowLocalhost() {
-        this.allowLocalhost = true;
-        return this;
-    }
-
-    /**
-     * Exposes whether localhost URLs are permitted. Intended for
-     * internal use.
-     */
-    public boolean allowLocalhostEnabled() {
-        return allowLocalhost;
     }
 }

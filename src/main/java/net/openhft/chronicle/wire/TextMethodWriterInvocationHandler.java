@@ -38,10 +38,10 @@ import java.util.function.Supplier;
  */
 public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvocationHandler {
 
-    /** Supplier for the target {@link MarshallableOut}. */
+    // Supplier for the target {@link MarshallableOut}
     @NotNull
     private final Supplier<MarshallableOut> marshallableOutSupplier;
-    /** Caches argument converters keyed by {@link Method}. */
+    // Caches argument converters keyed by {@link Method}
     private final Map<Method, Consumer<Object[]>> visitorConverter = new LinkedHashMap<>();
 
     /**
@@ -101,7 +101,7 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
         }
     }
 
-    /** Shared no-op argument converter. */
+    // Shared no-op argument converter
     static final Consumer<Object[]> NOOP_CONSUMER = Jvm.uncheckedCast(Mocker.ignored(Consumer.class));
 
     /**
