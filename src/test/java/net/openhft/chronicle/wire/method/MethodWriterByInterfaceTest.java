@@ -48,26 +48,25 @@ public class MethodWriterByInterfaceTest extends WireTestCommon {
     // Test method writing and reading via implementation with text wire type
     @Test
     public void writeReadViaImplementation() {
-        checkWriteReadViaImplementation(WireType.TEXT);
+        checkWriteReadViaImplementation(WireType.TEXT, false);
     }
 
     // Test method writing and reading with text wire type and tuple generation enabled
     @Test
     public void writeReadViaImplementationGenerateTuples() {
-        Wires.GENERATE_TUPLES = true;
-        checkWriteReadViaImplementation(WireType.TEXT);
+        checkWriteReadViaImplementation(WireType.TEXT, true);
     }
 
     // Test method writing and reading via implementation with YAML wire type
     @Test
     public void writeReadViaImplementationYaml() {
-        checkWriteReadViaImplementation(WireType.YAML_ONLY);
+        checkWriteReadViaImplementation(WireType.YAML_ONLY, false);
     }
 
     // Helper method to perform the core test logic for different wire types
-    private void checkWriteReadViaImplementation(WireType wireType) {
+    private void checkWriteReadViaImplementation(WireType wireType, boolean generateTuples) {
         // Create a new wire instance of the specified wire type
-        Wire tw = wireType.apply(Bytes.allocateElasticOnHeap());
+        Wire tw = wireType.apply(Bytes.allocateElasticOnHeap()).generateTuples(generateTuples);
 
         // Create a method writer for the MWBI0 interface
         MWBI0 mwbi0 = tw.methodWriter(MWBI0.class);

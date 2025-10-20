@@ -15,6 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodWriterInvocationHandler;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
@@ -26,20 +27,25 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * An abstract handler for method writer invocations that provides a base implementation.
+ * An abstract base for {@link MethodWriterInvocationHandler}s that provides a base implementation.
  * It manages the invocation by mapping methods to their respective parameter holders and writing them to wires.
  * This class can handle both regular and generic events and supports method IDs for binary output.
  */
 public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvocationHandler implements MethodWriterInvocationHandler {
 
-    // Map to cache the parameter holders for method invocations
+    // Cache of analysed parameter writers keyed by method
     private final Map<Method, ParameterHolderSequenceWriter> parameterMap = new ConcurrentHashMap<>();
+
+    // If true a {@link MessageHistory} is written before each event
     protected boolean recordHistory;
 
-    // Name for the generic event, if any. A generic event take the event name as the first argument
+    /**
+     * Name of the method used for generic events. The first argument becomes
+     * the event name on the wire.
+     */
     protected String genericEvent = "";
 
-    // Flag to determine if method IDs should be used in binary output
+    // Use numeric {@link MethodId} values when writing to binary wires
     private boolean useMethodIds;
 
     /**
@@ -100,13 +106,21 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
         writeEvent0(wire, method, args, methodName, 0);
     }
 
-    // Helper to write a generic event to the wire
+    // Helper to write a generic event where the first argument supplies the event name
     private void writeGenericEvent(Wire wire, @NotNull Method method, Object[] args) throws InvalidMarshallableException {
         String methodName = args[0].toString();
         writeEvent0(wire, method, args, methodName, 1);
     }
 
-    // Core logic to write events to the wire, distinguishing between methods with and without arguments
+    /**
+     * Writes the event name or ID followed by the parameters, distinguishing between methods with and without arguments
+     *
+     * @param wire      target wire
+     * @param method    source method
+     * @param args      arguments array
+     * @param methodName resolved name to write
+     * @param oneParam   index offset when the first argument is the event name
+     */
     @SuppressWarnings("unchecked")
     private void writeEvent0(Wire wire, @NotNull Method method, Object[] args, String methodName, int oneParam) throws InvalidMarshallableException {
         // Fetch or compute the parameter holder for the method

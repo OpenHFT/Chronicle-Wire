@@ -16,6 +16,7 @@
 package net.openhft.chronicle.wire.reordered;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
@@ -30,6 +31,7 @@ import java.util.Collection;
 import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Test class extending WireTestCommon to validate serialization and deserialization behaviors
@@ -100,6 +102,8 @@ public class ReorderedTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testWithReorderedFields() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Bytes<?> bytes = Bytes.elasticByteBuffer();
         Wire wire = wireType.apply(bytes);
 

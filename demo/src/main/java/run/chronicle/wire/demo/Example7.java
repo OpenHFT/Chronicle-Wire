@@ -22,7 +22,11 @@ import net.openhft.chronicle.wire.WireType;
 
 import java.io.IOException;
 
-//This example shows how to use alias names for classes
+/**
+ * Example of using class aliases for YAML files. {@link Data1} is registered
+ * with the alias pool while {@link Data2} is not, so its full class name is
+ * emitted in the output.
+ */
 public class Example7 {
 
     //Data1.class is added to Alias pool but Data2.class is not

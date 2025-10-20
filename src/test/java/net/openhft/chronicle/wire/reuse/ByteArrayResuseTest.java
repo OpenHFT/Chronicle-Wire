@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire.reuse;
 
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.util.BinaryLengthLength;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
@@ -25,6 +26,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * ByteArrayReuseTest extends WireTestCommon to test the reuse of byte arrays during
@@ -39,6 +41,8 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
      */
     @Test
     public void writeReadBytesArray() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         SELF_DESCRIBING = true;
         doWriteReadBytesArray("" +
                 "c4 64 61 74 61                                  # data:\n" +
@@ -62,6 +66,8 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
      */
     @Test
     public void writeReadBytesArrayBinary() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         SELF_DESCRIBING = false;
         doWriteReadBytesArray("" +
                 "c4 64 61 74 61                                  # data:\n" +

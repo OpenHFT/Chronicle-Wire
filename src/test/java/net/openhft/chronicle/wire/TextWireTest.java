@@ -26,6 +26,7 @@ import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
@@ -56,6 +57,7 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 @SuppressWarnings({"rawtypes", "unchecked", "try", "serial", "deprecation"})
 public class TextWireTest extends WireTestCommon {
@@ -63,6 +65,11 @@ public class TextWireTest extends WireTestCommon {
     // Create a new TextWire instance with an elastic heap allocated buffer
     static Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
     Bytes<?> bytes;
+
+    @Before
+    public void hasDirect() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+    }
 
     // Test to check if white space within type specifications is handled correctly.
     @Test
@@ -297,7 +304,7 @@ public class TextWireTest extends WireTestCommon {
     @Test
     public void testWriteToBinaryAndTriesToConvertToText() {
 
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = allocateElasticOnHeap();
         Wire wire = WireType.BINARY.apply(b);
         wire.usePadding(true);
 
@@ -2631,9 +2638,8 @@ public class TextWireTest extends WireTestCommon {
     static class ABCD extends SelfDescribingMarshallable implements Monitorable {
         Bytes<?> A = Bytes.allocateElasticDirect();
         Bytes<?> B = Bytes.allocateDirect(64);
-        Bytes<?> C = Bytes.elasticByteBuffer();
+        Bytes<?> C = Bytes.allocateElasticOnHeap();
         Bytes<?> D = Bytes.allocateElasticOnHeap(1);
-
 
         // Method to release all byte buffers
         void releaseAll() {

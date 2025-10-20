@@ -18,31 +18,39 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.io.Closeable;
 
+/**
+ * Interface for a bit set that is both {@link Marshallable} and
+ * {@link Closeable}. Implementations may store state off-heap so that bits can
+ * be persisted or shared between processes. Examples include
+ * {@link LongValueBitSet} and {@link LongArrayValueBitSet}.
+ */
 public interface ChronicleBitSet extends Marshallable, Closeable {
+
+    /** The number of bits in a {@code long} word (64). */
     long BITS_PER_WORD = Long.BYTES * 8L;
 
     /**
      * Returns the number of bits of space actually in use by this {@code ChronicleBitSet} to represent bit values.
      * The maximum element in the set is the size - 1st element.
      *
-     * @return the number of bits currently in this bit set
+     * @return the current capacity of this bit set
      */
     int size();
 
     /**
-     * Sets the bit at the specified index to {@code true}.
+     * Sets the bit at the given zero-based index.
      *
-     * @param bitIndex a bit index
-     * @throws IndexOutOfBoundsException if the specified index is negative
+     * @param bitIndex index of the bit to set
+     * @throws IndexOutOfBoundsException if {@code bitIndex < 0}
      */
     void set(int bitIndex);
 
     /**
-     * Sets the bit at the specified index to the specified value.
+     * Sets the bit at the given index to the provided value.
      *
-     * @param bitIndex a bit index
-     * @param value    a boolean value to set
-     * @throws IndexOutOfBoundsException if the specified index is negative
+     * @param bitIndex zero-based index of the bit to modify
+     * @param value    the value to store at that index
+     * @throws IndexOutOfBoundsException if {@code bitIndex < 0}
      */
     default void set(int bitIndex, boolean value) {
         if (value)
@@ -51,16 +59,24 @@ public interface ChronicleBitSet extends Marshallable, Closeable {
             clear(bitIndex);
     }
 
+    /**
+     * Sets every bit in the range {@code [fromIndex, toIndex)} to
+     * {@code true}.
+     *
+     * @param fromIndex index of the first bit to set, zero-based
+     * @param toIndex   index after the last bit to set
+     * @throws IndexOutOfBoundsException if an index is negative or the range
+     *                                   is invalid
+     */
     void set(int fromIndex, int toIndex);
 
     /**
-     * Sets the bits from the specified {@code fromIndex} (inclusive) to the specified {@code toIndex} (exclusive) to the specified value.
+     * Sets each bit in the range {@code [fromIndex, toIndex)} to the given value.
      *
-     * @param fromIndex index of the first bit to be set
-     * @param toIndex   index after the last bit to be set
-     * @param value     value to set the selected bits to
-     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, or {@code toIndex} is negative,
-     *                                   or {@code fromIndex} is larger than {@code toIndex}
+     * @param fromIndex zero-based index of the first bit to modify
+     * @param toIndex   index after the last bit to modify
+     * @param value     value to store in the selected range
+     * @throws IndexOutOfBoundsException if an index is negative or the range is invalid
      */
     default void set(int fromIndex, int toIndex, boolean value) {
         if (value)
@@ -70,26 +86,25 @@ public interface ChronicleBitSet extends Marshallable, Closeable {
     }
 
     /**
-     * Returns the value of the bit with the specified index. The value is {@code true} if the bit with the index {@code bitIndex} is currently set in
-     * this {@code ChronicleBitSet}; otherwise, the result is {@code false}.
+     * Returns the value of the bit at the given zero-based index.
      *
-     * @param bitIndex the bit index
-     * @return the value of the bit with the specified index
-     * @throws IndexOutOfBoundsException if the specified index is negative
+     * @param bitIndex index of the bit to query
+     * @return {@code true} if the bit is set
+     * @throws IndexOutOfBoundsException if {@code bitIndex < 0}
      */
     boolean get(int bitIndex);
 
     /**
-     * Sets the bit specified by the index to {@code false}.
+     * Clears the bit at the given zero-based index.
      *
-     * @param bitIndex the index of the bit to be cleared
-     * @throws IndexOutOfBoundsException if the specified index is negative
+     * @param bitIndex index of the bit to clear
+     * @throws IndexOutOfBoundsException if {@code bitIndex < 0}
      */
     void clear(int bitIndex);
 
     /**
-     * Returns the index of the first bit that is set to {@code true} that occurs on or after the specified starting index. If no such bit exists then
-     * {@code -1} is returned.
+     * Finds the index of the next set bit between {@code fromIndex} and
+     * {@code toIndex} inclusive.
      *
      * <p>To iterate over the {@code true} bits in a {@code ChronicleBitSet},
      * use the following loop:
@@ -102,13 +117,20 @@ public interface ChronicleBitSet extends Marshallable, Closeable {
      *     }
      * }}</pre>
      *
-     * @param fromIndex the index to start checking from (inclusive)
-     * @param toIndex   (inclusive) returns -1 if a bit is not found before this value
-     * @return the index of the next set bit, or {@code -1} if there is no such bit
-     * @throws IndexOutOfBoundsException if the specified index is negative
+     * @param fromIndex zero-based index to begin searching (inclusive)
+     * @param toIndex   maximum index to examine (inclusive)
+     * @return index of the next set bit or {@code -1} if none is found
+     * @throws IndexOutOfBoundsException if an index is negative
      */
     int nextSetBit(int fromIndex, int toIndex);
 
+    /**
+     * Finds the next set bit at or after {@code fromIndex}.
+     *
+     * @param fromIndex zero-based index to begin searching
+     * @return index of the next set bit or {@code -1} if none is found
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}
+     */
     int nextSetBit(int fromIndex);
 
     /**
@@ -140,33 +162,113 @@ public interface ChronicleBitSet extends Marshallable, Closeable {
         return 0;
     }
 
+    /**
+     * Counts the number of bits set to {@code true}.
+     *
+     * @return number of set bits
+     */
     int cardinality();
 
+    /**
+     * Returns the index of the next clear bit at or after {@code index}.
+     *
+     * @param index zero-based starting position
+     * @return index of the next clear bit or {@code -1} if none is found
+     * @throws IndexOutOfBoundsException if {@code index < 0}
+     */
     int nextClearBit(int index);
 
+    /**
+     * Flips the state of the bit at {@code index}.
+     *
+     * @param index zero-based index of the bit to flip
+     * @throws IndexOutOfBoundsException if {@code index < 0}
+     */
     void flip(int index);
 
+    /**
+     * Toggles all bits in the range {@code [fromIndex, toIndex)}.
+     *
+     * @param fromIndex zero-based start of the range
+     * @param toIndex   end of the range (exclusive)
+     * @throws IndexOutOfBoundsException if the range is invalid
+     */
     void flip(int fromIndex, int toIndex);
 
+    /**
+     * Clears all bits in the range {@code [fromIndex, toIndex)}.
+     *
+     * @param fromIndex zero-based start of the range
+     * @param toIndex   end of the range (exclusive)
+     * @throws IndexOutOfBoundsException if the range is invalid
+     */
     void clear(int fromIndex, int toIndex);
 
+    /**
+     * Returns the number of {@code long} words currently used to hold the bits.
+     * Trailing zero words are not counted.
+     *
+     * @return number of words in use
+     */
     int getWordsInUse();
 
+    /**
+     * Fetches the word at {@code wordIndex} from the internal representation.
+     *
+     * @param wordIndex zero-based index of the word
+     * @return the word value or {@code 0} if out of range
+     */
     long getWord(int wordIndex);
 
+    /**
+     * Sets the word at {@code wordIndex} to {@code bits}. Implementations may
+     * extend the storage to accommodate the index.
+     *
+     * @param wordIndex zero-based index of the word to modify
+     * @param bits      the 64 bits to store
+     */
     void setWord(int wordIndex, long bits);
 
+    /**
+     * Clears the bits that are set in the given set from this set.
+     *
+     * @param bitSet bit set defining the bits to clear
+     */
     void andNot(ChronicleBitSet bitSet);
 
+    /**
+     * Performs a logical AND with the given set.
+     *
+     * @param bitSet other bit set
+     */
     void and(ChronicleBitSet bitSet);
 
+    /**
+     * Performs a logical XOR with the given set.
+     *
+     * @param bitSet other bit set
+     */
     void xor(ChronicleBitSet bitSet);
 
+    /**
+     * Performs a logical OR with the given set.
+     *
+     * @param bitSet other bit set
+     */
     void or(ChronicleBitSet bitSet);
 
+    /**
+     * Checks whether any bit is set in both this set and {@code bitSet}.
+     *
+     * @param bitSet other bit set
+     * @return {@code true} if the sets share a common set bit
+     */
     boolean intersects(ChronicleBitSet bitSet);
 
+    /**
+     * Copies all bits from {@code bitSet} into this set.
+     *
+     * @param bitSet source bit set
+     */
     void copyFrom(ChronicleBitSet bitSet);
-
-//    ChronicleBitSet get(int rangeStart, int rangeEnd);
 }

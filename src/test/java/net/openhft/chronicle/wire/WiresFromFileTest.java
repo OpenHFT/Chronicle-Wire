@@ -63,7 +63,7 @@ public class WiresFromFileTest extends WireTestCommon {
     }
 
     // Definition for MDU class
-    static class MDU extends SelfDescribingMarshallable {
-        String symbol;
+    public static class MDU extends SelfDescribingMarshallable {
+        public String symbol;
     }
 }

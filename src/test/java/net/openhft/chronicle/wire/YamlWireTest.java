@@ -19,7 +19,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.internal.NoBytesStore;
-import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.TextWireTest.ABCD;
 import net.openhft.chronicle.wire.converter.NanoTime;
@@ -58,6 +58,7 @@ import static net.openhft.chronicle.wire.YamlTokeniserTest.doTest;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 @SuppressWarnings({"rawtypes", "unchecked", "try", "serial"})
 @RunWith(value = Parameterized.class)
@@ -905,6 +906,8 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testABCDBytes() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         @NotNull Wire wire = createWire();
         wire.bytes().append(
                 "A : \"hi\",\n" +
@@ -935,6 +938,8 @@ public class YamlWireTest extends WireTestCommon {
     // Test the string building behavior for ABC objects with Wire.
     @Test
     public void testABCStringBuilder() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         String A = "A: \"hi\", # This is an A\n";
         String B = "B: 'hi', # This is a B\n";
         String C = "C: hi, # And that's a C\n";
@@ -1054,6 +1059,8 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testContextDump() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Bytes<?> from = Bytes.from("# comment\n" +
                 "A: \n" +
                 "  b: 1234\n" +
@@ -1085,6 +1092,8 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testContextDump2() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Bytes<?> from = Bytes.from("#\nb: AA\nc: {}\nd: \n  A: 1\n  B: 2\ne: end");
         try {
             YamlWire yw = new YamlWire(from);
@@ -1244,6 +1253,8 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testException() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         @NotNull Exception e = new InvalidAlgorithmParameterException("Reference cannot be null") {
             @NotNull
             @Override
@@ -1699,17 +1710,23 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test(expected = IllegalArgumentException.class)
     public void writeUnserializable() throws IOException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         System.out.println(WireType.YAML_ONLY.asString(Thread.currentThread()));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void writeUnserializable2() throws IOException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         @NotNull Socket s = new Socket();
         System.out.println(WireType.YAML_ONLY.asString(s));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void writeUnserializable3() throws IOException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         SocketChannel sc = SocketChannel.open();
         System.out.println(WireType.YAML_ONLY.asString(sc));
     }
@@ -1763,6 +1780,8 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testStringArray() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         @NotNull Wire wire = createWire();
         wire.bytes().append("!" + StringArray.class.getName() + " { strings: [ a, b, c ] }");
         StringArray sa = wire.getValueIn()
@@ -1778,6 +1797,8 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testSetBytesAfterDeserialization() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         BytesWrapper bw = Marshallable.fromString("!net.openhft.chronicle.wire.YamlWireTest$BytesWrapper {\n" +
                 "  bytes: \"\"\n" +
                 "}\n");
@@ -1837,6 +1858,8 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void nestedWithEnumSet() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Wire wire = createWire();
         YNestedWithEnumSet n = new YNestedWithEnumSet();
         n.list.add(new WithEnumSet("none"));
@@ -1860,7 +1883,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testDoublePrecisionOverYamlWire() {
-        final Bytes<?> bytes = Bytes.elasticByteBuffer();
+        final Bytes<?> bytes = allocateElasticOnHeap();
 
         final Wire wire = WireType.YAML.apply(bytes);
         final double d = 0.000212345678901;
@@ -1930,6 +1953,8 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testNestedListInterleavedComments() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         YamlWireTest.StringArray obj = WireType.YAML.fromString(YamlWireTest.StringArray.class,
                 "     # first\n" +
                         "{\n" +
@@ -1966,6 +1991,8 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void putData() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Data data = new Data();
         data.timeNS = (long) 1.6e18;
         data.bytes = Bytes.from("zzz");
@@ -1999,6 +2026,8 @@ public class YamlWireTest extends WireTestCommon {
     // Test for Large YAML Documents
     @Test
     public void testLargeYamlDocument() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Wire wire = createWire();
         StringBuilder largeYaml = new StringBuilder();
         for (int i = 0; i < 10000; i++) {
@@ -2011,13 +2040,13 @@ public class YamlWireTest extends WireTestCommon {
     }
 
     // Test for Special Characters in Strings
+    @SuppressWarnings("UnnecessaryUnicodeEscape")
     @Test
     public void testSpecialCharactersInStrings() {
         Wire wire = createWire();
         wire.bytes().append("text: \"Line1\\nLine2\\tTabbed\\u263A\"");
-        assertEquals("Line1\nLine2\tTabbed☺", wire.read("text").text());
+        assertEquals("Line1\nLine2\tTabbed\u263A", wire.read("text").text());
     }
-
 
     enum BWKey implements WireKey {
         field1, field2, field3

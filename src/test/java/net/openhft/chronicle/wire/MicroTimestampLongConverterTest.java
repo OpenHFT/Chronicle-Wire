@@ -49,8 +49,12 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
     // Test different date format parsing
     @Test
     public void parse2() {
+        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456"),
+                INSTANCE.parse("2020-09-18T01:02:03.456"));
         assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456789"),
                 INSTANCE.parse("2020-09-18T01:02:03.456789"));
+        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456789"),
+                INSTANCE.parse("2020-09-18T01:02:03.456789012"));
     }
 
     // Check if trailing 'Z' in timestamp does not affect parsing

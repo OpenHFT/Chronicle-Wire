@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -54,6 +55,7 @@ public class SequenceTest extends WireTestCommon {
     // Test method to check serialization and deserialization functionality.
     @Test
     public void test() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Create a new My object.
         My m1 = new My();

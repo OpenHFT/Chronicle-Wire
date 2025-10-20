@@ -130,7 +130,7 @@ public class Issue609Test extends WireTestCommon {
      * Configuration class representing a single input of a service.
      */
     public static class InputCfg extends AbstractMarshallableCfg {
-        private String input;
+        public String input;
 
         public InputCfg() {
             this(null);

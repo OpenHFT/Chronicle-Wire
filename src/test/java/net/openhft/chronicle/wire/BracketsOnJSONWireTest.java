@@ -1,11 +1,17 @@
+/*
+ * Copyright 2016-2025 chronicle.software
+ */
+
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class BracketsOnJSONWireTest extends net.openhft.chronicle.wire.WireTestCommon {
 
@@ -20,6 +26,7 @@ public class BracketsOnJSONWireTest extends net.openhft.chronicle.wire.WireTestC
     // Test the JSON_ONLY wire type with a method writer and reader using the Printer interface
     @Test
     public void test() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Create an elastic byte buffer to hold the wire data
         final Bytes<ByteBuffer> t = Bytes.elasticByteBuffer();

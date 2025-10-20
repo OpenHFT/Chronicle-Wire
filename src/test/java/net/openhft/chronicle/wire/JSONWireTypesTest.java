@@ -1,5 +1,10 @@
+/*
+ * Copyright 2016-2025 chronicle.software
+ */
+
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -8,11 +13,14 @@ import java.util.Set;
 
 import static net.openhft.chronicle.wire.WireType.JSON_ONLY;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class JSONWireTypesTest extends WireTestCommon {
     @SuppressWarnings("unchecked")
     @Test
     public void nestedSets() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         DtoWithNestedSets dto = new DtoWithNestedSets()
             .setOfSets(
                 of(of(new Dto().field("123")), of(new Dto().field("234")))
@@ -50,7 +58,7 @@ public class JSONWireTypesTest extends WireTestCommon {
     }
 
     public static class DtoWithNestedSets extends SelfDescribingMarshallable {
-        private Set<Set<Dto>> setOfSets;
+        public Set<Set<Dto>> setOfSets;
 
         public Set<Set<Dto>> setOfSets() {
             return setOfSets;

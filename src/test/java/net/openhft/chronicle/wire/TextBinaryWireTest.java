@@ -1,8 +1,8 @@
 /*
  * Copyright 2016-2025 chronicle.software
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *       http://www.apache.org/licenses/LICENSE-2.0
@@ -73,7 +73,7 @@ public class TextBinaryWireTest extends WireTestCommon {
 
     // Create a Wire instance based on the wireType of the test.
     public Wire createWire() {
-        final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
+        final Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(wire.isBinary());
         return wire;
     }

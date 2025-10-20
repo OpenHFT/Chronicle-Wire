@@ -16,11 +16,14 @@
 
 package net.openhft.chronicle.wire.issue;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.Wires;
 import org.junit.Assert;
 import org.junit.Test;
+
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Test class to validate the serialization behavior of special Unicode characters using Wires.
@@ -34,6 +37,8 @@ public class Issue344Test extends WireTestCommon {
      */
     @Test
     public void testFFFF() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         runWith('\uFFFF');
     }
 
@@ -42,6 +47,8 @@ public class Issue344Test extends WireTestCommon {
      */
     @Test
     public void testFFFE() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         runWith('\uFFFE');
     }
 

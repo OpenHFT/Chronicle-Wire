@@ -1,10 +1,11 @@
 = Chronicle Wire: Error Handling and Diagnostics Guide
 :toc:
+:sectnums:
 :source-highlighter: rouge
 
 Purpose: To provide a comprehensive guide on handling errors, diagnosing issues, and debugging when using the Chronicle Wire library.
 
-== 1. Introduction
+== Introduction
 
 Effective error handling and diagnostics are crucial when working with any serialisation library, especially in high-performance systems where Chronicle Wire is often employed.
 Unexpected data, schema mismatches, or resource issues can lead to runtime problems.
@@ -19,11 +20,11 @@ We will cover:
 
 Understanding these aspects will help you build more resilient and maintainable applications with Chronicle Wire.
 
-== 2. Common Exceptions in Chronicle Wire and `chronicle-bytes`
+== Common Exceptions in Chronicle Wire and `chronicle-bytes`
 
 While Chronicle Wire itself might throw specific exceptions, many issues manifest as exceptions from the `chronicle-bytes` library it uses for low-level I/O, or as standard Java exceptions.
 
-=== 2.1. `java.nio.BufferUnderflowException` (from `chronicle-bytes`)
+=== `java.nio.BufferUnderflowException` (from `chronicle-bytes`)
 
 Cause :: This exception typically occurs during a read operation when an attempt is made to read more data from a `Bytes` buffer than is currently available (i.e., trying to read beyond the current `readLimit()` or `writePosition()`).
 
@@ -39,7 +40,7 @@ Debugging/Handling ::
 * Ensure `DocumentContext.isPresent()` is true before attempting to read from its `wire()`.
 * When reading from a shared `Bytes` (e.g., in Chronicle Queue), ensure the write operation was completed and committed.
 
-=== 2.2. `java.nio.BufferOverflowException` (from `chronicle-bytes`)
+=== `java.nio.BufferOverflowException` (from `chronicle-bytes`)
 
 Cause :: Occurs during a write operation when an attempt is made to write more data into a `Bytes` buffer than its current capacity or limit allows, and the buffer is not elastic or cannot expand further.
 
@@ -53,7 +54,7 @@ Debugging/Handling ::
 * Check the `bytes.isElastic()` and `bytes.realCapacity()` methods.
 * Catch the exception and potentially try to resize the buffer or handle the oversized data (e.g., by logging an error or truncating if appropriate).
 
-=== 2.3. `java.io.EOFException` (often wrapped or from `chronicle-bytes` stream utilities)
+=== `java.io.EOFException` (often wrapped or from `chronicle-bytes` stream utilities)
 
 Cause :: Signals that an end of file or end of stream has been reached unexpectedly during an input operation.
 
@@ -66,7 +67,7 @@ Debugging/Handling ::
 * Similar to `BufferUnderflowException`, ensure data integrity and availability.
 * Implement proper end-of-stream detection logic in your application.
 
-=== 2.4. `java.lang.IllegalStateException`
+=== `java.lang.IllegalStateException`
 
 Cause :: This is a general-purpose exception indicating that a method has been invoked at an illegal or inappropriate time, or that the object is not in an appropriate state for the requested operation.
 
@@ -82,7 +83,7 @@ Debugging/Handling ::
 * Check for thread-safety issues if in a concurrent environment.
 The exception message often provides more specific details.
 
-=== 2.5. `net.openhft.chronicle.wire.InvalidMarshallableException`
+=== `net.openhft.chronicle.wire.InvalidMarshallableException`
 
 Cause :: Thrown when there's a problem serialising or deserialising a `Validatable` object, often related to schema inconsistencies or unexpected data.
 
@@ -97,7 +98,7 @@ Debugging/Handling ::
 * Verify class definitions on both writing and reading sides, especially field names and types.
 * Check if schema evolution rules are being followed.
 
-=== 2.6. `java.lang.ClassNotFoundException` or `java.lang.NoClassDefFoundError`
+=== `java.lang.ClassNotFoundException` or `java.lang.NoClassDefFoundError`
 
 Cause :: Occurs during deserialisation when type information is present in the wire format (e.g., `!com.example.MyClass {}` in YAML from `YAML_RETAIN_TYPE`) but the specified class cannot be found on the classpath of the reading application.
 
@@ -110,7 +111,7 @@ Debugging/Handling ::
 * Ensure all necessary classes are available on the classpath of the deserialising application.
 * Use Chronicle Wire's class aliasing (`Wires.CLASS_ALIASES.addAlias(...)`) to map serialized type names to actual classes, which can help decouple serialized names from actual class names.
 
-=== 2.7. `java.lang.IllegalArgumentException`
+=== `java.lang.IllegalArgumentException`
 
 Cause :: Often thrown when a method receives an argument that is invalid or inappropriate for its intended use.
 
@@ -123,11 +124,11 @@ Debugging/Handling ::
 * Check the arguments being passed to Chronicle Wire/Bytes methods.
 * Read the exception message carefully as it usually indicates which argument was problematic.
 
-== 3. Troubleshooting Deserialisation Issues
+== Troubleshooting Deserialisation Issues
 
 Deserialisation is often where subtle data or schema issues become apparent.
 
-=== 3.1. Schema Mismatches
+=== Schema Mismatches
 
 * **Symptoms:** `InvalidMarshallableException`, unexpected `null` values, incorrect field values, or even `BufferUnderflowException` if field count/size changes drastically with formats like `FIELDLESS_BINARY`.
 * **Diagnosis:**
@@ -140,7 +141,7 @@ Look for differences in field names, types, order (if using `FIELDLESS_BINARY`),
 * Implement proper schema evolution strategies (see Chronicle Wire documentation on schema evolution).
 * For `FIELDLESS_BINARY`, ensure strict schema identity or implement a versioning/migration path.
 
-=== 3.2. Corrupted Data or Framing Errors
+=== Corrupted Data or Framing Errors
 
 * **Symptoms:** `EOFException`, `BufferUnderflowException`, `InvalidMarshallableException` with cryptic messages, or reading garbage data.
 * **Diagnosis:**
@@ -154,7 +155,7 @@ If you have custom framing, ensure it's correct.
 * Use `DocumentContext` correctly with `try-with-resources` to ensure proper document finalisation and reading.
 * Investigate the source of potential data corruption (network issues, disk errors, bugs in writing logic).
 
-=== 3.3. Class Aliasing and Polymorphism Issues
+=== Class Aliasing and Polymorphism Issues
 
 * **Symptoms:** `ClassNotFoundException`, or deserialisation into a base type instead of the expected subtype.
 * **Diagnosis:**
@@ -166,17 +167,17 @@ If you have custom framing, ensure it's correct.
 * Use `WireType`s that retain type information when deserialising polymorphic types.
 * Explicitly pass the concrete class to `valueIn.object(SpecificType.class)` if type information is not in the stream.
 
-=== 3.4. Missing No-Argument Constructor
+=== Missing No-Argument Constructor
 
 * **Symptoms:** Exception during object instantiation, often a `NoSuchMethodException` wrapped in a Wire exception.
 * **Diagnosis:** Chronicle Wire (like many serialisation libraries) may require a no-argument constructor to instantiate objects before populating them, especially when using reflection-based or generated marshallers. Generally, it doesn't need a no-argument constructor for `BytesMarshallable` classes. However, this will result in `transient` fields not being set, which can lead to unexpected `null` values or default values in the deserialised object.
 * **Solutions:** Add a public or protected no-argument constructor to your `Marshallable` classes. The access level is ignored, so `private` or package-local can be used.
 
-== 4. Troubleshooting Serialisation Issues
+== Troubleshooting Serialisation Issues
 
 Issues during serialisation are often more straightforward but can still occur.
 
-=== 4.1. Buffer Overflow
+=== Buffer Overflow
 
 * **Symptoms:** `BufferOverflowException`.
 * **Diagnosis:** The data being written is larger than the `Bytes` buffer's current capacity.
@@ -185,7 +186,7 @@ Issues during serialisation are often more straightforward but can still occur.
 * If using fixed-size buffers, ensure they are pre-allocated with sufficient capacity.
 Estimate maximum message size.
 
-=== 4.2. Invalid Data for Fields/Annotations
+=== Invalid Data for Fields/Annotations
 
 * **Symptoms:** `IllegalArgumentException`, `IllegalStateException`, or exceptions from annotation converters (e.g., `Base85LongConverter` failing to parse an invalid character).
 * **Diagnosis:** An attempt was made to write data that violates constraints.
@@ -196,16 +197,16 @@ Estimate maximum message size.
 * Ensure data conforms to the constraints imposed by annotations.
 * Handle exceptions from converters gracefully.
 
-=== 4.3. Custom `Marshallable` Implementation Bugs
+=== Custom `Marshallable` Implementation Bugs
 
 * **Symptoms:** Incorrect data written, `NullPointerException`, or other unexpected exceptions originating from your `writeMarshallable()` method.
 * **Diagnosis:** Step through your custom `writeMarshallable()` logic in a debugger.
 Log the values being written.
 * **Solutions:** Carefully review and test your custom marshalling logic, ensuring all fields are written correctly and in the intended order (especially for `BytesMarshallable`).
 
-== 5. Debugging Techniques
+== Debugging Techniques
 
-=== 5.1. Dump to YAML/Text
+=== Dump to YAML/Text
 
 One of the most powerful features of Chronicle Wire for debugging is its ability to switch formats.
 * **Writing:** If you suspect issues with binary serialisation, temporarily change the `WireType` to `YAML_ONLY` or `JSON_ONLY` and print the `Bytes.toString()`.
@@ -229,29 +230,29 @@ try {
 // Remember to release binaryBytes if it's reference counted
 ----
 
-=== 5.2. Logging `Bytes` Content
+=== Logging `Bytes` Content
 
 * `bytes.toHexString()`: Provides a hexadecimal dump of the buffer's content.
 Useful for inspecting binary data at a low level.
 * `bytes.toDebugString()`: Can provide more detailed internal state of the `Bytes` object.
 * `bytes.readRemaining()` / `bytes.writeRemaining()`: Check remaining capacity.
 
-=== 5.3. Using a Debugger
+=== Using a Debugger
 
 Step through the Chronicle Wire API calls, and especially into your custom `readMarshallable()` / `writeMarshallable()` methods if you have them.
 Inspect the state of `Wire`, `Bytes`, and your objects.
 
-=== 5.4. `Wires.GENERATE_TUPLES` (Legacy/Specific Use)
+=== `Wires.GENERATE_TUPLES` (Legacy/Specific Use)
 
 In some older versions or specific contexts, setting `Wires.GENERATE_TUPLES = true;` would cause complex objects to be written as a "tuple" of their fields, which could be easier to debug in text.
 Check current documentation if this flag is still relevant or has alternatives.
 
-=== 5.5. Isolate the Problem
+=== Isolate the Problem
 
 Try to create a minimal, reproducible example of the error.
 Serialize and deserialize a problematic object in a simple test case to rule out environmental factors.
 
-== 6. Error Handling Best Practices
+== Error Handling Best Practices
 
 * **Use `try-with-resources` for `DocumentContext`:** Ensures proper resource management and finalisation of documents.
 [source,java]
@@ -268,13 +269,13 @@ try (DocumentContext dc = wire.writingDocument()) {
 * **Logging:** Log errors with sufficient context (e.g., the data being processed if it's not too large or sensitive, relevant identifiers, stack traces).
 * **Resource Management:** Always release `Bytes` buffers obtained from `Bytes.elasticByteBuffer()` or `Bytes.allocateDirect()` using `bytes.releaseLast()` when they are no longer needed, especially for direct/off-heap memory, to prevent memory leaks.
 
-== 7. Related Errors in Integrated Systems
+== Related Errors in Integrated Systems
 
 When Chronicle Wire is used within larger systems like Chronicle Queue or Chronicle Network, errors might originate from those systems but relate to the data being processed by Wire.
 
 * **Network Errors (`java.net.SocketException`, etc.):** If using Wire over a network, underlying network issues can interrupt data streams, leading to partial messages and subsequent Wire deserialisation errors.
 
-== 8. Conclusion
+== Conclusion
 
 Robust error handling is key to building reliable systems with Chronicle Wire.
 By understanding common exceptions, employing effective debugging techniques, and following best practices, developers can quickly diagnose and resolve issues, ensuring their applications are resilient and maintainable.

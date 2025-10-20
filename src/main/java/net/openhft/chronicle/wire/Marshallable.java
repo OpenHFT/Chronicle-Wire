@@ -35,13 +35,14 @@ import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
 /**
- * Represents a data structure that supports both reading from and writing to marshallable
- * formats. Implementations of this interface can be converted to and from serialized forms,
- * making it suitable for storage, transmission, or other forms of data exchange.
- * <p>
- * This interface also provides a set of static utility methods to aid in the manipulation
- * and interpretation of marshallable data, allowing for data comparison, hashing,
- * and serialization to and from string and file representations.
+ * A cornerstone interface for objects that need to be serialised to and
+ * deserialised from a wire format.  It combines the ability to {@link
+ * WriteMarshallable write} and {@link ReadMarshallable read} and also extends
+ * {@link Resettable} so that implementations may be reused.  Typical
+ * implementations are data transfer objects or stateful components that must be
+ * persisted or transmitted.  A set of utility methods is provided for common
+ * operations such as comparison, hashing and conversion to and from textual
+ * forms.
  */
 @DontChain
 public interface Marshallable extends WriteMarshallable, ReadMarshallable, Resettable {

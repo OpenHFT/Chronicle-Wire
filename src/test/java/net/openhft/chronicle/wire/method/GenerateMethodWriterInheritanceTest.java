@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire.method;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.*;
 import org.junit.Test;
 
@@ -28,6 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static net.openhft.chronicle.wire.WireType.BINARY;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 /**
@@ -124,6 +126,8 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
      */
     @Test
     public void testGenerateForLongGeneratedClassName() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Allocate a new binary wire buffer
         final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
 

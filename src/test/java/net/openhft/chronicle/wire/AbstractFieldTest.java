@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -25,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 @RunWith(value = Parameterized.class)
 public class AbstractFieldTest extends WireTestCommon {
@@ -53,6 +55,8 @@ public class AbstractFieldTest extends WireTestCommon {
     // Test serialization and deserialization of the abstract field in MSDMHolder class.
     @Test
     public void abstractField() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         MSDMHolder holder = new MSDMHolder();
         holder.marshallable = new MySelfDescribingMarshallable("Hello World");
 
@@ -66,6 +70,8 @@ public class AbstractFieldTest extends WireTestCommon {
     // Test serialization and deserialization of the abstract field in MSDMHolder2 class.
     @Test
     public void abstractField2() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         MSDMHolder2 holder = new MSDMHolder2();
         holder.marshallable = new MySelfDescribingMarshallable("Hello World");
 

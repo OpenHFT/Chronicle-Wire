@@ -7,20 +7,23 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * This interface defines the structure and behavior of an event within a system.
- * It extends {@link BaseEvent}, thereby inheriting methods related to time management,
- * and adds methods specific to event identification and manipulation.
+ * Represents a business or system occurrence identified by an ID and time.
+ * Extends {@link BaseEvent} for temporal handling and adds event identification.
  * <p>
- * NOTE: Only use this interface if the eventId is required as the eventTime is sufficient in most cases
+ * NOTE: Only use this interface if the eventId is required as the eventTime is sufficient in most cases.
+ * The eventId allows events to be routed or categorised beyond their timestamp.
+ * <p>
+ * The self-referential generic &lt;E extends Event&lt;E&gt;&gt; lets implementations return their own type for chaining.
  *
- * @param <E> The type of the implementing event class, following the self-referential generic pattern.
+ * @param <E> the type of the implementing event class
  */
 public interface Event<E extends Event<E>> extends BaseEvent<E> {
 
     /**
-     * Retrieves the unique identifier associated with this event.
+     * Identifier used for routing or logging.
+     * Defaults to an empty string if none has been set.
      *
-     * @return The unique identifier for this event.
+     * @return current identifier, or an empty string when unset
      */
     @NotNull
     default CharSequence eventId() {
@@ -29,11 +32,11 @@ public interface Event<E extends Event<E>> extends BaseEvent<E> {
     }
 
     /**
-     * Assigns an identifier to this event. The provided identifier must not be null.
-     * This method can be used to explicitly set or change the event's identifier.
+     * Assigns or replaces the identifier.
      *
-     * @param eventId The unique identifier to assign to this event.
-     * @return The current instance of the event, facilitating method chaining.
+     * @param eventId unique identifier to assign, should not be null; an empty
+     *                string can be used when no specific ID is required
+     * @return this event instance for chaining
      */
     @SuppressWarnings("unchecked")
     default E eventId(@NotNull final CharSequence eventId) {
@@ -42,12 +45,12 @@ public interface Event<E extends Event<E>> extends BaseEvent<E> {
     }
 
     /**
-     * Updates the event with a new name, and if the event time is not already set,
-     * updates the event time to the current system time. This method is useful for renaming
-     * events and ensuring they have a valid timestamp.
+     * Updates the event ID and sets the time if needed.
+     * The ID is set to {@code eventName} when the current ID is empty.
+     * If {@link #eventTime()} is {@code <= 0} the time is updated via {@link #eventTimeNow()}.
      *
-     * @param eventName The new name to be assigned to the event.
-     * @return The current instance of the implementing class, with any necessary updates applied.
+     * @param eventName name to assign when {@link #eventId()} is empty
+     * @return this event instance after the update
      */
     @SuppressWarnings("unchecked")
     default E updateEvent(final String eventName) {
@@ -62,12 +65,11 @@ public interface Event<E extends Event<E>> extends BaseEvent<E> {
     }
 
     /**
-     * Copies essential details from one event to another. This method is preferred over direct
-     * field access as it provides a more controlled way of transferring details between events,
-     * and facilitates future changes to the event structure.
+     * Copies the eventId and eventTime from one event to another.
+     * Prefer this helper over field access to keep a single point of change.
      *
-     * @param from The source event from which details are copied.
-     * @param to The target event to which details are copied.
+     * @param from the source {@code Event}
+     * @param to   the target {@code Event}
      */
     static void copyEventDetails(Event<?> from, Event<?> to) {
         to.eventId(from.eventId());

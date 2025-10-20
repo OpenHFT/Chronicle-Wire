@@ -17,17 +17,26 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.BitSet;
 
+import static org.junit.Assume.assumeFalse;
+
 public class BitSetTest extends WireTestCommon {
+
+    @Before
+    public void hasDirect() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+    }
 
     // Test the equality of a BitSet after being written and read from a wire
     @Test
     public void testBitSetEquals() {
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             Wire wire = WireType.TEXT.apply(b);
 
@@ -45,7 +54,7 @@ public class BitSetTest extends WireTestCommon {
     // Test the equality of a BitSet with multiple bits set after being written and read from a wire
     @Test
     public void testBitSetEquals2() {
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             Wire wire = WireType.TEXT.apply(b);
 
@@ -64,7 +73,7 @@ public class BitSetTest extends WireTestCommon {
     // Test the conversion of a BitSet to text format after being written to a wire
     @Test
     public void testBitSetToText() {
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             Wire wire = WireType.TEXT.apply(b);
 
@@ -84,7 +93,7 @@ public class BitSetTest extends WireTestCommon {
     // Test the conversion of a BitSet with multiple bits set to text format after being written to a wire
     @Test
     public void testBitSet2ToText() {
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             Wire wire = WireType.TEXT.apply(b);
 
@@ -110,7 +119,7 @@ public class BitSetTest extends WireTestCommon {
         BitSet using = new BitSet(4);
         using.set(1);
 
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             Wire wire = WireType.TEXT.apply(b);
 

@@ -15,6 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.MethodWriterInvocationHandler;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,16 +23,24 @@ import java.lang.reflect.Method;
 import java.util.function.Supplier;
 
 /**
- * The BinaryMethodWriterInvocationHandler handles method invocations specific to binary writing scenarios with optional metadata support.
+ * {@link MethodWriterInvocationHandler} that serialises method calls to a
+ * {@link MarshallableOut} using the binary wire format.
+ * <p>
+ * Each call is wrapped in a {@link WriteDocumentContext} which is opened and
+ * closed by this handler. Calls may be written as data or metadata documents
+ * depending on the {@link #metaData} flag.
  */
 public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInvocationHandler {
+
+    // Supplier for the target {@link MarshallableOut} used to serialise method calls
     @NotNull
     private final Supplier<MarshallableOut> marshallableOutSupplier;
-    private final boolean metaData;  // Flag to determine if metadata should be written.
+
+    // Flag to determine if metadata should be written
+    private final boolean metaData;
 
     /**
-     * Constructor that initializes the handler using the given class, metadata flag and MarshallableOut.
-     * This constructor uses a constant MarshallableOut.
+     * Create a handler bound to a single {@link MarshallableOut} instance.
      *
      * @param tClass           The class type associated with this handler.
      * @param metaData         Flag to determine if metadata is to be written.
@@ -42,11 +51,11 @@ public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInv
     }
 
     /**
-     * Constructor that initializes the handler using the given class, metadata flag and a supplier of MarshallableOut.
+     * Create a handler using the given class, metadata flag and a supplier of MarshallableOut.
      *
-     * @param tClass                  The class type associated with this handler.
+     * @param tClass                  primary interface of the proxy
      * @param metaData                Flag to determine if metadata is to be written.
-     * @param marshallableOutSupplier The supplier providing instances of MarshallableOut.
+     * @param marshallableOutSupplier supplier of the destination for serialised calls
      */
     public BinaryMethodWriterInvocationHandler(Class<?> tClass, final boolean metaData, Supplier<MarshallableOut> marshallableOutSupplier) {
         super(tClass);
@@ -55,6 +64,11 @@ public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInv
         recordHistory = marshallableOutSupplier.get().recordHistory();
     }
 
+    /**
+     * Intercepts calls on the proxy. A call to {@code writingDocument()} is handled here
+     * to expose the underlying {@link WriteDocumentContext} directly.
+     * Other calls are delegated to {@link AbstractMethodWriterInvocationHandler#doInvoke(Object, Method, Object[])}.
+     */
     @Override
     protected Object doInvoke(Object proxy, Method method, Object[] args) {
         if (method.getName().equals("writingDocument") && method.getParameterCount() == 0) {
@@ -73,6 +87,13 @@ public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInv
         return metaData;
     }
 
+    /**
+     * Serialises the given {@code method} call with {@code args} to the configured output.
+     * Each invocation acquires a new {@link WriteDocumentContext} which is marked
+     * to possibly hold metadata according to {@link #metaData}.
+     * If the return type of the method is an interface the document context is marked as
+     * {@code chained} so subsequent calls may share the same context.
+     */
     @Override
     protected void handleInvoke(Method method, Object[] args) {
         boolean chained = method.getReturnType().isInterface();

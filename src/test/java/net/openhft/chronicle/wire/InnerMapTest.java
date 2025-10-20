@@ -1,8 +1,8 @@
 /*
  * Copyright 2016-2025 chronicle.software
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *       http://www.apache.org/licenses/LICENSE-2.0
@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,13 +28,17 @@ import org.junit.Test;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static org.junit.Assume.assumeFalse;
+
 public class InnerMapTest extends WireTestCommon {
 
     // A test case to verify the marshaling and demarshaling of the `MyMarshable` class
     @Test
     public void testMyInnnerMap() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Create a new instance of MyMarshable and set its properties
-        @NotNull MyMarshable myMarshable = new MyMarshable().name("rob");
+        @NotNull MyMarshable myMarshable = new MyMarshable("rob");
         myMarshable.commission().put("hello", 123.4);
         myMarshable.nested = new MyNested("text");
 
@@ -52,7 +57,7 @@ public class InnerMapTest extends WireTestCommon {
 
         // Allocate elastic byte buffer to hold serialized data
         @SuppressWarnings("rawtypes")
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
 
         // Create a binary wire object for serialization; note the comment about binary vs text
         @NotNull Wire w = new BinaryWire(b);
@@ -86,7 +91,8 @@ public class InnerMapTest extends WireTestCommon {
         }
 
         // Default constructor
-        public MyMarshable() {
+        public MyMarshable(String name) {
+            this.name = name;
             this.commission = new LinkedHashMap<>();
         }
 

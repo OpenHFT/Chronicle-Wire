@@ -29,11 +29,10 @@ public class TestJsonIssue467 {
 
     public static class ResponseItem467 extends SelfDescribingMarshallable {
         @NotNull
-        String index;
-        private final Bytes<?> key = Bytes.elasticByteBuffer();
-        private Object payload;
+        public String index;
+        public final Bytes<?> key = Bytes.allocateElasticOnHeap();
+        public Object payload;
     }
-
 
     @Test
     public void test() {
@@ -163,6 +162,4 @@ public class TestJsonIssue467 {
                 "  payload: Successfully debited your account by 0.0\n" +
                 "}\n", responseItem467.toString());
     }
-
-
 }

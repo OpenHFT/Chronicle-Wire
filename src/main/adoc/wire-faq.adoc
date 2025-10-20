@@ -3,21 +3,22 @@
 :source-highlighter: rouge
 
 Purpose: To provide answers to frequently asked questions about the Chronicle Wire library.
+:sectnums:
 
 [qanda]
 == Basics & Core Concepts
 
 What is Chronicle Wire? ::
-Chronicle Wire is an open-source Java library from the OpenHFT ecosystem designed for high-performance, low-latency serialization and deserialization. It supports multiple data formats through a unified API.
+Chronicle Wire is an open-source Java library from the OpenHFT ecosystem designed for high-performance, low-latency serialisation and deserialisation. It supports multiple data formats through a unified API.
 
-Why should I use Chronicle Wire over standard Java Serialization? ::
-Chronicle Wire offers significantly better performance (lower latency, higher throughput), minimal garbage creation, greater flexibility with multiple data formats, and more robust schema evolution capabilities compared to standard Java Serialization.
+Why should I use Chronicle Wire over standard Java Serialisation? ::
+Chronicle Wire offers significantly better performance (lower latency, higher throughput), minimal garbage creation, greater flexibility with multiple data formats, and more robust schema evolution capabilities compared to standard Java Serialisation.
 
 What are the main design goals of Chronicle Wire? ::
 Low latency, minimal garbage collection, format agnosticism (support for YAML, JSON, Binary, etc.), and efficient handling of off-heap memory.
 
 What does "format-agnostic" mean in the context of Chronicle Wire? ::
-It means you can write your serialization/deserialization logic once (e.g., using `Marshallable` objects) and then switch the underlying data format (e.g., from YAML to Binary) by simply changing the `WireType` without altering your core application code.
+It means you can write your serialisation/deserialisation logic once (e.g., using `Marshallable` objects) and then switch the underlying data format (e.g., from YAML to Binary) by simply changing the `WireType` without altering your core application code.
 
 What is `Bytes` in Chronicle Wire? ::
 `Bytes` (from the `chronicle-bytes` library) is a core abstraction representing a sequence of bytes. It can wrap on-heap byte arrays, off-heap direct memory, or memory-mapped files. Chronicle Wire implementations read from and write to `Bytes` instances.
@@ -26,7 +27,7 @@ What is a `Wire` instance? ::
 A `Wire` instance is the primary interface for reading and writing structured data in a specific format (like YAML, JSON, or Binary). You obtain it by applying a `WireType` to a `Bytes` buffer.
 
 What is `WireType`? ::
-`WireType` is an enum that defines the different serialization formats supported by Chronicle Wire (e.g., `YAML_ONLY`, `JSON_ONLY`, `BINARY_LIGHT`, `FIELDLESS_BINARY`). It also acts as a factory for creating `Wire` instances.
+`WireType` is an enum that defines the different serialisation formats supported by Chronicle Wire (e.g., `YAML_ONLY`, `JSON_ONLY`, `BINARY_LIGHT`, `FIELDLESS_BINARY`). It also acts as a factory for creating `Wire` instances.
 
 What is `DocumentContext`? ::
 `DocumentContext` is used to manage the boundaries of individual messages or "documents" when streaming multiple items to or from a `Wire`. It's crucial for ensuring messages are correctly framed, especially in binary formats or when used with Chronicle Queue.
@@ -37,7 +38,7 @@ What is the `Marshallable` interface? ::
 It's an interface that your POJOs can implement to indicate they can be serialized and deserialized by Chronicle Wire. It has `readMarshallable(WireIn)` and `writeMarshallable(WireOut)` methods.
 
 What is `SelfDescribingMarshallable`? ::
-It's a convenient abstract base class that implements `Marshallable`. It automatically provides serialization/deserialization logic for fields (via reflection or code generation) and also generates `toString()`, `equals()`, and `hashCode()` methods based on the object's fields.
+It's a convenient abstract base class that implements `Marshallable`. It automatically provides serialisation/deserialisation logic for fields (via reflection or code generation) and also generates `toString()`, `equals()`, and `hashCode()` methods based on the object's fields.
 
 What is `BytesMarshallable`? ::
 It's a lower-level interface for objects that need complete control over their binary representation. Implementors read/write directly from/to `BytesIn`/`BytesOut`, bypassing some of Wire's higher-level mechanisms for maximum performance or custom formats.
@@ -46,13 +47,13 @@ How does Chronicle Wire serialize fields in a `Marshallable` object? ::
 By default (especially with `SelfDescribingMarshallable`), it can use reflection or, for better performance, generate bytecode at runtime (`WireMarshaller`) to directly access and serialize/deserialize fields.
 
 Do I need getters and setters for `Marshallable` objects? ::
-Not strictly for serialization if fields are public or default access within the same package. However, for private fields or to follow JavaBean conventions, getters/setters are good practice. Chronicle Wire's generated marshallers can often access private fields if permissions allow.
+Not strictly for serialisation if fields are public or default access within the same package. However, for private fields or to follow JavaBean conventions, getters/setters are good practice. Chronicle Wire's generated marshallers can often access private fields if permissions allow.
 
 Can I serialize collections (Lists, Maps) with Chronicle Wire? ::
 Yes. Chronicle Wire can serialize collections containing primitives, strings, or other `Marshallable` objects. It has specific methods on `ValueOut` (e.g., `sequence()`, `marshallableAsMap()`) and `ValueIn` to handle them.
 
 How are null values handled? ::
-Chronicle Wire can represent nulls. In text formats, it might be explicit (e.g., `fieldName: !!null ""`). In binary, it's handled with special markers or by omitting fields. The behavior can sometimes depend on the `WireType`.
+Chronicle Wire can represent nulls. In text formats, it might be explicit (e.g., `fieldName: !!null ""`). In binary, it's handled with special markers or by omitting fields. The behaviour can sometimes depend on the `WireType`.
 
 == API Usage
 
@@ -74,7 +75,7 @@ It ensures that the `DocumentContext` is closed properly. For writing, closing t
 Can Chronicle Wire serialize enums? ::
 Yes, enums can be serialized. They are typically written as their string name in text formats or as an ordinal/name in binary.
 
-== Serialization Formats
+== Serialisation Formats
 
 Which `WireType` should I choose for human-readable output? ::
 `YAML_ONLY` or `JSON_ONLY` are good choices for pure YAML or JSON output respectively.
@@ -89,12 +90,12 @@ Can I read data written in one `WireType` with another? ::
 Sometimes, yes. For example, binary data written with `BINARY_LIGHT` can often be "dumped" or inspected using `YAML_ONLY` because `BINARY_LIGHT` can be self-describing. `READ_ANY` wire type attempts to auto-detect the format. However, you cannot reliably read `FIELDLESS_BINARY` as YAML, for instance.
 
 How does `YAML_RETAIN_TYPE` or `JSON_RETAIN_TYPE` work? ::
-These wire types include explicit type information (e.g., `!com.example.MyClass {}` in YAML) in the output. This allows for deserialization of polymorphic types or when the concrete class is not known by the reader beforehand.
+These wire types include explicit type information (e.g., `!com.example.MyClass {}` in YAML) in the output. This allows for deserialisation of polymorphic types or when the concrete class is not known by the reader beforehand.
 
 == Annotations
 
 What is the purpose of annotations in Chronicle Wire? ::
-Annotations provide a declarative way to customize serialization behavior, such as data conversion, formatting, or providing metadata for schema evolution, without writing extensive custom marshalling code.
+Annotations provide a declarative way to customise serialisation behaviour, such as data conversion, formatting, or providing metadata for schema evolution, without writing extensive custom marshalling code.
 
 How does `@LongConversion` (e.g., `@Base64`, `@Base85`) work? ::
 It allows you to store a short string (packed into a `long`) efficiently in binary while representing it as a human-readable string in text formats. For example, `@ShortText long myId;` will store up to 10 characters in an 8-byte long.
@@ -140,7 +141,7 @@ It's designed to create minimal or zero garbage in its critical paths, especiall
 What is "off-heap" memory and how does Wire use it? ::
 Off-heap memory is Java direct memory allocated outside the JVM's garbage-collected heap. Chronicle Wire, through `chronicle-bytes`, can serialize directly to and deserialize directly from off-heap `Bytes` buffers, reducing GC pressure.
 
-How can I optimize Chronicle Wire performance? ::
+How can I optimise Chronicle Wire performance? ::
 * Choose efficient binary `WireType`s (`BINARY_LIGHT`, `FIELDLESS_BINARY`).
 * Use off-heap `Bytes`.
 * Reuse `Marshallable` objects if possible (e.g., with a `reset()` method).
@@ -153,20 +154,20 @@ Performance comparisons depend heavily on the specific use case, data structures
 == Integration
 
 How is Chronicle Wire used in Chronicle Queue? ::
-Chronicle Wire is the serialization engine for messages stored in Chronicle Queue. It serializes data into queue excerpts (typically in `BINARY_LIGHT` format). The `MethodWriter` and `MethodReader` patterns in Queue use Wire to serialize method calls and arguments.
+Chronicle Wire is the serialisation engine for messages stored in Chronicle Queue. It serializes data into queue excerpts (typically in `BINARY_LIGHT` format). The `MethodWriter` and `MethodReader` patterns in Queue use Wire to serialize method calls and arguments.
 
 How is Chronicle Wire used in Chronicle Map? ::
 Chronicle Wire is used to serialize keys and values when they are custom Java objects being stored in an off-heap Chronicle Map. Users typically make their keys/values `Marshallable` or `BytesMarshallable`.
 
 Can I use Chronicle Wire for network communication? ::
-Yes. While Wire itself is a serialization library, it's used by `chronicle-network` (and related OpenHFT networking components) to marshal data for sending over TCP/IP or UDP.
+Yes. While Wire itself is a serialisation library, it's used by `chronicle-network` (and related OpenHFT networking components) to marshal data for sending over TCP/IP or UDP.
 
 Can I use Chronicle Wire for configuration files? ::
 Yes, `YAML_ONLY` Wire is excellent for creating and parsing human-readable configuration files. Your configuration DTOs can implement `Marshallable`.
 
 == Troubleshooting & Debugging
 
-My deserialization is failing, what could be wrong? ::
+My deserialisation is failing, what could be wrong? ::
 Common causes include:
 * Schema mismatch (fields added/removed/changed type, especially with non-flexible formats like `FIELDLESS_BINARY`).
 * Incorrect `WireType` used for reading data written in a different, incompatible format.
@@ -189,10 +190,10 @@ Are there any common pitfalls when using Chronicle Wire? ::
 == Advanced Topics
 
 What are "trivially copyable objects" in Chronicle Wire? ::
-This is an optimization where, if an object's serialized form is a direct memory copy of its in-memory layout (e.g., a class with only primitive fields laid out appropriately for `BytesMarshallable`), serialization/deserialization can be extremely fast, almost a `memcpy`.
+This is an optimisation where, if an object's serialized form is a direct memory copy of its in-memory layout (e.g., a class with only primitive fields laid out appropriately for `BytesMarshallable`), serialisation/deserialisation can be extremely fast, almost a `memcpy`.
 
 Can I create custom `WireType` implementations? ::
-Yes, the architecture is extensible, but this is an advanced task requiring a deep understanding of the `Wire` interface and serialization principles.
+Yes, the architecture is extensible, but this is an advanced task requiring a deep understanding of the `Wire` interface and serialisation principles.
 
 How does Chronicle Wire handle circular dependencies in object graphs? ::
 Standard Chronicle Wire object marshalling is primarily designed for tree-like structures or DAGs. Deeply nested circular dependencies can cause issues (like `StackOverflowError`) if not handled carefully. For complex graphs, you might need custom marshalling logic or to break cycles.

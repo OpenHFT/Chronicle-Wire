@@ -1,3 +1,7 @@
+/*
+ * Copyright 2016-2025 chronicle.software
+ */
+
 package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.bytes.Bytes;
@@ -5,10 +9,12 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import net.openhft.chronicle.wire.*;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assume.assumeFalse;
 
 public class CNFREOnMissingClassTest extends WireTestCommon {
 
@@ -94,6 +100,8 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
      */
     @Test
     public void useTupleOnMissingClassForInterfaceField() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         testInterfaceFieldTest0(true, "" +
                 "!UsesInterfaceField {\n" +
                 "  name: henry,\n" +

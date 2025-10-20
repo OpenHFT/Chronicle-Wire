@@ -27,12 +27,19 @@ import net.openhft.chronicle.wire.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+/**
+ * Demonstrates the event-by-method pattern where method calls are serialised
+ * and later dispatched to a handler via a {@link MethodReader}.
+ */
 public class EventByMethodExamples {
     static {
         // let it flush the System.err first
         Jvm.pause(20);
     }
 
+    /**
+     * Runs all demo scenarios.
+     */
     public static void main(String[] args) {
         helloWorld();
         noArgs();
@@ -168,6 +175,9 @@ public class EventByMethodExamples {
         System.out.println();
     }
 
+    /**
+     * Events that can be published in this demo.
+     */
     interface Examples extends Saying {
         void noArgs();
 
@@ -185,26 +195,44 @@ public class EventByMethodExamples {
         void withDto(MyTypes dto);
     }
 
+    /**
+     * Simple greeting event.
+     */
     interface Saying {
         void say(String hello);
     }
 
+    /**
+     * Adds a timestamp to an event.
+     */
     interface Timed<T> {
         T at(@LongConversion(NanoTimestampLongConverter.class) long time);
     }
 
+    /**
+     * Combination of {@link Timed} and {@link Saying} events.
+     */
     interface TimedSaying extends Timed<Saying> {
 
     }
 
+    /**
+     * Allows events to be routed to a named destination.
+     */
     interface Destination<T> {
         T via(String via);
     }
 
+    /**
+     * Combines destination routing with timestamped sayings.
+     */
     interface DestinationTimedSaying extends Destination<TimedSaying> {
 
     }
 
+    /**
+     * DTO used to demonstrate sending a block of primitive fields as one event.
+     */
     static class MyTypes extends SelfDescribingMarshallable {
         final StringBuilder text = new StringBuilder();
         boolean flag;

@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire.issue;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
@@ -27,6 +28,7 @@ import java.nio.ByteBuffer;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Test class to validate the handling of nested objects
@@ -41,6 +43,8 @@ public class WireBug38Test extends WireTestCommon {
      */
     @Test
     public void testNestedObj() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Define the TEXT WireType and a test string
         @NotNull final WireType wireType = WireType.TEXT;
         @NotNull final String exampleString = "{";

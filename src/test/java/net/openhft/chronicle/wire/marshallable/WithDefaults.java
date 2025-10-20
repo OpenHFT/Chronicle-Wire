@@ -29,22 +29,22 @@ import org.jetbrains.annotations.NotNull;
 public class WithDefaults extends SelfDescribingMarshallable {
 
     // Stores bytes data initialized with the string "Hello"
-    Bytes<?> bytes = Bytes.from("Hello");
+    public Bytes<?> bytes = Bytes.from("Hello");
 
     // Stores a default text value "Hello"
-    String text = "Hello";
+    public String text = "Hello";
 
     // Default flag set to true
-    boolean flag = true;
+    public boolean flag = true;
 
     // Default numerical value set to the smallest integer value
-    int num = Integer.MIN_VALUE;
+    public int num = Integer.MIN_VALUE;
 
     // Default numerical value set to the smallest long value
-    Long num2 = Long.MIN_VALUE;
+    public Long num2 = Long.MIN_VALUE;
 
     // Default quantity initialized to NaN (Not a Number)
-    double qty = Double.NaN;
+    public double qty = Double.NaN;
 
     /**
      * Writes the marshallable data of this class to the given wire.

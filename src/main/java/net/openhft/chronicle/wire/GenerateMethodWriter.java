@@ -46,8 +46,20 @@ import static java.util.Collections.*;
 import static net.openhft.chronicle.core.util.GenericReflection.erase;
 import static net.openhft.chronicle.core.util.GenericReflection.getParameterTypes;
 /**
- * This is the GenerateMethodWriter class responsible for generating method writer code.
- * It provides utility methods and configurations to facilitate the dynamic generation of method writers.
+ * Dynamically generates and compiles Java code for method writer proxies.  The
+ * generated proxy serialises invocations to a {@link MarshallableOut}
+ * destination using a chosen {@link WireType}.
+ * <p>
+ * Each target interface is inspected and an implementation is produced that
+ * forwards calls to the matching {@link ValueOut} method on a {@link Wire}.
+ * The resulting class is compiled and loaded at runtime.  It is primarily used
+ * by {@link VanillaMethodWriterBuilder} when code generation is enabled.
+ * <p>
+ * This implementation predates {@link GenerateMethodWriter2} and exists for
+ * specific use cases.
+ *
+ * @see VanillaMethodWriterBuilder
+ * @see MethodWriter
  */
 @SuppressWarnings("deprecation")
 public class GenerateMethodWriter {
@@ -148,8 +160,8 @@ public class GenerateMethodWriter {
     private final boolean verboseTypes;
 
     /**
-     * Constructor for the GenerateMethodWriter class.
-     * Initializes all the required fields for the code generation process.
+     * Internal constructor used by {@link #newClass}.
+     * All parameters configure a single proxy generation run.
      *
      * @param packageName         The package name for the generated method writer.
      * @param interfaces          The interfaces to be implemented by the generated method writer.
@@ -186,7 +198,7 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Generates a proxy class based on the provided interface class.
+     * Creates and compiles a new method writer class based on the provided interface class.
      *
      * @param fullClassName         Fully qualified class name for the generated proxy class.
      * @param interfaces            A set of interface classes that the generated proxy class will implement.
@@ -194,11 +206,11 @@ public class GenerateMethodWriter {
      * @param wireType              The wire type for serialization.
      * @param genericEvent          The generic event type.
      * @param metaData              Indicates if metadata should be included.
-     * @param useMethodId           Indicates if method ID should be used.
-     * @param useUpdateInterceptor  Indicates if the update interceptor should be used.
+     * @param useMethodId           Indicates if {@link MethodId} should be used.
+     * @param useUpdateInterceptor  Indicates if the {@link UpdateInterceptor} should be used.
      * @param verboseTypes          Indicates if verbose types should be used.
      * @return                      A generated proxy class based on the provided interface class,
-     *                              or null if it can't be created.
+     *                              or {@code null} if it can't be created.
      */
     @Nullable
     public static Class<?> newClass(String fullClassName,

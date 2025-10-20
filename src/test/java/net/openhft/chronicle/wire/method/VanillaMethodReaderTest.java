@@ -37,6 +37,7 @@ import java.util.concurrent.BlockingQueue;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 public class VanillaMethodReaderTest extends WireTestCommon {
 
@@ -44,6 +45,8 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     public void testMethodReaderWriterMetadata() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             Wire wire = WireType.BINARY.apply(b);
@@ -90,6 +93,8 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     public void readMethods() throws IOException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Wire wire = new TextWire(BytesUtil.readFile("methods/in.yaml"))
                 .useTextDocuments();
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
@@ -220,10 +225,11 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     public void testNestedUnknownClass() {
-        Wires.GENERATE_TUPLES = true;
+        assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
-                .useTextDocuments();
+                .useTextDocuments()
+                .generateTuples(true);
         MRTListener writer2 = wire2.methodWriter(MRTListener.class);
 
         String text = "unknown: {\n" +
@@ -235,7 +241,8 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 "}\n" +
                 "...\n";
         Wire wire = TextWire.from(text)
-                .useTextDocuments();
+                .useTextDocuments()
+                .generateTuples(true);
         MethodReader reader = wire.methodReader(writer2);
         checkReaderType(reader);
         assertTrue(reader.readOne());
@@ -245,10 +252,11 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     public void testUnknownClassDoesntThrow() {
-        Wires.GENERATE_TUPLES = true;
+        assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
-                .useTextDocuments();
+                .useTextDocuments()
+                .generateTuples(true);
         MRTListener writer2 = wire2.methodWriter(MRTListener.class);
 
         String text = "top: !UnknownClass {\n" +
@@ -264,7 +272,8 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 "}\n" +
                 "...\n";
         Wire wire = TextWire.from(text)
-                .useTextDocuments();
+                .useTextDocuments()
+                .generateTuples(true);
         MethodReader reader = wire.methodReader(writer2);
         checkReaderType(reader);
         assertTrue(reader.readOne());
@@ -275,10 +284,11 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test(expected = ClassNotFoundRuntimeException.class)
     public void testUnknownClassThrow() {
-        Wires.GENERATE_TUPLES = false;
+        assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
-                .useTextDocuments();
+                .useTextDocuments()
+                .generateTuples(false);
         MRTListener writer2 = wire2.methodWriter(MRTListener.class);
 
         String text = "top: !UnknownClass {\n" +
@@ -294,7 +304,8 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 "}\n" +
                 "...\n";
         Wire wire = TextWire.from(text)
-                .useTextDocuments();
+                .useTextDocuments()
+                .generateTuples(false);
         MethodReader reader = wire.methodReader(writer2);
         checkReaderType(reader);
         assertTrue(reader.readOne());
@@ -327,11 +338,6 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         } finally {
             MessageHistory.clear();
         }
-    }
-
-    @After
-    public void resetGenerateTuples() {
-        Wires.GENERATE_TUPLES = false;
     }
 
     @Test(expected = IllegalStateException.class)

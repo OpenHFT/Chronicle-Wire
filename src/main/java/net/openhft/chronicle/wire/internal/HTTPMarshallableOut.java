@@ -25,7 +25,9 @@ import net.openhft.chronicle.wire.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 

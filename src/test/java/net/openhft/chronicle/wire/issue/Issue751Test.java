@@ -1,9 +1,16 @@
+/*
+ * Copyright 2016-2025 chronicle.software
+ */
+
 package net.openhft.chronicle.wire.issue;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
+
+import static org.junit.Assume.assumeFalse;
 
 public class Issue751Test extends WireTestCommon {
 
@@ -29,8 +36,8 @@ public class Issue751Test extends WireTestCommon {
     }
 
     public static class Three extends SelfDescribingMarshallable {
-        private One one;
-        private Two two;
+        public One one;
+        public Two two;
 
         public Three(One one, Two two) {
             this.one = one;
@@ -40,6 +47,8 @@ public class Issue751Test extends WireTestCommon {
 
     @Test
     public void comparableField() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Wire wire = new YamlWire(Bytes.allocateElasticOnHeap());
         wire.write("first").object(new Three(
                 new One("hello"), new Two(42)));

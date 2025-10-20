@@ -1,8 +1,8 @@
 /*
  * Copyright 2016-2025 chronicle.software
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *       http://www.apache.org/licenses/LICENSE-2.0
@@ -33,10 +33,10 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 public class Nested implements Serializable, Validatable {
     private static final long serialVersionUID = 0L;
     // Fields of various types including a custom class, collections, and a map
-    ScalarValues values;
-    List<String> strings;
-    Set<Integer> ints;
-    Map<String, List<Double>> map;
+    public ScalarValues values;
+    public List<String> strings;
+    public Set<Integer> ints;
+    public Map<String, List<Double>> map;
 
     // Default constructor
     public Nested() {

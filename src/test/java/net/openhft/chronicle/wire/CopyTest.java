@@ -1,8 +1,8 @@
 /*
  * Copyright 2016-2025 chronicle.software
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *       http://www.apache.org/licenses/LICENSE-2.0
@@ -146,10 +146,10 @@ public class CopyTest extends WireTestCommon {
 
     // Class representing the data structure to be used in the copy test
     @SuppressWarnings("unused")
-    private static class AClass extends SelfDescribingMarshallable {
-        Map<CcyPair, String> map;
-        String[] array;
-        int intValue;
-        double value;
+    public static class AClass extends SelfDescribingMarshallable {
+        public Map<CcyPair, String> map;
+        public String[] array;
+        public int intValue;
+        public double value;
     }
 }

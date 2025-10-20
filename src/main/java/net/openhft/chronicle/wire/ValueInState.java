@@ -37,7 +37,8 @@ class ValueInState {
     private long[] unexpected = EMPTY_ARRAY;
 
     /**
-     * Resets the saved position and the unexpected values to their initial states.
+     * Resets this state, clearing {@link #savedPosition} and removing all
+     * recorded unexpected positions.
      */
     public void reset() {
         savedPosition = 0;
@@ -45,24 +46,25 @@ class ValueInState {
     }
 
     /**
-     * Adds an unexpected position to the list of unexpected values.
+     * Adds the given {@code wirePosition} to the list of unexpected field starts.
+     * Grows the internal array if required.
      *
-     * @param position The unexpected position to be added
+     * @param wirePosition position of an unexpected field
      */
-    public void addUnexpected(long position) {
+    public void addUnexpected(long wirePosition) {
         if (unexpectedSize >= unexpected.length) {
             int newSize = unexpected.length * 3 / 2 + 8;
             @NotNull long[] unexpected2 = new long[newSize];
             System.arraycopy(unexpected, 0, unexpected2, 0, unexpected.length);
             unexpected = unexpected2;
         }
-        unexpected[unexpectedSize++] = position;
+        unexpected[unexpectedSize++] = wirePosition;
     }
 
     /**
-     * Sets the saved position for the current state.
+     * Stores the given position for later retrieval.
      *
-     * @param savedPosition The position to be saved
+     * @param savedPosition position to save
      */
     public void savedPosition(long savedPosition) {
         this.savedPosition = savedPosition;

@@ -26,31 +26,43 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * The {@code MessagePathClassifier} class is responsible for classifying message paths based on their histories.
- * This classifier allows messages to be grouped or identified based on patterns of their source IDs. It provides
- * mechanisms to associate a path ID with certain patterns of source IDs and to retrieve the appropriate path ID
- * for a given message history.
+ * Classifies message paths based on the history of each message.
  * <p>
- * This class also implements {@link IntSupplier}, allowing the direct fetching of path ID for the current
- * {@link MessageHistory}.
+ * In systems where messages may traverse several hops, known routes can be
+ * registered as patterns of source IDs. Each pattern is linked to a {@code pathId}
+ * which can later be used for metrics, monitoring or routing decisions. The
+ * longest matching pattern wins.
+ * <p>
+ * Implements {@link IntSupplier} so the current thread's
+ * {@link MessageHistory} can be classified directly via {@link #getAsInt()}.
  */
 public class MessagePathClassifier implements IntSupplier {
 
-    // Patterns of source IDs for classification.
+    /**
+     * Patterns of source IDs for classification. A message history matches a
+     * pattern when its source IDs end with the sequence.
+     */
     private final List<int[]> sourcePattern = new ArrayList<>();
 
-    // Path IDs corresponding to the patterns.
+    /**
+     * Path IDs corresponding to the patterns. Index {@code i} relates to
+     * {@code sourcePattern.get(i)}.
+     */
     private final List<Integer> pathIds = new ArrayList<>();
 
     /**
-     * Registers a path ID for message histories ending with a specific sequence of source IDs.
+     * Registers a path ID for message histories that end with the supplied
+     * sequence of source IDs.
      * <p>
      * This method enables the user to define how the classifier should categorize certain patterns
      * of message history.
      *
-     * @param pathId  A unique identifier for the message path.
-     * @param sources An ordered array of source IDs representing a pattern in the message history.
-     * @return The current instance of the  for chaining.
+     * @param pathId  the identifier to associate with this pattern
+     * @param sources the sequence of source IDs that must appear at the end of
+     *                a message history
+     * @return this classifier for chaining
+     * @throws IllegalArgumentException if the same sequence is registered with a
+     *                                  different {@code pathId}
      */
     public MessagePathClassifier addPathForSourcesEnding(int pathId, int... sources) {
         OptionalInt duplicate = IntStream.range(0, sourcePattern.size())
@@ -68,16 +80,23 @@ public class MessagePathClassifier implements IntSupplier {
         return this;
     }
 
+    /**
+     * Returns the path ID for the current thread's {@link MessageHistory}.
+     */
     @Override
     public int getAsInt() {
         return pathFor(MessageHistory.get());
     }
 
     /**
-     * Determines the path ID for a specific {@link MessageHistory}.
+     * Determines the {@code pathId} for the supplied history.
+     * <p>
+     * All registered patterns are checked and the longest matching suffix is
+     * selected.
      *
-     * @param messageHistory The message history to classify.
-     * @return The classified path ID for the given message history.
+     * @param messageHistory the history to classify
+     * @return the matching path ID
+     * @throws IllegalStateException if none of the patterns apply
      */
     public int pathFor(MessageHistory messageHistory) {
         Integer pathId = null;
@@ -97,6 +116,9 @@ public class MessagePathClassifier implements IntSupplier {
         return pathId;
     }
 
+    /**
+     * Returns a readable representation of the classifier state.
+     */
     @Override
     public String toString() {
         return "MessagePathClassifier{" +

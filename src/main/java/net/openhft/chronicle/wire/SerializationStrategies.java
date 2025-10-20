@@ -360,7 +360,8 @@ public enum SerializationStrategies implements SerializationStrategy {
                 wrapper.demarshallable = Demarshallable.newInstance(wrapper.type, in.wireIn());
                 return wrapper;
             } else if (using instanceof ReadMarshallable) {
-                return in.object(using, Object.class);
+                ((ReadMarshallable) using).readMarshallable(in.wireIn());
+                return using;
             } else {
                 return Demarshallable.newInstance((Class) using.getClass(), in.wireIn());
             }
@@ -857,15 +858,11 @@ public enum SerializationStrategies implements SerializationStrategy {
      */
     static class ArrayWrapper implements ReadResolvable<Object[]> {
 
-        /**
-         * The class type of the elements in the array.
-         */
+        // The class type of the elements in the array
         @NotNull
         final Class type;
 
-        /**
-         * The actual array wrapped by this wrapper.
-         */
+        // The actual array wrapped by this wrapper
         Object[] array;
 
         /**
@@ -900,15 +897,11 @@ public enum SerializationStrategies implements SerializationStrategy {
      */
     static class PrimArrayWrapper implements ReadResolvable<Object> {
 
-        /**
-         * The class type of the elements in the primitive array.
-         */
+        // The class type of the elements in the primitive array
         @NotNull
         final Class type;
 
-        /**
-         * The actual primitive array wrapped by this wrapper.
-         */
+        // The actual primitive array wrapped by this wrapper
         Object array;
 
         /**
@@ -939,15 +932,11 @@ public enum SerializationStrategies implements SerializationStrategy {
      */
     static class DemarshallableWrapper implements ReadResolvable<Demarshallable> {
 
-        /**
-         * The class type of the Demarshallable object.
-         */
+        // The class type of the Demarshallable object
         @NotNull
         final Class type;
 
-        /**
-         * The actual Demarshallable object wrapped by this wrapper.
-         */
+        // The actual Demarshallable object wrapped by this wrapper
         Demarshallable demarshallable;
 
         /**

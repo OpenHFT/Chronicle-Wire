@@ -20,27 +20,28 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@SuppressWarnings("rawtypes")
 /**
  * The WireDumper class provides utility methods to obtain a human-readable dump representation of {@link WireIn} content.
  * This class can operate on different WireIn or Bytes inputs and is designed to facilitate debugging and logging.
  */
+@SuppressWarnings("rawtypes")
 public class WireDumper {
 
-    // Instance of WireIn to read from
+    // The WireIn source whose content is being dumped
     @NotNull
     private final WireIn wireIn;
 
-    // Bytes that encapsulate the raw data
+    // The underlying Bytes instance from {@link #wireIn}
     @NotNull
     private final Bytes<?> bytes;
 
-    // Tracks the header number for internal operations
+    // Internal counter for tracking header/document numbers in the dump output
     private long headerNumber = -1;
 
     /**
-     * Private constructor for WireDumper.
-     * It initializes the wireIn and bytes. If wireIn is null, a new BinaryWire is created.
+     * Private constructor, use the static factory methods such as
+     * {@link #of(WireIn)}. If {@code wireIn} is {@code null} the bytes are
+     * wrapped in a new {@link BinaryWire}.
      *
      * @param wireIn WireIn instance (nullable)
      * @param bytes  Bytes instance containing the raw data
@@ -53,7 +54,7 @@ public class WireDumper {
     }
 
     /**
-     * Factory method to create a new WireDumper instance given a {@link WireIn} object.
+     * Creates a {@code WireDumper} for the given {@link WireIn} instance.
      *
      * @param wireIn The WireIn instance to be dumped
      * @return A new WireDumper instance
@@ -64,8 +65,9 @@ public class WireDumper {
     }
 
     /**
-     * Factory method to create a new WireDumper instance given a {@link Bytes} object.
-     * This method uses default padding alignment.
+     * Creates a {@code WireDumper} for the given {@link Bytes} instance,
+     * implicitly treating it as a {@link BinaryWire}. This method uses
+     * the default padding alignment.
      *
      * @param bytes The Bytes object containing the raw data to be dumped
      * @return A new WireDumper instance
@@ -76,10 +78,13 @@ public class WireDumper {
     }
 
     /**
-     * Factory method to create a new WireDumper instance given a {@link Bytes} object and an alignment preference.
+     * Creates a {@code WireDumper} for the given {@link Bytes} instance,
+     * implicitly treating it as a {@link BinaryWire}. The {@code align}
+     * parameter controls whether padding is assumed (see
+     * {@link AbstractWire#DEFAULT_USE_PADDING}).
      *
      * @param bytes The Bytes object containing the raw data to be dumped
-     * @param align Boolean value indicating whether to align the dumped data
+     * @param align Whether to use padding alignment
      * @return A new WireDumper instance
      */
     @SuppressWarnings("deprecation")
@@ -114,12 +119,12 @@ public class WireDumper {
     }
 
     /**
-     * Returns a string representation of the content located at the given position and length in the bytes.
-     * This method uses the default abbreviated format.
+     * Dumps a specific region of the wire content, starting at {@code position}
+     * for {@code length} bytes, as a string.
      *
-     * @param position Starting position of the content to be represented
-     * @param length   Length of the content to be represented
-     * @return String representation of the specified content
+     * @param position The starting byte position in the wire's underlying buffer
+     * @param length   The number of bytes to dump from the starting position
+     * @return A string representation of the specified wire content region
      */
     @NotNull
     public String asString(long position, long length) {
@@ -127,13 +132,13 @@ public class WireDumper {
     }
 
     /**
-     * Returns a string representation of the content located at the given position and length in the bytes.
-     * The method provides an option to use an abbreviated format.
+     * Dumps a specific region of the wire content, starting at {@code position}
+     * for {@code length} bytes, as a string.
      *
-     * @param position Starting position of the content to be represented
-     * @param length   Length of the content to be represented
-     * @param abbrev   Boolean value indicating whether to use abbreviated format
-     * @return String representation of the specified content
+     * @param position The starting byte position in the wire's underlying buffer
+     * @param length   The number of bytes to dump from the starting position
+     * @param abbrev   If true, long content within individual messages might be abbreviated
+     * @return A string representation of the specified wire content region
      */
     @NotNull
     public String asString(long position, long length, boolean abbrev) {
@@ -166,25 +171,25 @@ public class WireDumper {
     }
 
     /**
-     * Dumps a single wire entry from the internal byte buffer to the provided StringBuilder.
-     * This method uses the default abbreviated format.
+     * Reads and dumps a single size-prefixed message from the wire into the
+     * supplied {@code sb}. This method uses the default abbreviated format.
      *
-     * @param sb     StringBuilder to which the wire entry will be appended
-     * @param buffer Temporary buffer to assist in dumping the wire entry
-     * @return Boolean value indicating whether the dump was successful
+     * @param sb     The {@link StringBuilder} to append the dumped message to
+     * @param buffer A temporary {@link Bytes} buffer used if the source message is binary
+     * @return {@code true} if the end of the wire was reached, {@code false} otherwise
      */
     public boolean dumpOne(@NotNull StringBuilder sb, @Nullable Bytes<?> buffer) {
         return dumpOne(sb, buffer, false);
     }
 
     /**
-     * Dumps a single wire entry from the internal byte buffer to the provided StringBuilder.
-     * This method provides an option to use an abbreviated format.
+     * Reads and dumps a single size-prefixed message from the wire into the
+     * supplied {@code sb}.
      *
-     * @param sb     StringBuilder to which the wire entry will be appended
-     * @param buffer Temporary buffer to assist in dumping the wire entry
-     * @param abbrev Boolean value indicating whether to use abbreviated format
-     * @return Boolean value indicating whether the dump was successful
+     * @param sb     The {@link StringBuilder} to append the dumped message to
+     * @param buffer A temporary {@link Bytes} buffer used if the source message is binary; may be {@code null}
+     * @param abbrev If true, abbreviates content
+     * @return {@code true} if the end of the wire was reached, {@code false} otherwise
          */
     public boolean dumpOne(@NotNull StringBuilder sb, @Nullable Bytes<?> buffer, boolean abbrev) {
         // Read position in the byte buffer for extracting the header
@@ -319,10 +324,10 @@ public class WireDumper {
      * It positions the bytes at the specified read position, converts the content to hexadecimal, and sets
      * the resulting string to the StringBuilder.
      *
-     * @param sb The StringBuilder to which the hexadecimal string will be appended.
-     * @param len The length or number of bytes to read and convert to hexadecimal.
-     * @param readPosition The starting position in the byte buffer from which to start reading.
-     * @param sblen The length to reset the StringBuilder to. This is typically used to overwrite any existing content.
+     * @param sb          The {@link StringBuilder} to append the hexadecimal dump to
+     * @param len         The number of bytes to read from {@link #bytes} and dump
+     * @param readPosition The starting position in {@link #bytes} to read from
+     * @param sblen       The length to which {@code sb} should be reset before appending the hex dump
      */
     public void dumpAsHexadecimal(@NotNull StringBuilder sb, int len, long readPosition, int sblen) {
         // Set the read position and remaining length for the byte buffer.

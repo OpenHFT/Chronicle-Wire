@@ -448,8 +448,8 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     public static final class Shares extends SelfDescribingMarshallable {
 
-        private String symbol;
-        private long noShares;
+        public String symbol;
+        public long noShares;
 
         public Shares() {
         }
@@ -478,9 +478,9 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     public static final class News extends SelfDescribingMarshallable {
 
-        private String symbol;
-        private String header;
-        private String body;
+        public String symbol;
+        public String header;
+        public String body;
 
         public News() {
         }

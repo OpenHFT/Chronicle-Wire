@@ -2,12 +2,42 @@
 Peter Lawrey
 
 Chronicle favours modelling events as asynchronous method calls.
-This document explores the 'Events by Method' paradigm in Chronicle Wire, demonstrating how to model, process and test events represented as asynchronous Java method calls, and how to leverage different wire formats for these events.
-This has a number of advantages:
+This document explains the *events by method* pattern used by Chronicle Wire.
+An event is defined as a Java interface method which is written to a `Wire` by a
+`MethodWriter` and dispatched to a handler by a `MethodReader`.
 
-. The simplest way to pass data between components is a method call (no actual transport).
-. Asynchronous method calls can be easily modelled into data structures.
-. Events as method calls lead to a natural association of an action with an event type.
+Advantages of this pattern include:
+
+* Direct method calls remain the simplest form of communication when the
+  producer and consumer are in the same JVM.
+* Interfaces describing events become easy to serialise as data structures
+  for persistence or testing.
+* Generated proxies minimise allocation and provide type safety.
+
+== Core components
+
+. Event interface :: A plain Java interface whose methods represent event types.
+. Handler implementation :: A class that implements the event interface to
+  process events locally.
+. `MethodWriter` :: Generates a proxy that serialises method calls onto a `Wire`.
+. `MethodReader` :: Reads method calls from a `Wire` and invokes them on a
+  handler.
+. Wire format :: YAML, JSON or binary encodings used to store or transmit the
+  events.
+
+[mermaid]
+....
+sequenceDiagram
+    caller->>MethodWriter: invoke method
+    MethodWriter->>Wire: serialised call
+    MethodReader->>Handler: dispatch method
+....
+
+Typical use cases include:
+
+* High performance inter-process messaging.
+* Recording events to disk for replay during testing.
+* Converting asynchronous network traffic into method calls.
 
 == Event processing
 
@@ -20,12 +50,13 @@ Chronicle Services added configuration of multiple microservices services, queue
 
 Each event type has a different method to be called which implements code for that event type.
 
-[mermaid]
-....
+ifdef::env-github[[source,mermaid]]
+ifndef::env-github[[mermaid]]
+----
 graph LR
-    A(Event Sources) --> B(Microservice\nMethod Implementations)
-    B --> C(Event Store\nChronicle Queue)
-....
+    A(Event Sources) --> B(Microservice<br/>Method Implementations)
+    B --> C(Event Store<br/>Chronicle Queue)
+----
 
 However, messages can still be produced and processed dynamically through the use of a wildcard event callback method where the event type is passed programmatically, for example `void onEvent(String eventType, WireIn data)`.
 
@@ -35,14 +66,15 @@ A gateway handles information on behalf of remote clients.
 It has two main inputs: data from the client and data from the systems it talks to.
 In turn, it can produce two streams of output, one replies to the client and the other passes on data to internal systems.
 
-[mermaid]
-....
+ifdef::env-github[[source,mermaid]]
+ifndef::env-github[[mermaid]]
+----
 graph LR
     C(Client) --> G(Gateway)
-    S(Internal Systems\\nsources) --> G
+    S(Internal Systems<br/>sources) --> G
     G --> CR(Client replies)
-    G --> DS(Internal Systems\\ndownstream events)
-....
+    G --> DS(Internal Systems<br/>downstream events)
+----
 
 === Testing using YAML
 
@@ -53,6 +85,16 @@ In both cases, these components can be tested using events stored in YAML files.
 # tiny illustration
 myEvent: { someField: 1 }
 anotherEvent: simpleValue
+----
+
+=== Example on the wire
+
+The same call written using `TextWire` would appear in a log or queue as:
+
+[source,yaml]
+----
+myEvent:
+  someField: 1
 ----
 
 === Mix wire formats as needed
@@ -89,7 +131,7 @@ Some advantages of Binary YAML are:
 
 Some advantages of Trivially Copyable Objects
 
-. Raw memory copy for serialization/deserialization.
+. Raw memory copy for serialisation/deserialisation.
 . Compact memory structure provided fields don't vary in size much.
 . Works provided the writer/reader arrange the fields the same way.
 . Better performance than Binary YAML (about half the latency).
@@ -127,7 +169,7 @@ interface Examples {
 }
 
 static class MyTypes extends SelfDescribingMarshallable {
-    String text;
+    final StringBuilder text = new StringBuilder();
     boolean flag;
     byte b;
     short s;
@@ -136,7 +178,7 @@ static class MyTypes extends SelfDescribingMarshallable {
     float f;
     double d;
     long l;
-
+}
 ----
 
 Chained events are useful for composing events.
@@ -167,7 +209,7 @@ interface DestinationTimedSaying extends Destination<TimedSaying> { }
 A producer can use the fluent API as follows:
 [source,java]
 ----
-DestinationTimedSaying writer = /* MethodWriter instance */;
+DestinationTimedSaying writer = wire.methodWriter(DestinationTimedSaying.class);
 writer.via("targetQueue")
       .at(System.nanoTime())
       .say("Hello Composed World");

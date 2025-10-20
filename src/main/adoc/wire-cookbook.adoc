@@ -1,18 +1,41 @@
 = Chronicle Wire Cookbook: Practical Recipes
 :toc:
+:sectnums:
 :source-highlighter: rouge
 
 Purpose :: To provide a collection of practical recipes for common tasks and advanced techniques when using the Chronicle Wire library.
+:sectnums:
 
-== 1. Introduction
+== Introduction
 
 This cookbook offers a series of focused, problem-solution style recipes to help you effectively use Chronicle Wire. Each recipe addresses a specific task or challenge, providing code examples and explanations. Whether you're new to Chronicle Wire or looking for advanced techniques, these recipes aim to provide quick and actionable guidance.
 
+ifdef::env-github[[source,mermaid]]
+ifndef::env-github[[mermaid]]
+----
+graph TD
+    subgraph "Serialisation Process"
+        A[Java Object] -->|"implements Marshallable"| B[Marshallable Object]
+        B -->|"writeMarshallable()"| C[Wire]
+        C -->|"WireType (YAML, JSON, Binary)"| D[Bytes]
+        D -->|"Store/Transmit"| E[Persistence/Network]
+    end
+
+    subgraph "Deserialisation Process"
+        F[Persistence/Network] -->|"Read"| G[Bytes]
+        G -->|"WireType (same as serialisation)"| H[Wire]
+        H -->|"readMarshallable()"| I[Marshallable Object]
+        I -->|"Field Population"| J[Java Object]
+    end
+----
+
+The diagram above illustrates the basic serialisation and deserialisation process in Chronicle Wire. Objects implementing the `Marshallable` interface can be written to a `Wire` instance, which uses a specific `WireType` to determine the format (YAML, JSON, Binary, etc.). The data is then stored in a `Bytes` buffer, which can be persisted or transmitted. The deserialisation process reverses these steps.
+
 TIP: For a foundational understanding of Chronicle Wire's architecture and core concepts, please refer to the main Chronicle Wire documentation and architectural overview.
 
-== 2. Basic Serialization and Deserialization
+== Basic Serialization and Deserialization
 
-=== 2.1. Recipe: Serializing a Simple POJO to Various Formats
+=== Recipe: Serializing a Simple POJO to Various Formats
 
 *Problem:*
 You have a simple Plain Old Java Object (POJO) and you want to serialize it into different formats like YAML, JSON, and Binary using Chronicle Wire.
@@ -40,7 +63,7 @@ public class MyData extends SelfDescribingMarshallable {
         this.value = value;
     }
 
-    // Getters are good practice, though not strictly required for basic serialization
+    // Getters are good practice, though not strictly required for basic serialisation
     // if fields are public or Wire has access. Private fields with no access
     // might require getters/setters or specific configuration.
     public String message() { return message; }
@@ -57,7 +80,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 
-public class BasicSerializationDemo {
+public class BasicSerialisationDemo {
     public static void main(String[] args) {
         MyData data = new MyData("Hello Wire!", 123, 45.67);
 
@@ -91,9 +114,9 @@ public class BasicSerializationDemo {
 ----
 
 Discussion ::
-`SelfDescribingMarshallable` automatically handles the serialization of fields. By simply changing the `WireType` (e.g., `YAML_ONLY`, `JSON_ONLY`, `BINARY_LIGHT`), you can control the output format without altering the `MyData` class or the core serialization call (`getValueOut().object(data)`). `*_ONLY` variants like `YAML_ONLY` or `JSON_ONLY` are often preferred for cleaner output when not needing to retain full type information for dynamic deserialization into differing types (though `YAML` and `JSON` wire types can be configured to include type information if needed).
+`SelfDescribingMarshallable` automatically handles the serialisation of fields. By simply changing the `WireType` (e.g., `YAML_ONLY`, `JSON_ONLY`, `BINARY_LIGHT`), you can control the output format without altering the `MyData` class or the core serialisation call (`getValueOut().object(data)`). `*_ONLY` variants like `YAML_ONLY` or `JSON_ONLY` are often preferred for cleaner output when not needing to retain full type information for dynamic deserialisation into differing types (though `YAML` and `JSON` wire types can be configured to include type information if needed).
 
-=== 2.2. Recipe: Deserializing Data into a POJO
+=== Recipe: Deserializing Data into a POJO
 
 *Problem:*
 You have serialized data (e.g., in YAML or Binary format) and want to deserialize it back into an instance of your POJO.
@@ -110,7 +133,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 
-public class BasicDeserializationDemo {
+public class BasicDeserialisationDemo {
     public static void main(String[] args) {
         // --- YAML Example ---
         String yamlInput = "!MyData {\n" +
@@ -153,11 +176,12 @@ public class BasicDeserializationDemo {
 ----
 
 *Discussion:*
-`getValueIn().object(MyData.class)` is the key call for deserialization. Chronicle Wire reads the data and populates a new instance of `MyData`. For text formats like YAML, the `!MyData` type hint helps in identifying the target class, though providing the class explicitly in `object()` is robust. For binary formats, if type information isn't inherently part of the stream for the specific `WireType` chosen, providing the target class is essential. `SelfDescribingMarshallable` with `BINARY_LIGHT` typically includes type information or field names/numbers allowing for successful deserialization.
+`getValueIn().object(MyData.class)` is the key call for deserialisation. Chronicle Wire reads the data and populates a new instance of `MyData`. For text formats like YAML, the `!MyData` type hint helps in identifying the target class, though providing the class explicitly in `object()` is robust. For binary formats, if type information isn't inherently part of the stream for the specific `WireType` chosen, providing the target class is essential. `SelfDescribingMarshallable` with `BINARY_LIGHT` typically includes type information or field names/numbers allowing for successful deserialisation.
 
-== 3. Working with Annotations
+[[working_with_annotations]]
+== Working with Annotations
 
-=== 3.1. Recipe: Using `@LongConversion` for Compact String Storage
+=== Recipe: Using `@LongConversion` for Compact String Storage
 
 *Problem:*
 You have a short string identifier (e.g., a symbol or ID up to 10-11 characters using a Base85-like alphabet) that you want to represent as a `long` in your Java object for efficiency, but display as a String in human-readable formats (like YAML).
@@ -245,7 +269,7 @@ public class LongConversionDemo {
 Discussion ::
 In the YAML output, `symbol` appears as a string "AAPL". However, in the `CompactIdData` object and in the binary wire format, it's stored as an 8-byte `long`. This technique is excellent for performance-sensitive applications that deal with many short textual identifiers, saving space and potentially speeding up comparisons/hashing if the `long` form is used internally. Chronicle Wire provides several built-in converters (`Base32`, `Base64`, `Base85`, etc.).
 
-=== 3.2. Recipe: Formatting Timestamps with `@NanoTime`
+=== Recipe: Formatting Timestamps with `@NanoTime`
 
 *Problem:*
 You want to store a timestamp as a `long` (nanoseconds since epoch) for precision and performance, but have it automatically formatted as a human-readable ISO date-time string in text-based wire formats.
@@ -296,7 +320,7 @@ public class NanoTimeDemo {
         yamlBytes.releaseLast();
 
         // Deserialize (timestamp will be read back as long)
-        Bytes<?> yamlBytesIn = Bytes.fromString(yamlBytes.toString()); // Create new Bytes from string for deserialization
+        Bytes<?> yamlBytesIn = Bytes.fromString(yamlBytes.toString()); // Create new Bytes from string for deserialisation
         Wire yamlWireIn = WireType.YAML_ONLY.apply(yamlBytesIn);
         EventData deserializedEvent = yamlWireIn.getValueIn().object(EventData.class);
         System.out.println("\nDeserialized Timestamp (long): " + deserializedEvent.timestampNanos());
@@ -309,9 +333,10 @@ public class NanoTimeDemo {
 *Discussion:*
 The `@NanoTime` annotation (and similarly `@MillisTime` for millisecond precision) ensures that the `long` timestamp is converted to/from a standard ISO 8601 string representation in text formats like YAML or JSON, while remaining a `long` in binary formats and in the Java object. This provides both human readability for logs/configs and numerical efficiency for processing.
 
-== 4. Schema Evolution
+[[schema_evolution]]
+== Schema Evolution
 
-=== 4.1. Recipe: Adding a New Field (Backward Compatibility)
+=== Recipe: Adding a New Field (Backward Compatibility)
 
 *Problem:*
 You have an existing `Marshallable` class and need to add a new field. You want older versions of your application (that don't know about the new field) to still be able to read data written by the new version, and new versions to read old data.
@@ -390,8 +415,8 @@ public class SchemaEvolutionDemo {
         com.example.evo.VersionedDataV2 dataV2 = new com.example.evo.VersionedDataV2("test", 100);
         Bytes<?> bytesV2 = Bytes.elasticByteBuffer();
         Wire wireWriteV2 = WireType.YAML_ONLY.apply(bytesV2);
-        // Wires. ጣCLASS_ALIASES.addAlias(com.example.evo.VersionedDataV2.class, "VersionedData");
-        // Wires. ጣCLASS_ALIASES.addAlias(com.example.evo.VersionedDataV1.class, "VersionedData");
+        ClassAliasPool.CLASS_ALIASES.addAlias(com.example.evo.VersionedDataV2.class, "VersionedData");
+        ClassAliasPool.CLASS_ALIASES.addAlias(com.example.evo.VersionedDataV1.class, "VersionedData");
         wireWriteV2.write("yaml").object(dataV2);
         String v2DataAsString = bytesV2.toString();
         System.out.println("Data written by V2:\n" + v2DataAsString);
@@ -421,11 +446,11 @@ public class SchemaEvolutionDemo {
 ----
 
 *Discussion:*
-When new code reads old data (V1 data into `VersionedDataV2`), the `newField` in `VersionedDataV2` will be initialized to its Java default value (0 for `int`, `null` for objects, `false` for `boolean`). When old code (expecting `VersionedDataV1`) reads data written by new code (V2 data), it will simply ignore the `newField` it doesn't recognize. This works seamlessly for most self-describing `WireType`s. Using consistent class aliasing (e.g., `Wires.CLASS_ALIASES.addAlias(VersionedDataV2.class, "VersionedData")`) can be important if you rely on type information in the stream (like `!VersionedData`) rather than always specifying the concrete class on deserialization.
+When new code reads old data (V1 data into `VersionedDataV2`), the `newField` in `VersionedDataV2` will be initialized to its Java default value (0 for `int`, `null` for objects, `false` for `boolean`). When old code (expecting `VersionedDataV1`) reads data written by new code (V2 data), it will simply ignore the `newField` it doesn't recognize. This works seamlessly for most self-describing `WireType`s. Using consistent class aliasing (e.g., `Wires.CLASS_ALIASES.addAlias(VersionedDataV2.class, "VersionedData")`) can be important if you rely on type information in the stream (like `!VersionedData`) rather than always specifying the concrete class on deserialisation.
 
-== 5. Working with `DocumentContext`
+== Working with `DocumentContext`
 
-=== 5.1. Recipe: Writing and Reading Multiple Documents
+=== Recipe: Writing and Reading Multiple Documents
 
 *Problem:*
 You need to write a sequence of distinct messages or objects to a single `Bytes` buffer or stream, and then read them back one by one.
@@ -506,9 +531,9 @@ public class MultiDocumentDemo {
 *Discussion:*
 The `try-with-resources` block ensures that each `DocumentContext` is properly closed. When `writingDocument()`'s context is closed, metadata (like message length) is written, allowing the reader to correctly identify document boundaries. `readingDocument()` returns a context; `dc.isPresent()` tells you if a document was found. `dc.isData()` or `dc.isMetaData()` can be used to distinguish message types, a pattern heavily used by Chronicle Queue.
 
-== 6. Advanced & Performance
+== Advanced & Performance
 
-=== 6.1. Recipe: Implementing `BytesMarshallable` for Maximum Control
+=== Recipe: Implementing `BytesMarshallable` for Maximum Control
 
 *Problem:*
 You need the absolute best performance or have a very specific binary layout in mind, and the overhead of `Marshallable` (even with code generation) is too much, or you need to interact with raw `Bytes` directly.
@@ -553,7 +578,13 @@ public class PerfCriticalData implements BytesMarshallable {
     public int id() { return id; }
     public long value() { return value; }
 
-    // A generic equals, hashCode, toString are inherited and don't need to be overridden
+    @Override
+    public String toString() {
+        return "PerfCriticalData{" +
+                "id=" + id +
+                ", value=0x" + Long.toHexString(value) +
+                '}';
+    }
 }
 ----
 
@@ -583,7 +614,6 @@ public class BytesMarshallableDemo {
         // For BytesMarshallable, often you pass an instance to be populated.
 
         System.out.println("Read back: " + dataIn);
-        System.out.println("ID: " + dataIn.getId() + ", Value: " + Long.toHexString(dataIn.getValue()));
 
         bytes.releaseLast();
     }
@@ -595,3 +625,11 @@ public class BytesMarshallableDemo {
 
 NOTE: This cookbook provides a starting point. Many more recipes can be developed for specific use cases and advanced features of Chronicle Wire. Refer to the main documentation for comprehensive details on each feature.
 
+== Related Topics
+
+* link:wire-architecture.adoc[Architecture Overview] - Understand the internal architecture of Chronicle Wire
+* link:wire-annotations.adoc[Annotations Guide] - Learn about annotations for fine-tuning serialisation
+* link:wire-schema-evolution.adoc[Schema Evolution] - How to evolve your data structures over time
+* link:wire-error-handling.adoc[Error Handling and Diagnostics] - Troubleshooting and error handling
+* link:wire-faq.adoc[FAQ] - Answers to frequently asked questions
+* link:index.adoc[Documentation Home] - Return to the main documentation page

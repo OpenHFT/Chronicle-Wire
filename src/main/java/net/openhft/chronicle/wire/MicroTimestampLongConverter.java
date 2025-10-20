@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * A {@code MicroTimestampLongConverter} is an implementation of {@code AbstractTimestampLongConverter}
  * which handles conversions between long timestamps and date-time strings.
- * The precision of this converter is to the microsecond.
+ * The precision of this converter is to the microsecond, extra precision is ignored.
  * This converter is singleton, the instance can be accessed using the public field INSTANCE.
  */
 public class MicroTimestampLongConverter extends AbstractTimestampLongConverter {
@@ -59,7 +59,9 @@ public class MicroTimestampLongConverter extends AbstractTimestampLongConverter 
     /**
      * Constructs a new {@code MicroTimestampLongConverter} with the specified zone ID.
      *
-     * @param zoneId the zone ID to be used for the conversion of long values
+     * @param zoneId The string representation of the ZoneId (e.g., "UTC", "Europe/London")
+     *               to be used for formatting date-time strings. This converter
+     *               handles timestamps with microsecond precision.
      */
     public MicroTimestampLongConverter(String zoneId) {
         super(zoneId, TimeUnit.MICROSECONDS);
@@ -67,7 +69,7 @@ public class MicroTimestampLongConverter extends AbstractTimestampLongConverter 
 
     @Override
     protected void appendFraction(DateTimeFormatterBuilder builder) {
-        builder.appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true);
+        builder.appendFraction(ChronoField.MICRO_OF_SECOND, 0, 9, true);
     }
 
     /**

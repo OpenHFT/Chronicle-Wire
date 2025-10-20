@@ -18,7 +18,7 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 
 // Class MyTypesCustom extends MyTypes and implements Marshallable to provide custom serialization logic
-class MyTypesCustom extends MyTypes implements Marshallable {
+public class MyTypesCustom extends MyTypes implements Marshallable {
 
     // Override the writeMarshallable method to dictate how instances of MyTypesCustom will be serialized to wire format
     @Override

@@ -75,6 +75,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
     private boolean insideHeader;
     private HeadNumberChecker headNumberChecker;
     private boolean usePadding = DEFAULT_USE_PADDING;
+    private boolean generateTuples = GENERATE_TUPLES;
 
     /**
      * Constructor for AbstractWire.
@@ -658,6 +659,17 @@ public abstract class AbstractWire implements Wire, InternalWire {
      */
     public boolean usePadding() {
         return usePadding;
+    }
+
+    @Override
+    public boolean generateTuples() {
+        return generateTuples;
+    }
+
+    @Override
+    public Wire generateTuples(boolean generateTuples) {
+        this.generateTuples = generateTuples;
+        return this;
     }
 
     /**

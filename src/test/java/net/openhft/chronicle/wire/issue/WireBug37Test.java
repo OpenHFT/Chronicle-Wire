@@ -23,8 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
-import java.nio.ByteBuffer;
-
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -59,7 +57,7 @@ public class WireBug37Test extends WireTestCommon {
         assertEquals(obj1, obj2);
 
         // Serialize obj2 into bytes using the TEXT WireType
-        final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
+        final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         obj2.writeMarshallable(wireType.apply(bytes));
 
         // Convert the bytes back to string

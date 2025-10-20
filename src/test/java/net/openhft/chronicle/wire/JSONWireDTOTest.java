@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 // Test class for testing JSON wire DTO functionalities.
 public class JSONWireDTOTest extends WireTestCommon {
@@ -31,6 +33,8 @@ public class JSONWireDTOTest extends WireTestCommon {
     // Test to verify serialization and deserialization of DTO using JSONWire.
     @Test
     public void dto() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         expectException("Found this$0, in class");
 
         // Allocate bytes for storing the serialized DTO.

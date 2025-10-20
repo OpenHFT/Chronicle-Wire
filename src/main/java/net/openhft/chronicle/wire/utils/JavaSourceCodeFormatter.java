@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class JavaSourceCodeFormatter extends SourceCodeFormatter {
 
-    /** Default number of spaces for indentation in Java source code. */
+    // Default number of spaces for indentation in Java source code
     private static final int INDENT_SPACES = 4;
 
     /**
