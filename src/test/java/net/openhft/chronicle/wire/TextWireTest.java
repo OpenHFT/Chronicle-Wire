@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +17,16 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.internal.NoBytesStore;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.Monitorable;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
@@ -49,28 +50,34 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.util.stream.Collectors.toList;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticDirect;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
-// The test suite focuses on validating various behaviors of the TextWire class.
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "try", "serial", "deprecation"})
 public class TextWireTest extends WireTestCommon {
 
     // Create a new TextWire instance with an elastic heap allocated buffer
     static Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
     Bytes<?> bytes;
 
+    @Before
+    public void hasDirect() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+    }
+
     // Test to check if white space within type specifications is handled correctly.
     @Test
     public void fromList() {
         for (String text : new String[]{
-                "[a, b, c]",
-                "[ 'a', 'b', 'c' ]",
-                "[ \"a\", \"b\", \"c\" ]"
+                "[a , b\n, c]",
+                "[ 'a'\n, 'b' , 'c' ]",
+                "[ \"a\" , \"b\" ,\n\"c\"\n]"
         }) {
             @NotNull Wire wire = createWire();
             wire.bytes().append(text);
@@ -177,10 +184,10 @@ public class TextWireTest extends WireTestCommon {
         // Deserialize a string with more fields than the TwoFields class has.
         // Fields "d", "e", and "f" are not part of TwoFields, and should be collected in the "others" field.
         TwoFields tf = Marshallable.fromString("!" + TwoFields.class.getName() + " {" +
-                "a : 1,\n" +
+                "a : 1 ,\n" +
                 "b\t : two,\n" +
                 "c: three,\n" +
-                "d: 44,\n" +
+                "d: 44 , \n" +
                 "e: also,\n" +
                 "f: at the end\n" +
                 "}");
@@ -229,16 +236,6 @@ public class TextWireTest extends WireTestCommon {
         // Verify that TEXT WireType doesn't require any license check.
         WireType.TEXT.licenceCheck();
         assertTrue(WireType.TEXT.isAvailable());
-
-        // Check that DELTA_BINARY WireType requires a license and throws an exception if not present.
-        try {
-            expectException("A Chronicle-Wire-Enterprise licence is required to run this code because you are using DELTA_BINARY which is a licence product");
-            WireType.DELTA_BINARY.licenceCheck();
-            fail();
-        } catch (IllegalStateException expected) {
-            // exception is expected
-        }
-        assertFalse(WireType.DELTA_BINARY.isAvailable());
     }
 
     // Test to ensure that objects with TreeMap fields are correctly serialized and deserialized.
@@ -307,7 +304,7 @@ public class TextWireTest extends WireTestCommon {
     @Test
     public void testWriteToBinaryAndTriesToConvertToText() {
 
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = allocateElasticOnHeap();
         Wire wire = WireType.BINARY.apply(b);
         wire.usePadding(true);
 
@@ -1204,30 +1201,36 @@ public class TextWireTest extends WireTestCommon {
     // Test the string building behavior for ABC objects with Wire.
     @Test
     public void testABCStringBuilder() {
+        String A = "A: \"hi\", # This is an A\n";
+        String B = "B: 'hi', # This is a B\n";
+        String C = "C: hi, # And that's a C\n";
 
         // Create a wire and append values for A, B, and C
         @NotNull Wire wire = createWire();
-        wire.bytes().append(
-                "A: \"hi\",\n" +
-                        "B: 'hi',\n" +
-                        "C: hi,\n");
+        StringBuilder sb = new StringBuilder();
+        wire.commentListener(s -> sb.append(s).append('\n'));
         ABC abc = new ABC();
 
-        // Read from wire and assert its value for 5 iterations
-        for (int i = 0; i < 5; i++) {
-            wire.bytes().readPosition(0);
-            assertEquals("!net.openhft.chronicle.wire.TextWireTest$ABC {\n" +
+        // Read from wire and assert its value for all permutations
+        for (String input : new String[] { A + B + C, B + A + C, C + A + B, A + C + B, B + C + A, C + B + A }) {
+            wire.reset();
+            wire.bytes().append(input);
+            assertEquals(input, "!net.openhft.chronicle.wire.TextWireTest$ABC {\n" +
                     "  A: hi,\n" +
                     "  B: hi,\n" +
                     "  C: hi\n" +
                     "}\n", wire.getValueIn()
                     .object(abc, ABC.class)
                     .toString());
+            assertEquals(sb.toString(),
+                    // legacy behavior: "C" comment is ignored as it's after the last field
+                    Arrays.asList("This is an A", "This is a B"),
+                    Arrays.stream(sb.toString().split("\n")).sorted(Collections.reverseOrder()).collect(toList()));
+            sb.setLength(0);
         }
     }
 
     // Test reading and writing of a string map with Wire.
-    @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteStrings() {
         // Initialize bytes and wire for writing
@@ -1378,7 +1381,6 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // Test reading and writing a map with integer keys and values to/from a Wire.
-    @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteIntegers() {
         // Create a byte store and wire to work with
@@ -1442,7 +1444,6 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // Test reading and writing a map with Marshallable keys and values to/from a Wire.
-    @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteMarshable() {
         // Create a byte store and wire to work with
@@ -2181,8 +2182,8 @@ public class TextWireTest extends WireTestCommon {
         // Create a NestedList instance from its serialized string representation.
         NestedList nl = Marshallable.fromString("!" + NestedList.class.getName() + " {\n" +
                 "  name: name,\n" +
-                "  listA: [ { a: 1, b: 1.2 } ],\n" +
-                "  listB: [ { a: 1, b: 1.2 }, { a: 3, b: 2.3 } ]," +
+                "  listA: [ { a: 1\n, b: 1.2 } ],\n" +
+                "  listB: [ { a: 1 ,\nb: 1.2 }, { a: 3 , b: 2.3 } ]," +
                 "  num: 128\n" +
                 "}\n");
 
@@ -2590,7 +2591,7 @@ public class TextWireTest extends WireTestCommon {
     // Static class representing a Data Transfer Object (DTO)
     // with a 'Class' type field
     static class DTO extends SelfDescribingMarshallable {
-        Class type;
+        Class<?> type;
     }
 
     // Static class holding a Map with RetentionPolicy keys and Double values
@@ -2634,10 +2635,10 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // Class with fields of Bytes type initialized with various Byte buffers
-    static class ABCD extends SelfDescribingMarshallable {
+    static class ABCD extends SelfDescribingMarshallable implements Monitorable {
         Bytes<?> A = Bytes.allocateElasticDirect();
         Bytes<?> B = Bytes.allocateDirect(64);
-        Bytes<?> C = Bytes.elasticByteBuffer();
+        Bytes<?> C = Bytes.allocateElasticOnHeap();
         Bytes<?> D = Bytes.allocateElasticOnHeap(1);
 
         // Method to release all byte buffers
@@ -2646,6 +2647,14 @@ public class TextWireTest extends WireTestCommon {
             B.releaseLast();
             C.releaseLast();
             D.releaseLast();
+        }
+
+        @Override
+        public void unmonitor() {
+            Monitorable.unmonitor(A);
+            Monitorable.unmonitor(B);
+            Monitorable.unmonitor(C);
+            Monitorable.unmonitor(D);
         }
     }
 
@@ -2770,7 +2779,7 @@ public class TextWireTest extends WireTestCommon {
 
     // Class holding byte storage and a long, with custom serialization logic.
     static class DtoWithBytesField extends SelfDescribingMarshallable {
-        BytesStore bytes;
+        BytesStore<?, ?> bytes;
         long another;
 
         // Implement custom deserialization logic for this object.

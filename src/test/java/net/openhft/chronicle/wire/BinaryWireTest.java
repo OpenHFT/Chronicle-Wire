@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +19,9 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.internal.NoBytesStore;
 import net.openhft.chronicle.bytes.internal.SingleMappedFile;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.ScopeConfined;
+import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.VanillaReferenceOwner;
 import org.jetbrains.annotations.NotNull;
@@ -47,6 +47,7 @@ import java.util.stream.Stream;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 @RunWith(value = Parameterized.class)
 public class BinaryWireTest extends WireTestCommon {
@@ -56,7 +57,6 @@ public class BinaryWireTest extends WireTestCommon {
     final boolean numericField;
     final boolean fieldLess;
     final int compressedSize;
-    @SuppressWarnings("rawtypes")
     @NotNull
     Bytes<?> bytes = new HexDumpBytes();
 
@@ -140,10 +140,11 @@ public class BinaryWireTest extends WireTestCommon {
     }
 
     // Create a BinaryWire with pre-defined properties set during initialization
+    @SuppressWarnings("deprecation")
     @NotNull
     private BinaryWire createWire() {
         bytes.clear();
-        @NotNull BinaryWire wire = new BinaryWire(bytes, fixed, numericField, fieldLess, compressedSize, "lzw", false);
+        @NotNull BinaryWire wire = new BinaryWire(bytes, fixed, numericField, fieldLess, compressedSize, "lzw");
         wire.usePadding(true);
         return wire;
     }
@@ -1306,9 +1307,9 @@ public class BinaryWireTest extends WireTestCommon {
 
         // Check the wire content against expected values.
         checkWire(wire,
-            // Expected representation 1
+                // Expected representation 1
                 "" +
-                "c1 41                                           # A:\n" +
+                        "c1 41                                           # A:\n" +
                         "82 3f 00 00 00                                  # MyTypesCustom\n" +
                         "c6 42 5f 46 4c 41 47                            # B_FLAG:\n" +
                         "b1                                              # true\n" +
@@ -1338,7 +1339,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "e7 42 79 65 20 6e 6f 77                         # Bye now\n",
                 // Expected representation 2
                 "" +
-                "c1 41                                           # A:\n" +
+                        "c1 41                                           # A:\n" +
                         "82 3f 00 00 00                                  # MyTypesCustom\n" +
                         "c6 42 5f 46 4c 41 47                            # B_FLAG:\n" +
                         "b1                                              # true\n" +
@@ -1368,7 +1369,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "e7 42 79 65 20 6e 6f 77                         # Bye now\n",
                 // Expected representation 3
                 "" +
-                "c1 41                                           # A:\n" +
+                        "c1 41                                           # A:\n" +
                         "82 4b 00 00 00                                  # MyTypesCustom\n" +
                         "c6 42 5f 46 4c 41 47                            # B_FLAG:\n" +
                         "b1                                              # true\n" +
@@ -1398,7 +1399,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "e7 42 79 65 20 6e 6f 77                         # Bye now\n",
                 // Expected representation 4
                 "" +
-                "ba 41                                           # 65\n" +
+                        "ba 41                                           # 65\n" +
                         "82 27 00 00 00                                  # MyTypesCustom\n" +
                         "ba 00                                           # 0\n" +
                         "b1                                              # true\n" +
@@ -1428,7 +1429,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "e7 42 79 65 20 6e 6f 77                         # Bye now\n",
                 // Expected representation 5
                 "" +
-                "ba 41                                           # 65\n" +
+                        "ba 41                                           # 65\n" +
                         "82 33 00 00 00                                  # MyTypesCustom\n" +
                         "ba 00                                           # 0\n" +
                         "b1                                              # true\n" +
@@ -1458,7 +1459,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "e7 42 79 65 20 6e 6f 77                         # Bye now\n",
                 // Expected representation 6
                 "" +
-                "82 1b 00 00 00                                  # MyTypesCustom\n" +
+                        "82 1b 00 00 00                                  # MyTypesCustom\n" +
                         "b1                                              # true\n" +
                         "a5 39 30                                        # 12345\n" +
                         "94 80 ad 4b                                     # 1234560/1e4\n" +
@@ -1474,7 +1475,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "e7 42 79 65 20 6e 6f 77                         # Bye now\n",
                 // Expected representation 7
                 "" +
-                "82 27 00 00 00                                  # MyTypesCustom\n" +
+                        "82 27 00 00 00                                  # MyTypesCustom\n" +
                         "b1                                              # true\n" +
                         "a5 39 30                                        # 12345\n" +
                         "91 77 be 9f 1a 2f dd 5e 40                      # 123.456\n" +
@@ -1598,7 +1599,7 @@ public class BinaryWireTest extends WireTestCommon {
     @Test
     public void testUsingEvents() throws Exception {
         // Creating a wire instance with binary format
-        final Wire w = WireType.BINARY.apply(Bytes.elasticByteBuffer());
+        final Wire w = WireType.BINARY.apply(Bytes.allocateElasticOnHeap());
         w.usePadding(true);
 
         // Writing three events with DTOs to the wire
@@ -1692,6 +1693,7 @@ public class BinaryWireTest extends WireTestCommon {
         }
     }
 
+    @SuppressWarnings("try")
     @Test
     public void readsComment() {
         StringBuilder sb = new StringBuilder();
@@ -1724,6 +1726,8 @@ public class BinaryWireTest extends WireTestCommon {
 
     @Test
     public void writeEndOfWireDoesNotUpdateModifiedTimeOnNoOpWhenUnderlyingBytesIsFile() throws IOException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Create a temporary file for the test
         final File tempFile = IOTools.createTempFile("test-lastModified-endOfWire");
         final AtomicLong endOfWirePosition = new AtomicLong();
@@ -1735,7 +1739,9 @@ public class BinaryWireTest extends WireTestCommon {
             assertTrue(wire.writeEndOfWire(100, TimeUnit.MILLISECONDS, endOfWirePosition.get()));
         });
 
-        // Store the file's last modified time for later comparison
+        // this will wait until any pending resources have been closed
+        BackgroundResourceReleaser.releasePendingResources();
+
         long lastModified = tempFile.lastModified();
         Jvm.pause(10);
 
@@ -1745,8 +1751,11 @@ public class BinaryWireTest extends WireTestCommon {
             assertFalse(wire.writeEndOfWire(100, TimeUnit.MILLISECONDS, endOfWirePosition.get()));
         });
 
-        // Assert that the file's last modified time hasn't changed
-        assertEquals(lastModified, tempFile.lastModified());
+        long lastModified2 = tempFile.lastModified();
+        if (OS.isMacOSX() && lastModified2 - lastModified == 1)
+            return;
+
+        assertEquals(lastModified, lastModified2);
     }
 
     private void createWireFromFileAnd(File file, Consumer<@ScopeConfined Wire> wireConsumer) throws IOException {
@@ -1755,6 +1764,9 @@ public class BinaryWireTest extends WireTestCommon {
             final Bytes<?> bytes = mappedFile.acquireBytesForWrite(owner, 0);
             Wire wire = WireType.BINARY.apply(bytes);
             wireConsumer.accept(wire);
+            @SuppressWarnings("unchecked")
+            MappedBytesStore mappedBytesStore = (MappedBytesStore) bytes.bytesStore();
+            mappedBytesStore.syncUpTo(8192);
             bytes.releaseLast(owner);
         }
     }

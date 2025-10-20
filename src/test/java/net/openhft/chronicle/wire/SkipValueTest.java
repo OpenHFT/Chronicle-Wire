@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +18,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesMarshallable;
 import net.openhft.chronicle.bytes.util.BinaryLengthLength;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +38,8 @@ import java.util.function.Consumer;
 import static net.openhft.chronicle.wire.BinaryWireCode.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assume.assumeFalse;
+
 /**
  * Tests the ability to skip certain values in wire formats based on the parameterized input.
  */
@@ -154,6 +155,8 @@ public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     @Test
     public void test() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Creates a new wire using the BINARY WireType.
         Wire wire = WireType.BINARY.apply(Bytes.allocateElasticOnHeap());
 

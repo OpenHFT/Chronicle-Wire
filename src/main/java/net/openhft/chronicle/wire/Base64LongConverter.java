@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,9 +32,7 @@ public class Base64LongConverter extends AbstractLongConverter {
      */
     public static final Base64LongConverter INSTANCE = new Base64LongConverter();
 
-    /**
-     * A string representing the set of characters to be used in base64 encoding.
-     */
+    // A string representing the set of characters to be used in base64 encoding
     private static final String CHARS = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
 
     /**

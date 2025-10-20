@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +16,20 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
-@SuppressWarnings("rawtypes")
 public class WireInternalTest extends WireTestCommon {
 
     // Test the serialization and deserialization of a Throwable object using Wire's object method.
     @Test
     public void testThrowableAsObject() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Create an elastic byte buffer for testing.
         final Bytes<?> bytes = Bytes.elasticByteBuffer();
         try {
@@ -57,6 +58,8 @@ public class WireInternalTest extends WireTestCommon {
     // Test the serialization and deserialization of a Throwable using Wire's dedicated throwable method.
     @Test
     public void testThrowable() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Similar setup to the previous test but uses TEXT wire type and the dedicated throwable methods.
         final Bytes<?> bytes = Bytes.elasticByteBuffer();
         try {
@@ -78,7 +81,7 @@ public class WireInternalTest extends WireTestCommon {
     // Test the conversion of a size-prefixed binary message to text using Wire.
     @Test
     public void testFromSizePrefixedBinaryToText() {
-        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         @NotNull Wire wire = new BinaryWire(bytes);
         wire.usePadding(true);
 

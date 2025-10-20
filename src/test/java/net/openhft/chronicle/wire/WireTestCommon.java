@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +36,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings({"this-escape"})
 public class WireTestCommon {
 
     // A thread dump to monitor thread states and detect unwanted thread creation
@@ -59,6 +58,7 @@ public class WireTestCommon {
         // Ignore exceptions with incubating feature warnings
         ignoreException("The incubating features are subject to change");
         ignoreException("NamedThreadFactory created here");
+        ignoreException("Unable to find suitable cleaner service, falling back to using reflection");
     }
 
     // Activates the reference tracing before executing tests
@@ -180,7 +180,7 @@ public class WireTestCommon {
         assertReferencesReleased();
         checkThreadDump();
         checkExceptions();
-        MessageHistory.set(null);
+        MessageHistory.clear();
     }
 
     // Placeholder for subclasses to include additional operations before afterChecks
@@ -201,6 +201,5 @@ public class WireTestCommon {
 
     @Before
     public void throwCNFRE() {
-        Wires.THROW_CNFRE = true;
     }
 }

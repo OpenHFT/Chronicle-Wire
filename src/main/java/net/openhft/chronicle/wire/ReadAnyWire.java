@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +30,6 @@ import java.util.function.Supplier;
  * The specific wire type is determined dynamically based on the provided bytes.
  * This class provides flexibility in reading from wires that could be in either format.
  */
-@SuppressWarnings("rawtypes")
 public class ReadAnyWire extends AbstractAnyWire implements Wire {
 
     /**

@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +29,17 @@ import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 /**
  * Represents a self-describing object that is trivially copyable, extending the functionality of {@link SelfDescribingMarshallable}.
  * The class provides mechanisms to efficiently manage the internal data layout of an instance based on various data types
- * such as longs, ints, shorts, and bytes. The layout is determined using a description integer.
+ * such as longs, ints, shorts, and bytes. Useful for high-performance scenarios where the layout determined using a
+ * {@code description} integer is known and stable yet the object remains self-describing when marshalled.
  */
+@SuppressWarnings("this-escape")
 public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMarshallable {
+
+    /**
+     * Combined limit for primitive fields to avoid unreasonable copies.
+     * A description requesting more fields than this is rejected.
+     */
+    private static final int FIELD_COUNT_LIMIT = 256;
 
     // Contains the description of the data layout.
     @FieldGroup("header")
@@ -60,6 +66,11 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
      */
     protected abstract int $length();
 
+    /**
+     * Reads the object's state from the bytes. If the layout description in the
+     * input matches {@link #$description()}, a fast unsafe copy is performed;
+     * otherwise {@link #carefulCopy(BytesIn, int)} handles schema differences.
+     */
     @Override
     public void readMarshallable(BytesIn<?> bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         int description0 = bytes.readInt();
@@ -87,6 +98,10 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
         int ints0 = (description0 >>> 16) & 0xFF;
         int shorts0 = (description0 >>> 8) & 0x7F;
         int bytes0 = description0 & 0xFF;
+
+        if (longs0 + ints0 + shorts0 + bytes0 > FIELD_COUNT_LIMIT)
+            throw new IllegalStateException("Excessive field count in description: " +
+                    Integer.toHexString(description0));
 
         // Calculate the total length required based on data types
         int length = longs0 * 8 + ints0 * 4 + shorts0 * 2 + bytes0;
@@ -144,6 +159,10 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
         }
     }
 
+    /**
+     * Writes the description followed by the trivially copyable fields using an
+     * unsafe memory copy.
+     */
     @Override
     public void writeMarshallable(BytesOut<?> bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
         bytes.writeInt($description());

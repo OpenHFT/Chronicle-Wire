@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +21,9 @@ package net.openhft.chronicle.wire;
  * This interface provides a contract for checking a given header number and its position.
  * Typically, implementations of this interface will contain logic to determine whether
  * the provided header number, in the context of its position are a valid combination.
+ * <p>
+ * Used by {@link AbstractWire} to validate header numbers, for example, to ensure sequence
+ * numbers are contiguous or monotonically increasing when reading from a queue.
  */
 @FunctionalInterface
 public interface HeadNumberChecker {
@@ -30,9 +31,11 @@ public interface HeadNumberChecker {
     /**
      * Checks whether the provided header number meets a certain condition in the context of its position.
      *
-     * @param headerNumber The header number to be checked.
-     * @param position The position or context associated with the header number.
-     * @return {@code true} if the header number is valid; {@code false} otherwise.
+     * @param headerNumber The header number read from the wire.
+     * @param position     The byte position in the wire where this header number was encountered.
+     *                     This can be used for context or logging.
+     * @return {@code true} if the header number is considered valid according to the implementation's
+     * logic, {@code false} otherwise (which might lead to an error or retry).
      */
     boolean checkHeaderNumber(long headerNumber, long position);
 }

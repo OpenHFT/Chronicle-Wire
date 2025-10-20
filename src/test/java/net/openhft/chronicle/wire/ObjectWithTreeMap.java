@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +19,7 @@ package net.openhft.chronicle.wire;
 import java.util.TreeMap;
 
 // Class ObjectWithTreeMap extends SelfDescribingMarshallable and contains a TreeMap
-class ObjectWithTreeMap extends SelfDescribingMarshallable {
+public class ObjectWithTreeMap extends SelfDescribingMarshallable {
     // Declaration and instantiation of a TreeMap, mapping String keys to String values
-    final TreeMap<String, String> map = new TreeMap<>();
+    public final TreeMap<String, String> map = new TreeMap<>();
 }

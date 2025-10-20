@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -269,7 +267,7 @@ public class GenerateJsonSchemaMain {
     /**
      * Adds a type descriptor to the given StringBuilder based on the type and annotations
      * of a field or method parameter. This method checks for specific annotations like
-     * {@link IntConversion} and {@link LongConversion} to determine the type description.
+     * {@link LongConversion} to determine the type description.
      * If the field/parameter is of Collection type, it's identified as an "array", and if it's
      * of type Map, it's identified as an "object". For other types, the corresponding schema is generated.
      *
@@ -280,7 +278,7 @@ public class GenerateJsonSchemaMain {
     private void addTypeForFieldOrParam(StringBuilder desc, Class<?> pType, Annotation[] annotations) {
         LongConversion lc = find(annotations, LongConversion.class);
         if (lc != null) {
-            Class value = lc.value();
+            Class<?> value = lc.value();
             if (value.getName().contains("Timestamp"))
                 desc.append("\"type\": \"string\",\n" +
                         "\"format\": \"date-time\"");
@@ -309,7 +307,7 @@ public class GenerateJsonSchemaMain {
     private <T extends Annotation> T find(Annotation[] annotations, Class<T> aClass) {
         for (Annotation annotation : annotations) {
             if (aClass.isAssignableFrom(annotation.annotationType()))
-                return (T) annotation;
+                return Jvm.uncheckedCast(annotation);
         }
         return null;
     }

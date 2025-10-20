@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +25,7 @@ import java.util.List;
  */
 class ValueInStack {
 
-    // A list to hold ValueInState instances that can be reused
+    // A list of {@link ValueInState} objects that can be reused to reduce allocation. Acts as the underlying storage for the stack
     final List<ValueInState> freeList = new ArrayList<>();
 
     // Represents the current level of the stack
@@ -49,7 +47,8 @@ class ValueInStack {
     }
 
     /**
-     * Increases the current level of the stack. If the free list has a state at this new level, it is reset.
+     * Increments {@link #level}. If a state object already exists at the new
+     * level it is reset for reuse.
      */
     public void push() {
         level++;
@@ -59,9 +58,8 @@ class ValueInStack {
     }
 
     /**
-     * Decreases the current level of the stack. If the level would become negative, an exception is thrown.
-     *
-     * @throws IllegalStateException if trying to pop below the bottom of the stack.
+     * Decrements {@link #level}. Throws {@link IllegalStateException} if called
+     * below level&nbsp;0.
      */
     public void pop() {
         if (level < 0)
@@ -81,7 +79,7 @@ class ValueInStack {
     }
 
     /**
-     * Adds a new {@link ValueInState} instance to the free list.
+     * Adds a new, default-initialised {@link ValueInState} to the free list.
      */
     private void addOne() {
         freeList.add(new ValueInState());

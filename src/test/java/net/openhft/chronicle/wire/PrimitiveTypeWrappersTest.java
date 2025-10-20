@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,8 +58,8 @@ public class PrimitiveTypeWrappersTest extends WireTestCommon {
         @NotNull final Number[] nums = new Number[]{(byte) 1, (short) 2, (float) 3, 4, (long) 5, (double) 6};
 
         for (@NotNull Number num : nums) {
-            for (@NotNull Class type : types) {
-                @NotNull final Wire wire = wireFactory();  // Get a Wire instance
+            for (@NotNull Class<?> type : types) {
+                @NotNull final Wire wire = wireFactory();
 
                 wire.write().object(num); // Write the number to the wire
                // System.out.println(wire);

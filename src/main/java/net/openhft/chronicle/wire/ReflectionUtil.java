@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,21 +31,31 @@ import java.util.List;
  */
 public final class ReflectionUtil {
 
-    // Configuration flag to determine if package name should be prepended
-    private static final boolean PREPEND_PACKAGE = Jvm.getBoolean("wire.method.prependPackage");
-    // Base package prefix for generated names
-    private static final String PACKAGE_PREFIX = "net.openhft.chronicle.wire.method";
+    /**
+     * System property ({@code wire.method.prependPackage}) flag. If true,
+     * {@link #generatedPackageName(String)} will always prepend
+     * {@link #PACKAGE_PREFIX} to the package name.
+     */
+    private static final boolean PREPEND_PACKAGE =
+            Jvm.getBoolean("wire.method.prependPackage");
+
+    /**
+     * The base package prefix ({@code net.openhft.chronicle.wire.method}) used
+     * by {@link #generatedPackageName(String)} when prepending is active.
+     */
+    private static final String PACKAGE_PREFIX =
+            "net.openhft.chronicle.wire.method";
 
     // Private constructor to prevent instantiation
     private ReflectionUtil() {
     }
 
     /**
-     * Creates and returns a list of all interfaces implemented by the
-     * provided {@code oClass} and all its superclasses.
+     * Creates and returns a new {@link List} of all interfaces implemented by
+     * the provided {@code oClass} and all its super classes.
      *
-     * @param oClass The class to inspect.
-     * @return A list of interfaces implemented by the given class and its ancestors.
+     * @param oClass The class whose implemented interfaces (including inherited ones) are to be retrieved.
+     * @return A new {@link List} of all unique interfaces implemented by {@code oClass} and its superclass hierarchy.
      */
     public static List<Class<?>> interfaces(@NotNull final Class<?> oClass) {
         final List<Class<?>> list = new ArrayList<>();
@@ -55,7 +63,10 @@ public final class ReflectionUtil {
         return list;
     }
 
-    // Recursively gather interfaces from the given class and its superclasses
+    /**
+     * Recursively populates the {@code list} with interfaces implemented by
+     * {@code oClass} and its superclasses, stopping at {@code java.lang.Object}.
+     */
     private static void interfaces(final Class<?> oClass, final List<Class<?>> list) {
         final Class<?> baseClass = oClass.getSuperclass();
         if (baseClass == null)
@@ -66,12 +77,14 @@ public final class ReflectionUtil {
     }
 
     /**
-     * Generates a package name based on a given class full name.
-     * If the class belongs to specific packages (like 'java.', 'javax.', 'com.sun.'),
-     * or if the {@code PREPEND_PACKAGE} flag is set, the generated package name
-     * will be prefixed with {@code PACKAGE_PREFIX}.
+     * Generates a package name based on the supplied class name. If the class
+     * resides in a reserved package such as {@code java.} or if
+     * {@link #PREPEND_PACKAGE} is true, the resulting name will be prefixed with
+     * {@link #PACKAGE_PREFIX}.
      *
-     * @param classFullName The full name of the class.
+     * @param classFullName The fully qualified name of the class for which to
+     *                      generate a potentially modified package name (e.g.,
+     *                      for generated proxy classes).
      * @return The generated package name.
      */
     @NotNull

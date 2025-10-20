@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,6 +116,7 @@ public class MethodWriterTest extends WireTestCommon {
         Assert.assertTrue(wire.toString().startsWith("callToDefaultMethod: hello world"));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void multiOut() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());

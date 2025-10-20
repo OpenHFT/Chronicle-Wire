@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +29,7 @@ import java.util.Map;
 public class Field extends SelfDescribingMarshallable {
 
     // A map to maintain the required status for various field names
-    private final Map<String, Required> required = new HashMap<>();
+    public final Map<String, Required> required = new HashMap<>();
 
     /**
      * Sets the required status for a given field name.

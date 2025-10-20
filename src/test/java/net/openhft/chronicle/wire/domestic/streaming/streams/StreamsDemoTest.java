@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -309,7 +307,6 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
         if (Runtime.getRuntime().availableProcessors() > 2) {
             assertTrue(threads.size() > 1);
         }
-
     }
 
     @Test
@@ -371,7 +368,6 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
                 st += streamDurationMs;
                 it += iterationDurationMs;
             }
-
         }
         System.out.println("st = " + st);
         System.out.println("it = " + it);
@@ -452,8 +448,8 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     public static final class Shares extends SelfDescribingMarshallable {
 
-        private String symbol;
-        private long noShares;
+        public String symbol;
+        public long noShares;
 
         public Shares() {
         }
@@ -482,9 +478,9 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     public static final class News extends SelfDescribingMarshallable {
 
-        private String symbol;
-        private String header;
-        private String body;
+        public String symbol;
+        public String header;
+        public String body;
 
         public News() {
         }
@@ -518,7 +514,6 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
         public void body(String body) {
             this.body = body;
         }
-
     }
 
     private static void assertLongSummaryStatisticsEqual(LongSummaryStatistics a,
@@ -537,5 +532,4 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
         ((Wire) in).bytes().readPosition(0);
         return in;
     }
-
 }

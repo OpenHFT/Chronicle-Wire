@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,12 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import org.junit.Test;
 
+import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -34,6 +34,8 @@ public class VanillaMessageHistoryTest extends net.openhft.chronicle.wire.WireTe
 
         // Create and initialize a VanillaMessageHistory object
         VanillaMessageHistory vmh = new VanillaMessageHistory();
+        vmh.addSourceDetails(true);
+        vmh.useBytesMarshallable(false);
         vmh.addSource(1, 128);
         vmh.addTiming(12121212);
 
@@ -66,7 +68,9 @@ public class VanillaMessageHistoryTest extends net.openhft.chronicle.wire.WireTe
 
         // Create two new VanillaMessageHistory objects for comparison
         VanillaMessageHistory vmh2 = new VanillaMessageHistory();
+        vmh2.useBytesMarshallable(false);
         VanillaMessageHistory vmh3 = new VanillaMessageHistory();
+        vmh3.useBytesMarshallable(false);
 
         // Check that the hash codes of the two new objects are equal
         assertEquals(vmh3.hashCode(),
@@ -78,12 +82,14 @@ public class VanillaMessageHistoryTest extends net.openhft.chronicle.wire.WireTe
 
         // Add the last timing to the original VanillaMessageHistory (which gets added on read)
         vmh.addTiming(vmh2.timing(1));
+        vmh2.addSourceDetails(true);
 
         // Assert the two VanillaMessageHistory objects are equal in content and hash code
         assertEquals(vmh.toString(), vmh2.toString());
+
+        assumeFalse(Jvm.maxDirectMemory() == 0);
         assertEquals(vmh, vmh2);
         assertEquals(vmh.hashCode(),
                 vmh2.hashCode());
     }
-
 }

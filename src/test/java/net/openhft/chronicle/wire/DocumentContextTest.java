@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +23,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-// Class to test the functionality of the DocumentContext in different wire formats.
+@SuppressWarnings("all")
 public class DocumentContextTest extends WireTestCommon {
 
     // Test multi-message serialization in TEXT format.
@@ -46,6 +44,7 @@ public class DocumentContextTest extends WireTestCommon {
     }
 
     // Test multi-message serialization in BINARY format.
+    @SuppressWarnings("deprecation")
     @Test
     public void multiMessageBinary() {
         // Create a wire of BINARY type with hex dump
@@ -75,9 +74,13 @@ public class DocumentContextTest extends WireTestCommon {
         wire.acquireWritingDocument(false).wire().writeEventName("two").int16(2);
         try (DocumentContext dc = wire.acquireWritingDocument(false)) {
             dc.wire().writeEventName("three").int16(3);
-            dc.close();
-            dc.close();
+            close(dc);
+            close(dc);
         }
         return wire.bytes();
+    }
+
+    private static void close(DocumentContext dc) {
+        dc.close();
     }
 }

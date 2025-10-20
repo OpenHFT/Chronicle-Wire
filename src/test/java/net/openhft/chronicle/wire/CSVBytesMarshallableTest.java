@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,15 +26,6 @@ import org.junit.Test;
 import static net.openhft.chronicle.wire.Wires.acquireStringBuilderScoped;
 import static org.junit.Assert.assertEquals;
 
-// Enum representing currency pairs and an interner utility for its values
-enum CcyPair {
-    EURUSD, GBPUSD, EURCHF;
-
-    // Static utility to intern the currency pair values
-    static final EnumInterner<CcyPair> INTERNER = new EnumInterner<>(CcyPair.class);
-}
-
-@SuppressWarnings("rawtypes")
 public class CSVBytesMarshallableTest extends WireTestCommon {
 
     // Bytes representing raw data for the tests
@@ -48,7 +37,7 @@ public class CSVBytesMarshallableTest extends WireTestCommon {
     // Test for low level bytes marshalling using FXPrice
     @Test
     public void bytesMarshallable() {
-        Bytes<?> bytes2 = Bytes.elasticByteBuffer();
+        Bytes<?> bytes2 = Bytes.allocateElasticOnHeap();
         @NotNull FXPrice fxPrice = new FXPrice();
 
         // Read, marshall, and write data from one set of bytes to another
@@ -102,7 +91,7 @@ public class CSVBytesMarshallableTest extends WireTestCommon {
         // Initialize wires for input and output data
         @NotNull CSVWire in = new CSVWire(bytes);
 
-        Bytes<?> bytes2 = Bytes.elasticByteBuffer();
+        Bytes<?> bytes2 = Bytes.allocateElasticOnHeap();
         Wire out = wt.apply(bytes2);
 
         @NotNull FXPrice2 fxPrice = new FXPrice2();
@@ -181,7 +170,6 @@ class FXPrice implements BytesMarshallable {
         }
     }
 }
-
 /**
  * Class representing a foreign exchange price.
  * Implements the Marshallable interface to support reading and writing of its values using the Wire format.

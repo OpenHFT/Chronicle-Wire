@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +30,9 @@ import java.lang.annotation.Target;
  * <p>
  * This allows for consistent, self-descriptive annotations in fields or parameters,
  * guiding developers and API users about the intended format of the long value.
- * </p>
- *
  * <p>
  * The Base16 format is often used for representing binary data in an ASCII string format,
  * and this annotation helps in ensuring that the long value adheres to this representation.
- * </p>
  *
  * @see PowerOfTwoLongConverter
  */
@@ -51,7 +46,6 @@ public @interface Base16 {
      * <p>
      * This instance is initialized with symbols "0123456789abcdef" to represent
      * the 16 possible values in a Base16 system.
-     * </p>
      */
     LongConverter INSTANCE = new PowerOfTwoLongConverter("0123456789abcdef");
 }

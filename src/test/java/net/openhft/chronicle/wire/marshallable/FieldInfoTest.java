@@ -1,8 +1,8 @@
 /*
- * Copyright 2016-2020 chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *       http://www.apache.org/licenses/LICENSE-2.0
@@ -12,11 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
+
 
 package net.openhft.chronicle.wire.marshallable;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.FieldInfo;
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
@@ -31,6 +32,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
+
 // Runner to enable parameterized tests for the FieldInfoTest class
 @RunWith(value = Parameterized.class)
 public class FieldInfoTest extends WireTestCommon {
@@ -258,8 +261,8 @@ public class FieldInfoTest extends WireTestCommon {
                         "}\n" +
                         ", !net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo {\n" +
                         "  name: dynamicEnum,\n" +
-                        "  type: !type net.openhft.chronicle.wire.marshallable.TestDynamicEnum,\n" +
-                        "  bracketType: UNKNOWN,\n" +
+                        "  type: !type net.openhft.chronicle.wire.marshallable.TestEnum,\n" +
+                        "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         "]",
@@ -279,6 +282,8 @@ public class FieldInfoTest extends WireTestCommon {
     // Test method to ensure the field information from the Marshallable object matches the expected value
     @Test
     public void fieldInfo() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         @NotNull List<FieldInfo> infos = m.$fieldInfos();
         assertEquals(fieldInfos, infos.toString());
     }

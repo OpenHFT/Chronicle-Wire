@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +49,10 @@ public class NanoTimestampLongConverterTest extends WireTestCommon {
     // Testing parsing of different string formats for nanosecond timestamps.
     @Test
     public void parseString() {
+        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456"),
+                INSTANCE.parse("2020-09-18T01:02:03.456"));
+        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456789"),
+                INSTANCE.parse("2020-09-18T01:02:03.456789"));
         assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456789012"),
                 INSTANCE.parse("2020-09-18T01:02:03.456789012"));
     }
@@ -88,12 +90,10 @@ public class NanoTimestampLongConverterTest extends WireTestCommon {
     }
 
     // Testing round-trip conversions (from string to long and back) for different timezones and formats.
-    @SuppressWarnings("deprecation")
     @Test
     public void roundTripTest() {
         roundTrip(TIMESTAMP_STRING_MELBOURNE, TIMESTAMP, new NanoTimestampLongConverter("Australia/Melbourne"));
         roundTrip(TIMESTAMP_STRING_UTC_NO_SUFFIX, TIMESTAMP, new NanoTimestampLongConverter("UTC"));
-        roundTrip(TIMESTAMP_STRING_UTC, TIMESTAMP, new NanoTimestampLongConverter("UTC", true));
     }
 
     // Helper method for the round-trip conversions.

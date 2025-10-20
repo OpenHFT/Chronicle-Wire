@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +38,7 @@ public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
      * Test case to verify that an anonymous class can be passed to MethodReader.
      * It sets up a writer, writes a message, then uses a MethodReader to read and process the message using an anonymous class implementation.
      */
+    @SuppressWarnings("deprecation")
     @Test
     public void testAnonymousClassCanBePassedToMethodReader() {
         // Initialization of the wire with padding
@@ -73,6 +72,7 @@ public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
      * Test case to verify that a core class can be passed to MethodReader.
      * Similar to the above test but uses a BooleanConsumer core class.
      */
+    @SuppressWarnings("deprecation")
     @Test
     public void testCoreClassCanBePassedToMethodReader() throws Exception {
         // Initialization of the wire with padding
@@ -106,6 +106,7 @@ public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
      * Test case to verify that a lambda expression can be passed to MethodReader.
      * It demonstrates how a lambda can be used to implement the reading functionality.
      */
+    @SuppressWarnings("deprecation")
     @Test
     public void testLambdaCanBePassedToMethodReader() {
         // Initialization of the wire with padding

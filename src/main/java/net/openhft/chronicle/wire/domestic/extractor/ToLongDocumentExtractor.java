@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +43,7 @@ public interface ToLongDocumentExtractor {
      * queue but of another type.
      * <p>
      * Extractors that must include {@link Long#MIN_VALUE} as a valid value must use other means of
-     * aggregating values (e.g. use an {@link DocumentExtractor DocumentExtractor<Long> }.
+     * aggregating values (e.g. use an {@link DocumentExtractor DocumentExtractor&lt;Long> }.
      *
      * @param wire  to use
      * @param index to use
@@ -149,5 +147,4 @@ public interface ToLongDocumentExtractor {
     static ToLongDocumentExtractor extractingIndex() {
         return (wire, index) -> index;
     }
-
 }

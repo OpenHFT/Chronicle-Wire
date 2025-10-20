@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.Mocker;
 import org.junit.Test;
 
@@ -27,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 // Two base interfaces with some methods
 interface GMBA {
@@ -50,6 +50,7 @@ public class GenerateMethodBridgeTest extends WireTestCommon {
 
     @Test
     public void createBridge() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Instantiating an object to generate method bridges
         GenerateMethodBridge gmb = new GenerateMethodBridge();
@@ -64,7 +65,7 @@ public class GenerateMethodBridgeTest extends WireTestCommon {
         md.invokes().add(GMBZ.class);
 
         // Setting package and base class names for the metadata
-        md.packageName(getClass().getPackage().getName());
+        md.packageName(Jvm.getPackageName(getClass()));
         md.baseClassName("GMB");
 
         // Acquiring a class based on the metadata

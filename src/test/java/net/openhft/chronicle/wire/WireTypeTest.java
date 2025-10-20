@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +27,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("deprecation")
 public class WireTypeTest extends WireTestCommon {
 
     // Add alias for TestMarshallable class for the test
@@ -115,9 +114,7 @@ public class WireTypeTest extends WireTestCommon {
             // Skip unsupported WireTypes
             if (wt == WireType.RAW
                     || wt == WireType.READ_ANY
-                    || wt == WireType.CSV
-                    || wt == WireType.DELTA_BINARY
-                    || wt == WireType.DEFAULT_ZERO_BINARY)
+                    || wt == WireType.CSV)
                 continue;
 
             // Create a temporary file

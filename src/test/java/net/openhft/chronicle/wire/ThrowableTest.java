@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,12 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 // This test class focuses on handling Throwable objects with different WireTypes.
 public class ThrowableTest extends WireTestCommon {
@@ -39,7 +39,7 @@ public class ThrowableTest extends WireTestCommon {
                 // Initialize the Throwable object with a message and cause
                 Throwable message = new Throwable("message");
                 message.initCause(new Throwable("cause"));
-                wire.getValueOut()
+                dc.wire().getValueOut()
                         .object(message);
             }
 /*            if (wireType == WireType.TEXT)
@@ -47,9 +47,10 @@ public class ThrowableTest extends WireTestCommon {
             else
                 System.out.println(wire.bytes().toHexString()+"\n"+Wires.fromSizePrefixedBlobs(wire.bytes()));*/
 
+            assumeFalse(Jvm.maxDirectMemory() == 0);
             // Read the written Throwable and validate its content
             try (DocumentContext dc = wire.readingDocument()) {
-                Throwable t = (Throwable) wire.getValueIn().object();
+                Throwable t = (Throwable) dc.wire().getValueIn().object();
                 assertEquals("message", t.getMessage());
                 assertTrue(t.getStackTrace()[0].toString().startsWith("net.openhft.chronicle.wire.ThrowableTest.writeReadThrowable(ThrowableTest.java"));
             }

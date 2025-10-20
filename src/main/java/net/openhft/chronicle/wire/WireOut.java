@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +70,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * @throws InvalidMarshallableException if there's an error marshalling the event.
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    default ValueOut writeEvent(Class expectedType, Object eventKey) throws InvalidMarshallableException {
+    default ValueOut writeEvent(Class<?> expectedType, Object eventKey) throws InvalidMarshallableException {
         if (eventKey instanceof WireKey)
             return writeEventName((WireKey) eventKey);
         if (eventKey instanceof CharSequence)

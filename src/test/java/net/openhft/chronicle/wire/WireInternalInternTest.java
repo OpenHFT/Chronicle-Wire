@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,9 +81,8 @@ public class WireInternalInternTest extends WireTestCommon {
 //    @Test
     public void intern() {
         int sep = typeValue.indexOf(' ');
-        // Extracting the class type from the test input value.
-        Class type = ClassAliasPool.CLASS_ALIASES.forName(typeValue.substring(1, sep));
-        // Extracting the actual value from the test input value.
+        Class<?> type = ClassAliasPool.CLASS_ALIASES.forName(
+                typeValue.substring(1, sep));
         String value = typeValue.substring(sep + 1);
         // Interning the value using WireInternal.
         Object value2 = WireInternal.intern(type, value);

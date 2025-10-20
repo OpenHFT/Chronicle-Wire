@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,6 +81,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void doTestInterceptorSupportedInGeneratedCode(CountDownLatch readerCreateLatch, boolean addDummyInstance) {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
@@ -151,6 +150,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
      * Covers {@link GeneratingMethodReaderInterceptorReturns}, which allows intervening in method reader's logic
      * without resorting to reflective calls.
      */
+    @SuppressWarnings("deprecation")
     @Test
     public void testGeneratingAggregatingInfoInterceptor() {
         // Create a wire with a buffer of size 128 and padding enabled
@@ -192,6 +192,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
      * Covers {@link GeneratingMethodReaderInterceptorReturns}, which allows intervening in method reader's logic
      * without resorting to reflective calls.
      */
+    @SuppressWarnings("deprecation")
     @Test
     public void testGeneratingSkippingInterceptor() {
         // Create a wire with a buffer of size 128 and padding enabled

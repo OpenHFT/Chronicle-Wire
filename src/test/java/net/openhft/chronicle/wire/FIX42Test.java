@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,7 +170,7 @@ public class FIX42Test extends WireTestCommon {
         // If 'testId' is negative, use TEXT WireType. Otherwise, initialize a binary wire with various configurations.
         @NotNull Wire wire = testId < 0
                 ? WireType.TEXT.apply(bytes)
-                : new BinaryWire(bytes, fixed, numericField, fieldLess, Integer.MAX_VALUE, "binary", true);
+                : new BinaryWire(bytes, fixed, numericField, fieldLess, Integer.MAX_VALUE, "binary");
 
         return wire;
     }

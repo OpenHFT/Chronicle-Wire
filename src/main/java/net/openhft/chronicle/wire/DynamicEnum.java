@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +26,8 @@ import java.util.List;
  * possessing a {@code String name} field. The interface extends both {@link CoreDynamicEnum} and
  * {@link Marshallable}, facilitating serialization and specific dynamic enumeration operations.
  */
+@SuppressWarnings({"deprecation", "rawtypes", "unchecked"})
+@Deprecated(/* to be removed in x.28 */)
 public interface DynamicEnum extends CoreDynamicEnum, Marshallable {
 
     /**

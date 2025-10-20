@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +18,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,8 +39,7 @@ import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
-@SuppressWarnings("rawtypes")
-// Testing the BinaryWire2 with different padding configurations
+@SuppressWarnings({"rawtypes","try"})
 @RunWith(value = Parameterized.class)
 public class BinaryWire2Test extends WireTestCommon {
     final boolean usePadding;
@@ -63,10 +61,11 @@ public class BinaryWire2Test extends WireTestCommon {
     }
 
     // Create a new BinaryWire instance based on the current test configuration
+    @SuppressWarnings("deprecation")
     @NotNull
     private BinaryWire createWire() {
         bytes.clear();
-        @NotNull BinaryWire wire = new BinaryWire(bytes, false, false, false, 32, "lzw", false);
+        @NotNull BinaryWire wire = new BinaryWire(bytes, false, false, false, 32, "lzw");
         wire.usePadding(usePadding);
         return wire;
     }
@@ -90,9 +89,6 @@ public class BinaryWire2Test extends WireTestCommon {
                     e.printStackTrace();
                 }
         }
-        wireCodes.remove(BinaryWireCode.FIELD_ANCHOR); // TODO
-        wireCodes.remove(BinaryWireCode.ANCHOR); // TODO
-        wireCodes.remove(BinaryWireCode.UPDATED_ALIAS); // TODO
         wireCodes.remove(BinaryWireCode.U8_ARRAY); // should always be nested
         wireCodes.remove(BinaryWireCode.I64_ARRAY); // should always be nested
         wireCodes.remove(BinaryWireCode.FIELD_NAME_ANY); // should always be nested
@@ -119,8 +115,8 @@ public class BinaryWire2Test extends WireTestCommon {
                 v -> v.date(LocalDate.MIN),
                 v -> v.dateTime(LocalDateTime.MIN),
                 v -> v.zonedDateTime(ZonedDateTime.now()),
-                v -> v.marshallable(w -> {
-                }),
+                Jvm.maxDirectMemory() > 0 ? v -> v.marshallable(w -> {
+                }) : v -> v.text("na"),
                 v -> v.set(new TreeSet<>()),
                 v -> v.object(null),
                 v -> v.text(""),
@@ -191,7 +187,7 @@ public class BinaryWire2Test extends WireTestCommon {
         @NotNull Wire wire = createWire();
         wire.write().object(Bytes.from("Hello"));
 
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = allocateElasticOnHeap();
         wire.read().bytes(b);
         assertEquals("Hello", b.toString());
         b.releaseLast();
@@ -332,6 +328,8 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test writing sequences in both binary and text format with Chronicle Wire
     @Test
     public void testSequence() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         @NotNull Wire wire = createWire();
         writeMessage(wire);
         assertEquals("" +
@@ -352,7 +350,7 @@ public class BinaryWire2Test extends WireTestCommon {
                         "]\n",
                 Wires.fromSizePrefixedBlobs(wire));
 
-        @NotNull Wire twire = WireType.TEXT.apply(Bytes.elasticByteBuffer());
+        @NotNull Wire twire = WireType.TEXT.apply(allocateElasticOnHeap());
         writeMessage(twire);
         assertEquals("" +
                         "--- !!meta-data\n" +
@@ -395,6 +393,8 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test writing messages with padding and validate their binary and text representations
     @Test
     public void testSequenceContext() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         assumeTrue(usePadding);
         @NotNull Wire wire = createWire();
         writeMessageContext(wire);
@@ -421,7 +421,7 @@ public class BinaryWire2Test extends WireTestCommon {
                         "e7 76 61 6c 75 65 2d 32                         # value-2\n",
                 wire.bytes().toHexString());
 
-        @NotNull Wire twire = WireType.TEXT.apply(Bytes.elasticByteBuffer());
+        @NotNull Wire twire = WireType.TEXT.apply(allocateElasticOnHeap());
         writeMessageContext(twire);
 
         // Expected textual representation of the written data
@@ -637,7 +637,7 @@ public class BinaryWire2Test extends WireTestCommon {
 
         // Convert the compressed content to plain text format and validate
         wire.bytes().readPosition(0);
-        Bytes<?> asText = Bytes.elasticByteBuffer();
+        Bytes<?> asText = allocateElasticOnHeap();
         wire.copyTo(WireType.TEXT.apply(asText));
         assertEquals("message: # gzip\n" + s +
                 "\n", asText.toString());
@@ -670,11 +670,11 @@ public class BinaryWire2Test extends WireTestCommon {
      */
     public void testCompression(String comp) {
         bytes.clear();
-        @NotNull Wire wire = new BinaryWire(bytes, false, false, false, 32, comp, false);
+        @NotNull Wire wire = new BinaryWire(bytes, false, false, false, 32, comp);
 
         // Create a repetitive string and convert it to BytesStore
         @NotNull String str = "xxxxxxxxxxxxxxxx2xxxxxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyyyyyyyy2yyyyyyyyyyyyyyyyy";
-        BytesStore bytes = Bytes.from(str);
+        BytesStore<?, ?> bytes = Bytes.from(str);
 
         // Write the string to the wire using the specified compression
         wire.write().bytes(bytes);
@@ -835,7 +835,7 @@ public class BinaryWire2Test extends WireTestCommon {
     public void testBytesLiteral() {
         assumeFalse(usePadding);  // Skip this test if padding is used
 
-        @NotNull Wire wire = new BinaryWire(Bytes.elasticByteBuffer());
+        @NotNull Wire wire = new BinaryWire(allocateElasticOnHeap());
         wire.write("test").text("Hello World");
 
         @NotNull final BinaryWire wire1 = createWire();
@@ -849,7 +849,7 @@ public class BinaryWire2Test extends WireTestCommon {
 
         // Read the nested wire's content and check its value
         wire1.readDocument(null, w -> {
-            @Nullable final BytesStore bytesStore = w.read(() -> "nested")
+            @Nullable final BytesStore<?, ?> bytesStore = w.read(() -> "nested")
                     .bytesLiteral();
             assertEquals(wire.bytes(), bytesStore);
         });
@@ -916,7 +916,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test writing a map with diverse types to a wire and then reading it back
     @Test
     public void testWriteMap() {
-        @NotNull Wire wire = new BinaryWire(Bytes.elasticByteBuffer());
+        @NotNull Wire wire = new BinaryWire(allocateElasticOnHeap());
 
         // Create a map with different types of values
         @NotNull Map<String, Object> putMap = new HashMap<String, Object>();
@@ -1070,4 +1070,3 @@ public class BinaryWire2Test extends WireTestCommon {
         }
     }
 }
-

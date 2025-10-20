@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +41,8 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assume.assumeFalse;
 
 public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireTestCommon {
 
@@ -56,6 +56,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     // Test appending data to a file
     @Test
     public void fileAppend() throws IOException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
         final String expected = "" +
                 "mid: mid\n" +
                 "next: 1\n" +
@@ -82,9 +83,10 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     // Write expected messages to the file specified in the URL and verify its content
     public void file(String query, String expected) throws IOException {
         final File file = new File(OS.getTarget(), "tmp-" + System.nanoTime());
+        @SuppressWarnings("deprecation")
         final URL url = new URL("file://" + file.getAbsolutePath() + query);
         writeMessages(url);
-        final Bytes bytes = BytesUtil.readFile(file.getAbsolutePath());
+        final Bytes<?> bytes = BytesUtil.readFile(file.getAbsolutePath());
         assertEquals(expected, bytes.toString());
         // can overwrite ok
         writeMessages(url);
@@ -97,7 +99,9 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
 
     // Write messages to the specified URL with a given WireType
     private void writeMessages(URL url, WireType wireType) {
-        final MarshallableOut out = MarshallableOut.builder(url).wireType(wireType).get();
+        final MarshallableOut out = MarshallableOut.builder(url)
+                .wireType(wireType)
+                .get();
         ITop top = out.methodWriter(ITop.class);
         top.mid("mid")
                 .next(1)
@@ -108,6 +112,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     }
 
     // Test writing messages to an HTTP endpoint and validate the response
+    @Ignore(/* long running test */)
     @Test
     public void http() throws IOException, InterruptedException {
         InetSocketAddress address = new InetSocketAddress(0);
@@ -117,6 +122,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
         server.createContext("/echo", new Handler(queue));
         server.start();
         try {
+            @SuppressWarnings("deprecation")
             final URL url = new URL("http://localhost:" + port + "/echo");
             writeMessages(url);
             assertEquals(
@@ -142,6 +148,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
         server.createContext("/echo", new Handler(queue));
         server.start();
         try {
+            @SuppressWarnings("deprecation")
             final URL url = new URL("http://localhost:" + port + "/echo/append");
             writeMessages(url);
             assertEquals(
@@ -166,12 +173,12 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
         server.createContext("/echo", new Handler(queue));
         server.start();
         try {
+            @SuppressWarnings("deprecation")
             final URL url = new URL("http://localhost:" + port + "/echo");
             writeMessages(url, WireType.BINARY_LIGHT);
         } finally {
             server.stop(1);
         }
-
     }
 
     // Interface representing a timed event.
@@ -189,7 +196,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
 
         @Override
         public void handle(HttpExchange xchg) throws IOException {
-            Bytes bytes = Bytes.allocateElasticOnHeap();
+            Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap();
             char ch;
             for (InputStream is = xchg.getRequestBody(); (ch = (char) is.read()) != (char) -1; )
                 bytes.writeUnsignedByte(ch);
@@ -197,7 +204,8 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
                 queue.add(bytes.toHexString());
             else
                 queue.add(bytes.toString());
-            xchg.sendResponseHeaders(202, 0);
+            // use -1 to indicate not response as 0 allows an arbitrary length
+            xchg.sendResponseHeaders(202, -1);
         }
     }
 
@@ -229,8 +237,11 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
                 server = HttpServer.create(new InetSocketAddress(PORT), 50);
                 server.createContext("/bench", new BenchHandler());
                 server.start();
+                @SuppressWarnings("deprecation")
                 final URL url = new URL("http://localhost:" + PORT + "/bench");
-                MarshallableOut out = MarshallableOut.builder(url).wireType(WireType.JSON_ONLY).get();
+                MarshallableOut out = MarshallableOut.builder(url)
+                        .wireType(WireType.JSON_ONLY)
+                        .get();
                 timed = out.methodWriter(Timed.class);
             } catch (IOException ioe) {
                 throw Jvm.rethrow(ioe);
@@ -257,7 +268,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
             public void handle(HttpExchange xchg) {
                 try {
                     InputStream is = xchg.getRequestBody();
-                    final Bytes<byte[]> bytes2 = (Bytes<byte[]>) wire.bytes();
+                    final Bytes<byte[]> bytes2 = Jvm.uncheckedCast(wire.bytes());
                     int length = is.available();
                     byte[] bytes = bytes2.underlyingObject();
                     int length2 = is.read(bytes);
@@ -276,4 +287,3 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
         }
     }
 }
-

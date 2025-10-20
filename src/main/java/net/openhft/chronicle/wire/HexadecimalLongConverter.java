@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +31,7 @@ public class HexadecimalLongConverter extends AbstractLongConverter {
      */
     public static final LongConverter INSTANCE = new HexadecimalLongConverter();
 
-    /**
-     * The character set used for hexadecimal encoding.
-     */
+    // The character set used for hexadecimal encoding
     private static final String CHARS = "0123456789abcdef";
 
     /**

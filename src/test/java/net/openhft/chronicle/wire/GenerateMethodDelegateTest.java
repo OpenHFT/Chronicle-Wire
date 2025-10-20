@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +16,11 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.StringWriter;
@@ -32,9 +32,14 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class GenerateMethodDelegateTest extends WireTestCommon {
 
+    @Before
+    public void hasDirect() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+    }
     // Test the validity of class naming conventions
     @Test(expected = IllegalArgumentException.class)
     public void testInvalidName() {
@@ -42,18 +47,18 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
         GenerateMethodDelegate gmd = new GenerateMethodDelegate();
 
         // Set metadata for the generated class with an invalid name
-        gmd.metaData().packageName(GenerateMethodDelegateTest.class.getPackage().getName())
+        gmd.metaData().packageName(Jvm.getPackageName(GenerateMethodDelegateTest.class))
                 .baseClassName("GMDT-");
     }
 
-    // Test acquiring a class that implements multiple interfaces
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
     public void testAcquireClass() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         // Initialize a new GenerateMethodDelegate
         GenerateMethodDelegate gmd = new GenerateMethodDelegate();
 
         // Set metadata for the generated class
-        gmd.metaData().packageName(GenerateMethodDelegateTest.class.getPackage().getName())
+        gmd.metaData().packageName(Jvm.getPackageName(GenerateMethodDelegateTest.class))
                 .baseClassName("GMDT");
 
         // Add multiple interfaces to the metadata
@@ -62,11 +67,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
                 Consumer.class,
                 Supplier.class,
                 BiConsumer.class);
-
-        // Acquire the class with the specified class loader
-        Class aClass = gmd.acquireClass(GenerateMethodDelegateTest.class.getClassLoader());
-
-        // Create an instance of the acquired class
+        Class<?> aClass = gmd.acquireClass(GenerateMethodDelegateTest.class.getClassLoader());
         MethodDelegate md = (MethodDelegate) aClass.getDeclaredConstructor().newInstance();
 
         // Create a StringWriter for logging
@@ -76,7 +77,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
         md.delegate(Mocker.logging(RCSB.class, "", sw));
         ((Runnable) md).run();
         ((Consumer) md).accept("consumer");
-        ((Supplier) md).get();
+        ((Supplier<?>) md).get();
         ((BiConsumer) md).accept("bi", "consumer");
 
         // Assert the expected log output
@@ -86,7 +87,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
                 "accept[bi, consumer]\n", sw.toString().replace("\r", ""));
     }
 
-    // Test the chaining of delegates
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
     public void chainedDelegate() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         // Create a custom GenerateMethodDelegate with overridden methods for chaining
@@ -107,17 +108,13 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
         };
 
         // Set metadata for the generated class
-        gmd.metaData().packageName(GenerateMethodDelegateTest.class.getPackage().getName())
+        gmd.metaData().packageName(Jvm.getPackageName(GenerateMethodDelegateTest.class))
                 .baseClassName("GMDTC");
         gmd.metaData().interfaces().add(Chained1.class);
 
         // Create a StringWriter for logging
         StringWriter sw = new StringWriter();
-
-        // Acquire the class with the specified class loader
-        Class aClass = gmd.acquireClass(GenerateMethodDelegateTest.class.getClassLoader());
-
-        // Create an instance of the acquired class
+        Class<?> aClass = gmd.acquireClass(GenerateMethodDelegateTest.class.getClassLoader());
         MethodDelegate md = (MethodDelegate) aClass.getDeclaredConstructor().newInstance();
 
         // Set delegate and invoke chained methods
@@ -151,6 +148,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
         void say(String text);
     }
 
+    @SuppressWarnings("rawtypes")
     // A combined interface that extends multiple standard Java interfaces
     interface RCSB extends Runnable, Consumer, Supplier, BiConsumer {
     }

@@ -1,8 +1,8 @@
 /*
- * Copyright 2016-2020 chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *       http://www.apache.org/licenses/LICENSE-2.0
@@ -12,16 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
+
 
 package net.openhft.chronicle.wire.serializable;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
-import net.openhft.chronicle.wire.Wire;
-import net.openhft.chronicle.wire.WireTestCommon;
-import net.openhft.chronicle.wire.WireType;
+import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
@@ -90,7 +88,7 @@ public class SerializableWireTest extends WireTestCommon {
         // Ignore exceptions for certain test cases
         if (ime) // TODO Fix to be expected
             ignoreException(ek -> ek.throwable instanceof InvalidMarshallableException, "IME");
-        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         try {
             // Apply wire type to bytes
             Wire wire = wireType.apply(bytes);
@@ -115,4 +113,26 @@ public class SerializableWireTest extends WireTestCommon {
             bytes.releaseLast();
         }
     }
+
+    @Test
+    public void testStringBuilderSerialization() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+        try {
+            Wire wire = new BinaryWire(bytes);
+            TextContainer outerContainer = new TextContainer();
+            outerContainer.innerBuilders = new StringBuilder[] { new StringBuilder("innerText") };
+            wire.write("data").object(outerContainer);
+
+            TextContainer deserializedContainer = wire.read("data").object(TextContainer.class);
+
+            assertEquals(outerContainer.innerBuilders[0].toString(), deserializedContainer.innerBuilders[0].toString());
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    public static class TextContainer extends SelfDescribingMarshallable {
+        public StringBuilder[] innerBuilders; // Represents inner StringBuilders
+    }
+
 }

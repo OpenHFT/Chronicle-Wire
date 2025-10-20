@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +34,6 @@ import java.util.stream.Stream;
  * <p>
  * Use the {@link #builder(URL)} method to create an instance of {@link MarshallableOutBuilder} to help construct
  * appropriate implementations based on provided URLs.
- * </p>
  */
 @DontChain
 public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteNotifier {
@@ -258,7 +255,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      */
     @SuppressWarnings("rawtypes")
     @NotNull
-    default <T> T methodWriter(@NotNull Class<T> tClass, Class... additional) {
+    default <T> T methodWriter(@NotNull Class<T> tClass, Class<?>... additional) {
         VanillaMethodWriterBuilder<T> builder =
                 (VanillaMethodWriterBuilder<T>) methodWriterBuilder(false, tClass);
         Stream.of(additional).forEach(builder::addInterface);

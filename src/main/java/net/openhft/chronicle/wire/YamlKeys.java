@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,9 +48,7 @@ public class YamlKeys {
     }
 
     /**
-     * Returns the current number of offsets stored in the collection.
-     *
-     * @return The count of offsets.
+     * Returns the number of stored offsets in the collection.
      */
     public int count() {
         return count;
@@ -76,11 +72,7 @@ public class YamlKeys {
     }
 
     /**
-     * Removes the offset at the specified index.
-     *
-     * <p>Subsequent offsets are shifted to the left (their indices decrease by one).
-     *
-     * @param i The index of the offset to be removed.
+     * Removes the offset at {@code i}, shifting remaining values left by one.
      */
     public void removeIndex(int i) {
         count--;

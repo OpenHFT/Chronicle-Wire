@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +49,7 @@ public enum GeneratedProxyClass {
      * @return The proxy class based on the provided interface classes, or null if it cannot be created.
      */
     @SuppressWarnings("rawtypes")
-    public static Class from(String packageName, Set<Class> interfaces, String className, ClassLoader classLoader) {
+    public static Class<?> from(String packageName, Set<Class> interfaces, String className, ClassLoader classLoader) {
         int maxArgs = 0;
         Set<Method> methods = new LinkedHashSet<>(16);
 
@@ -73,8 +71,8 @@ public enum GeneratedProxyClass {
         int count = 0;
 
         String sep = "";
-        // Building the methodArray based on the provided interfaces
-        for (Class interfaceClazz : interfaces) {
+        // create methodArray
+        for (Class<?> interfaceClazz : interfaces) {
             sb.append(sep);
             String interfaceName = nameForClass(interfaceClazz);
             sb.append(interfaceName);

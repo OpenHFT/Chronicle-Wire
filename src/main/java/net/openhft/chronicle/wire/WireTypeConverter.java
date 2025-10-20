@@ -1,3 +1,7 @@
+/*
+ * Copyright 2016-2025 chronicle.software
+ */
+
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.wire.internal.WireTypeConverterInternal;
@@ -12,40 +16,42 @@ public class WireTypeConverter {
     private final WireTypeConverterInternal delegate;
 
     /**
-     * Default constructor initializing the WireTypeConverter with a default {@link WireTypeConverterInternal} instance.
+     * Default constructor.
+     * Initialises the internal delegate {@link net.openhft.chronicle.wire.internal.WireTypeConverterInternal}.
      */
     public WireTypeConverter() {
         delegate = new WireTypeConverterInternal();
     }
 
     /**
-     * Converts the given JSON formatted input to its equivalent YAML representation.
+     * Converts the given JSON formatted input to its YAML representation.
      *
-     * @param json The JSON input to be converted.
-     * @return The converted YAML representation.
+     * @param json the JSON formatted {@link CharSequence} to be converted
+     * @return a {@link CharSequence} containing the YAML representation of the input JSON
      */
     public CharSequence jsonToYaml(CharSequence json) {
         return delegate.jsonToYaml(json);
     }
 
     /**
-     * Converts the given YAML formatted input to its equivalent JSON representation.
+     * Converts the given YAML formatted input to its JSON representation.
      *
-     * @param yaml The YAML input to be converted.
-     * @return The converted JSON representation.
+     * @param yaml the YAML formatted {@link CharSequence} to be converted
+     * @return a {@link CharSequence} containing the JSON representation of the input YAML
      */
     public CharSequence yamlToJson(CharSequence yaml) {
         return delegate.yamlToJson(yaml);
     }
 
     /**
-     * Associates a given class type with an older type name as an alias.
-     * This facilitates backward compatibility or recognition of renamed classes.
+     * Registers a class alias that will be used during conversions.
+     * This allows a type name {@code oldTypeName} seen in the input to be mapped to
+     * {@code newClass} during deserialisation by the internal wires.
      *
-     * @param newClass    The new class type.
-     * @param oldTypeName The older or previous type name.
+     * @param newClass   the target {@link Class} object
+     * @param oldTypeName the alternative or old type name string that should map to {@code newClass}
      */
-    public void addAlias(Class newClass, String oldTypeName) {
+    public void addAlias(Class<?> newClass, String oldTypeName) {
         delegate.addAlias(newClass, oldTypeName);
     }
 }

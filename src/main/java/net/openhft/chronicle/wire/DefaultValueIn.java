@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +39,8 @@ import java.util.function.*;
 /**
  * This class provides the default implementation for the {@link ValueIn} interface. It's primarily designed
  * to handle default values, converting them into various formats such as text and bytes.
- * The default value is retrieved from an underlying {@link WireIn} source.
+ * It returns either {@code null}, a primitive zero or the value configured by the {@link WireMarshaller}.
+ * This allows optional fields to be skipped without breaking deserialisation.
  */
 @SuppressWarnings("rawtypes")
 public class DefaultValueIn implements ValueIn {
@@ -94,7 +93,7 @@ public class DefaultValueIn implements ValueIn {
         @Nullable Object o = defaultValue;
         if (o == null)
             return wireIn();
-        @NotNull BytesStore bytes = (BytesStore) o;
+        @NotNull BytesStore<?, ?> bytes = (BytesStore) o;
         toBytes.write(bytes);
         return wireIn();
     }
@@ -107,16 +106,16 @@ public class DefaultValueIn implements ValueIn {
             toBytes.set(NoBytesStore.NO_PAGE, 0);
             return wireIn();
         }
-        @NotNull BytesStore bytes = (BytesStore) o;
+        @NotNull BytesStore<?, ?> bytes = (BytesStore) o;
         toBytes.set(bytes.addressForRead(0), bytes.realCapacity());
         return wireIn();
     }
 
     @NotNull
     @Override
-    public WireIn bytesMatch(@NotNull BytesStore compareBytes, @NotNull BooleanConsumer consumer) {
+    public WireIn bytesMatch(@NotNull BytesStore<?, ?> compareBytes, @NotNull BooleanConsumer consumer) {
         @Nullable Object o = defaultValue;
-        @NotNull BytesStore bytes = (BytesStore) o;
+        @NotNull BytesStore<?, ?> bytes = (BytesStore) o;
         consumer.accept(compareBytes.contentEquals(bytes));
         return wireIn();
     }
@@ -129,7 +128,7 @@ public class DefaultValueIn implements ValueIn {
             wireInConsumer.readMarshallable(Wires.NO_BYTES);
             return wireIn();
         }
-        @Nullable BytesStore bytes = (BytesStore) o;
+        @Nullable BytesStore<?, ?> bytes = (BytesStore) o;
         wireInConsumer.readMarshallable(bytes.bytesForRead());
         return wireIn();
     }
@@ -145,6 +144,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn;
     }
 
+    /**
+     * Always returns {@code 0} as no bytes are consumed.
+     */
     @Override
     public long readLength() {
         return 0;
@@ -269,11 +271,17 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Always {@code false} as no sequence exists.
+     */
     @Override
     public boolean hasNext() {
         return false;
     }
 
+    /**
+     * Always {@code false} as no sequence exists.
+     */
     @Override
     public boolean hasNextSequenceItem() {
         return false;
@@ -287,6 +295,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Not implemented for default values.
+     */
     @NotNull
     @Override
     public <T> WireIn int64array(@Nullable LongArrayValues values, T t, @NotNull BiConsumer<T, LongArrayValues> setter) {
@@ -311,6 +322,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Not implemented for default values.
+     */
     @Override
     public WireIn bool(@NotNull final BooleanValue ret) {
         throw new UnsupportedOperationException("todo");
@@ -336,11 +350,17 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Always returns {@code false} as there is no sequence.
+     */
     @Override
     public <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
         return false;
     }
 
+    /**
+     * Always returns {@code false}; there is no data to read.
+     */
     @Override
     public <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0) {
         return false;
@@ -368,6 +388,9 @@ public class DefaultValueIn implements ValueIn {
         return (T) defaultValue;
     }
 
+    /**
+     * Supplies a {@code null} type prefix.
+     */
     @NotNull
     @Override
     public <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts) {
@@ -375,6 +398,9 @@ public class DefaultValueIn implements ValueIn {
         return this;
     }
 
+    /**
+     * Supplies a {@code null} type prefix to {@code ts} and returns the wire.
+     */
     @NotNull
     @Override
     public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> ts) throws IORuntimeException, BufferUnderflowException {
@@ -387,6 +413,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn.classLookup();
     }
 
+    /**
+     * Returns {@link #defaultValue} unchanged.
+     */
     @Nullable
     @Override
     public Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
@@ -452,6 +481,9 @@ public class DefaultValueIn implements ValueIn {
         return (Type) defaultValue;
     }
 
+    /**
+     * Always {@link BracketType#NONE} as no value is read.
+     */
     @NotNull
     @Override
     public BracketType getBracketType() {
@@ -463,23 +495,32 @@ public class DefaultValueIn implements ValueIn {
         return defaultValue == null;
     }
 
+    /**
+     * Returns {@link #defaultValue}.
+     */
     @Override
-    public Object objectWithInferredType(Object using, SerializationStrategy strategy, Class type) {
+    public Object objectWithInferredType(Object using, SerializationStrategy strategy, Class<?> type) {
         return defaultValue;
     }
 
+    /**
+     * Always {@code false}; nothing was found on the wire.
+     */
     @Override
     public boolean isPresent() {
         return false;
     }
 
+    /**
+     * Always {@code false}.
+     */
     @Override
     public boolean isTyped() {
         return false;
     }
 
     @Override
-    public Class typePrefix() {
+    public Class<?> typePrefix() {
         @Nullable Object o = defaultValue;
         if (o == null) return void.class;
         return o.getClass();

@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,27 +78,8 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
         assertEquals(expected, actual);
     }
 
-    // Test to check behavior when a missing type is assumed
-    @Test
-    public void testAssumeTheTypeMissingType() {
-        Wires.THROW_CNFRE = false;
-        Wires.GENERATE_TUPLES = false;
-        expectException("Cannot find a class for Xyz are you missing an alias?");
-        final String cs = "!Xyz " +
-                "{\n" +
-                "  y: hello8\n" +
-                "}\n";
-        String s = Marshallable.fromString(Dto.class, cs).toString();
-        assertEquals("" +
-                "!net.openhft.chronicle.wire.InvalidYamWithCommonMistakesTest$Dto {\n" +
-                "  y: hello8,\n" +
-                "  x: !!null \"\"\n" +
-                "}\n", s);
-    }
-
     @Test(expected = ClassNotFoundRuntimeException.class)
     public void testAssumeTheTypeMissingTypeThrows() {
-        Wires.THROW_CNFRE = true;
         Wires.GENERATE_TUPLES = false;
 
         final String cs = "!Xyz " +

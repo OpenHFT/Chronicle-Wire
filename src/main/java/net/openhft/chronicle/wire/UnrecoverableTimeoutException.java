@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +25,17 @@ import org.jetbrains.annotations.NotNull;
  * conventional manner.
  */
 public class UnrecoverableTimeoutException extends IllegalStateException {
+    private static final long serialVersionUID = 0L;
 
     /**
      * Constructs a new UnrecoverableTimeoutException with the specified underlying
      * exception as the cause.
      * The message from the underlying exception is propagated to this exception.
      *
-     * @param e The underlying exception that caused this timeout exception.
+     * @param e The underlying {@link Exception} that represents the original
+     *          timeout or related error condition.
      */
+    @SuppressWarnings("this-escape")
     public UnrecoverableTimeoutException(@NotNull Exception e) {
         super(e.getMessage());
         initCause(e);

@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +15,14 @@
  */
 package net.openhft.chronicle.wire.marshallable;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * This class tests the behavior of NaN values when used in different data types like primitives, wrappers, and objects.
@@ -48,6 +48,8 @@ public class CompareNaNTest extends WireTestCommon {
      */
     @Test
     public void testWrapDTO() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         @NotNull WrapDTO a = new WrapDTO(Double.NaN, Float.NaN);
         @NotNull WrapDTO b = new WrapDTO(Double.NaN, Float.NaN);
         assertEquals(a.toString(), b.toString());
@@ -60,6 +62,8 @@ public class CompareNaNTest extends WireTestCommon {
      */
     @Test
     public void testObjectWrapDTO() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         @NotNull ObjectWrapDTO a = new ObjectWrapDTO(Double.NaN, Float.NaN);
         @NotNull ObjectWrapDTO b = new ObjectWrapDTO(Double.NaN, Float.NaN);
         assertEquals(a.toString(), b.toString());

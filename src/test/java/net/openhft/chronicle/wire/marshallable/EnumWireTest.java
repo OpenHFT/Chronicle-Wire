@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@
 package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.ReadResolvable;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
@@ -31,6 +30,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.junit.Assert.assertSame;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * A suite of tests focused on checking the serialization/deserialization
@@ -38,7 +38,6 @@ import static org.junit.Assert.assertSame;
  *
  * @author greg allen
  */
-@SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
 public class EnumWireTest extends WireTestCommon {
 
@@ -58,7 +57,7 @@ public class EnumWireTest extends WireTestCommon {
 
     // Helper method that serializes a given marshallable object (like Person) using the provided wire strategy.
     private static Wire serialise(@NotNull Function<Bytes<?>, Wire> createWire, @NotNull Marshallable person) {
-        Wire wire = createWire.apply(Bytes.elasticByteBuffer());
+        Wire wire = createWire.apply(Bytes.allocateElasticOnHeap());
         person.writeMarshallable(wire);
         return wire;
     }
@@ -66,12 +65,16 @@ public class EnumWireTest extends WireTestCommon {
     // Test case that checks the correct deserialization of an enum that implements Marshallable.
     @Test
     public void testEnumImplementingMarshallable() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         assertSame(Marsh.MARSH, roundTrip(Person1::new).field);
     }
 
     // Test case that checks the correct deserialization of an enum that does NOT implement Marshallable.
     @Test
     public void testEnumNotImplementingMarshallable() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         assertSame(NoMarsh.NO_MARSH, roundTrip(Person2::new).field);
     }
 
@@ -79,13 +82,15 @@ public class EnumWireTest extends WireTestCommon {
     // and implements both Marshallable and ReadResolvable.
     @Test
     public void testEnumImplementingMarshallableAndReadResolve() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         assertSame(MarshAndResolve.MARSH_AND_RESOLVE, roundTrip(Person3::new).field);
     }
 
     // Helper method that serializes an object using the current wire strategy and then deserializes it.
     private <T extends Marshallable> T roundTrip(@NotNull Supplier<T> supplier) {
         Wire wire = serialise(createWire, supplier.get());
-       // System.out.println(wire.bytes());
+        // System.out.println(wire.bytes());
         try {
             T deserialized = supplier.get();
             deserialized.readMarshallable(wire);

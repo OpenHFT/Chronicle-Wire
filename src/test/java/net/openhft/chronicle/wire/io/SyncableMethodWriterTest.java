@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +19,7 @@ package net.openhft.chronicle.wire.io;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MappedBytes;
 import net.openhft.chronicle.bytes.OnHeapBytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.Syncable;
@@ -33,6 +32,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon {
 
@@ -64,7 +64,7 @@ public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTes
     }
 
     // Core logic for testing the say and sync operations, encapsulated for reuse
-    private void doTest(Bytes bytes) {
+    private void doTest(Bytes<?> bytes) {
         Wire wire = new SyncableYamlWire(bytes);
         SayAndSync sas = wire.methodWriter(SayAndSync.class);
         sas.say("hello");
@@ -87,6 +87,7 @@ public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTes
     // Test the say and sync operations but this time with a MappedBytes instance which maps bytes to a file
     @Test
     public void sayAndSyncMappedBytes() throws FileNotFoundException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
         final File file = IOTools.createTempFile("sayAndSyncMappedBytes");
         file.deleteOnExit();
         try (MappedBytes mb = MappedBytes.mappedBytes(file, OS.pageSize())) {

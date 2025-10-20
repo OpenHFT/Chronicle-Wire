@@ -1,12 +1,18 @@
+/*
+ * Copyright 2016-2025 chronicle.software
+ */
+
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.OnHeapBytes;
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Test;
 
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class WireDumperRandomTest {
 
@@ -51,6 +57,7 @@ public class WireDumperRandomTest {
             }
         }
 
+        assumeFalse(Jvm.maxDirectMemory() == 0);
         // Assert that count should be 3. It seems like we expect 3 strings not to start with the defined string.
         assertEquals(3, count);
     }

@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +16,7 @@
 
 package net.openhft.chronicle.wire;
 /*
- * Copyright 2016-2021 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,19 +49,15 @@ import java.util.stream.IntStream;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("unchecked")
 @RunWith(value = Parameterized.class)
 public class ChronicleBitSetTest extends WireTestCommon {
 
     // Random number generator for tests
     private final Random generator = new Random();
-
-    // The type of ChronicleBitSet to test
-    private final Class clazz;
-
-    // Collection of resources to close after tests
-    private final List closeables = new ArrayList();
-
-    // Different instances of empty ChronicleBitSets for testing
+    private final Class<?> clazz;
+    @SuppressWarnings("rawtypes")
+    private final List closeables = new ArrayList<>();
     private final ChronicleBitSet emptyBS0;
     private final ChronicleBitSet emptyBS1;
     private final ChronicleBitSet emptyBS127;
@@ -78,9 +70,8 @@ public class ChronicleBitSetTest extends WireTestCommon {
         super.threadDump();
     }
 
-    // Constructor - Initializes various configurations for the test
-    public ChronicleBitSetTest(Class clazz) {
-        // Ensure JVM is 64-bit for the tests
+    @SuppressWarnings("this-escape")
+    public ChronicleBitSetTest(Class<?> clazz) {
         assumeTrue(Jvm.is64bit());
         this.clazz = clazz;
         emptyBS0 = createBitSet();

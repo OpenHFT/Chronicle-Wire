@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +30,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class MethodWriterStringTest extends net.openhft.chronicle.wire.WireTestCommon {
     // A blocking queue to hold String messages, used for synchronization between writer and reader.
-    private ArrayBlockingQueue<String> q = new ArrayBlockingQueue(1);
+    private ArrayBlockingQueue<String> q = new ArrayBlockingQueue<>(1);
 
     /**
      * An interface defining a single method that accepts a String message.
@@ -67,5 +65,4 @@ public class MethodWriterStringTest extends net.openhft.chronicle.wire.WireTestC
     private void println(String msg) {
         q.add(msg);
     }
-
 }

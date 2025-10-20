@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
  * <p>
  * This class can be particularly useful in scenarios where wire keys are required to be identified
  * both by a textual name and a numeric code.
- * </p>
  */
 public class MethodWireKey extends BytesInBinaryMarshallable implements WireKey {
 

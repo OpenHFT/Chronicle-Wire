@@ -1,8 +1,8 @@
 /*
- * Copyright 2016-2020 chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *       http://www.apache.org/licenses/LICENSE-2.0
@@ -12,12 +12,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
+
 
 package net.openhft.chronicle.wire.marshallable;
 
-import net.openhft.chronicle.wire.DynamicEnum;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
 import java.io.File;
@@ -47,7 +46,7 @@ public class ScalarValues extends SelfDescribingMarshallable {
     Long l2;
     Double d2;
 
-    Class aClass;
+    Class<?> aClass;
     RetentionPolicy policy;
     String text;
     LocalDate date;
@@ -58,7 +57,7 @@ public class ScalarValues extends SelfDescribingMarshallable {
     BigInteger bi;
     BigDecimal bd;
     File file;
-    TestDynamicEnum dynamicEnum;
+    TestEnum dynamicEnum;
 
    // Path path;
 
@@ -95,14 +94,13 @@ public class ScalarValues extends SelfDescribingMarshallable {
         bi = BigInteger.valueOf(i);
         bd = BigDecimal.valueOf(i);
         file = new File("/tmp/" + i);
-        dynamicEnum = TestDynamicEnum.THREE;
+        dynamicEnum = TestEnum.THREE;
     }
 }
-
 /**
  * A simple dynamic enumeration used in ScalarValues.
  */
-enum TestDynamicEnum implements DynamicEnum {
+enum TestEnum {
     ONE,   // Represents the first value
     TWO,   // Represents the second value
     THREE  // Represents the third value

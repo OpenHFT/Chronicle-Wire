@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +21,6 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +37,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
         testMarshallable.setName("hello world");
 
         // Create a ByteBuffer to hold the serialized data
-        Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer();
+        Bytes<?> byteBufferBytes = Bytes.allocateElasticOnHeap();
 
         // Initialize a Wire object with TEXT type
         @NotNull Wire wire = WireType.TEXT.apply(byteBufferBytes);
@@ -77,7 +74,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
 
         // Create a ByteBuffer to hold the serialized data
         @SuppressWarnings("rawtypes")
-        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
         // Initialize a Wire object with BINARY type
         @NotNull Wire wire = new BinaryWire(bytes);
@@ -106,7 +103,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
     @Test
     public void test() {
 
-        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.BINARY.apply(bytes);
         @NotNull MarshableFilter expected = new MarshableFilter("hello", "world");
 
@@ -195,7 +192,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
     }
 
     // Class representing a filter with sorting details for processing data.
-    static class SortedFilter extends SelfDescribingMarshallable {
+    public static class SortedFilter extends SelfDescribingMarshallable {
         // Index from which the filtering should start.
         public long fromIndex;
 

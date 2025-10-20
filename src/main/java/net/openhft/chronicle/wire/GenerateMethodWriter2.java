@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +37,8 @@ import static java.util.Collections.*;
  * It extends the {@link AbstractClassGenerator} with metadata type {@link GMWMetaData}. This class internally maintains
  * a set of template methods that help in the method writer generation. These templates are based on certain method names
  * and parameter types, which define their structure.
- * </p>
  */
-@SuppressWarnings("StringBufferReplaceableByString")
+@SuppressWarnings("this-escape")
 public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethodWriter2.GMWMetaData> {
 
     // The simple name of the DocumentContext class used for template methods.
@@ -89,7 +86,8 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     private final Map<Class<?>, String> methodWritersMap = new LinkedHashMap<>();
 
     /**
-     * Default constructor that initializes the metadata and sets up necessary imports.
+     * Creates a new generator with default {@link GMWMetaData} and registers
+     * the imports required by the generated code.
      */
     public GenerateMethodWriter2() {
         super(new GMWMetaData());
@@ -104,7 +102,6 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
      * <p>
      * The method looks up the template from the predefined {@code TEMPLATE_METHODS}. If no matching template is
      * found, it returns {@code null}.
-     * </p>
      *
      * @param name The method name to look up
      * @param returnType The return type of the method
@@ -126,7 +123,6 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
      * <p>
      * This method provides string representations for various primitive types, {@link CharSequence}, and
      * {@link Marshallable}. If the type does not match any predefined types, it defaults to returning "object".
-     * </p>
      *
      * @param type The class type to convert
      * @return The corresponding string representation of the type
@@ -156,6 +152,11 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         return "object";
     }
 
+    /**
+     * Adds fields used by the generated proxy such as the {@code Closeable},
+     * optional {@link UpdateInterceptor} and the supplier of
+     * {@link MarshallableOut} instances.
+     */
     @Override
     protected void generateFields(SourceCodeFormatter mainCode) {
         super.generateFields(mainCode);
@@ -168,6 +169,10 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
                 .append(nameForClass(Supplier.class)).append("<").append(nameForClass(MarshallableOut.class)).append("> outSupplier;\n");
     }
 
+    /**
+     * Emits a constructor that initialises the output supplier, the optional
+     * interceptor and the associated {@link Closeable}.
+     */
     @Override
     protected void generateConstructors(SourceCodeFormatter mainCode) {
         super.generateConstructors(mainCode);
@@ -183,6 +188,12 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         mainCode.append("}\n");
     }
 
+    /**
+     * Generates the body of a proxied method.  It opens a
+     * {@link WriteDocumentContext}, writes the event name or ID and serialises
+     * the arguments.  The return type dictates whether the call is terminating
+     * or part of a fluent API.
+     */
     @Override
     protected void generateMethod(Method method, StringBuilder params, List<String> paramList, SourceCodeFormatter mainCode) {
         String name = method.getName();
@@ -232,6 +243,10 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         methodReturn(mainCode, method, metaData().interfaces());
     }
 
+    /**
+     * Declares any {@code ThreadLocal} fields required for chained writers at
+     * the end of code generation.
+     */
     @Override
     protected void generateEnd(SourceCodeFormatter mainCode) {
         super.generateEnd(mainCode);

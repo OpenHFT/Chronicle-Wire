@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +25,8 @@ import net.openhft.chronicle.wire.Wire;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Simple Example with a nested data type.
- * In this example the data is marshalled as a nested data structure.
+ * Shows how to marshal a {@link Data} object as a nested document within a
+ * parent wire, using both text and binary formats.
  */
 public class Example3 {
     public static void main(String[] args) {

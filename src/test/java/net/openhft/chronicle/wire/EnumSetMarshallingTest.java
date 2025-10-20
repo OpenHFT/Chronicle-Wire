@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +16,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
@@ -31,6 +30,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Tests for marshalling and unmarshalling of EnumSets using Wire.
@@ -63,6 +63,8 @@ public class EnumSetMarshallingTest extends WireTestCommon {
      */
     @Test
     public void shouldMarshallEmptySet() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Initialization of resources and test data
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         final Foo written = new Foo(EnumSet.noneOf(Thread.State.class));
@@ -88,6 +90,8 @@ public class EnumSetMarshallingTest extends WireTestCommon {
      */
     @Test
     public void shouldMarshallFullSet() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Initialization of resources and test data
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         final Foo written = new Foo(EnumSet.allOf(Thread.State.class));
@@ -114,6 +118,8 @@ public class EnumSetMarshallingTest extends WireTestCommon {
      */
     @Test
     public void shouldUnmarshallToContainerWithNullValue() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Initialization of resources and test data
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         final Foo written = new Foo(EnumSet.allOf(Thread.State.class));
@@ -141,6 +147,8 @@ public class EnumSetMarshallingTest extends WireTestCommon {
      */
     @Test
     public void shouldAllowMultipleInstancesInObjectGraph() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Initialization of resources and test data
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         final Container written = new Container();

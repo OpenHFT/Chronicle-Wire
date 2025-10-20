@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +63,7 @@ public class MarshallableMethodReaderTest extends net.openhft.chronicle.wire.Wir
 
     // Helper method to test ignoring methods with or without scanning
     public void doIgnoredMethods(boolean scanning) {
+        expectException("Unknown method-name='bye' called on class net.openhft.chronicle.wire.method.MarshallableMethodReaderTest$SayingMicroservice");
         // Creates a new YAML based Wire instance
         Wire wire = Wire.newYamlWireOnHeap();
 
@@ -102,7 +101,7 @@ public class MarshallableMethodReaderTest extends net.openhft.chronicle.wire.Wir
     // Utility method to write a method call into the wire
     private static void writeDoc(@NotNull Wire wire, String say) {
         try (DocumentContext dc = wire.writingDocument()) {
-            wire.write(say).text("");
+            dc.wire().write(say).text("");
         }
     }
 

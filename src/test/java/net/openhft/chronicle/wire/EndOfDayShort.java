@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +21,7 @@ import java.io.Serializable;
 
 // Model class representing end of day short information for a stock.
 public class EndOfDayShort extends SelfDescribingMarshallable implements Serializable {
+    private static final long serialVersionUID = 0L;
     // Symbol,Company,Price,Change,ChangePercent,Day's Volume
     public String name;
     public double closingPrice, change, changePercent;

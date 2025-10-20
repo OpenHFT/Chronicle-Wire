@@ -1,8 +1,8 @@
 /*
- * Copyright 2016-2020 chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *       http://www.apache.org/licenses/LICENSE-2.0
@@ -12,8 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
+
 
 package net.openhft.chronicle.wire;
 
@@ -59,7 +59,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO1 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO2");
 
         // Creating a Wire instance based on the provided WireType
-        final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
+        final Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(wire.isBinary());
         CLASS_ALIASES.addAlias(DTO1.class, "DTO");
 
@@ -93,7 +93,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO2 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO1");
 
         // Creating a Wire instance based on the provided WireType
-        final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
+        final Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(wire.isBinary());
         CLASS_ALIASES.addAlias(DTO2.class, "DTO");
 
@@ -122,8 +122,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     @Test
     public void testCheckThatNewDataAddedToADocumentDoesNotEffectOldReads() {
 
-        @SuppressWarnings("rawtypes")
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             // Creating a Wire instance
             Wire w = WireType.FIELDLESS_BINARY.apply(b);
@@ -153,7 +152,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         }
     }
 
-    // DTO1 class to represent a data structure with one field 'one'
+    @SuppressWarnings("this-escape")
     public static class DTO1 extends SelfDescribingMarshallable implements Demarshallable {
 
         // Field to hold an integer value
@@ -183,7 +182,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         }
     }
 
-    // DTO2 class to represent a data structure with fields 'one', 'two', and 'three'
+    @SuppressWarnings("this-escape")
     public static class DTO2 extends SelfDescribingMarshallable implements Demarshallable {
         // Field to hold an Object
         Object three;
@@ -244,4 +243,3 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         }
     }
 }
-

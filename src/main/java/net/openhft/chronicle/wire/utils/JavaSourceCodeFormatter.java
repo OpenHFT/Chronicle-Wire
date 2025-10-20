@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class JavaSourceCodeFormatter extends SourceCodeFormatter {
 
-    /** Default number of spaces for indentation in Java source code. */
+    // Default number of spaces for indentation in Java source code
     private static final int INDENT_SPACES = 4;
 
     /**
@@ -52,10 +50,8 @@ public class JavaSourceCodeFormatter extends SourceCodeFormatter {
 
     /**
      * Constructs a new Java source code formatter with a provided AtomicInteger to manage the indentation level.
-     *
      * <p>
      * This can be useful in scenarios where the indentation needs to be managed or adjusted externally.
-     * </p>
      *
      * @param indent AtomicInteger managing the indentation level.
      */

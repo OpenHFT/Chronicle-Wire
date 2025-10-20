@@ -1,5 +1,5 @@
 /*
- *     Copyright (C) 2015-2020 chronicle.software
+ *     Copyright 2015-2025 chronicle.software
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License as published by
@@ -30,7 +30,7 @@ public class NativeData implements Byteable {
     static final int TEXT = FLAG + 1;
     private static final int MAX_TEXT = 16;
 
-    private BytesStore bytesStore;
+    private BytesStore<?, ?> bytesStore;
     private long offset;
     private long length;
 
@@ -95,7 +95,7 @@ public class NativeData implements Byteable {
     }
 
     @Override
-    public BytesStore bytesStore() {
+    public BytesStore<?, ?> bytesStore() {
         return bytesStore;
     }
 

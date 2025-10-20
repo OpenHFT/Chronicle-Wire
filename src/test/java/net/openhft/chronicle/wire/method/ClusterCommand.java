@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +32,7 @@ public class ClusterCommand extends SelfDescribingMarshallable {
     private Service service;
 
     // The service ID in bytes format, initialized as an elastic byte buffer
-    private final Bytes<?> serviceId = Bytes.elasticByteBuffer();
+    private final Bytes<?> serviceId = Bytes.allocateElasticOnHeap();
 
     /**
      * Constructs a ClusterCommand with the given cycle and Service.

@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +23,7 @@ import org.junit.Test;
 import static org.hamcrest.core.StringContains.containsString;
 
 // A test class to ensure small double values are marshaled and unmarshaled correctly using
-// Chronicle-Wire. The referenced issue URL suggests this is likely addressing a specific bug
-// or feature request in the Chronicle-Wire library.
+// Chronicle-Wire.
 // See: https://github.com/OpenHFT/Chronicle-Wire/issues/240
 public class SmallDoublesMarshallingTest extends WireTestCommon {
 

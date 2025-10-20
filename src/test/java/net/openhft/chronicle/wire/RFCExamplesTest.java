@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +16,13 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static net.openhft.chronicle.wire.RFCExamplesTest.Fields.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 /* Based on
 https://github.com/OpenHFT/RFC/blob/master/Chronicle/Engine/Remote/Chronicle-Engine-0.1.md
@@ -37,9 +37,10 @@ public class RFCExamplesTest extends WireTestCommon {
     map.put(2, "world");
     map.put(3, "bye");
      */
-    @SuppressWarnings("rawtypes")
     @Test
     public void testPuts() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Allocate an elastic buffer on heap.
         @NotNull Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 

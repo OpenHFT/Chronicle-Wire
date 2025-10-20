@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +24,7 @@ import net.openhft.chronicle.core.io.Validatable;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -40,7 +39,6 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@SuppressWarnings("rawtypes")
 public class WiresTest extends WireTestCommon {
 
     private final BytesContainer container1 = new BytesContainer();
@@ -54,6 +52,8 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     public void defaultCompilerOptions() throws Exception {
+        Assume.assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Field compiler = Jvm.getField(Wires.class, "CACHED_COMPILER");
         compiler.set(null, null);
         Wires.loadFromJava(this.getClass().getClassLoader(), this.getClass().getName(), "");
@@ -66,6 +66,8 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     public void customCompilerOptions() throws Exception {
+        Assume.assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Field compiler = Jvm.getField(Wires.class, "CACHED_COMPILER");
         compiler.set(null, null);
         System.setProperty("compiler.options", "-g -parameters");
@@ -86,7 +88,7 @@ public class WiresTest extends WireTestCommon {
         Assert.assertTrue(Double.isInfinite(TEXT.apply(Bytes.from("-Infinity")).getValueIn().float64()));
 
         // -0.0 is sent to denote and error
-        Assert.assertEquals(-0.0, TEXT.apply(Bytes.from("'1.0'")).getValueIn().float64(), 0);
+        Assert.assertEquals(-0.0, TEXT.apply(Bytes.from("''")).getValueIn().float64(), 0.0);
 
         // -0.0 is sent to denote and error
         Assert.assertEquals(-0.0, TEXT.apply(Bytes.from("Broken")).getValueIn().float64(), 0);
@@ -97,6 +99,7 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     public void resetShouldClearBytes() {
+        Assume.assumeFalse(Jvm.maxDirectMemory() == 0);
 
         container1.bytesField.clear().append("value1");
         container2.bytesField.clear().append("value2");
@@ -110,6 +113,8 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     public void resetShouldClearArbitraryMutableFields() {
+        Assume.assumeFalse(Jvm.maxDirectMemory() == 0);
+
         StringBuilderContainer container1 = new StringBuilderContainer();
         container1.stringBuilder.setLength(0);
         container1.stringBuilder.append("value1");
@@ -128,6 +133,8 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     public void copyToShouldMutateBytes() {
+        Assume.assumeFalse(Jvm.maxDirectMemory() == 0);
+
         BytesContainerMarshallable container1 = new BytesContainerMarshallable();
         container1.bytesField.append("1");
         container1.bytesField.append("2");
@@ -140,7 +147,7 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     public void unknownType() throws NoSuchFieldException {
-        Wires.GENERATE_TUPLES = true;
+        Assume.assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Marshallable marshallable = Wires.tupleFor(Marshallable.class, "UnknownType");
         marshallable.setField("one", 1);
@@ -152,79 +159,15 @@ public class WiresTest extends WireTestCommon {
                 "  two: 2.2,\n" +
                 "  three: three\n" +
                 "}\n", toString);
+
+        Wires.GENERATE_TUPLES = true;
+
         Object o = Marshallable.fromString(toString);
         assertEquals(toString, o.toString());
     }
 
-    @Test
-    public void unknownType2() {
-        wiresThrowCNFRE(false);
-        Wires.GENERATE_TUPLES = true;
-
-        String text = "!FourValues {\n" +
-                "  string: Hello,\n" +
-                "  num: 123,\n" +
-                "  big: 1E6,\n" +
-                "  also: extra\n" +
-                "}\n";
-        ThreeValues tv = Marshallable.fromString(ThreeValues.class, text);
-        assertEquals(text, tv.toString());
-        assertEquals("Hello", tv.string());
-        tv.string("Hello World");
-        assertEquals("Hello World", tv.string());
-
-        assertEquals(123, tv.num());
-        tv.num(1234);
-        assertEquals(1234, tv.num());
-
-        assertEquals(1e6, tv.big(), 0.0);
-        tv.big(0.128);
-        assertEquals(0.128, tv.big(), 0.0);
-
-        assertEquals("!FourValues {\n" +
-                "  string: Hello World,\n" +
-                "  num: !int 1234,\n" +
-                "  big: 0.128,\n" +
-                "  also: extra\n" +
-                "}\n", tv.toString());
-    }
-
-    @Test(expected = ClassNotFoundRuntimeException.class)
-    public void unknownType2WarnThrows() {
-        wiresThrowCNFRE(false);
-        Wires.GENERATE_TUPLES = false;
-
-        String text = "!FourValues {\n" +
-                "  string: Hello,\n" +
-                "  num: 123,\n" +
-                "  big: 1E6,\n" +
-                "  also: extra\n" +
-                "}\n";
-        ThreeValues tv = Marshallable.fromString(ThreeValues.class, text);
-        assertEquals(text, tv.toString());
-        assertEquals("Hello", tv.string());
-        tv.string("Hello World");
-        assertEquals("Hello World", tv.string());
-
-        assertEquals(123, tv.num());
-        tv.num(1234);
-        assertEquals(1234, tv.num());
-
-        assertEquals(1e6, tv.big(), 0.0);
-        tv.big(0.128);
-        assertEquals(0.128, tv.big(), 0.0);
-
-        assertEquals("!FourValues {\n" +
-                "  string: Hello World,\n" +
-                "  num: !int 1234,\n" +
-                "  big: 0.128,\n" +
-                "  also: extra\n" +
-                "}\n", tv.toString());
-    }
-
     @Test(expected = ClassNotFoundRuntimeException.class)
     public void unknownType2Throws2() {
-        wiresThrowCNFRE(true);
         Wires.GENERATE_TUPLES = false;
 
         String text = "!FourValues {\n" +
@@ -255,9 +198,6 @@ public class WiresTest extends WireTestCommon {
                 "}\n", tv.toString());
     }
 
-    public static void wiresThrowCNFRE(boolean throwCnfre) {
-        Wires.THROW_CNFRE = throwCnfre;
-    }
     @Test
     public void recordAsYaml() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -313,6 +253,7 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     public void deepCopyNotBoundToThread() {
+        Assume.assumeFalse(Jvm.maxDirectMemory() == 0);
         BytesContainerMarshallable bcm = new BytesContainerMarshallable();
         bcm.bytesField.append("Hello");
         assumeFalse(Jvm.getValue(bcm.bytesField, "usedByThread") == null);
@@ -371,6 +312,8 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     public void copyToContainsBytesMarshallable() {
+        Assume.assumeFalse(Jvm.maxDirectMemory() == 0);
+
         ContainsBM containsBM = new ContainsBM(new BasicBytesMarshallable("Harold"));
         ContainsBM containsBM2 = new ContainsBM(null);
         Wires.copyTo(containsBM, containsBM2);
@@ -379,7 +322,9 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     public void deepCopyWillWorkWhenDynamicEnumIsAnnotatedAsMarshallable() {
-        ClassAliasPool.CLASS_ALIASES.addAlias(Thing.class, EnumThing.class);
+        Assume.assumeFalse(Jvm.maxDirectMemory() == 0);
+
+         ClassAliasPool.CLASS_ALIASES.addAlias(Thing.class, EnumThing.class);
 
         Thing thing2 = Marshallable.fromString(
                 "!Thing {" +
@@ -393,12 +338,14 @@ public class WiresTest extends WireTestCommon {
         assertEquals(thing2, thingCopy);
     }
 
+    @SuppressWarnings("deprecation")
     static class Thing extends AbstractEventCfg<Thing> {
         @AsMarshallable
         DynamicEnum dee1;
         String someString;
     }
 
+    @SuppressWarnings("deprecation")
     enum EnumThing implements DynamicEnum {
         ONE,
         TWO;

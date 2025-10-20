@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,10 +46,22 @@ import static java.util.Collections.*;
 import static net.openhft.chronicle.core.util.GenericReflection.erase;
 import static net.openhft.chronicle.core.util.GenericReflection.getParameterTypes;
 /**
- * This is the GenerateMethodWriter class responsible for generating method writer code.
- * It provides utility methods and configurations to facilitate the dynamic generation of method writers.
+ * Dynamically generates and compiles Java code for method writer proxies.  The
+ * generated proxy serialises invocations to a {@link MarshallableOut}
+ * destination using a chosen {@link WireType}.
+ * <p>
+ * Each target interface is inspected and an implementation is produced that
+ * forwards calls to the matching {@link ValueOut} method on a {@link Wire}.
+ * The resulting class is compiled and loaded at runtime.  It is primarily used
+ * by {@link VanillaMethodWriterBuilder} when code generation is enabled.
+ * <p>
+ * This implementation predates {@link GenerateMethodWriter2} and exists for
+ * specific use cases.
+ *
+ * @see VanillaMethodWriterBuilder
+ * @see MethodWriter
  */
-@SuppressWarnings("StringBufferReplaceableByString")
+@SuppressWarnings("deprecation")
 public class GenerateMethodWriter {
 
     // Constants for class names to be used in the generated method writer code
@@ -150,8 +160,8 @@ public class GenerateMethodWriter {
     private final boolean verboseTypes;
 
     /**
-     * Constructor for the GenerateMethodWriter class.
-     * Initializes all the required fields for the code generation process.
+     * Internal constructor used by {@link #newClass}.
+     * All parameters configure a single proxy generation run.
      *
      * @param packageName         The package name for the generated method writer.
      * @param interfaces          The interfaces to be implemented by the generated method writer.
@@ -188,8 +198,7 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Generates a proxy class based on the provided interface class.
-     * Note: This method is deprecated and will be removed in version x.26.
+     * Creates and compiles a new method writer class based on the provided interface class.
      *
      * @param fullClassName         Fully qualified class name for the generated proxy class.
      * @param interfaces            A set of interface classes that the generated proxy class will implement.
@@ -197,50 +206,11 @@ public class GenerateMethodWriter {
      * @param wireType              The wire type for serialization.
      * @param genericEvent          The generic event type.
      * @param metaData              Indicates if metadata should be included.
-     * @param useMethodId           Indicates if method ID should be used.
-     * @param useUpdateInterceptor  Indicates if the update interceptor should be used.
-     * @return                      A generated proxy class based on the provided interface class,
-     *                              or null if it can't be created.
-     */
-    @Nullable
-    @Deprecated /* to be removed is version x.26. */
-    public static Class<?> newClass(String fullClassName,
-                                    Set<Class<?>> interfaces,
-                                    ClassLoader classLoader,
-                                    final WireType wireType,
-                                    final String genericEvent,
-                                    boolean metaData,
-                                    boolean useMethodId,
-                                    final boolean useUpdateInterceptor) {
-        String packageName = ReflectionUtil.generatedPackageName(fullClassName);
-
-        int lastDot = fullClassName.lastIndexOf('.');
-        String className = lastDot == -1 ? fullClassName : fullClassName.substring(lastDot + 1);
-
-        return new GenerateMethodWriter(packageName,
-                interfaces,
-                className,
-                classLoader,
-                wireType,
-                genericEvent,
-                metaData, useMethodId, useUpdateInterceptor, false)
-                .createClass();
-    }
-
-    /**
-     * Generates a proxy class based on the provided interface class.
-     *
-     * @param fullClassName         Fully qualified class name for the generated proxy class.
-     * @param interfaces            A set of interface classes that the generated proxy class will implement.
-     * @param classLoader           The class loader to use for generating the proxy class.
-     * @param wireType              The wire type for serialization.
-     * @param genericEvent          The generic event type.
-     * @param metaData              Indicates if metadata should be included.
-     * @param useMethodId           Indicates if method ID should be used.
-     * @param useUpdateInterceptor  Indicates if the update interceptor should be used.
+     * @param useMethodId           Indicates if {@link MethodId} should be used.
+     * @param useUpdateInterceptor  Indicates if the {@link UpdateInterceptor} should be used.
      * @param verboseTypes          Indicates if verbose types should be used.
      * @return                      A generated proxy class based on the provided interface class,
-     *                              or null if it can't be created.
+     *                              or {@code null} if it can't be created.
      */
     @Nullable
     public static Class<?> newClass(String fullClassName,
@@ -295,7 +265,7 @@ public class GenerateMethodWriter {
      * @param type   The class type to be converted.
      * @return       A representative string for the given class type.
      */
-    private static CharSequence toString(Class type) {
+    private static CharSequence toString(Class<?> type) {
         if (boolean.class.equals(type)) {
             return "bool";
         } else if (byte.class.equals(type)) {
@@ -327,7 +297,7 @@ public class GenerateMethodWriter {
      * @return       The full name of the class with '$' characters replaced.
      */
     @NotNull
-    private static String nameForClass(Class type) {
+    private static String nameForClass(Class<?> type) {
         return type.getName().replace('$', '.');
     }
 
@@ -341,17 +311,16 @@ public class GenerateMethodWriter {
      * @return            The appropriate name of the class based on the import context.
      */
     @NotNull
-    private static String nameForClass(Set<String> importSet, Class type) {
+    private static String nameForClass(Set<String> importSet, Class<?> type) {
         if (type.isArray())
             return nameForClass(importSet, type.getComponentType()) + "[]";
         String s = nameForClass(type);
-        Package aPackage = type.getPackage();
-        if (aPackage != null)
-            if (importSet.contains(s)
-                    || "java.lang".equals(aPackage.getName())
-                    || (!type.getName().contains("$")
-                    && importSet.contains(aPackage.getName() + ".*")))
-                return type.getSimpleName();
+        String packageName = Jvm.getPackageName(type);
+        if (importSet.contains(s)
+                || "java.lang".equals(packageName)
+                || (!type.getName().contains("$")
+                && importSet.contains(packageName + ".*")))
+            return type.getSimpleName();
         return s;
     }
 
@@ -428,10 +397,9 @@ public class GenerateMethodWriter {
      *     <li>Processes each method from the provided interfaces and generates an appropriate method body.</li>
      *     <li>Attempts to load the newly created class using the generated source code.</li>
      * </ol>
-     * </p>
      *
      * <p><b>Debugging:</b> If the static field `DUMP_CODE` is set to {@code true}, the generated Java code
-     * will be printed to the standard output. This can be useful for debugging purposes.</p>
+     * will be printed to the standard output. This can be useful for debugging purposes.
      *
      * @return The {@link Class} object representing the dynamically generated class.
      * @throws MethodWriterValidationException If there's an issue validating methods during the code generation.
@@ -470,7 +438,7 @@ public class GenerateMethodWriter {
             importSet.add(Supplier.class.getName());
 
             // Iterate through all interfaces to extract required imports and validations
-            for (Class interfaceClazz : interfaces) {
+            for (Class<?> interfaceClazz : interfaces) {
                 importSet.add(nameForClass(interfaceClazz));
 
                 if (!interfaceClazz.isInterface())
@@ -485,8 +453,8 @@ public class GenerateMethodWriter {
                     if (template != null)
                         continue;
                     for (Type type : getParameterTypes(dm, interfaceClazz)) {
-                        Class pType = erase(type);
-                        if (pType.isPrimitive() || pType.isArray() || pType.getPackage().getName().equals("java.lang"))
+                        Class<?> pType = erase(type);
+                        if (pType.isPrimitive() || pType.isArray() || Jvm.getPackageName(pType).equals("java.lang"))
                             continue;
                         importSet.add(nameForClass(pType));
                     }
@@ -512,7 +480,7 @@ public class GenerateMethodWriter {
             Set<String> handledMethodSignatures = new HashSet<>();
             Set<String> methodIds = new HashSet<>();
 
-            for (Class interfaceClazz : interfaces) {
+            for (Class<?> interfaceClazz : interfaces) {
 
                 String interfaceName = nameForClass(importSet, interfaceClazz);
                 imports.append(interfaceName);
@@ -573,7 +541,6 @@ public class GenerateMethodWriter {
             // In case of other exceptions, wrap the cause and rethrow
             throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + imports, e));
         }
-
     }
 
     /**
@@ -585,7 +552,7 @@ public class GenerateMethodWriter {
      * @param interfaceClazz The interface class relative to which the method's return type is evaluated.
      * @return The class type of the method's return type.
          */
-    private Class<?> returnType(Method dm, Class interfaceClazz) {
+    private Class<?> returnType(Method dm, Class<?> interfaceClazz) {
         Type returnType = GenericReflection.getReturnType(dm, interfaceClazz);
         if (!(returnType instanceof Class))
             returnType = (Type) ((TypeVariable<?>) returnType).getGenericDeclaration();
@@ -600,11 +567,11 @@ public class GenerateMethodWriter {
      * @param interfaceType The interface type in which the method is defined.
      * @return The template string if found, otherwise {@code null}.
      */
-    private String templateFor(Method dm, Class interfaceType) {
+    private String templateFor(Method dm, Class<?> interfaceType) {
         Map<List<Class<?>>, String> map = TEMPLATE_METHODS.get(dm.getName());
         if (map == null)
             return null;
-        List<Class> sig = new ArrayList<>();
+        List<Class<?>> sig = new ArrayList<>();
         sig.add(returnType(dm, interfaceType));
         for (Type type : getParameterTypes(dm, interfaceType)) {
             addAll(sig, erase(type));
@@ -709,7 +676,7 @@ public class GenerateMethodWriter {
             final String name;
             if (parameterCount > 0) {
                 Type type = parameterTypes[parameterCount - 1];
-                if (type instanceof Class && ((Class) type).isPrimitive())
+                if (type instanceof Class && ((Class<?>) type).isPrimitive())
                     Jvm.warn().on(getClass(), "Generated code to call updateInterceptor for " + dm + " will box and generate garbage");
                 name = parameters[parameterCount - 1].getName();
             } else
@@ -883,7 +850,7 @@ public class GenerateMethodWriter {
      * @param startJ   The starting index to check if the current parameter is among multiple arguments.
      * @param p        The parameter whose value is being written.
      */
-    private void writeValue(final Method dm, Class type, final StringBuilder body, final int startJ, final Parameter p) {
+    private void writeValue(final Method dm, Class<?> type, final StringBuilder body, final int startJ, final Parameter p) {
         final String name = p.getName();
         String className = type.getTypeName().replace('$', '.');
 

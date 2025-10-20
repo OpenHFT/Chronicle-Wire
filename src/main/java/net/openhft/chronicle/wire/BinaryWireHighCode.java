@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,36 +21,84 @@ package net.openhft.chronicle.wire;
  * used for decoding in the binary wire format. Although the enum itself does not
  * contain any instances (indicated by the empty enum body), it does define several
  * static final fields that serve as unique identifiers for each type of high-level code.
- *
- * <p><strong>High-Level Code Definitions:</strong></p>
- * <ul>
- *     <li>{@code END_OF_STREAM} (-1): Indicates the end of the data stream.</li>
- *     <li>{@code NUM0} to {@code NUM7} (0x0 to 0x7): Represent numerical values.</li>
- *     <li>{@code CONTROL} (0x8): Indicates a control sequence.</li>
- *     <li>{@code FLOAT} (0x9): Indicates a floating-point number.</li>
- *     <li>{@code INT} (0xA): Indicates an integer value.</li>
- *     <li>{@code SPECIAL} (0xB): Indicates a special type.</li>
- *     <li>{@code FIELD0} and {@code FIELD1} (0xC, 0xD): Represent fields.</li>
- *     <li>{@code STR0} and {@code STR1} (0xE, 0xF): Represent string types.</li>
- * </ul>
  */
 public enum BinaryWireHighCode {
     ; // none
+
+    /** Indicates the end of the data stream. */
     static final int END_OF_STREAM = -1;
+
+    /** Represents numerical values, no longer in use. */
     static final int NUM0 = 0x0;
+
+    /** Represents numerical values, no longer in use. */
     static final int NUM1 = 0x1;
+
+    /** Represents numerical values, no longer in use. */
     static final int NUM2 = 0x2;
+
+    /** Represents numerical values, no longer in use. */
     static final int NUM3 = 0x3;
+
+    /** Represents numerical values, no longer in use. */
     static final int NUM4 = 0x4;
+
+    /** Represents numerical values, no longer in use. */
     static final int NUM5 = 0x5;
+
+    /** Represents numerical values, no longer in use. */
     static final int NUM6 = 0x6;
+
+    /** Represents numerical values, no longer in use. */
     static final int NUM7 = 0x7;
+
+    /**
+     * High code for control sequences such as byte length
+     * prefixes, padding and anchors.
+     */
     static final int CONTROL = 0x8;
+
+    /**
+     * High code for floating-point numbers such as
+     * {@link BinaryWireCode#FLOAT32} or {@link BinaryWireCode#FLOAT_STOP_6}.
+     */
     static final int FLOAT = 0x9;
+
+    /**
+     * High code for integer types such as
+     * {@link BinaryWireCode#INT32}, {@link BinaryWireCode#UINT8} and
+     * {@link BinaryWireCode#UUID}.
+     */
     static final int INT = 0xA;
+
+    /**
+     * High code for special values such as
+     * {@link BinaryWireCode#NULL}, {@link BinaryWireCode#TRUE} or
+     * {@link BinaryWireCode#TYPE_PREFIX}.
+     */
     static final int SPECIAL = 0xB;
+
+    /**
+     * High code {@code 0xC0} for compact field name strings of length 0-15
+     * (codes {@code 0xC0-0xCF}).
+     */
     static final int FIELD0 = 0xC;
+
+    /**
+     * High code {@code 0xD0} for compact field name strings of length 16-31
+     * (codes {@code 0xD0-0xDF}).
+     */
     static final int FIELD1 = 0xD;
+
+    /**
+     * High code {@code 0xE0} for general strings of UTF-8 length 0-15
+     * (codes {@code 0xE0-0xEF}).
+     */
     static final int STR0 = 0xE;
+
+    /**
+     * High code {@code 0xF0} for general strings of UTF-8 length 16-31
+     * (codes {@code 0xF0-0xFF}).
+     */
     static final int STR1 = 0xF;
 }

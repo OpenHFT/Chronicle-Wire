@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +52,7 @@ public class ValueOutTest extends TestCase {
     @Test
     public void test() {
         // Apply the wire type and ensure padding is used if binary
-        final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
+        final Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(wire.isBinary());
 
         // Define a byte array to be written and read during the test
@@ -81,7 +79,7 @@ public class ValueOutTest extends TestCase {
     @Test
     public void testRequestedType() {
         // Initialize the Wire object and enable padding for binary format
-        final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
+        final Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(wire.isBinary());
 
         // Define and write a byte array to the Wire object
@@ -103,7 +101,7 @@ public class ValueOutTest extends TestCase {
     @Test
     public void testAllBytes() {
         // Apply the wire type, ensuring padding is applied if binary
-        final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
+        final Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(wire.isBinary());
 
         // Loop through all possible byte values and test each one

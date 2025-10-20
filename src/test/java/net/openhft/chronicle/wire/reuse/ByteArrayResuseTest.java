@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +18,7 @@ package net.openhft.chronicle.wire.reuse;
 
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.util.BinaryLengthLength;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
@@ -27,6 +26,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * ByteArrayReuseTest extends WireTestCommon to test the reuse of byte arrays during
@@ -41,6 +41,8 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
      */
     @Test
     public void writeReadBytesArray() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         SELF_DESCRIBING = true;
         doWriteReadBytesArray("" +
                 "c4 64 61 74 61                                  # data:\n" +
@@ -57,7 +59,6 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
                 "   08 09 00\n");
     }           // Provide the expected hex string for the serialized data
 
-
     /**
      * Test method to verify the serialization and deserialization of byte arrays using
      * a binary format. It checks the equality of the serialized data with the expected
@@ -65,6 +66,8 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
      */
     @Test
     public void writeReadBytesArrayBinary() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         SELF_DESCRIBING = false;
         doWriteReadBytesArray("" +
                 "c4 64 61 74 61                                  # data:\n" +
@@ -76,7 +79,6 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
                 "   d2 02 96 49 00 00 00 00                         # timestamp\n" +
                 "   0a 00 00 00 01 02 03 04 05 06 07 08 09 00       # bytes\n");
     }           // Provide the expected hex string for the serialized data
-
 
     /**
      * Helper method to perform serialization and deserialization of Data objects.

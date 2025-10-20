@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +18,7 @@ package net.openhft.chronicle.wire.bytesmarshallable;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesMarshallable;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
@@ -28,12 +27,15 @@ import org.junit.Test;
 import java.util.Objects;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 public class NestedGenericTest extends WireTestCommon {
 
     // Test to verify generic serialization and deserialization using Chronicle Wire with generic ValueHolder
     @Test
     public void testGeneric() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Ignore specific warning about possible unmarshalling issues with the A class.
         ignoreException("BytesMarshallable found in field which is not matching exactly, the object may not unmarshall correctly if that type is not specified: " +
                 "net.openhft.chronicle.wire.bytesmarshallable.NestedGenericTest$A. The warning will not repeat so there may be more types affected.");
@@ -55,6 +57,8 @@ public class NestedGenericTest extends WireTestCommon {
     // Test to verify serialization and deserialization using Chronicle Wire with a non-generic ValueHolderDef
     @Test
     public void testDefined() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Allocate elastic bytes on heap and create binary wire to handle serialization
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.BINARY.apply(bytes);
@@ -85,6 +89,11 @@ public class NestedGenericTest extends WireTestCommon {
             ValueHolder<?> that = (ValueHolder<?>) o;
             return Objects.equals(defaultValue, that.defaultValue);
         }
+
+        @Override
+        public int hashCode() {
+            throw new UnsupportedOperationException();
+        }
     }
 
     // Defined ValueHolder class to hold values of type A for testing
@@ -102,6 +111,11 @@ public class NestedGenericTest extends WireTestCommon {
             if (o == null || getClass() != o.getClass()) return false;
             ValueHolderDef that = (ValueHolderDef) o;
             return Objects.equals(defaultValue, that.defaultValue);
+        }
+
+        @Override
+        public int hashCode() {
+            throw new UnsupportedOperationException();
         }
     }
 
@@ -122,6 +136,11 @@ public class NestedGenericTest extends WireTestCommon {
             if (o == null || getClass() != o.getClass()) return false;
             A a = (A) o;
             return x == a.x && Objects.equals(y, a.y);
+        }
+
+        @Override
+        public int hashCode() {
+            throw new UnsupportedOperationException();
         }
     }
 }

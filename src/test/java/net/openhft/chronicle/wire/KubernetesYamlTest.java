@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +27,6 @@ import java.util.stream.Stream;
 import static net.openhft.chronicle.wire.WireType.YAML;
 import static org.junit.Assert.assertEquals;
 
-@SuppressWarnings("rawtypes")
 @RequiredForClient
 public class KubernetesYamlTest extends WireTestCommon {
 
@@ -44,7 +41,7 @@ public class KubernetesYamlTest extends WireTestCommon {
      */
     public static void doTest(String file, String... expected) {
         // Bytes buffer to be used for reading
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             // Reading the YAML file into a stream
             InputStream is = KubernetesYamlTest.class.getResourceAsStream(DIR + file);

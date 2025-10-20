@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +30,7 @@ import java.util.Arrays;
  * for converting long values to and from strings using power-of-two bases.
  *
  * <p>This converter leverages certain mathematical properties of power-of-two bases
- * to optimize the conversion process.</p>
+ * to optimize the conversion process.
  */
 public class PowerOfTwoLongConverter implements LongConverter {
 
@@ -82,33 +80,33 @@ public class PowerOfTwoLongConverter implements LongConverter {
     /**
      * Parses a sequence of characters into a long value.
      *
-     * @param text the character sequence to parse.
+     * @param textToParse the character sequence to parse
      * @return the parsed long value.
      * @throws IllegalArgumentException if the character sequence contains unexpected characters or its length
      *      exceeds the maximum allowable length.
      */
     @Override
-    public long parse(CharSequence text) {
-        lengthCheck(text);
+    public long parse(CharSequence textToParse) {
+        lengthCheck(textToParse);
 
-        return parse0(text, 0, text.length());
+        return parse0(textToParse, 0, textToParse.length());
     }
 
     /**
      * Parses a part of a sequence of characters into a long value.
      *
-     * @param text the character sequence to parse.
-     * @param beginIndex the beginning index, inclusive.
-     * @param endIndex the ending index, exclusive.
+     * @param textToParse the character sequence to parse
+     * @param beginIndex  the beginning index, inclusive
+     * @param endIndex    the ending index, exclusive
      * @return the parsed long value.
      * @throws IllegalArgumentException if the character sequence contains unexpected character, or if any of
      *      the indices are invalid or the sub-sequence length exceeds the maximum allowable length.
      */
     @Override
-    public long parse(CharSequence text, int beginIndex, int endIndex) {
-        lengthCheck(text, beginIndex, endIndex);
+    public long parse(CharSequence textToParse, int beginIndex, int endIndex) {
+        lengthCheck(textToParse, beginIndex, endIndex);
 
-        return parse0(text, beginIndex, endIndex);
+        return parse0(textToParse, beginIndex, endIndex);
     }
 
     private long parse0(CharSequence text, int beginIndex, int endIndex) {
@@ -129,46 +127,46 @@ public class PowerOfTwoLongConverter implements LongConverter {
     /**
      * Appends a long value to a StringBuilder.
      *
-     * @param text the StringBuilder to append to
-     * @param value the long value to append
+     * @param destinationBuilder the StringBuilder to append to
+     * @param numericValue the long value to append
      */
     @Override
-    public void append(StringBuilder text, long value) {
-        int start = text.length();
-        while (value != 0) {
-            int val = (int) (value & mask); // Isolate bits for the current value.
-            text.append(decode[val]);
-            value >>>= shift; // Right-shift to move to the next value.
+    public void append(StringBuilder destinationBuilder, long numericValue) {
+        int start = destinationBuilder.length();
+        while (numericValue != 0) {
+            int val = (int) (numericValue & mask); // Isolate bits for the current value.
+            destinationBuilder.append(decode[val]);
+            numericValue >>>= shift; // Right-shift to move to the next value.
         }
 
-        StringUtils.reverse(text, start); // Reverse the result since it's constructed backward.
+        StringUtils.reverse(destinationBuilder, start); // Reverse the result since it's constructed backward.
 
-        if (text.length() > start + maxParseLength()) {
+        if (destinationBuilder.length() > start + maxParseLength()) {
             Jvm.warn().on(getClass(), "truncated because the value was too large");
-            text.setLength(start + maxParseLength());
+            destinationBuilder.setLength(start + maxParseLength());
         }
     }
 
     /**
      * Appends a long value to a Bytes object.
      *
-     * @param text the Bytes object to append to
-     * @param value the long value to append
+     * @param destination the Bytes object to append to
+     * @param numericValue the long value to append
      */
     @Override
-    public void append(Bytes<?> text, long value) {
-        int start = text.length();
-        while (value != 0) {
-            int val = (int) (value & mask);
-            text.append(decode[val]);
-            value >>>= shift;
+    public void append(Bytes<?> destination, long numericValue) {
+        int start = destination.length();
+        while (numericValue != 0) {
+            int val = (int) (numericValue & mask);
+            destination.append(decode[val]);
+            numericValue >>>= shift;
         }
 
-        BytesUtil.reverse(text, start); // Reverse the result for bytes.
+        BytesUtil.reverse(destination, start); // Reverse the result for bytes.
 
-        if (text.length() > start + maxParseLength()) {
+        if (destination.length() > start + maxParseLength()) {
             Jvm.warn().on(getClass(), "truncated because the value was too large");
-            text.readLimit((long) start + maxParseLength());
+            destination.readLimit((long) start + maxParseLength());
         }
     }
 

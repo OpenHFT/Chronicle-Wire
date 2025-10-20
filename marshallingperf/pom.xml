@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2016 chronicle.software
+  ~ Copyright 2016-2025 chronicle.software
   ~
   ~ Licensed under the *Apache License, Version 2.0* (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -35,12 +35,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <!-- Import BOMs so dependency versions remain consistent across projects -->
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>third-party-bom</artifactId>
-                <version>3.24.0</version>
+                <version>3.27ea0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -48,13 +49,14 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
-                <version>2.25ea-SNAPSHOT</version>
+                <version>2.27ea-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
+    <!-- Libraries used by the performance benchmarks -->
     <dependencies>
         <dependency>
             <groupId>net.openhft</groupId>
@@ -71,6 +73,10 @@
         <dependency>
             <groupId>net.openhft</groupId>
             <artifactId>jlbh</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.openhft</groupId>
+            <artifactId>chronicle-test-framework</artifactId>
         </dependency>
 
         <dependency>
@@ -93,6 +99,7 @@
         </plugins>
     </build>
 
+    <!-- Optional profiles to test alternative versions or run the benchmarks -->
     <profiles>
         <profile>
             <id>latest</id>
@@ -117,6 +124,7 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
+                        <!-- Runs the micro-benchmarks during the test phase -->
 
                         <configuration>
                             <systemProperties>

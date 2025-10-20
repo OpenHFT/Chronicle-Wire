@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +17,15 @@
 package net.openhft.chronicle.wire.issue;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.wire.Wire;
-import net.openhft.chronicle.wire.WireTestCommon;
-import net.openhft.chronicle.wire.WireType;
-import net.openhft.chronicle.wire.Wires;
+import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.wire.*;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * @author ryanlea
@@ -37,6 +34,8 @@ public class WireBug35Test extends WireTestCommon {
 
     @Test
     public void objectsInSequence() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
         final Wire wire = WireType.TEXT.apply(bytes);
@@ -45,7 +44,7 @@ public class WireBug35Test extends WireTestCommon {
             seq.marshallable(obj -> obj.write(() -> "key").text("value"));
         });
 
-        final String text = Wires.asText(wire).toString();
+        final String text = Wires.asText(wire, Bytes.allocateElasticOnHeap()).toString();
         Object load = new Yaml().load(text);
 
         assertEquals("{seq=[{key=value}, {key=value}]}", load.toString());
@@ -55,14 +54,14 @@ public class WireBug35Test extends WireTestCommon {
 
     @Test
     public void objectsInSequenceBinaryWire() {
-        final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
+        final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         final Wire wire = WireType.BINARY.apply(bytes);
         wire.write(() -> "seq").sequence(seq -> {
             seq.marshallable(obj -> obj.write(() -> "key").text("value"));
             seq.marshallable(obj -> obj.write(() -> "key").text("value"));
         });
 
-        final String text = Wires.asText(wire).toString();
+        final String text = Wires.asText(wire, Bytes.allocateElasticOnHeap()).toString();
         Object load = new Yaml().load(text);
 
         assertEquals("{seq=[{key=value}, {key=value}]}", load.toString());

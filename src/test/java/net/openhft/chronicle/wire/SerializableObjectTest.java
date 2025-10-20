@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +18,11 @@ package net.openhft.chronicle.wire;
 
 import io.github.classgraph.*;
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.jupiter.api.Disabled;
+import net.openhft.chronicle.core.Jvm;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import javax.swing.*;
 import java.awt.*;
@@ -32,7 +30,6 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
-import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.sql.*;
 import java.text.SimpleDateFormat;
@@ -51,6 +48,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 // Test class to verify serializable objects with Wire.
 final class SerializableObjectTest extends WireTestCommon {
@@ -91,7 +89,10 @@ final class SerializableObjectTest extends WireTestCommon {
     private static final Set<Class<?>> IGNORED_CLASSES = new HashSet<>(Arrays.asList(
             DoubleSummaryStatistics.class, // Specific classes to exclude from testing.
             DriverPropertyInfo.class,
-            SimpleDateFormat.class
+            SimpleDateFormat.class,
+            java.rmi.dgc.VMID.class,
+            net.openhft.chronicle.wire.serializable.ScalarValues.class,
+            net.openhft.chronicle.wire.serializable.Nested.class
     ));
 
     // Static block to handle specific classes that fail in certain Java versions.
@@ -104,7 +105,6 @@ final class SerializableObjectTest extends WireTestCommon {
         } catch (ClassNotFoundException ignore) {
             // This exception means the class isn't present, so we can safely ignore it.
         }
-
     }
 
     // Predicate to check if a constructor is the default one.
@@ -140,7 +140,7 @@ final class SerializableObjectTest extends WireTestCommon {
                 // java.lang
                 true,
                 (byte) 1,
-                (char) '2',
+                '2',
                 (short) 3,
                 4,
                 5L,
@@ -156,7 +156,6 @@ final class SerializableObjectTest extends WireTestCommon {
                 new DriverPropertyInfo("A", "B"),
                 new Date(TIME_MS),
                 wrap(() -> new SerialClob("A".toCharArray())),
-                wrap(() -> new SerialBlob("A".getBytes(StandardCharsets.UTF_8))),
                 // java.util
                 compose(new ArrayList<String>(), l -> l.add("a"), l -> l.add("b")),
                 compose(new BitSet(), bs -> bs.set(10)),
@@ -199,17 +198,6 @@ final class SerializableObjectTest extends WireTestCommon {
         ).filter(SerializableObjectTest::isSerializableEqualsByObject);  // Retain only those objects that are serializable and equivalent when reconstituted.
     }
 
-    // A utility method to safely create an object using a supplier that might throw an exception.
-    private static Object create(ThrowingSupplier s) {
-        try {
-            return s.get();
-        } catch (Exception e) {
-            // Convert any caught exception into an assertion error.
-            throw new AssertionError(e);
-        }
-    }
-
-    // Generates a stream of objects created through reflection.
     private static Stream<Object> reflectedObjects() {
         try (ScanResult scanResult = new ClassGraph().enableSystemJarsAndModules().enableAllInfo().scan()) {
             // Use ClassGraph to scan for all classes implementing Serializable.
@@ -226,6 +214,7 @@ final class SerializableObjectTest extends WireTestCommon {
             List<Object> objects = widgetClasses.stream()
                     .filter(c -> !IGNORED_CLASSES.contains(c.loadClass(true)))  // Filter out classes from the ignored list.
                     .filter(SerializableObjectTest::overridesEqualsObject)  // Ensure the class overrides equals() method.
+                    .filter(SerializableObjectTest::overridesToString)  // Ensure the class overrides equals() method.
                     .map(ci -> ci.loadClass(true))  // Load the actual class.
                     .filter(Objects::nonNull)  // Filter out nulls.
                     .map(SerializableObjectTest::createOrNull)  // Create an instance or return null if not possible.
@@ -264,10 +253,10 @@ final class SerializableObjectTest extends WireTestCommon {
      * @param o An optional instance of the class to check. If null, a new instance will be created.
      * @return true if the class is serializable and deserializable, and the original and deserialized objects are equal; false otherwise.
      */
-    private static boolean isSerializableEquals(Class aClass, Object o) {
+    private static boolean isSerializableEquals(Class<?> aClass, Object o) {
         try {
             // Create an instance if not provided
-            Object source = o == null ? aClass.newInstance() : o;
+            Object source = o == null ? aClass.getConstructor().newInstance() : o;
             // Sanity check to ensure non-null toString representation
             if (source.toString() == null)
                 return false;
@@ -320,6 +309,10 @@ final class SerializableObjectTest extends WireTestCommon {
                 });
     }
 
+    private static boolean overridesToString(ClassInfo ci) {
+        return !ci.getMethodInfo("toString").isEmpty();
+    }
+
     // Wrap a ThrowingSupplier's get method to propagate its checked exceptions as runtime exceptions
     private static <T, X extends Exception> T wrap(ThrowingSupplier<T, X> supplier) {
         try {
@@ -334,11 +327,9 @@ final class SerializableObjectTest extends WireTestCommon {
     @SafeVarargs
     private static <T> T compose(final T original,
                                  final Consumer<T>... operations) {
-        return Stream.of(operations)
-                .reduce(original, (t, oper) -> {
-                    oper.accept(t);
-                    return t;
-                }, (a, b) -> a);
+        for (Consumer<T> operation : operations)
+            operation.accept(original);
+        return original;
     }
 
     // Return a Stream of WireType enumerations for testing
@@ -360,8 +351,12 @@ final class SerializableObjectTest extends WireTestCommon {
         }
     }
 
-    // TestFactory to perform dynamic tests on different wire types and objects
-    @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/482")
+    @BeforeEach
+    public void hasDirect() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @TestFactory
     Stream<DynamicTest> test() {
         return DynamicTest.stream(cases(), Objects::toString, wireTypeObject -> {
@@ -422,5 +417,4 @@ final class SerializableObjectTest extends WireTestCommon {
             }
         }
     }
-
 }

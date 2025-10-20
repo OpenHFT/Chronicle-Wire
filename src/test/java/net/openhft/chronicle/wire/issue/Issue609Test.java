@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +104,6 @@ public class Issue609Test extends WireTestCommon {
     public static class ServiceCfg extends AbstractMarshallableCfg {
         public final List<InputCfg> inputs = new ArrayList<>();
 
-        @SuppressWarnings("unchecked")
         @Override
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
             @NotNull StringBuilder name = new StringBuilder();
@@ -133,7 +130,15 @@ public class Issue609Test extends WireTestCommon {
      * Configuration class representing a single input of a service.
      */
     public static class InputCfg extends AbstractMarshallableCfg {
-        private String input;
+        public String input;
+
+        public InputCfg() {
+            this(null);
+        }
+
+        public InputCfg(String in) {
+            this.input = in;
+        }
 
         public InputCfg() {
             this(null);

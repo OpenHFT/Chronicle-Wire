@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +16,7 @@
 
 package net.openhft.chronicle.wire.issue;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
@@ -27,6 +26,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Test class to validate behaviors associated with class aliases in the context of Wire.
@@ -59,6 +59,8 @@ public class Issue277Test extends WireTestCommon {
      */
     @Test
     public void isOk() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Deserialize the sample data into a Data2 object without throwing an exception
         Data2 o2 = WireType.TEXT.fromString(Data2.class, data);
 
@@ -76,6 +78,8 @@ public class Issue277Test extends WireTestCommon {
      */
     @Test(expected = ClassCastException.class)
     public void reproduce() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // This operation should fail and throw a ClassCastException
         Data2 o2 = WireType.TEXT.fromString(data);
         fail("" + o2);

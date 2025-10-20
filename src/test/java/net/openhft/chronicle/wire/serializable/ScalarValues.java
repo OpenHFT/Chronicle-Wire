@@ -1,8 +1,8 @@
 /*
- * Copyright 2016-2020 chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *       http://www.apache.org/licenses/LICENSE-2.0
@@ -12,8 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
+
 
 package net.openhft.chronicle.wire.serializable;
 
@@ -33,40 +33,41 @@ import java.util.UUID;
 
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes","deprecation"})
 public class ScalarValues implements Serializable, Validatable {
+    private static final long serialVersionUID = 0L;
     // Primitive data type fields
-    boolean flag;
-    byte b;
-    short s;
-    char ch;
-    int i;
-    float f;
-    long l;
-    double d;
+    public boolean flag;
+    public byte b;
+    public short s;
+    public char ch;
+    public int i;
+    public float f;
+    public long l;
+    public double d;
 
     // Wrapper class fields for primitive types
-    Boolean flag2;
-    Byte b2;
-    Short s2;
-    Character ch2;
-    Integer i2;
-    Float f2;
-    Long l2;
-    Double d2;
+    public Boolean flag2;
+    public Byte b2;
+    public Short s2;
+    public Character ch2;
+    public Integer i2;
+    public Float f2;
+    public Long l2;
+    public Double d2;
 
     // Fields of various Java standard library classes
-    Class aClass;
-    RetentionPolicy policy;
-    String text;
-    LocalDate date;
-    LocalTime time;
-    LocalDateTime dateTime;
-    ZonedDateTime zonedDateTime;
-    UUID uuid;
-    BigInteger bi;
-    BigDecimal bd;
-    File file;
+    public Class<?> aClass;
+    public RetentionPolicy policy;
+    public String text;
+    public LocalDate date;
+    public LocalTime time;
+    public LocalDateTime dateTime;
+    public ZonedDateTime zonedDateTime;
+    public UUID uuid;
+    public BigInteger bi;
+    public BigDecimal bd;
+    public File file;
     // Path path; // commented out
 
     // Default constructor
@@ -110,6 +111,11 @@ public class ScalarValues implements Serializable, Validatable {
     public boolean equals(Object obj) {
         // Check for instance equality and delegate to Wires utility for deep comparison
         return obj instanceof ScalarValues && Wires.isEquals(this, obj);
+    }
+
+    @Override
+    public int hashCode() {
+        throw new UnsupportedOperationException();
     }
 
     // Overriding toString method to provide a string representation of the object

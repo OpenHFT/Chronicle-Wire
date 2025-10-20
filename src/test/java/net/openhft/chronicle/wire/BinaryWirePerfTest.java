@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +37,6 @@ public class BinaryWirePerfTest extends WireTestCommon {
     final boolean fixed;
     final boolean numericField;
     final boolean fieldLess;
-    @SuppressWarnings("rawtypes")
     @NotNull
     Bytes<?> bytes = allocateElasticOnHeap();
 
@@ -70,7 +67,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
         bytes.clear();
         @NotNull Wire wire = testId == -1
                 ? new RawWire(bytes)
-                : new BinaryWire(bytes, fixed, numericField, fieldLess, Integer.MAX_VALUE, "lzw", false);
+                : new BinaryWire(bytes, fixed, numericField, fieldLess, Integer.MAX_VALUE, "lzw");
 
         return wire;
     }

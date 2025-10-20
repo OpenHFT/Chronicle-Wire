@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +18,7 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 
 // Class MyTypesCustom extends MyTypes and implements Marshallable to provide custom serialization logic
-class MyTypesCustom extends MyTypes implements Marshallable {
+public class MyTypesCustom extends MyTypes implements Marshallable {
 
     // Override the writeMarshallable method to dictate how instances of MyTypesCustom will be serialized to wire format
     @Override

@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +15,9 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.StopCharTesters;
-import net.openhft.chronicle.bytes.StopCharsTester;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.ClassLookup;
@@ -51,16 +47,22 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
  * It currently provides a subset of functionalities similar to the YAML wire format.
  * The core capability of this class is to handle JSON data structures as {@code Bytes}
  * objects, allowing for efficient manipulation and parsing.
- * </p>
  */
+@SuppressWarnings("this-escape")
 public class JSONWire extends TextWire {
 
-    // Represents the bytes for "ull" which might be used for some JSON representations.
-    public static final @NotNull Bytes<byte[]> ULL = Bytes.from("ull");
+    // The rest of null
+    private static final @NotNull Bytes<byte[]> _ULL = Bytes.from("ull");
+    @Deprecated(/* to be removed in x.28 */)
+    public static final @NotNull Bytes<byte[]> ULL = _ULL;
+    // the rest of true
+    private static final @NotNull Bytes<byte[]> _RUE = Bytes.from("rue");
+    // the rest of false
+    private static final @NotNull Bytes<byte[]> _ALSE = Bytes.from("alse");
 
     // Bytes for comma, commonly used as JSON separator.
     @SuppressWarnings("rawtypes")
-    static final BytesStore COMMA = BytesStore.from(",");
+    static final BytesStore<?, ?> COMMA = BytesStore.from(",");
 
     // A thread-local variable to store a reference to the stop characters tester for JSON parsing.
     static final ThreadLocal<WeakReference<StopCharsTester>> STRICT_ESCAPED_END_OF_TEXT_JSON = new ThreadLocal<>();
@@ -70,6 +72,7 @@ public class JSONWire extends TextWire {
 
     // Flag to determine whether to use types or not during parsing.
     boolean useTypes;
+    private JSONValueOutFromStart valueOutFromStart;
 
     /**
      * Default constructor, initializes with elastic bytes allocated on heap.
@@ -132,7 +135,7 @@ public class JSONWire extends TextWire {
      * <p>
      * This is useful for handling certain JSON conversion scenarios where
      * native types have wrapper counterparts, such as int and Integer.
-     * </p>
+     *
      * @param type The class to be checked.
      * @return {@code true} if the class is a Java wrapper type, otherwise {@code false}.
      */
@@ -143,7 +146,7 @@ public class JSONWire extends TextWire {
     }
 
     @Override
-    protected Class defaultKeyClass() {
+    protected Class<?> defaultKeyClass() {
         return String.class;
     }
 
@@ -178,7 +181,6 @@ public class JSONWire extends TextWire {
         return this;
     }
 
-
     @NotNull
     @Override
     protected JSONValueOut createValueOut() {
@@ -194,31 +196,11 @@ public class JSONWire extends TextWire {
             public double float64() {
                 consumePadding();
                 valueIn.skipType();
-                switch (peekCode()) {
-                    case '[':
-                    case '{':
-                        Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a double.");
-                        return 0;
-                }
 
-                boolean isNull;
+                if (isNull())
+                    return Double.NaN;
 
-                long l = bytes.readLimit();
-                try {
-                    bytes.readLimit(bytes.readPosition() + 4);
-                    isNull = "null".contentEquals(bytes);
-                } finally {
-                    bytes.readLimit(l);
-                }
-
-                if (isNull) {
-                    bytes.readSkip("null".length());
-                    consumePadding();
-                }
-
-                final double v = isNull ? Double.NaN : bytes.parseDouble();
-                checkRewind();
-                return v;
+                return super.float64();
             }
 
             @Override
@@ -289,20 +271,20 @@ public class JSONWire extends TextWire {
      * The segment copied depends on the first character encountered (e.g., '{' indicates a map).
      * This method understands JSON structural elements and translates them appropriately.
      *
-     * @param wire The wire output to copy the data to.
-     * @param inMap Flag indicating if the current position is inside a map structure.
+     * @param destWire  destination wire to copy the data to.
+     * @param expectKeyValues Flag indicating if the current position is inside a map structure.
      * @param topLevel Flag indicating if this is the topmost level of the copy operation.
      * @throws InvalidMarshallableException if there's a problem with copying the data.
      */
-    public void copyOne(@NotNull WireOut wire, boolean inMap, boolean topLevel) throws InvalidMarshallableException {
+    public void copyOne(@NotNull WireOut destWire, boolean expectKeyValues, boolean topLevel) throws InvalidMarshallableException {
         consumePadding();
         int ch = bytes.readUnsignedByte();
         switch (ch) {
             case '\'':
             case '"':
                 // Handle quoted values
-                copyQuote(wire, ch, inMap, topLevel);
-                if (inMap) {
+                copyQuote(destWire, ch, expectKeyValues, topLevel);
+                if (expectKeyValues) {
                     // For key-value pairs, consume any padding and expect a colon (:) separator
                     consumePadding();
                     int ch2 = bytes.readUnsignedByte();
@@ -310,21 +292,21 @@ public class JSONWire extends TextWire {
                         throw new IORuntimeException("Expected a ':' but got a '" + (char) ch);
 
                     // Recursively copy the associated value after the colon
-                    copyOne(wire, false, false);
+                    copyOne(destWire, false, false);
                 }
                 return;
 
             case '{':
                 // Determine if this is a type prefix or a standard map, and copy accordingly
                 if (isTypePrefix())
-                    copyTypePrefix(wire);
+                    copyTypePrefix(destWire);
                 else
-                    copyMap(wire);
+                    copyMap(destWire);
                 return;
 
             case '[':
                 // Handle sequences or arrays
-                copySequence(wire);
+                copySequence(destWire);
                 return;
 
             case '+':
@@ -341,15 +323,32 @@ public class JSONWire extends TextWire {
             case '9':
             case '.':
                 // Handle numeric values
-                copyNumber(wire);
+                copyNumber(destWire);
                 return;
 
+            case 'N':
             case 'n':
                 // Special handling for the 'null' value
-                if (bytes.startsWith(ULL) && !Character.isLetterOrDigit(bytes.peekUnsignedByte(bytes.readPosition() + 3))) {
-                    bytes.readSkip(3);
-                    consumePadding();
-                    wire.getValueOut().nu11();
+                if (compareRest(bytes, _ULL)) {
+                    destWire.getValueOut().nu11();
+                    return;
+                }
+                break;
+
+            case 'f':
+            case 'F':
+                // Special handling for the 'false' value
+                if (compareRest(bytes, _ALSE)) {
+                    destWire.getValueOut().bool(false);
+                    return;
+                }
+                break;
+
+            case 't':
+            case 'T':
+                // Special handling for the 'true' value
+                if (compareRest(bytes, _RUE)) {
+                    destWire.getValueOut().bool(true);
                     return;
                 }
                 break;
@@ -364,14 +363,42 @@ public class JSONWire extends TextWire {
     }
 
     /**
+     * Compares the remaining characters in {@code source} with {@code expected}, consuming
+     * them if they match and ensuring the next char is not alphanumeric.
+     */
+    static boolean compareRest(@NotNull StreamingDataInput<?> source, @NotNull Bytes<?> expected)
+            throws BufferUnderflowException, ClosedIllegalStateException {
+        if (expected.length() > source.readRemaining())
+            return false;
+        long position = source.readPosition();
+        for (int i = 0; i < expected.length(); i++) {
+            if (source.readUnsignedByte() != expected.charAt(i)) {
+                source.readPosition(position);
+                return false;
+            }
+        }
+        int ch = source.peekUnsignedByte();
+        if (Character.isLetterOrDigit(ch)) {
+            source.readPosition(position);
+            return false;
+        }
+        while (ch > 0 && ch <= ' ') {
+            source.readSkip(1);
+            ch = source.peekUnsignedByte();
+        }
+
+        return true;
+    }
+
+    /**
      * Copies a type prefix from the input to the given wire output.
      * The type prefix is assumed to be a text value prefixed with '@'. This method will extract
      * the type prefix and pass it on to the wire output.
      *
-     * @param wire The wire output to copy the type prefix to.
+     * @param destWire The wire output to copy the type prefix to.
      * @throws InvalidMarshallableException if there's a problem with copying the data.
      */
-    private void copyTypePrefix(WireOut wire) throws InvalidMarshallableException {
+    private void copyTypePrefix(WireOut destWire) throws InvalidMarshallableException {
         final StringBuilder sb = acquireStringBuilder();
 
         // Extract the type literal
@@ -379,7 +406,7 @@ public class JSONWire extends TextWire {
 
         // Remove the '@' prefix from the type literal
         sb.deleteCharAt(0);
-        wire.getValueOut().typePrefix(sb);
+        destWire.getValueOut().typePrefix(sb);
 
         // Consume any padding characters (e.g., whitespace)
         consumePadding();
@@ -388,7 +415,7 @@ public class JSONWire extends TextWire {
             throw new IORuntimeException("Expected a ':' after the type " + sb + " but got a " + (char) ch);
 
         // Recursively copy the associated value after the colon
-        copyOne(wire, true, false);
+        copyOne(destWire, false, false);
 
         consumePadding();
         int ch2 = bytes.readUnsignedByte();
@@ -412,18 +439,18 @@ public class JSONWire extends TextWire {
      * Copies a quoted string value from the input to the given wire output.
      * This method handles escaped characters within the quoted string.
      *
-     * @param wire The wire output to copy the quoted string to.
-     * @param ch The starting quote character (either single or double quote).
+     * @param destWire  destination wire
+     * @param quoteChar opening quote character
      * @param inMap Flag indicating if the current position is inside a map structure.
      * @param topLevel Flag indicating if this is the topmost level of the copy operation.
      * @throws InvalidMarshallableException if there's a problem with copying the data.
      */
-    private void copyQuote(WireOut wire, int ch, boolean inMap, boolean topLevel) throws InvalidMarshallableException {
+    private void copyQuote(WireOut destWire, int quoteChar, boolean inMap, boolean topLevel) throws InvalidMarshallableException {
         final StringBuilder sb = acquireStringBuilder();
         // Extract the quoted text
         while (bytes.readRemaining() > 0) {
             int ch2 = bytes.readUnsignedByte();
-            if (ch2 == ch)
+            if (ch2 == quoteChar)
                 break;
             sb.append((char) ch2);
 
@@ -437,11 +464,11 @@ public class JSONWire extends TextWire {
 
         // Determine how to write the text to the wire based on the provided flags
         if (topLevel) {
-            wire.writeEvent(String.class, sb);
+            destWire.writeEvent(String.class, sb);
         } else if (inMap) {
-            wire.write(sb);
+            destWire.write(sb);
         } else {
-            wire.getValueOut().text(sb);
+            destWire.getValueOut().text(sb);
         }
     }
 
@@ -449,11 +476,11 @@ public class JSONWire extends TextWire {
      * Copies a map structure from the input to the given wire output.
      * A map is assumed to be a set of key-value pairs enclosed in curly braces '{}'.
      *
-     * @param wire The wire output to copy the map structure to.
+     * @param destWire The wire output to copy the map structure to.
      * @throws InvalidMarshallableException if there's a problem with copying the data.
      */
-    private void copyMap(WireOut wire) throws InvalidMarshallableException {
-        wire.getValueOut().marshallable(out -> {
+    private void copyMap(WireOut destWire) throws InvalidMarshallableException {
+        destWire.getValueOut().marshallable(out -> {
             consumePadding();
 
             // Process each key-value pair within the map until the end is reached or the buffer is exhausted
@@ -467,7 +494,7 @@ public class JSONWire extends TextWire {
                 }
 
                 // Process one key-value pair within the map
-                copyOne(wire, true, false);
+                copyOne(destWire, true, false);
 
                 // After processing a key-value pair, expect either a comma (next pair) or the end of the map
                 expectComma('}');
@@ -478,14 +505,15 @@ public class JSONWire extends TextWire {
     /**
      * Consumes padding and expects either a comma (indicating another entry) or a given end character.
      *
-     * @param end The expected end character (e.g., '}' for maps or ']' for sequences).
+     * @param closingChar the terminating character that indicates the end of the current
+     *                    structure
      */
-    private void expectComma(char end) {
+    private void expectComma(char closingChar) {
         consumePadding();
         final int ch = peekNextByte();
 
         // If we've reached the expected end character, simply return
-        if (ch == end)
+        if (ch == closingChar)
             return;
 
         // If a comma is found, move past it and consume any subsequent padding
@@ -493,7 +521,7 @@ public class JSONWire extends TextWire {
             bytes.readSkip(1);
             consumePadding();
         } else {
-            throw new IORuntimeException("Expected a comma or '" + end + "' not a '" + (char) ch + "'");
+            throw new IORuntimeException("Expected a comma or '" + closingChar + "' not a '" + (char) ch + "'");
         }
     }
 
@@ -501,10 +529,10 @@ public class JSONWire extends TextWire {
      * Copies a sequence structure from the input to the given wire output.
      * A sequence is assumed to be a list of values enclosed in square brackets '[]'.
      *
-     * @param wire The wire output to copy the sequence to.
+     * @param destWire The wire output to copy the sequence to.
      */
-    private void copySequence(WireOut wire) {
-        wire.getValueOut().sequence(out -> {
+    private void copySequence(WireOut destWire) {
+        destWire.getValueOut().sequence(out -> {
             // Consume any padding characters (e.g., whitespace) before the sequence content
             consumePadding();
 
@@ -519,7 +547,7 @@ public class JSONWire extends TextWire {
                 }
 
                 // Process one value within the sequence
-                copyOne(wire, false, false);
+                copyOne(destWire, false, false);
 
                 // After processing a value, expect either a comma (next value) or the end of the sequence
                 expectComma(']');
@@ -599,7 +627,7 @@ public class JSONWire extends TextWire {
                         }
                     } else {
                         // For textual wire outputs, append a comma after the number
-                        wire.bytes().append(",");
+                        wire.getValueOut().elementSeparator();
                     }
                     return;
             }
@@ -680,8 +708,9 @@ public class JSONWire extends TextWire {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public ValueOut writeEvent(Class expectedType, Object eventKey) throws InvalidMarshallableException {
+    public ValueOut writeEvent(Class<?> expectedType, Object eventKey) throws InvalidMarshallableException {
         return super.writeEvent(String.class, "" + eventKey);
     }
 
@@ -719,7 +748,7 @@ public class JSONWire extends TextWire {
     class JSONReadDocumentContext extends TextReadDocumentContext {
         private int first;
 
-        public JSONReadDocumentContext(@Nullable AbstractWire wire) {
+        public JSONReadDocumentContext(@Nullable Wire wire) {
             super(wire);
         }
 
@@ -799,9 +828,10 @@ public class JSONWire extends TextWire {
      */
     class JSONValueOut extends YamlValueOut {
 
+        @SuppressWarnings("rawtypes")
         @NotNull
         @Override
-        public TextWire typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, Class type) {
+        public TextWire typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, Class<?> type) {
             prependSeparator();
             append("{\"@type\":\"");
             typeTranslator.accept(type, bytes);
@@ -842,10 +872,17 @@ public class JSONWire extends TextWire {
         @Override
         public JSONValueOut typePrefix(@NotNull CharSequence typeName) {
             if (useTypes) {
-                startBlock('{');
+                boolean nested = bytes.peekUnsignedByte(bytes.writePosition() - 1) == '{';
+                if (!nested)
+                    startBlock('{');
                 bytes.append("\"@");
                 bytes.append(applyAsAlias(classLookup, typeName));
                 bytes.append("\":");
+                if (nested) {
+                    if (valueOutFromStart == null)
+                         valueOutFromStart = new JSONValueOutFromStart();
+                    return valueOutFromStart;
+                }
             }
             return this;
         }
@@ -921,14 +958,30 @@ public class JSONWire extends TextWire {
         public void writeComment(@NotNull CharSequence s) {
         }
 
+        /**
+         * Write a special double value (e.g. NaN) as a string to the given bytes.
+         *
+         * @param bytes The bytes to append the stringified double value to
+         * @param value The double value to convert to a string
+         */
         @Override
-        protected String doubleToString(double d) {
-            return Double.isNaN(d) ? "null" : super.doubleToString(d);
+        protected void writeSpecialDoubleValueToBytes(Bytes<?> bytes, double value) {
+            bytes.append('"');
+            bytes.append(Double.toString(value));
+            bytes.append('"');
         }
 
+        /**
+         * Write a special double value (e.g. NaN) as a string to the given bytes.
+         *
+         * @param bytes The bytes to append the stringified double value to
+         * @param value The double value to convert to a string
+         */
         @Override
-        protected String floatToString(float f) {
-            return Float.isNaN(f) ? "null" : super.floatToString(f);
+        protected void writeSpecialFloatValueToBytes(Bytes<?> bytes, float value) {
+            bytes.append('"');
+            bytes.append(Float.toString(value));
+            bytes.append('"');
         }
 
         @NotNull
@@ -951,12 +1004,12 @@ public class JSONWire extends TextWire {
         }
 
         @Override
-        public @NotNull <V> JSONWire object(@NotNull Class<V> expectedType, V v) throws InvalidMarshallableException {
+        public @NotNull <V> JSONWire object(@NotNull Class<? extends V> expectedType, V v) throws InvalidMarshallableException {
             return (JSONWire) (useTypes ? super.object(v) : super.object(expectedType, v));
         }
 
         @Override
-        public @NotNull JSONValueOut typePrefix(Class type) {
+        public @NotNull JSONValueOut typePrefix(Class<?> type) {
             if (type.isPrimitive() || isWrapper(type) || type.isEnum()) {
                 // Do nothing because there are no other alternatives
                 // and thus, the type is implicitly given in the declaration.
@@ -966,9 +1019,10 @@ public class JSONWire extends TextWire {
             }
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public @NotNull <K, V> JSONWire marshallable(@Nullable Map<K, V> map, @NotNull Class<K> kClass, @NotNull Class<V> vClass, boolean leaf) throws InvalidMarshallableException {
-            return (JSONWire) super.marshallable(map, (Class) String.class, vClass, leaf);
+            return (JSONWire) super.marshallable(map, (Class<K>) String.class, vClass, leaf);
         }
 
         public @NotNull JSONWire time(final LocalTime localTime) {
@@ -978,13 +1032,19 @@ public class JSONWire extends TextWire {
         }
     }
 
+    class JSONValueOutFromStart extends JSONValueOut {
+        @Override
+        public void endTypePrefix() {
+            elementSeparator();
+        }
+    }
+
     /**
      * The JSONValueIn class extends the TextValueIn class.
      * It provides specialized methods for interpreting values from JSON data,
      * ensuring proper handling of JSON-specific constructs like the "null" value.
      */
     class JSONValueIn extends TextValueIn {
-
 
         @Nullable
         private Type consumeTypeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
@@ -1045,7 +1105,6 @@ public class JSONWire extends TextWire {
             }
         }
 
-
         /**
          * Determines if the current value represents a JSON null value.
          *
@@ -1092,17 +1151,22 @@ public class JSONWire extends TextWire {
         }
 
         @Override
-        public <E> E object(@Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
+        public <E> E object(@Nullable E using, @Nullable Class<? extends E> clazz) throws InvalidMarshallableException {
+            return useTypes ? parseType(using, clazz, true) : super.object(using, clazz, true);
+        }
+
+        @Override
+        public <E> E object(@Nullable E using, @Nullable Class<? extends E> clazz, boolean bestEffort) throws InvalidMarshallableException {
             return useTypes ? parseType(using, clazz, bestEffort) : super.object(using, clazz, bestEffort);
         }
 
         @Override
-        public Class typePrefix() {
+        public Class<?> typePrefix() {
             return super.typePrefix();
         }
 
         @Override
-        public Object typePrefixOrObject(Class tClass) {
+        public Object typePrefixOrObject(Class<?> tClass) {
             return super.typePrefixOrObject(tClass);
         }
 
@@ -1165,11 +1229,11 @@ public class JSONWire extends TextWire {
          * @throws InvalidMarshallableException If there's an issue with unmarshalling the data.
          * @throws ClassCastException If there's a type mismatch between the provided class or instance and the type definition.
          */
-        private <E> E parseType(@Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
+        private <E> E parseType(@Nullable E using, @Nullable Class<? extends E> clazz, boolean bestEffort) throws InvalidMarshallableException {
 
             Type aClass = consumeTypeLiteral(null);
             if (aClass != null)
-                return (E) aClass;
+                return Jvm.uncheckedCast(aClass);
 
             if (!hasTypeDefinition()) {
                 return super.object(using, clazz, bestEffort);
@@ -1177,7 +1241,7 @@ public class JSONWire extends TextWire {
                 final StringBuilder sb = acquireStringBuilder();
                 sb.setLength(0);
                 readTypeDefinition(sb);
-                final Class<?> overrideClass = classLookup().forName(sb.subSequence(1, sb.length()));
+                final Class<E> overrideClass = Jvm.uncheckedCast(classLookup().forName(sb.subSequence(1, sb.length())));
                 if (clazz != null && !clazz.isAssignableFrom(overrideClass))
                     throw new ClassCastException("Unable to cast " + overrideClass.getName() + " to " + clazz.getName());
                 if (using != null && !overrideClass.isInstance(using))
@@ -1245,5 +1309,15 @@ public class JSONWire extends TextWire {
         public boolean useTypes() {
             return useTypes;
         }
+    }
+
+    /**
+     * Render as a UTF-8 string.
+     *
+     * @return a UTF-8 string representation of the wire data.
+     */
+    @Override
+    public String toString() {
+        return toUtf8String();
     }
 }

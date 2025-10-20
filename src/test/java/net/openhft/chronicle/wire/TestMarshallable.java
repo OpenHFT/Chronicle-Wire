@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +24,10 @@ public class TestMarshallable extends SelfDescribingMarshallable {
     // Defining a non-null StringBuilder field named 'name' to store a name value,
     // initializing it to an empty StringBuilder instance
     @NotNull
-    private StringBuilder name = new StringBuilder();
+    public StringBuilder name = new StringBuilder();
 
     // Defining an integer field named 'count' to store a count value
-    private int count;
+    public int count;
 
     // Overriding the readMarshallable method from the parent class to customize
     // how the instance should read its state from a WireIn instance

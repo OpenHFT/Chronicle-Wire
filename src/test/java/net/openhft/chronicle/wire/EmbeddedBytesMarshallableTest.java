@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +68,8 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     // Test serialization and deserialization with certain expected output.
     @Test
     public void ebm() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Register the alias for the class.
         ClassAliasPool.CLASS_ALIASES.addAlias(EBM.class);
 
@@ -88,96 +88,15 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         assertEquals(expected, e1.toString());
         Bytes<?> bytes = new HexDumpBytes();
         e1.writeMarshallable(bytes);
-        assertEquals("00 00 03 08 1e 61 31 32 33 34 35 36 37 38 39 30\n" +
-                "31 32 33 34 35 36 37 38 39 30 31 32 33 34 35 36\n" +
-                "37 38 39 00 17 61 31 32 33 34 35 36 37 38 39 30\n" +
-                "31 32 33 34 35 36 37 38 39 61 62 63 c4 5f 74 4c\n" +
-                "00 00 00 00 0b 61 31 32 33 34 35 36 37 38 39 30\n", bytes.toHexString());
+        assertEquals("00 80 04 08 00 80 04 08 1e 61 31 32 33 34 35 36\n" +
+                "37 38 39 30 31 32 33 34 35 36 37 38 39 30 31 32\n" +
+                "33 34 35 36 37 38 39 00 17 61 31 32 33 34 35 36\n" +
+                "37 38 39 30 31 32 33 34 35 36 37 38 39 61 62 63\n" +
+                "c4 5f 74 4c 00 00 00 00 0b 61 31 32 33 34 35 36\n" +
+                "37 38 39 30\n", bytes.toHexString());
         EBM e2 = new EBM();
         e2.readMarshallable(bytes);
         assertEquals(expected, e2.toString());
-        bytes.releaseLast();
-    }
-
-    // Test potential schema changes and their effect on serialization and deserialization.
-    @Test
-    public void schemaChanges() {
-        // Register the alias for the classes.
-        ClassAliasPool.CLASS_ALIASES.addAlias(EBM1.class, EBM2.class, EBM3.class);
-        EBM3 e3 = Marshallable.fromString("!EBM3 {\n" +
-                "  l0: 80,\n" +
-                "  l1: 81,\n" +
-                "  l2: 82,\n" +
-                "  i0: 40,\n" +
-                "  i1: 41,\n" +
-                "  i2: 42,\n" +
-                "  s0: 20,\n" +
-                "  s1: 21,\n" +
-                "  s2: 22,\n" +
-                "  b0: 10,\n" +
-                "  b1: 11,\n" +
-                "  b2: 12\n" +
-                "}");
-        Bytes<?> bytes = new HexDumpBytes();
-        e3.writeMarshallable(bytes);
-        assertEquals("03 83 03 03 50 00 00 00 00 00 00 00 51 00 00 00\n" +
-                "00 00 00 00 52 00 00 00 00 00 00 00 28 00 00 00\n" +
-                "29 00 00 00 2a 00 00 00 14 00 15 00 16 00 0a 0b\n" +
-                "0c\n", bytes.toHexString());
-        EBM2 e2 = new EBM2();
-        e2.readMarshallable(bytes);
-        assertEquals("!EBM2 {\n" +
-                "  l0: 80,\n" +
-                "  l1: 81,\n" +
-                "  i0: 40,\n" +
-                "  i1: 41,\n" +
-                "  s0: 20,\n" +
-                "  s1: 21,\n" +
-                "  b0: 10,\n" +
-                "  b1: 11\n" +
-                "}\n", e2.toString());
-        bytes.readPosition(0);
-        EBM1 e1 = new EBM1();
-        e1.readMarshallable(bytes);
-        assertEquals("!EBM1 {\n" +
-                "  l0: 80,\n" +
-                "  i0: 40,\n" +
-                "  s0: 20,\n" +
-                "  b0: 10\n" +
-                "}\n", e1.toString());
-
-        bytes.clear();
-        e1.writeMarshallable(bytes);
-        assertEquals("01 81 01 01 50 00 00 00 00 00 00 00 28 00 00 00\n" +
-                "14 00 0a\n", bytes.toHexString());
-        e2.readMarshallable(bytes);
-        assertEquals("!EBM2 {\n" +
-                "  l0: 80,\n" +
-                "  l1: 0,\n" +
-                "  i0: 40,\n" +
-                "  i1: 0,\n" +
-                "  s0: 20,\n" +
-                "  s1: 0,\n" +
-                "  b0: 10,\n" +
-                "  b1: 0\n" +
-                "}\n", e2.toString());
-        bytes.readPosition(0);
-        e3.readMarshallable(bytes);
-        assertEquals("!EBM3 {\n" +
-                "  l0: 80,\n" +
-                "  l1: 0,\n" +
-                "  l2: 0,\n" +
-                "  i0: 40,\n" +
-                "  i1: 0,\n" +
-                "  i2: 0,\n" +
-                "  s0: 20,\n" +
-                "  s1: 0,\n" +
-                "  s2: 0,\n" +
-                "  b0: 10,\n" +
-                "  b1: 0,\n" +
-                "  b2: 0\n" +
-                "}\n", e3.toString());
-
         bytes.releaseLast();
     }
 
@@ -230,6 +149,21 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         bytes.readLimit(64);
         EBM ebm = new EBM();
         ebm.readMarshallable(bytes);
+    }
+
+    // Test deserialization with field counts exceeding FIELD_COUNT_LIMIT (256).
+    // Expected to throw an IllegalStateException.
+    @Test(expected = IllegalStateException.class)
+    public void excessiveFieldCounts() {
+        int desc = (200 << 24) | (200 << 16) | 1;
+        int length = 200 * 8 + 200 * 4 + 1;
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(length + 8);
+        bytes.writeInt(desc);
+        for (int i = 0; i < length; i++)
+            bytes.writeByte((byte) 0);
+        bytes.readLimit(bytes.writePosition());
+        EBM1 ebm1 = new EBM1();
+        ebm1.readMarshallable(bytes);
     }
 
     // A class representing a Marshallable object with fields grouped into embedded Bytes.

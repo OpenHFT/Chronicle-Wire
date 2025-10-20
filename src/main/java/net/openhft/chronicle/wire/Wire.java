@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,35 +26,11 @@ import java.io.IOException;
  * Defines the standard interface for sequentially writing to and reading from a Bytes stream.
  * Implementations of this interface should ensure single-threaded access and avoid method chaining.
  *
- * <p>This interface combines the capabilities of both {@link WireIn} and {@link WireOut} interfaces.</p>
+ * <p>This interface combines the capabilities of both {@link WireIn} and {@link WireOut} interfaces.
  */
 @SingleThreaded
 @DontChain
 public interface Wire extends WireIn, WireOut {
-
-    /**
-     * Factory method to create a Wire instance based on the file extension provided in the file name.
-     * Currently supports "csv" and "yaml" extensions.
-     *
-     * @param name The name of the file, including its extension.
-     * @return A Wire implementation corresponding to the file extension.
-     * @throws IOException If there's an error accessing the file.
-     * @throws IllegalArgumentException If the file type is unknown.
-     * @deprecated This method might be removed in future releases. Consider other ways to create a Wire instance.
-     */
-    @Deprecated(/*to be removed?*/)
-    static Wire fromFile(@NotNull String name) throws IOException {
-        @NotNull String ext = name.substring(name.lastIndexOf('.') + 1).toLowerCase();
-        switch (ext) {
-            case "csv":
-                return CSVWire.fromFile(name);
-            case "yaml":
-                return TextWire.fromFile(name);
-            default:
-                throw new IllegalArgumentException("Unknown file type " + name);
-        }
-    }
-
     /**
      * Factory method to create a new YamlWire instance that writes to an on-heap Bytes object.
      *
@@ -75,4 +49,21 @@ public interface Wire extends WireIn, WireOut {
     @Override
     @NotNull
     Wire headerNumber(long headerNumber);
+
+    /**
+     * Indicates whether tuples should be generated.
+     * By default, this method returns the value of Wires.GENERATE_TUPLES
+     * @return true if tuples should be generated, false otherwise.
+     */
+    default boolean generateTuples() {
+        return Wires.GENERATE_TUPLES;
+    }
+
+    /**
+     * Sets whether tuples should be generated.
+     * @param generateTuples true to enable tuple generation, false to disable it.
+     */
+    default Wire generateTuples(boolean generateTuples) {
+        return this;
+    }
 }

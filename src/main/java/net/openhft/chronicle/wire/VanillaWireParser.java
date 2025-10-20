@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,43 +28,43 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Provides an implementation of the WireParser interface, parsing wire inputs using both named and numbered
- * parselets to associate specific actions with events or field names.
- * <p>
- * This parser uses a default consumer to handle unmatched entries and a field number parselet for numbered fields.
- * </p>
+ * Provides an implementation of {@link WireParser} that maps field names or ids to
+ * {@link WireParselet}s. Named parselets are looked up via {@link #namedConsumer} and
+ * numbered fields via {@link #numberedConsumer}. A {@link #defaultConsumer} handles
+ * fields that are not explicitly registered and {@link #fieldNumberParselet} deals with
+ * unmapped numeric identifiers.
  */
 public class VanillaWireParser implements WireParser {
 
-    // Map of field names to their associated parselets, sorted by CharSequence order.
+    // Map of field names to parselets. {@link CharSequenceComparator#INSTANCE} provides stable ordering and lookup semantics
     private final Map<CharSequence, WireParselet> namedConsumer = new TreeMap<>(CharSequenceComparator.INSTANCE);
 
-    // Map of field numbers to their associated parselets.
+    // Map of numeric field ids to the original name and parselet
     private final Map<Integer, Map.Entry<String, WireParselet>> numberedConsumer = new HashMap<>();
 
-    // The default consumer to handle unmatched entries.
+    // Invoked when a field name is not present in {@link #namedConsumer}
     private final WireParselet defaultConsumer;
 
-    // Used for building strings for parsing.
+    // Reusable buffer for reading textual field names.
     private final StringBuilder sb = new StringBuilder(128);
 
-    // Holds the name of the last event that was parsed.
+    // Caches the most recently parsed field name
     private final StringBuilder lastEventName = new StringBuilder(128);
 
-    // Handles numbered fields.
+    // Called when a numeric field id is not mapped in {@link #numberedConsumer}
     private FieldNumberParselet fieldNumberParselet;
 
-    // Holds the last parslet that was used.
+    // Cache of the parselet associated with {@link #lastEventName}
     private WireParselet lastParslet = null;
 
-    // Indicates the position in the wire input of the last parsed event.
+    // Start position of the last parsed event for debugging purposes
     private long lastStart = 0;
 
     /**
-     * Constructs a new VanillaWireParser with the specified default consumer and field number parselet.
+     * Creates a parser using the supplied handlers.
      *
-     * @param defaultConsumer The default consumer to handle unmatched entries.
-     * @param fieldNumberParselet The field number parselet for handling numbered fields.
+     * @param defaultConsumer      consumer for unregistered named fields. Must not be {@code null}.
+     * @param fieldNumberParselet  handler for unregistered numeric ids. Must not be {@code null}.
      */
     public VanillaWireParser(@NotNull WireParselet defaultConsumer,
                              @NotNull FieldNumberParselet fieldNumberParselet) {
@@ -78,10 +76,8 @@ public class VanillaWireParser implements WireParser {
     }
 
     /**
-     * Peeks at the next code or byte in the wire input without moving the read position.
-     *
-     * @param wireIn The wire input to peek into.
-     * @return The next unsigned byte as an integer.
+     * Returns the next byte in {@code wireIn} without altering its read position.
+     * The value is returned as an unsigned int.
      */
     private int peekCode(@NotNull WireIn wireIn) {
         return wireIn.bytes().peekUnsignedByte();
@@ -93,12 +89,16 @@ public class VanillaWireParser implements WireParser {
     }
 
     /**
-     * Parses a single input from the wire. Determines if the input should be parsed as binary or not.
-     * Throws specific exceptions in the case of invocation issues or invalid marshallable data.
+     * Reads one field from {@code wireIn}. Binary fields (identified by
+     * {@link BinaryWireCode#FIELD_NUMBER}) are handled by
+     * {@link #parseOneBinary(WireIn)}. Otherwise the field name is read into
+     * {@link #sb} and the matching parselet located via {@link #namedConsumer}.
+     * If no match is found, {@link #getDefaultConsumer()} is used. The chosen
+     * parselet and name are cached for the next call.
      *
-     * @param wireIn The wire input to parse.
-     * @throws InvocationTargetRuntimeException if an invocation error occurs during parsing.
-     * @throws InvalidMarshallableException if invalid marshallable data is encountered during parsing.
+     * @param wireIn the source of the field
+     * @throws InvocationTargetRuntimeException if a parselet throws a checked exception
+     * @throws InvalidMarshallableException     if the wire data is malformed
      */
     public void parseOne(@NotNull WireIn wireIn) throws InvocationTargetRuntimeException, InvalidMarshallableException {
         long start = wireIn.bytes().readPosition();
@@ -138,11 +138,11 @@ public class VanillaWireParser implements WireParser {
     }
 
     /**
-     * Handles the scenario where an attempt to read a method name results in an empty value.
-     * Logs a warning about the situation and the contents leading up to this.
+     * Called when {@link ValueIn#text()} returns an empty name. Emits a warning
+     * with the surrounding bytes to aid debugging.
      *
-     * @param wireIn The wire input being parsed.
-     * @param start  The position in the wire input at which the method started.
+     * @param wireIn source of the bytes
+     * @param start  position at which the field began
      */
     private void parseOneEmpty(@NotNull WireIn wireIn, long start) {
         // Log a warning message indicating a potential misplaced method.
@@ -155,11 +155,12 @@ public class VanillaWireParser implements WireParser {
     }
 
     /**
-     * Parses binary data from the wire based on a method ID. If the ID is not mapped, the
-     * field number parselet is used to continue the parsing process.
+     * Handles binary wires that encode the field by numeric id. The id is read
+     * as a stop-bit long. If a parselet is registered for that id it is invoked;
+     * otherwise {@link #fieldNumberParselet} is called.
      *
-     * @param wireIn The wire input containing binary data.
-     * @throws InvalidMarshallableException if invalid marshallable data is encountered.
+     * @param wireIn binary wire to read from
+     * @throws InvalidMarshallableException if the wire contains malformed data
      */
     private void parseOneBinary(@NotNull WireIn wireIn) throws InvalidMarshallableException {
         long methodId = wireIn.readEventNumber();
@@ -177,6 +178,10 @@ public class VanillaWireParser implements WireParser {
         fieldNumberParselet.readOne(methodId, wireIn);
     }
 
+    /**
+     * Registers {@code valueInConsumer} for both the text and numeric forms of
+     * {@code key}.
+     */
     @NotNull
     @Override
     public VanillaWireParser register(@NotNull WireKey key, WireParselet valueInConsumer) {
@@ -184,12 +189,12 @@ public class VanillaWireParser implements WireParser {
     }
 
     /**
-     * Registers a WireParselet with a keyName. This method calculates the hashcode
-     * of the keyName and delegates to the private register method.
+     * Registers {@code valueInConsumer} to handle the field named {@code keyName}.
+     * Also associates it with {@code keyName.hashCode()} for binary ids.
      *
-     * @param keyName         The name of the key to register.
-     * @param valueInConsumer The WireParselet associated with the keyName.
-     * @return Returns the current instance of VanillaWireParser for method chaining.
+     * @param keyName         textual field name
+     * @param valueInConsumer parselet invoked for this field
+     * @return this parser instance
      */
     @NotNull
     public VanillaWireParser register(String keyName, WireParselet valueInConsumer) {
@@ -198,14 +203,12 @@ public class VanillaWireParser implements WireParser {
     }
 
     /**
-     * Registers a WireParselet with a given keyName and code.
-     * The keyName is stored in the namedConsumer map and the code
-     * with its corresponding keyName in the numberedConsumer map.
+     * Internal helper that stores the mapping in both the named and numbered maps.
      *
-     * @param keyName         The name of the key to register.
-     * @param code            The code associated with the keyName.
-     * @param valueInConsumer The WireParselet associated with the keyName.
-     * @return Returns the current instance of VanillaWireParser for method chaining.
+     * @param keyName         textual name of the field
+     * @param code            numeric id of the field
+     * @param valueInConsumer parselet invoked for this field
+     * @return this parser instance
      */
     private VanillaWireParser register(String keyName, int code, WireParselet valueInConsumer) {
         // Store the WireParselet in the namedConsumer map using the keyName.
@@ -216,6 +219,9 @@ public class VanillaWireParser implements WireParser {
         return this;
     }
 
+    /**
+     * Returns the parselet registered for {@code name} or {@code null} if none.
+     */
     @Override
     public WireParselet lookup(CharSequence name) {
         return namedConsumer.get(name);

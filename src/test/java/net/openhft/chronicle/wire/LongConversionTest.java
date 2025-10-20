@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.Mocker;
 import org.junit.Test;
@@ -27,6 +26,7 @@ import java.io.StringWriter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assume.assumeFalse;
 
 public class LongConversionTest extends WireTestCommon {
 
@@ -38,6 +38,8 @@ public class LongConversionTest extends WireTestCommon {
     // Test case to verify the correct serialization and deserialization of the LongHolder object
     @Test
     public void dto() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Creating a new LongHolder instance and setting values for its fields
         LongHolder lh = new LongHolder();
         lh.hex = 0XFEDCBA9876543210L;

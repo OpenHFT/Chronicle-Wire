@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@
 package net.openhft.chronicle.wire.internal;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.*;
@@ -60,7 +59,7 @@ public class FileMarshallableOut implements MarshallableOut {
             final String path = url.getPath();
             final String path0 = options.append ? path : (path + ".tmp");
             try (FileOutputStream out = new FileOutputStream(path0, options.append)) {
-                final Bytes<byte[]> bytes = (Bytes<byte[]>) wire.bytes();
+                final Bytes<byte[]> bytes = Jvm.uncheckedCast(wire.bytes());
                 out.write(bytes.underlyingObject(), 0, (int) bytes.readLimit());
             } catch (IOException ioe) {
                 throw new IORuntimeException(ioe);
@@ -89,6 +88,9 @@ public class FileMarshallableOut implements MarshallableOut {
     public FileMarshallableOut(MarshallableOutBuilder builder, WireType wireType) throws InvalidMarshallableException {
         this.url = builder.url();
         assert url.getProtocol().equals("file"); // Ensure the protocol is "file"
+        String path = url.getPath();
+        if (path == null || path.isEmpty() || path.contains(".."))
+            throw new IllegalArgumentException("Invalid file path: " + path);
 
         // If there's a query in the URL, parse and set the options
         final String query = url.getQuery();

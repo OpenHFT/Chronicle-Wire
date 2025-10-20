@@ -1,3 +1,7 @@
+/*
+ * Copyright 2016-2025 chronicle.software
+ */
+
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
@@ -16,9 +20,7 @@ public class JSONEmptySequencesTest extends net.openhft.chronicle.wire.WireTestC
         // Add an alias for the Foo class to simplify the YAML representation.
         ClassAliasPool.CLASS_ALIASES.addAlias(Foo.class);
 
-        // Allocate memory for Bytes data.
-        final Bytes data = Bytes.allocateElasticOnHeap();
-        // Add a JSON representation with a mix of empty and non-empty sequences.
+        final Bytes<byte[]> data = Bytes.allocateElasticOnHeap();
         data.append("!Foo {\n" +
                 "  field1: 1234,\n" +
                 "  field2: 456,\n" +
@@ -49,12 +51,12 @@ public class JSONEmptySequencesTest extends net.openhft.chronicle.wire.WireTestC
     }
 
     // A private static class Foo with four fields, where two of them are lists.
-    private static final class Foo extends SelfDescribingMarshallable {
-        int field1;  // A field of type int.
-        int field2;  // Another field of type int.
+    public static final class Foo extends SelfDescribingMarshallable {
+        public int field1;  // A field of type int.
+        public int field2;  // Another field of type int.
         // A list of strings that is initialized as an empty ArrayList.
-        final List<String> field3 = new ArrayList<>();
+        public final List<String> field3 = new ArrayList<>();
         // Another list of strings that is initialized as an empty ArrayList.
-        final List<String> field4 = new ArrayList<>();
+        public final List<String> field4 = new ArrayList<>();
     }
 }

@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +63,7 @@ public class WiresFromFileTest extends WireTestCommon {
     }
 
     // Definition for MDU class
-    static class MDU extends SelfDescribingMarshallable {
-        String symbol;
+    public static class MDU extends SelfDescribingMarshallable {
+        public String symbol;
     }
 }

@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 Chronicle Software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +22,13 @@ package net.openhft.chronicle.wire;
  * unmarshalling processes.
  */
 public class UnexpectedFieldHandlingException extends RuntimeException {
+    private static final long serialVersionUID = 0L;
 
     /**
      * Constructs a new UnexpectedFieldHandlingException with the provided underlying cause.
      *
-     * @param cause The root cause of this exception, typically originating from
+     * @param cause The root cause of this exception, often an exception thrown
+     *              from within an implementation of
      *              {@link ReadMarshallable#unexpectedField(Object, ValueIn)}.
      */
     public UnexpectedFieldHandlingException(Throwable cause) {

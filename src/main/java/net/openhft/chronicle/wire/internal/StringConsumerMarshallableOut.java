@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +24,7 @@ import java.util.function.Consumer;
 /**
  * An implementation of {@link MarshallableOut} that serializes {@link Marshallable} objects and forwards
  * the serialized string representation to a provided {@link Consumer<String>}.
- *
+ * <p>
  * The class encapsulates a {@link Wire} to hold the serialized representation. Upon closing of a document context,
  * the serialized content is converted to a string and passed to the given string consumer.
  */

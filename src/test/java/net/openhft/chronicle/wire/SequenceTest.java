@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -56,6 +55,7 @@ public class SequenceTest extends WireTestCommon {
     // Test method to check serialization and deserialization functionality.
     @Test
     public void test() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Create a new My object.
         My m1 = new My();
@@ -138,7 +138,7 @@ public class SequenceTest extends WireTestCommon {
 
         // Write the set to the wire.
         try (DocumentContext dc = w1.writingDocument()) {
-            w1.write("list").object(value);
+            dc.wire().write("list").object(value);
         }
 
         // Print the serialized data.
@@ -146,9 +146,9 @@ public class SequenceTest extends WireTestCommon {
 
         // Read the set back from the wire.
         try (DocumentContext dc = w1.readingDocument()) {
-            Object o = w1.read("list").object();
+            Object o = dc.wire().read("list").object();
             if (wireType == WireType.JSON)
-                o = new LinkedHashSet<>((Collection) o); // Convert back to set if JSON.
+                o = new LinkedHashSet<>((Collection<?>) o);
             assertEquals(value, o);
         }
     }
@@ -167,7 +167,7 @@ public class SequenceTest extends WireTestCommon {
 
         // Write the list to the wire.
         try (DocumentContext dc = w1.writingDocument()) {
-            w1.write("list").object(value);
+            dc.wire().write("list").object(value);
         }
 
         // Print the serialized data.
@@ -175,7 +175,7 @@ public class SequenceTest extends WireTestCommon {
 
         // Read the list back from the wire.
         try (DocumentContext dc = w1.readingDocument()) {
-            Object o = w1.read("list").object();
+            Object o = dc.wire().read("list").object();
             assertEquals(value, o);
         }
     }
@@ -199,7 +199,7 @@ public class SequenceTest extends WireTestCommon {
 
         // Write the map to the wire.
         try (DocumentContext dc = w1.writingDocument()) {
-            w1.write("map").object(value);
+            dc.wire().write("map").object(value);
         }
 
         // Print the serialized data.
@@ -207,7 +207,7 @@ public class SequenceTest extends WireTestCommon {
 
         // Read the map back from the wire.
         try (DocumentContext dc = w1.readingDocument()) {
-            Object o = w1.read("map").object();
+            Object o = dc.wire().read("map").object();
             assertEquals(value, o);
         }
     }

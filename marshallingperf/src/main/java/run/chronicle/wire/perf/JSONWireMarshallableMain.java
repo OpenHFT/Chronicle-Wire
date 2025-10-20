@@ -1,15 +1,36 @@
+/*
+ * Copyright 2016-2025 chronicle.software
+ */
+
 package run.chronicle.wire.perf;
 
+import net.openhft.affinity.AffinityLock;
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.util.Histogram;
+import net.openhft.chronicle.testframework.GcControls;
 import net.openhft.chronicle.wire.*;
 
 import static run.chronicle.wire.perf.BytesInBytesMarshallableMain.histoOut;
 
+/**
+ * Benchmarks the performance of marshalling and unmarshalling objects using
+ * {@link JSONWire}. The {@link Example} class exercises several primitive and
+ * string fields.
+ */
 public class JSONWireMarshallableMain {
 
+    /**
+     * Executes the JSON wire benchmark.
+     *
+     * <p>Iterations with a negative index warm the JVM. After warm up the
+     * program measures the time to write and read an {@link Example} instance.
+     * Results are printed as latency histograms.
+     *
+     * @param args Command line arguments (not used).
+     */
     public static void main(String... args) {
 
         Histogram readHist = new Histogram();
@@ -20,28 +41,37 @@ public class JSONWireMarshallableMain {
         Example n2 = new Example();
         Wire wire = WireType.JSON.apply(Bytes.allocateElasticDirect(128));
 
-        for (int i = -20_000; i < 50_000_000; i++) {
-            wire.clear();
-            long start = System.nanoTime();
-            n.writeMarshallable(wire);
-            long end = System.nanoTime();
-            writeHist.sample(end - start);
-            start = System.nanoTime();
-            n2.readMarshallable(wire);
-            end = System.nanoTime();
-            readHist.sample(end - start);
-            if (i == 0) {
-                readHist.reset();
-                writeHist.reset();
+        try (AffinityLock lock = AffinityLock.acquireLock()) {
+            // Warm up with negative iterations then record timings
+            for (int i = -100_000; i < 50_000_000; i++) {
+                wire.clear();
+                long start = System.nanoTime();
+                n.writeMarshallable(wire);
+                long end = System.nanoTime();
+                writeHist.sample(end - start);
+                start = System.nanoTime();
+                n2.readMarshallable(wire);
+                end = System.nanoTime();
+                readHist.sample(end - start);
+                if (i == 0) {
+                    System.out.println("Warmup complete, awaiting GC");
+                    readHist.reset();
+                    writeHist.reset();
+                    GcControls.waitForGcCycle();
+                    System.out.println("GC complete, starting benchmark");
+                }
             }
-            if (i >= -1000)
-                Thread.yield();
         }
+
+        System.out.println("Benchmark complete, writing results");
 
         histoOut("read", JSONWireMarshallableMain.class, readHist);
         histoOut("write", JSONWireMarshallableMain.class, writeHist);
     }
 
+    /**
+     * Simple data holder used to exercise JSON serialisation of various field types.
+     */
     static class Example extends SelfDescribingMarshallable {
         int smallInt = 0;
         long longInt = 0;
@@ -49,6 +79,9 @@ public class JSONWireMarshallableMain {
         boolean flag = false;
         String text;
 
+        /**
+         * Creates an example populated with provided values.
+         */
         Example(int smallInt, long longInt, double price, boolean flag, String text) {
             this.smallInt = smallInt;
             this.longInt = longInt;
@@ -57,6 +90,9 @@ public class JSONWireMarshallableMain {
             this.text = text;
         }
 
+        /**
+         * Creates an empty instance for reading into.
+         */
         public Example() {
         }
 

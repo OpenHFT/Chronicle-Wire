@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@
 package net.openhft.chronicle.wire.issue;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
@@ -29,6 +28,7 @@ import java.nio.ByteBuffer;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Test class that examines the BINARY WireType's ability to serialize
@@ -43,6 +43,8 @@ public class WireBug39Test extends WireTestCommon {
      */
     @Test
     public void testBinaryEncoding() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Define the BINARY WireType and a test string (an emoji followed by text)
         @NotNull final WireType wireType = WireType.BINARY;
         @NotNull final String exampleString = "\uD83E\uDDC0 extra";

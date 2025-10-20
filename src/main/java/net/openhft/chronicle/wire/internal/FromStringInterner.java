@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +16,7 @@
 
 package net.openhft.chronicle.wire.internal;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
@@ -30,13 +29,11 @@ import java.nio.BufferUnderflowException;
  * <p>
  * This cache guarantees that it will provide a value matching the decoded bytes of the input string,
  * but doesn't ensure the same object is returned on subsequent calls or across threads.
- * </p>
  * <p>
  * Note: While it's not strictly thread-safe, it's expected to still produce correct results.
- * </p>
  * @author peter.lawrey
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings("unchecked")
 public abstract class FromStringInterner<T> {
 
     // Array of interned entries
@@ -55,10 +52,11 @@ public abstract class FromStringInterner<T> {
      * @param capacity The desired capacity of the interner.
      * @throws IllegalArgumentException
      */
+    @SuppressWarnings("rawtypes")
     protected FromStringInterner(int capacity) throws IllegalArgumentException {
         int n = Maths.nextPower2(capacity, 128);
         shift = Maths.intLog2(n);
-        entries = new InternerEntry[n];
+        entries = Jvm.uncheckedCast(new InternerEntry[n]);
         mask = n - 1;
     }
 

@@ -1,5 +1,5 @@
 /*
- *     Copyright (C) 2015-2020 chronicle.software
+ *     Copyright 2015-2025 chronicle.software
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License as published by
@@ -43,11 +43,9 @@ enum DataFields implements WireKey {
         return ordinal();
     }
 }
-
 @Retention(RetentionPolicy.RUNTIME)
 @interface PrintAsText {
 }
-
 @State(Scope.Thread)
 public class Main {
     final Bytes<?> bytes = Bytes.allocateDirect(128).unchecked(true);
@@ -235,4 +233,3 @@ public class Main {
         return data2B;
     }
 }
-

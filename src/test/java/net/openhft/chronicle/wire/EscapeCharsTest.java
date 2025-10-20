@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +39,7 @@ import static org.junit.Assert.assertNull;
 public class EscapeCharsTest extends WireTestCommon {
     @NotNull
     final String chs;
-    private final Future future;
+    private final Future<?> future;
 
     // Override the threadDump from WireTestCommon to use the parent implementation
     @Override
@@ -56,7 +54,7 @@ public class EscapeCharsTest extends WireTestCommon {
      * @param chs   Characters to test
      * @param future Represents the result of an asynchronous computation
      */
-    public EscapeCharsTest(@NotNull String chs, Future future) {
+    public EscapeCharsTest(@NotNull String chs, Future<?> future) {
         this.chs = chs;
         this.future = future;
     }

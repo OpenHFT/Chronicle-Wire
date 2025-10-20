@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +65,7 @@ public class WireSerializedLambdaTest extends WireTestCommon {
 
     // Helper function to test text-based wire formats
     private static void doTestText(WireType wireType) {
-        @NotNull Wire wire = wireType.apply(Bytes.elasticByteBuffer());
+        @NotNull Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         SerializableFunction<String, String> fun = String::toUpperCase;
 
         wire.write(() -> "one").object(fun)

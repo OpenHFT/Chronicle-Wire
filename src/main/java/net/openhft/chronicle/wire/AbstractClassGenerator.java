@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +38,10 @@ import java.util.stream.Collectors;
  *
  * @param <M> Represents the meta-data associated with the class being generated.
  */
+@SuppressWarnings("unchecked")
 public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.MetaData<M>> {
 
-    // Static compiler to cache and compile generated code.
+    // TODO Use Wires.loadFromJava() instead of a public static final
     public static final CachedCompiler CACHED_COMPILER = new CachedCompiler(Jvm.isDebug() ? new File(OS.getTarget(), "generated-test-sources") : null, null);
 
     // Flag to determine if the generated source code should be displayed.
@@ -140,7 +139,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
             }
 
             // Compile and load the generated class.
-            return CACHED_COMPILER.loadFromJava(classLoader, fullName, sourceCode.toString());
+            return (Class<T>) CACHED_COMPILER.loadFromJava(classLoader, fullName, sourceCode.toString());
         } catch (Throwable e) {
             // If there's any error during generation, compile, or load, throw an exception.
             throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + sourceCode, e));
@@ -178,11 +177,11 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
         if (clazz.isArray())
             return nameForClass(clazz.getComponentType()) + "[]";
         String s = clazz.getName().replace('$', '.');
-        Package aPackage = clazz.getPackage();
-        if (aPackage != null && !clazz.getName().contains("$")) {
+        String packageName = Jvm.getPackageName(clazz);
+        if (!clazz.getName().contains("$")) {
             // Exclude common java.lang imports and handle others.
-            if (!"java.lang".equals(aPackage.getName())
-                    && !importSet.contains(aPackage.getName() + ".*")) {
+            if (!"java.lang".equals(packageName) && !packageName.isEmpty()
+                    && !importSet.contains(packageName + ".*")) {
                 try {
                     if (!importSet.contains(s))
                         importSet.add(s);
@@ -234,9 +233,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
         if (code.length() > maxCode())
             code = code.substring(1, maxCode());
         char ch = 'A';
-        ch += (h >>> 1) % 26;
-
-        // Construct the final class name.
+        ch += (char) ((h >>> 1) % 26);
         return metaData.baseClassName() + '$' + ch + code;
     }
 
@@ -409,7 +406,6 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
      * The method retrieves abstract methods from the interfaces specified in the metadata and the superclass.
      * Any concrete method present in the superclass or interfaces is considered to have already been
      * overridden, so these methods are excluded from the result.
-     * </p>
      *
      * @return A set of methods that need to be overridden.
      */
@@ -460,7 +456,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
      * The `MetaData` class serves as a blueprint for the characteristics of the class
      * to be generated. It provides specifications like the package name, base class name,
      * interfaces to be implemented, and the flag to use an update interceptor.
-     * </p>
+     *
      * @param <M> Represents the actual type extending this `MetaData` class, facilitating method chaining.
      */
     public abstract static class MetaData<M extends MetaData<M>> extends SelfDescribingMarshallable {

@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,12 +35,15 @@ import java.util.Map;
  * Note: This interface assumes that you are familiar with the concept of marshallable objects,
  * which are objects that can be marshalled (converted to byte streams) and unmarshalled
  * (converted back to objects).
- * </p>
  */
 @FunctionalInterface
 public interface MarshallableIn {
 
-    // Size configuration for internal use
+    /**
+     * Maximum length of a string that will be interned when read via
+     * {@link #readText()}. Strings longer than this are returned without
+     * interning. Controlled by system property {@code marshallableIn.intern.size}.
+     */
     int MARSHALLABLE_IN_INTERN_SIZE = Integer.getInteger("marshallableIn.intern.size", 128);
 
     /**
@@ -55,11 +56,11 @@ public interface MarshallableIn {
     DocumentContext readingDocument();
 
     /**
-     * Reads a document using the provided {@code ReadMarshallable} instance. This method
-     * simplifies the reading operation by handling the lifecycle of the {@code DocumentContext}.
+     * Convenience wrapper that opens a {@link DocumentContext} using the provided {@code ReadMarshallable}
+     * instance, delegates to the supplied reader to consume its contents and closes the context afterwards.
      *
-     * @param reader The mechanism to use for reading the document.
-     * @return {@code true} if the reading operation was successful, otherwise {@code false}.
+     * @param reader strategy used to read the document
+     * @return {@code false} if no document was present
      */
     default boolean readDocument(@NotNull ReadMarshallable reader) throws InvalidMarshallableException {
         try (@NotNull DocumentContext dc = readingDocument()) {
@@ -93,7 +94,6 @@ public interface MarshallableIn {
      * @param using The {@code Bytes} object to populate with read data.
      * @return {@code true} if the reading operation was successful, otherwise {@code false}.
      */
-    @SuppressWarnings("rawtypes")
     default boolean readBytes(@NotNull Bytes<?> using) throws InvalidMarshallableException {
         try (@NotNull DocumentContext dc = readingDocument()) {
             if (!dc.isPresent())

@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +27,10 @@ import java.util.stream.IntStream;
 
 import static java.util.Comparator.comparingInt;
 
+/**
+ * Maps integer keys to values using a sorted list so that existing objects can
+ * be reused when deserialising.
+ */
 public class IntMapper<V> extends SelfDescribingMarshallable {
 
     private final List<V> values = new ArrayList<>();
@@ -51,6 +53,12 @@ public class IntMapper<V> extends SelfDescribingMarshallable {
         this.values.sort(comparingInt(extractor));
     }
 
+    /**
+     * Looks up a value by key.
+     *
+     * @param key integer identifier
+     * @return the mapped value or {@code null} if absent
+     */
     public V get(int key) {
         int index = binarySearch(key);
         if (index >= 0)

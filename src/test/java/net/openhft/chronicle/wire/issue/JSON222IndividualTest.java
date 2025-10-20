@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +75,7 @@ public class JSON222IndividualTest extends WireTestCommon {
 
     // Helper method to check serialization of an object into JSON representation
     void checkSerialized(@NotNull String expected, Object o) {
-        @NotNull Wire wire = WireType.TEXT.apply(Bytes.elasticByteBuffer());
+        @NotNull Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
         try {
             wire.getValueOut()
                     .object(o);

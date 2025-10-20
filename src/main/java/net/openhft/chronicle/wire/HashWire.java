@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,12 +39,13 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 /**
- * The {@code HashWire} class is responsible for generating hash values from provided objects or {@link WriteMarshallable} instances.
+ * A specialised {@link WireOut} used only for hashing.
  * <p>
- * This class provides a consistent hashing mechanism by leveraging a predefined set of constants and algorithms.
- * Instances are stored in a {@code ThreadLocal} to ensure thread-safety and optimized access across the application.
- * </p>
- * @see WriteMarshallable
+ * Values written to this wire are not serialised. The
+ * {@linkplain #valueOut value writer} mixes each item into a rolling hash using
+ * constants {@code K0}, {@code M0}, {@code M1}, {@code M2} and {@code M3}. An
+ * instance is obtained from a {@linkplain ThreadLocal thread-local} and the hash
+ * is cleared on retrieval.
  */
 @SuppressWarnings("rawtypes")
 public class HashWire implements WireOut, HexDumpBytesDescription {
@@ -65,7 +64,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         }
     };
 
-    // Hashing constants
+    // Internal constants used by the mixing algorithm
     private static final int K0 = 0x6d0f27bd;
     private static final int M0 = 0x5bc80bad;
     private static final int M1 = 0xea7585d7;
@@ -75,7 +74,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
     // Value output for hashing.
     private final ValueOut valueOut = new HashValueOut();
 
-    // Current hash value.
+    // Accumulated raw hash value
     long hash = 0;
 
     /**
@@ -101,20 +100,14 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
     }
 
     /**
-     * Computes a 32-bit hash for the provided {@link WriteMarshallable} value.
-     *
-     * @param value The {@link WriteMarshallable} value to be hashed.
-     * @return The 32-bit hash value.
+     * As {@link #hash64(WriteMarshallable)} but returning 32 bits.
      */
     public static int hash32(WriteMarshallable value) {
         return hash32((Object) value);
     }
 
     /**
-     * Computes a 32-bit hash for the provided object.
-     *
-     * @param value The object to be hashed.
-     * @return The 32-bit hash value.
+     * As {@link #hash64(Object)} but returning 32 bits.
      */
     public static int hash32(Object value) {
         @NotNull HashWire hashWire = hwTL.get();
@@ -127,16 +120,24 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         // Do nothing
     }
 
+    /**
+     * Always returns {@link ClassAliasPool#CLASS_ALIASES} as type
+     * resolution is still required for consistent hashing.
+     */
     @Override
     public ClassLookup classLookup() {
         return ClassAliasPool.CLASS_ALIASES;
     }
 
+    /** Reset the accumulated {@link #hash}. */
     @Override
     public void clear() {
         hash = 0;
     }
 
+    /**
+     * Alias for {@link #clear()}.
+     */
     @Override
     public void reset() {
         clear();
@@ -168,7 +169,6 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
      * <p>
      * This method uses the current hash value and applies an agitation function to provide
      * a consistent and dispersed 64-bit hash result.
-     * </p>
      *
      * @return The 64-bit agitated hash value.
      */
@@ -181,7 +181,6 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
      * <p>
      * This method derives the 32-bit hash from the 64-bit hash value. The derived hash is
      * the result of XOR-ing the high and low 32-bits of the 64-bit hash.
-     * </p>
      *
      * @return The derived 32-bit hash value.
      */
@@ -190,6 +189,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         return (int) (h ^ (h >>> 32));
     }
 
+    /** Hashes an anonymous value field. */
     @NotNull
     @Override
     public ValueOut write() {
@@ -203,6 +203,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         return write(key.name());
     }
 
+    /** Hashes the field name before returning {@link #valueOut}. */
     @NotNull
     @Override
     public ValueOut write(@NotNull CharSequence name) {
@@ -210,9 +211,10 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         return valueOut;
     }
 
+    /** Hashes the event key and returns {@link #valueOut}. */
     @NotNull
     @Override
-    public ValueOut writeEvent(Class ignored, @NotNull Object eventKey) {
+    public ValueOut writeEvent(Class<?> ignored, @NotNull Object eventKey) {
         hash += K0 + eventKey.hashCode() * M0;
         return valueOut;
     }
@@ -239,12 +241,14 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         return new WireObjectOutput(this);
     }
 
+    /** Comments do not affect the hash. */
     @NotNull
     @Override
     public WireOut writeComment(CharSequence s) {
         return this;
     }
 
+    /** Padding is ignored for hashing. */
     @NotNull
     @Override
     public WireOut addPadding(int paddingToAdd) {
@@ -303,29 +307,36 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Unsupported as {@code HashWire} does not hold an output buffer.
+     */
     @NotNull
     @Override
     public Bytes<?> bytes() {
         throw new UnsupportedOperationException();
     }
 
+    /** Not applicable; returns {@code this} for chaining. */
     @Override
     public HexDumpBytesDescription<?> bytesComment() {
         return this;
     }
 
+    /** Not supported. */
     @NotNull
     @Override
     public IntValue newIntReference() {
         throw new UnsupportedOperationException();
     }
 
+    /** Not supported. */
     @NotNull
     @Override
     public LongValue newLongReference() {
         throw new UnsupportedOperationException();
     }
 
+    /** Not supported. */
     @NotNull
     @Override
     public BooleanValue newBooleanReference() {
@@ -342,23 +353,27 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         return true; // text wire is orders of magnitude slower
     }
 
+    /** Not supported. */
     @NotNull
     @Override
     public LongArrayValues newLongArrayReference() {
         throw new UnsupportedOperationException();
     }
 
+    /** Not supported. */
     @Override
     public @NotNull IntArrayValues newIntArrayReference() {
         throw new UnsupportedOperationException();
     }
 
+    /** Unsupported by {@code HashWire}. */
     @NotNull
     @Override
     public Pauser pauser() {
         throw new UnsupportedOperationException();
     }
 
+    /** Not supported. */
     @Override
     public void pauser(Pauser pauser) {
         throw new UnsupportedOperationException();
@@ -371,9 +386,9 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
      * The class implements the {@link ValueOut} interface, providing methods to handle
      * various data types like booleans, text, bytes, etc., and updating the hash
      * value accordingly.
-     * </p>
-     */
+         */
     class HashValueOut implements ValueOut {
+        /** Mixes {@link #M2} or {@link #M3} depending on the flag. */
         @NotNull
         @Override
         public WireOut bool(Boolean flag) {
@@ -381,6 +396,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Mixes {@code Maths.hash64(s)} into the hash. */
         @NotNull
         @Override
         public WireOut text(@Nullable CharSequence s) {
@@ -388,6 +404,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Mixes the byte value. */
         @NotNull
         @Override
         public WireOut int8(byte i8) {
@@ -395,20 +412,23 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Mixes the bytes content via {@code Maths.hash64}. */
         @NotNull
         @Override
-        public WireOut bytes(@Nullable BytesStore fromBytes) {
+        public WireOut bytes(@Nullable BytesStore<?, ?> fromBytes) {
             hash = hash * M1 + Maths.hash64(fromBytes);
             return HashWire.this;
         }
 
+        /** Mixes the type name and bytes. */
         @NotNull
         @Override
-        public WireOut bytes(@NotNull String type, @Nullable BytesStore fromBytes) {
+        public WireOut bytes(@NotNull String type, @Nullable BytesStore<?, ?> fromBytes) {
             hash = hash * M1 + Maths.hash64(type) ^ Maths.hash64(fromBytes);
             return HashWire.this;
         }
 
+        /** Mixes the raw bytes array. */
         @NotNull
         @Override
         public WireOut rawBytes(@NotNull byte[] value) {
@@ -416,6 +436,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Lengths are mixed with {@link #M3}. */
         @NotNull
         @Override
         public ValueOut writeLength(long remaining) {
@@ -423,6 +444,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return this;
         }
 
+        /** Mixes the byte array content. */
         @NotNull
         @Override
         public WireOut bytes(@NotNull byte[] fromBytes) {
@@ -430,6 +452,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Mixes the type name and array content. */
         @NotNull
         @Override
         public WireOut bytes(@NotNull String type, @NotNull byte[] fromBytes) {
@@ -438,6 +461,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
 
         }
 
+        /** Mixes the unsigned value. */
         @NotNull
         @Override
         public WireOut uint8checked(int u8) {
@@ -445,6 +469,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Mixes the short value. */
         @NotNull
         @Override
         public WireOut int16(short i16) {
@@ -452,6 +477,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Mixes the unsigned short value. */
         @NotNull
         @Override
         public WireOut uint16checked(int u16) {
@@ -459,6 +485,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Mixes the code point. */
         @NotNull
         @Override
         public WireOut utf8(int codepoint) {
@@ -466,6 +493,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Mixes the int value. */
         @NotNull
         @Override
         public WireOut int32(int i32) {
@@ -473,6 +501,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Mixes the unsigned int value. */
         @NotNull
         @Override
         public WireOut uint32checked(long u32) {
@@ -480,6 +509,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Mixes the long value. */
         @NotNull
         @Override
         public WireOut int64(long i64) {
@@ -487,6 +517,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Unsupported. */
         @NotNull
         @Override
         public WireOut int128forBinding(long i64x0, long i64x1, TwoLongValue longValue) {
@@ -499,6 +530,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return int64(i64);
         }
 
+        /** Hashes the capacity only. */
         @NotNull
         @Override
         public WireOut int64array(long capacity) {
@@ -506,12 +538,14 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Not supported. */
         @NotNull
         @Override
         public WireOut int64array(long capacity, LongArrayValues values) {
             throw new UnsupportedOperationException();
         }
 
+        /** Mixes the float bits. */
         @NotNull
         @Override
         public WireOut float32(float f) {
@@ -519,6 +553,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Mixes the double bits. */
         @NotNull
         @Override
         public WireOut float64(double d) {
@@ -526,6 +561,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Mixes the time's hash code. */
         @NotNull
         @Override
         public WireOut time(@NotNull LocalTime localTime) {
@@ -533,6 +569,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Mixes the zonedDateTime hash code. */
         @NotNull
         @Override
         public WireOut zonedDateTime(@NotNull ZonedDateTime zonedDateTime) {
@@ -540,6 +577,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Mixes the date hash code. */
         @NotNull
         @Override
         public WireOut date(@NotNull LocalDate localDate) {
@@ -547,6 +585,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Mixes the dateTime hash code. */
         @NotNull
         @Override
         public WireOut dateTime(@NotNull LocalDateTime localDateTime) {
@@ -554,6 +593,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Mixes the type name before writing the object. */
         @NotNull
         @Override
         public ValueOut typePrefix(@NotNull CharSequence typeName) {
@@ -566,6 +606,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this.classLookup();
         }
 
+        /** Mixes the literal type name. */
         @NotNull
         @Override
         public WireOut typeLiteral(@Nullable CharSequence type) {
@@ -573,13 +614,15 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Mixes the literal class name. */
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class type) {
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class<?> type) {
             hash = hash * M1 + (type == null ? 0 : type.hashCode() * M2);
             return HashWire.this;
         }
 
+        /** Mixes the UUID's hash code. */
         @NotNull
         @Override
         public WireOut uuid(@NotNull UUID uuid) {
@@ -587,36 +630,42 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Unsupported. */
         @NotNull
         @Override
         public WireOut int32forBinding(int value) {
             throw new UnsupportedOperationException("todo");
         }
 
+        /** Unsupported. */
         @NotNull
         @Override
         public WireOut int32forBinding(int value, @NotNull IntValue intValue) {
             throw new UnsupportedOperationException("todo");
         }
 
+        /** Unsupported. */
         @NotNull
         @Override
         public WireOut int64forBinding(long value) {
             throw new UnsupportedOperationException("todo");
         }
 
+        /** Unsupported. */
         @NotNull
         @Override
         public WireOut int64forBinding(long value, @NotNull LongValue longValue) {
             throw new UnsupportedOperationException("todo");
         }
 
+        /** Unsupported. */
         @NotNull
         @Override
         public WireOut boolForBinding(final boolean value, @NotNull final BooleanValue longValue) {
             throw new UnsupportedOperationException("todo");
         }
 
+        /** Writes each element in sequence for hashing. */
         @NotNull
         @Override
         public <T> WireOut sequence(T t, @NotNull BiConsumer<T, ValueOut> writer) {
@@ -624,6 +673,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Writes each element of the sequence for hashing. */
         @NotNull
         @Override
         public <T, K> WireOut sequence(T t, K kls, @NotNull TriConsumer<T, K, ValueOut> writer) throws InvalidMarshallableException {
@@ -631,6 +681,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Delegates to the object to update the hash. */
         @NotNull
         @Override
         public WireOut marshallable(@NotNull WriteMarshallable object) throws InvalidMarshallableException {
@@ -638,6 +689,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Uses {@link Wires#writeMarshallable} for hashing. */
         @NotNull
         @Override
         public WireOut marshallable(@NotNull Serializable object) throws InvalidMarshallableException {
@@ -645,6 +697,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Mixes the map's hash code. */
         @NotNull
         @Override
         public WireOut map(@NotNull Map map) {
@@ -652,15 +705,23 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
+        /** Returns the outer {@code HashWire}. */
         @NotNull
         @Override
         public WireOut wireOut() {
             return HashWire.this;
         }
 
+        /** No-op. */
         @Override
         public void resetState() {
             // No nothing
+        }
+
+        /** No-op. */
+        @Override
+        public void elementSeparator() {
+
         }
     }
 }

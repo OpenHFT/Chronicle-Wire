@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,15 +28,10 @@ import org.jetbrains.annotations.NotNull;
  * and reducing garbage.
  * <p>
  * For objects which need to deserialize final fields, consider using the {@link Demarshallable} interface.
- * </p>
  *
  * <p>
  * Example usage might involve reading an object's state from a file or network stream
  * without allocating a new object on each read operation.
- * </p>
- *
- * @apiNote This interface is marked as a functional interface, which means it is intended
- * primarily to be used as a lambda or method reference.
  */
 @FunctionalInterface
 @DontChain

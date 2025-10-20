@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import static net.openhft.chronicle.core.io.IOTools.deleteDirWithFiles;
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
+@SuppressWarnings("this-escape")
 public class TriviallyCopyableJLBH implements JLBHTask {
 
     enum HouseType {
@@ -50,7 +49,6 @@ public class TriviallyCopyableJLBH implements JLBHTask {
         CLASS_ALIASES.addAlias(House.class, "House2");
         System.setProperty("disable.thread.safety", "true");
         System.setProperty("jvm.resource.tracing", "false");
-        System.setProperty("check.thread.safety", "false");
     }
 
     public interface BaseHouse {
@@ -94,12 +92,11 @@ public class TriviallyCopyableJLBH implements JLBHTask {
         public BinaryLengthLength binaryLengthLength() {
             return BinaryLengthLength.LENGTH_8BIT;
         }
-
     }
 
     public static class House extends SelfDescribingMarshallable implements BaseHouse {
 
-        final Bytes address = Bytes.allocateDirect(128);
+        final Bytes<Void> address = Bytes.allocateDirect(128);
 
         public BaseHouse address(CharSequence owner) {
             address.clear().append(owner);
@@ -165,7 +162,6 @@ public class TriviallyCopyableJLBH implements JLBHTask {
         } catch (Exception e) {
             Jvm.rethrow(e);
         }
-
     }
 
     @NotNull

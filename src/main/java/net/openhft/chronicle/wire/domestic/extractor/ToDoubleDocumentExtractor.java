@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +44,7 @@ public interface ToDoubleDocumentExtractor {
      * queue but of another type.
      * <p>
      * Extractors that must include {@link Double#NaN} as a valid value must use other means of
-     * aggregating values (e.g. use an {@link DocumentExtractor DocumentExtractor<Double> }.
+     * aggregating values (e.g. use an {@link DocumentExtractor DocumentExtractor&lt;Double> }.
      *
      * @param wire  to use
      * @param index to use

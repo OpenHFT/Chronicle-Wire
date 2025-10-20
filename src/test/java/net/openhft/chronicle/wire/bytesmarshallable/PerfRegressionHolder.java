@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -181,7 +179,8 @@ public class PerfRegressionHolder {
         }
 
         // Writes the provided BytesStore to the provided byte sequence as an 8-bit byte sequence
-        protected void write8Bit(BytesOut<?> bytes, BytesStore a) {
+        @SuppressWarnings("rawtypes")
+        protected void write8Bit(BytesOut<?> bytes, BytesStore<?, ?> a) {
             if (a == null) {
                 bytes.writeStopBit(-1);
             } else {
@@ -249,8 +248,9 @@ public class PerfRegressionHolder {
         // Writes the provided BytesStore to the provided byte sequence
         // by first writing the length of the bytes to be written (as stop-bit encoded),
         // and then writing each byte individually.
+        @SuppressWarnings("rawtypes")
         @Override
-        protected void write8Bit(BytesOut<?> bytes, BytesStore a) {
+        protected void write8Bit(BytesOut<?> bytes, BytesStore<?, ?> a) {
             final int length = a.length();
             bytes.writeStopBit(length);
             for (int i = 0; i < length; i++)
@@ -402,7 +402,6 @@ public class PerfRegressionHolder {
             bytes.writeUtf8(e);
             bytes.writeUtf8(f);
         }
-
     }
 
     // Example test method for benchmarking a specific type of object

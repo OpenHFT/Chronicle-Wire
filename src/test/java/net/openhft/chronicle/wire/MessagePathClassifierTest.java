@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 chronicle.software
+ * Copyright 2016-2025 chronicle.software
  */
 
 package net.openhft.chronicle.wire;
@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("deprecation")
 public class MessagePathClassifierTest extends WireTestCommon {
 
     // Utility function to convert a string into a VanillaMessageHistory object.

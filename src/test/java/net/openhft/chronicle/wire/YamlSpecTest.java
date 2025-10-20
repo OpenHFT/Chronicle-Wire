@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +22,12 @@ import org.junit.Test;
 
 import java.io.InputStream;
 
-@SuppressWarnings("rawtypes")
 @Deprecated(/* Should be fully covered by YamlSpecificationTest */)
 public class YamlSpecTest extends WireTestCommon {
     static String DIR = "/yaml/spec/";
 
     public static void doTest(String file, String expected) {
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + file);
@@ -47,7 +44,7 @@ public class YamlSpecTest extends WireTestCommon {
 
     @Test
     public void test2_18Multi_lineFlowScalarsFixed() {
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_18Multi_lineFlowScalarsFixed.yaml");

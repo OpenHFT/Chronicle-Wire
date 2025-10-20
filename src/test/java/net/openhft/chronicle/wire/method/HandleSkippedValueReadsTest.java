@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +18,7 @@ package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.Wire;
@@ -105,6 +104,7 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
         StringWriter sw = new StringWriter();
         final MethodReader reader = wire.methodReaderBuilder()
                 .scanning(scanning)
+                .exceptionHandlerOnUnknownMethod(Jvm.debug())
                 .metaDataHandler(Mocker.logging(MetaMethod.class, "M ", sw))
                 .build(Mocker.logging(DataMethod.class, "D ", sw));
 
@@ -203,6 +203,7 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
         StringWriter sw = new StringWriter();
         final MethodReader reader = wire.methodReaderBuilder()
                 .scanning(scanning)
+                .exceptionHandlerOnUnknownMethod(Jvm.debug())
                 .metaDataHandler(Mocker.logging(MetaMethod.class, "M ", sw))
                 .build(Mocker.logging(DataMethod.class, "D ", sw));
 

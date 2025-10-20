@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +61,6 @@ public class ListLookup {
         } else {
             System.out.println("Not found!");
         }
-
     }
 
     private static final class Data extends SelfDescribingMarshallable {
@@ -134,5 +131,4 @@ public class ListLookup {
         }
         return -(low + 1);  // key not found
     }
-
 }

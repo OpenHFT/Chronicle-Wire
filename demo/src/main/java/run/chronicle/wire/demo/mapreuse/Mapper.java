@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +24,10 @@ import java.util.stream.Stream;
 
 import static java.util.Comparator.comparing;
 
+/**
+ * Generic mapper that uses a sorted list to map keys to values, allowing value
+ * instances to be reused when deserialising.
+ */
 public class Mapper<K, V> extends SelfDescribingMarshallable {
 
     private final List<V> values = new ArrayList<>();

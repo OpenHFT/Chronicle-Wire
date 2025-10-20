@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +22,11 @@ import net.openhft.chronicle.wire.WireType;
 
 import java.io.IOException;
 
-//This example shows how to use alias names for classes
+/**
+ * Example of using class aliases for YAML files. {@link Data1} is registered
+ * with the alias pool while {@link Data2} is not, so its full class name is
+ * emitted in the output.
+ */
 public class Example7 {
 
     //Data1.class is added to Alias pool but Data2.class is not

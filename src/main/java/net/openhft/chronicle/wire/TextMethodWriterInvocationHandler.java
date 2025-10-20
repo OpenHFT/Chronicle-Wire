@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.MethodWriterInvocationHandler;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.util.Mocker;
@@ -31,36 +30,45 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * This class represents an invocation handler specifically for text method writers. It extends the
- * AbstractMethodWriterInvocationHandler to implement method call behavior for text-based method writers.
- * It mainly converts method calls to textual data using the provided MarshallableOut.
+ * A {@link MethodWriterInvocationHandler} that serialises method calls to a
+ * text-based {@link MarshallableOut} such as YAML or JSON. Each invocation
+ * is wrapped in a {@link WriteDocumentContext} and numeric arguments annotated
+ * with {@link LongConversion} are rendered via the associated
+ * {@link LongConverter}.
  */
 public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvocationHandler {
+
+    // Supplier for the target {@link MarshallableOut}
     @NotNull
     private final Supplier<MarshallableOut> marshallableOutSupplier;
+    // Caches argument converters keyed by {@link Method}
     private final Map<Method, Consumer<Object[]>> visitorConverter = new LinkedHashMap<>();
 
     /**
-     * Constructor initializing the handler with a MarshallableOut instance.
+     * Creates a handler bound to the supplied interface and target.
      *
      * @param tClass           The class for which this invocation handler is being used.
      * @param marshallableOut  The MarshallableOut instance used for data serialization.
      */
-    TextMethodWriterInvocationHandler(Class tClass, @NotNull MarshallableOut marshallableOut) {
+    TextMethodWriterInvocationHandler(Class<?> tClass, @NotNull MarshallableOut marshallableOut) {
         this(tClass, () -> marshallableOut);
     }
 
     /**
-     * Constructor initializing the handler with a supplier for MarshallableOut.
+     * Creates a handler that obtains its output destination lazily.
      *
-     * @param tClass                   The class for which this invocation handler is being used.
-     * @param marshallableOutSupplier  The supplier providing instances of MarshallableOut for data serialization.
+     * @param tClass                  primary interface for the method writer
+     * @param marshallableOutSupplier supplier of the text-based output
      */
-    public TextMethodWriterInvocationHandler(Class tClass, @NotNull Supplier<MarshallableOut> marshallableOutSupplier) {
+    public TextMethodWriterInvocationHandler(Class<?> tClass, @NotNull Supplier<MarshallableOut> marshallableOutSupplier) {
         super(tClass);
         this.marshallableOutSupplier = marshallableOutSupplier;
     }
 
+    /**
+     * Handles a direct {@code writingDocument()} call on the proxy before
+     * deferring to the superclass for normal method processing.
+     */
     @Override
     protected Object doInvoke(Object proxy, Method method, Object[] args) {
         if (method.getName().equals("writingDocument") && method.getParameterCount() == 0) {
@@ -70,6 +78,10 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
         return super.doInvoke(proxy, method, args);
     }
 
+    /**
+     * Converts arguments if needed and writes the method call to the underlying
+     * text wire within a {@link WriteDocumentContext}.
+     */
     @Override
     protected void handleInvoke(Method method, Object[] args) {
         visitorConverter.computeIfAbsent(method, this::buildConverter)
@@ -89,20 +101,23 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
         }
     }
 
-    static final Consumer<Object[]> NOOP_CONSUMER = Mocker.ignored(Consumer.class);
+    // Shared no-op argument converter
+    static final Consumer<Object[]> NOOP_CONSUMER = Jvm.uncheckedCast(Mocker.ignored(Consumer.class));
 
     /**
-     * Builds a converter for method parameters based on the annotations present on the method.
-     * It supports long and int conversions based on annotations like @LongConversion and @IntConversion.
+     * Builds or retrieves a converter for the first parameter of {@code method}.
+     * If it has a {@link LongConversion} annotation (or one annotated with it),
+     * numbers are wrapped in {@link RawText} using the stated
+     * {@link LongConverter}.
      *
-     * @param method  The method for which the converter is being built.
-     * @return A Consumer that takes in an Object array and performs conversions on it.
+     * @param method source of parameter annotations
+     * @return argument consumer for that method
      */
     private Consumer<Object[]> buildConverter(Method method) {
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
 
         // If there are no annotations, return a no-operation consumer.
-        if (parameterAnnotations.length <= 0)
+        if (parameterAnnotations.length == 0)
             return NOOP_CONSUMER;
         for (Annotation anno : parameterAnnotations[0]) {
             if (anno instanceof LongConversion) {

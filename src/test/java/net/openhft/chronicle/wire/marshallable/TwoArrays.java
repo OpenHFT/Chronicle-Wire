@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +30,10 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 public class TwoArrays extends SelfDescribingMarshallable implements Closeable {
 
     // Represents an array of integer values
-    final IntArrayValues ia;
+    public IntArrayValues ia;
 
     // Represents an array of long values
-    final LongArrayValues la;
+    public LongArrayValues la;
 
     // Transient flag indicating whether the TwoArrays instance is closed or not
     transient boolean closed;

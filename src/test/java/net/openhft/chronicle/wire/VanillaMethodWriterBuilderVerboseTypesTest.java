@@ -1,9 +1,15 @@
+/*
+ * Copyright 2016-2025 chronicle.software
+ */
+
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -11,6 +17,8 @@ import org.junit.runners.Parameterized;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+
+import static org.junit.Assume.assumeFalse;
 
 @RunWith(value = Parameterized.class)
 public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
@@ -30,6 +38,11 @@ public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chro
     public VanillaMethodWriterBuilderVerboseTypesTest(boolean verboseTypes, String expects) {
         this.verboseTypes = verboseTypes;
         this.expects = expects;
+    }
+
+    @Before
+    public void hasDirect() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     // Provide different combinations of parameters for the test runs
@@ -84,7 +97,7 @@ public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chro
         TextWire textWire = new TextWire(bytes);
 
         // Configure method writer builder with verbosity settings
-        VanillaMethodWriterBuilder<Printer> methodWriterBuilder = (VanillaMethodWriterBuilder) textWire.methodWriterBuilder(false, Printer.class);
+        VanillaMethodWriterBuilder<Printer> methodWriterBuilder = (VanillaMethodWriterBuilder<Printer>) textWire.methodWriterBuilder(false, Printer.class);
         methodWriterBuilder.verboseTypes(verboseTypes);
 
         // Create a printer instance and print a message

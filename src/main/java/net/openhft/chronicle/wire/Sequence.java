@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,55 +16,64 @@
 package net.openhft.chronicle.wire;
 
 /**
- * This is the Sequence interface.
- * <p>
- * It defines a contract for managing sequences in conjunction with write positions.
- * This interface is crucial when dealing with data structures where sequentiality and write positions matter,
- * such as in a message queue.
- * </p>
+ * Defines a contract for mapping a write position (typically in a persistent
+ * store such as Chronicle Queue) to a logical sequence number, and vice versa.
+ * This is crucial for systems that need to assign ordered sequence numbers to
+ * messages or events written at potentially non-contiguous positions.
  */
 public interface Sequence {
-
-    // Constant representing that a sequence for a given write position is not found and the client can retry.
+    /**
+     * Returned by {@link #getSequence(long)} when a sequence number cannot be
+     * found for the given position but the operation may succeed if retried.
+     */
     long NOT_FOUND_RETRY = Long.MIN_VALUE;
 
-    // Constant representing that a sequence for a given write position is not found and the client should not retry.
+    /**
+     * Returned by {@link #getSequence(long)} when a sequence number cannot be
+     * found for the given position and retrying is unlikely to succeed.
+     */
     long NOT_FOUND = -1;
 
     /**
-     * Retrieves the sequence for a given write position.
+     * gets the sequence for a writePosition
+     * <p>
+     * This method will only return a valid sequence number of the write position if the write position is the
+     * last write position in the queue. YOU CAN NOT USE THIS METHOD TO LOOK UP RANDOM SEQUENCES FOR ANY WRITE POSITION.
+     * NOT_FOUND_RETRY will be return if a sequence number can not be found  ( so retry )
+     * or NOT_FOUND if you should not retry
      *
-     * Note: This method is specifically designed to fetch the sequence for the last write position
-     * in the queue. It is not suitable for obtaining sequences for arbitrary write positions.
-     *
-     * @param forWritePosition the last write position, typically representing the end of a queue.
-     * @return NOT_FOUND_RETRY if the sequence for this write position cannot be found and retrying might succeed later;
-     *         NOT_FOUND if the sequence is not present and retrying will not help.
+     * @param forWritePosition the last write position, expected to be the end of queue
+     * @return NOT_FOUND_RETRY if the sequence for this write position can not be found (you can retry), or
+     * NOT_FOUND if it can't be found and there is no point in retrying
      */
     long getSequence(long forWritePosition);
 
     /**
-     * Assigns a sequence number to a particular write position.
+     * Sets the sequence number for the given write position.
      *
-     * @param sequence the sequence number to be set.
-     * @param position the write position with which the sequence number is associated.
+     * @param sequence The sequence number to associate with the position.
+     * @param position The write position for which the sequence number should be
+     *                 recorded.
      */
     void setSequence(long sequence, long position);
 
     /**
-     * Translates a given header number and sequence to its index representation.
+     * Combines a {@code headerNumber} (such as a cycle count) and a
+     * {@code sequence} within that header into a single index value.
      *
-     * @param headerNumber the header number.
-     * @param sequence the sequence number.
-     * @return The index corresponding to the provided header number and sequence.
+     * @param headerNumber The higher-order part of the index, for example a
+     *                     cycle number.
+     * @param sequence The lower-order sequence number within the header.
+     * @return A combined index representing the header and sequence.
      */
     long toIndex(long headerNumber, long sequence);
 
     /**
-     * Converts an index to its corresponding sequence number.
+     * Extracts the lower-order sequence number from an index previously created
+     * by {@link #toIndex(long, long)}.
      *
-     * @param index the index to be converted.
-     * @return The sequence number corresponding to the given index.
+     * @param index The combined index.
+     * @return The sequence number extracted from the index.
      */
     long toSequenceNumber(long index);
 }

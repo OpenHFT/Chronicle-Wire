@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,10 +110,9 @@ public class JSONWithAMapTest extends net.openhft.chronicle.wire.WireTestCommon 
         Assert.assertEquals(expected, actual);
     }
 
-    static class ResponseItem extends SelfDescribingMarshallable {
-        @NotNull String index;
-        Bytes<?> key = Bytes.allocateElasticOnHeap();
-        private Object payload;
+    public static class ResponseItem extends SelfDescribingMarshallable {
+        public @NotNull String index;
+        public Bytes<?> key = Bytes.allocateElasticOnHeap();
+        public Object payload;
     }
 }
-

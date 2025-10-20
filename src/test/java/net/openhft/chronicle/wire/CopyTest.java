@@ -1,8 +1,8 @@
 /*
- * Copyright 2016-2020 chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *       http://www.apache.org/licenses/LICENSE-2.0
@@ -12,8 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
+
 
 package net.openhft.chronicle.wire;
 
@@ -75,7 +75,6 @@ public class CopyTest extends WireTestCommon {
         );
     }
 
-    // This test ensures that data can be copied from one wire to another, preserving integrity
     @SuppressWarnings("rawtypes")
     @Test
     public void testCopy() {
@@ -106,6 +105,8 @@ public class CopyTest extends WireTestCommon {
             assertFalse(text, text.contains("\n\""));
         }
 
+        if (to == WireType.BINARY_LIGHT)
+            wireTo.readingDocument();
         // Validate the data in the destination wire
         final String event = wireTo.readEvent(String.class);
         assertEquals("test", event);
@@ -124,6 +125,8 @@ public class CopyTest extends WireTestCommon {
                 System.out.println(wireFrom);
                 System.out.println(wireTo);
             }
+            if (to == WireType.BINARY_LIGHT)
+                wireTo.readingDocument();
             Object b2 = wireTo.read("msg").object();
 
             assertEquals(a, b2);
@@ -143,10 +146,10 @@ public class CopyTest extends WireTestCommon {
 
     // Class representing the data structure to be used in the copy test
     @SuppressWarnings("unused")
-    private static class AClass extends SelfDescribingMarshallable {
-        Map<CcyPair, String> map;
-        String[] array;
-        int intValue;
-        double value;
+    public static class AClass extends SelfDescribingMarshallable {
+        public Map<CcyPair, String> map;
+        public String[] array;
+        public int intValue;
+        public double value;
     }
 }

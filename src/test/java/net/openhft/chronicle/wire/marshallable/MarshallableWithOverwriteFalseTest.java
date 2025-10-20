@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +16,7 @@
 
 package net.openhft.chronicle.wire.marshallable;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
@@ -29,6 +28,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Test class to validate behavior of marshallable objects with overwriting disabled.
@@ -40,6 +40,7 @@ public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
      */
     @Test
     public void test() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Create instances of MyDto2 and MyDto
         MyDto2 myDto2 = new MyDto2();

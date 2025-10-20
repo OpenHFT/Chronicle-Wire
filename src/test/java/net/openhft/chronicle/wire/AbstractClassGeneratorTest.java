@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.UpdateInterceptor;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
 import org.junit.Test;
 
@@ -30,6 +29,7 @@ import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 // Generator for simple classes based on SimpleMetaData
 class SimpleClassGenerator extends AbstractClassGenerator<SimpleMetaData> {
@@ -95,6 +95,8 @@ public class AbstractClassGeneratorTest extends WireTestCommon {
     // Test case to validate the SimpleClassGenerator's functionality
     @Test
     public void simpleGenerator() throws Exception {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         doTest("Hello World");
         doTest("Bye now");
         doTest("The time is " + LocalDateTime.now());
@@ -104,7 +106,7 @@ public class AbstractClassGeneratorTest extends WireTestCommon {
     protected void doTest(String message) throws Exception {
         SimpleClassGenerator scg = new SimpleClassGenerator();
         scg.metaData()
-                .packageName(getClass().getPackage().getName())
+                .packageName(Jvm.getPackageName(getClass()))
                 .baseClassName("ACGT")
                 .message = message;
         Class<Callable<String>> aClass = scg.acquireClass(getClass().getClassLoader());
@@ -121,6 +123,8 @@ public class AbstractClassGeneratorTest extends WireTestCommon {
     // Test case to validate the interceptor's functionality in the UIClassGenerator
     @Test
     public void useInterceptor() throws Exception {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // StringWriter to capture the interceptor's output
         StringWriter sw = new StringWriter();
 
@@ -182,12 +186,12 @@ public class AbstractClassGeneratorTest extends WireTestCommon {
     protected void doTest(UpdateInterceptor ui, String message) throws Exception {
         UIClassGenerator scg = new UIClassGenerator();
         scg.metaData()
-                .packageName(getClass().getPackage().getName())
+                .packageName(Jvm.getPackageName(getClass()))
                 .baseClassName("ACGTUI")
                 .useUpdateInterceptor(true)
                 .message = message;
-        Class<Consumer> aClass = scg.acquireClass(getClass().getClassLoader());
-        Consumer callable = aClass.getDeclaredConstructor(UpdateInterceptor.class).newInstance(ui);
+        Class<Consumer<MyTypes>> aClass = scg.acquireClass(getClass().getClassLoader());
+        Consumer<MyTypes> callable = aClass.getDeclaredConstructor(UpdateInterceptor.class).newInstance(ui);
         // break point on the next line to be able to debug the generated class.
         MyTypes mt = new MyTypes().text(message);
         callable.accept(mt);

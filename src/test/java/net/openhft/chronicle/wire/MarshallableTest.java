@@ -1,8 +1,8 @@
 /*
- * Copyright 2016-2020 chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *       http://www.apache.org/licenses/LICENSE-2.0
@@ -12,8 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
+
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
@@ -245,34 +245,34 @@ public class MarshallableTest extends WireTestCommon {
     }
 
     // DTO containing an array of DTO1 objects
-    static class WithArray extends SelfDescribingMarshallable {
-        DTO1[] dto1s;
+    public static class WithArray extends SelfDescribingMarshallable {
+        public DTO1[] dto1s;
     }
 
     // Sample DTO with fields of different types
-    static class DTO1 extends SelfDescribingMarshallable {
-        String one;
-        List<Integer> two;
-        LocalDate three;
+    public static class DTO1 extends SelfDescribingMarshallable {
+        public String one;
+        public List<Integer> two;
+        public LocalDate three;
     }
 
     // Another sample DTO, similar to DTO1 but with some differences
-    static class DTO2 extends SelfDescribingMarshallable {
-        RetentionPolicy one;
-        List<Long> two;
-        String three;
+    public static class DTO2 extends SelfDescribingMarshallable {
+        public RetentionPolicy one;
+        public List<Long> two;
+        public String three;
     }
 
     // A data class with static properties and default values
-    static class StaticData extends AbstractMarshallableCfg {
-        int anInt = 100;
-        long aLong = ~100L;
-        List<String> aList = new ArrayList<>();
+    public static class StaticData extends AbstractMarshallableCfg {
+        public int anInt = 100;
+        public long aLong = ~100L;
+        public List<String> aList = new ArrayList<>();
     }
 
     // A data class similar to StaticData, but non-static and without default values for some fields
-    class NonStaticData extends AbstractMarshallableCfg {
-        int anInt;
-        List<String> aList = new ArrayList<>();
+    public class NonStaticData extends AbstractMarshallableCfg {
+        public int anInt;
+        public List<String> aList = new ArrayList<>();
     }
 }

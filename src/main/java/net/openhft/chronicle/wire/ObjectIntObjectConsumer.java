@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +23,7 @@ package net.openhft.chronicle.wire;
  *
  * <p>Example Usage:
  * <pre>
- *     ObjectIntObjectConsumer<String, Double> printer = (str, num, dbl) ->
+ *     ObjectIntObjectConsumer&lt;String, Double&gt; printer = (str, num, dbl) -&gt;
  *         System.out.println(str + " - " + num + " - " + dbl);
  *     printer.accept("Value", 5, 20.5);
  * </pre>
@@ -40,9 +38,9 @@ public interface ObjectIntObjectConsumer<T, V> {
     /**
      * Performs the operation defined by this consumer.
      *
-     * @param t The first object argument.
-     * @param u The integer argument.
-     * @param v The second object argument.
+     * @param t the first input argument of type {@code T}
+     * @param u the second input argument, an {@code int} value
+     * @param v the third input argument of type {@code V}
      */
     void accept(T t, int u, V v);
 }

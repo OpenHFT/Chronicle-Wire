@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,11 +44,11 @@ public class MicroLongConverterTest extends WireTestCommon {
     /**
      * Data class with fields representing time and duration, both using custom LongConverters.
      */
-    static class Data extends SelfDescribingMarshallable {
+    public static class Data extends SelfDescribingMarshallable {
         @LongConversion(MicroTimestampLongConverter.class)
-        long time;  // Timestamp in microseconds
+        public long time;  // Timestamp in microseconds
 
         @LongConversion(MicroDurationLongConverter.class)
-        long ttl;   // Duration in microseconds
+        public long ttl;   // Duration in microseconds
     }
 }

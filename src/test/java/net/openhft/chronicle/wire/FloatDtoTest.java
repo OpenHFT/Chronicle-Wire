@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +22,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-@SuppressWarnings("rawtypes")
 public class FloatDtoTest extends WireTestCommon {
 
     // Test method to serialize and deserialize a 'Value' object using a wire
@@ -32,7 +29,7 @@ public class FloatDtoTest extends WireTestCommon {
     public void test() {
         // Creating a 'Value' instance with specific values
         @NotNull final Value value = new Value(99, 2000f);
-        final Bytes<?> bytes = Bytes.elasticByteBuffer();
+        final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         final Wire w = WireType.BINARY.apply(bytes);
 
         // Serializing the 'value' object to the wire

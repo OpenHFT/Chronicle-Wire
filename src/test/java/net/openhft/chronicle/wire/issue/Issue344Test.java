@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +16,14 @@
 
 package net.openhft.chronicle.wire.issue;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.Wires;
 import org.junit.Assert;
 import org.junit.Test;
+
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Test class to validate the serialization behavior of special Unicode characters using Wires.
@@ -36,6 +37,8 @@ public class Issue344Test extends WireTestCommon {
      */
     @Test
     public void testFFFF() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         runWith('\uFFFF');
     }
 
@@ -44,6 +47,8 @@ public class Issue344Test extends WireTestCommon {
      */
     @Test
     public void testFFFE() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         runWith('\uFFFE');
     }
 

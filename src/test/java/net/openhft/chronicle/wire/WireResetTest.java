@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +16,10 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.Closeable;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.time.LocalDate;
@@ -29,8 +29,14 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 public class WireResetTest extends WireTestCommon {
+    @Before
+    public void hasDirect() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+    }
+
     @Test
     //https://github.com/OpenHFT/Chronicle-Wire/issues/225
     public void test() {
@@ -125,14 +131,12 @@ public class WireResetTest extends WireTestCommon {
         public boolean isClosed() {
             return isClosed;
         }
-
     }
 
     public static class EventAbstractCloseable extends AbstractCloseable implements Marshallable {
         @Override
         protected void performClose() {
         }
-
     }
 
     static class Identifier extends SelfDescribingMarshallable {

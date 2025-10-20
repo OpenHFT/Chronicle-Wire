@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +26,6 @@ import org.jetbrains.annotations.NotNull;
  * <p>
  * While writing, it can be ensured that meta-data is correctly specified, and the position of the write
  * operation is recorded.
- * </p>
  */
 public class TextWriteDocumentContext implements WriteDocumentContext {
 
@@ -95,7 +92,6 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
     }
 
     @Override
-    @SuppressWarnings("rawtypes")
     public void close() {
         if (chainedElement)
             return;

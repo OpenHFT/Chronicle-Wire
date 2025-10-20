@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,14 +93,14 @@ public class JSON222Test extends WireTestCommon {
         // Convert byte array to Bytes object for further processing
         Bytes<?> b = Bytes.wrapForRead(bytes);
         @NotNull Wire wire = new JSONWire(b);
-        Bytes<?> bytes2 = Bytes.elasticByteBuffer();
+        Bytes<?> bytes2 = Bytes.allocateElasticOnHeap();
         @NotNull Wire out = wireType.apply(bytes2);
 
         // Flag to determine if this test iteration is expected to fail
         boolean fail = file.getName().startsWith("n");
-        Bytes<?> bytes3 = Bytes.elasticByteBuffer();
+        Bytes<?> bytes3 = Bytes.allocateElasticOnHeap();
         try {
-            @NotNull List list = new ArrayList();
+            @NotNull List<Object> list = new ArrayList<>();
             do {
                 // Read an object from the wire
                 @Nullable final Object object = wire.getValueIn()

@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,13 @@
 package net.openhft.chronicle.wire;
 
 /**
- * The {@code MethodWriter} interface defines the contract for classes that have the capability to
- * output their data in a marshallable format using the {@link MarshallableOut} interface.
- * Implementers of this interface are expected to provide the logic to transform or serialize their internal
- * state to a format supported by the {@link MarshallableOut} instance provided.
+ * Defines a contract for components that can serialise method calls to a {@link MarshallableOut} target.
+ * Typically implemented by proxies created via {@link MarshallableOut#methodWriter(Class, Class...)} or
+ * {@link VanillaMethodWriterBuilder}. Implementations should ensure that method
+ * invocations on the writer result in corresponding messages being written to the configured {@code MarshallableOut}.
+ *
+ * @see MarshallableOut#methodWriter(Class, Class...)
+ * @see VanillaMethodWriterBuilder
  */
 public interface MethodWriter {
 

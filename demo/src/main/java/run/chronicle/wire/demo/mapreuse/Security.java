@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +18,16 @@ package run.chronicle.wire.demo.mapreuse;
 
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
+/**
+ * DTO representing a financial security used in the map reuse example.
+ */
 public final class Security extends SelfDescribingMarshallable {
 
+    /** security identifier */
     private int id;
+    /** averaged price for the example */
     private long averagePrice;
+    /** trade count */
     private long count;
 
     public Security(int id, long price, long count) {

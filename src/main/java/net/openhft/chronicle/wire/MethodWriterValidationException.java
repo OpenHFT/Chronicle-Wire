@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +17,22 @@
 package net.openhft.chronicle.wire;
 
 /**
- * The {@code MethodWriterValidationException} is a specialized exception class that indicates a failure
- * in generating a {@link MethodWriter}. This exception type prevents falling back to the default proxy
- * implementation. It is typically thrown when there are invalid conditions or configurations related to
- * {@link MethodWriter} creation.
+ * Exception thrown when a generated {@link MethodWriter} cannot be created.
+ *
+ * <p>Generated writers are typically faster and richer than reflection based
+ * proxies. When the generator configuration fails validation this exception is
+ * thrown so the system does not fall back to the proxy implementation.
+ *
+ * @see GenerateMethodWriter
+ * @see VanillaMethodWriterBuilder
  */
 public class MethodWriterValidationException extends IllegalArgumentException {
+    private static final long serialVersionUID = 0L;
 
     /**
      * Constructs a new {@code MethodWriterValidationException} with the specified detail message.
      *
-     * @param s the detail message explaining the reason for the exception.
+     * @param s the detail message explaining the validation failure
      */
     public MethodWriterValidationException(String s) {
         super(s);

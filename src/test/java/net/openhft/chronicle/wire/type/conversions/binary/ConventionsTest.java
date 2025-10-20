@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +16,7 @@
 package net.openhft.chronicle.wire.type.conversions.binary;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +25,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
-import java.nio.ByteBuffer;
+
+import static org.junit.Assume.assumeFalse;
 
 @SuppressWarnings("unchecked")
 public class ConventionsTest extends WireTestCommon {
@@ -34,8 +34,8 @@ public class ConventionsTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testTypeConversionsMaxValue() throws NoSuchFieldException, IllegalAccessException {
-        // Test conversion of maximum values for various types
-        for (@NotNull Class type : new Class[]{String.class, Integer.class, Long.class, Short
+
+        for (@NotNull Class<?> type : new Class[]{String.class, Integer.class, Long.class, Short
                 .class, Byte
                 .class, Float.class, Double.class}) {
             Object extected;
@@ -58,8 +58,9 @@ public class ConventionsTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testTypeConversionsMinValue() throws IllegalAccessException, NoSuchFieldException {
-        // Test conversion of minimum values for various types
-        for (@NotNull Class type : new Class[]{String.class, Integer.class, Long.class, Short.class, Byte
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
+        for (@NotNull Class<?> type : new Class[]{String.class, Integer.class, Long.class, Short.class, Byte
                 .class, Float.class, Double.class}) {
             Object extected;
             // Check if type is a subclass of Number
@@ -81,8 +82,9 @@ public class ConventionsTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testTypeConversionsSmallNumber() {
-        // Test conversion of a small number for various types
-        for (@NotNull Class type : new Class[]{String.class, Integer.class, Long.class, Short
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
+        for (@NotNull Class<?> type : new Class[]{String.class, Integer.class, Long.class, Short
                 .class, Byte.class}) {
             // Use a small number as a string for the expected value
             @NotNull Object extected = "123"; // small number
@@ -92,15 +94,16 @@ public class ConventionsTest extends WireTestCommon {
 
         // Special cases for floating-point numbers
         Assert.assertEquals(123.0, test("123", Double.class), 0);
-        Assert.assertEquals(123.0, (double) (Float) test("123", Float.class), 0);
+        Assert.assertEquals(123.0, (double) test("123", Float.class), 0);
 
     }
 
     @SuppressWarnings("rawtypes")
     @Test
     public void testTypeConversionsConvertViaString() throws NoSuchFieldException, IllegalAccessException {
-        // Test type conversions via String for various numeric types
-        for (@NotNull Class type : new Class[]{Integer.class, Long.class, Short.class, Byte
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
+        for (@NotNull Class<?> type : new Class[]{Integer.class, Long.class, Short.class, Byte
                 .class}) {
             Object extected;
             // If type is a subclass of Number, get its MAX_VALUE
@@ -123,6 +126,8 @@ public class ConventionsTest extends WireTestCommon {
 
     @Test
     public void testTypeConversionsMaxUnsigned() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Test conversions for maximum unsigned long value
         for (long shift : new long[]{8}) {
             long extected = 1L << shift;
@@ -133,7 +138,7 @@ public class ConventionsTest extends WireTestCommon {
     @Nullable
     public <T> T test(Object source, @NotNull Class<T> destinationType) {
         // Method to test conversion of objects to different types using Chronicle Wire
-        Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         try {
             @NotNull final BinaryWire wire = new BinaryWire(bytes);
 

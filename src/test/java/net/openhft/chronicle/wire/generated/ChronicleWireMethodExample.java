@@ -1,3 +1,7 @@
+/*
+ * Copyright 2016-2025 chronicle.software
+ */
+
 package net.openhft.chronicle.wire.generated;
 
 import net.openhft.chronicle.bytes.Bytes;
@@ -27,7 +31,6 @@ interface MyService {
      */
     int bar(String arg1, long arg2);
 }
-
 /**
  * Implementation of the MyService interface for demonstrating method serialization and deserialization.
  */
@@ -43,7 +46,6 @@ class MyServiceImpl implements MyService {
         return arg1.length() + (int) arg2;
     }
 }
-
 /**
  * Demonstrates the Chronicle Wire library's method writer and reader capabilities.
  * The example showcases serializing method calls and their arguments, and later
@@ -57,7 +59,7 @@ public class ChronicleWireMethodExample {
         MyService service = new MyServiceImpl();
 
         // Initialize the Bytes buffer and obtain a MethodWriter for the MyService interface
-        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.BINARY.apply(bytes);
         MyService writer = wire.methodWriter(MyService.class);
 

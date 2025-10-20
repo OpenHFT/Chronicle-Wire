@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +21,7 @@ package net.openhft.chronicle.wire;
  * This is typically used to safeguard against improper file manipulation and to maintain data integrity.
  */
 public class WriteAfterEOFException extends IllegalStateException {
+    private static final long serialVersionUID = 0L;
 
     /**
      * Constructs a new instance of WriteAfterEOFException with a default error message.

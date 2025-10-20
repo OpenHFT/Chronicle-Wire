@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * A {@code MicroTimestampLongConverter} is an implementation of {@code AbstractTimestampLongConverter}
  * which handles conversions between long timestamps and date-time strings.
- * The precision of this converter is to the microsecond.
+ * The precision of this converter is to the microsecond, extra precision is ignored.
  * This converter is singleton, the instance can be accessed using the public field INSTANCE.
  */
 public class MicroTimestampLongConverter extends AbstractTimestampLongConverter {
@@ -55,39 +53,23 @@ public class MicroTimestampLongConverter extends AbstractTimestampLongConverter 
         String property = System.getProperty(AbstractTimestampLongConverter.TIMESTAMP_LONG_CONVERTERS_ZONE_ID_SYSTEM_PROPERTY);
         if (property != null)
             return property;
-        property = System.getProperty("mtlc.zoneId");
-        if (property != null) {
-            // TODO: x.26 remove the old property
-            Jvm.warn().on(MicroTimestampLongConverter.class, "mtlc.zoneId has been deprecated and will be removed in x.26. Instead use " + AbstractTimestampLongConverter.TIMESTAMP_LONG_CONVERTERS_ZONE_ID_SYSTEM_PROPERTY);
-            return property;
-        }
         return "UTC";
     }
 
     /**
      * Constructs a new {@code MicroTimestampLongConverter} with the specified zone ID.
      *
-     * @param zoneId the zone ID to be used for the conversion of long values
+     * @param zoneId The string representation of the ZoneId (e.g., "UTC", "Europe/London")
+     *               to be used for formatting date-time strings. This converter
+     *               handles timestamps with microsecond precision.
      */
     public MicroTimestampLongConverter(String zoneId) {
         super(zoneId, TimeUnit.MICROSECONDS);
     }
 
-    /**
-     * Constructs a new {@code MicroTimestampLongConverter} with the specified zone ID and flag for including zone suffix for UTC.
-     * This constructor is set to be deprecated in x.26 version.
-     *
-     * @param zoneId                 the zone ID to be used for the conversion of long values
-     * @param includeZoneSuffixForUTC the flag to indicate if 'Z' suffix should be included for UTC zone timestamps
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    public MicroTimestampLongConverter(String zoneId, boolean includeZoneSuffixForUTC) {
-        super(zoneId, TimeUnit.MICROSECONDS, includeZoneSuffixForUTC);
-    }
-
     @Override
     protected void appendFraction(DateTimeFormatterBuilder builder) {
-        builder.appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true);
+        builder.appendFraction(ChronoField.MICRO_OF_SECOND, 0, 9, true);
     }
 
     /**

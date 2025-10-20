@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +27,7 @@ import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.IgnoresEverything;
 import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.threads.TimingPauser;
+import net.openhft.chronicle.wire.domestic.InternalWire;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ObjectInput;
@@ -45,7 +44,7 @@ import static net.openhft.chronicle.wire.Wires.*;
  * Represents the AbstractWire class which serves as a base for all Wire implementations.
  * This class provides fundamental shared behaviors, configurations, and initializations for Wire types.
  */
-public abstract class AbstractWire implements Wire {
+public abstract class AbstractWire implements Wire, InternalWire {
 
     // Default padding configuration loaded from the system properties.
     public static final boolean DEFAULT_USE_PADDING = Jvm.getBoolean("wire.usePadding", false);
@@ -76,6 +75,7 @@ public abstract class AbstractWire implements Wire {
     private boolean insideHeader;
     private HeadNumberChecker headNumberChecker;
     private boolean usePadding = DEFAULT_USE_PADDING;
+    private boolean generateTuples = GENERATE_TUPLES;
 
     /**
      * Constructor for AbstractWire.
@@ -590,7 +590,6 @@ public abstract class AbstractWire implements Wire {
         } finally {
             resetTimedPauser();
         }
-
     }
 
     /**
@@ -643,6 +642,7 @@ public abstract class AbstractWire implements Wire {
     /**
      * used by write bytes when doing a rollback
      */
+    @Override
     public void forceNotInsideHeader() {
         insideHeader = false;
     }
@@ -659,6 +659,17 @@ public abstract class AbstractWire implements Wire {
      */
     public boolean usePadding() {
         return usePadding;
+    }
+
+    @Override
+    public boolean generateTuples() {
+        return generateTuples;
+    }
+
+    @Override
+    public Wire generateTuples(boolean generateTuples) {
+        this.generateTuples = generateTuples;
+        return this;
     }
 
     /**

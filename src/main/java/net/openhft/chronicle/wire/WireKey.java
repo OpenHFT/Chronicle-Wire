@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,21 +23,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Represents a unique identifier or key for wiring protocols. This interface can
- * be used to encode or decode structured data, and it provides methods for getting
- * the name and the default value of the key, as well as utility methods for
- * working with the key's code.
+ * Represents a unique identifier or key for wiring protocols.
+ * This is a functional interface where {@link #name()} is the primary method.
+ * Implementations are typically enums or small classes.
+ * A {@code WireKey} associates a textual name with a numeric {@link #code()} for use in binary wire formats.
  */
 @FunctionalInterface
 public interface WireKey {
 
     /**
-     * Checks if the provided array of WireKey objects have unique codes.
-     * Throws an AssertionError if two or more keys have the same code.
+     * Checks that each entry uses a distinct {@link #code()} value.
      *
-     * @param keys An array of WireKey objects to check.
-     * @return Returns true if all keys have unique codes.
-     * @throws AssertionError if two or more keys have the same code.
+     * @param keys An array of {@code WireKey} objects to be checked for unique {@link #code()} values.
+     * @return {@code true} if all codes are unique.
+     * @throws AssertionError if two or more keys share the same code.
      */
     static boolean checkKeys(@NotNull WireKey[] keys) {
         @NotNull Map<Integer, WireKey> codes = new HashMap<>();
@@ -52,12 +49,11 @@ public interface WireKey {
     }
 
     /**
-     * Converts the provided CharSequence into a code. If the CharSequence starts
-     * with a digit, it attempts to parse it as an integer. Otherwise, it returns
-     * the hash code of the CharSequence.
+     * Converts a textual name to a numeric code.
+     * If the text begins with a digit it is parsed as an integer, otherwise its hash code is used.
      *
-     * @param cs CharSequence to convert.
-     * @return The converted code.
+     * @param cs The {@link CharSequence} (typically a field or event name) to convert into a numeric code.
+     * @return the derived code.
      */
     static int toCode(@NotNull CharSequence cs) {
         @NotNull String s = cs.toString();
@@ -71,28 +67,29 @@ public interface WireKey {
     }
 
     /**
-     * Retrieves the name of the WireKey.
+     * Returns the textual name of this key.
+     * This is often used in text-based wire formats or for debugging.
      *
-     * @return Name of the WireKey.
+     * @return the name of this key.
      */
     @NotNull
     CharSequence name();
 
     /**
-     * Calculates the code of the WireKey based on its name.
-     * By default, it uses the {@link #toCode(CharSequence)} method.
+     * Returns a numeric code for this key, typically derived from its {@link #name()}.
+     * By default this delegates to {@link #toCode(CharSequence)}.
      *
-     * @return Code of the WireKey.
+     * @return the code for this key.
      */
     default int code() {
         return toCode(name());
     }
 
     /**
-     * Determines the type of the WireKey based on its default value.
-     * If the default value is null, it returns Void.class.
+     * Returns the {@link java.lang.reflect.Type} associated with the value this key typically represents,
+     * inferred from {@link #defaultValue()}. Returns {@code Void.class} if no default value is defined.
      *
-     * @return Type of the WireKey.
+     * @return the associated type.
      */
     default Type type() {
         @Nullable Object o = defaultValue();
@@ -100,9 +97,10 @@ public interface WireKey {
     }
 
     /**
-     * Retrieves the default value associated with this WireKey.
+     * Returns the default value for the field or event represented by this key.
+     * Deserialisers may use this if the key is absent. {@code null} indicates no default.
      *
-     * @return Default value of the WireKey, or null if not defined.
+     * @return the default value or {@code null}.
      */
     @Nullable
     default Object defaultValue() {
@@ -110,11 +108,11 @@ public interface WireKey {
     }
 
     /**
-     * Checks if the provided CharSequence content matches the string representation
-     * of this WireKey.
+     * Compares the string representation of this {@code WireKey} (obtained via {@code this.toString()})
+     * with the provided {@link CharSequence} {@code c} for content equality.
      *
-     * @param c CharSequence to compare with.
-     * @return True if content matches, otherwise false.
+     * @param c The {@link CharSequence} to compare against this key's string form.
+     * @return {@code true} if the contents are equal.
      */
     default boolean contentEquals(@NotNull CharSequence c) {
         return this.toString().contentEquals(c);

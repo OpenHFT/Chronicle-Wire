@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +38,6 @@ import static org.junit.Assert.assertEquals;
  * Test class for WireCollection, using various wire types.
  */
 @Ignore("TODO FIX")
-@SuppressWarnings("rawtypes")
 @RunWith(value = Parameterized.class)
 public class WireCollectionTest extends WireTestCommon {
 
@@ -72,7 +69,7 @@ public class WireCollectionTest extends WireTestCommon {
                 // Test with various wire types
                 new Object[]{WireType.TEXT},
                 new Object[]{WireType.YAML_ONLY},
-                new Object[]{(Function<Bytes<?>, Wire>) bytes -> new BinaryWire(bytes, false, true, false, 128, "binary", false)},
+                new Object[]{(Function<Bytes<?>, Wire>) bytes -> new BinaryWire(bytes, false, true, false, 128, "binary")},
                 new Object[]{WireType.BINARY},
                 new Object[]{WireType.BINARY_LIGHT},
                 new Object[]{WireType.FIELDLESS_BINARY},
@@ -93,7 +90,7 @@ public class WireCollectionTest extends WireTestCommon {
      */
     @Test
     public void testMultipleReads() {
-        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
 
         // Writing the collection to the wire

@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -182,25 +180,22 @@ public interface WireIn extends WireCommon, MarshallableIn {
     void clear();
 
     /**
-     * Determines if there's more data available in the current document.
-     * Consumes any padding before checking if readRemaining() > 0.
-     * <p>
-     * NOTE: This method only works inside a document. If called just before a document,
-     * it might read the lead in case of padding.
+     * This consumes any padding before checking if readRemaining() &gt; 0 <p> NOTE: This method
+     * only works inside a document. Call it just before a document and it won't know not to read
+     * the read in case there is padding.
      *
-     * @return true if there's more data to read in the current document, otherwise false.
+     * @return if there is more data to be read in this document.
      */
     default boolean hasMore() {
         return isNotEmptyAfterPadding();
     }
 
     /**
-     * Determines if there's more data available in the current document after consuming any padding.
-     * <p>
-     * NOTE: This method should only be used within the confines of a document. Otherwise, it might
-     * not behave as expected.
+     * This consumes any padding before checking if readRemaining() &gt; 0 <p> NOTE: This method
+     * only works inside a document. Call it just before a document and it won't know not to read
+     * the read in case there is padding.
      *
-     * @return true if there's more data to read in the current document after consuming padding, otherwise false.
+     * @return if there is more data to be read in this document.
      */
     default boolean isNotEmptyAfterPadding() {
         consumePadding();
@@ -269,10 +264,10 @@ public interface WireIn extends WireCommon, MarshallableIn {
     }
 
     /**
-     * Provides a context for reading a document without using a lambda expression.
-     * Equivalent to calling {@link WireIn#readDocument}.
+     * equivalent to {@link  WireIn#readDocument(net.openhft.chronicle.wire.ReadMarshallable,
+     * net.openhft.chronicle.wire.ReadMarshallable)} but with out the use of a lambda expression
      *
-     * @return the document context which provides control over the reading process.
+     * @return the document context
      */
     @Override
     @NotNull
@@ -299,11 +294,11 @@ public interface WireIn extends WireCommon, MarshallableIn {
     void commentListener(Consumer<CharSequence> commentListener);
 
     /**
-     * Attempts to read a header for data. If successful, it adjusts the read position to the start of the data.
+     * Consume a header if one is available.
      *
-     * @return true if a data header was successfully read and data can be read between readPosition and readLimit.
-     * Returns false if no header is ready.
-     * @throws EOFException if an end-of-file marker is encountered.
+     * @return true, if a message can be read between readPosition and readLimit, else false if no
+     * header is ready.
+     * @throws EOFException if the end of wire marker is reached.
      */
     default boolean readDataHeader() throws EOFException {
         return readDataHeader(false) == HeaderType.DATA;
@@ -347,18 +342,6 @@ public interface WireIn extends WireCommon, MarshallableIn {
      * Reads the metadata header from the current position in the stream.
      */
     void readMetaDataHeader();
-
-    /**
-     * Provides a textual representation of the current WireIn instance.
-     * Deprecated and set to be removed in future versions.
-     *
-     * @return A CharSequence containing a text representation, or null if conversion is not possible.
-     */
-    @Deprecated(/* to be removed in x.25 */)
-    @Nullable
-    default CharSequence asText() {
-        return Wires.asText(this);
-    }
 
     /**
      * Peeks at the content in the current WireIn instance and returns it as a YAML string.

@@ -1,3 +1,7 @@
+/*
+ * Copyright 2016-2025 chronicle.software
+ */
+
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
@@ -60,5 +64,4 @@ public class MarshallableCfgResetTest extends net.openhft.chronicle.wire.WireTes
         new JSONWire(Bytes.from("{\"engine\":{\"isItElectric\":false}}")).getValueIn().object(using, Boat.class);
         Assert.assertFalse(boat.engine.isItElectric);
     }
-
 }

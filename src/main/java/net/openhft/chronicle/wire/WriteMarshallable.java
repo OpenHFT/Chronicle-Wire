@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +28,7 @@ import org.jetbrains.annotations.NotNull;
  * <p>
  * This interface is annotated with {@code @FunctionalInterface}, indicating that it is
  * intended to be used primarily for lambda expressions and method references.
- * Furthermore, the {@code @DontChain} annotation suggests that implementations should
+ * Furthermore, the {@code @DontChain} annotation highlights that implementations should
  * not be chained for certain operations.
  */
 @FunctionalInterface
@@ -48,8 +46,8 @@ public interface WriteMarshallable extends WriteValue, CommonMarshallable {
     /**
      * Write the current state of the marshallable entity to the provided wire.
      *
-     * @param wire The wire format to write to.
-     * @throws InvalidMarshallableException if any serialization error occurs.
+     * @param wire the wire to write to
+     * @throws InvalidMarshallableException if serialization fails
      */
     void writeMarshallable(@NotNull WireOut wire) throws InvalidMarshallableException;
 

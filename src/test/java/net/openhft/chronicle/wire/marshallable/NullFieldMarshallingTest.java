@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +30,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assume.assumeFalse;
 
 public class NullFieldMarshallingTest extends WireTestCommon {
     protected Map<ExceptionKey, Integer> exceptions;
@@ -56,6 +55,8 @@ public class NullFieldMarshallingTest extends WireTestCommon {
 
     @Test
     public void testAbstractNullFieldUnmarshalledCorrectlyText() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         VO object = new VO();
 
         String val = Marshallable.$toString(object);
@@ -67,9 +68,11 @@ public class NullFieldMarshallingTest extends WireTestCommon {
 
     @Test
     public void testAbstractNullFieldUnmarshalledCorrectlyBinary() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         VO object = new VO();
 
-        final Wire wire = WireType.BINARY.apply(Bytes.elasticByteBuffer());
+        final Wire wire = WireType.BINARY.apply(Bytes.allocateElasticOnHeap());
         wire.write().typedMarshallable(object);
 
         VO object2 = wire.read().typedMarshallable();

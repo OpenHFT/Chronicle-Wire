@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +16,23 @@
 package net.openhft.chronicle.wire;
 
 /**
- * Represents a container for raw textual data.
- * The primary purpose of this class is to encapsulate a text
- * while providing a simple structure for raw text handling.
+ * Represents a container for raw textual data. This class can be used as a
+ * method argument type in method writers (see {@link VanillaMethodWriterBuilder})
+ * to indicate that the provided {@link CharSequence} should be written to the
+ * wire with minimal or no escaping, if supported by the wire type (for example,
+ * {@link ValueOut#rawText(CharSequence)}). This is a package-private class,
+ * intended for internal use within the Chronicle Wire framework.
  */
 class RawText {
     // The encapsulated raw textual data
     String text;
 
     /**
-     * Constructs a new instance of {@code RawText} initialized with
-     * the provided CharSequence.
+     * Constructs a new instance of {@code RawText} initialised with the provided
+     * {@link CharSequence}.
      *
-     * @param text The CharSequence to be encapsulated by this instance.
+     * @param text The {@link CharSequence} whose content will be stored. It is
+     *             converted to a {@link String} internally.
      */
     public RawText(CharSequence text) {
         this.text = text.toString();

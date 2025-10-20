@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +22,11 @@ import net.openhft.chronicle.wire.*;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Demonstrates how different {@link Wire} implementations encode a simple set
+ * of fields. The example writes the same data using TextWire, BinaryWire and
+ * RawWire and prints the result of each.
+ */
 public class Example1 {
     public static void main(String[] args) {
 

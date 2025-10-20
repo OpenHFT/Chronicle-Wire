@@ -1,8 +1,8 @@
 /*
- * Copyright 2016-2020 chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *       http://www.apache.org/licenses/LICENSE-2.0
@@ -12,27 +12,34 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
+
 
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ReadResolvable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Tests for marshalling and unmarshalling of Enum using Wire.
  */
 public class EnumTest extends WireTestCommon {
+    @Before
+    public void hasDirect() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+    }
 
     /**
      * Tests serialization and deserialization of the TestEnum enumeration.
@@ -76,7 +83,7 @@ public class EnumTest extends WireTestCommon {
      * Enumeration used for testing purposes.
      * Implements Marshallable for Wire compatibility.
      */
-    public enum TestEnum implements Marshallable, ReadResolvable<TestEnum> {
+    public enum TestEnum implements Marshallable {
         INSTANCE;
 
         // Read data from the wire, currently no implementation
@@ -87,13 +94,6 @@ public class EnumTest extends WireTestCommon {
         // Write data to the wire, currently no implementation
         @Override
         public void writeMarshallable(@NotNull WireOut wire) {
-        }
-
-        // Ensure deserialized instance is resolved to the same INSTANCE
-        @NotNull
-        @Override
-        public EnumTest.TestEnum readResolve() {
-            return INSTANCE;
         }
     }
 }

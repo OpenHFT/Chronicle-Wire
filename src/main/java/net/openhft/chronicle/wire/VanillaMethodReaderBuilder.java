@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,18 +32,19 @@ import java.util.function.Predicate;
 import static net.openhft.chronicle.wire.WireParser.SKIP_READABLE_BYTES;
 
 /**
- * The {@code VanillaMethodReaderBuilder} class implements the {@link MethodReaderBuilder} interface.
- * It provides a mechanism to create a method reader for deserializing method calls from a wire input.
+ * Builder for {@link VanillaMethodReader}. Implements {@link MethodReaderBuilder} and
+ * allows configuration of default parsing behaviour, exception handling, method
+ * interception and use of generated proxies.
  */
 public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
-    // A constant representing the configuration property to disable reader proxy code generation.
+    // System property name to disable proxy generation.
     public static final String DISABLE_READER_PROXY_CODEGEN = "disableReaderProxyCodegen";
 
-    // Cache for storing classes associated with their names for optimization.
+    // Cache of generated reader classes keyed by name.
     private static final Map<String, Class<?>> classCache = new ConcurrentHashMap<>();
 
-    // A sentinel value indicating a failed compilation attempt.
+    // Marker stored in {@link #classCache} when generation fails.
     private static final Class<?> COMPILE_FAILED = ClassNotFoundException.class;
 
     // The input from which method calls are read.
@@ -67,13 +66,17 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     private Object[] metaDataHandler = null;
 
     // The exception handler to use when a method is not recognized.
-    private ExceptionHandler exceptionHandlerOnUnknownMethod = Jvm.debug();
+    private ExceptionHandler exceptionHandlerOnUnknownMethod = Jvm.getBoolean("chronicle.methodReader.warn") ? Jvm.warn() : Jvm.debug();
 
     // A predicate to further filter method calls.
-    private Predicate predicate = x -> true;
+    private Predicate<MethodReader> predicate = x -> true;
 
     // A flag to indicate whether the reader is in a scanning mode.
     private boolean scanning = false;
+
+    // A flag to determine support for parameters which can either be non-Marshallable or Marshallable
+    // null for auto-detect
+    private Boolean multipleNonMarshallableParamTypes = null;
 
     /**
      * Constructs a new {@code VanillaMethodReaderBuilder} with the specified wire input.
@@ -92,8 +95,22 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
      * @param exceptionHandlerOnUnknownMethod The exception handler to use when a method is not recognized.
      * @return A {@link WireParselet} that logs or handles unrecognized methods.
      */
+    @Deprecated(/* to be removed in x.29 */)
     @NotNull
     public static WireParselet createDefaultParselet(ExceptionHandler exceptionHandlerOnUnknownMethod) {
+        return createDefaultParselet(exceptionHandlerOnUnknownMethod, null);
+    }
+
+    /**
+     * Creates a default {@link WireParselet} that handles unrecognized methods.
+     * When an unrecognized method is encountered, it logs a warning or uses
+     * the provided exception handler, depending on the method name's length.
+     *
+     * @param exceptionHandlerOnUnknownMethod The exception handler to use when a method is not recognized.
+     * @param clazz The class on which the method was called, used for logging purposes.
+     * @return A {@link WireParselet} that logs or handles unrecognized methods.
+     */
+    public static WireParselet createDefaultParselet(ExceptionHandler exceptionHandlerOnUnknownMethod, Class<?> clazz) {
         return (s, v) -> {
             MessageHistory history = MessageHistory.get();
             long sourceIndex = history.lastSourceIndex();
@@ -101,28 +118,39 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
             ExceptionHandler eh = s.length() == 0
                     ? Jvm.warn()
                     : exceptionHandlerOnUnknownMethod;
-            eh.on(VanillaMethodReader.class, errorMsg(s, history, sourceIndex));
+            if (eh.isEnabled(VanillaMethodReader.class)) {
+                eh.on(VanillaMethodReader.class, errorMsg(s, history, sourceIndex, clazz));
+            }
         };
     }
 
     /**
      * Returns an error message based on the given parameters.
      *
-     * @param s             The sequence that represents either a method name or a method ID.
-     * @param history       The message history for the current method call.
-     * @param sourceIndex   The index of the source from where the method call was read.
+     * @param s           The sequence that represents either a method name or a method ID.
+     * @param history     The message history for the current method call.
+     * @param sourceIndex The index of the source from where the method call was read.
+     * @param clazz       The class on which the method was called, used for logging purposes.
      * @return A formatted error message for unrecognized methods or method IDs.
      */
     @NotNull
-    private static String errorMsg(CharSequence s, MessageHistory history, long sourceIndex) {
+    private static String errorMsg(CharSequence s, MessageHistory history, long sourceIndex, @Nullable Class<?> clazz) {
 
         // Determine whether the provided sequence is a method name or a method ID based on its first character.
         final String identifierType = s.length() != 0 && Character.isDigit(s.charAt(0)) ? "@MethodId" : "method-name";
-        String msg = "Unknown " + identifierType + "='" + s + "'";
+        StringBuilder msg = new StringBuilder()
+                .append("Unknown ").append(identifierType)
+                .append("='").append(s).append("'");
+        if (clazz != null) {
+            if (clazz.getName().contains("Proxy$") || clazz.getName().contains("$Lambda"))
+                clazz = clazz.getInterfaces()[0];
+            msg.append(" called on ").append(clazz);
+        }
         if (history.lastSourceId() >= 0)
-            msg += " from " + history.lastSourceId() + " at " +
-                    Long.toHexString(sourceIndex) + " ~ " + (int) sourceIndex;
-        return msg;
+            msg.append(" from ").append(history.lastSourceId())
+                    .append(" at ").append(Long.toHexString(sourceIndex))
+                    .append(" ~ ").append((int) sourceIndex);
+        return msg.toString();
     }
 
     public WireParselet defaultParselet() {
@@ -190,6 +218,17 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     }
 
     /**
+     * Configures the reader to handle parameters which can have multiple non-marshallable parameter types.
+     *
+     * @param multipleNonMarshallableParamTypes Whether the reader should handle multiple non-marshallable parameter types.
+     * @return This builder instance for chaining.
+     */
+    public VanillaMethodReaderBuilder multipleNonMarshallableParamTypes(Boolean multipleNonMarshallableParamTypes) {
+        this.multipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes;
+        return this;
+    }
+
+    /**
      * Creates an instance of a generated method reader.
      * The method first checks if the desired generated reader class is already loaded.
      * If not, it attempts to generate a new class and then instantiate it.
@@ -202,7 +241,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         if (ignoreDefaults || Jvm.getBoolean(DISABLE_READER_PROXY_CODEGEN))
             return null;
 
-        GenerateMethodReader generateMethodReader = new GenerateMethodReader(wireType, methodReaderInterceptorReturns, metaDataHandler, impls);
+        GenerateMethodReader generateMethodReader = new GenerateMethodReader(wireType, methodReaderInterceptorReturns, multipleNonMarshallableParamTypes, metaDataHandler, impls);
 
         String fullClassName = generateMethodReader.packageName() + "." + generateMethodReader.generatedClassName();
 
@@ -272,11 +311,10 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
      */
     @NotNull
     public MethodReader build(Object... impls) {
-        // If a default parselet has not been set, create one using the exception handler for unknown methods.
         if (this.defaultParselet == null)
-            this.defaultParselet = createDefaultParselet(exceptionHandlerOnUnknownMethod);
+            this.defaultParselet = createDefaultParselet(exceptionHandlerOnUnknownMethod, impls.length > 0 ? impls[0].getClass() : null);
 
-        // Attempt to create an instance of the generated method reader.
+        @SuppressWarnings("resource")
         final MethodReader generatedInstance = createGeneratedInstance(impls);
 
         // If the generated instance isn't available, use the default vanilla method reader.
@@ -287,7 +325,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     }
 
     @Override
-    public MethodReaderBuilder predicate(Predicate<?> predicate) {
+    public MethodReaderBuilder predicate(Predicate<MethodReader> predicate) {
         this.predicate = predicate;
         return this;
     }

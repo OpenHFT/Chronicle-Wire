@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +18,7 @@ package net.openhft.chronicle.wire.dynenum;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.EnumCache;
 import net.openhft.chronicle.core.util.Mocker;
@@ -29,11 +28,12 @@ import org.junit.Test;
 
 import java.io.StringWriter;
 
-import static net.openhft.chronicle.wire.DynamicEnum.updateEnum;
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 // The WireDynamicEnumTest class extends WireTestCommon to inherit its common functionalities.
 // This class is intended to test dynamic enumeration functionalities in the context of wiring.
+@SuppressWarnings("deprecation")
 public class WireDynamicEnumTest extends WireTestCommon {
 
     // This setup method is executed before each test.
@@ -51,6 +51,8 @@ public class WireDynamicEnumTest extends WireTestCommon {
     // This method simulates the dynamic addition of an enumeration value.
     // It initializes various objects and performs operations to test the behavior of dynamic enums.
     private static void doAddedEnum(WireType wireType) throws NoSuchFieldException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Wire tw = wireType.apply(Bytes.allocateElasticOnHeap());
         UsesWDENums nums = tw.methodWriter(UsesWDENums.class);
         nums.push(WDENums.ONE);
@@ -104,6 +106,8 @@ public class WireDynamicEnumTest extends WireTestCommon {
     // This test validates the functionality of adding a dynamic enum using TEXT wire type.
     @Test
     public void dontResetDynamicEnum() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         HoldsWDENum x = new HoldsWDENum(null, null);
         assertEquals("!HoldsWDENum {\n" +
                 "  a: !!null \"\",\n" +
@@ -132,6 +136,8 @@ public class WireDynamicEnumTest extends WireTestCommon {
     // This test method validates the deserialization process of the dynamic enums and checks the correctness of the output.
     @Test
     public void deserialize() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Define the text input string representing the serialized form of the dynamic enums and their operations.
         String text = "push: ONE\n" +
                 "...\n" +
@@ -217,6 +223,8 @@ public class WireDynamicEnumTest extends WireTestCommon {
      */
     @Test
     public void deserialize2() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Define the input text string, which represents serialized data.
         String text = "push: ONE\n" +
                 "...\n" +
@@ -278,7 +286,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
             public void unwraps(UnwrapsWDENum unwrapsWDENum) {
                 WDENums c = unwrapsWDENum.c;
                 sw.append("Update " + c + "\n");
-                updateEnum(c);
+                net.openhft.chronicle.wire.DynamicEnum.updateEnum(c);
             }
 
             // Implement the 'push2' method to capture the name, nice, and value of the WDENum2 enum.
@@ -292,7 +300,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
             public void unwrap2(UnwrapsWDENum2 unwrapsWDENum2) {
                 WDENum2 d = unwrapsWDENum2.d;
                 sw.append("Update " + d + "\n");
-                updateEnum(d);
+                net.openhft.chronicle.wire.DynamicEnum.updateEnum(d);
             }
         });
 

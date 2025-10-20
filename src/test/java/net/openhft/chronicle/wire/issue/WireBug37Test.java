@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +22,6 @@ import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
-
-import java.nio.ByteBuffer;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -61,7 +57,7 @@ public class WireBug37Test extends WireTestCommon {
         assertEquals(obj1, obj2);
 
         // Serialize obj2 into bytes using the TEXT WireType
-        final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
+        final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         obj2.writeMarshallable(wireType.apply(bytes));
 
         // Convert the bytes back to string

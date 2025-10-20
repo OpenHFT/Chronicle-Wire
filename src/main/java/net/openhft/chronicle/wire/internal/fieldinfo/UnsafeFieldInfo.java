@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +18,7 @@ package net.openhft.chronicle.wire.internal.fieldinfo;
 
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.wire.BracketType;
-import net.openhft.chronicle.wire.VanillaFieldInfo;
+import net.openhft.chronicle.wire.internal.VanillaFieldInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
@@ -41,7 +39,7 @@ class UnsafeFieldInfo extends VanillaFieldInfo {
      * @param bracketType The bracket type associated with the field.
      * @param field       The actual field representation.
      */
-    public UnsafeFieldInfo(String name, Class type, BracketType bracketType, @NotNull Field field) {
+    public UnsafeFieldInfo(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         super(name, type, bracketType, field);
     }
 

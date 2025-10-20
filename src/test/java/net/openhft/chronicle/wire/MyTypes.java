@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +18,20 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 
 // Class representing a collection of various data types, extending SelfDescribingMarshallable for serialization support
-class MyTypes extends SelfDescribingMarshallable {
+public class MyTypes extends SelfDescribingMarshallable {
 
     // StringBuilder instance to hold and manipulate string data efficiently
-    final StringBuilder text = new StringBuilder();
+    public final StringBuilder text = new StringBuilder();
 
     // Fields representing various data types
-    boolean flag;  // Field representing a boolean flag
-    byte b;        // Field to store a byte value
-    short s;       // Field to store a short value
-    char ch;       // Field to store a char value
-    int i;         // Field to store an integer value
-    float f;       // Field to store a float value
-    double d;      // Field to store a double value
-    long l;        // Field to store a long value
+    public boolean flag;  // Field representing a boolean flag
+    public byte b;        // Field to store a byte value
+    public short s;       // Field to store a short value
+    public char ch;       // Field to store a char value
+    public int i;         // Field to store an integer value
+    public float f;       // Field to store a float value
+    public double d;      // Field to store a double value
+    public long l;        // Field to store a long value
 
     // Method to update and return the current instance for a boolean flag
     public MyTypes flag(boolean b) {

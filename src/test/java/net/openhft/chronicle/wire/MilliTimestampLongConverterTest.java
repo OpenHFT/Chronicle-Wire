@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +53,10 @@ public class MilliTimestampLongConverterTest extends WireTestCommon {
     public void parse2() {
         assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456"),
                 INSTANCE.parse("2020-09-18T01:02:03.456"));
+        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456"),
+                INSTANCE.parse("2020-09-18T01:02:03.456789"));
+        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456"),
+                INSTANCE.parse("2020-09-18T01:02:03.456789012"));
     }
 
     // Test if trailing 'Z' in the timestamp does not affect parsing
@@ -97,11 +99,9 @@ public class MilliTimestampLongConverterTest extends WireTestCommon {
     }
 
     // Test the round-trip conversion for various timezones, ensuring consistency in parsing and conversion back to string
-    @SuppressWarnings("deprecation")
     @Test
     public void roundTripTest() {
         roundTrip(TIMESTAMP_STRING_UTC_NO_SUFFIX, TIMESTAMP, new MilliTimestampLongConverter("UTC"));
-        roundTrip(TIMESTAMP_STRING_UTC, TIMESTAMP, new MilliTimestampLongConverter("UTC", true));
         roundTrip(TIMESTAMP_STRING_MELBOURNE, TIMESTAMP, new MilliTimestampLongConverter("Australia/Melbourne"));
     }
 

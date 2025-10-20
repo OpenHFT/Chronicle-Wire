@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +30,7 @@ import java.util.List;
  * and an optional text field. It extends SelfDescribingMarshallable for serialization and
  * deserialization using the Chronicle Wire library.
  */
-class ThreeSequence extends SelfDescribingMarshallable {
+public class ThreeSequence extends SelfDescribingMarshallable {
 
     // Transient buffers to temporarily hold data during the marshalling process.
     // These buffers are not serialized because of the 'transient' modifier.

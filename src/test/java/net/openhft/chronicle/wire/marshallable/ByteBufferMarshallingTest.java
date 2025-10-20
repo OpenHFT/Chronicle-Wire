@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +17,18 @@
 package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.wire.RawWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.Test;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * This class tests the marshalling and unmarshalling of objects using ByteBuffers.
@@ -41,6 +42,8 @@ public class ByteBufferMarshallingTest extends WireTestCommon {
      */
     @Test
     public void writeReadByteBuffer() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Initialize an elastic ByteBuffer and create a Wire for it
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         Wire wire = new RawWire(bytes);
@@ -65,6 +68,8 @@ public class ByteBufferMarshallingTest extends WireTestCommon {
      */
     @Test
     public void writeReadViaByteBuffer() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Initialize an elastic ByteBuffer and create a Wire for it
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         Wire wire = new RawWire(bytes);
@@ -76,12 +81,13 @@ public class ByteBufferMarshallingTest extends WireTestCommon {
 
         // Configure the positions and limits for the ByteBuffer
         ByteBuffer bb = bytes.underlyingObject();
-        bb.position((int) bytes.readPosition());
-        bb.limit((int) bytes.readLimit());
+        Buffer b = bb;
+        b.position((int) bytes.readPosition());
+        b.limit((int) bytes.readLimit());
 
         // Create a second ByteBuffer and transfer data from the first one
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
-        bytes2.ensureCapacity(bb.remaining());
+        bytes2.ensureCapacity(b.remaining());
 
         ByteBuffer bb2 = bytes2.underlyingObject();
         bb2.clear();
@@ -110,6 +116,8 @@ public class ByteBufferMarshallingTest extends WireTestCommon {
      */
     @Test
     public void writeReadBytesViaByteBuffer() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Initialize an elastic ByteBuffer
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 

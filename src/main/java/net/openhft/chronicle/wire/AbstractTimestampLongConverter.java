@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +18,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.AppendableUtil;
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.core.Jvm;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -44,12 +41,10 @@ import java.util.concurrent.TimeUnit;
  * <p>
  * Parsing of ISO dates, with or without timestamps, is supported. If an ISO date is read with no
  * timezone, it is assumed to be in the converter's zone.
- * <p>
- * As of x.26, the property `timestampLongConverters.includeZoneSuffixWhenZoneIsUTC` will be deprecated
- * and UTC dates will always be written with a 'Z' suffix.
  *
  * @see LongConverter for the interface this abstract class implements.
  */
+@SuppressWarnings("this-escape")
 public abstract class AbstractTimestampLongConverter implements LongConverter {
     /**
      * Universal Time Coordinated (UTC) timezone
@@ -61,39 +56,22 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
      */
     public static final String TIMESTAMP_LONG_CONVERTERS_ZONE_ID_SYSTEM_PROPERTY = "timestampLongConverters.zoneId";
 
-    /**
-     * System property to specify whether to include the 'Z' suffix for UTC zone timestamps. To be deprecated in x.26 version.
-     */
-    public static final String INCLUDE_ZONE_SUFFIX_WHEN_ZONE_IS_UTC_SYSTEM_PROPERTY = "timestampLongConverters.includeZoneSuffixWhenZoneIsUTC";
-
-    /**
-     * The specific timezone used by this converter.
-     */
+    // The specific timezone used by this converter
     private final ZoneId zoneId;
 
-    /**
-     * Formatter used for parsing timestamps.
-     */
+    // Formatter used for parsing timestamps
     private final DateTimeFormatter formatterForParsing;
 
-    /**
-     * Formatter used for formatting timestamps.
-     */
+    // Formatter used for formatting timestamps
     private final DateTimeFormatter formatterForFormatting;
 
-    /**
-     * Flag to indicate if UTC dates are written without a suffix.
-     */
+    // Flag to indicate if UTC dates are written without a suffix
     private final boolean writingUtcDatesWithNoSuffix;
 
-    /**
-     * The amount of timestamps that fits in a second.
-     */
+    // The amount of timestamps that fits in a second
     private final long amountPerSecond;
 
-    /**
-     * The equivalent nanoseconds for a timestamp.
-     */
+    // The equivalent nanoseconds for a timestamp
     private final long nanosPerAmount;
 
     /**
@@ -107,28 +85,19 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
     }
 
     /**
-     * Constructs a new {@code AbstractTimestampLongConverter} with the specified zone ID and time unit.
-     * The flag for including zone suffix for UTC is fetched from the system property.
+     * Constructs a new {@code AbstractTimestampLongConverter} with the specified
+     * zone ID and time unit.
      *
-     * @param zoneId   the zone ID to be used for the conversion of long values
-     * @param timeUnit the time unit for the conversion of long values
+     * @param zoneId   The string representation of the {@link ZoneId} (for
+     *                 example "UTC" or "Europe/London") used when a parsed date
+     *                 does not contain its own offset. All internal long values
+     *                 are treated as UTC based.
+     * @param timeUnit The {@link TimeUnit} defining the precision of the long
+     *                 timestamp values handled by this converter.
      */
     protected AbstractTimestampLongConverter(String zoneId, TimeUnit timeUnit) {
-        this(zoneId, timeUnit, Jvm.getBoolean(INCLUDE_ZONE_SUFFIX_WHEN_ZONE_IS_UTC_SYSTEM_PROPERTY));
-    }
-
-    /**
-     * Constructs a new {@code AbstractTimestampLongConverter} with the specified zone ID, time unit and flag for including zone suffix for UTC.
-     * This constructor is set to be deprecated in x.26 version.
-     *
-     * @param zoneId                  the zone ID to be used for the conversion of long values
-     * @param timeUnit                the time unit for the conversion of long values
-     * @param includeZoneSuffixForUTC the flag to indicate if 'Z' suffix should be included for UTC zone timestamps
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    protected AbstractTimestampLongConverter(String zoneId, TimeUnit timeUnit, boolean includeZoneSuffixForUTC) {
         this.zoneId = ZoneId.of(zoneId);
-        this.writingUtcDatesWithNoSuffix = this.zoneId.equals(UTC) && !includeZoneSuffixForUTC;
+        this.writingUtcDatesWithNoSuffix = this.zoneId.equals(UTC);
         this.amountPerSecond = timeUnit.convert(1, TimeUnit.SECONDS);
         this.nanosPerAmount = TimeUnit.NANOSECONDS.convert(1, timeUnit);
         this.formatterForParsing = createFormatter();
@@ -141,10 +110,13 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
 
     /**
      * Parses the provided text and converts it into a long timestamp.
-     * The text can be an ISO date or a timestamp. If the text includes a timezone, it's used for conversion;
-     * otherwise, the converter's timezone is used.
+     * The input may be an ISO-8601 date, a date-time with or without a zone, or
+     * a plain numeric timestamp. When no zone is present, the converter's
+     * {@link ZoneId} is assumed.
      *
-     * @param text the text to be parsed
+     * @param text The character sequence representing a date, timestamp or
+     *             numeric value to be parsed into a UTC long in this
+     *             converter's {@link TimeUnit}.
      * @return a long value representing the parsed timestamp
      */
     @Override
@@ -170,17 +142,22 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
     }
 
     /**
-     * Interpret formatted date
+     * Interpret a formatted date that has already been normalised to UTC.
      *
-     * @param value The parsed formatted date (in UTC zone)
+     * @param value The {@link ZonedDateTime} parsed from the text and adjusted
+     *              to UTC. The implementation extracts the epoch based long in
+     *              this converter's {@link TimeUnit}.
      * @return The value as a long timestamp
      */
     protected abstract long parseFormattedDate(ZonedDateTime value);
 
     /**
-     * Interpret long timestamp
+     * Interpret a long value that has been parsed directly from the input text.
      *
-     * @param value The parsed timestamp
+     * @param value The numeric value extracted from {@code text} before any unit
+     *              conversion is applied.
+     * @param text  The original character sequence. Implementations may use it
+     *              for logging or context when the conversion is ambiguous.
      * @return The value as a long timestamp
      */
     protected abstract long parseTimestamp(long value, CharSequence text);
@@ -212,12 +189,20 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
     }
 
     /**
-     * Appends the fraction of the second to the provided {@code DateTimeFormatterBuilder}.
+     * Append the fraction-of-second pattern to the formatter builder.
      *
-     * @param builder The builder after the initial date format has been added
+     * @param builder The {@link DateTimeFormatterBuilder} after the basic date
+     *                and time pattern has been added.
      */
     protected abstract void appendFraction(DateTimeFormatterBuilder builder);
 
+    /**
+     * Format the timestamp value and append it to the supplied {@link Appendable}.
+     *
+     * @param text  The destination for the formatted date-time, such as a
+     *              {@link StringBuilder} or {@link Bytes} instance.
+     * @param value The UTC timestamp in this converter's {@link TimeUnit}.
+     */
     public void append(Appendable text, long value) {
         if (value <= 0) {
             AppendableUtil.append(text, value);
@@ -236,10 +221,10 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
     }
 
     /**
-     * Appends the provided long value to the given {@code StringBuilder}. This method delegates to {@code append(Appendable, long)}.
+     * Convenience overload that delegates to {@link #append(Appendable, long)}.
      *
-     * @param text  the {@code StringBuilder} to append to
-     * @param value the long value to be appended
+     * @param text  The {@link StringBuilder} to receive the formatted value.
+     * @param value The UTC timestamp in this converter's {@link TimeUnit}.
      */
     @Override
     public void append(StringBuilder text, long value) {
@@ -247,10 +232,10 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
     }
 
     /**
-     * Appends the provided long value to the given {@code Bytes}. This method delegates to {@code append(Appendable, long)}.
+     * Convenience overload for appending to a {@link Bytes} instance.
      *
-     * @param bytes the {@code Bytes} to append to
-     * @param value the long value to be appended
+     * @param bytes The {@link Bytes} sink for the formatted value.
+     * @param value The UTC timestamp in this converter's {@link TimeUnit}.
      */
     @Override
     public void append(Bytes<?> bytes, long value) {

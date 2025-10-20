@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +30,7 @@ public class GenerateMethodWriterSameInterfaceDifferentOuterClassTest extends Te
     public void test() {
 
         // Create a new Wire object with elastic byte buffer and BINARY settings
-        final Wire wire = BINARY.apply(Bytes.elasticByteBuffer());
+        final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
 
         // Activate padding for the wire object
         wire.usePadding(true);

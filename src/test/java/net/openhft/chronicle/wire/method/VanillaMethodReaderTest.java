@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,14 +37,16 @@ import java.util.concurrent.BlockingQueue;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
-@SuppressWarnings("rawtypes")
 public class VanillaMethodReaderTest extends WireTestCommon {
 
     A instance;
 
     @Test
     public void testMethodReaderWriterMetadata() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             Wire wire = WireType.BINARY.apply(b);
@@ -93,6 +93,8 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     public void readMethods() throws IOException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Wire wire = new TextWire(BytesUtil.readFile("methods/in.yaml"))
                 .useTextDocuments();
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
@@ -222,34 +224,12 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     }
 
     @Test
-    public void testNestedUnknownClassWarn() {
-        WiresTest.wiresThrowCNFRE(false);
-        Wires.GENERATE_TUPLES = false;
-
-        Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
-                .useTextDocuments();
-        MRTListener writer2 = wire2.methodWriter(MRTListener.class);
-
-        String text = "unknown: {\n" +
-                "  u: !!null \"\"\n" +
-                "}\n" +
-                "...\n";
-        Wire wire = TextWire.from(text)
-                .useTextDocuments();
-        MethodReader reader = wire.methodReader(writer2);
-        checkReaderType(reader);
-        assertTrue(reader.readOne());
-        assertFalse(reader.readOne());
-        assertEquals(text, wire2.toString());
-    }
-
-    @Test
     public void testNestedUnknownClass() {
-        WiresTest.wiresThrowCNFRE(true);
-        Wires.GENERATE_TUPLES = true;
+        assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
-                .useTextDocuments();
+                .useTextDocuments()
+                .generateTuples(true);
         MRTListener writer2 = wire2.methodWriter(MRTListener.class);
 
         String text = "unknown: {\n" +
@@ -261,40 +241,10 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 "}\n" +
                 "...\n";
         Wire wire = TextWire.from(text)
-                .useTextDocuments();
+                .useTextDocuments()
+                .generateTuples(true);
         MethodReader reader = wire.methodReader(writer2);
         checkReaderType(reader);
-        assertTrue(reader.readOne());
-        assertFalse(reader.readOne());
-        assertEquals(text, wire2.toString());
-    }
-
-    @Test(expected = ClassNotFoundRuntimeException.class)
-    public void testUnknownClassCNFREInterface() {
-        WiresTest.wiresThrowCNFRE(false);
-        Wires.GENERATE_TUPLES = false;
-
-        Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
-                .useTextDocuments();
-        MRTListener writer2 = wire2.methodWriter(MRTListener.class);
-
-        String text = "top: !UnknownClass {\n" +
-                "  one: 1,\n" +
-                "  two: 2.2,\n" +
-                "  three: words\n" +
-                "}\n" +
-                "...\n" +
-                "top: {\n" +
-                "  one: 11,\n" +
-                "  two: 22.2,\n" +
-                "  three: many words\n" +
-                "}\n" +
-                "...\n";
-        Wire wire = TextWire.from(text)
-                .useTextDocuments();
-        MethodReader reader = wire.methodReader(writer2);
-        checkReaderType(reader);
-        assertTrue(reader.readOne());
         assertTrue(reader.readOne());
         assertFalse(reader.readOne());
         assertEquals(text, wire2.toString());
@@ -302,11 +252,11 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     public void testUnknownClassDoesntThrow() {
-        WiresTest.wiresThrowCNFRE(true);
-        Wires.GENERATE_TUPLES = true;
+        assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
-                .useTextDocuments();
+                .useTextDocuments()
+                .generateTuples(true);
         MRTListener writer2 = wire2.methodWriter(MRTListener.class);
 
         String text = "top: !UnknownClass {\n" +
@@ -322,7 +272,8 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 "}\n" +
                 "...\n";
         Wire wire = TextWire.from(text)
-                .useTextDocuments();
+                .useTextDocuments()
+                .generateTuples(true);
         MethodReader reader = wire.methodReader(writer2);
         checkReaderType(reader);
         assertTrue(reader.readOne());
@@ -333,11 +284,11 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test(expected = ClassNotFoundRuntimeException.class)
     public void testUnknownClassThrow() {
-        WiresTest.wiresThrowCNFRE(true);
-        Wires.GENERATE_TUPLES = false;
+        assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
-                .useTextDocuments();
+                .useTextDocuments()
+                .generateTuples(false);
         MRTListener writer2 = wire2.methodWriter(MRTListener.class);
 
         String text = "top: !UnknownClass {\n" +
@@ -353,7 +304,8 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 "}\n" +
                 "...\n";
         Wire wire = TextWire.from(text)
-                .useTextDocuments();
+                .useTextDocuments()
+                .generateTuples(false);
         MethodReader reader = wire.methodReader(writer2);
         checkReaderType(reader);
         assertTrue(reader.readOne());
@@ -384,13 +336,8 @@ public class VanillaMethodReaderTest extends WireTestCommon {
             assertFalse(reader.readOne());
             assertEquals(0, MessageHistory.get().sources());
         } finally {
-            MessageHistory.set(null);
+            MessageHistory.clear();
         }
-    }
-
-    @After
-    public void resetGenerateTuples() {
-        Wires.GENERATE_TUPLES = false;
     }
 
     @Test(expected = IllegalStateException.class)
@@ -577,11 +524,4 @@ public class VanillaMethodReaderTest extends WireTestCommon {
             this.field2 = field2;
         }
     }
-}
-
-class MockDto extends SelfDescribingMarshallable {
-    @Comment("field1 comment")
-    String field1;
-    @Comment("field2 comment")
-    double field2;
 }

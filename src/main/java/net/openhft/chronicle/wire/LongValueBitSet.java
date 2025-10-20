@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +32,15 @@ import java.util.stream.StreamSupport;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
 /**
- * This is the LongValueBitSet class extending AbstractCloseable.
- * This class represents a BitSet designed to be shared across processes without requiring locks.
- * It has been implemented as a lock-free solution and does not support resizing.
+ * A {@link ChronicleBitSet} implementation backed by an array of
+ * {@link net.openhft.chronicle.core.values.LongValue}s. The backing
+ * words may reside in off-heap memory so the bit set can be shared
+ * between processes. Operations are performed using compare-and-swap
+ * loops rather than explicit locks.
+ * <b>Note:</b> the capacity is fixed on construction and cannot be
+ * expanded later.
  */
+@SuppressWarnings("this-escape")
 public class LongValueBitSet extends AbstractCloseable implements Marshallable, ChronicleBitSet {
 
     // Mask used for operations on partial words.
@@ -46,34 +49,34 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     // Provides a pausing strategy for contention management.
     private transient Pauser pauser;
 
-    /**
-     * The internal field corresponding to the serialField "bits".
-     */
+    // The array of {@link LongValue} words storing the bits for this set. Each entry is a 64‑bit word that may be shared across processes
     private LongValue[] words;
 
     /**
-     * Constructor that initializes a LongValueBitSet with a maximum number of bits provided as an integer.
+     * Creates a bit set sized for {@code maxNumberOfBits} bits.
+     * The backing array is allocated but not bound to any {@link Wire}.
      *
-     * @param maxNumberOfBits The maximum number of bits this BitSet can accommodate.
+     * @param maxNumberOfBits maximum number of bits this set can hold
      */
     public LongValueBitSet(final int maxNumberOfBits) {
         this((long) maxNumberOfBits);
     }
 
     /**
-     * Constructor that initializes a LongValueBitSet with a maximum number of bits provided as an integer and associates it with a Wire.
+     * Creates a bit set sized for {@code maxNumberOfBits} bits and immediately
+     * binds the backing array to the supplied {@link Wire} for serialisation.
      *
-     * @param maxNumberOfBits The maximum number of bits this BitSet can accommodate.
-     * @param w The Wire associated with this BitSet.
+     * @param maxNumberOfBits maximum number of bits this set can hold
+     * @param w               wire used to marshal the initial state
      */
     public LongValueBitSet(final int maxNumberOfBits, Wire w) {
         this((long) maxNumberOfBits, w);
     }
 
     /**
-     * Constructor that initializes a LongValueBitSet with a maximum number of bits provided as a long.
+     * Creates a bit set sized for {@code maxNumberOfBits} bits.
      *
-     * @param maxNumberOfBits The maximum number of bits this BitSet can accommodate.
+     * @param maxNumberOfBits maximum number of bits this set can hold
      */
     public LongValueBitSet(final long maxNumberOfBits) {
         int size = (int) ((maxNumberOfBits + BITS_PER_WORD - 1) / BITS_PER_WORD);
@@ -82,10 +85,11 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Constructor that initializes a LongValueBitSet with a maximum number of bits provided as a long and associates it with a Wire.
+     * Creates a bit set sized for {@code maxNumberOfBits} bits and binds its
+     * storage to a {@link Wire} for marshalling.
      *
-     * @param maxNumberOfBits The maximum number of bits this BitSet can accommodate.
-     * @param w The Wire associated with this BitSet.
+     * @param maxNumberOfBits maximum number of bits this set can hold
+     * @param w               wire used to marshal the initial state
      */
     public LongValueBitSet(final long maxNumberOfBits, Wire w) {
         this(maxNumberOfBits);
@@ -131,11 +135,20 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
                     " > toIndex: " + toIndex);
     }
 
+    /**
+     * Returns the raw word at {@code wordIndex}. If the index is beyond the
+     * backing array the value {@code 0} is returned.
+     */
     @Override
     public long getWord(int wordIndex) {
         return wordIndex < words.length ? words[wordIndex].getValue() : 0;
     }
 
+    /**
+     * Sets the raw word at {@code wordIndex} to {@code bits}. The array is
+     * not expanded; {@link #expandTo(int)} will throw if the index is beyond the
+     * configured capacity.
+     */
     @Override
     public void setWord(int wordIndex, long bits) {
         expandTo(wordIndex);
@@ -144,25 +157,22 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
 
     @Override
     protected void performClose() {
-        closeQuietly(words);
+        closeQuietly((Object[]) words);
     }
 
     /**
-     * Fetches the number of words currently in use in this BitSet.
-     *
-     * @return The number of words in use.
+     * Returns the number of {@link LongValue} words available in the backing
+     * array. This is the fixed capacity rather than a logical size.
      */
     public int getWordsInUse() {
         return words.length;
     }
 
     /**
-     * Atomically sets the value of a LongValue object based on a provided function and parameter.
-     * It uses a pausing strategy to deal with contention.
-     *
-     * @param word The LongValue object whose value needs to be set.
-     * @param param The parameter to pass to the function.
-     * @param function A function that takes the old value of the word and the provided parameter to produce a new value.
+     * Atomically updates {@code word} using a compare‑and‑swap loop. The
+     * {@code function} computes a new value from the current one and
+     * {@code param}. The {@link #pauser()} is used between failed CAS
+     * attempts to reduce contention.
      */
     public void set(LongValue word, long param, LongFunction function) {
         throwExceptionIfClosed();
@@ -179,10 +189,8 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Fetches the Pauser object for this bit set.
-     * If the Pauser object is not yet initialized, it initializes it to a busy pauser.
-     *
-     * @return The Pauser object associated with this bit set.
+     * Returns the {@link Pauser} used for CAS backoff, creating it on first
+     * use. The default strategy is {@link Pauser#busy()}.
      */
     private Pauser pauser() {
         if (this.pauser == null)
@@ -191,11 +199,8 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Atomically sets the value of a LongValue object to a new value.
-     * It uses a pausing strategy to handle contention during the set operation.
-     *
-     * @param word The LongValue object whose value needs to be set.
-     * @param newValue The new value to be set.
+     * Atomically sets {@code word} to {@code newValue}. A CAS loop is used
+     * with {@link #pauser()} invoked between attempts when contention occurs.
      */
     public void set(LongValue word, long newValue) {
         throwExceptionIfClosed();
@@ -208,10 +213,8 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Converts the bit set to a byte array representation.
-     * It serializes the bits into bytes in little-endian order.
-     *
-     * @return A byte array containing all the bits set in this bit set.
+     * Returns a little‑endian byte array representing this set. Each word
+     * is written in sequence.
      */
     public byte[] toByteArray() {
         throwExceptionIfClosed();
@@ -232,10 +235,9 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Ensures that the current bit set can accommodate a specified word index.
-     * Throws an UnsupportedOperationException if the bit set cannot be expanded.
-     *
-     * @param wordIndex The word index that needs to be accommodated.
+     * Verifies that {@code wordIndex} is within the fixed capacity. This
+     * implementation never resizes and will throw
+     * {@link UnsupportedOperationException} if expansion would be required.
      */
     private void expandTo(int wordIndex) {
         int wordsRequired = wordIndex + 1;
@@ -247,10 +249,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Flips the bit at the specified index, toggling it from its current value.
-     * If the bit is currently set to 0, it will become 1, and vice versa.
-     *
-     * @param bitIndex The index of the bit to flip.
+     * Atomically toggles the bit at {@code bitIndex}.
      */
     public void flip(int bitIndex) {
         throwExceptionIfClosed();
@@ -264,33 +263,21 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Applies the bitwise XOR operation between the provided word and parameter.
-     * The result of this operation toggles the bits where they differ.
-     *
-     * @param word The LongValue object representing the word.
-     * @param param The parameter against which XOR operation needs to be performed.
+     * Atomically performs {@code word ^= param}.
      */
     private void caret(LongValue word, long param) {
         set(word, param, (x, y) -> x ^ y);
     }
 
     /**
-     * Applies the bitwise AND operation between the provided word and parameter.
-     * The result of this operation retains the bits that are set in both the word and the parameter.
-     *
-     * @param word The LongValue object representing the word.
-     * @param param The parameter against which AND operation needs to be performed.
+     * Atomically performs {@code word &= param}.
      */
     private void and(LongValue word, final long param) {
         set(word, param, (x, y) -> x & y);
     }
 
     /**
-     * Flips a range of bits, toggling them from their current value.
-     * If a bit within the range is currently set to 0, it will become 1, and vice versa.
-     *
-     * @param fromIndex Index of the first bit to flip (inclusive).
-     * @param toIndex Index of the last bit to flip (exclusive).
+     * Atomically flips bits in the range [{@code fromIndex}, {@code toIndex}).
      */
     public void flip(int fromIndex, int toIndex) {
         throwExceptionIfClosed();
@@ -327,9 +314,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Sets the bit at the specified index to {@code true}.
-     *
-     * @param bitIndex The index of the bit to be set to {@code true}.
+     * Atomically sets the bit at {@code bitIndex}.
      */
     public void set(int bitIndex) {
         // Check if the BitSet is closed, if so, throws an exception
@@ -347,11 +332,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Performs a bitwise OR operation on the given word and parameter.
-     * This method is particularly used to set a specific bit to {@code true} within a word.
-     *
-     * @param word The word on which the operation will be performed.
-     * @param param The parameter value used in the OR operation.
+     * Atomically performs {@code word |= param}.
      */
     private void pipe(LongValue word, long param) {
         // Set the desired bit by using the OR operation
@@ -359,11 +340,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Sets the bit at the specified index to the specified value.
-     * If the value is {@code true}, the bit is set to 1, otherwise it is set to 0.
-     *
-     * @param bitIndex The index of the bit to be modified.
-     * @param value The new value for the specified bit.
+     * Sets the bit at {@code bitIndex} to {@code value}.
      */
     public void set(int bitIndex, boolean value) {
         throwExceptionIfClosed();
@@ -375,7 +352,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Sets the bits from the specified {@code fromIndex} (inclusive) to the specified {@code toIndex} (exclusive) to {@code true}.
+     * Atomically sets all bits in the range [{@code fromIndex}, {@code toIndex}) to {@code true}.
      */
     public void set(int fromIndex, int toIndex) {
         throwExceptionIfClosed();
@@ -412,13 +389,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Sets the bits from the specified {@code fromIndex} (inclusive) to the specified {@code toIndex} (exclusive) to the specified value.
-     *
-     * @param fromIndex index of the first bit to be set
-     * @param toIndex   index after the last bit to be set
-     * @param value     value to set the selected bits to
-     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, or {@code toIndex} is negative, or {@code fromIndex} is larger than {@code
-     *                                   toIndex}
+     * Atomically sets all bits in the range to {@code value}.
      */
     public void set(int fromIndex, int toIndex, boolean value) {
         throwExceptionIfClosed();
@@ -733,9 +704,8 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Calculates and returns the number of bits set to {@code true} in this {@code ChronicleBitSet}.
-     *
-     * @return The number of bits currently set to {@code true}.
+     * Counts the bits set to {@code true}. Each word is read
+     * with {@link LongValue#getVolatileValue()} for visibility.
      */
     public int cardinality() {
         throwExceptionIfClosed();
@@ -1010,6 +980,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
                 false);
     }
 
+    /** Serialises the backing words to {@code wire}. */
     @Override
     public void writeMarshallable(@NotNull final WireOut wire) {
         wire.write("numberOfLongValues").int32(words.length);
@@ -1021,21 +992,22 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         }
     }
 
+    /** Deserialises the backing words from {@code wire}. */
     @Override
     public void readMarshallable(@NotNull final WireIn wire) throws IORuntimeException {
         singleThreadedCheckDisabled(true);
         throwExceptionIfClosed();
 
-        closeQuietly(words);
+        closeQuietly((Object[]) words);
 
         int numberOfLongValues = wire.read("numberOfLongValues").int32();
         words = new LongReference[numberOfLongValues];
         for (int i = 0; i < numberOfLongValues; i++) {
             words[i] = wire.getValueIn().int64ForBinding(null);
         }
-
     }
 
+    /** Copies the contents of {@code bitSet} into this instance. */
     @Override
     public void copyFrom(ChronicleBitSet bitSet) {
         OS.memory().loadFence();

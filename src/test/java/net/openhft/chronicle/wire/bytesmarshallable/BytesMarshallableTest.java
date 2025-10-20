@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +19,7 @@ package net.openhft.chronicle.wire.bytesmarshallable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -37,8 +36,8 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
-@SuppressWarnings("rawtypes")
 @RunWith(value = Parameterized.class)
 public class BytesMarshallableTest extends WireTestCommon {
     private final WireType wireType;
@@ -68,6 +67,8 @@ public class BytesMarshallableTest extends WireTestCommon {
     @SuppressWarnings("incomplete-switch")
     @Test
     public void primitiveDto() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Creating a wire object using the previously defined method
         Wire wire = createWire();
 
@@ -115,6 +116,8 @@ public class BytesMarshallableTest extends WireTestCommon {
     @SuppressWarnings("incomplete-switch")
     @Test
     public void primitiveDto2() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Creating a wire object using the previously defined method
         Wire wire = createWire();
 

@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,9 +33,7 @@ public class Base32LongConverter extends AbstractLongConverter {
      */
     public static final Base32LongConverter INSTANCE = new Base32LongConverter();
 
-    /**
-     * The character set used for base32 encoding.
-     */
+    // The character set used for base32 encoding
     private static final String CHARS = "234567ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     /**
@@ -57,4 +53,3 @@ public class Base32LongConverter extends AbstractLongConverter {
             converter.addEncode(ch, Character.toUpperCase(ch));
     }
 }
-

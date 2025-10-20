@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +75,7 @@ public class WireTests {
     // Test to verify that hex representations of negative long values are handled correctly
     @Test
     public void testHexLongNegativeTest() {
-        final Bytes<?> b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.allocateElasticOnHeap();
         final long expectedLong1 = -1;
         final long expectedLong2 = Long.MIN_VALUE;
         try {
@@ -107,7 +105,7 @@ public class WireTests {
     // Test to verify that non-existent type literals are handled leniently
     @Test
     public void testLenientTypeLiteral() {
-        final Bytes<?> b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             final Wire wire = createWire(b);
 
@@ -127,7 +125,7 @@ public class WireTests {
     // Test to verify that Date objects are correctly written and read
     @Test
     public void testDate() {
-        final Bytes<?> b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.allocateElasticOnHeap();
         final Wire wire = createWire(b);
 
         wire.getValueOut()
@@ -154,13 +152,13 @@ public class WireTests {
     // Test to verify that LocalDateTime objects are correctly written and read
     @Test
     public void testLocalDateTime() {
-        final Bytes<?> b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             final Wire wire = createWire(b);
             LocalDateTime expected = LocalDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
             wire.getValueOut().object(expected);
             // Is a hint needed? Type hint varies based on the WireType
-            Class type = wireType == WireType.JSON ? LocalDateTime.class : Object.class;
+            Class<?> type = wireType == WireType.JSON ? LocalDateTime.class : Object.class;
             assertEquals(expected, wire.getValueIn().object(type));
         } finally {
             b.releaseLast();
@@ -170,12 +168,12 @@ public class WireTests {
     // Test to verify that ZonedDateTime objects are correctly written and read
     @Test
     public void testZonedDateTime() {
-        final Bytes<?> b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.allocateElasticOnHeap();
         final Wire wire = createWire(b);
         ZonedDateTime expected = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
         wire.getValueOut().object(expected);
         // Is a hint needed? Type hint varies based on the WireType
-        Class type = wireType == WireType.JSON ? ZonedDateTime.class : Object.class;
+        Class<?> type = wireType == WireType.JSON ? ZonedDateTime.class : Object.class;
         assertEquals(expected, wire.getValueIn().object(type));
 
         b.releaseLast();
@@ -185,7 +183,7 @@ public class WireTests {
     @Test
     public void testSkipValueWithNumbersAndStrings() {
 
-        final Bytes<?> b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.allocateElasticOnHeap();
         final Wire wire = createWire(b);
 
         wire.write("value1").text("text");
@@ -207,7 +205,7 @@ public class WireTests {
     // Test to verify that null values are correctly written and read
     @Test
     public void testWriteNull() {
-        final Bytes<?> b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.allocateElasticOnHeap();
         final Wire wire = createWire(b);
         wire.write().object(null);  // Write null values
         wire.write().object(null);
@@ -234,7 +232,7 @@ public class WireTests {
 
         @NotNull TestClass testClass = new TestClass(Boolean.class);
 
-        final Bytes<?> b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.allocateElasticOnHeap();
         final Wire wire = createWire(b);
         wire.write().typedMarshallable(testClass);
 
@@ -247,7 +245,7 @@ public class WireTests {
     // Test to verify that unknown fields are cleared between read contexts
     @Test
     public void unknownFieldsAreClearedBetweenReadContexts() {
-        final Bytes<?> b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.allocateElasticOnHeap();
         final Wire wire = createWire(b);
 
         // Writing "first" and "second" fields to the document
@@ -273,7 +271,7 @@ public class WireTests {
         assumeTrue(usePadding);
         assumeTrue(wireType == WireType.BINARY);
 
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.allocateElasticOnHeap();
         final Wire wire = createWire(b);
 
         // Asserting that the peek YAML is initially empty
@@ -340,7 +338,7 @@ public class WireTests {
     @Test
     // Test to ensure that isPresent() returns true when the value is actually present
     public void isPresentReturnsTrueWhenValueIsPresent() {
-        Bytes<?> b = Bytes.elasticByteBuffer();  // Create an elastic byte buffer
+        Bytes<?> b = Bytes.allocateElasticOnHeap();  // Create an elastic byte buffer
         final Wire wire = createWire(b);         // Create a Wire object
         wire.write("value").int32(12345);        // Write an integer value to the wire with the key "value"
         assertTrue(wire.read("value").isPresent()); // Assert that reading the key "value" from the wire is present
@@ -349,7 +347,7 @@ public class WireTests {
     @Test
     // Test to ensure that isPresent() returns false when the value is not present
     public void isPresentReturnsFalseWhenValueIsNotPresent() {
-        Bytes<?> b = Bytes.elasticByteBuffer();  // Create an elastic byte buffer
+        Bytes<?> b = Bytes.allocateElasticOnHeap();  // Create an elastic byte buffer
         final Wire wire = createWire(b);         // Create a Wire object
         wire.write("value").int32(12345);        // Write an integer value to the wire with the key "value"
         assertFalse(wire.read("anotherValue").isPresent());  // Assert that reading a non-existing key from the wire is not present
@@ -364,13 +362,13 @@ public class WireTests {
 
     // Inner class to represent a test object with a Class field
     static class TestClass extends SelfDescribingMarshallable {
-        Class o;  // Class field
+        Class<?> o;
 
-        TestClass(Class o) {  // Constructor
+        TestClass(Class<?> o) {
             this.o = o;
         }
 
-        Class clazz() {  // Getter for the Class field
+        Class<?> clazz() {
             return o;
         }
     }

@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +95,7 @@ public class ShortTextLongConverterTest extends WireTestCommon {
 
     @Test
     public void testAppend() {
-        final Bytes<?> b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             final LongConverter idLongConverter = ShortTextLongConverter.INSTANCE;
             final long helloWorld = idLongConverter.parse(TEST_STRING);
@@ -110,7 +108,7 @@ public class ShortTextLongConverterTest extends WireTestCommon {
 
     @Test
     public void testAppendWithExistingData() {
-        final Bytes<?> b = Bytes.elasticByteBuffer().append("hello");
+        final Bytes<?> b = Bytes.allocateElasticOnHeap().append("hello");
         try {
             final LongConverter idLongConverter = ShortTextLongConverter.INSTANCE;
             final long helloWorld = idLongConverter.parse(TEST_STRING);

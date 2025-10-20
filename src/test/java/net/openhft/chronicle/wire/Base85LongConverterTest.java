@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +19,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.junit.Test;
 
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
@@ -101,7 +98,7 @@ public class Base85LongConverterTest extends WireTestCommon {
     @Test
     public void testAppend() {
         // Create an elastic byte buffer
-        final Bytes<?> b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             // Obtain the singleton instance of Base85LongConverter
             final Base85LongConverter idLongConverter = Base85LongConverter.INSTANCE;
@@ -121,7 +118,7 @@ public class Base85LongConverterTest extends WireTestCommon {
     @Test
     public void testAppendWithExistingData() {
         // Create an elastic byte buffer and append "hello" to it
-        final Bytes<?> b = Bytes.elasticByteBuffer().append("hello");
+        final Bytes<?> b = Bytes.allocateElasticOnHeap().append("hello");
         try {
             // Obtain the singleton instance of Base85LongConverter
             final Base85LongConverter idLongConverter = Base85LongConverter.INSTANCE;

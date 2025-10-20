@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +34,7 @@ public class MethodIdTest extends WireTestCommon {
     @Test
     public void methodIdInBinary() {
         // Create a new BinaryWire instance with specified configurations
-        Wire wire = new BinaryWire(new HexDumpBytes(), true, true, false, 128, "", false);
+        Wire wire = new BinaryWire(new HexDumpBytes(), true, true, false, 128, "");
 
         // Generate a proxy instance for the Methods interface
         final Methods methods = wire.methodWriter(Methods.class);

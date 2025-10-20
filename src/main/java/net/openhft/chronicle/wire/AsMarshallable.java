@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +26,7 @@ import java.lang.annotation.Target;
  * a {@code Marshallable} type, implying it should be serialized or deserialized accordingly.
  * It can be applied to fields or method parameters to provide metadata about their marshalling behavior.
  */
-@Retention(RetentionPolicy.RUNTIME)  // Indicates that this annotation should be retained at runtime.
-@Target({ElementType.FIELD, ElementType.PARAMETER})  // Specifies that this annotation can be applied to fields and method parameters.
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.PARAMETER})
 public @interface AsMarshallable {
 }

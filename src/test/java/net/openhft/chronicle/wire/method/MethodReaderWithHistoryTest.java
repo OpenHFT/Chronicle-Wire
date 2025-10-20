@@ -1,8 +1,11 @@
+/*
+ * Copyright 2016-2025 chronicle.software
+ */
+
 package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.wire.VanillaMessageHistory;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
@@ -42,7 +45,7 @@ public class MethodReaderWithHistoryTest extends WireTestCommon {
         RecordHistorySays historySays = wire.methodWriter(RecordHistorySays.class);
 
         // Initialize a message history instance
-        VanillaMessageHistory history = new VanillaMessageHistory();
+        net.openhft.chronicle.wire.VanillaMessageHistory history = new net.openhft.chronicle.wire.VanillaMessageHistory();
 
         // Record and write the first history and message
         history.reset();

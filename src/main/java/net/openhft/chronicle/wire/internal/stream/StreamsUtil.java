@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,6 +117,7 @@ public final class StreamsUtil {
      * The VanillaSpliteratorOfLong is a spliterator over a PrimitiveIterator.OfLong,
      * providing basic spliterator functionalities for long elements.
      */
+    @SuppressWarnings("overloads")
     public static final class VanillaSpliteratorOfLong
             extends AbstractPrimitiveSpliterator<Long, LongConsumer, Spliterator.OfLong, PrimitiveIterator.OfLong>
             implements Spliterator.OfLong {
@@ -153,6 +152,7 @@ public final class StreamsUtil {
      * The VanillaSpliteratorOfDouble is a spliterator over a PrimitiveIterator.OfDouble,
      * providing basic spliterator functionalities for double elements.
      */
+    @SuppressWarnings("overloads")
     public static final class VanillaSpliteratorOfDouble
             extends AbstractPrimitiveSpliterator<Double, DoubleConsumer, Spliterator.OfDouble, PrimitiveIterator.OfDouble>
             implements Spliterator.OfDouble {
@@ -188,7 +188,7 @@ public final class StreamsUtil {
      * mechanisms to iterate over primitive elements, supporting parallel processing by splitting the source into smaller chunks.
      *
      * <p>The abstract class expects the implementation of the {@code split} method, which dictates the splitting mechanism
-     * for derived primitive spliterators.</p>
+     * for derived primitive spliterators.
      *
      * @param <T> The type of the elements returned by this spliterator.
      * @param <C> The type of consumer for the primitive type.
@@ -347,7 +347,6 @@ public final class StreamsUtil {
             next = null;
             return val;
         }
-
     }
 
     /**
@@ -413,7 +412,6 @@ public final class StreamsUtil {
             next = Long.MIN_VALUE;
             return val;
         }
-
     }
 
     /**
@@ -479,7 +477,5 @@ public final class StreamsUtil {
             next = Double.NaN;
             return val;
         }
-
     }
-
 }

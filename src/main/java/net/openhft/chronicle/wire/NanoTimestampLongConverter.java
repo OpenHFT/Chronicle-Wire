@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,22 +46,12 @@ public class NanoTimestampLongConverter extends AbstractTimestampLongConverter {
     /**
      * Constructs a new {@code NanoTimestampLongConverter} with the specified zone ID.
      *
-     * @param zoneId the zone ID to be used for the conversion of long values
+     * @param zoneId The string representation of the {@link java.time.ZoneId}
+     *               used for formatting and parsing. Nanosecond precision is
+     *               supported.
      */
     public NanoTimestampLongConverter(String zoneId) {
         super(zoneId, TimeUnit.NANOSECONDS);
-    }
-
-    /**
-     * Constructs a new {@code NanoTimestampLongConverter} with the specified zone ID and flag for including zone suffix for UTC.
-     * This constructor is set to be deprecated in x.26 version.
-     *
-     * @param zoneId                 the zone ID to be used for the conversion of long values
-     * @param includeZoneSuffixForUTC the flag to indicate if 'Z' suffix should be included for UTC zone timestamps
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    public NanoTimestampLongConverter(String zoneId, boolean includeZoneSuffixForUTC) {
-        super(zoneId, TimeUnit.NANOSECONDS, includeZoneSuffixForUTC);
     }
 
     /**

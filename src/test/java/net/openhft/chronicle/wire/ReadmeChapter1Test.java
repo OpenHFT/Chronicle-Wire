@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +16,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -30,8 +30,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 public class ReadmeChapter1Test extends WireTestCommon {
+
+    @Before
+    public void hasDirect() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+    }
+
     @SuppressWarnings("unused")
     @Test
     public void example1() {
@@ -209,7 +216,6 @@ mydata: {
   timeUnit: NANOSECONDS,
   price: 10.5
 }
-
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ```
 To write in binary instead
@@ -271,7 +277,6 @@ mydata: !Data {
   timeUnit: NANOSECONDS,
   price: 10.5
 }
-
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ```
 To write in binary instead
@@ -414,13 +419,15 @@ mydata: [
     number: 98765,
     timeUnit: HOURS,
     price: 1.5
-},
+}
+,
   !Data {
     message: G'Day All,
     number: 1212121,
     timeUnit: MINUTES,
     price: 12.34
-},
+}
+,
   !Data {
     message: Howyall,
     number: 1234567890,
@@ -462,13 +469,15 @@ mydata: [
     number: 98765,
     timeUnit: HOURS,
     price: 1.5
-},
+}
+,
   !Data {
     message: G'Day All,
     number: 1212121,
     timeUnit: MINUTES,
     price: 12.34
-},
+}
+,
   !Data {
     message: Howyall,
     number: 1234567890,
@@ -519,7 +528,6 @@ prints
   timeUnit: NANOSECONDS,
   price: 10.5
 }
-
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ```
 To write in binary instead
@@ -553,7 +561,6 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
         bytes2.releaseLast();
     }
 }
-
 /*
 The code for the class Data
 ```java

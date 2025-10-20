@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@
 package net.openhft.chronicle.wire.internal;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.*;
@@ -26,18 +25,20 @@ import net.openhft.chronicle.wire.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 
 /**
  * This class allows for the serialization of {@link Marshallable} objects and their transmission over HTTP using the POST method.
  * It is conceptually similar to the command {@code wget --post-data='{data}' http://{host}:{port}/url...}.
- *
+ * <p>
  * The class encapsulates a {@link Wire} which holds the serialized representation. On closure of a document context,
  * the serialized content is posted to the given URL.
  */
-
+@SuppressWarnings("this-escape")
 public class HTTPMarshallableOut implements MarshallableOut {
 
     // The target URL to which serialized data is posted
@@ -68,7 +69,7 @@ public class HTTPMarshallableOut implements MarshallableOut {
                 try {
                     endWire();
                     try (final OutputStream out = conn.getOutputStream()) {
-                        final Bytes<byte[]> bytes = (Bytes<byte[]>) wire.bytes();
+                        final Bytes<byte[]> bytes = Jvm.uncheckedCast(wire.bytes());
                         final byte[] b = bytes.underlyingObject();
                         assert b != null;
                         out.write(b, 0, (int) bytes.readLimit());

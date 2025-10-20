@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +28,6 @@ import net.openhft.chronicle.core.pool.EnumCache;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.scoped.ScopedResourcePool;
-import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.wire.internal.StringConsumerMarshallableOut;
 import net.openhft.compiler.CachedCompiler;
@@ -61,38 +58,79 @@ import static net.openhft.chronicle.wire.SerializationStrategies.*;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static net.openhft.chronicle.wire.WireType.YAML_ONLY;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
 /**
- * The {@code Wires} enum encapsulates constants and utility methods related to wire operations.
- * It defines flags, masks, and utility methods that facilitate operations on wires.
- * For example, it provides constants like {@code NOT_COMPLETE} to indicate a wire message's completeness status.
- * This enum doesn't have any specific enumeration values but provides a utility-based structure.
+ * Utility holder for low-level wire constants and helper methods.
+ * <p>
+ * This enum does not contain any enumeration values.  It acts as a
+ * central hub for header flags and masks, static utility methods for
+ * common wire operations, and management of reusable resources such as
+ * {@link StringBuilder} pools and {@link net.openhft.compiler.CachedCompiler}
+ * instances.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public enum Wires {
     ; // No specific enumeration values
 
-    // Constants defining various masks and flags for wire operations
+    /**
+     * Mask for extracting the length from a 4&nbsp;byte header.
+     * Only the lower 30&nbsp;bits are used for the length value.
+     */
     public static final int LENGTH_MASK = -1 >>> 2;
-    public static final int NOT_COMPLETE = 0x8000_0000;
-    public static final int META_DATA = 1 << 30;
-    public static final int UNKNOWN_LENGTH = 0x0;
-    // value to use when the message is not ready and of an unknown length
-    public static final int NOT_COMPLETE_UNKNOWN_LENGTH = NOT_COMPLETE;
-    // value to use when no more data is possible e.g. on a roll.
-    public static final int END_OF_DATA = NOT_COMPLETE | META_DATA;
-    public static final int NOT_INITIALIZED = 0x0;
-    // An empty Bytes object
-    public static final Bytes<?> NO_BYTES = BytesStore.empty().bytesForRead();
-    // Size of the SPB header
-    public static final int SPB_HEADER_SIZE = 4;
-    // Dynamic list of class strategy functions
-    public static final List<Function<Class, SerializationStrategy>> CLASS_STRATEGY_FUNCTIONS = new CopyOnWriteArrayList<>();
 
-    @Deprecated(/* for removal in x.26 */)
-    static boolean THROW_CNFRE = Jvm.getBoolean("class.not.found.for.missing.class.alias", true);
-    // Class local storage for serialization strategies based on the class type
+    /**
+     * Flag ({@code 0x8000_0000}) indicating that the following message is not yet complete.
+     * Used in the length prefix of a size-prefixed blob.
+     */
+    public static final int NOT_COMPLETE = 0x8000_0000;
+
+    /**
+     * Flag ({@code 0x4000_0000}) marking the document as meta-data rather than data.
+     */
+    public static final int META_DATA = 1 << 30;
+
+    /**
+     * Value representing an unknown length ({@code 0}).
+     */
+    public static final int UNKNOWN_LENGTH = 0x0;
+
+    /**
+     * Combination of {@link #NOT_COMPLETE} and {@link #UNKNOWN_LENGTH} for incomplete messages
+     * of unknown size.
+     */
+    public static final int NOT_COMPLETE_UNKNOWN_LENGTH = NOT_COMPLETE;
+
+    /**
+     * Combination of {@link #NOT_COMPLETE} and {@link #META_DATA} used to indicate no more data
+     * is expected, for example at end of a roll.
+     */
+    public static final int END_OF_DATA = NOT_COMPLETE | META_DATA;
+
+    /**
+     * Value used for an uninitialised header ({@code 0}).
+     */
+    public static final int NOT_INITIALIZED = 0x0;
+
+    /**
+     * Shared immutable {@link Bytes} instance representing an empty buffer.
+     */
+    public static final Bytes<?> NO_BYTES = BytesStore.empty().bytesForRead();
+
+    /**
+     * Size in bytes of a Size-Prefixed Blob (SPB) header.
+     */
+    public static final int SPB_HEADER_SIZE = 4;
+
+    /**
+     * Registry of functions that determine the {@link SerializationStrategy} for a class.
+     */
+    public static final List<Function<Class<?>, SerializationStrategy>> CLASS_STRATEGY_FUNCTIONS = new CopyOnWriteArrayList<>();
+
+    /**
+     * Cache mapping classes to their {@link SerializationStrategy}.
+     * Strategies are resolved via {@link #CLASS_STRATEGY_FUNCTIONS}.
+     */
     static final ClassLocal<SerializationStrategy> CLASS_STRATEGY = ClassLocal.withInitial(c -> {
-        for (@NotNull Function<Class, SerializationStrategy> func : CLASS_STRATEGY_FUNCTIONS) {
+        for (@NotNull Function<Class<?>, SerializationStrategy> func : CLASS_STRATEGY_FUNCTIONS) {
             final SerializationStrategy strategy = func.apply(c);
             if (strategy != null)
                 return strategy;
@@ -100,15 +138,16 @@ public enum Wires {
         return ANY_OBJECT;
     });
 
-    // Class local storage for field information lookup based on class
+    // Cache of {@link FieldInfoPair} describing marshallable fields for each class
     static final ClassLocal<FieldInfoPair> FIELD_INFOS = ClassLocal.withInitial(FieldInfo::lookupClass);
 
-    // Function to produce Marshallable objects based on a given class type
+    // Provides a function that can create proxy {@link Marshallable} implementations for tuple-like interfaces
     static final ClassLocal<Function<String, Marshallable>> MARSHALLABLE_FUNCTION = ClassLocal.withInitial(tClass -> {
         Class[] interfaces = {Marshallable.class, tClass};
         if (tClass == Marshallable.class)
             interfaces = new Class[]{Marshallable.class};
         try {
+            @SuppressWarnings("deprecation")
             Class<?> proxyClass = Proxy.getProxyClass(tClass.getClassLoader(), interfaces);
             Constructor<?> constructor = proxyClass.getConstructor(InvocationHandler.class);
             constructor.setAccessible(true);
@@ -117,24 +156,36 @@ public enum Wires {
             throw new IllegalStateException(e);
         }
     });
+    /**
+     * Thread-local pool of {@link StringBuilder} instances to reduce allocations.
+     */
     static final ScopedResourcePool<StringBuilder> STRING_BUILDER_SCOPED_RESOURCE_POOL = StringBuilderPool.createThreadLocal();
-    @Deprecated(/* To be removed in x.26 */)
-    // Pool for string builders, aiding in efficient string operations
-    static final StringBuilderPool SBP = new StringBuilderPool();
-    // Thread local storage for BinaryWire instances
+
+    // Thread-local {@link BinaryWire} used for temporary read or write operations
     static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(Bytes.allocateElasticOnHeap()));
-    // Flag to determine if code dump is enabled
+
+    // Flag derived from the {@code dumpCodeToTarget} system property or {@link Jvm#isDebug()}. When true, generated Java source is written to the build target directory
     static final boolean DUMP_CODE_TO_TARGET = Jvm.getBoolean("dumpCodeToTarget", Jvm.isDebug());
-    // Constants related to thread identifiers
+
+    // Mask for embedding a thread identifier within a header
     private static final int TID_MASK = 0b00111111_11111111_11111111_11111111;
+
+    // Inverse of {@link #TID_MASK} for removing a masked thread identifier
     private static final int INVERSE_TID_MASK = ~TID_MASK;
-    // Flag to enable tuple generation
+
+    /**
+     * Flag indicating whether tuple generation is permitted via the
+     * {@code wire.generate.tuples} system property.
+     */
     public static boolean GENERATE_TUPLES = Jvm.getBoolean("wire.generate.tuples");
-    // Flags to assist with state management and logging
+
+    // Used to ensure an untyped bytes warning is logged only once
     static volatile boolean warnedUntypedBytesOnce = false;
-    // Thread local storage for string builders
+
+    // Legacy thread-local {@link StringBuilder}. Prefer {@link #STRING_BUILDER_SCOPED_RESOURCE_POOL}
     static ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
-    // Compiler cache for dynamic code generation
+
+    // Shared {@link net.openhft.compiler.CachedCompiler} for dynamic class generation
     static CachedCompiler CACHED_COMPILER = null;
 
     /**
@@ -200,60 +251,58 @@ public enum Wires {
     }
 
     /**
-     * This decodes some Bytes where the first 4-bytes is the length.  e.g. Wire.writeDocument wrote
-     * it. <a href="https://github.com/OpenHFT/RFC/tree/master/Size-Prefixed-Blob">Size Prefixed
-     * Blob</a>
+     * Dumps a sequence of size-prefixed binary messages as a human readable
+     * string.  The first four bytes of each message contain the length and
+     * status flags.  See the <a href="https://github.com/OpenHFT/RFC/tree/master/Size-Prefixed-Blob">Size Prefixed Blob</a>
+     * specification.
      *
-     * @param bytes to decode
-     * @return as String
+     * @param bytes the bytes containing the size-prefixed data
+     * @return the dump in text form
      */
     public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes) {
         return WireDumper.of(bytes).asString();
     }
 
     /**
-     * Converts the provided bytes, which represent aligned size-prefixed blobs,
-     * into a readable string format.
+     * Dumps aligned size-prefixed blobs.  Alignment means each record may have
+     * padding between messages.
      *
-     * @param bytes the bytes representing aligned size-prefixed blobs
-     * @return the readable string representation of the blobs
+     * @param bytes the bytes containing the aligned blobs
+     * @return textual dump of the messages
      */
     public static String fromAlignedSizePrefixedBlobs(@NotNull Bytes<?> bytes) {
         return WireDumper.of(bytes, true).asString();
     }
 
     /**
-     * Converts the provided bytes, representing size-prefixed blobs,
-     * into a readable string format with the option to abbreviate.
+     * Dumps size-prefixed blobs with optional abbreviation of long content.
      *
-     * @param bytes   the bytes representing size-prefixed blobs
-     * @param abbrev  if {@code true}, the output string will be abbreviated
-     * @return the readable string representation of the blobs
+     * @param bytes  the bytes containing the messages
+     * @param abbrev if {@code true} long fields are abbreviated
+     * @return textual dump of the blobs
      */
     public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, boolean abbrev) {
         return WireDumper.of(bytes).asString(abbrev);
     }
 
     /**
-     * Converts the provided bytes, representing size-prefixed blobs,
-     * into a readable string format from the specified position.
+     * Dumps size-prefixed blobs starting at a given position.
      *
-     * @param bytes    the bytes representing size-prefixed blobs
-     * @param position the position in bytes from which the conversion starts
-     * @return the readable string representation of the blobs from the specified position
+     * @param bytes    the bytes containing the messages
+     * @param position the offset in {@code bytes} to begin dumping
+     * @return textual dump of the remaining messages
      */
     public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, long position) {
         return fromSizePrefixedBlobs(bytes, position, false);
     }
 
     /**
-     * Converts the provided bytes, representing size-prefixed blobs,
-     * into a readable string format from a specified position and with the option to pad.
+     * Dumps size-prefixed blobs from a given position with optional padding.
      *
-     * @param bytes    the bytes representing size-prefixed blobs
-     * @param position the position in bytes from which the conversion starts
-     * @param padding  if {@code true}, the output string will have padding
-     * @return the readable string representation of the blobs from the specified position
+     * @param bytes    the bytes containing the messages
+     * @param position start position in {@code bytes}
+     * @param padding  whether message boundaries are padded
+     * @return textual dump of the blobs
      */
     public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, long position, boolean padding) {
         final long limit = bytes.readLimit();
@@ -263,33 +312,28 @@ public enum Wires {
     }
 
     /**
-     * Converts the provided bytes, which represent size-prefixed blobs,
-     * into a readable string format with options for padding and abbreviation.
+     * Dumps size-prefixed blobs with control over padding and abbreviation.
      *
-     * @param bytes   the bytes representing size-prefixed blobs
-     * @param padding if {@code true}, the output string will have padding
-     * @param abbrev  if {@code true}, the output string will be abbreviated
-     * @return the readable string representation of the blobs
+     * @param bytes   the bytes containing the messages
+     * @param padding whether message boundaries are padded
+     * @param abbrev  whether long content should be abbreviated
+     * @return textual dump of the blobs
      */
     public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, boolean padding, boolean abbrev) {
         return WireDumper.of(bytes, padding).asString(abbrev);
     }
 
     /**
-     * Converts the contents of the provided {@code DocumentContext}
-     * which represent size-prefixed blobs into a readable string format.
-     * The method supports handling of both TextWire and BinaryWire types.
+     * Dumps the current document of the supplied {@link DocumentContext} as a
+     * sequence of size-prefixed blobs.  Both {@link TextWire} and
+     * {@link BinaryWire} contexts are supported.
      *
-     * @param dc the {@code DocumentContext} holding the wire data
-     * @return the readable string representation of the blobs
+     * @param dc the document context whose content should be dumped
+     * @return textual dump of the blobs
      */
     public static String fromSizePrefixedBlobs(@NotNull DocumentContext dc) {
-        // Get the wire object from the document context
         Wire wire = dc.wire();
-        // Extract bytes from the wire
         Bytes<?> bytes = wire.bytes();
-
-        // Check if the wire is of TextWire type
         if (wire instanceof TextWire) {
             // Return the direct string representation for TextWire
             return bytes.toString();
@@ -312,9 +356,9 @@ public enum Wires {
             try {
                 // Write the computed header to the temporary bytes
                 tempBytes.writeOrderedInt(header);
-                final AbstractWire wire2 = ((BinaryReadDocumentContext) dc).wire;
+                final Wire wire2 = ((BinaryReadDocumentContext) dc).wire;
                 // Copy data from the original wire to the temporary bytes
-                tempBytes.write(wire2.bytes, 0, wire2.bytes.readLimit());
+                tempBytes.write(wire2.bytes(), 0, wire2.bytes().readLimit());
 
                 // Derive the wire type and apply it to the temporary bytes
                 final WireType wireType = WireType.valueOf(wire);
@@ -351,38 +395,33 @@ public enum Wires {
     }
 
     /**
-     * Converts the contents of the provided {@code WireIn}
-     * which represent size-prefixed blobs into a readable string format.
+     * Dumps the messages from a {@link WireIn} as a human readable string.
      *
-     * @param wireIn the {@code WireIn} instance holding the wire data
-     * @return the readable string representation of the blobs
+     * @param wireIn the input wire
+     * @return textual dump of the blobs
      */
     public static String fromSizePrefixedBlobs(@NotNull WireIn wireIn) {
         return fromSizePrefixedBlobs(wireIn, false);
     }
 
     /**
-     * Converts the contents of the provided {@code WireIn}
-     * which represent size-prefixed blobs into a readable string format,
-     * with the option to abbreviate the output.
+     * Dumps the messages from a {@link WireIn} with optional abbreviation.
      *
-     * @param wireIn the {@code WireIn} instance holding the wire data
-     * @param abbrev  if {@code true}, the output string will be abbreviated
-     * @return the readable string representation of the blobs
+     * @param wireIn the input wire
+     * @param abbrev whether long content should be abbreviated
+     * @return textual dump of the blobs
      */
     public static String fromSizePrefixedBlobs(@NotNull WireIn wireIn, boolean abbrev) {
         return WireDumper.of(wireIn).asString(abbrev);
     }
 
     /**
-     * @deprecated Use {@link #asText(WireIn, Bytes)} instead
+     * Converts the contents of {@code wireIn} to a text (YAML-like) representation.
+     *
+     * @param wireIn the source wire
+     * @param output buffer to receive the text
+     * @return {@code output} containing the textual form
      */
-    @Deprecated(/* To be removed in x.26 */)
-    @NotNull
-    public static CharSequence asText(@NotNull WireIn wireIn) {
-        return asText(wireIn, WireInternal.acquireInternalBytes());
-    }
-
     @NotNull
     public static CharSequence asText(@NotNull WireIn wireIn, Bytes<?> output) {
         ValidatableUtil.startValidateDisabled();
@@ -399,19 +438,13 @@ public enum Wires {
      * @param bytes the byte buffer for the wire
      * @return a new instance of JSONWire
      */
-    private static Wire newJsonWire(Bytes bytes) {
+    private static Wire newJsonWire(Bytes<?> bytes) {
         return new JSONWire(bytes).useTypes(true).trimFirstCurly(false).useTextDocuments();
     }
 
     /**
-     * @deprecated Use {@link #asBinary(WireIn, Bytes)} instead
+     * Copies the contents of {@code wireIn} into {@code output} using a binary wire.
      */
-    @Deprecated(/* To be removed in x.26 */)
-    @NotNull
-    public static Bytes asBinary(@NotNull WireIn wireIn) throws InvalidMarshallableException {
-        return asType(wireIn, BinaryWire::new, WireInternal.acquireInternalBytes());
-    }
-
     public static Bytes<?> asBinary(@NotNull WireIn wireIn, Bytes<?> output) throws InvalidMarshallableException {
         return asType(wireIn, BinaryWire::new, output);
     }
@@ -435,14 +468,8 @@ public enum Wires {
     }
 
     /**
-     * @deprecated Use {@link #asJson(WireIn, Bytes)} instead
+     * Converts {@code wireIn} to JSON and writes the result into {@code output}.
      */
-    @Deprecated(/* To be removed in x.26 */)
-    @NotNull
-    public static Bytes asJson(@NotNull WireIn wireIn) throws InvalidMarshallableException {
-        return asType(wireIn, Wires::newJsonWire, WireInternal.acquireInternalBytes());
-    }
-
     public static Bytes<?> asJson(@NotNull WireIn wireIn, Bytes<?> output) throws InvalidMarshallableException {
         return asType(wireIn, Wires::newJsonWire, output);
     }
@@ -453,113 +480,82 @@ public enum Wires {
      * @param bytes the byte buffer for the wire
      * @return a new instance of TextWire with timestamps
      */
-    private static Wire newTextWire(Bytes bytes) {
+    private static Wire newTextWire(Bytes<?> bytes) {
         return new TextWire(bytes).addTimeStamps(true);
     }
 
     /**
-     * @deprecated Use {@link #acquireStringBuilderScoped()} instead
+     * Obtains a {@link StringBuilder} from the thread-local pool wrapped in a
+     * {@link ScopedResource} so it is automatically returned when the scope is closed.
      */
-    @Deprecated(/* To be removed in x.26 */)
-    public static StringBuilder acquireStringBuilder() {
-        if (Jvm.isDebug()) {
-            return new StringBuilder();
-        } else {
-            return SBP.acquireStringBuilder();
-        }
-    }
-
     public static ScopedResource<StringBuilder> acquireStringBuilderScoped() {
         return STRING_BUILDER_SCOPED_RESOURCE_POOL.get();
     }
 
     /**
-     * Extracts the length from the given length value.
-     *
-     * @param len the encoded length
-     * @return the decoded length
+     * Extracts the pure length from a 4&nbsp;byte header value, removing
+     * flags such as {@link #NOT_COMPLETE} and {@link #META_DATA}.
      */
     public static int lengthOf(int len) {
         return len & LENGTH_MASK;
     }
 
     /**
-     * Checks if the given header is ready (complete and not zero).
-     *
-     * @param header the input header
-     * @return true if the header is ready, false otherwise
+     * Returns {@code true} if the header denotes a complete document.
      */
     public static boolean isReady(int header) {
         return (header & NOT_COMPLETE) == 0 && header != 0;
     }
 
     /**
-     * Checks if the given header is not complete or zero.
-     *
-     * @param header the input header
-     * @return true if the header is not complete or zero, false otherwise
+     * Returns {@code true} if the header indicates an incomplete document or zero length.
      */
     public static boolean isNotComplete(int header) {
         return (header & NOT_COMPLETE) != 0 || header == 0;
     }
 
     /**
-     * Checks if the given header represents ready data (neither meta-data nor incomplete) and is not zero.
-     *
-     * @param header the input header
-     * @return true if the header represents ready data, false otherwise
+     * Tests whether a header represents completed data (not meta-data) and is non-zero.
      */
     public static boolean isReadyData(int header) {
         return ((header & (META_DATA | NOT_COMPLETE)) == 0) && (header != 0);
     }
 
     /**
-     * Checks if the given length represents data and not meta-data.
-     *
-     * @param len the encoded length
-     * @return true if the length represents data, false otherwise
+     * Returns {@code true} if the header denotes data rather than meta-data.
      */
     public static boolean isData(int len) {
         return (len & META_DATA) == 0;
     }
 
     /**
-     * Checks if the given length represents ready meta-data.
-     *
-     * @param len the encoded length
-     * @return true if the length represents ready meta-data, false otherwise
+     * Returns {@code true} if the header is marked as meta-data and the document is complete.
      */
     public static boolean isReadyMetaData(int len) {
         return (len & (META_DATA | NOT_COMPLETE)) == META_DATA;
     }
 
     /**
-     * Checks if the given length represents a known length (neither unknown nor meta-data).
-     *
-     * @param len the encoded length
-     * @return true if the length is known, false otherwise
+     * Returns {@code true} if the header has a definite length value.
      */
     public static boolean isKnownLength(int len) {
         return (len & (META_DATA | LENGTH_MASK)) != UNKNOWN_LENGTH;
     }
 
     /**
-     * Checks if the given length is not initialized.
-     *
-     * @param len the encoded length
-     * @return true if the length is not initialized, false otherwise
+     * Returns {@code true} if the header has not been initialised.
      */
     public static boolean isNotInitialized(int len) {
         return len == NOT_INITIALIZED;
     }
 
     /**
-     * Converts a long value to an int, ensuring it falls within the 30-bit range.
+     * Converts {@code l} to a 30&nbsp;bit unsigned int.
      *
-     * @param l     the input long value
-     * @param error the error message template in case of an out-of-range value
-     * @return the converted int value
-     * @throws IllegalStateException if the value is out of the 30-bit range
+     * @param l     the value to convert
+     * @param error error message used if {@code l} is outside {@code 0}..{@link #LENGTH_MASK}
+     * @return {@code l} as an int
+     * @throws IllegalStateException if {@code l} is out of range
      */
     public static int toIntU30(long l, @NotNull String error) {
         if (l < 0 || l > LENGTH_MASK)
@@ -568,13 +564,14 @@ public enum Wires {
     }
 
     /**
-     * Acquires a lock on the given BytesStore at the specified position.
+     * Attempts to claim a 4&nbsp;byte header by atomically swapping
+     * {@link #NOT_INITIALIZED} with {@link #NOT_COMPLETE}.
      *
-     * @param store    the byte store to lock
-     * @param position the position at which to lock
-     * @return true if the lock was successfully acquired, false otherwise
+     * @param store    bytes containing the header
+     * @param position offset of the header
+     * @return {@code true} if the lock was acquired
      */
-    public static boolean acquireLock(@NotNull BytesStore store, long position) {
+    public static boolean acquireLock(@NotNull BytesStore<?, ?> store, long position) {
         return store.compareAndSwapInt(position, NOT_INITIALIZED, NOT_COMPLETE);
     }
 
@@ -634,77 +631,28 @@ public enum Wires {
      *
      * @return the created Bytes instance
      */
-    static Bytes<?> unmonitoredDirectBytes() {
-        Bytes<?> bytes = Bytes.allocateElasticDirect(128);
+    static Bytes<Void> unmonitoredDirectBytes() {
+        Bytes<Void> bytes = Bytes.allocateElasticDirect(128);
         IOTools.unmonitor(bytes);
         return bytes;
     }
 
     /**
-     * @deprecated Use {@link #acquireBytesScoped()} instead
+     * Provides a pooled {@link Bytes} instance wrapped in a {@link ScopedResource}.
+     *
+     * @return the scoped bytes
      */
-    @Deprecated(/* To be removed in x.26 */)
     @NotNull
-    public static Bytes<?> acquireBytes() {
-        if (Jvm.isDebug())
-            return Bytes.allocateElasticOnHeap();
-        Bytes<?> bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL,
-                Wires::unmonitoredDirectBytes);
-        bytes.clear();
-        return bytes;
-    }
-
-    @NotNull
-    public static ScopedResource<Bytes<?>> acquireBytesScoped() {
+    public static ScopedResource<Bytes<Void>> acquireBytesScoped() {
         return WireInternal.BYTES_SCOPED_THREAD_LOCAL.get();
     }
 
     /**
-     * @deprecated Use {@link #acquireBytesScoped()} instead
+     * Obtains a pooled {@link BinaryWire} wrapped in a {@link ScopedResource}
+     * for temporary serialisation tasks.
      */
-    @Deprecated(/* To be removed in x.26 */)
-    @NotNull
-    static Bytes<?> acquireBytesForToString() {
-        // otherwise we get confusing debug messages.
-        if (Jvm.isDebug())
-            return Bytes.allocateElasticOnHeap();
-
-        Bytes<?> bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_F2S_TL,
-                Wires::unmonitoredDirectBytes);
-        bytes.clear();
-        return bytes;
-    }
-
-    /**
-     * @deprecated Use {@link #acquireBinaryWireScoped()} instead
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    @NotNull
-    public static Wire acquireBinaryWire() {
-        Wire wire = ThreadLocalHelper.getTL(WireInternal.BINARY_WIRE_TL,
-                () -> new BinaryWire(Wires.unmonitoredDirectBytes())
-                        .setOverrideSelfDescribing(true));
-        wire.clear();
-        return wire;
-    }
-
     public static ScopedResource<Wire> acquireBinaryWireScoped() {
         return WireInternal.BINARY_WIRE_SCOPED_TL.get();
-    }
-
-    /**
-     * @return
-     * @deprecated Use {@link Wires#acquireBytesScoped()} instead
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    @NotNull
-    public static Bytes<?> acquireAnotherBytes() {
-        if (Jvm.isDebug())
-            return Bytes.allocateElasticOnHeap();
-        Bytes<?> bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL,
-                Wires::unmonitoredDirectBytes);
-        bytes.clear();
-        return bytes;
     }
 
     /**
@@ -834,8 +782,8 @@ public enum Wires {
      *
      * @param source source
      * @param target dest
+     * @param <T>    target type
      * @return target
-     * @param <T> target type
      */
     @NotNull
     public static <T> T copyTo(Object source, @NotNull T target) throws InvalidMarshallableException {
@@ -844,7 +792,7 @@ public enum Wires {
             Wire wire = wireSR.get();
             wire.getValueOut().object(source);
             wire.getValueIn().typePrefix(); // drop the type prefix.
-            wire.getValueIn().object(target, target.getClass());
+            wire.getValueIn().object(target, (Class<T>) target.getClass());
             return target;
         } finally {
             ValidatableUtil.endValidateDisabled();
@@ -885,7 +833,7 @@ public enum Wires {
      * @return List of field information
      */
     @NotNull
-    public static List<FieldInfo> fieldInfos(@NotNull Class aClass) {
+    public static List<FieldInfo> fieldInfos(@NotNull Class<?> aClass) {
         return FIELD_INFOS.get(aClass).list;
     }
 
@@ -895,7 +843,7 @@ public enum Wires {
      * @param aClass Class to retrieve field information for
      * @return Map of field names to their information
      */
-    public static @NotNull Map<String, FieldInfo> fieldInfoMap(@NotNull Class aClass) {
+    public static @NotNull Map<String, FieldInfo> fieldInfoMap(@NotNull Class<?> aClass) {
         return FIELD_INFOS.get(aClass).map;
     }
 
@@ -906,15 +854,12 @@ public enum Wires {
      * @param name   Field name
      * @return Information about the field
      */
-    public static FieldInfo fieldInfo(@NotNull Class aClass, String name) {
+    public static FieldInfo fieldInfo(@NotNull Class<?> aClass, String name) {
         return FIELD_INFOS.get(aClass).map.get(name);
     }
 
     /**
-     * Checks if a given integer represents the end of file marker.
-     *
-     * @param num Integer to check
-     * @return true if the integer represents end of file, false otherwise
+     * Returns {@code true} if the supplied header value denotes end of data.
      */
     public static boolean isEndOfFile(int num) {
         return num == END_OF_DATA;
@@ -1008,13 +953,13 @@ public enum Wires {
      * @return A sequence of objects read using the provided serialization strategy
      */
     @Nullable
-    public static <E> E objectSequence(ValueIn in, @Nullable E using, @Nullable Class clazz, SerializationStrategy<E> strategy) {
+    public static <E> E objectSequence(ValueIn in, @Nullable E using, @Nullable Class<? extends E> clazz, SerializationStrategy strategy) {
         if (clazz == Object.class)
             strategy = LIST;
         if (using == null)
-            using = (E) strategy.newInstanceOrNull(clazz);
+            using = strategy.newInstanceOrNull((Class<E>) clazz);
 
-        SerializationStrategy<E> finalStrategy = strategy;
+        SerializationStrategy finalStrategy = strategy;
         return in.sequence(using, (using1, in1) -> finalStrategy.readUsing(clazz, using1, in1, BracketType.UNKNOWN)) ? readResolve(using) : null;
     }
 
@@ -1030,9 +975,7 @@ public enum Wires {
      * @throws InvalidMarshallableException If the deserialization process encounters an error
      */
     @Nullable
-    public static <E> E objectMap(ValueIn in, @Nullable E using, @Nullable Class clazz, @NotNull SerializationStrategy<E> strategy) throws InvalidMarshallableException {
-
-        // If the input value is null, return null.
+    public static <E> E objectMap(ValueIn in, @Nullable E using, @Nullable Class<? extends E> clazz, @NotNull SerializationStrategy strategy) throws InvalidMarshallableException {
         if (in.isNull())
             return null;
 
@@ -1042,7 +985,7 @@ public enum Wires {
 
         // If no object is provided to populate, instantiate a new one using the strategy.
         if (using == null) {
-            using = (E) strategy.newInstanceOrNull(clazz);
+            using = strategy.newInstanceOrNull((Class<E>) clazz);
         }
 
         // If the class represents a Throwable, deserialize it using a special method.
@@ -1120,7 +1063,7 @@ public enum Wires {
      * @throws InvalidMarshallableException If the deserialization process encounters an error
      */
     @Nullable
-    public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class clazz) throws InvalidMarshallableException {
+    public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class<? extends E> clazz) throws InvalidMarshallableException {
         return ValidatableUtil.validate(object1(in, using, clazz, true));
     }
 
@@ -1135,7 +1078,7 @@ public enum Wires {
      * @return The deserialized and validated object.
      * @throws InvalidMarshallableException If an error occurs during deserialization.
      */
-    public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
+    public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class<? extends E> clazz, boolean bestEffort) throws InvalidMarshallableException {
         return ValidatableUtil.validate(object1(in, using, clazz, bestEffort));
     }
 
@@ -1150,9 +1093,7 @@ public enum Wires {
      * @return The deserialized object.
      * @throws InvalidMarshallableException If an error occurs during deserialization.
      */
-    public static <E> E object1(ValueIn in, @Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
-
-        // Attempt to get the type prefix or the object directly from the input.
+    public static <E> E object1(ValueIn in, @Nullable E using, @Nullable Class<? extends E> clazz, boolean bestEffort) throws InvalidMarshallableException {
         Object o = in.typePrefixOrObject(clazz);
         if (o == null && using instanceof ReadMarshallable)
             o = using;
@@ -1163,15 +1104,15 @@ public enum Wires {
     }
 
     @Nullable
-    static <E> E object2(ValueIn in, @Nullable E using, @Nullable Class clazz, boolean bestEffort, Class o) {
-        @Nullable final Class clazz2 = o;
+    static <E> E object2(ValueIn in, @Nullable E using, @Nullable Class<? extends E> clazz, boolean bestEffort, Class<?> o) {
+        @Nullable final Class<?> clazz2 = o;
         if (clazz2 == void.class) {
             in.text();
             return null;
         } else if (clazz2 == BytesStore.class) {
             if (using == null)
                 using = (E) Bytes.allocateElasticOnHeap(32);
-            clazz = Base64.class;
+            clazz = (Class<E>) Base64.class;
             bestEffort = true;
         }
 
@@ -1187,7 +1128,7 @@ public enum Wires {
                     || clazz.isAssignableFrom(clazz2)
                     || ReadResolvable.class.isAssignableFrom(clazz2)
                     || !ObjectUtils.isConcreteClass(clazz)) {
-                clazz = clazz2;
+                clazz = (Class<E>) clazz2;
                 if (!clazz.isInstance(using))
                     using = null;
             } else if (!bestEffort && !(isScalarClass(clazz) && isScalarClass(clazz2))) {
@@ -1195,9 +1136,9 @@ public enum Wires {
             }
         }
         if (clazz == null)
-            clazz = Object.class;
-        Class classForStrategy = clazz.isInterface() && using != null ? using.getClass() : clazz;
-        SerializationStrategy<E> strategy = CLASS_STRATEGY.get(classForStrategy);
+            clazz = (Class<E>) Object.class;
+        Class<?> classForStrategy = clazz.isInterface() && using != null ? using.getClass() : clazz;
+        SerializationStrategy strategy = CLASS_STRATEGY.get(classForStrategy);
         BracketType brackets = strategy.bracketType();
         if (brackets == BracketType.UNKNOWN)
             brackets = in.getBracketType();
@@ -1227,6 +1168,8 @@ public enum Wires {
                         ? (E) e
                         : (E) WireInternal.intern(clazz, e);
 
+            case UNKNOWN:
+            case HISTORY_MESSAGE:
             default:
                 throw new AssertionError();
         }
@@ -1254,8 +1197,7 @@ public enum Wires {
      * @param type The class type to check.
      * @return True if the class type is scalar, false otherwise.
      */
-    static boolean isScalarClass(Class type) {
-        // If type is a subtype of Comparable, fetch the associated serialization strategy.
+    static boolean isScalarClass(Class<?> type) {
         if (Comparable.class.isAssignableFrom(type)) {
             final SerializationStrategy strategy = Wires.CLASS_STRATEGY.get(type);
             // Return true only if the strategy is neither ANY_OBJECT nor ANY_NESTED.
@@ -1270,12 +1212,12 @@ public enum Wires {
      * @param clazz The class to check.
      * @return True if the class is considered a DTO interface, false otherwise.
      */
-    public static boolean dtoInterface(Class clazz) {
+    public static boolean dtoInterface(Class<?> clazz) {
         return clazz != null
                 && clazz.isInterface()
                 && clazz != Bytes.class
                 && clazz != BytesStore.class
-                && !clazz.getPackage().getName().startsWith("java");
+                && !Jvm.getPackageName(clazz).startsWith("java");
     }
 
     /**
@@ -1322,6 +1264,7 @@ public enum Wires {
 
     /**
      * Returns a tuple for the specified class and type name.
+     * The caller must check whether tuples are enabled before calling this method.
      *
      * @param <T>       The type parameter.
      * @param tClass    The class type for which the tuple is required.
@@ -1330,12 +1273,6 @@ public enum Wires {
      */
     @Nullable
     public static <T> T tupleFor(Class<T> tClass, String typeName) {
-        // Check if tuple generation is enabled.
-        if (!GENERATE_TUPLES) {
-            Jvm.warn().on(Wires.class, "Cannot find a class for " + typeName + " are you missing an alias?");
-            return null;
-        }
-
         // Set default class if not provided or provided as Object.
         if (tClass == null || tClass == Object.class)
             tClass = (Class<T>) Marshallable.class;
@@ -1356,19 +1293,15 @@ public enum Wires {
      * @return True if the object's package name is internal, false otherwise.
      */
     public static boolean isInternal(@NotNull Object value) {
-        String name = value.getClass().getPackage().getName();
+        String name = Jvm.getPackageName(value.getClass());
         return name.startsWith("java.")
                 || name.startsWith("javax.")
                 || name.startsWith("jdk.");
     }
 
     /**
-     * Creates a BinaryWire for reading with the given input, position, and length.
-     *
-     * @param in        The input bytes.
-     * @param position  The starting position.
-     * @param length    The length of data to read.
-     * @return A BinaryWire configured for reading.
+     * Provides a thread-local {@link BinaryWire} configured to read from the supplied
+     * byte store.  The returned wire shares the underlying bytes; no copy is made.
      */
     @NotNull
     public static BinaryWire binaryWireForRead(Bytes<?> in, long position, long length) {
@@ -1380,12 +1313,8 @@ public enum Wires {
     }
 
     /**
-     * Creates a BinaryWire for writing with the given input, position, and length.
-     *
-     * @param in        The input bytes.
-     * @param position  The starting position.
-     * @param length    The length of data to write.
-     * @return A BinaryWire configured for writing.
+     * Provides a thread-local {@link BinaryWire} configured for writing to the supplied
+     * byte store.  The returned wire views the given bytes without copying.
      */
     @NotNull
     public static BinaryWire binaryWireForWrite(Bytes<?> in, long position, long length) {
@@ -1397,18 +1326,11 @@ public enum Wires {
     }
 
     /**
-     * Loads a Java class from the given source code string using the specified class loader.
-     * If a cached compiler is not initialized, it initializes one either with default settings
-     * or specific directories if they exist and `DUMP_CODE_TO_TARGET` is true.
-     *
-     * @param classLoader The class loader to use for loading the class.
-     * @param className   The name of the class to be loaded.
-     * @param code        The Java source code for the class.
-     * @return The loaded class.
-     * @throws ClassNotFoundException If the class could not be found or loaded.
+     * Dynamically compiles and loads a class from its source code.
+     * The {@link #CACHED_COMPILER} is created lazily and may write generated
+     * files to the build directory when {@link #DUMP_CODE_TO_TARGET} is set.
      */
-    static synchronized Class loadFromJava(ClassLoader classLoader, String className, String code) throws ClassNotFoundException {
-        // Check if the CACHED_COMPILER instance is initialized.
+    static synchronized Class<?> loadFromJava(ClassLoader classLoader, String className, String code) throws ClassNotFoundException {
         if (CACHED_COMPILER == null) {
             final String target = OS.getTarget();
             File sourceDir = null;
@@ -1441,7 +1363,7 @@ public enum Wires {
     /**
      * Enum to provide serialization strategy based on the class type (Enum or DynamicEnum).
      */
-    enum SerializeEnum implements Function<Class, SerializationStrategy> {
+    enum SerializeEnum implements Function<Class<?>, SerializationStrategy> {
         INSTANCE;
 
         /**
@@ -1450,8 +1372,9 @@ public enum Wires {
          * @param aClass The class for which to determine the serialization strategy.
          * @return The serialization strategy or null if none matches.
          */
+        @SuppressWarnings("deprecation")
         @Nullable
-        static SerializationStrategy getSerializationStrategy(@NotNull Class aClass) {
+        static SerializationStrategy getSerializationStrategy(@NotNull Class<?> aClass) {
             if (DynamicEnum.class.isAssignableFrom(aClass))
                 return DYNAMIC_ENUM;
             if (Enum.class.isAssignableFrom(aClass))
@@ -1467,7 +1390,7 @@ public enum Wires {
          */
         @Nullable
         @Override
-        public SerializationStrategy apply(@NotNull Class aClass) {
+        public SerializationStrategy apply(@NotNull Class<?> aClass) {
             return getSerializationStrategy(aClass);
         }
     }
@@ -1475,7 +1398,7 @@ public enum Wires {
     /**
      * Enum providing serialization strategy specifically for Java Language related classes.
      */
-    enum SerializeJavaLang implements Function<Class, SerializationStrategy> {
+    enum SerializeJavaLang implements Function<Class<?>, SerializationStrategy> {
         INSTANCE;
 
         // Constants for date formatting.
@@ -1591,8 +1514,7 @@ public enum Wires {
          * @param in The ValueIn object which contains the class name.
          * @return The Class object associated with the name.
          */
-        private static Class forName(Class o, ValueIn in) {
-            // Acquire a StringBuilder from a ThreadLocal (presumably for performance reasons to avoid frequent allocations).
+        private static Class<?> forName(Class<?> o, ValueIn in) {
             final StringBuilder sb0 = sb.get();
 
             // Reset the StringBuilder to its initial state.
@@ -1606,20 +1528,21 @@ public enum Wires {
         }
 
         @Override
-        public SerializationStrategy apply(@NotNull Class aClass) {
+        public SerializationStrategy apply(@NotNull Class<?> aClass) {
             switch (aClass.getName()) {
                 case "[B":
                     return ScalarStrategy.of(byte[].class, (o, in) -> in.bytes());
 
                 case "java.lang.StringBuilder":
                     return ScalarStrategy.of(StringBuilder.class, (o, in) -> {
+                        StringBuilder builder;
                         try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
-                            StringBuilder builder = (o == null)
+                             builder = (o == null)
                                     ? stlSb.get()
                                     : o;
                             in.textTo(builder);
                         }
-                        return o;
+                        return builder;
                     });
 
                 case "java.lang.String":
@@ -1642,7 +1565,6 @@ public enum Wires {
 
                 case "java.lang.Character":
                     return ScalarStrategy.of(Character.class, (o, in) -> {
-                        //noinspection unchecked
                         @Nullable final String text = in.text();
                         if (text == null || text.length() == 0)
                             return null;
@@ -1722,7 +1644,7 @@ public enum Wires {
                     if (aClass.isPrimitive())
                         return ANY_SCALAR;
                     if (aClass.isArray()) {
-                        final Class componentType = aClass.getComponentType();
+                        final Class<?> componentType = aClass.getComponentType();
                         if (componentType.isPrimitive())
                             return PRIM_ARRAY;
                         return ARRAY;
@@ -1743,7 +1665,7 @@ public enum Wires {
      * The primary function of this enum is to map a {@link Class} to its appropriate {@link SerializationStrategy}.
      * For example, classes that implement the {@link Demarshallable} interface will be associated with the DEMARSHALLABLE strategy.
      */
-    enum SerializeMarshallables implements Function<Class, SerializationStrategy> {
+    enum SerializeMarshallables implements Function<Class<?>, SerializationStrategy> {
         INSTANCE;
 
         /**
@@ -1753,7 +1675,7 @@ public enum Wires {
          * @return The serialization strategy, or null if there's no specific strategy for the class.
          */
         @Nullable
-        static SerializationStrategy getSerializationStrategy(@NotNull Class aClass) {
+        static SerializationStrategy getSerializationStrategy(@NotNull Class<?> aClass) {
             if (Demarshallable.class.isAssignableFrom(aClass))
                 return DEMARSHALLABLE;
             if (ReadMarshallable.class.isAssignableFrom(aClass)
@@ -1770,7 +1692,7 @@ public enum Wires {
          * @return The corresponding serialization strategy for the given class.
          */
         @Override
-        public SerializationStrategy apply(@NotNull Class aClass) {
+        public SerializationStrategy apply(@NotNull Class<?> aClass) {
             @Nullable SerializationStrategy x = getSerializationStrategy(aClass);
             if (x != null) return x;
             if (Map.class.isAssignableFrom(aClass))
@@ -1796,7 +1718,7 @@ public enum Wires {
      * classes like BytesStore, Bytes, and Base64 encoded bytes. It helps in mapping specific classes
      * to the corresponding serialization strategies.
      */
-    enum SerializeBytes implements Function<Class, SerializationStrategy> {
+    enum SerializeBytes implements Function<Class<?>, SerializationStrategy> {
         INSTANCE;
 
         /**
@@ -1827,7 +1749,7 @@ public enum Wires {
          * @return The corresponding serialization strategy for the given class or null if not found.
          */
         @Override
-        public SerializationStrategy apply(@NotNull Class aClass) {
+        public SerializationStrategy apply(@NotNull Class<?> aClass) {
             switch (aClass.getName()) {
                 case "net.openhft.chronicle.bytes.BytesStore":
                     return ScalarStrategy.of(BytesStore.class, (o, in) -> in.bytesStore());
@@ -1977,7 +1899,7 @@ public enum Wires {
                     return Boolean.TRUE;
             }
             if (args == null || args.length == 0) {
-                Class returnType = method.getReturnType();
+                Class<?> returnType = method.getReturnType();
                 if (fields.containsKey(name))
                     return ObjectUtils.convertTo(returnType, fields.get(name));
                 return ObjectUtils.defaultValue(returnType);
@@ -1996,12 +1918,12 @@ public enum Wires {
          * 2. If the other object is an instance of {@link Marshallable}.
          * 3. If the class names match.
          * 4. If the other object is a proxy.
-         * 5. If the proxy's invocation handler is an instance of {@link TupleInvocationHandler}.
-         * 6. If the fields map inside both {@link TupleInvocationHandler} instances are equal.
+         * 5. If the proxy's invocation handler is an instance of .
+         * 6. If the fields map inside both  instances are equal.
          *
          * @param proxy The proxy instance being compared.
          * @param o     The object to be compared with the proxy for equality.
-         * @return true if the specified object is equal to the proxy, otherwise false.
+         * @return Boolean.TRUE if the specified object is equal to the proxy, otherwise Boolean.FALSE.
          */
         @NotNull
         private Object equals0(Object proxy, Object o) {
@@ -2032,12 +1954,10 @@ public enum Wires {
     static class TupleFieldInfo extends AbstractFieldInfo {
 
         /**
-         * Constructor for the {@link TupleFieldInfo}.
-         *
          * @param name The name of the field.
          * @param type The type of the field.
          */
-        public TupleFieldInfo(String name, Class type) {
+        public TupleFieldInfo(String name, Class<?> type) {
             super(type, bracketType(SerializeMarshallables.INSTANCE.apply(type)), name);
         }
 

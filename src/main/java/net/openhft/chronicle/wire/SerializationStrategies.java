@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,11 +38,11 @@ import java.util.*;
 
 import static net.openhft.chronicle.wire.BracketType.UNKNOWN;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
 /**
  * Enumerates the available serialization strategies, each implementing the {@link SerializationStrategy} interface.
  * These strategies cater to different serialization requirements and support specific object types.
  */
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public enum SerializationStrategies implements SerializationStrategy {
 
     /**
@@ -362,7 +360,8 @@ public enum SerializationStrategies implements SerializationStrategy {
                 wrapper.demarshallable = Demarshallable.newInstance(wrapper.type, in.wireIn());
                 return wrapper;
             } else if (using instanceof ReadMarshallable) {
-                return in.object(using, Object.class);
+                ((ReadMarshallable) using).readMarshallable(in.wireIn());
+                return using;
             } else {
                 return Demarshallable.newInstance((Class) using.getClass(), in.wireIn());
             }
@@ -620,15 +619,22 @@ public enum SerializationStrategies implements SerializationStrategy {
             @NotNull List<Object> list = (o == null ? new ArrayList<>() : (List<Object>) o);
             @NotNull final WireIn wireIn = in.wireIn();
             long pos = wireIn.bytes().readPosition();
+            int count = 0;
             while (in.hasNextSequenceItem()) {
-                list.add(in.object());
-
+                if (list.size() > count) {
+                    list.set(count, in.object(list.get(count), Object.class));
+                } else {
+                    list.add(in.object());
+                }
+                count++;
                 // make sure we are progressing.
                 long pos2 = wireIn.bytes().readPosition();
                 if (pos2 <= pos && !Jvm.isDebug())
                     throw new IllegalStateException(wireIn.bytes().toDebugString());
                 pos = pos2;
             }
+            while (list.size() > count)
+                list.remove(list.size() - 1);
             return list;
         }
 
@@ -676,7 +682,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         /**
          * Reads an array object from the provided input source, adding each
          * item in the sequence to a list, which is then converted into an array.
-         *
+         * <p>
          * If the 'using' parameter is an instance of ArrayWrapper, the method
          * first deserializes items into a list and then wraps them into an array
          * with the correct component type. Otherwise, it deserializes items into
@@ -749,7 +755,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         /**
          * Reads a primitive array object from the provided input source,
          * dynamically resizing the array during the deserialization process.
-         *
+         * <p>
          * The method starts with an empty array and doubles its size as needed
          * to accommodate the incoming data. After all items have been read,
          * the array is resized to fit the number of items that were read.
@@ -825,7 +831,7 @@ public enum SerializationStrategies implements SerializationStrategy {
      * definition for serialization purposes.
      * <p>
      * Attempts to create a new instance of the given class.
-     * </p>
+     *
      * @param type The class for which a new instance is to be created.
      * @return A new instance of the given class or {@code null} if the instantiation fails.
      */
@@ -852,15 +858,11 @@ public enum SerializationStrategies implements SerializationStrategy {
      */
     static class ArrayWrapper implements ReadResolvable<Object[]> {
 
-        /**
-         * The class type of the elements in the array.
-         */
+        // The class type of the elements in the array
         @NotNull
         final Class type;
 
-        /**
-         * The actual array wrapped by this wrapper.
-         */
+        // The actual array wrapped by this wrapper
         Object[] array;
 
         /**
@@ -895,15 +897,11 @@ public enum SerializationStrategies implements SerializationStrategy {
      */
     static class PrimArrayWrapper implements ReadResolvable<Object> {
 
-        /**
-         * The class type of the elements in the primitive array.
-         */
+        // The class type of the elements in the primitive array
         @NotNull
         final Class type;
 
-        /**
-         * The actual primitive array wrapped by this wrapper.
-         */
+        // The actual primitive array wrapped by this wrapper
         Object array;
 
         /**
@@ -934,15 +932,11 @@ public enum SerializationStrategies implements SerializationStrategy {
      */
     static class DemarshallableWrapper implements ReadResolvable<Demarshallable> {
 
-        /**
-         * The class type of the Demarshallable object.
-         */
+        // The class type of the Demarshallable object
         @NotNull
         final Class type;
 
-        /**
-         * The actual Demarshallable object wrapped by this wrapper.
-         */
+        // The actual Demarshallable object wrapped by this wrapper
         Demarshallable demarshallable;
 
         /**

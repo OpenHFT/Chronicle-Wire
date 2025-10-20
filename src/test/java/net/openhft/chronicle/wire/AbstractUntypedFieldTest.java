@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,12 +104,11 @@ class AbstractUntypedFieldTest extends WireTestCommon {
     }
 
     // Implementation of the abstract base class
-    private static final class AImpl extends A {
+    public static final class AImpl extends A {
     }
 
     // Holder class to hold instances of type A
-    private static final class Holder {
+    public static final class Holder {
         A a;
     }
-
 }

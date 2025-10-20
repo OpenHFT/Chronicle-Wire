@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2022 chronicle.software
- *
- *       https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +30,7 @@ import java.time.LocalTime;
 import java.util.*;
 
 import static net.openhft.chronicle.wire.JsonUtil.assertBalancedBrackets;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/324
@@ -188,7 +188,6 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         public Bar(String value) {
             this.value = value;
         }
-
     }
 
     // Test to write a custom class Bar instance to the wire and verify the written content
@@ -212,17 +211,19 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
 
     // Custom class implementing Serializable interface for testing
     static final class Ser implements Serializable {
+        private static final long serialVersionUID = 0L;
         int foo;
     }
 
     // Test to write a serializable class instance to the wire and verify the written content
     @Test
     public void serializable() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         final Ser s = new Ser();
         wire.getValueOut().object(s);
         final String actual = wire.toString();
         System.out.println("actual = " + actual);
         assertBalancedBrackets(actual);
     }
-
 }
