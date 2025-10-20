@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.junit.Assert;
 import org.junit.Test;
@@ -24,6 +25,8 @@ import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collection;
+
+import static org.junit.Assume.assumeFalse;
 
 /**
  * This test class corresponds to an issue raised in the Chronicle-Wire repository.
@@ -74,6 +77,8 @@ public class JSONTypesWithEnumsAndBoxedTypesTest extends net.openhft.chronicle.w
     // Test method to verify the JSON Wire representation.
     @Test
     public void test() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Add an alias for the F1 class for a more concise YAML representation.
         ClassAliasPool.CLASS_ALIASES.addAlias(F1.class);
 

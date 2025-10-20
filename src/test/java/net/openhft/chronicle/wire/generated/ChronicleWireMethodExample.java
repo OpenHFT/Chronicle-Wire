@@ -1,3 +1,7 @@
+/*
+ * Copyright 2016-2025 chronicle.software
+ */
+
 package net.openhft.chronicle.wire.generated;
 
 import net.openhft.chronicle.bytes.Bytes;
@@ -55,7 +59,7 @@ public class ChronicleWireMethodExample {
         MyService service = new MyServiceImpl();
 
         // Initialize the Bytes buffer and obtain a MethodWriter for the MyService interface
-        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.BINARY.apply(bytes);
         MyService writer = wire.methodWriter(MyService.class);
 

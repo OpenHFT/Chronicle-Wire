@@ -56,13 +56,13 @@ public class MapCustomTest extends WireTestCommon {
      * Inherits from SelfDescribingMarshallable for marshalling capabilities.
      */
     @SuppressWarnings("rawtypes")
-    private static class MapsHolder<T extends Integer> extends SelfDescribingMarshallable {
+    public static class MapsHolder<T extends Integer> extends SelfDescribingMarshallable {
         // Define custom maps and their instances
-        private IntToStringMap i2sMap = new IntToStringMap();
-        private IntMap<Void, String> iMap = new IntMap<>();
-        private IntSuperMap<String, MapsHolder> isMap = new IntSuperMap<>();
-        private TransformingMap<T, BigDecimal, String> transMap = new TransformingMap<>(BigDecimal::new);
-        private GeneralMap gMap = new GeneralMap();
+        public IntToStringMap i2sMap = new IntToStringMap();
+        public IntMap<Void, String> iMap = new IntMap<>();
+        public IntSuperMap<String, MapsHolder> isMap = new IntSuperMap<>();
+        public TransformingMap<T, BigDecimal, String> transMap = new TransformingMap<>(BigDecimal::new);
+        public GeneralMap gMap = new GeneralMap();
         // ClassCastException: net.openhft.chronicle.core.util.ObjectUtils$$Lambda$73/1401132667 cannot be cast to Map
         // private MarkedMap<String> mMap = i2sMap;
 
@@ -97,7 +97,7 @@ public class MapCustomTest extends WireTestCommon {
     /**
      * Custom TreeMap implementation marked with an interface.
      */
-    private static class IntToStringMap extends TreeMap<Integer, String> implements MarkedMap<String> {
+    public static class IntToStringMap extends TreeMap<Integer, String> implements MarkedMap<String> {
         @Override
         public void close() {
             // No-op.
@@ -107,22 +107,22 @@ public class MapCustomTest extends WireTestCommon {
     /**
      * Custom HashMap that contains an additional generic field.
      */
-    private static class IntMap<IGNORE, V> extends HashMap<Integer, V> {
-        private IGNORE me;
+    public static class IntMap<IGNORE, V> extends HashMap<Integer, V> {
+        public IGNORE me;
     }
 
     /**
      * Extended version of IntMap.
      */
-    private static class IntSuperMap<SUPER, SELF> extends IntMap<Function<Integer, SELF>, SUPER> {
+    public static class IntSuperMap<SUPER, SELF> extends IntMap<Function<Integer, SELF>, SUPER> {
         // No-op.
     }
 
     /**
      * Custom LinkedHashMap that supports value transformation.
      */
-    private static class TransformingMap<K, O, I> extends LinkedHashMap<K, I> {
-        private Function<I, O> transform;
+    public static class TransformingMap<K, O, I> extends LinkedHashMap<K, I> {
+        public Function<I, O> transform;
 
         // Constructor to set the transformation function
         public TransformingMap(Function<I, O> transform) {
@@ -144,14 +144,14 @@ public class MapCustomTest extends WireTestCommon {
      * A more generic version of IntMap.
      */
     @SuppressWarnings("rawtypes")
-    private static class GeneralMap extends IntMap {
+    public static class GeneralMap extends IntMap {
         // No-op.
     }
 
     /**
      * Marked map interface that extends Map and Closeable.
      */
-    private interface MarkedMap<V> extends Map<Integer, V>, Closeable {
+    public interface MarkedMap<V> extends Map<Integer, V>, Closeable {
         // No-op.
     }
 }

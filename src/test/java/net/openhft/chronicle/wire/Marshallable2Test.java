@@ -1,8 +1,8 @@
 /*
  * Copyright 2016-2025 chronicle.software
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *       http://www.apache.org/licenses/LICENSE-2.0
@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.Validatable;
 import org.junit.Test;
@@ -28,6 +29,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -79,6 +81,8 @@ public class Marshallable2Test extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testObject() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         Wire wire = wireType.apply(bytes);
 

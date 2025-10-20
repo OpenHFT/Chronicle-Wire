@@ -30,7 +30,7 @@ public class GenerateMethodWriterSameInterfaceDifferentOuterClassTest extends Te
     public void test() {
 
         // Create a new Wire object with elastic byte buffer and BINARY settings
-        final Wire wire = BINARY.apply(Bytes.elasticByteBuffer());
+        final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
 
         // Activate padding for the wire object
         wire.usePadding(true);

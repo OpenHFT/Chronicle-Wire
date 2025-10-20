@@ -27,7 +27,7 @@ public class TextWireTypeArrayTest extends WireTestCommon {
     @Test
     public void shouldUnmarshalArrayOfType() {
         // Initialize the byte storage
-        final Bytes<?> bytes = Bytes.elasticByteBuffer();
+        final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
         // Create a TextWire instance with the provided bytes
         final Wire wire = WireType.TEXT.apply(bytes);
@@ -51,7 +51,7 @@ public class TextWireTypeArrayTest extends WireTestCommon {
     }
 
     // Inner class defining an array of class types
-    static class HasClasses extends SelfDescribingMarshallable {
-        Class<?>[] classes = {String.class, Integer.class, Number.class};
+    public static class HasClasses extends SelfDescribingMarshallable {
+        public Class<?>[] classes = {String.class, Integer.class, Number.class};
     }
 }

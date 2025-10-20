@@ -37,7 +37,7 @@ public class CSVBytesMarshallableTest extends WireTestCommon {
     // Test for low level bytes marshalling using FXPrice
     @Test
     public void bytesMarshallable() {
-        Bytes<?> bytes2 = Bytes.elasticByteBuffer();
+        Bytes<?> bytes2 = Bytes.allocateElasticOnHeap();
         @NotNull FXPrice fxPrice = new FXPrice();
 
         // Read, marshall, and write data from one set of bytes to another
@@ -91,7 +91,7 @@ public class CSVBytesMarshallableTest extends WireTestCommon {
         // Initialize wires for input and output data
         @NotNull CSVWire in = new CSVWire(bytes);
 
-        Bytes<?> bytes2 = Bytes.elasticByteBuffer();
+        Bytes<?> bytes2 = Bytes.allocateElasticOnHeap();
         Wire out = wt.apply(bytes2);
 
         @NotNull FXPrice2 fxPrice = new FXPrice2();

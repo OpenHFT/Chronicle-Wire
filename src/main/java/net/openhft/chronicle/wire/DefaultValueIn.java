@@ -39,7 +39,8 @@ import java.util.function.*;
 /**
  * This class provides the default implementation for the {@link ValueIn} interface. It's primarily designed
  * to handle default values, converting them into various formats such as text and bytes.
- * The default value is retrieved from an underlying {@link WireIn} source.
+ * It returns either {@code null}, a primitive zero or the value configured by the {@link WireMarshaller}.
+ * This allows optional fields to be skipped without breaking deserialisation.
  */
 @SuppressWarnings("rawtypes")
 public class DefaultValueIn implements ValueIn {
@@ -143,6 +144,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn;
     }
 
+    /**
+     * Always returns {@code 0} as no bytes are consumed.
+     */
     @Override
     public long readLength() {
         return 0;
@@ -267,11 +271,17 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Always {@code false} as no sequence exists.
+     */
     @Override
     public boolean hasNext() {
         return false;
     }
 
+    /**
+     * Always {@code false} as no sequence exists.
+     */
     @Override
     public boolean hasNextSequenceItem() {
         return false;
@@ -285,6 +295,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Not implemented for default values.
+     */
     @NotNull
     @Override
     public <T> WireIn int64array(@Nullable LongArrayValues values, T t, @NotNull BiConsumer<T, LongArrayValues> setter) {
@@ -309,6 +322,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Not implemented for default values.
+     */
     @Override
     public WireIn bool(@NotNull final BooleanValue ret) {
         throw new UnsupportedOperationException("todo");
@@ -334,11 +350,17 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    /**
+     * Always returns {@code false} as there is no sequence.
+     */
     @Override
     public <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
         return false;
     }
 
+    /**
+     * Always returns {@code false}; there is no data to read.
+     */
     @Override
     public <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0) {
         return false;
@@ -366,6 +388,9 @@ public class DefaultValueIn implements ValueIn {
         return (T) defaultValue;
     }
 
+    /**
+     * Supplies a {@code null} type prefix.
+     */
     @NotNull
     @Override
     public <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts) {
@@ -373,6 +398,9 @@ public class DefaultValueIn implements ValueIn {
         return this;
     }
 
+    /**
+     * Supplies a {@code null} type prefix to {@code ts} and returns the wire.
+     */
     @NotNull
     @Override
     public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> ts) throws IORuntimeException, BufferUnderflowException {
@@ -385,6 +413,9 @@ public class DefaultValueIn implements ValueIn {
         return wireIn.classLookup();
     }
 
+    /**
+     * Returns {@link #defaultValue} unchanged.
+     */
     @Nullable
     @Override
     public Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
@@ -450,6 +481,9 @@ public class DefaultValueIn implements ValueIn {
         return (Type) defaultValue;
     }
 
+    /**
+     * Always {@link BracketType#NONE} as no value is read.
+     */
     @NotNull
     @Override
     public BracketType getBracketType() {
@@ -461,16 +495,25 @@ public class DefaultValueIn implements ValueIn {
         return defaultValue == null;
     }
 
+    /**
+     * Returns {@link #defaultValue}.
+     */
     @Override
     public Object objectWithInferredType(Object using, SerializationStrategy strategy, Class<?> type) {
         return defaultValue;
     }
 
+    /**
+     * Always {@code false}; nothing was found on the wire.
+     */
     @Override
     public boolean isPresent() {
         return false;
     }
 
+    /**
+     * Always {@code false}.
+     */
     @Override
     public boolean isTyped() {
         return false;

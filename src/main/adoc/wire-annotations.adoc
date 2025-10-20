@@ -1,9 +1,8 @@
 = Chronicle Wire Annotations: A Comprehensive Guide
-
-:toc: 
+:toc:
+:sectnums:
 :source-highlighter: rouge
 
-:sectnums:
 Purpose: To provide a comprehensive user guide and reference for all standard annotations available in Chronicle Wire, detailing their purpose, usage, and impact on serialisation.
 
 == Introduction
@@ -247,6 +246,8 @@ AppConfig {
 }
 ----
 
+
+////
 === `@DefaultValue`
 
 Status :: Road Map
@@ -280,7 +281,9 @@ public class SystemSettings extends SelfDescribingMarshallable {
     // ...
 }
 ----
+////
 
+////
 === `@DeprecatedWireKey` (and similar for field renaming)
 
 Status :: Road Map
@@ -312,6 +315,8 @@ public class UserDetails extends SelfDescribingMarshallable {
 }
 ----
 NOTE: The exact mechanism for field renaming with backward compatibility can vary. `Wires.FIELD_RENAME_MAP` or programmatic remapping using `WireParselet` might be used. Always consult the specific Chronicle Wire version documentation for the recommended approach to field renaming.
+////
+
 
 == Best Practices for Using Annotations
 

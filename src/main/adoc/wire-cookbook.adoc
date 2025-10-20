@@ -1,5 +1,6 @@
 = Chronicle Wire Cookbook: Practical Recipes
 :toc:
+:sectnums:
 :source-highlighter: rouge
 
 Purpose :: To provide a collection of practical recipes for common tasks and advanced techniques when using the Chronicle Wire library.
@@ -9,7 +10,8 @@ Purpose :: To provide a collection of practical recipes for common tasks and adv
 
 This cookbook offers a series of focused, problem-solution style recipes to help you effectively use Chronicle Wire. Each recipe addresses a specific task or challenge, providing code examples and explanations. Whether you're new to Chronicle Wire or looking for advanced techniques, these recipes aim to provide quick and actionable guidance.
 
-[mermaid]
+ifdef::env-github[[source,mermaid]]
+ifndef::env-github[[mermaid]]
 ----
 graph TD
     subgraph "Serialisation Process"

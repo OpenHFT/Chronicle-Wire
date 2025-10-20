@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire.issue;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.JSONWire;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
@@ -28,6 +29,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * see https://github.com/OpenHFT/Chronicle-Wire/issues/322
@@ -69,6 +71,7 @@ public class JSON322Test extends WireTestCommon {
 
     @Test
     public void supportNestedTypes() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final Three three = new Three();
         three.one = new One("hello");
@@ -106,6 +109,8 @@ public class JSON322Test extends WireTestCommon {
 
     @Test
     public void supportTypes() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         ClassAliasPool.CLASS_ALIASES.addAlias(Combined322.class, TypeOne322.class, TypeTwo322.class);
         Combined322 c = new Combined322();
         List<SelfDescribingMarshallable> list = c.list = new ArrayList<>();

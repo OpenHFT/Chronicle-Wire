@@ -16,6 +16,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
@@ -28,6 +29,7 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class TextDocumentTest extends WireTestCommon {
 
@@ -67,6 +69,8 @@ public class TextDocumentTest extends WireTestCommon {
     // Test the document writing and reading for TEXT wireType.
     @Test
     public void testDocument() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         doTestDocument(WireType.TEXT);
     }
 

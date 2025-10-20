@@ -17,10 +17,12 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import org.junit.Test;
 
+import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -84,6 +86,8 @@ public class VanillaMessageHistoryTest extends net.openhft.chronicle.wire.WireTe
 
         // Assert the two VanillaMessageHistory objects are equal in content and hash code
         assertEquals(vmh.toString(), vmh2.toString());
+
+        assumeFalse(Jvm.maxDirectMemory() == 0);
         assertEquals(vmh, vmh2);
         assertEquals(vmh.hashCode(),
                 vmh2.hashCode());

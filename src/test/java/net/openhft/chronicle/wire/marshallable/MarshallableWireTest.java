@@ -1,8 +1,8 @@
 /*
  * Copyright 2016-2025 chronicle.software
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *       http://www.apache.org/licenses/LICENSE-2.0
@@ -18,12 +18,14 @@
 package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -34,6 +36,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 // Runner to enable parameterized tests for the MarshallableWireTest class
 @RunWith(value = Parameterized.class)
@@ -49,6 +52,11 @@ public class MarshallableWireTest extends WireTestCommon {
     public MarshallableWireTest(WireType wireType, Marshallable m) {
         this.wireType = wireType;
         this.m = m;
+    }
+
+    @Before
+    public void hasDirect() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     // Provide test data combinations for the parameterized test
@@ -88,7 +96,7 @@ public class MarshallableWireTest extends WireTestCommon {
     public void writeMarshallable() {
 
         // Allocate memory for writing data
-        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
         // Apply the specific WireType to the allocated memory
         Wire wire = wireType.apply(bytes);

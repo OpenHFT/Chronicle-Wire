@@ -29,6 +29,7 @@ import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.values.*;
 import net.openhft.chronicle.threads.NamedThreadFactory;
+import net.openhft.chronicle.wire.internal.MapMarshaller;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -59,7 +60,7 @@ import static net.openhft.chronicle.wire.Wires.isScalar;
 public interface ValueOut {
 
     /**
-     * Thread local instance for MapMarshaller to support thread-safe marshalling operations.
+     * Thread local {@link MapMarshaller} to support thread-safe marshalling operations.
      */
     ThreadLocal<MapMarshaller> MM_TL = ThreadLocal.withInitial(MapMarshaller::new);
 
@@ -69,15 +70,12 @@ public interface ValueOut {
     int SMALL_MESSAGE = 64;
 
     /**
-     * Represents a 64-character sequence of zeros.
+     * Utility string of sixty-four zeros, often used when commenting binary output.
      */
     String ZEROS_64 = "0000000000000000000000000000000000000000000000000000000000000000";
 
     /**
-     * Checks if the provided object is an instance of Enum or DynamicEnum.
-     *
-     * @param v Object to be checked.
-     * @return {@code true} if the object is an instance of Enum or DynamicEnum; {@code false} otherwise.
+     * Utility to check whether {@code v} is a standard {@link Enum} or a {@link DynamicEnum}.
      */
     @SuppressWarnings("deprecation")
     static boolean isAnEnum(Object v) {
@@ -87,8 +85,8 @@ public interface ValueOut {
     /**
      * Write a boolean value.
      *
-     * @param flag The boolean value to be written.
-     * @return The WireOut instance for chained calls.
+     * @param flag value to write
+     * @return parent wire for chaining
      */
     @NotNull
     WireOut bool(Boolean flag);
@@ -96,8 +94,8 @@ public interface ValueOut {
     /**
      * Write a text value.
      *
-     * @param s The CharSequence containing the text to be written.
-     * @return The WireOut instance for chained calls.
+     * @param s text to write
+     * @return parent wire for chaining
      */
     @NotNull
     WireOut text(@Nullable CharSequence s);
@@ -137,10 +135,7 @@ public interface ValueOut {
     }
 
     /**
-     * Write a character value as text. This method delegates its functionality to {@link #text(char)}.
-     *
-     * @param c The character to be written.
-     * @return The WireOut instance for chained calls.
+     * Alias for {@link #text(char)}.
      */
     @NotNull
     default WireOut character(char c) {
@@ -163,13 +158,13 @@ public interface ValueOut {
      * Write a signed 8-bit integer value. The provided long value is first checked
      * to ensure it fits within the bounds of a signed 8-bit integer.
      *
-     * @param x The long value to be written as an 8-bit integer.
-     * @return The WireOut instance for chained calls.
-     * @throws ArithmeticException if the supplied argument does not fit in an unsigned 8-bit integer.
+     * @param value value to write
+     * @return parent wire for chaining
+     * @throws ArithmeticException if {@code x} does not fit in a byte
      */
     @NotNull
-    default WireOut int8(long x) {
-        return int8(Maths.toInt8(x));
+    default WireOut int8(long value) {
+        return int8(Maths.toInt8(value));
     }
 
     /**
@@ -1802,45 +1797,4 @@ public interface ValueOut {
         // Do nothing in the default implementation
     }
 
-    /**
-     * MapMarshaller is a utility for serializing a Map into a Wire format.
-     * This is an inner class used for handling the custom marshalling process for Map objects.
-     * Its primary function is to loop through a Map's entries and write each key-value pair to the Wire.
-     */
-    class MapMarshaller<K, V> implements WriteMarshallable {
-        private Map<K, V> map;
-        private Class<K> kClass;
-        private Class<V> vClass;
-        private boolean leaf;
-
-        /**
-         * Configures the MapMarshaller with the provided parameters.
-         *
-         * @param map The map to be marshalled.
-         * @param kClass The class type of the map's key.
-         * @param vClass The class type of the map's value.
-         * @param leaf A flag indicating if the current node is a leaf in a structure.
-         */
-        void params(@Nullable Map<K, V> map, @NotNull Class<K> kClass, @NotNull Class<V> vClass, boolean leaf) {
-            this.map = map;
-            this.kClass = kClass;
-            this.vClass = vClass;
-            this.leaf = leaf;
-        }
-
-        /**
-         * Converts and writes the Map's entries to the Wire format.
-         *
-         * @param wire The WireOut instance to write to.
-         */
-        @Override
-        public void writeMarshallable(@NotNull WireOut wire) throws InvalidMarshallableException {
-            for (@NotNull Map.Entry<K, V> entry : map.entrySet()) {
-                ValueOut valueOut = wire.writeEvent(kClass, entry.getKey());
-                boolean wasLeaf = valueOut.swapLeaf(leaf);
-                valueOut.object(vClass, entry.getValue());
-                valueOut.swapLeaf(wasLeaf);
-            }
-        }
-    }
 }

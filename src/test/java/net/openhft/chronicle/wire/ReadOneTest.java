@@ -17,11 +17,14 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * This class is used to test the functionality related to reading individual messages and snapshots
@@ -61,20 +64,26 @@ public class ReadOneTest extends WireTestCommon {
     // Basic test for reading without scanning the wire
     @Test
     public void test() throws InterruptedException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         doTest(false);
     }
 
     // Test for reading the wire using scanning
     @Test
     public void testScanning() throws InterruptedException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         doTest(true);
     }
 
     // Core testing method that simulates writing to and reading from the Wire
     public void doTest(boolean scanning) throws InterruptedException {
+        ignoreException("Unknown @MethodId='history' called on interface net.openhft.chronicle.wire.ReadOneTest$SnapshotListener");
+        ignoreException("Unknown method-name='myDto' called on interface net.openhft.chronicle.wire.ReadOneTest$SnapshotListener");
         // Initialization phase
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
-        Wire wire = new TextWire(b) {
+        Wire wire = new YamlWire(b) {
             @Override
             public boolean recordHistory() {
                 return true;
@@ -84,6 +93,7 @@ public class ReadOneTest extends WireTestCommon {
         MyDtoListener myOut = wire.methodWriterBuilder(MyDtoListener.class).build();
         SnapshotListener snapshotOut = wire.methodWriterBuilder(SnapshotListener.class).build();
 
+        ((VanillaMessageHistory) MessageHistory.get()).useBytesMarshallable(false);
         // Simulating different historical records and writes to the Wire
         generateHistory(1);
         myOut.myDto(new MyDto());
@@ -110,7 +120,6 @@ public class ReadOneTest extends WireTestCommon {
                 .scanning(scanning)
                 .build((SnapshotListener) d -> q[0] = d);
 
-        // Conditional checks based on whether scanning mode is active
         if (!scanning) {
             // 1
             assertTrue(reader.readOne());

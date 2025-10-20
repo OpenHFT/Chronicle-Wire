@@ -18,6 +18,8 @@ package net.openhft.chronicle.wire;
 
 import io.github.classgraph.*;
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
@@ -46,6 +48,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 // Test class to verify serializable objects with Wire.
 final class SerializableObjectTest extends WireTestCommon {
@@ -346,6 +349,11 @@ final class SerializableObjectTest extends WireTestCommon {
         } else {
             assertEquals(a, b);
         }
+    }
+
+    @BeforeEach
+    public void hasDirect() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

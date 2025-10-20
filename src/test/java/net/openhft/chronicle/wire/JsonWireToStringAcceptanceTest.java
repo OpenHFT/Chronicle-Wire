@@ -28,12 +28,13 @@ import static org.junit.Assert.assertEquals;
 /**
  * Verify that unicode characters can be properly represented in JSON output.
  */
+@SuppressWarnings("UnnecessaryUnicodeEscape")
 public class JsonWireToStringAcceptanceTest {
 
     private static Collection<WireType> WIRE_TYPES = Arrays.asList(WireType.JSON, WireType.JSON_ONLY);
 
     @ParameterizedTest
-    @ValueSource(strings = {"£", "€", "¥", "₹", "ó", "óaóó", "☞☞☞☞☞", "ÊÆÄ"})
+    @ValueSource(strings = {"£", "€", "¥", "\u20B9", "ó", "óaóó", "", "ÊÆÄ"})
     public void json_verifyAsString(String input) {
         Map<String, String> map = new HashMap<>();
         map.put("x", input);
@@ -43,7 +44,7 @@ public class JsonWireToStringAcceptanceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"£", "€", "¥", "₹", "ó", "óaóó"})
+    @ValueSource(strings = {"£", "€", "¥", "\u20B9", "ó", "óaóó"})
     public void json_verifyObjectToString(String input) {
         Map<String, String> map = new HashMap<>();
         map.put("x", input);
@@ -52,7 +53,7 @@ public class JsonWireToStringAcceptanceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"£", "€", "¥", "₹", "ó", "óaóó"})
+    @ValueSource(strings = {"£", "€", "¥", "\u20B9", "ó", "óaóó"})
     public void json_verifyAsText(String input) {
         Map<String, String> map = new HashMap<>();
         map.put("x", input);

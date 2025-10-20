@@ -1,8 +1,8 @@
 /*
  * Copyright 2016-2025 chronicle.software
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *       http://www.apache.org/licenses/LICENSE-2.0
@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
@@ -25,11 +26,14 @@ import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
+import static org.junit.Assume.assumeFalse;
+
 // Test class focusing on the functionality of elastic byte buffers with wire operations.
 public class ElasticByteBufferTest extends WireTestCommon {
 
     @Test
     public void testElasticByteBufferWithWire() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Initialize an elastic byte buffer with initial size of 10.
         Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer(10);

@@ -17,14 +17,17 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 import static net.openhft.chronicle.wire.Marshallable.fromString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assume.assumeFalse;
 
 // see also UnsafeTextBytesTest
 // Class to test the serialization and deserialization of double values.
@@ -34,6 +37,11 @@ public class DoubleTest extends WireTestCommon {
     static class TwoDoubleDto extends SelfDescribingMarshallable {
         double price;
         double qty;
+    }
+
+    @Before
+    public void hasDirect() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     /**
@@ -58,7 +66,7 @@ public class DoubleTest extends WireTestCommon {
     @Test
     public void testManyDoubles() {
         // Create an elastic buffer for serialization
-        final Bytes<?> bytes = Bytes.elasticByteBuffer();
+        final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
         // Iterate over a range of double values and check serialization format
         for (double aDouble = -1; aDouble < 1; aDouble += 0.00001) {

@@ -16,6 +16,7 @@
 package net.openhft.chronicle.wire.reuse;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
@@ -30,6 +31,7 @@ import java.util.Collection;
 import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * NestedClassTest is a parameterized test class extending WireTestCommon.
@@ -94,6 +96,8 @@ public class NestedClassTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testMultipleReads() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Bytes<?> bytes = Bytes.elasticByteBuffer();
         Wire wire = wireType.apply(bytes);
 

@@ -362,7 +362,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
     // Definition of a custom BytesMarshallable object with a double field.
     public static class MyBytesMarshallable extends BytesInBinaryMarshallable {
-        double d;
+        public double d;
     }
 
     // Definition of a regular Data Transfer Object (DTO) with string and integer fields.

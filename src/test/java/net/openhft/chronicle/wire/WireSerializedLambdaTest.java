@@ -65,7 +65,7 @@ public class WireSerializedLambdaTest extends WireTestCommon {
 
     // Helper function to test text-based wire formats
     private static void doTestText(WireType wireType) {
-        @NotNull Wire wire = wireType.apply(Bytes.elasticByteBuffer());
+        @NotNull Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         SerializableFunction<String, String> fun = String::toUpperCase;
 
         wire.write(() -> "one").object(fun)

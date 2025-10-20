@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -27,6 +28,7 @@ import java.util.Collection;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 @RunWith(value = Parameterized.class)
 public class BinaryInTextTest extends WireTestCommon {
@@ -67,6 +69,8 @@ public class BinaryInTextTest extends WireTestCommon {
     // Test to validate reserialization of binary content from text
     @Test
     public void testReserialize() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         BIT bit = wireType.fromString(BIT.class, "{\n" +
                 "b: !!binary AAAAAAA=,\n" +
                 "c: !!binary CCCCCCCC,\n" +

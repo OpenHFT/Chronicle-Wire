@@ -32,9 +32,7 @@ public class Base64LongConverter extends AbstractLongConverter {
      */
     public static final Base64LongConverter INSTANCE = new Base64LongConverter();
 
-    /**
-     * A string representing the set of characters to be used in base64 encoding.
-     */
+    // A string representing the set of characters to be used in base64 encoding
     private static final String CHARS = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
 
     /**

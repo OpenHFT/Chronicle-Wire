@@ -1,8 +1,8 @@
 /*
  * Copyright 2016-2025 chronicle.software
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *       http://www.apache.org/licenses/LICENSE-2.0
@@ -88,7 +88,7 @@ public class SerializableWireTest extends WireTestCommon {
         // Ignore exceptions for certain test cases
         if (ime) // TODO Fix to be expected
             ignoreException(ek -> ek.throwable instanceof InvalidMarshallableException, "IME");
-        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         try {
             // Apply wire type to bytes
             Wire wire = wireType.apply(bytes);
@@ -132,7 +132,7 @@ public class SerializableWireTest extends WireTestCommon {
     }
 
     public static class TextContainer extends SelfDescribingMarshallable {
-        StringBuilder[] innerBuilders; // Represents inner StringBuilders
+        public StringBuilder[] innerBuilders; // Represents inner StringBuilders
     }
 
 }

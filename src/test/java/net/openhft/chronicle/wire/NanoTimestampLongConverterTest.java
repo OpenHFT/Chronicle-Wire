@@ -49,6 +49,10 @@ public class NanoTimestampLongConverterTest extends WireTestCommon {
     // Testing parsing of different string formats for nanosecond timestamps.
     @Test
     public void parseString() {
+        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456"),
+                INSTANCE.parse("2020-09-18T01:02:03.456"));
+        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456789"),
+                INSTANCE.parse("2020-09-18T01:02:03.456789"));
         assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456789012"),
                 INSTANCE.parse("2020-09-18T01:02:03.456789012"));
     }

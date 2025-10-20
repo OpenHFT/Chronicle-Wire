@@ -21,6 +21,10 @@ package net.openhft.chronicle.wire;
  * inherently use self-describing messages.
  */
 public abstract class SelfDescribingMarshallable extends AbstractCommonMarshallable {
+
+    /**
+     * Always returns {@code true} as these marshallables emit type metadata.
+     */
     @Override
     public boolean usesSelfDescribingMessage() {
         return true;

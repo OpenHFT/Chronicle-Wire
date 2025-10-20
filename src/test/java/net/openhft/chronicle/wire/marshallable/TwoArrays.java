@@ -30,10 +30,10 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 public class TwoArrays extends SelfDescribingMarshallable implements Closeable {
 
     // Represents an array of integer values
-    final IntArrayValues ia;
+    public IntArrayValues ia;
 
     // Represents an array of long values
-    final LongArrayValues la;
+    public LongArrayValues la;
 
     // Transient flag indicating whether the TwoArrays instance is closed or not
     transient boolean closed;

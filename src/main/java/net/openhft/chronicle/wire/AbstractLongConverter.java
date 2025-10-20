@@ -29,23 +29,24 @@ public abstract class AbstractLongConverter implements LongConverter {
     protected final LongConverter converter;
 
     /**
-     * Constructs an {@code AbstractLongConverter} using a given set of characters.
-     * Internally, it uses the LongConverter's forSymbols method to create an instance of LongConverter with the provided characters.
+     * Constructs an {@code AbstractLongConverter} using a given set of symbols.
+     * Internally, it delegates to {@link LongConverter#forSymbols(String)} to build
+     * a converter suited to the supplied symbols.
      *
-     * @param chars set of characters to use for conversion.
+     * @param symbolSet the characters that define the encoding scheme
      */
-    protected AbstractLongConverter(String chars) {
-        this(LongConverter.forSymbols(chars));
+    protected AbstractLongConverter(String symbolSet) {
+        this(LongConverter.forSymbols(symbolSet));
     }
 
     /**
-     * Constructs an {@code AbstractLongConverter} with a specified converter.
-     * This constructor allows subclasses to provide a custom implementation of LongConverter.
+     * Constructs an {@code AbstractLongConverter} with a specific converter.
+     * This constructor allows subclasses to supply their own implementation.
      *
-     * @param converter the underlying {@link LongConverter} to be used for conversions.
+     * @param underlyingConverter the {@link LongConverter} that performs the work
      */
-    protected AbstractLongConverter(LongConverter converter) {
-        this.converter = converter;
+    protected AbstractLongConverter(LongConverter underlyingConverter) {
+        this.converter = underlyingConverter;
     }
 
     /**
@@ -61,46 +62,46 @@ public abstract class AbstractLongConverter implements LongConverter {
     /**
      * Parses the provided text using the underlying converter.
      *
-     * @param text the text to parse.
-     * @return the parsed long value.
+     * @param textToParse the text to parse
+     * @return the parsed long value
      */
     @Override
-    public long parse(CharSequence text) {
-        return converter.parse(text);
+    public long parse(CharSequence textToParse) {
+        return converter.parse(textToParse);
     }
 
     /**
      * Parses a part of the provided text using the underlying converter.
      *
-     * @param text the text to parse.
-     * @param beginIndex the beginning index, inclusive.
-     * @param endIndex the ending index, exclusive.
+     * @param textToParse the text to parse
+     * @param beginIndex  the beginning index, inclusive
+     * @param endIndex    the ending index, exclusive
      * @return the parsed long value.
      */
     @Override
-    public long parse(CharSequence text, int beginIndex, int endIndex) {
-        return converter.parse(text, beginIndex, endIndex);
+    public long parse(CharSequence textToParse, int beginIndex, int endIndex) {
+        return converter.parse(textToParse, beginIndex, endIndex);
     }
 
     /**
-     * Appends the provided long value to the provided {@code StringBuilder} text.
+     * Appends the provided long value to the destination {@code StringBuilder}.
      *
-     * @param text the StringBuilder to append to.
-     * @param value the long value to convert and append.
+     * @param destinationBuilder the builder receiving the formatted value
+     * @param numericValue the long value to convert and append
      */
     @Override
-    public void append(StringBuilder text, long value) {
-        converter.append(text, value);
+    public void append(StringBuilder destinationBuilder, long numericValue) {
+        converter.append(destinationBuilder, numericValue);
     }
 
     /**
-     * Appends the provided long value to the provided {@code Bytes} text.
+     * Appends the provided long value to the destination {@code Bytes}.
      *
-     * @param bytes the Bytes object to append to.
-     * @param value the long value to convert and append.
+     * @param destination the Bytes to append to
+     * @param numericValue the long value to convert and append
      */
     @Override
-    public void append(Bytes<?> bytes, long value) {
-        converter.append(bytes, value);
+    public void append(Bytes<?> destination, long numericValue) {
+        converter.append(destination, numericValue);
     }
 }

@@ -68,6 +68,8 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     // Test serialization and deserialization with certain expected output.
     @Test
     public void ebm() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         // Register the alias for the class.
         ClassAliasPool.CLASS_ALIASES.addAlias(EBM.class);
 
@@ -147,6 +149,21 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         bytes.readLimit(64);
         EBM ebm = new EBM();
         ebm.readMarshallable(bytes);
+    }
+
+    // Test deserialization with field counts exceeding FIELD_COUNT_LIMIT (256).
+    // Expected to throw an IllegalStateException.
+    @Test(expected = IllegalStateException.class)
+    public void excessiveFieldCounts() {
+        int desc = (200 << 24) | (200 << 16) | 1;
+        int length = 200 * 8 + 200 * 4 + 1;
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(length + 8);
+        bytes.writeInt(desc);
+        for (int i = 0; i < length; i++)
+            bytes.writeByte((byte) 0);
+        bytes.readLimit(bytes.writePosition());
+        EBM1 ebm1 = new EBM1();
+        ebm1.readMarshallable(bytes);
     }
 
     // A class representing a Marshallable object with fields grouped into embedded Bytes.

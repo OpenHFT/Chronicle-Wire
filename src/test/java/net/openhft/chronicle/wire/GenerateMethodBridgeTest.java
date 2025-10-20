@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 // Two base interfaces with some methods
 interface GMBA {
@@ -49,6 +50,7 @@ public class GenerateMethodBridgeTest extends WireTestCommon {
 
     @Test
     public void createBridge() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Instantiating an object to generate method bridges
         GenerateMethodBridge gmb = new GenerateMethodBridge();

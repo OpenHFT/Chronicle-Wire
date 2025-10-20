@@ -1,8 +1,8 @@
 /*
  * Copyright 2016-2025 chronicle.software
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *       http://www.apache.org/licenses/LICENSE-2.0
@@ -266,7 +266,7 @@ public class NestedMapsTest extends WireTestCommon {
     @Test
     public void testMapReadAndWrite() {
         // Create a byte buffer and initialize the wire
-        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
         wire.usePadding(wire.isBinary());
 
@@ -292,10 +292,10 @@ public class NestedMapsTest extends WireTestCommon {
     }
 
     // Define the Mapped class for testing purposes
-    static class Mapped extends SelfDescribingMarshallable {
-        final Set<String> words = new LinkedHashSet<>();      // Set to store unique words
-        final List<Integer> numbers = new ArrayList<>();     // List to store numbers
-        final Map<String, String> map1 = new LinkedHashMap<>();   // Map for string to string mapping
-        final Map<String, Double> map2 = new LinkedHashMap<>();  // Map for string to double mapping
+    public static class Mapped extends SelfDescribingMarshallable {
+        public final Set<String> words = new LinkedHashSet<>();      // Set to store unique words
+        public final List<Integer> numbers = new ArrayList<>();     // List to store numbers
+        public final Map<String, String> map1 = new LinkedHashMap<>();   // Map for string to string mapping
+        public final Map<String, Double> map2 = new LinkedHashMap<>();  // Map for string to double mapping
     }
 }

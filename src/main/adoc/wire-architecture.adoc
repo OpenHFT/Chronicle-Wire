@@ -1,9 +1,8 @@
 = Chronicle Wire: Architectural Overview
-
 :toc:
+:sectnums:
 :source-highlighter: rouge
 
-:sectnums:
 Purpose: To provide a comprehensive understanding of the internal architecture of the Chronicle Wire library, its components, and design principles.
 
 == Introduction
@@ -31,7 +30,8 @@ The architecture of Chronicle Wire is guided by several core design principles:
 
 Chronicle Wire's architecture can be conceptualized in several layers, with well-defined components interacting across these layers.
 
-[mermaid]
+ifdef::env-github[[source,mermaid]]
+ifndef::env-github[[mermaid]]
 ----
 graph TD
     A[Application Code] -->|Interacts via| B[Chronicle Wire API Layer]
@@ -100,7 +100,8 @@ The `Bytes` abstraction is fundamental. It provides a mutable, resizable view ov
 
 The `Wire` interface abstracts the process of serializing and deserializing structured data. An application obtains a `Wire` instance, typically specifying a `WireType` and providing a `Bytes` buffer.
 
-[mermaid]
+ifdef::env-github[[source,mermaid]]
+ifndef::env-github[[mermaid]]
 ----
 classDiagram
     class Wire {
@@ -210,7 +211,8 @@ wire.write("trade")
 
 == Serialization Formats (`WireType`) and Flexibility
 
-[mermaid]
+ifdef::env-github[[source,mermaid]]
+ifndef::env-github[[mermaid]]
 ----
 graph LR
     subgraph "Wire Format Comparison"
@@ -267,7 +269,8 @@ Several architectural choices contribute to Chronicle Wire's high performance:
 
 == Integration with OpenHFT Ecosystem
 
-[mermaid]
+ifdef::env-github[[source,mermaid]]
+ifndef::env-github[[mermaid]]
 ----
 graph TD
     subgraph "OpenHFT Ecosystem"

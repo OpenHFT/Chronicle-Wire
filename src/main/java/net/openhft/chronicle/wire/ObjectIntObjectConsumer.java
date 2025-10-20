@@ -38,9 +38,9 @@ public interface ObjectIntObjectConsumer<T, V> {
     /**
      * Performs the operation defined by this consumer.
      *
-     * @param t The first object argument.
-     * @param u The integer argument.
-     * @param v The second object argument.
+     * @param t the first input argument of type {@code T}
+     * @param u the second input argument, an {@code int} value
+     * @param v the third input argument of type {@code V}
      */
     void accept(T t, int u, V v);
 }

@@ -46,8 +46,8 @@ public interface WriteMarshallable extends WriteValue, CommonMarshallable {
     /**
      * Write the current state of the marshallable entity to the provided wire.
      *
-     * @param wire The wire format to write to.
-     * @throws InvalidMarshallableException if any serialization error occurs.
+     * @param wire the wire to write to
+     * @throws InvalidMarshallableException if serialization fails
      */
     void writeMarshallable(@NotNull WireOut wire) throws InvalidMarshallableException;
 

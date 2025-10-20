@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -114,8 +115,8 @@ public class BinaryWire2Test extends WireTestCommon {
                 v -> v.date(LocalDate.MIN),
                 v -> v.dateTime(LocalDateTime.MIN),
                 v -> v.zonedDateTime(ZonedDateTime.now()),
-                v -> v.marshallable(w -> {
-                }),
+                Jvm.maxDirectMemory() > 0 ? v -> v.marshallable(w -> {
+                }) : v -> v.text("na"),
                 v -> v.set(new TreeSet<>()),
                 v -> v.object(null),
                 v -> v.text(""),
@@ -186,7 +187,7 @@ public class BinaryWire2Test extends WireTestCommon {
         @NotNull Wire wire = createWire();
         wire.write().object(Bytes.from("Hello"));
 
-        Bytes<?> b = Bytes.elasticByteBuffer();
+        Bytes<?> b = allocateElasticOnHeap();
         wire.read().bytes(b);
         assertEquals("Hello", b.toString());
         b.releaseLast();
@@ -327,6 +328,8 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test writing sequences in both binary and text format with Chronicle Wire
     @Test
     public void testSequence() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         @NotNull Wire wire = createWire();
         writeMessage(wire);
         assertEquals("" +
@@ -347,7 +350,7 @@ public class BinaryWire2Test extends WireTestCommon {
                         "]\n",
                 Wires.fromSizePrefixedBlobs(wire));
 
-        @NotNull Wire twire = WireType.TEXT.apply(Bytes.elasticByteBuffer());
+        @NotNull Wire twire = WireType.TEXT.apply(allocateElasticOnHeap());
         writeMessage(twire);
         assertEquals("" +
                         "--- !!meta-data\n" +
@@ -390,6 +393,8 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test writing messages with padding and validate their binary and text representations
     @Test
     public void testSequenceContext() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         assumeTrue(usePadding);
         @NotNull Wire wire = createWire();
         writeMessageContext(wire);
@@ -416,7 +421,7 @@ public class BinaryWire2Test extends WireTestCommon {
                         "e7 76 61 6c 75 65 2d 32                         # value-2\n",
                 wire.bytes().toHexString());
 
-        @NotNull Wire twire = WireType.TEXT.apply(Bytes.elasticByteBuffer());
+        @NotNull Wire twire = WireType.TEXT.apply(allocateElasticOnHeap());
         writeMessageContext(twire);
 
         // Expected textual representation of the written data
@@ -632,7 +637,7 @@ public class BinaryWire2Test extends WireTestCommon {
 
         // Convert the compressed content to plain text format and validate
         wire.bytes().readPosition(0);
-        Bytes<?> asText = Bytes.elasticByteBuffer();
+        Bytes<?> asText = allocateElasticOnHeap();
         wire.copyTo(WireType.TEXT.apply(asText));
         assertEquals("message: # gzip\n" + s +
                 "\n", asText.toString());
@@ -830,7 +835,7 @@ public class BinaryWire2Test extends WireTestCommon {
     public void testBytesLiteral() {
         assumeFalse(usePadding);  // Skip this test if padding is used
 
-        @NotNull Wire wire = new BinaryWire(Bytes.elasticByteBuffer());
+        @NotNull Wire wire = new BinaryWire(allocateElasticOnHeap());
         wire.write("test").text("Hello World");
 
         @NotNull final BinaryWire wire1 = createWire();
@@ -911,7 +916,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test writing a map with diverse types to a wire and then reading it back
     @Test
     public void testWriteMap() {
-        @NotNull Wire wire = new BinaryWire(Bytes.elasticByteBuffer());
+        @NotNull Wire wire = new BinaryWire(allocateElasticOnHeap());
 
         // Create a map with different types of values
         @NotNull Map<String, Object> putMap = new HashMap<String, Object>();

@@ -16,8 +16,10 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.Closeable;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.time.LocalDate;
@@ -27,8 +29,14 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 public class WireResetTest extends WireTestCommon {
+    @Before
+    public void hasDirect() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+    }
+
     @Test
     //https://github.com/OpenHFT/Chronicle-Wire/issues/225
     public void test() {

@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import org.junit.Test;
 
@@ -27,6 +28,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 // Class to test behavior of Wire in the context of Enums, especially unknown Enums
 public class UnknownEnumTest extends WireTestCommon {
@@ -47,6 +49,8 @@ public class UnknownEnumTest extends WireTestCommon {
     // Test to check how the Wire handles an unknown dynamic Enum
     @Test
     public void testUnknownDynamicEnum() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Wire wire = createWire();
         wire.write("value").text("Maybe");
 
@@ -88,10 +92,10 @@ public class UnknownEnumTest extends WireTestCommon {
     // This test ensures that TextWire produces a friendly error message for unknown Enum types
     @Test
     public void shouldGenerateFriendlyErrorMessageWhenTypeIsNotKnownInTextWire() {
-        Wires.GENERATE_TUPLES = true;
         try {
-            final TextWire textWire = TextWire.from("enumField: !UnknownEnum QUX");
-            textWire.valueIn.wireIn().read("enumField").object();
+            final Wire textWire = TextWire.from("enumField: !UnknownEnum QUX")
+                                            .generateTuples(true);
+            textWire.getValueIn().wireIn().read("enumField").object();
 
             fail(); // This point should not be reached
         } catch (Exception e) {
@@ -99,8 +103,6 @@ public class UnknownEnumTest extends WireTestCommon {
             String message = e.getMessage().replaceAll(" [a-z0-9.]+.Proxy\\d+", " ProxyXX");
             assertThat(message,
                     is(equalTo("Trying to read marshallable class ProxyXX at [pos: 23, rlim: 27, wlim: 27, cap: 27 ]  QUX expected to find a {")));
-        } finally {
-            Wires.GENERATE_TUPLES = false;
         }
     }
 
