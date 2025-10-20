@@ -1748,17 +1748,12 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          * @param list The list to populate with the sequence items.
          * @param buffer Temporary storage used during sequence processing.
          * @param bufferAdd Supplier function to add items to the buffer.
-         * @param reader0 Reader to process the tokens.
+         * @param reader0 The reader that processes each item in the sequence.
          * @return true if the sequence was successfully read, false otherwise.
          * @throws InvalidMarshallableException If there's a problem with marshalling.
          */
-        public <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0) throws InvalidMarshallableException {
-            // Delegate to the other `sequence` method without the reader.
-            return sequence(list, buffer, bufferAdd);
-        }
-
         @Override
-        public <T> boolean sequence(@NotNull List<T> list, @NotNull List<T> buffer, @NotNull Supplier<T> bufferAdd) throws InvalidMarshallableException {
+        public <T> boolean sequence(@NotNull List<T> list, @NotNull List<T> buffer, @NotNull Supplier<T> bufferAdd, Reader reader0) throws InvalidMarshallableException {
             consumePadding();
             if (isNull()) {
                 return false;
@@ -1768,12 +1763,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 int minIndent = yt.secondTopContext().indent;
                 yt.next(Integer.MAX_VALUE);
 
-                while (hasNextSequenceItem()) {
-                    if (buffer.size() <= list.size())
-                        buffer.add(bufferAdd.get());
-                    Object using = buffer.get(list.size());
-                    list.add((T) valueIn.object(using, using.getClass()));
-                }
+                reader0.accept(this, list, buffer, bufferAdd);
 
                 if (yt.current() == YamlToken.NONE)
                     yt.next(minIndent);

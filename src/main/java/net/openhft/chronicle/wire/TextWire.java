@@ -2207,23 +2207,18 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         /**
-         * Handles the processing of a sequence, delegating to an overloaded version of itself.
+         * Handles the processing of a sequence.
          *
          * @param <T> The type of items in the lists.
          * @param list The main list that should be populated based on the buffer.
          * @param buffer A temporary buffer used for staging data.
          * @param bufferAdd A supplier function that can add items to the buffer.
-         * @param reader0 This seems to be an unused reader, possibly for future extensions.
+         * @param reader0 The reader that processes each item in the sequence.
          * @return Returns a boolean indicating success/failure or some other status.
          * @throws InvalidMarshallableException if there's an error during the sequence processing.
          */
-        public <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0) throws InvalidMarshallableException {
-            // Currently, this method delegates to an overloaded version of itself, ignoring the reader0 parameter.
-            return sequence(list, buffer, bufferAdd);
-        }
-
         @Override
-        public <T> boolean sequence(@NotNull List<T> list, @NotNull List<T> buffer, @NotNull Supplier<T> bufferAdd) throws InvalidMarshallableException {
+        public <T> boolean sequence(@NotNull List<T> list, @NotNull List<T> buffer, @NotNull Supplier<T> bufferAdd, Reader reader0) throws InvalidMarshallableException {
 
             list.clear();
             consumePadding();
@@ -2245,14 +2240,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                 sequenceLimit = 1;
             }
 
-            while (hasNextSequenceItem()) {
-                int size = list.size();
-                if (buffer.size() <= size) buffer.add(bufferAdd.get());
-
-                final T t = buffer.get(size);
-                if (t instanceof Resettable) ((Resettable) t).reset();
-                list.add(object(t, (Class<T>) t.getClass()));
-            }
+            reader0.accept(this, list, buffer, bufferAdd);
 
             if (code == '[') {
                 consumePadding(1);
