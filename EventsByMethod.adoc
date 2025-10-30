@@ -8,22 +8,17 @@ An event is defined as a Java interface method which is written to a `Wire` by a
 
 Advantages of this pattern include:
 
-* Direct method calls remain the simplest form of communication when the
-  producer and consumer are in the same JVM.
-* Interfaces describing events become easy to serialise as data structures
-  for persistence or testing.
+* Direct method calls remain the simplest form of communication when the producer and consumer are in the same JVM.
+* Interfaces describing events become easy to serialise as data structures for persistence or testing.
 * Generated proxies minimise allocation and provide type safety.
 
 == Core components
 
-. Event interface :: A plain Java interface whose methods represent event types.
-. Handler implementation :: A class that implements the event interface to
-  process events locally.
-. `MethodWriter` :: Generates a proxy that serialises method calls onto a `Wire`.
-. `MethodReader` :: Reads method calls from a `Wire` and invokes them on a
-  handler.
-. Wire format :: YAML, JSON or binary encodings used to store or transmit the
-  events.
+Event interface :: A plain Java interface whose methods represent event types.
+Handler implementation :: A class that implements the event interface to process events locally.
+`MethodWriter` :: Generates a proxy that serialises method calls onto a `Wire`.
+`MethodReader` :: Reads method calls from a `Wire` and invokes them on a handler.
+Wire format :: YAML, JSON or binary encodings used to store or transmit the events.
 
 [mermaid]
 ....
@@ -78,7 +73,8 @@ graph LR
 
 === Testing using YAML
 
-In both cases, these components can be tested using events stored in YAML files.  Events appear as method names with their arguments, which may be simple scalars, a list of values or a DTO represented as a mapping.
+In both cases, these components can be tested using events stored in YAML files.
+Events appear as method names with their arguments, which may be simple scalars, a list of values or a DTO represented as a mapping.
 
 [source,yaml]
 ----
@@ -140,7 +136,8 @@ Some advantages of Trivially Copyable Objects
 
 Events received by a component can be handled in two main ways:
 
-1. *Raw Message Forwarding* - the raw `Bytes` or `DocumentContext` can be forwarded to another queue or network channel without deserialising the message fully.  This is efficient for routers or filters that only inspect metadata.
+1. *Raw Message Forwarding* - the raw `Bytes` or `DocumentContext` can be forwarded to another queue or network channel without deserialising the message fully.
+This is efficient for routers or filters that only inspect metadata.
 2. *Full Deserialisation and Re-invocation* - the event is deserialised and the corresponding method invoked locally; as part of the processing logic the same (or another) method can then be invoked downstream via a `MethodWriter`.
 
 == Modelling simple asynchronous method calls
@@ -207,6 +204,7 @@ interface DestinationTimedSaying extends Destination<TimedSaying> { }
 ----
 
 A producer can use the fluent API as follows:
+
 [source,java]
 ----
 DestinationTimedSaying writer = wire.methodWriter(DestinationTimedSaying.class);
@@ -234,6 +232,7 @@ class MyTimedSaying implements TimedSaying {
     }
 }
 ----
+
 This pattern skips deserialisation of the remaining message when an early filter indicates the event should be ignored, saving processing time for irrelevant data.
 
 === Say one text message
