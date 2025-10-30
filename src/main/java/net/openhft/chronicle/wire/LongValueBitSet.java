@@ -26,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.*;
+import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
@@ -70,7 +71,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * @param w               wire used to marshal the initial state
      */
     public LongValueBitSet(final int maxNumberOfBits, Wire w) {
-        this((long) maxNumberOfBits, w);
+        this((long) maxNumberOfBits, Objects.requireNonNull(w, "w"));
     }
 
     /**
@@ -79,6 +80,9 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * @param maxNumberOfBits maximum number of bits this set can hold
      */
     public LongValueBitSet(final long maxNumberOfBits) {
+        if (maxNumberOfBits < 0) {
+            throw new IllegalArgumentException("maxNumberOfBits must be non-negative");
+        }
         int size = (int) ((maxNumberOfBits + BITS_PER_WORD - 1) / BITS_PER_WORD);
         words = new LongValue[size];
         singleThreadedCheckDisabled(true);
@@ -93,6 +97,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      */
     public LongValueBitSet(final long maxNumberOfBits, Wire w) {
         this(maxNumberOfBits);
+        Objects.requireNonNull(w, "w");
         writeMarshallable(w);
         readMarshallable(w);
     }
@@ -115,7 +120,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * @return A BitSet containing the bits from the byte array.
      */
     public static BitSet valueOf(byte[] bytes) {
-        return BitSet.valueOf(ByteBuffer.wrap(bytes));
+        return BitSet.valueOf(ByteBuffer.wrap(Objects.requireNonNull(bytes, "bytes")));
     }
 
     /**
@@ -177,6 +182,9 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     public void set(LongValue word, long param, LongFunction function) {
         throwExceptionIfClosed();
 
+        Objects.requireNonNull(word, "word");
+        Objects.requireNonNull(function, "function");
+
         final Pauser internalPauser = pauser();
         internalPauser.reset();
 
@@ -204,6 +212,8 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      */
     public void set(LongValue word, long newValue) {
         throwExceptionIfClosed();
+
+        Objects.requireNonNull(word, "word");
 
         pauser.reset();
         long oldValue = word.getVolatileValue();
@@ -266,6 +276,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * Atomically performs {@code word ^= param}.
      */
     private void caret(LongValue word, long param) {
+        Objects.requireNonNull(word, "word");
         set(word, param, (x, y) -> x ^ y);
     }
 
@@ -273,6 +284,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * Atomically performs {@code word &= param}.
      */
     private void and(LongValue word, final long param) {
+        Objects.requireNonNull(word, "word");
         set(word, param, (x, y) -> x & y);
     }
 
@@ -335,6 +347,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * Atomically performs {@code word |= param}.
      */
     private void pipe(LongValue word, long param) {
+        Objects.requireNonNull(word, "word");
         // Set the desired bit by using the OR operation
         set(word, param, (x, y) -> x | y);
     }
@@ -684,6 +697,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      */
     public boolean intersects(ChronicleBitSet set) {
         throwExceptionIfClosed();
+        Objects.requireNonNull(set, "set");
 
         // Check common words between both bitsets for any intersection
         for (int i = Math.min(getWordsInUse(), set.getWordsInUse()) - 1; i >= 0; i--)
@@ -700,6 +714,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * @return {@code true} if there's an intersection, otherwise {@code false}.
      */
     public boolean intersects(LongValueBitSet set) {
+        Objects.requireNonNull(set, "set");
         return intersects((ChronicleBitSet) set);
     }
 
@@ -725,6 +740,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      */
     public void and(ChronicleBitSet set) {
         throwExceptionIfClosed();
+        Objects.requireNonNull(set, "set");
 
         // If both bitsets are the same, no operation is needed
         if (this == set)
@@ -749,6 +765,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * @param set The {@code LongValueBitSet} to perform the logical <b>AND</b> operation with.
      */
     public void and(LongValueBitSet set) {
+        Objects.requireNonNull(set, "set");
         and((ChronicleBitSet) set);
     }
 
@@ -759,6 +776,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * @param set The {@code LongValueBitSet} to perform the logical <b>OR</b> operation with.
      */
     public void or(LongValueBitSet set) {
+        Objects.requireNonNull(set, "set");
         or((ChronicleBitSet) set);
     }
 
@@ -770,6 +788,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      */
     public void or(ChronicleBitSet set) {
         throwExceptionIfClosed();
+        Objects.requireNonNull(set, "set");
 
         if (this == set)
             return;
@@ -802,6 +821,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      */
     public void xor(ChronicleBitSet set) {
         throwExceptionIfClosed();
+        Objects.requireNonNull(set, "set");
 
         int wordsInCommon = Math.min(getWordsInUse(), set.getWordsInUse());
 
@@ -825,6 +845,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * @param set The {@code LongValueBitSet} to perform the logical <b>XOR</b> operation with.
      */
     public void xor(LongValueBitSet set) {
+        Objects.requireNonNull(set, "set");
         xor((ChronicleBitSet) set);
     }
 
@@ -836,6 +857,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      */
     public void andNot(ChronicleBitSet set) {
         throwExceptionIfClosed();
+        Objects.requireNonNull(set, "set");
 
         // Perform logical (a & !b) on words in common
         OS.memory().loadFence();
@@ -851,6 +873,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * @param set The {@code LongValueBitSet} to use for clearing matching bits.
      */
     public void andNot(LongValueBitSet set) {
+        Objects.requireNonNull(set, "set");
         andNot((ChronicleBitSet) set);
     }
 
@@ -1010,6 +1033,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     /** Copies the contents of {@code bitSet} into this instance. */
     @Override
     public void copyFrom(ChronicleBitSet bitSet) {
+        Objects.requireNonNull(bitSet, "bitSet");
         OS.memory().loadFence();
         final int wordsInUse = bitSet.getWordsInUse();
         if (wordsInUse > words.length)

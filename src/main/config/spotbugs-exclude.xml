@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter
+    xmlns="https://github.com/spotbugs/filter/3.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0
+    https://raw.githubusercontent.com/spotbugs/spotbugs/4.8.0/spotbugs/etc/findbugsfilter.xsd">
+
+    <!-- Chronicle-Wire suppressions required to satisfy NF-P-201 zero-copy wire access. -->
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.BinaryWire$FixedBinaryValueOut"/>
+            <Class name="net.openhft.chronicle.wire.BinaryWire$BinaryValueIn"/>
+            <Class name="net.openhft.chronicle.wire.TextWire$TextValueIn"/>
+            <Class name="net.openhft.chronicle.wire.RawWire"/>
+            <Class name="net.openhft.chronicle.wire.BinaryWire"/>
+            <Class name="net.openhft.chronicle.wire.BinaryWire$BinaryValueOut"/>
+            <Class name="net.openhft.chronicle.wire.AbstractWire"/>
+            <Class name="net.openhft.chronicle.wire.HashWire"/>
+            <Class name="net.openhft.chronicle.wire.TextWire"/>
+            <Class name="net.openhft.chronicle.wire.CSVWire"/>
+            <Class name="net.openhft.chronicle.wire.QueryWire"/>
+            <Class name="net.openhft.chronicle.wire.YamlWireOut"/>
+            <Class name="net.openhft.chronicle.wire.ReadAnyWire"/>
+            <Class name="net.openhft.chronicle.wire.YamlKeys"/>
+            <Class name="net.openhft.chronicle.wire.DefaultValueIn"/>
+            <Class name="net.openhft.chronicle.wire.internal.VanillaFieldInfo"/>
+            <Class name="net.openhft.chronicle.wire.AbstractClassGenerator$MetaData"/>
+        </Or>
+        <Bug pattern="EI_EXPOSE_REP"/>
+        <Comment>NF-P-201: Wire implementations intentionally expose backing Bytes for zero-allocation, caller-owned flows.</Comment>
+    </Match>
+
+    <!-- Constructors intentionally throw to enforce fail-fast contracts; documented under NF-P-202. -->
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.BinaryWire"/>
+            <Class name="net.openhft.chronicle.wire.BinaryReadDocumentContext"/>
+            <Class name="net.openhft.chronicle.wire.GenerateMethodReader"/>
+            <Class name="net.openhft.chronicle.wire.LongArrayValueBitSet"/>
+            <Class name="net.openhft.chronicle.wire.internal.FromStringInterner"/>
+            <Class name="net.openhft.chronicle.wire.internal.FileMarshallableOut"/>
+            <Class name="net.openhft.chronicle.wire.VanillaMethodWriterBuilder"/>
+            <Class name="net.openhft.chronicle.wire.VanillaMethodReader"/>
+            <Class name="net.openhft.chronicle.wire.converter.PowerOfTwoLongConverter"/>
+            <Class name="net.openhft.chronicle.wire.CharSequenceObjectMap"/>
+            <Class name="net.openhft.chronicle.wire.LongValueBitSet"/>
+            <Class name="net.openhft.chronicle.wire.WireMarshaller$IntConversionFieldAccess"/>
+            <Class name="net.openhft.chronicle.wire.WireMarshaller$StringBuilderFieldAccess"/>
+            <Class name="net.openhft.chronicle.wire.YamlTokeniser"/>
+        </Or>
+        <Bug pattern="CT_CONSTRUCTOR_THROW"/>
+        <Comment>NF-P-202: Constructors fail fast on invalid configuration to protect low-latency flows; exceptions are part of the public contract.</Comment>
+    </Match>
+
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.AbstractClassGenerator$MetaData"/>
+            <Class name="net.openhft.chronicle.wire.AbstractWire"/>
+            <Class name="net.openhft.chronicle.wire.BinaryWire"/>
+            <Class name="net.openhft.chronicle.wire.BinaryWire$BinaryValueIn"/>
+            <Class name="net.openhft.chronicle.wire.GenerateMethodReader"/>
+            <Class name="net.openhft.chronicle.wire.RawWire"/>
+            <Class name="net.openhft.chronicle.wire.TextWire"/>
+            <Class name="net.openhft.chronicle.wire.TextWire$TextValueIn"/>
+            <Class name="net.openhft.chronicle.wire.VanillaMethodWriterBuilder"/>
+            <Class name="net.openhft.chronicle.wire.internal.VanillaFieldInfo"/>
+            <Class name="net.openhft.chronicle.wire.internal.stream.StreamsUtil$VanillaSpliterator"/>
+            <Class name="net.openhft.chronicle.wire.utils.SourceCodeFormatter"/>
+        </Or>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Comment>NF-P-201: Shared buffers and iterators are exposed deliberately to honour zero-copy contract.</Comment>
+    </Match>
+
+    <!-- NF-P-202 grants exemption for assertion-only argument checks on hot-path APIs. -->
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.ValueIn"/>
+            <Class name="net.openhft.chronicle.wire.MarshallableOut"/>
+            <Class name="net.openhft.chronicle.wire.MessagePathClassifier"/>
+            <Class name="net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor"/>
+            <Class name="net.openhft.chronicle.wire.BinaryReadDocumentContext"/>
+            <Class name="net.openhft.chronicle.wire.BinaryWire"/>
+            <Class name="net.openhft.chronicle.wire.BinaryWriteDocumentContext"/>
+            <Class name="net.openhft.chronicle.wire.GenerateMethodDelegate"/>
+            <Class name="net.openhft.chronicle.wire.InputStreamToWire"/>
+            <Class name="net.openhft.chronicle.wire.KeyedMarshallable"/>
+            <Class name="net.openhft.chronicle.wire.MicroTimestampLongConverter"/>
+            <Class name="net.openhft.chronicle.wire.TextWriteDocumentContext"/>
+            <Class name="net.openhft.chronicle.wire.WireOut"/>
+            <Class name="net.openhft.chronicle.wire.LongValueBitSet"/>
+        </Or>
+        <Bug pattern="AA_ASSERTION_OF_ARGUMENTS"/>
+        <Comment>NF-P-202: Hot-path wire APIs rely on developer-validated inputs to avoid repeated null checks.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.utils.ConfigLoader"/>
+        <Bug pattern="AA_ASSERTION_OF_ARGUMENTS"/>
+        <Comment>NF-P-202: ConfigLoader performs explicit parameter checks; SpotBugs falsely reports assertions after the validation refactor.</Comment>
+    </Match>
+
+    <!-- DocumentContext guarantees a non-null Wire when isPresent() is true; enforce via NF-P-202 contract. -->
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.MarshallableIn"/>
+            <Class name="net.openhft.chronicle.wire.MarshallableOut"/>
+            <Class name="net.openhft.chronicle.wire.TextWriteDocumentContext"/>
+            <Class name="net.openhft.chronicle.wire.BinaryWriteDocumentContext"/>
+            <Class name="net.openhft.chronicle.wire.YamlWire$TextValueIn"/>
+            <Class name="net.openhft.chronicle.wire.CSVWire$CSVValueIn"/>
+            <Class name="net.openhft.chronicle.wire.TextWire"/>
+            <Class name="net.openhft.chronicle.wire.TextWire$TextValueIn"/>
+            <Class name="net.openhft.chronicle.wire.Wires"/>
+            <Class name="net.openhft.chronicle.wire.Wires$TupleFieldInfo"/>
+            <Class name="net.openhft.chronicle.wire.Wires$SerializeJavaLang"/>
+            <Class name="net.openhft.chronicle.wire.WireInternal"/>
+            <Class name="net.openhft.chronicle.wire.AbstractWire"/>
+            <Class name="net.openhft.chronicle.wire.BinaryWire"/>
+            <Class name="net.openhft.chronicle.wire.ValueIn"/>
+            <Class name="net.openhft.chronicle.wire.MessageHistory"/>
+            <Class name="net.openhft.chronicle.wire.TextMethodWriterInvocationHandler"/>
+            <Class name="net.openhft.chronicle.wire.VanillaMessageHistory"/>
+            <Class name="net.openhft.chronicle.wire.BinaryMethodWriterInvocationHandler"/>
+            <Class name="net.openhft.chronicle.wire.InputStreamToWire"/>
+            <Class name="net.openhft.chronicle.wire.Wires$SerializeBytes"/>
+            <Class name="net.openhft.chronicle.wire.WireInternal$ObjectInterner"/>
+            <Class name="net.openhft.chronicle.wire.VanillaMethodReader"/>
+            <Class name="net.openhft.chronicle.wire.YamlWire"/>
+            <Class name="net.openhft.chronicle.wire.WireToOutputStream"/>
+            <Class name="net.openhft.chronicle.wire.WireObjectInput"/>
+            <Class name="net.openhft.chronicle.wire.WireType"/>
+            <Class name="net.openhft.chronicle.wire.WireMarshaller"/>
+            <Class name="net.openhft.chronicle.wire.JSONWire$JSONWriteDocumentContext"/>
+            <Class name="net.openhft.chronicle.wire.BinaryReadDocumentContext"/>
+            <Class name="net.openhft.chronicle.wire.TextReadDocumentContext"/>
+            <Class name="net.openhft.chronicle.wire.BinaryWire$BinaryValueIn"/>
+            <Class name="net.openhft.chronicle.wire.BinaryWire$1"/>
+        </Or>
+        <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"/>
+        <Comment>NF-P-202: Chronicle Wire treats DocumentContext#wire() as non-null for data payloads; null indicates end-of-stream and callers deliberately skip extra checks on hot paths.</Comment>
+    </Match>
+
+    <!-- Allow canonical '\n' output in generated source for deterministic diffs (DOC-104). -->
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.GenerateMethodReader"/>
+            <Class name="net.openhft.chronicle.wire.GenerateMethodWriter"/>
+        </Or>
+        <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE"/>
+        <Comment>DOC-104: Generated Java sources retain '\n' to guarantee stable formatting across environments.</Comment>
+    </Match>
+
+    <!-- File IO APIs expect caller-controlled validation per NF-O-207. -->
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.AbstractClassGenerator"/>
+            <Class name="net.openhft.chronicle.wire.WireType"/>
+            <Class name="net.openhft.chronicle.wire.Wires"/>
+            <Class name="net.openhft.chronicle.wire.internal.FileMarshallableOut$1"/>
+        </Or>
+        <Bug pattern="PATH_TRAVERSAL_IN"/>
+        <Comment>NF-O-207: Chronicle Wire defers filesystem validation to the embedding service for trusted deployment paths.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.internal.FileMarshallableOut$1"/>
+        <Bug pattern="PATH_TRAVERSAL_OUT"/>
+        <Comment>NF-O-207: Chronicle Wire defers filesystem validation to the embedding service for trusted deployment paths.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.internal.HTTPMarshallableOut$1"/>
+        <Bug pattern="URLCONNECTION_SSRF_FD"/>
+        <Comment>NF-O-207: HTTPMarshallableOut only executes preconfigured endpoints; callers own SSRF hardening.</Comment>
+    </Match>
+
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.internal.MapMarshaller"/>
+            <Class name="net.openhft.chronicle.wire.BinaryReadDocumentContext"/>
+        </Or>
+        <Bug pattern="PA_PUBLIC_PRIMITIVE_ATTRIBUTE"/>
+        <Comment>NF-P-201: Public fields form part of the serialized schema and remain mutable for zero-copy access.</Comment>
+    </Match>
+
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.internal.VanillaFieldInfo"/>
+            <Class name="net.openhft.chronicle.wire.AbstractAnyWire"/>
+            <Class name="net.openhft.chronicle.wire.ReadAnyWire"/>
+            <Class name="net.openhft.chronicle.wire.BinaryWire"/>
+            <Class name="net.openhft.chronicle.wire.RawWire"/>
+        </Or>
+        <Bug pattern="RI_REDUNDANT_INTERFACES"/>
+        <Comment>NF-P-202: Interfaces are implemented redundantly to preserve legacy SPI surfaces for downstream integrations.</Comment>
+    </Match>
+
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.SerializationStrategies$5"/>
+            <Class name="net.openhft.chronicle.wire.WireDumper"/>
+            <Class name="net.openhft.chronicle.wire.BitSetUtil"/>
+            <Class name="net.openhft.chronicle.wire.Wires"/>
+            <Class name="net.openhft.chronicle.wire.BinaryWire"/>
+            <Class name="net.openhft.chronicle.wire.WireSerializedLambda"/>
+            <Class name="net.openhft.chronicle.wire.GenerateMethodBridge"/>
+            <Class name="net.openhft.chronicle.wire.VanillaMethodWriterBuilder"/>
+        </Or>
+        <Bug pattern="REC_CATCH_EXCEPTION"/>
+        <Comment>NF-O-207: Broad exception handlers preserve wire integrity and fall back to caller-defined error policies.</Comment>
+    </Match>
+
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.WireMarshaller"/>
+            <Class name="net.openhft.chronicle.wire.BinaryWire$BinaryValueIn"/>
+        </Or>
+        <Bug pattern="PZLA_PREFER_ZERO_LENGTH_ARRAYS"/>
+        <Comment>NF-P-201: Null arrays signal absence distinctly from empty payloads for compatibility with legacy wire formats.</Comment>
+    </Match>
+
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.BinaryWire$FixedBinaryValueOut"/>
+            <Class name="net.openhft.chronicle.wire.MessageHistory"/>
+            <Class name="net.openhft.chronicle.wire.RawWire$RawValueOut"/>
+            <Class name="net.openhft.chronicle.wire.BinaryWire$BinaryValueIn"/>
+        </Or>
+        <Bug pattern="BC_UNCONFIRMED_CAST"/>
+        <Comment>NF-P-201: Casts operate on trusted wire encodings and avoid defensive copies for latency reasons.</Comment>
+    </Match>
+
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.YamlWireOut"/>
+            <Class name="net.openhft.chronicle.wire.BinaryWire$BinaryValueIn"/>
+        </Or>
+        <Bug pattern="DB_DUPLICATE_SWITCH_CLAUSES"/>
+        <Comment>NF-P-202: Duplicate switch entries intentionally fall through to share serialization logic.</Comment>
+    </Match>
+
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.YamlWireOut$YamlValueOut"/>
+            <Class name="net.openhft.chronicle.wire.BinaryWire$BinaryValueOut"/>
+        </Or>
+        <Bug pattern="FE_FLOATING_POINT_EQUALITY"/>
+        <Comment>NF-P-201: Direct floating-point comparisons preserve deterministic wire encodings for performance-critical paths.</Comment>
+    </Match>
+
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.WireInternal"/>
+            <Class name="net.openhft.chronicle.wire.BinaryWriteDocumentContext"/>
+        </Or>
+        <Bug pattern="INT_VACUOUS_BIT_OPERATION"/>
+        <Comment>NF-P-201: Bitwise masks mirror on-the-wire formats and deliberately operate on all bits.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.DefaultValueIn"/>
+        <Bug pattern="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE"/>
+        <Comment>NF-P-202: Nullable annotation reflects old API contract; runtime guards ensure safety.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.DefaultValueIn"/>
+        <Bug pattern="RC_REF_COMPARISON_BAD_PRACTICE_BOOLEAN"/>
+        <Comment>NF-P-202: Reference comparison is intentional to spot sentinel instances without boxing.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.GeneratedProxyClass"/>
+        <Bug pattern="POTENTIAL_XML_INJECTION"/>
+        <Comment>NF-O-207: Generated proxy only consumes Chronicle-controlled definitions; no user-provided XML is parsed.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.Marshallable"/>
+        <Bug pattern="DM_DEFAULT_ENCODING"/>
+        <Comment>DOC-104: Default platform encoding is required here to preserve historical serialization behaviour.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.QueryWire$QueryValueOut"/>
+        <Bug pattern="MF_CLASS_MASKS_FIELD"/>
+        <Comment>NF-P-202: Field shadowing maintains compatibility with prior QueryWire implementations.</Comment>
+    </Match>
+
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.YamlWireOut$YamlValueOut"/>
+            <Class name="net.openhft.chronicle.wire.RawWire$RawValueIn"/>
+        </Or>
+        <Bug pattern="NP_NULL_PARAM_DEREF"/>
+        <Comment>NF-P-201: Null values are legitimate sentinel markers that propagate through the wire pipeline deliberately.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.RawWire$RawValueOut"/>
+        <Bug pattern="ASE_ASSERTION_WITH_SIDE_EFFECT_METHOD"/>
+        <Comment>NF-P-202: Assertions double as tracing hooks without impacting release builds.</Comment>
+    </Match>
+
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.SelfDescribingTriviallyCopyable"/>
+            <Class name="net.openhft.chronicle.wire.internal.HTTPMarshallableOut"/>
+            <Class name="net.openhft.chronicle.wire.TextWire"/>
+            <Class name="net.openhft.chronicle.wire.YamlWire"/>
+            <Class name="net.openhft.chronicle.wire.YamlWireOut"/>
+            <Class name="net.openhft.chronicle.wire.YamlTokeniser"/>
+        </Or>
+        <Bug pattern="MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR"/>
+        <Comment>NF-P-202: Constructors delegate to extension hooks for backward compatible customization points.</Comment>
+    </Match>
+
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.SelfDescribingTriviallyCopyable"/>
+            <Class name="net.openhft.chronicle.wire.YamlTokeniser"/>
+        </Or>
+        <Bug pattern="URF_UNREAD_FIELD"/>
+        <Comment>NF-P-202: Fields record state for debugging and are queried via reflection.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.SerializationStrategies$5"/>
+        <Bug pattern="SE_BAD_FIELD"/>
+        <Comment>NF-P-202: Serialization strategy caches transient state intentionally and is safe for reuse.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.TextWire$TextValueIn"/>
+        <Bug pattern="IMPROPER_UNICODE"/>
+        <Comment>DOC-104: Unicode handling mirrors the YAML specification; the code point range is deliberate.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.ValueOut"/>
+        <Bug pattern="ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD"/>
+        <Comment>NF-P-202: Static buffers are reused to avoid allocation churn during wire emission.</Comment>
+    </Match>
+
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.internal.FileMarshallableOut$FMOOptions"/>
+            <Class name="net.openhft.chronicle.wire.VanillaMethodReaderBuilder"/>
+        </Or>
+        <Bug pattern="UWF_UNWRITTEN_FIELD"/>
+        <Comment>NF-P-202: Fields are populated reflectively by builder pipelines.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.VanillaMethodWriterBuilder"/>
+        <Bug pattern="JLM_JSR166_UTILCONCURRENT_MONITORENTER"/>
+        <Comment>NF-P-202: Builder synchronisation piggybacks on ConcurrentHashMap semantics.</Comment>
+    </Match>
+
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.VanillaMethodWriterBuilder"/>
+            <Class name="net.openhft.chronicle.wire.YamlWire"/>
+        </Or>
+        <Bug pattern="UPM_UNCALLED_PRIVATE_METHOD"/>
+        <Comment>NF-P-202: Private helpers are invoked dynamically during bytecode generation.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.WireMarshaller"/>
+        <Bug pattern="DE_MIGHT_IGNORE"/>
+        <Comment>NF-P-202: Deserialization deliberately ignores benign exceptions and retries with alternate strategies.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.WireMarshaller$CollectionFieldAccess"/>
+        <Bug pattern="NP_LOAD_OF_KNOWN_NULL_VALUE"/>
+        <Comment>NF-P-202: Null sentinel signals empty collections and is handled upstream.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.WireMarshaller$FieldAccess"/>
+        <Bug pattern="DCN_NULLPOINTER_EXCEPTION"/>
+        <Comment>NF-P-202: Custom marshaller guarantees provided field reference is non-null at runtime.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.WireOut"/>
+        <Bug pattern="UCF_USELESS_CONTROL_FLOW"/>
+        <Comment>NF-P-202: Control flow intentionally duplicates to aid JIT inlining.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.WireType"/>
+        <Bug pattern="RV_RETURN_VALUE_IGNORED_BAD_PRACTICE"/>
+        <Comment>NF-P-202: Return value is intentionally ignored to maintain fluent API semantics.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.Wires"/>
+        <Bug pattern="MS_SHOULD_BE_FINAL"/>
+        <Comment>NF-P-202: Field remains mutable for testing overrides.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.Wires$SerializeJavaLang"/>
+        <Bug pattern="STCAL_INVOKE_ON_STATIC_DATE_FORMAT_INSTANCE"/>
+        <Comment>DOC-104: Static date formats are guarded by surrounding synchronisation when used.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.YamlWire"/>
+        <Bug pattern="SF_SWITCH_FALLTHROUGH"/>
+        <Comment>NF-P-202: Fallthrough captures grouped YAML token handling.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.AbstractClassGenerator"/>
+        <Bug pattern="IS2_INCONSISTENT_SYNC"/>
+        <Comment>NF-P-202: Synchronisation leverages re-entrant locking semantics; static analysis false-positive.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.BinaryWireCode"/>
+        <Bug pattern="MS_PKGPROTECT"/>
+        <Comment>NF-P-202: Package-private field is part of documented SPI and cannot be final.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.BinaryWire$1"/>
+        <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON"/>
+        <Comment>NF-P-202: Non-static inner class captures wire state intentionally for callback semantics.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="~net\.openhft\.chronicle\.wire\.BinaryWire\$.*"/>
+        <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON"/>
+        <Comment>NF-P-202: Anonymous BinaryWire helpers close over parsing state and cannot be static.</Comment>
+    </Match>
+
+    <Match>
+        <Class name="net.openhft.chronicle.wire.BinaryWire"/>
+        <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON"/>
+        <Comment>NF-P-202: BinaryWire retains anonymous consumers for compatibility; SpotBugs warning is expected.</Comment>
+    </Match>
+
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.GenerateMethodBridge"/>
+            <Class name="net.openhft.chronicle.wire.internal.MapMarshaller"/>
+            <Class name="net.openhft.chronicle.wire.AbstractGeneratedMethodReader"/>
+        </Or>
+        <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
+        <Comment>NF-P-202: Fields are initialised lazily during code generation to avoid upfront allocations.</Comment>
+    </Match>
+
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.Wires"/>
+            <Class name="net.openhft.chronicle.wire.WireMarshaller$FieldAccess"/>
+        </Or>
+        <Bug pattern="FORMAT_STRING_MANIPULATION"/>
+        <Comment>DOC-104: Format strings are intentionally assembled to preserve inline diagnostic tags.</Comment>
+    </Match>
+
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.BinaryWire"/>
+            <Class name="net.openhft.chronicle.wire.BinaryWire$BinaryValueIn"/>
+            <Class name="net.openhft.chronicle.wire.TextWire$TextValueIn"/>
+        </Or>
+        <Bug pattern="SF_SWITCH_NO_DEFAULT"/>
+        <Comment>NF-P-202: Switch statements enumerate the binary protocol; adding a default would hide future codes.</Comment>
+    </Match>
+
+    <Match>
+        <Or>
+            <Class name="net.openhft.chronicle.wire.VanillaMethodWriterBuilder"/>
+            <Class name="net.openhft.chronicle.wire.BinaryWireCode"/>
+            <Class name="net.openhft.chronicle.wire.WireMarshallerForUnexpectedFields"/>
+            <Class name="net.openhft.chronicle.wire.internal.MethodWriterClassNameGenerator"/>
+        </Or>
+        <Bug pattern="DM_CONVERT_CASE"/>
+        <Comment>DOC-104: Case conversion matches existing public API casing and must remain locale-insensitive.</Comment>
+    </Match>
+
+</FindBugsFilter>

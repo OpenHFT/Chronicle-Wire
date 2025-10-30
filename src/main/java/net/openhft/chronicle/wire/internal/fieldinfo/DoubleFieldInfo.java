@@ -63,7 +63,7 @@ public final class DoubleFieldInfo extends UnsafeFieldInfo {
 
     @Override
     public boolean isEqual(Object a, Object b) {
-        return getDouble(a) == getDouble(b);
+        return Double.doubleToLongBits(getDouble(a)) == Double.doubleToLongBits(getDouble(b));
     }
 
     @Override

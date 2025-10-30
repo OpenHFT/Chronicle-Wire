@@ -66,7 +66,10 @@ public interface MarshallableIn {
         try (@NotNull DocumentContext dc = readingDocument()) {
             if (!dc.isPresent())
                 return false;
-            reader.readMarshallable(dc.wire());
+            final Wire wire = dc.wire();
+            if (wire == null)
+                return false;
+            reader.readMarshallable(wire);
         }
         return true;
     }
@@ -82,7 +85,10 @@ public interface MarshallableIn {
         try (@NotNull DocumentContext dc = readingDocument()) {
             if (!dc.isPresent())
                 return false;
-            reader.readMarshallable(dc.wire().bytes());
+            final Wire wire = dc.wire();
+            if (wire == null)
+                return false;
+            reader.readMarshallable(wire.bytes());
         }
         return true;
     }
@@ -98,7 +104,10 @@ public interface MarshallableIn {
         try (@NotNull DocumentContext dc = readingDocument()) {
             if (!dc.isPresent())
                 return false;
-            Bytes<?> bytes = dc.wire().bytes();
+            final Wire wire = dc.wire();
+            if (wire == null)
+                return false;
+            Bytes<?> bytes = wire.bytes();
             long len = Math.min(using.writeRemaining(), bytes.readRemaining());
             using.write(bytes, bytes.readPosition(), len);
             bytes.readSkip(len);
@@ -119,9 +128,12 @@ public interface MarshallableIn {
             if (!dc.isPresent()) {
                 return null;
             }
+            final Wire wire = dc.wire();
+            if (wire == null)
+                return null;
             try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
                 StringBuilder sb = stlSb.get();
-                dc.wire().getValueIn().text(sb);
+                wire.getValueIn().text(sb);
                 return sb.length() < MARSHALLABLE_IN_INTERN_SIZE
                         ? WireInternal.INTERNER.intern(sb)
                         : sb.toString();
@@ -144,7 +156,12 @@ public interface MarshallableIn {
                 sb.setLength(0);
                 return false;
             }
-            dc.wire().getValueIn().text(sb);
+            final Wire wire = dc.wire();
+            if (wire == null) {
+                sb.setLength(0);
+                return false;
+            }
+            wire.getValueIn().text(sb);
         }
         return true;
     }
@@ -168,7 +185,7 @@ public interface MarshallableIn {
                 return null;
             }
             final Wire wire = dc.wire();
-            if (!wire.hasMore())
+            if (wire == null || !wire.hasMore())
                 return Collections.emptyMap();
             @NotNull Map<K, V> ret = new LinkedHashMap<>();
             while (wire.hasMore()) {

@@ -19,6 +19,8 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 /**
  * Provides a concrete implementation of the {@link WriteDocumentContext} for text-based wire representations.
  * This class manages and tracks the state of the document being written and contains functionalities
@@ -56,7 +58,7 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
      * @param wire The wire instance to be used for writing
      */
     public TextWriteDocumentContext(Wire wire) {
-        this.wire = wire;
+        this.wire = Objects.requireNonNull(wire, "wire");
     }
 
     /**

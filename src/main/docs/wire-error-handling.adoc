@@ -130,48 +130,57 @@ Deserialisation is often where subtle data or schema issues become apparent.
 
 === Schema Mismatches
 
-* **Symptoms:** `InvalidMarshallableException`, unexpected `null` values, incorrect field values, or even `BufferUnderflowException` if field count/size changes drastically with formats like `FIELDLESS_BINARY`.
-* **Diagnosis:**
-1. **Dump to YAML:** If possible, convert the problematic binary data to YAML to visually inspect field names, types, and values.
-2. **Compare Class Definitions:** Manually compare the `Marshallable` class definitions used by the writer and the reader.
+Symptoms ::
+`InvalidMarshallableException`, unexpected `null` values, incorrect field values, or even `BufferUnderflowException` if field count/size changes drastically with formats like `FIELDLESS_BINARY`.
+Diagnosis ::
+. *Dump to YAML:* If possible, convert the problematic binary data to YAML to visually inspect field names, types, and values.
+. *Compare Class Definitions:* Manually compare the `Marshallable` class definitions used by the writer and the reader.
 Look for differences in field names, types, order (if using `FIELDLESS_BINARY`), and annotations.
-3. **Check `@FieldNumber`:** If using binary formats and `@FieldNumber`, ensure these are consistent and unique.
-* **Solutions:**
+. *Check `@FieldNumber`:* If using binary formats and `@FieldNumber`, ensure these are consistent and unique.
+Solutions ::
 * Align class definitions.
 * Implement proper schema evolution strategies (see Chronicle Wire documentation on schema evolution).
 * For `FIELDLESS_BINARY`, ensure strict schema identity or implement a versioning/migration path.
 
 === Corrupted Data or Framing Errors
 
-* **Symptoms:** `EOFException`, `BufferUnderflowException`, `InvalidMarshallableException` with cryptic messages, or reading garbage data.
-* **Diagnosis:**
-1. **Inspect `DocumentContext`:** When reading in a loop, log the state of `dc.isPresent()`, `dc.isData()`, `dc.isMetaData()`, `dc.isNotComplete()`.
+Symptoms ::
+`EOFException`, `BufferUnderflowException`, `InvalidMarshallableException` with cryptic messages, or reading garbage data.
+Diagnosis ::
+. *Inspect `DocumentContext`:* When reading in a loop, log the state of `dc.isPresent()`, `dc.isData()`, `dc.isMetaData()`, `dc.isNotComplete()`.
 An unexpected `isNotComplete()` can indicate a partially written message.
-2. **Hex Dump:** Examine the raw `Bytes` using `bytes.toHexString()` to look for unexpected patterns or premature ends.
-3. **Verify Length Prefixes:** If `DocumentContext` is used, it handles length prefixes.
+. *Hex Dump:* Examine the raw `Bytes` using `bytes.toHexString()` to look for unexpected patterns or premature ends.
+. *Verify Length Prefixes:* If `DocumentContext` is used, it handles length prefixes.
 If you have custom framing, ensure it's correct.
-* **Solutions:**
+Solutions ::
 * Ensure producers fully write and commit/flush data before consumers try to read it.
 * Use `DocumentContext` correctly with `try-with-resources` to ensure proper document finalisation and reading.
 * Investigate the source of potential data corruption (network issues, disk errors, bugs in writing logic).
 
 === Class Aliasing and Polymorphism Issues
 
-* **Symptoms:** `ClassNotFoundException`, or deserialisation into a base type instead of the expected subtype.
-* **Diagnosis:**
-1. Check YAML/JSON output for type tags (e.g., `!com.example.MySpecificType {}`).
-2. Verify `Wires.CLASS_ALIASES` setup on both sides if aliases are used.
-3. Ensure the `WireType` used supports and is configured for type retention (e.g., `YAML_RETAIN_TYPE` vs `YAML_ONLY`).
-* **Solutions:**
+Symptoms ::
+`ClassNotFoundException`, or deserialisation into a base type instead of the expected subtype.
+Diagnosis ::
+. Check YAML/JSON output for type tags (e.g., `!com.example.MySpecificType {}`).
+. Verify `Wires.CLASS_ALIASES` setup on both sides if aliases are used.
+. Ensure the `WireType` used supports and is configured for type retention (e.g., `YAML_RETAIN_TYPE` vs `YAML_ONLY`).
+Solutions ::
 * Configure class aliasing correctly and consistently.
 * Use `WireType`s that retain type information when deserialising polymorphic types.
 * Explicitly pass the concrete class to `valueIn.object(SpecificType.class)` if type information is not in the stream.
 
 === Missing No-Argument Constructor
 
-* **Symptoms:** Exception during object instantiation, often a `NoSuchMethodException` wrapped in a Wire exception.
-* **Diagnosis:** Chronicle Wire (like many serialisation libraries) may require a no-argument constructor to instantiate objects before populating them, especially when using reflection-based or generated marshallers. Generally, it doesn't need a no-argument constructor for `BytesMarshallable` classes. However, this will result in `transient` fields not being set, which can lead to unexpected `null` values or default values in the deserialised object.
-* **Solutions:** Add a public or protected no-argument constructor to your `Marshallable` classes. The access level is ignored, so `private` or package-local can be used.
+Symptoms ::
+Exception during object instantiation, often a `NoSuchMethodException` wrapped in a Wire exception.
+Diagnosis ::
+Chronicle Wire (like many serialisation libraries) may require a no-argument constructor to instantiate objects before populating them, especially when using reflection-based or generated marshallers.
+Generally, it doesn't need a no-argument constructor for `BytesMarshallable` classes.
+However, this will result in `transient` fields not being set, which can lead to unexpected `null` values or default values in the deserialised object.
+Solutions ::
+Add a public or protected no-argument constructor to your `Marshallable` classes.
+The access level is ignored, so `private` or package-local can be used.
 
 == Troubleshooting Serialisation Issues
 
@@ -179,39 +188,48 @@ Issues during serialisation are often more straightforward but can still occur.
 
 === Buffer Overflow
 
-* **Symptoms:** `BufferOverflowException`.
-* **Diagnosis:** The data being written is larger than the `Bytes` buffer's current capacity.
-* **Solutions:**
+Symptoms ::
+`BufferOverflowException`.
+Diagnosis ::
+The data being written is larger than the `Bytes` buffer's current capacity.
+Solutions ::
 * Use `Bytes.elasticByteBuffer()` or `Bytes.elasticHeapByteBuffer()` for automatically resizing buffers.
 * If using fixed-size buffers, ensure they are pre-allocated with sufficient capacity.
 Estimate maximum message size.
 
 === Invalid Data for Fields/Annotations
 
-* **Symptoms:** `IllegalArgumentException`, `IllegalStateException`, or exceptions from annotation converters (e.g., `Base85LongConverter` failing to parse an invalid character).
-* **Diagnosis:** An attempt was made to write data that violates constraints.
+Symptoms ::
+`IllegalArgumentException`, `IllegalStateException`, or exceptions from annotation converters (e.g., `Base85LongConverter` failing to parse an invalid character).
+Diagnosis ::
+An attempt was made to write data that violates constraints.
 * A string field annotated with `@MaxUtf8Len` receives a string that is too long.
 * A `@LongConversion`-annotated field receives a string that cannot be parsed by the converter.
-* **Solutions:**
+Solutions ::
 * Validate data before attempting to serialize it.
 * Ensure data conforms to the constraints imposed by annotations.
 * Handle exceptions from converters gracefully.
 
 === Custom `Marshallable` Implementation Bugs
 
-* **Symptoms:** Incorrect data written, `NullPointerException`, or other unexpected exceptions originating from your `writeMarshallable()` method.
-* **Diagnosis:** Step through your custom `writeMarshallable()` logic in a debugger.
+Symptoms ::
+Incorrect data written, `NullPointerException`, or other unexpected exceptions originating from your `writeMarshallable()` method.
+Diagnosis ::
+Step through your custom `writeMarshallable()` logic in a debugger.
 Log the values being written.
-* **Solutions:** Carefully review and test your custom marshalling logic, ensuring all fields are written correctly and in the intended order (especially for `BytesMarshallable`).
+Solutions ::
+Carefully review and test your custom marshalling logic, ensuring all fields are written correctly and in the intended order (especially for `BytesMarshallable`).
 
 == Debugging Techniques
 
 === Dump to YAML/Text
 
 One of the most powerful features of Chronicle Wire for debugging is its ability to switch formats.
-* **Writing:** If you suspect issues with binary serialisation, temporarily change the `WireType` to `YAML_ONLY` or `JSON_ONLY` and print the `Bytes.toString()`.
+Writing ::
+If you suspect issues with binary serialisation, temporarily change the `WireType` to `YAML_ONLY` or `JSON_ONLY` and print the `Bytes.toString()`.
 This allows you to see a human-readable representation of what's being written.
-* **Reading:** If you have binary data in a `Bytes` buffer that you suspect is malformed, you can attempt to read it using a `YAML_ONLY` wire (if the binary format is self-describing like `BINARY_LIGHT`):
+Reading ::
+If you have binary data in a `Bytes` buffer that you suspect is malformed, you can attempt to read it using a `YAML_ONLY` wire (if the binary format is self-describing like `BINARY_LIGHT`):
 
 [source,java]
 ----
@@ -254,7 +272,8 @@ Serialize and deserialize a problematic object in a simple test case to rule out
 
 == Error Handling Best Practices
 
-* **Use `try-with-resources` for `DocumentContext`:** Ensures proper resource management and finalisation of documents.
+Use `try-with-resources` for `DocumentContext` ::
+Ensures proper resource management and finalisation of documents.
 [source,java]
 ----
 try (DocumentContext dc = wire.writingDocument()) {
@@ -262,18 +281,25 @@ try (DocumentContext dc = wire.writingDocument()) {
 } // dc.close() is called automatically
 ----
 
-* **Check `DocumentContext.isPresent()` before reading:** Prevents errors when no more data is available.
-* **Validate Data:** Validate business data before attempting serialisation to catch issues early.
-* **Graceful Degradation:** For non-critical errors, log the issue and continue if possible, rather than crashing the application.
-* **Specific Catch Blocks:** Catch specific exceptions (`BufferUnderflowException`, `InvalidMarshallableException`) rather than generic `Exception` where possible, to handle them more appropriately.
-* **Logging:** Log errors with sufficient context (e.g., the data being processed if it's not too large or sensitive, relevant identifiers, stack traces).
-* **Resource Management:** Always release `Bytes` buffers obtained from `Bytes.elasticByteBuffer()` or `Bytes.allocateDirect()` using `bytes.releaseLast()` when they are no longer needed, especially for direct/off-heap memory, to prevent memory leaks.
+Check `DocumentContext.isPresent()` before reading ::
+Prevents errors when no more data is available.
+Validate Data ::
+Validate business data before attempting serialisation to catch issues early.
+Graceful Degradation ::
+For non-critical errors, log the issue and continue if possible, rather than crashing the application.
+Specific Catch Blocks ::
+Catch specific exceptions (`BufferUnderflowException`, `InvalidMarshallableException`) rather than generic `Exception` where possible, to handle them more appropriately.
+Logging ::
+Log errors with sufficient context (e.g., the data being processed if it's not too large or sensitive, relevant identifiers, stack traces).
+Resource Management ::
+Always release `Bytes` buffers obtained from `Bytes.elasticByteBuffer()` or `Bytes.allocateDirect()` using `bytes.releaseLast()` when they are no longer needed, especially for direct/off-heap memory, to prevent memory leaks.
 
 == Related Errors in Integrated Systems
 
 When Chronicle Wire is used within larger systems like Chronicle Queue or Chronicle Network, errors might originate from those systems but relate to the data being processed by Wire.
 
-* **Network Errors (`java.net.SocketException`, etc.):** If using Wire over a network, underlying network issues can interrupt data streams, leading to partial messages and subsequent Wire deserialisation errors.
+Network Errors (`java.net.SocketException`, etc.) ::
+If using Wire over a network, underlying network issues can interrupt data streams, leading to partial messages and subsequent Wire deserialisation errors.
 
 == Conclusion
 

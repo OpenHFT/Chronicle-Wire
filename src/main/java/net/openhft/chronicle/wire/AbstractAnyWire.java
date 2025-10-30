@@ -25,6 +25,7 @@ import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -59,7 +60,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
      */
     @Nullable
     public Wire underlyingWire() {
-        return wireAcquisition.acquireWire();
+        return requireWire();
     }
 
     /**
@@ -72,98 +73,102 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
         return wireAcquisition.underlyingType();
     }
 
+    private Wire requireWire() {
+        return Objects.requireNonNull(wireAcquisition.acquireWire(), "wireAcquisition returned null");
+    }
+
     @Override
     public void copyTo(@NotNull WireOut wire) throws InvalidMarshallableException {
-        wireAcquisition.acquireWire().copyTo(wire);
+        requireWire().copyTo(wire);
     }
 
     @NotNull
     @Override
     public ValueIn read() {
-        return wireAcquisition.acquireWire().read();
+        return requireWire().read();
     }
 
     @NotNull
     @Override
     public ValueIn read(@NotNull WireKey key) {
-        return wireAcquisition.acquireWire().read(key);
+        return requireWire().read(key);
     }
 
     @NotNull
     @Override
     public ValueIn read(@NotNull StringBuilder name) {
-        return wireAcquisition.acquireWire().read(name);
+        return requireWire().read(name);
     }
 
     @Nullable
     @Override
     public <K> K readEvent(Class<K> expectedClass) throws InvalidMarshallableException {
-        return wireAcquisition.acquireWire().readEvent(expectedClass);
+        return requireWire().readEvent(expectedClass);
     }
 
     @Override
     public void writeStartEvent() {
-        wireAcquisition.acquireWire().writeStartEvent();
+        requireWire().writeStartEvent();
     }
 
     @Override
     public void writeEndEvent() {
-        wireAcquisition.acquireWire().writeEndEvent();
+        requireWire().writeEndEvent();
     }
 
     @NotNull
     @Override
     public ValueIn getValueIn() {
-        return wireAcquisition.acquireWire().getValueIn();
+        return requireWire().getValueIn();
     }
 
     @NotNull
     @Override
     public WireIn readComment(@NotNull StringBuilder sb) {
-        return wireAcquisition.acquireWire().readComment(sb);
+        return requireWire().readComment(sb);
     }
 
     @NotNull
     @Override
     public IntValue newIntReference() {
-        return wireAcquisition.acquireWire().newIntReference();
+        return requireWire().newIntReference();
     }
 
     @NotNull
     @Override
     public LongValue newLongReference() {
-        return wireAcquisition.acquireWire().newLongReference();
+        return requireWire().newLongReference();
     }
 
     @NotNull
     @Override
     public LongArrayValues newLongArrayReference() {
-        return wireAcquisition.acquireWire().newLongArrayReference();
+        return requireWire().newLongArrayReference();
     }
 
     @Override
     public @NotNull IntArrayValues newIntArrayReference() {
-        return wireAcquisition.acquireWire().newIntArrayReference();
+        return requireWire().newIntArrayReference();
     }
 
     void checkWire() {
-        wireAcquisition.acquireWire();
+        requireWire();
     }
 
     @NotNull
     @Override
     public DocumentContext readingDocument() {
-        return wireAcquisition.acquireWire().readingDocument();
+        return requireWire().readingDocument();
     }
 
     @Override
     public DocumentContext readingDocument(long readLocation) {
-        return wireAcquisition.acquireWire().readingDocument(readLocation);
+        return requireWire().readingDocument(readLocation);
     }
 
     @Override
     public void consumePadding() {
-        final Wire wire = wireAcquisition.acquireWire();
+        final Wire wire = requireWire();
         wire.commentListener(commentListener);
         wire.consumePadding();
     }
@@ -171,56 +176,56 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public ValueOut write() {
-        return wireAcquisition.acquireWire().write();
+        return requireWire().write();
     }
 
     @NotNull
     @Override
     public ValueOut write(WireKey key) {
-        return wireAcquisition.acquireWire().write(key);
+        return requireWire().write(key);
     }
 
     @Override
     public ValueOut write(CharSequence key) {
-        return wireAcquisition.acquireWire().write(key);
+        return requireWire().write(key);
     }
 
     @Override
     public ValueOut writeEvent(Class<?> expectedType, Object eventKey) throws InvalidMarshallableException {
-        return wireAcquisition.acquireWire().writeEvent(expectedType, eventKey);
+        return requireWire().writeEvent(expectedType, eventKey);
     }
 
     @NotNull
     @Override
     public ValueOut getValueOut() {
-        return wireAcquisition.acquireWire().getValueOut();
+        return requireWire().getValueOut();
     }
 
     @NotNull
     @Override
     public WireOut writeComment(CharSequence s) {
-        return wireAcquisition.acquireWire().writeComment(s);
+        return requireWire().writeComment(s);
     }
 
     @NotNull
     @Override
     public WireOut addPadding(int paddingToAdd) {
-        return wireAcquisition.acquireWire().addPadding(paddingToAdd);
+        return requireWire().addPadding(paddingToAdd);
     }
 
     @Override
     public DocumentContext writingDocument(boolean metaData) {
-        return wireAcquisition.acquireWire().writingDocument(metaData);
+        return requireWire().writingDocument(metaData);
     }
 
     @Override
     public DocumentContext acquireWritingDocument(boolean metaData) {
-        return wireAcquisition.acquireWire().acquireWritingDocument(metaData);
+        return requireWire().acquireWritingDocument(metaData);
     }
 
     @Override
     public String readingPeekYaml() {
-        return wireAcquisition.acquireWire().readingPeekYaml();
+        return requireWire().readingPeekYaml();
     }
 
     /**

@@ -36,32 +36,58 @@ public enum ConfigLoader {
     ; // none
 
     public static String loadFile(Class<?> classLoader, String filename) throws IOException {
+        if (classLoader == null)
+            throw new IllegalArgumentException("classLoader must not be null");
+        if (filename == null)
+            throw new IllegalArgumentException("filename must not be null");
         return new String(IOTools.readFile(classLoader, filename), StandardCharsets.UTF_8);
     }
 
     public static <T> T loadFromFile(String filename) throws IOException {
+        if (filename == null)
+            throw new IllegalArgumentException("filename must not be null");
         return loadFromFile(ConfigLoader.class, filename);
     }
 
     public static <T> T loadFromFile(Class<?> classLoader, String filename) throws IOException {
+        if (classLoader == null)
+            throw new IllegalArgumentException("classLoader must not be null");
+        if (filename == null)
+            throw new IllegalArgumentException("filename must not be null");
         return load(loadFile(classLoader, filename));
     }
 
     public static <T> T loadFromFile(String filename, Properties properties) throws IOException {
+        if (filename == null)
+            throw new IllegalArgumentException("filename must not be null");
+        if (properties == null)
+            throw new IllegalArgumentException("properties must not be null");
         return loadFromFile(ConfigLoader.class, filename, properties);
     }
 
     public static <T> T loadFromFile(Class<?> classLoader, String filename, Properties properties) throws IOException {
+        if (classLoader == null)
+            throw new IllegalArgumentException("classLoader must not be null");
+        if (filename == null)
+            throw new IllegalArgumentException("filename must not be null");
+        if (properties == null)
+            throw new IllegalArgumentException("properties must not be null");
         return loadWithProperties(loadFile(classLoader, filename), properties);
     }
 
     @SuppressWarnings("unchecked")
     public static <T> T load(String fileAsString) {
+        if (fileAsString == null)
+            throw new IllegalArgumentException("fileAsString must not be null");
         return  (T) TextWire.from(replaceTokensWithProperties(fileAsString)).readObject();
     }
 
     @SuppressWarnings("unchecked")
     public static <T> T loadWithProperties(String fileAsString, Properties properties) {
+        if (fileAsString == null)
+            throw new IllegalArgumentException("fileAsString must not be null");
+        if (properties == null)
+            throw new IllegalArgumentException("properties must not be null");
         return (T) TextWire.from(replaceTokensWithProperties(fileAsString, properties)).readObject();
     }
 }

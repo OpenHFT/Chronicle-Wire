@@ -19,6 +19,8 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 import static net.openhft.chronicle.wire.Wires.toIntU30;
 
 /**
@@ -49,7 +51,7 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
      * @param wire The wire instance to be used for the writing process.
      */
     public BinaryWriteDocumentContext(Wire wire) {
-        this.wire = wire;
+        this.wire = Objects.requireNonNull(wire, "wire");
     }
 
     /**

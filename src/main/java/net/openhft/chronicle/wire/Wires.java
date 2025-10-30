@@ -333,6 +333,8 @@ public enum Wires {
      */
     public static String fromSizePrefixedBlobs(@NotNull DocumentContext dc) {
         Wire wire = dc.wire();
+        if (wire == null)
+            return "";
         Bytes<?> bytes = wire.bytes();
         if (wire instanceof TextWire) {
             // Return the direct string representation for TextWire
@@ -357,8 +359,10 @@ public enum Wires {
                 // Write the computed header to the temporary bytes
                 tempBytes.writeOrderedInt(header);
                 final Wire wire2 = ((BinaryReadDocumentContext) dc).wire;
-                // Copy data from the original wire to the temporary bytes
-                tempBytes.write(wire2.bytes(), 0, wire2.bytes().readLimit());
+                if (wire2 != null) {
+                    // Copy data from the original wire to the temporary bytes
+                    tempBytes.write(wire2.bytes(), 0, wire2.bytes().readLimit());
+                }
 
                 // Derive the wire type and apply it to the temporary bytes
                 final WireType wireType = WireType.valueOf(wire);

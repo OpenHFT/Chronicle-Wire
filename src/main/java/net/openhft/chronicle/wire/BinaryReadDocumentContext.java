@@ -117,7 +117,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         if (readLimit0 > 0 && wire0 != null) {
             @NotNull final Bytes<?> bytes = wire0.bytes();
             bytes.readLimit(readLimit0);
-            if (wire.usePadding())
+            if (wire0.usePadding())
                 readPosition0 += BytesUtil.padOffset(readPosition0);
             bytes.readPosition(Math.min(readLimit0, readPosition0));
         }
@@ -142,8 +142,11 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         if (rollback) {
             present = false;
             rollback = false;
-            if (start > -1)
-                wire.bytes().readPosition(start).readLimit(readLimit);
+            if (start > -1) {
+                Wire wireLocal = this.wire;
+                if (wireLocal != null)
+                    wireLocal.bytes().readPosition(start).readLimit(readLimit);
+            }
             start = -1;
             return true;
         }
@@ -154,10 +157,16 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     @Override
     public void start() {
         rollback = false;
-        wire.getValueIn().resetState();
-        wire.getValueOut().resetBetweenDocuments();
+        final Wire wireLocal = this.wire;
+        if (wireLocal == null) {
+            present = false;
+            notComplete = false;
+            return;
+        }
+        wireLocal.getValueIn().resetState();
+        wireLocal.getValueOut().resetBetweenDocuments();
         readPosition = readLimit = -1;
-        @NotNull final Bytes<?> bytes = wire.bytes();
+        @NotNull final Bytes<?> bytes = wireLocal.bytes();
         setStart(bytes.readPosition());
 
         present = false;
@@ -167,11 +176,11 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         }
 
         // align
-        long position = bytes.readPositionForHeader(wire.usePadding());
+        long position = bytes.readPositionForHeader(wireLocal.usePadding());
 
         int header = bytes.readVolatileInt(position);
         notComplete = Wires.isNotComplete(header); // || isEndOfFile
-        if (header == 0 || (wire.notCompleteIsNotPresent() && notComplete)) {
+        if (header == 0 || (wireLocal.notCompleteIsNotPresent() && notComplete)) {
             return;
         }
 

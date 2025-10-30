@@ -161,7 +161,7 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
             if (type == long.class)
                 return getLong(a) == getLong(b);
             if (type == double.class)
-                return getDouble(a) == getDouble(b);
+                return Double.doubleToLongBits(getDouble(a)) == Double.doubleToLongBits(getDouble(b));
             if (type == char.class)
                 return getChar(a) == getChar(b);
         }

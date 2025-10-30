@@ -1,4 +1,6 @@
 = Chronicle Wire
+:pp: ++
+
 Chronicle Software
 :css-signature: demo
 :toc: macro
@@ -77,7 +79,7 @@ For example, you can have one format embedded in another.
 
 == Support
 
-This library requires Java 8. Support for `C++`, `ruby` and `python` is available in Chronicle Queue Enterprise.
+This library requires Java 8. Support for `C{pp}`, `ruby` and `python` is available in Chronicle Queue Enterprise.
 
 == Text Formats
 
@@ -264,7 +266,7 @@ prints in `RawWire`.
 00000020 00 00 25 40                                      ··%@
 ----
 
-//For more examples see https://github.com/OpenHFT/Chronicle-Wire/blob/master/README-Chapter1.md[Examples Chapter1]
+// For more examples see https://github.com/OpenHFT/Chronicle-Wire/blob/master/README-Chapter1.md[Examples Chapter1]
 === link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Example2.java[Simple example with a data type]
 
 This example is much the same as the previous section, with the code required wrapped in a method.
@@ -640,7 +642,10 @@ prints:
 }
 ----
 
-Create configuration files cfg1.yaml and cfg2.yaml. See how the classes' names appear differently in yaml files for classes with alias name and without alias name. For Data1 object alias name is used in the yaml file (cfg1.yaml). Data2 object should be loaded from a yaml file
+Create configuration files cfg1.yaml and cfg2.yaml.
+See how the classes' names appear differently in yaml files for classes with alias name and without alias name.
+For Data1 object alias name is used in the yaml file (cfg1.yaml).
+Data2 object should be loaded from a yaml file
 with the complete name of class (including package name) otherwise you will receive an Exception.
 
 .cfg1.yaml
@@ -797,11 +802,13 @@ with the following table:
 
 === YAML Anchors and Aliases
 
-Chronicle Wire supports YAML anchors (`&`) and aliases (`*`) which allow you to reuse values within a YAML document. This feature is particularly useful for configuration files where you want to share common values across multiple sections.
+Chronicle Wire supports YAML anchors (`&`) and aliases (`*`) which allow you to reuse values within a YAML document.
+This feature is particularly useful for configuration files where you want to share common values across multiple sections.
 
 === Basic Usage
 
-Anchors are defined using `&anchorName` and referenced using `*anchorName`. The following example demonstrates sharing a hostname across multiple service configurations.
+Anchors are defined using `&anchorName` and referenced using `*anchorName`.
+The following example demonstrates sharing a hostname across multiple service configurations.
 
 [source,yaml]
 ----
@@ -854,7 +861,8 @@ static class SystemConfig extends SelfDescribingMarshallable {
 
 ==== Basic Field Anchors
 
-This test shows how a string value for `host` is defined once with an anchor (`&dbHost`) and reused twice with an alias (`*dbHost`). Chronicle Wire ensures that the reused string is the same instance in memory.
+This test shows how a string value for `host` is defined once with an anchor (`&dbHost`) and reused twice with an alias (`*dbHost`).
+Chronicle Wire ensures that the reused string is the same instance in memory.
 
 [source,java]
 ----
@@ -885,7 +893,8 @@ assertSame(systemConfig.backup.host, systemConfig.database.host);
 
 === Object Anchors
 
-You can also anchor and reuse entire objects, not just scalar values. This is powerful for defining default configurations that can be applied to multiple components.
+You can also anchor and reuse entire objects, not just scalar values.
+This is powerful for defining default configurations that can be applied to multiple components.
 
 ==== Server Config Classes
 
@@ -912,7 +921,8 @@ static class ServerSystemConfig extends SelfDescribingMarshallable {
 
 ==== Object Anchor Example
 
-In this example, a complete `ServerConfig` object is defined and anchored as `&defaultServer`. This exact same object instance is then referenced for the `primary`, `secondary`, and `monitoring` server configurations.
+In this example, a complete `ServerConfig` object is defined and anchored as `&defaultServer`.
+This exact same object instance is then referenced for the `primary`, `secondary`, and `monitoring` server configurations.
 
 [source,java]
 ----
@@ -1020,13 +1030,13 @@ However, more complicated objects with object instance fields may experience und
 
 In order to `reset` a marshallable object, the process is as follows:
 
-1. create a new instance of the object to be reset (this is done just once per object type, then cached)
-2. reset all fields, so that
-  a. when the field value implements `Resettable` interface, and the default value of the field is not `null`, and the current field value is of exactly the same class as the default value, `value.reset()` will be called. This behavior is introduced in Chronicle Wire `2.25`.
-  b. when the field type is `Collection` or `Map`, and the default value is empty collection, it will be cleared.
-  c. there is specific built-in copy-by-value handling for some types such as `Bytes`
-  d. all other fields will be copied by reference from the new instance to the existing instance
-3. the existing instance is now considered 'reset' back to default values
+. create a new instance of the object to be reset (this is done just once per object type, then cached)
+. reset all fields, so that
+.. when the field value implements `Resettable` interface, and the default value of the field is not `null`, and the current field value is of exactly the same class as the default value, `value.reset()` will be called. This behavior is introduced in Chronicle Wire `2.25`.
+.. when the field type is `Collection` or `Map`, and the default value is empty collection, it will be cleared.
+.. there is specific built-in copy-by-value handling for some types such as `Bytes`
+.. all other fields will be copied by reference from the new instance to the existing instance
+. the existing instance is now considered 'reset' back to default values
 
 The object created in step `1` is cached for performance reasons, meaning that both the new and existing instance of the marshallable object could have a reference to the same object.
 
@@ -1065,9 +1075,10 @@ The output of the test above is:
 true
 ----
 
-showing that the field **b** of each container object is now referencing the same `ByteBuffer` instance.
+showing that the field *b* of each container object is now referencing the same `ByteBuffer` instance.
 
-An exception to this is when the field value implements `Resettable` interface, when the default value of the field is not null, and the current field value is of exactly the same class as the default value. In this case, `value.reset()` will be called instead of overwriting it with default value by reference.
+An exception to this is when the field value implements `Resettable` interface, when the default value of the field is not null, and the current field value is of exactly the same class as the default value.
+In this case, `value.reset()` will be called instead of overwriting it with default value by reference.
 
 In order to work around this, if necessary, the marshallable class can override `Marshallable.reset`:
 
@@ -1121,7 +1132,8 @@ Other types are supported; for example, 32-bit integer values, and an array of 6
 == Pass-by-name or Dynamic Enums
 
 Chronicle Wire supports passing objects reference by the `name()` of the object referenced.
-This is supported trivially with `enum` which define a `name()` for you. e.g.
+This is supported trivially with `enum` which define a `name()` for you.
+e.g.
 
 .Passing a reference to an enum using it's name
 [source,java]
@@ -1157,7 +1169,8 @@ enum ServerId implements DynamicEnum {
 
 === Not passing by name
 
-Sometimes you need to pass the actually data, esp the first time. This can be achieved by using the `@AsMarshallable` annotation which will always pass the object as a typedMarshallable.
+Sometimes you need to pass the actually data, esp the first time.
+This can be achieved by using the `@AsMarshallable` annotation which will always pass the object as a typedMarshallable.
 
 [source, java]
 ----
@@ -1262,9 +1275,11 @@ MyData myData = EnumCache.of(MyData.class).nameFor("Three");
 out.refData(new RefData(myData));
 ----
 
-NOTE: The unique key for these objects is their type and name. Two objects of different types can have the same name.
+NOTE: The unique key for these objects is their type and name.
+Two objects of different types can have the same name.
 
-IMPORTANT: These objects passed by reference are never cleaned up. Only use them when there is likely to be a limited number of them over the life of the application.
+IMPORTANT: These objects passed by reference are never cleaned up.
+Only use them when there is likely to be a limited number of them over the life of the application.
 
 == Using @MethodId
 
@@ -1392,7 +1407,8 @@ interface ThreeValues {
 ----
 
 == Handling unexpected fields
-By default, Chronicle Wire skips fields which names don't match any field of the DTO class. It's possible to capture such fields by overriding method or `ReadMarshallable`:
+By default, Chronicle Wire skips fields which names don't match any field of the DTO class.
+It's possible to capture such fields by overriding method or `ReadMarshallable`:
 
 [source,Java]
 ----
@@ -1508,7 +1524,8 @@ You may wish to intercept handling a call in the method reader in order to execu
 ==== Intercepting by passing control over the original method call
 
 `MethodReader` provides a flexible feature for supporting all the above use cases -- the option to specify `MethodReaderInterceptorReturns`.
-If set, it will be triggered *instead* of the original call. It's possible to either skip the original method or to call it via passed `Invocation` instance:
+If set, it will be triggered _instead_ of the original call.
+It's possible to either skip the original method or to call it via passed `Invocation` instance:
 
 [source,Java]
 ----
@@ -1527,7 +1544,8 @@ class MyInterceptor implements MethodReaderInterceptorReturns {
 
 `GeneratingMethodReaderInterceptorReturns` allows to change the logic of `MethodReader` without an overhead provided by reflexive calls.
 
-Code returned by `codeBeforeCall` and `codeAfterCall` will be added before and after actual method call in the generated source code of the method reader. It's possible to use original call arguments and object instance in the added code.
+Code returned by `codeBeforeCall` and `codeAfterCall` will be added before and after actual method call in the generated source code of the method reader.
+It's possible to use original call arguments and object instance in the added code.
 
 Simple example that enforces skipping the original call in case the second agrument is `null`:
 
@@ -1550,13 +1568,17 @@ class SkippingInterceptor implements GeneratingMethodReaderInterceptorReturns {
     }
 }
 ----
-If the code provided by generating interceptor differs from the code provided by another generating interceptor, their `generatorId` should be different as well. It's needed to ensure re-compilation in case a new interceptor is passed.
+If the code provided by generating interceptor differs from the code provided by another generating interceptor, their `generatorId` should be different as well.
+It's needed to ensure re-compilation in case a new interceptor is passed.
 
 See `MethodReaderInterceptorReturnsTest` for more examples.
 
 === Spring Boot and dynamic compilation in Chronicle Wire
-Chronicle Wire's `MethodReader` and `MethodWriter` dynamically compile Java code to get around some limitations in Java's underlying proxy mechanism and to do this the Java platform's standard compilation mechanism is used. The platform compiler uses the classpath variable to look for classes in directories and JAR files, and is not able to make use of classloaders to find classes.
-Spring Boot uses a custom deployment mechanism - all classes and JARs are deployed in a fat JAR and Spring's classloader can extract classes from this. In order for the compiler to be able to see classes from the fat JAR, the classes should be extracted onto the disk somewhere. This is easy if the classes are contained in a JAR (i.e. a JAR inside the fat JAR) - Spring can be made to extract the JAR to a temp directory, such as by configuring Maven Spring Boot plugin:
+Chronicle Wire's `MethodReader` and `MethodWriter` dynamically compile Java code to get around some limitations in Java's underlying proxy mechanism and to do this the Java platform's standard compilation mechanism is used.
+The platform compiler uses the classpath variable to look for classes in directories and JAR files, and is not able to make use of classloaders to find classes.
+Spring Boot uses a custom deployment mechanism - all classes and JARs are deployed in a fat JAR and Spring's classloader can extract classes from this.
+In order for the compiler to be able to see classes from the fat JAR, the classes should be extracted onto the disk somewhere.
+This is easy if the classes are contained in a JAR (i.e. a JAR inside the fat JAR) - Spring can be made to extract the JAR to a temp directory, such as by configuring Maven Spring Boot plugin:
 
 [source,xml]
 ----
@@ -1625,7 +1647,7 @@ Chronicle Wire can be used for:
 
 Simple Binary Encoding (SBE) is designed to be a more efficient replacement for FIX.
 It is not limited to FIX protocols, and can be easily extended by updating an XML schema.
-It is simple, binary, and it supports C++ and Java.
+It is simple, binary, and it supports C{pp} and Java.
 
 XML, when it first started, did not use XML for its own schema files, and it is not insignificant that SBE does not use SBE for its schema either.
 This is because it is not trying to be human-readable.
@@ -1668,7 +1690,7 @@ The documentation looks well-thought-out, and it is worth emulating.
 | Unset fields take space on wire? | optional               | optional            | no                     | yes                     | yes                 | no
 | Pointers take space on wire?     | no                     | no                  | no                     | yes                     | no                  | yes
 | Pass-by-name (Dynamic Enums) | yes                     | no                  | no                     | no                     | no                  | no
-| C++                              | yes                | planned             | yes                    | yes (C++11)*            | yes                 | yes
+| C`                              | yes                | planned             | yes                    | yes (C`11)*            | yes                 | yes
 | Java                             | Java 8                 | Java 8              | yes                    | yes*                    | yes                 | yes
 | C#                               | yes                    | yes                 | yes                    | yes*                    | yes                 | yes*
 | Go                               | no                     | no                  | yes                    | yes                     | no                  | yes*
@@ -1693,11 +1715,11 @@ See https://capnproto.org/news/2014-06-17-capnproto-flatbuffers-sbe.html for a c
 
 Wire optionally supports:
 
-- field name changes
-- field order changes
-- capturing or ignoring unexpected fields
-- setting of fields to the default, if not available
-- raw messages can be longer or shorter than expected
+* field name changes
+* field order changes
+* capturing or ignoring unexpected fields
+* setting of fields to the default, if not available
+* raw messages can be longer or shorter than expected
 
 The more flexibility, the larger the overhead in terms of CPU and memory.
 Chronicle Wire allows you to dynamically pick the optimal configuration, and convert between these options.
@@ -1777,7 +1799,7 @@ If you copy the in-memory data directly, its format does not change.
 If you want to drop padding, you can copy the message to a wire format without padding.
 You can decide whether the original padding is to be preserved or not, if turned back into a format with padding.
 
-We could look at supporting *Cap'n'Proto*'s zero-byte removal compression.
+We could look at supporting _Cap'n'Proto_'s zero-byte removal compression.
 
 === Un-set fields take space on the wire
 
@@ -1817,11 +1839,11 @@ See also <<code-generation-for-marshallable,Marshallable code generation templat
 
 Marshallable objects have been designed to allow you to
 
-- write a simple POJO
-- have the `toString()`, `hashCode()` and `equals(Object)` methods created for you.
-- serialization to a human-readable format (based on YAML), as well as efficient binary formats.
-- the string format for text and binary can be logged and reconstructed from the text or hexadecimal dump
-- copying and conversion of data from one type to another
+* write a simple POJO
+* have the `toString()`, `hashCode()` and `equals(Object)` methods created for you.
+* serialization to a human-readable format (based on YAML), as well as efficient binary formats.
+* the string format for text and binary can be logged and reconstructed from the text or hexadecimal dump
+* copying and conversion of data from one type to another
 
 == Pojo LongConversionExample
 
@@ -1925,11 +1947,11 @@ When writing and reading from text, Marshallable are always self describing, how
 
 `SelfDescribingMarshallable` is slightly slower, and larger when writing but supports schema changes such as
 
-- Adding fields.
-- Removing fields
-- Changing the order of fields
-- Change the type of fields
-- Dumbing as text without access to the class specification.
+* Adding fields.
+* Removing fields
+* Changing the order of fields
+* Change the type of fields
+* Dumbing as text without access to the class specification.
 
 `BytesInBinaryMarshallable` is faster and more compact, however you need to add your own support for schema changes.
 See the Code Generating section below.
@@ -2080,9 +2102,9 @@ This shows that we can serialise and then de-serialise 100,000 messages in a sec
 image::jlbhBenchmark.png[buffer,600,400]
 * Microseconds to both serialise and deserialise a message
 
-===  Platform support
+=== Platform support
 
-Chronicle Wire supports `Java 8`, `Java 11` and `C++`.
+Chronicle Wire supports `Java 8`, `Java 11` and `C{pp}`.
 Future versions may support `Java 14`, `python`.
 
 '''
@@ -2131,12 +2153,12 @@ try (ChronicleContext context = ChronicleContext.newContext(url)) {
 
 == Documentation
 
-* link:src/main/adoc/index.adoc[Documentation Index]
-* link:src/main/adoc/wire-architecture.adoc[Architectural Overview]
-* link:src/main/adoc/wire-schema-evolution.adoc[Schema Evolution Deep Dive]
-* link:src/main/adoc/wire-cookbook.adoc[Cookbook]
-* link:src/main/adoc/wire-faq.adoc[FAQ]
-* link:src/main/adoc/wire-glossary.adoc[Glossary]
+* link:src/main/docs/index.adoc[Documentation Index]
+* link:src/main/docs/wire-architecture.adoc[Architectural Overview]
+* link:src/main/docs/wire-schema-evolution.adoc[Schema Evolution Deep Dive]
+* link:src/main/docs/wire-cookbook.adoc[Cookbook]
+* link:src/main/docs/wire-faq.adoc[FAQ]
+* link:src/main/docs/wire-glossary.adoc[Glossary]
 * link:EventsByMethod.adoc[Events by Method]
 * link:YAML2SpecificationCompliance.adoc[YAML 1.2 Compliance]
 * link:systemProperties.adoc[System Properties Guide]

@@ -104,6 +104,8 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
         @NotNull DocumentContext dc = writingDocument();
         try {
             Wire wire = dc.wire();
+            if (wire == null)
+                throw new IllegalStateException("DocumentContext returned null Wire for " + key);
             wire.write(key).object(value);
         } catch (Throwable t) {
             dc.rollbackOnClose();
@@ -126,6 +128,8 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
         @NotNull DocumentContext dc = writingDocument();
         try {
             Wire wire = dc.wire();
+            if (wire == null)
+                throw new IllegalStateException("DocumentContext returned null Wire for event " + eventName);
             wire.write(eventName).object(value);
         } catch (Throwable t) {
             dc.rollbackOnClose();
@@ -147,6 +151,8 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
         try (@NotNull DocumentContext dc = writingDocument(false)) {
             try {
                 Wire wire = dc.wire();
+                if (wire == null)
+                    throw new IllegalStateException("DocumentContext returned null Wire for writeDocument");
                 writer.writeMarshallable(wire);
             } catch (Throwable t) {
                 dc.rollbackOnClose();
@@ -166,7 +172,10 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     default void writeBytes(@NotNull WriteBytesMarshallable marshallable) throws UnrecoverableTimeoutException, InvalidMarshallableException {
         @NotNull DocumentContext dc = writingDocument();
         try {
-            marshallable.writeMarshallable(dc.wire().bytes());
+            Wire wire = dc.wire();
+            if (wire == null)
+                throw new IllegalStateException("DocumentContext returned null Wire for writeBytes");
+            marshallable.writeMarshallable(wire.bytes());
         } catch (Throwable t) {
             dc.rollbackOnClose();
             throw Jvm.rethrow(t);
@@ -191,6 +200,8 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
         @NotNull DocumentContext dc = writingDocument();
         try {
             Wire wire = dc.wire();
+            if (wire == null)
+                throw new IllegalStateException("DocumentContext returned null Wire for custom writer");
             writer.accept(wire.getValueOut(), t);
         } catch (Throwable e) {
             dc.rollbackOnClose();

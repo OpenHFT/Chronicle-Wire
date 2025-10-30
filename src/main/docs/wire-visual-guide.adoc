@@ -7,7 +7,8 @@ Purpose: To provide visual representations of key concepts, processes, and compo
 
 == Introduction
 
-This document contains diagrams and visual aids to help understand the Chronicle Wire library. It complements the text-based documentation by providing visual representations of key concepts, processes, and components.
+This document contains diagrams and visual aids to help understand the Chronicle Wire library.
+It complements the text-based documentation by providing visual representations of key concepts, processes, and components.
 
 == Architectural Overview
 

@@ -4,11 +4,15 @@
 :sectnums:
 :source-highlighter: rouge
 
-This document lists Java system properties that influence Chronicle libraries such as Chronicle Wire and Chronicle Core. These options are commonly used for debugging or performance tuning.
+This document lists Java system properties that influence Chronicle libraries such as Chronicle Wire and Chronicle Core.
+These options are commonly used for debugging or performance tuning.
 
-NOTE: Boolean properties are parsed with `net.openhft.chronicle.core.Jvm.getBoolean(String, boolean)`. A property is `true` when the key is present (e.g. `-Dprop`) or set to `true`/`yes`. To change a non-default value, provide the opposite value explicitly.
+NOTE: Boolean properties are parsed with `net.openhft.chronicle.core.Jvm.getBoolean(String, boolean)`.
+A property is `true` when the key is present (e.g. `-Dprop`) or set to `true`/`yes`.
+To change a non-default value, provide the opposite value explicitly.
 
-WARNING: Changing these settings can affect behaviour and performance. Use them mainly for development and debugging unless advised otherwise.
+WARNING: Changing these settings can affect behaviour and performance.
+Use them mainly for development and debugging unless advised otherwise.
 
 == Core and Wire System Properties
 
@@ -66,6 +70,10 @@ Useful for inspecting field order in text based wire formats.
 
 == Important Considerations
 
-* **Version Specificity:** Defaults and behaviour can change between Chronicle releases. Check the version of the library you use.
-* **Performance Impact:** Properties that enable additional logging or code generation tracing (like `dumpCode` or `yaml.logging`) can slow down your application.
-* **Testing:** Include any required system property values in your test configuration to ensure consistent behaviour.
+Version Specificity ::
+Defaults and behaviour can change between Chronicle releases.
+Check the version of the library you use.
+Performance Impact ::
+Properties that enable additional logging or code generation tracing (like `dumpCode` or `yaml.logging`) can slow down your application.
+Testing ::
+Include any required system property values in your test configuration to ensure consistent behaviour.

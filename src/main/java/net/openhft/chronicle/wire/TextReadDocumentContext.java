@@ -131,6 +131,10 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         long readPosition = this.readPosition;
 
         Wire wire0 = this.wire;
+        if (wire0 == null) {
+            present = false;
+            return;
+        }
         Bytes<?> bytes = wire0.bytes();
         bytes.readLimit(readLimit);
 
@@ -151,7 +155,7 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         }
         start = -1;
 
-        wire.getValueIn().resetState();
+        wire0.getValueIn().resetState();
         present = false;
     }
 
@@ -168,11 +172,17 @@ public class TextReadDocumentContext implements ReadDocumentContext {
 
     @Override
     public void start() {
-        wire.getValueIn().resetState();
-        Bytes<?> bytes = wire.bytes();
+        final Wire wireLocal = this.wire;
+        if (wireLocal == null) {
+            present = false;
+            notComplete = false;
+            return;
+        }
+        wireLocal.getValueIn().resetState();
+        Bytes<?> bytes = wireLocal.bytes();
 
         present = false;
-        wire.consumePadding();
+        wireLocal.consumePadding();
         while(isEndOfMessage(bytes))
             skipSep(bytes);
 
@@ -182,7 +192,7 @@ public class TextReadDocumentContext implements ReadDocumentContext {
             return;
         }
 
-        metaData = wire.hasMetaDataPrefix();
+        metaData = wireLocal.hasMetaDataPrefix();
         start = bytes.readPosition();
         consumeToEndOfMessage(bytes);
 
@@ -205,10 +215,12 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         bytes.readSkip(3);
 
         // Reset the state of the value input in the wire
-        wire.getValueIn().resetState();
+        if (wire != null)
+            wire.getValueIn().resetState();
 
         // Consume any padding present in the wire
-        wire.consumePadding();
+        if (wire != null)
+            wire.consumePadding();
     }
 
     @Override
