@@ -8,22 +8,17 @@ An event is defined as a Java interface method which is written to a `Wire` by a
 
 Advantages of this pattern include:
 
-* Direct method calls remain the simplest form of communication when the
-  producer and consumer are in the same JVM.
-* Interfaces describing events become easy to serialise as data structures
-  for persistence or testing.
+* Direct method calls remain the simplest form of communication when the producer and consumer are in the same JVM.
+* Interfaces describing events become easy to serialise as data structures for persistence or testing.
 * Generated proxies minimise allocation and provide type safety.
 
 == Core components
 
-. Event interface :: A plain Java interface whose methods represent event types.
-. Handler implementation :: A class that implements the event interface to
-  process events locally.
-. `MethodWriter` :: Generates a proxy that serialises method calls onto a `Wire`.
-. `MethodReader` :: Reads method calls from a `Wire` and invokes them on a
-  handler.
-. Wire format :: YAML, JSON or binary encodings used to store or transmit the
-  events.
+Event interface :: A plain Java interface whose methods represent event types.
+Handler implementation :: A class that implements the event interface to process events locally.
+`MethodWriter` :: Generates a proxy that serialises method calls onto a `Wire`.
+`MethodReader` :: Reads method calls from a `Wire` and invokes them on a handler.
+Wire format :: YAML, JSON or binary encodings used to store or transmit the events.
 
 [mermaid]
 ....
@@ -208,6 +203,7 @@ interface DestinationTimedSaying extends Destination<TimedSaying> { }
 ----
 
 A producer can use the fluent API as follows:
+
 [source,java]
 ----
 DestinationTimedSaying writer = wire.methodWriter(DestinationTimedSaying.class);
@@ -235,6 +231,7 @@ class MyTimedSaying implements TimedSaying {
     }
 }
 ----
+
 This pattern skips deserialisation of the remaining message when an early filter indicates the event should be ignored, saving processing time for irrelevant data.
 
 === Say one text message

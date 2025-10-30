@@ -6,20 +6,16 @@
 == Overview
 
 Chronicle Wire implements YAML parsing primarily through `YamlWire` and `TextWire`.
-This document outlines the level of compliance with the YAML 1.2.2 specification
-and highlights any deviations.
-It is intended for developers who require
-interoperability information.
+This document outlines the level of compliance with the YAML 1.2.2 specification and highlights any deviations.
+It is intended for developers who require interoperability information.
 
 link:https://yaml.org/spec/1.2.2/[YAML 1.2.2 specification]
 
 == Overview
 
 Chronicle Wire implements YAML parsing primarily through `YamlWire` and `TextWire`.
-This document outlines the level of compliance with the YAML 1.2.2 specification
-and highlights any deviations.
-It is intended for developers who require
-interoperability information.
+This document outlines the level of compliance with the YAML 1.2.2 specification and highlights any deviations.
+It is intended for developers who require interoperability information.
 
 link:https://yaml.org/spec/1.2.2/[YAML 1.2.2 specification]
 
@@ -40,7 +36,7 @@ See https://yaml.org/spec/1.2.2/ for more information.
 | Document Start (`---`) | 6.8.1, Examples 2.7+ | *Yes* | Multiple documents using `---` are supported.
 | Document End (`...`) | 6.8.2, Example 2.8 | Partial | `...` is recognised but not strictly required if another `---` or EOF follows.
 | Comments (`#`) | 6.6, Example 2.9 | *Yes* | Comments are parsed and ignored. `@Comment` annotation can generate comments during serialisation.
-| Anchors (`&`) & Aliases (`_`) | 3.2.2.2, 7.1, Example 2.10 | *_Yes** | Allows repeated nodes and object graphs with cycles or shared references.
+| Anchors (`&`) & Aliases (`_`) | 3.2.2.2, 7.1, Example 2.10 | *Yes* | Allows repeated nodes and object graphs with cycles or shared references.
 | Tags (e.g., `!!map`, `!mytype`) | 3.2.1.2, 7.3, Example 2.23 | *Yes* | Supports standard and custom tags. `!!binary` works with `BytesStore` and `byte[]`.
 | Complex Mapping Keys | 2.1, Example 2.11 | No | Mapping keys must be scalars; the explicit `? key : value` syntax is not supported.
 | Flow Scalars (Multi-line) | 7.3.2, Example 2.18 | Partial | Quoted multi-line flow scalars supported. Unquoted plain multi-line scalars may require specific formatting.

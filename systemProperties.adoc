@@ -17,7 +17,7 @@ Use them mainly for development and debugging unless advised otherwise.
 == Core and Wire System Properties
 
 .System Properties Details
-[cols="2a,1,3a,2a", options="header"]
+[cols="2a,1,3a,2a",options="header"]
 |===
 | Property Key (System Property Name)
 | Default Value
