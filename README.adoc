@@ -2131,12 +2131,12 @@ try (ChronicleContext context = ChronicleContext.newContext(url)) {
 
 == Documentation
 
-* link:src/main/adoc/index.adoc[Documentation Index]
-* link:src/main/adoc/wire-architecture.adoc[Architectural Overview]
-* link:src/main/adoc/wire-schema-evolution.adoc[Schema Evolution Deep Dive]
-* link:src/main/adoc/wire-cookbook.adoc[Cookbook]
-* link:src/main/adoc/wire-faq.adoc[FAQ]
-* link:src/main/adoc/wire-glossary.adoc[Glossary]
+* link:src/main/docs/index.adoc[Documentation Index]
+* link:src/main/docs/wire-architecture.adoc[Architectural Overview]
+* link:src/main/docs/wire-schema-evolution.adoc[Schema Evolution Deep Dive]
+* link:src/main/docs/wire-cookbook.adoc[Cookbook]
+* link:src/main/docs/wire-faq.adoc[FAQ]
+* link:src/main/docs/wire-glossary.adoc[Glossary]
 * link:EventsByMethod.adoc[Events by Method]
 * link:YAML2SpecificationCompliance.adoc[YAML 1.2 Compliance]
 * link:systemProperties.adoc[System Properties Guide]
