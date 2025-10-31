@@ -1677,6 +1677,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             case BinaryWireHighCode.INT:
                 // Convert the integer to double.
                 return readInt0(code);
+            default:
+                break;
         }
 
         // If the encoding is unrecognized, throw an exception.
