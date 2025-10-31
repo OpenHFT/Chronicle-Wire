@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 // Testing the generation of class names for MethodWriter
-public class MethodWriterClassNameGeneratorTest extends net.openhft.chronicle.wire.WireTestCommon {
+class MethodWriterClassNameGeneratorTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Instance of the class name generator to be tested
     private final MethodWriterClassNameGenerator classNameGenerator = new MethodWriterClassNameGenerator();
@@ -94,7 +94,8 @@ public class MethodWriterClassNameGeneratorTest extends net.openhft.chronicle.wi
         String cn2 = generatedClassName(null, false, false, WireType.TEXT,
                 NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener1.class,
                 NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGi_DiffersInTheTruncatedPortion.class);
-        Jvm.startup().on(MethodWriterClassNameGeneratorTest.class, "Must differ:\n" + cn1 + "\n" + cn2);
+        String ls = System.lineSeparator();
+        Jvm.startup().on(MethodWriterClassNameGeneratorTest.class, "Must differ:" + ls + cn1 + ls + cn2);
         assertNotEquals(cn1, cn2);
     }
 
