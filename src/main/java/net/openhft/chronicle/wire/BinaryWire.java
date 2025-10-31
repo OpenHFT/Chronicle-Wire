@@ -562,7 +562,9 @@ public class BinaryWire extends AbstractWire implements Wire {
                         // fall through to unknownCode(wire) after inner switch
                     }
                 }
-                unknownCode(wire);
+                // If no more bytes remain, do not attempt to read another code; just exit
+                if (bytes.readRemaining() > 0)
+                    unknownCode(wire);
                 break;
 
             case BinaryWireHighCode.FLOAT:
@@ -572,7 +574,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     Number d = readFloat0(peekCode);
                     wire.getValueOut().object(d);
                 } catch (Exception e) {
-                    unknownCode(wire);
+                    if (bytes.readRemaining() > 0)
+                        unknownCode(wire);
                 }
                 break;
 
@@ -590,7 +593,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                             wire.getValueOut().object(l);
                     }
                 } catch (Exception e) {
-                    unknownCode(wire);
+                    if (bytes.readRemaining() > 0)
+                        unknownCode(wire);
                 }
                 break;
 
@@ -617,8 +621,9 @@ public class BinaryWire extends AbstractWire implements Wire {
                 break;
 
             default:
-                // Unknown high code group: report the code for easier diagnostics
-                unknownCode(wire);
+                // Unknown high code group: report the code only if data remains; otherwise exit quietly
+                if (bytes.readRemaining() > 0)
+                    unknownCode(wire);
                 break;
         }
     }
@@ -1428,8 +1433,10 @@ public class BinaryWire extends AbstractWire implements Wire {
                 wire.getValueOut().bool(true);
                 break;
             default:
-                unknownCode(wire);
-        }
+                // Only throw if there is still data to read; avoid spurious EndOfFile at stream end
+                if (bytes.readRemaining() > 0)
+                    unknownCode(wire);
+                }
     }
 
     /**

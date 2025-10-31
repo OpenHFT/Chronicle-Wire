@@ -196,14 +196,8 @@
                 <configuration>
                     <nrOfIndentSpace>4</nrOfIndentSpace>
                 </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>sort</goal>
-                        </goals>
-                        <phase>verify</phase>
-                    </execution>
-                </executions>
+                <!-- Do not bind to lifecycle to avoid mutating pom on normal builds.
+                     Run on demand via: mvn sortpom:sort -->
             </plugin>
 
             <!-- Check API compatibility against previous releases -->
@@ -555,10 +549,10 @@
                             </execution>
                             <execution>
                                 <id>report</id>
-                                <phase>verify</phase>
                                 <goals>
                                     <goal>report</goal>
                                 </goals>
+                                <phase>verify</phase>
                                 <configuration>
                                     <dataFile>${project.build.directory}/jacoco.exec</dataFile>
                                     <outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
@@ -566,10 +560,10 @@
                             </execution>
                             <execution>
                                 <id>check</id>
-                                <phase>verify</phase>
                                 <goals>
                                     <goal>check</goal>
                                 </goals>
+                                <phase>verify</phase>
                                 <configuration>
                                     <dataFile>${project.build.directory}/jacoco.exec</dataFile>
                                     <rules>

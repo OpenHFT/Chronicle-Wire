@@ -17,6 +17,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.junit.Test;
+import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 
 import static org.junit.Assert.*;
 
@@ -36,8 +37,7 @@ public class RawWireEdgeCaseTest extends WireTestCommon {
         assertEquals("hello", wire.read().text());
         assertEquals(20L, wire.read().int64());
 
-        // reading past end should return default values (0 or null)
-        wire.read().int32();
+        // reading past end should fail with an underflow
+        assertThrows(DecoratedBufferUnderflowException.class, () -> wire.read().int32());
     }
 }
-

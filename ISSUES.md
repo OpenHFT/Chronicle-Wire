@@ -2,7 +2,7 @@
 
 Total open/confirmed issues: 1628
 
-## 1. AZk52uJNviqOMEUt0pa7
+## 1. AZk52uJNviqOMEUt0pa7 (Fixed locally)
 
 - **Rule**: `java:S1607`
 - **Severity**: MAJOR
@@ -14,7 +14,7 @@ Total open/confirmed issues: 1628
 - **Message**:
   Either add an explanation about why this test is skipped or remove the "@Ignore" annotation.
 
-## 2. AZhCOAu7TtJ4wK8ep7DL
+## 2. AZhCOAu7TtJ4wK8ep7DL (Fixed locally)
 
 - **Rule**: `java:S1128`
 - **Severity**: MINOR
@@ -26,7 +26,7 @@ Total open/confirmed issues: 1628
 - **Message**:
   Remove this unused import 'net.openhft.chronicle.bytes.MethodId'.
 
-## 3. AZfmhMwUeoieKB1eXn7_
+## 3. AZfmhMwUeoieKB1eXn7_ (Fixed locally)
 
 - **Rule**: `java:S1104`
 - **Severity**: MINOR
@@ -38,7 +38,7 @@ Total open/confirmed issues: 1628
 - **Message**:
   Make map a static final constant or non-public and provide accessors if needed.
 
-## 4. AZfmhMwUeoieKB1eXn8A
+## 4. AZfmhMwUeoieKB1eXn8A (Fixed locally)
 
 - **Rule**: `java:S1104`
 - **Severity**: MINOR
@@ -50,7 +50,7 @@ Total open/confirmed issues: 1628
 - **Message**:
   Make kClass a static final constant or non-public and provide accessors if needed.
 
-## 5. AZfmhMwUeoieKB1eXn8B
+## 5. AZfmhMwUeoieKB1eXn8B (Fixed locally)
 
 - **Rule**: `java:S1104`
 - **Severity**: MINOR
@@ -62,7 +62,7 @@ Total open/confirmed issues: 1628
 - **Message**:
   Make vClass a static final constant or non-public and provide accessors if needed.
 
-## 6. AZfmhMwUeoieKB1eXn8C
+## 6. AZfmhMwUeoieKB1eXn8C (Fixed locally)
 
 - **Rule**: `java:S1104`
 - **Severity**: MINOR
@@ -74,7 +74,7 @@ Total open/confirmed issues: 1628
 - **Message**:
   Make leaf a static final constant or non-public and provide accessors if needed.
 
-## 7. AZfmhMw0eoieKB1eXn8D
+## 7. AZfmhMw0eoieKB1eXn8D (Fixed locally)
 
 - **Rule**: `java:S1128`
 - **Severity**: MINOR
@@ -86,7 +86,7 @@ Total open/confirmed issues: 1628
 - **Message**:
   Remove this unused import 'net.openhft.chronicle.core.Jvm'.
 
-## 8. AZfmhMjIeoieKB1eXn7-
+## 8. AZfmhMjIeoieKB1eXn7- (Fixed locally)
 
 - **Rule**: `java:S5786`
 - **Severity**: INFO
@@ -98,7 +98,7 @@ Total open/confirmed issues: 1628
 - **Message**:
   Remove this 'public' modifier.
 
-## 9. AZfmhMZQeoieKB1eXn78
+## 9. AZfmhMZQeoieKB1eXn78 (Fixed locally)
 
 - **Rule**: `java:S116`
 - **Severity**: MINOR
@@ -110,7 +110,7 @@ Total open/confirmed issues: 1628
 - **Message**:
   Rename this field "C" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.
 
-## 10. AZfmhMh-eoieKB1eXn79
+## 10. AZfmhMh-eoieKB1eXn79 (Fixed locally)
 
 - **Rule**: `java:S1128`
 - **Severity**: MINOR
@@ -122,7 +122,7 @@ Total open/confirmed issues: 1628
 - **Message**:
   Remove this unused import 'org.junit.Assume.assumeFalse'.
 
-## 11. AZfmhMQPeoieKB1eXn77
+## 11. AZfmhMQPeoieKB1eXn77 (Fixed locally)
 
 - **Rule**: `java:S1128`
 - **Severity**: MINOR

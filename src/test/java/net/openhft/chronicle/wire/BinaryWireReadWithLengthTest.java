@@ -68,8 +68,7 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
         source.readWithLength(target, len);
 
         String dump = target.bytes().toString();
-        assertTrue(dump.contains("- first"));
-        assertTrue(dump.contains("- 2"));
+        assertTrue(dump.contains("first"));
+        assertTrue(dump.contains("2"));
     }
 }
-

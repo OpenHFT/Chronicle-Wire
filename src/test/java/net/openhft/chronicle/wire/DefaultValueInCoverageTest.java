@@ -100,8 +100,9 @@ public class DefaultValueInCoverageTest extends WireTestCommon {
 
         assertSame(wire.classLookup(), valueIn.classLookup());
 
-        BinaryLongArrayReference values = new BinaryLongArrayReference(2);
-        valueIn.defaultValue = values;
-        assertSame(values, valueIn.applyToMarshallable(in -> values));
+        try (BinaryLongArrayReference values = new BinaryLongArrayReference(2)) {
+            valueIn.defaultValue = values;
+            assertSame(values, valueIn.applyToMarshallable(in -> values));
+        }
     }
 }

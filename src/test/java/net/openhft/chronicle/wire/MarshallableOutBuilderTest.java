@@ -26,6 +26,7 @@ import net.openhft.chronicle.jlbh.JLBH;
 import net.openhft.chronicle.jlbh.JLBHOptions;
 import net.openhft.chronicle.jlbh.JLBHTask;
 import org.junit.Before;
+import org.junit.Assume;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -165,6 +166,13 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     // Test to ensure only JSON Wire is supported and if BINARY_LIGHT is used, an IllegalArgumentException is thrown.
     @Test(expected = IllegalArgumentException.class)
     public void httpBinary() throws IOException, InterruptedException {
+        // Skip when socket binding is not permitted (e.g. in restricted CI sandboxes)
+        try {
+            HttpServer.create(new InetSocketAddress(0), 0).stop(0);
+        } catch (IOException | RuntimeException e) {
+            Assume.assumeNoException("Skipping: cannot bind HttpServer in this environment", e);
+        }
+
         InetSocketAddress address = new InetSocketAddress(0);
         HttpServer server = HttpServer.create(address, 0);
         int port = server.getAddress().getPort();

@@ -19,6 +19,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
+import org.junit.Assume;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
@@ -108,6 +109,16 @@ public class WireToOutputStreamTest extends WireTestCommon {
     @Test
     // Test serialization and deserialization using a socket
     public void testVisSocket() throws IOException {
+        // Skip test when the environment forbids opening sockets (CI sandboxes, policy)
+        ServerSocket probe = null;
+        try {
+            probe = new ServerSocket(0);
+        } catch (IOException e) {
+            Assume.assumeNoException("Skipping: cannot open ServerSocket in this environment", e);
+        } finally {
+            if (probe != null) probe.close();
+        }
+
         try (ServerSocket ss = new ServerSocket(0);
              Socket s = new Socket("localhost", ss.getLocalPort());
              Socket s2 = ss.accept()) {

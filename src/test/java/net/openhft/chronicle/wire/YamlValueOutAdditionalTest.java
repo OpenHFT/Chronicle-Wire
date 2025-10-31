@@ -36,11 +36,11 @@ public class YamlValueOutAdditionalTest extends WireTestCommon {
         String yaml = bytes.toString();
         assertTrue(yaml.contains("quoted: \"needs: quoting\""));
 
+        // Read the whole document as a map (avoids relying on ValueIn#marshallable for root documents)
         Map<String, Object> values = YamlWire.from(yaml)
-                .read().marshallableAsMap(String.class, Object.class);
+                .readAllAsMap(String.class, Object.class, new java.util.LinkedHashMap<>());
         assertEquals("needs: quoting", values.get("quoted"));
         assertEquals("first\nsecond", values.get("multiline"));
         assertEquals(true, values.get("flag"));
     }
 }
-

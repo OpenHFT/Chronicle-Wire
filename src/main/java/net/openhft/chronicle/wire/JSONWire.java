@@ -919,6 +919,7 @@ public class JSONWire extends TextWire {
 
         @Override
         protected void popState() {
+            // Do nothing: JSON writer has no stack state to restore here
         }
 
         @Override
@@ -933,15 +934,17 @@ public class JSONWire extends TextWire {
 
         @Override
         protected void afterClose() {
-
+            // Do nothing: separator and state handled by higher-level logic
         }
 
         @Override
         protected void addNewLine(long pos) {
+            // Do nothing: JSON output remains on a single line by design here
         }
 
         @Override
         protected void newLine() {
+            // Do nothing: pretty printing not enabled in this writer
         }
 
         @Override
@@ -956,6 +959,7 @@ public class JSONWire extends TextWire {
 
         @Override
         public void writeComment(@NotNull CharSequence s) {
+            // Do nothing: JSON has no native comments
         }
 
         /**
