@@ -702,6 +702,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     }
                     wireValueOut.object(object);
                     break;
+                default:
+                    break;
             }
         } finally {
             bytes.readLimit(limit);  // Reset the read limit to its original value.
