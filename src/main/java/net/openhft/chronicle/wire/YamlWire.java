@@ -52,6 +52,8 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 @SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
 public class YamlWire extends YamlWireOut<YamlWire> {
 
+    private static final String UNABLE_TO_READ = "Unable to read ";
+
     // YAML-specific tag constants for representing special constructs.
     static final String SEQ_MAP = "!seqmap";
     static final String BINARY_TAG = "!binary";
@@ -2223,7 +2225,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 yt.next();
             valueIn.skipType();
             if (yt.current() != YamlToken.TEXT) {
-                Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a double.");
+                Jvm.warn().on(getClass(), UNABLE_TO_READ + valueIn.objectBestEffort() + " as a double.");
                 return 0;
             }
             switch (yt.current()) {
@@ -2250,7 +2252,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 default:
                     break;
             }
-            Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a double.");
+            Jvm.warn().on(getClass(), UNABLE_TO_READ + valueIn.objectBestEffort() + " as a double.");
             return 0;
         }
 
@@ -2513,4 +2515,3 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         writeContext.rollbackIfNotComplete();
     }
 }
-

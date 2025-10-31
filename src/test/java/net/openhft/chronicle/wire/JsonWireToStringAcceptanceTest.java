@@ -29,16 +29,16 @@ import static org.junit.Assert.assertEquals;
  * Verify that unicode characters can be properly represented in JSON output.
  */
 @SuppressWarnings("UnnecessaryUnicodeEscape")
-public class JsonWireToStringAcceptanceTest {
+class JsonWireToStringAcceptanceTest {
 
-    private static Collection<WireType> WIRE_TYPES = Arrays.asList(WireType.JSON, WireType.JSON_ONLY);
+    private static Collection<WireType> wireTypes = Arrays.asList(WireType.JSON, WireType.JSON_ONLY);
 
     @ParameterizedTest
     @ValueSource(strings = {"£", "€", "¥", "\u20B9", "ó", "óaóó", "", "ÊÆÄ"})
     public void json_verifyAsString(String input) {
         Map<String, String> map = new HashMap<>();
         map.put("x", input);
-        for (WireType wireType : WIRE_TYPES) {
+        for (WireType wireType : wireTypes) {
             assertEquals("{\"x\":\"" + input + "\"}", wireType.asString(map));
         }
     }

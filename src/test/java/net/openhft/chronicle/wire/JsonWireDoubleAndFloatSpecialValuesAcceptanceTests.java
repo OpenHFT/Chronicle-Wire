@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *     <li>{@link JSONWire.JSONValueOut#writeSpecialFloatValueToBytes(Bytes, float)} </li>
  * </ul>
  */
-public class JsonWireDoubleAndFloatSpecialValuesAcceptanceTests {
+class JsonWireDoubleAndFloatSpecialValuesAcceptanceTests {
 
     @ParameterizedTest
     @MethodSource("doubleTestInputs")

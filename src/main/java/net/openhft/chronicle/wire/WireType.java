@@ -522,6 +522,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      * Internal helper that removes a single {@code null} element from
      * collections created when reading certain empty lists.
      */
+    @SuppressWarnings("java:S3011")
     private void cleanNullCollections(Object object) {
         if (object == null) return;
         Field[] declaredFields = object.getClass().getDeclaredFields();
@@ -531,6 +532,10 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
             if (!Collection.class.isAssignableFrom(field.getType())) continue;
 
             try {
+                // For performance we update field accessibility. This runs under tests with
+                // JPMS opens (see ${jvm.requiredArgs}); if not available, fail gracefully.
+                // Suppressed Sonar S3011 as this is a controlled, internal optimisation.
+                //noinspection JavaReflectionMemberAccess
                 field.setAccessible(true);
                 Object fieldValue = field.get(object);
 

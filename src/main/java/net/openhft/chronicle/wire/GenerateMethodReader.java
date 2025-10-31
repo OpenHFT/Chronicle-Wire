@@ -561,7 +561,7 @@ public class GenerateMethodReader {
 
         // Field setup based on method parameters and interceptor
         if (parameterTypes.length > 0 || hasRealInterceptorReturns())
-            fields.append(format("// %s\n", m.getName()));
+            fields.append(format("// %s%n", m.getName()));
 
         // Iterating through method parameters to setup fields
         for (int i = 0; i < parameterTypes.length; i++) {
@@ -571,13 +571,13 @@ public class GenerateMethodReader {
             String fieldName = m.getName() + "arg" + i;
             if (fieldNames.add(fieldName)) {
                 if (parameterType == Bytes.class) {
-                    fields.append(format("private Bytes %s = Bytes.allocateElasticOnHeap();\n", fieldName));
+                    fields.append(format("private Bytes %s = Bytes.allocateElasticOnHeap();%n", fieldName));
                 } else {
                     if (!parameterType.isPrimitive() && !Modifier.isFinal(parameterType.getModifiers()) && multipleNonMarshallableParamTypes(parameterType)) {
-                        fields.append(format("private final Map<Class<? extends %s>, %s> %sInstances = new HashMap<>();\n", typeName, typeName, fieldName));
-                        fields.append(format("private final Function<Class<? extends %s>, %s> %sFunc = %sInstances::get;\n", typeName, typeName, fieldName, fieldName));
+                        fields.append(format("private final Map<Class<? extends %s>, %s> %sInstances = new HashMap<>();%n", typeName, typeName, fieldName));
+                        fields.append(format("private final Function<Class<? extends %s>, %s> %sFunc = %sInstances::get;%n", typeName, typeName, fieldName, fieldName));
                     }
-                    fields.append(format("private %s %s;\n", typeName, fieldName));
+                    fields.append(format("private %s %s;%n", typeName, fieldName));
                 }
             }
         }
@@ -601,7 +601,7 @@ public class GenerateMethodReader {
         }
 
         if (parameterTypes.length > 0 || hasRealInterceptorReturns())
-            fields.append("\n");
+            fields.append(String.format("%n"));
 
         // Checking and handling @MethodId annotation
         final MethodId methodIdAnnotation = Jvm.findAnnotation(m, MethodId.class);
@@ -889,8 +889,8 @@ public class GenerateMethodReader {
         } else {
             // Handling other object types.
             final String typeName = argumentType.getCanonicalName();
-            boolean multipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes(argumentType);
-            if (!Modifier.isFinal(argumentType.getModifiers()) && multipleNonMarshallableParamTypes) {
+            boolean hasMultipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes(argumentType);
+            if (!Modifier.isFinal(argumentType.getModifiers()) && hasMultipleNonMarshallableParamTypes) {
                 return format("%s = %s.object(%s, %s.class);\nif (!(%s instanceof Demarshallable)) {\n%sInstances.put(%s.getClass(), %s);\n}\n", argumentName, valueInName, argumentName + "Func", typeName, argumentName, argumentName, argumentName, argumentName);
             }
             if (isRecyclable(argumentType)) {

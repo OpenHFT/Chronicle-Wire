@@ -2022,9 +2022,9 @@ public class YamlWireTest extends WireTestCommon {
     // Test for Empty YAML Document
     @Test
     public void testEmptyYamlDocument() {
-        Wire wire = createWire();
-        wire.bytes().append("");
-        assertFalse(wire.readingDocument().isPresent());
+        Wire wireLocal = createWire();
+        wireLocal.bytes().append("");
+        assertFalse(wireLocal.readingDocument().isPresent());
     }
 
     // Test for Large YAML Documents
@@ -2032,14 +2032,14 @@ public class YamlWireTest extends WireTestCommon {
     public void testLargeYamlDocument() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        Wire wire = createWire();
+        Wire wireLocal = createWire();
         StringBuilder largeYaml = new StringBuilder();
         for (int i = 0; i < 10000; i++) {
             largeYaml.append("key").append(i).append(": value").append(i).append("\n");
         }
-        wire.bytes().append(largeYaml.toString());
+        wireLocal.bytes().append(largeYaml.toString());
         for (int i = 0; i < 10000; i++) {
-            assertEquals("value" + i, wire.read("key" + i).text());
+            assertEquals("value" + i, wireLocal.read("key" + i).text());
         }
     }
 
@@ -2047,9 +2047,9 @@ public class YamlWireTest extends WireTestCommon {
     @SuppressWarnings("UnnecessaryUnicodeEscape")
     @Test
     public void testSpecialCharactersInStrings() {
-        Wire wire = createWire();
-        wire.bytes().append("text: \"Line1\\nLine2\\tTabbed\\u263A\"");
-        assertEquals("Line1\nLine2\tTabbed\u263A", wire.read("text").text());
+        Wire wireLocal = createWire();
+        wireLocal.bytes().append("text: \"Line1\\nLine2\\tTabbed\\u263A\"");
+        assertEquals("Line1\nLine2\tTabbed\u263A", wireLocal.read("text").text());
     }
 
     enum BWKey implements WireKey {
