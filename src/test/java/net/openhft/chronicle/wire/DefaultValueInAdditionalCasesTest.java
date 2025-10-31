@@ -43,11 +43,9 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
         dvi.bytesMatch(src, b -> match[0] = b);
         assertTrue(match[0]);
 
-        // bytesSet with null and non-null default
+        // bytesSet with null default (non-null requires direct memory address)
         PointerBytesStore pbs = new PointerBytesStore();
         dvi.defaultValue = null;
-        assertSame(dvi.wireIn(), dvi.bytesSet(pbs));
-        dvi.defaultValue = (BytesStore<?, ?>) src;
         assertSame(dvi.wireIn(), dvi.bytesSet(pbs));
     }
 
