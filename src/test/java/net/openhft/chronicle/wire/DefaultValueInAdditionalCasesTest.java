@@ -36,7 +36,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
         Bytes<?> src = Bytes.wrapForRead("hello".getBytes());
         dvi.defaultValue = (BytesStore<?, ?>) src;
         Bytes<?> out = Bytes.allocateElasticOnHeap(16);
-        assertSame(out, dvi.text(out));
+        assertSame(out, dvi.textTo(out));
         assertEquals("hello", out.toString());
 
         final boolean[] match = {false};
@@ -80,4 +80,3 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
         assertArrayEquals(data, dvi.bytes(using));
     }
 }
-
