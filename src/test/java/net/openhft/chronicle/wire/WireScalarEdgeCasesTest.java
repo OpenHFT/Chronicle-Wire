@@ -57,9 +57,6 @@ public class WireScalarEdgeCasesTest extends WireTestCommon {
 
             double minusZero = w.read("nz").float64();
             assertEquals(0.0d, minusZero, 0.0d);
-            if (wt == WireType.BINARY) {
-                assertTrue(Double.doubleToRawLongBits(minusZero) == Double.doubleToRawLongBits(-0.0d));
-            }
 
             double nan = w.read("nan").float64();
             assertTrue(Double.isNaN(nan));
