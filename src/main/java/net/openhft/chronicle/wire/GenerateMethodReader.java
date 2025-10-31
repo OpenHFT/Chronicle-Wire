@@ -248,7 +248,7 @@ public class GenerateMethodReader {
 
         // Start constructing the source code.
         if (!packageName().isEmpty())
-            sourceCode.append(format("package %s;\n", packageName()));
+        sourceCode.append(format("package %s;%n", packageName()));
 
         // Import statements required for the generated code.
         boolean hasMultipleNonMarshallableParamTypes = !Boolean.FALSE.equals(multipleNonMarshallableParamTypes);
@@ -268,16 +268,16 @@ public class GenerateMethodReader {
                 "\n");
 
         // Declare the generated class extending AbstractGeneratedMethodReader.
-        sourceCode.append(format("public class %s extends AbstractGeneratedMethodReader {\n", generatedClassName()));
+        sourceCode.append(format("public class %s extends AbstractGeneratedMethodReader {%n", generatedClassName()));
 
         // Inline comment for instances section.
         sourceCode.append("// instances on which parsed calls are invoked\n");
 
         for (int i = 0; metaDataHandler != null && i < metaDataHandler.length; i++) {
-            sourceCode.append(format("private final Object metaInstance%d;\n", i));
+            sourceCode.append(format("private final Object metaInstance%d;%n", i));
         }
         for (int i = 0; i < instances.length; i++) {
-            sourceCode.append(format("private final Object instance%d;\n", i));
+            sourceCode.append(format("private final Object instance%d;%n", i));
         }
         sourceCode.append("private final WireParselet defaultParselet;\n");
         sourceCode.append("\n");
@@ -328,13 +328,13 @@ public class GenerateMethodReader {
 
         // Initialize metaInstance objects.
         for (int i = 0; metaDataHandler != null && i < metaDataHandler.length; i++)
-            sourceCode.append(format("metaInstance%d = metaInstances[%d];\n", i, i));
+            sourceCode.append(format("metaInstance%d = metaInstances[%d];%n", i, i));
 
         // Initialize instance objects.
         for (int i = 0; i < instances.length - 1; i++)
-            sourceCode.append(format("instance%d = instances[%d];\n", i, i));
+            sourceCode.append(format("instance%d = instances[%d];%n", i, i));
 
-        sourceCode.append(format("instance%d = instances[%d];\n}\n\n", instances.length - 1, instances.length - 1));
+        sourceCode.append(format("instance%d = instances[%d];%n}%n%n", instances.length - 1, instances.length - 1));
 
         // Override the restIgnored method if chained calls are present.
         if (hasChainedCalls) {
@@ -587,7 +587,7 @@ public class GenerateMethodReader {
             hasChainedCalls = true;
 
         if (hasRealInterceptorReturns()) {
-            fields.append(format("private final Object[] interceptor%sArgs = new Object[%d];\n",
+            fields.append(format("private final Object[] interceptor%sArgs = new Object[%d];%n",
                     m.getName(), parameterTypes.length));
 
             String parameterTypesArg = parameterTypes.length == 0 ? "" :
@@ -596,7 +596,7 @@ public class GenerateMethodReader {
                             .map(s -> s + ".class")
                             .collect(Collectors.joining(", "));
 
-            fields.append(format("private static final Method %smethod = lookupMethod(%s.class, \"%s\"%s);\n",
+            fields.append(format("private static final Method %smethod = lookupMethod(%s.class, \"%s\"%s);%n",
                     m.getName(), anInterface.getCanonicalName(), m.getName(), parameterTypesArg));
         }
 
@@ -614,7 +614,7 @@ public class GenerateMethodReader {
         String chainedCallPrefix = chainReturnType != null ? "chainedCallReturnResult = " : "";
 
         // Handling code generation for event name switch block
-        eventNameSwitchBlock.append(format("case \"%s\":\n", m.getName()));
+        eventNameSwitchBlock.append(format("case \"%s\":%n", m.getName()));
         if (parameterTypes.length == 0) {
             eventNameSwitchBlock.append("valueIn.skipValue();\n");
             eventNameSwitchBlock.append(methodCall(m, instanceFieldName, chainedCallPrefix, chainReturnType));
@@ -688,9 +688,9 @@ public class GenerateMethodReader {
      */
     private void addMethodIdSwitch(String methodName, int methodId, SourceCodeFormatter eventIdSwitchBlock) {
         // Append the switch case based on method ID
-        eventIdSwitchBlock.append(format("case %d:\n", methodId));
+        eventIdSwitchBlock.append(format("case %d:%n", methodId));
         // Set the last executed method's name
-        eventIdSwitchBlock.append(format("lastEventName = \"%s\";\n", methodName));
+        eventIdSwitchBlock.append(format("lastEventName = \"%s\";%n", methodName));
         // End of the switch case
         eventIdSwitchBlock.append("break;\n\n");
     }
@@ -748,7 +748,7 @@ public class GenerateMethodReader {
         } else {
             // called for non generating interceptor
             for (int i = 0; i < parameterTypes.length; i++) {
-                res.append(format("interceptor%sArgs[%d] = %sarg%d;\n", m.getName(), i, m.getName(), i));
+                res.append(format("interceptor%sArgs[%d] = %sarg%d;%n", m.getName(), i, m.getName(), i));
             }
 
             // Determine if a return type cast is needed for the method
@@ -819,84 +819,84 @@ public class GenerateMethodReader {
 
         // Generate code based on the type of the argument.
         if (boolean.class.equals(argumentType)) {
-            return format("%s = %s.bool();\n", argumentName, valueInName);
+            return format("%s = %s.bool();%n", argumentName, valueInName);
         } else if (byte.class.equals(argumentType)) {
             // If numeric conversion is available and has a shared instance.
             if (numericConversionClass != null && hasInstance(numericConversionClass)) {
-                return format("%s = (byte) %s.INSTANCE.parse(%s.text());\n", argumentName, numericConversionClass.getName(), valueInName);
+                return format("%s = (byte) %s.INSTANCE.parse(%s.text());%n", argumentName, numericConversionClass.getName(), valueInName);
             }
             // If numeric conversion is available and is an instance of LongConverter.
             else if (numericConversionClass != null && LongConverter.class.isAssignableFrom(numericConversionClass)) {
                 // Register a converter for this type.
-                numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);\n",
+                numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);%n",
                         numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
 
-                return format("%s = (byte) %sConverter.parse(%s.text());\n", argumentName, argumentName, valueInName);
+                return format("%s = (byte) %sConverter.parse(%s.text());%n", argumentName, argumentName, valueInName);
             } else // Default byte reading logic.
-                return format("%s = %s.readByte();\n", argumentName, valueInName);
+                return format("%s = %s.readByte();%n", argumentName, valueInName);
         } else if (char.class.equals(argumentType)) {
             // Handling character type arguments.
-            return format("%s = %s.character();\n", argumentName, valueInName);
+            return format("%s = %s.character();%n", argumentName, valueInName);
         } else if (short.class.equals(argumentType)) {
             // Generate code based on the type of the argument and presence of numeric conversion.
             if (numericConversionClass != null && hasInstance(numericConversionClass)) {
-                return format("%s = (short) %s.INSTANCE.parse(%s.text());\n", argumentName, numericConversionClass.getName(), valueInName);
+                return format("%s = (short) %s.INSTANCE.parse(%s.text());%n", argumentName, numericConversionClass.getName(), valueInName);
 
             } else if (numericConversionClass != null && LongConverter.class.isAssignableFrom(numericConversionClass)) {
-                numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);\n",
+                numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);%n",
                         numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
 
-                return format("%s = (short) %sConverter.parse(%s.text());\n", argumentName, argumentName, valueInName);
+                return format("%s = (short) %sConverter.parse(%s.text());%n", argumentName, argumentName, valueInName);
             } else
-                return format("%s = %s.int16();\n", argumentName, valueInName);
+                return format("%s = %s.int16();%n", argumentName, valueInName);
         } else if (int.class.equals(argumentType)) {
             // Generate code based on the type of the argument and presence of numeric conversion.
             if (numericConversionClass != null && hasInstance(numericConversionClass)) {
-                return format("%s = (int) %s.INSTANCE.parse(%s.text());\n", argumentName, numericConversionClass.getName(), valueInName);
+                return format("%s = (int) %s.INSTANCE.parse(%s.text());%n", argumentName, numericConversionClass.getName(), valueInName);
 
             } else if (numericConversionClass != null && LongConverter.class.isAssignableFrom(numericConversionClass)) {
-                numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);\n",
+                numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);%n",
                         numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
 
-                return format("%s = (int) %sConverter.parse(%s.text());\n", argumentName, argumentName, valueInName);
+                return format("%s = (int) %sConverter.parse(%s.text());%n", argumentName, argumentName, valueInName);
             } else
-                return format("%s = %s.int32();\n", argumentName, valueInName);
+                return format("%s = %s.int32();%n", argumentName, valueInName);
         } else if (long.class.equals(argumentType)) {
             // Generate code based on the type of the argument and presence of numeric conversion.
             if (numericConversionClass != null && hasInstance(numericConversionClass)) {
-                return format("%s = %s.INSTANCE.parse(%s.text());\n", argumentName, numericConversionClass.getName(), valueInName);
+                return format("%s = %s.INSTANCE.parse(%s.text());%n", argumentName, numericConversionClass.getName(), valueInName);
 
             } else if (numericConversionClass != null && LongConverter.class.isAssignableFrom(numericConversionClass)) {
-                numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);\n",
+                numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);%n",
                         numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
 
-                return format("%s = %sConverter.parse(%s.text());\n", argumentName, argumentName, valueInName);
+                return format("%s = %sConverter.parse(%s.text());%n", argumentName, argumentName, valueInName);
             } else {
-                return format("%s = %s.int64();\n", argumentName, valueInName);
+                return format("%s = %s.int64();%n", argumentName, valueInName);
             }
         } else if (float.class.equals(argumentType)) {
             // Handling float type arguments.
-            return format("%s = %s.float32();\n", argumentName, valueInName);
+            return format("%s = %s.float32();%n", argumentName, valueInName);
         } else if (double.class.equals(argumentType)) {
             // Handling double type arguments.
-            return format("%s = %s.float64();\n", argumentName, valueInName);
+            return format("%s = %s.float64();%n", argumentName, valueInName);
         } else if (Bytes.class.isAssignableFrom(argumentType)) {
             // Handling Bytes type arguments.
-            return format("%s.bytes(%s);\n", valueInName, argumentName);
+            return format("%s.bytes(%s);%n", valueInName, argumentName);
         } else if (CharSequence.class.isAssignableFrom(argumentType)) {
             // Handling CharSequence type arguments.
-            return format("%s = %s.text();\n", argumentName, valueInName);
+            return format("%s = %s.text();%n", argumentName, valueInName);
         } else {
             // Handling other object types.
             final String typeName = argumentType.getCanonicalName();
             boolean hasMultipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes(argumentType);
             if (!Modifier.isFinal(argumentType.getModifiers()) && hasMultipleNonMarshallableParamTypes) {
-                return format("%s = %s.object(%s, %s.class);\nif (!(%s instanceof Demarshallable)) {\n%sInstances.put(%s.getClass(), %s);\n}\n", argumentName, valueInName, argumentName + "Func", typeName, argumentName, argumentName, argumentName, argumentName);
+                return format("%s = %s.object(%s, %s.class);\nif (!(%s instanceof Demarshallable)) {\n%sInstances.put(%s.getClass(), %s);\n}%n", argumentName, valueInName, argumentName + "Func", typeName, argumentName, argumentName, argumentName, argumentName);
             }
             if (isRecyclable(argumentType)) {
-                return format("%s = %s.object(checkRecycle(%s), %s.class);\n", argumentName, valueInName, argumentName, typeName);
+                return format("%s = %s.object(checkRecycle(%s), %s.class);%n", argumentName, valueInName, argumentName, typeName);
             }
-            return format("%s = %s.object(%s, %s.class);\n", argumentName, valueInName, argumentName, typeName);
+            return format("%s = %s.object(%s, %s.class);%n", argumentName, valueInName, argumentName, typeName);
         }
     }
 
