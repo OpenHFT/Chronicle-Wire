@@ -5044,6 +5044,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                         case FLOAT_SET_LOW_4:
                             bytes.readUnsignedByte();  // Read a byte and treat it as unsigned
                             return;
+                        default:
+                            break;
                     }
                     // If none of the known float codes were matched, throw an exception
                     throw new UnsupportedOperationException(stringForCode(code));
@@ -5081,6 +5083,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                         case INT64_0x:
                             bytes.readLong();  // Read a 64-bit signed integer
                             return;
+                        default:
+                            break;
                     }
                     // If none of the known integer codes were matched, throw an exception
                     throw new UnsupportedOperationException(stringForCode(code));
