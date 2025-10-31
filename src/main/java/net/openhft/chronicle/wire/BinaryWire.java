@@ -1460,6 +1460,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                         return 0;
                     case TRUE:
                         return 1;
+                    default:
+                        break;
                 }
                 break;
 
@@ -1471,6 +1473,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             case BinaryWireHighCode.INT:
                 // For integer codes, decode the integer.
                 return readInt0(code);
+            default:
+                break;
         }
 
         // If we can't decode, throw an exception.
@@ -1506,6 +1510,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             case FLOAT64:
                 // 64-bit floating point representation.
                 return bytes.readDouble();
+            default:
+                break;
         }
         throw new UnsupportedOperationException(stringForCode(code));
     }
@@ -1542,6 +1548,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             case FLOAT64:
                 // 64-bit floating point representation.
                 return bytes.readDouble();
+            default:
+                break;
         }
 
         // If we can't decode, throw an exception.
