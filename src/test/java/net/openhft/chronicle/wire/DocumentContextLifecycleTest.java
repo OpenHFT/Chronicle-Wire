@@ -53,7 +53,7 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
 
     @Test
     public void textUseTextDocumentsLifecycle() {
-        TextWire w = (TextWire) new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
+        Wire w = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
         try (DocumentContext dc = w.writingDocument()) {
             dc.wire().write("x").int64(11L);
         }
@@ -75,4 +75,3 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
         assertTrue(w.writingIsComplete());
     }
 }
-
