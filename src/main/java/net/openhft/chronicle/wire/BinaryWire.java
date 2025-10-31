@@ -557,6 +557,10 @@ public class BinaryWire extends AbstractWire implements Wire {
                     }
                     case U8_ARRAY:
                         unexpectedCode();
+                        break;
+                    default: {
+                        // fall through to unknownCode(wire) after inner switch
+                    }
                 }
                 unknownCode(wire);
                 break;
@@ -610,6 +614,11 @@ public class BinaryWire extends AbstractWire implements Wire {
                 bytes.uncheckedReadSkipOne();
                 @Nullable StringBuilder sb = readText(peekCode, acquireStringBuilder());
                 wire.getValueOut().text(sb);
+                break;
+
+            default:
+                // Unknown high code group: report the code for easier diagnostics
+                unknownCode(wire);
                 break;
         }
     }
