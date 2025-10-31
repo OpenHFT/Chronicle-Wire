@@ -44,4 +44,19 @@ public class TextWireEdgeCaseTest extends WireTestCommon {
         assertTrue(output.contains("needs: \\\"quoting\\\""));
         assertEquals("needs: \"quoting\"", TextWire.from(output).read("message").text());
     }
+
+    @Test
+    public void documentContextRoundTrip() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+        TextWire wire = new TextWire(bytes);
+        wire.useTextDocuments();
+        try (DocumentContext dc = wire.writingDocument()) {
+            dc.wire().write("msg").text("hi");
+        }
+
+        bytes.readPositionRemaining(0, bytes.writePosition());
+        try (DocumentContext dc = wire.readingDocument()) {
+            assertEquals("hi", dc.wire().read("msg").text());
+        }
+    }
 }

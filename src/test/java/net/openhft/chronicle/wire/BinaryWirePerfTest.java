@@ -78,7 +78,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
 
     // Performance test for Wire serialization and deserialization
     @Test
-    public void wirePerf() throws StreamCorruptedException {
+    public void wirePerf() {
        // System.out.println("Custom TestId: " + testId + ", fixed: " + fixed + ", numberField: " + numericField + ", fieldLess: " + fieldLess);
         @NotNull Wire wire = createBytes();
 
@@ -100,7 +100,6 @@ public class BinaryWirePerfTest extends WireTestCommon {
     }
 
     private void wirePerf0(@NotNull Wire wire, @NotNull MyTypes a, @NotNull MyTypes b, int t) {
-        long start = System.nanoTime();
         int runs = 200000;
         for (int i = 0; i < runs; i++) {
             wire.clear();
@@ -112,7 +111,6 @@ public class BinaryWirePerfTest extends WireTestCommon {
 
             b.readMarshallable(wire);
         }
-        //long rate = (System.nanoTime() - start) / runs;
 
        // System.out.printf("(vars) %,d : %,d ns avg, len= %,d%n", t, rate, wire.bytes().readPosition());
     }
@@ -130,7 +128,6 @@ public class BinaryWirePerfTest extends WireTestCommon {
 
     // Common method to test serialization and deserialization for type MyType2
     private void wirePerf0(@NotNull Wire wire, @NotNull MyType2 a, @NotNull MyType2 b, int t) {
-        long start = System.nanoTime();
         int runs = 300000;
         for (int i = 0; i < runs; i++) {
             wire.clear();
@@ -140,8 +137,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
 
             b.readMarshallable(wire);
         }
-        long rate = (System.nanoTime() - start) / runs;
-       // System.out.printf("(ints) %,d : %,d ns avg, len= %,d%n", t, rate, wire.bytes().readPosition());
+       // System.out.printf("(ints) %,d : len= %,d%n", t, wire.bytes().readPosition());
     }
 
     // *************************************************************************

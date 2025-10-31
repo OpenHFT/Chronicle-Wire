@@ -514,7 +514,7 @@
             </activation>
             <properties>
                 <!-- Align sonar profile thresholds to current coverage levels -->
-                <jacoco.line.coverage>0.703</jacoco.line.coverage>
+                <jacoco.line.coverage>0.706</jacoco.line.coverage>
                 <jacoco.branch.coverage>0.648</jacoco.branch.coverage>
             </properties>
             <build>
@@ -528,7 +528,7 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
-                            <!-- Keep ${argLine} first to preserve other tooling injections -->
+                            <!-- Keep @{argLine} first so other tooling (e.g. JaCoCo) can prepend arguments -->
                             <argLine>@{argLine} ${jvm.requiredArgs} -Djvm.coverage=true</argLine>
                         </configuration>
                     </plugin>
@@ -536,8 +536,9 @@
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
                         <version>${jacoco-maven-plugin.version}</version>
-                        <!-- Exclude problematic test class from instrumentation to avoid ASM error -->
                         <configuration>
+                            <!-- Save exec and site reports -->
+                            <outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
                             <excludes>
                                 <exclude>net/openhft/chronicle/wire/ReadmeChapter1Test*</exclude>
                             </excludes>
@@ -548,21 +549,29 @@
                                 <goals>
                                     <goal>prepare-agent</goal>
                                 </goals>
+                                <configuration>
+                                    <destFile>${project.build.directory}/jacoco.exec</destFile>
+                                </configuration>
                             </execution>
                             <execution>
                                 <id>report</id>
+                                <phase>verify</phase>
                                 <goals>
                                     <goal>report</goal>
                                 </goals>
-                                <phase>verify</phase>
+                                <configuration>
+                                    <dataFile>${project.build.directory}/jacoco.exec</dataFile>
+                                    <outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
+                                </configuration>
                             </execution>
                             <execution>
                                 <id>check</id>
+                                <phase>verify</phase>
                                 <goals>
                                     <goal>check</goal>
                                 </goals>
-                                <phase>verify</phase>
                                 <configuration>
+                                    <dataFile>${project.build.directory}/jacoco.exec</dataFile>
                                     <rules>
                                         <rule>
                                             <element>BUNDLE</element>

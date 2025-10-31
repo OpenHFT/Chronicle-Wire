@@ -2635,6 +2635,7 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // Class with fields of Bytes type initialized with various Byte buffers
+    @SuppressWarnings("java:S116") // Keep A,B,C,D uppercase to match expected YAML keys in assertions
     static class ABCD extends SelfDescribingMarshallable implements Monitorable {
         Bytes<?> A = Bytes.allocateElasticDirect();
         Bytes<?> B = Bytes.allocateDirect(64);
@@ -2659,6 +2660,7 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // Class containing three StringBuilder fields
+    @SuppressWarnings("java:S116") // Keep A,B,C uppercase to match expected YAML keys in assertions
     static class ABC extends SelfDescribingMarshallable {
         StringBuilder A = new StringBuilder();
         StringBuilder B = new StringBuilder();
