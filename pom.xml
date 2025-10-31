@@ -508,8 +508,8 @@
             </activation>
             <properties>
                 <!-- Align sonar profile thresholds to current coverage levels -->
-                <jacoco.line.coverage>0.706</jacoco.line.coverage>
-                <jacoco.branch.coverage>0.648</jacoco.branch.coverage>
+                <jacoco.line.coverage>0.724</jacoco.line.coverage>
+                <jacoco.branch.coverage>0.661</jacoco.branch.coverage>
             </properties>
             <build>
                 <plugins>
