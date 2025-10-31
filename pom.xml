@@ -521,6 +521,15 @@
                         <groupId>org.sonarsource.scanner.maven</groupId>
                         <artifactId>sonar-maven-plugin</artifactId>
                     </plugin>
+                    <!-- Ensure JPMS flags from parent are propagated during sonar runs -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <!-- Keep ${argLine} first to preserve other tooling injections -->
+                            <argLine>${argLine} ${jvm.requiredArgs} -Djvm.coverage=true</argLine>
+                        </configuration>
+                    </plugin>
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
