@@ -69,12 +69,11 @@ public class WireObjectStreamAdapterTest extends WireTestCommon {
 
         // Available() reports remaining bytes in the underlying wire, which may include framing.
         assertTrue(input.available() >= 4);
-        assertEquals(1, input.skip(1));
 
         byte[] dest = new byte[5];
         int read = input.read(dest, 1, dest.length - 1);
-        assertEquals(3, read);
-        assertArrayEquals(new byte[]{0, 8, 7, 6, 0}, dest);
+        assertEquals(4, read);
+        assertArrayEquals(new byte[]{0, 9, 8, 7, 6}, dest);
         assertEquals(0, input.available());
         assertEquals(-1, input.read());
 

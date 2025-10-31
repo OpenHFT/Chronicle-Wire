@@ -67,13 +67,29 @@ class WireObjectInput implements ObjectInput {
         final long remaining = wire.bytes().readRemaining();
         if (remaining <= 0)
             throw new EOFException();
-        if (len > remaining)
-            len = (int) remaining;
-        Bytes<?> bytes = Bytes.wrapForWrite(b);
-        bytes.writePosition(off);
-        bytes.writeLimit((long) off + len);
-        wire.getValueIn().bytes(bytes);
-        return (int) (bytes.lengthWritten(off));
+        int toRead = (int) Math.min(len, remaining);
+
+        // Use an elastic sink to avoid DecoratedBufferOverflowException when the wire emits textual/encoded bytes.
+        Bytes<?> sink = Bytes.allocateElasticOnHeap(toRead);
+        long start = sink.writePosition();
+        sink.writeLimit(start + toRead);
+        try {
+            wire.getValueIn().bytes(sink);
+            int written = (int) (sink.writePosition() - start);
+            if (written <= 0) {
+                // Fallback: read byte-by-byte to preserve semantics
+                int i = 0;
+                for (; i < toRead && wire.bytes().readRemaining() > 0; i++)
+                    b[off + i] = wire.getValueIn().int8();
+                return i == 0 ? -1 : i;
+            }
+            sink.readPosition(start);
+            int copy = Math.min(written, len);
+            sink.read(b, off, copy);
+            return copy;
+        } finally {
+            sink.releaseLast();
+        }
     }
 
     /**

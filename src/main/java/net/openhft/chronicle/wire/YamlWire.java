@@ -1964,6 +1964,26 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 consumePadding();
             }
             switch (yt.current()) {
+                case ALIAS: {
+                    String alias = yt.text();
+                    Object o = anchorValues.get(alias);
+                    yt.next();
+                    if (o == null)
+                        throw new IllegalStateException("Unknown alias " + alias + " with no corresponding anchor");
+                    if (object instanceof java.util.Map && o instanceof java.util.Map) {
+                        ((java.util.Map) object).clear();
+                        ((java.util.Map) object).putAll((java.util.Map) o);
+                        return object;
+                    }
+                    return o;
+                }
+                case ANCHOR: {
+                    String anchor = yt.text();
+                    yt.next();
+                    Object result = marshallable(object, strategy);
+                    anchorValues.put(anchor, result);
+                    return result;
+                }
                 case TAG:
                     Class<?> clazz = typePrefix();
                     if (clazz != object.getClass())
