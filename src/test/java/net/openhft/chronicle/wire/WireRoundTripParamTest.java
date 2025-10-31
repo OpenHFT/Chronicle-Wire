@@ -18,7 +18,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.junit.Test;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import static org.junit.Assert.*;
@@ -39,8 +38,7 @@ public class WireRoundTripParamTest extends WireTestCommon {
     @Test
     public void primitivesRoundTrip() {
         for (WireType wt : TYPES) {
-            Bytes<ByteBuffer> bytes = Bytes.allocateElasticOnHeap(256);
-            Wire w = wt.apply(bytes);
+            Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
 
             w.write("i8").int8((byte) -1);
             w.write("i16").int16((short) 32767);
@@ -66,8 +64,7 @@ public class WireRoundTripParamTest extends WireTestCommon {
     @Test
     public void sequenceRoundTrip() {
         for (WireType wt : TYPES) {
-            Bytes<ByteBuffer> bytes = Bytes.allocateElasticOnHeap(256);
-            Wire w = wt.apply(bytes);
+            Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
 
             w.write("seq").sequence(v -> {
                 v.int32(1);
@@ -76,14 +73,13 @@ public class WireRoundTripParamTest extends WireTestCommon {
             });
 
             final Object[] out = new Object[3];
-            w.read("seq").sequence((in, size) -> {
-                out[0] = in.int32();
-                out[1] = in.text();
-                out[2] = in.int64();
+            w.read("seq").sequence(out, (arr, in) -> {
+                arr[0] = in.int32();
+                arr[1] = in.text();
+                arr[2] = in.int64();
             });
 
             assertArrayEquals(new Object[]{1, "two", 3L}, out);
         }
     }
 }
-

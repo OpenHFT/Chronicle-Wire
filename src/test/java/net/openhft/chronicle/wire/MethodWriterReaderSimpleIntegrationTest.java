@@ -19,7 +19,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import org.junit.Test;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,8 +40,7 @@ public class MethodWriterReaderSimpleIntegrationTest extends WireTestCommon {
 
     @Test
     public void roundTrip() {
-        Bytes<ByteBuffer> bytes = Bytes.allocateElasticOnHeap(256);
-        Wire w = new BinaryWire(bytes);
+        Wire w = new BinaryWire(Bytes.allocateElasticOnHeap(256));
 
         Echo writer = w.methodWriter(Echo.class);
         writer.one(7);
@@ -69,4 +67,3 @@ public class MethodWriterReaderSimpleIntegrationTest extends WireTestCommon {
         assertTrue(seen.get(2).startsWith("three:"));
     }
 }
-
