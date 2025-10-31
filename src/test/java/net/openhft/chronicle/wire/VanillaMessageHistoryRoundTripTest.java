@@ -32,7 +32,8 @@ public class VanillaMessageHistoryRoundTripTest extends WireTestCommon {
         w.write("mh").object(mh);
         VanillaMessageHistory r = w.read("mh").object(VanillaMessageHistory.class);
 
-        assertEquals(mh.timings(), r.timings());
+        // write adds one timing for the write itself
+        assertEquals(mh.timings() + 1, r.timings());
         assertEquals(mh.timing(0), r.timing(0));
     }
 
@@ -48,8 +49,7 @@ public class VanillaMessageHistoryRoundTripTest extends WireTestCommon {
 
         VanillaMessageHistory r = new VanillaMessageHistory();
         r.readMarshallable(b);
-        assertEquals(mh.timings(), r.timings());
+        assertEquals(mh.timings() + 1, r.timings());
         assertEquals(mh.timing(0), r.timing(0));
     }
 }
-
