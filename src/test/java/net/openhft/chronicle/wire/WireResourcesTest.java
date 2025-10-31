@@ -26,7 +26,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.StreamCorruptedException;
 import java.nio.file.Files;
 
 import static net.openhft.chronicle.core.io.ReferenceOwner.INIT;
@@ -176,7 +175,7 @@ public class WireResourcesTest extends WireTestCommon {
     }
 
     // Helper method to write a message into the given wire.
-    private static void writeMessage(@NotNull Wire wire) throws StreamCorruptedException {
+    private static void writeMessage(@NotNull Wire wire) {
         try (DocumentContext dc = wire.writingDocument()) {
             final Bytes<?> bytes = dc.wire().bytes();
             bytes.writeSkip(128000);
