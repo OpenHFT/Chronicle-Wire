@@ -27,7 +27,6 @@ public class WireInternerAndDumpTest extends WireTestCommon {
 
     @Test
     public void textWireInternsRepeatedStrings() {
-        int before = WireInternal.INTERNER.valueCount();
         TextWire w = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
         try (DocumentContext dc = w.writingDocument()) {
             dc.wire().write("k").text("alpha");
@@ -44,8 +43,8 @@ public class WireInternerAndDumpTest extends WireTestCommon {
         }
         // Same canonical instance expected due to interning
         assertSame(s1, s2);
-        int after = WireInternal.INTERNER.valueCount();
-        assertTrue(after >= before + 1);
+        // Do not assert on global interner counts as other tests may have already
+        // populated the interner; asserting referential equality is sufficient.
     }
 
     @Test
@@ -58,4 +57,3 @@ public class WireInternerAndDumpTest extends WireTestCommon {
         assertTrue(hex.contains("foo")); // dumped as ASCII alongside hex
     }
 }
-
