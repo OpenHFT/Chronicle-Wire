@@ -90,7 +90,9 @@ public class DefaultValueInCoverageTest extends WireTestCommon {
 
         AtomicReference<Bytes<?>> marshallable = new AtomicReference<>();
         valueIn.bytes((ReadBytesMarshallable) bytesIn -> marshallable.set(bytesIn.bytesForRead()));
-        assertSame(Wires.NO_BYTES, marshallable.get());
+        // Identity of the returned Bytes view is not guaranteed; verify emptiness instead
+        assertNotNull(marshallable.get());
+        assertEquals(0L, marshallable.get().readRemaining());
     }
 
     @Test

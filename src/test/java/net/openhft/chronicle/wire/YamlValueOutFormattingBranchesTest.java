@@ -56,5 +56,24 @@ public class YamlValueOutFormattingBranchesTest extends WireTestCommon {
         Map<?, ?> out = r.read("map").marshallableAsMap(String.class, Object.class);
         assertEquals(m, out);
     }
-}
 
+    @Test
+    public void writesQuotedAndMultilineValues() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+        YamlWire wire = new YamlWire(bytes);
+
+        wire.write("quoted").text("needs: quoting");
+        wire.write("multiline").text("first\nsecond");
+        wire.write("flag").bool(true);
+
+        String yaml = bytes.toString();
+        assertTrue(yaml.contains("quoted: \"needs: quoting\""));
+
+        // Read the whole document as a map (avoids relying on ValueIn#marshallable for root documents)
+        Map<String, Object> values = YamlWire.from(yaml)
+                .readAllAsMap(String.class, Object.class, new java.util.LinkedHashMap<>());
+        assertEquals("needs: quoting", values.get("quoted"));
+        assertEquals("first\nsecond", values.get("multiline"));
+        assertEquals(true, values.get("flag"));
+    }
+}
