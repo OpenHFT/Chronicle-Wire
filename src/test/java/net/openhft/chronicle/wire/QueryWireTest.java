@@ -77,4 +77,36 @@ public class QueryWireTest extends WireTestCommon {
         // Verify that the results list contains the correct values
         assertEquals(new ArrayList<>(Arrays.asList(true, 12345L, "Hello World", 12.345)), results);
     }
+
+    @Test
+    public void writesAndReadsQueryFragments() {
+        Bytes<?> bytes = allocateElasticOnHeap();
+        QueryWire writer = new QueryWire(bytes);
+
+        writer.write("flag").bool(true);
+        writer.write("count").int64(42);
+        writer.write("name").text("alpha beta");
+        writer.write("raw").rawBytes("tail".getBytes(java.nio.charset.StandardCharsets.ISO_8859_1));
+        writer.write("payload").bytes(new byte[]{1, 2, 3});
+
+        String query = bytes.toString();
+        assertTrue(query.contains("flag=true"));
+        assertTrue(query.contains("count=42"));
+        assertTrue(query.contains("raw=tail"));
+        assertTrue(query.contains("payload="));
+
+        bytes.readPositionRemaining(0, bytes.writePosition());
+        QueryWire reader = new QueryWire(bytes);
+
+        assertEquals("true", reader.read("flag").text());
+        assertEquals(42L, reader.read("count").int64());
+        assertEquals("alpha beta", reader.read("name").text());
+
+        Bytes<?> payload = allocateElasticOnHeap();
+        reader.read("payload").textTo(payload);
+        assertEquals("AQID", payload.toString());
+        payload.releaseLast();
+
+        bytes.releaseLast();
+    }
 }

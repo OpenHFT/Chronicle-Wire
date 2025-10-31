@@ -71,4 +71,36 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
         assertTrue(dump.contains("first"));
         assertTrue(dump.contains("2"));
     }
+
+    @Test
+    public void copyEntireWireToText() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+        BinaryWire writer = new BinaryWire(bytes);
+        writer.writeEventName("say").text("hello");
+        writer.writeEventName("number").int32(42);
+
+        bytes.readPositionRemaining(0, bytes.writePosition());
+        Wire textWire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
+        new BinaryWire(bytes).copyTo(textWire);
+        String output = textWire.bytes().toString();
+
+        assertTrue(output.contains("say: hello"));
+        assertTrue(output.contains("number: 42"));
+    }
+
+    @Test
+    public void copyMessagesIndividually() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+        BinaryWire writer = new BinaryWire(bytes);
+        writer.writeEventName("alpha").text("one");
+        writer.writeEventName("beta").int32(2);
+
+        bytes.readPositionRemaining(0, bytes.writePosition());
+        Wire textWire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
+        BinaryWire source = new BinaryWire(bytes);
+
+        source.copyOne(textWire);
+        String first = textWire.bytes().toString();
+        assertTrue(first.length() > 0);
+    }
 }
