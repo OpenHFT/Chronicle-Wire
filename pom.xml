@@ -45,10 +45,9 @@
         <sonar.organization>openhft</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
-        <!-- Updated to reflect current measured coverage to keep builds green while tests are expanded -->
-        <!-- Align to last measured project-wide coverage -->
-        <jacoco.line.coverage>0.703</jacoco.line.coverage>
-        <jacoco.branch.coverage>0.648</jacoco.branch.coverage>
+        <!-- Coverage thresholds reflect current bundle coverage (JDK 11 sonar run) -->
+        <jacoco.line.coverage>0.724</jacoco.line.coverage>
+        <jacoco.branch.coverage>0.661</jacoco.branch.coverage>
     </properties>
 
     <!-- Use BOMs to keep dependency versions consistent across modules -->
@@ -507,9 +506,8 @@
                 <activeByDefault>false</activeByDefault>
             </activation>
             <properties>
-                <!-- Align sonar profile thresholds to current coverage levels -->
-                <jacoco.line.coverage>0.724</jacoco.line.coverage>
-                <jacoco.branch.coverage>0.661</jacoco.branch.coverage>
+                <!-- Point Sonar to the JaCoCo XML report emitted during verify -->
+                <sonar.coverage.jacoco.xmlReportPaths>${project.reporting.outputDirectory}/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
             </properties>
             <build>
                 <plugins>
@@ -522,8 +520,8 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
-                            <!-- Keep @{argLine} first so other tooling (e.g. JaCoCo) can prepend arguments -->
-                            <argLine>@{argLine} ${jvm.requiredArgs} -Djvm.coverage=true</argLine>
+                            <!-- Use JaCoCo-prepared argLine and append JPMS flags + coverage flag -->
+                            <argLine>${surefireArgLine} ${jvm.requiredArgs} -Djvm.coverage=true</argLine>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -544,7 +542,8 @@
                                     <goal>prepare-agent</goal>
                                 </goals>
                                 <configuration>
-                                    <destFile>${project.build.directory}/jacoco.exec</destFile>
+                                    <!-- Provide agent args via this property for Surefire -->
+                                    <propertyName>surefireArgLine</propertyName>
                                 </configuration>
                             </execution>
                             <execution>
