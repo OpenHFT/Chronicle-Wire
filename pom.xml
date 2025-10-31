@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2016-2025 chronicle.software
-  ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
-  ~
-  ~     http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
-  -->
+
+    Copyright 2016-2025 chronicle.software
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
@@ -22,14 +24,21 @@
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
         <version>1.27ea1</version>
-        <relativePath />
+        <relativePath></relativePath>
     </parent>
 
     <artifactId>chronicle-wire</artifactId>
     <version>2.27ea13-SNAPSHOT</version>
+    <packaging>bundle</packaging>
     <name>OpenHFT/Chronicle-Wire</name>
     <description>Chronicle-Wire - Core library for Chronicle's binary wire serialization</description>
-    <packaging>bundle</packaging>
+
+    <scm>
+        <connection>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</connection>
+        <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</developerConnection>
+        <tag>ea</tag>
+        <url>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</url>
+    </scm>
 
     <properties>
         <!-- Settings for SonarCloud analysis -->
@@ -201,10 +210,10 @@
                 <artifactId>binary-compatibility-enforcer-plugin</artifactId>
                 <executions>
                     <execution>
-                        <phase>verify</phase>
                         <goals>
                             <goal>enforcer</goal>
                         </goals>
+                        <phase>verify</phase>
                         <configuration>
                             <referenceVersion>2.27ea0</referenceVersion>
                             <artifactsURI>https://teamcity.chronicle.software/repository/download</artifactsURI>
@@ -223,7 +232,6 @@
                     </execution>
                 </executions>
             </plugin>
-
 
             <!-- Attach source jars to the build -->
             <plugin>
@@ -283,17 +291,12 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${project.groupId}.${project.artifactId}
-                        </Bundle-SymbolicName>
+                        <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>OpenHFT :: ${project.artifactId}</Bundle-Name>
                         <Bundle-Version>${project.version}</Bundle-Version>
-                        <Export-Package>
-                            net.openhft.chronicle.wire.*;-noimport:=true
-                        </Export-Package>
-                        <Import-Package>
-                            org.xerial.snappy;resolution:=optional,
-                            *
-                        </Import-Package>
+                        <Export-Package>net.openhft.chronicle.wire.*;-noimport:=true</Export-Package>
+                        <Import-Package>org.xerial.snappy;resolution:=optional,
+                            *</Import-Package>
                     </instructions>
                 </configuration>
                 <executions>
@@ -556,14 +559,6 @@
                 <plugins>
                     <plugin>
                         <artifactId>maven-invoker-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>test</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                            </execution>
-                        </executions>
                         <configuration>
                             <pom>marshallingperf/pom.xml</pom>
                             <goals>clean,test</goals>
@@ -573,6 +568,14 @@
                             </properties>
                             <streamLogs>true</streamLogs>
                         </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <phase>test</phase>
+                            </execution>
+                        </executions>
                     </plugin>
                     <!-- Launch JLBH benchmarks under this profile -->
                     <plugin>
@@ -585,15 +588,14 @@
                         <executions>
                             <execution>
                                 <id>long-converter-test</id>
-                                <phase>test</phase>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>
+                                <phase>test</phase>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
                                     <commandlineArgs>${jvm.requiredArgs} -classpath %classpath
-                                        net.openhft.chronicle.wire.AbstractTimestampLongConverterJLBHBenchmark
-                                    </commandlineArgs>
+                                        net.openhft.chronicle.wire.AbstractTimestampLongConverterJLBHBenchmark</commandlineArgs>
                                 </configuration>
                             </execution>
                         </executions>
@@ -610,11 +612,4 @@
             </build>
         </profile>
     </profiles>
-
-    <scm>
-        <url>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</url>
-        <connection>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</connection>
-        <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</developerConnection>
-        <tag>ea</tag>
-    </scm>
 </project>
