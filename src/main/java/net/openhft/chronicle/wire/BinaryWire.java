@@ -1919,6 +1919,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     case PADDING32:
                         bytes.readSkip(bytes.readUnsignedInt());
                         return readText(bytes.readUnsignedByte(), sb);
+                    default:
+                        break;
                 }
                 throw unknownCode(code);
 
@@ -1948,6 +1950,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     case EVENT_OBJECT:
                         valueIn.text((StringBuilder) sb);
                         return sb;
+                    default:
+                        break;
                 }
                 throw unknownCode(code);
 
