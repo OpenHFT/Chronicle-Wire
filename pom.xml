@@ -525,6 +525,12 @@
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
                         <version>${jacoco-maven-plugin.version}</version>
+                        <!-- Exclude problematic test class from instrumentation to avoid ASM error -->
+                        <configuration>
+                            <excludes>
+                                <exclude>net/openhft/chronicle/wire/ReadmeChapter1Test*</exclude>
+                            </excludes>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>prepare-agent</id>
