@@ -39,10 +39,10 @@ public class DefaultValueInEdgeCasesTest extends WireTestCommon {
 
     @Test
     public void explicitNullOverridesWrapper() {
-        String doc = "!" + WithDefaults.class.getName() + " { s: null }";
+        // Use YAML null literal to ensure a true null is parsed.
+        String doc = "!" + WithDefaults.class.getName() + " { s: !!null }";
         WithDefaults wd = WireType.TEXT.fromString(WithDefaults.class, doc);
         assertNull(wd.s);
         assertEquals(7, wd.i);
     }
 }
-

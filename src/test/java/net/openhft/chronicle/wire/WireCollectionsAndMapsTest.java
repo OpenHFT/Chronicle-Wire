@@ -64,9 +64,9 @@ public class WireCollectionsAndMapsTest extends WireTestCommon {
     }
 
     @Test
-    public void textYamlMapRoundTrip() {
-        // Only TEXT and YAML expose ValueIn.map; BINARY uses marshallable forms.
-        for (WireType wt : new WireType[]{WireType.TEXT, WireType.YAML}) {
+    public void mapsRoundTripViaMarshallable() {
+        // Use ValueIn.marshallableAsMap across supported wire types.
+        for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
             Map<String, Object> in = new LinkedHashMap<>();
             in.put("k1", 1);
@@ -74,12 +74,9 @@ public class WireCollectionsAndMapsTest extends WireTestCommon {
             in.put("k3", 3L);
             w.write("m").map(in);
 
-            Map<?, ?> out = ((wt == WireType.TEXT)
-                    ? ((TextWire) w).valueIn.map(String.class, Object.class, null)
-                    : ((YamlWire) w).valueIn.map(String.class, Object.class, null));
+            Map<?, ?> out = w.read("m").marshallableAsMap(String.class, Object.class);
             assertNotNull(out);
             assertEquals(in, out);
         }
     }
 }
-
