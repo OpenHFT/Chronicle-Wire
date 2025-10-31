@@ -2,7 +2,7 @@
 <!--
   ~ Copyright 2016-2025 chronicle.software
   ~
-  ~ Licensed under the *Apache License, Version 2.0* (the "License");
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
   ~ You may obtain a copy of the License at
   ~
@@ -14,7 +14,6 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
@@ -29,13 +28,16 @@
     <artifactId>chronicle-wire</artifactId>
     <version>2.27ea13-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Wire</name>
-    <!-- Core library for Chronicle's binary wire serialization -->
-    <description>Chronicle-Wire</description>
+    <description>Chronicle-Wire - Core library for Chronicle's binary wire serialization</description>
     <packaging>bundle</packaging>
+
     <properties>
         <!-- Settings for SonarCloud analysis -->
         <sonar.organization>openhft</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+        <jacoco.line.coverage>0.80</jacoco.line.coverage>
+        <jacoco.branch.coverage>0.70</jacoco.branch.coverage>
     </properties>
 
     <!-- Use BOMs to keep dependency versions consistent across modules -->
@@ -56,7 +58,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -159,28 +160,41 @@
 
     <repositories>
         <repository>
-            <id>chronicle-enterprise-snapshots</id>
-            <name>Snapshot Repository</name>
-            <url>
-                https://nexus.chronicle.software/content/repositories/snapshots
-            </url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
+            <id>chronicle-enterprise-snapshots</id>
+            <name>Snapshot Repository</name>
+            <url>https://nexus.chronicle.software/content/repositories/snapshots</url>
         </repository>
         <repository>
-            <id>chronicle-enterprise-release</id>
-            <url>
-                https://nexus.chronicle.software/content/repositories/releases
-            </url>
             <releases>
                 <enabled>true</enabled>
             </releases>
+            <id>chronicle-enterprise-release</id>
+            <url>https://nexus.chronicle.software/content/repositories/releases</url>
         </repository>
     </repositories>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>com.github.ekryd.sortpom</groupId>
+                <artifactId>sortpom-maven-plugin</artifactId>
+                <version>3.0.1</version>
+                <configuration>
+                    <nrOfIndentSpace>4</nrOfIndentSpace>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>sort</goal>
+                        </goals>
+                        <phase>verify</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- Check API compatibility against previous releases -->
             <plugin>
                 <groupId>net.openhft</groupId>
@@ -200,26 +214,16 @@
                                     <name>skip-internal-packages</name>
                                     <value>net.openhft.chronicle.wire.domestic.*</value>
                                 </extraOption>
+                                <extraOption>
+                                    <name>skip-internal-packages</name>
+                                    <value>.*internal.*</value>
+                                </extraOption>
                             </extraOptions>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
 
-            <!-- Runs unit tests -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <!-- required for Issue327Test.date -->
-                    <systemPropertyVariables>
-                        <user.timezone>UTC</user.timezone>
-                    </systemPropertyVariables>
-                    <forkCount>1</forkCount>
-                    <reuseForks>true</reuseForks>
-                    <runOrder>hourly</runOrder>
-                </configuration>
-            </plugin>
 
             <!-- Attach source jars to the build -->
             <plugin>
@@ -256,6 +260,22 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Runs unit tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- required for Issue327Test.date -->
+                    <systemPropertyVariables>
+                        <user.timezone>UTC</user.timezone>
+                    </systemPropertyVariables>
+                    <forkCount>1</forkCount>
+                    <reuseForks>true</reuseForks>
+                    <runOrder>hourly</runOrder>
+                </configuration>
+            </plugin>
+
             <!-- Build the OSGi bundle used by downstream projects -->
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -425,20 +445,55 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>4.1</version>
+
+                <configuration>
+                    <header>license_header.txt</header>
+                    <properties>
+                        <currentYear>2025</currentYear>
+                    </properties>
+                    <headerDefinitions>
+                        <headerDefinition>license_header_def.xml</headerDefinition>
+                    </headerDefinitions>
+                    <excludes>
+                        <exclude>**/*.versionsBackup</exclude>
+                        <exclude>LICENSE</exclude>
+                        <exclude>src/test/resources/**</exclude>
+                        <exclude>src/main/resources/**</exclude>
+                        <exclude>src/main/config/**</exclude>
+                    </excludes>
+                </configuration>
+
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
-    <scm>
-        <url>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</url>
-        <connection>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</connection>
-        <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</developerConnection>
-        <tag>ea</tag>
-    </scm>
-
     <profiles>
-        <!-- Profile used when publishing sonar metrics -->
+        <profile>
+            <id>assertions</id>
+            <properties>
+                <zero.cost.assertions>enabled</zero.cost.assertions>
+            </properties>
+        </profile>
         <profile>
             <id>sonar</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <jacoco.line.coverage>0.73</jacoco.line.coverage>
+                <jacoco.branch.coverage>0.62</jacoco.branch.coverage>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -448,18 +503,46 @@
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco-maven-plugin.version}</version>
                         <executions>
                             <execution>
+                                <id>prepare-agent</id>
                                 <goals>
                                     <goal>prepare-agent</goal>
                                 </goals>
                             </execution>
                             <execution>
                                 <id>report</id>
-                                <phase>prepare-package</phase>
                                 <goals>
                                     <goal>report</goal>
                                 </goals>
+                                <phase>verify</phase>
+                            </execution>
+                            <execution>
+                                <id>check</id>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                                <phase>verify</phase>
+                                <configuration>
+                                    <rules>
+                                        <rule>
+                                            <element>BUNDLE</element>
+                                            <limits>
+                                                <limit>
+                                                    <counter>LINE</counter>
+                                                    <value>COVEREDRATIO</value>
+                                                    <minimum>${jacoco.line.coverage}</minimum>
+                                                </limit>
+                                                <limit>
+                                                    <counter>BRANCH</counter>
+                                                    <value>COVEREDRATIO</value>
+                                                    <minimum>${jacoco.branch.coverage}</minimum>
+                                                </limit>
+                                            </limits>
+                                        </rule>
+                                    </rules>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -527,4 +610,11 @@
             </build>
         </profile>
     </profiles>
+
+    <scm>
+        <url>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</url>
+        <connection>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</connection>
+        <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</developerConnection>
+        <tag>ea</tag>
+    </scm>
 </project>
