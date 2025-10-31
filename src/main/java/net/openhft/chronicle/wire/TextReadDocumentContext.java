@@ -68,8 +68,8 @@ public class TextReadDocumentContext implements ReadDocumentContext {
      */
     public static void consumeToEndOfMessage(Bytes<?> bytes) {
         while (bytes.readRemaining() > 0) {
-            while (bytes.readRemaining() > 0 && bytes.readUnsignedByte() >= ' ') {
-                // read skips forward.
+            while (bytes.readRemaining() > 0 && bytes.peekUnsignedByte() >= ' ') {
+                bytes.readUnsignedByte();
             }
             if (isEndOfMessage(bytes)) {
                 break;

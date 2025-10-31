@@ -15,7 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.util.Builder;
@@ -459,17 +459,6 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
             throw new IllegalArgumentException("expecting a class rather than an interface, proxyClass=" + proxyClass);
         this.proxyClass = proxyClass;
         return this;
-    }
-
-    /**
-     * Converts the first character of a given string to uppercase and the rest to lowercase.
-     *
-     * @param name The input string to be converted.
-     * @return The converted string with its first character in uppercase and the rest in lowercase.
-     */
-    @NotNull
-    private String toFirstCapCase(@NotNull String name) {
-        return Character.toUpperCase(name.charAt(0)) + name.substring(1).toLowerCase();
     }
 
     /**

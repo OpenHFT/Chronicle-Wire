@@ -15,7 +15,10 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesIn;
+import net.openhft.chronicle.bytes.BytesOut;
+import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.ref.BinaryIntArrayReference;
 import net.openhft.chronicle.bytes.ref.BinaryIntReference;
 import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
@@ -25,8 +28,15 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.scoped.ScopedResource;
-import net.openhft.chronicle.core.util.*;
-import net.openhft.chronicle.core.values.*;
+import net.openhft.chronicle.core.util.ObjectUtils;
+import net.openhft.chronicle.core.values.BooleanValue;
+import net.openhft.chronicle.core.values.ByteValue;
+import net.openhft.chronicle.core.values.CharValue;
+import net.openhft.chronicle.core.values.DoubleValue;
+import net.openhft.chronicle.core.values.FloatValue;
+import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongValue;
+import net.openhft.chronicle.core.values.ShortValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -239,7 +249,7 @@ public class RawWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public Wire readComment(@NotNull StringBuilder sb) {
-        return RawWire.this;
+        return this;
     }
 
     @Override
@@ -339,7 +349,7 @@ public class RawWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public Wire writeComment(CharSequence s) {
-        return RawWire.this;
+        return this;
     }
 
     @NotNull

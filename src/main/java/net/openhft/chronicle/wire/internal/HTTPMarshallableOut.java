@@ -20,14 +20,20 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.wire.*;
+import net.openhft.chronicle.wire.DocumentContext;
+import net.openhft.chronicle.wire.DocumentContextHolder;
+import net.openhft.chronicle.wire.JSONWire;
+import net.openhft.chronicle.wire.Marshallable;
+import net.openhft.chronicle.wire.MarshallableOut;
+import net.openhft.chronicle.wire.MarshallableOutBuilder;
+import net.openhft.chronicle.wire.UnrecoverableTimeoutException;
+import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireType;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.InetAddress;
 import java.net.URL;
-import java.net.UnknownHostException;
 
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 
@@ -68,7 +74,7 @@ public class HTTPMarshallableOut implements MarshallableOut {
 
                 try {
                     endWire();
-                    try (final OutputStream out = conn.getOutputStream()) {
+                    try (OutputStream out = conn.getOutputStream()) {
                         final Bytes<byte[]> bytes = Jvm.uncheckedCast(wire.bytes());
                         final byte[] b = bytes.underlyingObject();
                         assert b != null;

@@ -489,7 +489,7 @@ public enum SerializationStrategies implements SerializationStrategy {
          */
         @Override
         public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
-            @NotNull Map<Object, Object> map = (o == null ? new LinkedHashMap<>() : (Map<Object, Object>) o);
+            @NotNull Map<Object, Object> map = o == null ? new LinkedHashMap<>() : (Map<Object, Object>) o;
             @NotNull final WireIn wireIn = in.wireIn();
             long pos = wireIn.bytes().readPosition();
             while (in.hasNext()) {
@@ -549,7 +549,7 @@ public enum SerializationStrategies implements SerializationStrategy {
          */
         @Override
         public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
-            @NotNull Set<Object> set = (o == null ? new LinkedHashSet<>() : (Set<Object>) o);
+            @NotNull Set<Object> set = o == null ? new LinkedHashSet<>() : (Set<Object>) o;
             @NotNull final WireIn wireIn = in.wireIn();
             @NotNull final Bytes<?> bytes = wireIn.bytes();
             long pos = bytes.readPosition();
@@ -616,7 +616,7 @@ public enum SerializationStrategies implements SerializationStrategy {
          */
         @Override
         public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
-            @NotNull List<Object> list = (o == null ? new ArrayList<>() : (List<Object>) o);
+            @NotNull List<Object> list = o == null ? new ArrayList<>() : (List<Object>) o;
             @NotNull final WireIn wireIn = in.wireIn();
             long pos = wireIn.bytes().readPosition();
             int count = 0;

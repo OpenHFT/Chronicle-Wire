@@ -311,7 +311,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
 
         int wordIndex = wordIndex(bitIndex);
 
-        pipe(wordIndex, (1L << bitIndex)); // Activates the bit at the specified index
+        pipe(wordIndex, 1L << bitIndex); // Activates the bit at the specified index
     }
 
     /**

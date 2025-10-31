@@ -15,9 +15,19 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesIn;
+import net.openhft.chronicle.bytes.BytesOut;
+import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
-import net.openhft.chronicle.bytes.ref.*;
+import net.openhft.chronicle.bytes.ref.BinaryBooleanReference;
+import net.openhft.chronicle.bytes.ref.BinaryDoubleReference;
+import net.openhft.chronicle.bytes.ref.BinaryFloatReference;
+import net.openhft.chronicle.bytes.ref.BinaryIntArrayReference;
+import net.openhft.chronicle.bytes.ref.BinaryIntReference;
+import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
+import net.openhft.chronicle.bytes.ref.BinaryLongReference;
 import net.openhft.chronicle.bytes.util.BinaryLengthLength;
 import net.openhft.chronicle.bytes.util.Bit8StringInterner;
 import net.openhft.chronicle.bytes.util.Compression;
@@ -31,8 +41,19 @@ import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.scoped.ScopedResourcePool;
-import net.openhft.chronicle.core.util.*;
-import net.openhft.chronicle.core.values.*;
+import net.openhft.chronicle.core.util.BinaryLengthLengthString;
+import net.openhft.chronicle.core.util.ObjectUtils;
+import net.openhft.chronicle.core.util.StringUtils;
+import net.openhft.chronicle.core.values.BooleanValue;
+import net.openhft.chronicle.core.values.ByteValue;
+import net.openhft.chronicle.core.values.CharValue;
+import net.openhft.chronicle.core.values.DoubleValue;
+import net.openhft.chronicle.core.values.FloatValue;
+import net.openhft.chronicle.core.values.IntArrayValues;
+import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongArrayValues;
+import net.openhft.chronicle.core.values.LongValue;
+import net.openhft.chronicle.core.values.ShortValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -889,7 +910,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     @Override
     public long readEventNumber() {
         int peekCode = peekCodeAfterPadding();
-        if (peekCode == BinaryWireCode.FIELD_NUMBER) {
+        if (peekCode == FIELD_NUMBER) {
             bytes.uncheckedReadSkipOne();
             int peekCode2 = bytes.peekUnsignedByte();
             if (0 <= peekCode2 && peekCode2 < 128) {
@@ -1738,7 +1759,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     public ValueOut write(@NotNull WireKey key) {
         if (!fieldLess) {
             if (numericFields)
-                writeField(key.code());
+                writeFieldCode(key.code());
             else
                 writeField(key.name());
         }
@@ -1750,7 +1771,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     public ValueOut write(@NotNull CharSequence key) {
         if (!fieldLess) {
             if (numericFields)
-                writeField(WireKey.toCode(key));
+                writeFieldCode(WireKey.toCode(key));
             else
                 writeField(key);
         }
@@ -1768,7 +1789,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     public Wire writeComment(CharSequence s) {
         writeCode(COMMENT);
         bytes.writeUtf8(s);
-        return BinaryWire.this;
+        return this;
     }
 
     @NotNull
@@ -1820,7 +1841,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         // If name starts with a digit, attempt to parse it as an integer.
         if (len > 0 && isDigit(name.charAt(0))) {
             try {
-                writeField(StringUtils.parseInt(name, 10));
+                writeFieldCode(StringUtils.parseInt(name, 10));
                 return;
             } catch (NumberFormatException ignored) {
             }
@@ -1835,7 +1856,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      * Writes a numeric field identifier to the byte buffer as
      * {@link BinaryWireCode#FIELD_NUMBER} and a stop-bit value.
      */
-    private void writeField(int code) {
+    private void writeFieldCode(int code) {
         // If hex dump retention is enabled, write the code as a hex dump description.
         if (bytes.retainedHexDumpDescription())
             bytes.writeHexDumpDescription(Integer.toString(code));
@@ -1947,7 +1968,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             case BinaryWireHighCode.FIELD0:
             case BinaryWireHighCode.FIELD1:
-                try (final ScopedResource<StringBuilder> sbTl = SBP.get()) {
+                try (ScopedResource<StringBuilder> sbTl = SBP.get()) {
                     readField(sbTl.get(), "", code);
                 }
                 AppendableUtil.setLength(sb, 0);
@@ -2093,7 +2114,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 bytes.writeHexDumpDescription(flag == null ? "null" : flag ? "true" : "false");
             bytes.writeUnsignedByte(flag == null
                     ? NULL
-                    : (flag ? TRUE : FALSE));
+                    : flag ? TRUE : FALSE);
             return BinaryWire.this;
         }
 
@@ -3026,10 +3047,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             // Attempt to convert the float to a fixed-point representation with 6 decimal places
             long l6 = Math.round(l * 1e6);
             // Check if the fixed-point conversion is valid and within specific bounds
-            if (l6 / 1e6f == l && l6 > (-1L << 2 * 7) && l6 < (1L << 3 * 7)) {
-                if (writeAsFixedPoint(l, l6))
-                    return; // If written successfully as fixed-point, exit the method
-            }
+            if (l6 / 1e6f == l && l6 > (-1L << 2 * 7) && l6 < (1L << 3 * 7) && writeAsFixedPoint(l, l6))
+                return; // If written successfully as fixed-point, exit the method
 
             // Write as a standard float
             super.float32(l);
@@ -3046,10 +3065,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             // Attempt to convert the double to a fixed-point representation with 6 decimal places
             long l6 = Math.round(l * 1e6);
             // Check if the fixed-point conversion is valid and within specific bounds
-            if (l6 / 1e6 == l && l6 > (-1L << 5 * 7) && l6 < (1L << 6 * 7)) {
-                if (writeAsFixedPoint(l, l6))
-                    return; // If written successfully as fixed-point, exit the method
-            }
+            if (l6 / 1e6 == l && l6 > (-1L << 5 * 7) && l6 < (1L << 6 * 7) && writeAsFixedPoint(l, l6))
+                return; // If written successfully as fixed-point, exit the method
 
             // Check if the double can be represented precisely as a float or if it's NaN
             if (((double) (float) l) == l || Double.isNaN(l)) {
@@ -3724,7 +3741,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                 default:
                     if (code >= STRING_0)
-                        return code + (1L - STRING_0);
+                        return code + 1L - STRING_0;
                     //System.out.println("code=" + code + ", bytes=" + bytes.toHexString());
                     return -1;
             }

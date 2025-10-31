@@ -15,7 +15,6 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodWriterInvocationHandler;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
@@ -45,7 +44,7 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
      */
     protected String genericEvent = "";
 
-    // Use numeric {@link MethodId} values when writing to binary wires
+    // Use numeric method identifiers when writing to binary wires
     private boolean useMethodIds;
 
     /**

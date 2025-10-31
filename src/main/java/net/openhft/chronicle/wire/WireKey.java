@@ -15,6 +15,8 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -61,7 +63,7 @@ public interface WireKey {
             try {
                 return Integer.parseInt(s);
             } catch (NumberFormatException faillback) {
-                // ignored
+                Jvm.debug().on(WireKey.class, "Falling back to hash code for '" + s + "'", faillback);
             }
         return s.hashCode();
     }

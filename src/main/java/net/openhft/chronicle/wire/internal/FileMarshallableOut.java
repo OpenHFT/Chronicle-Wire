@@ -20,7 +20,12 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
-import net.openhft.chronicle.wire.*;
+import net.openhft.chronicle.wire.DocumentContextHolder;
+import net.openhft.chronicle.wire.MarshallableOut;
+import net.openhft.chronicle.wire.MarshallableOutBuilder;
+import net.openhft.chronicle.wire.QueryWire;
+import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireType;
 
 import java.io.FileOutputStream;
 import java.io.IOException;

@@ -15,11 +15,10 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.Closeable;
-import net.openhft.chronicle.core.util.GenericReflection;
 import net.openhft.chronicle.core.util.IgnoresEverything;
 import net.openhft.chronicle.wire.utils.JavaSourceCodeFormatter;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
@@ -152,7 +151,7 @@ public class GenerateMethodReader {
      * duplicate handling.
      */
     private static String signature(Method m, Class<?> type) {
-        return GenericReflection.getReturnType(m, type) + " " + m.getName() + " " + Arrays.toString(GenericReflection.getParameterTypes(m, type));
+        return getReturnType(m, type) + " " + m.getName() + " " + Arrays.toString(getParameterTypes(m, type));
     }
 
     /**
@@ -499,13 +498,11 @@ public class GenerateMethodReader {
                 continue;
 
             final String methodName = m.getName();
-            try {
-                // skip Object defined methods.
-                Object.class.getMethod(methodName, m.getParameterTypes());
-                continue;
-            } catch (NoSuchMethodException e) {
-                // not an Object method.
-            }
+        boolean isObjectMethod = Arrays.stream(Object.class.getMethods())
+                .anyMatch(objectMethod -> objectMethod.getName().equals(methodName)
+                        && Arrays.equals(objectMethod.getParameterTypes(), m.getParameterTypes()));
+        if (isObjectMethod)
+            continue;
 
             if (handledMethodNames.containsKey(methodName)) {
                 throw new IllegalStateException("MethodReader does not support overloaded methods. " +

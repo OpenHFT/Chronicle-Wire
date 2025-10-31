@@ -17,13 +17,21 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
-import net.openhft.chronicle.bytes.ref.*;
+import net.openhft.chronicle.bytes.ref.BinaryBooleanReference;
+import net.openhft.chronicle.bytes.ref.BinaryIntReference;
+import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
+import net.openhft.chronicle.bytes.ref.BinaryLongReference;
+import net.openhft.chronicle.bytes.ref.BinaryTwoLongReference;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.LicenceCheck;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.ValidatableUtil;
 import net.openhft.chronicle.core.scoped.ScopedResource;
-import net.openhft.chronicle.core.values.*;
+import net.openhft.chronicle.core.values.BooleanValue;
+import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongArrayValues;
+import net.openhft.chronicle.core.values.LongValue;
+import net.openhft.chronicle.core.values.TwoLongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,7 +39,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.Collection;
@@ -371,21 +378,21 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
             wire = ((AbstractAnyWire) wire).underlyingWire();
 
         if (wire instanceof YamlWire)
-            return WireType.YAML;
+            return YAML;
 
         if (wire instanceof JSONWire)
-            return WireType.JSON;
+            return JSON;
 
         if (wire instanceof TextWire)
-            return WireType.TEXT;
+            return TEXT;
 
         if (wire instanceof BinaryWire) {
             @NotNull BinaryWire binaryWire = (BinaryWire) wire;
-            return binaryWire.fieldLess() ? FIELDLESS_BINARY : WireType.BINARY;
+            return binaryWire.fieldLess() ? FIELDLESS_BINARY : BINARY;
         }
 
         if (wire instanceof RawWire) {
-            return WireType.RAW;
+            return RAW;
         }
 
         throw new IllegalStateException("unknown type");

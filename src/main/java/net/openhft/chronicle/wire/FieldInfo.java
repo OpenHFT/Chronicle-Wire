@@ -16,7 +16,12 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.wire.internal.VanillaFieldInfo;
-import net.openhft.chronicle.wire.internal.fieldinfo.*;
+import net.openhft.chronicle.wire.internal.fieldinfo.CharFieldInfo;
+import net.openhft.chronicle.wire.internal.fieldinfo.DoubleFieldInfo;
+import net.openhft.chronicle.wire.internal.fieldinfo.FieldInfoPair;
+import net.openhft.chronicle.wire.internal.fieldinfo.IntFieldInfo;
+import net.openhft.chronicle.wire.internal.fieldinfo.LongFieldInfo;
+import net.openhft.chronicle.wire.internal.fieldinfo.ObjectFieldInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

@@ -166,7 +166,8 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
                 first = false;
                 mainCode.append("this.").append(fname).append(".").append(name).append("(").append(params).append(");\n");
             } catch (NoSuchMethodException e) {
-                // skip the handler if the method is not found in it.
+                // Handler does not implement this method; skip to the next candidate.
+                continue;
             }
         }
     }

@@ -38,11 +38,11 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
-import static java.util.Collections.*;
 import static net.openhft.chronicle.core.util.GenericReflection.erase;
 import static net.openhft.chronicle.core.util.GenericReflection.getParameterTypes;
 /**
@@ -101,22 +101,22 @@ public class GenerateMethodWriter {
 
         // Define template methods for the generation process
         TEMPLATE_METHODS.put("close",
-                singletonMap(singletonList(void.class), "public void close() {\n" +
+                Collections.singletonMap(Collections.singletonList(void.class), "public void close() {\n" +
                         "   if (this.closeable != null) {\n" +
                         "        this.closeable.close();\n" +
                         "   }\n" +
                         "}\n"));
         TEMPLATE_METHODS.put("recordHistory",
-                singletonMap(singletonList(boolean.class), "public boolean recordHistory() {\n" +
+                Collections.singletonMap(Collections.singletonList(boolean.class), "public boolean recordHistory() {\n" +
                         "    return out.get().recordHistory();\n" +
                         "}\n"));
         List<Class<?>> dcBoolean = Stream.of(DocumentContext.class, boolean.class).collect(Collectors.toList());
         TEMPLATE_METHODS.put("acquireWritingDocument",
-                singletonMap(dcBoolean, "public " + DOCUMENT_CONTEXT + " acquireWritingDocument(boolean metaData){\n" +
+                Collections.singletonMap(dcBoolean, "public " + DOCUMENT_CONTEXT + " acquireWritingDocument(boolean metaData){\n" +
                         "    return out.get().acquireWritingDocument(metaData);\n" +
                         "}\n"));
         Map<List<Class<?>>, String> wd = new LinkedHashMap<>();
-        wd.put(singletonList(DocumentContext.class), "public " + DOCUMENT_CONTEXT + " writingDocument(){\n" +
+        wd.put(Collections.singletonList(DocumentContext.class), "public " + DOCUMENT_CONTEXT + " writingDocument(){\n" +
                 "    return out.get().writingDocument();\n" +
                 "}\n");
         wd.put(dcBoolean, "public " + DOCUMENT_CONTEXT + " writingDocument(boolean metaData){\n" +
@@ -430,11 +430,11 @@ public class GenerateMethodWriter {
             importSet.add(Jvm.class.getName());
             importSet.add(Closeable.class.getName());
             importSet.add(DocumentContextHolder.class.getName());
-            importSet.add(java.lang.reflect.InvocationHandler.class.getName());
-            importSet.add(java.lang.reflect.Method.class.getName());
-            importSet.add(java.util.stream.IntStream.class.getName());
-            importSet.add(java.util.ArrayList.class.getName());
-            importSet.add(java.util.List.class.getName());
+importSet.add(InvocationHandler.class.getName());
+importSet.add(Method.class.getName());
+importSet.add(IntStream.class.getName());
+importSet.add(ArrayList.class.getName());
+importSet.add(List.class.getName());
             importSet.add(Supplier.class.getName());
 
             // Iterate through all interfaces to extract required imports and validations
@@ -495,7 +495,7 @@ public class GenerateMethodWriter {
                         continue;
 
                     final Class<?> returnType = returnType(dm, interfaceClazz);
-                    if (dm.isDefault() && (!returnType.equals(void.class) && !returnType.isInterface()))
+                    if (dm.isDefault() && !returnType.equals(void.class) && !returnType.isInterface())
                         continue;
 
                     final String signature = signature(dm, interfaceClazz);
@@ -790,7 +790,7 @@ public class GenerateMethodWriter {
     private String writeEventNameOrId(final Method dm, final StringBuilder body, final String eventName) {
         String methodID = "";
         final Optional<Annotation> methodId = useMethodId ? stream(dm.getAnnotations()).filter(MethodId.class::isInstance).findFirst() : Optional.empty();
-        if ((wireType != WireType.TEXT && wireType != WireType.YAML) && methodId.isPresent()) {
+        if (wireType != WireType.TEXT && wireType != WireType.YAML && methodId.isPresent()) {
 
             long value = ((MethodId) methodId.get()).value();
             body.append(format("final " + VALUE_OUT + " _valueOut_ = _dc_.wire().writeEventId(%s, %d);\n", eventName, value));

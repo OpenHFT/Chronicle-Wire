@@ -59,7 +59,7 @@ public final class ReductionUtil {
         long lastIndex = -1;
         boolean end = false;
         while (!end) {
-            try (final DocumentContext dc = tailer.readingDocument()) {
+            try (DocumentContext dc = tailer.readingDocument()) {
                 final Wire wire = dc.wire();
                 if (dc.isPresent() && wire != null) {
                     lastIndex = dc.index();

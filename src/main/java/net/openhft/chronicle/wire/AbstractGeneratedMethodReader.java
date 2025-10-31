@@ -282,7 +282,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
             // that method reader will cooperatively write saved history.
             messageHistory = tempMessageHistory.getAndSet(messageHistory);
             MessageHistory.set(messageHistory);
-            assert (messageHistory != tempMessageHistory.get());
+            assert messageHistory != tempMessageHistory.get();
         } else {
             // This input event generated an output event.
             // In case previous input event was processed by this method reader, TEMP_MESSAGE_HISTORY may contain

@@ -93,6 +93,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
             return (Class<T>) classLoader.loadClass(fullName);
 
         } catch (ClassNotFoundException cnfe) {
+            Jvm.debug().on(getClass(), "Generating class " + fullName);
             // If not found, continue to generate and compile the class.
         }
         try {

@@ -37,7 +37,7 @@ enum TextStopCharTesters implements StopCharTester {
      */
     END_OF_TYPE {
         @NotNull
-        private final BitSet eow = TextStopCharTesters.endOfTypeBitSet();
+        private final BitSet eow = endOfTypeBitSet();
         private final int eowLength = eow.length();
 
         @Override

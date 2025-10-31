@@ -69,7 +69,7 @@ public abstract class AbstractFieldInfo implements FieldInfo {
     @Override
     public boolean equals(Object obj) {
         if (obj == null) return false;
-        return (this == obj || Wires.isEquals(this, obj));
+        return this == obj || Wires.isEquals(this, obj);
     }
 
     @Override

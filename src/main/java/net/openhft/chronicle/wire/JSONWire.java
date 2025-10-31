@@ -15,7 +15,9 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -210,7 +212,7 @@ public class JSONWire extends TextWire {
                     bytes.readSkip(-1);
 
                     // !='l' to handle 'null' in JSON wire
-                else if (ch != 'l' && (ch > 'F' && (ch < 'a' || ch > 'f'))) {
+                else if (ch != 'l' && ch > 'F' && (ch < 'a' || ch > 'f')) {
                     throw new IllegalArgumentException("Unexpected character in number '" + (char) ch + '\'');
                 }
             }
@@ -1158,16 +1160,6 @@ public class JSONWire extends TextWire {
         @Override
         public <E> E object(@Nullable E using, @Nullable Class<? extends E> clazz, boolean bestEffort) throws InvalidMarshallableException {
             return useTypes ? parseType(using, clazz, bestEffort) : super.object(using, clazz, bestEffort);
-        }
-
-        @Override
-        public Class<?> typePrefix() {
-            return super.typePrefix();
-        }
-
-        @Override
-        public Object typePrefixOrObject(Class<?> tClass) {
-            return super.typePrefixOrObject(tClass);
         }
 
         @Override

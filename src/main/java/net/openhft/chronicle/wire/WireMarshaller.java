@@ -21,7 +21,8 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.UnsafeMemory;
-import net.openhft.chronicle.core.io.*;
+import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.util.ClassLocal;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
@@ -101,8 +102,8 @@ public class WireMarshaller<T> {
     public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial
             (tClass ->
                     Throwable.class.isAssignableFrom(tClass)
-                            ? WireMarshaller.ofThrowable(tClass)
-                            : WireMarshaller.of(tClass)
+                            ? ofThrowable(tClass)
+                            : of(tClass)
             );
 
     /**
@@ -537,10 +538,11 @@ public class WireMarshaller<T> {
 
                 } else {
                     // If not, copy default values
-                    for (; i < fields.length; i++) {
-                        FieldAccess field2 = fields[i];
+                    for (int j = i; j < fields.length; j++) {
+                        FieldAccess field2 = fields[j];
                         field2.setDefaultValue(defaultValue, t);
                     }
+                    i = fields.length;
 
                     if (vin == null || sb.length() <= 0)
                         return;
@@ -942,7 +944,7 @@ public class WireMarshaller<T> {
             try {
                 commentAnnotation = Jvm.findAnnotation(field, Comment.class);
             } catch (NullPointerException ignore) {
-
+                commentAnnotation = null;
             }
         }
 
@@ -1722,9 +1724,10 @@ public class WireMarshaller<T> {
                 if (a2 == null) return false;
                 Class<?> aClass1 = a1.getClass();
                 Class<?> aClass2 = a2.getClass();
-                if (aClass1 != aClass2)
-                    if (!aClass1.isAssignableFrom(aClass2) && !aClass2.isAssignableFrom(aClass1))
-                        return false;
+                if (aClass1 != aClass2
+                        && !aClass1.isAssignableFrom(aClass2)
+                        && !aClass2.isAssignableFrom(aClass1))
+                    return false;
                 int len1 = Array.getLength(a1);
                 int len2 = Array.getLength(a2);
                 if (len1 != len2)
@@ -1790,9 +1793,10 @@ public class WireMarshaller<T> {
                 if (a2 == null) return false;
                 Class<?> aClass1 = a1.getClass();
                 Class<?> aClass2 = a2.getClass();
-                if (aClass1 != aClass2)
-                    if (!aClass1.isAssignableFrom(aClass2) && !aClass2.isAssignableFrom(aClass1))
-                        return false;
+                if (aClass1 != aClass2
+                        && !aClass1.isAssignableFrom(aClass2)
+                        && !aClass2.isAssignableFrom(aClass1))
+                    return false;
                 return Arrays.equals((byte[]) a1, (byte[]) a2);
             } catch (IllegalAccessException e) {
                 throw new AssertionError(e);
@@ -2122,10 +2126,6 @@ public class WireMarshaller<T> {
             throw new UnsupportedOperationException();
         }
 
-        @Override
-        protected boolean sameValue(Object o, Object o2) throws IllegalAccessException {
-            return super.sameValue(o, o2);
-        }
     }
 
     /**

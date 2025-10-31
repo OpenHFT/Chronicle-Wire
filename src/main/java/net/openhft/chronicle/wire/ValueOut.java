@@ -27,7 +27,15 @@ import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import net.openhft.chronicle.core.util.ObjectUtils;
-import net.openhft.chronicle.core.values.*;
+import net.openhft.chronicle.core.values.BooleanValue;
+import net.openhft.chronicle.core.values.ByteValue;
+import net.openhft.chronicle.core.values.CharValue;
+import net.openhft.chronicle.core.values.DoubleValue;
+import net.openhft.chronicle.core.values.FloatValue;
+import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongArrayValues;
+import net.openhft.chronicle.core.values.LongValue;
+import net.openhft.chronicle.core.values.ShortValue;
 import net.openhft.chronicle.threads.NamedThreadFactory;
 import net.openhft.chronicle.wire.internal.MapMarshaller;
 import org.jetbrains.annotations.NotNull;
@@ -1392,7 +1400,7 @@ public interface ValueOut {
         } else if (value instanceof Reference) {
             return object(((Reference) value).get());
         } else {
-            if ((Wires.isInternal(value)))
+            if (Wires.isInternal(value))
                 throw new IllegalArgumentException("type=" + valueClass +
                         " is unsupported, it must either be of type Marshallable, String or " +
                         "AutoBoxed primitive Object");

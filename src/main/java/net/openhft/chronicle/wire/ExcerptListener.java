@@ -54,12 +54,12 @@ public interface ExcerptListener {
     @NotNull
     default ExcerptListener andThen(@NotNull final ExcerptListener after) {
         requireNonNull(after);
-        return ((wire, index) -> {
+        return (wire, index) -> {
             final long readPosition = wire.bytes().readPosition();
             this.onExcerpt(wire, index);
             // Rewind the wire to allow replaying of messages
             wire.bytes().readPosition(readPosition);
             after.onExcerpt(wire, index);
-        });
+        };
     }
 }

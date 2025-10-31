@@ -340,7 +340,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         int wordIndex = wordIndex(bitIndex);
 
         // Set the desired bit to 1 (true) within the corresponding word
-        pipe(words[wordIndex], (1L << bitIndex));
+        pipe(words[wordIndex], 1L << bitIndex);
     }
 
     /**

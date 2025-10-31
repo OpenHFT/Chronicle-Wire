@@ -15,7 +15,8 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,6 +25,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import static net.openhft.chronicle.wire.TextWire.getEscapingSingleQuotes;
 
 /**
  * Text based wire format for Comma Separated Values (CSV).
@@ -151,7 +154,9 @@ public class CSVWire extends TextWire {
             // Checks if the code point represents a comment.
             if (codePoint == '#') {
                 // If so, skip characters until the end of the line.
-                while (readCode() >= ' ') ;
+                while (readCode() >= ' ') {
+                    // skip comment body
+                }
                 continue;
             }
             if (Character.isWhitespace(codePoint)) {
@@ -300,9 +305,9 @@ public class CSVWire extends TextWire {
                 case '\'': {
                     bytes.readSkip(1);
                     if (use8bit)
-                        bytes.parse8bit(a, TextWire.getEscapingSingleQuotes());
+                        bytes.parse8bit(a, getEscapingSingleQuotes());
                     else
-                        bytes.parseUtf8(a, TextWire.getEscapingSingleQuotes());
+                        bytes.parseUtf8(a, getEscapingSingleQuotes());
                     unescape(a);
                     int code = peekCode();
                     if (code == '\'')

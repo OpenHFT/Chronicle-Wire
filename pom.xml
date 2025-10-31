@@ -15,7 +15,8 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -23,7 +24,7 @@
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
         <version>1.27ea1</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <artifactId>chronicle-wire</artifactId>
@@ -536,14 +537,19 @@
                                 </goals>
                             </execution>
                         </executions>
-                <configuration>
-                    <skip>true</skip>
-                    <failOnViolation>false</failOnViolation>
-                    <failOnError>false</failOnError>
-                    <printFailingErrors>true</printFailingErrors>
-                    <excludeFromFailureFile>src/main/config/pmd-exclude.properties</excludeFromFailureFile>
-                </configuration>
-            </plugin>
+                        <configuration>
+                            <skipPmdError>false</skipPmdError>
+                            <failOnViolation>true</failOnViolation>
+                            <printFailingErrors>true</printFailingErrors>
+                            <typeResolution>false</typeResolution>
+                            <excludeFromFailureFile>src/main/config/pmd-exclude.properties</excludeFromFailureFile>
+                            <excludes>
+                                <!-- PMD-4578: Parser crashes on nested generics; drop once upstream fixes TextWire/YamlWireOut. -->
+                                <exclude>**/TextWire.java</exclude>
+                                <exclude>**/YamlWireOut.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>

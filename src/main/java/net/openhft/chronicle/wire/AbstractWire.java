@@ -561,7 +561,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
                 // two states where it is unable to continue.
                 if (header == END_OF_DATA)
                     return EndOfWire.PRESENT;
-                if (Wires.isNotComplete(header)) {
+                if (isNotComplete(header)) {
                     if (!writeEOF)
                         return EndOfWire.NOT_PRESENT;
 

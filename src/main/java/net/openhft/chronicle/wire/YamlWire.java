@@ -15,16 +15,31 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.*;
-import net.openhft.chronicle.bytes.ref.*;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesIn;
+import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.HexDumpBytesDescription;
+import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
+import net.openhft.chronicle.bytes.ref.BinaryLongReference;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.ValidatableUtil;
 import net.openhft.chronicle.core.pool.ClassLookup;
-import net.openhft.chronicle.core.util.*;
-import net.openhft.chronicle.core.values.*;
+import net.openhft.chronicle.core.util.ClassLocal;
+import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
+import net.openhft.chronicle.core.util.ObjectUtils;
+import net.openhft.chronicle.core.util.StringUtils;
+import net.openhft.chronicle.core.values.BooleanValue;
+import net.openhft.chronicle.core.values.ByteValue;
+import net.openhft.chronicle.core.values.CharValue;
+import net.openhft.chronicle.core.values.DoubleValue;
+import net.openhft.chronicle.core.values.FloatValue;
+import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongArrayValues;
+import net.openhft.chronicle.core.values.LongValue;
+import net.openhft.chronicle.core.values.ShortValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,6 +47,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
@@ -287,28 +303,44 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         String ss = targetBuffer.toString();
 
         // Attempt to parse as a long
-        try {
-            return Long.decode(ss);
-        } catch (NumberFormatException fallback) {
-            // Intentionally left blank to handle fallback
-        }
+        Long decodedLong = decodeLongOrNull(ss);
+        if (decodedLong != null)
+            return decodedLong;
 
-        // Attempt to parse as a double
-        try {
-            return Double.parseDouble(ss);
-        } catch (NumberFormatException fallback) {
-            // Intentionally left blank to handle fallback
-        }
+        Double parsedDouble = parseDoubleOrNull(ss);
+        if (parsedDouble != null)
+            return parsedDouble;
 
-        // Attempt to parse as a date or time
-        try {
-            return parseDateOrTime(inputTextBuilder, ss);
-        } catch (DateTimeParseException fallback) {
-            // Intentionally left blank to handle fallback
-        }
+        TemporalAccessor temporal = parseDateOrTimeOrNull(inputTextBuilder, ss);
+        if (temporal != null)
+            return temporal;
 
         // If none of the interpretations was successful, return the original string content
         return inputTextBuilder;
+    }
+
+    private static Long decodeLongOrNull(String value) {
+        try {
+            return Long.decode(value);
+        } catch (NumberFormatException ignored) {
+            return null;
+        }
+    }
+
+    private static Double parseDoubleOrNull(String value) {
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException ignored) {
+            return null;
+        }
+    }
+
+    private static TemporalAccessor parseDateOrTimeOrNull(StringBuilder source, String value) {
+        try {
+            return parseDateOrTime(source, value);
+        } catch (DateTimeParseException ignored) {
+            return null;
+        }
     }
 
     /**
@@ -905,7 +937,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         // Compare the processed string in the StringBuilder with the expected keyName
-        return (sb.length() == 0 || StringUtils.isEqual(sb, keyName));
+        return sb.length() == 0 || StringUtils.isEqual(sb, keyName);
     }
 
     @NotNull
@@ -1005,37 +1037,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         return new TextIntArrayReference();
     }
 
-    /**
-     * Reads a YAML map and deserializes it into a Java Map, converting values to the specified type.
-     *
-     * @param valueType The class type to which map values should be converted.
-     * @return A Java Map representing the YAML map.
-     */
-    @NotNull
-    private Map readMap(Class<?> valueType) {
-        Map map = new LinkedHashMap();
-        if (yt.current() == YamlToken.MAPPING_START) {
-            while (yt.next() == YamlToken.MAPPING_KEY) {
-                if (yt.next() == YamlToken.TEXT) {
-                    String key = yt.text();
-                    Object o;
-                    if (yt.next() == YamlToken.TEXT) {
-                        // Convert the text to the specified type
-                        o = ObjectUtils.convertTo(valueType, yt.text());
-                    } else {
-                        throw new UnsupportedOperationException(yt.toString());
-                    }
-                    map.put(key, o);
-                } else {
-                    throw new UnsupportedOperationException(yt.toString());
-                }
-            }
-        } else {
-            throw new UnsupportedOperationException(yt.toString());
-        }
-        return map;
-    }
-
     @Override
     public void startEvent() {
         consumePadding();
@@ -1055,9 +1056,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      */
     void startEventIfTop() {
         consumePadding();
-        if (yt.contextSize() == 3)
-            if (yt.current() == YamlToken.MAPPING_START)
-                yt.next();
+        if (yt.contextSize() == 3 && yt.current() == YamlToken.MAPPING_START)
+            yt.next();
     }
 
     @Override
@@ -1931,17 +1931,13 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public Type typeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
             consumePadding();
-            if (yt.current() == YamlToken.TAG) {
-                if (yt.text().equals("type")) {
-                    if (yt.next() == YamlToken.TEXT) {
-                        String text = yt.text();
-                        yt.next();
-                        try {
-                            return classLookup().forName(text);
-                        } catch (ClassNotFoundRuntimeException e) {
-                            return unresolvedHandler.apply(text, e.getCause());
-                        }
-                    }
+            if (yt.current() == YamlToken.TAG && "type".equals(yt.text()) && yt.next() == YamlToken.TEXT) {
+                String text = yt.text();
+                yt.next();
+                try {
+                    return classLookup().forName(text);
+                } catch (ClassNotFoundRuntimeException e) {
+                    return unresolvedHandler.apply(text, e.getCause());
                 }
             }
             throw new UnsupportedOperationException(yt.toString());
@@ -2483,18 +2479,30 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 return decoded;
 
             // Attempt to convert the byte array into other supported types, such as BitSet
-            try {
-                Method valueOf = type.getDeclaredMethod("valueOf", byte[].class);
+            Method valueOf = findValueOfMethod(type);
+            if (valueOf != null) {
                 Jvm.setAccessible(valueOf);
-                return valueOf.invoke(null, decoded);
-            } catch (NoSuchMethodException e) {
-                // ignored - method not found for conversion
-            } catch (InvocationTargetException | IllegalAccessException e) {
-                throw new IllegalStateException(e);
+                try {
+                    return valueOf.invoke(null, decoded);
+                } catch (InvocationTargetException | IllegalAccessException e) {
+                    throw new IllegalStateException(e);
+                }
             }
 
             // If all conversion attempts failed, throw an exception
             throw new UnsupportedOperationException("Cannot determine how to deserialize " + type + " from binary data");
+        }
+
+        private Method findValueOfMethod(Class<?> type) {
+            for (Method method : type.getDeclaredMethods()) {
+                if (Modifier.isStatic(method.getModifiers())
+                        && method.getName().equals("valueOf")
+                        && method.getParameterCount() == 1
+                        && method.getParameterTypes()[0] == byte[].class) {
+                    return method;
+                }
+            }
+            return null;
         }
 
         @Override
@@ -2513,4 +2521,3 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         writeContext.rollbackIfNotComplete();
     }
 }
-

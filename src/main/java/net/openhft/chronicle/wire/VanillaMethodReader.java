@@ -233,7 +233,7 @@ public class VanillaMethodReader implements MethodReader {
      * @param valueIn      value reader
      * @param interceptor  optional interceptor
      */
-    private static void invokeMethodWithOneLong(Object target, Object[] contextHolder, @NotNull Method method, String methodName, MethodHandle methodHandle, Object[] argHolder, CharSequence eventName, ValueIn valueIn, MethodReaderInterceptorReturns interceptor) {
+    private static void invokeMethodWithOneLong(Object target, Object[] contextHolder, @NotNull Method method, MethodHandle methodHandle, Object[] argHolder, CharSequence eventName, ValueIn valueIn, MethodReaderInterceptorReturns interceptor) {
         try {
             // Log the message if debugging is enabled
             if (Jvm.isDebug())
@@ -458,13 +458,11 @@ public class VanillaMethodReader implements MethodReader {
                 continue;
 
             // Ensure the method isn't one from the Object class.
-            try {
-                // skip Object defined methods.
-                Object.class.getMethod(m.getName(), m.getParameterTypes());
+            boolean isObjectMethod = Arrays.stream(Object.class.getMethods())
+                    .anyMatch(objectMethod -> objectMethod.getName().equals(m.getName())
+                            && Arrays.equals(objectMethod.getParameterTypes(), m.getParameterTypes()));
+            if (isObjectMethod)
                 continue;
-            } catch (NoSuchMethodException e) {
-                // not an Object method.
-            }
 
             if (!methodNamesHandled.add(m.getName())) {
                 String previous = methodsSignaturesHandled.stream().filter(signature -> signature.contains(" " + m.getName() + " ")).findFirst().orElseThrow(IllegalStateException::new);
@@ -552,7 +550,7 @@ public class VanillaMethodReader implements MethodReader {
                 MethodHandle mh = method.getDeclaringClass().isInstance(target) ? MethodHandles.lookup().unreflect(method).bindTo(target) : null;
                 @NotNull Object[] argArr = {null};
                 MethodWireKey key = createWireKey(method, name);
-                wireParser.registerOnce(key, (s, v) -> invokeMethodWithOneLong(target, contextHolder, method, name, mh, argArr, s, v, methodReaderInterceptorReturns));
+                wireParser.registerOnce(key, (s, v) -> invokeMethodWithOneLong(target, contextHolder, method, mh, argArr, s, v, methodReaderInterceptorReturns));
             } catch (IllegalAccessException e) {
                 Jvm.warn().on(target.getClass(), "Unable to unreflect " + method, e);
             }

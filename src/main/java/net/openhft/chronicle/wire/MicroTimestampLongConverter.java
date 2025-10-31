@@ -50,7 +50,7 @@ public class MicroTimestampLongConverter extends AbstractTimestampLongConverter 
      * @return The timestamp conversion property
      */
     private static String timestampConversionProperty() {
-        String property = System.getProperty(AbstractTimestampLongConverter.TIMESTAMP_LONG_CONVERTERS_ZONE_ID_SYSTEM_PROPERTY);
+        String property = System.getProperty(TIMESTAMP_LONG_CONVERTERS_ZONE_ID_SYSTEM_PROPERTY);
         if (property != null)
             return property;
         return "UTC";

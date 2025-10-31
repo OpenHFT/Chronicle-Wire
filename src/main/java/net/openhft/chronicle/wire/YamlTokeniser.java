@@ -18,7 +18,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.scoped.ScopedResourcePool;
@@ -291,15 +290,14 @@ public class YamlTokeniser {
             }
             case '.': {
                 int next = in.peekUnsignedByte();
-                if (indent2 == 0 && next == '.') {
-                    if (in.peekUnsignedByte(in.readPosition() + 1) == '.' &&
-                            in.peekUnsignedByte(in.readPosition() + 2) <= ' ') {
-                        if (contextIndent() <= minIndent)
-                            return dontRead();
-                        in.readSkip(2);
-                        popAll(1);
-                        return popPushed();
-                    }
+                if (indent2 == 0 && next == '.'
+                        && in.peekUnsignedByte(in.readPosition() + 1) == '.'
+                        && in.peekUnsignedByte(in.readPosition() + 2) <= ' ') {
+                    if (contextIndent() <= minIndent)
+                        return dontRead();
+                    in.readSkip(2);
+                    popAll(1);
+                    return popPushed();
                 }
                 unreadLast();
                 return readText(indent2);
@@ -556,9 +554,8 @@ public class YamlTokeniser {
                     return;
 
                 // If not preserving newlines, add space as separator if previous character isn't whitespace.
-                if (!withNewLines)
-                    if (temp.peekUnsignedByte(temp.writePosition() - 1) > ' ')
-                        temp.append(' ');
+                if (!withNewLines && temp.peekUnsignedByte(temp.writePosition() - 1) > ' ')
+                    temp.append(' ');
 
                 if (indent3 > indent2)
                     in.readPosition(lineStart + indent2);
@@ -1120,7 +1117,7 @@ public class YamlTokeniser {
             if (in.peekUnsignedByte() == '0') {
                 // Handle octal numbers.
                 final int i = in.peekUnsignedByte(in.readPosition() + 1);
-                try (final ScopedResource<StringBuilder> sbTl = SBP.get()) {
+                try (ScopedResource<StringBuilder> sbTl = SBP.get()) {
                     StringBuilder sb = sbTl.get();
                     if (Character.isDigit(i)) {
                         in.readSkip(1);

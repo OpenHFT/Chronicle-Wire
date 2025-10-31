@@ -20,7 +20,6 @@ import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.annotation.SingleThreaded;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 
 /**
  * Defines the standard interface for sequentially writing to and reading from a Bytes stream.

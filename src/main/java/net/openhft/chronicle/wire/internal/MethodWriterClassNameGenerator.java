@@ -4,7 +4,6 @@
 
 package net.openhft.chronicle.wire.internal;
 
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.wire.Base32LongConverter;
 import net.openhft.chronicle.wire.LongConverter;

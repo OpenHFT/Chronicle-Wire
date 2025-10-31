@@ -319,7 +319,7 @@ public final class StreamsUtil {
                 return true;
             }
             for (; ; ) {
-                try (final DocumentContext dc = tailer.readingDocument()) {
+                try (DocumentContext dc = tailer.readingDocument()) {
                     final Wire wire = dc.wire();
                     if (dc.isPresent() && wire != null) {
                         next = extractor.extract(wire, dc.index());
@@ -382,7 +382,7 @@ public final class StreamsUtil {
                 return true;
             }
             for (; ; ) {
-                try (final DocumentContext dc = tailer.readingDocument()) {
+                try (DocumentContext dc = tailer.readingDocument()) {
                     final Wire wire = dc.wire();
                     if (dc.isPresent() && wire != null) {
                         next = extractor.extractAsLong(wire, dc.index());
@@ -445,7 +445,7 @@ public final class StreamsUtil {
                 return true;
             }
             for (; ; ) {
-                try (final DocumentContext dc = tailer.readingDocument()) {
+                try (DocumentContext dc = tailer.readingDocument()) {
                     final Wire wire = dc.wire();
                     if (dc.isPresent() && wire != null) {
                         next = extractor.extractAsDouble(wire, dc.index());

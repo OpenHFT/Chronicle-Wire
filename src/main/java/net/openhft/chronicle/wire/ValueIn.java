@@ -15,15 +15,28 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesIn;
+import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.Resettable;
 import net.openhft.chronicle.core.io.ValidatableUtil;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.scoped.ScopedResource;
-import net.openhft.chronicle.core.util.*;
-import net.openhft.chronicle.core.values.*;
+import net.openhft.chronicle.core.util.ObjectUtils;
+import net.openhft.chronicle.core.util.StringUtils;
+import net.openhft.chronicle.core.values.BooleanValue;
+import net.openhft.chronicle.core.values.ByteValue;
+import net.openhft.chronicle.core.values.CharValue;
+import net.openhft.chronicle.core.values.DoubleValue;
+import net.openhft.chronicle.core.values.FloatValue;
+import net.openhft.chronicle.core.values.IntArrayValues;
+import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongArrayValues;
+import net.openhft.chronicle.core.values.LongValue;
+import net.openhft.chronicle.core.values.ShortValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,6 +50,9 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.function.*;
+
+import static net.openhft.chronicle.wire.SerializationStrategies.MARSHALLABLE;
+import static net.openhft.chronicle.wire.SerializationStrategies.SERIALIZABLE;
 
 import static net.openhft.chronicle.wire.SerializationStrategies.MARSHALLABLE;
 
@@ -964,7 +980,7 @@ public interface ValueIn {
      * @throws InvalidMarshallableException if the Serializable object is invalid
      */
     default boolean marshallable(@NotNull Serializable object) throws BufferUnderflowException, IORuntimeException, InvalidMarshallableException {
-        return marshallable(object, SerializationStrategies.SERIALIZABLE) != null;
+        return marshallable(object, SERIALIZABLE) != null;
     }
 
     /**
@@ -977,7 +993,7 @@ public interface ValueIn {
      * @throws InvalidMarshallableException if the ReadMarshallable object is invalid
      */
     default boolean marshallable(@NotNull ReadMarshallable object) throws BufferUnderflowException, IORuntimeException, InvalidMarshallableException {
-        return marshallable(object, SerializationStrategies.MARSHALLABLE) != null;
+        return marshallable(object, MARSHALLABLE) != null;
     }
 
     /**

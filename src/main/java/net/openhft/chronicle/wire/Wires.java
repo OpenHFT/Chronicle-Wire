@@ -15,20 +15,30 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesIn;
+import net.openhft.chronicle.bytes.BytesOut;
+import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.HexDumpBytesDescription;
+import net.openhft.chronicle.bytes.VanillaBytes;
+import net.openhft.chronicle.bytes.util.BytesUtil;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.Closeable;
-import net.openhft.chronicle.core.io.*;
+import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.pool.EnumCache;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.scoped.ScopedResourcePool;
-import net.openhft.chronicle.core.util.*;
+import net.openhft.chronicle.core.util.ClassLocal;
+import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
+import net.openhft.chronicle.core.util.ObjectUtils;
+import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.wire.internal.StringConsumerMarshallableOut;
 import net.openhft.compiler.CachedCompiler;
 import org.jetbrains.annotations.NotNull;
@@ -54,7 +64,11 @@ import java.util.function.Function;
 
 import static java.util.Arrays.asList;
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
-import static net.openhft.chronicle.wire.SerializationStrategies.*;
+import static net.openhft.chronicle.wire.SerializationStrategies.ANY_NESTED;
+import static net.openhft.chronicle.wire.SerializationStrategies.ANY_OBJECT;
+import static net.openhft.chronicle.wire.SerializationStrategies.ANY_SCALAR;
+import static net.openhft.chronicle.wire.SerializationStrategies.DEMARSHALLABLE;
+import static net.openhft.chronicle.wire.SerializationStrategies.MARSHALLABLE;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static net.openhft.chronicle.wire.WireType.YAML_ONLY;
 
@@ -246,6 +260,7 @@ public enum Wires {
         Wire wire = new YamlWire(bytes).useTextDocuments();
         MethodReader readerObj = wire.methodReader(obj);
         while (readerObj.readOne()) {
+            // continue until all events are replayed
         }
         bytes.releaseLast();
     }
@@ -349,7 +364,7 @@ public enum Wires {
             // Determine the length limit for the bytes
             length = wire.bytes().readLimit();
             // Determine the metadata bit
-            int metaDataBit = dc.isMetaData() ? Wires.META_DATA : 0;
+            int metaDataBit = dc.isMetaData() ? META_DATA : 0;
             // Compute the header based on the metadata and length
             int header = metaDataBit | toIntU30(length, "Document length %,d out of 30-bit int range.");
 
@@ -391,7 +406,7 @@ public enum Wires {
             }
 
             // Compute the length from the header position
-            length = Wires.lengthOf(bytes.readInt(headerPosition));
+            length = lengthOf(bytes.readInt(headerPosition));
         }
 
         // Return the string representation of the wire data from the computed header position
@@ -461,15 +476,16 @@ public enum Wires {
      * @return the representation of the wire data in the specified type
      * @throws InvalidMarshallableException if marshalling fails
      */
-    private static Bytes<?> asType(@NotNull WireIn wireIn, Function<Bytes, Wire> wireProvider, Bytes<?> output) throws InvalidMarshallableException {
-        long pos = wireIn.bytes().readPosition();
-        try {
-            wireIn.copyTo(new TextWire(output).addTimeStamps(true));
-            return output;
-        } finally {
-            wireIn.bytes().readPosition(pos);
-        }
+private static Bytes<?> asType(@NotNull WireIn wireIn, Function<Bytes<?>, Wire> wireProvider, Bytes<?> output) throws InvalidMarshallableException {
+    long pos = wireIn.bytes().readPosition();
+    try {
+        Wire targetWire = wireProvider.apply(output);
+        wireIn.copyTo(targetWire);
+        return output;
+    } finally {
+        wireIn.bytes().readPosition(pos);
     }
+}
 
     /**
      * Converts {@code wireIn} to JSON and writes the result into {@code output}.
@@ -815,7 +831,7 @@ public enum Wires {
     @NotNull
     public static <T> T project(Class<T> tClass, Object source) throws InvalidMarshallableException {
         T target = ObjectUtils.newInstance(tClass);
-        Wires.copyTo(source, target);
+        copyTo(source, target);
         return target;
     }
 
@@ -1012,7 +1028,7 @@ public enum Wires {
 
             // If the deserialized object and the cached version are not the same, update the cached version.
             if (e != e2) {
-                try (ScopedResource<Wire> wireSR = Wires.acquireBinaryWireScoped()) {
+                try (ScopedResource<Wire> wireSR = acquireBinaryWireScoped()) {
                     Wire wire = wireSR.get();
                     WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(aClass);
                     wm.writeMarshallable(e, wire);
@@ -1188,7 +1204,7 @@ public enum Wires {
     static boolean isScalar(Serializable object) {
         // If object implements Comparable, fetch the associated serialization strategy.
         if (object instanceof Comparable) {
-            final SerializationStrategy strategy = Wires.CLASS_STRATEGY.get(object.getClass());
+            final SerializationStrategy strategy = CLASS_STRATEGY.get(object.getClass());
             // Return true only if the strategy is neither ANY_OBJECT nor ANY_NESTED.
             return strategy != ANY_OBJECT && strategy != ANY_NESTED;
         }
@@ -1203,7 +1219,7 @@ public enum Wires {
      */
     static boolean isScalarClass(Class<?> type) {
         if (Comparable.class.isAssignableFrom(type)) {
-            final SerializationStrategy strategy = Wires.CLASS_STRATEGY.get(type);
+            final SerializationStrategy strategy = CLASS_STRATEGY.get(type);
             // Return true only if the strategy is neither ANY_OBJECT nor ANY_NESTED.
             return strategy != ANY_OBJECT && strategy != ANY_NESTED;
         }
@@ -1514,11 +1530,10 @@ public enum Wires {
         /**
          * Fetches the Class object associated with the name retrieved from the given ValueIn.
          *
-         * @param o The object for which the class needs to be determined. (This parameter is unused in the method.)
          * @param in The ValueIn object which contains the class name.
          * @return The Class object associated with the name.
          */
-        private static Class<?> forName(Class<?> o, ValueIn in) {
+        private static Class<?> forName(ValueIn in) {
             final StringBuilder sb0 = sb.get();
 
             // Reset the StringBuilder to its initial state.
@@ -1540,7 +1555,7 @@ public enum Wires {
                 case "java.lang.StringBuilder":
                     return ScalarStrategy.of(StringBuilder.class, (o, in) -> {
                         StringBuilder builder;
-                        try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+                        try (ScopedResource<StringBuilder> stlSb = acquireStringBuilderScoped()) {
                              builder = (o == null)
                                     ? stlSb.get()
                                     : o;
@@ -1733,7 +1748,7 @@ public enum Wires {
          * @return A Bytes object containing the decoded data.
          */
         static Bytes<?> decodeBase64(Bytes<?> o, ValueIn in) {
-            try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
+            try (ScopedResource<StringBuilder> stlSb = acquireStringBuilderScoped()) {
                 @NotNull StringBuilder sb0 = stlSb.get();
                 in.text(sb0);
                 String s = WireInternal.INTERNER.intern(sb0);
