@@ -64,12 +64,15 @@ public class ValueInArrayReadersTest extends WireTestCommon {
         // Text/YAML use base64 and may compress; validate binary where exact bytes round‑trip is expected.
         Wire w = WireType.BINARY.apply(Bytes.allocateElasticOnHeap(256));
         byte[] in = new byte[]{10, 20, 30};
-        w.write("arr").sequence(v -> v.bytes(in));
+        w.write("arr").sequence(v -> {
+            v.uint8(in[0]);
+            v.uint8(in[1]);
+            v.uint8(in[2]);
+        });
 
         byte[] out = new byte[3];
         int n = w.read("arr").array(out);
-        assertEquals(1, n);
+        assertEquals(3, n);
         assertArrayEquals(in, out);
     }
 }
-
