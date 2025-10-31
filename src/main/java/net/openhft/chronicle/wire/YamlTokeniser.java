@@ -389,6 +389,9 @@ public class YamlTokeniser {
             case '^':
             case '_':
             case '~':
+                break;
+            default:
+                break;
         }
 
         // If changing context, don't read the symbol
@@ -801,6 +804,8 @@ public class YamlTokeniser {
                 case '\r':
                     unreadLast();
                     return;
+                default:
+                    break;
             }
             if (ch > ' ')
                 blockEnd = in.readPosition();
