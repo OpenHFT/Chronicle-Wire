@@ -353,6 +353,9 @@ public class CSVWire extends TextWire {
                         case 0:
                         case -1:
                             return bytes.readPosition() - start - 1;
+                        default:
+                            // Continue scanning until an end-of-line marker is found
+                            break;
                     }
                 }
             } finally {
