@@ -1073,6 +1073,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                 // Skip the peek code and read the event object.
                 bytes.uncheckedReadSkipOne();
                 return valueIn.object(expectedClass);
+            default:
+                break;
         }
 
         // If the peek code doesn't match any known type, return null.
