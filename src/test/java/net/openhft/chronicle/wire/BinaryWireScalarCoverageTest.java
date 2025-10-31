@@ -1,0 +1,61 @@
+/*
+ * Copyright 2016-2025 chronicle.software
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package net.openhft.chronicle.wire;
+
+import net.openhft.chronicle.bytes.Bytes;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+public class BinaryWireScalarCoverageTest extends WireTestCommon {
+
+    @Test
+    public void roundTripsCommonScalarTypes() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+        BinaryWire wire = new BinaryWire(bytes);
+
+        wire.write("i32").int32(123);
+        wire.write("i64").int64(Long.MIN_VALUE + 7);
+        wire.write("boolTrue").bool(true);
+        wire.write("boolFalse").bool(false);
+        wire.write("text").text("hello");
+        wire.write("float").float64(3.14159);
+        wire.write("seq").sequence(v -> {
+            v.int16((short) 1);
+            v.text("two");
+            v.int64(3L);
+        });
+
+        bytes.readPositionRemaining(0, bytes.writePosition());
+
+        assertEquals(123, wire.read("i32").int32());
+        assertEquals(Long.MIN_VALUE + 7, wire.read("i64").int64());
+        assertTrue(wire.read("boolTrue").bool());
+        assertFalse(wire.read("boolFalse").bool());
+        assertEquals("hello", wire.read("text").text());
+        assertEquals(3.14159, wire.read("float").float64(), 0.0);
+
+        Object[] holder = new Object[3];
+        wire.read("seq").sequence(holder, (arr, in) -> {
+            arr[0] = in.int16();
+            arr[1] = in.text();
+            arr[2] = in.int64();
+        });
+        assertEquals((short) 1, holder[0]);
+        assertEquals("two", holder[1]);
+        assertEquals(3L, holder[2]);
+    }
+}

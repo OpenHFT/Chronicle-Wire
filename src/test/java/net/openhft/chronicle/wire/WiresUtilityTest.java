@@ -47,5 +47,21 @@ public class WiresUtilityTest extends WireTestCommon {
         String dump = Wires.fromSizePrefixedBlobs(wire.bytes());
         assertTrue(dump.contains("value: 7"));
     }
-}
 
+    @Test
+    public void dumpsWithPositionAndPadding() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+        BinaryWire wire = new BinaryWire(bytes);
+        try (DocumentContext dc = wire.writingDocument(false)) {
+            dc.wire().write("k1").text("v1");
+        }
+        try (DocumentContext dc = wire.writingDocument(false)) {
+            dc.wire().write("k2").text("v2");
+        }
+
+        bytes.readPositionRemaining(0, bytes.writePosition());
+        String dump = Wires.fromSizePrefixedBlobs(bytes, 0, true);
+        assertTrue(dump.contains("k1: v1"));
+        assertTrue(dump.contains("k2: v2"));
+    }
+}
