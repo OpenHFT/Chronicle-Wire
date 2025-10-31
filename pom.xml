@@ -46,8 +46,9 @@
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
         <!-- Updated to reflect current measured coverage to keep builds green while tests are expanded -->
-        <jacoco.line.coverage>0.70</jacoco.line.coverage>
-        <jacoco.branch.coverage>0.64</jacoco.branch.coverage>
+        <!-- Align to last measured project-wide coverage -->
+        <jacoco.line.coverage>0.703</jacoco.line.coverage>
+        <jacoco.branch.coverage>0.648</jacoco.branch.coverage>
     </properties>
 
     <!-- Use BOMs to keep dependency versions consistent across modules -->
@@ -511,8 +512,8 @@
             </activation>
             <properties>
                 <!-- Align sonar profile thresholds to current coverage levels -->
-                <jacoco.line.coverage>0.70</jacoco.line.coverage>
-                <jacoco.branch.coverage>0.64</jacoco.branch.coverage>
+                <jacoco.line.coverage>0.703</jacoco.line.coverage>
+                <jacoco.branch.coverage>0.648</jacoco.branch.coverage>
             </properties>
             <build>
                 <plugins>
