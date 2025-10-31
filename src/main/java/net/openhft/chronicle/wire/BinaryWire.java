@@ -1593,6 +1593,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             case INT64_0x:
                 // 64-bit signed integer.
                 return bytes.readLong();
+            default:
+                break;
         }
 
         // If we can't decode, throw an exception.
