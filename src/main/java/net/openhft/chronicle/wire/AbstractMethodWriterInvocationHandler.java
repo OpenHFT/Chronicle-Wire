@@ -3,7 +3,6 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodWriterInvocationHandler;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
