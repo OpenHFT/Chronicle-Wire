@@ -1,3 +1,7 @@
+#
+# Copyright 2016-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
+#
+
 # Example configuration used by Example7
 !run.chronicle.wire.demo.Example7$Data2 {
   name: Helen,      # Person's forename
