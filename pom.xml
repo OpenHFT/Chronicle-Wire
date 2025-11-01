@@ -202,9 +202,13 @@
                             <artifactsURI>https://teamcity.chronicle.software/repository/download</artifactsURI>
                             <binaryCompatibilityPercentageRequired>91.6</binaryCompatibilityPercentageRequired>
                             <extraOptions>
+                                <!--This skips "internal" but checks "impl"-->
+                                <extraOption>
+                                    <name>-keep-internal</name>
+                                </extraOption>
                                 <extraOption>
                                     <name>skip-internal-packages</name>
-                                    <value>net.openhft.chronicle.wire.domestic.*</value>
+                                    <value>.*internal.*</value>
                                 </extraOption>
                                 <extraOption>
                                     <name>skip-internal-packages</name>

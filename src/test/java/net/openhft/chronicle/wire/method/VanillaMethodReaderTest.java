@@ -12,7 +12,6 @@ import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Assume;
 import org.junit.Test;
 
@@ -389,7 +388,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
             assertTrue(reader.readOne());
             assertEquals("meta: to[aye]\n" +
                             "meta: say[hi AAA]\n",
-                     asString(out));
+                    asString(out));
         }
 
         assertTrue(reader.readOne());
@@ -398,7 +397,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                         "data: to[one]\n" +
                         "data: say[hi 111]\n",
 
-                     asString(out));
+                asString(out));
         if (!scanning) {
             assertTrue(reader.readOne());
             assertEquals("meta: to[aye]\n" +
