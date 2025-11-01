@@ -459,27 +459,15 @@
                         <headerDefinition>license_header_def.xml</headerDefinition>
                     </headerDefinitions>
                     <excludes>
-                        <exclude>**/*.versionsBackup</exclude>
                         <exclude>LICENSE</exclude>
+                        <exclude>**/*.adoc</exclude>
+                        <exclude>**/*.txt</exclude>
+                        <exclude>docs/antora/**</exclude>
                         <exclude>src/test/resources/**</exclude>
                         <exclude>src/main/resources/**</exclude>
                         <exclude>src/main/config/**</exclude>
-                        <!-- Transient and generated content -->
                         <exclude>target/**</exclude>
-                        <exclude>**/generated-sources/**</exclude>
-                        <exclude>**/*.bak</exclude>
-                        <exclude>**/*.png</exclude>
-                        <!-- Benchmark result artefacts and logs -->
-                        <exclude>microbenchmarks/results/**</exclude>
-                        <exclude>microbenchmarks/results2021/**</exclude>
-                        <exclude>microbenchmarks/*.results.txt</exclude>
-                        <!-- Project root documentation artefacts not handled by header mappings -->
-                        <exclude>**/*.adoc</exclude>
-                        <exclude>systemProperties.adoc</exclude>
-                        <exclude>README.adoc</exclude>
-                        <exclude>EventsByMethod.adoc</exclude>
-                        <exclude>YAML2SpecificationCompliance.adoc</exclude>
-                    </excludes>
+                        <exclude>**/*.versionsBackup</exclude>                   </excludes>
                 </configuration>
 
                 <executions>
