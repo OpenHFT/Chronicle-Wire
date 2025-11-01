@@ -545,6 +545,9 @@ public class BinaryWire extends AbstractWire implements Wire {
                     }
                     case U8_ARRAY:
                         unexpectedCode();
+                        break;
+                    default:
+                        break;
                 }
                 unknownCode(wire);
                 break;
@@ -598,6 +601,12 @@ public class BinaryWire extends AbstractWire implements Wire {
                 bytes.uncheckedReadSkipOne();
                 @Nullable StringBuilder sb = readText(peekCode, acquireStringBuilder());
                 wire.getValueOut().text(sb);
+                break;
+
+            default:
+                // Unknown high code group: report the code only if data remains; otherwise exit quietly
+                if (bytes.readRemaining() > 0)
+                    unknownCode(wire);
                 break;
         }
     }
@@ -680,6 +689,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                         }
                     }
                     wireValueOut.object(object);
+                    break;
+                default:
                     break;
             }
         } finally {
@@ -1050,6 +1061,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                 // Skip the peek code and read the event object.
                 bytes.uncheckedReadSkipOne();
                 return valueIn.object(expectedClass);
+            default:
+                break;
         }
 
         // If the peek code doesn't match any known type, return null.
@@ -1403,8 +1416,10 @@ public class BinaryWire extends AbstractWire implements Wire {
                 wire.getValueOut().bool(true);
                 break;
             default:
-                unknownCode(wire);
-        }
+                // Only throw if there is still data to read; avoid spurious EndOfFile at stream end
+                if (bytes.readRemaining() > 0)
+                    unknownCode(wire);
+                }
     }
 
     /**
@@ -1439,6 +1454,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                         return 0;
                     case TRUE:
                         return 1;
+                    default:
+                        break;
                 }
                 break;
 
@@ -1450,6 +1467,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             case BinaryWireHighCode.INT:
                 // For integer codes, decode the integer.
                 return readInt0(code);
+            default:
+                break;
         }
 
         // If we can't decode, throw an exception.
@@ -1485,6 +1504,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             case FLOAT64:
                 // 64-bit floating point representation.
                 return bytes.readDouble();
+            default:
+                break;
         }
         throw new UnsupportedOperationException(stringForCode(code));
     }
@@ -1521,6 +1542,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             case FLOAT64:
                 // 64-bit floating point representation.
                 return bytes.readDouble();
+            default:
+                break;
         }
 
         // If we can't decode, throw an exception.
@@ -1564,6 +1587,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             case INT64_0x:
                 // 64-bit signed integer.
                 return bytes.readLong();
+            default:
+                break;
         }
 
         // If we can't decode, throw an exception.
@@ -1642,6 +1667,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             case BinaryWireHighCode.INT:
                 // Convert the integer to double.
                 return readInt0(code);
+            default:
+                break;
         }
 
         // If the encoding is unrecognized, throw an exception.
@@ -1888,6 +1915,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     case PADDING32:
                         bytes.readSkip(bytes.readUnsignedInt());
                         return readText(bytes.readUnsignedByte(), sb);
+                    default:
+                        break;
                 }
                 throw unknownCode(code);
 
@@ -1917,6 +1946,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     case EVENT_OBJECT:
                         valueIn.text((StringBuilder) sb);
                         return sb;
+                    default:
+                        break;
                 }
                 throw unknownCode(code);
 
@@ -5003,6 +5034,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                         case FLOAT_SET_LOW_4:
                             bytes.readUnsignedByte();  // Read a byte and treat it as unsigned
                             return;
+                        default:
+                            break;
                     }
                     // If none of the known float codes were matched, throw an exception
                     throw new UnsupportedOperationException(stringForCode(code));
@@ -5040,6 +5073,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                         case INT64_0x:
                             bytes.readLong();  // Read a 64-bit signed integer
                             return;
+                        default:
+                            break;
                     }
                     // If none of the known integer codes were matched, throw an exception
                     throw new UnsupportedOperationException(stringForCode(code));

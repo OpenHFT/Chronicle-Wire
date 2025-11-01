@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
  * Verify that unicode characters can be properly represented in JSON output.
  */
 @SuppressWarnings("UnnecessaryUnicodeEscape")
-public class JsonWireToStringAcceptanceTest {
+class JsonWireToStringAcceptanceTest {
 
     private static Collection<WireType> WIRE_TYPES = Arrays.asList(WireType.JSON, WireType.JSON_ONLY);
 

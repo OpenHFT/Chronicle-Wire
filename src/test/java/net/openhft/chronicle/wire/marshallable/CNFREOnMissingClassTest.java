@@ -8,7 +8,6 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import net.openhft.chronicle.wire.*;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

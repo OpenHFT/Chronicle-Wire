@@ -18,10 +18,10 @@ import java.util.Map;
  * Its primary function is to loop through a Map's entries and write each key-value pair to the Wire.
  */
 public class MapMarshaller<K, V> implements WriteMarshallable {
-    public Map<K, V> map;
-    public Class<K> kClass;
-    public Class<V> vClass;
-    public boolean leaf;
+    private Map<K, V> map;
+    private Class<K> kClass;
+    private Class<V> vClass;
+    private boolean leaf;
 
     /**
      * Configures the MapMarshaller with the provided parameters.

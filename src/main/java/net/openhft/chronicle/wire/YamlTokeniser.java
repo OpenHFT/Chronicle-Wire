@@ -6,7 +6,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.scoped.ScopedResourcePool;
@@ -377,6 +376,9 @@ public class YamlTokeniser {
             case '^':
             case '_':
             case '~':
+                break;
+            default:
+                break;
         }
 
         // If changing context, don't read the symbol
@@ -789,6 +791,8 @@ public class YamlTokeniser {
                 case '\r':
                     unreadLast();
                     return;
+                default:
+                    break;
             }
             if (ch > ' ')
                 blockEnd = in.readPosition();

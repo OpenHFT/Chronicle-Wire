@@ -113,7 +113,7 @@ public class TestJsonIssue467 {
         }
 
         // check the number of '{' match the number of '}'
-        Assert.assertTrue("openBracket=" + openBracket + ",closeBracket=" + closeBracket, openBracket == closeBracket);
+        Assert.assertEquals("openBracket and closeBracket should match", openBracket, closeBracket);
 
         // DON'T CHANGE THE EXPECTED JSON IT IS CORRECT ! - please use this website to validate the json - https://jsonformatter.org
         Assert.assertEquals("{\"@ResponseItem467\":{\"index\":\"4ab100000005\",\"key\":\"seqNumber\",\"payload\":{\"eventId\":\"periodicUpdate\",\"eventTime\":1652109920838805734,\"seqNumbers\":[ {\"sessionID\":{\"localCompID\":\"SERVER\",\"remoteCompID\":\"CLIENT\",\"localSubID\":null,\"remoteSubID\":null},\"rSeq\":1517,\"wSeq\":1519,\"isActive\":true,\"isConnected\":false} ]}}}", actual);
