@@ -140,7 +140,7 @@ implementation 'net.openhft:chronicle-wire:REPLACE_WITH_VERSION'
 ----
 
 .Simple Example
-[source,java]
+[source,java,opts=novalidate]
 ----
 Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 Wire wire = WireType.TEXT.apply(bytes);

@@ -164,8 +164,7 @@ Bytes: 91
 
 [source,json]
 ----
---- !!data
-"price":1234,"longInt":1234567890,"smallInt":123,"flag":true,"text":"Hello World!","side":"Sell"
+{"price":1234,"longInt":1234567890,"smallInt":123,"flag":true,"text":"Hello World!","side":"Sell"}
 ----
 Bytes: 100
 
