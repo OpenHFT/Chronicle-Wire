@@ -2113,7 +2113,7 @@ As can be seen on lines 18-26, we have the ability to switch between running the
 This shows that we can serialise and then de-serialise 100,000 messages in a second.The Trivially Copyable version is even faster, especially at the higher percentiles.
 
 .Benchmark Performance Between TriviallyCopyable and BinaryWire
-image::jlbhBenchmark.png[buffer,600,400]
+image::images/jlbhBenchmark.png[buffer,600,400]
 * Microseconds to both serialise and deserialise a message
 
 === Platform support
@@ -2173,9 +2173,9 @@ try (ChronicleContext context = ChronicleContext.newContext(url)) {
 * link:src/main/docs/wire-cookbook.adoc[Cookbook]
 * link:src/main/docs/wire-faq.adoc[FAQ]
 * link:src/main/docs/wire-glossary.adoc[Glossary]
-* link:EventsByMethod.adoc[Events by Method]
-* link:YAML2SpecificationCompliance.adoc[YAML 1.2 Compliance]
-* link:systemProperties.adoc[System Properties Guide]
+* link:docs/EventsByMethod.adoc[Events by Method]
+* link:docs/YAML2SpecificationCompliance.adoc[YAML 1.2 Compliance]
+* link:docs/systemProperties.adoc[System Properties Guide]
 
 == Community and Support
 
