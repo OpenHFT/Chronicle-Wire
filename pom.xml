@@ -483,10 +483,6 @@
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
-            <properties>
-                <!-- Point Sonar to the JaCoCo XML report emitted during verify -->
-                <sonar.coverage.jacoco.xmlReportPaths>${project.reporting.outputDirectory}/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-            </properties>
             <build>
                 <plugins>
                     <plugin>

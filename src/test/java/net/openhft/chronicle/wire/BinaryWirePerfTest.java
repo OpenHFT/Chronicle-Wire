@@ -98,8 +98,6 @@ public class BinaryWirePerfTest extends WireTestCommon {
 
             b.readMarshallable(wire);
         }
-
-       // System.out.printf("(vars) %,d : %,d ns avg, len= %,d%n", t, rate, wire.bytes().readPosition());
     }
 
     // Performance test for serializing and deserializing integers with Wire
@@ -124,7 +122,6 @@ public class BinaryWirePerfTest extends WireTestCommon {
 
             b.readMarshallable(wire);
         }
-       // System.out.printf("(ints) %,d : len= %,d%n", t, wire.bytes().readPosition());
     }
 
     // *************************************************************************

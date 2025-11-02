@@ -165,8 +165,6 @@ public class BinaryWire extends AbstractWire implements Wire {
      * @param compressedSize Threshold size for compression
      * @param compression Type of compression (e.g., "binary")
      * @param supportDelta must be false
-     * @deprecated Scheduled for removal in x.29; delta wire format is not supported.
-     *             Use {@link #BinaryWire(Bytes, boolean, boolean, boolean, int, String)} instead.
      */
     @Deprecated(/* to be removed in x.29 */)
     public BinaryWire(@NotNull Bytes<?> bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression, boolean supportDelta) {
@@ -548,9 +546,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     case U8_ARRAY:
                         unexpectedCode();
                         break;
-                    default: {
-                        // fall through to unknownCode(wire) after inner switch
-                    }
+                    default:
+                        break;
                 }
                 // If no more bytes remain, do not attempt to read another code; just exit
                 if (bytes.readRemaining() > 0)
