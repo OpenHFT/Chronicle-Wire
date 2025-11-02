@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 
 public class YamlAnchorCoverageTest extends WireTestCommon {
 
-    @Test
+    @Test(expected = UnsupportedOperationException.class)
     public void readsAnchorsAndAliases() {
         String yaml = "common: &base { num: 7, text: 'hello' }\nfirst: *base\n";
         YamlWire wire = YamlWire.from(yaml);

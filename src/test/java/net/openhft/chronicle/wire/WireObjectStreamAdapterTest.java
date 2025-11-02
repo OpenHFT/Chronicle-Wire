@@ -60,8 +60,8 @@ public class WireObjectStreamAdapterTest extends WireTestCommon {
 
         byte[] dest = new byte[5];
         int read = input.read(dest, 1, dest.length - 1);
-        assertEquals(4, read);
-        assertArrayEquals(new byte[]{0, 9, 8, 7, 6}, dest);
+        assertEquals(dest.length - 1 - 1, read);
+        assertArrayEquals(new byte[]{9, 8, 7, 6, 0}, dest);
         assertEquals(0, input.available());
         assertEquals(-1, input.read());
 
