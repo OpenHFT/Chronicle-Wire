@@ -140,7 +140,7 @@ implementation 'net.openhft:chronicle-wire:REPLACE_WITH_VERSION'
 ----
 
 .Simple Example
-[source,java]
+[source,java,opts=novalidate]
 ----
 Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 Wire wire = WireType.TEXT.apply(bytes);
@@ -173,7 +173,7 @@ System.out.println(bytes.toString());
 First you need to have a buffer to write to.
 This can be a `byte[]`, a `ByteBuffer`, off-heap memory, or even an address and length that you have obtained from some other library.
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
 // Bytes which wraps a byte[]
 Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap();
@@ -185,7 +185,7 @@ Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 Now you can choose which format you are using.
 As the wire formats are themselves unbuffered, you can use them with the same buffer, but in general using one wire format is easier.
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
 Wire wire = new TextWire(bytes);
 // or
@@ -201,7 +201,7 @@ Wire wire3 = new RawWire(bytes3);
 
 So now you can write to the wire with a simple document.
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
 wire.write("message").text("Hello World")
       .write("number").int64(1234567890L)
@@ -221,7 +221,7 @@ code: SECONDS
 price: 10.5
 ----
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
 // The same code for BinaryWire
 wire2.write("message").text("Hello World")
@@ -245,7 +245,7 @@ prints
 Using `RawWire` strips away all the meta data to reduce the size of the message, and improves speed.
 The down-side is that we cannot easily see what the message contains.
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
 // The same code for RawWire
 wire3.write("message").text("Hello World")
@@ -271,7 +271,7 @@ prints in `RawWire`.
 This example is much the same as the previous section, with the code required wrapped in a method.
 See Section "The code for the class Data" for the code for Data.
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
 // Bytes which wraps a ByteBuffer which is resized as needed.
 Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -304,7 +304,7 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 
 To write in binary instead
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
 Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
 Wire wire2 = new BinaryWire(bytes2);
@@ -333,7 +333,7 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 
 In this example the data is marshalled as a nested data structure.
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 
 // Bytes which wraps a byte[] which is resized as needed
@@ -369,7 +369,7 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 
 To write in binary instead
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 Bytes<?> bytes2 = new HexDumpBytes();
 Wire wire2 = new BinaryWire(bytes2);
@@ -405,7 +405,7 @@ In this example, the type is encoded with the data.
 Instead of showing the entire package name which will almost certainly not work on any other platform, an alias for the type is used.
 It also means the message is shorter and faster.
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
 Wire wire = new TextWire(Bytes.allocateElasticOnHeap());
 
@@ -438,7 +438,7 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 
 To write in binary instead
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
 Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap());
 
@@ -469,7 +469,7 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 
 === link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Example6.java[Write a message with a sequence of records]
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
 // Bytes which wraps a ByteBuffer which is resized as needed
 Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -534,7 +534,7 @@ Data{message='Howyall', number=1234567890, timeUnit=SECONDS, price=1000.0}
 
 To write in binary instead
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
 Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
 Wire wire2 = new BinaryWire(bytes2);
@@ -591,7 +591,7 @@ Data{message='Howyall', number=1234567890, timeUnit=SECONDS, price=1000.0}
 
 This example shows how to pass your classes to `ClassAliasPool.CLASS_ALIASES.addAlias(Class<?>... classes)`, to create alias names for them so that you can refer to them without using the complete name of their packages.
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 // Create two classes Data1 and Data2 and add only the Data1.class to alias pool.
 static {
@@ -674,7 +674,7 @@ Data2 object should be loaded from a yaml file with the complete name of class (
 
 Create instances of Data1 and Data2 by reading the above configuration files and print the created objects:
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 Data1 o1 = WireType.TEXT.fromFile("cfg1.yaml");
 System.out.println("o1 = " + o1);
@@ -693,7 +693,7 @@ address: "21 High street, Liverpool"
 
 and
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 Data2 o2 = WireType.TEXT.fromFile("cfg2.yaml");
 System.out.println("o2 = " + o2);
@@ -714,7 +714,7 @@ You will see the complete package name for `o2` object.
 
 === link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Data.java[The code for the class Data]
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
 class Data implements Marshallable {
     private String message;
@@ -843,7 +843,7 @@ backup:
 
 These are the simple DTO (Data Transfer Object) classes used for deserializing the YAML.
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 static class DatabaseConfig extends SelfDescribingMarshallable {
     String host;
@@ -875,7 +875,7 @@ static class SystemConfig extends SelfDescribingMarshallable {
 This test shows how a string value for `host` is defined once with an anchor (`&dbHost`) and reused twice with an alias (`*dbHost`).
 Chronicle Wire ensures that the reused string is the same instance in memory.
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 String yaml = "" +
         "database: {\n" +
@@ -909,7 +909,7 @@ This is powerful for defining default configurations that can be applied to mult
 
 ==== Server Config Classes
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 static class ServerConfig extends SelfDescribingMarshallable {
     int timeout;
@@ -935,7 +935,7 @@ static class ServerSystemConfig extends SelfDescribingMarshallable {
 In this example, a complete `ServerConfig` object is defined and anchored as `&defaultServer`.
 This exact same object instance is then referenced for the `primary`, `secondary`, and `monitoring` server configurations.
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 String yaml = "" +
         "defaults: &defaultServer !net.openhft.chronicle.wire.YamlAnchorExamplesTest$ServerConfig {\n" +
@@ -977,7 +977,7 @@ Some example `LongConverters` are `NanoTimestampLongConverter` which stores a na
 
 For example:
 
-[source,java]
+[source,java,opts=novalidate]
 ----
     long ts = NanoTimestampLongConverter.INSTANCE.parse("2023-02-15T05:31:49.856123456");
     System.out.println(ts); // 1676439109856123456
@@ -986,7 +986,7 @@ For example:
 
 and
 
-[source,java]
+[source,java,opts=novalidate]
 ----
     long code = Base64LongConverter.INSTANCE.parse("UXX0UXZ0");
     System.out.println(code); // 94034908776117
@@ -1054,7 +1054,7 @@ The object created in step `1` is cached for performance reasons, meaning that b
 While this will not be a problem for primitive or immutable values (for example, `int`, `Long`, `String`), a mutable field such as `ByteBuffer` will cause problems.
 Consider the following case:
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 public class BufferContainer {
     private final ByteBuffer b = ByteBuffer.allocate(16);
@@ -1093,7 +1093,7 @@ In this case, `value.reset()` will be called instead of overwriting it with defa
 
 In order to work around this, if necessary, the marshallable class can override `Marshallable.reset`:
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 public class BufferContainer implements Marshallable {
     private ByteBuffer b = ByteBuffer.allocate(16);
@@ -1109,7 +1109,7 @@ public class BufferContainer implements Marshallable {
 
 If the field type implements `Resettable` (including `Marshallable` classes), and the field has non-`null` default value, the existing value will be reset without creating any extra garbage:
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 public class ComplexDto implements SelfDescribingMarshallable {
     private ContainedDto v = new ContainedDto(); // reset() will be propagated to this value
@@ -1126,7 +1126,7 @@ While serialized data can be updated by replacing a whole record, this might not
 
 Chronicle Wire offers the ability to bind a reference to a fixed value of a field, and perform atomic operations on that field; for example, volatile read/write, and compare-and-swap.
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
    // field to cache the location and object used to reference a field.
    private LongValue counter = null;
@@ -1146,7 +1146,7 @@ Chronicle Wire supports passing objects reference by the `name()` of the object 
 This is supported trivially with `enum` which define a `name()` for you. e.g.
 
 .Passing a reference to an enum using it's name
-[source,java]
+[source,java,opts=novalidate]
 ----
 enum ServerId {
     LN_A
@@ -1168,7 +1168,7 @@ serverId: LN_A
 
 However, we might wish to alter metadata associated with the enum
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 enum ServerId implements DynamicEnum {
     LN_A(101);
@@ -1182,7 +1182,7 @@ enum ServerId implements DynamicEnum {
 Sometimes you need to pass the actually data, esp the first time.
 This can be achieved by using the `@AsMarshallable` annotation which will always pass the object as a typedMarshallable.
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 public class RefData extends AbstractEventCfg<RefData> {
     @AsMarshallable
@@ -1200,7 +1200,7 @@ public class RefData extends AbstractEventCfg<RefData> {
 
 You can choose to update the existing `enum` with this information.
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 public void refData(RefData refData) {
     DynamicEnum.updateEnum(refData.data);
@@ -1240,7 +1240,7 @@ NOTE: You can't use an enum before it is defined, this is assumed to be in input
 You may wish to pass by reference a data type which is not an enum.
 This can be done by adding `DynamicEnum` to a regular class and adding a `name` field.
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 class MyData implements DynamicEnum {
     public static final MyData ONE = new MyData("One"); // used as a predefined object
@@ -1255,10 +1255,13 @@ NOTE: This is particularly useful if you have a class which must extend another 
 
 [source,yaml]
 ----
+---
 myData: One # uses predefined value
 ...
+---
 myData: Two # uses predefined value
 ...
+---
 refData: {
     eventId: GUI,
     eventTime: 2020-09-09T09:09:09.999,
@@ -1267,15 +1270,17 @@ refData: {
    }
 }
 ...
+---
 myData: Three # use the one just defined
 ...
+---
 myData: Four # will error as doesn't exist.
 ...
 ----
 
 The consumer doesn't need to do anything special to use the new enum, however the producer need to create it in code as follows.
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
 ServerId serverId = EnumCache.of(ServerId.class).nameFor("HK_A");
 serverId.priority(200);
@@ -1296,7 +1301,7 @@ Only use them when there is likely to be a limited number of them over the life 
 You can assign a method id to a method using the annotation `@MethodId(long int: id)`.
 The provided id should be unique across all classes using the same MethodReader/Writer, therefore it is safe practice to use unique method id in your entire system.A method name can be determined from its method id and this results in saving memory when calling the method.The following example shows the difference between memory usage when using method id and when not using it.In this example the method `saysomethingnice()` has been annotated with `MethodId(7)` and it has been called from `shouldDetermineMethodNamesFromMethodIds()`.
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
 
  interface Speaker {
@@ -1355,7 +1360,7 @@ NOTE: This only works when the expected type is not a class.
 
 === LongConversionExample
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
 @Test
 public void unknownType() throws NoSuchFieldException {
@@ -1421,7 +1426,7 @@ interface ThreeValues {
 By default, Chronicle Wire skips fields which names don't match any field of the DTO class.
 It's possible to capture such fields by overriding method or `ReadMarshallable`:
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
     default void unexpectedField(Object event, ValueIn valueIn) {
         valueIn.skipValue();
@@ -1430,7 +1435,7 @@ It's possible to capture such fields by overriding method or `ReadMarshallable`:
 
 One of best practices is saving unexpected fields in order to process them after the deserialization:
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
         transient Map<String, Object> others = new LinkedHashMap<>();
 
@@ -1442,7 +1447,7 @@ One of best practices is saving unexpected fields in order to process them after
 
 It's also possible to use fail-fast approach and throw an exception:
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
         @Override
         public void unexpectedField(Object event, ValueIn valueIn) {
@@ -1454,7 +1459,7 @@ Exceptions that are thrown from this method are never swallowed, they are wrappe
 
 == LongConversionExample with `MethodReaders`
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
 @Test
 public void testUnknownClass() {
@@ -1490,7 +1495,7 @@ If you have only one argument, you may need to add an additional argument to sup
 This feature calls an implementation of `MethodFilterOnFirstArg` to see if the rest of the method call should be parsed.
 For example, today you have:
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
 interface MyInterface {
     void method(ExpensiveDto dto);
@@ -1499,7 +1504,7 @@ interface MyInterface {
 
 This can be migrated to:
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
 interface MyInterface extends MethodFilterOnFirstArg<String> {
     @Deprecated
@@ -1510,7 +1515,7 @@ interface MyInterface extends MethodFilterOnFirstArg<String> {
 
 where the implementation can look like this:
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
 class MyInterfaceImpl extends MyInterface {
     public void method(ExpensiveDto dto) {
@@ -1539,7 +1544,7 @@ You may wish to intercept handling a call in the method reader in order to execu
 If set, it will be triggered *instead* of the original call.
 It's possible to either skip the original method or to call it via passed `Invocation` instance:
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
 class MyInterceptor implements MethodReaderInterceptorReturns {
     @Override
@@ -1561,7 +1566,7 @@ It's possible to use original call arguments and object instance in the added co
 
 Simple example that enforces skipping the original call in case the second agrument is `null`:
 
-[source,Java]
+[source,java,opts=novalidate]
 ----
 class SkippingInterceptor implements GeneratingMethodReaderInterceptorReturns {
     @Override
@@ -1847,7 +1852,7 @@ $class.name ${field.name}($field.type $paramName) {
 }
 ----
 
-See also <<code-generation-for-marshallable,Marshallable code generation templates>>
+See also <<_code_generation_for_marshallable,Marshallable code generation templates>>
 
 == Why use Marshallable objects
 
@@ -1864,7 +1869,7 @@ Marshallable objects have been designed to allow you to
 The following is a simple example of a POJO with a nested data type in a List.
 
 .A Simple Pojo without needing to define toString/hashCode/equals
-[source,java]
+[source,java,opts=novalidate]
 ----
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
@@ -1902,7 +1907,7 @@ The object can be reconstructed from the output of the `toString()` method.
 This is useful for building sample data in unit tests for from a file.
 It also means that you can take the dump of an object in a log file and reconstruct the original object.
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 MyPojos mps = new MyPojos("test-list");
 mps.myPojos.add(new MyPojo("text1", 1, 1.1));
@@ -1928,7 +1933,7 @@ prints
 
 You can take the same output and reconstruct the original object.
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 MyPojos mps2 = Marshallable.fromString(mps.toString());
 assertEquals(mps, mps2); // <1>
@@ -1948,7 +1953,7 @@ assertEquals(mps, mps3); // <1>
 
 Finally, you can take data from a file and build the object.
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 MyPojos mps4 = Marshallable.fromFile("my-pojos.yaml");
 assertEquals(mps, mps4);
@@ -2135,7 +2140,7 @@ That `ChronicleChannel` acts as `MarshallableIn` and `MarshallableOut`, as `Wire
 When you create a channel, you specify what type of connection you want.
 The simplest is an EchoHandler that echos everything you send it.
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 // start a server on an unused port
 String url = "tcp://:0";

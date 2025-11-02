@@ -98,7 +98,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     }
 
     // Test writing messages to an HTTP endpoint and validate the response
-    @Ignore(/* long running test */)
+    @Ignore("long running test")
     @Test
     public void http() throws IOException, InterruptedException {
         InetSocketAddress address = new InetSocketAddress(0);

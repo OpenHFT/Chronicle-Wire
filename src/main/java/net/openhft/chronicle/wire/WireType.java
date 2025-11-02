@@ -510,6 +510,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      * Internal helper that removes a single {@code null} element from
      * collections created when reading certain empty lists.
      */
+    @SuppressWarnings("java:S3011")
     private void cleanNullCollections(Object object) {
         if (object == null) return;
         Field[] declaredFields = object.getClass().getDeclaredFields();

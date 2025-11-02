@@ -339,7 +339,7 @@ final class SerializableObjectTest extends WireTestCommon {
     }
 
     @BeforeEach
-    public void hasDirect() {
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
