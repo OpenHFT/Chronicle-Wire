@@ -4,15 +4,15 @@
     Copyright 2016-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
         <version>1.27ea1</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <artifactId>chronicle-wire</artifactId>
@@ -40,7 +40,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
@@ -441,7 +440,8 @@
 
                 <configuration>
                     <!-- One-line header; no newlines -->
-                    <inlineHeader>Copyright 2016-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0</inlineHeader>
+                    <inlineHeader>Copyright 2016-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
+                    </inlineHeader>
                     <excludes>
                         <exclude>LICENSE</exclude>
                         <exclude>**/*.adoc</exclude>
@@ -476,38 +476,41 @@
     </scm>
 
     <profiles>
-        <!-- Profile used when publishing sonar metrics -->
+        <profile>
+            <id>assertions</id>
+            <properties>
+                <zero.cost.assertions>enabled</zero.cost.assertions>
+            </properties>
+        </profile>
+
         <profile>
             <id>sonar</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
+            <!-- If you keep thresholds as properties, define them here
+                 (or in the parent) so they resolve during this profile) -->
+            <properties>
+                <jacoco.line.coverage>0.7</jacoco.line.coverage>
+                <jacoco.branch.coverage>0.6</jacoco.branch.coverage>
+            </properties>
+
             <build>
                 <plugins>
                     <plugin>
                         <groupId>org.sonarsource.scanner.maven</groupId>
                         <artifactId>sonar-maven-plugin</artifactId>
                     </plugin>
-                    <!-- Ensure JPMS flags from parent are propagated during sonar runs -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
-                            <!-- Use JaCoCo-prepared argLine and append JPMS flags + coverage flag -->
                             <argLine>${surefireArgLine} ${jvm.requiredArgs} -Djvm.coverage=true</argLine>
+                            <forkCount>1</forkCount>
+                            <reuseForks>false</reuseForks>
                         </configuration>
                     </plugin>
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
                         <version>0.8.14</version>
-                        <configuration>
-                            <!-- Save exec and site reports -->
-                            <outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
-                            <excludes>
-                                <exclude>net/openhft/chronicle/wire/ReadmeChapter1Test*</exclude>
-                            </excludes>
-                        </configuration>
                         <executions>
                             <execution>
                                 <id>prepare-agent</id>
@@ -515,21 +518,23 @@
                                     <goal>prepare-agent</goal>
                                 </goals>
                                 <configuration>
-                                    <!-- Provide agent args via this property for Surefire -->
                                     <propertyName>surefireArgLine</propertyName>
+                                    <excludes>
+                                        <!-- Low-level reflection/unsafe helpers where behaviour is JVM/architecture gated -->
+                                        <exclude>net/openhft/chronicle/bytes/internal/ByteBuffers*</exclude>
+                                        <exclude>net/openhft/chronicle/bytes/internal/UnsafeText*</exclude>
+                                    </excludes>
                                 </configuration>
                             </execution>
+
                             <execution>
                                 <id>report</id>
                                 <goals>
                                     <goal>report</goal>
                                 </goals>
                                 <phase>verify</phase>
-                                <configuration>
-                                    <dataFile>${project.build.directory}/jacoco.exec</dataFile>
-                                    <outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
-                                </configuration>
                             </execution>
+
                             <execution>
                                 <id>check</id>
                                 <goals>
@@ -537,7 +542,6 @@
                                 </goals>
                                 <phase>verify</phase>
                                 <configuration>
-                                    <dataFile>${project.build.directory}/jacoco.exec</dataFile>
                                     <rules>
                                         <rule>
                                             <element>BUNDLE</element>
@@ -562,12 +566,13 @@
                 </plugins>
             </build>
         </profile>
-        <!-- Profile to run performance benchmarks -->
+
         <profile>
             <id>run-benchmarks</id>
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-invoker-plugin</artifactId>
                         <configuration>
                             <pom>marshallingperf/pom.xml</pom>
