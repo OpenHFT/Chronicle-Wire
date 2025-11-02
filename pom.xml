@@ -25,6 +25,9 @@
         <!-- Settings for SonarCloud analysis -->
         <sonar.organization>openhft</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <!-- Coverage thresholds reflect current bundle coverage (JDK 11 sonar run) -->
+        <jacoco.line.coverage>0.724</jacoco.line.coverage>
+        <jacoco.branch.coverage>0.661</jacoco.branch.coverage>
     </properties>
 
     <!-- Use BOMs to keep dependency versions consistent across modules -->
@@ -497,7 +500,7 @@
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>${jacoco-maven-plugin.version}</version>
+                        <version>0.8.14</version>
                         <configuration>
                             <!-- Save exec and site reports -->
                             <outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
@@ -518,10 +521,41 @@
                             </execution>
                             <execution>
                                 <id>report</id>
-                                <phase>prepare-package</phase>
                                 <goals>
                                     <goal>report</goal>
                                 </goals>
+                                <phase>verify</phase>
+                                <configuration>
+                                    <dataFile>${project.build.directory}/jacoco.exec</dataFile>
+                                    <outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>check</id>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                                <phase>verify</phase>
+                                <configuration>
+                                    <dataFile>${project.build.directory}/jacoco.exec</dataFile>
+                                    <rules>
+                                        <rule>
+                                            <element>BUNDLE</element>
+                                            <limits>
+                                                <limit>
+                                                    <counter>LINE</counter>
+                                                    <value>COVEREDRATIO</value>
+                                                    <minimum>${jacoco.line.coverage}</minimum>
+                                                </limit>
+                                                <limit>
+                                                    <counter>BRANCH</counter>
+                                                    <value>COVEREDRATIO</value>
+                                                    <minimum>${jacoco.branch.coverage}</minimum>
+                                                </limit>
+                                            </limits>
+                                        </rule>
+                                    </rules>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
