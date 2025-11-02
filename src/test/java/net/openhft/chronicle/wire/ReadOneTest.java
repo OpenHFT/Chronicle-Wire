@@ -68,8 +68,7 @@ public class ReadOneTest extends WireTestCommon {
         ignoreException("Unknown @MethodId='history' called on interface net.openhft.chronicle.wire.ReadOneTest$SnapshotListener");
         ignoreException("Unknown method-name='myDto' called on interface net.openhft.chronicle.wire.ReadOneTest$SnapshotListener");
         // Initialization phase
-        final Bytes<?> b = Bytes.allocateElasticOnHeap();
-        Wire wire = new YamlWire(b) {
+        Wire wire = new YamlWire() {
             @Override
             public boolean recordHistory() {
                 return true;

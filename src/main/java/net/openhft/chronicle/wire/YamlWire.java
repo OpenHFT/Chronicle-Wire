@@ -69,6 +69,14 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     private YamlWire rereadWire;
 
     /**
+     * Default constructor that initializes the YamlWire with elastic direct bytes. Assumes text documents.
+     */
+    public YamlWire() {
+        this(Bytes.allocateElasticDirect());
+        useTextDocuments();
+    }
+
+    /**
      * Constructor that initializes the YamlWire with provided bytes and a flag indicating the use of 8-bit.
      *
      * @param bytes Bytes from which YamlWire is initialized

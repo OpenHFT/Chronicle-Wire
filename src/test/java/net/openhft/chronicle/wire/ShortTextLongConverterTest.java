@@ -114,7 +114,7 @@ public class ShortTextLongConverterTest extends WireTestCommon {
 
     @Test
     public void allSafeCharsYamlWire() {
-        Wire wire = new YamlWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
+        Wire wire = new YamlWire();
         allSafeChars(wire);
     }
 

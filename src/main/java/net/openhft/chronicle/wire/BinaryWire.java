@@ -125,6 +125,12 @@ public class BinaryWire extends AbstractWire implements Wire {
     private Boolean overrideSelfDescribing = null;
 
     /**
+     * Constructs a {@code BinaryWire} with default settings and elastic on-heap bytes.
+     */
+    public BinaryWire() {
+        this(Bytes.allocateElasticOnHeap());
+    }
+    /**
      * Constructs a {@code BinaryWire} with default settings.
      *
      * @param bytes the bytes to be processed by this wire

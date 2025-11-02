@@ -73,7 +73,7 @@ public class IdentifierLongConverterTest extends net.openhft.chronicle.wire.Wire
     // Test using the YamlWire format with safe characters
     @Test
     public void allSafeCharsYamlWire() {
-        Wire wire = new YamlWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
+        Wire wire = new YamlWire();
         allSafeChars(wire);
     }
 
