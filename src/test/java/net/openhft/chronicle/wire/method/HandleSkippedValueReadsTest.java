@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @RunWith(Parameterized.class)
 public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.WireTestCommon {
 
-    final WireType wireType;
+    private final WireType wireType;
 
     public HandleSkippedValueReadsTest(WireType wireType) {
         this.wireType = wireType;
@@ -52,7 +52,7 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
         doTest(true);
     }
 
-    public void doTest(boolean scanning) {
+    private void doTest(boolean scanning) {
         Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         try (DocumentContext dc = wire.writingDocument(true)) {
             dc.wire()
@@ -173,7 +173,7 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
         doIndex2index(true);
     }
 
-    public void doIndex2index(boolean scanning) {
+    private void doIndex2index(boolean scanning) {
         Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         try (DocumentContext dc = wire.writingDocument(true)) {
             dc.wire()

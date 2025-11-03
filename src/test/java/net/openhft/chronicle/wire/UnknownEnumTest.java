@@ -29,7 +29,7 @@ public class UnknownEnumTest extends WireTestCommon {
             109, 84, 101, 115, 116, 36, 84, 101, 109, 112, -27, 70, 73, 82, 83, 84};
 
     // Helper method to create a Wire instance
-    public Wire createWire() {
+    private Wire createWire() {
         return WireType.TEXT.apply(Bytes.allocateElasticOnHeap(128));
     }
 

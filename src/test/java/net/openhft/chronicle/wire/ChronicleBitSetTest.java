@@ -132,17 +132,17 @@ public class ChronicleBitSetTest extends WireTestCommon {
     }
 
     // Check if the given condition is true
-    public void check(boolean condition) {
+    private void check(boolean condition) {
         Assert.assertTrue(condition);
     }
 
     // Check if the given condition is true with a diagnostic message
-    public void check(boolean condition, String diagnostic) {
+    private void check(boolean condition, String diagnostic) {
         Assert.assertTrue(diagnostic, condition);
     }
 
     // Check if the ChronicleBitSet is empty
-    public void checkEmpty(ChronicleBitSet s) {
+    private void checkEmpty(ChronicleBitSet s) {
         check(s.isEmpty(), "isEmpty");
         check(s.length() == 0, "length");
         check(s.cardinality() == 0, "cardinality");
@@ -164,7 +164,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     }
 
     // Creates a ChronicleBitSet and sets bits based on given elements
-    public ChronicleBitSet makeSet(int... elts) {
+    private ChronicleBitSet makeSet(int... elts) {
         ChronicleBitSet s = createBitSet(IntStream.of(elts).max().getAsInt() + 1L);
         for (int elt : elts)
             s.set(elt);
@@ -172,7 +172,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     }
 
     // Check equality properties of two ChronicleBitSets
-    public void checkEquality(ChronicleBitSet s, ChronicleBitSet t) {
+    private void checkEquality(ChronicleBitSet s, ChronicleBitSet t) {
         checkSanity(s, t);
         check(s.equals(t), "equals");
         check(s.toString().equals(t.toString()), "equal strings");
@@ -181,7 +181,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     }
 
     // Check the validity of ChronicleBitSet(s)
-    public void checkSanity(ChronicleBitSet... sets) {
+    private void checkSanity(ChronicleBitSet... sets) {
         for (ChronicleBitSet s : sets) {
             int len = s.length();
             int cardinality1 = s.cardinality();
@@ -1186,7 +1186,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
      * Create a new ChronicleBitSet with default size of 1024.
      * @return the new ChronicleBitSet.
      */
-    public ChronicleBitSet createBitSet() {
+    private ChronicleBitSet createBitSet() {
         final ChronicleBitSet bitSet = createBitSet(1024);
         closeables.add(bitSet);
         return bitSet;

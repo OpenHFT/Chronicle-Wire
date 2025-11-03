@@ -14,14 +14,14 @@ import java.util.List;
  * OuterClass extends SelfDescribingMarshallable to facilitate serialization and deserialization.
  * It contains multiple lists of NestedClass objects and handles custom serialization logic.
  */
-public class OuterClass extends SelfDescribingMarshallable {
+class OuterClass extends SelfDescribingMarshallable {
     // Lists for maintaining instances of NestedClass and their free pools
-    final List<NestedClass> listAFree = new ArrayList<>();
-    final List<NestedClass> listA = new ArrayList<>();
-    final List<NestedClass> listBFree = new ArrayList<>();
-    final List<NestedClass> listB = new ArrayList<>();
-    String text;
-    WireType wireType;
+    private final List<NestedClass> listAFree = new ArrayList<>();
+    private final List<NestedClass> listA = new ArrayList<>();
+    private final List<NestedClass> listBFree = new ArrayList<>();
+    private final List<NestedClass> listB = new ArrayList<>();
+    private String text;
+    private WireType wireType;
 
     /**
      * Custom read logic for marshalling from Wire. It specifies how fields and lists
@@ -92,7 +92,7 @@ public class OuterClass extends SelfDescribingMarshallable {
      * leveraging the free pool pattern for efficient memory management.
      */
     @NotNull
-    public List<NestedClass> getListA() {
+    private List<NestedClass> getListA() {
         return listA;
     }
 
@@ -109,7 +109,7 @@ public class OuterClass extends SelfDescribingMarshallable {
     }
 
     @NotNull
-    public List<NestedClass> getListB() {
+    private List<NestedClass> getListB() {
         return listB;
     }
 

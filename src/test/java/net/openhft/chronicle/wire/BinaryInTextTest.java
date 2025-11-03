@@ -76,7 +76,7 @@ public class BinaryInTextTest extends WireTestCommon {
 
     // Inner class to test serialization and deserialization of binary content in text
     @SuppressWarnings("rawtypes")
-    static class BIT extends SelfDescribingMarshallable {
+    private static class BIT extends SelfDescribingMarshallable {
         Bytes<?> b;
         BytesStore<?, ?> c;
     }

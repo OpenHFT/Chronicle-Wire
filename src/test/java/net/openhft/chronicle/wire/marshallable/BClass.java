@@ -11,16 +11,16 @@ import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
 class BClass extends BytesInBinaryMarshallable {
 
     // Fields that the class contains.
-    int id;
-    boolean flag;
-    byte b;
-    char ch;
-    short s;
-    int i;
-    long l;
-    float f;
-    double d;
-    String text;
+    private int id;
+    private boolean flag;
+    private byte b;
+    private char ch;
+    private short s;
+    private int i;
+    private long l;
+    private float f;
+    private double d;
+    private String text;
 
     // Constructor to initialize the BClass with the given arguments.
     public BClass(int id, boolean flag, byte b, char ch, short s, int i, long l, float f, double d, String text) {

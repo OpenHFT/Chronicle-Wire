@@ -39,7 +39,7 @@ public class TextWireTypeArrayTest extends WireTestCommon {
     }
 
     // Inner class defining an array of class types
-    public static class HasClasses extends SelfDescribingMarshallable {
+    static class HasClasses extends SelfDescribingMarshallable {
         public Class<?>[] classes = {String.class, Integer.class, Number.class};
     }
 }

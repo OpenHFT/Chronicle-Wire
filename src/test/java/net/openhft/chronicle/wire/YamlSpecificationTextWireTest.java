@@ -86,7 +86,7 @@ public class YamlSpecificationTextWireTest extends WireTestCommon {
 
     // Helper method to read the bytes of a file
     @Nullable
-    public byte[] getBytes(String file) throws IOException {
+    private byte[] getBytes(String file) throws IOException {
         // Locate the file resource
         InputStream is = getClass().getResourceAsStream("/yaml/spec/" + file);
         if (is == null) return null;

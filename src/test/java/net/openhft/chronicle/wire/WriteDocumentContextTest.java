@@ -13,7 +13,7 @@ import static org.junit.Assert.assertTrue;
 public class WriteDocumentContextTest extends WireTestCommon {
 
     // Writes three key-value pairs to the given Wire using nested DocumentContexts
-    static void writeThreeKeys(Wire wire) {
+    private static void writeThreeKeys(Wire wire) {
         // Acquire a top-level writing document
         try (DocumentContext dc0 = wire.acquireWritingDocument(false)) {
             // Write three key-value pairs using nested DocumentContexts
@@ -28,7 +28,7 @@ public class WriteDocumentContextTest extends WireTestCommon {
     }
 
     // Writes three key-value pairs to the given Wire using chained DocumentContexts
-    static void writeThreeChainedKeys(Wire wire) {
+    private static void writeThreeChainedKeys(Wire wire) {
         // Write three key-value pairs and mark each as a chained element except the last
         for (int i = 0; i < 3; i++) {
             try (WriteDocumentContext dc = (WriteDocumentContext) wire.acquireWritingDocument(false)) {

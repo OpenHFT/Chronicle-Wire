@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 public class IdentifierLongConverterTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Defining constants for the test class
-    public static final String MAX_SMALL_POSITIVE_STR = "^^^^^^^^^^";
+    private static final String MAX_SMALL_POSITIVE_STR = "^^^^^^^^^^";
 
     // Test the parsing functionality for the minimum values
     @Test

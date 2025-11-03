@@ -80,8 +80,8 @@ public class Issue609Test extends WireTestCommon {
         assertEquals(expected, WireType.TEXT.fromString(withString2));
     }
 
-    public static class ChronicleServicesCfg extends AbstractMarshallableCfg {
-        public final Map<String, ServiceCfg> services = new LinkedHashMap<>();
+    static class ChronicleServicesCfg extends AbstractMarshallableCfg {
+        final Map<String, ServiceCfg> services = new LinkedHashMap<>();
     }
 
     /**
@@ -89,8 +89,8 @@ public class Issue609Test extends WireTestCommon {
      * This class also includes custom deserialization logic to properly deserialize
      * the 'inputs' field, which can have different value types.
      */
-    public static class ServiceCfg extends AbstractMarshallableCfg {
-        public final List<InputCfg> inputs = new ArrayList<>();
+    static class ServiceCfg extends AbstractMarshallableCfg {
+        final List<InputCfg> inputs = new ArrayList<>();
 
         @Override
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
@@ -118,17 +118,17 @@ public class Issue609Test extends WireTestCommon {
      * Configuration class representing a single input of a service.
      */
     public static class InputCfg extends AbstractMarshallableCfg {
-        public String input;
+        String input;
 
-        public InputCfg() {
+        InputCfg() {
             this(null);
         }
 
-        public InputCfg(String in) {
+        InputCfg(String in) {
             this.input = in;
         }
 
-        public InputCfg input(String input) {
+        InputCfg input(String input) {
             this.input = input;
             return this;
         }

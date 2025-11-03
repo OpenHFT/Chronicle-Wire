@@ -77,7 +77,7 @@ public class InnerMapTest extends WireTestCommon {
         }
 
         // Default constructor
-        public MyMarshable(String name) {
+        MyMarshable(String name) {
             this.name = name;
             this.commission = new LinkedHashMap<>();
         }
@@ -88,7 +88,7 @@ public class InnerMapTest extends WireTestCommon {
         }
 
         // Getter for commission map
-        public Map<String, Double> commission() {
+        Map<String, Double> commission() {
             return commission;
         }
 
@@ -105,7 +105,7 @@ public class InnerMapTest extends WireTestCommon {
         String value;
 
         // Constructor to initialize the value
-        public MyNested(String value) {
+        MyNested(String value) {
             this.value = value;
         }
     }

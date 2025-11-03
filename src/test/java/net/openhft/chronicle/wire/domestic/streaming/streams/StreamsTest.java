@@ -79,7 +79,7 @@ final class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
         private final Wire wire;
         private final NamedOperations operations;
 
-        public WireOperationsRecord(Wire wire, NamedOperations operations) {
+        WireOperationsRecord(Wire wire, NamedOperations operations) {
             this.wire = wire;
             this.operations = operations;
         }
@@ -98,7 +98,7 @@ final class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
         }
     }
 
-    Stream<Named<Function<Stream<MarketData>, Stream<MarketData>>>> operations() {
+    private Stream<Named<Function<Stream<MarketData>, Stream<MarketData>>>> operations() {
         return Stream.of(
                 Named.of("filter", s -> s.filter(md -> md.last() % 2 == 1)),
                 Named.of("distinct", Stream::distinct),
@@ -151,7 +151,7 @@ final class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
         return wire;
     }
 
-    void assertStreamEquals(Stream<MarketData> expected, Stream<MarketData> actual) {
+    private void assertStreamEquals(Stream<MarketData> expected, Stream<MarketData> actual) {
         final List<MarketData> expectedList = expected.collect(toList());
         final List<MarketData> actualList = actual
                 // Make a copy as the stream might reuse objects

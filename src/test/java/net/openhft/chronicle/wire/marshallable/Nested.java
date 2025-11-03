@@ -14,22 +14,22 @@ import java.util.Set;
  * This class can be serialized/deserialized as it extends SelfDescribingMarshallable.
  */
 @SuppressWarnings("serial")
-public class Nested extends SelfDescribingMarshallable {
+class Nested extends SelfDescribingMarshallable {
 
     // Holds scalar values
-    public ScalarValues values;
+    private ScalarValues values;
 
     // A list of strings
-    public List<String> strings;
+    private List<String> strings;
 
     // A set of integers
-    public Set<Integer> ints;
+    private Set<Integer> ints;
 
     // A map with string keys and lists of doubles as values
-    public Map<String, List<Double>> map;
+    private Map<String, List<Double>> map;
 
     // An array of strings
-    public String[] array;
+    private String[] array;
 
     /**
      * Default constructor.

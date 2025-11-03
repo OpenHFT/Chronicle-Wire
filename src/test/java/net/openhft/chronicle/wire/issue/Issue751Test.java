@@ -17,7 +17,7 @@ public class Issue751Test extends WireTestCommon {
     public static class One extends SelfDescribingMarshallable {
         Comparable<?> text;
 
-        public One(Comparable<?> text) {
+        One(Comparable<?> text) {
             this.text = text;
         }
     }
@@ -25,7 +25,7 @@ public class Issue751Test extends WireTestCommon {
     public static class Two implements Comparable<Two>, Marshallable {
         Comparable<?> text;
 
-        public Two(Comparable<?> text) {
+        Two(Comparable<?> text) {
             this.text = text;
         }
 
@@ -35,11 +35,11 @@ public class Issue751Test extends WireTestCommon {
         }
     }
 
-    public static class Three extends SelfDescribingMarshallable {
-        public One one;
-        public Two two;
+    static class Three extends SelfDescribingMarshallable {
+        One one;
+        Two two;
 
-        public Three(One one, Two two) {
+        Three(One one, Two two) {
             this.one = one;
             this.two = two;
         }

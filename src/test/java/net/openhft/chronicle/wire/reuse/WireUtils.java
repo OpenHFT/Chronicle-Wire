@@ -15,7 +15,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Utility class for creating and comparing WireProperty and WireCollection objects.
  */
-public class WireUtils {
+class WireUtils {
 
     // Random object for generating random values
     private static final Random rand = new Random();
@@ -27,7 +27,7 @@ public class WireUtils {
      * @return A WireProperty with randomly generated attributes.
      */
     @NotNull
-    public static WireProperty randomWireProperty(int i) {
+    private static WireProperty randomWireProperty(int i) {
         return new WireProperty("reference" + i, "@:" + i, "name" + i, UUID.randomUUID().toString().replace("-", ""), rand.nextLong(), rand.nextInt(), UUID.randomUUID().toString());
     }
 
@@ -64,7 +64,7 @@ public class WireUtils {
      * @param a The first WireModel instance.
      * @param b The second WireModel instance.
      */
-    public static void compareWireModel(@NotNull WireModel a, @NotNull WireModel b) {
+    private static void compareWireModel(@NotNull WireModel a, @NotNull WireModel b) {
         assertEquals(a.getId(), b.getId());
         assertEquals(a.getRevision(), b.getRevision());
         assertEquals(a.getKey(), b.getKey());
@@ -76,7 +76,7 @@ public class WireUtils {
      * @param a The first WireProperty instance.
      * @param b The second WireProperty instance.
      */
-    public static void compareWireProperty(@NotNull WireProperty a, @NotNull WireProperty b) {
+    private static void compareWireProperty(@NotNull WireProperty a, @NotNull WireProperty b) {
         compareWireModel(a, b);
         assertEquals(a.getReference(), b.getReference());
         assertEquals(a.getValue(), b.getValue());

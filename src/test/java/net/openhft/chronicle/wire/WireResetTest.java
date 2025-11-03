@@ -121,7 +121,7 @@ public class WireResetTest extends WireTestCommon {
         }
     }
 
-    public static class EventAbstractCloseable extends AbstractCloseable implements Marshallable {
+    static class EventAbstractCloseable extends AbstractCloseable implements Marshallable {
         @Override
         protected void performClose() {
         }

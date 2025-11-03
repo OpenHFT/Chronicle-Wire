@@ -23,6 +23,7 @@ public class TriviallyCopyableMarketData extends BytesInBinaryMarshallable {
 
     // Unique identifier for the security, encoded in Base85 format for compactness
     @LongConversion(Base85LongConverter.class)
+    private
     long securityId;
 
     // Timestamp of the market data, encoded to represent microsecond precision

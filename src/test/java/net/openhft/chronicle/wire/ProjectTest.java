@@ -101,12 +101,11 @@ public class ProjectTest extends WireTestCommon {
     public static class Inner extends SelfDescribingMarshallable {
         private String name;
 
-        public String name() {
+        String name() {
             return name;
         }
 
-        @NotNull
-        public Inner name(String name) {
+        @NotNull Inner name(String name) {
             this.name = name;
             return this;
         }
@@ -116,12 +115,11 @@ public class ProjectTest extends WireTestCommon {
     public static class Outer extends SelfDescribingMarshallable {
         private Inner inner;
 
-        public Inner inner() {
+        Inner inner() {
             return inner;
         }
 
-        @NotNull
-        public Outer inner(Inner inner) {
+        @NotNull Outer inner(Inner inner) {
             this.inner = inner;
             return this;
         }
@@ -135,8 +133,7 @@ public class ProjectTest extends WireTestCommon {
             return name2;
         }
 
-        @NotNull
-        public Simple name2(String name2) {
+        @NotNull Simple name2(String name2) {
             this.name2 = name2;
             return this;
         }

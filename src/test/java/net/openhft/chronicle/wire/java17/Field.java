@@ -16,7 +16,7 @@ import java.util.Map;
 public class Field extends SelfDescribingMarshallable {
 
     // A map to maintain the required status for various field names
-    public final Map<String, Required> required = new HashMap<>();
+    private final Map<String, Required> required = new HashMap<>();
 
     /**
      * Sets the required status for a given field name.

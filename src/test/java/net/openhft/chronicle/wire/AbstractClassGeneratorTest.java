@@ -22,7 +22,7 @@ import static org.junit.Assume.assumeFalse;
 class SimpleClassGenerator extends AbstractClassGenerator<SimpleMetaData> {
 
     // Constructor initializing generator with default metadata and setting Callable as its interface
-    protected SimpleClassGenerator() {
+    SimpleClassGenerator() {
         super(new SimpleMetaData());
         metaData().interfaces().add(Callable.class);
     }
@@ -42,7 +42,7 @@ class SimpleClassGenerator extends AbstractClassGenerator<SimpleMetaData> {
 class UIClassGenerator extends AbstractClassGenerator<SimpleMetaData> {
 
     // Constructor initializing generator with default metadata and setting Consumer as its interface
-    protected UIClassGenerator() {
+    UIClassGenerator() {
         super(new SimpleMetaData());
         metaData().interfaces().add(Consumer.class);
     }
@@ -90,7 +90,7 @@ public class AbstractClassGeneratorTest extends WireTestCommon {
     }
 
     // Helper method to perform the test with a given message
-    protected void doTest(String message) throws Exception {
+    private void doTest(String message) throws Exception {
         SimpleClassGenerator scg = new SimpleClassGenerator();
         scg.metaData()
                 .packageName(Jvm.getPackageName(getClass()))
@@ -170,7 +170,7 @@ public class AbstractClassGeneratorTest extends WireTestCommon {
     }
 
     // Helper method to test UIClassGenerator with a given message and update interceptor
-    protected void doTest(UpdateInterceptor ui, String message) throws Exception {
+    private void doTest(UpdateInterceptor ui, String message) throws Exception {
         UIClassGenerator scg = new UIClassGenerator();
         scg.metaData()
                 .packageName(Jvm.getPackageName(getClass()))

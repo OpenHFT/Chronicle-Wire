@@ -163,7 +163,7 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
     static class SameMethodNameImpl implements AnInterface, AnInterfaceSameName {
         private final AtomicBoolean callRegistered;
 
-        public SameMethodNameImpl(AtomicBoolean callRegistered) {
+        SameMethodNameImpl(AtomicBoolean callRegistered) {
             this.callRegistered = callRegistered;
         }
 
@@ -177,7 +177,7 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
     static class SameInterfaceImpl implements AnInterface, ADescendant {
         private final AtomicBoolean callRegistered;
 
-        public SameInterfaceImpl(AtomicBoolean callRegistered) {
+        SameInterfaceImpl(AtomicBoolean callRegistered) {
             this.callRegistered = callRegistered;
         }
 

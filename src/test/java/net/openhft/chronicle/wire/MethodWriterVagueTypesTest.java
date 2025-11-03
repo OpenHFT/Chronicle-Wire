@@ -59,13 +59,13 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
         void msg(FinalMarshallableContainer m, FinalNonMarshallableContainer nm);
     }
 
-    public static final class FinalMarshallableContainer extends NonMarshallableTestContainer implements Marshallable{}
-    public static final class FinalNonMarshallableContainer extends NonMarshallableTestContainer{}
+    static final class FinalMarshallableContainer extends NonMarshallableTestContainer implements Marshallable{}
+    static final class FinalNonMarshallableContainer extends NonMarshallableTestContainer{}
 
-    public static class MarshallableTestContainer extends NonMarshallableTestContainer implements Marshallable {
+    static class MarshallableTestContainer extends NonMarshallableTestContainer implements Marshallable {
     }
 
-    public static class NonMarshallableTestContainer implements Container {
+    static class NonMarshallableTestContainer implements Container {
 
         String randomInt = String.valueOf(new Random().nextInt());
 
@@ -85,7 +85,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
         }
     }
 
-    public interface Container{}
+    interface Container{}
 
     @Test
     public void testSingle() throws Exception {

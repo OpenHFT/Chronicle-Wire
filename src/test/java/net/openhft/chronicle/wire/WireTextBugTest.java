@@ -85,7 +85,7 @@ public class WireTextBugTest extends WireTestCommon {
         }
 
         // Setter for clOrdID
-        public void setClOrdID(String aClOrdID) {
+        void setClOrdID(String aClOrdID) {
             clOrdID = aClOrdID;
         }
     }

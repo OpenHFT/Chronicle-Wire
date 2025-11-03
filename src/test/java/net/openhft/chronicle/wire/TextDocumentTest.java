@@ -79,8 +79,8 @@ public class TextDocumentTest extends WireTestCommon {
 
     // Nested class to represent a header, with functionality to write and read itself to/from a Wire.
     static class Header implements Marshallable {
-        public static final long WRITE_BYTE = 512;
-        public static final long READ_BYTE = 1024;
+        static final long WRITE_BYTE = 512;
+        static final long READ_BYTE = 1024;
 
         UUID uuid;
         ZonedDateTime created;
@@ -90,7 +90,7 @@ public class TextDocumentTest extends WireTestCommon {
         LongValue readByte;
 
         // Constructor initializes a Header with random UUID and current date-time.
-        public Header() {
+        Header() {
             this.uuid = UUID.randomUUID();
             this.writeByte = null;
             this.readByte = null;
@@ -117,7 +117,7 @@ public class TextDocumentTest extends WireTestCommon {
         }
 
         // Close the resources associated with the header.
-        public void closeAll() {
+        void closeAll() {
             Closeable.closeQuietly(readByte, writeByte);
         }
     }

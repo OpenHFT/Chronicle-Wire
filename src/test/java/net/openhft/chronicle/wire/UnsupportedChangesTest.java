@@ -93,25 +93,25 @@ public class UnsupportedChangesTest extends WireTestCommon {
     // Definitions of the various Marshallable objects used in the above test methods.
 
     // Wrapper class containing double values, extending the SelfDescribingMarshallable class.
-    static class Wrapper extends SelfDescribingMarshallable {
+    private static class Wrapper extends SelfDescribingMarshallable {
         double pnl;
         double second;
     }
 
     // IntWrapper class containing long values, extending the SelfDescribingMarshallable class.
-    static class IntWrapper extends SelfDescribingMarshallable {
+    private static class IntWrapper extends SelfDescribingMarshallable {
         long pnl;
         long second;
     }
 
     // BooleanWrapper class containing a boolean and a long value, extending the SelfDescribingMarshallable class.
-    static class BooleanWrapper extends SelfDescribingMarshallable {
+    private static class BooleanWrapper extends SelfDescribingMarshallable {
         boolean flag;
         long second;
     }
 
     // Nested class containing an Inner object, extending the SelfDescribingMarshallable class.
-    static class Nested extends SelfDescribingMarshallable {
+    private static class Nested extends SelfDescribingMarshallable {
         Inner inner;
     }
 

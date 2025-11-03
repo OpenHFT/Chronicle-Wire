@@ -25,13 +25,13 @@ public class UnicodeStringTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @NotNull
     // Static byte buffer used for wire operations
-    static Bytes<?> bytes = nativeBytes();
+    private static Bytes<?> bytes = nativeBytes();
 
     // Wire object to handle serialization and deserialization
-    static Wire wire = createWire();
+    private static Wire wire = createWire();
 
     // Char array to be used in tests
-    static char[] chars = new char[128];
+    private static char[] chars = new char[128];
 
     // Character under test
     private final char ch;

@@ -10,10 +10,10 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
  * Inherits the capabilities of SelfDescribingMarshallable to provide
  * self-describing marshalling and unmarshalling.
  */
-public class Group extends SelfDescribingMarshallable {
+class Group extends SelfDescribingMarshallable {
 
     // The field associated with this group
-    public Field field;
+    private Field field;
 
     /**
      * Constructs a Group with the specified field.

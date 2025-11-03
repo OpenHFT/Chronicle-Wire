@@ -38,7 +38,7 @@ public class LongConvertorFieldsTest {
          * @param i  Int value.
          * @param l  Long value.
          */
-        public Base16DTO(byte b, char ch, short s, int i, long l) {
+        Base16DTO(byte b, char ch, short s, int i, long l) {
             this.b = b;
             this.ch = ch;
             this.s = s;
@@ -97,7 +97,7 @@ public class LongConvertorFieldsTest {
          * @param i  Int value.
          * @param l  Long value.
          */
-        public Base64DTO(byte b, char ch, short s, int i, long l) {
+        Base64DTO(byte b, char ch, short s, int i, long l) {
             this.b = b;
             this.ch = ch;
             this.s = s;
@@ -156,7 +156,7 @@ public class LongConvertorFieldsTest {
          * @param i  Int value.
          * @param l  Long value.
          */
-        public Base85DTO(byte b, char ch, short s, int i, long l) {
+        Base85DTO(byte b, char ch, short s, int i, long l) {
             this.b = b;
             this.ch = ch;
             this.s = s;
@@ -219,7 +219,7 @@ public class LongConvertorFieldsTest {
         @ShortText
         long l;
 
-        public ShortTextDTO(byte b, char ch, short s, int i, long l) {
+        ShortTextDTO(byte b, char ch, short s, int i, long l) {
             this.b = b;
             this.ch = ch;
             this.s = s;
@@ -286,7 +286,7 @@ public class LongConvertorFieldsTest {
          * @param i  Int value.
          * @param l  Long value.
          */
-        public WordsDTO(byte b, char ch, short s, int i, long l) {
+        WordsDTO(byte b, char ch, short s, int i, long l) {
             this.b = b;
             this.ch = ch;
             this.s = s;

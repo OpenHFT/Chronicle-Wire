@@ -40,12 +40,13 @@ import static org.junit.Assume.assumeFalse;
 @RunWith(value = Parameterized.class)
 public class BinaryWireTest extends WireTestCommon {
 
-    final int testId;
-    final boolean fixed;
-    final boolean numericField;
-    final boolean fieldLess;
-    final int compressedSize;
+    private final int testId;
+    private final boolean fixed;
+    private final boolean numericField;
+    private final boolean fieldLess;
+    private final int compressedSize;
     @NotNull
+    private
     Bytes<?> bytes = new HexDumpBytes();
 
     // Constructor for initializing parameters of the test
@@ -981,7 +982,7 @@ public class BinaryWireTest extends WireTestCommon {
             double f;
 
             // Setter for the floating-point value
-            public void set(double d) {
+            void set(double d) {
                 f = d;
             }
         }
@@ -1792,6 +1793,6 @@ public class BinaryWireTest extends WireTestCommon {
     }
 
     // A simple class representing a Circle
-    class Circle implements Marshallable {
+    private class Circle implements Marshallable {
     }
 }

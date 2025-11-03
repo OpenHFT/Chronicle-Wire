@@ -52,11 +52,11 @@ public class StreamMain {
 
 // Represents a file format with version, timestamp, creator, and other metadata.
 class FileFormat extends SelfDescribingMarshallable {
-    int version = 100;
-    ZonedDateTime createdTime = ZonedDateTime.now();
-    String creator = System.getProperty("user.name");
-    UUID identity = UUID.randomUUID();
-    WireType wireType;
+    private int version = 100;
+    private ZonedDateTime createdTime = ZonedDateTime.now();
+    private String creator = System.getProperty("user.name");
+    private UUID identity = UUID.randomUUID();
+    private WireType wireType;
 
     // Deserialize the object from the wire.
     @Override

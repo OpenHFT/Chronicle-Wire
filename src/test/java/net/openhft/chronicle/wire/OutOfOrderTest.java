@@ -14,10 +14,10 @@ import static org.junit.Assume.assumeFalse;
 
 public class OutOfOrderTest extends WireTestCommon {
     // Define JSON snippets to be used in tests
-    static final String start = "{ \"a\": 1, ";
-    static final String records = "\"records\":[{\"id\":1}], ";
-    static final String missing = "\"missing\": 111, ";
-    static final String end = "\"z\": 99 }";
+    private static final String start = "{ \"a\": 1, ";
+    private static final String records = "\"records\":[{\"id\":1}], ";
+    private static final String missing = "\"missing\": 111, ";
+    private static final String end = "\"z\": 99 }";
 
     @Test
     public void outOfOrder() {
@@ -29,7 +29,7 @@ public class OutOfOrderTest extends WireTestCommon {
         doTest(start + missing + records + end, "{\"a\":1,\"b\":null,\"records\":[ {\"id\":1} ],\"z\":99}");
     }
 
-    void doTest(String input, String expected) {
+    private void doTest(String input, String expected) {
         // Convert the input string to bytes
         Bytes<?> from = Bytes.from(input);
         // Create a JSONWire object from the bytes
@@ -46,7 +46,7 @@ public class OutOfOrderTest extends WireTestCommon {
     }
 
     // Helper class with various fields for testing
-    static class OOOT extends SelfDescribingMarshallable {
+    private static class OOOT extends SelfDescribingMarshallable {
         int a;
         String b;
         List<OOOT2> records;
@@ -54,7 +54,7 @@ public class OutOfOrderTest extends WireTestCommon {
     }
 
     // Nested helper class
-    static class OOOT2 extends SelfDescribingMarshallable {
+    private static class OOOT2 extends SelfDescribingMarshallable {
         int id;
     }
 }

@@ -72,7 +72,7 @@ public class WireBug38Test extends WireTestCommon {
             builder.setLength(0);
         }
 
-        public void append(CharSequence cs) {
+        void append(CharSequence cs) {
             builder.append(cs);
         }
 

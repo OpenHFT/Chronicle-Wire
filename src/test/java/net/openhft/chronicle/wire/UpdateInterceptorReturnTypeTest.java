@@ -34,7 +34,7 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
     }
 
     // Creates and returns a new Wire instance with allocated memory
-    static Wire createWire() {
+    private static Wire createWire() {
         final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
         return wire;
     }

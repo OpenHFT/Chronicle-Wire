@@ -555,10 +555,10 @@ The code for the class Data
 ```java
 */
 class Data extends SelfDescribingMarshallable {
-    String message;
-    long number;
-    TimeUnit timeUnit;
-    double price;
+    private String message;
+    private long number;
+    private TimeUnit timeUnit;
+    private double price;
 
     public Data() {
     }

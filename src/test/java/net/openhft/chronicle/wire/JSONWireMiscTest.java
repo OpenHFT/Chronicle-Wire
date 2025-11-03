@@ -152,7 +152,7 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
     final static class Foo {
         final int value;
 
-        public Foo(int value) {
+        Foo(int value) {
             this.value = value;
         }
     }
@@ -172,7 +172,7 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
 
         final String value;
 
-        public Bar(String value) {
+        Bar(String value) {
             this.value = value;
         }
     }

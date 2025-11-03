@@ -64,6 +64,6 @@ public class Issue344Test extends WireTestCommon {
      * It contains a single field testChar of type char.
      */
     private static class TestData implements Marshallable {
-        public char testChar;
+        char testChar;
     }
 }

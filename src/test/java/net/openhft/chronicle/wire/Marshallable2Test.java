@@ -116,7 +116,7 @@ public class Marshallable2Test extends WireTestCommon {
         Inner2 inner2;
         transient boolean validated;
 
-        public Outer(String name) {
+        Outer(String name) {
             this.name = name;
         }
 

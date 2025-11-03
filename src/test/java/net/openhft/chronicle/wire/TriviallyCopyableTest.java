@@ -18,7 +18,7 @@ public class TriviallyCopyableTest extends WireTestCommon {
 
     // Test utility to perform read and write operations on byte buffers
     // with AA instances, and then check if the original and the result are equal
-    static void doTest(BiConsumer<Bytes<?>, AA> read, BiConsumer<Bytes<?>, AA> write) {
+    private static void doTest(BiConsumer<Bytes<?>, AA> read, BiConsumer<Bytes<?>, AA> write) {
         // Allocate direct memory for bytes
         Bytes<?> bytes = Bytes.allocateDirect(40);
 
@@ -64,7 +64,7 @@ public class TriviallyCopyableTest extends WireTestCommon {
         boolean flag, flag2;
 
         // Constructor to initialize all fields
-        public AA(byte b1, byte b2, boolean flag, boolean flag2, char ch, short s, float f, int i, double d, long l) {
+        AA(byte b1, byte b2, boolean flag, boolean flag2, char ch, short s, float f, int i, double d, long l) {
             this.b1 = b1;
             this.b2 = b2;
             this.flag = flag;

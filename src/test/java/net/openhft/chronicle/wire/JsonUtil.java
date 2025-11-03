@@ -13,7 +13,7 @@ public final class JsonUtil {
     }
 
     // Count the occurrence of a character in a string.
-    static int count(String s, Character c) {
+    private static int count(String s, Character c) {
         return (int) s.chars()
                 .mapToObj(i -> (char) i)       // Convert intStream to charStream.
                 .filter(c::equals)             // Filter the occurrences of the character.
@@ -27,9 +27,9 @@ public final class JsonUtil {
     }
 
     // Check the balance of specified opening and closing brackets in a given string.
-    static void assertBalancedBrackets(String input,
-                                       Character opening,
-                                       Character closing) {
+    private static void assertBalancedBrackets(String input,
+                                               Character opening,
+                                               Character closing) {
         final int openingCount = count(input, opening); // Count of opening brackets.
         final int closingCount = count(input, closing); // Count of closing brackets.
 

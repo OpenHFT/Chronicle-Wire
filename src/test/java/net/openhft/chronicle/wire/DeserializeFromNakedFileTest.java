@@ -72,16 +72,16 @@ public class DeserializeFromNakedFileTest extends WireTestCommon {
 
     // Plain old Java class used for the deserialization test.
     private static class PlainOldJavaClass {
-        public int heartBtInt;
+        int heartBtInt;
     }
 
     // Self-describing class that extends SelfDescribingMarshallable for the deserialization test.
     private static class SelfDescribingClass extends SelfDescribingMarshallable {
-        public int heartBtInt;
+        int heartBtInt;
     }
 
     // Bytes class that implements BytesMarshallable for the deserialization test.
     private static class BytesClass implements BytesMarshallable {
-        public int heartBtInt;
+        int heartBtInt;
     }
 }

@@ -50,7 +50,7 @@ public class TextWireAgitatorTest extends WireTestCommon {
     }
 
     // An inner static class designed to be marshallable, with a single boolean field named "flag".
-    static class MyFlagged extends SelfDescribingMarshallable {
+    private static class MyFlagged extends SelfDescribingMarshallable {
         boolean flag;
     }
 }

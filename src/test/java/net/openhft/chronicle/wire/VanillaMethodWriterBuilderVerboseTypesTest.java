@@ -62,23 +62,23 @@ public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chro
     }
 
     // Nested class representing a specific object with a string and value
-    public static class MyObject2 extends SelfDescribingMarshallable {
+    static class MyObject2 extends SelfDescribingMarshallable {
 
         private final String str;
         private final int value;
 
-        public MyObject2(String str, int value) {
+        MyObject2(String str, int value) {
             this.str = str;
             this.value = value;
         }
     }
 
     // Nested class representing an object containing a list of `MyObject2`
-    public static class MyObject extends SelfDescribingMarshallable {
+    static class MyObject extends SelfDescribingMarshallable {
 
         private final ArrayList<MyObject2> list = new ArrayList<>();
 
-        public MyObject(String str, int value) {
+        MyObject(String str, int value) {
             list.add(new MyObject2(str, value));
         }
     }

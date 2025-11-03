@@ -433,7 +433,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
         WDENums a, b;  // The two instances of WDENums
 
         // Constructor initializes the holder with two WDENums values
-        public HoldsWDENum(WDENums a, WDENums b) {
+        HoldsWDENum(WDENums a, WDENums b) {
             this.a = a;
             this.b = b;
         }
@@ -445,7 +445,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
         WDENums c;  // The wrapped instance of WDENums
 
         // Constructor initializes the wrapper with a WDENums value
-        public UnwrapsWDENum(WDENums c) {
+        UnwrapsWDENum(WDENums c) {
             this.c = c;
         }
     }
@@ -456,7 +456,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
         WDENum2 d;  // The wrapped instance of WDENum2
 
         // Constructor initializes the wrapper with a WDENum2 value
-        public UnwrapsWDENum2(WDENum2 d) {
+        UnwrapsWDENum2(WDENum2 d) {
             this.d = d;
         }
     }

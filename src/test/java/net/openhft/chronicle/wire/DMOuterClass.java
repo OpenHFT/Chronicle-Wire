@@ -20,17 +20,17 @@ import java.util.Map;
 class DMOuterClass extends SelfDescribingMarshallable {
 
     // String attribute to store textual data in an instance of DMOuterClass.
-    String text;
+    private String text;
 
     // Various primitive data type attributes to demonstrate
     // handling different data types within the class.
-    boolean b;
-    byte bb;
-    short s;
-    float f;
-    double d;
-    long l;
-    int i;
+    private boolean b;
+    private byte bb;
+    private short s;
+    private float f;
+    private double d;
+    private long l;
+    private int i;
 
     // A List to hold instances of the nested class, DMNestedClass,
     // which demonstrates object aggregation within the outer class.

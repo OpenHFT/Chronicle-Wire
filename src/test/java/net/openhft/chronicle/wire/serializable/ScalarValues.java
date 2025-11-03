@@ -23,37 +23,37 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 public class ScalarValues implements Serializable, Validatable {
     private static final long serialVersionUID = 0L;
     // Primitive data type fields
-    public boolean flag;
-    public byte b;
-    public short s;
-    public char ch;
-    public int i;
-    public float f;
-    public long l;
-    public double d;
+    private boolean flag;
+    private byte b;
+    private short s;
+    private char ch;
+    private int i;
+    private float f;
+    private long l;
+    private double d;
 
     // Wrapper class fields for primitive types
-    public Boolean flag2;
-    public Byte b2;
-    public Short s2;
-    public Character ch2;
-    public Integer i2;
-    public Float f2;
-    public Long l2;
-    public Double d2;
+    private Boolean flag2;
+    private Byte b2;
+    private Short s2;
+    private Character ch2;
+    private Integer i2;
+    private Float f2;
+    private Long l2;
+    private Double d2;
 
     // Fields of various Java standard library classes
-    public Class<?> aClass;
-    public RetentionPolicy policy;
-    public String text;
-    public LocalDate date;
-    public LocalTime time;
-    public LocalDateTime dateTime;
-    public ZonedDateTime zonedDateTime;
-    public UUID uuid;
-    public BigInteger bi;
-    public BigDecimal bd;
-    public File file;
+    private Class<?> aClass;
+    private RetentionPolicy policy;
+    private String text;
+    private LocalDate date;
+    private LocalTime time;
+    private LocalDateTime dateTime;
+    private ZonedDateTime zonedDateTime;
+    private UUID uuid;
+    private BigInteger bi;
+    private BigDecimal bd;
+    private File file;
     // Path path; // commented out
 
     // Default constructor

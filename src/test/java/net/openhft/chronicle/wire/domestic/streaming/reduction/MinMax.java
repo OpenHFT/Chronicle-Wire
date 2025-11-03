@@ -8,7 +8,7 @@ package net.openhft.chronicle.wire.domestic.streaming.reduction;
  * This class provides functionality to merge its state with other MinMax objects
  * or update its state based on a given MarketData object.
  */
-public final class MinMax {
+final class MinMax {
 
     // Holds the minimum value, initialized to the maximum possible value of a double.
     private double min = Double.MAX_VALUE;

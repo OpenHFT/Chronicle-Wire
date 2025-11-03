@@ -13,11 +13,11 @@ public class MyTypes extends SelfDescribingMarshallable {
 
     // Fields representing various data types
     public boolean flag;  // Field representing a boolean flag
-    public byte b;        // Field to store a byte value
+    private byte b;        // Field to store a byte value
     public short s;       // Field to store a short value
-    public char ch;       // Field to store a char value
+    private char ch;       // Field to store a char value
     public int i;         // Field to store an integer value
-    public float f;       // Field to store a float value
+    private float f;       // Field to store a float value
     public double d;      // Field to store a double value
     public long l;        // Field to store a long value
 

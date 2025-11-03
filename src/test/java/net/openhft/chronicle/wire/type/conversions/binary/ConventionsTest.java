@@ -124,7 +124,7 @@ public class ConventionsTest extends WireTestCommon {
     }
 
     @Nullable
-    public <T> T test(Object source, @NotNull Class<T> destinationType) {
+    private <T> T test(Object source, @NotNull Class<T> destinationType) {
         // Method to test conversion of objects to different types using Chronicle Wire
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         try {

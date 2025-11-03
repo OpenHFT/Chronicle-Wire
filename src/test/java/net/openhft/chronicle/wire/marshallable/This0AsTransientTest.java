@@ -83,7 +83,7 @@ public class This0AsTransientTest extends WireTestCommon {
     class MyClass1 extends SelfDescribingMarshallable {
         long value;
 
-        public MyClass1(long value) {
+        MyClass1(long value) {
             this.value = value;
         }
     }
@@ -96,7 +96,7 @@ public class This0AsTransientTest extends WireTestCommon {
         String this$0;
         long value;
 
-        public MyClass2(long value) {
+        MyClass2(long value) {
             this.value = value;
         }
     }

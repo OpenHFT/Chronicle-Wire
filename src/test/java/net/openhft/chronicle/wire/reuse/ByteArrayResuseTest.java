@@ -74,7 +74,7 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
      *
      * @param expected The expected hexadecimal string representation of the serialized data.
      */
-    public void doWriteReadBytesArray(String expected) {
+    private void doWriteReadBytesArray(String expected) {
         Data data = new Data();
         data.timestamp = 1234567890L;
         byte[] bytes = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
@@ -97,7 +97,7 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
         assertSame(bytes2, data2.bytes); // Check for byte array reuse
     }
 
-    static boolean SELF_DESCRIBING;
+    private static boolean SELF_DESCRIBING;
 
     /**
      * Data class extends SelfDescribingMarshallable for testing byte array reuse.

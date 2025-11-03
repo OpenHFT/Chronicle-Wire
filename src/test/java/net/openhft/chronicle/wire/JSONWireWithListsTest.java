@@ -43,7 +43,7 @@ public class JSONWireWithListsTest extends net.openhft.chronicle.wire.WireTestCo
         private int car;        // Car number of the driver
 
         // Constructor for initializing F1 driver data
-        public F1(String surname, int car) {
+        F1(String surname, int car) {
             this.surname = surname;
             this.car = car;
         }

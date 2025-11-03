@@ -49,7 +49,7 @@ public class MessageRoutingExample {
     static class Product extends SelfDescribingMarshallable {
         String name;
 
-        public Product(String name) {
+        Product(String name) {
             this.name = name;
         }
 

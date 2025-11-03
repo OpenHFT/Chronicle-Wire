@@ -74,7 +74,7 @@ public class WireBug37Test extends WireTestCommon {
         }
 
         // Appends a character sequence to the builder
-        public void append(CharSequence cs) {
+        void append(CharSequence cs) {
             builder.append(cs);
         }
 

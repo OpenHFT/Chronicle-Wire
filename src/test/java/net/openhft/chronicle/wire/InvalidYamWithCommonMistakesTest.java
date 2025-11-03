@@ -207,7 +207,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
     }
 
     // DTO class containing a string and another DTO
-    public static class Dto extends SelfDescribingMarshallable {
+    static class Dto extends SelfDescribingMarshallable {
         String y;
         DtoB x;
 
@@ -233,7 +233,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
         String y;
 
         // Constructor to initialize DtoB with given value
-        public DtoB(final String y) {
+        DtoB(final String y) {
             this.y = y;
         }
 

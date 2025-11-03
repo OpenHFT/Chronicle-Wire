@@ -20,7 +20,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assume.assumeFalse;
 
 public class NullFieldMarshallingTest extends WireTestCommon {
-    protected Map<ExceptionKey, Integer> exceptions;
+    private Map<ExceptionKey, Integer> exceptions;
 
     @Before
     public void setup() {

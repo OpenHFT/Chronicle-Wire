@@ -12,15 +12,15 @@ import org.jetbrains.annotations.NotNull;
 class AClass extends SelfDescribingMarshallable {
     // Member variables
     int id;
-    boolean flag;
-    byte b;
-    char ch;
-    short s;
-    int i;
-    long l;
-    float f;
-    double d;
-    String text;
+    private boolean flag;
+    private byte b;
+    private char ch;
+    private short s;
+    private int i;
+    private long l;
+    private float f;
+    private double d;
+    private String text;
 
     // Constructor to initialize the AClass with given arguments.
     public AClass(int id, boolean flag, byte b, char ch, short s, int i, long l, float f, double d, String text) {

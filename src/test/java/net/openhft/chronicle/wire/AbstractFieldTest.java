@@ -83,7 +83,7 @@ public class AbstractFieldTest extends WireTestCommon {
     static class MySelfDescribingMarshallable extends SelfDescribingMarshallable {
         String text;
 
-        public MySelfDescribingMarshallable(String s) {
+        MySelfDescribingMarshallable(String s) {
             text = s;
         }
     }

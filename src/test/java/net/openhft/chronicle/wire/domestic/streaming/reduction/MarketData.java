@@ -100,7 +100,7 @@ public final class MarketData extends SelfDescribingMarshallable implements Vali
      *
      * @param symbol Symbol represented as a long.
      */
-    public void symbol(long symbol) {
+    private void symbol(long symbol) {
         this.symbol = symbol;
     }
 
@@ -109,7 +109,7 @@ public final class MarketData extends SelfDescribingMarshallable implements Vali
      *
      * @param symbol Symbol represented as a string.
      */
-    public void symbol(String symbol) {
+    private void symbol(String symbol) {
         this.symbol = Base85LongConverter.INSTANCE.parse(symbol);
     }
 
@@ -145,7 +145,7 @@ public final class MarketData extends SelfDescribingMarshallable implements Vali
      *
      * @param high Highest traded price.
      */
-    public void high(double high) {
+    private void high(double high) {
         this.high = high;
     }
 

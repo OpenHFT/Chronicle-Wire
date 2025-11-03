@@ -72,7 +72,7 @@ public class WithSubstitutionTest extends WireTestCommon {
     /**
      * Data Transfer Object (DTO) representing the wire structure with potential substitutions.
      */
-    static class WSDTO extends SelfDescribingMarshallable {
+    private static class WSDTO extends SelfDescribingMarshallable {
         int num;    // Integer field that can have substitutions
         double d;   // Double field that can have substitutions
         String text; // String field that can have substitutions

@@ -30,8 +30,9 @@ import static org.junit.Assume.assumeTrue;
 @SuppressWarnings({"rawtypes","try"})
 @RunWith(value = Parameterized.class)
 public class BinaryWire2Test extends WireTestCommon {
-    final boolean usePadding;
+    private final boolean usePadding;
     @NotNull
+    private
     Bytes<?> bytes = new HexDumpBytes();
 
     // Constructor to set the padding parameter
@@ -656,7 +657,7 @@ public class BinaryWire2Test extends WireTestCommon {
      *
      * @param comp Compression scheme ("binary", "gzip", or "lzw")
      */
-    public void testCompression(String comp) {
+    private void testCompression(String comp) {
         bytes.clear();
         @NotNull Wire wire = new BinaryWire(bytes, false, false, false, 32, comp);
 
@@ -874,7 +875,7 @@ public class BinaryWire2Test extends WireTestCommon {
     }
 
     // Helper method for reading and writing Unicode
-    public void doTestUnicodeReadAndWrite() {
+    private void doTestUnicodeReadAndWrite() {
         @NotNull Wire wire = createWire();
         try {
             wire.writeDocument(false, w -> w.write("data")

@@ -11,9 +11,9 @@ import java.io.InputStream;
 
 @Deprecated(/* Should be fully covered by YamlSpecificationTest */)
 public class YamlSpecTest extends WireTestCommon {
-    static String DIR = "/yaml/spec/";
+    private static String DIR = "/yaml/spec/";
 
-    public static void doTest(String file, String expected) {
+    private static void doTest(String file, String expected) {
         Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             InputStream is = YamlSpecTest.class.getResourceAsStream

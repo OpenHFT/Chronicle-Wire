@@ -46,7 +46,7 @@ public class JSONTypesWithMapsTest extends net.openhft.chronicle.wire.WireTestCo
         private int car;         // Represents the car number.
 
         // Constructor for the F1 class.
-        public F1(String surname, int car) {
+        F1(String surname, int car) {
             this.surname = surname;
             this.car = car;
         }

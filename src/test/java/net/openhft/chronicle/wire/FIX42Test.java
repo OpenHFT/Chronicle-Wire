@@ -66,16 +66,16 @@ import static org.junit.Assert.assertEquals;
 @RunWith(value = Parameterized.class)
 public class FIX42Test extends WireTestCommon {
     // Test ID for identification
-    final int testId;
+    private final int testId;
 
     // Flag to determine if the test is fixed
-    final boolean fixed;
+    private final boolean fixed;
 
     // Flag to determine if the field is numeric
-    final boolean numericField;
+    private final boolean numericField;
 
     // Flag to determine if the field is absent
-    final boolean fieldLess;
+    private final boolean fieldLess;
 
     // Dump string for storing binary representations
     private final String dump;
@@ -83,6 +83,7 @@ public class FIX42Test extends WireTestCommon {
     // Elastic byte buffer for writing and reading data
     @SuppressWarnings("rawtypes")
     @NotNull
+    private
     Bytes<?> bytes = allocateElasticOnHeap();
 
     // Constructor to initialize the test parameters
@@ -192,7 +193,7 @@ public class FIX42Test extends WireTestCommon {
         double openingPrice, closingPrice;
 
         // Constructor to initialize the market data snapshot with provided values
-        public MarketDataSnapshot(String symbol, double openingPrice, double closingPrice) {
+        MarketDataSnapshot(String symbol, double openingPrice, double closingPrice) {
             this.symbol = symbol;
             this.openingPrice = openingPrice;
             this.closingPrice = closingPrice;

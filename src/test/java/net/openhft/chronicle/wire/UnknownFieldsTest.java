@@ -55,7 +55,7 @@ public class UnknownFieldsTest extends WireTestCommon {
     }
 
     // Inner class that defines behavior when an unexpected field is encountered
-    public static class Inner implements Marshallable {
+    private static class Inner implements Marshallable {
         @Override
         public void unexpectedField(Object event, ValueIn valueIn) {
             // Throw a NumberFormatException when an unexpected field is encountered
@@ -64,12 +64,12 @@ public class UnknownFieldsTest extends WireTestCommon {
     }
 
     // Test variation class with a generic Object field
-    public static class Variation1 implements Marshallable {
+    private static class Variation1 implements Marshallable {
         Object object;
     }
 
     // Test variation class with a custom behavior for unexpected fields
-    public static class Variation2 implements Marshallable {
+    private static class Variation2 implements Marshallable {
         Object object;
 
         @Override

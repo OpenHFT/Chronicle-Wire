@@ -40,7 +40,7 @@ public class WireExamples2 {
      * Represents a text object that internally uses a Base64 encoding.
      * Extends the `SelfDescribingMarshallable` to utilize its serialization features.
      */
-    public static class TextObject extends SelfDescribingMarshallable {
+    static class TextObject extends SelfDescribingMarshallable {
         // Temporary buffer for conversion purposes
         transient StringBuilder temp = new StringBuilder();
 
@@ -53,7 +53,7 @@ public class WireExamples2 {
          *
          * @param text Text to initialize the object with.
          */
-        public TextObject(CharSequence text) {
+        TextObject(CharSequence text) {
             this.text = Base64LongConverter.INSTANCE.parse(text);
         }
 

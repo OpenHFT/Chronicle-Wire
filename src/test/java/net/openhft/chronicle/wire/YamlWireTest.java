@@ -51,8 +51,8 @@ import static org.junit.Assume.assumeFalse;
 @SuppressWarnings({"rawtypes", "unchecked", "try", "serial"})
 @RunWith(value = Parameterized.class)
 public class YamlWireTest extends WireTestCommon {
-    static Wire wire = Wire.newYamlWireOnHeap(); // Initialize a static YAML wire
-    final boolean usePadding; // Flag to indicate if padding should be used
+    private static Wire wire = Wire.newYamlWireOnHeap(); // Initialize a static YAML wire
+    private final boolean usePadding; // Flag to indicate if padding should be used
 
     // Constructor for initializing the usePadding flag
     public YamlWireTest(boolean usePadding) {
@@ -630,7 +630,7 @@ public class YamlWireTest extends WireTestCommon {
         // Custom object to hold floating-point value for verification
         class Floater {
             double f;
-            public void set(double d) { f = d; }
+            void set(double d) { f = d; }
         }
         @NotNull Floater n = new Floater();
         IntStream.rangeClosed(1, 3).forEach(e -> {
@@ -2048,13 +2048,13 @@ public class YamlWireTest extends WireTestCommon {
         void put(Bytes<?> key, Data data);
     }
 
-    static class FieldWithComment extends SelfDescribingMarshallable {
+    private static class FieldWithComment extends SelfDescribingMarshallable {
         @Comment("a comment where the value=%s")
         String field;
         // String field2;
     }
 
-    static class FieldWithComment2 extends SelfDescribingMarshallable {
+    private static class FieldWithComment2 extends SelfDescribingMarshallable {
         @Comment("a comment where the value=%s")
         String field;
         String field2;
@@ -2081,7 +2081,7 @@ public class YamlWireTest extends WireTestCommon {
         @NotNull
         Bytes<?> bytes = allocateElasticDirect();
 
-        public void bytes(@NotNull CharSequence cs) {
+        void bytes(@NotNull CharSequence cs) {
             bytes.clear();
             bytes.append(cs);
         }
@@ -2098,6 +2098,6 @@ public class YamlWireTest extends WireTestCommon {
         byte[] data;
     }
 
-    class Circle implements Marshallable {
+    private class Circle implements Marshallable {
     }
 }

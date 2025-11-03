@@ -31,7 +31,7 @@ import static org.junit.Assume.assumeFalse;
 public class JSONWireTest extends WireTestCommon {
 
     // Utility function to test copying from a JSONWire to a binary wire and back to a JSONWire.
-    static void testCopyToBinaryAndBack(CharSequence str) {
+    private static void testCopyToBinaryAndBack(CharSequence str) {
         // Initialize a JSONWire from the input string
         JSONWire json = new JSONWire(Bytes.from(str));
         HexDumpBytes hexDump = new HexDumpBytes();
@@ -63,7 +63,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     // Utility function to test copying from a JSONWire to a binary wire and back to a JSONWire.
-    static void testCopyToYAMLAndBack(CharSequence str) {
+    private static void testCopyToYAMLAndBack(CharSequence str) {
         // Initialize a JSONWire from the input string
         JSONWire json = new JSONWire(Bytes.from(str));
 

@@ -30,6 +30,7 @@ public class RawWireTest extends WireTestCommon {
     // Suppressing raw type warnings for the Bytes<?> object.
     @SuppressWarnings("rawtypes")
     @NotNull
+    private
     // Bytes object used to simulate wire data storage.
     Bytes<?> bytes = nativeBytes();
 
@@ -343,7 +344,7 @@ public class RawWireTest extends WireTestCommon {
         class Floater {
             double f;
 
-            public void set(double d) {
+            void set(double d) {
                 f = d;
             }
         }

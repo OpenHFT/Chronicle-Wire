@@ -22,11 +22,12 @@ import static org.junit.Assert.assertTrue;
 public class BinaryWirePerfTest extends WireTestCommon {
 
     // Define test parameters
-    final int testId;
-    final boolean fixed;
-    final boolean numericField;
-    final boolean fieldLess;
+    private final int testId;
+    private final boolean fixed;
+    private final boolean numericField;
+    private final boolean fieldLess;
     @NotNull
+    private
     Bytes<?> bytes = allocateElasticOnHeap();
 
     // Constructor for parameterized test

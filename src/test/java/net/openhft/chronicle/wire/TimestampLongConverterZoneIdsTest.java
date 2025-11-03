@@ -49,7 +49,7 @@ public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
     }
 
     // This static method tests a given zoneId with the specified converter type.
-    static void testManyZones(String zoneId, ConverterType converterType) {
+    private static void testManyZones(String zoneId, ConverterType converterType) {
         assumeFalse(zoneId.equals("GMT0"));
         AbstractTimestampLongConverter mtlc = converterType.createConverter(zoneId);
         final String str = mtlc.asString(converterType.sampleTimeInUTC);

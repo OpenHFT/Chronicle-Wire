@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
  * This class provides default initialization for its member fields.
  */
 @SuppressWarnings("rawtypes")
-public class WithDefaults extends SelfDescribingMarshallable {
+class WithDefaults extends SelfDescribingMarshallable {
 
     // Stores bytes data initialized with the string "Hello"
     public Bytes<?> bytes = Bytes.from("Hello");

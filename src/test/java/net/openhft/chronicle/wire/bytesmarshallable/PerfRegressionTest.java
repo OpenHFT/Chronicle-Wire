@@ -20,7 +20,7 @@ import static org.junit.Assert.fail;
 
 public class PerfRegressionTest extends WireTestCommon {
 
-    final String cpuClass = Jvm.getCpuClass();  // Likely obtaining some CPU class information from a utility class 'Jvm'.
+    private final String cpuClass = Jvm.getCpuClass();  // Likely obtaining some CPU class information from a utility class 'Jvm'.
 
     @Ignore("Long running")
     @Test

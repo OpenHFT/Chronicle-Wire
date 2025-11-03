@@ -37,7 +37,7 @@ public class ClassAliasPoolTest extends WireTestCommon {
     }
 
     // Helper method to match char sequences in a mock setup
-    public static CharSequence charSequence(String text) {
+    private static CharSequence charSequence(String text) {
         EasyMock.reportMatcher(new IArgumentMatcher() {
             @Override
             public boolean matches(Object argument) {
@@ -136,7 +136,7 @@ public class ClassAliasPoolTest extends WireTestCommon {
     }
 
     // Test data class representing a type of event with a single value
-    public static class CAPTData extends SelfDescribingMarshallable {
+    static class CAPTData extends SelfDescribingMarshallable {
         long value;
     }
 }

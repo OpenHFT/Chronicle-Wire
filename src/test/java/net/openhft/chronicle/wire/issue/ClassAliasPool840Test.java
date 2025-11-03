@@ -77,12 +77,12 @@ public class ClassAliasPool840Test {
             return value;
         }
 
-        public Dto value(long value) {
+        Dto value(long value) {
             this.value = value;
             return this;
         }
     }
 
-    public static class Type extends SelfDescribingMarshallable {
+    private static class Type extends SelfDescribingMarshallable {
     }
 }

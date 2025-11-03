@@ -50,20 +50,20 @@ public class JSONWireTypesTest extends WireTestCommon {
             return field;
         }
 
-        public Dto field(String field) {
+        Dto field(String field) {
             this.field = field;
             return this;
         }
     }
 
     public static class DtoWithNestedSets extends SelfDescribingMarshallable {
-        public Set<Set<Dto>> setOfSets;
+        Set<Set<Dto>> setOfSets;
 
         public Set<Set<Dto>> setOfSets() {
             return setOfSets;
         }
 
-        public DtoWithNestedSets setOfSets(Set<Set<Dto>> setOfSets) {
+        DtoWithNestedSets setOfSets(Set<Set<Dto>> setOfSets) {
             this.setOfSets = setOfSets;
             return this;
         }

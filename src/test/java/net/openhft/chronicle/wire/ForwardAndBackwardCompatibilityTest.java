@@ -146,12 +146,12 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
 
         // Constructor used via reflection for deserialization
         @UsedViaReflection
-        public DTO1(@NotNull WireIn wire) {
+        DTO1(@NotNull WireIn wire) {
             readMarshallable(wire);
         }
 
         // Regular constructor to initialize 'one' field
-        public DTO1(int i) {
+        DTO1(int i) {
             this.one = i;
         }
 
@@ -181,12 +181,12 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
 
         // Constructor used via reflection for deserialization
         @UsedViaReflection
-        public DTO2(@NotNull WireIn wire) {
+        DTO2(@NotNull WireIn wire) {
             readMarshallable(wire);
         }
 
         // Regular constructor to initialize fields 'one', 'two', and 'three'
-        public DTO2(int one, int two, Object three) {
+        DTO2(int one, int two, Object three) {
             this.one = one;
             this.two = two;
             this.three = three;

@@ -7,15 +7,15 @@ import org.jetbrains.annotations.NotNull;
 
 // Defining a class named TestMarshallable, which extends SelfDescribingMarshallable
 // to utilize its self-describing marshallable capabilities
-public class TestMarshallable extends SelfDescribingMarshallable {
+class TestMarshallable extends SelfDescribingMarshallable {
 
     // Defining a non-null StringBuilder field named 'name' to store a name value,
     // initializing it to an empty StringBuilder instance
     @NotNull
-    public StringBuilder name = new StringBuilder();
+    private StringBuilder name = new StringBuilder();
 
     // Defining an integer field named 'count' to store a count value
-    public int count;
+    private int count;
 
     // Overriding the readMarshallable method from the parent class to customize
     // how the instance should read its state from a WireIn instance

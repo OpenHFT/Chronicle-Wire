@@ -21,7 +21,7 @@ import static org.junit.Assume.assumeFalse;
 public class DoubleTest extends WireTestCommon {
 
     // DTO representing two double values.
-    static class TwoDoubleDto extends SelfDescribingMarshallable {
+    private static class TwoDoubleDto extends SelfDescribingMarshallable {
         double price;
         double qty;
     }

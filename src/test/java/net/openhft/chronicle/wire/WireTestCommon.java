@@ -27,10 +27,10 @@ import static org.junit.Assert.assertEquals;
 public class WireTestCommon {
 
     // A thread dump to monitor thread states and detect unwanted thread creation
-    protected ThreadDump threadDump;
+    private ThreadDump threadDump;
 
     // Collection to record exceptions
-    protected Map<ExceptionKey, Integer> exceptions;
+    private Map<ExceptionKey, Integer> exceptions;
 
     // Collection of exceptions that should be ignored during tests
     private final Map<Predicate<ExceptionKey>, String> ignoredExceptions = new LinkedHashMap<>();
@@ -41,7 +41,7 @@ public class WireTestCommon {
     private boolean gt;
 
     // Default constructor initializes ignored exceptions
-    public WireTestCommon() {
+    protected WireTestCommon() {
         // Ignore exceptions with incubating feature warnings
         ignoreException("The incubating features are subject to change");
         ignoreException("NamedThreadFactory created here");
@@ -55,18 +55,18 @@ public class WireTestCommon {
     }
 
     // Verifies if all references were released after the tests
-    public void assertReferencesReleased() {
+    void assertReferencesReleased() {
         AbstractReferenceCounted.assertReferencesReleased();
     }
 
     // Intended to be used with @Before for tests that might create threads
     // Captures a snapshot of all threads before test execution
-    public void threadDump() {
+    void threadDump() {
         threadDump = new ThreadDump();
     }
 
     // Checks if any new threads have been created after test execution
-    public void checkThreadDump() {
+    private void checkThreadDump() {
         if (threadDump != null)
             threadDump.assertNoNewThreads();
     }
@@ -78,32 +78,32 @@ public class WireTestCommon {
     }
 
     // Adds an exception with a particular message to the ignore list
-    public void ignoreException(String message) {
+    protected void ignoreException(String message) {
         ignoreException(k -> contains(k.message, message) || (k.throwable != null && contains(k.throwable.getMessage(), message)), message);
     }
 
     // Utility method to check if a text contains a particular message
-    static boolean contains(String text, String message) {
+    private static boolean contains(String text, String message) {
         return text != null && text.contains(message);
     }
 
     // Ignores a specific exception based on a given predicate and description
-    public void ignoreException(Predicate<ExceptionKey> predicate, String description) {
+    protected void ignoreException(Predicate<ExceptionKey> predicate, String description) {
         ignoredExceptions.put(predicate, description);
     }
 
     // Expects an exception with a particular message during the tests
-    public void expectException(String message) {
+    protected void expectException(String message) {
         expectException(k -> contains(k.message, message) || (k.throwable != null && contains(k.throwable.getMessage(), message)), message);
     }
 
     // Expect an exception based on a given predicate and description during the tests
-    public void expectException(Predicate<ExceptionKey> predicate, String description) {
+    private void expectException(Predicate<ExceptionKey> predicate, String description) {
         expectedExceptions.put(predicate, description);
     }
 
     // Checks if the exceptions thrown during tests match the expected and ignored exceptions
-    public void checkExceptions() {
+    protected void checkExceptions() {
         // Validate expected exceptions were thrown
         for (Map.Entry<Predicate<ExceptionKey>, String> expectedException : expectedExceptions.entrySet()) {
             if (!exceptions.keySet().removeIf(expectedException.getKey()))
@@ -141,7 +141,7 @@ public class WireTestCommon {
     /**
      * Parses and round-trips each of provided strings delimited and trailed by comma with a specified converter.
      */
-    protected static void subStringParseLoop(String s, LongConverter c, int comparisons) {
+    static void subStringParseLoop(String s, LongConverter c, int comparisons) {
         int oldPos = 0;
         int newPos;
         while ((newPos = s.indexOf(',', oldPos)) >= 0) {
@@ -171,7 +171,7 @@ public class WireTestCommon {
     }
 
     // Placeholder for subclasses to include additional operations before afterChecks
-    protected void preAfter() {
+    void preAfter() {
     }
 
     // Store the current value of GENERATE_TUPLES before test execution

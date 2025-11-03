@@ -112,7 +112,7 @@ public class YamlSpecificationTest extends WireTestCommon {
 
     // Helper method to get bytes from a given file
     @Nullable
-    public byte[] getBytes(String file) throws IOException {
+    private byte[] getBytes(String file) throws IOException {
         InputStream is = getClass().getResourceAsStream("/yaml/spec/" + file);
         if (is == null) return null;
         int len = is.available();

@@ -15,10 +15,10 @@ import org.jetbrains.annotations.NotNull;
 class Rung extends SelfDescribingMarshallable {
 
     // Represents the price of the rung
-    double price;
+    private double price;
 
     // Represents the quantity associated with this rung
-    double qty;
+    private double qty;
 
     // Indicates if this rung is a delta (difference) from the previous rung
     boolean delta;

@@ -48,13 +48,13 @@ public class MonetaTest extends net.openhft.chronicle.wire.WireTestCommon {
     }
 
     // Inner class representing a non-scalar comparable object
-    public static class NonScalarComparable implements Serializable, Comparable<NonScalarComparable> {
+    static class NonScalarComparable implements Serializable, Comparable<NonScalarComparable> {
         private static final long serialVersionUID = 0L;
         // Currency instance
-        public final Currency currency;
+        final Currency currency;
 
         // Constructor accepting a Currency instance
-        public NonScalarComparable(Currency currency) {
+        NonScalarComparable(Currency currency) {
             this.currency = currency;
         }
 

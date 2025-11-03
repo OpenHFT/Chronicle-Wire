@@ -5,7 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 
-public class SelfDescribingDemarshallableObject extends SelfDescribingMarshallable implements Demarshallable {
+class SelfDescribingDemarshallableObject extends SelfDescribingMarshallable implements Demarshallable {
 
     String name = null;
     double value = Double.NaN;

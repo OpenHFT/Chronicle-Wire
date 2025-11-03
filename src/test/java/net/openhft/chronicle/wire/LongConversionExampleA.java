@@ -13,12 +13,12 @@ public class LongConversionExampleA {
     }
 
     // Static inner class representing a House with an owner represented in Base64 format
-    public static class House {
+    static class House {
         @Base64
         long owner;
 
         // Method to set the owner's name which is then converted into its Base64 representation
-        public void owner(CharSequence owner) {
+        void owner(CharSequence owner) {
             this.owner = Base64LongConverter.INSTANCE.parse(owner);
         }
 

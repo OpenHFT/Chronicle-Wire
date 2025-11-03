@@ -30,7 +30,7 @@ public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTes
 
     // A specialized YamlWire that has synchronization capabilities
     static class SyncableYamlWire extends YamlWire implements Syncable {
-        public SyncableYamlWire(@NotNull Bytes<?> bytes) {
+        SyncableYamlWire(@NotNull Bytes<?> bytes) {
             super(bytes);
             useTextDocuments();
         }

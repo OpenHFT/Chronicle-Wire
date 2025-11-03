@@ -14,6 +14,7 @@ class MyMarshallable extends SelfDescribingMarshallable {
 
     // The data member to be marshalled and unmarshalled
     @Nullable
+    private
     String someData;
 
     /**

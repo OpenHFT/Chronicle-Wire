@@ -224,7 +224,7 @@ public class MethodWriterTest extends WireTestCommon {
         doTestPrimitives(false);
     }
 
-    protected void doTestPrimitives(boolean byteShort) {
+    void doTestPrimitives(boolean byteShort) {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
 
         Args writer = wire.methodWriter(Args.class);
@@ -291,7 +291,7 @@ public class MethodWriterTest extends WireTestCommon {
         checkWriterType(instance);
     }
 
-    protected void checkWriterType(Object writer) {
+    void checkWriterType(Object writer) {
         assertFalse(Proxy.isProxyClass(writer.getClass()));
     }
 
