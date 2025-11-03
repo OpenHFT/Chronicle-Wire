@@ -292,9 +292,20 @@ public class WiresTest extends WireTestCommon {
     public void copyToIncompleteValidation() {
         OneTwoFour o124 = new OneTwoFour(11, 222, 44444);
         TwoFourThreeValidatable o243 = new TwoFourThreeValidatable(2, 4, 3);
-        // o243's validate method used to be called and would blow up as o243 was incomplete.
+        assertEquals("" +
+                "!net.openhft.chronicle.wire.WiresTest$TwoFourThreeValidatable {\n" +
+                "  two: 2,\n" +
+                "  four: 4,\n" +
+                "  three: 3\n" +
+                "}\n", o243.toString());
         // Using copyTo to partially hydrate an object is perfectly valid
         Wires.copyTo(o124, o243);
+        assertEquals("" +
+                "!net.openhft.chronicle.wire.WiresTest$TwoFourThreeValidatable {\n" +
+                "  two: 222,\n" +
+                "  four: 44444,\n" +
+                "  three: 0\n" +
+                "}\n", o243.toString());
     }
 
     @Test

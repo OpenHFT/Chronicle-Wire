@@ -26,7 +26,7 @@ import static org.junit.Assume.assumeFalse;
 public class BinaryWireWithMappedBytesTest extends WireTestCommon {
 
     // Defines if the MappedFile should retain its contents
-    static final boolean RETAIN = Jvm.getBoolean("mappedFile.retain");
+    private static final boolean RETAIN = Jvm.getBoolean("mappedFile.retain");
 
     /**
      * Test to verify the reference management at the start of a binary wire

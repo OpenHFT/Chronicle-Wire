@@ -17,7 +17,7 @@ public class WireExamples1 {
         example2();
     }
 
-    public static void example1() {
+    private static void example1() {
 
         // allows the YAML to refer to car, rather than net.openhft.chronicle.wire.WireExamples$Car
         ClassAliasPool.CLASS_ALIASES.addAlias(Car.class);
@@ -27,7 +27,7 @@ public class WireExamples1 {
         System.out.println(wire);
     }
 
-    public static void example2() {
+    private static void example2() {
 
         ClassAliasPool.CLASS_ALIASES.addAlias(Car.class);
 
@@ -36,11 +36,11 @@ public class WireExamples1 {
         System.out.println(wire.bytes().toHexString());
     }
 
-    public static class Car implements Marshallable {
+    static class Car implements Marshallable {
         private int number;
         private String driver;
 
-        public Car(String driver, int number) {
+        Car(String driver, int number) {
             this.driver = driver;
             this.number = number;
         }

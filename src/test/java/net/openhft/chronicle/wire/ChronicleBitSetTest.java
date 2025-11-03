@@ -132,17 +132,17 @@ public class ChronicleBitSetTest extends WireTestCommon {
     }
 
     // Check if the given condition is true
-    public void check(boolean condition) {
+    private void check(boolean condition) {
         Assert.assertTrue(condition);
     }
 
     // Check if the given condition is true with a diagnostic message
-    public void check(boolean condition, String diagnostic) {
+    private void check(boolean condition, String diagnostic) {
         Assert.assertTrue(diagnostic, condition);
     }
 
     // Check if the ChronicleBitSet is empty
-    public void checkEmpty(ChronicleBitSet s) {
+    private void checkEmpty(ChronicleBitSet s) {
         check(s.isEmpty(), "isEmpty");
         check(s.length() == 0, "length");
         check(s.cardinality() == 0, "cardinality");
@@ -164,7 +164,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     }
 
     // Creates a ChronicleBitSet and sets bits based on given elements
-    public ChronicleBitSet makeSet(int... elts) {
+    private ChronicleBitSet makeSet(int... elts) {
         ChronicleBitSet s = createBitSet(IntStream.of(elts).max().getAsInt() + 1L);
         for (int elt : elts)
             s.set(elt);
@@ -172,7 +172,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     }
 
     // Check equality properties of two ChronicleBitSets
-    public void checkEquality(ChronicleBitSet s, ChronicleBitSet t) {
+    private void checkEquality(ChronicleBitSet s, ChronicleBitSet t) {
         checkSanity(s, t);
         check(s.equals(t), "equals");
         check(s.toString().equals(t.toString()), "equal strings");
@@ -181,7 +181,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     }
 
     // Check the validity of ChronicleBitSet(s)
-    public void checkSanity(ChronicleBitSet... sets) {
+    private void checkSanity(ChronicleBitSet... sets) {
         for (ChronicleBitSet s : sets) {
             int len = s.length();
             int cardinality1 = s.cardinality();
@@ -200,33 +200,6 @@ public class ChronicleBitSetTest extends WireTestCommon {
             check(len >= 0, "length >= 0");
             check(cardinality1 >= 0, "cardinality >= 0");
         }
-    }
-
-    // Performance test for the flip operation
-    @Test
-    @Ignore("Performance test")
-    public void testFlipTime() {
-        // Make a fairly random ChronicleBitSet
-        ChronicleBitSet b1 = createBitSet();
-        b1.set(1000);
-
-        // Performance test for multi-word flip
-        long startTime = System.currentTimeMillis();
-        for (int x = 0; x < 100000; x++) {
-            b1.flip(100, 900);
-        }
-        long endTime = System.currentTimeMillis();
-        long total = endTime - startTime;
-        System.out.println("Multiple word flip Time " + total);
-
-        // Performance test for single-word flip
-        startTime = System.currentTimeMillis();
-        for (int x = 0; x < 100000; x++) {
-            b1.flip(2, 44);
-        }
-        endTime = System.currentTimeMillis();
-        total = endTime - startTime;
-        System.out.println("Single word flip Time " + total);
     }
 
     @Test
@@ -437,7 +410,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
                 boolean bit1 = b1.get(x);
                 boolean bit2 = b2.get(x);
                 boolean bit3 = b3.get(x);
-                if (!(bit3 == (bit1 & (!bit2))))
+                if (!(bit3 == (bit1 && (!bit2))))
                     failCount++;
             }
             checkSanity(b1, b2, b3);
@@ -474,7 +447,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
                 boolean bit1 = b1.get(x);
                 boolean bit2 = b2.get(x);
                 boolean bit3 = b3.get(x);
-                if (!(bit3 == (bit1 & bit2))) {
+                if (!(bit3 == (bit1 && bit2))) {
                     System.out.println("x: " + x);
                     failCount++;
                 }
@@ -547,7 +520,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
                 boolean bit1 = b1.get(y);
                 boolean bit2 = b2.get(y);
                 boolean bit3 = b3.get(y);
-                if (!(bit3 == (bit1 | bit2)))
+                if (!(bit3 == (bit1 || bit2)))
                     failCount++;
             }
             checkSanity(b1, b2, b3);
@@ -1213,7 +1186,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
      * Create a new ChronicleBitSet with default size of 1024.
      * @return the new ChronicleBitSet.
      */
-    public ChronicleBitSet createBitSet() {
+    private ChronicleBitSet createBitSet() {
         final ChronicleBitSet bitSet = createBitSet(1024);
         closeables.add(bitSet);
         return bitSet;

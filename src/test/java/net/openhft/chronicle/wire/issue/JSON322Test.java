@@ -23,36 +23,36 @@ import static org.junit.Assume.assumeFalse;
  */
 public class JSON322Test extends WireTestCommon {
 
-    public static class One extends SelfDescribingMarshallable {
+    static class One extends SelfDescribingMarshallable {
         String text;
 
-        public One(String text) {
+        One(String text) {
             this.text = text;
         }
     }
 
-    public static class Two extends SelfDescribingMarshallable {
+    static class Two extends SelfDescribingMarshallable {
         String text;
 
-        public Two(String text) {
+        Two(String text) {
             this.text = text;
         }
     }
 
-    public static class Four extends Two {
+    static class Four extends Two {
         String text;
 
-        public Four(String text) {
+        Four(String text) {
             super(text);
             this.text = text;
         }
     }
 
-    public static class Three extends SelfDescribingMarshallable {
+    static class Three extends SelfDescribingMarshallable {
         private One one;
         private Two two;
 
-        public Three() {
+        Three() {
         }
     }
 
@@ -141,15 +141,15 @@ public class JSON322Test extends WireTestCommon {
     }
 
     static class Combined322 extends SelfDescribingMarshallable {
-        public TypeOne322 t1;
-        public TypeTwo322 t2;
-        public List<SelfDescribingMarshallable> list;
+        TypeOne322 t1;
+        TypeTwo322 t2;
+        List<SelfDescribingMarshallable> list;
     }
 
     static class TypeOne322 extends SelfDescribingMarshallable {
         String text;
 
-        public TypeOne322(String one) {
+        TypeOne322(String one) {
             text = one;
         }
     }
@@ -158,7 +158,7 @@ public class JSON322Test extends WireTestCommon {
         int id;
         long value;
 
-        public TypeTwo322(int id, long value) {
+        TypeTwo322(int id, long value) {
             this.id = id;
             this.value = value;
         }

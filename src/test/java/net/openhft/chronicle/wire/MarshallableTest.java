@@ -232,34 +232,34 @@ public class MarshallableTest extends WireTestCommon {
     }
 
     // DTO containing an array of DTO1 objects
-    public static class WithArray extends SelfDescribingMarshallable {
-        public DTO1[] dto1s;
+    static class WithArray extends SelfDescribingMarshallable {
+        DTO1[] dto1s;
     }
 
     // Sample DTO with fields of different types
-    public static class DTO1 extends SelfDescribingMarshallable {
+    static class DTO1 extends SelfDescribingMarshallable {
         public String one;
         public List<Integer> two;
         public LocalDate three;
     }
 
     // Another sample DTO, similar to DTO1 but with some differences
-    public static class DTO2 extends SelfDescribingMarshallable {
-        public RetentionPolicy one;
-        public List<Long> two;
-        public String three;
+    static class DTO2 extends SelfDescribingMarshallable {
+        RetentionPolicy one;
+        List<Long> two;
+        String three;
     }
 
     // A data class with static properties and default values
-    public static class StaticData extends AbstractMarshallableCfg {
-        public int anInt = 100;
+    static class StaticData extends AbstractMarshallableCfg {
+        int anInt = 100;
         public long aLong = ~100L;
-        public List<String> aList = new ArrayList<>();
+        List<String> aList = new ArrayList<>();
     }
 
     // A data class similar to StaticData, but non-static and without default values for some fields
-    public class NonStaticData extends AbstractMarshallableCfg {
-        public int anInt;
-        public List<String> aList = new ArrayList<>();
+    class NonStaticData extends AbstractMarshallableCfg {
+        int anInt;
+        List<String> aList = new ArrayList<>();
     }
 }

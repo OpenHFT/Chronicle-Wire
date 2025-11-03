@@ -242,7 +242,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
         private final boolean addInfoOnTwoArgs; // Flag to determine if info should be added when twoArgs method is called
 
         // Constructor initializes the StringBuilder for info and flag for twoArgs method
-        public InterceptedInterfaceImpl(StringBuilder info, boolean addInfoOnTwoArgs) {
+        InterceptedInterfaceImpl(StringBuilder info, boolean addInfoOnTwoArgs) {
             this.info = info;
             this.addInfoOnTwoArgs = addInfoOnTwoArgs;
         }
@@ -284,7 +284,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
         private final StringBuilder info; // Storage for aggregated information
 
         // Constructor initializes the StringBuilder for info
-        public InterceptedChainedImpl(StringBuilder info) {
+        InterceptedChainedImpl(StringBuilder info) {
             this.info = info;
         }
 

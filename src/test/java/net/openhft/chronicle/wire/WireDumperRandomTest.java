@@ -15,7 +15,7 @@ import static org.junit.Assume.assumeFalse;
 
 public class WireDumperRandomTest {
 
-    public static final int LEN = 64;
+    private static final int LEN = 64;
 
     @Test
     public void dumpBinary() {

@@ -14,12 +14,12 @@ import org.jetbrains.annotations.NotNull;
  * It demonstrates custom read and write logic for marshalling, handling nested objects and different data types.
  */
 public class NestedClass implements Marshallable {
-    String text;
-    String text2;
-    double number;
-    double number2;
-    double number4; // out of order
-    NestedClass doublyNested;
+    private String text;
+    private String text2;
+    private double number;
+    private double number2;
+    private double number4; // out of order
+    private NestedClass doublyNested;
 
     /**
      * Custom read logic for marshalling from Wire. It specifies how each field of the class

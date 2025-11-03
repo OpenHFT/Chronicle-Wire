@@ -58,7 +58,7 @@ public class CSVWireTest extends WireTestCommon {
     }
 
     // Helper method to validate wire contents.
-    public void doTestWire(@NotNull Wire wire) {
+    private void doTestWire(@NotNull Wire wire) {
         // Read and validate wire contents one row at a time.
         @NotNull StringBuilder row = new StringBuilder();
         assertTrue(wire.hasMore());

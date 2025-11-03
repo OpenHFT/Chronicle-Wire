@@ -66,7 +66,7 @@ public class JSONNanTest extends WireTestCommon {
     }
 
     // Class Dto extending SelfDescribingMarshallable with a single double field
-    public static class Dto extends SelfDescribingMarshallable {
+    static class Dto extends SelfDescribingMarshallable {
         double value;
         double value1;
         long value2;

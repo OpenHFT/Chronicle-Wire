@@ -14,7 +14,7 @@ import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 // relates to https://github.com/OpenHFT/Chronicle-Wire/issues/467
 public class TestJsonIssue467 {
 
-    public static class ResponseItem467 extends SelfDescribingMarshallable {
+    static class ResponseItem467 extends SelfDescribingMarshallable {
         @NotNull
         public String index;
         public final Bytes<?> key = Bytes.allocateElasticOnHeap();

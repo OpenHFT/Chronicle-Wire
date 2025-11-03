@@ -51,8 +51,8 @@ import static org.junit.Assume.assumeFalse;
 public class TextWireTest extends WireTestCommon {
 
     // Create a new TextWire instance with an elastic heap allocated buffer
-    static Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
-    Bytes<?> bytes;
+    private static Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
+    private Bytes<?> bytes;
 
     @Before
     public void hasDirect() {
@@ -214,7 +214,7 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // Utility method to convert a map to a string representation in properties format.
-    public String asProperties(Map<String, Object> map) {
+    private String asProperties(Map<String, Object> map) {
         return map.entrySet().stream().map(Object::toString).collect(Collectors.joining("\n"));
     }
 
@@ -836,7 +836,7 @@ public class TextWireTest extends WireTestCommon {
         class Floater {
             double f;
 
-            public void set(double d) {
+            void set(double d) {
                 f = d;
             }
         }
@@ -2588,7 +2588,7 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // Class representing a field having an Enum type and a byte array
-    public static final class FieldWithEnum extends SelfDescribingMarshallable {
+    static final class FieldWithEnum extends SelfDescribingMarshallable {
         private byte[] allowedFoos;
         private final OrderLevel orderLevel = OrderLevel.PARENT;
     }
@@ -2656,7 +2656,7 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // Nested class having another nested class field and a long field
-    static class NestedA extends SelfDescribingMarshallable {
+    private static class NestedA extends SelfDescribingMarshallable {
         NestedB b;
         long value;
     }
@@ -2676,7 +2676,7 @@ public class TextWireTest extends WireTestCommon {
         @NotNull
         Bytes<?> bytes = allocateElasticDirect();
 
-        public void bytes(@NotNull CharSequence cs) {
+        void bytes(@NotNull CharSequence cs) {
             bytes.clear();
             bytes.append(cs);
         }
@@ -2687,7 +2687,7 @@ public class TextWireTest extends WireTestCommon {
         double d;
         double n;
 
-        public DoubleWrapper(double d) {
+        DoubleWrapper(double d) {
             this.d = d;
             this.n = -d;
         }
@@ -2714,7 +2714,7 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // Nested item class to be utilized within NestedList, holding integral and floating-point data.
-    static class NestedItem extends SelfDescribingMarshallable {
+    private static class NestedItem extends SelfDescribingMarshallable {
         int a;
         double b;
     }
@@ -2801,7 +2801,7 @@ public class TextWireTest extends WireTestCommon {
         long hexa2;
 
         // Constructor initializing both long fields.
-        public TwoLongs(long hexadecimal, long hexa2) {
+        TwoLongs(long hexadecimal, long hexa2) {
             this.hexadecimal = hexadecimal;
             this.hexa2 = hexa2;
         }
@@ -2813,13 +2813,13 @@ public class TextWireTest extends WireTestCommon {
         Duration duration;
 
         // Constructor initializing both fields.
-        public DurationHolder(int foo, Duration duration) {
+        DurationHolder(int foo, Duration duration) {
             this.foo = foo;
             this.duration = duration;
         }
     }
 
     // Basic class capable of being serialized/deserialized without field definition.
-    class Circle implements Marshallable {
+    private class Circle implements Marshallable {
     }
 }

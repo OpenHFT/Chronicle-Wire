@@ -14,7 +14,7 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
  * Represents a marshallable object containing two arrays: one of integers and one of longs.
  * Implements the Closeable interface to provide resource management capabilities.
  */
-public class TwoArrays extends SelfDescribingMarshallable implements Closeable {
+class TwoArrays extends SelfDescribingMarshallable implements Closeable {
 
     // Represents an array of integer values
     public IntArrayValues ia;
@@ -23,7 +23,7 @@ public class TwoArrays extends SelfDescribingMarshallable implements Closeable {
     public LongArrayValues la;
 
     // Transient flag indicating whether the TwoArrays instance is closed or not
-    transient boolean closed;
+    private transient boolean closed;
 
     /**
      * Constructs a new TwoArrays instance with specified sizes for the integer and long arrays.

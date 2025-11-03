@@ -21,41 +21,41 @@ import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
 public class PerfRegressionHolder {
     // A set of test strings split into an array
-    String[] s = "1,12,12345,123456789,123456789012,12345678901234567890123".split(",");
+    private String[] s = "1,12,12345,123456789,123456789012,12345678901234567890123".split(",");
     // Various field initializations using different constructors or default constructors
     // for different types of BytesFields and StringFields
-    BytesFields bf1 = new BytesFields(s);
-    BytesFields bf2 = new BytesFields();
+    private BytesFields bf1 = new BytesFields(s);
+    private BytesFields bf2 = new BytesFields();
 
-    DefaultBytesFields df1 = new DefaultBytesFields(s);
-    DefaultBytesFields df2 = new DefaultBytesFields();
+    private DefaultBytesFields df1 = new DefaultBytesFields(s);
+    private DefaultBytesFields df2 = new DefaultBytesFields();
 
-    ReferenceBytesFields rf1 = new ReferenceBytesFields(s);
-    ReferenceBytesFields rf2 = new ReferenceBytesFields();
+    private ReferenceBytesFields rf1 = new ReferenceBytesFields(s);
+    private ReferenceBytesFields rf2 = new ReferenceBytesFields();
 
-    StringFields sf1 = new StringFields(s);
-    StringFields sf2 = new StringFields();
+    private StringFields sf1 = new StringFields(s);
+    private StringFields sf2 = new StringFields();
 
-    DefaultStringFields dsf1 = new DefaultStringFields(s);
-    DefaultStringFields dsf2 = new DefaultStringFields();
+    private DefaultStringFields dsf1 = new DefaultStringFields(s);
+    private DefaultStringFields dsf2 = new DefaultStringFields();
 
-    ArrayStringFields asf1 = new ArrayStringFields(s);
-    ArrayStringFields asf2 = new ArrayStringFields();
+    private ArrayStringFields asf1 = new ArrayStringFields(s);
+    private ArrayStringFields asf2 = new ArrayStringFields();
 
-    DefaultUtf8StringFields dusf1 = new DefaultUtf8StringFields(s);
-    DefaultUtf8StringFields dusf2 = new DefaultUtf8StringFields();
+    private DefaultUtf8StringFields dusf1 = new DefaultUtf8StringFields(s);
+    private DefaultUtf8StringFields dusf2 = new DefaultUtf8StringFields();
 
-    DefaultStringFields dsf0 = new DefaultStringFields(new String[6]);
+    private DefaultStringFields dsf0 = new DefaultStringFields(new String[6]);
 
     // Initializing byte buffers: one direct (off-heap) and one on heap
-    final Bytes<?> direct = Bytes.allocateElasticDirect();
-    final Bytes<?> onHeap = Bytes.allocateElasticOnHeap();
+    private final Bytes<?> direct = Bytes.allocateElasticDirect();
+    private final Bytes<?> onHeap = Bytes.allocateElasticOnHeap();
 
     // MappedBytes will be used to map files into memory for testing
-    MappedBytes mapped;
+    private MappedBytes mapped;
 
     // A volatile integer barrier utilized possibly for ensuring visibility between threads
-    static volatile int barrier;
+    private static volatile int barrier;
 
     // Method to perform a performance test using a provided Runnable
     public void doTest(Runnable runnable) {
@@ -108,11 +108,11 @@ public class PerfRegressionHolder {
         Bytes<?> f = Bytes.allocateElasticOnHeap();
 
         // Default constructor
-        public BytesFields() {
+        BytesFields() {
         }
 
         // Constructor to initialize Bytes objects with provided strings
-        public BytesFields(String... s) {
+        BytesFields(String... s) {
             this();
             // Assigning provided strings to byte fields
             this.a.append(s[0]);
@@ -128,11 +128,11 @@ public class PerfRegressionHolder {
     // in reading and writing marshallable bytes fields from and to byte sequences.
     static class DefaultBytesFields extends BytesFields {
         // Default constructor
-        public DefaultBytesFields() {
+        DefaultBytesFields() {
         }
 
         // Constructor that takes variable string arguments and forwards them to the super constructor
-        public DefaultBytesFields(String... s) {
+        DefaultBytesFields(String... s) {
             super(s);
         }
 
@@ -149,7 +149,7 @@ public class PerfRegressionHolder {
         }
 
         // Reads an 8-bit byte sequence from the provided byte sequence and appends it to the provided Bytes field
-        protected void read8Bit(BytesIn<?> bytes, Bytes<?> a) {
+        void read8Bit(BytesIn<?> bytes, Bytes<?> a) {
             bytes.read8bit(a);
         }
 
@@ -167,7 +167,7 @@ public class PerfRegressionHolder {
 
         // Writes the provided BytesStore to the provided byte sequence as an 8-bit byte sequence
         @SuppressWarnings("rawtypes")
-        protected void write8Bit(BytesOut<?> bytes, BytesStore<?, ?> a) {
+        void write8Bit(BytesOut<?> bytes, BytesStore<?, ?> a) {
             if (a == null) {
                 bytes.writeStopBit(-1);
             } else {
@@ -187,11 +187,11 @@ public class PerfRegressionHolder {
     // referencing behaviors during reading and writing of byte sequences.
     static class ReferenceBytesFields extends DefaultBytesFields {
         // Default constructor
-        public ReferenceBytesFields() {
+        ReferenceBytesFields() {
         }
 
         // Constructor that takes variable string arguments and forwards them to the super constructor
-        public ReferenceBytesFields(String... s) {
+        ReferenceBytesFields(String... s) {
             super(s);
         }
 
@@ -256,12 +256,12 @@ public class PerfRegressionHolder {
         String e = "";
         String f = "";
 
-        public StringFields() {
+        StringFields() {
 
         }
 
         // Constructor taking a variable number of String arguments and initializing respective fields.
-        public StringFields(String... s) {
+        StringFields(String... s) {
             this();  // Calling the default constructor
             // Initializing each field with corresponding input
             this.a = s[0];
@@ -283,12 +283,12 @@ public class PerfRegressionHolder {
                 .toArray();  // Collecting to array
 
         // Default constructor
-        public ArrayStringFields() {
+        ArrayStringFields() {
             super();
         }
 
         // Constructor accepting variable String arguments and forwarding them to the superclass
-        public ArrayStringFields(String... s) {
+        ArrayStringFields(String... s) {
             super(s);
         }
  // UU 2340
@@ -320,11 +320,11 @@ public class PerfRegressionHolder {
     // avoiding the direct memory manipulation used in ArrayStringFields.
     static class DefaultStringFields extends StringFields {
         // Default constructor
-        public DefaultStringFields() {
+        DefaultStringFields() {
         }
 
         // Constructor accepting variable String arguments and forwarding them to the superclass
-        public DefaultStringFields(String... s) {
+        DefaultStringFields(String... s) {
             super(s);
         }
 
@@ -358,11 +358,11 @@ public class PerfRegressionHolder {
     // providing default read and write implementations for UTF-8 encoded strings.
     static class DefaultUtf8StringFields extends StringFields {
         // Default constructor
-        public DefaultUtf8StringFields() {
+        DefaultUtf8StringFields() {
         }
 
         // Constructor accepting variable String arguments and forwarding them to the superclass
-        public DefaultUtf8StringFields(String... s) {
+        DefaultUtf8StringFields(String... s) {
             super(s);
         }
 

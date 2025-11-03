@@ -14,11 +14,11 @@ import org.jetbrains.annotations.NotNull;
  * It demonstrates custom read logic for marshalling a subset of fields and writing additional fields.
  */
 public class NestedReadSubset implements Marshallable {
-    String text;
-    String text2;
-    double number;
-    double number2;
-    double number4;
+    private String text;
+    private String text2;
+    private double number;
+    private double number2;
+    private double number4;
 
     /**
      * Custom read logic for marshalling from Wire. It specifies how a subset of fields

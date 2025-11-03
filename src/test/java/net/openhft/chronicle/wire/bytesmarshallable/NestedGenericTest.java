@@ -64,7 +64,7 @@ public class NestedGenericTest extends WireTestCommon {
     private static class ValueHolder<V> {
         private final V defaultValue;
 
-        public ValueHolder(V defaultValue) {
+        ValueHolder(V defaultValue) {
             this.defaultValue = defaultValue;
         }
 
@@ -87,7 +87,7 @@ public class NestedGenericTest extends WireTestCommon {
     private static class ValueHolderDef {
         private final A defaultValue;
 
-        public ValueHolderDef(A defaultValue) {
+        ValueHolderDef(A defaultValue) {
             this.defaultValue = defaultValue;
         }
 
@@ -111,7 +111,7 @@ public class NestedGenericTest extends WireTestCommon {
         int x;
         String y;
 
-        public A(int x, String y) {
+        A(int x, String y) {
             this.x = x;
             this.y = y;
         }

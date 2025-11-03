@@ -99,6 +99,7 @@ public class WireResetTest extends WireTestCommon {
         Event e = new Event();
         e.someDate = LocalDate.now();
         e.reset();
+        assertNull(e.someDate);
     }
 
     public static class Event extends SelfDescribingMarshallable implements Closeable {
@@ -120,7 +121,7 @@ public class WireResetTest extends WireTestCommon {
         }
     }
 
-    public static class EventAbstractCloseable extends AbstractCloseable implements Marshallable {
+    static class EventAbstractCloseable extends AbstractCloseable implements Marshallable {
         @Override
         protected void performClose() {
         }

@@ -67,7 +67,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     }
 
     // Write expected messages to the file specified in the URL and verify its content
-    public void file(String query, String expected) throws IOException {
+    private void file(String query, String expected) throws IOException {
         final File file = new File(OS.getTarget(), "tmp-" + System.nanoTime());
         @SuppressWarnings("deprecation")
         final URL url = new URL("file://" + file.getAbsolutePath() + query);
@@ -176,7 +176,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     static class Handler implements HttpHandler {
         private final BlockingQueue<String> queue;
 
-        public Handler(BlockingQueue<String> queue) {
+        Handler(BlockingQueue<String> queue) {
             this.queue = queue;
         }
 

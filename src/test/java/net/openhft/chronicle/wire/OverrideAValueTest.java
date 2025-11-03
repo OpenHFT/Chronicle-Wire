@@ -63,7 +63,7 @@ public class OverrideAValueTest extends WireTestCommon {
     static class NumberHolder extends SelfDescribingMarshallable {
         // Declaration and initialization of a static final Integer ONE
         @SuppressWarnings("UnnecessaryBoxing")
-        public static final Integer ONE = new Integer(1);
+        static final Integer ONE = new Integer(1);
         // Non-static Integer field num, initialized to ONE
         @NotNull
         Integer num = ONE;
@@ -73,7 +73,7 @@ public class OverrideAValueTest extends WireTestCommon {
     static class ObjectHolder extends SelfDescribingMarshallable {
         // Declaration and initialization of a static final NumberHolder NH
         @SuppressWarnings("UnnecessaryBoxing")
-        public static final NumberHolder NH = new NumberHolder();
+        static final NumberHolder NH = new NumberHolder();
         // Non-static NumberHolder field nh, initialized to NH
         @NotNull
         NumberHolder nh = NH;
@@ -87,13 +87,13 @@ public class OverrideAValueTest extends WireTestCommon {
     }
 
     // Static class SubClass, extending ParentClass, representing a subclass with an additional value attribute
-    static class SubClass extends ParentClass {
+    private static class SubClass extends ParentClass {
         // Double field value, initialized to 1.28
         double value = 1.28;
     }
 
     // Static class ParentHolder, extending SelfDescribingMarshallable, to encapsulate an instance of ParentClass
-    static class ParentHolder extends SelfDescribingMarshallable {
+    private static class ParentHolder extends SelfDescribingMarshallable {
         // Final field object, instantiated as a new ParentClass
         final ParentClass object = new ParentClass();
     }

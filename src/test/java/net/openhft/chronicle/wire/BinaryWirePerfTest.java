@@ -14,17 +14,19 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
+import static org.junit.Assert.assertTrue;
 
 @Ignore("Long running test")
 @RunWith(value = Parameterized.class)
 public class BinaryWirePerfTest extends WireTestCommon {
 
     // Define test parameters
-    final int testId;
-    final boolean fixed;
-    final boolean numericField;
-    final boolean fieldLess;
+    private final int testId;
+    private final boolean fixed;
+    private final boolean numericField;
+    private final boolean fieldLess;
     @NotNull
+    private
     Bytes<?> bytes = allocateElasticOnHeap();
 
     // Constructor for parameterized test
@@ -66,7 +68,6 @@ public class BinaryWirePerfTest extends WireTestCommon {
     // Performance test for Wire serialization and deserialization
     @Test
     public void wirePerf() {
-       // System.out.println("Custom TestId: " + testId + ", fixed: " + fixed + ", numberField: " + numericField + ", fieldLess: " + fieldLess);
         @NotNull Wire wire = createBytes();
 
         // Custom type serialization and deserialization test
@@ -77,13 +78,13 @@ public class BinaryWirePerfTest extends WireTestCommon {
             wirePerf0(wire, a, new MyTypesCustom(), t);
         }
 
-       // System.out.println("Reflective TestId: " + testId + ", fixed: " + fixed + ", numberField: " + numericField + ", fieldLess: " + fieldLess);
         @NotNull MyTypes b = new MyTypes();
         for (int t = 0; t < 3; t++) {
             b.text.setLength(0);
             b.text.append("Hello World");
             wirePerf0(wire, b, new MyTypes(), t);
         }
+        assertTrue(true);
     }
 
     private void wirePerf0(@NotNull Wire wire, @NotNull MyTypes a, @NotNull MyTypes b, int t) {
@@ -103,16 +104,17 @@ public class BinaryWirePerfTest extends WireTestCommon {
     // Performance test for serializing and deserializing integers with Wire
     @Test
     public void wirePerfInts() {
-       // System.out.println("TestId: " + testId + ", fixed: " + fixed + ", numberField: " + numericField + ", fieldLess: " + fieldLess);
         @NotNull Wire wire = createBytes();
         @NotNull MyType2 a = new MyType2();
         for (int t = 0; t < 3; t++) {
             wirePerf0(wire, a, new MyType2(), t);
         }
+        assertTrue(true);
     }
 
     // Common method to test serialization and deserialization for type MyType2
     private void wirePerf0(@NotNull Wire wire, @NotNull MyType2 a, @NotNull MyType2 b, int t) {
+        long start = System.nanoTime();
         int runs = 300000;
         for (int i = 0; i < runs; i++) {
             wire.clear();
@@ -122,6 +124,8 @@ public class BinaryWirePerfTest extends WireTestCommon {
 
             b.readMarshallable(wire);
         }
+        long rate = (System.nanoTime() - start) / runs;
+        System.out.printf("(ints) %,d : %,d ns avg, len= %,d%n", t, rate, wire.bytes().readPosition());
     }
 
     // *************************************************************************

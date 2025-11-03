@@ -433,20 +433,20 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     }
 
-    public static final class Shares extends SelfDescribingMarshallable {
+    static final class Shares extends SelfDescribingMarshallable {
 
-        public String symbol;
-        public long noShares;
+        String symbol;
+        long noShares;
 
-        public Shares() {
+        Shares() {
         }
 
-        public Shares(@NotNull String symbol, long noShares) {
+        Shares(@NotNull String symbol, long noShares) {
             this.symbol = symbol;
             this.noShares = noShares;
         }
 
-        public String symbol() {
+        String symbol() {
             return symbol;
         }
 
@@ -454,7 +454,7 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
             this.symbol = symbol;
         }
 
-        public long noShares() {
+        long noShares() {
             return noShares;
         }
 
@@ -465,20 +465,20 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     public static final class News extends SelfDescribingMarshallable {
 
-        public String symbol;
-        public String header;
-        public String body;
+        String symbol;
+        String header;
+        String body;
 
         public News() {
         }
 
-        public News(String symbol, String header, String body) {
+        News(String symbol, String header, String body) {
             this.symbol = symbol;
             this.header = header;
             this.body = body;
         }
 
-        public String symbol() {
+        String symbol() {
             return symbol;
         }
 

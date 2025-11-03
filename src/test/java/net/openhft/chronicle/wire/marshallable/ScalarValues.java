@@ -14,36 +14,36 @@ import java.util.UUID;
 
 @SuppressWarnings("rawtypes")
 public class ScalarValues extends SelfDescribingMarshallable {
-    boolean flag;
-    byte b;
-    short s;
-    char ch;
-    int i;
-    float f;
-    long l;
-    double d;
+    private boolean flag;
+    private byte b;
+    private short s;
+    private char ch;
+    private int i;
+    private float f;
+    private long l;
+    private double d;
 
-    Boolean flag2;
-    Byte b2;
-    Short s2;
-    Character ch2;
-    Integer i2;
-    Float f2;
-    Long l2;
-    Double d2;
+    private Boolean flag2;
+    private Byte b2;
+    private Short s2;
+    private Character ch2;
+    private Integer i2;
+    private Float f2;
+    private Long l2;
+    private Double d2;
 
-    Class<?> aClass;
-    RetentionPolicy policy;
-    String text;
-    LocalDate date;
-    LocalTime time;
-    LocalDateTime dateTime;
-    ZonedDateTime zonedDateTime;
-    UUID uuid;
-    BigInteger bi;
-    BigDecimal bd;
-    File file;
-    TestEnum dynamicEnum;
+    private Class<?> aClass;
+    private RetentionPolicy policy;
+    private String text;
+    private LocalDate date;
+    private LocalTime time;
+    private LocalDateTime dateTime;
+    private ZonedDateTime zonedDateTime;
+    private UUID uuid;
+    private BigInteger bi;
+    private BigDecimal bd;
+    private File file;
+    private TestEnum dynamicEnum;
 
    // Path path;
 

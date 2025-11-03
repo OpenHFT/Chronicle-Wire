@@ -79,7 +79,7 @@ public class ClusterCommand extends SelfDescribingMarshallable {
      * @param serviceId The service ID to set.
      * @return The current ClusterCommand instance.
      */
-    public ClusterCommand serviceId(String serviceId) {
+    private ClusterCommand serviceId(String serviceId) {
         this.serviceId.clear().append(serviceId);
 
         return this;

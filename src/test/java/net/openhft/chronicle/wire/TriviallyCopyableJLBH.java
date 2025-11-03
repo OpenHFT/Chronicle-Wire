@@ -25,10 +25,10 @@ public class TriviallyCopyableJLBH implements JLBHTask {
     }
 
     // use -Dio.type=binary or trivial to set. Defaults to binary
-    HouseType type = HouseType.UNKNOWN;
+    private HouseType type = HouseType.UNKNOWN;
 
     // use -Dcpu=N to set. Defaults to 2
-    final int CPU;
+    private final int CPU;
 
     static {
         System.setProperty("jvm.resource.tracing", "false");
@@ -92,22 +92,22 @@ public class TriviallyCopyableJLBH implements JLBHTask {
     }
 
     private JLBH lth;
-    final BaseHouse originalHouse;
+    private final BaseHouse originalHouse;
 
     private BaseHouse newHouse(HouseType type) {
         return type == HouseType.TRIVIALLY_COPYABLE ? new TriviallyCopyableHouse() : new House();
     }
 
-    final BaseHouse targetHouse;
+    private final BaseHouse targetHouse;
 
-    final Wire wire = WireType.BINARY.apply(Bytes.allocateDirect(1024));
+    private final Wire wire = WireType.BINARY.apply(Bytes.allocateDirect(1024));
 
     public static void main(String[] args) {
         new TriviallyCopyableJLBH().test();   
         System.exit(0);
     }
 
-    TriviallyCopyableJLBH() 
+    private TriviallyCopyableJLBH()
     {
         String ioType = System.getProperty("io.type", "binary");
         if(ioType.equals("binary")) {
@@ -125,7 +125,7 @@ public class TriviallyCopyableJLBH implements JLBHTask {
         targetHouse = newHouse(type);
     }
 
-    public void test() {
+    private void test() {
         deleteDirWithFiles("tmp");
         @NotNull JLBHOptions jlbhOptions = new JLBHOptions()
                 .warmUpIterations(1_000_000)

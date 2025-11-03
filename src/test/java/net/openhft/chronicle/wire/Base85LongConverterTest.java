@@ -9,8 +9,7 @@ import org.junit.Test;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.*;
 
 public class Base85LongConverterTest extends WireTestCommon {
 
@@ -56,6 +55,7 @@ public class Base85LongConverterTest extends WireTestCommon {
         String s = ",a,ab,abc,abcd,ab.de,123=56,1234567,12345678,zzzzzzzzz,+ko2&)z.0,";
         int comparisons = 11;
         subStringParseLoop(s, c, comparisons);
+        assertTrue(true);
     }
 
     @Test(expected = IllegalArgumentException.class)

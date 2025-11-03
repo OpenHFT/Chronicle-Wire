@@ -97,7 +97,7 @@ public class JSONWithAMapTest extends net.openhft.chronicle.wire.WireTestCommon 
         Assert.assertEquals(expected, actual);
     }
 
-    public static class ResponseItem extends SelfDescribingMarshallable {
+    private static class ResponseItem extends SelfDescribingMarshallable {
         public @NotNull String index;
         public Bytes<?> key = Bytes.allocateElasticOnHeap();
         public Object payload;

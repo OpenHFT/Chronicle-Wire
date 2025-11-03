@@ -30,7 +30,7 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
         assertNotNull(object);
     }
 
-    static class TwoFields extends AbstractMarshallableCfg {
+    private static class TwoFields extends AbstractMarshallableCfg {
         private String name;
         private Object fieldOne;
     }
@@ -48,7 +48,7 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
         final TwoFields simple = Marshallable.fromString(simpleObject);
     }
 
-    static class UsesTwoFields extends AbstractMarshallableCfg {
+    private static class UsesTwoFields extends AbstractMarshallableCfg {
         private TwoFields bothFields;
         private String name;
     }

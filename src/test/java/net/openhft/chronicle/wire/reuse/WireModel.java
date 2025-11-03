@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
  * Base class for models in the Wire framework, providing common functionality
  * for serialization and deserialization, along with basic model properties.
  */
-public class WireModel extends SelfDescribingMarshallable {
+class WireModel extends SelfDescribingMarshallable {
     // Unique identifier for the model
     private long id;
     // Revision number for versioning of the model
@@ -25,7 +25,7 @@ public class WireModel extends SelfDescribingMarshallable {
     /**
      * Default constructor for creating an instance of WireModel.
      */
-    public WireModel() {
+    WireModel() {
     }
 
     /**
@@ -35,7 +35,7 @@ public class WireModel extends SelfDescribingMarshallable {
      * @param revision The revision number for the model.
      * @param key      Optional key for additional identification.
      */
-    public WireModel(long id, int revision, @Nullable String key) {
+    WireModel(long id, int revision, @Nullable String key) {
         this.id = id;
         this.revision = revision;
         this.key = key;

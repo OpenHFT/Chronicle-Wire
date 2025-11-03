@@ -18,15 +18,15 @@ import java.util.List;
  * and deserialization using Chronicle Wire. It contains lists of NestedClass objects
  * and some basic properties.
  */
-public class OuterClass implements Marshallable {
+class OuterClass implements Marshallable {
     // Lists for storing NestedClass instances. Separate lists are maintained
     // for free and used instances to optimize object reuse.
-    final List<NestedClass> listAFree = new ArrayList<>();
-    final List<NestedClass> listA = new ArrayList<>();
-    final List<NestedClass> listBFree = new ArrayList<>();
-    final List<NestedClass> listB = new ArrayList<>();
-    String text; // Text property of the class.
-    WireType wireType; // The type of Wire (serialization format) used.
+    private final List<NestedClass> listAFree = new ArrayList<>();
+    private final List<NestedClass> listA = new ArrayList<>();
+    private final List<NestedClass> listBFree = new ArrayList<>();
+    private final List<NestedClass> listB = new ArrayList<>();
+    private String text; // Text property of the class.
+    private WireType wireType; // The type of Wire (serialization format) used.
 
     /**
      * Deserializes data from Wire format into an OuterClass instance.
@@ -105,7 +105,7 @@ public class OuterClass implements Marshallable {
      * @return A list of NestedClass instances.
      */
     @NotNull
-    public List<NestedClass> getListA() {
+    private List<NestedClass> getListA() {
         return listA;
     }
 
@@ -136,7 +136,7 @@ public class OuterClass implements Marshallable {
      * @return A list of NestedClass instances.
      */
     @NotNull
-    public List<NestedClass> getListB() {
+    private List<NestedClass> getListB() {
         return listB;
     }
 

@@ -23,7 +23,7 @@ class JsonWireToStringAcceptanceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"£", "€", "¥", "\u20B9", "ó", "óaóó", "", "ÊÆÄ"})
-    public void json_verifyAsString(String input) {
+    void json_verifyAsString(String input) {
         Map<String, String> map = new HashMap<>();
         map.put("x", input);
         for (WireType wireType : WIRE_TYPES) {
@@ -33,7 +33,7 @@ class JsonWireToStringAcceptanceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"£", "€", "¥", "\u20B9", "ó", "óaóó"})
-    public void json_verifyObjectToString(String input) {
+    void json_verifyObjectToString(String input) {
         Map<String, String> map = new HashMap<>();
         map.put("x", input);
         WireOut object = new JSONWire().getValueOut().object(map);
@@ -42,7 +42,7 @@ class JsonWireToStringAcceptanceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"£", "€", "¥", "\u20B9", "ó", "óaóó"})
-    public void json_verifyAsText(String input) {
+    void json_verifyAsText(String input) {
         Map<String, String> map = new HashMap<>();
         map.put("x", input);
         JSONWire jsonWire = new JSONWire();

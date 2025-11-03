@@ -43,19 +43,19 @@ public class MapCustomTest extends WireTestCommon {
      * Inherits from SelfDescribingMarshallable for marshalling capabilities.
      */
     @SuppressWarnings("rawtypes")
-    public static class MapsHolder<T extends Integer> extends SelfDescribingMarshallable {
+    static class MapsHolder<T extends Integer> extends SelfDescribingMarshallable {
         // Define custom maps and their instances
-        public IntToStringMap i2sMap = new IntToStringMap();
-        public IntMap<Void, String> iMap = new IntMap<>();
-        public IntSuperMap<String, MapsHolder> isMap = new IntSuperMap<>();
-        public TransformingMap<T, BigDecimal, String> transMap = new TransformingMap<>(BigDecimal::new);
-        public GeneralMap gMap = new GeneralMap();
+        IntToStringMap i2sMap = new IntToStringMap();
+        IntMap<Void, String> iMap = new IntMap<>();
+        IntSuperMap<String, MapsHolder> isMap = new IntSuperMap<>();
+        TransformingMap<T, BigDecimal, String> transMap = new TransformingMap<>(BigDecimal::new);
+        GeneralMap gMap = new GeneralMap();
         // ClassCastException: net.openhft.chronicle.core.util.ObjectUtils$$Lambda$73/1401132667 cannot be cast to Map
         // private MarkedMap<String> mMap = i2sMap;
 
         // Constructor to initialize maps with provided key-value pairs
         @SuppressWarnings("unchecked")
-        public MapsHolder(T x, String y) {
+        MapsHolder(T x, String y) {
             i2sMap.put(x, y);
             iMap.put(x, y);
             isMap.put(x, y);
@@ -109,10 +109,10 @@ public class MapCustomTest extends WireTestCommon {
      * Custom LinkedHashMap that supports value transformation.
      */
     public static class TransformingMap<K, O, I> extends LinkedHashMap<K, I> {
-        public Function<I, O> transform;
+        Function<I, O> transform;
 
         // Constructor to set the transformation function
-        public TransformingMap(Function<I, O> transform) {
+        TransformingMap(Function<I, O> transform) {
             this.transform = transform;
         }
 
@@ -138,7 +138,7 @@ public class MapCustomTest extends WireTestCommon {
     /**
      * Marked map interface that extends Map and Closeable.
      */
-    public interface MarkedMap<V> extends Map<Integer, V>, Closeable {
+    interface MarkedMap<V> extends Map<Integer, V>, Closeable {
         // No-op.
     }
 }

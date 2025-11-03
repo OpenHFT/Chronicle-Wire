@@ -50,7 +50,7 @@ public class JSONEmptySequencesTest extends net.openhft.chronicle.wire.WireTestC
     }
 
     // A private static class Foo with four fields, where two of them are lists.
-    public static final class Foo extends SelfDescribingMarshallable {
+    static final class Foo extends SelfDescribingMarshallable {
         public int field1;  // A field of type int.
         public int field2;  // Another field of type int.
         // A list of strings that is initialized as an empty ArrayList.

@@ -362,6 +362,6 @@ public class WireTests {
     }
 
     // Inner class to represent a Circle, implements Marshallable for serialization
-    class Circle implements Marshallable {
+    private class Circle implements Marshallable {
     }
 }

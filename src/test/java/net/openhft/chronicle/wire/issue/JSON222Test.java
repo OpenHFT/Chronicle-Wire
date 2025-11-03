@@ -30,7 +30,7 @@ import static org.junit.Assert.assertEquals;
 public class JSON222Test extends WireTestCommon {
 
     @NotNull
-    final File file;
+    private final File file;
 
     // Constructor that accepts parameters for each test iteration
     public JSON222Test(@NotNull String fileName, File file) {
@@ -148,7 +148,7 @@ public class JSON222Test extends WireTestCommon {
     }
 
     // Utility method to parse a string using the SnakeYaml library
-    static void parseWithSnakeYaml(@NotNull String s) {
+    private static void parseWithSnakeYaml(@NotNull String s) {
         try {
             @NotNull Yaml yaml = new Yaml();
             yaml.load(new StringReader(s));

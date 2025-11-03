@@ -18,7 +18,7 @@ public class LongConversionExampleC {
 
     // Static inner class representing a House with address details stored in a specific format
     @SuppressWarnings("this-escape")
-    public static class House extends SelfDescribingMarshallable {
+    static class House extends SelfDescribingMarshallable {
         @FieldGroup("address")
         // 5 longs, each at 8 bytes = 40 bytes, so we can store a String with up to 40 ISO-8859 characters
         private long text4a, text4b, text4c, text4d, text4e;
@@ -27,7 +27,7 @@ public class LongConversionExampleC {
         private transient Bytes<House> address = Bytes.forFieldGroup(this, "address");
 
         // Method to append the address details to the Bytes object
-        public void address(CharSequence owner) {
+        void address(CharSequence owner) {
             address.append(owner);
         }
     }

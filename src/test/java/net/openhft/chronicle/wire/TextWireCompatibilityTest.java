@@ -33,7 +33,7 @@ public class TextWireCompatibilityTest extends WireTestCommon {
 
     // A superclass designed to be marshallable with basic incompatibility checks.
     // It primarily checks for the presence and value of the "a" field, and absence of the "c" field.
-    public static class SuperIncompatibleObject implements Marshallable {
+    static class SuperIncompatibleObject implements Marshallable {
         @Override
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
             // Verify the value of the "a" field
@@ -78,6 +78,6 @@ public class TextWireCompatibilityTest extends WireTestCommon {
     }
 
     // A simple marshallable class used as a placeholder object in the SubIncompatibleObject class.
-    public static class SimpleObject implements Marshallable {
+    static class SimpleObject implements Marshallable {
     }
 }

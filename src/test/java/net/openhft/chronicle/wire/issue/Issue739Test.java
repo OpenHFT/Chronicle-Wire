@@ -18,7 +18,7 @@ import static org.junit.Assume.assumeFalse;
  */
 public class Issue739Test extends WireTestCommon {
 
-    public static class One extends SelfDescribingMarshallable {
+    static class One extends SelfDescribingMarshallable {
         String text;
 
         public One(String text) {
@@ -26,7 +26,7 @@ public class Issue739Test extends WireTestCommon {
         }
     }
 
-    public static class Two extends SelfDescribingMarshallable {
+    static class Two extends SelfDescribingMarshallable {
         String text;
 
         public Two(String text) {
@@ -34,13 +34,13 @@ public class Issue739Test extends WireTestCommon {
         }
     }
 
-    public static class Three extends SelfDescribingMarshallable {
+    static class Three extends SelfDescribingMarshallable {
         private One one;
         private Two two;
         private One twoAndHalf;
     }
 
-    public static class IThree extends SelfDescribingMarshallable {
+    static class IThree extends SelfDescribingMarshallable {
         private Marshallable one;
         private Marshallable two;
         private Marshallable twoAndHalf;

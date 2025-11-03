@@ -58,7 +58,7 @@ public class TextBinaryWireTest extends WireTestCommon {
     }
 
     // Create a Wire instance based on the wireType of the test.
-    public Wire createWire() {
+    private Wire createWire() {
         final Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(wire.isBinary());
         return wire;

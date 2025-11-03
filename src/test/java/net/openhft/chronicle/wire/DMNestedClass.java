@@ -11,10 +11,10 @@ package net.openhft.chronicle.wire;
 class DMNestedClass extends SelfDescribingMarshallable {
 
     // A string attribute to hold textual data within the instance of DMNestedClass.
-    String str;
+    private String str;
 
     // An integer attribute to hold numerical data within the instance of DMNestedClass.
-    int num;
+    private int num;
 
     /**
      * Parameterized constructor to initialize an instance of DMNestedClass

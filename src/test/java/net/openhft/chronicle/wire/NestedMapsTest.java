@@ -278,10 +278,10 @@ public class NestedMapsTest extends WireTestCommon {
     }
 
     // Define the Mapped class for testing purposes
-    public static class Mapped extends SelfDescribingMarshallable {
-        public final Set<String> words = new LinkedHashSet<>();      // Set to store unique words
-        public final List<Integer> numbers = new ArrayList<>();     // List to store numbers
-        public final Map<String, String> map1 = new LinkedHashMap<>();   // Map for string to string mapping
-        public final Map<String, Double> map2 = new LinkedHashMap<>();  // Map for string to double mapping
+    static class Mapped extends SelfDescribingMarshallable {
+        final Set<String> words = new LinkedHashSet<>();      // Set to store unique words
+        final List<Integer> numbers = new ArrayList<>();     // List to store numbers
+        final Map<String, String> map1 = new LinkedHashMap<>();   // Map for string to string mapping
+        final Map<String, Double> map2 = new LinkedHashMap<>();  // Map for string to double mapping
     }
 }

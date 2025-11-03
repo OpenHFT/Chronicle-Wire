@@ -105,7 +105,7 @@ public class Base64Test extends net.openhft.chronicle.wire.WireTestCommon {
          * @param i    Int value.
          * @param data Long value.
          */
-        public Data64(byte b, short s, int i, long data) {
+        Data64(byte b, short s, int i, long data) {
             this.b = b;
             this.s = s;
             this.i = i;

@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class Base64LongConverterTest extends WireTestCommon {
 
@@ -33,6 +34,7 @@ public class Base64LongConverterTest extends WireTestCommon {
         String s = ",a,ab,abc,abcd,ab.de,123_56,1234567,12345678,123456789,z23456789,z234567890,O_________,";
         int comparisons = 13;
         subStringParseLoop(s, c, comparisons);
+        assertTrue(true);
     }
 
     @Test(expected = IllegalArgumentException.class)

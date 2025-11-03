@@ -54,12 +54,12 @@ public class BytesUsageTest extends WireTestCommon {
         Bytes<?> clOrdId = Bytes.allocateElasticOnHeap();
 
         // Getter for clOrdId
-        public Bytes<?> clOrdId() {
+        Bytes<?> clOrdId() {
             return clOrdId;
         }
 
         // Setter for clOrdId that also allows chaining
-        public BytesWrapper clOrdId(Bytes<?> clOrdId) {
+        BytesWrapper clOrdId(Bytes<?> clOrdId) {
             this.clOrdId = clOrdId;
             return this;
         }

@@ -344,41 +344,41 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
     }
 
     // Definition of a custom Marshallable object with a long field.
-    public static class MyMarshallable extends SelfDescribingMarshallable {
+    static class MyMarshallable extends SelfDescribingMarshallable {
         long l;
     }
 
     // Definition of a custom BytesMarshallable object with a double field.
-    public static class MyBytesMarshallable extends BytesInBinaryMarshallable {
-        public double d;
+    static class MyBytesMarshallable extends BytesInBinaryMarshallable {
+        double d;
     }
 
     // Definition of a regular Data Transfer Object (DTO) with string and integer fields.
-    public static class RegularDTO extends SelfDescribingMarshallable {
+    static class RegularDTO extends SelfDescribingMarshallable {
         String s;
         int i;
     }
 
-    public static class ConfigDTO extends AbstractMarshallableCfg {
+    static class ConfigDTO extends AbstractMarshallableCfg {
         String s;
         boolean b;
     }
 
     // Definition of a DTO with a list-containing field.
-    public static class ListContainingDto extends SelfDescribingMarshallable {
+    static class ListContainingDto extends SelfDescribingMarshallable {
         List<Object> list;
     }
 
     // Definition of a DTO with a list-containing field.
-    public static class ObjectContainingDto extends SelfDescribingMarshallable {
+    static class ObjectContainingDto extends SelfDescribingMarshallable {
         Object list;
     }
 
-    public static class MyDto extends SelfDescribingMarshallable {
+    static class MyDto extends SelfDescribingMarshallable {
         private final int a;
         private final int b;
 
-        public MyDto(int a, int b) {
+        MyDto(int a, int b) {
             this.a = a;
             this.b = b;
         }

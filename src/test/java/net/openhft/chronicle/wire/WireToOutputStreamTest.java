@@ -116,7 +116,7 @@ public class WireToOutputStreamTest extends WireTestCommon {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @NotNull
     // Function to read an object from the wire
-    public Object readAnObject(Wire wire2) {
+    private Object readAnObject(Wire wire2) {
         Class<?> type = wire2.getValueIn().typeLiteral();
         Object ao2 = ObjectUtils.newInstance(type);
         Wires.readMarshallable(ao2, wire2, true);
@@ -125,7 +125,7 @@ public class WireToOutputStreamTest extends WireTestCommon {
 
     @NotNull
     // Function to write an object to the wire
-    public AnObject writeAnObject(Wire wire) {
+    private AnObject writeAnObject(Wire wire) {
         AnObject ao = new AnObject();
         ao.value = 12345;
         ao.text = "Hello";

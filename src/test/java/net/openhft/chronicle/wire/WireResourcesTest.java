@@ -173,7 +173,7 @@ public class WireResourcesTest extends WireTestCommon {
 
     // Helper method to retrieve the MappedFile associated with the given wire.
     @NotNull
-    protected MappedFile mappedFile(@NotNull Wire wire) {
+    private MappedFile mappedFile(@NotNull Wire wire) {
         return ((MappedBytes) wire.bytes()).mappedFile();
     }
 }

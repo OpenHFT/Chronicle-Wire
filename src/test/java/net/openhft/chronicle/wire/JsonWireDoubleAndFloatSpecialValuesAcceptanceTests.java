@@ -156,7 +156,7 @@ class JsonWireDoubleAndFloatSpecialValuesAcceptanceTests {
     /**
      * Convert the double value to its JSON string representation.
      */
-    public String toJson(double value) {
+    private String toJson(double value) {
         JSONWire jsonWire = new JSONWire();
         jsonWire.getValueOut().object(value);
         return JSONWire.asText(jsonWire);
@@ -165,7 +165,7 @@ class JsonWireDoubleAndFloatSpecialValuesAcceptanceTests {
     /**
      * Convert the float value to its JSON string representation.
      */
-    public String toJson(float value) {
+    private String toJson(float value) {
         JSONWire jsonWire = new JSONWire();
         jsonWire.getValueOut().object(value);
         return JSONWire.asText(jsonWire);

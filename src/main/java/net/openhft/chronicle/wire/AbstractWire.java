@@ -446,6 +446,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
      * @return True if there's no data after the end or if the check isn't feasible.
      * @throws IllegalStateException If data is written after the end of the message.
      */
+    @SuppressWarnings("java:S3516") // enabled by assertion
     private boolean checkNoDataAfterEnd(long pos) {
         // can't do this check without jumping back.
         if (!bytes.inside(pos, 4L))

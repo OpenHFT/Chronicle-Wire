@@ -325,7 +325,7 @@ final class SerializableObjectTest extends WireTestCommon {
     }
 
     // Assert that two objects are "equivalent" based on certain conditions
-    static void assertEqualEnough(Object a, Object b) {
+    private static void assertEqualEnough(Object a, Object b) {
         if (a.getClass() != b.getClass())
             assertEquals(a, b);
         if (a instanceof Throwable) {
@@ -389,7 +389,7 @@ final class SerializableObjectTest extends WireTestCommon {
         WireType wireType;
         Object object;
 
-        public WireTypeObject(WireType wireType, Object object) {
+        WireTypeObject(WireType wireType, Object object) {
             this.wireType = wireType;
             this.object = object;
         }

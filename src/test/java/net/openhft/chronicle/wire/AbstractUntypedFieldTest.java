@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 class AbstractUntypedFieldTest extends WireTestCommon {
 
     // Provide different wire format factories (JSON, Text, and YAML) for parameterized tests
-    static Stream<Function<Bytes<byte[]>, Wire>> provideWire() {
+    private static Stream<Function<Bytes<byte[]>, Wire>> provideWire() {
         return Stream.of(
                 JSONWire::new,
                 TextWire::new,
@@ -91,11 +91,11 @@ class AbstractUntypedFieldTest extends WireTestCommon {
     }
 
     // Implementation of the abstract base class
-    public static final class AImpl extends A {
+    private static final class AImpl extends A {
     }
 
     // Holder class to hold instances of type A
-    public static final class Holder {
+    static final class Holder {
         A a;
     }
 }

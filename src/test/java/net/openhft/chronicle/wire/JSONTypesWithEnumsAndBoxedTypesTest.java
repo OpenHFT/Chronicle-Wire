@@ -54,7 +54,7 @@ public class JSONTypesWithEnumsAndBoxedTypesTest extends net.openhft.chronicle.w
         private Location location;  // Represents the current location of the car.
 
         // Constructor for the F1 class.
-        public F1(String surname, int car, Location location) {
+        F1(String surname, int car, Location location) {
             this.surname = surname;
             this.car = car;
             this.location = location;

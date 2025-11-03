@@ -15,7 +15,7 @@ public class EgMain {
         long time;
     }
 
-    static long time;
+    private static long time;
 
     public static void main(String[] args) {
         // Create a time provider for a specific host ID.

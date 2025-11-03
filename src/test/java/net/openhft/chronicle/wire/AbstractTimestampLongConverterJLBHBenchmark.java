@@ -42,7 +42,7 @@ public class AbstractTimestampLongConverterJLBHBenchmark implements JLBHTask {
     }
 
     // Configure and initiate the JLBH benchmark
-    public void run() {
+    private void run() {
         JLBHOptions jlbhOptions = new JLBHOptions()
                 .iterations(ITERATIONS)
                 .runs(5)

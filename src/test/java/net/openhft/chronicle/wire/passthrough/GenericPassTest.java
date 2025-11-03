@@ -185,7 +185,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
     private static class MyDocumentContextBroker implements DocumentContextBroker {
         private final Wire wire2; // Wire to write messages to
 
-        public MyDocumentContextBroker(Wire wire2) {
+        MyDocumentContextBroker(Wire wire2) {
             this.wire2 = wire2;
         }
 

@@ -24,6 +24,6 @@ public class MethodWriterMarshallableTest extends WireTestCommon {
     }
 
     // Interface declared invalid for method writer usage due to it extending Marshallable
-    interface MyBadInterface extends Marshallable {
+    private interface MyBadInterface extends Marshallable {
     }
 }

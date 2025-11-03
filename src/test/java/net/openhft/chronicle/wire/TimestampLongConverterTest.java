@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class TimestampLongConverterTest extends WireTestCommon {
 
     // Defines the data sets for each converter (Milli, Micro, Nano)
-    static Stream<Arguments> converters() {
+    private static Stream<Arguments> converters() {
         return Stream.of(
                 Arguments.of(
                         "Milli",

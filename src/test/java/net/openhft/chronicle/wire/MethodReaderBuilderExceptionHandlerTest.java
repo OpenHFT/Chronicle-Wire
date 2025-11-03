@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
 
     // Static input data for the tests
-    static final String input = "" +
+    private static final String input = "" +
             "---\n" +
             "a: a1\n" +
             "...\n" +
@@ -56,7 +56,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
     }
 
     // Composite interface extending both _B and _C
-    interface _BC extends _B, _C {
+    private interface _BC extends _B, _C {
     }
 
     // Test where nothing is expected to happen, using non-scanning method

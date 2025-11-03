@@ -149,17 +149,17 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
 
         // Constructor used via reflection when reading from the wire
         @UsedViaReflection
-        public MDTO1(@NotNull WireIn wire) {
+        MDTO1(@NotNull WireIn wire) {
             readMarshallable(wire);
         }
 
         // Constructor to set the value of "one" directly
-        public MDTO1(int i) {
+        MDTO1(int i) {
             this.one = i;
         }
 
         // Default constructor
-        public MDTO1() {
+        MDTO1() {
 
         }
 
@@ -186,12 +186,12 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
 
         // Constructor used via reflection when reading from the wire
         @UsedViaReflection
-        public MDTO2(@NotNull WireIn wire) {
+        MDTO2(@NotNull WireIn wire) {
             readMarshallable(wire);
         }
 
         // Constructor to initialize "one", "two", and "three" with given values
-        public MDTO2(int one, int two, @NotNull Object three) {
+        MDTO2(int one, int two, @NotNull Object three) {
             this.one = one;
             this.two = two;
             this.three.setLength(0);
@@ -199,7 +199,7 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
         }
 
         // Default constructor
-        public MDTO2() {
+        MDTO2() {
 
         }
 

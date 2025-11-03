@@ -115,11 +115,10 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
     }
 
     // Class representing a Marshallable object with text data.
-    public static class MyMarshallable implements Marshallable {
+    static class MyMarshallable implements Marshallable {
 
         // Mutable sequence of characters to store textual data.
-        @NotNull
-        public StringBuilder text = new StringBuilder();
+        @NotNull StringBuilder text = new StringBuilder();
 
         // Method responsible for deserializing the object from the Wire input.
         @Override
@@ -150,14 +149,14 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
     static class MarshableFilter extends SelfDescribingMarshallable {
         // Name of the column to which the filter applies.
         @NotNull
-        public final String columnName;
+        final String columnName;
 
         // Filter expression used to filter data.
         @NotNull
-        public final String filter;
+        final String filter;
 
         // Constructor to initialize column name and filter expression.
-        public MarshableFilter(@NotNull String columnName, @NotNull String filter) {
+        MarshableFilter(@NotNull String columnName, @NotNull String filter) {
             this.columnName = columnName;
             this.filter = filter;
         }
@@ -167,10 +166,10 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
     static class MarshableOrderBy extends SelfDescribingMarshallable {
         // Name of the column used for ordering data.
         @NotNull
-        public final String column;
+        final String column;
 
         // Flag indicating the sort direction: true for ascending, false for descending.
-        public final boolean isAscending;
+        final boolean isAscending;
 
         // Constructor to initialize column name and sort direction.
         public MarshableOrderBy(@NotNull String column, boolean isAscending) {
@@ -180,7 +179,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
     }
 
     // Class representing a filter with sorting details for processing data.
-    public static class SortedFilter extends SelfDescribingMarshallable {
+    static class SortedFilter extends SelfDescribingMarshallable {
         // Index from which the filtering should start.
         public long fromIndex;
 
@@ -189,7 +188,6 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
         public List<MarshableOrderBy> marshableOrderBy = new ArrayList<>();
 
         // List of filter conditions specifying the columns and their respective filter expressions.
-        @NotNull
-        public List<MarshableFilter> marshableFilters = new ArrayList<>();
+        @NotNull List<MarshableFilter> marshableFilters = new ArrayList<>();
     }
 }

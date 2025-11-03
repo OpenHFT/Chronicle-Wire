@@ -47,7 +47,7 @@ public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
     }
 
     // Helper method to return the provided consumer directly.
-    static Consumer<ValueOut> wr(Consumer<ValueOut> valueOutConsumer) {
+    private static Consumer<ValueOut> wr(Consumer<ValueOut> valueOutConsumer) {
         return valueOutConsumer;
     }
 
@@ -207,7 +207,7 @@ public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // BM is a simple class that implements BytesMarshallable, allowing instances to be serialized to and
     // deserialized from Bytes directly.
-    static class BM implements BytesMarshallable {
+    private static class BM implements BytesMarshallable {
         // Stores the current system time in nanoseconds when an instance of BM is created.
         long time = System.nanoTime();
     }

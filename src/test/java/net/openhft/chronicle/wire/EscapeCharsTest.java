@@ -26,7 +26,7 @@ import static org.junit.Assert.assertNull;
 @RunWith(value = Parameterized.class)
 public class EscapeCharsTest extends WireTestCommon {
     @NotNull
-    final String chs;
+    private final String chs;
     private final Future<?> future;
 
     // Override the threadDump from WireTestCommon to use the parent implementation
@@ -88,7 +88,7 @@ public class EscapeCharsTest extends WireTestCommon {
      * @param str  String to be tested
      * @param wire Wire format for the test
      */
-    static void testEscaped(String str, @NotNull Wire wire) {
+    private static void testEscaped(String str, @NotNull Wire wire) {
         wire.reset();
 
         // Write the string to wire

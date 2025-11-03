@@ -78,7 +78,7 @@ public class MethodWriterTest extends WireTestCommon {
         listener.accept(wire);
     }
 
-    static MarketData createMarketData() {
+    private static MarketData createMarketData() {
         return new MarketData("MSFT", 100, 110, 90);
     }
 

@@ -92,7 +92,7 @@ public class JSONWireDTOTest extends WireTestCommon {
         int num;
 
         // Constructor to initialize the nested class.
-        public JSNestedClass(String str, int num) {
+        JSNestedClass(String str, int num) {
             this.str = str;
             this.num = num;
         }

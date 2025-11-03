@@ -91,8 +91,8 @@ public class Issue341Test extends WireTestCommon {
     }
 
     // Class that represents a test object with an Instant property.
-    public static final class MyClass extends SelfDescribingMarshallable {
-        public Instant instant;
+    static final class MyClass extends SelfDescribingMarshallable {
+        Instant instant;
     }
 
     // Class that represents a test object with a String value and implements Serializable and Comparable.

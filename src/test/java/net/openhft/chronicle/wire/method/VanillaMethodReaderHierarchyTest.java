@@ -122,7 +122,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      */
     private static class SimpleDescendantClass implements SimpleDescendant {
         private final BlockingQueue<String> queue;
-        public SimpleDescendantClass(BlockingQueue<String> queue) {
+        SimpleDescendantClass(BlockingQueue<String> queue) {
             this.queue = queue;
         }
         @Override
@@ -142,7 +142,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      */
     private static class SimpleDescendantClass2 extends SimpleAbstractDescendantClass {
         private final BlockingQueue<String> queue;
-        public SimpleDescendantClass2(BlockingQueue<String> queue) {
+        SimpleDescendantClass2(BlockingQueue<String> queue) {
             this.queue = queue;
         }
         @Override
@@ -155,7 +155,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      * Class extending SimpleDescendantClass2 and implementing Simple.
      */
     private static class SimpleDescendantClass3 extends SimpleDescendantClass2 implements Simple {
-        public SimpleDescendantClass3(BlockingQueue<String> queue) {
+        SimpleDescendantClass3(BlockingQueue<String> queue) {
             super(queue);
         }
     }
@@ -164,7 +164,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      * Class implementing multiple interfaces with the same method (duck typing).
      */
     private static class DuckTyping extends SimpleDescendantClass2 implements Simple, SimpleSameMethod {
-        public DuckTyping(BlockingQueue<String> queue) {
+        DuckTyping(BlockingQueue<String> queue) {
             super(queue);
         }
     }

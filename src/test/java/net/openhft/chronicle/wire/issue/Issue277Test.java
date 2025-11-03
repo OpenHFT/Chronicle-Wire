@@ -33,7 +33,7 @@ public class Issue277Test extends WireTestCommon {
     }
 
     // Sample data in string format to be used for deserialization tests
-    static final String data = "" +
+    private static final String data = "" +
             "!Data1 {\n" +
             "  name: Tom,\n" +
             "  age: 25,\n" +

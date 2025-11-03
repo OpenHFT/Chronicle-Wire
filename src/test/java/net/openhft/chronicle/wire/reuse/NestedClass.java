@@ -16,9 +16,9 @@ import org.jetbrains.annotations.NotNull;
  */
 public class NestedClass implements Marshallable {
     // Field to store text data
-    String text;
+    private String text;
     // Field to store numeric data
-    double number;
+    private double number;
 
     /**
      * Reads data from a WireIn instance and populates the fields of this class.

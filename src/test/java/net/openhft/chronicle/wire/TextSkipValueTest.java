@@ -18,7 +18,7 @@ import static org.junit.Assert.assertEquals;
 public class TextSkipValueTest extends WireTestCommon {
 
     // This will store the input string for each run of the test.
-    final String input;
+    private final String input;
 
     // Constructor that initializes the 'input' member variable.
     public TextSkipValueTest(String input) {

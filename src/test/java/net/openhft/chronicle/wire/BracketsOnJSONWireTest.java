@@ -15,7 +15,7 @@ import static org.junit.Assume.assumeFalse;
 public class BracketsOnJSONWireTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Variable to store the actual message from the wire
-    String actual;
+    private String actual;
 
     // Interface to define a Printer with a single method 'print'
     interface Printer {

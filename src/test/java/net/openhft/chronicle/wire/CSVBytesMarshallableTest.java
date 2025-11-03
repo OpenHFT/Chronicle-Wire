@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 public class CSVBytesMarshallableTest extends WireTestCommon {
 
     // Bytes representing raw data for the tests
-    Bytes<?> bytes = Bytes.from(
+    private Bytes<?> bytes = Bytes.from(
             "1.09029,1.090305,EURUSD,2,1,EBS\n" +
                     "1.50935,1.50936,GBPUSD,5,1,RTRS\n" +
                     "1.0906,1.09065,EURCHF,3,1,EBS\n");
@@ -104,14 +104,14 @@ public class CSVBytesMarshallableTest extends WireTestCommon {
 @SuppressWarnings("rawtypes")
 class FXPrice implements BytesMarshallable {
     // Fields to store price data and related attributes
-    public double bidprice;
-    public double offerprice;
+    private double bidprice;
+    private double offerprice;
     //enum
-    public CcyPair pair;
-    public int size;
-    public byte level;
-    public String exchangeName;
-    public transient double midPrice;
+    private CcyPair pair;
+    private int size;
+    private byte level;
+    private String exchangeName;
+    private transient double midPrice;
 
     /**
      * Reads the object's data from bytes.
@@ -164,13 +164,13 @@ class FXPrice implements BytesMarshallable {
  */
 class FXPrice2 implements Marshallable {
     // Fields to store price data and related attributes
-    public double bidprice;
-    public double offerprice;
+    private double bidprice;
+    private double offerprice;
     //enum
-    public CcyPair pair;
-    public int size;
-    public byte level;
-    public String exchangeName;
+    private CcyPair pair;
+    private int size;
+    private byte level;
+    private String exchangeName;
     public transient double midPrice;
 
     /**

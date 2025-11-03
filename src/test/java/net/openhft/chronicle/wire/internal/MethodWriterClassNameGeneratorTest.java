@@ -93,17 +93,17 @@ public class MethodWriterClassNameGeneratorTest extends net.openhft.chronicle.wi
     }
 
     // Simple test interface
-    interface JustAnInterface {
+    private interface JustAnInterface {
 
     }
 
     // Complex test interfaces to simulate long names and truncation scenarios
-    interface NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener1 {
+    private interface NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener1 {
     }
 
-    interface NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener2 {
+    private interface NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener2 {
     }
 
-    interface NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGi_DiffersInTheTruncatedPortion {
+    private interface NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGi_DiffersInTheTruncatedPortion {
     }
 }

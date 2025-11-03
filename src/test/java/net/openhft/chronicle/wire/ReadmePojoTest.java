@@ -93,7 +93,7 @@ public class ReadmePojoTest extends WireTestCommon {
         double factor; // Floating point factor
 
         // Constructor for MyPojo
-        public MyPojo(String text, int num, double factor) {
+        MyPojo(String text, int num, double factor) {
             this.text = text;
             this.num = num;
             this.factor = factor;
@@ -106,7 +106,7 @@ public class ReadmePojoTest extends WireTestCommon {
         List<MyPojo> myPojos = new ArrayList<>(); // List of MyPojo objects
 
         // Constructor for MyPojos
-        public MyPojos(String name) {
+        MyPojos(String name) {
             this.name = name;
         }
     }

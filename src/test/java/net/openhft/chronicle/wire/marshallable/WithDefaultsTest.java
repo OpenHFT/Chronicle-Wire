@@ -46,7 +46,7 @@ public class WithDefaultsTest extends WireTestCommon {
      *
      * @param consumer Consumer action to apply on the WithDefaults instance.
      */
-    void doTest(Consumer<WithDefaults> consumer) {
+    private void doTest(Consumer<WithDefaults> consumer) {
         // Initialize the WithDefaults instance
         WithDefaults wd = new WithDefaults();
 

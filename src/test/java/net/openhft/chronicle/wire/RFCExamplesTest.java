@@ -156,7 +156,7 @@ put: [ 3, bye ]
 
     // Clear the byte buffer.
     @SuppressWarnings("rawtypes")
-    public void clear(@NotNull Bytes<?> bytes) {
+    private void clear(@NotNull Bytes<?> bytes) {
         bytes.clear();
         bytes.zeroOut(0, bytes.realCapacity());
     }
@@ -167,7 +167,7 @@ put: [ 3, bye ]
      *
      * @param wire The Wire object used for serialization.
      */
-    public void writeMessageOne(@NotNull Wire wire) {
+    private void writeMessageOne(@NotNull Wire wire) {
         // Write meta-data with the given service lookup and transaction id.
         wire.writeDocument(true, out ->
                 out.write(csp).text("///service-lookup")

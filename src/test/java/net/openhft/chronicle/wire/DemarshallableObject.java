@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
  * This class represents a demarshallable object with capabilities for both reading from
  * and writing to a wire format, making it suitable for serialization and deserialization tasks.
  */
-public class DemarshallableObject implements Demarshallable, WriteMarshallable {
+class DemarshallableObject implements Demarshallable, WriteMarshallable {
     @NotNull
     final String name;  // Holds the name of the object
     final int value;    // Holds a numeric value associated with the object

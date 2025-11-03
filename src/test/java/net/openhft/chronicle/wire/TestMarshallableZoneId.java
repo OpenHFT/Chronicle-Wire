@@ -14,7 +14,7 @@ public class TestMarshallableZoneId {
 
     // Define a static nested class named 'MySelfDescribingMarshallable',
     // which extends 'SelfDescribingMarshallable' and includes a 'ZoneId' field
-    public static class MySelfDescribingMarshallable extends SelfDescribingMarshallable {
+    static class MySelfDescribingMarshallable extends SelfDescribingMarshallable {
         ZoneId zoneId; // Declare a ZoneId field named 'zoneId'
     }
 
@@ -44,7 +44,7 @@ public class TestMarshallableZoneId {
 
     // Define a static nested class named 'MyAbstractMarshallableCfg',
     // which extends 'AbstractMarshallableCfg' and includes a 'ZoneId' field
-    public static class MyAbstractMarshallableCfg extends AbstractMarshallableCfg {
+    static class MyAbstractMarshallableCfg extends AbstractMarshallableCfg {
         ZoneId zoneId; // Declare a ZoneId field named 'zoneId'
     }
 

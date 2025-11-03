@@ -27,7 +27,7 @@ import static org.junit.Assume.assumeFalse;
 
 public class VanillaMethodReaderTest extends WireTestCommon {
 
-    A instance;
+    private A instance;
 
     @Test
     public void testMethodReaderWriterMetadata() {
@@ -349,7 +349,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         doParseMetaData(true);
     }
 
-    public void doParseMetaData(boolean scanning) {
+    private void doParseMetaData(boolean scanning) {
         Wire wire = WireType.BINARY_LIGHT.apply(new HexDumpBytes());
         final RoutedSaying routedSaying = wire.methodWriter(RoutedSaying.class);
         final RoutedSaying metaRoutedSaying = wire.methodWriterBuilder(true, RoutedSaying.class).build();

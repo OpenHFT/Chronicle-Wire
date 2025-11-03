@@ -62,7 +62,7 @@ public class JSON222IndividualTest extends WireTestCommon {
     }
 
     // Helper method to check serialization of an object into JSON representation
-    void checkSerialized(@NotNull String expected, Object o) {
+    private void checkSerialized(@NotNull String expected, Object o) {
         @NotNull Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
         try {
             wire.getValueOut()
@@ -85,7 +85,7 @@ public class JSON222IndividualTest extends WireTestCommon {
     }
 
     // Helper method to check deserialization of a JSON input into an object representation
-    void checkDeserialized(String expected, @NotNull String input) {
+    private void checkDeserialized(String expected, @NotNull String input) {
         @NotNull Wire wire = TextWire.from(input);
 
         // Validate the input with an external YAML parser

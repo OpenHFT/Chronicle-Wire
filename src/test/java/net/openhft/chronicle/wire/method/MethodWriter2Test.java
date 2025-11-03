@@ -139,6 +139,6 @@ public class MethodWriter2Test extends WireTestCommon {
             }
         };
 
-        public abstract String expected();
+        protected abstract String expected();
     }
 }

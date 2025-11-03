@@ -12,12 +12,12 @@ public class LongConversionExampleB {
     }
 
     // Static inner class representing a House with an owner using a specific long conversion
-    public static class House extends SelfDescribingMarshallable {
+    static class House extends SelfDescribingMarshallable {
         @LongConversion(Base64LongConverter.class)
         long owner;
 
         // Method to set the owner's name which is then converted to its corresponding long value
-        public void owner(CharSequence owner) {
+        void owner(CharSequence owner) {
             this.owner = Base64LongConverter.INSTANCE.parse(owner);
         }
     }

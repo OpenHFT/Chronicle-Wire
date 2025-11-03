@@ -65,7 +65,7 @@ public class CompareNaNTest extends WireTestCommon {
         double d;
         float f;
 
-        public PrimDTO(double d, float f) {
+        PrimDTO(double d, float f) {
             this.d = d;
             this.f = f;
         }
@@ -78,7 +78,7 @@ public class CompareNaNTest extends WireTestCommon {
         Double d;
         Float f;
 
-        public WrapDTO(Double d, Float f) {
+        WrapDTO(Double d, Float f) {
             this.d = d;
             this.f = f;
         }
@@ -92,7 +92,7 @@ public class CompareNaNTest extends WireTestCommon {
         Object d;
         Object f;
 
-        public ObjectWrapDTO(Object d, Object f) {
+        ObjectWrapDTO(Object d, Object f) {
             this.d = d;
             this.f = f;
         }

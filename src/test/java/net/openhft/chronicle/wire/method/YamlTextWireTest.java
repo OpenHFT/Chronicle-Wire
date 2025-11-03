@@ -32,8 +32,8 @@ public class YamlTextWireTest extends WireTestCommon {
         ClassAliasPool.CLASS_ALIASES.addAlias(Fields.class);
     }
 
-    final String name;  // Name of the test scenario
-    final String s;     // YAML formatted text to be tested
+    private final String name;  // Name of the test scenario
+    private final String s;     // YAML formatted text to be tested
 
     /**
      * Constructor for parameterized test instances.

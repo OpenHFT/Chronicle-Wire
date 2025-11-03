@@ -18,11 +18,11 @@ public class SmallDoublesMarshallingTest extends WireTestCommon {
     public static class Example extends SelfDescribingMarshallable {
         private double doubleVal;
 
-        public double doubleVal() {
+        double doubleVal() {
             return doubleVal;
         }
 
-        public Example doubleVal(double doubleVal) {
+        Example doubleVal(double doubleVal) {
             this.doubleVal = doubleVal;
             return this;
         }
