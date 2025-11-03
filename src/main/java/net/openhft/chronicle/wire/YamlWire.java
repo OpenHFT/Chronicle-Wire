@@ -72,7 +72,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * Default constructor that initializes the YamlWire with elastic direct bytes. Assumes text documents.
      */
     public YamlWire() {
-        this(Bytes.allocateElasticDirect());
+        this(Bytes.allocateElasticOnHeap());
         useTextDocuments();
     }
 
