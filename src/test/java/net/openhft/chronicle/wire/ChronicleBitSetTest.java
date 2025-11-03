@@ -202,33 +202,6 @@ public class ChronicleBitSetTest extends WireTestCommon {
         }
     }
 
-    // Performance test for the flip operation
-    @Test
-    @Ignore("Performance test")
-    public void testFlipTime() {
-        // Make a fairly random ChronicleBitSet
-        ChronicleBitSet b1 = createBitSet();
-        b1.set(1000);
-
-        // Performance test for multi-word flip
-        long startTime = System.currentTimeMillis();
-        for (int x = 0; x < 100000; x++) {
-            b1.flip(100, 900);
-        }
-        long endTime = System.currentTimeMillis();
-        long total = endTime - startTime;
-        System.out.println("Multiple word flip Time " + total);
-
-        // Performance test for single-word flip
-        startTime = System.currentTimeMillis();
-        for (int x = 0; x < 100000; x++) {
-            b1.flip(2, 44);
-        }
-        endTime = System.currentTimeMillis();
-        total = endTime - startTime;
-        System.out.println("Single word flip Time " + total);
-    }
-
     @Test
     public void testNextSetBit() {
         int failCount = 0;
@@ -437,7 +410,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
                 boolean bit1 = b1.get(x);
                 boolean bit2 = b2.get(x);
                 boolean bit3 = b3.get(x);
-                if (!(bit3 == (bit1 & (!bit2))))
+                if (!(bit3 == (bit1 && (!bit2))))
                     failCount++;
             }
             checkSanity(b1, b2, b3);
@@ -474,7 +447,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
                 boolean bit1 = b1.get(x);
                 boolean bit2 = b2.get(x);
                 boolean bit3 = b3.get(x);
-                if (!(bit3 == (bit1 & bit2))) {
+                if (!(bit3 == (bit1 && bit2))) {
                     System.out.println("x: " + x);
                     failCount++;
                 }
@@ -547,7 +520,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
                 boolean bit1 = b1.get(y);
                 boolean bit2 = b2.get(y);
                 boolean bit3 = b3.get(y);
-                if (!(bit3 == (bit1 | bit2)))
+                if (!(bit3 == (bit1 || bit2)))
                     failCount++;
             }
             checkSanity(b1, b2, b3);

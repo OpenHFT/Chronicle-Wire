@@ -20,6 +20,7 @@ public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
      * field name, supporting both original and lower-cased names for flexibility in matching
      * fields from the input wire.
      */
+    @SuppressWarnings("java:S2387")
     final CharSequenceObjectMap<FieldAccess> fieldMap;
 
     public WireMarshallerForUnexpectedFields(@NotNull FieldAccess[] fields, boolean isLeaf, T defaultValue) {

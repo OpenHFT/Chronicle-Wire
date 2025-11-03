@@ -3365,7 +3365,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 case NULL:
                     return null;
 
-                case STRING_ANY: {
+                case STRING_ANY: { // NOSONAR
                     long len0 = bytes.readStopBit();
                     if (len0 == -1L) {
                         return null;
@@ -3722,7 +3722,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 case DATE_TIME:
                 case ZONED_DATE_TIME:
                 case TYPE_LITERAL:
-                case STRING_ANY: {
+                case STRING_ANY: { // NOSONAR
                     long pos0 = bytes.readPosition();
                     try {
                         bytes.uncheckedReadSkipOne();
@@ -4787,7 +4787,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     switch (code) {
                         case BYTES_LENGTH8:
                         case BYTES_LENGTH16:
-                        case BYTES_LENGTH32: {
+                        case BYTES_LENGTH32: { // NOSONAR
                             if (using instanceof StringBuilder) {
                                 bytesStore((StringBuilder) using);
                                 return using;

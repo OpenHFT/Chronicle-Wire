@@ -7,15 +7,13 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.StreamCorruptedException;
 
-// This class tests the performance of raw wire operations.
-@Ignore("Long running test")
-public class RawWirePerfTest extends WireTestCommon {
+import static org.junit.Assert.assertTrue;
 
-    // Test case to measure the performance of raw wire operations.
-    @Test
-    public void testRawPerf() {
+public class RawWirePerfMain extends WireTestCommon {
 
+    public static void main(String[] args) throws StreamCorruptedException {
         // Create an instance of BinaryWirePerfTest with specific parameters.
         // These parameters typically control the test conditions.
         @NotNull BinaryWirePerfTest test = new BinaryWirePerfTest(-1, true, false, true);

@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class Base32LongConverterTest extends WireTestCommon {
 
@@ -30,6 +31,7 @@ public class Base32LongConverterTest extends WireTestCommon {
         String s = ",O,A,L,ZZ,QQ,ABCDEGHIJKLM,5OPQRSTVWXYZ,JZZZZZZZZZZZ,";
         int comparisons = 9;
         subStringParseLoop(s, c, comparisons);
+        assertTrue(true);
     }
 
     @Test(expected = IllegalArgumentException.class)

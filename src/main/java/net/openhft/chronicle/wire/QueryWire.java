@@ -30,7 +30,7 @@ import java.util.function.BiFunction;
  * Extends {@link TextWire} and supplies {@link QueryValueIn} and
  * {@link QueryValueOut} for query specific value handling.
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "java:S2387"})
 public class QueryWire extends TextWire {
 
     // The specialized output handler for query string values.

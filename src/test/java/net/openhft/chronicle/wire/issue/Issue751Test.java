@@ -9,6 +9,7 @@ import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
 public class Issue751Test extends WireTestCommon {
@@ -52,6 +53,15 @@ public class Issue751Test extends WireTestCommon {
         wire.write("first").object(new Three(
                 new One("hello"), new Two(42)));
 
-        System.err.println(wire.read("first").object());
+        Object first = wire.read("first").object();
+        assertEquals("" +
+                "!net.openhft.chronicle.wire.issue.Issue751Test$Three {\n" +
+                "  one: {\n" +
+                "    text: hello\n" +
+                "  },\n" +
+                "  two: {\n" +
+                "    text: !int 42\n" +
+                "  }\n" +
+                "}\n", first.toString());
     }
 }

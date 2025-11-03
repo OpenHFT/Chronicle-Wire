@@ -12,6 +12,7 @@ import org.junit.Test;
 import java.lang.reflect.Proxy;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeFalse;
 
 // Test class extending MethodWriterTest to test behavior of method writers when using proxies
@@ -40,17 +41,16 @@ public class MethodWriterProxyTest extends MethodWriterTest {
     public void multiOut() {
         // Calls the same test method from the parent class
         super.multiOut();
+        fail();
     }
 
     // Test method for testing primitives, ignored on specific conditions and known issues
     @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
     @Test
     public void testPrimitives() {
-        // Skip the test on Mac ARM architecture
-        assumeFalse(Jvm.isMacArm());
-
         // Calls the test method for primitives from the parent class
         super.doTestPrimitives(true);
+        fail();
     }
 
     // Method to check the type of the writer object in the context of this test class
