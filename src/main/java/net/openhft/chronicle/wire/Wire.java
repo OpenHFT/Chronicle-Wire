@@ -25,7 +25,7 @@ public interface Wire extends WireIn, WireOut {
      * @return A YamlWire instance configured to write to an on-heap Bytes object.
      */
     static Wire newYamlWireOnHeap() {
-        return new YamlWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
+        return new YamlWire();
     }
 
     /**

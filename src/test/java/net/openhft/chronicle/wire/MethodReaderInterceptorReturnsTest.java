@@ -320,8 +320,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
         @Override
         public String codeBeforeCall(Method m, String objectName, String[] argumentNames) {
             if (m.getName().equals("oneArg")) {
-                return String.format("if (%s == 2)\n" +
-                        "break;\n", argumentNames[0]);
+                return String.format("if (%s == 2)%nbreak;%n", argumentNames[0]);
             }
 
             return null;

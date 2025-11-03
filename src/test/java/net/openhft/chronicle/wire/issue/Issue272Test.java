@@ -27,7 +27,6 @@ public class Issue272Test {
      */
     @Test
     public void arrays() {
-        // Allocate a buffer to hold the serialized data
         Bytes<?> buffer = Bytes.allocateElasticOnHeap();
 
         // Define two int arrays for testing
@@ -145,7 +144,7 @@ public class Issue272Test {
                 bytes.toHexString());
 
         // Convert the BinaryWire back into a YamlWire and verify its string representation
-        Wire wire2 = new YamlWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
+        Wire wire2 = new YamlWire();
         copyAll(copyWire, wire2);
         assertEquals("to: dest1\n" +
                         "send: message\n" +

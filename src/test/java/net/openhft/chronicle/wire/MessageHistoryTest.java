@@ -298,14 +298,14 @@ public class MessageHistoryTest extends WireTestCommon {
         vmh.addTiming(11111111);
         vmh.addTiming(22222222);
 
-        Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
+        Wire wire = new BinaryWire();
         vmh.useBytesMarshallable(useBytesMarshallable);
         ValueOut valueOut = useBytesMarshallable
                 ? wire.writeEventId(MESSAGE_HISTORY_METHOD_ID)
                 : wire.writeEventName(MethodReader.HISTORY);
         valueOut.object(SetTimeMessageHistory.class, vmh);
 
-        Wire wire2 = new YamlWire(Bytes.allocateElasticOnHeap());
+        Wire wire2 = new YamlWire();
         wire.copyTo(wire2);
 
         assertEquals("history: {\n" +

@@ -331,7 +331,7 @@ public class LongConvertorFieldsTest {
      * @param expected The expected string representation of the serialized object.
      */
     private void doTest(Marshallable dto, String expected) {
-        Wire wire = new YamlWire(Bytes.allocateElasticOnHeap());
+        Wire wire = new YamlWire();
         wire.getValueOut().object(dto);
         assertEquals(expected, wire.toString());
         Object object = wire.getValueIn().object();

@@ -49,7 +49,7 @@ public class Issue751Test extends WireTestCommon {
     public void comparableField() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        Wire wire = new YamlWire(Bytes.allocateElasticOnHeap());
+        Wire wire = new YamlWire();
         wire.write("first").object(new Three(
                 new One("hello"), new Two(42)));
 

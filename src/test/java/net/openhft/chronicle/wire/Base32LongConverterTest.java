@@ -53,7 +53,7 @@ public class Base32LongConverterTest extends WireTestCommon {
     // A test to check the character safety in YamlWire.
     @Test
     public void allSafeCharsYamlWire() {
-        Wire wire = new YamlWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
+        Wire wire = new YamlWire();
         allSafeChars(wire);
     }
 
