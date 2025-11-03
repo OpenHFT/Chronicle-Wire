@@ -19,10 +19,10 @@ public class WireExamples1 {
 
     public static void example1() {
 
-        // allows the the YAML to refer to car, rather than net.openhft.chronicle.wire.WireExamples$Car
+        // allows the YAML to refer to car, rather than net.openhft.chronicle.wire.WireExamples$Car
         ClassAliasPool.CLASS_ALIASES.addAlias(Car.class);
 
-        Wire wire = new YamlWire(Bytes.allocateElasticOnHeap());
+        Wire wire = new YamlWire();
         wire.getValueOut().object(new Car("Lewis Hamilton", 44));
         System.out.println(wire);
     }

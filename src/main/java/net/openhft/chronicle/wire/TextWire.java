@@ -110,6 +110,13 @@ public class TextWire extends YamlWireOut<TextWire> {
     private boolean strict = false;
 
     /**
+     * Default constructor initializing the `TextWire` with elastic on-heap bytes, assume text documents.
+     */
+    public TextWire() {
+        this(Bytes.allocateElasticOnHeap());
+        useTextDocuments();
+    }
+    /**
      * Constructor to initialize the `TextWire` with a specific bytes representation
      * and a flag to determine if 8-bit encoding is to be used.
      *

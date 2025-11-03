@@ -129,7 +129,7 @@ public class EventByMethodExamples {
         System.out.println("----");
         System.out.println();
 
-        Wire yamlWire = new YamlWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
+        Wire yamlWire = new YamlWire();
         code.accept(yamlWire.methodWriter(tClass));
 
         System.out.println("." + methodName + " As YAML ");

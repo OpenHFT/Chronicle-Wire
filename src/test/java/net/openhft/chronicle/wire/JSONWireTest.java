@@ -68,7 +68,7 @@ public class JSONWireTest extends WireTestCommon {
         JSONWire json = new JSONWire(Bytes.from(str));
 
         // Initialize a YAML wire
-        YamlWire yaml = new YamlWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
+        YamlWire yaml = new YamlWire();
 
         // Initialize another JSONWire for copying back from binary
         JSONWire json2 = new JSONWire(Bytes.allocateElasticOnHeap());

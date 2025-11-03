@@ -134,7 +134,7 @@ public class Base85LongConverterTest extends WireTestCommon {
     @Test
     public void allSafeCharsYamlWire() {
         // Create a YamlWire instance with elastic on heap bytes and configure it to use text documents
-        Wire wire = new YamlWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
+        Wire wire = new YamlWire();
         // Execute the generic safe character check
         allSafeChars(wire);
     }

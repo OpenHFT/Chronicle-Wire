@@ -60,6 +60,13 @@ public class RawWire extends AbstractWire implements Wire {
     private StringBuilder lastSB;
 
     /**
+     * Creates a {@code RawWire} backed by an elastic on-heap buffer. Strings
+     * are encoded using 8-bit length prefixes.
+     */
+    public RawWire() {
+        this(Bytes.allocateElasticOnHeap());
+    }
+    /**
      * Creates a {@code RawWire} backed by the given buffer. Strings are encoded
      * using 8-bit length prefixes.
      *
