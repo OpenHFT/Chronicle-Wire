@@ -1,0 +1,46 @@
+= Chronicle Wire Runtime Health Runbook
+Chronicle Software
+:toc:
+:sectnums:
+:lang: en-GB
+:source-highlighter: rouge
+
+== Purpose
+
+This runbook guides on-call engineers through the most common operational issues:
+build failures, leaked `DocumentContext` instances, and schema drift.
+
+[[build-recovery]]
+== Build Recovery (`mvn -q clean verify`)
+
+1. Confirm the failing JVM version. Run `java -version` and compare it with the CI lane.
+2. Execute `mvn -q -e clean verify` locally. Capture the first stack trace.
+3. If the failure stems from missing documentation, run `scripts/check-doc-includes.py`
+   and update the relevant `.adoc` files (see `functional-requirements.adoc`).
+4. For test regressions, bisect with `git bisect run mvn -q -DskipTests=false test`
+   to isolate the offending commit.
+5. After applying the fix, rerun `mvn -q clean verify` and attach the log to the PR.
+
+[[document-context-leak]]
+== DocumentContext Leak Response
+
+1. Capture a thread dump: `jcmd <pid> Thread.print | tee /tmp/wire-thread-dump.txt`.
+2. Search for `DocumentContext.close` or `AbstractMethodReader.readOne` stack traces.
+3. If the writer side is stuck, enable debug logging for `net.openhft.chronicle.wire` temporarily
+   and reproduce the issue in a lower environment.
+4. Inspect user code for missing try-with-resources blocks around `DocumentContext`.
+5. Add coverage or assertions (`DocumentContextLifecycleTest`) and rerun the full build.
+
+[[schema-drift]]
+== Schema Drift Investigation
+
+1. Compare producer and consumer SHAs. If they differ, check whether new fields were added without defaults.
+2. Dump a problematic message with `WireDumper` (see `wire-cookbook.adoc`) and inspect field names.
+3. Validate converters by running `mvn -q -Dtest=LongConversionTest test`.
+4. Update `data-requirements.adoc` and `wire-schema-evolution.adoc` with the new field rules.
+5. Add regression tests before redeploying.
+
+== Verification
+
+* Each runbook step must conclude with a green `mvn -q clean verify`.
+* Link incident notes back to `ops-scenarios.adoc` so future contributors know which entry was exercised.

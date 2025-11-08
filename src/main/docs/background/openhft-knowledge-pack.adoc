@@ -1,0 +1,56 @@
+= OpenHFT Knowledge Pack for Chronicle Wire
+Chronicle Software
+:toc:
+:sectnums:
+:lang: en-GB
+:source-highlighter: rouge
+
+== Purpose
+
+This background note captures institutional knowledge about the OpenHFT ecosystem that Chronicle Wire
+depends on. It informs performance tuning, dependency management, and support policies.
+
+== Dependency Baseline
+
+[cols="1,2,2", options="header"]
+|===
+|Library |Notes |Tracking
+
+|`net.openhft:chronicle-bytes`
+|Provides the low-level `Bytes` abstraction used by every wire type. Chronicle Wire tracks the latest
+release from the `ea` stream but keeps compatibility with the most recent GA.
+|Chronicle BOM plus `project-requirements.adoc`.
+
+|`net.openhft:chronicle-core`
+|Supplies utility classes (thread affinity, OS detection, and annotations) referenced by Wire.
+|Keep aligned with the version bundled in the BOM to avoid `NoSuchMethodError`.
+
+|`net.openhft:affinity`
+|Used by some benchmarks and optional modules to pin threads when verifying latency claims.
+|Only required for integration and load testing.
+|===
+
+== Supported JVMs
+
+* Primary: JDK 8u382+, 11.0.20+, 17.0.8+, 21.0.1+.
+* Early Access: JDK 22 (monitored via the `ea` branch; no guarantees yet).
+* HotSpot is the reference runtime; OpenJ9 receives best-effort support.
+
+== Performance Notes
+
+* Chronicle Wire prefers G1 or ZGC for production when running on Java 17+.
+* Allocate direct memory via `-XX:MaxDirectMemorySize` to match Chronicle Queue retention;
+  undersizing this flag leads to forced recycling of buffers under load.
+* Use `-Djvm.compile.threshold=1000` or JIT profiles when benchmarking `MethodWriter` to reach
+  steady-state quickly.
+
+== Observability
+
+* Enable `-Dchronicle.wire.dumpOnError=true` during incident triage to print problematic documents.
+* Chronicle Services deployments typically send structured error events to Chronicle Telemetry;
+  Wire emits markers that this pipeline consumes.
+
+== References
+
+* `system-architecture.adoc` ties these dependencies back to the component diagram.
+* Chronicle public docs: https://chronicle.software/knowledge-base/

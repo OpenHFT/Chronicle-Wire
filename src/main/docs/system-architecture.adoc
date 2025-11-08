@@ -1,0 +1,60 @@
+= Chronicle Wire System Architecture
+Chronicle Software
+:toc:
+:sectnums:
+:lang: en-GB
+:source-highlighter: rouge
+
+== Purpose
+
+This document summarises how Chronicle Wire's modules collaborate with the wider OpenHFT stack.
+Use it as an orientation map before diving into the detailed views in `wire-architecture.adoc`,
+`wire-schema-evolution.adoc`, and the component notes.
+
+== Context
+
+Chronicle Wire provides the serialisation substrate for components such as Chronicle Queue,
+Chronicle Services, and higher-level trading stacks. It sits between business code and
+`chronicle-bytes`, exposing a format-neutral API that maps directly to heap or off-heap buffers.
+
+== Component Map
+
+----
+Application Services -> Wire API -> WireType Implementations -> Chronicle Bytes -> Storage / Network
+                               |-> Method Writer/Reader      -> Event Consumers
+                               |-> Converters / Marshallers  -> Domain Objects
+----
+
+* **Application Services** use Wire to read and write domain objects without worrying about the
+  transport format.
+* **Wire API** includes `Wire`, `WireIn`, `WireOut`, `DocumentContext`, `ValueIn`, and `ValueOut`.
+* **WireType Implementations** (Text, YAML, JSON, Binary) convert API calls into bytes.
+* **Chronicle Bytes** supplies direct-memory primitives and pooling.
+* **Storage / Network** refers to Chronicle Queue, replication, or user-defined transports.
+
+== Data Flow
+
+1. The caller requests a document via `Wire.acquireWritingDocument`.
+2. Fields are written using fluent `ValueOut` calls (or generated via `MethodWriter`).
+3. The document is published, transferring ownership of the buffer slice.
+4. Consumers wrap the slice in a `Wire` via the appropriate `WireType` and replay the fields.
+5. Optional converters (`LongConverter`, `Base32LongConverter`, etc.) translate textual encodings
+   into numeric forms without allocations.
+
+== Cross-Cutting Concerns
+
+* **Threading:** `DocumentContext` enforces single-writer, single-reader semantics per instance.
+  Shared buffers are protected via Chronicle Bytes' CAS-based locking and sequencing.
+* **Performance:** Hot loops avoid reflection; method writers generate bytecode-backed proxies.
+* **Resilience:** Error handling is centralised in `wire-error-handling.adoc`; operational
+  responses live in `ops-scenarios.adoc`.
+* **Documentation Sync:** Any change to the architecture must update this file as well as the
+  detailed component documentation.
+
+== Future Work
+
+Chronicle Wire continues to adopt decisions recorded in `decision-log.adoc`. Upcoming investigations
+include:
+
+* Expanding support for pluggable `ClassLookup` strategies for sandboxed environments.
+* Tightening integration with streaming schema registries without regressing latency.
