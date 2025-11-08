@@ -30,6 +30,9 @@ import static org.junit.Assume.assumeFalse;
  * @author Rob Austin
  */
 public class WireTextBugTest extends WireTestCommon {
+    private static final String BUG_TEXT = "!Bug {\n" +
+            "  clOrdID: \"FIX.4.4:12345678_client1->FOO/MINI1-1234567891234-12\"\n" +
+            "}\n";
 
     @org.junit.Test
     // Test for handling text within the Wire framework
@@ -47,9 +50,7 @@ public class WireTextBugTest extends WireTestCommon {
         b.setClOrdID("FIX.4.4:12345678_client1->FOO/MINI1-1234567891234-12");
 
         // Check the Bug object's string representation
-        assertEquals("!Bug {\n" +
-                "  clOrdID: \"FIX.4.4:12345678_client1->FOO/MINI1-1234567891234-12\"\n" +
-                "}\n", b.toString());
+        assertEquals(BUG_TEXT, b.toString());
 
         // Write the Bug object to the wire
         encodeWire.getValueOut().object(b);
@@ -66,13 +67,49 @@ public class WireTextBugTest extends WireTestCommon {
         @Nullable Bug b2 = (Bug) o;
 
         // Check the deserialized Bug object's string representation
-        assertEquals("!Bug {\n" +
-                "  clOrdID: \"FIX.4.4:12345678_client1->FOO/MINI1-1234567891234-12\"\n" +
-                "}\n", b2.toString());
+        assertEquals(BUG_TEXT, b2.toString());
 
         // Release resources
         encodeWire.bytes().releaseLast();
         decodeWire.bytes().releaseLast();
+    }
+
+    @org.junit.Test
+    public void textWireOnDirectBytesSurvivesBufferMutation() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+        ClassAliasPool.CLASS_ALIASES.addAlias(Bug.class);
+
+        Bytes<?> directBytes = Bytes.allocateElasticDirect(128);
+        try {
+            Wire encodeWire = new TextWire(directBytes);
+            Bug bug = new Bug();
+            bug.setClOrdID("FIX.4.4:12345678_client1->FOO/MINI1-1234567891234-12");
+            encodeWire.getValueOut().object(bug);
+
+            byte[] snapshot = encodeWire.bytes().toByteArray();
+            directBytes.readPositionRemaining(0, directBytes.writePosition());
+            Wire decodeWire = new TextWire(directBytes);
+            Bug decoded = decodeWire.getValueIn().object(Bug.class);
+            assertEquals(BUG_TEXT, decoded.toString());
+
+            directBytes.zeroOut(0, directBytes.realCapacity());
+            directBytes.clear();
+
+            // The decoded object should keep its text even though the backing buffer was zeroed.
+            assertEquals(BUG_TEXT, decoded.toString());
+
+            // Local mutations must not impact a fresh decode from the saved snapshot.
+            decoded.setClOrdID(decoded.getClOrdID() + "-local");
+            Wire snapshotWire = new TextWire(Bytes.wrapForRead(snapshot));
+            try {
+                Bug snapshotBug = snapshotWire.getValueIn().object(Bug.class);
+                assertEquals(BUG_TEXT, snapshotBug.toString());
+            } finally {
+                snapshotWire.bytes().releaseLast();
+            }
+        } finally {
+            directBytes.releaseLast();
+        }
     }
 
     // Inner class to represent a Bug with a single field clOrdID

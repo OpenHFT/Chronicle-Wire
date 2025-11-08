@@ -62,4 +62,28 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
         }
         assertTrue(w.writingIsComplete());
     }
+
+    @Test
+    public void rollbackKeepsDocumentAvailableForNextRead() {
+        Wire w = WireType.BINARY.apply(Bytes.allocateElasticOnHeap(256));
+        try (DocumentContext dc = w.writingDocument()) {
+            dc.wire().write("item").text("value");
+        }
+
+        try (DocumentContext dc = w.readingDocument()) {
+            assertTrue(dc.isPresent());
+            dc.rollbackOnClose();
+        }
+
+        try (DocumentContext dc = w.readingDocument()) {
+            assertTrue("document should still be present after rollback", dc.isPresent());
+            assertEquals("value", dc.wire().read("item").text());
+        }
+
+        try (DocumentContext dc = w.readingDocument()) {
+            assertFalse(dc.isPresent());
+        }
+        w.bytes().releaseLast();
+    }
+
 }

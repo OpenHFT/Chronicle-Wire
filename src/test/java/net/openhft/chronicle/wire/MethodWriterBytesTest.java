@@ -45,6 +45,10 @@ public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCo
         Bytes result = q.poll(10, TimeUnit.SECONDS);
         // Verify that the fetched message matches the expected content
         Assert.assertEquals("hello", result.toString());
+        if (result != null) {
+            result.releaseLast();
+        }
+        w.bytes().releaseLast();
     }
 
     /**
@@ -52,5 +56,60 @@ public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCo
      */
     private void println(Bytes<?> bytes) {
         q.add(bytes);
+    }
+
+    @Test
+    public void reusedBytesRemainStableAcrossDispatches() throws InterruptedException {
+        Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
+        Print printer = wire.methodWriter(Print.class);
+        Bytes<?> reusable = Bytes.allocateElasticOnHeap();
+        try {
+            reusable.writeUtf8("alpha");
+            printer.msg(reusable);
+
+            reusable.clear();
+            reusable.writeUtf8("beta");
+            printer.msg(reusable);
+
+            ArrayBlockingQueue<String> sink = new ArrayBlockingQueue<>(2);
+            MethodReader reader = wire.methodReader((Print) bytes -> {
+                bytes.readPosition(0);
+                sink.add(bytes.readUtf8());
+            });
+
+            Assert.assertTrue(reader.readOne());
+            Assert.assertEquals("alpha", sink.poll(5, TimeUnit.SECONDS));
+            Assert.assertTrue(reader.readOne());
+            Assert.assertEquals("beta", sink.poll(5, TimeUnit.SECONDS));
+        } finally {
+            reusable.releaseLast();
+            wire.bytes().releaseLast();
+        }
+    }
+
+    @Test
+    public void producerMutationDuringCallbackDoesNotCorruptPayload() throws InterruptedException {
+        Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
+        Bytes<?> shared = Bytes.allocateElasticOnHeap();
+        try {
+            Print printer = wire.methodWriter(Print.class);
+            shared.writeUtf8("original");
+            printer.msg(shared);
+
+            ArrayBlockingQueue<String> sink = new ArrayBlockingQueue<>(1);
+            MethodReader reader = wire.methodReader((Print) bytes -> {
+                // mutate the shared Bytes while the reader is consuming
+                shared.clear();
+                shared.writeUtf8("mutated");
+                bytes.readPosition(0);
+                sink.add(bytes.readUtf8());
+            });
+
+            Assert.assertTrue(reader.readOne());
+            Assert.assertEquals("original", sink.poll(5, TimeUnit.SECONDS));
+        } finally {
+            shared.releaseLast();
+            wire.bytes().releaseLast();
+        }
     }
 }
