@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Copyright 2016-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
+# Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
 #
 
 export MAVEN_OPTS="--add-exports=java.base/jdk.internal.ref=ALL-UNNAMED --add-exports=java.base/sun.nio.ch=ALL-UNNAMED \
