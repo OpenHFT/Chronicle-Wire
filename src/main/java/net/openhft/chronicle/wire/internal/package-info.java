@@ -1,10 +1,6 @@
 //
 // Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
 //
-
-/*
- * Copyright 2016-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
- */
 /**
  * Provides internal utility classes and implementation details for the Chronicle Wire library.
  * <p>
