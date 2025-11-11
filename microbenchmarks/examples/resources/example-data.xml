@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
 
-    Copyright 2016-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
+    Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
 
 -->
 <sbe:messageSchema xmlns:sbe="http://www.fixprotocol.org/ns/simple/1.0"
