@@ -335,7 +335,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     /** Optimised binary deserialisation using direct memory access. */
     private void readMarshallableDirect(@NotNull BytesIn<?> bytes) {
         long addr = bytes.addressForRead(bytes.readPosition());
-        long start = addr;
+        final long start = addr;
         Memory memory = OS.memory();
         sources = memory.readByte(addr++);
         for (int i = 0; i < sources; i++) {
@@ -384,7 +384,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     /** Optimised binary serialisation using direct memory access. */
     private void writeMarshallableDirect(BytesOut<?> b) {
         long addr = b.addressForWritePosition();
-        long start = addr;
+        final long start = addr;
         Memory memory = OS.memory();
         memory.writeByte(addr++, (byte) sources);
         for (int i = 0; i < sources; i++) {

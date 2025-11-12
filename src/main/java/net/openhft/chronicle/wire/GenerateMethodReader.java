@@ -812,9 +812,8 @@ public class GenerateMethodReader {
             // If numeric conversion is available and has a shared instance.
             if (numericConversionClass != null && hasInstance(numericConversionClass)) {
                 return format("%s = (byte) %s.INSTANCE.parse(%s.text());\n", argumentName, numericConversionClass.getName(), valueInName);
-            }
-            // If numeric conversion is available and is an instance of LongConverter.
-            else if (numericConversionClass != null && LongConverter.class.isAssignableFrom(numericConversionClass)) {
+            } else if (numericConversionClass != null && LongConverter.class.isAssignableFrom(numericConversionClass)) {
+                // If numeric conversion is available and is an instance of LongConverter.
                 // Register a converter for this type.
                 numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);\n",
                         numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
@@ -901,10 +900,10 @@ public class GenerateMethodReader {
      * based on {@link #multipleNonMarshallableParamTypes} and the type itself.
      */
     private boolean multipleNonMarshallableParamTypes(Class<?> argumentType) {
-        Boolean _multipleNonMarshallableParamTypes = this.multipleNonMarshallableParamTypes;
-        return _multipleNonMarshallableParamTypes == null
+        Boolean cachedMultipleNonMarshallableParamTypes = this.multipleNonMarshallableParamTypes;
+        return cachedMultipleNonMarshallableParamTypes == null
                 ? argumentType.isInterface() && !isRecyclable(argumentType) || argumentType == Object.class
-                : _multipleNonMarshallableParamTypes;
+                : cachedMultipleNonMarshallableParamTypes;
     }
 
     /**

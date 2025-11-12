@@ -35,6 +35,9 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 @DontChain
 public interface Marshallable extends WriteMarshallable, ReadMarshallable, Resettable {
 
+    // CHECKSTYLE:OFF: MethodName
+    // CHECKSTYLE:OFF: ParameterName
+
     /**
      * Compares a given {@code WriteMarshallable} object with another object for equality.
      *
@@ -66,6 +69,9 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     static String $toString(WriteMarshallable $this) {
         return TEXT.asString($this);
     }
+
+    // CHECKSTYLE:ON: ParameterName
+    // CHECKSTYLE:ON: MethodName
 
     /**
      * Converts a {@code CharSequence} into its corresponding marshallable representation.
@@ -250,9 +256,9 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * Copy fields from this to dest by marshalling out and then in. Allows copying of fields by name
      * even if there is no type relationship between this and dest
      *
+     * @param <T> destination type
      * @param dest destination
      * @return t
-     * @param <T> destination type
      */
     default <T extends Marshallable> T copyTo(@NotNull T dest) throws InvalidMarshallableException {
         return Wires.copyTo(this, dest);
@@ -272,6 +278,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
                 Wires::copyTo);
     }
 
+    // CHECKSTYLE:OFF: MethodName
     /**
      * Retrieves the list of field information for the current class.
      *
@@ -290,6 +297,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     default @NotNull Map<String, FieldInfo> $fieldInfoMap() {
         return Wires.fieldInfoMap(getClass());
     }
+    // CHECKSTYLE:ON: MethodName
 
     /**
      * Returns the alias name for the current class, if available.

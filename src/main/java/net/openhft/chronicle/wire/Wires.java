@@ -176,10 +176,9 @@ public enum Wires {
     // Shared {@link net.openhft.compiler.CachedCompiler} for dynamic class generation
     static CachedCompiler CACHED_COMPILER = null;
 
-    /**
-     * Static initializer block for the Wires enum. It populates the list of
-     * class strategy functions and adds some default strategies for serialization.
-     * It also sets up wire aliases.
+    /*
+     * Static initializer block. It populates the list of class strategy functions and adds some
+     * default strategies for serialization. It also sets up wire aliases.
      */
     static {
         Jvm.addToClassPath(Wires.class);
@@ -234,6 +233,8 @@ public enum Wires {
         Wire wire = new YamlWire(bytes).useTextDocuments();
         MethodReader readerObj = wire.methodReader(obj);
         while (readerObj.readOne()) {
+            // Intentionally empty; loop drains the reader.
+            continue;
         }
         bytes.releaseLast();
     }
@@ -1419,7 +1420,7 @@ public enum Wires {
             return out.writeString(format);
         }
 
-                /**
+        /**
          * Attempts to parse a date string from a ValueIn object and return a corresponding Date object.
          *
          * @param in The ValueIn object containing the date string.
@@ -1885,6 +1886,8 @@ public enum Wires {
                     break;
                 case "usesSelfDescribingMessage":
                     return Boolean.TRUE;
+                default:
+                    break;
             }
             if (args == null || args.length == 0) {
                 Class<?> returnType = method.getReturnType();

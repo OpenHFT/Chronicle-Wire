@@ -166,10 +166,10 @@ public enum BinaryWireCode {
      */
     public static final int SET_LOW_INT16 = 0xA9;
     //    public static final int FIXED_5 = 0xAA;
-//    public static final int FIXED_4 = 0xAB;
-//    public static final int FIXED_3 = 0xAC;
-//    public static final int FIXED_2 = 0xAD;
-//    public static final int FIXED_1 = 0xAE;
+    //    public static final int FIXED_4 = 0xAB;
+    //    public static final int FIXED_3 = 0xAC;
+    //    public static final int FIXED_2 = 0xAD;
+    //    public static final int FIXED_1 = 0xAE;
     /**
      * 64-bit integer to be displaying in hexadecimal format.
      */

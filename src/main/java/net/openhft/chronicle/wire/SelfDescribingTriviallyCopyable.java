@@ -32,6 +32,7 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
     @FieldGroup("header")
     transient int description = $description();
 
+    // CHECKSTYLE:OFF: MethodName
     /**
      * Fetches the description of the current data layout.
      *
@@ -52,6 +53,7 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
      * @return The total data length.
      */
     protected abstract int $length();
+    // CHECKSTYLE:ON: MethodName
 
     /**
      * Reads the object's state from the bytes. If the layout description in the

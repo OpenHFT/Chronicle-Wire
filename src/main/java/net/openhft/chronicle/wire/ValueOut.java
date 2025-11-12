@@ -412,6 +412,7 @@ public interface ValueOut {
     @NotNull
     WireOut int128forBinding(long i64x0, long i64x1, TwoLongValue value);
 
+    // CHECKSTYLE:OFF: MethodName
     /**
      * Write a signed 64-bit integer value as a hexadecimal representation. The behavior
      * of this method might differ based on the wire type in use.
@@ -421,6 +422,7 @@ public interface ValueOut {
      */
     @NotNull
     WireOut int64_0x(long i64);
+    // CHECKSTYLE:ON: MethodName
 
     /**
      * Allocate space for writing an array of 64-bit integers. The exact behavior might
@@ -581,7 +583,7 @@ public interface ValueOut {
     @NotNull
     default WireOut typeLiteral(@Nullable Type type) {
         return type == null ? nu11()
-                : type instanceof Class<?>? typeLiteral((Class) type)
+                : type instanceof Class<?> ? typeLiteral((Class<?>) type)
                 : typeLiteral(type.getTypeName());
     }
 
@@ -1308,6 +1310,8 @@ public interface ValueOut {
                 endTypePrefix();
                 return result;
             }
+            default:
+                break;
         }
         // Check if the value is an instance of WriteMarshallable interface
         if (value instanceof WriteMarshallable) {
@@ -1519,6 +1523,8 @@ public interface ValueOut {
             case "java.math.BigDecimal":
             case "java.io.File":
                 return text(value.toString());
+            default:
+                break;
         }
         // Check if value is an Enum and get its name
         if (isAnEnum(value)) {
@@ -1615,7 +1621,7 @@ public interface ValueOut {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> tmpBytes = stlBytes.get();
             Compression.compress(compression, uncompressedBytes, tmpBytes);
-        // Write the compressed bytes
+            // Write the compressed bytes
             bytes(compression, tmpBytes);
             return wireOut();
         }

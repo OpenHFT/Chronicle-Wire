@@ -197,7 +197,7 @@ public class JSONWire extends TextWire {
                 if (ch == ':' || ch == '}' || ch == ']')
                     bytes.readSkip(-1);
 
-                    // !='l' to handle 'null' in JSON wire
+                // !='l' to handle 'null' in JSON wire
                 else if (ch != 'l' && (ch > 'F' && (ch < 'a' || ch > 'f'))) {
                     throw new IllegalArgumentException("Unexpected character in number '" + (char) ch + '\'');
                 }

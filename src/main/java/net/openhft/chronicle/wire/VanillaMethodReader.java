@@ -283,7 +283,7 @@ public class VanillaMethodReader implements MethodReader {
      * Used to support chained calls where methods return a new handler.
      */
     private static void updateContext(Object[] contextHolder, Object intercept) {
-//        System.err.println("context: " + (intercept == null ? null : intercept.getClass()));
+        // System.err.println("context: " + (intercept == null ? null : intercept.getClass()));
         contextHolder[0] = intercept;
     }
 

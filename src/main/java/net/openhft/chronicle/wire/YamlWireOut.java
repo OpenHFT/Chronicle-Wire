@@ -1412,7 +1412,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         @Override
         public T marshallable(@NotNull WriteMarshallable object) throws InvalidMarshallableException {
             WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(object.getClass());
-            boolean wasLeaf0 = leaf;
+            final boolean wasLeaf0 = leaf;
             if (indentation > 1 && wm.isLeaf())
                 leaf = true;
 

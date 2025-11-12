@@ -363,7 +363,7 @@ public class YamlTokeniser {
                     return pushed.isEmpty() ? next0(minIndent) : popPushed();
                 }
                 break;
-        // Other symbols that might have specific semantics in certain YAML constructs
+            // Other symbols that might have specific semantics in certain YAML constructs
             case '+':
             case '$':
             case '(':
@@ -612,7 +612,7 @@ public class YamlTokeniser {
         if (isInFlow()) {
             return keyDefinitionToken; // If we are inside a flow structure, return the key token.
         }
-        int pos = this.pushed.size();
+        final int pos = this.pushed.size();
 
         // Pop contexts until the current indent matches the existing context.
         while (currentIndentLevel < contextIndent()) {

@@ -93,7 +93,7 @@ public final class ConcurrentCollectors {
     public static <T>
     Collector<T, ?, T> reducingConcurrent(final T identity,
                                           @NotNull final BinaryOperator<T> op) {
-                                          // Ensure the binary operator is not null.
+        // Ensure the binary operator is not null.
         requireNonNull(op);
 
         // Set up a concurrent reduction using an AtomicReference as the accumulator.

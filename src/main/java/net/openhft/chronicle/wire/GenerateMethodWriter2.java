@@ -192,7 +192,7 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
             return;
         }
 
-        boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
+        final boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
         String wdc = nameForClass(WriteDocumentContext.class);
         boolean passthrough = returnType == DocumentContext.class;
         withLineNumber(mainCode)

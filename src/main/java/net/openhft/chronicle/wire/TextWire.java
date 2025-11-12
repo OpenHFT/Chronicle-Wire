@@ -190,7 +190,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      * @param sb A {@link CharSequence} that is also an {@link Appendable}, containing potentially escaped sequences.
      *           This sequence will be modified directly.
      */
-    public static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb) {
+    public static <S extends Appendable & CharSequence> void unescape(@NotNull S sb) {
         int end = 0;
         int length = sb.length();
         for (int i = 0; i < length; i++) {
@@ -1406,7 +1406,7 @@ public class TextWire extends YamlWireOut<TextWire> {
          * {@code !binary}, and resolves anchors or aliases.
          */
         @SuppressWarnings("fallthrough")
-        @Nullable <ACS extends Appendable & CharSequence> CharSequence textTo0(@NotNull ACS destination) {
+        @Nullable <S extends Appendable & CharSequence> CharSequence textTo0(@NotNull S destination) {
             consumePadding();
             int ch = peekCode();
             @Nullable CharSequence ret = destination;
@@ -1512,7 +1512,7 @@ public class TextWire extends YamlWireOut<TextWire> {
          * encountered but not expanded. A warning is logged and the literal
          * characters are copied into {@code destination}.
          */
-        private <ACS extends Appendable & CharSequence> void unsubstitutedString(@NotNull ACS destination) {
+        private <S extends Appendable & CharSequence> void unsubstitutedString(@NotNull S destination) {
             String text = bytes.toString();
             // Limit the log output to 32 characters for brevity
             if (text.length() > 32)
@@ -1538,7 +1538,7 @@ public class TextWire extends YamlWireOut<TextWire> {
          * {@code quotes}. The surrounding quote is skipped, the body parsed and
          * unescaped, then any trailing padding is consumed.
          */
-        private <ACS extends Appendable & CharSequence> void readText(@NotNull ACS destination, @NotNull StopCharTester quotes) {
+        private <S extends Appendable & CharSequence> void readText(@NotNull S destination, @NotNull StopCharTester quotes) {
             // Skip the initial quote (either ' or ")
             bytes.readSkip(1);
             // Read the content based on the character encoding being used
@@ -1812,8 +1812,6 @@ public class TextWire extends YamlWireOut<TextWire> {
          * Consumes a sequence or list (e.g., `[item1, item2]`) in the text format.
          */
         private void consumeSeq() {
-            int code;
-
             // Skip the opening '[' character
             bytes.readSkip(1);
             for (; ; ) {
@@ -1838,7 +1836,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             consumePadding();
 
             // Read the next character
-            code = readCode();
+            final int code = readCode();
 
             // Ensure that the sequence is properly closed with a ']'
             if (code != ']') {
@@ -1851,8 +1849,6 @@ public class TextWire extends YamlWireOut<TextWire> {
          * Consumes a map structure (e.g., `{key1: value1, key2: value2}`) in the text format.
          */
         private void consumeMap() {
-            int code;
-
             // Skip the opening '{' character for the map
             bytes.readSkip(1);
             for (; ; ) {
@@ -1879,7 +1875,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             consumePadding();
 
             // Read the next character to ensure the map is closed properly
-            code = readCode();
+            final int code = readCode();
             if (code != '}') {
                 bytes.readSkip(-1);
                 throw new IllegalStateException("Expected a } was " + (char) code);
@@ -2000,6 +1996,8 @@ public class TextWire extends YamlWireOut<TextWire> {
                 case '[':
                     // Throw an exception if attempting to read a map or list as a number
                     throw new IORuntimeException("Cannot read a " + (char) code + " as a number");
+                default:
+                    break;
             }
 
             // Read and return the long value from the stream
@@ -2566,9 +2564,8 @@ public class TextWire extends YamlWireOut<TextWire> {
             // Handle type prefix indicated by '!' character.
             if (code == '!') {
                 typePrefix(null, (o, x) -> { /* sets acquireStringBuilder(); */});
-            }
-            // Throw exception if unsupported type is encountered.
-            else if (code != '{') {
+            } else if (code != '{') {
+                // Throw exception if unsupported type is encountered.
                 throw new IORuntimeException("Unsupported type " + stringForCode(code));
             }
 
@@ -2752,6 +2749,8 @@ public class TextWire extends YamlWireOut<TextWire> {
                 case '{':
                     Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a long.");
                     return 0;
+                default:
+                    break;
             }
 
             long l = getALong();
@@ -2801,6 +2800,8 @@ public class TextWire extends YamlWireOut<TextWire> {
                 case '\'':
                 case '"':
                     sep = bytes.readUnsignedByte();
+                    break;
+                default:
                     break;
             }
             final double v = bytes.parseDouble();
@@ -2947,6 +2948,8 @@ public class TextWire extends YamlWireOut<TextWire> {
                 case '9':
                 case '+':
                     return valueIn.readNumber();
+                default:
+                    break;
             }
 
             // Convert the content to a Bytes or StringBuilder if the using object is of that type.
@@ -3040,7 +3043,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         /**
          * Reads a sequence from the current stream context and attempts to interpret
          * it based on the provided class type. This method has specialized handling
-         * for arrays and collections including {@link Object[]}, {@link String[]},
+         * for arrays and collections including {@code Object[]}, {@code String[]},
          * {@link List}, and {@link Set}.
          * <p>
          * If the class type isn't one of the recognized specialized types, an

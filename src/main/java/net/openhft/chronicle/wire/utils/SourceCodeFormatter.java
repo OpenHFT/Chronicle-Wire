@@ -186,12 +186,12 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
      * Appends the provided object's string representation to the formatted string.
      * The object should have a meaningful string representation for this operation to be effective.
      *
-     * @param <Stringable> The type of the object to be appended.
-     * @param stringable The object whose string representation will be appended.
+     * @param <T> The type of the object to be appended.
+     * @param value The object whose string representation will be appended.
      * @return The current SourceCodeFormatter instance.
      */
-    public <Stringable> SourceCodeFormatter append(Stringable stringable) {
-        formattedCode.append(stringable);
+    public <T> SourceCodeFormatter append(T value) {
+        formattedCode.append(value);
         return this;
     }
 

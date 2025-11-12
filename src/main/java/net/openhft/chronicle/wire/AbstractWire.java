@@ -221,13 +221,13 @@ public abstract class AbstractWire implements Wire, InternalWire {
         alignForRead(bytes);
         for (; ; ) {
             int header = bytes.peekVolatileInt();
-//            if (isReady(header)) {
+            // if (isReady(header)) {
             if ((header & NOT_COMPLETE) != 0 || header == 0) {
                 if (header == END_OF_DATA)
                     return HeaderType.EOF;
                 return HeaderType.NONE;
             }
-//                if (isData(header))
+            // if (isData(header))
             if ((header & META_DATA) == 0)
                 return HeaderType.DATA;
             if (includeMetaData && isReadyMetaData(header))
@@ -396,7 +396,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
         int header = (int) value;
         if (metaData) header |= META_DATA;
         // shouldn't happen due to padding above.
-//        assert header == UNKNOWN_LENGTH;
+        // assert header == UNKNOWN_LENGTH;
 
         assert insideHeader;
         insideHeader = false;

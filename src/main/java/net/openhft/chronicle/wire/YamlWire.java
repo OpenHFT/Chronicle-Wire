@@ -143,9 +143,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      *
      * @param targetBuffer The appendable containing characters to be unescaped.
      * @param blockQuoteChar The block quote character that determines the escaping scheme (' or ").
-     * @param <ACS> An appendable that also implements CharSequence interface.
+     * @param <S> An appendable that also implements CharSequence interface.
      */
-    private static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS targetBuffer, char blockQuoteChar) {
+    private static <S extends Appendable & CharSequence> void unescape(@NotNull S targetBuffer, char blockQuoteChar) {
         int end = 0;
         int length = targetBuffer.length();
         boolean skip = false;
@@ -753,6 +753,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 return object;
             case NONE:
                 return null;
+            default:
+                break;
         }
         throw new UnsupportedOperationException(yt.toString());
     }
@@ -1041,6 +1043,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 return;
             case NONE:
                 return;
+            default:
+                break;
         }
         throw new UnsupportedOperationException(yt.toString());
     }
@@ -1252,6 +1256,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         /**
          * Extracts the text from the current token and appends it to a StringBuilder.
          * Handles various YAML tokens like TEXT, LITERAL, and TAG.
+         *
          * @return StringBuilder containing the text.
          */
         @Nullable
@@ -1314,6 +1319,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     }
 
                     throw new UnsupportedOperationException(yt.toString());
+                default:
+                    break;
             }
             return destinationBuilder;
         }
@@ -1411,6 +1418,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
         /**
          * Reads the length of a marshallable.
+         *
          * @return The length of the marshallable.
          */
         protected long readLengthMarshallable() {
@@ -1425,6 +1433,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
         /**
          * Consumes any token type based on its indentation level.
+         *
          * @param minIndent Minimum indentation level to consume.
          */
         protected void consumeAny(int minIndent) {
@@ -1824,6 +1833,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     // Allows scalar value to be converted into singleton array
                 case TEXT:
                     return true;
+                default:
+                    break;
             }
             return false;
         }
@@ -1877,7 +1888,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 }
                 default:
                     return null;
-/*
+            /*
 
                 case MAPPING_START:
                     if (tClass == null || tClass == Object.class || tClass == Map.class) {
@@ -1893,7 +1904,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     break;
                 case TEXT:
                     return text();
-*/
+            */
             }
         }
 
@@ -2395,7 +2406,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Nullable
         protected Object readNumberOrText() {
             // Determine the kind of quote used for the YAML block
-            char blockQuoteChar = yt.blockQuote();
+            final char blockQuoteChar = yt.blockQuote();
             // Extract the text content into a StringBuilder
             @Nullable StringBuilder s = textTo0(acquireStringBuilder());
             if (yt.current() == YamlToken.LITERAL)

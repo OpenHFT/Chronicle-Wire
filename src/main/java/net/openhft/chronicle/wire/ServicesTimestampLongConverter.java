@@ -9,6 +9,7 @@ import net.openhft.chronicle.core.time.LongTime;
 import net.openhft.chronicle.core.time.TimeProvider;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.LongUnaryOperator;
 import java.util.function.ToLongFunction;
 
 import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
@@ -29,7 +30,7 @@ public class ServicesTimestampLongConverter implements LongConverter {
     private static final String SERVICES_TIME_UNIT = System.getProperty("service.time.unit", "ns");
 
     // Functional interface to convert the time.
-    private static final longFunction toTime;
+    private static final LongUnaryOperator toTime;
 
     // Functional interface to fetch the current time.
     private static final ToLongFunction<TimeProvider> currentTime;
@@ -75,7 +76,7 @@ public class ServicesTimestampLongConverter implements LongConverter {
      * @return The converted long value based on the system-configured time unit.
      */
     public static long toTime(long arg) {
-        return toTime.apply(arg);
+        return toTime.applyAsLong(arg);
     }
 
     /**
@@ -109,6 +110,7 @@ public class ServicesTimestampLongConverter implements LongConverter {
 
     /**
      * Parses the provided {@link CharSequence} into a timestamp in the configured time unit.
+     *
      * @param text The character sequence representing a date-time string, which will be parsed by
      *             the underlying timestamp converter (for example
      *             {@link NanoTimestampLongConverter} or {@link MicroTimestampLongConverter}) based
@@ -161,18 +163,4 @@ public class ServicesTimestampLongConverter implements LongConverter {
         underlying.append(bytes, value);
     }
 
-    /**
-     * This is the longFunction interface. It's a functional interface designed to perform operations
-     * on long values and return a long result. It is used internally in ServicesTimestampLongConverter
-     * to abstract the conversion logic based on the system-configured time unit.
-     */
-    interface longFunction {
-        /**
-         * Processes a long value and returns the result.
-         *
-         * @param value The input long value to be processed by the function.
-         * @return The processed value.
-         */
-        long apply(long value);
-    }
 }

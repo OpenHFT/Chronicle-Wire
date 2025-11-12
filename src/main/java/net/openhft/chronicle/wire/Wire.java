@@ -41,6 +41,7 @@ public interface Wire extends WireIn, WireOut {
     /**
      * Indicates whether tuples should be generated.
      * By default, this method returns the value of Wires.GENERATE_TUPLES
+     *
      * @return true if tuples should be generated, false otherwise.
      */
     default boolean generateTuples() {
@@ -49,6 +50,7 @@ public interface Wire extends WireIn, WireOut {
 
     /**
      * Sets whether tuples should be generated.
+     *
      * @param generateTuples true to enable tuple generation, false to disable it.
      */
     default Wire generateTuples(boolean generateTuples) {

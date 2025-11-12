@@ -52,13 +52,13 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      * Uses binary documents and padding by default.
      */
     TEXT {
-        private final boolean TEXT_AS_YAML = Jvm.getBoolean("wire.testAsYaml");
+        private final boolean textAsYaml = Jvm.getBoolean("wire.testAsYaml");
 
         @SuppressWarnings("deprecation")
         @NotNull
         @Override
         public Wire apply(@NotNull Bytes<?> bytes) {
-            if (TEXT_AS_YAML)
+            if (textAsYaml)
                 return YAML.apply(bytes);
             final TextWire wire = new TextWire(bytes).useBinaryDocuments();
             wire.usePadding(true);
@@ -83,7 +83,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
                 bytes.appendUtf8(cs);
                 @NotNull Wire wire = apply(bytes);
                 wire.consumePadding();
-                if (!TEXT_AS_YAML)
+                if (!textAsYaml)
                     ((TextWire) wire).consumeDocumentStart();
                 return wire.getValueIn().object(tClass);
             } finally {

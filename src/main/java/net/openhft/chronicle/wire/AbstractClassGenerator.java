@@ -93,7 +93,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
                         "package " + metaData.packageName() + ";\n" +
                         "\n");
                 String extendsClassName = nameForClass(extendsClass());
-                String implementsSet = metaData.interfaces().stream()
+                final String implementsSet = metaData.interfaces().stream()
                         .map(this::nameForClass)
                         .sorted()
                         .collect(Collectors.joining(", "));
@@ -321,7 +321,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
         StringBuilder params = new StringBuilder();
         Parameter[] parameters = method.getParameters();
         for (int i = 0, ptsLength = pts.length; i < ptsLength; i++) {
-            Class<?> pt = pts[i];
+            final Class<?> pt = pts[i];
             mainCode.append(sep);
             params.append(sep);
             sep = ", ";

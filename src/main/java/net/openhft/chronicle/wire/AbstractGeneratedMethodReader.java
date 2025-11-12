@@ -191,7 +191,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
             while (bytes.readRemaining() > 0) {
                 if (wireIn.isEndEvent())
                     break;
-                long start = bytes.readPosition();
+                final long start = bytes.readPosition();
 
                 // Read the wire based on whether it's data or metadata.
                 MethodReaderStatus mrs = context.isData()

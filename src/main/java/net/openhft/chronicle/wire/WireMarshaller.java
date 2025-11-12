@@ -64,6 +64,7 @@ public class WireMarshaller<T> {
             try {
                 isRecord = Jvm.getMethod(Class.class, "isRecord");
             } catch (Exception ignored) {
+                isRecord = null;
             }
         }
     }
@@ -86,12 +87,12 @@ public class WireMarshaller<T> {
      * types receive a specialised marshaller that handles their field discovery
      * slightly differently, while all other classes use the generic variant.
      */
-    public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial
-            (tClass ->
+    public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial(
+            tClass ->
                     Throwable.class.isAssignableFrom(tClass)
                             ? WireMarshaller.ofThrowable(tClass)
                             : WireMarshaller.of(tClass)
-            );
+    );
 
     /**
      * Internal constructor used by the factory methods.
@@ -238,7 +239,7 @@ public class WireMarshaller<T> {
      * Returns {@code null} for primitives, arrays and interfaces.
      */
     static <T> T defaultValueForType(@NotNull Class<T> tClass) {
-//        tClass = ObjectUtils.implementationToUse(tClass);
+        // tClass = ObjectUtils.implementationToUse(tClass);
         if (ObjectUtils.isConcreteClass(tClass)
                 && !tClass.getName().startsWith("java")
                 && !tClass.isEnum()
@@ -930,7 +931,7 @@ public class WireMarshaller<T> {
             try {
                 commentAnnotation = Jvm.findAnnotation(field, Comment.class);
             } catch (NullPointerException ignore) {
-
+                commentAnnotation = null;
             }
         }
 
@@ -1804,7 +1805,7 @@ public class WireMarshaller<T> {
         private final BiConsumer<Object, ValueOut> sequenceGetter;
 
         // The type of the enum component
-        private final Class<?>componentType;
+        private final Class<?> componentType;
 
         // A supplier for creating an empty EnumSet of the component type
         private final Supplier<EnumSet> enumSetSupplier;
@@ -1846,7 +1847,7 @@ public class WireMarshaller<T> {
                                            ValueOut out,
                                            Object[] values,
                                            Field field,
-                                           Class<?>componentType)
+                                           Class<?> componentType)
                 throws InvalidMarshallableException {
             final EnumSet coll;
             try {
@@ -1953,7 +1954,7 @@ public class WireMarshaller<T> {
         final Supplier<Collection> collectionSupplier;
 
         // The component type of the Collection
-        private final Class<?>componentType;
+        private final Class<?> componentType;
         private final Class<?> type;
         private final BiConsumer<Object, ValueOut> sequenceGetter;
 
@@ -1967,7 +1968,7 @@ public class WireMarshaller<T> {
          * @param componentType The type of the elements in the collection.
          * @param type The type of the collection itself.
          */
-        public CollectionFieldAccess(@NotNull Field field, Boolean isLeaf, @Nullable Supplier<Collection> collectionSupplier, Class<?>componentType, Class<?>type) {
+        public CollectionFieldAccess(@NotNull Field field, Boolean isLeaf, @Nullable Supplier<Collection> collectionSupplier, Class<?> componentType, Class<?> type) {
             super(field, isLeaf);
             this.collectionSupplier = collectionSupplier == null ? newInstance() : collectionSupplier;
             this.componentType = componentType;

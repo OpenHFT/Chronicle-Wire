@@ -62,8 +62,8 @@ public enum WireInternal {
     // Collection of classes that are internable to reduce memory consumption.
     static final Set<Class> INTERNABLE = new HashSet<>(Arrays.asList(
             String.class,
-//            Date.class,
-//            TimeZone.class,
+            // Date.class,
+            // TimeZone.class,
             UUID.class,
             DayOfWeek.class,
             LocalDate.class,
@@ -77,8 +77,8 @@ public enum WireInternal {
             Year.class,
             YearMonth.class,
             ZonedDateTime.class
-//            ZoneId.class,
-//            ZoneOffset.class
+    //    ZoneId.class,
+    //    ZoneOffset.class
     ));
 
     // Map to store and retrieve object interners for specific classes.
@@ -156,8 +156,8 @@ public enum WireInternal {
             wireOut.addPadding(bytesToSkip);
             position1 = bytes.writePosition();
         }
-//            if (position1 < position)
-//                System.out.println("Message truncated from " + position + " to " + position1);
+        // if (position1 < position)
+        //     System.out.println("Message truncated from " + position + " to " + position1);
         int length;
         if (bytes instanceof HexDumpBytes) {
             // Todo: this looks suspicious. Why cast to int individually rather than use long arithmetics?

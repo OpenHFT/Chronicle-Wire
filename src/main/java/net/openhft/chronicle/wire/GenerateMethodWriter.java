@@ -142,7 +142,7 @@ public class GenerateMethodWriter {
     // Concurrent map to cache method writers
     private final ConcurrentMap<Class<?>, String> methodWritersMap = new ConcurrentHashMap<>();
     // AtomicInteger to manage indentation in the generated code
-    final private AtomicInteger indent = new AtomicInteger();
+    private final AtomicInteger indent = new AtomicInteger();
     // Indicates if verbose types are used in the generated method writer
     private final boolean verboseTypes;
 
@@ -653,7 +653,6 @@ public class GenerateMethodWriter {
         final String typeName = nameForClass(importSet, returnType);
 
         final StringBuilder body = new StringBuilder();
-        String methodIDAnotation = "";
         final Type[] parameterTypes = getParameterTypes(dm, interfaceClazz);
 
         // UpdateInterceptor logic
@@ -674,8 +673,8 @@ public class GenerateMethodWriter {
         }
 
         body.append("MarshallableOut out = this.out.get();\n");
-        boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
-        boolean passthrough = returnType == DocumentContext.class;
+        final boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
+        final boolean passthrough = returnType == DocumentContext.class;
 
         // MarshallableOut setup logic
         if (!passthrough)
@@ -706,11 +705,11 @@ public class GenerateMethodWriter {
         }
 
         // Determine the appropriate event name or ID for the method
-        methodIDAnotation = writeEventNameOrId(dm, body, eventName);
+        final String methodIdAnnotation = writeEventNameOrId(dm, body, eventName);
 
         // Check for duplicate method IDs and throw an exception if a duplicate is found
-        if (methodIDAnotation.length() > 0 && !methodIds.add(methodIDAnotation))
-            throw new MethodWriterValidationException("Duplicate methodIds. Cannot add " + methodIDAnotation + " to " + methodIds);
+        if (methodIdAnnotation.length() > 0 && !methodIds.add(methodIdAnnotation))
+            throw new MethodWriterValidationException("Duplicate methodIds. Cannot add " + methodIdAnnotation + " to " + methodIds);
 
         // Write out the parameters for the method, if they exist
         if (parameters.length > 0)
@@ -737,7 +736,7 @@ public class GenerateMethodWriter {
 
         // Return the formatted method writer code
         return format("\n%s public %s %s(%s) {\n %s%s}\n",
-                methodIDAnotation,
+                methodIdAnnotation,
                 typeName,
                 dm.getName(),
                 methodSignature(importSet, dm, parameterTypes),

@@ -1175,7 +1175,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         bytes.uncheckedReadSkipOne();
         if (bytes.isDirectMemory() && bytes.bytesStore() instanceof NativeBytesStore) {
             // Optimized parsing for direct memory access.
-            AppendableUtil.parse8bit_SB1(bytes, sb, peekCode & 0x1f);
+            AppendableUtil.parse8bitSb1(bytes, sb, peekCode & 0x1f);
         } else {
             try {
                 // General parsing for non-direct memory.
@@ -1222,6 +1222,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                 // Get the textual representation of the event object.
                 valueIn.text(sb);
                 return sb;
+            default:
+                break;
         }
 
         // Return null for unknown special fields.
@@ -1639,6 +1641,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             case INT64_0x:
                 // 64-bit signed integer.
                 return bytes.readLong();
+            default:
+                break;
         }
 
         // If the encoding is unrecognized, throw an exception.
@@ -1840,10 +1844,23 @@ public class BinaryWire extends AbstractWire implements Wire {
     private void writeField0(@NotNull CharSequence name, int len) {
         // If name starts with a digit, attempt to parse it as an integer.
         if (len > 0 && isDigit(name.charAt(0))) {
-            try {
-                writeField(StringUtils.parseInt(name, 10));
+            long numericValue = 0;
+            boolean numeric = true;
+            for (int i = 0; i < len; i++) {
+                char ch = name.charAt(i);
+                if (!isDigit(ch)) {
+                    numeric = false;
+                    break;
+                }
+                numericValue = numericValue * 10 + (ch - '0');
+                if (numericValue > Integer.MAX_VALUE) {
+                    numeric = false;
+                    break;
+                }
+            }
+            if (numeric) {
+                writeField((int) numericValue);
                 return;
-            } catch (NumberFormatException ignored) {
             }
         }
 
@@ -2815,7 +2832,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      * Extends the FixedBinaryValueOut class to support binary value outputs with additional logic for converting
      * and writing different types of numbers, namely integers and longs.
      */
-     protected class BinaryValueOut extends FixedBinaryValueOut {
+    protected class BinaryValueOut extends FixedBinaryValueOut {
         @Override
         public boolean isBinary() {
             return true;
@@ -3268,16 +3285,18 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public BracketType getBracketType() {
             consumePadding();
-            switch (peekCode()) {
-                case BYTES_LENGTH8:
-                    return getBracketTypeFor(bytes.readUnsignedByte(bytes.readPosition() + 1 + 1));
-                case BYTES_LENGTH16:
-                    return getBracketTypeFor(bytes.readUnsignedByte(bytes.readPosition() + 2 + 1));
-                case BYTES_LENGTH32:
-                    return getBracketTypeFor(bytes.readUnsignedByte(bytes.readPosition() + 4 + 1));
-                case NULL:
-                    return BracketType.NONE;
-            }
+        switch (peekCode()) {
+            case BYTES_LENGTH8:
+                return getBracketTypeFor(bytes.readUnsignedByte(bytes.readPosition() + 1 + 1));
+            case BYTES_LENGTH16:
+                return getBracketTypeFor(bytes.readUnsignedByte(bytes.readPosition() + 2 + 1));
+            case BYTES_LENGTH32:
+                return getBracketTypeFor(bytes.readUnsignedByte(bytes.readPosition() + 4 + 1));
+            case NULL:
+                return BracketType.NONE;
+            default:
+                break;
+        }
             return BracketType.NONE;
         }
 
@@ -3831,6 +3850,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     consumePadding();
                     code = bytes.readUnsignedByte();
                     break;
+                default:
+                    break;
             }
 
             // Check if the code indicates a text format
@@ -4349,7 +4370,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 // todo get delta wire to support Function<Class, ReadMarshallable> correctly
                 return typedMarshallable();
 
-            @Nullable final Class<T>aClass = (Class<T>) typePrefix();
+            @Nullable final Class<T> aClass = (Class<T>) typePrefix();
 
             if (ReadMarshallable.class.isAssignableFrom(aClass)) {
                 final ReadMarshallable marshallable = marshallableFunction.apply(aClass);
@@ -4631,20 +4652,22 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (isText(code))
                 return Boolean.valueOf(text());
 
-            switch (code) {
-                case TRUE:
-                    return true;
-                case FALSE:
-                    return false;
+        switch (code) {
+            case TRUE:
+                return true;
+            case FALSE:
+                return false;
 
-                case PADDING:
-                case PADDING32:
-                case COMMENT:
-                    bytes.uncheckedReadSkipBackOne();
-                    consumePadding();
-                    return bool();
-            }
-            throw new IORuntimeException(stringForCode(code));
+            case PADDING:
+            case PADDING32:
+            case COMMENT:
+                bytes.uncheckedReadSkipBackOne();
+                consumePadding();
+                return bool();
+            default:
+                break;
+        }
+        throw new IORuntimeException(stringForCode(code));
         }
 
         @Override
@@ -4671,6 +4694,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     bytes.uncheckedReadSkipBackOne();  // Move back by one position.
                     consumePadding();  // Handle the padding or comment.
                     code = readCode();  // Read the next code.
+                    break;
+                default:
                     break;
             }
 
@@ -4841,6 +4866,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                         case ANCHOR:
                         case UPDATED_ALIAS:
                             return typedMarshallable();
+                        default:
+                            break;
 
                     }
                     break;
@@ -4886,6 +4913,8 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                         case TYPE_LITERAL:
                             return typeLiteral();
+                        default:
+                            break;
 
                     }
                     break;
@@ -4899,6 +4928,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     if (code == UUID)
                         return new java.util.UUID(bytes.readLong(), bytes.readLong());
                     return readInt0object(code);
+                default:
+                    break;
             }
             // assume it a String
             return text();
@@ -5005,6 +5036,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                             consumeNext();
                             return;
                         }
+                        default:
+                            break;
                     }
                     break;
 
@@ -5084,6 +5117,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     }
                     // If none of the known integer codes were matched, throw an exception
                     throw new UnsupportedOperationException(stringForCode(code));
+                default:
+                    break;
             }
             // If the code doesn't match any known pattern, assume it's a text encoding
             text();
