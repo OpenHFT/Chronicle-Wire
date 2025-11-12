@@ -7,14 +7,18 @@ Purpose: To provide visual representations of key concepts, processes, and compo
 
 == Introduction
 
-This document contains diagrams and visual aids to help understand the Chronicle Wire library. It complements the text-based documentation by providing visual representations of key concepts, processes, and components.
+This document contains diagrams and visual aids to help understand the Chronicle Wire library.
+It complements the text-based documentation by providing visual representations of key concepts, processes, and components.
 
 == Architectural Overview
 
 === Layered Architecture
 
-ifdef::env-github[[source,mermaid]]
-ifndef::env-github[[mermaid]]
+ifdef::env-github[[source,mermaid]
+]
+ifndef::env-github[[mermaid]
+]
+
 ----
 graph TD
     A[Application Code] -->|Interacts via| B[Chronicle Wire API Layer]
@@ -38,8 +42,11 @@ graph TD
 
 === Core Components
 
-ifdef::env-github[[source,mermaid]]
-ifndef::env-github[[mermaid]]
+ifdef::env-github[[source,mermaid]
+]
+ifndef::env-github[[mermaid]
+]
+
 ----
 classDiagram
     class Wire {
@@ -51,7 +58,7 @@ classDiagram
         +writingDocument() DocumentContext
         +readingDocument() DocumentContext
     }
-    
+
     class WireType {
         <<enum>>
         YAML
@@ -67,25 +74,25 @@ classDiagram
         READ_ANY
         +apply(Bytes) Wire
     }
-    
+
     class YamlWire {
         -bytes Bytes
         +getValueIn() ValueIn
         +getValueOut() ValueOut
     }
-    
+
     class BinaryWire {
         -bytes Bytes
         +getValueIn() ValueIn
         +getValueOut() ValueOut
     }
-    
+
     class JSONWire {
         -bytes Bytes
         +getValueIn() ValueIn
         +getValueOut() ValueOut
     }
-    
+
     Wire <|.. YamlWire
     Wire <|.. BinaryWire
     Wire <|.. JSONWire
@@ -94,8 +101,11 @@ classDiagram
 
 == Serialization and Deserialization Process
 
-ifdef::env-github[[source,mermaid]]
-ifndef::env-github[[mermaid]]
+ifdef::env-github[[source,mermaid]
+]
+ifndef::env-github[[mermaid]
+]
+
 ----
 graph TD
     subgraph "Serialisation Process"
@@ -104,7 +114,7 @@ graph TD
         C -->|"WireType (YAML, JSON, Binary)"| D[Bytes]
         D -->|"Store/Transmit"| E[Persistence/Network]
     end
-    
+
     subgraph "Deserialisation Process"
         F[Persistence/Network] -->|"Read"| G[Bytes]
         G -->|"WireType (same as serialisation)"| H[Wire]
@@ -115,26 +125,29 @@ graph TD
 
 == Wire Format Comparison
 
-ifdef::env-github[[source,mermaid]]
-ifndef::env-github[[mermaid]]
+ifdef::env-github[[source,mermaid]
+]
+ifndef::env-github[[mermaid]
+]
+
 ----
 graph LR
     subgraph "Wire Format Comparison"
         A[Wire Formats] --> B[Text Formats]
         A --> C[Binary Formats]
-        
+
         B --> D[YAML]
         B --> E[JSON]
         B --> F[TEXT]
-        
+
         C --> G[BINARY_LIGHT]
         C --> H[FIELDLESS_BINARY]
         C --> I[RAW]
-        
+
         D --> J["Human-readable<br>Self-describing<br>Type retention (optional)"]
         E --> J
         F --> J
-        
+
         G --> K["Compact<br>Self-describing<br>Good schema evolution"]
         H --> L["Most compact<br>Fastest<br>Schema-sensitive"]
         I --> M["Raw bytes<br>For BytesMarshallable<br>No framing"]
@@ -154,12 +167,12 @@ graph TD
         B -->|Remove Field| D[Backward Compatible]
         B -->|Rename Field| E[Needs Special Handling]
         B -->|Change Type| F[Complex - May Need Custom Logic]
-        
+
         C -->|"Older Reader"| G[Ignores Unknown Fields]
         D -->|"Newer Reader"| H[Uses Default Values]
         E -->|"@FieldNumber or Rename Map"| I[Maps Old Name to New]
         F -->|"Custom readMarshallable"| J[Custom Conversion Logic]
-        
+
         K[Wire Format] --> L{Compatibility Level}
         L -->|"YAML/JSON/BINARY_LIGHT"| M[Good Schema Evolution]
         L -->|"FIELDLESS_BINARY"| N[Limited/No Evolution]
@@ -168,8 +181,11 @@ graph TD
 
 == Integration with OpenHFT Ecosystem
 
-ifdef::env-github[[source,mermaid]]
-ifndef::env-github[[mermaid]]
+ifdef::env-github[[source,mermaid]
+]
+ifndef::env-github[[mermaid]
+]
+
 ----
 graph TD
     subgraph "OpenHFT Ecosystem"
@@ -177,7 +193,7 @@ graph TD
         A --> C[Chronicle Map]
         A --> D[Chronicle Network]
         A --> E[Chronicle Services]
-        
+
         B -->|"Serializes messages<br>MethodWriter/Reader"| F[Queue Excerpts]
         C -->|"Serializes keys/values"| G[Off-heap Map]
         D -->|"Marshals data"| H[Network Communication]

@@ -61,10 +61,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
         return wire;
     }
 
-    // *************************************************************************
     // Test Cases
-    // *************************************************************************
-
     // Performance test for Wire serialization and deserialization
     @Test
     public void wirePerf() {
@@ -128,10 +125,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
         System.out.printf("(ints) %,d : %,d ns avg, len= %,d%n", t, rate, wire.bytes().readPosition());
     }
 
-    // *************************************************************************
     // Internal Classes
-    // *************************************************************************
-
     // MyType2 class for serialization and deserialization tests
     static class MyType2 implements Marshallable {
         int i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x;

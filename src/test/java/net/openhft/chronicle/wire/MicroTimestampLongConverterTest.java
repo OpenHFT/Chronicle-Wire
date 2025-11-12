@@ -16,10 +16,7 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
     private static final long TIMESTAMP = 1676439109856123L;
     private static final String TIMESTAMP_STRING_MELBOURNE = "2023-02-15T16:31:49.856123+11:00";
 
-    // *************************************************************************
     // Test Cases
-    // *************************************************************************
-
     // Test if the parse method correctly interprets timestamps
     @Test
     public void parse() {

@@ -72,10 +72,6 @@ class SimpleMetaData extends AbstractClassGenerator.MetaData<SimpleMetaData> {
     public String message;  // Message to be used in generated methods
 }
 
-// *************************************************************************
-// Test Cases
-// *************************************************************************
-
 // Tests for the AbstractClassGenerator's functionality
 public class AbstractClassGeneratorTest extends WireTestCommon {
 
@@ -103,10 +99,7 @@ public class AbstractClassGeneratorTest extends WireTestCommon {
         assertEquals(message, call);
     }
 
-    // *************************************************************************
     // Test Cases
-    // *************************************************************************
-
     // Test case to validate the interceptor's functionality in the UIClassGenerator
     @Test
     public void useInterceptor() throws Exception {

@@ -385,8 +385,6 @@ public class VersionedDataV2 extends SelfDescribingMarshallable {
     public VersionedDataV2(String existingField) {
         this(existingField, 0); // Default value for newField
     }
-
-
     public String existingField() { return existingField; }
     public int newField() { return newField; }
 }
@@ -496,8 +494,6 @@ public class MultiDocumentDemo {
         try (DocumentContext dc = wire.writingDocument(false)) { // false for data
              dc.wire().write("msg").object(new SimpleMessage("Message Three (data part)"));
         }
-
-
         System.out.println("Bytes buffer size after writing: " + bytes.writePosition());
         System.out.println("Hex dump of buffer:\n" + bytes.toHexString());
 

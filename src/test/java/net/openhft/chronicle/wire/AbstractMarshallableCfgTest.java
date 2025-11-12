@@ -31,10 +31,7 @@ public class AbstractMarshallableCfgTest extends WireTestCommon{
         double amt = 1.0;
     }
 
-    // *************************************************************************
     // Test Cases
-    // *************************************************************************
-
     // Test the string representation of the MyAMC configuration
     @Test
     public void asString() {

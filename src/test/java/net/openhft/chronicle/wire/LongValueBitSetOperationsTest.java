@@ -6,7 +6,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.junit.Test;
 
-
 import static org.junit.Assert.*;
 
 /**

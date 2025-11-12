@@ -5,7 +5,7 @@ developers: !!set
   ? name: John
     role: founder
   : null
-  
+
 name: Bean123
 
 sorted: !!set
