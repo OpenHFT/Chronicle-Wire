@@ -1,0 +1,56 @@
+= Chronicle Wire Operational Requirements
+Chronicle Software
+:toc:
+:sectnums:
+:lang: en-GB
+:source-highlighter: rouge
+
+== Overview
+
+Chronicle Wire is a library, yet it still has operational expectations for release engineering,
+compatibility, and observability. This document anchors those expectations with `OPS` and `NF-O`
+tags from the Nine-Box taxonomy.
+
+== Operational Targets
+
+[cols="1,3,2", options="header"]
+|===
+|ID |Requirement |Notes
+
+|OPS-001
+|`mvn -q clean verify` must pass on every supported JDK (current CI branches: `develop-java8-ok`,
+`develop-java11s-ok`, `develop-java17-ok`, and `develop-java21-ok`) before cutting a release.
+|Run the command locally prior to opening a PR and after each rebase.
+
+|OPS-002
+|Release builds must be reproducible. Dependencies are pinned via the Chronicle BOM and validated by
+`project-requirements.adoc`. Enforced by the build scan that fails when SNAPSHOT dependencies leak in.
+|Check the output of `mvn -q -Dchronicletag=release verify` if a release candidate is prepared.
+
+|NF-O-001
+|Provide actionable diagnostics when serialisation fails. Exceptions must include the field name, type,
+and offset where possible. Logging must stay off by default to avoid polluting low-latency workloads.
+|`wire-error-handling.adoc` captures the message templates; parser suites such as
+`InvalidYamWithCommonMistakesTest.java` and `TextWireTest.java` guard regressions.
+
+|OPS-003
+|Security review checklist (see `security-review.adoc`) must be completed for each PR.
+Any unchecked item blocks the release candidate.
+|Document findings or trade-offs directly in the relevant AsciiDoc file.
+
+|OPS-004
+|Documentation, code, and tests must move in lock-step. Changes that alter behaviour require updates
+to `functional-requirements.adoc`, the relevant runbook, and at least one regression test.
+|Reviewed during PRs; also supported by the `DOC` tagging guidance in `decision-log.adoc`.
+|===
+
+== Maintenance Windows
+
+* Patch releases follow Chronicle's standard Tuesday cadence.
+* API-breaking changes are bundled into LTS drops and called out under `decision-log.adoc`
+  together with mitigation steps.
+
+== Runbook Links
+
+* `runbooks/wire-runtime-health.adoc` describes how to triage build or runtime regressions.
+* `ops-scenarios.adoc` lists the operational situations that require the runbook above.

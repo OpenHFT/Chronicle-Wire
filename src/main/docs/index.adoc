@@ -11,6 +11,21 @@ Chronicle Wire is a high-performance, low-latency serialisation library that for
 link:wire-architecture.adoc[Chronicle Wire: Architectural Overview] ::
   Summarises the internal architecture, components and design principles.
 
+link:system-architecture.adoc[System Architecture Summary] ::
+  Shows how Chronicle Wire links application services, wire formats, and Chronicle Bytes.
+
+link:functional-requirements.adoc[Functional Requirements Catalogue] ::
+  Lists behavioural contracts with traceability to regression tests.
+
+link:data-requirements.adoc[Data Requirements] ::
+  Defines message envelopes, metadata, and schema evolution rules.
+
+link:operational-requirements.adoc[Operational Requirements] ::
+  Captures build gates, diagnostics policy, and documentation expectations.
+
+link:interface-control.adoc[Interface Control Document] ::
+  Documents the contracts exposed to applications (`Wire`, `DocumentContext`, writers/readers).
+
 link:wire-cookbook.adoc[Chronicle Wire Cookbook: Practical Recipes] ::
   Offers practical recipes for common tasks and advanced techniques.
 
@@ -23,6 +38,12 @@ link:wire-schema-evolution.adoc[Chronicle Wire: Schema Evolution Deep Dive] ::
 link:wire-error-handling.adoc[Chronicle Wire: Error Handling and Diagnostics Guide] ::
   Covers diagnosing issues and dealing with errors.
 
+link:ops-scenarios.adoc[Operational Scenarios] ::
+  Ties common incidents to requirements and runbooks.
+
+link:runbooks/wire-runtime-health.adoc[Runtime Health Runbook] ::
+  Provides step-by-step recovery processes for build failures, leaks, and schema drift.
+
 link:wire-faq.adoc[Chronicle Wire FAQ: Common Questions Answered] ::
   Provides answers to frequent questions.
 
@@ -34,6 +55,12 @@ link:project-requirements.adoc[Project Requirements: Chronicle Wire Documentatio
 
 link:security-review.adoc[Chronicle Wire Security Review] ::
   Discusses known security considerations and trade-offs in the library.
+
+link:decision-log.adoc[Decision Log] ::
+  Chronicles architectural and process choices with rationale.
+
+link:background/openhft-knowledge-pack.adoc[OpenHFT Knowledge Pack] ::
+  Records version support, JVM targets, and tuning notes.
 
 link:../../EventsByMethod.adoc[Events by Method Guide] ::
   Explains the event-driven approach via asynchronous method calls.

@@ -1,0 +1,35 @@
+= Chronicle Wire Operational Scenarios
+Chronicle Software
+:toc:
+:sectnums:
+:lang: en-GB
+:source-highlighter: rouge
+
+== Scenario Catalogue
+
+OPS-SC-001 :: Build Fails on `mvn -q clean verify`
+* Trigger: CI or local build exits non-zero.
+  ** Runbook: <<build-recovery>>
+  ** Requirement: OPS-001
+* Signals: Maven error logs, missing tests, or format violations.
+  ** Tools: `mvn -q -e verify`, `git status`, `scripts/check-doc-includes.py`
+
+OPS-SC-002 :: DocumentContext Leak or Unclosed Writer
+* Trigger: Queue tailers stall or Chronicle Queue reports `DocumentContext not closed`.
+  ** Runbook: <<document-context-leak>>
+  ** Requirement: FN-002
+* Signals: Thread dumps pointing at `DocumentContext.close`, growing mapped file usage.
+  ** Tools: `jcmd <pid> Thread.print`, `wire-error-handling.adoc`
+
+OPS-SC-003 :: Schema Drift Between Producers and Consumers
+* Trigger: Readers throw `UnknownFieldException` or skip fields unexpectedly.
+  ** Runbook: <<schema-drift>>
+  ** Requirement: FN-101 through FN-103
+* Signals: Divergent git SHAs, new fields missing defaults, converter mismatches.
+  ** Tools: `wire-schema-evolution.adoc`, `functional-requirements.adoc`, `git bisect`
+
+== Usage
+
+* Each scenario ties back to a requirement ID so reviewers can confirm coverage.
+* Update this file whenever new operational runbooks are added or when incident reviews
+  uncover a missing scenario.

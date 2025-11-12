@@ -1,0 +1,71 @@
+= Chronicle Wire Functional Requirements
+Chronicle Software
+:toc:
+:sectnums:
+:lang: en-GB
+:source-highlighter: rouge
+
+== Purpose
+
+This catalogue lists the functional behaviours that Chronicle Wire must keep stable across releases.
+It references representative regression tests and the build command (`mvn -q clean verify`) that must
+pass before shipping any change.
+
+== Requirement Table
+
+[cols="1,3,2", options="header"]
+|===
+|ID |Description |Verification
+
+|FN-001
+|Serialise and deserialise `Marshallable` and `SelfDescribingMarshallable` types with consistent field
+mapping across all `WireType` implementations, including `TextWire`, `YamlWire`, `JSONWire`, and `BinaryWire`.
+|`src/test/java/net/openhft/chronicle/wire/WireTypeTest.java` plus multi-format coverage tests under
+`src/test/java/net/openhft/chronicle/wire/*Wire*.java`.
+
+|FN-002
+|Provide explicit `DocumentContext` boundaries so multi-message streams can be replayed, skipped, or
+rolled back without corrupting state. Nested documents must maintain parent context metadata.
+|Lifecycle tests at `src/test/java/net/openhft/chronicle/wire/DocumentContextLifecycleTest.java`,
+`ReadDocumentContextTest.java`, and `WriteDocumentContextTest.java`.
+
+|FN-003
+|Guarantee deterministic encoding of scalars, nested documents, and anchors in `BinaryWire` so hashes,
+signatures, and replication ledgers remain stable between JVMs.
+|Binary-focused suites such as `BinaryWireTest.java`, `BinaryWireHighCodeTest.java`, and
+`BinaryWireAnchorTest.java`.
+
+|FN-004
+|Method writer/reader infrastructure shall transform strongly-typed service interfaces into wire traffic
+without reflection-induced garbage, while supporting interceptors and chained adapters.
+|`MethodReader*Test.java`, `VanillaMethodReaderTest.java`, `MethodWriterReaderSimpleIntegrationTest.java`,
+and `GenerateMethodWriter2CoverageTest.java`.
+
+|FN-005
+|Low-latency converters (e.g., long and time converters) must provide zero-copy parsing and formatting
+hooks so downstream engines keep nanosecond precision without intermediate allocations.
+|`net/openhft/chronicle/wire/converter/*Test.java` plus integration tests under
+`src/test/java/net/openhft/chronicle/wire/LongConversionTest.java`.
+
+|FN-006
+|Reference counting for shared `Bytes` instances must stay consistent so wire readers and writers can
+handover buffers without leaks. Leaked owners shall trigger `warnAndReleaseIfNotReleased()` to keep queues
+stable, as outlined in xref:system-architecture.adoc#component_map[System Architecture – Component Map].
+|`src/test/java/net/openhft/chronicle/wire/BytesReferenceCountingTest.java`,
+`src/test/java/net/openhft/chronicle/wire/WireResourcesTest.java`.
+
+|FN-007
+|Elastic `Bytes` growth must not corrupt `readPosition`, `writePosition`, or snapshot views. Chronicle Wire
+depends on `chronicle-bytes` to expand buffers in zero-copy fashion (see
+xref:system-architecture.adoc#cross_cutting_concerns[System Architecture – Cross-Cutting Concerns]).
+|`src/test/java/net/openhft/chronicle/wire/ElasticBytesCapacityTest.java`,
+`src/test/java/net/openhft/chronicle/wire/ElasticByteBufferTest.java`.
+|===
+
+== Traceability and Updates
+
+* Link new requirements back to `project-requirements.adoc` and the ADR in `decision-log.adoc`.
+* When new behaviours are introduced, expand this file, add the corresponding tests, and keep the IDs
+stable so release notes can track regressions precisely.
+* Always update the `Verification` column with the canonical test path to help reviewers jump straight
+to the relevant coverage.

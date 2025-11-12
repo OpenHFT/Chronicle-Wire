@@ -1,0 +1,57 @@
+= Chronicle Wire Decision Log
+Chronicle Software
+:toc:
+:sectnums:
+:lang: en-GB
+:source-highlighter: rouge
+
+This log records architectural and process choices that affect Chronicle Wire.
+Entries follow the Chronicle-wide template and use Nine-Box identifiers.
+
+=== [DOC-001] Real-time Documentation Loop
+
+Date :: 2024-05-01
+Context ::
+* Documentation drift slowed previous release reviews.
+* Chronicle introduced the expectation that docs, tests, and code move together.
+Decision Statement :: Adopt a real-time documentation workflow where any behavioural change updates the related `.adoc` file before merging.
+Alternatives Considered ::
+* Do nothing: Accept drift and rely on periodic clean-up. ::
+  ** Pros: No immediate effort.
+  ** Cons: Reviewers cannot trust docs; regressions slip through.
+* Batch documentation pushes during release hardening. ::
+  ** Pros: Potentially fewer doc merges.
+  ** Cons: High risk of missing knowledge; difficult cherry-picks.
+Rationale for Decision ::
+* Keeps requirements and runbooks trustworthy for both humans and AI agents.
+* Reduces rework because inconsistencies are caught early.
+Impact & Consequences ::
+* Slightly longer individual PRs, but faster acceptance.
+* Enables tooling (`scripts/check-doc-includes.py`) to enforce completeness.
+Notes/Links ::
+** `project-requirements.adoc`
+** `ops-scenarios.adoc`
+
+=== [NF-O-002] Multi-JDK Verification Gates
+
+Date :: 2024-05-10
+Context ::
+* Chronicle Wire supports several LTS JVMs and must remain binary compatible.
+* CI already mirrors branches such as `develop-java8-ok`.
+Decision Statement :: Make `mvn -q clean verify` on JDK 8, 11, 17, and 21 a release gate.
+Alternatives Considered ::
+* Support only the latest two LTS releases. ::
+  ** Pros: Less CI cost.
+  ** Cons: Breaks downstream platforms still on Java 8.
+* Allow per-feature overrides. ::
+  ** Pros: Faster experimentation.
+  ** Cons: High risk of shipping regressions unnoticed.
+Rationale for Decision ::
+* Chronicles' clients adopt new JVMs at different speeds; regression risk outweighs CI cost.
+* Early detection prevents subtle `Unsafe` or module-related bugs.
+Impact & Consequences ::
+* Developers must reproduce failures locally or via container images.
+* The release checklist now includes CI links for every JVM build.
+Notes/Links ::
+** `operational-requirements.adoc`
+** `functional-requirements.adoc`

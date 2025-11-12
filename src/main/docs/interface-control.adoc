@@ -1,0 +1,57 @@
+= Chronicle Wire Interface Control Document
+Chronicle Software
+:toc:
+:sectnums:
+:lang: en-GB
+:source-highlighter: rouge
+
+== Purpose
+
+This ICD captures the externally visible contracts between Chronicle Wire and its consumers.
+It focuses on interfaces that act as integration points for other Chronicle components or third-party
+applications.
+
+== Core Interfaces
+
+[cols="1,2,3", options="header"]
+|===
+|Interface |Key Responsibilities |Stability Notes
+
+|`net.openhft.chronicle.wire.Wire`
+|Creates document contexts, exposes `WireIn/WireOut`, and manages format-specific features.
+|Binary compatible across minor versions. Methods may gain overloads but never remove existing ones.
+
+|`net.openhft.chronicle.wire.DocumentContext`
+|Scopes each message, tracks metadata (rolling cycle, chain ID), and coordinates releases.
+|Must be closed via try-with-resources. Missing close is treated as a programmer error and logged.
+
+|`net.openhft.chronicle.wire.MethodWriter` / `MethodReader`
+|Generate strongly-typed service proxies and decoders that ride on top of Wire documents.
+|Generated classes are implementation details, but the public builder APIs remain stable.
+
+|`net.openhft.chronicle.wire.converter.LongConverter`
+|Maps textual encodings to numeric values without intermediate allocation.
+|Consumers may supply custom implementations so the SPI contract is documented in code comments.
+|===
+
+== Document Lifecycle
+
+1. Allocate a document context (`Wire.acquireWritingDocument`). The context carries metadata such as
+   source ID and thread ID.
+2. Write fields via `ValueOut`. Each call translates to an entry in the current document.
+3. Close the context to publish the bytes downstream.
+4. Readers obtain a matching `DocumentContext` from `Wire.readingDocument()` and consume the fields.
+
+All code paths must honour this lifecycle; skipping the closing step can leak buffers or block queue tailers.
+
+== Compatibility Policy
+
+* Method signatures in the interfaces listed above change only in major releases.
+* Default methods may be added for convenience, but callers should not rely on them being invoked unless
+  they explicitly target the newer version.
+* Any deprecation is announced one release ahead and mirrored in `functional-requirements.adoc`.
+
+== References
+
+* `wire-architecture.adoc` for deeper component diagrams.
+* `wire-cookbook.adoc` for typical usage examples that rely on this ICD.

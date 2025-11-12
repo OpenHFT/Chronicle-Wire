@@ -4,14 +4,15 @@
     Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
         <version>1.27ea2-SNAPSHOT</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <artifactId>chronicle-wire</artifactId>
@@ -22,8 +23,9 @@
     <packaging>bundle</packaging>
     <properties>
         <!-- Define the target coverage thresholds as properties -->
-        <jacoco.line.coverage>0.7</jacoco.line.coverage>
-        <jacoco.branch.coverage>0.6</jacoco.branch.coverage>
+        <jacoco.line.coverage>0.726</jacoco.line.coverage>
+        <jacoco.branch.coverage>0.664</jacoco.branch.coverage>
+        <surefireArgLine/>
     </properties>
 
     <!-- Use BOMs to keep dependency versions consistent across modules -->
@@ -255,8 +257,8 @@
                     <forkCount>1</forkCount>
                     <reuseForks>true</reuseForks>
                     <runOrder>hourly</runOrder>
-                    <!-- Allow other tools to prepend; include JPMS flags from parent for JDK 11+ -->
-                    <argLine>@{argLine} ${jvm.requiredArgs}</argLine>
+                    <!-- Allow jacoco/others to inject via surefireArgLine along with JPMS flags -->
+                    <argLine>${surefireArgLine} ${jvm.requiredArgs}</argLine>
                 </configuration>
             </plugin>
 
