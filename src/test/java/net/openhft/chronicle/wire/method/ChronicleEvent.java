@@ -33,6 +33,7 @@ public class ChronicleEvent extends BytesInBinaryMarshallable implements Event {
 
     /**
      * Sets the sending time for the event.
+     *
      * @param sendingTimeNS The time the event was sent, in nanoseconds.
      */
     @Override
@@ -42,6 +43,7 @@ public class ChronicleEvent extends BytesInBinaryMarshallable implements Event {
 
     /**
      * Retrieves the sending time for the event.
+     *
      * @return The time the event was sent, in nanoseconds.
      */
     @Override
@@ -51,6 +53,7 @@ public class ChronicleEvent extends BytesInBinaryMarshallable implements Event {
 
     /**
      * Sets the transaction time for the event.
+     *
      * @param transactTimeNS The time the event was processed or transacted, in nanoseconds.
      */
     @Override
@@ -60,6 +63,7 @@ public class ChronicleEvent extends BytesInBinaryMarshallable implements Event {
 
     /**
      * Retrieves the transaction time for the event.
+     *
      * @return The time the event was processed or transacted, in nanoseconds.
      */
     @Override

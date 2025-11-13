@@ -22,7 +22,9 @@ public class WireCollectionsAndMapsTest extends WireTestCommon {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
 
             // empty and single element sequence
-            w.write("empty").sequence(v -> {});
+            w.write("empty").sequence(v -> {
+                return;
+            });
             w.write("one").sequence(v -> v.int32(7));
             // mixed types
             w.write("mix").sequence(v -> {
@@ -34,11 +36,22 @@ public class WireCollectionsAndMapsTest extends WireTestCommon {
             // read back
             final int[] len = {0};
             len[0] = w.read("empty").sequenceWithLength(new Object[0], (in, arr) -> {
-                int c = 0; while (in.hasNextSequenceItem()) { in.skipValue(); c++; } return c; });
+                int c = 0;
+                while (in.hasNextSequenceItem()) {
+                    in.skipValue();
+                    c++;
+                }
+                return c;
+            });
             assertEquals(0, len[0]);
 
             len[0] = w.read("one").sequenceWithLength(new int[1], (in, arr) -> {
-                int c = 0; while (in.hasNextSequenceItem()) { arr[c++] = in.int32(); } return c; });
+                int c = 0;
+                while (in.hasNextSequenceItem()) {
+                    arr[c++] = in.int32();
+                }
+                return c;
+            });
             assertEquals(1, len[0]);
 
             Object[] out = new Object[3];

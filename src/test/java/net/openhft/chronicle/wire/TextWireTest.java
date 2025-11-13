@@ -1189,9 +1189,9 @@ public class TextWireTest extends WireTestCommon {
     // Test the string building behavior for ABC objects with Wire.
     @Test
     public void testABCStringBuilder() {
-        String A = "A: \"hi\", # This is an A\n";
-        String B = "B: 'hi', # This is a B\n";
-        String C = "C: hi, # And that's a C\n";
+        String stringA = "A: \"hi\", # This is an A\n";
+        String stringB = "B: 'hi', # This is a B\n";
+        String stringC = "C: hi, # And that's a C\n";
 
         // Create a wire and append values for A, B, and C
         @NotNull Wire wire = createWire();
@@ -1200,7 +1200,13 @@ public class TextWireTest extends WireTestCommon {
         ABC abc = new ABC();
 
         // Read from wire and assert its value for all permutations
-        for (String input : new String[] { A + B + C, B + A + C, C + A + B, A + C + B, B + C + A, C + B + A }) {
+        for (String input : new String[] {
+                stringA + stringB + stringC,
+                stringB + stringA + stringC,
+                stringC + stringA + stringB,
+                stringA + stringC + stringB,
+                stringB + stringC + stringA,
+                stringC + stringB + stringA }) {
             wire.reset();
             wire.bytes().append(input);
             assertEquals(input, "!net.openhft.chronicle.wire.TextWireTest$ABC {\n" +
@@ -1916,8 +1922,8 @@ public class TextWireTest extends WireTestCommon {
                         "one: !byte[] !!binary AQ==\n" +
                         "# position: 64, header: 2\n" +
                         "--- !!data\n" +
-                        "four: !byte[] !!binary AQIDBA==\n"
-                , Wires.fromSizePrefixedBlobs(wire.bytes()));
+                        "four: !byte[] !!binary AQIDBA==\n",
+                Wires.fromSizePrefixedBlobs(wire.bytes()));
 
         // Read back each byte array from the Wire and verify its contents.
         wire.readDocument(null, w -> assertArrayEquals(new byte[0], (byte[]) w.read(() -> "nothing").object()));
@@ -1950,8 +1956,8 @@ public class TextWireTest extends WireTestCommon {
                         "? { MyField: parent }: {\n" +
                         "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key1 }: value1,\n" +
                         "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key2 }: value2\n" +
-                        "}\n"
-                , Wires.fromSizePrefixedBlobs(wire.bytes()));
+                        "}\n",
+                Wires.fromSizePrefixedBlobs(wire.bytes()));
 
         // Read back the map from the Wire and verify its contents.
         wire.readDocument(null, w -> {
@@ -2222,6 +2228,8 @@ public class TextWireTest extends WireTestCommon {
                     case 3:
                         cs += "  num: 128,\n";
                         break;
+                    default:
+                        throw new IllegalStateException("Unexpected selector");
                 }
                 z /= 4;
             }

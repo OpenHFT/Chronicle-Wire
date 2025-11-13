@@ -19,16 +19,16 @@ import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 public class TriviallyCopyableJLBH implements JLBHTask {
 
     enum HouseType {
-        TRIVIALLY_COPYABLE, 
+        TRIVIALLY_COPYABLE,
         BINARY_WIRE,
-        UNKNOWN;
+        UNKNOWN
     }
 
     // use -Dio.type=binary or trivial to set. Defaults to binary
     private HouseType type = HouseType.UNKNOWN;
 
     // use -Dcpu=N to set. Defaults to 2
-    private final int CPU;
+    private final int cpu;
 
     static {
         System.setProperty("jvm.resource.tracing", "false");
@@ -103,23 +103,22 @@ public class TriviallyCopyableJLBH implements JLBHTask {
     private final Wire wire = WireType.BINARY.apply(Bytes.allocateDirect(1024));
 
     public static void main(String[] args) {
-        new TriviallyCopyableJLBH().test();   
+        new TriviallyCopyableJLBH().test();
         System.exit(0);
     }
 
-    private TriviallyCopyableJLBH()
-    {
+    private TriviallyCopyableJLBH() {
         String ioType = System.getProperty("io.type", "binary");
-        if(ioType.equals("binary")) {
+        if (ioType.equals("binary")) {
             type = HouseType.BINARY_WIRE;
-        } else if(ioType.equals("trivial")) {
+        } else if (ioType.equals("trivial")) {
             type = HouseType.TRIVIALLY_COPYABLE;
         } else {
             System.out.println("-Dio.type must be \"binary\" or \"trivial\"");
             System.exit(-1);
         }
 
-        CPU = Integer.parseInt(System.getProperty("cpu", "2"));
+        cpu = Integer.parseInt(System.getProperty("cpu", "2"));
 
         originalHouse = newHouse(type).address("82 St John Street, Clerkenwell");
         targetHouse = newHouse(type);
@@ -132,7 +131,7 @@ public class TriviallyCopyableJLBH implements JLBHTask {
                 .iterations(1_000_000)
                 .throughput(100_000)
                 .accountForCoordinatedOmission(false)
-                .acquireLock(()->AffinityLock.acquireLock(CPU))
+                .acquireLock(() -> AffinityLock.acquireLock(cpu))
                 .recordOSJitter(false)
                 .runs(5)
                 .jlbhTask(this);

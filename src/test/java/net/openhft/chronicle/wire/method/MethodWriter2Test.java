@@ -21,13 +21,8 @@ import java.util.function.Consumer;
 import static org.junit.Assert.*;
 
 // Test class for verifying the behavior of a method writer with different argument types and update interceptor
+// run with -DdumpCode to see the generated code
 public class MethodWriter2Test extends WireTestCommon {
-
-    // Static block - can be used for setting properties like code dumping
-    static {
-        // Uncomment to enable dumping of generated code
-        // System.setProperty("dumpCode", "true");
-    }
 
     // Test to verify that method calls with DTO arguments are allowed through
     @Test

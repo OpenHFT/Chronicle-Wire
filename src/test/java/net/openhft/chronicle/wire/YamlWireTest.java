@@ -630,7 +630,10 @@ public class YamlWireTest extends WireTestCommon {
         // Custom object to hold floating-point value for verification
         class Floater {
             double f;
-            void set(double d) { f = d; }
+
+            void set(double d) {
+                f = d;
+            }
         }
         @NotNull Floater n = new Floater();
         IntStream.rangeClosed(1, 3).forEach(e -> {
@@ -928,9 +931,9 @@ public class YamlWireTest extends WireTestCommon {
     public void testABCStringBuilder() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        String A = "A: \"hi\", # This is an A\n";
-        String B = "B: 'hi', # This is a B\n";
-        String C = "C: hi, # And that's a C\n";
+        String stringA = "A: \"hi\", # This is an A\n";
+        String stringB = "B: 'hi', # This is a B\n";
+        String stringC = "C: hi, # And that's a C\n";
 
         // Create a wire and append values for A, B, and C
         @NotNull Wire wire = createWire();
@@ -939,7 +942,13 @@ public class YamlWireTest extends WireTestCommon {
         ABC abc = new ABC();
 
         // Read from wire and assert its value for all permutations
-        for (String input : new String[] { A + B + C, B + A + C, C + A + B, A + C + B, B + C + A, C + B + A }) {
+        for (String input : new String[] {
+                stringA + stringB + stringC,
+                stringB + stringA + stringC,
+                stringC + stringA + stringB,
+                stringA + stringC + stringB,
+                stringB + stringC + stringA,
+                stringC + stringB + stringA }) {
             wire.reset();
             wire.bytes().append(input);
             assertEquals(input, "!net.openhft.chronicle.wire.TextWireTest$ABC {\n" +
@@ -1682,8 +1691,8 @@ public class YamlWireTest extends WireTestCommon {
                         "? { MyField: parent }: {\n" +
                         "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key1 }: value1,\n" +
                         "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key2 }: value2\n" +
-                        "}\n"
-                , Wires.fromSizePrefixedBlobs(wire.bytes()));
+                        "}\n",
+                Wires.fromSizePrefixedBlobs(wire.bytes()));
 
         wire.readDocument(null, w -> {
             Map<MyMarshallable, Map> map1 = w.getValueIn().marshallableAsMap(MyMarshallable.class, Map.class);

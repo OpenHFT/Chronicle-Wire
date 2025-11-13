@@ -82,6 +82,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
 
     /**
      * Helper method to check the method writing and reading functionality.
+     *
      * @param simple An implementation of the Simple interface.
      */
     private void checkWriteRead(Simple simple) throws InvalidMarshallableException {
@@ -134,7 +135,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
     /**
      * Abstract class implementing SimpleDescendant.
      */
-    private static abstract class SimpleAbstractDescendantClass implements SimpleDescendant {
+    private abstract static class SimpleAbstractDescendantClass implements SimpleDescendant {
     }
 
     /**

@@ -144,6 +144,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     /**
      * Interface representing a broker with a method to route actions via a named path.
+     *
      * @param <T> The type of action or behavior being routed.
      */
     interface Broker<T> {
@@ -152,6 +153,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     /**
      * Interface for routing actions using an alternative method.
+     *
      * @param <T> The type of action or behavior being routed.
      */
     interface Another<T> {

@@ -112,7 +112,7 @@ class WireUtils {
             if (b.getCollections().containsKey(c.getReference())) {
                 compareWireCollection(c, b.getCollections().get(c.getReference()));
             } else {
-                //Assert.fail("Cannot match collection child element WireCollection");
+                Assert.fail("Cannot match collection child element WireCollection");
             }
         });
     }

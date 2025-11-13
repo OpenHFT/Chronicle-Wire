@@ -14,7 +14,9 @@ import static org.junit.Assert.*;
 
 public class VanillaMethodWriterBuilderOptionsTest extends WireTestCommon {
 
-    interface Events { void event(String s); }
+    interface Events {
+        void event(String s);
+    }
 
     @Test
     public void honoursUpdateInterceptorAndThreadSafeToggle() {
@@ -34,9 +36,9 @@ public class VanillaMethodWriterBuilderOptionsTest extends WireTestCommon {
         MethodReader reader = wire.methodReader((Events) seen::add);
         while (reader.readOne()) {
             // drain
+            continue;
         }
         assertEquals(1, seen.size());
         assertEquals("keep", seen.get(0));
     }
 }
-

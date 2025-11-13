@@ -38,10 +38,10 @@ public class GenerateMethodWriterMultiInterfaceTest extends WireTestCommon {
         });
         while (reader.readOne()) {
             // drain
+            continue;
         }
         assertEquals(2, seen.size());
         assertTrue(seen.get(0).startsWith("two:"));
         assertTrue(seen.get(1).startsWith("one:"));
     }
 }
-

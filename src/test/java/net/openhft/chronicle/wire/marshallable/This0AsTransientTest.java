@@ -93,6 +93,7 @@ public class This0AsTransientTest extends WireTestCommon {
      * This class has an explicit 'this$0' field to mimic the behavior of hidden fields in inner classes.
      */
     class MyClass2 extends SelfDescribingMarshallable {
+        @SuppressWarnings("unused")
         String this$0;
         long value;
 

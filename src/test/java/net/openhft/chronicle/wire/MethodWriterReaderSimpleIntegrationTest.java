@@ -47,6 +47,7 @@ public class MethodWriterReaderSimpleIntegrationTest extends WireTestCommon {
 
         while (reader.readOne()) {
             // loop until exhausted
+            continue;
         }
 
         assertEquals(3, seen.size());

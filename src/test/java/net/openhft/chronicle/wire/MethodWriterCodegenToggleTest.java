@@ -59,10 +59,11 @@ public class MethodWriterCodegenToggleTest extends WireTestCommon {
             @Override public void a(int x) { seen.add("a:" + x); }
             @Override public void b(String s) { seen.add("b:" + s); }
         });
-        while (r.readOne()) { /* drain */ }
+        while (r.readOne()) {
+            continue;
+        }
         assertEquals(2, seen.size());
         assertTrue(seen.get(0).startsWith("a:"));
         assertTrue(seen.get(1).startsWith("b:"));
     }
 }
-

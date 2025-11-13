@@ -26,7 +26,7 @@ import static org.junit.Assume.assumeFalse;
 public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Constant representing the text value for tests
-    private final String TEXT = "abc";
+    private static final String TEXT = "abc";
 
     // Flag to indicate if types should be used or not
     private final boolean useTypes;
@@ -149,7 +149,7 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
     }
 
     // Custom class definition with an integer value for testing
-    final static class Foo {
+    static final class Foo {
         final int value;
 
         Foo(int value) {
@@ -168,7 +168,7 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
     }
 
     // Custom class definition with a string value for testing
-    final static class Bar {
+    static final class Bar {
 
         final String value;
 

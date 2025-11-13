@@ -53,12 +53,10 @@ public class JSONWireTest extends WireTestCommon {
                 str.toString()
                         .replaceAll("\\.0(\\D)", "$1")
                         .replaceAll(" ?\\[ ?", "[")
-                        .replaceAll(" ?\\] ?", "]")
-                ,
+                        .replaceAll(" ?\\] ?", "]"),
                 json2.toString()
                         .replaceAll(" ?\\[ ?", "[")
-                        .replaceAll(" ?\\] ?", "]")
-        );
+                        .replaceAll(" ?\\] ?", "]"));
         hexDump.releaseLast();
     }
 
@@ -84,12 +82,10 @@ public class JSONWireTest extends WireTestCommon {
                 str.toString()
                         .replaceAll("\\.0(\\D)", "$1")
                         .replaceAll(" ?\\[ ?", "[")
-                        .replaceAll(" ?\\] ?", "]")
-                ,
+                        .replaceAll(" ?\\] ?", "]"),
                 json2.toString()
                         .replaceAll(" ?\\[ ?", "[")
-                        .replaceAll(" ?\\] ?", "]")
-        );
+                        .replaceAll(" ?\\] ?", "]"));
     }
 
     // Utility function to create a JSONWire from a string

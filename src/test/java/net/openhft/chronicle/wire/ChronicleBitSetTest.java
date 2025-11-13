@@ -1145,6 +1145,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
 
     /**
      * Clone the provided ChronicleBitSet using its size.
+     *
      * @param b1 the ChronicleBitSet to clone.
      * @return the cloned ChronicleBitSet.
      */
@@ -1154,7 +1155,8 @@ public class ChronicleBitSetTest extends WireTestCommon {
 
     /**
      * Clone the provided ChronicleBitSet with the given size.
-     * @param b1 the ChronicleBitSet to clone.
+     *
+     * @param b1   the ChronicleBitSet to clone.
      * @param size the size for the new cloned ChronicleBitSet.
      * @return the cloned ChronicleBitSet.
      */
@@ -1169,6 +1171,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
 
     /**
      * Create a new ChronicleBitSet with default size of 1024.
+     *
      * @return the new ChronicleBitSet.
      */
     private ChronicleBitSet createBitSet() {
@@ -1179,6 +1182,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
 
     /**
      * Create a new ChronicleBitSet with the specified size.
+     *
      * @param bits the size for the new ChronicleBitSet.
      * @return the new ChronicleBitSet.
      */
@@ -1193,7 +1197,8 @@ public class ChronicleBitSetTest extends WireTestCommon {
     /**
      * Create a ChronicleBitSet using the provided Wire and size.
      * This method uses reflection to instantiate the ChronicleBitSet.
-     * @param w the Wire for the new ChronicleBitSet.
+     *
+     * @param w    the Wire for the new ChronicleBitSet.
      * @param size the size for the new ChronicleBitSet.
      * @return the new ChronicleBitSet.
      */

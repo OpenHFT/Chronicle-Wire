@@ -81,7 +81,7 @@ public class MethodWriterClassNameGeneratorTest extends net.openhft.chronicle.wi
                 NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener2.class);
         String cn2 = generatedClassName(null, false, false, WireType.TEXT,
                 NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener1.class,
-                NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGi_DiffersInTheTruncatedPortion.class);
+                NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGiDiffersInTheTruncatedPortion.class);
         Jvm.startup().on(MethodWriterClassNameGeneratorTest.class, "Must differ:\n" + cn1 + "\n" + cn2);
         assertNotEquals(cn1, cn2);
     }
@@ -104,6 +104,6 @@ public class MethodWriterClassNameGeneratorTest extends net.openhft.chronicle.wi
     private interface NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener2 {
     }
 
-    private interface NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGi_DiffersInTheTruncatedPortion {
+    private interface NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGiDiffersInTheTruncatedPortion {
     }
 }

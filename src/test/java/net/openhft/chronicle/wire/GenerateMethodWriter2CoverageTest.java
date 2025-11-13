@@ -38,6 +38,7 @@ public class GenerateMethodWriter2CoverageTest extends WireTestCommon {
             MethodReader reader = wire.methodReader(recorder);
             while (reader.readOne()) {
                 // drain
+                continue;
             }
 
             List<String> expected = new ArrayList<>();

@@ -18,8 +18,13 @@ public class WireMarshallerDeepGraphTest extends WireTestCommon {
     public static class Child extends SelfDescribingMarshallable {
         int id;
         String name;
-        public Child() {}
-        public Child(int id, String name) { this.id = id; this.name = name; }
+        public Child() {
+        }
+
+        public Child(int id, String name) {
+            this.id = id;
+            this.name = name;
+        }
     }
 
     public static class Parent extends SelfDescribingMarshallable {
@@ -44,4 +49,3 @@ public class WireMarshallerDeepGraphTest extends WireTestCommon {
         }
     }
 }
-

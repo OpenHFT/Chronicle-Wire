@@ -16,6 +16,7 @@ public class MethodWriterReaderDispatchTest extends WireTestCommon {
 
     interface Api {
         void a(int i);
+
         void b(String s);
     }
 
@@ -36,10 +37,10 @@ public class MethodWriterReaderDispatchTest extends WireTestCommon {
         });
         while (r.readOne()) {
             // drain
+            continue;
         }
         assertEquals(2, seen.size());
         assertTrue(seen.get(0).startsWith("a:"));
         assertTrue(seen.get(1).startsWith("b:"));
     }
 }
-

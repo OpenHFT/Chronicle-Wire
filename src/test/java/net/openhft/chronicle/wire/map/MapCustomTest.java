@@ -94,14 +94,14 @@ public class MapCustomTest extends WireTestCommon {
     /**
      * Custom HashMap that contains an additional generic field.
      */
-    public static class IntMap<IGNORE, V> extends HashMap<Integer, V> {
-        public IGNORE me;
+    public static class IntMap<I, V> extends HashMap<Integer, V> {
+        public I me;
     }
 
     /**
      * Extended version of IntMap.
      */
-    public static class IntSuperMap<SUPER, SELF> extends IntMap<Function<Integer, SELF>, SUPER> {
+    public static class IntSuperMap<S, T> extends IntMap<Function<Integer, T>, S> {
         // No-op.
     }
 

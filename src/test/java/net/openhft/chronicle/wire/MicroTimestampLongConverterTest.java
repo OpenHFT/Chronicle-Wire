@@ -56,7 +56,7 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
 
     // Test timestamp parsing with New York timezone
     @Test
-    public void NYparse() {
+    public void parseNewYorkTimeZone() {
         MicroTimestampLongConverter mtlc = new MicroTimestampLongConverter("America/New_York");
         long time = INSTANCE.parse("2020/09/18T01:02:03.456789");
         final String str = mtlc.asString(time);

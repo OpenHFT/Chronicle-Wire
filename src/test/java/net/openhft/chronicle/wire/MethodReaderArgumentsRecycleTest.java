@@ -96,7 +96,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
         });
     }
 
-    private static void _assertEquals(Object a, Object b) {
+    private static void assertRecycledEquality(Object a, Object b) {
         if (a instanceof int[] && b instanceof int[])
             assertArrayEquals((int[]) a, (int[]) b);
         else if (a instanceof Object[] && b instanceof Object[])
@@ -110,11 +110,11 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
         call.accept(firstArg);
         assertTrue(reader.readOne());
         Object firstRef = lastArgumentRef;
-        _assertEquals(firstArg, lastArgumentRef);
+        assertRecycledEquality(firstArg, lastArgumentRef);
 
         call.accept(secondArg);
         assertTrue(reader.readOne());
-        _assertEquals(secondArg, lastArgumentRef);
+        assertRecycledEquality(secondArg, lastArgumentRef);
 
         assertNotSame(firstRef, lastArgumentRef);
     }

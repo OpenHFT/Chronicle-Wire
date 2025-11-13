@@ -41,22 +41,22 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
             "...\n";
 
     // Interface for handling 'a' type messages
-    interface _A {
+    interface IA {
         void a(String text);
     }
 
     // Interface for handling 'b' type messages
-    interface _B {
+    interface IB {
         void b(String text);
     }
 
     // Interface for handling 'c' type messages
-    interface _C {
+    interface IC {
         void c(String text);
     }
 
     // Composite interface extending both _B and _C
-    private interface _BC extends _B, _C {
+    private interface IBC extends IB, IC {
     }
 
     // Test where nothing is expected to happen, using non-scanning method
@@ -89,7 +89,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
                         "# true\n" +
                         "# true\n" +
                         "# true\n",
-                ExceptionHandler.ignoresEverything(), _A.class, false);
+                ExceptionHandler.ignoresEverything(), IA.class, false);
     }
 
     // Test focusing on the 'a' type message, using scanning method
@@ -100,7 +100,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
                         "a[a2]\n" +
                         "# true\n" +
                         "# false\n",
-                ExceptionHandler.ignoresEverything(), _A.class, true);
+                ExceptionHandler.ignoresEverything(), IA.class, true);
     }
 
 // Continue from the previously provided class `MethodReaderBuilderExceptionHandlerTest`.
@@ -118,7 +118,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
                         "# true\n" +
                         "c[c2]\n" +
                         "# true\n",
-                ExceptionHandler.ignoresEverything(), _BC.class, false);
+                ExceptionHandler.ignoresEverything(), IBC.class, false);
     }
 
     // Test focusing on both 'b' and 'c' type messages using scanning method
@@ -132,7 +132,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
                         "# true\n" +
                         "c[c2]\n" +
                         "# true\n",
-                ExceptionHandler.ignoresEverything(), _BC.class, true);
+                ExceptionHandler.ignoresEverything(), IBC.class, true);
     }
 
     // Test focusing on 'b' and 'c' type messages using non-scanning method, while expecting a warning for the 'a' type message
@@ -149,7 +149,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
                         "# true\n" +
                         "c[c2]\n" +
                         "# true\n",
-                Jvm.warn(), _BC.class, false);
+                Jvm.warn(), IBC.class, false);
     }
 
     // Test focusing on 'b' and 'c' type messages using scanning method, while expecting a warning for the 'a' type message
@@ -164,7 +164,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
                         "# true\n" +
                         "c[c2]\n" +
                         "# true\n",
-                Jvm.warn(), _BC.class, true);
+                Jvm.warn(), IBC.class, true);
     }
 
     // A helper method for performing tests:

@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
-@SuppressWarnings({"rawtypes","try"})
+@SuppressWarnings({"rawtypes", "try"})
 @RunWith(value = Parameterized.class)
 public class BinaryWire2Test extends WireTestCommon {
     private final boolean usePadding;
@@ -804,8 +804,8 @@ public class BinaryWire2Test extends WireTestCommon {
                         "? { MyField: parent }: {\n" +
                         "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key1 }: value1,\n" +
                         "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key2 }: value2\n" +
-                        "}\n"
-                , Wires.fromSizePrefixedBlobs(wire.bytes()));
+                        "}\n",
+                Wires.fromSizePrefixedBlobs(wire.bytes()));
 
         // Read the document from the wire and check the values
         wire.readDocument(null, w -> {
@@ -923,7 +923,7 @@ public class BinaryWire2Test extends WireTestCommon {
         wire.bytes().releaseLast(); // Release the resources
     }
 
-// This test is designed to check if the wire correctly reads a Bytes object from a marshallable representation.
+    // This test is designed to check if the wire correctly reads a Bytes object from a marshallable representation.
     @Test
     public void testreadBytes() {
         // Create a new BinaryWire with heap allocated storage

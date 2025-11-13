@@ -1175,7 +1175,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         bytes.uncheckedReadSkipOne();
         if (bytes.isDirectMemory() && bytes.bytesStore() instanceof NativeBytesStore) {
             // Optimized parsing for direct memory access.
-            AppendableUtil.parse8bitSb1(bytes, sb, peekCode & 0x1f);
+            AppendableUtil.parse8bit_SB1(bytes, sb, peekCode & 0x1f);
         } else {
             try {
                 // General parsing for non-direct memory.

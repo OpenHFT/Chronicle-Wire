@@ -19,9 +19,17 @@ public class ValueInApisNegativeTest extends WireTestCommon {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
 
             // empty sequence
-            w.write("s").sequence(v -> {});
+            w.write("s").sequence(v -> {
+                return;
+            });
             int len = w.read("s").sequenceWithLength(new Object[0], (in, o) -> {
-                int c = 0; while (in.hasNextSequenceItem()) { in.skipValue(); c++; } return c; });
+                int c = 0;
+                while (in.hasNextSequenceItem()) {
+                    in.skipValue();
+                    c++;
+                }
+                return c;
+            });
             assertEquals(0, len);
 
             // bytesMatch on binary only (text/yaml base64 specifics are covered elsewhere)

@@ -60,6 +60,7 @@ public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
 
         /**
          * Reads the data from the provided WireIn object to populate this DTO.
+         *
          * @param wire WireIn instance containing serialized data
          * @throws IORuntimeException If an IO error occurs during reading
          */

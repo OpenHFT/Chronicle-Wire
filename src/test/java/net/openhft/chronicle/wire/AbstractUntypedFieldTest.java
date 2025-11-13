@@ -87,7 +87,7 @@ class AbstractUntypedFieldTest extends WireTestCommon {
     }
 
     // Abstract base class for testing
-    static abstract class A {
+    abstract static class A {
     }
 
     // Implementation of the abstract base class

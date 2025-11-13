@@ -198,18 +198,16 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
 
         if (!scanning) {
             // one
-            assertEquals("M meta[one]\n"
-                    , asString(sw));
+            assertEquals("M meta[one]\n", asString(sw));
             assertTrue(reader.readOne());
             // i2i
-            assertEquals("M meta[one]\n"
-                    , asString(sw));
+            assertEquals("M meta[one]\n", asString(sw));
             assertTrue(reader.readOne());
         }
         // data six
         assertEquals("M meta[one]\n" +
-                        "D data[six]\n"
-                , asString(sw));
+                        "D data[six]\n",
+                asString(sw));
         assertFalse(reader.readOne());
     }
 
