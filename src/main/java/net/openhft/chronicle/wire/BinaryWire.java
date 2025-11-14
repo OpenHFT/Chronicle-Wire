@@ -2659,7 +2659,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (bytes.retainedHexDumpDescription())
                 bytes.writeHexDumpDescription("int32 for binding");
             int32forBinding(value);
-            ((BinaryIntReference) intValue).bytesStore(bytes, bytes.writePosition() - 4, 4);
+            BinaryIntReference reference = requireReference(intValue, BinaryIntReference.class, "int32forBinding");
+            reference.bytesStore(bytes, bytes.writePosition() - 4, 4);
             return BinaryWire.this;
         }
 
@@ -2669,7 +2670,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (bytes.retainedHexDumpDescription())
                 bytes.writeHexDumpDescription("int64 for binding");
             int64forBinding(value);
-            ((BinaryLongReference) longValue).bytesStore(bytes, bytes.writePosition() - 8, 8);
+            BinaryLongReference reference = requireReference(longValue, BinaryLongReference.class, "int64forBinding");
+            reference.bytesStore(bytes, bytes.writePosition() - 8, 8);
             return BinaryWire.this;
         }
 
@@ -2677,8 +2679,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public WireOut boolForBinding(final boolean value, @NotNull final BooleanValue booleanValue) {
             bool(value);
-            ((BinaryBooleanReference) booleanValue).bytesStore(bytes, bytes.writePosition() - 1,
-                    1);
+            BinaryBooleanReference reference = requireReference(booleanValue, BinaryBooleanReference.class, "boolForBinding");
+            reference.bytesStore(bytes, bytes.writePosition() - 1, 1);
             return BinaryWire.this;
         }
 
@@ -2758,8 +2760,11 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             if (useSelfDescribingMessage(object))
                 object.writeMarshallable(BinaryWire.this);
-            else
+            else {
+                if (!(object instanceof WriteBytesMarshallable))
+                    throw new InvalidMarshallableException("Object must implement WriteBytesMarshallable when usesSelfDescribingMessage is false: " + object.getClass());
                 ((WriteBytesMarshallable) object).writeMarshallable(BinaryWire.this.bytes());
+            }
 
             binaryLengthLength.writeLength(bytes, pos, bytes.writePosition());
             return BinaryWire.this;
@@ -3348,6 +3353,21 @@ public class BinaryWire extends AbstractWire implements Wire {
                     (code >= STRING_0 && code <= STRING_31);
         }
 
+        private void copyTextToBytesOut(BytesOut<?> target) {
+            if (target instanceof Bytes) {
+                textTo((Bytes) target);
+                return;
+            }
+            try (ScopedResource<Bytes<Void>> scoped = Wires.acquireBytesScoped()) {
+                Bytes<?> temp = scoped.get();
+                textTo(temp);
+                temp.readPosition(0);
+                long length = temp.readRemaining();
+                target.write(temp, 0L, length);
+                temp.clear();
+            }
+        }
+
         @Nullable
         @Override
         public StringBuilder textTo(@NotNull StringBuilder sb) {
@@ -3459,10 +3479,10 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             }
             if (code == U8_ARRAY) {
-                ((Bytes) bytes).readWithLength(length - 1, toBytes);
+                bytes.readWithLength(length - 1, toBytes);
             } else {
                 bytes.uncheckedReadSkipBackOne();
-                textTo((Bytes) toBytes);
+                copyTextToBytesOut(toBytes);
             }
             return wireIn();
         }
@@ -4520,6 +4540,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                         else
                             Wires.readMarshallable(object, BinaryWire.this, false);
                     } else {
+                        if (!(object instanceof ReadBytesMarshallable))
+                            throw new InvalidMarshallableException("Object must implement ReadBytesMarshallable when usesSelfDescribingMessage is false: " + object.getClass());
                         ((ReadBytesMarshallable) object).readMarshallable(BinaryWire.this.bytes);
                     }
                 } finally {
@@ -5123,5 +5145,12 @@ public class BinaryWire extends AbstractWire implements Wire {
             // If the code doesn't match any known pattern, assume it's a text encoding
             text();
         }
+    }
+
+    private static <T> T requireReference(Object value, Class<T> expected, String action) {
+        if (expected.isInstance(value))
+            return expected.cast(value);
+        throw new IllegalArgumentException(action + " requires " + expected.getSimpleName() +
+                " but was " + (value == null ? "null" : value.getClass().getName()));
     }
 }

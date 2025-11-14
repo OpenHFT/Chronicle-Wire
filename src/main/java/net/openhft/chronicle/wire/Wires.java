@@ -170,6 +170,13 @@ public enum Wires {
     // Used to ensure an untyped bytes warning is logged only once
     static volatile boolean warnedUntypedBytesOnce = false;
 
+    static boolean markUntypedBytesWarning() {
+        if (warnedUntypedBytesOnce)
+            return false;
+        warnedUntypedBytesOnce = true;
+        return true;
+    }
+
     // Legacy thread-local {@link StringBuilder}. Prefer {@link #STRING_BUILDER_SCOPED_RESOURCE_POOL}
     static ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
 
@@ -1037,8 +1044,9 @@ public enum Wires {
         if (using instanceof Date) {
             ((Date) using).setTime(time);
             return using;
-        } else
+        } else {
             return (E) new Date(time);
+        }
     }
 
     /**
@@ -1416,7 +1424,10 @@ public enum Wires {
          * @return A WireOut object, which represents the state after the write operation.
          */
         public static WireOut writeDate(Date date, ValueOut out) {
-            final String format = SDF_2.format(date);
+            final String format;
+            synchronized (SDF_2) {
+                format = SDF_2.format(date);
+            }
             return out.writeString(format);
         }
 

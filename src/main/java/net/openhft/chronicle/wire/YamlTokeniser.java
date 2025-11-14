@@ -130,6 +130,10 @@ public class YamlTokeniser {
         return contexts.isEmpty() ? YamlToken.STREAM_START : topContext().token;
     }
 
+    long lastKeyPosition() {
+        return lastKeyPosition >= 0 ? lastKeyPosition : lineStart;
+    }
+
     /**
      * Retrieves the top context from the context stack.
      * This method provides the most recent tokenization context.

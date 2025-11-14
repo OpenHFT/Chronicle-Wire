@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.ref.BinaryBooleanReference;
 import net.openhft.chronicle.bytes.ref.BinaryIntArrayReference;
 import net.openhft.chronicle.bytes.ref.BinaryIntReference;
 import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
@@ -418,8 +419,9 @@ public class RawWire extends AbstractWire implements Wire {
                         throw new AssertionError(e);
                     }
                 }
-            else
+            else {
                 bytes.writeUtf8(s);
+            }
             return RawWire.this;
         }
 
@@ -656,7 +658,8 @@ public class RawWire extends AbstractWire implements Wire {
         @Override
         public WireOut int32forBinding(int value, @NotNull IntValue intValue) {
             int32forBinding(value);
-            ((BinaryIntReference) intValue).bytesStore(bytes, bytes.writePosition() - 4, 4);
+            BinaryIntReference reference = requireReference(intValue, BinaryIntReference.class, "int32forBinding");
+            reference.bytesStore(bytes, bytes.writePosition() - 4, 4);
             return RawWire.this;
         }
 
@@ -664,7 +667,8 @@ public class RawWire extends AbstractWire implements Wire {
         @Override
         public WireOut int64forBinding(long value, @NotNull LongValue longValue) {
             int64forBinding(value);
-            ((BinaryLongReference) longValue).bytesStore(bytes, bytes.writePosition() - 8, 8);
+            BinaryLongReference reference = requireReference(longValue, BinaryLongReference.class, "int64forBinding");
+            reference.bytesStore(bytes, bytes.writePosition() - 8, 8);
             return RawWire.this;
         }
 
@@ -672,7 +676,8 @@ public class RawWire extends AbstractWire implements Wire {
         @Override
         public WireOut boolForBinding(final boolean value, @NotNull final BooleanValue longValue) {
             bool(value);
-            ((BinaryLongReference) longValue).bytesStore(bytes, bytes.writePosition() - 1, 1);
+            BinaryBooleanReference reference = requireReference(longValue, BinaryBooleanReference.class, "boolForBinding");
+            reference.bytesStore(bytes, bytes.writePosition() - 1, 1);
             return RawWire.this;
         }
 
@@ -1257,5 +1262,12 @@ public class RawWire extends AbstractWire implements Wire {
         public Object objectWithInferredType(Object using, SerializationStrategy strategy, Class<?> type) {
             throw new UnsupportedOperationException("Cannot read " + using + " value and " + type + " type for RawWire");
         }
+    }
+
+    private static <T> T requireReference(Object value, Class<T> expected, String action) {
+        if (expected.isInstance(value))
+            return expected.cast(value);
+        throw new IllegalArgumentException(action + " requires " + expected.getSimpleName() +
+                " but was " + (value == null ? "null" : value.getClass().getName()));
     }
 }

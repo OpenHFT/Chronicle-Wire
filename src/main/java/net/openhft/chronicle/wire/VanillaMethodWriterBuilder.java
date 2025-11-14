@@ -297,11 +297,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                 // Attempt to create an instance from an already loaded class
                 return (T) newInstance(Class.forName(fullClassName));
             } catch (ClassNotFoundException e) {
-                Class<?> clazz;
-                // only one thread at a time so two threads don't try to generate the same class.
-                synchronized (classCache) {
-                    clazz = classCache.computeIfAbsent(fullClassName, this::newClass);
-                }
+                Class<?> clazz = classCache.computeIfAbsent(fullClassName, this::newClass);
                 if (clazz != null && clazz != COMPILE_FAILED) {
                     return (T) newInstance(clazz);
                 }
@@ -447,17 +443,6 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
             throw new IllegalArgumentException("expecting a class rather than an interface, proxyClass=" + proxyClass);
         this.proxyClass = proxyClass;
         return this;
-    }
-
-    /**
-     * Converts the first character of a given string to uppercase and the rest to lowercase.
-     *
-     * @param name The input string to be converted.
-     * @return The converted string with its first character in uppercase and the rest in lowercase.
-     */
-    @NotNull
-    private String toFirstCapCase(@NotNull String name) {
-        return Character.toUpperCase(name.charAt(0)) + name.substring(1).toLowerCase();
     }
 
     /**

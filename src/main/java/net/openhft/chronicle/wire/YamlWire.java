@@ -513,8 +513,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             } finally {
                 bytes.readLimit(l);
             }
-        } else
+        } else {
             return bytes.toString();
+        }
     }
 
     @Override
@@ -605,15 +606,25 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 wireValueOut.text(yt.text());
                 break;
             case NONE:
+                break;
             case DIRECTIVE:
+                break;
             case DOCUMENT_END:
+                break;
             case SEQUENCE_END:
+                break;
             case SEQUENCE_ENTRY:
+                break;
             case ANCHOR:
+                break;
             case ALIAS:
+                break;
             case RESERVED:
+                break;
             case STREAM_END:
+                break;
             case STREAM_START:
+                break;
             default:
                 break;
         }
@@ -731,7 +742,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         return targetBuffer;
     }
 
-    @SuppressWarnings("fallthrough")
     @Nullable
     @Override
     public <K> K readEvent(@NotNull Class<K> expectedClass) throws InvalidMarshallableException {
@@ -739,24 +749,30 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         switch (yt.current()) {
             case MAPPING_START:
                 yt.next();
-                assert yt.current() == YamlToken.MAPPING_KEY;
-                // Deliberate fall-through
+                if (yt.current() != YamlToken.MAPPING_KEY)
+                    throw new IllegalStateException("Expected MAPPING_KEY but was " + yt.current());
+                return readMappingEvent(expectedClass);
             case MAPPING_KEY:
-                YamlToken next = yt.next();
-                if (next == YamlToken.MAPPING_KEY) {
-                    return readEvent(expectedClass);
-                }
-
-                K object = valueIn.object(expectedClass);
-                if (object instanceof StringBuilder)
-                    return (K) object.toString();
-                return object;
+                return readMappingEvent(expectedClass);
             case NONE:
                 return null;
             default:
                 break;
         }
         throw new UnsupportedOperationException(yt.toString());
+    }
+
+    @Nullable
+    private <K> K readMappingEvent(@NotNull Class<K> expectedClass) throws InvalidMarshallableException {
+        YamlToken next = yt.next();
+        if (next == YamlToken.MAPPING_KEY) {
+            return readEvent(expectedClass);
+        }
+
+        K object = valueIn.object(expectedClass);
+        if (object instanceof StringBuilder)
+            return (K) object.toString();
+        return object;
     }
 
     @Override
@@ -774,18 +790,18 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     @Override
-    @SuppressWarnings("fallthrough")
     public void consumePadding() {
         while (true) {
             switch (yt.current()) {
                 case COMMENT:
                     String text = yt.text();
                     commentListener.accept(text);
-                    // fall through
+                    yt.next();
+                    continue;
                 case DIRECTIVE:
                 case DIRECTIVES_END:
                     yt.next();
-                    break;
+                    continue;
                 default:
                     return;
             }
@@ -839,7 +855,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         int minIndent = yc.indent;
         // go through remaining keys
         while (yt.current() == YamlToken.MAPPING_KEY) {
-            long lastKeyPosition = yt.lineStart;
+            long lastKeyPosition = yt.lastKeyPosition();
             if (checkForMatch(keyName))
                 return valueIn;
 
@@ -1001,37 +1017,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @Override
     public @NotNull IntArrayValues newIntArrayReference() {
         return new TextIntArrayReference();
-    }
-
-    /**
-     * Reads a YAML map and deserializes it into a Java Map, converting values to the specified type.
-     *
-     * @param valueType The class type to which map values should be converted.
-     * @return A Java Map representing the YAML map.
-     */
-    @NotNull
-    private Map readMap(Class<?> valueType) {
-        Map map = new LinkedHashMap();
-        if (yt.current() == YamlToken.MAPPING_START) {
-            while (yt.next() == YamlToken.MAPPING_KEY) {
-                if (yt.next() == YamlToken.TEXT) {
-                    String key = yt.text();
-                    Object o;
-                    if (yt.next() == YamlToken.TEXT) {
-                        // Convert the text to the specified type
-                        o = ObjectUtils.convertTo(valueType, yt.text());
-                    } else {
-                        throw new UnsupportedOperationException(yt.toString());
-                    }
-                    map.put(key, o);
-                } else {
-                    throw new UnsupportedOperationException(yt.toString());
-                }
-            }
-        } else {
-            throw new UnsupportedOperationException(yt.toString());
-        }
-        return map;
     }
 
     @Override

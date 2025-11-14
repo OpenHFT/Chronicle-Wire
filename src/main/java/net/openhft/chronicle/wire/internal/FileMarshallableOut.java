@@ -11,7 +11,9 @@ import net.openhft.chronicle.wire.*;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -81,6 +83,7 @@ public class FileMarshallableOut implements MarshallableOut {
 
         // If there's a query in the URL, parse and set the options
         final String query = url.getQuery();
+        options.append = query != null && parseAppendFlag(query);
         if (query != null) {
             QueryWire queryWire = new QueryWire(Bytes.from(query));
             options.readMarshallable(queryWire);
@@ -115,5 +118,27 @@ public class FileMarshallableOut implements MarshallableOut {
      */
     static class FMOOptions extends SelfDescribingMarshallable {
         boolean append; // Indicates if data should be appended to the existing file
+    }
+
+    private static boolean parseAppendFlag(String query) {
+        for (String pair : query.split("&")) {
+            if (pair.isEmpty())
+                continue;
+            int equals = pair.indexOf('=');
+            String rawKey = equals >= 0 ? pair.substring(0, equals) : pair;
+            String rawValue = equals >= 0 ? pair.substring(equals + 1) : "";
+            if ("append".equalsIgnoreCase(decodeComponent(rawKey))) {
+                return Boolean.parseBoolean(decodeComponent(rawValue));
+            }
+        }
+        return false;
+    }
+
+    private static String decodeComponent(String value) {
+        try {
+            return URLDecoder.decode(value, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new IORuntimeException(e);
+        }
     }
 }

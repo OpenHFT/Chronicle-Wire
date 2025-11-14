@@ -27,7 +27,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.*;
 import static net.openhft.chronicle.core.util.GenericReflection.erase;
@@ -577,7 +576,7 @@ public class GenerateMethodWriter {
         codeFormatter.append("public void marshallableOut(MarshallableOut out) {\n");
         codeFormatter.append("this.out = () -> out;");
         for (Map.Entry<Class<?>, String> e : methodWritersMap.entrySet()) {
-            codeFormatter.append(format("\n    this.%s.remove();", e.getValue()));
+            codeFormatter.append(format("%n    this.%s.remove();", e.getValue()));
         }
         codeFormatter.append("\n}\n");
 
@@ -603,21 +602,21 @@ public class GenerateMethodWriter {
                 .append(MARSHALLABLE_OUT)
                 .append("> out;\n");
         for (Map.Entry<Class<?>, String> e : methodWritersMap.entrySet()) {
-            result.append(format("private transient ThreadLocal<%s> %s;\n", nameForClass(importSet, e.getKey()), e.getValue()));
+            result.append(format("private transient ThreadLocal<%s> %s;%n", nameForClass(importSet, e.getKey()), e.getValue()));
         }
         result.append('\n');
 
-        result.append(format("// constructor\npublic %s(Supplier<" + MARSHALLABLE_OUT + "> out, "
+        result.append(format("// constructor%npublic %s(Supplier<" + MARSHALLABLE_OUT + "> out, "
                 + CLOSEABLE + " closeable, " +
-                UpdateInterceptor.class.getSimpleName() + " " + UPDATE_INTERCEPTOR_FIELD + ") {\n", className));
+                UpdateInterceptor.class.getSimpleName() + " " + UPDATE_INTERCEPTOR_FIELD + ") {%n", className));
 
         if (useUpdateInterceptor)
             result.append("this." + UPDATE_INTERCEPTOR_FIELD + "= " + UPDATE_INTERCEPTOR_FIELD + ";\n");
         result.append("this.out = out;\n" +
                 "this.closeable = closeable;");
         for (Map.Entry<Class<?>, String> e : methodWritersMap.entrySet()) {
-            result.append(format("\n%s = ThreadLocal.withInitial(() -> out.get().methodWriter(%s.class));", e.getValue(), nameForClass(e.getKey())));
-            result.append(format("\n%s = ThreadLocal.withInitial(() -> out.get().methodWriterBuilder(%s.class)" +
+            result.append(format("%n%s = ThreadLocal.withInitial(() -> out.get().methodWriter(%s.class));", e.getValue(), nameForClass(e.getKey())));
+            result.append(format("%n%s = ThreadLocal.withInitial(() -> out.get().methodWriterBuilder(%s.class)" +
                     ".verboseTypes(%b).build());", e.getValue(), nameForClass(e.getKey()), verboseTypes));
         }
 
@@ -665,8 +664,9 @@ public class GenerateMethodWriter {
                 if (type instanceof Class && ((Class<?>) type).isPrimitive())
                     Jvm.warn().on(getClass(), "Generated code to call updateInterceptor for " + dm + " will box and generate garbage");
                 name = parameters[parameterCount - 1].getName();
-            } else
+            } else {
                 name = "null";
+            }
             body.append("// updateInterceptor\n"
                     + "if (! this." + UPDATE_INTERCEPTOR_FIELD +
                     ".update(\"" + dm.getName() + "\", " + name + ")) return" + returnDefault(returnType) + ";\n");
@@ -687,8 +687,9 @@ public class GenerateMethodWriter {
                 .append(")");
         if (passthrough)
             body.append(";\n");
-        else
+        else {
             body.append(") {\n");
+        }
         body.append("try {\n");
         body.append("_dc_.chainedElement(" + (!terminating && !passthrough) + ");\n");
         body.append("if (out.recordHistory()) MessageHistory.writeHistory(_dc_);\n");
@@ -735,7 +736,7 @@ public class GenerateMethodWriter {
             body.append("}\n");
 
         // Return the formatted method writer code
-        return format("\n%s public %s %s(%s) {\n %s%s}\n",
+        return format("%n%s public %s %s(%s) {%n %s%s}%n",
                 methodIdAnnotation,
                 typeName,
                 dm.getName(),
@@ -779,11 +780,12 @@ public class GenerateMethodWriter {
         if ((wireType != WireType.TEXT && wireType != WireType.YAML) && methodId.isPresent()) {
 
             long value = ((MethodId) methodId.get()).value();
-            body.append(format("final " + VALUE_OUT + " _valueOut_ = _dc_.wire().writeEventId(%s, %d);\n", eventName, value));
-            methodID = format("@" + METHOD_ID + "(%d)\n", value);
+            body.append(format("final " + VALUE_OUT + " _valueOut_ = _dc_.wire().writeEventId(%s, %d);%n", eventName, value));
+            methodID = format("@" + METHOD_ID + "(%d)%n", value);
 
-        } else
-            body.append(format("final " + VALUE_OUT + " _valueOut_ = _dc_.wire().writeEventName(%s);\n", eventName));
+        } else {
+            body.append(format("final " + VALUE_OUT + " _valueOut_ = _dc_.wire().writeEventName(%s);%n", eventName));
+        }
         return methodID;
     }
 
@@ -812,14 +814,15 @@ public class GenerateMethodWriter {
 
             // Append appropriate value to the body based on parameter type and annotations
             if (!name.isEmpty() && (WireType.TEXT == wireType || WireType.YAML == wireType))
-                body.append(format("_valueOut_.rawText(%s.INSTANCE.asText(%s));\n", name, p.getName()));
+                body.append(format("_valueOut_.rawText(%s.INSTANCE.asText(%s));%n", name, p.getName()));
             else if (p.getType().isPrimitive() || CharSequence.class.isAssignableFrom(p.getType())) {
                 if (longConversion != null && (p.getType() == long.class || CharSequence.class.isAssignableFrom(p.getType())))
-                    body.append(format("%s.writeLong(%s.INSTANCE, %s);\n", multipleArgs ? "_v_" : "_valueOut_", longConversion.value().getName(), p.getName()));
+                    body.append(format("%s.writeLong(%s.INSTANCE, %s);%n", multipleArgs ? "_v_" : "_valueOut_", longConversion.value().getName(), p.getName()));
                 else
-                    body.append(format("%s.%s(%s);\n", multipleArgs ? "_v_" : "_valueOut_", toString(erase(parameterTypes[j])), p.getName()));
-            } else
+                    body.append(format("%s.%s(%s);%n", multipleArgs ? "_v_" : "_valueOut_", toString(erase(parameterTypes[j])), p.getName()));
+            } else {
                 writeValue(dm, erase(parameterTypes[j]), body, startJ, p);
+            }
         }
 
         // Close the parameter array if there are multiple arguments
@@ -893,7 +896,7 @@ public class GenerateMethodWriter {
         } else if (returnType.isInterface()) {
             methodWritersMap.computeIfAbsent(returnType, k -> "methodWriter" + k.getSimpleName() + "TL");
             result.append("// method return\n");
-            result.append(format("return methodWriter%sTL.get();\n", returnType.getSimpleName()));
+            result.append(format("return methodWriter%sTL.get();%n", returnType.getSimpleName()));
         } else if (!returnType.isPrimitive()) {
             result.append("return null;\n");
         } else if (returnType == boolean.class) {
@@ -905,5 +908,9 @@ public class GenerateMethodWriter {
         }
 
         return result;
+    }
+
+    private static String format(String template, Object... args) {
+        return String.format(template.replace("\n", "%n"), args);
     }
 }

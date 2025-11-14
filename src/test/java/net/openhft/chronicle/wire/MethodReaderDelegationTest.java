@@ -113,8 +113,9 @@ public class MethodReaderDelegationTest extends WireTestCommon {
         try (DocumentContext dc = wire.acquireWritingDocument(false)) {
             if (useMethodId) {
                 Objects.requireNonNull(dc.wire()).writeEventId(myFallId).text("");
-            } else
+            } else {
                 Objects.requireNonNull(dc.wire()).writeEventName("myFall").text("");
+            }
         }
 
         // Call the 'myCall' method on the writer again

@@ -65,6 +65,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
     // Accumulated raw hash value
     long hash = 0;
 
+
     /**
      * Computes a 64-bit hash for the provided {@link WriteMarshallable} value.
      *
@@ -195,7 +196,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
     @NotNull
     @Override
     public ValueOut write(@NotNull CharSequence name) {
-        hash += K0 + name.hashCode() * M0;
+        hash += (long) (K0 + name.hashCode() * M0);
         return valueOut;
     }
 
@@ -203,7 +204,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
     @NotNull
     @Override
     public ValueOut writeEvent(Class<?> ignored, @NotNull Object eventKey) {
-        hash += K0 + eventKey.hashCode() * M0;
+        hash += (long) (K0 + eventKey.hashCode() * M0);
         return valueOut;
     }
 
@@ -396,7 +397,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         @NotNull
         @Override
         public WireOut int8(byte i8) {
-            hash = hash * M1 + i8 * M2;
+            hash = hash * M1 + (long) (i8 * M2);
             return HashWire.this;
         }
 
@@ -453,7 +454,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         @NotNull
         @Override
         public WireOut uint8checked(int u8) {
-            hash = hash * M1 + u8 * M2;
+            hash = hash * M1 + (long) (u8 * M2);
             return HashWire.this;
         }
 
@@ -461,7 +462,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         @NotNull
         @Override
         public WireOut int16(short i16) {
-            hash = hash * M1 + i16 * M2;
+            hash = hash * M1 + (long) (i16 * M2);
             return HashWire.this;
         }
 
@@ -469,7 +470,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         @NotNull
         @Override
         public WireOut uint16checked(int u16) {
-            hash = hash * M1 + u16 * M2;
+            hash = hash * M1 + (long) (u16 * M2);
             return HashWire.this;
         }
 
@@ -477,7 +478,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         @NotNull
         @Override
         public WireOut utf8(int codepoint) {
-            hash = hash * M1 + codepoint * M2;
+            hash = hash * M1 + (long) (codepoint * M2);
             return HashWire.this;
         }
 
@@ -485,7 +486,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         @NotNull
         @Override
         public WireOut int32(int i32) {
-            hash = hash * M1 + i32 * M2;
+            hash = hash * M1 + (long) (i32 * M2);
             return HashWire.this;
         }
 
@@ -537,7 +538,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         @NotNull
         @Override
         public WireOut float32(float f) {
-            hash = hash * M1 + Float.floatToRawIntBits(f) * M2;
+            hash = hash * M1 + (long) (Float.floatToRawIntBits(f) * M2);
             return HashWire.this;
         }
 
@@ -553,7 +554,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         @NotNull
         @Override
         public WireOut time(@NotNull LocalTime localTime) {
-            hash = hash * M1 + localTime.hashCode() * M2;
+            hash = hash * M1 + (long) (localTime.hashCode() * M2);
             return HashWire.this;
         }
 
@@ -561,7 +562,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         @NotNull
         @Override
         public WireOut zonedDateTime(@NotNull ZonedDateTime zonedDateTime) {
-            hash = hash * M1 + zonedDateTime.hashCode() * M2;
+            hash = hash * M1 + (long) (zonedDateTime.hashCode() * M2);
             return HashWire.this;
         }
 
@@ -569,7 +570,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         @NotNull
         @Override
         public WireOut date(@NotNull LocalDate localDate) {
-            hash = hash * M1 + localDate.hashCode() * M2;
+            hash = hash * M1 + (long) (localDate.hashCode() * M2);
             return HashWire.this;
         }
 
@@ -577,7 +578,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         @NotNull
         @Override
         public WireOut dateTime(@NotNull LocalDateTime localDateTime) {
-            hash = hash * M1 + localDateTime.hashCode() * M2;
+            hash = hash * M1 + (long) (localDateTime.hashCode() * M2);
             return HashWire.this;
         }
 
@@ -585,7 +586,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         @NotNull
         @Override
         public ValueOut typePrefix(@NotNull CharSequence typeName) {
-            hash = hash * M1 + typeName.hashCode() * M2;
+            hash = hash * M1 + (long) (typeName.hashCode() * M2);
             return this;
         }
 
@@ -598,7 +599,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         @NotNull
         @Override
         public WireOut typeLiteral(@Nullable CharSequence type) {
-            hash = hash * M1 + (type == null ? 0 : type.hashCode() * M2);
+            hash = hash * M1 + (type == null ? 0 : (long) (type.hashCode() * M2));
             return HashWire.this;
         }
 
@@ -606,7 +607,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         @NotNull
         @Override
         public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class<?> type) {
-            hash = hash * M1 + (type == null ? 0 : type.hashCode() * M2);
+            hash = hash * M1 + (type == null ? 0 : (long) (type.hashCode() * M2));
             return HashWire.this;
         }
 
@@ -614,7 +615,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         @NotNull
         @Override
         public WireOut uuid(@NotNull UUID uuid) {
-            hash = hash * M1 + uuid.hashCode() * M2;
+            hash = hash * M1 + (long) (uuid.hashCode() * M2);
             return HashWire.this;
         }
 
@@ -689,7 +690,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         @NotNull
         @Override
         public WireOut map(@NotNull Map map) {
-            hash = hash * M1 + map.hashCode() * M2;
+            hash = hash * M1 + (long) (map.hashCode() * M2);
             return HashWire.this;
         }
 
@@ -709,7 +710,8 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         /** No-op. */
         @Override
         public void elementSeparator() {
-
+            // Not applicable
         }
+
     }
 }

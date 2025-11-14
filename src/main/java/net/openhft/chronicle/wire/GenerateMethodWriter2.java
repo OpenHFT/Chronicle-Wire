@@ -292,9 +292,10 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
             // For primitive types and CharSequences, write directly
             if (p.getType().isPrimitive() || CharSequence.class.isAssignableFrom(p.getType())) {
                 body.append(multipleParams ? "v." : ".").append(asString(p.getType())).append("(").append(p.getName()).append(");\n");
-            } else
+            } else {
                 // For non-primitive types, delegate to writeValue
                 writeValue(dm, body, startJ, p);
+            }
         }
 
         // Close array writing if there were multiple parameters

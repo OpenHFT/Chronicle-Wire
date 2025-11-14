@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import java.nio.charset.StandardCharsets;
 
 import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
 import static net.openhft.chronicle.wire.WireType.TEXT;
@@ -117,7 +118,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * @return The corresponding marshallable object, or {@code null} if the conversion is not possible.
      */
     static <T> T fromString(@NotNull InputStream is) throws InvalidMarshallableException {
-        Scanner s = new Scanner(is).useDelimiter("\\A");
+        Scanner s = new Scanner(is, StandardCharsets.UTF_8.name()).useDelimiter("\\A");
         return TEXT.fromString(s.hasNext() ? s.next() : "");
     }
 

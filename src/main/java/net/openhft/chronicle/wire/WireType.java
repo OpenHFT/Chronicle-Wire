@@ -667,7 +667,9 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
         @NotNull File file2 = new File(tempFilename);
         if (!file2.renameTo(new File(filename))) {
-            file2.delete();
+            if (!file2.delete()) {
+                Jvm.warn().on(WireType.class, "Failed to delete temporary file " + tempFilename);
+            }
             throw new IOException("Failed to rename " + tempFilename + " to " + filename);
         }
     }

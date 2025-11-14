@@ -277,7 +277,7 @@ public enum BinaryWireCode {
     /**
      * Array storing the string representations for each binary wire code, facilitating easier debugging and logging.
      */
-    public static final String[] STRING_FOR_CODE = new String[256];
+    static final String[] STRING_FOR_CODE = new String[256];
 
     // Static initializer to populate the STRING_FOR_CODE array:
     static {

@@ -57,7 +57,7 @@ public interface MessageHistory extends Marshallable {
      */
     @UsedViaReflection
     static void writeHistory(DocumentContext dc) {
-        if (((WriteDocumentContext) dc).isEmpty()) { // only add to the start of a message. i.e. for chained calls.
+        if (dc instanceof WriteDocumentContext && ((WriteDocumentContext) dc).isEmpty()) { // only add to the start of a message. i.e. for chained calls.
             get().doWriteHistory(dc);
         }
     }

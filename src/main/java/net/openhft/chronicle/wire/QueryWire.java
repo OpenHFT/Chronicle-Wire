@@ -215,7 +215,7 @@ public class QueryWire extends TextWire {
 
         // The separator to prepend before writing the next value.
         @NotNull
-        String sep = "";
+        String separator = "";
 
         // The field name to prepend before writing the next value.
         @Nullable
@@ -226,8 +226,8 @@ public class QueryWire extends TextWire {
          */
         @Override
         void prependSeparator() {
-            bytes.appendUtf8(sep);
-            sep = "";
+            bytes.appendUtf8(separator);
+            separator = "";
             if (fieldName != null) {
                 bytes.appendUtf8(fieldName).appendUtf8('=');
                 fieldName = null;
@@ -236,7 +236,7 @@ public class QueryWire extends TextWire {
 
         @Override
         public void elementSeparator() {
-            sep = "&";
+            separator = "&";
         }
 
         /**
@@ -335,7 +335,7 @@ public class QueryWire extends TextWire {
         public QueryValueOut typePrefix(@NotNull CharSequence typeName) {
             prependSeparator();
             bytes.appendUtf8(typeName);
-            sep = " ";
+            separator = " ";
             return this;
         }
 
@@ -388,7 +388,7 @@ public class QueryWire extends TextWire {
             prependSeparator();
             pushState();
             bytes.appendUtf8("[");
-            sep = ",";
+            separator = ",";
             long pos = bytes.writePosition();
             writer.accept(t, this);
             if (pos != bytes.writePosition())
@@ -407,7 +407,7 @@ public class QueryWire extends TextWire {
             prependSeparator();
             pushState();
             bytes.appendUtf8("[");
-            sep = ",";
+            separator = ",";
             long pos = bytes.writePosition();
             writer.accept(t, kls, this);
             if (pos != bytes.writePosition())
@@ -435,7 +435,7 @@ public class QueryWire extends TextWire {
 
             prependSeparator();
             bytes.appendUtf8("{");
-            sep = ",";
+            separator = ",";
 
             object.writeMarshallable(QueryWire.this);
 

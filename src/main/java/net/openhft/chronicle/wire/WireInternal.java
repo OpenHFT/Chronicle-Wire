@@ -145,7 +145,7 @@ public enum WireInternal {
         position = bytes.writePositionForHeader(wireOut.usePadding());
 
         int metaDataBit = metaData ? Wires.META_DATA : 0;
-        int len0 = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
+        int len0 = metaDataBit | Wires.NOT_COMPLETE;
         bytes.writeOrderedInt(len0);
         writer.writeMarshallable(wireOut);
         if (!wireOut.isBinary())

@@ -471,8 +471,9 @@ public class TextWire extends YamlWireOut<TextWire> {
             } finally {
                 bytes.readLimit(l);
             }
-        } else
+        } else {
             return bytes.toString();
+        }
     }
 
     /**

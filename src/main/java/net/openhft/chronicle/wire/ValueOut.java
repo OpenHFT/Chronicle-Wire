@@ -1327,15 +1327,11 @@ public interface ValueOut {
 
         // Check if the value is an instance of WriteBytesMarshallable interface
         if (value instanceof WriteBytesMarshallable) {
-            // Warn about possible unmarshalling issue
-            if (!Wires.warnedUntypedBytesOnce) {
+            if (Wires.markUntypedBytesWarning()) {
                 Jvm.warn().on(ValueOut.class, "BytesMarshallable found in field which is not matching exactly, " +
                         "the object may not unmarshall correctly if that type is not specified: " + valueClass.getName() +
                         ". The warning will not repeat so there may be more types affected.");
-
-                Wires.warnedUntypedBytesOnce = true;
             }
-
             return bytesMarshallable((BytesMarshallable) value);
         }
 
