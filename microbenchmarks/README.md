@@ -33,7 +33,7 @@ For this reason I ran the tests with 10 forks.  By looking at the high percentil
 | BytesMarshallable |  8-bit     | true                       | na                   | true         | 39    |  0.17        | 0.21          | 2.13            |   6.9     |
 | BytesMarshallable + stop bit encoding |  8-bit | true | na                 | true         | 28    |  0.21        | 0.25          | 2.40            |   6.4     |
 
-All times are in micro-seconds
+All times are in µs (microseconds)
 
 "8-bit" encoding is ISO-8859-1 where characters 0 to 255 are mapped to bytes 0 to 255. I this case, (bytes) string.charAt(0)
 
@@ -103,7 +103,7 @@ There was a small advantage in encoding the side as a boolean rather than an Enu
 | Externalizable | UTF-8          |  true                       | false                 | false        | 197   |  25.0       |        29.7     | 85,000        | 120,000 |
 | Externalizable with Chronicle Bytes | UTF-8 |  true   | false                 | false        | 197   |  24.5       |        29.3     | 85,000        | 118,000 |
 
-All times are in micro-seconds
+All times are in µs (microseconds)
 
 ## Comparison of JSON formats
 

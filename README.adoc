@@ -5,6 +5,7 @@ Chronicle Software
 :toc: macro
 :toclevels: 2
 :icons: font
+:lang: en-GB
 :sectnums:
 :source-highlighter: rouge
 
