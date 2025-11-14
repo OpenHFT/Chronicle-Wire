@@ -1,6 +1,8 @@
 = Chronicle Wire: Security Review & Known Trade-offs
 :toc:
 :sectnums:
+:lang: en-GB
+:source-highlighter: rouge
 
 == Introduction
 
