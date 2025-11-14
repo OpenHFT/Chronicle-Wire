@@ -1987,7 +1987,11 @@ public class WireMarshaller<T> {
                         out.object(componentType, list.get(i));
                     }
                 } else if (coll == null) {
-                    return;
+                    try {
+                        field.set(coll, null);
+                    } catch (IllegalAccessException e) {
+                        throw new AssertionError(e);
+                    }
                 } else {
                     for (Object element : coll) {
                         out.object(componentType, element);
