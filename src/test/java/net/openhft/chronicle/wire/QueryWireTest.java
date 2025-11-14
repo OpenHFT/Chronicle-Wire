@@ -9,11 +9,11 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 // This class tests the functionalities related to the QueryWire's read and write operations.
 public class QueryWireTest extends WireTestCommon {
@@ -64,6 +64,7 @@ public class QueryWireTest extends WireTestCommon {
 
         // Verify that the results list contains the correct values
         assertEquals(new ArrayList<>(Arrays.asList(true, 12345L, "Hello World", 12.345)), results);
+        bytes.releaseLast();
     }
 
     @Test
@@ -96,5 +97,67 @@ public class QueryWireTest extends WireTestCommon {
         payload.releaseLast();
 
         bytes.releaseLast();
+    }
+
+    @Test
+    public void percentEncodedCharactersRemainLiteral() {
+        @NotNull QueryWire wire = createWire();
+        String literal = "value%2Bplus+space";
+        wire.write("token").text(literal);
+
+        assertTrue(bytes.toString().contains("token=" + literal));
+
+        bytes.readPositionRemaining(0, bytes.writePosition());
+        QueryWire reader = new QueryWire(bytes);
+        assertEquals(literal, reader.read("token").text());
+        bytes.releaseLast();
+    }
+
+    @Test
+    public void handlesZeroBytesAndDanglingKeys() {
+        Bytes<?> storage = allocateElasticOnHeap();
+        QueryWire wire = new QueryWire(storage);
+        byte[] raw = new byte[]{'A', 0, 'B'};
+        wire.write("raw").rawBytes(raw);
+        wire.write("encoded").bytes(raw);
+
+        storage.readPositionRemaining(0, storage.writePosition());
+        QueryWire reader = new QueryWire(storage);
+        Bytes<?> sink = allocateElasticOnHeap();
+        reader.read("raw").textTo(sink);
+        assertArrayEquals(raw, sink.toByteArray());
+        sink.releaseLast();
+        assertEquals(Base64.getEncoder().encodeToString(raw), reader.read("encoded").text());
+        storage.releaseLast();
+
+        Bytes<?> truncated = Bytes.from("done=true&dangling");
+        try {
+            QueryWire danglingReader = new QueryWire(truncated);
+            assertEquals("true", danglingReader.read("done").text());
+            assertEquals("", danglingReader.read("dangling").text());
+        } finally {
+            truncated.releaseLast();
+        }
+    }
+
+    @Test
+    public void queryWireOutputCanFeedTextWireAfterFormatting() {
+        @NotNull QueryWire wire = createWire();
+        wire.write("name").text("alpha beta");
+        wire.write("count").int64(7);
+
+        String yamlLike = bytes.toString()
+                .replace("&", "\n")
+                .replace("=", ": ");
+
+        Bytes<?> yamlBytes = Bytes.from(yamlLike);
+        try {
+            Wire textWire = WireType.TEXT.apply(yamlBytes);
+            assertEquals("alpha beta", textWire.read("name").text());
+            assertEquals(7L, textWire.read("count").int64());
+        } finally {
+            yamlBytes.releaseLast();
+            bytes.releaseLast();
+        }
     }
 }
