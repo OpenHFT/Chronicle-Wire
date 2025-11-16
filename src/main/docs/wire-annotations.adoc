@@ -2,6 +2,7 @@
 :toc:
 :sectnums:
 :source-highlighter: rouge
+:lang: en-GB
 
 Purpose: To provide a comprehensive user guide and reference for all standard annotations available in Chronicle Wire, detailing their purpose, usage, and impact on serialisation.
 

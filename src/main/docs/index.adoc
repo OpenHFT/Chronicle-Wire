@@ -2,6 +2,7 @@
 :toc: left
 :toclevels: 2
 :source-highlighter: rouge
+:lang: en-GB
 :sectnums:
 
 Chronicle Wire is a high-performance, low-latency serialisation library that forms part of the OpenHFT stack. This index links to the documentation set.

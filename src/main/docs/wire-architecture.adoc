@@ -2,6 +2,7 @@
 :toc:
 :sectnums:
 :source-highlighter: rouge
+:lang: en-GB
 
 Purpose: To provide a comprehensive understanding of the internal architecture of the Chronicle Wire library, its components, and design principles.
 

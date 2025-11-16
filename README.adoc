@@ -31,9 +31,11 @@ Typical use cases include configuration files, persistence of in-memory state, a
 * Schema evolution with optional field handling
 * Low-latency, low-allocation serialisation of `Marshallable` POJOs
 * Automatic conversion between formats
-* Integration with other Chronicle components === Why are these concerns conflated?
+* Integration with other Chronicle components
 
-Often you want to use these interchangeably.
+=== Why are these concerns conflated?
+
+Often you want to use these formats interchangeably.
 
 * Configuration includes aliased type information.
 This supports easy extension by adding new classes/versions, and cross-platform using type aliasing.
@@ -1300,7 +1302,7 @@ Only use them when there is likely to be a limited number of them over the life 
 == Using @MethodId
 
 You can assign a method id to a method using the annotation `@MethodId(long int: id)`.
-The provided id should be unique across all classes using the same MethodReader/Writer, therefore it is safe practice to use unique method id in your entire system.A method name can be determined from its method id and this results in saving memory when calling the method.The following example shows the difference between memory usage when using method id and when not using it.In this example the method `saysomethingnice()` has been annotated with `MethodId(7)` and it has been called from `shouldDetermineMethodNamesFromMethodIds()`.
+The provided id should be unique across all classes using the same MethodReader/Writer, therefore it is safe practice to use unique method ids in your entire system. A method name can be determined from its method id and this results in saving memory when calling the method. The following example shows the difference between memory usage when using method ids and when not using them. In this example the method `saysomethingnice()` has been annotated with `MethodId(7)` and it has been called from `shouldDetermineMethodNamesFromMethodIds()`.
 
 [source,java,opts=novalidate]
 ----
@@ -2115,8 +2117,8 @@ private static final int MASHALLABLE_VERSION = 1;
 === JLBH Benchmark Performance
 
 To explore the efficiency of the examples above, this link:https://github.com/OpenHFT/Chronicle-Wire/blob/develop/src/test/java/net/openhft/chronicle/wire/TriviallyCopyableJLBH.java[TrivallyCopyableJLBH.java] test was created.
-As can be seen on lines 18-26, we have the ability to switch between running the TriviallyCopyable House ("House1"), the BinaryWire House ("House2") or 'UNKNOWN'.Important to note is that trivially copyable objects were used in order to improve java serialisation speeds.For further understanding on trivially copyable objects, refer to link:https://dzone.com/articles/how-to-get-c-speed-in-java-serialisation[this article].
-This shows that we can serialise and then de-serialise 100,000 messages in a second.The Trivially Copyable version is even faster, especially at the higher percentiles.
+As can be seen on lines 18-26, we have the ability to switch between running the TriviallyCopyable House ("House1"), the BinaryWire House ("House2") or 'UNKNOWN'. Important to note is that trivially copyable objects were used in order to improve Java serialisation speeds. For further understanding on trivially copyable objects, refer to link:https://dzone.com/articles/how-to-get-c-speed-in-java-serialisation[this article].
+This shows that we can serialise and then de-serialise 100,000 messages in a second. The Trivially Copyable version is even faster, especially at the higher percentiles.
 
 .Benchmark Performance Between TriviallyCopyable and BinaryWire
 image::images/jlbhBenchmark.png[buffer,600,400]

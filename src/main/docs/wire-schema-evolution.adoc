@@ -4,6 +4,7 @@
 
 Purpose: To provide an in-depth exploration of schema evolution capabilities and mechanisms within Chronicle Wire, including implementation details and advanced strategies.
 :sectnums:
+:lang: en-GB
 
 == Introduction to Schema Evolution in Chronicle Wire
 

@@ -4,6 +4,7 @@
 
 Purpose: To provide visual representations of key concepts, processes, and components in the Chronicle Wire library.
 :sectnums:
+:lang: en-GB
 
 == Introduction
 

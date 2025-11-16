@@ -1,4 +1,3 @@
-
 = Chronicle Wire Glossary
 :toc:
 :toclevels: 2
@@ -6,6 +5,7 @@
 :icons: font
 
 :sectnums:
+:lang: en-GB
 Purpose: To provide clear definitions for common terms and concepts used in Chronicle Wire and its related ecosystem.
 
 [glossary]
