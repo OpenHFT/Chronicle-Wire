@@ -5,12 +5,15 @@
 :lang: en-GB
 :sectnums:
 
-Chronicle Wire is a high-performance, low-latency serialisation library that forms part of the OpenHFT stack. This index links to the documentation set.
+Chronicle Wire is a high performance, low latency serialisation library that forms part of the OpenHFT stack. This index links to the documentation set.
 
 == Documentation Index
 
-link:wire-architecture.adoc[Chronicle Wire: Architectural Overview] ::
-  Summarises the internal architecture, components and design principles.
+link:architecture-overview.adoc[Chronicle Wire Architecture Overview] ::
+  Positions Chronicle Wire within the OpenHFT stack and summarises the layered architecture, components and data flows.
+
+link:wire-architecture.adoc[Internal Architecture Details] ::
+  Expands on internal layers, `WireType` implementations, and design principles.
 
 link:system-architecture.adoc[System Architecture Summary] ::
   Shows how Chronicle Wire links application services, wire formats, and Chronicle Bytes.
@@ -23,6 +26,9 @@ link:data-requirements.adoc[Data Requirements] ::
 
 link:operational-requirements.adoc[Operational Requirements] ::
   Captures build gates, diagnostics policy, and documentation expectations.
+
+link:testing-strategy.adoc[Testing Strategy] ::
+  Describes the unit, integration and performance testing approach for Chronicle Wire.
 
 link:interface-control.adoc[Interface Control Document] ::
   Documents the contracts exposed to applications (`Wire`, `DocumentContext`, writers/readers).
