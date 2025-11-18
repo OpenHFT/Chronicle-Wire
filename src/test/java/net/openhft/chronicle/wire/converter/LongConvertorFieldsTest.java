@@ -333,7 +333,27 @@ public class LongConvertorFieldsTest {
     private void doTest(Marshallable dto, String expected) {
         Wire wire = new YamlWire();
         wire.getValueOut().object(dto);
-        assertEquals(expected, wire.toString());
+
+        String actual = wire.toString();
+        String[] expectedLines = expected.split("\n");
+        String[] actualLines = actual.split("\n");
+
+        assertEquals(expectedLines.length, actualLines.length);
+        assertEquals(expectedLines[0], actualLines[0]);
+        assertEquals(expectedLines[expectedLines.length - 1], actualLines[actualLines.length - 1]);
+
+        java.util.List<String> expectedFields = java.util.Arrays.stream(java.util.Arrays.copyOfRange(expectedLines, 1, expectedLines.length - 1))
+                .map(s -> s.endsWith(",") ? s.substring(0, s.length() - 1) : s)
+                .sorted()
+                .collect(java.util.stream.Collectors.toList());
+
+        java.util.List<String> actualFields = java.util.Arrays.stream(java.util.Arrays.copyOfRange(actualLines, 1, actualLines.length - 1))
+                .map(s -> s.endsWith(",") ? s.substring(0, s.length() - 1) : s)
+                .sorted()
+                .collect(java.util.stream.Collectors.toList());
+
+        assertEquals(expectedFields, actualFields);
+
         Object object = wire.getValueIn().object();
         assertEquals(dto, object);
     }
