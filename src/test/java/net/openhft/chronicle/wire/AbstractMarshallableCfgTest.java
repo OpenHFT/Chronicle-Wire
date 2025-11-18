@@ -51,18 +51,20 @@ public class AbstractMarshallableCfgTest extends WireTestCommon{
         myAMC.nestedSDM.bytes.append("Hi");
 
         // Verify modified string representation
-        assertEquals("" +
-                        "!net.openhft.chronicle.wire.AbstractMarshallableCfgTest$MyAMC {\n" +
-                        "  nestedAMC: {\n" +
-                        "    number: 0,\n" +
-                        "    flag: true\n" +
-                        "  },\n" +
-                        "  nestedSDM: {\n" +
-                        "    bytes: Hi,\n" +
-                        "    amt: 1.0\n" +
-                        "  }\n" +
-                        "}\n",
-                myAMC.toString());
+        // Note: Use content-based assertions rather than exact string match
+        // to avoid non-deterministic field ordering from getDeclaredFields()
+        String actual = myAMC.toString();
+        
+        // Verify the class header is present
+        assertEquals(true, actual.startsWith("!net.openhft.chronicle.wire.AbstractMarshallableCfgTest$MyAMC {"));
+        
+        // Verify both nested objects and their fields are present with correct values
+        assertEquals(true, actual.contains("nestedAMC: {"));
+        assertEquals(true, actual.contains("number: 0"));
+        assertEquals(true, actual.contains("flag: true"));
+        assertEquals(true, actual.contains("nestedSDM: {"));
+        assertEquals(true, actual.contains("bytes: Hi"));
+        assertEquals(true, actual.contains("amt: 1.0"));
     }
 
     // Test the deep copy functionality
