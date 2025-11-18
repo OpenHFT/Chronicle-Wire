@@ -169,7 +169,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     private void checkSanity(ChronicleBitSet... sets) {
         for (ChronicleBitSet s : sets) {
             int len = s.length();
-            int cardinality1 = s.cardinality();
+            final int cardinality1 = s.cardinality();
             int cardinality2 = 0;
             // Counting set bits
             for (int i = s.nextSetBit(0); i >= 0; i = s.nextSetBit(i + 1)) {
@@ -445,8 +445,6 @@ public class ChronicleBitSetTest extends WireTestCommon {
 
     @Test
     public void testAnd2() {
-        int failCount = 0;
-
         // Test the AND operation that clears the last word of the bitset
         ChronicleBitSet b4 = makeSet(2, 127);
         assertEquals("{2, 127}", b4.toString());
@@ -455,6 +453,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         b4.and(b4a);
         assertEquals("{2}", b4.toString());
         checkSanity(b4);
+        int failCount = 0;
         final ChronicleBitSet bs2 = makeSet(2);
         if (!(b4.equals(bs2))) {
             failCount++;
@@ -613,7 +612,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
             for (int x = 0; x < 100; x++) {
                 // Flip a random range twice
                 int rangeStart = generator.nextInt(100);
-                int rangeEnd = rangeStart + generator.nextInt(100);
+                final int rangeEnd = rangeStart + generator.nextInt(100);
                 b1.flip(rangeStart);
                 b1.flip(rangeStart);
                 if (b1.length() != 0)
@@ -629,12 +628,12 @@ public class ChronicleBitSetTest extends WireTestCommon {
         // Test length after or
         for (int i = 0; i < 100; i++) {
             ChronicleBitSet b1 = createBitSet(256);
-            ChronicleBitSet b2 = createBitSet(256);
+            final ChronicleBitSet b2 = createBitSet(256);
             int bit1 = generator.nextInt(100);
             int bit2 = generator.nextInt(100);
             if (bit2 >= bit1)
                 bit2++;
-            int highestSetBit = Math.max(bit1, bit2);
+            final int highestSetBit = Math.max(bit1, bit2);
             b1.set(bit1);
             assertEquals("{" + bit1 + "}", b1.toString());
             b2.set(bit2);
@@ -811,45 +810,6 @@ public class ChronicleBitSetTest extends WireTestCommon {
 
         assertEquals(0, failCount);
     }
-
-/*    @Test
-    public void testGet() {
-        int failCount = 0;
-
-        for (int i = 0; i < 1000; i++) {
-            ChronicleBitSet b1 = createBitSet();
-
-            // Make a fairly random ChronicleBitSet
-            int numberOfSetBits = generator.nextInt(100) + 1;
-            int highestPossibleSetBit = generator.nextInt(1000) + 1;
-
-            for (int x = 0; x < numberOfSetBits; x++)
-                b1.set(generator.nextInt(highestPossibleSetBit));
-
-            // Get a new set from a random range
-            int rangeStart = generator.nextInt(100);
-            int rangeEnd = rangeStart + generator.nextInt(100);
-
-            ChronicleBitSet b2 = b1.get(rangeStart, rangeEnd);
-
-            ChronicleBitSet b3 = createBitSet();
-            for (int x = rangeStart; x < rangeEnd; x++)
-                b3.set(x - rangeStart, b1.get(x));
-
-            // Verify their equality
-            if (!b2.equals(b3)) {
-                System.out.println("start=" + rangeStart);
-                System.out.println("end=" + rangeEnd);
-                System.out.println(b1);
-                System.out.println(b2);
-                System.out.println(b3);
-                failCount++;
-            }
-            checkEquality(b2, b3);
-        }
-
-        assertEquals(0, failCount);
-    }*/
 
     @Test
     public void testIntersects() {
@@ -1090,8 +1050,8 @@ public class ChronicleBitSetTest extends WireTestCommon {
                 b2.set(generator.nextInt(possibleSetBit));
             }
 
-            ChronicleBitSet b3 = cloneBitSet(b1, possibleSetBit);
-            ChronicleBitSet b4 = cloneBitSet(b2, possibleSetBit);
+            final ChronicleBitSet b3 = cloneBitSet(b1, possibleSetBit);
+            final ChronicleBitSet b4 = cloneBitSet(b2, possibleSetBit);
 
             for (int x = 0; x < possibleSetBit; x++) {
                 b1.flip(x);
@@ -1121,10 +1081,10 @@ public class ChronicleBitSetTest extends WireTestCommon {
                 b2.set(generator.nextInt(possibleSetBit));
             }
 
-            ChronicleBitSet b3 = cloneBitSet(b1, possibleSetBit);
-            ChronicleBitSet b4 = cloneBitSet(b2, possibleSetBit);
-            ChronicleBitSet b5 = cloneBitSet(b1, possibleSetBit);
-            ChronicleBitSet b6 = cloneBitSet(b2, possibleSetBit);
+            final ChronicleBitSet b3 = cloneBitSet(b1, possibleSetBit);
+            final ChronicleBitSet b4 = cloneBitSet(b2, possibleSetBit);
+            final ChronicleBitSet b5 = cloneBitSet(b1, possibleSetBit);
+            final ChronicleBitSet b6 = cloneBitSet(b2, possibleSetBit);
 
             for (int x = 0; x < possibleSetBit; x++)
                 b2.flip(x);

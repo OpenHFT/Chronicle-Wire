@@ -37,11 +37,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
         // Deserialize the Wire's bytes to a String
         String value = Wires.fromSizePrefixedBlobs(wire.bytes());
 
-        //String replace = value.replace("\n", "\\n");
-
-       // System.out.println(byteBufferBytes.toHexString());
-
-        // Ensure the serialized output matches the expected format
+        // Ensure the serialised output matches the expected format
         assertEquals("" +
                 "--- !!data\n" +
                 "any-key: {\n" +
@@ -50,7 +46,6 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
                 "}\n",
                 value);
 
-         // Assert.assertTrue(replace.length() > 1);
         // Release the ByteBuffer's resources
         byteBufferBytes.releaseLast();
     }
@@ -77,8 +72,6 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
         // Read back the MyMarshallable object from the Wire
         @NotNull final ValueIn read = wire.read(() -> "key");
         @Nullable final MyMarshallable result = read.typedMarshallable();
-
-       // System.out.println(result.toString());
 
         // Ensure the read value matches the written one
         assertEquals("text", result.text.toString());

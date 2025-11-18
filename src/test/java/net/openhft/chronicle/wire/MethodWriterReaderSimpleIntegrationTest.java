@@ -38,11 +38,19 @@ public class MethodWriterReaderSimpleIntegrationTest extends WireTestCommon {
         List<String> seen = new ArrayList<>();
         MethodReader reader = w.methodReader(new Echo() {
             @Override
-            public void one(int v) { seen.add("one:" + v); }
+            public void one(int v) {
+                seen.add("one:" + v);
+            }
+
             @Override
-            public void two(String t) { seen.add("two:" + t); }
+            public void two(String t) {
+                seen.add("two:" + t);
+            }
+
             @Override
-            public void three(long a, double b) { seen.add("three:" + a + "," + b); }
+            public void three(long a, double b) {
+                seen.add("three:" + a + "," + b);
+            }
         });
 
         while (reader.readOne()) {

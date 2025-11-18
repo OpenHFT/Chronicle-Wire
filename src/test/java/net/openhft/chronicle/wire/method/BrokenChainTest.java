@@ -42,7 +42,7 @@ public class BrokenChainTest extends WireTestCommon {
     private void doBrokenChain(WireType wireType) {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
-        First writer = wire.methodWriter(First.class);
+        final First writer = wire.methodWriter(First.class);
         assertTrue(wire.writingIsComplete());
 
         List<String> list = new ArrayList<>();

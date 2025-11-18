@@ -2484,7 +2484,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         @Override
         public Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy)
                 throws BufferUnderflowException, IORuntimeException, InvalidMarshallableException {
-            long position0 = bytes.readPosition();
+            final long position0 = bytes.readPosition();
             if (isNull()) {
                 consumePadding(1);
                 return null;

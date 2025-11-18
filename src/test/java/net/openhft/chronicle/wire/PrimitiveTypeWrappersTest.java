@@ -50,7 +50,6 @@ public class PrimitiveTypeWrappersTest extends WireTestCommon {
                 @NotNull final Wire wire = wireFactory();
 
                 wire.write().object(num); // Write the number to the wire
-               // System.out.println(wire);
                 @Nullable final Object object = wire.read().object(type); // Read the number back as the specified type
                 Assert.assertTrue(num.getClass() + " to " + type.getName(), type.isAssignableFrom(object.getClass()));
                 Assert.assertEquals(num.getClass() + " to " + type.getName(), num.intValue(), ((Number) object).intValue());
@@ -67,7 +66,6 @@ public class PrimitiveTypeWrappersTest extends WireTestCommon {
             @NotNull final Wire wire = wireFactory();
 
             wire.write().object(num);
-           // System.out.println(num.getClass() + " of " + num + " is " + (isTextWire ? wire.toString() : wire.bytes().toHexString()));
             @Nullable final Object object = wire.read().object(Object.class);
             Assert.assertSame(num.getClass(), object.getClass());
             Assert.assertEquals(num.getClass().getName(), num, object);

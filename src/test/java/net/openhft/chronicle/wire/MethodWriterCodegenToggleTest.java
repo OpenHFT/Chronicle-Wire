@@ -25,7 +25,11 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class MethodWriterCodegenToggleTest extends WireTestCommon {
 
-    interface API { void a(int x); void b(String s); }
+    interface API {
+        void a(int x);
+
+        void b(String s);
+    }
 
     @Parameterized.Parameters(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
     public static Collection<Object[]> data() {
@@ -56,8 +60,15 @@ public class MethodWriterCodegenToggleTest extends WireTestCommon {
 
         List<String> seen = new ArrayList<>();
         MethodReader r = w.methodReader(new API() {
-            @Override public void a(int x) { seen.add("a:" + x); }
-            @Override public void b(String s) { seen.add("b:" + s); }
+            @Override
+            public void a(int x) {
+                seen.add("a:" + x);
+            }
+
+            @Override
+            public void b(String s) {
+                seen.add("b:" + s);
+            }
         });
         while (r.readOne()) {
             continue;

@@ -92,7 +92,6 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
                 sourceCode.append("" +
                         "package " + metaData.packageName() + ";\n" +
                         "\n");
-                String extendsClassName = nameForClass(extendsClass());
                 final String implementsSet = metaData.interfaces().stream()
                         .map(this::nameForClass)
                         .sorted()
@@ -111,9 +110,11 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
                 String genericType = generateGenericType();
                 if (genericType != null && !genericType.isEmpty())
                     sourceCode.append('<').append(genericType).append('>');
-                if (extendsClass() != Object.class)
+                if (extendsClass() != Object.class) {
+                    String extendsClassName = nameForClass(extendsClass());
                     sourceCode.append(" extends ")
                             .append(extendsClassName);
+                }
                 if (implementsSet.length() > 0) {
                     sourceCode.append(" implements ")
                             .append(implementsSet);

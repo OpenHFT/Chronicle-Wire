@@ -99,7 +99,7 @@ public class FIX42Test extends WireTestCommon {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() {
         // Various dump strings representing different binary data scenarios
-        String dump_1 = "" +
+        String textDump1 = "" +
                 "Symbol: EURUSD\n" +
                 "NoMDEntries: 2\n" +
                 "MDEntryType: 52\n" +
@@ -140,7 +140,7 @@ public class FIX42Test extends WireTestCommon {
 
         // Return a list of objects arrays containing different test parameter combinations
         return Arrays.asList(
-                new Object[]{-1, false, false, false, dump_1},
+                new Object[]{-1, false, false, false, dump1},
                 new Object[]{0, false, false, false, dump0},
                 new Object[]{1, true, false, false, dump1},
                 new Object[]{2, false, true, false, dump2},

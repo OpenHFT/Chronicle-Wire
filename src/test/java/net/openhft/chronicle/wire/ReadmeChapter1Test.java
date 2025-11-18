@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
+// CHECKSTYLE:OFF - README-style examples intentionally non-conforming for documentation purposes
 @SuppressWarnings({"java:S2699", "java:S125", "java:S1854", "java:S1481"})
 public class ReadmeChapter1Test extends WireTestCommon {
 
@@ -575,3 +576,5 @@ class Data extends SelfDescribingMarshallable {
  */
 
 }
+
+// CHECKSTYLE:ON

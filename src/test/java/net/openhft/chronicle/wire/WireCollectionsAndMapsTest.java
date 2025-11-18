@@ -19,7 +19,7 @@ public class WireCollectionsAndMapsTest extends WireTestCommon {
     @Test
     public void sequenceReadWrite() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
-            Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
+            final Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
 
             // empty and single element sequence
             w.write("empty").sequence(v -> {
@@ -68,11 +68,12 @@ public class WireCollectionsAndMapsTest extends WireTestCommon {
     public void mapsRoundTripViaMarshallable() {
         // Use ValueIn.marshallableAsMap across supported wire types.
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
-            Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
             Map<String, Object> in = new LinkedHashMap<>();
             in.put("k1", 1);
             in.put("k2", "v2");
             in.put("k3", 3L);
+
+            final Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
             w.write("m").map(in);
 
             Map<?, ?> out = w.read("m").marshallableAsMap(String.class, Object.class);

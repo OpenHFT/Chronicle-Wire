@@ -3458,7 +3458,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireIn bytes(@NotNull BytesOut<?> toBytes, boolean clearBytes) {
-            long length = readLength();
+            final long length = readLength();
             int code = readCode();
             if (clearBytes)
                 toBytes.clear();

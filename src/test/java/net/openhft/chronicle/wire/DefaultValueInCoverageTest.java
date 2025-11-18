@@ -8,11 +8,11 @@ import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.junit.Test;
 
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.*;
 
 public class DefaultValueInCoverageTest extends WireTestCommon {
@@ -28,7 +28,7 @@ public class DefaultValueInCoverageTest extends WireTestCommon {
         assertEquals(0, pointer.safeLimit());
 
         Bytes<?> direct = Bytes.allocateDirect(32);
-        direct.write("hi".getBytes(StandardCharsets.ISO_8859_1));
+        direct.write("hi".getBytes(ISO_8859_1));
         valueIn.defaultValue = direct.bytesStore();
         valueIn.bytesSet(pointer);
         assertTrue("pointer should point at direct store", pointer.safeLimit() >= 2);
@@ -61,7 +61,7 @@ public class DefaultValueInCoverageTest extends WireTestCommon {
         valueIn.bytes(sink);
         byte[] out = new byte[(int) sink.readRemaining()];
         sink.read(out);
-        assertArrayEquals("data".getBytes(StandardCharsets.ISO_8859_1), out);
+        assertArrayEquals("data".getBytes(ISO_8859_1), out);
         data.releaseLast();
         sink.releaseLast();
     }

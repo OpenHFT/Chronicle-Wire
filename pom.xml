@@ -34,7 +34,7 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>third-party-bom</artifactId>
-                <version>3.27ea2</version>
+                <version>3.27ea7</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -480,7 +480,6 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
-
                         <configuration>
                             <classpathScope>test</classpathScope>
                         </configuration>
@@ -512,33 +511,75 @@
             </build>
         </profile>
 
-        <!-- Optional: per-module quality profile so SpotBugs only runs on modern JDKs when needed -->
         <profile>
-            <id>module-quality</id>
+            <id>quality</id>
             <activation>
+                <!-- Run the full quality stack only on modern JDKs. -->
                 <jdk>[11,)</jdk>
             </activation>
             <build>
                 <plugins>
-                    <!-- SpotBugs analysis for Chronicle Wire (only when running on Java 11+) -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
+                        <version>3.6.0</version>
+                        <executions>
+                            <execution>
+                                <id>validate</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <configLocation>${checkstyle.config.location}</configLocation>
+                            <failOnViolation>true</failOnViolation>
+                            <logViolationsToConsole>true</logViolationsToConsole>
+                            <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                            <violationSeverity>${checkstyle.violationSeverity}</violationSeverity>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>com.puppycrawl.tools</groupId>
+                                <artifactId>checkstyle</artifactId>
+                                <version>10.26.1</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>net.openhft</groupId>
+                                <artifactId>chronicle-quality-rules</artifactId>
+                                <version>1.27.0-SNAPSHOT</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
                     <plugin>
                         <groupId>com.github.spotbugs</groupId>
                         <artifactId>spotbugs-maven-plugin</artifactId>
                         <version>4.9.8.1</version>
                         <configuration>
                             <effort>Max</effort>
-                            <!-- Treat SpotBugs findings as warnings: report with Low threshold but do not fail the build -->
                             <threshold>Low</threshold>
-                            <includeTests>true</includeTests>
+                            <!-- Analyse main sources only; tests are covered by central filters and policies. -->
+                            <includeTests>false</includeTests>
                             <failOnError>true</failOnError>
+                            <!-- Shared SpotBugs filters from chronicle-quality-rules -->
+                            <includeFilterFile>net/openhft/quality/spotbugs27/chronicle-spotbugs-include.xml</includeFilterFile>
+                            <excludeFilterFile>net/openhft/quality/spotbugs27/chronicle-spotbugs-exclude.xml</excludeFilterFile>
                         </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>net.openhft</groupId>
+                                <artifactId>chronicle-quality-rules</artifactId>
+                                <version>1.27.0-SNAPSHOT</version>
+                            </dependency>
+                        </dependencies>
                         <executions>
                             <execution>
                                 <id>spotbugs-main</id>
-                                <!-- Run after compilation of main classes, before tests execute -->
-                                <phase>process-classes</phase>
+                                <!-- Bind after test classes are compiled so includeTests=true analyses src/test/java as well. -->
+                                <phase>process-test-classes</phase>
                                 <goals>
-                                    <goal>spotbugs</goal>
+                                    <goal>check</goal>
                                 </goals>
                             </execution>
                         </executions>

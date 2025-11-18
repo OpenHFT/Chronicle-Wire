@@ -29,8 +29,8 @@ public class Issue609Test extends WireTestCommon {
      */
     @Test
     public void testServices() throws IOException {
-        // Deserializes the ChronicleServicesCfg from a YAML file
-        ChronicleServicesCfg obj = WireType.YAML.fromString(ChronicleServicesCfg.class, BytesUtil.readFile("yaml/services.yaml"));
+        // Deserialises the ChronicleServicesCfg from a YAML file
+        final ChronicleServicesCfg obj = WireType.YAML.fromString(ChronicleServicesCfg.class, BytesUtil.readFile("yaml/services.yaml"));
 
         // Creates an expected configuration manually
         ChronicleServicesCfg expected = new ChronicleServicesCfg();

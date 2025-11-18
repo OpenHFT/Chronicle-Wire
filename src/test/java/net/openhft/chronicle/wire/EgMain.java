@@ -22,12 +22,12 @@ public class EgMain {
         DistributedUniqueTimeProvider tp = DistributedUniqueTimeProvider.forHostId(28);
         Event e = new Event();
         e.time = tp.currentTimeNanos();
-        // Sample serialized format of the event.
-/*
-!net.openhft.chronicle.wire.EgMain$Event {
-  time: 2021-12-28T14:07:02.954100128
-}
-*/
+        // Sample serialised format of the event.
+        /*
+        !net.openhft.chronicle.wire.EgMain$Event {
+          time: 2021-12-28T14:07:02.954100128
+        }
+        */
         String str = e.toString();
         Event e2 = Marshallable.fromString(str);
         System.out.println(e2);

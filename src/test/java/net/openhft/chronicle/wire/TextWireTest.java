@@ -92,7 +92,7 @@ public class TextWireTest extends WireTestCommon {
     // Test handling of Bytes data type in TextWire.
     @Test
     public void testBytes() {
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
         @NotNull byte[] allBytes = new byte[256];
         for (int i = 0; i < 256; i++)
             allBytes[i] = (byte) i;
@@ -116,7 +116,7 @@ public class TextWireTest extends WireTestCommon {
     // Test handling of comments in TextWire.
     @Test
     public void comment() {
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
         wire.writeComment("\thi: omg");
         wire.write("hi").text("there");
         assertEquals("there", wire.read("hi").text());
@@ -1288,7 +1288,7 @@ public class TextWireTest extends WireTestCommon {
     @Test
     public void testWriteMarshallable() {
         // Create wire instance
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
         @NotNull MyTypesCustom mtA = new MyTypesCustom();
         mtA.flag = true;
         mtA.d = 123.456;
@@ -1344,7 +1344,7 @@ public class TextWireTest extends WireTestCommon {
     @Test
     public void testWriteMarshallableAndFieldLength() {
         // Create wire instance
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
         @NotNull MyTypesCustom mtA = new MyTypesCustom();
         mtA.flag = true;
         mtA.d = 123.456;
@@ -1354,13 +1354,13 @@ public class TextWireTest extends WireTestCommon {
         @NotNull ValueOut write = wire.write(() -> "A");
 
         // Determine the start position for field length calculation
-        long start = wire.bytes().writePosition() + 1; // including one space for "sep".
+        final long start = wire.bytes().writePosition() + 1; // including one space for "sep".
 
         // Write the Marshallable instance to wire
         write.marshallable(mtA);
 
         // Calculate the length of written field
-        long fieldLen = wire.bytes().lengthWritten(start);
+        final long fieldLen = wire.bytes().lengthWritten(start);
 
         // Assert the string format of wire after writing
         expectWithSnakeYaml("{A={B_FLAG=true, S_NUM=12345, D_NUM=123.456, L_NUM=0, I_NUM=-12345789, TEXT=}}", wire);
@@ -1368,7 +1368,7 @@ public class TextWireTest extends WireTestCommon {
         @NotNull ValueIn read = wire.read(() -> "A");
 
         // Determine the length of the read field
-        long len = read.readLength();
+        final long len = read.readLength();
 
         // Assert the equality of calculated field lengths
         assertEquals(fieldLen, len, 1);
@@ -1736,14 +1736,14 @@ public class TextWireTest extends WireTestCommon {
         @Nullable Map<String, String> map = wire.read().object(Map.class);
         assertEquals(0, map.size());
 
-        // TODO we shouldn't need to create a new wire.
+        // TODO we should not need to create a new wire.
         // wire = createWire();
-//
+        //
         // Set<String> threeObjects = new HashSet(Arrays.asList(new String[]{"abc", "def", "ghi"}));
         // wire.write().object(threeObjects);
-//
+        //
         // Set<String> list2 = wire.read()
-        // .object(Set.class);
+        //         .object(Set.class);
         // assertEquals(3, list2.size());
         // assertEquals("[abc, def, ghi]", list2.toString());
     }
@@ -1751,7 +1751,7 @@ public class TextWireTest extends WireTestCommon {
     // This test case demonstrates how to decode nested structures from a textual representation.
     @Test
     public void testNestedDecode() {
-        @NotNull String s = "cluster: {\n" +
+        final String s = "cluster: {\n" +
                 "  host1: {\n" +
                 "     hostId: 1,\n" +
                 // "     name: one,\n" +
@@ -1897,7 +1897,7 @@ public class TextWireTest extends WireTestCommon {
     @Test
     public void testByteArray() {
         // Initialize a new Wire instance.
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
 
         // Enable padding for the Wire.
         wire.usePadding(true);
@@ -1940,7 +1940,7 @@ public class TextWireTest extends WireTestCommon {
         map.put(new MyMarshallable("key2"), "value2");
 
         // Initialize a new Wire instance.
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
 
         // Disable padding for the Wire.
         wire.usePadding(false);
@@ -1995,7 +1995,7 @@ public class TextWireTest extends WireTestCommon {
     @Test
     public void writeCharacter() {
         // Initialize a new Wire instance.
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
 
         // Define a set of characters to test with.
         for (char ch : new char[]{0, '!', 'a', Character.MAX_VALUE}) {
@@ -2012,7 +2012,7 @@ public class TextWireTest extends WireTestCommon {
     @Test
     public void testSortedSet() {
         // Initialize a new Wire instance.
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
 
         // Create a SortedSet (TreeSet) and populate it with strings.
         @NotNull SortedSet<String> set = new TreeSet<>();
@@ -2040,7 +2040,7 @@ public class TextWireTest extends WireTestCommon {
     @Test
     public void testSortedMap() {
         // Initialize a new Wire instance.
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
 
         // Create a SortedMap (TreeMap) and populate it with key-value pairs.
         @NotNull SortedMap<String, Long> set = new TreeMap<>();
@@ -2108,12 +2108,6 @@ public class TextWireTest extends WireTestCommon {
         bw.bytes.releaseLast();
     }
 
-    /**
-     * Tests the serialization and deserialization process for the DoubleWrapper class.
-     * This test ensures that double values in the DoubleWrapper class are correctly serialized
-     * to their engineering notation (where appropriate) and deserialized back to their original
-     * values. It also tests the use of a class alias for a more concise serialization format.
-     */
     @Test
     public void testDoubleEngineering() {
         // Registering an alias 'D' for the DoubleWrapper class to shorten the serialized format.
@@ -2170,7 +2164,7 @@ public class TextWireTest extends WireTestCommon {
         assertEquals(10e6, dw5.d, 0);
     }
 
-     // Tests the consistency of serialization and deserialization of NestedList objects and various property combinations.
+    // Tests the consistency of serialization and deserialization of NestedList objects and various property combinations.
     @Test
     public void testNestedList() {
         // Create a NestedList instance from its serialized string representation.
@@ -2303,7 +2297,7 @@ public class TextWireTest extends WireTestCommon {
     @Test
     public void nestedWithEnumSet() {
         // Create a Wire instance and a NestedWithEnumSet object
-        Wire wire = createWire();
+        final Wire wire = createWire();
         NestedWithEnumSet n = new NestedWithEnumSet();
         n.list.add(new WithEnumSet("none"));
         n.list.add(new WithEnumSet("one", EnumSet.of(TimeUnit.DAYS)));
@@ -2570,7 +2564,7 @@ public class TextWireTest extends WireTestCommon {
                     "]\n" +
                     "     # fin\n");
 
-    // Assert that the object was deserialized correctly without being affected by the comments.
+        // Assert that the object was deserialised correctly without being affected by the comments.
         assertEquals(obj, Arrays.asList("bar", "quux"));
     }
 
@@ -2630,7 +2624,8 @@ public class TextWireTest extends WireTestCommon {
         }
     }
 
-    // Class with fields of Bytes type initialized with various Byte buffers
+    // Class with fields of Bytes type initialised with various Byte buffers.
+    // CHECKSTYLE:OFF - uppercase field names required to match YAML keys in assertions
     @SuppressWarnings("java:S116") // Keep A,B,C,D uppercase to match expected YAML keys in assertions
     static class ABCD extends SelfDescribingMarshallable implements Monitorable {
         Bytes<?> A = Bytes.allocateElasticDirect();
@@ -2660,8 +2655,9 @@ public class TextWireTest extends WireTestCommon {
     static class ABC extends SelfDescribingMarshallable {
         StringBuilder A = new StringBuilder();
         StringBuilder B = new StringBuilder();
-        StringBuilder C = new StringBuilder();
+            StringBuilder C = new StringBuilder();
     }
+    // CHECKSTYLE:ON
 
     // Nested class having another nested class field and a long field
     private static class NestedA extends SelfDescribingMarshallable {

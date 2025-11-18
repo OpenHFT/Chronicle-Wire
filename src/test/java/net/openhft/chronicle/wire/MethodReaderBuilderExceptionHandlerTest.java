@@ -103,8 +103,6 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
                 ExceptionHandler.ignoresEverything(), IA.class, true);
     }
 
-// Continue from the previously provided class `MethodReaderBuilderExceptionHandlerTest`.
-
     // Test focusing on both 'b' and 'c' type messages using non-scanning method
     @Test
     public void testBC() {

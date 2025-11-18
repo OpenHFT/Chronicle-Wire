@@ -45,8 +45,6 @@ public class ScalarValues extends SelfDescribingMarshallable {
     private File file;
     private TestEnum dynamicEnum;
 
-   // Path path;
-
     public ScalarValues() {
     }
 

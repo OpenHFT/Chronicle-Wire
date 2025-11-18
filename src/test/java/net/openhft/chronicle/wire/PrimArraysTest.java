@@ -89,7 +89,6 @@ public class PrimArraysTest extends WireTestCommon {
             // Write the test array to the wire
             wire.write("test")
                     .object(array);
-           // System.out.println(wire);
             // Assert that the textual representation matches when using WireType.TEXT
             if (wireType == WireType.TEXT)
                 assertEquals(asText.trim(), wire.toString().trim());

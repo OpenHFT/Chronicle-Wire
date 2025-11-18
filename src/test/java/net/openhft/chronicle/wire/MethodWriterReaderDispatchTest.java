@@ -32,8 +32,15 @@ public class MethodWriterReaderDispatchTest extends WireTestCommon {
 
         List<String> seen = new ArrayList<>();
         MethodReader r = w.methodReader(new Api() {
-            @Override public void a(int i) { seen.add("a:" + i); }
-            @Override public void b(String s) { seen.add("b:" + s); }
+            @Override
+            public void a(int i) {
+                seen.add("a:" + i);
+            }
+
+            @Override
+            public void b(String s) {
+                seen.add("b:" + s);
+            }
         });
         while (r.readOne()) {
             // drain

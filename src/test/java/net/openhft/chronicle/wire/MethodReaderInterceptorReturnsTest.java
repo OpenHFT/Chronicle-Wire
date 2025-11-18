@@ -71,10 +71,10 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
 
     @SuppressWarnings("deprecation")
     private void doTestInterceptorSupportedInGeneratedCode(CountDownLatch readerCreateLatch, boolean addDummyInstance) {
-        BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
 
-        InterceptedInterface writer = wire.methodWriter(InterceptedInterface.class);
+        final InterceptedInterface writer = wire.methodWriter(InterceptedInterface.class);
 
         final StringBuilder interceptedMethodNames = new StringBuilder();
 

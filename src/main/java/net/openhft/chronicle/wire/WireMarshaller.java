@@ -1987,11 +1987,7 @@ public class WireMarshaller<T> {
                         out.object(componentType, list.get(i));
                     }
                 } else if (coll == null) {
-                    try {
-                        field.set(coll, null);
-                    } catch (IllegalAccessException e) {
-                        throw new AssertionError(e);
-                    }
+                    return;
                 } else {
                     for (Object element : coll) {
                         out.object(componentType, element);
@@ -2014,7 +2010,6 @@ public class WireMarshaller<T> {
             @Nullable final Supplier<Collection> collectionSupplier;
             @NotNull final Class<?> componentType;
             final Class<?> type;
-            @Nullable Boolean isLeaf = null;
             type = field.getType();
             if (type == List.class || type == Collection.class)
                 collectionSupplier = ArrayList::new;
@@ -2026,6 +2021,7 @@ public class WireMarshaller<T> {
                 collectionSupplier = null;
 
             componentType = extractClass(computeActualTypeArguments(Collection.class, field)[0]);
+            @Nullable Boolean isLeaf = null;
             if (componentType != Object.class) {
                 isLeaf = !Throwable.class.isAssignableFrom(componentType)
                         // Don't recurse into the same class

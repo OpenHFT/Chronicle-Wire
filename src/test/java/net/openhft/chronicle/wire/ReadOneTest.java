@@ -76,7 +76,7 @@ public class ReadOneTest extends WireTestCommon {
         };
 
         MyDtoListener myOut = wire.methodWriterBuilder(MyDtoListener.class).build();
-        SnapshotListener snapshotOut = wire.methodWriterBuilder(SnapshotListener.class).build();
+        final SnapshotListener snapshotOut = wire.methodWriterBuilder(SnapshotListener.class).build();
 
         ((VanillaMessageHistory) MessageHistory.get()).useBytesMarshallable(false);
         // Simulating different historical records and writes to the Wire

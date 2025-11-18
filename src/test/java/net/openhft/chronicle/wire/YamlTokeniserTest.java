@@ -135,7 +135,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                 doTest("morse-code.yaml")); // Invoke the tokenization utility and verify the output
     }
 
- // Test case for tokenizing YAML content with mixed quotes
+    // Test case for tokenising YAML content with mixed quotes
     @Test
     public void mixedQuotes() {
         // The expected tokenized representation of the mixed-quotes.yaml file

@@ -801,7 +801,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testDate() {
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
         LocalDate now = LocalDate.now();
         wire.write().date(now)
                 .write().date(LocalDate.MAX)
@@ -813,7 +813,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testUuid() {
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
         UUID uuid = UUID.randomUUID();
         wire.write().uuid(uuid)
                 .write().uuid(new UUID(0, 0))
@@ -825,7 +825,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testTypeWithoutSpace() {
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
         wire.bytes().append("A: !").append(MyTypes.class.getName()).append("{}");
 
         @NotNull MyTypes mt = (MyTypes) wire.read("A")
@@ -985,7 +985,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testWriteMarshallable() {
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
         @NotNull MyTypesCustom mtA = new MyTypesCustom();
         mtA.flag = true;
         mtA.d = 123.456;
@@ -1032,7 +1032,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testWriteMarshallableAndFieldLength() {
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
         @NotNull MyTypesCustom mtA = new MyTypesCustom();
         mtA.flag = true;
         mtA.d = 123.456;
@@ -1041,9 +1041,9 @@ public class YamlWireTest extends WireTestCommon {
 
         @NotNull ValueOut write = wire.write(() -> "A");
 
-        long start = wire.bytes().writePosition() + 1; // including one space for "sep".
+        final long start = wire.bytes().writePosition() + 1; // including one space for "sep".
         write.marshallable(mtA);
-        long fieldLen = wire.bytes().lengthWritten(start);
+        final long fieldLen = wire.bytes().lengthWritten(start);
 
         expectWithSnakeYaml("{A={B_FLAG=true, S_NUM=12345, D_NUM=123.456, L_NUM=0, I_NUM=-12345789, TEXT=}}", wire);
 
@@ -1741,7 +1741,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testSortedSet() {
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
         @NotNull SortedSet<String> set = new TreeSet<>();
         set.add("one");
         set.add("two");
@@ -1759,7 +1759,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testSortedMap() {
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
         @NotNull SortedMap<String, Long> set = new TreeMap<>();
         set.put("one", 1L);
         set.put("two", 2L);
@@ -1857,7 +1857,7 @@ public class YamlWireTest extends WireTestCommon {
     public void nestedWithEnumSet() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        Wire wire = createWire();
+        final Wire wire = createWire();
         YNestedWithEnumSet n = new YNestedWithEnumSet();
         n.list.add(new WithEnumSet("none"));
         n.list.add(new WithEnumSet("one", EnumSet.of(TimeUnit.DAYS)));

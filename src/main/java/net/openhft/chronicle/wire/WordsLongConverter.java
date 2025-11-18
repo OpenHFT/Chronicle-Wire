@@ -7,12 +7,13 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IOTools;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-import java.util.ArrayList;
-import java.util.List;
+
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
 /**
  * The {@code WordsLongConverter} class implements the LongConverter interface.
@@ -37,7 +38,7 @@ public class WordsLongConverter implements LongConverter {
     static {
         try {
             // Load the words from the resource file, ignoring comment lines.
-            String content = new String(IOTools.readFile(WordsLongConverter.class, "common-words.txt"), StandardCharsets.ISO_8859_1);
+            String content = new String(IOTools.readFile(WordsLongConverter.class, "common-words.txt"), ISO_8859_1);
             String[] lines = content.split("\\R");
             List<String> list = new ArrayList<>();
             for (String line : lines) {

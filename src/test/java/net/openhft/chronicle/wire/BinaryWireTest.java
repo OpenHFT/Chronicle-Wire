@@ -1267,7 +1267,7 @@ public class BinaryWireTest extends WireTestCommon {
         // BinaryWire.SPEC = 18;
 
         // Create a new wire instance.
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
 
         // Initialize a MyTypesCustom instance (mtA) with specific values.
         @NotNull MyTypesCustom mtA = new MyTypesCustom();
@@ -1626,7 +1626,7 @@ public class BinaryWireTest extends WireTestCommon {
     @Test
     public void testSortedSet() {
         // Creating a wire instance and a sorted set of strings
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
         @NotNull SortedSet<String> set = new TreeSet<>();
         set.add("one");
         set.add("two");
@@ -1644,7 +1644,7 @@ public class BinaryWireTest extends WireTestCommon {
     @Test
     public void testSortedMap() {
         // Creating a wire instance and a sorted map
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
         @NotNull SortedMap<String, Long> set = new TreeMap<>();
         set.put("one", 1L);
         set.put("two", 2L);

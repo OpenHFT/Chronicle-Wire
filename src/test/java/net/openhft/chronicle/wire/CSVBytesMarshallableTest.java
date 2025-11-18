@@ -90,10 +90,6 @@ public class CSVBytesMarshallableTest extends WireTestCommon {
             fxPrice.writeMarshallable(out);
         }
 
-       // System.out.println();
-       // System.out.println(wt);
-       // System.out.println(binary ? bytes2.toHexString() : bytes2.toString());
-
         bytes2.releaseLast();
     }
 }

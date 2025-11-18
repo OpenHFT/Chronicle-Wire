@@ -59,17 +59,15 @@ public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
     @Parameterized.Parameters(name = "{index}: {0}")
     public static Collection<Object[]> data() throws IllegalAccessException {
 
-        // An array that will be populated with test cases.
         Object[][] list = {
-                // Here you define each test case. The array consists of:
-            // { name of wire code (filled out later), the code itself, a consumer to produce the value }
+                // { name of wire code (filled out later), the code itself, a consumer to produce the value }
                 {null, BYTES_LENGTH8, wr(v -> v.object(Dto8.class, new Dto8()))},
                 {null, BYTES_LENGTH16, wr(v -> v.object(Dto16.class, new Dto16()))},
                 {null, BYTES_LENGTH32, wr(v -> v.object(Dto32.class, new Dto32()))},
-/*                {null, BYTES_MARSHALLABLE, wr(v -> {
-                    v.object(BM.class, new BM());
-                    v.wireOut().bytes().readPosition(5);
-                })},*/
+                /* {null, BYTES_MARSHALLABLE, wr(v -> {
+                     v.object(BM.class, new BM());
+                     v.wireOut().bytes().readPosition(5);
+                 })}, */
                 {null, U8_ARRAY, wr(v -> {
                     v.bytes(new byte[4]);
                     v.wireOut().bytes().readPosition(2);
@@ -88,9 +86,6 @@ public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
                 {null, FLOAT_STOP_2, wr(v -> v.float64(1.23))},
                 {null, FLOAT_STOP_4, wr(v -> v.float64(0.0123))},
                 {null, FLOAT_STOP_6, wr(v -> v.float64(0.000123))},
-//        public static final int FLOAT_SET_LOW_0 = 0x9A;
-//        public static final int FLOAT_SET_LOW_2 = 0x9B;
-//        public static final int FLOAT_SET_LOW_4 = 0x9C;
                 {null, UUID, wr(v -> v.uuid(java.util.UUID.randomUUID()))},
                 {null, UINT8, wr(v -> v.uint8(129))},
                 {null, UINT16, wr(v -> v.uint16(65500))},
@@ -99,8 +94,6 @@ public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
                 {null, INT16, wr(v -> v.int16(-32000))},
                 {null, INT32, wr(v -> v.int32(-65555))},
                 {null, INT64, wr(v -> v.int64(1234567890123456789L))},
-//        public static final int SET_LOW_INT8 = 0xA8;
-//        public static final int SET_LOW_INT16 = 0xA9;
                 {null, INT64_0x, wr(v -> v.int64_0x(1L << 63))},
                 {null, FALSE, wr(v -> v.bool(false))},
                 {null, TRUE, wr(v -> v.bool(true))},
@@ -109,17 +102,10 @@ public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
                 {null, DATE_TIME, wr(v -> v.dateTime(LocalDateTime.now()))},
                 {null, ZONED_DATE_TIME, wr(v -> v.zonedDateTime(ZonedDateTime.now()))},
                 {null, TYPE_PREFIX, wr(v -> v.object(new Dto8()))},
-//        public static final int FIELD_NAME_ANY = 0xB7;
                 {null, STRING_ANY, wr(v -> v.text("Long string 012345678901234567890123456789"))},
-//        public static final int EVENT_NAME = 0xB9;
-//        public static final int FIELD_NUMBER = 0xBA;
                 {null, NULL, wr(v -> v.nu11())},
                 {null, TYPE_LITERAL, wr(v -> v.typeLiteral(String.class))},
-//        public static final int EVENT_OBJECT = 0xBD;
                 {null, COMMENT, wr(v -> v.wireOut().writeComment("hi").getValueOut().text("hi"))},
-//        public static final int HINT = 0xBF;
-//        public static final int FIELD_NAME0 = 0xC0;
-//        public static final int FIELD_NAME31 = 0xDF;
                 {null, STRING_0, wr(v -> v.text(""))},
                 {null, STRING_31, wr(v -> v.text("0123456789012345678901234567890"))},
         };

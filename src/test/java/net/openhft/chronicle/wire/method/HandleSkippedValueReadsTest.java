@@ -37,8 +37,6 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
         return Arrays.asList(
                 new Object[]{WireType.BINARY_LIGHT},
                 new Object[]{WireType.TEXT}
-                // TODO FIX
-//                new Object[]{WireType.YAML_ONLY}
         );
     }
 

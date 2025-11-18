@@ -35,7 +35,7 @@ public class WireResourcesTest extends WireTestCommon {
         tmp.deleteOnExit();
 
         // Initialize and verify initial reference counts.
-        MappedBytes mb0;
+        final MappedBytes mb0;
         @NotNull MappedBytes mb = MappedBytes.mappedBytes(tmp, 64 * 1024);
         assertEquals(1, mb.mappedFile().refCount());
         assertEquals(1, mb.refCount());
@@ -73,7 +73,7 @@ public class WireResourcesTest extends WireTestCommon {
         tmp.deleteOnExit();
 
         // Initialize the mapped bytes and verify the initial reference counts.
-        Wire wire;
+        final Wire wire;
         @NotNull MappedBytes mb = MappedBytes.mappedBytes(tmp, 64 * 1024);
         assertEquals(1, mb.mappedFile().refCount());
         assertEquals(1, mb.refCount());

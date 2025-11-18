@@ -109,7 +109,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
     private <T> void verifyNotRecycled(T firstArg, T secondArg, Consumer<T> call) {
         call.accept(firstArg);
         assertTrue(reader.readOne());
-        Object firstRef = lastArgumentRef;
+        final Object firstRef = lastArgumentRef;
         assertRecycledEquality(firstArg, lastArgumentRef);
 
         call.accept(secondArg);
@@ -123,7 +123,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
     private <T> void verifyRecycled(T firstArg, T secondArg, Consumer<T> call) {
         call.accept(firstArg);
         assertTrue(reader.readOne());
-        Object firstRef = lastArgumentRef;
+        final Object firstRef = lastArgumentRef;
         assertEquals(firstArg, lastArgumentRef);
 
         call.accept(secondArg);
@@ -154,10 +154,10 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
     // Test to verify that a MyMarshallable object argument gets recycled between calls.
     @Test
     public void testMarshallableRecycled() {
-        MyMarshallable first = new MyMarshallable();
+        final MyMarshallable first = new MyMarshallable();
         first.l = 5L;
 
-        MyMarshallable second = new MyMarshallable();
+        final MyMarshallable second = new MyMarshallable();
         second.l = 7L;
 
         verifyRecycled(first, second, writer::marshallableCall);
@@ -166,10 +166,10 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
     // Test to confirm that a MyBytesMarshallable object argument gets recycled between calls.
     @Test
     public void testBytesMarshallableRecycled() {
-        MyBytesMarshallable first = new MyBytesMarshallable();
+        final MyBytesMarshallable first = new MyBytesMarshallable();
         first.d = 8.5;
 
-        MyBytesMarshallable second = new MyBytesMarshallable();
+        final MyBytesMarshallable second = new MyBytesMarshallable();
         second.d = 32.25;
 
         verifyRecycled(first, second, writer::bytesMarshallableCall);
@@ -220,10 +220,10 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
     // Test to ascertain that a DTO object's list field gets recycled between calls.
     @Test
     public void testWrappedListAsObjectRecycled() {
-        ObjectContainingDto first = new ObjectContainingDto();
+        final ObjectContainingDto first = new ObjectContainingDto();
         first.list = new ArrayList<>(Arrays.asList(6, "f"));
 
-        ObjectContainingDto second = new ObjectContainingDto();
+        final ObjectContainingDto second = new ObjectContainingDto();
         second.list = new ArrayList<>(Arrays.asList(-3, "s"));
 
         verifyRecycled(first, second, writer::wrappedObjectCall);
@@ -241,7 +241,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
         // Make a call with the first ListContainingDto and read the response.
         writer.wrappedObjectCall(first);
         assertTrue(reader.readOne());
-        Object firstRef = lastArgumentRef;
+        final Object firstRef = lastArgumentRef;
         assertEquals("" +
                 "!net.openhft.chronicle.wire.MethodReaderArgumentsRecycleTest$ObjectContainingDto {\n" +
                 "  list: [\n" +
@@ -250,10 +250,10 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
                 "    !net.openhft.chronicle.wire.MethodReaderArgumentsRecycleTest$MyDto { a: 5, b: 6 }\n" +
                 "  ]\n" +
                 "}\n", lastArgumentRef.toString());
-        List<?> list1 = (List<?>) ((ObjectContainingDto) lastArgumentRef).list;
+        final List<?> list1 = (List<?>) ((ObjectContainingDto) lastArgumentRef).list;
         assertEquals(first.list, list1);
-        MyDto dto0 = (MyDto) list1.get(0);
-        MyDto dto1 = (MyDto) list1.get(1);
+        final MyDto dto0 = (MyDto) list1.get(0);
+        final MyDto dto1 = (MyDto) list1.get(1);
 
         // Make a call with the second ListContainingDto and read the response.
         writer.wrappedObjectCall(second);
@@ -264,7 +264,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
                 "    !net.openhft.chronicle.wire.MethodReaderArgumentsRecycleTest$MyDto { a: 9, b: 0 }\n" +
                 "  ]\n" +
                 "}\n", lastArgumentRef.toString());
-        List<?> list2 = (List<?>) ((ObjectContainingDto) lastArgumentRef).list;
+        final List<?> list2 = (List<?>) ((ObjectContainingDto) lastArgumentRef).list;
         assertEquals(second.list, list2);
         assertSame(dto0, list1.get(0));
         assertSame(dto1, list1.get(1));

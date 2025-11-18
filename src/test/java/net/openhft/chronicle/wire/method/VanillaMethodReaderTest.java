@@ -86,7 +86,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
                 .useTextDocuments();
         // expected
-        Bytes<?> expected = BytesUtil.readFile("methods/out.yaml");
+        final Bytes<?> expected = BytesUtil.readFile("methods/out.yaml");
         MockMethods writer = wire2.methodWriter(MockMethods.class);
         MethodReader reader = wire.methodReader(writer);
         checkReaderType(reader);

@@ -69,9 +69,6 @@ public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
             // The following line works, but is commented out for this test
             // Wires.readMarshallable(this, wire, true);
 
-            // WORKS
-             // Wires.readMarshallable(this, wire, true);  // WORKS
-
             // FAILS
             Wires.readMarshallable(this, wire, false);
         }

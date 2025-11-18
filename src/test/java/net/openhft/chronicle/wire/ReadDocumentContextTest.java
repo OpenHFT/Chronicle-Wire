@@ -87,7 +87,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
         }
 
         // Save the current write position of the wire
-        long pos = wire.bytes().writePosition();
+        final long pos = wire.bytes().writePosition();
 
         // Write an incomplete document to the wire
         wire.writeNotCompleteDocument(false, w -> w.write("key").text("someText"));
@@ -178,7 +178,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
         }
 
         // Store the current read limit of the buffer
-        long limit = b.readLimit();
+        final long limit = b.readLimit();
 
         // Simulate a scenario where data has not been fully read from the socket by moving the read position and limiting the read limit
         long newReadPosition = b.readPosition() + 2;
@@ -234,7 +234,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
         }
 
         // Store the current read limit of the buffer
-        long limit = b.readLimit();
+        final long limit = b.readLimit();
 
         // Simulate a scenario where data has not been fully read from the socket by moving the read position and setting the read limit 5 bytes further
         long newReadPosition = b.readPosition() + 5;

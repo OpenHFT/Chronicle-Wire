@@ -99,10 +99,6 @@ public class MethodIdTest extends WireTestCommon {
 
     // Interface defining various methods with specific method IDs using annotations
     interface Methods {
-// not supported yet
-//        @MethodId(Long.MIN_VALUE)
-//        void methodLongMin(long a);
-
         @MethodId('@')
         void methodAt(char at);
         @MethodId('z')
@@ -116,11 +112,6 @@ public class MethodIdTest extends WireTestCommon {
 
         @MethodId(Byte.MIN_VALUE)
         void methodByteMin(long a);
-
-// not supported yet
-//        @MethodId(Long.MAX_VALUE)
-//        void methodLongMax(long a);
-
         @MethodId(Integer.MAX_VALUE)
         void methodIntMax(long a);
 

@@ -92,7 +92,6 @@ public class TextCompatibilityTest extends WireTestCommon {
             }
             Object o = TEXT.fromFile(Object.class, filename);
         } catch (Exception e) {
-           // System.out.println("Expected:\n" + expected);
             throw new AssertionError(filename, e);
         }
     }

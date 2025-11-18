@@ -178,10 +178,7 @@ final class SerializableObjectTest extends WireTestCommon {
                 //
                 Instant.ofEpochMilli(TIME_MS),
                 Color.BLUE,
-//                new MessageFormat("%s%n"),
-//                InetAddress.getLoopbackAddress(),
                 new File("file")
-//                create(() -> new URL("http://chronicle.software/dir/files"))
         ).filter(SerializableObjectTest::isSerializableEqualsByObject);  // Retain only those objects that are serializable and equivalent when reconstituted.
     }
 

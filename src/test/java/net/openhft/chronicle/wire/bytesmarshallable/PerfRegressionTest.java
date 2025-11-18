@@ -26,7 +26,6 @@ public class PerfRegressionTest extends WireTestCommon {
     @Test
     public void regressionTests() throws Exception {
         final URL location = PerfRegressionTest.class.getProtectionDomain().getCodeSource().getLocation();
-//        System.getProperties().forEach((k,v) -> System.out.println(k+"= "+v));
         File file = new File(location.getFile());
 
         // Navigate the directory structure to the "target" directory.
@@ -36,12 +35,8 @@ public class PerfRegressionTest extends WireTestCommon {
 
         // Array of classes that appear to be subjected to the benchmark test.
         Class<?>[] classes = {
-//                BenchBytesMain.class,
                 BenchStringMain.class,
                 BenchArrayStringMain.class,
-//                BenchNullMain.class,
-//                BenchFieldsMain.class,
-//                BenchRefBytesMain.class,
                 BenchRefStringMain.class,
                 BenchUtf8StringMain.class,
         };
@@ -144,9 +139,6 @@ public class PerfRegressionTest extends WireTestCommon {
         process.destroy();
         return result;
     }
-//            doTest(
-//                    times -> timesOk(times[0], times[1], times[2]));
-//        }
 
     // Determine if execution times for a set of tests are within acceptable ranges
     private boolean timesOk(double d, double ds, double dn) {

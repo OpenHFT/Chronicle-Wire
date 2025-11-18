@@ -55,9 +55,6 @@ public class MethodReaderWithHistoryTest extends WireTestCommon {
         history.reset();
         history.addSource(2, 22);
         historySays.history(history).say("bye");
-
-//        System.out.println(wire);
-
         String[] says = {null};
         MethodReader reader = wire.methodReader((RecordHistorySays) h -> {
             assertEquals(1, h.sourceId(0));

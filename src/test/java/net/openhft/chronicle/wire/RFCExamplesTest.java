@@ -32,17 +32,6 @@ public class RFCExamplesTest extends WireTestCommon {
         // Allocate an elastic buffer on heap.
         @NotNull Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
-/*
-        This represents a serialized format of the metadata and data.
-        It shows the service lookup, the type of view (Map), and the key/value types.
-         */
-/*
---- !!meta-data
-csp:///service-lookup
-tid: 1426502826520
---- !!data
-lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
- */
         @NotNull Wire text = WireType.TEXT.apply(bytes);
         text.usePadding(true);
         writeMessageOne(text);
@@ -88,23 +77,6 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
                         "[pos: 0, rlim: 68, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@⒘///service-lookupu\\u009F)å\"٠٠٠٠٠ ٠٠٠\\u001C٠٠٠⒋test⒊Map⒖٠٠٠⒎Integer⒍String‡٠٠٠٠٠٠٠٠",
                 bytes.toDebugString());
 
-        /*
-        This serialized format is supposed to be a representation of put operations.
-        It shows the metadata (like the server URL and transaction id) and the key/value pairs to put.
-         */
-/*
---- !!meta-data
-cid: 1
-# or
-csp://server1/test
-tid: 1426502826525
---- !!data
-put: [ 1, hello ]
---- !!data
-put: [ 2, world ]
---- !!data
-put: [ 3, bye ]
-*/
         clear(bytes);
         writeMessageTwo(text);
 

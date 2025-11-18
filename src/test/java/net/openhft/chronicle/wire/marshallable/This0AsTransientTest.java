@@ -90,8 +90,9 @@ public class This0AsTransientTest extends WireTestCommon {
 
     /**
      * Another non-static inner class, which also has a hidden reference to the outer instance.
-     * This class has an explicit 'this$0' field to mimic the behavior of hidden fields in inner classes.
+     * This class has an explicit 'this$0' field to mimic the behaviour of hidden fields in inner classes.
      */
+    // CHECKSTYLE:OFF - field name intentionally matches JVM synthetic 'this$0' for testing
     class MyClass2 extends SelfDescribingMarshallable {
         @SuppressWarnings("unused")
         String this$0;
@@ -101,4 +102,5 @@ public class This0AsTransientTest extends WireTestCommon {
             this.value = value;
         }
     }
+    // CHECKSTYLE:ON
 }

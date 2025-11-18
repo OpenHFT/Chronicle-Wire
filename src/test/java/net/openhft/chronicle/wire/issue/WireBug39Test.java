@@ -54,7 +54,6 @@ public class WireBug39Test extends WireTestCommon {
 
         // Convert the bytes back to string
         final String output = bytes.toString();
-       // System.out.println("output: [" + output + "]");
 
         // Deserialize the string back into obj3 and ensure it matches obj1 and obj2
         obj3.readMarshallable(wireType.apply(Bytes.from(output)));

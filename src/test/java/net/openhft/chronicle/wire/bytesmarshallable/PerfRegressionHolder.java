@@ -291,10 +291,6 @@ public class PerfRegressionHolder {
         ArrayStringFields(String... s) {
             super(s);
         }
- // UU 2340
- // 8U 3110
- // U8 3060
- // 88 3510
 
         // Read marshallable data from a byte sequence into String fields
         // using memory offsets for potentially enhanced performance.

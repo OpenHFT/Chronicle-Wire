@@ -28,7 +28,7 @@ public class JSONWireDTOTest extends WireTestCommon {
         Bytes<?> bytes = Bytes.allocateElasticDirect();
 
         // Instantiate JSONWire for serialization and deserialization.
-        JSONWire wire = new JSONWire(bytes);
+        final JSONWire wire = new JSONWire(bytes);
 
         // Create a test object.
         JSOuterClass dto = new JSOuterClass();

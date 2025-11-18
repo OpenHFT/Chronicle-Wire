@@ -75,7 +75,7 @@ public class MethodWriterClassNameGenerator {
                 sb.append(i.getEnclosingClass().getSimpleName());
             sb.append(i.getSimpleName());
         });
-        int endOfInterfacesIndex = sb.length();
+        final int endOfInterfacesIndex = sb.length();
         sb.append(genericEvent == null ? "" : genericEvent);
         sb.append(metaData ? "MetadataAware" : "");
         sb.append(intercepting ? "Intercepting" : "");

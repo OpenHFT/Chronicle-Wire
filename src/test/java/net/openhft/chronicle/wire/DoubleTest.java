@@ -32,9 +32,9 @@ public class DoubleTest extends WireTestCommon {
     }
 
     /**
-     * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/299 Fixed case where a serializable 'double' value sometimes has trailing zero
+     * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/299 Fixed case where a serialisable 'double' value sometimes has a trailing zero.
      */
-     // Test the serialization format of two double values without trailing zeros.
+    // Test the serialisation format of two double values without trailing zeros.
     @Test
     public void testParsingForTwoDoubles() {
         CLASS_ALIASES.addAlias(TwoDoubleDto.class);

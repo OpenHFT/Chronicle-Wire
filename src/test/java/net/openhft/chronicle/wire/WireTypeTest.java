@@ -81,12 +81,6 @@ public class WireTypeTest extends WireTestCommon {
                 "00000020 65 C5 63 6F 75 6E 74 01                          e·count·         \n";
         // Validate Binary-based WireType
         assertEquals(tm, WireType.BINARY.fromString(asBinary));
-
-/* NOT Supported
-        String asRaw = "00000000 10 54 65 73 74 4D 61 72  73 68 61 6C 6C 61 62 6C ·TestMar shallabl\n" +
-                "00000010 65 09 00 00 00 04 6E 61  6D 65 01 00 00 00       e·····na me····  \n";
-        assertEquals(tm, WireType.RAW.fromString(asRaw));
-*/
     }
 
     // Test WireType's ability to write and read from a file

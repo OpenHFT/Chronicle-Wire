@@ -45,7 +45,6 @@ public class JSONWireTest extends WireTestCommon {
 
         // Perform the copying operations
         json.copyTo(binary);
-//        System.out.println(binary.bytes().toHexString());
         binary.copyTo(json2);
 
         // Assertions to make sure the copying was successful
@@ -283,7 +282,6 @@ public class JSONWireTest extends WireTestCommon {
                     "}\n", lists1.toString());
             final String str = JSON.asString(lists1);
             testCopyToBinaryAndBack(str);
-//            testCopyToYAMLAndBack(str);
         } finally {
             // Release occupied memory
             wire.bytes().releaseLast();
@@ -391,12 +389,6 @@ public class JSONWireTest extends WireTestCommon {
 
         // A complex JSON string causing some parsing issues
         String str = "[320,{\"as\":[[\"32905.50000\",\"1.60291699\",\"1625822573.857656\"],[\"32905.60000\",\"0.10415889\",\"1625822573.194909\"]],\"bs\":[[\"32893.60000\",\"0.15042948\",\"1625822574.220475\"]]},\"book-10\"]";
-
-        // A simple version of JSON str for testing purposes (commented out)
-//        String str = "[1,{\"a\":[2,3]}]";
-
-        // A different simple JSON string that seems to work
-//        String str = "[1,2,3,\"c\"]";
 
         final Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer(); // Create an elastic byte buffer
         byteBufferBytes.append(str); // Append the JSON string to the byte buffer

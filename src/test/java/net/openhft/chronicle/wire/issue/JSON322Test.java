@@ -86,9 +86,6 @@ public class JSON322Test extends WireTestCommon {
 
         final Three parsedThree = (Three) parsed;
 
-/*        bytes.clear();
-        wire.getValueOut().object(parsed);*/
-
         assertEquals(One.class, parsedThree.one.getClass());
         assertEquals(Four.class, parsedThree.two.getClass());
         assertEquals(three, parsed);

@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.Assert.*;
 
@@ -75,7 +76,7 @@ public class QueryWireTest extends WireTestCommon {
         writer.write("flag").bool(true);
         writer.write("count").int64(42);
         writer.write("name").text("alpha beta");
-        writer.write("raw").rawBytes("tail".getBytes(java.nio.charset.StandardCharsets.ISO_8859_1));
+        writer.write("raw").rawBytes("tail".getBytes(ISO_8859_1));
         writer.write("payload").bytes(new byte[]{1, 2, 3});
 
         String query = bytes.toString();

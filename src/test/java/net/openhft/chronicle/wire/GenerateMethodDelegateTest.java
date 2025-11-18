@@ -135,9 +135,8 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
         void say(String text);
     }
 
+    // A combined interface that extends multiple standard Java interfaces
     @SuppressWarnings("rawtypes")
-    private
-            // A combined interface that extends multiple standard Java interfaces
-    interface RCSB extends Runnable, Consumer, Supplier, BiConsumer {
+    private interface RCSB extends Runnable, Consumer, Supplier, BiConsumer {
     }
 }
