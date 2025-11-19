@@ -8,9 +8,11 @@ Purpose: To provide a comprehensive user guide and reference for all standard an
 
 == Introduction
 
-Chronicle Wire leverages Java annotations to provide developers with fine-grained control over the serialisation and deserialisation process. Annotations offer a declarative way to customise data representation, optimise for performance or size, add metadata, and aid in schema evolution, often without needing to write complex custom marshalling logic.
+Chronicle Wire leverages Java annotations to provide developers with fine-grained control over the serialisation and deserialisation process.
+Annotations offer a declarative way to customise data representation, optimise for performance or size, add metadata, and aid in schema evolution, often without needing to write complex custom marshalling logic.
 
-This document serves as a comprehensive guide to the standard annotations provided by Chronicle Wire. For each annotation, it details:
+This document serves as a comprehensive guide to the standard annotations provided by Chronicle Wire.
+For each annotation, it details:
 
 * Its primary purpose and intended use case.
 * Where it can be applied (e.g., fields, types).
@@ -18,15 +20,19 @@ This document serves as a comprehensive guide to the standard annotations provid
 * Its specific behaviour and impact on different wire formats (text vs. binary).
 * Practical examples to illustrate its usage.
 
-Understanding these annotations is key to effectively tailoring Chronicle Wire to your specific application needs, whether for human readability, extreme performance, or robust data versioning. This guide aims to fulfil the requirements for such documentation by being that guide.
+Understanding these annotations is key to effectively tailoring Chronicle Wire to your specific application needs, whether for human readability, extreme performance, or robust data versioning.
+This guide aims to fulfil the requirements for such documentation by being that guide.
 
 == Core Annotation Categories
 
 Chronicle Wire annotations can be broadly categorised based on their primary function:
 
-* **Data Conversion & Formatting:** These annotations alter how a Java data type is represented on the wire, often to optimise for space, performance, or human readability in text formats.
-* **Schema Definition & Metadata:** These annotations provide metadata about fields or types, which can influence how data is structured, aid in schema evolution, or add descriptive information.
-* **Marshalling Control (Less Common for Direct Wire Annotations):** While direct field inclusion/exclusion is often handled by Java's `transient` keyword or the inherent behaviour of `Marshallable`, some annotations might subtly influence what or how data is marshalled.
+Data Conversion & Formatting ::
+These annotations alter how a Java data type is represented on the wire, often to optimise for space, performance, or human readability in text formats.
+Schema Definition & Metadata ::
+These annotations provide metadata about fields or types, which can influence how data is structured, aid in schema evolution, or add descriptive information.
+Marshalling Control (Less Common for Direct Wire Annotations) ::
+While direct field inclusion/exclusion is often handled by Java's `transient` keyword or the inherent behaviour of `Marshallable`, some annotations might subtly influence what or how data is marshalled.
 
 This guide will explore annotations primarily from the first two categories.
 
@@ -37,7 +43,8 @@ These annotations are crucial for controlling the on-wire representation of your
 === `@LongConversion` and Derivative Converters
 
 Purpose ::
-The `@LongConversion` annotation is a powerful meta-annotation used to specify that a `long` field in Java should be converted to and from a different representation (typically a String) when serialised to text-based wire formats, while remaining a `long` in binary formats. This is extremely useful for compactly storing short textual identifiers or codes within an 8-byte long.
+The `@LongConversion` annotation is a powerful meta-annotation used to specify that a `long` field in Java should be converted to and from a different representation (typically a String) when serialised to text-based wire formats, while remaining a `long` in binary formats.
+This is extremely useful for compactly storing short textual identifiers or codes within an 8-byte long.
 
 Target :: Field (of type `long`)
 
@@ -45,8 +52,12 @@ Attributes ::
 `value` (Class<? extends LongConverter>):: Specifies the `LongConverter` implementation class to use for the conversion.
 
 Behaviour ::
-* **Text Formats (YAML, JSON):** The `LongConverter`'s `asString(long)` method is called to produce a String representation for the output. During input, `parse(CharSequence)` is called to convert the String back to a `long`.
-* **Binary Formats:** The field is serialised directly as a standard `long` (typically 8 bytes). The conversion logic is not applied.
+Text Formats (YAML, JSON) ::
+The `LongConverter`'s `asString(long)` method is called to produce a String representation for the output.
+During input, `parse(CharSequence)` is called to convert the String back to a `long`.
+Binary Formats ::
+The field is serialised directly as a standard `long` (typically 8 bytes).
+The conversion logic is not applied.
 
 Use Case :: Storing short alphanumeric IDs, symbols, or codes (e.g., currency pairs, stock tickers, status codes) that can be mapped to a `long` for efficient storage and processing, but need to be human-readable in configurations or logs.
 
@@ -58,9 +69,12 @@ While `@LongConversion` is the base, Chronicle Wire provides several convenient 
 Annotations :: `@Base32`, `@Base64`, `@Base85` (these are meta-annotated with `@LongConversion` pointing to respective `BaseNLongConverter` implementations).
 
 Purpose :: To store short strings (composed of characters from the respective BaseN alphabet) within a `int`, up to 5 characters, or `long` upt o 10 characters.
-* `@Base32`: Uses a 32-character alphabet. Can store up to 12 characters in a `long`.
-* `@Base64`: Uses a 64-character alphabet (A-Z, a-z, 0-9, +, /). Can store up to 10 characters in a `long`.
-* `@Base85`: Uses an 85-character alphabet. Can store up to 10 (sometimes 11 depending on exact character values) characters more efficiently than Base64 for certain character sets.
+* `@Base32`: Uses a 32-character alphabet.
+Can store up to 12 characters in a `long`.
+* `@Base64`: Uses a 64-character alphabet (A-Z, a-z, 0-9, +, /).
+Can store up to 10 characters in a `long`.
+* `@Base85`: Uses an 85-character alphabet.
+Can store up to 10 (sometimes 11 depending on exact character values) characters more efficiently than Base64 for certain character sets.
 
 .Example (`@Base64`)
 [source,java]
@@ -98,20 +112,23 @@ public class StockInfo extends SelfDescribingMarshallable {
 
 Status :: Stable
 
-Purpose :: Provides a concise way to convert short strings (up to ten
-characters) to and from a  `int` up to 5 characters, or `long` up to 10 characters. using the `ShortTextLongConverter`.
+Purpose :: Provides a concise way to convert short strings (up to ten characters) to and from a  `int` up to 5 characters, or `long` up to 10 characters.
+using the `ShortTextLongConverter`.
 It is a specialised form of `@LongConversion` and internally relies on the same Base85-based encoding as `@Base85`.
 
 The difference between `@ShortText` and `@Base85` is that `@ShortText` truncates leading spaces and `@Base85` truncates leading zeros.
-e.g. `@ShortText` will convert "   123" to "123" and `@Base85` will convert "000123" to "123".
+e.g. `@ShortText` will convert " 123" to "123" and `@Base85` will convert "000123" to "123".
 
 Target :: Field (of type `long`)
 
 Behaviour ::
-* **Text Formats:** Values appear as Base 85 strings.
-* **Binary Formats:** Values are stored as eight-byte longs.
+Text Formats ::
+Values appear as Base 85 strings.
+Binary Formats ::
+Values are stored as eight-byte longs.
 
-Use Case :: Compact storage of short identifiers or codes while keeping them readable in YAML/JSON. It acts as a shorthand for
+Use Case :: Compact storage of short identifiers or codes while keeping them readable in YAML/JSON.
+It acts as a shorthand for
 `@LongConversion(ShortTextLongConverter.class)`.
 
 .Example (`@ShortText`)
@@ -134,8 +151,10 @@ Purpose :: To format `long` fields representing timestamps (nanoseconds or milli
 Target :: Field (of type `long`)
 
 Behaviour ::
-* **Text Formats (YAML, JSON):** Converts the `long` timestamp to an ISO 8601 string (e.g., `2023-10-27T10:15:30.123456789Z`).
-* **Binary Formats:** Stores the `long` value directly.
+Text Formats (YAML, JSON) ::
+Converts the `long` timestamp to an ISO 8601 string (e.g., `2023-10-27T10:15:30.123456789Z`).
+Binary Formats ::
+Stores the `long` value directly.
 
 Use Case :: Storing precise timestamps efficiently while allowing easy human inspection in logs or configuration files.
 
@@ -174,7 +193,8 @@ These annotations provide additional information about fields or types, primaril
 
 Status :: Road Map
 
-Purpose :: To assign a persistent, explicit numeric identifier to a field. This is primarily used in some binary wire formats (`BINARY`, `BINARY_LIGHT`) where fields might be identified by number instead of, or in addition to, their names.
+Purpose :: To assign a persistent, explicit numeric identifier to a field.
+This is primarily used in some binary wire formats (`BINARY`, `BINARY_LIGHT`) where fields might be identified by number instead of, or in addition to, their names.
 
 Target :: Field
 
@@ -182,12 +202,16 @@ Attributes ::
 `value` (int):: The unique numeric identifier for the field.
 
 Behaviour ::
-* **Binary Formats:** The specified field number is written to the wire instead of/alongside the field name. This allows the Java field name to be refactored (renamed) without breaking binary compatibility, as long as the `@FieldNumber` remains the same.
-* **Text Formats:** Generally has no direct effect on the output (field names are used).
+Binary Formats ::
+The specified field number is written to the wire instead of/alongside the field name.
+This allows the Java field name to be refactored (renamed) without breaking binary compatibility, as long as the `@FieldNumber` remains the same.
+Text Formats ::
+Generally has no direct effect on the output (field names are used).
 
 Use Case :: Ensuring long-term binary compatibility and allowing safe refactoring of field names in `Marshallable` classes when using number-based binary field identification.
 
 Example ::
+
 [source,java]
 ----
 import net.openhft.chronicle.wire.FieldNumber;
@@ -216,12 +240,15 @@ Attributes ::
 `value` (String):: The comment text.
 
 Behaviour ::
-* **YAML Format:** The comment is usually rendered preceding the field.
-* **JSON/Binary Formats:** This annotation is generally ignored.
+YAML Format ::
+The comment is usually rendered preceding the field.
+JSON/Binary Formats ::
+This annotation is generally ignored.
 
 Use Case :: Improving the readability and self-documentation of configuration files or data dumps generated in YAML format.
 
 Example ::
+
 [source,java]
 ----
 import net.openhft.chronicle.wire.Comment;
@@ -249,12 +276,19 @@ AppConfig {
 
 == Best Practices for Using Annotations
 
-* **Be Purposeful:** Use annotations where they add clear value, such as improving readability in text formats (`@Comment`, `@NanoTime`), optimising binary size/performance (`@LongConversion`, `@FieldNumber`), or ensuring schema stability (`@FieldNumber`).
-* **Understand Format Impact:** Be aware that some annotations only affect text formats (e.g., `@Comment`), while others primarily impact binary formats (e.g., `@FieldNumber`'s core use).
-* **Consistency:** Apply annotations consistently across related `Marshallable` classes for predictable behaviour.
-* **Test Thoroughly:** When using annotations that affect data representation or schema (like `@LongConversion` or `@FieldNumber`), thoroughly test both serialisation and deserialisation, especially across different versions of your classes if schema evolution is a concern.
-* **Consult Javadoc:** The Javadoc for each annotation is the ultimate source of truth for its specific attributes and behaviour in the version of Chronicle Wire you are using.
-* **Keep it Simple:** While powerful, avoid over-using annotations if simpler solutions suffice. The default behaviour of `SelfDescribingMarshallable` is often sufficient for many use cases.
+Be Purposeful ::
+Use annotations where they add clear value, such as improving readability in text formats (`@Comment`, `@NanoTime`), optimising binary size/performance (`@LongConversion`, `@FieldNumber`), or ensuring schema stability (`@FieldNumber`).
+Understand Format Impact ::
+Be aware that some annotations only affect text formats (e.g., `@Comment`), while others primarily impact binary formats (e.g., `@FieldNumber`'s core use).
+Consistency ::
+Apply annotations consistently across related `Marshallable` classes for predictable behaviour.
+Test Thoroughly ::
+When using annotations that affect data representation or schema (like `@LongConversion` or `@FieldNumber`), thoroughly test both serialisation and deserialisation, especially across different versions of your classes if schema evolution is a concern.
+Consult Javadoc ::
+The Javadoc for each annotation is the ultimate source of truth for its specific attributes and behaviour in the version of Chronicle Wire you are using.
+Keep it Simple ::
+While powerful, avoid over-using annotations if simpler solutions suffice.
+The default behaviour of `SelfDescribingMarshallable` is often sufficient for many use cases.
 
 This guide provides a solid foundation for understanding and utilising the annotations within Chronicle Wire to build efficient, flexible, and maintainable Java applications.
 

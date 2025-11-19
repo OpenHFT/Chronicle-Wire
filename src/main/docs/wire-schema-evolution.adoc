@@ -14,10 +14,12 @@ For systems that store data long-term or communicate across different service ve
 
 Chronicle Wire's approach to schema evolution is rooted in its flexible, format-agnostic design:
 
-* **Philosophy:** It generally favors flexibility, particularly with its self-describing formats (like YAML, JSON, and `BINARY_LIGHT`).
+Philosophy ::
+It generally favors flexibility, particularly with its self-describing formats (like YAML, JSON, and `BINARY_LIGHT`).
 These formats inherently carry metadata (field names or numbers) that allows for a degree of tolerance to schema changes.
 Conversely, highly optimised, non-self-describing formats like `FIELDLESS_BINARY` offer minimal to no schema evolution support by design, prioritising raw speed and compactness.
-* **No Central Schema Registry:** Unlike systems like Apache Avro or Google Protocol Buffers, Chronicle Wire does not typically rely on separately defined schema files (e.g., `.avsc` or `.proto`).
+No Central Schema Registry ::
+Unlike systems like Apache Avro or Google Protocol Buffers, Chronicle Wire does not typically rely on separately defined schema files (e.g., `.avsc` or `.proto`).
 The Java class definition (often a `Marshallable` object) itself serves as the primary schema definition.
 Evolution is managed by how these class definitions change and how the chosen `WireType` interprets those changes against existing serialised data.
 
@@ -61,9 +63,11 @@ This mapping is generally case-sensitive but can sometimes be influenced by inte
 
 `BINARY_LIGHT` / `BINARY` Formats ::
 * These formats can store either the full field name (more verbose, similar to text but in binary) or, more commonly for efficiency, a numeric field identifier.
-* **Field Numbers:** When field numbers are used (often via the `@FieldNumber` annotation), a compact representation of this number (e.g., stop-bit encoded for small numbers) is written to the wire preceding the field's data.
+Field Numbers ::
+When field numbers are used (often via the `@FieldNumber` annotation), a compact representation of this number (e.g., stop-bit encoded for small numbers) is written to the wire preceding the field's data.
 This numeric tag uniquely identifies the field.
-* **Field Names:** If full field names are used, they are typically written as length-prefixed UTF-8 strings.
+Field Names ::
+If full field names are used, they are typically written as length-prefixed UTF-8 strings.
 * Each field entry generally consists of this identifier (name or number), potentially some type information or length indication for the data itself, followed by the serialised field value.
 
 ifdef::env-github[[source,mermaid]
@@ -92,13 +96,15 @@ graph TD
 
 === Handling Unknown Fields (Forward Compatibility)
 
-*Forward compatibility* means that older code (a reader with an older schema version) can process data written by newer code (a writer with a newer schema version that includes additional fields).
+_Forward compatibility_ means that older code (a reader with an older schema version) can process data written by newer code (a writer with a newer schema version that includes additional fields).
 
 Mechanism ::
 * When a Chronicle Wire reader encounters a field name or field number in the input stream that does not exist in its current class definition, it will attempt to skip over that field's data.
-* **Skipping Data in Text Formats:** For YAML/JSON, this involves parsing past the unknown key and its entire associated value (which could be a simple scalar, a list, or a nested object).
+Skipping Data in Text Formats ::
+For YAML/JSON, this involves parsing past the unknown key and its entire associated value (which could be a simple scalar, a list, or a nested object).
 The parser understands the structure to know where the unknown field ends.
-* **Skipping Data in Binary Formats:** The `Wire` implementation must be able to determine the length of the unknown field's data to skip it.
+Skipping Data in Binary Formats ::
+The `Wire` implementation must be able to determine the length of the unknown field's data to skip it.
 This is often achieved because:
 ** The field's type might be encoded, implying a known fixed length (e.g., `int` is 4 bytes).
 ** Variable-length data (like strings, nested objects, or sequences) is typically length-prefixed.
@@ -110,7 +116,7 @@ Performance impact of skipping is generally minimal unless there are very many l
 
 === Handling Missing Fields (Backward Compatibility)
 
-*Backward compatibility* means that newer code (a reader with a newer schema version that expects more fields) can process data written by older code (a writer with an older schema version that omits some of these fields).
+_Backward compatibility_ means that newer code (a reader with a newer schema version that expects more fields) can process data written by older code (a writer with an older schema version that omits some of these fields).
 
 Primary Mechanism :: A default constructor is used.
 * When there is a default constructor for the Java class, a sample instance is created to define the default value for each field.
@@ -138,7 +144,7 @@ if (this.myList == null) {
 
 === Reordering Fields
 
-In self-describing formats (text or binary with field names/numbers), the physical order of fields in the serialised data stream generally does *not* need to match the declaration order in the Java class.
+In self-describing formats (text or binary with field names/numbers), the physical order of fields in the serialised data stream generally does _not_ need to match the declaration order in the Java class.
 Deserialisation maps fields based on their identified names or numbers.
 This provides flexibility in how data is written or how classes are refactored.
 
@@ -148,30 +154,30 @@ Changing the data type of an existing field is the most complex part of schema e
 Chronicle Wire provides limited automatic coercion.
 
 Scenarios and Wire Behaviour ::
-* **Widening Primitives (e.g., `int` in data, `long` in class):**
-** **Text Formats:** Often handled gracefully, as text "123" can be parsed into an `int` or a `long`.
-** **Binary Formats:** If the binary format stores the `int` as, say, 4 bytes, and the class expects a `long`, the `Wire` implementation *might* promote it (e.g., read 4 bytes, convert to long).
+Widening Primitives (e.g., `int` in data, `long` in class) ::
+* *Text Formats:* Often handled gracefully, as text "123" can be parsed into an `int` or a `long`.
+* *Binary Formats:* If the binary format stores the `int` as, say, 4 bytes, and the class expects a `long`, the `Wire` implementation _might_ promote it (e.g., read 4 bytes, convert to long).
 However, this depends on the specific `WireType` and its internal logic.
 It's safer to assume this needs testing.
-* **Narrowing Primitives (e.g., `long` in data, `int` in class):**
-** **Text Formats:** If the textual representation of the long value fits into an `int`, parsing might succeed.
+Narrowing Primitives (e.g., `long` in data, `int` in class) ::
+* *Text Formats:* If the textual representation of the long value fits into an `int`, parsing might succeed.
 If it's out of range for `int`, a `NumberFormatException` or similar parsing error is likely.
-** **Binary Formats:** Reading a `long` (8 bytes) into an `int` (4 bytes) field is problematic.
+* *Binary Formats:* Reading a `long` (8 bytes) into an `int` (4 bytes) field is problematic.
 Chronicle Wire will likely throw an error or read incorrect data, as it would attempt to read only 4 bytes for the `int` field, leaving the remaining 4 bytes of the long unread or misinterpreting them as the start of the next field.
 Data loss or corruption is highly probable without custom handling.
-* **Changing Numeric Type (e.g., `int` to `double`):**
-** **Text Formats:** "123" can be parsed as an `int` or `double`. `123.45` cannot be parsed as an `int`.
-** **Binary Formats:** `int` and `double` have different binary representations.
+Changing Numeric Type (e.g., `int` to `double`) ::
+* *Text Formats:* "123" can be parsed as an `int` or `double`. `123.45` cannot be parsed as an `int`.
+* *Binary Formats:* `int` and `double` have different binary representations.
 Automatic conversion is unlikely; this would typically lead to errors or misinterpretation.
-* **Changing To/From `String` (e.g., `int` in data, `String` in class):**
-** **Text Formats:** Reading a numeric literal like `123` into a `String` field is usually fine (`"123"`).
+Changing To/From `String` (e.g., `int` in data, `String` in class) ::
+* *Text Formats:* Reading a numeric literal like `123` into a `String` field is usually fine (`"123"`).
 Reading a string like `"abc"` into an `int` field will fail.
-** **Binary Formats:** No automatic conversion.
+* *Binary Formats:* No automatic conversion.
 The wire expects a binary representation of an `int` versus a binary representation of a string (e.g., length-prefixed UTF-8).
-* **Changing Complex Types (e.g., `OldType` to `NewType`, or `List<OldType>` to `List<NewType>`):**
-** Chronicle Wire will automatically convert between different custom `Marshallable` types, even if they are structurally different.
+Changing Complex Types (e.g., `OldType` to `NewType`, or `List<OldType>` to `List<NewType>`) ::
+* Chronicle Wire will automatically convert between different custom `Marshallable` types, even if they are structurally different.
 This can leave all fields as default if there are no matches.
-** Conversion from scalar to marshallable or vise versa is not automatic.
+* Conversion from scalar to marshallable or vise versa is not automatic.
 For example, reading a `String` into a `List<String>` field will not work without custom logic.
 
 Strategy :: When a field type must change, the safest approach is often to:
@@ -185,7 +191,8 @@ Strategy :: When a field type must change, the safest approach is often to:
 
 The `FIELDLESS_BINARY` `WireType` is designed for extreme performance and compactness by omitting all field names and numbers.
 
-* **Mechanism:** Data is written as a direct sequence of field values in the exact order they are declared in the `Marshallable` class.
+Mechanism ::
+Data is written as a direct sequence of field values in the exact order they are declared in the `Marshallable` class.
 +
 [source,java]
 ----
@@ -195,12 +202,15 @@ class MyFieldlessData extends SelfDescribingMarshallable {
     // Wire output is just: (binary int for fieldA)(binary long for fieldB)
 }
 ----
-* **Brittleness:** This format is *extremely* intolerant of schema changes:
-** **Order Matters:** Changing the order of fields in the class breaks deserialisation.
-** **Type Matters:** Changing a field's type (e.g., `int` to `long`) breaks deserialisation as the number of bytes read/written will mismatch.
-** **Count Matters:** Adding or removing fields breaks deserialisation.
-* **Consequences of Mismatch:** `BufferUnderflowException`, `BufferOverflowException`, reading garbage data, or application-level errors due to incorrect field values.
-* **Strategies for Versioning with `FIELDLESS_BINARY`:**
+
+Brittleness ::
+This format is _extremely_ intolerant of schema changes:
+* *Order Matters:* Changing the order of fields in the class breaks deserialisation.
+* *Type Matters:* Changing a field's type (e.g., `int` to `long`) breaks deserialisation as the number of bytes read/written will mismatch.
+* *Count Matters:* Adding or removing fields breaks deserialisation.
+Consequences of Mismatch ::
+`BufferUnderflowException`, `BufferOverflowException`, reading garbage data, or application-level errors due to incorrect field values.
+Strategies for Versioning with `FIELDLESS_BINARY` ::
 
 Explicit Version Field :: Include a version number as the very first field.
 The reader reads this version first and then uses different `Marshallable` class definitions or parsing logic based on this version.
@@ -227,33 +237,42 @@ Annotations provide metadata that Chronicle Wire uses to manage schema evolution
 
 Status :: Road Map
 
-* **Deep Dive:** When using `BINARY_LIGHT` or `BINARY` wire that supports numbered fields, this annotation assigns a persistent numeric ID to a Java field.
+Deep Dive ::
+When using `BINARY_LIGHT` or `BINARY` wire that supports numbered fields, this annotation assigns a persistent numeric ID to a Java field.
 The wire format will store this number instead of (or sometimes alongside) the textual field name.
-* **Mechanism:** During serialisation, the `WireMarshaller` looks for this annotation.
+Mechanism ::
+During serialisation, the `WireMarshaller` looks for this annotation.
 If present, it instructs the binary `Wire` implementation to write the specified number as the field tag.
 During deserialisation, the binary `Wire` reads the numeric tag and the `WireMarshaller` uses an internal map (numeric tag -> Java Field object) to find the corresponding field to populate.
-* **Benefit:** This decouples the on-wire field identifier from the Java field's textual name, allowing the Java field to be renamed without breaking binary compatibility.
+Benefit ::
+This decouples the on-wire field identifier from the Java field's textual name, allowing the Java field to be renamed without breaking binary compatibility.
 The numeric ID remains the contract.
-* **Requirement:** Field numbers must be unique within the scope of the class being serialised.
+Requirement ::
+Field numbers must be unique within the scope of the class being serialised.
 
 === `@DeprecatedWireKey(String[] oldKeys)` (and alternatives like `Wires.FIELD_RENAME_MAP`)
 
 Status :: Road Map
 
-* **Deep Dive:** This addresses field renaming primarily for *text-based* formats (YAML, JSON) or binary formats that store textual field names.
-* **Mechanism (Conceptual for `@DeprecatedWireKey`):** During deserialisation, if the `WireMarshaller` encounters a field name in the input stream that matches one of the `oldKeys` specified in an `@DeprecatedWireKey` annotation on a field, it will map the value to that annotated Java field (which now has a new name).
-* **`Wires.FIELD_RENAME_MAP`:** This static map provides a programmatic way to declare renames: `Wires.FIELD_RENAME_MAP.put(OldClassName.class.getName() + ".oldFieldName", "newFieldName");`.
+Deep Dive ::
+This addresses field renaming primarily for _text-based_ formats (YAML, JSON) or binary formats that store textual field names.
+Mechanism (Conceptual for `@DeprecatedWireKey`) ::
+During deserialisation, if the `WireMarshaller` encounters a field name in the input stream that matches one of the `oldKeys` specified in an `@DeprecatedWireKey` annotation on a field, it will map the value to that annotated Java field (which now has a new name).
+`Wires.FIELD_RENAME_MAP` ::
+This static map provides a programmatic way to declare renames: `Wires.FIELD_RENAME_MAP.put(OldClassName.class.getName() + ".oldFieldName", "newFieldName");`.
 The marshaller consults this map.
-* **Benefit:** Allows graceful renaming of fields in Java code while still being able to read older data that uses the previous field names.
-* **Note:** When writing, the *current* Java field name is typically used.
+Benefit ::
+Allows graceful renaming of fields in Java code while still being able to read older data that uses the previous field names.
+Note ::
+When writing, the _current_ Java field name is typically used.
 
 == Advanced Strategies and Implementation Considerations
 
 For complex schema migrations beyond simple field additions/removals or renames supported by annotations, more advanced strategies are required.
 
 Custom `readMarshallable` / `writeMarshallable` Implementations::
-** This is the most powerful way to handle complex schema changes.
-** **Reading Old Versions:** Inside `readMarshallable(WireIn wire)` of a newer class version, you can inspect the incoming wire for tell-tale signs of an older version (e.g., presence/absence of certain fields, an explicit version field).
+* This is the most powerful way to handle complex schema changes.
+* *Reading Old Versions:* Inside `readMarshallable(WireIn wire)` of a newer class version, you can inspect the incoming wire for tell-tale signs of an older version (e.g., presence/absence of certain fields, an explicit version field).
 Based on this, you can have conditional logic to read fields that existed in the old version and map/transform them to the new structure.
 +
 [source,java]
@@ -268,42 +287,42 @@ if (wire.read("anotherOldFieldToBeRemoved").isPresent()) {
      wire.getValueIn().skipValue(); // Skip it if it's no longer needed
 }
 ----
-** **Writing for Forward/Backward Compatibility:** When writing, you might choose to write data in a way that newer readers can fully utilise but older readers can still partially understand (by gracefully skipping new parts).
-Or, for a transition period, you might write *both* old and new representations of a changed field.
+* *Writing for Forward/Backward Compatibility:* When writing, you might choose to write data in a way that newer readers can fully utilise but older readers can still partially understand (by gracefully skipping new parts).
+Or, for a transition period, you might write _both_ old and new representations of a changed field.
 
 Explicit Version Field ::
-** A common robust strategy is to include an explicit `schemaVersion` integer field as the first field in every `Marshallable` object.
-** **Writing:** Always write the current schema version of the class.
-** **Reading:**
+* A common robust strategy is to include an explicit `schemaVersion` integer field as the first field in every `Marshallable` object.
+* *Writing:* Always write the current schema version of the class.
+* *Reading:*
 . Read the `schemaVersion` field first.
 . Based on this version, either:
-** Instantiate a specific `V1_Object.class`, `V2_Object.class`, etc. and deserialise into that.
-** Use a single class with conditional logic in `readMarshallable` that adapts to the `schemaVersion` found.
-** Use a factory or strategy pattern to delegate to different parsing logic.
-** This makes schema changes explicit and manageable.
+* Instantiate a specific `V1_Object.class`, `V2_Object.class`, etc. and deserialise into that.
+* Use a single class with conditional logic in `readMarshallable` that adapts to the `schemaVersion` found.
+* Use a factory or strategy pattern to delegate to different parsing logic.
+* This makes schema changes explicit and manageable.
 
 `WireParselet` (for Text Formats) ::
-** A `WireParselet` is a functional interface `(s, v) -> {}` where `s` is a `CharSequence` (the field name/key) and `v` is a `ValueIn`.
+* A `WireParselet` is a functional interface `(s, v) -> {}` where `s` is a `CharSequence` (the field name/key) and `v` is a `ValueIn`.
 You can provide a `WireParselet` to certain Wire methods (e.g., `wire.read().applyToMarshallable(parselet)`).
-** This allows for completely custom parsing logic for text-based formats.
+* This allows for completely custom parsing logic for text-based formats.
 You can inspect field names, skip fields, transform values, or build up your object graph manually.
 It's powerful for very complex transformations or when dealing with loosely structured text data.
 
 Offline Data Migration ::
-** For major, incompatible schema changes, especially with large existing datasets (e.g., in Chronicle Queue or Map), an offline migration process might be necessary.
-** This involves writing a dedicated utility that:
+* For major, incompatible schema changes, especially with large existing datasets (e.g., in Chronicle Queue or Map), an offline migration process might be necessary.
+* This involves writing a dedicated utility that:
 . Reads data using the old schema definition (`OldType.class`).
 . Transforms the `OldType` instances into `NewType` instances (applying necessary business logic).
 . Writes the `NewType` instances to a new data store (new queue, new map, or overwriting).
-** Chronicle Wire itself provides the tools for the reading (V1) and writing (V2) parts of this process.
+* Chronicle Wire itself provides the tools for the reading (V1) and writing (V2) parts of this process.
 
 Diagnostic Flags (e.g., `Wires.WARN_ON_UNUSED_NOTES`) ::
-** Setting flags like `Wires.WARN_ON_UNUSED_NOTES = true;` can cause Chronicle Wire to log warnings if it encounters fields in the input stream that are not consumed by the reader's class.
+* Setting flags like `Wires.WARN_ON_UNUSED_NOTES = true;` can cause Chronicle Wire to log warnings if it encounters fields in the input stream that are not consumed by the reader's class.
 This can help identify unexpected fields or schema discrepancies during development and testing.
 (Check specific flags and their current status in your Wire version).
 
 ClassAlias` and Evolution ::
-** When class names or packages are refactored, `Wires.CLASS_ALIASES.addAlias(NewClass.class, "OldSerializedName")` or `Wires.CLASS_ALIASES.addAlias(NewClass.class, OldClass.class.getName())` allows data serialised with the old class name (if the name was embedded, e.g., in YAML with type retention) to be deserialised into the new class.
+* When class names or packages are refactored, `Wires.CLASS_ALIASES.addAlias(NewClass.class, "OldSerializedName")` or `Wires.CLASS_ALIASES.addAlias(NewClass.class, OldClass.class.getName())` allows data serialised with the old class name (if the name was embedded, e.g., in YAML with type retention) to be deserialised into the new class.
 This decouples the on-wire type identifier from the physical Java class name.
 
 == Best Practices for Evolvable Schemas
@@ -320,7 +339,7 @@ Avoid Removing Fields if Possible :: If a field must be removed, ensure readers 
 Consider deprecating it first.
 
 Be Extremely Cautious with Type Changes :: Changing the fundamental type of a field (e.g., `int` to `String`, `String` to a complex type) usually requires custom migration logic or a new field strategy.
-Simple widening of primitives (e.g., `int` to `long`) *may* work but needs thorough testing with the specific `WireType`.
+Simple widening of primitives (e.g., `int` to `long`) _may_ work but needs thorough testing with the specific `WireType`.
 
 Consider Explicit Versioning :: For complex objects or critical data, embed a `schemaVersion` field within your `Marshallable` objects and use it to drive deserialisation logic.
 

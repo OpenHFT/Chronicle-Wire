@@ -7,12 +7,12 @@ Chronicle Software
 
 == Purpose
 
-This background note captures institutional knowledge about the OpenHFT ecosystem that Chronicle Wire
-depends on. It informs performance tuning, dependency management, and support policies.
+This background note captures institutional knowledge about the OpenHFT ecosystem that Chronicle Wire depends on.
+It informs performance tuning, dependency management, and support policies.
 
 == Dependency Baseline
 
-[cols="1,2,2", options="header"]
+[cols="1,2,2",options="header"]
 |===
 |Library |Notes |Tracking
 
@@ -39,16 +39,13 @@ release from the `ea` stream but keeps compatibility with the most recent GA.
 == Performance Notes
 
 * Chronicle Wire prefers G1 or ZGC for production when running on Java 17+.
-* Allocate direct memory via `-XX:MaxDirectMemorySize` to match Chronicle Queue retention;
-  undersizing this flag leads to forced recycling of buffers under load.
-* Use `-Djvm.compile.threshold=1000` or JIT profiles when benchmarking `MethodWriter` to reach
-  steady-state quickly.
+* Allocate direct memory via `-XX:MaxDirectMemorySize` to match Chronicle Queue retention; undersizing this flag leads to forced recycling of buffers under load.
+* Use `-Djvm.compile.threshold=1000` or JIT profiles when benchmarking `MethodWriter` to reach steady-state quickly.
 
 == Observability
 
 * Enable `-Dchronicle.wire.dumpOnError=true` during incident triage to print problematic documents.
-* Chronicle Services deployments typically send structured error events to Chronicle Telemetry;
-  Wire emits markers that this pipeline consumes.
+* Chronicle Services deployments typically send structured error events to Chronicle Telemetry; Wire emits markers that this pipeline consumes.
 
 == References
 

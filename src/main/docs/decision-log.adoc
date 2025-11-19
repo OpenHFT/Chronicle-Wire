@@ -8,7 +8,7 @@ Chronicle Software
 This log records architectural and process choices that affect Chronicle Wire.
 Entries follow the Chronicle-wide template and use Nine-Box identifiers.
 
-=== [DOC-001] Real-time Documentation Loop
+== [DOC-001] Real-time Documentation Loop
 
 Date :: 2024-05-01
 Context ::
@@ -16,12 +16,12 @@ Context ::
 * Chronicle introduced the expectation that docs, tests, and code move together.
 Decision Statement :: Adopt a real-time documentation workflow where any behavioural change updates the related `.adoc` file before merging.
 Alternatives Considered ::
-* Do nothing: Accept drift and rely on periodic clean-up. ::
-  ** Pros: No immediate effort.
-  ** Cons: Reviewers cannot trust docs; regressions slip through.
-* Batch documentation pushes during release hardening. ::
-  ** Pros: Potentially fewer doc merges.
-  ** Cons: High risk of missing knowledge; difficult cherry-picks.
+* Do nothing: Accept drift and rely on periodic clean-up.
+** Pros: No immediate effort.
+** Cons: Reviewers cannot trust docs; regressions slip through.
+* Batch documentation pushes during release hardening.
+** Pros: Potentially fewer doc merges.
+** Cons: High risk of missing knowledge; difficult cherry-picks.
 Rationale for Decision ::
 * Keeps requirements and runbooks trustworthy for both humans and AI agents.
 * Reduces rework because inconsistencies are caught early.
@@ -29,10 +29,10 @@ Impact & Consequences ::
 * Slightly longer individual PRs, but faster acceptance.
 * Enables tooling (`scripts/check-doc-includes.py`) to enforce completeness.
 Notes/Links ::
-** `project-requirements.adoc`
-** `ops-scenarios.adoc`
+* `project-requirements.adoc`
+* `ops-scenarios.adoc`
 
-=== [NF-O-002] Multi-JDK Verification Gates
+== [NF-O-002] Multi-JDK Verification Gates
 
 Date :: 2024-05-10
 Context ::
@@ -40,12 +40,14 @@ Context ::
 * CI already mirrors branches such as `develop-java8-ok`.
 Decision Statement :: Make `mvn -q clean verify` on JDK 8, 11, 17, and 21 a release gate.
 Alternatives Considered ::
-* Support only the latest two LTS releases. ::
-  ** Pros: Less CI cost.
-  ** Cons: Breaks downstream platforms still on Java 8.
-* Allow per-feature overrides. ::
-  ** Pros: Faster experimentation.
-  ** Cons: High risk of shipping regressions unnoticed.
+* Support only the latest two LTS releases.
+::
+** Pros: Less CI cost.
+** Cons: Breaks downstream platforms still on Java 8.
+* Allow per-feature overrides.
+::
+** Pros: Faster experimentation.
+** Cons: High risk of shipping regressions unnoticed.
 Rationale for Decision ::
 * Chronicles' clients adopt new JVMs at different speeds; regression risk outweighs CI cost.
 * Early detection prevents subtle `Unsafe` or module-related bugs.
@@ -53,10 +55,10 @@ Impact & Consequences ::
 * Developers must reproduce failures locally or via container images.
 * The release checklist now includes CI links for every JVM build.
 Notes/Links ::
-** `operational-requirements.adoc`
-** `functional-requirements.adoc`
+* `operational-requirements.adoc`
+* `functional-requirements.adoc`
 
-=== [FN-001] WireType Matrix and Marshallable Compatibility
+== [FN-001] WireType Matrix and Marshallable Compatibility
 
 Date :: 2024-11-14
 Context ::
@@ -64,12 +66,12 @@ Context ::
 * Downstream components such as Chronicle Queue, Chronicle Map, and Chronicle Services rely on being able to switch wire formats for debugging, configuration, or transport without changing application-level code.
 Decision Statement :: Treat `Marshallable` and `SelfDescribingMarshallable` as the canonical programming model and require each `WireType` implementation to preserve field names, ordering rules, and defaulting semantics when round-tripping data.
 Alternatives Considered ::
-* Per-format APIs (for example YAML-specific and binary-specific marshalling code). ::
-  ** Pros: Could be tuned for each format.
-  ** Cons: Fragments the API, increases maintenance, and makes cross-format testing difficult.
-* Restricting Chronicle Wire to a single preferred format (for example binary only). ::
-  ** Pros: Simpler surface area and fewer corner cases.
-  ** Cons: Reduces debuggability and flexibility; breaks existing YAML and JSON use cases.
+* Per-format APIs (for example YAML-specific and binary-specific marshalling code).
+** Pros: Could be tuned for each format.
+** Cons: Fragments the API, increases maintenance, and makes cross-format testing difficult.
+* Restricting Chronicle Wire to a single preferred format (for example binary only).
+** Pros: Simpler surface area and fewer corner cases.
+** Cons: Reduces debuggability and flexibility; breaks existing YAML and JSON use cases.
 Rationale for Decision ::
 * A single `Wire` API keeps application code independent of the representation while still allowing formats to evolve.
 * Using `Marshallable` as the canonical contract ensures testability and provides a clear place to enforce compatibility.
@@ -77,10 +79,10 @@ Impact & Consequences ::
 * All new formats and optimisations must be validated against the regression suites listed under `FN-001` in `functional-requirements.adoc`.
 * Documentation and examples should demonstrate swapping `WireType` without changing business logic.
 Notes/Links ::
-** `functional-requirements.adoc` (requirement `FN-001`)
-** `wire-architecture.adoc`
+* `functional-requirements.adoc` (requirement `FN-001`)
+* `wire-architecture.adoc`
 
-=== [FN-002] DocumentContext Boundaries and Streaming
+== [FN-002] DocumentContext Boundaries and Streaming
 
 Date :: 2024-11-14
 Context ::
@@ -88,12 +90,12 @@ Context ::
 * Consumers must be able to replay, skip, or roll back individual documents without corrupting surrounding state, and enforce single-writer and single-reader semantics.
 Decision Statement :: Treat `DocumentContext` as the standard envelope for multi-message streams, enforcing clear start and end boundaries and associating metadata with each document.
 Alternatives Considered ::
-* Implicit message boundaries based solely on `Bytes` positions. ::
-  ** Pros: Slightly simpler API for trivial use cases.
-  ** Cons: Error prone, makes replay and partial reads harder, and complicates integration with Chronicle Queue.
-* Per-format framing rules without a common abstraction. ::
-  ** Pros: Allows fine tuned formats.
-  ** Cons: Pushes complexity into user code and reduces portability between transports.
+* Implicit message boundaries based solely on `Bytes` positions.
+** Pros: Slightly simpler API for trivial use cases.
+** Cons: Error prone, makes replay and partial reads harder, and complicates integration with Chronicle Queue.
+* Per-format framing rules without a common abstraction.
+** Pros: Allows fine tuned formats.
+** Cons: Pushes complexity into user code and reduces portability between transports.
 Rationale for Decision ::
 * `DocumentContext` provides a uniform way to demarcate messages while still allowing underlying `Bytes` to be shared and reused.
 * Explicit boundaries make error handling and back-pressure strategies easier to document and test.
@@ -101,10 +103,10 @@ Impact & Consequences ::
 * Application code should wrap read and write operations in `try (DocumentContext dc = wire.writingDocument())` or `readingDocument()` blocks.
 * Tests listed under `FN-002` validate nested documents and ensure context metadata survives round trips.
 Notes/Links ::
-** `functional-requirements.adoc` (requirement `FN-002`)
-** `system-architecture.adoc`
+* `functional-requirements.adoc` (requirement `FN-002`)
+* `system-architecture.adoc`
 
-=== [NF-P-001] Bytecode-backed Method Writers
+== [NF-P-001] Bytecode-backed Method Writers
 
 Date :: 2024-11-14
 Context ::
@@ -112,12 +114,12 @@ Context ::
 * Reflection heavy proxies introduce garbage and can become a bottleneck in hot loops.
 Decision Statement :: Use bytecode generated method writers and readers as the primary mechanism for turning interfaces into wire messages, avoiding runtime reflection in steady state hot paths.
 Alternatives Considered ::
-* Pure reflection based proxies for method dispatch. ::
-  ** Pros: Simpler implementation with no explicit code generation step.
-  ** Cons: Higher allocation rate and slower dispatch under load.
-* Manually written adapters for each service interface. ::
-  ** Pros: Maximum control over encoding and performance.
-  ** Cons: High maintenance cost and increased chance of subtle bugs.
+* Pure reflection based proxies for method dispatch.
+** Pros: Simpler implementation with no explicit code generation step.
+** Cons: Higher allocation rate and slower dispatch under load.
+* Manually written adapters for each service interface.
+** Pros: Maximum control over encoding and performance.
+** Cons: High maintenance cost and increased chance of subtle bugs.
 Rationale for Decision ::
 * Bytecode backed proxies strike a balance between performance and maintainability and are supported by Chronicle code generation tooling.
 * Generated writers make it easier to attach interceptors and adapters without duplicating boilerplate.
@@ -125,10 +127,10 @@ Impact & Consequences ::
 * Interface design should favour simple, streaming friendly signatures that map cleanly to wire operations.
 * Performance regressions in method writer code paths should be treated as violations of `FN-004` in `functional-requirements.adoc`.
 Notes/Links ::
-** `functional-requirements.adoc` (requirement `FN-004`)
-** `system-architecture.adoc`
+* `functional-requirements.adoc` (requirement `FN-004`)
+* `system-architecture.adoc`
 
-=== [NF-O-001] Serialisation Error Diagnostics and Logging Defaults
+== [NF-O-001] Serialisation Error Diagnostics and Logging Defaults
 
 Date :: 2024-11-14
 Context ::
@@ -136,12 +138,12 @@ Context ::
 * The operational requirement `NF-O-001` mandates including the field name, type, and offset in error messages where possible.
 Decision Statement :: Provide rich exception messages and structured diagnostics for serialisation failures while keeping logging disabled by default and delegating logging policy to calling applications.
 Alternatives Considered ::
-* Enable verbose logging within Chronicle Wire by default. ::
-  ** Pros: Easier initial debugging.
-  ** Cons: Unacceptable overhead and log volume in production, especially in inner loops.
-* Provide only minimal error detail to avoid overhead. ::
-  ** Pros: Saves some CPU and reduces message size.
-  ** Cons: Makes issues difficult to diagnose, particularly with binary formats.
+* Enable verbose logging within Chronicle Wire by default.
+** Pros: Easier initial debugging.
+** Cons: Unacceptable overhead and log volume in production, especially in inner loops.
+* Provide only minimal error detail to avoid overhead.
+** Pros: Saves some CPU and reduces message size.
+** Cons: Makes issues difficult to diagnose, particularly with binary formats.
 Rationale for Decision ::
 * Exception construction is outside the hottest paths; including field names and offsets provides significant debugging value.
 * Allowing callers to decide when to enable logging keeps Chronicle Wire suitable for latency sensitive workloads.
@@ -149,5 +151,5 @@ Impact & Consequences ::
 * Developers should follow the patterns described in `wire-error-handling.adoc` when adding new exceptions or validation logic.
 * Regression tests for malformed input should assert on exception text where feasible, not just on the exception type.
 Notes/Links ::
-** `operational-requirements.adoc` (requirement `NF-O-001`)
-** `wire-error-handling.adoc`
+* `operational-requirements.adoc` (requirement `NF-O-001`)
+* `wire-error-handling.adoc`

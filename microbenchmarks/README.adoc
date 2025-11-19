@@ -11,7 +11,8 @@ The tests were run with -Xmx1g -XX:MaxInlineSize=400 on an isolated CPU on an i7
 
 These are latency test with the https://github.com/OpenHFT/Chronicle-Wire/tree/master/microbenchmarks/results[full Results Here]
 
-Something I found interesting is that while a typical time might be stable for a given run, you can get different results at different time. +
+Something I found interesting is that while a typical time might be stable for a given run, you can get different results at different time.
++
 For this reason I ran the tests with 10 forks.
 By looking at the high percentiles, we tend to pick up the results of the worst run.
 
@@ -138,17 +139,20 @@ Tests with &quot;*&quot; on Bytes mean this has been written to/read from direct
 === SBE (Simple Binary Encoding)
 
 SBE performs as well are BytesMarshallable.
-Even though it was slower in this test, the difference to too small to draw any conclusions. i.e. in a different use case, a different developer might find the difference reversed.
+Even though it was slower in this test, the difference to too small to draw any conclusions.
+i.e. in a different use case, a different developer might find the difference reversed.
 
 However, I didn't find SBE simple.
-Perhaps this is because I didn't use the generation for different languages, but I found it was non-trivial to use and setup. +
+Perhaps this is because I didn't use the generation for different languages, but I found it was non-trivial to use and setup.
++
 For a flat class with just six fields it generated 9 classes, we have three support classes, and I ended up adding methods to the generated class to get it to perform as efficiently as I wanted.
 This is likely to be a lack of understanding on my part, though I might not be alone in this.
 
 === Snake YAML
 
 Snake YAML is a fully featured YAML 1.1 parser.
-The library has to do much more work to support all the features of the YAML standard which necessarily takes longer. +
+The library has to do much more work to support all the features of the YAML standard which necessarily takes longer.
++
 However, it takes a lot longer which means it may not be suitable if you need performance but you don't need a complete YAML parser.
 
 If you need to decode YAML which could come from any sources, Snake YAML is a better choice.
@@ -162,7 +166,8 @@ The UTF-8 encoded and 8-bit encoded tests look the same in these cases as there 
 
 The main advantage of YAML based wire format is it is easier to implement with, document and debug.
 
-What you want is the ease of a text wire format but the speed of a binary wire format. +
+What you want is the ease of a text wire format but the speed of a binary wire format.
++
 Being able to switch from one to the other can save you a lot of time in development and support, but still give you the speed you want.
 
 This uses 91 bytes, Note: the "— !!data" is added by the method to dump the data.
@@ -213,7 +218,8 @@ longInt: 1234567890
 
 === Binary Wire with fixed width fields.
 
-Fixed width fields support binding to values later and updating them atomically. +
+Fixed width fields support binding to values later and updating them atomically.
++
 Note: if you want to bind to specific values, there is support for this which will also ensure the values are aligned.
 
 This format uses 84 bytes
@@ -316,7 +322,8 @@ Test bytesMarshallable used 28 bytes.
 
 === SnakeYAML
 
-Snake YAML used the .0 on the end of the price to signify that it was a double. +
+Snake YAML used the .0 on the end of the price to signify that it was a double.
++
 This added two characters but is an elegant way of encoding that it should be a double.
 
 [source,yaml]
@@ -374,7 +381,8 @@ Test sbe used 43 chars.
 
 === Externalizable
 
-While Externalizable is more efficient than Serializable, it is still a heavy weight serialization. +
+While Externalizable is more efficient than Serializable, it is still a heavy weight serialization.
++
 Where Java Serialization does well is in serializing Object Graphs instead of Object Tree, i.e. objects with circular references.
 
 Test externalizable used 293 chars.

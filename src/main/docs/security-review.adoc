@@ -21,7 +21,8 @@ This security review focuses on:
 
 == Introduction
 
-This document provides an overview of known security considerations and deliberate trade-offs made within the Chronicle Wire library. Chronicle libraries prioritize very low-latency and high-throughput performance, which sometimes necessitates design choices that diverge from typical enterprise software where safety and security checks might take precedence over raw speed.
+This document provides an overview of known security considerations and deliberate trade-offs made within the Chronicle Wire library.
+Chronicle libraries prioritize very low-latency and high-throughput performance, which sometimes necessitates design choices that diverge from typical enterprise software where safety and security checks might take precedence over raw speed.
 
 The purpose of this document is to:
 
@@ -146,7 +147,8 @@ Why ::
 Useful for debugging and tracing configuration issues.
 
 Risks ::
-* `AbstractMarshallableCfg.unexpectedField` logs ignored values via `valueIn.objectBestEffort()`. Malicious inputs could appear in logs.
+* `AbstractMarshallableCfg.unexpectedField` logs ignored values via `valueIn.objectBestEffort()`.
+Malicious inputs could appear in logs.
 * `VanillaMethodReader.logMessage0` prints message payloads when `DEBUG_ENABLED` is true.
 * `YamlLogging` flags may expose sensitive data if enabled in production.
 * Unchecked input that is then logged compounds the issue.

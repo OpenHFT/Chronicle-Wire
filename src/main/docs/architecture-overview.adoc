@@ -7,33 +7,23 @@ Chronicle Software
 :source-highlighter: rouge
 
 This document combines and supersedes the earlier `wire-architecture.adoc` and
-`system-architecture.adoc` views for Chronicle Wire. It positions Chronicle Wire
-within the wider OpenHFT stack, describes its core abstractions and layers, and
-explains how data flows through the system in typical deployments.
+`system-architecture.adoc` views for Chronicle Wire.
+It positions Chronicle Wire within the wider OpenHFT stack, describes its core abstractions and layers, and explains how data flows through the system in typical deployments.
 
 == Introduction
 
-Chronicle Wire is a high performance, low latency serialisation and
-deserialisation library that sits near the base of the OpenHFT stack. It
-provides a format agnostic `Wire` API over Chronicle Bytes, allowing the same
-domain code to read and write YAML, JSON, CSV and several binary formats
-without changing application logic.
+Chronicle Wire is a high performance, low latency serialisation and deserialisation library that sits near the base of the OpenHFT stack.
+It provides a format agnostic `Wire` API over Chronicle Bytes, allowing the same domain code to read and write YAML, JSON, CSV and several binary formats without changing application logic.
 
-Chronicle Wire is used heavily by Chronicle Queue, Chronicle Map, Chronicle
-Network and Chronicle Services. In these systems it is responsible for turning
-strongly typed Java objects and service interfaces into bytes that can be stored
-off heap, persisted to disk, replicated, or sent over the network.
+Chronicle Wire is used heavily by Chronicle Queue, Chronicle Map, Chronicle Network and Chronicle Services.
+In these systems it is responsible for turning strongly typed Java objects and service interfaces into bytes that can be stored off heap, persisted to disk, replicated, or sent over the network.
 
 The main architectural goals are:
 
-* Performance - achieve extremely low latency and high throughput for data
-  serialisation and deserialisation while keeping CPU and GC overhead minimal.
-* Flexibility - support multiple text and binary formats behind a unified API so
-  callers can switch representation without large refactors.
-* Extensibility - make it straightforward to add new wire formats, converters
-  and marshalling strategies.
-* Schema evolution - allow data structures to evolve over time without breaking
-  consumers, especially when text and binary formats are mixed.
+* Performance - achieve extremely low latency and high throughput for data serialisation and deserialisation while keeping CPU and GC overhead minimal.
+* Flexibility - support multiple text and binary formats behind a unified API so callers can switch representation without large refactors.
+* Extensibility - make it straightforward to add new wire formats, converters and marshalling strategies.
+* Schema evolution - allow data structures to evolve over time without breaking consumers, especially when text and binary formats are mixed.
 
 == System Context and Component Map
 
@@ -45,17 +35,13 @@ Application Services -> Wire API -> WireType Implementations -> Chronicle Bytes 
                                |-> Converters / Marshallers  -> Domain Objects
 ----
 
-* Application services use Wire to read and write domain objects without being
-  tied to a particular serialisation format.
+* Application services use Wire to read and write domain objects without being tied to a particular serialisation format.
 * The Wire API layer provides `Wire`, `WireIn`, `WireOut`, `DocumentContext`,
-  `ValueIn` and `ValueOut` plus interfaces such as `Marshallable` and
-  `BytesMarshallable`.
-* WireType implementations (for example text, YAML, JSON, binary) turn API
-  calls into a sequence of bytes in a specific format and back again.
-* Chronicle Bytes offers the underlying on heap and off heap byte stores and the
-  cursor based `Bytes` views used by all Wire implementations.
-* Storage or network layers such as Chronicle Queue and Chronicle Network move
-  those bytes between processes, files and machines.
+`ValueIn` and `ValueOut` plus interfaces such as `Marshallable` and
+`BytesMarshallable`.
+* WireType implementations (for example text, YAML, JSON, binary) turn API calls into a sequence of bytes in a specific format and back again.
+* Chronicle Bytes offers the underlying on heap and off heap byte stores and the cursor based `Bytes` views used by all Wire implementations.
+* Storage or network layers such as Chronicle Queue and Chronicle Network move those bytes between processes, files and machines.
 
 Within the broader OpenHFT ecosystem the relationships can be viewed as:
 
@@ -76,8 +62,7 @@ graph TD
     end
 ----
 
-Chronicle Wire is therefore both a standalone library and a shared dependency
-that strongly influences the performance and behaviour of the higher layers.
+Chronicle Wire is therefore both a standalone library and a shared dependency that strongly influences the performance and behaviour of the higher layers.
 
 == Design Principles
 
@@ -85,51 +70,41 @@ Several core principles guide the implementation of Chronicle Wire.
 
 === Low Garbage and Direct Memory
 
-* Off heap and direct memory access via Chronicle Bytes is preferred for hot
-  paths to minimise pressure on the JVM garbage collector.
-* Objects that participate in serialisation are designed for reuse. Many
-  `Marshallable` types expose `reset` or similar methods so instances can be
-  recycled between messages.
-* Where appropriate Chronicle Wire uses Unsafe and low level memory operations
-  (through Chronicle Bytes) to reduce bounds checking and copying overhead,
-  subject to the mitigations described in `security-review.adoc`.
+* Off heap and direct memory access via Chronicle Bytes is preferred for hot paths to minimise pressure on the JVM garbage collector.
+* Objects that participate in serialisation are designed for reuse.
+Many
+`Marshallable` types expose `reset` or similar methods so instances can be recycled between messages.
+* Where appropriate Chronicle Wire uses Unsafe and low level memory operations (through Chronicle Bytes) to reduce bounds checking and copying overhead, subject to the mitigations described in `security-review.adoc`.
 
 === Format Agnostic API
 
 * Application code interacts with a single `Wire` API plus `WireIn` and
-  `WireOut` interfaces.
-* The `WireType` enumeration selects the concrete implementation to use for a
-  given `Bytes` instance. Changing the format is normally a matter of picking a
-  different `WireType` without touching domain logic.
-* Both self describing formats (with field names or identifiers) and compact
-  non self describing formats are supported to allow different trade offs
-  between debuggability and size.
+`WireOut` interfaces.
+* The `WireType` enumeration selects the concrete implementation to use for a given `Bytes` instance.
+Changing the format is normally a matter of picking a different `WireType` without touching domain logic.
+* Both self describing formats (with field names or identifiers) and compact non self describing formats are supported to allow different trade offs between debuggability and size.
 
 === Streaming and Framed Documents
 
-* Reading and writing typically happen in a streaming fashion rather than by
-  materialising whole documents up front.
-* `DocumentContext` provides an explicit envelope for a single message or
-  document, which supports replay, skipping and rollback when reading a stream
-  of messages.
-* The same abstractions are used whether data is coming from a queue file, a
-  memory mapped region, a socket, or an in memory buffer.
+* Reading and writing typically happen in a streaming fashion rather than by materialising whole documents up front.
+* `DocumentContext` provides an explicit envelope for a single message or document, which supports replay, skipping and rollback when reading a stream of messages.
+* The same abstractions are used whether data is coming from a queue file, a memory mapped region, a socket, or an in memory buffer.
 
 === Schema Evolution Friendly
 
-* Self describing textual and binary formats can carry field names and type
-  metadata so that new fields can be added without breaking older readers.
-* Numeric field identifiers (via annotations such as `@FieldNumber`) allow
-  binary schemas to evolve while keeping a stable numeric tag.
-* Converters (for example `LongConverter` based ones) can present compact
-  internal representations while still emitting readable forms in text.
+* Self describing textual and binary formats can carry field names and type metadata so that new fields can be added without breaking older readers.
+* Numeric field identifiers (via annotations such as `@FieldNumber`) allow binary schemas to evolve while keeping a stable numeric tag.
+* Converters (for example `LongConverter` based ones) can present compact internal representations while still emitting readable forms in text.
 
 == Layered Architecture
 
 Chronicle Wire's internal architecture can be understood as a set of layers.
 
-ifdef::env-github[[source,mermaid]]
-ifndef::env-github[[mermaid]]
+ifdef::env-github[[source,mermaid]
+]
+ifndef::env-github[[mermaid]
+]
+
 ----
 graph TD
     A[Application Code] -->|Interacts via| B[Wire API Layer]
@@ -154,77 +129,55 @@ graph TD
 
 * Contains the caller's business logic and domain objects.
 * Domain objects are often Plain Old Java Objects that implement the
-  `Marshallable` interface or extend `SelfDescribingMarshallable`.
-* Service interfaces can be exposed to Wire via the method writer and method
-  reader infrastructure.
+`Marshallable` interface or extend `SelfDescribingMarshallable`.
+* Service interfaces can be exposed to Wire via the method writer and method reader infrastructure.
 
 === Wire API Layer
 
 The main abstractions are:
 
-* `Wire` - the central interface that combines `WireIn` and `WireOut`. It
-  provides access to `ValueIn` and `ValueOut` for reading and writing fields and
-  nested documents.
-* `WireIn` and `WireOut` - lower level interfaces for reading and writing
-  primitive types, strings, sequences and maps in a format neutral way.
-* `ValueIn` and `ValueOut` - fluent entry points used by `Marshallable` objects
-  to pull or push values, including nested marshallable structures.
-* `DocumentContext` - frames a single document or message in a stream so that a
-  sequence of messages can be processed safely and independently.
-* `Marshallable` and `SelfDescribingMarshallable` - higher level interfaces and
-  base classes used by DTOs that want Wire to serialise and deserialise their
-  fields automatically.
-* `BytesMarshallable` - a lower level interface for types that want to control
-  their exact byte layout by reading and writing directly against `Bytes`.
-* `WireType` - an enumeration that chooses the concrete `Wire` implementation
-  for a given `Bytes` instance. It also captures format specific configuration.
+* `Wire` - the central interface that combines `WireIn` and `WireOut`.
+It provides access to `ValueIn` and `ValueOut` for reading and writing fields and nested documents.
+* `WireIn` and `WireOut` - lower level interfaces for reading and writing primitive types, strings, sequences and maps in a format neutral way.
+* `ValueIn` and `ValueOut` - fluent entry points used by `Marshallable` objects to pull or push values, including nested marshallable structures.
+* `DocumentContext` - frames a single document or message in a stream so that a sequence of messages can be processed safely and independently.
+* `Marshallable` and `SelfDescribingMarshallable` - higher level interfaces and base classes used by DTOs that want Wire to serialise and deserialise their fields automatically.
+* `BytesMarshallable` - a lower level interface for types that want to control their exact byte layout by reading and writing directly against `Bytes`.
+* `WireType` - an enumeration that chooses the concrete `Wire` implementation for a given `Bytes` instance.
+It also captures format specific configuration.
 
 === Wire Format Implementation Layer
 
-Each supported `WireType` has a corresponding implementation that knows how to
-encode and decode the API operations into bytes.
+Each supported `WireType` has a corresponding implementation that knows how to encode and decode the API operations into bytes.
 
-* Textual formats such as YAML, JSON, CSV and plain text are used for
-  human readable configuration, debugging, and integration with other systems.
-* Binary formats such as `BINARY`, `BINARY_LIGHT` and `FIELDLESS_BINARY` provide
-  compact, high performance encodings for latency sensitive use cases.
-* `RAW` formats target bytes level marshalling for `BytesMarshallable` types and
-  other specialised scenarios.
-* The special `READ_ANY` type attempts to detect and read any supported format,
-  which is useful for tools and generic consumers.
+* Textual formats such as YAML, JSON, CSV and plain text are used for human readable configuration, debugging, and integration with other systems.
+* Binary formats such as `BINARY`, `BINARY_LIGHT` and `FIELDLESS_BINARY` provide compact, high performance encodings for latency sensitive use cases.
+* `RAW` formats target bytes level marshalling for `BytesMarshallable` types and other specialised scenarios.
+* The special `READ_ANY` type attempts to detect and read any supported format, which is useful for tools and generic consumers.
 
-These implementations share common conventions about field naming, ordering and
-defaulting so that `Marshallable` objects can be round tripped between formats
-without changing semantics.
+These implementations share common conventions about field naming, ordering and defaulting so that `Marshallable` objects can be round tripped between formats without changing semantics.
 
 === Chronicle Bytes Layer
 
 Chronicle Bytes supplies the general purpose `Bytes` and `BytesStore`
 abstractions that Wire builds upon.
 
-* `BytesStore` represents the underlying storage region, which may be on heap,
-  native off heap or memory mapped file.
+* `BytesStore` represents the underlying storage region, which may be on heap, native off heap or memory mapped file.
 * `Bytes` exposes cursor based reading and writing operations over a
-  `BytesStore`. Wire implementations treat `Bytes` as their primary input and
-  output surface.
-* Reference counting and explicit `close` semantics are used to control the
-  lifecycle of off heap resources and mappings.
+`BytesStore`.
+Wire implementations treat `Bytes` as their primary input and output surface.
+* Reference counting and explicit `close` semantics are used to control the lifecycle of off heap resources and mappings.
 
-Wire relies on Chronicle Bytes for efficient primitive access, elastic buffer
-growth, and zero copy views over backing storage.
+Wire relies on Chronicle Bytes for efficient primitive access, elastic buffer growth, and zero copy views over backing storage.
 
 === Storage and Transport Layer
 
 This layer is usually provided by other OpenHFT components:
 
-* Chronicle Queue uses Wire to serialise messages into queue excerpts stored in
-  memory mapped files.
-* Chronicle Map uses Wire to serialise keys and values that live in its off heap
-  data structures.
-* Chronicle Network can use Wire to marshal payloads over TCP or other network
-  transports.
-* Chronicle Services use Wire as the event serialisation mechanism for
-  service to service protocols.
+* Chronicle Queue uses Wire to serialise messages into queue excerpts stored in memory mapped files.
+* Chronicle Map uses Wire to serialise keys and values that live in its off heap data structures.
+* Chronicle Network can use Wire to marshal payloads over TCP or other network transports.
+* Chronicle Services use Wire as the event serialisation mechanism for service to service protocols.
 
 Wire itself does not open sockets or files; it simply operates on the `Bytes`
 given to it by these higher layers.
@@ -233,46 +186,32 @@ given to it by these higher layers.
 
 The typical lifecycle for a message written with Chronicle Wire is:
 
-1. The caller acquires a `DocumentContext` for writing, usually via a method
-   such as `wire.acquireWritingDocument`.
-2. Within the `DocumentContext`, the caller writes fields using `ValueOut` calls
-   or by delegating to a `Marshallable` object.
-3. The `DocumentContext` is closed, which publishes the document and advances
-   the underlying `Bytes` write position.
-4. A consumer obtains a view of the same bytes, wraps it in a `Wire` of the
-   appropriate `WireType`, and acquires a `DocumentContext` for reading.
-5. The consumer reads fields using `ValueIn` or calls into a `Marshallable` to
-   reconstruct the DTO or event.
+. The caller acquires a `DocumentContext` for writing, usually via a method such as `wire.acquireWritingDocument`.
+. Within the `DocumentContext`, the caller writes fields using `ValueOut` calls or by delegating to a `Marshallable` object.
+. The `DocumentContext` is closed, which publishes the document and advances the underlying `Bytes` write position.
+. A consumer obtains a view of the same bytes, wraps it in a `Wire` of the appropriate `WireType`, and acquires a `DocumentContext` for reading.
+. The consumer reads fields using `ValueIn` or calls into a `Marshallable` to reconstruct the DTO or event.
 
 Method writers and readers provide a higher level variant of this flow:
 
-* A method writer proxies a service interface and turns method calls into wire
-  messages.
-* A method reader reads messages from a `Wire` and invokes the corresponding
-  methods on a target implementation.
+* A method writer proxies a service interface and turns method calls into wire messages.
+* A method reader reads messages from a `Wire` and invokes the corresponding methods on a target implementation.
 
-This pattern allows application code to remain interface based while relying on
-Wire for the underlying serialisation work.
+This pattern allows application code to remain interface based while relying on Wire for the underlying serialisation work.
 
 == Schema Evolution Overview
 
 Chronicle Wire supports a range of approaches to schema evolution.
 
-* Adding fields - new fields added to a `Marshallable` class are written by new
-  writers. Older readers simply ignore unknown fields in self describing
-  formats.
-* Removing fields - when fields are removed they are no longer written by new
-  code. Older readers expecting those fields see default or null values when
-  reading data written by newer code.
-* Reordering fields - in text formats and binary formats with field names the
-  order of fields is generally not significant.
-* Numeric field identifiers - `@FieldNumber` can be used to assign stable
-  numeric identifiers in binary formats so that fields can be renamed in code
-  without changing the on wire representation.
+* Adding fields - new fields added to a `Marshallable` class are written by new writers.
+Older readers simply ignore unknown fields in self describing formats.
+* Removing fields - when fields are removed they are no longer written by new code.
+Older readers expecting those fields see default or null values when reading data written by newer code.
+* Reordering fields - in text formats and binary formats with field names the order of fields is generally not significant.
+* Numeric field identifiers - `@FieldNumber` can be used to assign stable numeric identifiers in binary formats so that fields can be renamed in code without changing the on wire representation.
 
-Fieldless binary formats are more sensitive to schema changes, because both
-ends must agree on the exact order and type of fields. They are typically
-reserved for internal, tightly controlled schemas.
+Fieldless binary formats are more sensitive to schema changes, because both ends must agree on the exact order and type of fields.
+They are typically reserved for internal, tightly controlled schemas.
 
 For detailed rules and examples see `wire-schema-evolution.adoc`.
 
@@ -280,102 +219,71 @@ For detailed rules and examples see `wire-schema-evolution.adoc`.
 
 Several aspects of the design contribute to Chronicle Wire's performance:
 
-* Chronicle Bytes minimises copying and garbage creation by using off heap
-  storage and direct memory access where appropriate.
-* Specialised `Wire` implementations are tuned for each format, for example
-  using stop bit encoding for integers in binary formats to reduce size.
-* Generated method writers avoid runtime reflection in hot loops by using
-  bytecode generation.
-* Object reuse is encouraged for `DocumentContext`, marshallable DTOs and other
-  helper objects to avoid repeated allocation.
-* Abstraction layers are kept shallow; the public API is clean but the hot
-  path between a method call and bytes on the wire is short.
+* Chronicle Bytes minimises copying and garbage creation by using off heap storage and direct memory access where appropriate.
+* Specialised `Wire` implementations are tuned for each format, for example using stop bit encoding for integers in binary formats to reduce size.
+* Generated method writers avoid runtime reflection in hot loops by using bytecode generation.
+* Object reuse is encouraged for `DocumentContext`, marshallable DTOs and other helper objects to avoid repeated allocation.
+* Abstraction layers are kept shallow; the public API is clean but the hot path between a method call and bytes on the wire is short.
 
-When integrating Chronicle Wire into an application, performance should be
-evaluated end to end, including queue or network behaviour, JVM tuning and GC
-configuration.
+When integrating Chronicle Wire into an application, performance should be evaluated end to end, including queue or network behaviour, JVM tuning and GC configuration.
 
 == Cross Cutting and Operational Concerns
 
-Chronicle Wire's architecture interacts with several cross cutting concerns
-that are important for production deployments.
+Chronicle Wire's architecture interacts with several cross cutting concerns that are important for production deployments.
 
 === Threading and Concurrency
 
 * The single writer principle applies to many usage patterns: a given
-  `DocumentContext` should only be mutated by one thread at a time.
-* Shared `Bytes` and `BytesStore` instances rely on Chronicle Bytes sequencing
-  and compare and swap operations for correctness.
-* Thread local caches may be used to reduce allocation in hot paths; care must
-  be taken to avoid leaking sensitive data between tenants when threads are
-  pooled.
+`DocumentContext` should only be mutated by one thread at a time.
+* Shared `Bytes` and `BytesStore` instances rely on Chronicle Bytes sequencing and compare and swap operations for correctness.
+* Thread local caches may be used to reduce allocation in hot paths; care must be taken to avoid leaking sensitive data between tenants when threads are pooled.
 
 === Error Handling and Diagnostics
 
 * Error handling patterns and expected exception shapes are documented in
-  `wire-error-handling.adoc`.
+`wire-error-handling.adoc`.
 * Operational responses to failure scenarios are covered in
-  `ops-scenarios.adoc` and the runtime health runbook.
-* Exceptions should include as much context as is practical, such as field name
-  and offset, while keeping logging disabled by default in latency sensitive
-  environments.
+`ops-scenarios.adoc` and the runtime health runbook.
+* Exceptions should include as much context as is practical, such as field name and offset, while keeping logging disabled by default in latency sensitive environments.
 
 === Security and Validation
 
-Chronicle Wire deliberately keeps many hot paths lean to minimise latency, so
-input validation is often expected to happen at system boundaries.
+Chronicle Wire deliberately keeps many hot paths lean to minimise latency, so input validation is often expected to happen at system boundaries.
 
-* `security-review.adoc` documents known trade offs around validation, Unsafe
-  usage, dynamic typing and configuration expansion.
-* Callers are encouraged to enforce maximum message sizes, validate inputs at
-  network or API boundaries, and treat dynamic type tags carefully.
-* Logging controls such as `YamlLogging` should be used sparingly in production
-  to avoid leaking sensitive data.
+* `security-review.adoc` documents known trade offs around validation, Unsafe usage, dynamic typing and configuration expansion.
+* Callers are encouraged to enforce maximum message sizes, validate inputs at network or API boundaries, and treat dynamic type tags carefully.
+* Logging controls such as `YamlLogging` should be used sparingly in production to avoid leaking sensitive data.
 
 === Documentation and Traceability
 
 * Requirements are captured in `project-requirements.adoc`,
-  `functional-requirements.adoc`, `data-requirements.adoc` and
-  `operational-requirements.adoc`.
-* Architectural and process decisions are recorded in `decision-log.adoc` with
-  traceability to requirements and tests.
-* Real time documentation practices are encouraged so that architecture,
-  requirements, code and tests evolve together.
+`functional-requirements.adoc`, `data-requirements.adoc` and
+`operational-requirements.adoc`.
+* Architectural and process decisions are recorded in `decision-log.adoc` with traceability to requirements and tests.
+* Real time documentation practices are encouraged so that architecture, requirements, code and tests evolve together.
 
 == Trade-offs and Alternatives
 
-Chronicle Wire makes a number of explicit trade offs to meet its latency and
-throughput goals.
+Chronicle Wire makes a number of explicit trade offs to meet its latency and throughput goals.
 
-* **Minimal validation on hot paths** - many low level operations assume that
-  inputs have already been validated at the perimeter. This keeps the inner
-  loops simple and fast, but pushes more responsibility onto callers and higher
-  level modules to enforce size limits and reject malformed data.
-* **Off heap and Unsafe usage** - Wire relies on Chronicle Bytes for off heap
-  storage and, where necessary, Unsafe based access. This unlocks predictable
-  latency and large data sets but requires careful review and disciplined
-  resource management, as described in `security-review.adoc`.
-* **Dynamic typing and self describing data** - support for type tags and
-  polymorphic DTOs makes schema evolution and debugging easier, but increases
-  the risk of gadget style deserialisation issues if inputs are not constrained
-  to trusted packages.
-* **Fieldless binary formats** - formats such as `FIELDLESS_BINARY` maximise
-  compactness and speed by omitting field names, at the cost of being very
-  sensitive to schema drift. They are best reserved for tightly controlled,
-  internal schemas where both ends evolve together.
-* **Logging defaults** - by default, verbose logging and payload dumps are
-  disabled so that hot paths are not polluted with logging overhead. This makes
-  initial debugging slightly harder, but is essential for latency sensitive
-  deployments.
+Minimal validation on hot paths ::
+many low level operations assume that inputs have already been validated at the perimeter.
+This keeps the inner loops simple and fast, but pushes more responsibility onto callers and higher level modules to enforce size limits and reject malformed data.
+Off heap and Unsafe usage ::
+Wire relies on Chronicle Bytes for off heap storage and, where necessary, Unsafe based access.
+This unlocks predictable latency and large data sets but requires careful review and disciplined resource management, as described in `security-review.adoc`.
+Dynamic typing and self describing data ::
+support for type tags and polymorphic DTOs makes schema evolution and debugging easier, but increases the risk of gadget style deserialisation issues if inputs are not constrained to trusted packages.
+Fieldless binary formats ::
+formats such as `FIELDLESS_BINARY` maximise compactness and speed by omitting field names, at the cost of being very sensitive to schema drift.
+They are best reserved for tightly controlled, internal schemas where both ends evolve together.
+Logging defaults ::
+by default, verbose logging and payload dumps are disabled so that hot paths are not polluted with logging overhead.
+This makes initial debugging slightly harder, but is essential for latency sensitive deployments.
 
-Alternative designs include always validating message sizes and structures
-inside Wire itself, using only heap based buffers and standard Java
-serialisation APIs, or avoiding dynamic typing and binary formats entirely.
-These approaches are suitable for less latency sensitive systems, but would not
-meet the performance targets expected of the Chronicle stack. The chosen design
-is documented so that embedding applications can apply compensating controls
-where needed, for example strict type whitelists, perimeter validation and
-careful logging policies.
+Alternative designs include always validating message sizes and structures inside Wire itself, using only heap based buffers and standard Java serialisation APIs, or avoiding dynamic typing and binary formats entirely.
+These approaches are suitable for less latency sensitive systems, but would not meet the performance targets expected of the Chronicle stack.
+The chosen design is documented so that embedding applications can apply compensating controls where needed, for example strict type whitelists, perimeter validation and careful logging policies.
 
 == Related Documents
 
@@ -387,6 +295,5 @@ For deeper detail on specific aspects of Chronicle Wire see:
 * `wire-glossary.adoc` - glossary of terminology used across the Wire docs.
 * `wire-error-handling.adoc` - error handling guidance and exception patterns.
 * `security-review.adoc` - security considerations and mitigations.
-* `ops-scenarios.adoc` and `runbooks/wire-runtime-health.adoc` - operational
-  scenarios and runbook entries.
+* `ops-scenarios.adoc` and `runbooks/wire-runtime-health.adoc` - operational scenarios and runbook entries.
 * `index.adoc` - entry point for the Chronicle Wire documentation set.

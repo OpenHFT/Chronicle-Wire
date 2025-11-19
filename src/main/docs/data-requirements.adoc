@@ -8,12 +8,11 @@ Chronicle Software
 == Purpose
 
 This document captures the structural expectations for Chronicle Wire payloads.
-It complements `functional-requirements.adoc` by focusing on envelopes, metadata,
-and schema-evolution guidance shared by all `WireType` implementations.
+It complements `functional-requirements.adoc` by focusing on envelopes, metadata, and schema-evolution guidance shared by all `WireType` implementations.
 
 == Message Envelope
 
-[cols="1,3", options="header"]
+[cols="1,3",options="header"]
 |===
 |ID |Requirement
 
@@ -23,8 +22,8 @@ The writer must emit the document length (for binary wires) or delimiter (for te
 so downstream consumers can skip, replay, or rewind without parsing the payload itself.
 
 |FN-102
-|Field names shall be emitted verbatim for textual wires and mapped to 32-bit field identifiers
-(`WireKey`) for binary wires. Field identifiers must stay stable across releases to preserve backwards compatibility.
+|Field names shall be emitted verbatim for textual wires and mapped to 32-bit field identifiers (`WireKey`) for binary wires.
+Field identifiers must stay stable across releases to preserve backwards compatibility.
 
 |FN-103
 |When class metadata is present (`@type` in YAML/JSON or numeric type IDs in BinaryWire),
@@ -34,26 +33,26 @@ it must reference the fully-qualified Java class or an alias registered via `Cla
 == Scalar and Collection Semantics
 
 * Numeric types are encoded using the narrowest width that preserves the caller's precision.
-  `long` timestamps must stay in epoch nanoseconds to align with down-stream `Pauser` and engine components.
+`long` timestamps must stay in epoch nanoseconds to align with down-stream `Pauser` and engine components.
 * Text values default to UTF-8 bytes on the wire while remaining ISO-8859-1 inside documentation.
-* Collections are written as nested documents where each entry uses either an implicit numeric key
-  (arrays) or explicit field names (maps). Ordered collections retain insertion order.
+* Collections are written as nested documents where each entry uses either an implicit numeric key (arrays) or explicit field names (maps).
+Ordered collections retain insertion order.
 
 == Schema Evolution Policy
 
-1. Prefer additive changes (new optional fields, new message types).
-2. Deprecations must keep the existing field identifier reserved even if unused.
-3. When renaming a field, register the former name via `FieldNumberLookup`
-   and keep a test in `WireSchemaEvolutionTest.java` or an equivalent suite.
-4. Use explicit defaults in readers to avoid `NullPointerException` when older payloads omit the new field.
+. Prefer additive changes (new optional fields, new message types).
+. Deprecations must keep the existing field identifier reserved even if unused.
+. When renaming a field, register the former name via `FieldNumberLookup`
+and keep a test in `WireSchemaEvolutionTest.java` or an equivalent suite.
+. Use explicit defaults in readers to avoid `NullPointerException` when older payloads omit the new field.
 
 == Metadata and Retention
 
 * Every document that leaves the JVM must carry a monotonically increasing `messageId`
-  or sequence supplied by the caller; Chronicle Wire does not synthesise one automatically.
+or sequence supplied by the caller; Chronicle Wire does not synthesise one automatically.
 * Timestamps inherit the caller timezone; the library never rewrites them.
 * Payloads stored on disk or transmitted over the network must keep their native endianness.
-  Mixing `WireType#binary` and `WireType#binary_little_endian` within the same queue is unsupported.
+Mixing `WireType#binary` and `WireType#binary_little_endian` within the same queue is unsupported.
 
 == References
 

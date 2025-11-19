@@ -138,9 +138,9 @@ Some advantages of Trivially Copyable Objects
 
 Events received by a component can be handled in two main ways:
 
-1. *Raw Message Forwarding* - the raw `Bytes` or `DocumentContext` can be forwarded to another queue or network channel without deserialising the message fully.
+. *Raw Message Forwarding* - the raw `Bytes` or `DocumentContext` can be forwarded to another queue or network channel without deserialising the message fully.
 This is efficient for routers or filters that only inspect metadata.
-2. *Full Deserialisation and Re-invocation* - the event is deserialised and the corresponding method invoked locally; as part of the processing logic the same (or another) method can then be invoked downstream via a `MethodWriter`.
+. *Full Deserialisation and Re-invocation* - the event is deserialised and the corresponding method invoked locally; as part of the processing logic the same (or another) method can then be invoked downstream via a `MethodWriter`.
 
 == Modelling simple asynchronous method calls
 

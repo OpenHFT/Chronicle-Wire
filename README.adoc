@@ -1146,7 +1146,8 @@ Other types are supported; for example, 32-bit integer values, and an array of 6
 == Pass-by-name or Dynamic Enums
 
 Chronicle Wire supports passing objects reference by the `name()` of the object referenced.
-This is supported trivially with `enum` which define a `name()` for you. e.g.
+This is supported trivially with `enum` which define a `name()` for you.
+e.g.
 
 .Passing a reference to an enum using it's name
 [source,java,opts=novalidate]
