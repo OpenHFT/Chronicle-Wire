@@ -39,33 +39,19 @@ public class WireInternalInternTest extends WireTestCommon {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() {
         return Stream.of(
-                // A list of date/time related objects for testing.
-//                new Date(),
-//                TimeZone.getTimeZone("GMT"),
-//                UUID.randomUUID(),
-                DayOfWeek.of(1),
-                LocalDate.now(),
-                LocalDateTime.now(),
-                LocalTime.now(),
-                Month.of(1)
-//                MonthDay.of(1, 2),
-//                OffsetDateTime.now(),
-//                OffsetTime.now(),
-//                Period.ofDays(2),
-//                Year.now(),
-//                YearMonth.now(),
-//                ZonedDateTime.now()
-//                ZoneId.of("GMT")
-//                ZoneOffset.ofHoursMinutes(5, 30)
-        )
-        // Mapping each object to a new Object array with a formatted string.
-        .map(s -> new Object[]{"!" + ClassAliasPool.CLASS_ALIASES.nameFor(s.getClass()) + " " + s + " "})
+                        // A list of date/time related objects for testing.
+                        DayOfWeek.of(1),
+                        LocalDate.now(),
+                        LocalDateTime.now(),
+                        LocalTime.now(),
+                        Month.of(1)
+                )
+                // Mapping each object to a new Object array with a formatted string.
+                .map(s -> new Object[]{"!" + ClassAliasPool.CLASS_ALIASES.nameFor(s.getClass()) + " " + s + " "})
                 .collect(Collectors.toList());
     }
 
-    // This test ensures that when values are interned, the same instance is returned for the same input.
-    // It's currently commented out, so it won't be executed.
-//    @Test
+    // Helper to ensure that when values are interned, the same instance is returned for the same input.
     public void intern() {
         int sep = typeValue.indexOf(' ');
         Class<?> type = ClassAliasPool.CLASS_ALIASES.forName(

@@ -12,24 +12,28 @@ public interface Event {
 
     /**
      * Sets the sending time for the event.
+     *
      * @param sendingTimeNS The sending time in nanoseconds.
      */
     void sendingTimeNS(long sendingTimeNS);
 
     /**
      * Retrieves the sending time of the event.
+     *
      * @return The sending time in nanoseconds.
      */
     long sendingTimeNS();
 
     /**
      * Sets the transaction time for the event.
+     *
      * @param transactTimeNS The transaction time in nanoseconds.
      */
     void transactTimeNS(long transactTimeNS);
 
     /**
      * Retrieves the transaction time of the event.
+     *
      * @return The transaction time in nanoseconds.
      */
     long transactTimeNS();

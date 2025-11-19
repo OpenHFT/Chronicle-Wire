@@ -27,6 +27,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
     public void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
+
     // Test the validity of class naming conventions
     @Test(expected = IllegalArgumentException.class)
     public void testInvalidName() {
@@ -135,9 +136,8 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
         void say(String text);
     }
 
+    // A combined interface that extends multiple standard Java interfaces
     @SuppressWarnings("rawtypes")
-    private
-            // A combined interface that extends multiple standard Java interfaces
-    interface RCSB extends Runnable, Consumer, Supplier, BiConsumer {
+    private interface RCSB extends Runnable, Consumer, Supplier, BiConsumer {
     }
 }

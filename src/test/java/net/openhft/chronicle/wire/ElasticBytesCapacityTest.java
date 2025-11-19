@@ -49,7 +49,7 @@ public class ElasticBytesCapacityTest extends WireTestCommon {
         long writePosition = bytes.writePosition();
         long readPosition = bytes.readPosition();
         long readLimit = bytes.readLimit();
-        long writeLimit = bytes.writeLimit();
+        final long writeLimit = bytes.writeLimit();
 
         bytes.readPositionRemaining(0, writePosition);
         assertEquals("read view should span written payload", writePosition, bytes.readLimit());

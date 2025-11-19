@@ -23,6 +23,86 @@ import static org.junit.Assume.assumeFalse;
  */
 public class JSON322Test extends WireTestCommon {
 
+    @Test
+    public void supportNestedTypes() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
+        final Three three = new Three();
+        three.one = new One("hello");
+        three.two = new Four("world");
+
+        final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+
+        JSONWire wire = new JSONWire(bytes)
+                .useTypes(true);
+        wire.getValueOut()
+                .object(three);
+
+        final String expected = "{\"@net.openhft.chronicle.wire.issue.JSON322Test$Three\":{\"one\":{\"@net.openhft.chronicle.wire.issue.JSON322Test$One\":{\"text\":\"hello\"}},\"two\":{\"@net.openhft.chronicle.wire.issue.JSON322Test$Four\":{\"text\":\"world\"}}}}";
+        final String actual = wire.bytes().toString();
+        assertEquals(expected, actual);
+
+        // Now try reading it back again
+        final JSONWire parserWire = new JSONWire(bytes)
+                .useTypes(true);
+
+        final Object parsed = parserWire.getValueIn().object();
+
+        assertNotNull(parsed);
+        assertEquals(Three.class, parsed.getClass());
+
+        final Three parsedThree = (Three) parsed;
+
+        assertEquals(One.class, parsedThree.one.getClass());
+        assertEquals(Four.class, parsedThree.two.getClass());
+        assertEquals(three, parsed);
+    }
+
+    @Test
+    public void supportTypes() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
+        ClassAliasPool.CLASS_ALIASES.addAlias(Combined322.class, TypeOne322.class, TypeTwo322.class);
+        Combined322 c = new Combined322();
+        List<SelfDescribingMarshallable> list = c.list = new ArrayList<>();
+        list.add(new TypeOne322("one"));
+        list.add(new TypeTwo322(2, 22));
+        c.t1 = new TypeOne322("one-one");
+        c.t2 = new TypeTwo322(222, 2020);
+
+        final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+        JSONWire wire = new JSONWire(bytes)
+                .useTypes(true);
+        wire.getValueOut()
+                .object(c);
+
+        assertEquals("{\"@Combined322\":{" +
+                        "\"t1\":{\"@TypeOne322\":{\"text\":\"one-one\"}}," +
+                        "\"t2\":{\"@TypeTwo322\":{\"id\":222,\"value\":2020}}," +
+                        "\"list\":[ {\"@TypeOne322\":{\"text\":\"one\"}},{\"@TypeTwo322\":{\"id\":2,\"value\":22}} ]}}",
+                wire.bytes().toString());
+
+        // Now try reading it back again
+        final JSONWire parserWire = new JSONWire(bytes)
+                .useTypes(true);
+
+        final Object parsed = parserWire.getValueIn().object();
+
+        assertNotNull(parsed);
+        assertEquals(Combined322.class, parsed.getClass());
+
+        final Combined322 combined322 = (Combined322) parsed;
+
+        assertEquals(TypeOne322.class, combined322.t1.getClass());
+        assertEquals(TypeTwo322.class, combined322.t2.getClass());
+        final List<? extends SelfDescribingMarshallable> l = combined322.list;
+        assertEquals(2, l.size());
+        assertEquals(TypeOne322.class, l.get(0).getClass());
+        assertEquals(TypeTwo322.class, l.get(1).getClass());
+
+        assertEquals(c, combined322);
+    }
+
     static class One extends SelfDescribingMarshallable {
         String text;
 
@@ -54,90 +134,6 @@ public class JSON322Test extends WireTestCommon {
 
         Three() {
         }
-    }
-
-    @Test
-    public void supportNestedTypes() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
-
-        final Three three = new Three();
-        three.one = new One("hello");
-        three.two = new Four("world");
-
-        final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
-
-        JSONWire wire = new JSONWire(bytes)
-                .useTypes(true);
-        wire.getValueOut()
-                .object(three);
-
-        final String expected = "{\"@net.openhft.chronicle.wire.issue.JSON322Test$Three\":{\"one\":{\"@net.openhft.chronicle.wire.issue.JSON322Test$One\":{\"text\":\"hello\"}},\"two\":{\"@net.openhft.chronicle.wire.issue.JSON322Test$Four\":{\"text\":\"world\"}}}}";
-        final String actual = wire.bytes().toString();
-        assertEquals(expected, actual);
-
-        // Now try reading it back again
-        final JSONWire parserWire = new JSONWire(bytes)
-                .useTypes(true);
-
-        final Object parsed = parserWire.getValueIn().object();
-
-        assertNotNull(parsed);
-        assertEquals(Three.class, parsed.getClass());
-
-        final Three parsedThree = (Three) parsed;
-
-/*        bytes.clear();
-        wire.getValueOut().object(parsed);*/
-
-        assertEquals(One.class, parsedThree.one.getClass());
-        assertEquals(Four.class, parsedThree.two.getClass());
-        assertEquals(three, parsed);
-    }
-
-    @Test
-    public void supportTypes() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
-
-        ClassAliasPool.CLASS_ALIASES.addAlias(Combined322.class, TypeOne322.class, TypeTwo322.class);
-        Combined322 c = new Combined322();
-        List<SelfDescribingMarshallable> list = c.list = new ArrayList<>();
-        list.add(new TypeOne322("one"));
-        list.add(new TypeTwo322(2, 22));
-        c.t1 = new TypeOne322("one-one");
-        c.t2 = new TypeTwo322(222, 2020);
-
-        final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
-        JSONWire wire = new JSONWire(bytes)
-                .useTypes(true);
-        wire.getValueOut()
-                .object(c);
-
-        assertEquals("" +
-                        "{\"@Combined322\":{" +
-                        "\"t1\":{\"@TypeOne322\":{\"text\":\"one-one\"}}," +
-                        "\"t2\":{\"@TypeTwo322\":{\"id\":222,\"value\":2020}}," +
-                        "\"list\":[ {\"@TypeOne322\":{\"text\":\"one\"}},{\"@TypeTwo322\":{\"id\":2,\"value\":22}} ]}}",
-                wire.bytes().toString());
-
-        // Now try reading it back again
-        final JSONWire parserWire = new JSONWire(bytes)
-                .useTypes(true);
-
-        final Object parsed = parserWire.getValueIn().object();
-
-        assertNotNull(parsed);
-        assertEquals(Combined322.class, parsed.getClass());
-
-        final Combined322 combined322 = (Combined322)parsed;
-
-        assertEquals(TypeOne322.class, combined322.t1.getClass());
-        assertEquals(TypeTwo322.class, combined322.t2.getClass());
-        final List<? extends SelfDescribingMarshallable> l = combined322.list;
-        assertEquals(2, l.size());
-        assertEquals(TypeOne322.class, l.get(0).getClass());
-        assertEquals(TypeTwo322.class, l.get(1).getClass());
-
-        assertEquals(c, combined322);
     }
 
     static class Combined322 extends SelfDescribingMarshallable {

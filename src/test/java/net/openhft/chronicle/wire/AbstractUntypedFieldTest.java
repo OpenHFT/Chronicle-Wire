@@ -36,8 +36,7 @@ class AbstractUntypedFieldTest extends WireTestCommon {
     @ParameterizedTest
     @MethodSource("provideWire")
     void typedFieldsShouldBeNonNull(Function<Bytes<byte[]>, Wire> wireConstruction) {
-        final Bytes<byte[]> bytes = Bytes.from("" +
-                "!net.openhft.chronicle.wire.AbstractUntypedFieldShouldBeNull$Holder {\n" +
+        final Bytes<byte[]> bytes = Bytes.from("!net.openhft.chronicle.wire.AbstractUntypedFieldShouldBeNull$Holder {\n" +
                 "  a: !AImpl {\n" +
                 "  }\n" +
                 "}");
@@ -87,7 +86,7 @@ class AbstractUntypedFieldTest extends WireTestCommon {
     }
 
     // Abstract base class for testing
-    static abstract class A {
+    abstract static class A {
     }
 
     // Implementation of the abstract base class

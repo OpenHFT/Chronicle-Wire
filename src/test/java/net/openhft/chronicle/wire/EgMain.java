@@ -8,13 +8,6 @@ import net.openhft.chronicle.bytes.DistributedUniqueTimeProvider;
 // Main class illustrating event time serialization and performance measurement of time provision.
 public class EgMain {
 
-    // Nested class representing an event with a timestamp.
-    static class Event extends SelfDescribingMarshallable {
-        // Convert the long timestamp to nano-time format.
-        @LongConversion(NanoTimestampLongConverter.class)
-        long time;
-    }
-
     private static long time;
 
     public static void main(String[] args) {
@@ -22,12 +15,12 @@ public class EgMain {
         DistributedUniqueTimeProvider tp = DistributedUniqueTimeProvider.forHostId(28);
         Event e = new Event();
         e.time = tp.currentTimeNanos();
-        // Sample serialized format of the event.
-/*
-!net.openhft.chronicle.wire.EgMain$Event {
-  time: 2021-12-28T14:07:02.954100128
-}
-*/
+        // Sample serialised format of the event.
+        /*
+        !net.openhft.chronicle.wire.EgMain$Event {
+          time: 2021-12-28T14:07:02.954100128
+        }
+        */
         String str = e.toString();
         Event e2 = Marshallable.fromString(str);
         System.out.println(e2);
@@ -41,5 +34,12 @@ public class EgMain {
             long delay = (System.nanoTime() - start) / runs;
             System.out.println(delay);
         }
+    }
+
+    // Nested class representing an event with a timestamp.
+    static class Event extends SelfDescribingMarshallable {
+        // Convert the long timestamp to nano-time format.
+        @LongConversion(NanoTimestampLongConverter.class)
+        long time;
     }
 }

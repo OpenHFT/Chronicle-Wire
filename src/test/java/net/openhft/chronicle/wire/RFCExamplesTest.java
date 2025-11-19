@@ -32,25 +32,13 @@ public class RFCExamplesTest extends WireTestCommon {
         // Allocate an elastic buffer on heap.
         @NotNull Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
-/*
-        This represents a serialized format of the metadata and data.
-        It shows the service lookup, the type of view (Map), and the key/value types.
-         */
-/*
---- !!meta-data
-csp:///service-lookup
-tid: 1426502826520
---- !!data
-lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
- */
         @NotNull Wire text = WireType.TEXT.apply(bytes);
         text.usePadding(true);
         writeMessageOne(text);
 
         // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
         // Validate the serialization result.
-        assertEquals("" +
-                        "--- !!meta-data\n" +
+        assertEquals("--- !!meta-data\n" +
                         "csp: ///service-lookup\n" +
                         "tid: 149873598325\n" +
                         "# position: 48, header: 0\n" +
@@ -73,8 +61,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         writeMessageOne(wire);
 
         // Validate the binary representation.
-        assertEquals("" +
-                        "[pos: 0, rlim: 132, wlim: 2147483632, cap: 2147483632 ] ǁ$٠٠@Ãcspñ///service-lookupÃtid§u\\u009F)å\"٠٠٠\\u008FX٠٠٠Ælookup\\u0082I٠٠٠ËrelativeUriätestÄview¼⒊MapÅtypes\\u0082#٠٠٠ÇkeyType¼⒎IntegerÉvalueType¼⒍String\\u008F\\u008F\\u008F‡٠٠٠٠٠٠٠٠٠٠٠٠٠",
+        assertEquals("[pos: 0, rlim: 132, wlim: 2147483632, cap: 2147483632 ] ǁ$٠٠@Ãcspñ///service-lookupÃtid§u\\u009F)å\"٠٠٠\\u008FX٠٠٠Ælookup\\u0082I٠٠٠ËrelativeUriätestÄview¼⒊MapÅtypes\\u0082#٠٠٠ÇkeyType¼⒎IntegerÉvalueType¼⒍String\\u008F\\u008F\\u008F‡٠٠٠٠٠٠٠٠٠٠٠٠٠",
                 bytes.toDebugString());
 
         // Create a raw representation of the wire.
@@ -84,33 +71,14 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         writeMessageOne(raw);
 
         // Validate the raw representation.
-        assertEquals("" +
-                        "[pos: 0, rlim: 68, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@⒘///service-lookupu\\u009F)å\"٠٠٠٠٠ ٠٠٠\\u001C٠٠٠⒋test⒊Map⒖٠٠٠⒎Integer⒍String‡٠٠٠٠٠٠٠٠",
+        assertEquals("[pos: 0, rlim: 68, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@⒘///service-lookupu\\u009F)å\"٠٠٠٠٠ ٠٠٠\\u001C٠٠٠⒋test⒊Map⒖٠٠٠⒎Integer⒍String‡٠٠٠٠٠٠٠٠",
                 bytes.toDebugString());
 
-        /*
-        This serialized format is supposed to be a representation of put operations.
-        It shows the metadata (like the server URL and transaction id) and the key/value pairs to put.
-         */
-/*
---- !!meta-data
-cid: 1
-# or
-csp://server1/test
-tid: 1426502826525
---- !!data
-put: [ 1, hello ]
---- !!data
-put: [ 2, world ]
---- !!data
-put: [ 3, bye ]
-*/
         clear(bytes);
         writeMessageTwo(text);
 
         // Validate the serialized format of the put operations.
-        assertEquals("" +
-                        "--- !!meta-data\n" +
+        assertEquals("--- !!meta-data\n" +
                         "csp: //server1/test\n" +
                         "cid: 1\n" +
                         "# position: 32, header: 0\n" +
@@ -132,8 +100,7 @@ put: [ 3, bye ]
                         "  value: bye\n" +
                         "}\n",
                 Wires.fromSizePrefixedBlobs(bytes));
-        assertEquals("" +
-                        "[pos: 0, rlim: 148, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@csp: //server1/test⒑cid: 1⒑ $٠٠٠put: {⒑  key: 1,⒑  value: hello⒑}⒑  $٠٠٠put: {⒑  key: 2,⒑  value: world⒑}⒑   ٠٠٠put: {⒑  key: 3,⒑  value: bye⒑}⒑‡٠٠٠٠٠٠٠٠٠٠٠٠٠",
+        assertEquals("[pos: 0, rlim: 148, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@csp: //server1/test⒑cid: 1⒑ $٠٠٠put: {⒑  key: 1,⒑  value: hello⒑}⒑  $٠٠٠put: {⒑  key: 2,⒑  value: world⒑}⒑   ٠٠٠put: {⒑  key: 3,⒑  value: bye⒑}⒑‡٠٠٠٠٠٠٠٠٠٠٠٠٠",
                 bytes.toDebugString());
 
         clear(bytes);
@@ -141,16 +108,14 @@ put: [ 3, bye ]
 
         // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
         // Validate the binary format of the put operations.
-        assertEquals("" +
-                        "[pos: 0, rlim: 128, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@Ãcspî//server1/testÃcid¡⒈\\u008F\\u008F\\u008F\\u001C٠٠٠Ãput\\u0082⒙٠٠٠Ãkey¡⒈Åvalueåhello\\u008F\\u001C٠٠٠Ãput\\u0082⒙٠٠٠Ãkey¡⒉Åvalueåworld\\u008F\\u001C٠٠٠Ãput\\u0082⒗٠٠٠Ãkey¡⒊Åvalueãbye\\u008F\\u008F\\u008F‡٠٠٠٠٠٠٠٠٠",
+        assertEquals("[pos: 0, rlim: 128, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@Ãcspî//server1/testÃcid¡⒈\\u008F\\u008F\\u008F\\u001C٠٠٠Ãput\\u0082⒙٠٠٠Ãkey¡⒈Åvalueåhello\\u008F\\u001C٠٠٠Ãput\\u0082⒙٠٠٠Ãkey¡⒉Åvalueåworld\\u008F\\u001C٠٠٠Ãput\\u0082⒗٠٠٠Ãkey¡⒊Åvalueãbye\\u008F\\u008F\\u008F‡٠٠٠٠٠٠٠٠٠",
                 bytes.toDebugString());
 
         clear(bytes);
         writeMessageTwo(raw);
 
         // Validate the raw format of the put operations.
-        assertEquals("" +
-                        "[pos: 0, rlim: 96, wlim: 2147483632, cap: 2147483632 ] ǁ\\u0018٠٠@⒕//server1/test⒈٠٠٠٠٠٠٠٠⒛٠٠٠⒕٠٠٠⒈٠٠٠٠٠٠٠⒌hello٠٠⒛٠٠٠⒕٠٠٠⒉٠٠٠٠٠٠٠⒌world٠٠⒗٠٠٠⒓٠٠٠⒊٠٠٠٠٠٠٠⒊bye‡٠٠٠٠٠٠٠٠",
+        assertEquals("[pos: 0, rlim: 96, wlim: 2147483632, cap: 2147483632 ] ǁ\\u0018٠٠@⒕//server1/test⒈٠٠٠٠٠٠٠٠⒛٠٠٠⒕٠٠٠⒈٠٠٠٠٠٠٠⒌hello٠٠⒛٠٠٠⒕٠٠٠⒉٠٠٠٠٠٠٠⒌world٠٠⒗٠٠٠⒓٠٠٠⒊٠٠٠٠٠٠٠⒊bye‡٠٠٠٠٠٠٠٠",
                 bytes.toDebugString());
     }
 
@@ -179,8 +144,8 @@ put: [ 3, bye ]
                         out2.write(relativeUri).text("test")
                                 .write(view).typeLiteral("Map")
                                 .write(types).marshallable(m ->
-                                m.write(() -> "keyType").typeLiteral("Integer")
-                                        .write(() -> "valueType").typeLiteral("String"))));
+                                        m.write(() -> "keyType").typeLiteral("Integer")
+                                                .write(() -> "valueType").typeLiteral("String"))));
 
         // Uncomment to print the serialized data.
         // System.out.println(wire);

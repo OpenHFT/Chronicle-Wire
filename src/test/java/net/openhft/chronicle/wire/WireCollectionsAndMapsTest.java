@@ -19,10 +19,11 @@ public class WireCollectionsAndMapsTest extends WireTestCommon {
     @Test
     public void sequenceReadWrite() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
-            Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
+            final Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
 
             // empty and single element sequence
-            w.write("empty").sequence(v -> {});
+            w.write("empty").sequence(v -> {
+            });
             w.write("one").sequence(v -> v.int32(7));
             // mixed types
             w.write("mix").sequence(v -> {
@@ -34,11 +35,22 @@ public class WireCollectionsAndMapsTest extends WireTestCommon {
             // read back
             final int[] len = {0};
             len[0] = w.read("empty").sequenceWithLength(new Object[0], (in, arr) -> {
-                int c = 0; while (in.hasNextSequenceItem()) { in.skipValue(); c++; } return c; });
+                int c = 0;
+                while (in.hasNextSequenceItem()) {
+                    in.skipValue();
+                    c++;
+                }
+                return c;
+            });
             assertEquals(0, len[0]);
 
             len[0] = w.read("one").sequenceWithLength(new int[1], (in, arr) -> {
-                int c = 0; while (in.hasNextSequenceItem()) { arr[c++] = in.int32(); } return c; });
+                int c = 0;
+                while (in.hasNextSequenceItem()) {
+                    arr[c++] = in.int32();
+                }
+                return c;
+            });
             assertEquals(1, len[0]);
 
             Object[] out = new Object[3];
@@ -55,11 +67,12 @@ public class WireCollectionsAndMapsTest extends WireTestCommon {
     public void mapsRoundTripViaMarshallable() {
         // Use ValueIn.marshallableAsMap across supported wire types.
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
-            Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
             Map<String, Object> in = new LinkedHashMap<>();
             in.put("k1", 1);
             in.put("k2", "v2");
             in.put("k3", 3L);
+
+            final Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
             w.write("m").map(in);
 
             Map<?, ?> out = w.read("m").marshallableAsMap(String.class, Object.class);

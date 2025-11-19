@@ -1,0 +1,118 @@
+= Chronicle Wire Testing Strategy
+:doctype: book
+:toc:
+:toclevels: 2
+:sectnums:
+:lang: en-GB
+:source-highlighter: rouge
+
+This document outlines the testing approach for Chronicle Wire and links tests
+to the requirements catalogues defined in `project-requirements.adoc` and
+`functional-requirements.adoc`. It supports the ISO 9001 design verification
+checklist and helps reviewers assess coverage for key behaviours.
+
+== Test Layers
+
+Chronicle Wire uses several complementary test layers:
+
+* unit tests in `src/test/java/net/openhft/chronicle/wire` for core API
+  contracts, `WireType` behaviour, `DocumentContext` lifecycles and method
+  writer or reader patterns;
+* integration style tests that exercise multiple WireTypes over shared `Bytes`
+  instances and interactions with other Chronicle modules where appropriate;
+* micro benchmarks and JLBH based harnesses in the `microbenchmarks` and
+  `marshallingperf` modules for performance related requirements;
+* exploratory and regression tests that capture previously reported bugs and
+  edge cases, especially around schema evolution, malformed input and dynamic
+  typing.
+
+Where practical, test classes reference requirement identifiers from
+`functional-requirements.adoc` (for example `FN-001`, `FN-002`) in comments or
+Javadoc to support traceability.
+
+== Unit Testing Approach
+
+Unit tests focus on:
+
+* functional behaviour of `Wire`, `WireIn` and `WireOut` across supported
+  `WireType` values, ensuring that `Marshallable` and
+  `SelfDescribingMarshallable` round trip correctly;
+* correct use of `DocumentContext` for framing messages, including nested
+  documents and failure or rollback scenarios;
+* dynamic typing and annotation handling, such as `@FieldNumber`,
+  `@LongConversion` and type alias resolution;
+* converters and low level helpers in `net.openhft.chronicle.wire` that are
+  used by higher level modules (for example long and time converters, class
+  lookup strategies).
+
+Tests are written to avoid non deterministic timing assumptions and to keep
+allocations low, reflecting the performance sensitive nature of the library.
+
+== Integration and Compatibility Tests
+
+Integration style tests cover:
+
+* combined usage of Wire with Chronicle Bytes where realistic `Bytes` and
+  `BytesStore` implementations are involved (on heap, native and mapped);
+* scenarios where messages are written using one `WireType` and read using
+  another, to exercise the format independence guarantees described in the
+  architecture and requirements documentation;
+* behaviour across JVM versions and platforms as part of the multi JDK
+  verification policy captured in `operational-requirements.adoc` and the
+  decision log.
+
+Where possible, integration tests reuse production configuration defaults so
+that changes in settings (for example system properties and logging flags) are
+exercised in continuous integration.
+
+== Performance and Benchmarking Strategy
+
+Performance related expectations are verified using:
+
+* JLBH style harnesses and JMH micro benchmarks under the `microbenchmarks`
+  directory, targeting serialisation or deserialisation latency for typical
+  DTOs, method writer or reader throughput and converter overhead;
+* scenario benchmarks in `marshallingperf` and the `demo` module that simulate
+  realistic usage patterns, such as queue based message flows or configuration
+  loading.
+
+Benchmark configurations, such as JVM flags, thread pinning and payload sizes,
+are documented alongside the benchmark source where relevant so that results
+are reproducible and comparable across versions.
+
+While not all benchmarks run on every CI executor, they are treated as gating
+signals before major releases or significant architectural changes that could
+affect latency or allocation characteristics.
+
+== Code Review and Regression Handling
+
+Design verification requires evidence that:
+
+* new features and bug fixes come with corresponding tests or benchmarks;
+* regressions are captured by durable tests where feasible;
+* test names or comments reference the relevant requirement identifiers or
+  issue references.
+
+During code review:
+
+* reviewers confirm that changes which touch method writers or readers,
+  `WireType` behaviour, Unsafe usage or schema evolution paths include targeted
+  tests and, where appropriate, updated documentation;
+* reviewers consider whether additional negative tests (for example malformed
+  inputs, incompatible schema changes, concurrent access) are needed to cover
+  the intended behaviour.
+
+== Running the Test Suite
+
+From the repository root, run:
+
+[source,bash]
+----
+mvn -q clean verify
+----
+
+This command builds all modules, executes unit and integration tests and runs
+static analysis tools configured in the Maven build. Module specific test runs
+can be scoped using Maven's `-pl` flag when iterating, but the full
+`verify` goal should be executed before releases or pull requests.
+

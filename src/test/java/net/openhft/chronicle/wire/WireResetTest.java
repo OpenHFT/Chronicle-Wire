@@ -49,7 +49,7 @@ public class WireResetTest extends WireTestCommon {
     //https://github.com/OpenHFT/Chronicle-Wire/issues/732
     public void testDeepReset() {
         Event event1 = new Event();
-        Identifier identifier1 = event1.identifier;
+        final Identifier identifier1 = event1.identifier;
         event1.identifier.id = "id";
         event1.identifier.parent = new Identifier("parent_id1");
         event1.identifier.permissions.put("uid1", "r");
@@ -104,17 +104,17 @@ public class WireResetTest extends WireTestCommon {
 
     public static class Event extends SelfDescribingMarshallable implements Closeable {
 
-        private boolean isClosed;
-
         Identifier identifier = new Identifier();
         Collection<Identifier> ids = new LinkedList<>();
         String payload;
         LocalDate someDate;
+        private boolean isClosed;
 
         @Override
         public void close() {
             isClosed = true;
         }
+
         @Override
         public boolean isClosed() {
             return isClosed;

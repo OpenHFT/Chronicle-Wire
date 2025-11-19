@@ -16,7 +16,8 @@ import java.util.Collection;
 import java.util.List;
 
 import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Smoke test that toggles codegen/proxy path via system property and verifies
@@ -25,17 +26,15 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class MethodWriterCodegenToggleTest extends WireTestCommon {
 
-    interface API { void a(int x); void b(String s); }
-
-    @Parameterized.Parameters(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[]{Boolean.TRUE}, new Object[]{Boolean.FALSE});
-    }
-
     private final boolean disable;
 
     public MethodWriterCodegenToggleTest(boolean disable) {
         this.disable = disable;
+    }
+
+    @Parameterized.Parameters(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[]{Boolean.TRUE}, new Object[]{Boolean.FALSE});
     }
 
     @After
@@ -56,13 +55,27 @@ public class MethodWriterCodegenToggleTest extends WireTestCommon {
 
         List<String> seen = new ArrayList<>();
         MethodReader r = w.methodReader(new API() {
-            @Override public void a(int x) { seen.add("a:" + x); }
-            @Override public void b(String s) { seen.add("b:" + s); }
+            @Override
+            public void a(int x) {
+                seen.add("a:" + x);
+            }
+
+            @Override
+            public void b(String s) {
+                seen.add("b:" + s);
+            }
         });
-        while (r.readOne()) { /* drain */ }
+        while (r.readOne()) {
+            continue;
+        }
         assertEquals(2, seen.size());
         assertTrue(seen.get(0).startsWith("a:"));
         assertTrue(seen.get(1).startsWith("b:"));
     }
-}
 
+    interface API {
+        void a(int x);
+
+        void b(String s);
+    }
+}

@@ -45,7 +45,7 @@ public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
 
         // Deserialize the string representation back to a MyDto2 object
         // System.out.println(cs);
-        MyDto2 o = (MyDto2) Marshallable.fromString(cs);
+        MyDto2 o = Marshallable.fromString(cs);
 
         // Verify the size of the strings list in the deserialized object
         assertEquals(2, o.myDto.get("").strings.size());
@@ -60,6 +60,7 @@ public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
 
         /**
          * Reads the data from the provided WireIn object to populate this DTO.
+         *
          * @param wire WireIn instance containing serialized data
          * @throws IORuntimeException If an IO error occurs during reading
          */
@@ -67,9 +68,6 @@ public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
             // Use the Wires utility to read the data
             // The following line works, but is commented out for this test
             // Wires.readMarshallable(this, wire, true);
-
-            // WORKS
-             // Wires.readMarshallable(this, wire, true);  // WORKS
 
             // FAILS
             Wires.readMarshallable(this, wire, false);

@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
-@SuppressWarnings({"rawtypes","try"})
+@SuppressWarnings({"rawtypes", "try"})
 @RunWith(value = Parameterized.class)
 public class BinaryWire2Test extends WireTestCommon {
     private final boolean usePadding;
@@ -321,8 +321,7 @@ public class BinaryWire2Test extends WireTestCommon {
 
         @NotNull Wire wire = createWire();
         writeMessage(wire);
-        assertEquals("" +
-                        "--- !!meta-data #binary\n" +
+        assertEquals("--- !!meta-data #binary\n" +
                         "csp: //path/service\n" +
                         "tid: 123456789\n" +
                         "# position: 32, header: 0\n" +
@@ -341,8 +340,7 @@ public class BinaryWire2Test extends WireTestCommon {
 
         @NotNull Wire twire = WireType.TEXT.apply(allocateElasticOnHeap());
         writeMessage(twire);
-        assertEquals("" +
-                        "--- !!meta-data\n" +
+        assertEquals("--- !!meta-data\n" +
                         "csp: //path/service\n" +
                         "tid: 123456789\n" +
                         "# position: 40, header: 0\n" +
@@ -389,8 +387,7 @@ public class BinaryWire2Test extends WireTestCommon {
         writeMessageContext(wire);
 
         // Expected binary hex representation of the written data
-        assertEquals("" +
-                        "1c 00 00 40                                     # msg-length\n" +
+        assertEquals("1c 00 00 40                                     # msg-length\n" +
                         "c3 63 73 70                                     # csp:\n" +
                         "ee 2f 2f 70 61 74 68 2f 73 65 72 76 69 63 65    # //path/service\n" +
                         "c3 74 69 64                                     # tid:\n" +
@@ -414,8 +411,7 @@ public class BinaryWire2Test extends WireTestCommon {
         writeMessageContext(twire);
 
         // Expected textual representation of the written data
-        assertEquals("" +
-                        "--- !!meta-data\n" +
+        assertEquals("--- !!meta-data\n" +
                         "csp: //path/service\n" +
                         "tid: 123456789\n" +
                         "# position: 39, header: 0\n" +
@@ -541,8 +537,7 @@ public class BinaryWire2Test extends WireTestCommon {
         }
 
         // Validate the serialized format of the entire wire content, including metadata and data
-        assertEquals("" +
-                        "--- !!meta-data #binary\n" +
+        assertEquals("--- !!meta-data #binary\n" +
                         "tid: 1234567890\n" +
                         "# position: 1X, header: 0\n" +
                         "--- !!data #binary\n" +
@@ -763,8 +758,7 @@ public class BinaryWire2Test extends WireTestCommon {
         wire.writeDocument(false, w -> w.write("four").object(thirtytwo));
 
         final String expected = usePadding ?
-                "" +
-                        "--- !!data #binary\n" +
+                "--- !!data #binary\n" +
                         "nothing: !byte[] \"\"\n" +
                         "# position: 24, header: 1\n" +
                         "--- !!data #binary\n" +
@@ -772,8 +766,7 @@ public class BinaryWire2Test extends WireTestCommon {
                         "# position: 44, header: 2\n" +
                         "--- !!data #binary\n" +
                         "four: !byte[] \"\\0\\x01\\x02\\x03\\x04\\x05\\x06\\a\\b\\t\\n\\v\\f\\r\\x0E\\x0F\\x10\\x11\\x12\\x13\\x14\\x15\\x16\\x17\\x18\\x19\\x1A\\e\\x1C\\x1D\\x1E\\x1F \"\n" :
-                "" +
-                        "--- !!data #binary\n" +
+                "--- !!data #binary\n" +
                         "nothing: !byte[] \"\"\n" +
                         "# position: 23, header: 1\n" +
                         "--- !!data #binary\n" +
@@ -804,8 +797,8 @@ public class BinaryWire2Test extends WireTestCommon {
                         "? { MyField: parent }: {\n" +
                         "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key1 }: value1,\n" +
                         "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key2 }: value2\n" +
-                        "}\n"
-                , Wires.fromSizePrefixedBlobs(wire.bytes()));
+                        "}\n",
+                Wires.fromSizePrefixedBlobs(wire.bytes()));
 
         // Read the document from the wire and check the values
         wire.readDocument(null, w -> {
@@ -890,8 +883,7 @@ public class BinaryWire2Test extends WireTestCommon {
             // "e4 bd a0 e5 a5 bd c5 76 61 6c 75 65 0f\n", bytes.toHexString());
             // Ensure that the wire's content matches the expected format with the Chinese characters
 
-            assertEquals("" +
-                            "--- !!data #binary\n" +
+            assertEquals("--- !!data #binary\n" +
                             "data: !!UpdateEvent {\n" +
                             "  mm: \"\\u4F60\\u597D\",\n" +
                             "  value: 15\n" +
@@ -923,7 +915,7 @@ public class BinaryWire2Test extends WireTestCommon {
         wire.bytes().releaseLast(); // Release the resources
     }
 
-// This test is designed to check if the wire correctly reads a Bytes object from a marshallable representation.
+    // This test is designed to check if the wire correctly reads a Bytes object from a marshallable representation.
     @Test
     public void testreadBytes() {
         // Create a new BinaryWire with heap allocated storage

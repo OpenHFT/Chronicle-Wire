@@ -56,8 +56,10 @@ public class TextReadDocumentContext implements ReadDocumentContext {
      */
     public static void consumeToEndOfMessage(Bytes<?> bytes) {
         while (bytes.readRemaining() > 0) {
-            while (bytes.readRemaining() > 0 && bytes.readUnsignedByte() >= ' ') {
-                // read skips forward.
+            while (bytes.readRemaining() > 0) {
+                if (bytes.readUnsignedByte() < ' ') {
+                    break;
+                }
             }
             if (isEndOfMessage(bytes)) {
                 break;
@@ -131,7 +133,7 @@ public class TextReadDocumentContext implements ReadDocumentContext {
             bytes.readPosition(readPosition);
             if (isEndOfMessage(bytes))
                 bytes.readSkip(3);
-            while(!bytes.isEmpty()) {
+            while (!bytes.isEmpty()) {
                 if (bytes.peekUnsignedByte() > ' ')
                     break;
                 bytes.readSkip(1);
@@ -161,7 +163,7 @@ public class TextReadDocumentContext implements ReadDocumentContext {
 
         present = false;
         wire.consumePadding();
-        while(isEndOfMessage(bytes))
+        while (isEndOfMessage(bytes))
             skipSep(bytes);
 
         if (bytes.readRemaining() < 1) {

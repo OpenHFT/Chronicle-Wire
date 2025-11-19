@@ -11,11 +11,18 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import static org.junit.Assume.assumeFalse;
 
 // Test class focusing on the functionality of elastic byte buffers with wire operations.
 public class ElasticByteBufferTest extends WireTestCommon {
+
+    private static String repeat(char ch, int length) {
+        char[] data = new char[length];
+        Arrays.fill(data, ch);
+        return new String(data);
+    }
 
     @Test
     public void testElasticByteBufferWithWire() {
@@ -44,5 +51,37 @@ public class ElasticByteBufferTest extends WireTestCommon {
         Assert.assertTrue(s.contains("some value of more than ten characters"));
 
         byteBufferBytes.releaseLast();
+    }
+
+    @Test
+    public void directElasticBufferResizesWhenCapacityIsExceeded() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
+        for (boolean padding : new boolean[]{true, false}) {
+            Bytes<?> directBytes = Bytes.allocateElasticDirect(32);
+            try {
+                Wire wire = WireType.BINARY.apply(directBytes);
+                wire.usePadding(padding);
+
+                long initialCapacity = directBytes.realCapacity();
+                String largeValue = repeat('x', (int) initialCapacity + 64);
+
+                try (DocumentContext context = wire.writingDocument(false)) {
+                    context.wire().write("payload").text(largeValue);
+                }
+
+                Assert.assertTrue("buffer should grow when payload exceeds initial capacity",
+                        directBytes.realCapacity() >= initialCapacity);
+
+                directBytes.readPositionRemaining(0, directBytes.writePosition());
+                try (DocumentContext context = wire.readingDocument()) {
+                    Assert.assertTrue(context.isPresent());
+                    Assert.assertEquals("padding=" + padding, largeValue,
+                            context.wire().read("payload").text());
+                }
+            } finally {
+                directBytes.releaseLast();
+            }
+        }
     }
 }

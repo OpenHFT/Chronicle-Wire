@@ -1,6 +1,23 @@
 = Chronicle Wire: Security Review & Known Trade-offs
 :toc:
 :sectnums:
+:lang: en-GB
+:source-highlighter: rouge
+
+This document is aligned with the shared security and architectural standards in `Chronicle-Quality-Rules/src/main/docs/security-review.adoc` and `Chronicle-Quality-Rules/src/main/docs/architectural-standards.adoc`.
+
+== Trust Zone and Responsibilities
+
+Chronicle Wire can sit at either the *Edge (Zone A)* or in the *Core (Zone B)* of a system, as defined in `Chronicle-Quality-Rules/src/main/docs/architectural-standards.adoc`:
+
+* At the Edge, Wire parses untrusted input (for example YAML/JSON configuration, network payloads or files) and must be treated as handling potentially hostile data.
+* In the Core, Wire serialises and deserialises objects that have already passed authentication and higher-level validation.
+
+This security review focuses on:
+
+* the risks that arise when Wire is used on untrusted data paths;
+* the controls and coding patterns that reduce those risks (for example bounds checking, maximum message sizes, deny-lists and fuzzing);
+* the trade-offs inherent in keeping hot paths fast for both Edge and Core usage.
 
 == Introduction
 

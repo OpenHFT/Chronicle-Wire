@@ -29,7 +29,6 @@ public class ConventionsTest extends WireTestCommon {
             Object extected;
             // Check if type is a subclass of Number
             if (Number.class.isAssignableFrom(type)) {
-               // System.out.println("" + type + "");
                 // Retrieve the MAX_VALUE field from the type class
                 final Field max_value = type.getField("MAX_VALUE");
                 extected = max_value.get(type);

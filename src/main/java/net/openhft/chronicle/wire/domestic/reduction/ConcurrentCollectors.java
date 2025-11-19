@@ -79,7 +79,7 @@ public final class ConcurrentCollectors {
      * input elements under a specified {@code BinaryOperator} using the
      * provided identity.
      * <p>
-     *     Note: The {@code reducing()} collectors are most useful when used in a
+     * Note: The {@code reducing()} collectors are most useful when used in a
      * multi-level reduction, downstream of {@code groupingBy} or
      * {@code partitioningBy}.
      *
@@ -93,7 +93,7 @@ public final class ConcurrentCollectors {
     public static <T>
     Collector<T, ?, T> reducingConcurrent(final T identity,
                                           @NotNull final BinaryOperator<T> op) {
-                                          // Ensure the binary operator is not null.
+        // Ensure the binary operator is not null.
         requireNonNull(op);
 
         // Set up a concurrent reduction using an AtomicReference as the accumulator.

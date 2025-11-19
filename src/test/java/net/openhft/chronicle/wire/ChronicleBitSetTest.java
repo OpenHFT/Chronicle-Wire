@@ -10,7 +10,6 @@ import net.openhft.chronicle.core.io.IOTools;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -35,13 +34,6 @@ public class ChronicleBitSetTest extends WireTestCommon {
     private final ChronicleBitSet emptyBS127;
     private final ChronicleBitSet emptyBS128;
 
-    // Capture a snapshot of all threads before test execution
-    @Override
-    @Before
-    public void threadDump() {
-        super.threadDump();
-    }
-
     @SuppressWarnings("this-escape")
     public ChronicleBitSetTest(Class<?> clazz) {
         assumeTrue(Jvm.is64bit());
@@ -50,10 +42,6 @@ public class ChronicleBitSetTest extends WireTestCommon {
         emptyBS1 = createBitSet(1);
         emptyBS127 = createBitSet(127);
         emptyBS128 = createBitSet(128);
-    }
-
-    // Helper method to assume certain conditions for the test
-    private void assumeTrue(boolean bit) {
     }
 
     // Test data provider
@@ -65,6 +53,17 @@ public class ChronicleBitSetTest extends WireTestCommon {
                 {LongArrayValueBitSet.class},
                 {LongValueBitSet.class},
         });
+    }
+
+    // Capture a snapshot of all threads before test execution
+    @Override
+    @Before
+    public void threadDump() {
+        super.threadDump();
+    }
+
+    // Helper method to assume certain conditions for the test
+    private void assumeTrue(boolean bit) {
     }
 
     // Cleanup resources after test
@@ -445,8 +444,6 @@ public class ChronicleBitSetTest extends WireTestCommon {
 
     @Test
     public void testAnd2() {
-        int failCount = 0;
-
         // Test the AND operation that clears the last word of the bitset
         ChronicleBitSet b4 = makeSet(2, 127);
         assertEquals("{2, 127}", b4.toString());
@@ -455,6 +452,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         b4.and(b4a);
         assertEquals("{2}", b4.toString());
         checkSanity(b4);
+        int failCount = 0;
         final ChronicleBitSet bs2 = makeSet(2);
         if (!(b4.equals(bs2))) {
             failCount++;
@@ -812,45 +810,6 @@ public class ChronicleBitSetTest extends WireTestCommon {
         assertEquals(0, failCount);
     }
 
-/*    @Test
-    public void testGet() {
-        int failCount = 0;
-
-        for (int i = 0; i < 1000; i++) {
-            ChronicleBitSet b1 = createBitSet();
-
-            // Make a fairly random ChronicleBitSet
-            int numberOfSetBits = generator.nextInt(100) + 1;
-            int highestPossibleSetBit = generator.nextInt(1000) + 1;
-
-            for (int x = 0; x < numberOfSetBits; x++)
-                b1.set(generator.nextInt(highestPossibleSetBit));
-
-            // Get a new set from a random range
-            int rangeStart = generator.nextInt(100);
-            int rangeEnd = rangeStart + generator.nextInt(100);
-
-            ChronicleBitSet b2 = b1.get(rangeStart, rangeEnd);
-
-            ChronicleBitSet b3 = createBitSet();
-            for (int x = rangeStart; x < rangeEnd; x++)
-                b3.set(x - rangeStart, b1.get(x));
-
-            // Verify their equality
-            if (!b2.equals(b3)) {
-                System.out.println("start=" + rangeStart);
-                System.out.println("end=" + rangeEnd);
-                System.out.println(b1);
-                System.out.println(b2);
-                System.out.println(b3);
-                failCount++;
-            }
-            checkEquality(b2, b3);
-        }
-
-        assertEquals(0, failCount);
-    }*/
-
     @Test
     public void testIntersects() {
         int failCount = 0;
@@ -1145,6 +1104,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
 
     /**
      * Clone the provided ChronicleBitSet using its size.
+     *
      * @param b1 the ChronicleBitSet to clone.
      * @return the cloned ChronicleBitSet.
      */
@@ -1154,7 +1114,8 @@ public class ChronicleBitSetTest extends WireTestCommon {
 
     /**
      * Clone the provided ChronicleBitSet with the given size.
-     * @param b1 the ChronicleBitSet to clone.
+     *
+     * @param b1   the ChronicleBitSet to clone.
      * @param size the size for the new cloned ChronicleBitSet.
      * @return the cloned ChronicleBitSet.
      */
@@ -1169,6 +1130,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
 
     /**
      * Create a new ChronicleBitSet with default size of 1024.
+     *
      * @return the new ChronicleBitSet.
      */
     private ChronicleBitSet createBitSet() {
@@ -1179,6 +1141,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
 
     /**
      * Create a new ChronicleBitSet with the specified size.
+     *
      * @param bits the size for the new ChronicleBitSet.
      * @return the new ChronicleBitSet.
      */
@@ -1193,7 +1156,8 @@ public class ChronicleBitSetTest extends WireTestCommon {
     /**
      * Create a ChronicleBitSet using the provided Wire and size.
      * This method uses reflection to instantiate the ChronicleBitSet.
-     * @param w the Wire for the new ChronicleBitSet.
+     *
+     * @param w    the Wire for the new ChronicleBitSet.
      * @param size the size for the new ChronicleBitSet.
      * @return the new ChronicleBitSet.
      */

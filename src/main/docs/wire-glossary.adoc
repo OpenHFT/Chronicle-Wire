@@ -1,4 +1,3 @@
-
 = Chronicle Wire Glossary
 :toc:
 :toclevels: 2
@@ -6,6 +5,7 @@
 :icons: font
 
 :sectnums:
+:lang: en-GB
 Purpose: To provide clear definitions for common terms and concepts used in Chronicle Wire and its related ecosystem.
 
 [glossary]
@@ -17,7 +17,7 @@ In Java, a form of metadata that can be added to code elements (classes, methods
 
 [glossaryentry]
 ASCII-7 ::
-A 7-bit character encoding standard representing 128 characters, primarily English letters, digits, and common punctuation. Relevant for ensuring text-based wire formats are universally readable.
+A 7-bit character encoding standard representing 128 characters, primarily English letters, digits, and common punctuation. Often used as a subset of ISO-8859-1 to keep text-based wire formats universally readable.
 
 [glossaryentry]
 AtomicLong ::

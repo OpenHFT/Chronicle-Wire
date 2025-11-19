@@ -26,13 +26,18 @@ import static org.junit.Assume.assumeFalse;
 public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Constant representing the text value for tests
-    private final String TEXT = "abc";
+    private static final String TEXT = "abc";
 
     // Flag to indicate if types should be used or not
     private final boolean useTypes;
 
     // Instance of JSONWire which will be used in the tests
     private JSONWire wire;
+
+    // Constructor to initialize the parameterized test instance with useTypes value
+    public JSONWireMiscTest(boolean useTypes) {
+        this.useTypes = useTypes;
+    }
 
     // Parameterized test data provider
     @Parameterized.Parameters(name = "useTypes={0}")
@@ -41,11 +46,6 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
                 new Object[]{true},
                 new Object[]{false}
         );
-    }
-
-    // Constructor to initialize the parameterized test instance with useTypes value
-    public JSONWireMiscTest(boolean useTypes) {
-        this.useTypes = useTypes;
     }
 
     // Setup method to initialize JSONWire with or without types based on the test instance
@@ -92,11 +92,6 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         final String actual = wire.toString();
         System.out.println("actual = " + actual);
         assertBalancedBrackets(actual);
-    }
-
-    // Enum definitions to be used for the asEnum test
-    enum A {
-        FIRST, SECOND, THIRD;
     }
 
     // Test to write an enum value to the wire and verify the written content
@@ -148,15 +143,6 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         assertBalancedBrackets(actual);
     }
 
-    // Custom class definition with an integer value for testing
-    final static class Foo {
-        final int value;
-
-        Foo(int value) {
-            this.value = value;
-        }
-    }
-
     // Test to write a sequence of custom class Foo instances to the wire and verify the written content
     @Test
     public void sequenceOfCustomClass() {
@@ -165,16 +151,6 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         final String actual = wire.toString();
         System.out.println("actual = " + actual);
         assertBalancedBrackets(actual);
-    }
-
-    // Custom class definition with a string value for testing
-    final static class Bar {
-
-        final String value;
-
-        Bar(String value) {
-            this.value = value;
-        }
     }
 
     // Test to write a custom class Bar instance to the wire and verify the written content
@@ -196,12 +172,6 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         assertBalancedBrackets(actual);
     }
 
-    // Custom class implementing Serializable interface for testing
-    static final class Ser implements Serializable {
-        private static final long serialVersionUID = 0L;
-        int foo;
-    }
-
     // Test to write a serializable class instance to the wire and verify the written content
     @Test
     public void serializable() {
@@ -212,5 +182,35 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
         final String actual = wire.toString();
         System.out.println("actual = " + actual);
         assertBalancedBrackets(actual);
+    }
+
+    // Enum definitions to be used for the asEnum test
+    enum A {
+        FIRST, SECOND, THIRD
+    }
+
+    // Custom class definition with an integer value for testing
+    static final class Foo {
+        final int value;
+
+        Foo(int value) {
+            this.value = value;
+        }
+    }
+
+    // Custom class definition with a string value for testing
+    static final class Bar {
+
+        final String value;
+
+        Bar(String value) {
+            this.value = value;
+        }
+    }
+
+    // Custom class implementing Serializable interface for testing
+    static final class Ser implements Serializable {
+        private static final long serialVersionUID = 0L;
+        int foo;
     }
 }

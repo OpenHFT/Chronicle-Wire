@@ -25,26 +25,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parameterized.class)
 public class WireToOutputStreamTest extends WireTestCommon {
 
-    // Serializable class for testing
-    public static class AnObject implements Serializable {
-        private static final long serialVersionUID = 0L;
-        long value;
-        String text;
-
-        Timestamp timestamp = new Timestamp(1234567890000L);
-
-        @Override
-        public String toString() {
-            // Override toString for easier debugging
-            return "AnObject{" +
-                    "value=" + value +
-                    ", text='" + text + '\'' +
-                    ", timestamp=" + timestamp +
-                    '}';
-        }
-    }
-
-    private WireType currentWireType;
+    private final WireType currentWireType;
 
     // Constructor to initialize the parameter
     public WireToOutputStreamTest(WireType currentWireType) {
@@ -72,10 +53,9 @@ public class WireToOutputStreamTest extends WireTestCommon {
     @Test
     // Test to ensure the Timestamp object can be serialized and deserialized correctly
     public void testTimestamp() {
-        Wire wire = currentWireType.apply(Bytes.allocateElasticOnHeap(128));
-        Timestamp ts = new Timestamp(1234567890000L);
+        final Wire wire = currentWireType.apply(Bytes.allocateElasticOnHeap(128));
+        final Timestamp ts = new Timestamp(1234567890000L);
         wire.write().object(ts);
-       // System.out.println(wire);
 
         Timestamp ts2 = wire.read()
                 .object(Timestamp.class);
@@ -85,9 +65,8 @@ public class WireToOutputStreamTest extends WireTestCommon {
     @Test
     // Test serialization and deserialization without a socket
     public void testNoSocket() {
-        Wire wire = currentWireType.apply(Bytes.allocateElasticOnHeap(128));
-        AnObject ao = writeAnObject(wire);
-       // System.out.println(wire);
+        final Wire wire = currentWireType.apply(Bytes.allocateElasticOnHeap(128));
+        final AnObject ao = writeAnObject(wire);
 
         Object ao2 = readAnObject(wire);
         assertEquals(ao.toString(), ao2.toString());
@@ -99,16 +78,15 @@ public class WireToOutputStreamTest extends WireTestCommon {
         try (ServerSocket ss = new ServerSocket(0);
              Socket s = new Socket("localhost", ss.getLocalPort());
              Socket s2 = ss.accept()) {
-            WireToOutputStream wtos = new WireToOutputStream(currentWireType, s.getOutputStream());
+            final WireToOutputStream wtos = new WireToOutputStream(currentWireType, s.getOutputStream());
 
-            Wire wire = wtos.getWire();
-            AnObject ao = writeAnObject(wire);
+            final Wire wire = wtos.getWire();
+            final AnObject ao = writeAnObject(wire);
             wtos.flush();
 
-            InputStreamToWire istw = new InputStreamToWire(currentWireType, s2.getInputStream());
-            Wire wire2 = istw.readOne();
-            Object ao2 = readAnObject(wire2);
-           // System.out.println(ao2);
+            final InputStreamToWire istw = new InputStreamToWire(currentWireType, s2.getInputStream());
+            final Wire wire2 = istw.readOne();
+            final Object ao2 = readAnObject(wire2);
             assertEquals(ao.toString(), ao2.toString());
         }
     }
@@ -134,5 +112,24 @@ public class WireToOutputStreamTest extends WireTestCommon {
         wire.getValueOut().typeLiteral(AnObject.class);
         Wires.writeMarshallable(ao, wire);
         return ao;
+    }
+
+    // Serializable class for testing
+    public static class AnObject implements Serializable {
+        private static final long serialVersionUID = 0L;
+        long value;
+        String text;
+
+        Timestamp timestamp = new Timestamp(1234567890000L);
+
+        @Override
+        public String toString() {
+            // Override toString for easier debugging
+            return "AnObject{" +
+                    "value=" + value +
+                    ", text='" + text + '\'' +
+                    ", timestamp=" + timestamp +
+                    '}';
+        }
     }
 }

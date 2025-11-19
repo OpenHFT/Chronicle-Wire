@@ -49,8 +49,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     @Test
     public void morseCode() {
         // The expected tokenized representation of the morse-code.yaml file
-        assertEquals("" +
-                        "DIRECTIVES_END \n" +
+        assertEquals("DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
                         "TEXT A\n" +
@@ -135,12 +134,11 @@ public class YamlTokeniserTest extends WireTestCommon {
                 doTest("morse-code.yaml")); // Invoke the tokenization utility and verify the output
     }
 
- // Test case for tokenizing YAML content with mixed quotes
+    // Test case for tokenising YAML content with mixed quotes
     @Test
     public void mixedQuotes() {
         // The expected tokenized representation of the mixed-quotes.yaml file
-        assertEquals("" +
-                        "DIRECTIVES_END \n" +
+        assertEquals("DIRECTIVES_END \n" +
                         "SEQUENCE_START \n" +
                         "TEXT \" \\\"\n" +
                         "TEXT ' \"\n" +

@@ -11,13 +11,12 @@ import java.io.InputStream;
 
 @Deprecated(/* Should be fully covered by YamlSpecificationTest */)
 public class YamlSpecTest extends WireTestCommon {
-    private static String DIR = "/yaml/spec/";
+    private static final String DIR = "/yaml/spec/";
 
     private static void doTest(String file, String expected) {
         Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
-            InputStream is = YamlSpecTest.class.getResourceAsStream
-                    (DIR + file);
+            InputStream is = YamlSpecTest.class.getResourceAsStream(DIR + file);
 
             Object o = Marshallable.fromString(is);
             Assert.assertNotNull(o);
@@ -33,8 +32,7 @@ public class YamlSpecTest extends WireTestCommon {
     public void test2_18Multi_lineFlowScalarsFixed() {
         Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
-            InputStream is = YamlSpecTest.class.getResourceAsStream
-                    (DIR + "2_18Multi_lineFlowScalarsFixed.yaml");
+            InputStream is = YamlSpecTest.class.getResourceAsStream(DIR + "2_18Multi_lineFlowScalarsFixed.yaml");
 
             Object o = Marshallable.fromString(is);
             Assert.assertNotNull(o);

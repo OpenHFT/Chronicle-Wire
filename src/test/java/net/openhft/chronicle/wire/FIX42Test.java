@@ -83,8 +83,7 @@ public class FIX42Test extends WireTestCommon {
     // Elastic byte buffer for writing and reading data
     @SuppressWarnings("rawtypes")
     @NotNull
-    private
-    Bytes<?> bytes = allocateElasticOnHeap();
+    private final Bytes<?> bytes = allocateElasticOnHeap();
 
     // Constructor to initialize the test parameters
     public FIX42Test(int testId, boolean fixed, boolean numericField, boolean fieldLess, String dump) {
@@ -99,48 +98,41 @@ public class FIX42Test extends WireTestCommon {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() {
         // Various dump strings representing different binary data scenarios
-        String dump_1 = "" +
-                "Symbol: EURUSD\n" +
+        String textDump1 = "Symbol: EURUSD\n" +
                 "NoMDEntries: 2\n" +
                 "MDEntryType: 52\n" +
                 "MDEntryPx: 1.1187\n" +
                 "MDEntryType: 53\n" +
                 "MDEntryPx: 1.1179\n";
-        String dump0 = "" +
-                "00000000 c6 53 79 6d 62 6f 6c e6  45 55 52 55 53 44 cb 4e ·Symbol· EURUSD·N\n" +
+        String dump0 = "00000000 c6 53 79 6d 62 6f 6c e6  45 55 52 55 53 44 cb 4e ·Symbol· EURUSD·N\n" +
                 "00000010 6f 4d 44 45 6e 74 72 69  65 73 a1 02 cb 4d 44 45 oMDEntri es···MDE\n" +
                 "00000020 6e 74 72 79 54 79 70 65  a1 34 c9 4d 44 45 6e 74 ntryType ·4·MDEnt\n" +
                 "00000030 72 79 50 78 94 b3 57 cb  4d 44 45 6e 74 72 79 54 ryPx··W· MDEntryT\n" +
                 "00000040 79 70 65 a1 35 c9 4d 44  45 6e 74 72 79 50 78 94 ype·5·MD EntryPx·\n" +
                 "00000050 ab 57                                            ·W               \n";
-        String dump1 = "" +
-                "00000000 c6 53 79 6d 62 6f 6c e6  45 55 52 55 53 44 cb 4e ·Symbol· EURUSD·N\n" +
+        String dump1 = "00000000 c6 53 79 6d 62 6f 6c e6  45 55 52 55 53 44 cb 4e ·Symbol· EURUSD·N\n" +
                 "00000010 6f 4d 44 45 6e 74 72 69  65 73 a6 02 00 00 00 cb oMDEntri es······\n" +
                 "00000020 4d 44 45 6e 74 72 79 54  79 70 65 a1 34 c9 4d 44 MDEntryT ype·4·MD\n" +
                 "00000030 45 6e 74 72 79 50 78 91  2e 90 a0 f8 31 e6 f1 3f EntryPx· .···1··?\n" +
                 "00000040 cb 4d 44 45 6e 74 72 79  54 79 70 65 a1 35 c9 4d ·MDEntry Type·5·M\n" +
                 "00000050 44 45 6e 74 72 79 50 78  91 a5 2c 43 1c eb e2 f1 DEntryPx ··,C····\n" +
                 "00000060 3f                                               ?                \n";
-        String dump2 = "" +
-                "00000000 ba 37 e6 45 55 52 55 53  44 ba 8c 02 a1 02 ba 8d ·7·EURUS D·······\n" +
+        String dump2 = "00000000 ba 37 e6 45 55 52 55 53  44 ba 8c 02 a1 02 ba 8d ·7·EURUS D·······\n" +
                 "00000010 02 a1 34 ba 8e 02 94 b3  57 ba 8d 02 a1 35 ba 8e ··4····· W····5··\n" +
                 "00000020 02 94 ab 57                                      ···W             \n";
-        String dump3 = "" +
-                "00000000 ba 37 e6 45 55 52 55 53  44 ba 8c 02 a6 02 00 00 ·7·EURUS D·······\n" +
+        String dump3 = "00000000 ba 37 e6 45 55 52 55 53  44 ba 8c 02 a6 02 00 00 ·7·EURUS D·······\n" +
                 "00000010 00 ba 8d 02 a1 34 ba 8e  02 91 2e 90 a0 f8 31 e6 ·····4·· ··.···1·\n" +
                 "00000020 f1 3f ba 8d 02 a1 35 ba  8e 02 91 a5 2c 43 1c eb ·?····5· ····,C··\n" +
                 "00000030 e2 f1 3f                                         ··?              \n";
-        String dump4 = "" +
-                "00000000 e6 45 55 52 55 53 44 a1  02 a1 34 94 b3 57 a1 35 ·EURUSD· ··4··W·5\n" +
+        String dump4 = "00000000 e6 45 55 52 55 53 44 a1  02 a1 34 94 b3 57 a1 35 ·EURUSD· ··4··W·5\n" +
                 "00000010 94 ab 57                                         ··W              \n";
-        String dump5 = "" +
-                "00000000 e6 45 55 52 55 53 44 a6  02 00 00 00 a1 34 91 2e ·EURUSD· ·····4·.\n" +
+        String dump5 = "00000000 e6 45 55 52 55 53 44 a6  02 00 00 00 a1 34 91 2e ·EURUSD· ·····4·.\n" +
                 "00000010 90 a0 f8 31 e6 f1 3f a1  35 91 a5 2c 43 1c eb e2 ···1··?· 5··,C···\n" +
                 "00000020 f1 3f                                            ·?               \n";
 
         // Return a list of objects arrays containing different test parameter combinations
         return Arrays.asList(
-                new Object[]{-1, false, false, false, dump_1},
+                new Object[]{-1, false, false, false, textDump1},
                 new Object[]{0, false, false, false, dump0},
                 new Object[]{1, true, false, false, dump1},
                 new Object[]{2, false, true, false, dump2},

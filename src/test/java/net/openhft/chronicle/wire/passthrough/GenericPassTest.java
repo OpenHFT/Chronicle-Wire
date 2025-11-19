@@ -29,8 +29,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
         sayingBroker.via("queue1").say("hello");
 
         // Assert the contents written to wire1
-        assertEquals("" +
-                        "via: queue1\n" +
+        assertEquals("via: queue1\n" +
                         "say: hello\n" +
                         "...\n",
                 wire1.toString());
@@ -43,8 +42,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
         final MethodReader reader = wire1.methodReader(microService);
         assertTrue(reader.readOne()); // Read one message
         assertFalse(reader.readOne()); // Assert no more messages
-        assertEquals("" +
-                        "via: queue1\n" +
+        assertEquals("via: queue1\n" +
                         "say: hello\n" +
                         "...\n",
                 wire2.toString());
@@ -83,8 +81,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
         assertTrue(reader.readOne()); // Read one message
         assertFalse(reader.readOne()); // Assert no more messages
         // the ... is added by the wire format.
-        assertEquals("" +
-                        "via: pass\n" +
+        assertEquals("via: pass\n" +
                         "\u0082\n" +
                         "...\n",
                 wire2.toString());
@@ -119,8 +116,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
         }
 
         // Assert the written data in wire1
-        assertEquals("" +
-                        "0b 00 00 00                                     # msg-length\n" +
+        assertEquals("0b 00 00 00                                     # msg-length\n" +
                         "b9 03 76 69 61                                  # via: (event)\n" +
                         "e4 70 61 73 73                                  # pass\n" +
                         "82                                              # opaque message\n",
@@ -134,8 +130,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
         final MethodReader reader = wire1.methodReader(microService);
         assertTrue(reader.readOne()); // Read one message
         assertFalse(reader.readOne()); // Assert no more messages
-        assertEquals("" +
-                        "0b 00 00 00                                     # msg-length\n" +
+        assertEquals("0b 00 00 00                                     # msg-length\n" +
                         "b9 03 76 69 61                                  # via: (event)\n" +
                         "e4 70 61 73 73                                  # pass\n" +
                         "82                                              # passed-through\n",
@@ -144,6 +139,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     /**
      * Interface representing a broker with a method to route actions via a named path.
+     *
      * @param <T> The type of action or behavior being routed.
      */
     interface Broker<T> {
@@ -152,6 +148,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     /**
      * Interface for routing actions using an alternative method.
+     *
      * @param <T> The type of action or behavior being routed.
      */
     interface Another<T> {

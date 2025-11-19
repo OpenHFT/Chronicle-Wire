@@ -49,7 +49,7 @@ class ScalarStrategy<E> implements SerializationStrategy {
      * @return A new instance of {@code ScalarStrategy}.
      */
     @NotNull
-    static <E > ScalarStrategy< E > of(Class< E > clazz, @NotNull BiFunction<? super E, ValueIn, E > read) {
+    static <E> ScalarStrategy<E> of(Class<E> clazz, @NotNull BiFunction<? super E, ValueIn, E> read) {
         return new ScalarStrategy<>(clazz, read);
     }
 
@@ -64,7 +64,7 @@ class ScalarStrategy<E> implements SerializationStrategy {
      * @return A new instance of {@code ScalarStrategy} for text.
      */
     @Nullable
-    static <E > ScalarStrategy< E > text(Class< E > clazz, @NotNull Function<String, E > func) {
+    static <E> ScalarStrategy<E> text(Class<E> clazz, @NotNull Function<String, E> func) {
         return new ScalarStrategy<>(clazz, (Object o, ValueIn in) -> {
             @Nullable String text = in.text();
             return text == null ? null : func.apply(text);
@@ -88,7 +88,7 @@ class ScalarStrategy<E> implements SerializationStrategy {
     @SuppressWarnings("rawtypes")
     @NotNull
     @Override
-    public <T> T newInstanceOrNull(Class<T>type) {
+    public <T> T newInstanceOrNull(Class<T> type) {
         return Jvm.uncheckedCast(ObjectUtils.newInstance(this.type));
     }
 

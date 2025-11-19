@@ -49,7 +49,6 @@ public class WireBug37Test extends WireTestCommon {
 
         // Convert the bytes back to string
         final String output = bytes.toString();
-       // System.out.println("output: [" + output + "]");
 
         // Deserialize the string back into obj3 and ensure it matches obj2
         obj3.readMarshallable(wireType.apply(Bytes.from(output)));
@@ -99,7 +98,7 @@ public class WireBug37Test extends WireTestCommon {
 
             @Nullable MarshallableObj that = (MarshallableObj) o;
 
-            return builder.toString().equals(that.builder.toString());
+            return builder.toString().contentEquals(that.builder);
         }
 
         // Hashcode derived from the content of the builder

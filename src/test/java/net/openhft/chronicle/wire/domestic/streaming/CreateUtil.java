@@ -45,19 +45,6 @@ public final class CreateUtil {
         return createThen(wireMutator);
     }
 
-    // [Commented Out Code: Create a Wire by appending it to a named Chronicle queue]
-/*
-    @NotNull
-    public static Wire createThenAppending(@NotNull final String name,
-                                           @NotNull final Consumer<? super Wire> mutator) {
-        final Consumer<SingleChronicleQueue> queueMutator = q -> {
-            ExcerptAppender excerptAppender = q.acquireAppender();
-            mutator.accept(excerptAppender);
-        };
-        return createThen(name, queueMutator);
-    }
-*/
-
     // Create a Wire and then apply a single Wire mutator to it
     @NotNull
     public static Wire createThen(@NotNull final Consumer<? super Wire> wireMutator) {

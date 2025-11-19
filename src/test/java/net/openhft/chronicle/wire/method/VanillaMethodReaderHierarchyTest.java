@@ -22,7 +22,7 @@ import static org.junit.Assert.assertTrue;
  * with different levels of class/interface hierarchy in Chronicle Wire.
  */
 public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
-    private BlockingQueue<String> queue = new ArrayBlockingQueue<>(10);
+    private final BlockingQueue<String> queue = new ArrayBlockingQueue<>(10);
 
     /**
      * Tests method writing and reading using a simple interface implementation.
@@ -82,6 +82,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
 
     /**
      * Helper method to check the method writing and reading functionality.
+     *
      * @param simple An implementation of the Simple interface.
      */
     private void checkWriteRead(Simple simple) throws InvalidMarshallableException {
@@ -122,9 +123,11 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      */
     private static class SimpleDescendantClass implements SimpleDescendant {
         private final BlockingQueue<String> queue;
+
         SimpleDescendantClass(BlockingQueue<String> queue) {
             this.queue = queue;
         }
+
         @Override
         public void hello(String name) {
             queue.add(name);
@@ -134,7 +137,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
     /**
      * Abstract class implementing SimpleDescendant.
      */
-    private static abstract class SimpleAbstractDescendantClass implements SimpleDescendant {
+    private abstract static class SimpleAbstractDescendantClass implements SimpleDescendant {
     }
 
     /**
@@ -142,9 +145,11 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      */
     private static class SimpleDescendantClass2 extends SimpleAbstractDescendantClass {
         private final BlockingQueue<String> queue;
+
         SimpleDescendantClass2(BlockingQueue<String> queue) {
             this.queue = queue;
         }
+
         @Override
         public void hello(String name) {
             queue.add(name);

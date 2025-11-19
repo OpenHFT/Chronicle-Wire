@@ -3,7 +3,6 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
@@ -17,35 +16,6 @@ import static org.junit.Assume.assumeFalse;
  * from a Wire-based data structure, ensuring they can be read in the correct sequence.
  */
 public class ReadOneTest extends WireTestCommon {
-
-    // Definition for MyDto class, used for testing reading data from the Wire
-    static class MyDto extends SelfDescribingMarshallable {
-        String data;
-    }
-
-    // Listener interface for MyDto to react when a MyDto is read
-    interface MyDtoListener {
-        void myDto(MyDto dto);
-    }
-
-    // Definition for SnapshotDTO class, used to represent snapshots in the test
-    static class SnapshotDTO extends SelfDescribingMarshallable {
-        String data;
-
-        public String data() {
-            return data;
-        }
-
-        SnapshotDTO data(String data) {
-            this.data = data;
-            return this;
-        }
-    }
-
-    // Listener interface for SnapshotDTO to react when a SnapshotDTO is read
-    interface SnapshotListener {
-        void snapshot(SnapshotDTO dto);
-    }
 
     // Basic test for reading without scanning the wire
     @Test
@@ -76,7 +46,7 @@ public class ReadOneTest extends WireTestCommon {
         };
 
         MyDtoListener myOut = wire.methodWriterBuilder(MyDtoListener.class).build();
-        SnapshotListener snapshotOut = wire.methodWriterBuilder(SnapshotListener.class).build();
+        final SnapshotListener snapshotOut = wire.methodWriterBuilder(SnapshotListener.class).build();
 
         ((VanillaMessageHistory) MessageHistory.get()).useBytesMarshallable(false);
         // Simulating different historical records and writes to the Wire
@@ -140,5 +110,34 @@ public class ReadOneTest extends WireTestCommon {
         messageHistory.reset();
         messageHistory.addSource(value, value);
         return messageHistory;
+    }
+
+    // Listener interface for MyDto to react when a MyDto is read
+    interface MyDtoListener {
+        void myDto(MyDto dto);
+    }
+
+    // Listener interface for SnapshotDTO to react when a SnapshotDTO is read
+    interface SnapshotListener {
+        void snapshot(SnapshotDTO dto);
+    }
+
+    // Definition for MyDto class, used for testing reading data from the Wire
+    static class MyDto extends SelfDescribingMarshallable {
+        String data;
+    }
+
+    // Definition for SnapshotDTO class, used to represent snapshots in the test
+    static class SnapshotDTO extends SelfDescribingMarshallable {
+        String data;
+
+        public String data() {
+            return data;
+        }
+
+        SnapshotDTO data(String data) {
+            this.data = data;
+            return this;
+        }
     }
 }

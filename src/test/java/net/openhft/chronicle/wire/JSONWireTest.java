@@ -45,7 +45,6 @@ public class JSONWireTest extends WireTestCommon {
 
         // Perform the copying operations
         json.copyTo(binary);
-//        System.out.println(binary.bytes().toHexString());
         binary.copyTo(json2);
 
         // Assertions to make sure the copying was successful
@@ -53,12 +52,10 @@ public class JSONWireTest extends WireTestCommon {
                 str.toString()
                         .replaceAll("\\.0(\\D)", "$1")
                         .replaceAll(" ?\\[ ?", "[")
-                        .replaceAll(" ?\\] ?", "]")
-                ,
+                        .replaceAll(" ?\\] ?", "]"),
                 json2.toString()
                         .replaceAll(" ?\\[ ?", "[")
-                        .replaceAll(" ?\\] ?", "]")
-        );
+                        .replaceAll(" ?\\] ?", "]"));
         hexDump.releaseLast();
     }
 
@@ -84,12 +81,10 @@ public class JSONWireTest extends WireTestCommon {
                 str.toString()
                         .replaceAll("\\.0(\\D)", "$1")
                         .replaceAll(" ?\\[ ?", "[")
-                        .replaceAll(" ?\\] ?", "]")
-                ,
+                        .replaceAll(" ?\\] ?", "]"),
                 json2.toString()
                         .replaceAll(" ?\\[ ?", "[")
-                        .replaceAll(" ?\\] ?", "]")
-        );
+                        .replaceAll(" ?\\] ?", "]"));
     }
 
     // Utility function to create a JSONWire from a string
@@ -287,7 +282,6 @@ public class JSONWireTest extends WireTestCommon {
                     "}\n", lists1.toString());
             final String str = JSON.asString(lists1);
             testCopyToBinaryAndBack(str);
-//            testCopyToYAMLAndBack(str);
         } finally {
             // Release occupied memory
             wire.bytes().releaseLast();
@@ -386,7 +380,7 @@ public class JSONWireTest extends WireTestCommon {
         // Assert that the extracted content matches the expected format
         assertEquals("[320, {as=[[32905.50000, 1.60291699, 1625822573.857656], [32905.60000, 0.10415889, 1625822573.194909]], bs=[[32893.60000, 0.15042948, 1625822574.220475]]}, book-10]", "" + list);
         testCopyToBinaryAndBack(str); // Test binary conversion and back with the provided JSON string
-        testCopyToYAMLAndBack('{'+str+'}');
+        testCopyToYAMLAndBack('{' + str + '}');
     }
 
     @Test
@@ -396,12 +390,6 @@ public class JSONWireTest extends WireTestCommon {
         // A complex JSON string causing some parsing issues
         String str = "[320,{\"as\":[[\"32905.50000\",\"1.60291699\",\"1625822573.857656\"],[\"32905.60000\",\"0.10415889\",\"1625822573.194909\"]],\"bs\":[[\"32893.60000\",\"0.15042948\",\"1625822574.220475\"]]},\"book-10\"]";
 
-        // A simple version of JSON str for testing purposes (commented out)
-//        String str = "[1,{\"a\":[2,3]}]";
-
-        // A different simple JSON string that seems to work
-//        String str = "[1,2,3,\"c\"]";
-
         final Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer(); // Create an elastic byte buffer
         byteBufferBytes.append(str); // Append the JSON string to the byte buffer
 
@@ -410,7 +398,7 @@ public class JSONWireTest extends WireTestCommon {
         final List<Object> list = jsonWire.getValueIn().list(Object.class); // Extract the content of the wire into a list
         assertNotNull(list); // Assert that the extracted list is not null
         testCopyToBinaryAndBack(str); // Test binary conversion and back with the JSON string
-        testCopyToYAMLAndBack('{'+str+'}');
+        testCopyToYAMLAndBack('{' + str + '}');
         byteBufferBytes.releaseLast(); // Release the last buffer to free up resources
     }
 
@@ -438,13 +426,6 @@ public class JSONWireTest extends WireTestCommon {
         assertEquals("{\"field1\":1234,\"field2\":456,\"field3\":[ ],\"field4\":[\"abc\",\"xyz\" ]}", JSON.asString(f));
     }
 
-    // A static class to demonstrate a holder of maps with different types of numeric keys and string values
-    static class MapWithIntegerKeysHolder extends SelfDescribingMarshallable {
-        Map<Integer, String> intMap = new LinkedHashMap<>(); // A map with integer keys
-        Map<Long, String> longMap = new LinkedHashMap<>();   // A map with long keys
-        Map<Double, String> doubleMap = new LinkedHashMap<>(); // A map with double keys
-    }
-
     @Test
     public void nestedMapWithIntegerKeys() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
@@ -459,8 +440,7 @@ public class JSONWireTest extends WireTestCommon {
         mh.doubleMap.put(2.56, "number");
         final String str = JSON.asString(mh); // Convert the populated object to its JSON string representation
         // Assert the generated JSON string matches the expected JSON string
-        assertEquals("" +
-                        "{\"intMap\":{\"1111\":\"ones\",\"2222\":\"twos\"},\"longMap\":{\"888888888888\":\"eights\",\"999999999999\":\"nines\"},\"doubleMap\":{\"1.28\":\"number\",\"2.56\":\"number\"}}",
+        assertEquals("{\"intMap\":{\"1111\":\"ones\",\"2222\":\"twos\"},\"longMap\":{\"888888888888\":\"eights\",\"999999999999\":\"nines\"},\"doubleMap\":{\"1.28\":\"number\",\"2.56\":\"number\"}}",
                 str);
         // Convert the JSON string back to a new instance of MapWithIntegerKeysHolder
         MapWithIntegerKeysHolder mh2 = JSON.fromString(MapWithIntegerKeysHolder.class, str);
@@ -529,6 +509,47 @@ public class JSONWireTest extends WireTestCommon {
         String str = "{\"a\":{\"@Mapped\":{\"b\":\"c\",\"d\":123.4}},\"e\":{\"@Scalar\":\"Value\"},\"f\":{\"@Mapped2\":{\"b\":\"c\"}},\"g\":{\"@Scalar2\":12345.6}}";
         testCopyToBinaryAndBack(str);
         testCopyToYAMLAndBack(str);
+    }
+
+    @Test
+    public void typeLiteral1() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
+        String expected = "{\"@net.openhft.chronicle.wire.JSONWireTest$DtoWithClassReference\":{\"implClass\":{\"@type\":\"net.openhft.chronicle.wire.JSONWireTest\"},\"bool\":false}}";
+        Object o = WireType.JSON_ONLY.fromString(expected);
+        String json = WireType.JSON_ONLY.asString(o);
+        Assert.assertEquals(expected, json);
+    }
+
+    @Test
+    public void typeLiteralTest2() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
+        DtoWithClassReference dtoWithClassReference = new DtoWithClassReference();
+        dtoWithClassReference.implClass = this.getClass();
+        String json = WireType.JSON_ONLY.asString(dtoWithClassReference);
+        assertEquals("{\"@net.openhft.chronicle.wire.JSONWireTest$DtoWithClassReference\"" +
+                        ":{\"implClass\":{\"@type\":\"net.openhft.chronicle.wire.JSONWireTest\"},\"bool\":false}}",
+                json);
+        assertEquals(dtoWithClassReference, WireType.JSON_ONLY.fromString(json));
+    }
+
+    @Test
+    public void testNullListCollectionWithMultipleFieldsJson() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
+        ClassAliasPool.CLASS_ALIASES.addAlias(CollectionContainer.class);
+        CollectionContainer container = WireType.JSON_ONLY.fromString("{ \"@CollectionContainer\": { \"collection\": [null, \"testValue\"] } }");
+        Object[] array = container.collection.toArray();
+        Assert.assertNull(array[0]);
+        Assert.assertEquals("testValue", array[1]);
+    }
+
+    // A static class to demonstrate a holder of maps with different types of numeric keys and string values
+    static class MapWithIntegerKeysHolder extends SelfDescribingMarshallable {
+        Map<Integer, String> intMap = new LinkedHashMap<>(); // A map with integer keys
+        Map<Long, String> longMap = new LinkedHashMap<>();   // A map with long keys
+        Map<Double, String> doubleMap = new LinkedHashMap<>(); // A map with double keys
     }
 
     // A class to represent a nested structure for testing JSON serialization
@@ -630,11 +651,19 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     // Class to represent an entity with two fields and two lists of strings
+    // Don't reorder these fields, or it will break testQuotedFieldsEmptySequence
     private static final class SimpleTwoLists implements Marshallable {
         int field1; // Integer field 1
         int field2; // Integer field 2
         final List<String> field3 = new ArrayList<>(); // List of strings for field3
         final List<String> field4 = new ArrayList<>(); // List of strings for field4
+
+        // Helper method to read and add string values from the reader to a list
+        private static void readList(SimpleTwoLists record, List<String> data, ValueIn reader) {
+            while (reader.hasNextSequenceItem()) { // Looping through sequence items
+                data.add(reader.text()); // Adding each text item to the list
+            }
+        }
 
         // Method to read marshallable data from the wire input
         @Override
@@ -644,52 +673,11 @@ public class JSONWireTest extends WireTestCommon {
             wire.read(() -> "field3").sequence(this, field3, SimpleTwoLists::readList); // Reading sequence for field3
             wire.read(() -> "field4").sequence(this, field4, SimpleTwoLists::readList); // Reading sequence for field4
         }
-
-        // Helper method to read and add string values from the reader to a list
-        private static void readList(SimpleTwoLists record, List<String> data, ValueIn reader) {
-            while (reader.hasNextSequenceItem()) { // Looping through sequence items
-                data.add(reader.text()); // Adding each text item to the list
-            }
-        }
-    }
-
-    @Test
-    public void typeLiteral1() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
-
-        String expected = "{\"@net.openhft.chronicle.wire.JSONWireTest$DtoWithClassReference\":{\"implClass\":{\"@type\":\"net.openhft.chronicle.wire.JSONWireTest\"},\"bool\":false}}";
-        Object o = WireType.JSON_ONLY.fromString(expected);
-        String json = WireType.JSON_ONLY.asString(o);
-        Assert.assertEquals(expected, json);
-    }
-
-    @Test
-    public void typeLiteralTest2() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
-
-        DtoWithClassReference dtoWithClassReference = new DtoWithClassReference();
-        dtoWithClassReference.implClass = this.getClass();
-        String json = WireType.JSON_ONLY.asString(dtoWithClassReference);
-        assertEquals("{\"@net.openhft.chronicle.wire.JSONWireTest$DtoWithClassReference\"" +
-                        ":{\"implClass\":{\"@type\":\"net.openhft.chronicle.wire.JSONWireTest\"},\"bool\":false}}",
-                json);
-        assertEquals(dtoWithClassReference, WireType.JSON_ONLY.fromString(json));
     }
 
     private static class DtoWithClassReference extends SelfDescribingMarshallable {
         private Class<?> implClass;
         private boolean bool;
-    }
-
-    @Test
-    public void testNullListCollectionWithMultipleFieldsJson() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
-
-        ClassAliasPool.CLASS_ALIASES.addAlias(CollectionContainer.class);
-        CollectionContainer container = WireType.JSON_ONLY.fromString("{ \"@CollectionContainer\": { \"collection\": [null, \"testValue\"] } }");
-        Object[] array = container.collection.toArray();
-        Assert.assertNull(array[0]);
-        Assert.assertEquals("testValue", array[1]);
     }
 
     private static class CollectionContainer {

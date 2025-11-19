@@ -305,13 +305,11 @@ public final class StreamsUtil {
             if (next != null) {
                 return true;
             }
-            long lastIndex = -1;
             for (; ; ) {
                 try (final DocumentContext dc = tailer.readingDocument()) {
                     final Wire wire = dc.wire();
                     if (dc.isPresent() && wire != null) {
-                        lastIndex = dc.index();
-                        next = extractor.extract(wire, lastIndex);
+                        next = extractor.extract(wire, dc.index());
                         if (next != null) {
                             return true;
                         }
@@ -370,13 +368,11 @@ public final class StreamsUtil {
             if (next != Long.MIN_VALUE) {
                 return true;
             }
-            long lastIndex = -1;
             for (; ; ) {
                 try (final DocumentContext dc = tailer.readingDocument()) {
                     final Wire wire = dc.wire();
                     if (dc.isPresent() && wire != null) {
-                        lastIndex = dc.index();
-                        next = extractor.extractAsLong(wire, lastIndex);
+                        next = extractor.extractAsLong(wire, dc.index());
                         if (next != Long.MIN_VALUE) {
                             return true;
                         }
@@ -435,13 +431,11 @@ public final class StreamsUtil {
             if (Double.isNaN(next)) {
                 return true;
             }
-            long lastIndex = -1;
             for (; ; ) {
                 try (final DocumentContext dc = tailer.readingDocument()) {
                     final Wire wire = dc.wire();
                     if (dc.isPresent() && wire != null) {
-                        lastIndex = dc.index();
-                        next = extractor.extractAsDouble(wire, lastIndex);
+                        next = extractor.extractAsDouble(wire, dc.index());
                         if (!Double.isNaN(next)) {
                             return true;
                         }

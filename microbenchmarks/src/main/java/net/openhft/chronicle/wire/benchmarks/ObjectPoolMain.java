@@ -22,6 +22,8 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+
 @State(Scope.Thread)
 public class ObjectPoolMain {
 
@@ -35,7 +37,7 @@ public class ObjectPoolMain {
     private final Bit8StringInterner si = new Bit8StringInterner(64);
 
     private static BytesStore<?, Void> BytesStoreFrom(String s) {
-        return BytesStore.nativeStoreFrom(s.getBytes(StandardCharsets.ISO_8859_1));
+        return BytesStore.nativeStoreFrom(s.getBytes(ISO_8859_1));
     }
 
     public static void main(String... args) throws RunnerException, InvocationTargetException, IllegalAccessException {

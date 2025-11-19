@@ -19,11 +19,13 @@ import org.junit.runners.Parameterized;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
+import static java.nio.charset.StandardCharsets.*;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(value = Parameterized.class)
@@ -55,6 +57,16 @@ public class JSON222Test extends WireTestCommon {
         // Sort the list of files based on a specific part of their names
         list.sort(Comparator.comparingInt(f -> Integer.parseInt(((String) f[0]).split("[_.]")[1])));
         return list;
+    }
+
+    // Utility method to parse a string using the SnakeYaml library
+    private static void parseWithSnakeYaml(@NotNull String s) {
+        try {
+            @NotNull Yaml yaml = new Yaml();
+            yaml.load(new StringReader(s));
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     // Test the JSON content using TextWire type
@@ -115,21 +127,13 @@ public class JSON222Test extends WireTestCommon {
                 // If the test iteration is expected to fail, we check the expected output against a reference file
                 @NotNull String path = file.getPath();
                 @NotNull final File file2 = new File(path.replaceAll("\\b._", "e-").replaceAll("\\.json", ".yaml"));
-
-/*
-               // System.out.println(file2 + "\n" + new String(bytes, "UTF-8") + "\n" + bytes2);
-                try (OutputStream out2 = new FileOutputStream(file2)) {
-                    out2.write(bytes2.toByteArray());
-                }
-*/
-
                 if (!file2.exists())
                     throw new AssertionError("Expected to fail\n" + bytes2);
                 @NotNull byte[] bytes4 = new byte[(int) file2.length()];
                 try (@NotNull InputStream in = new FileInputStream(file2)) {
                     in.read(bytes4);
                 }
-                String expected = new String(bytes4, "UTF-8");
+                String expected = new String(bytes4, UTF_8);
                 if (expected.contains("\r\n"))
                     expected = expected.replaceAll("\r\n", "\n");
                 String actual = bytes2.toString();
@@ -144,16 +148,6 @@ public class JSON222Test extends WireTestCommon {
             // Release resources to avoid memory leaks
             bytes2.releaseLast();
             bytes3.releaseLast();
-        }
-    }
-
-    // Utility method to parse a string using the SnakeYaml library
-    private static void parseWithSnakeYaml(@NotNull String s) {
-        try {
-            @NotNull Yaml yaml = new Yaml();
-            yaml.load(new StringReader(s));
-        } catch (Exception e) {
-            throw e;
         }
     }
 }

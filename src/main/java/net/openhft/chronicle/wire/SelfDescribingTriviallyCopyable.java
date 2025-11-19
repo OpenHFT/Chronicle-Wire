@@ -61,7 +61,7 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
     @Override
     public void readMarshallable(BytesIn<?> bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         int description0 = bytes.readInt();
-        if (description0 != $description())
+        if (description0 != description)
             carefulCopy(bytes, description0);
         else
             bytes.unsafeReadObject(this, $start(), $length());
@@ -98,7 +98,7 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
             throw new IllegalStateException("Invalid description: " + Integer.toHexString(description0) + ", length: " + length + ", remaining: " + in.readRemaining());
 
         // Copy long values from the input source to the object's memory
-        int longs = $description() >>> 24; // max 255
+        int longs = description >>> 24; // max 255
         for (int i = 0; i < Math.max(longs, longs0); i++) {
             long value = 0;
             if (i < longs0)
@@ -110,7 +110,7 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
         }
 
         // Copy int values from the input source to the object's memory
-        int ints = ($description() >>> 16) & 0xFF; // max 255
+        int ints = (description >>> 16) & 0xFF; // max 255
         for (int i = 0; i < Math.max(ints, ints0); i++) {
             int value = 0;
             if (i < ints0)
@@ -122,7 +122,7 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
         }
 
         // Copy short values from the input source to the object's memory
-        int shorts = ($description() >>> 8) & 0x7F; // max 127
+        int shorts = (description >>> 8) & 0x7F; // max 127
         for (int i = 0; i < Math.max(shorts, shorts0); i++) {
             short value = 0;
             if (i < shorts0)
@@ -134,7 +134,7 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
         }
 
         // Copy byte values from the input source to the object's memory
-        int bytes = $description() & 0xFF; // max 255
+        int bytes = description & 0xFF; // max 255
         for (int i = 0; i < Math.max(bytes, bytes0); i++) {
             byte value = 0;
             if (i < bytes0)
@@ -152,7 +152,7 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
      */
     @Override
     public void writeMarshallable(BytesOut<?> bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
-        bytes.writeInt($description());
+        bytes.writeInt(description);
         bytes.unsafeWriteObject(this, $start(), $length());
     }
 }

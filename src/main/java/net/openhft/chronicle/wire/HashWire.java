@@ -709,7 +709,6 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         /** No-op. */
         @Override
         public void elementSeparator() {
-
         }
     }
 }

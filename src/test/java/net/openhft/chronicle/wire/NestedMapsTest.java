@@ -97,8 +97,7 @@ public class NestedMapsTest extends WireTestCommon {
                 break;
             case BINARY:
                 // Expected serialized format for BINARY wire type
-                assertEquals("" +
-                        "--- !!data #binary\n" +
+                assertEquals("--- !!data #binary\n" +
                         "mapped: !net.openhft.chronicle.wire.NestedMapsTest$Mapped {\n" +
                         "  words: [\n" +
                         "    A,\n" +
@@ -132,8 +131,7 @@ public class NestedMapsTest extends WireTestCommon {
                 break;
             case FIELDLESS_BINARY:
                 // Expected serialized format for FIELDLESS_BINARY wire type
-                assertEquals("" +
-                        "--- !!data #binary\n" +
+                assertEquals("--- !!data #binary\n" +
                         "mapped: !net.openhft.chronicle.wire.NestedMapsTest$Mapped [\n" +
                         "  [\n" +
                         "    A,\n" +
@@ -164,6 +162,9 @@ public class NestedMapsTest extends WireTestCommon {
                         "    two point two: 2.2\n" +
                         "  }\n" +
                         "]\n", Wires.fromSizePrefixedBlobs(wire));
+                break;
+            default:
+                // Other wire types do not have deterministic string forms to assert.
                 break;
         }
 
@@ -236,6 +237,9 @@ public class NestedMapsTest extends WireTestCommon {
                 break;
             case FIELDLESS_BINARY:
                 assertEquals("[pos: 0, rlim: 119, wlim: 2147483632, cap: 2147483632 ] ǁ\\u0082*٠٠٠áAåquickåbrownãfoxåjumpsäoverãtheälazyãdog\\u0082⒕٠٠٠¡⒈¡⒉¡⒉¡⒊¡⒌¡⒏¡⒔\\u0082⒙٠٠٠¹⒊ayeãAAA¹⒊beeãBBB\\u0082\\u0019٠٠٠¹⒊one¡⒈¹⒔two point two\\u0092Ü⒈‡٠٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
+                break;
+            default:
+                // Other wire types do not have deterministic string forms to assert.
                 break;
         }
 

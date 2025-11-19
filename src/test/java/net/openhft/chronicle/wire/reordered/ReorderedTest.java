@@ -31,6 +31,7 @@ public class ReorderedTest extends WireTestCommon {
     // Static instances of OuterClass for test setup
     private static final OuterClass outerClass1 = new OuterClass();
     private static final OuterClass outerClass2 = new OuterClass();
+    private static final Collection<NestedReadSubset> nestedReadSubsets;
 
     // Static initialization block to configure the OuterClass instances for testing
     static {
@@ -62,7 +63,6 @@ public class ReorderedTest extends WireTestCommon {
     // Function to dynamically select the wire type for each test iteration
     @SuppressWarnings("rawtypes")
     private final Function<Bytes<?>, Wire> wireType;
-    private static final Collection<NestedReadSubset> nestedReadSubsets;
 
     // Constructor accepting the wire type function
     @SuppressWarnings("rawtypes")
@@ -102,7 +102,6 @@ public class ReorderedTest extends WireTestCommon {
             wire.bytes().writeUnsignedByte('\n');
         wire.writeEventName(() -> "test2").marshallable(outerClass2);
 
-       // System.out.println(bytes.readByte(0) < 0 ? bytes.toHexString() : bytes.toString());
         @NotNull StringBuilder sb = new StringBuilder();
         @NotNull OuterClass outerClass0 = new OuterClass();
 
@@ -155,8 +154,6 @@ public class ReorderedTest extends WireTestCommon {
             wire.write("b").int32(i * 11);
             wire.write("c").int32(i * 111);
 
-           // System.out.println(wire);
-           // Reading back the fields in a different order and asserting
             assertEquals(i * 111, wire.read(() -> "c").int32());
             assertEquals(i, wire.read(() -> "a").int32());
             assertEquals(i * 11, wire.read(() -> "b").int32());

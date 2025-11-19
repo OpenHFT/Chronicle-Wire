@@ -10,12 +10,10 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class GenerateMethodWriterMultiInterfaceTest extends WireTestCommon {
-
-    interface First { void one(int v); }
-    interface Second { void two(String s); }
 
     @Test
     public void builderSupportsAdditionalInterfaces() {
@@ -32,16 +30,30 @@ public class GenerateMethodWriterMultiInterfaceTest extends WireTestCommon {
 
         List<String> seen = new ArrayList<>();
         MethodReader reader = wire.methodReader(new First() {
-            @Override public void one(int v) { seen.add("one:" + v); }
+            @Override
+            public void one(int v) {
+                seen.add("one:" + v);
+            }
         }, new Second() {
-            @Override public void two(String s) { seen.add("two:" + s); }
+            @Override
+            public void two(String s) {
+                seen.add("two:" + s);
+            }
         });
         while (reader.readOne()) {
             // drain
+            continue;
         }
         assertEquals(2, seen.size());
         assertTrue(seen.get(0).startsWith("two:"));
         assertTrue(seen.get(1).startsWith("one:"));
     }
-}
 
+    interface First {
+        void one(int v);
+    }
+
+    interface Second {
+        void two(String s);
+    }
+}

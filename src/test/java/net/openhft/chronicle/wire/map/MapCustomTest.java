@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test suite for custom map implementations and their serialization.
@@ -35,7 +35,14 @@ public class MapCustomTest extends WireTestCommon {
         MapsHolder<Integer> result = Wires.deepCopy(mapsHolder);
 
         // Assert that the copied object is equivalent to the original
-        assertTrue(result.equals(mapsHolder));
+        assertEquals(result, mapsHolder);
+    }
+
+    /**
+     * Marked map interface that extends Map and Closeable.
+     */
+    interface MarkedMap<V> extends Map<Integer, V>, Closeable {
+        // No-op.
     }
 
     /**
@@ -94,14 +101,14 @@ public class MapCustomTest extends WireTestCommon {
     /**
      * Custom HashMap that contains an additional generic field.
      */
-    public static class IntMap<IGNORE, V> extends HashMap<Integer, V> {
-        public IGNORE me;
+    public static class IntMap<I, V> extends HashMap<Integer, V> {
+        public I me;
     }
 
     /**
      * Extended version of IntMap.
      */
-    public static class IntSuperMap<SUPER, SELF> extends IntMap<Function<Integer, SELF>, SUPER> {
+    public static class IntSuperMap<S, T> extends IntMap<Function<Integer, T>, S> {
         // No-op.
     }
 
@@ -132,13 +139,6 @@ public class MapCustomTest extends WireTestCommon {
      */
     @SuppressWarnings("rawtypes")
     public static class GeneralMap extends IntMap {
-        // No-op.
-    }
-
-    /**
-     * Marked map interface that extends Map and Closeable.
-     */
-    interface MarkedMap<V> extends Map<Integer, V>, Closeable {
         // No-op.
     }
 }

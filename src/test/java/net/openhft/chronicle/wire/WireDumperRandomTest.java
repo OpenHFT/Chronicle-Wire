@@ -50,9 +50,6 @@ public class WireDumperRandomTest {
             // Check whether the string starts with the predefined starting string.
             if (!string.startsWith(starts)) {
                 count++;
-//                if (count++ < 10)
-//                    System.out.println("i: " + i + " " + string);
-//                assertEquals("i: " + i + " " + string, starts, string.substring(0, starts.length()));
             }
         }
 

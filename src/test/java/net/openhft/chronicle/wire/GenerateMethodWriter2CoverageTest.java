@@ -12,9 +12,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class GenerateMethodWriter2CoverageTest extends WireTestCommon {
 
@@ -38,6 +36,7 @@ public class GenerateMethodWriter2CoverageTest extends WireTestCommon {
             MethodReader reader = wire.methodReader(recorder);
             while (reader.readOne()) {
                 // drain
+                continue;
             }
 
             List<String> expected = new ArrayList<>();

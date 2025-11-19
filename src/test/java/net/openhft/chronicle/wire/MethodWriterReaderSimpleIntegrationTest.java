@@ -10,21 +10,14 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Small end‑to‑end flow using MethodWriter and VanillaMethodReader to
  * exercise method dispatch and basic argument serialisation.
  */
 public class MethodWriterReaderSimpleIntegrationTest extends WireTestCommon {
-
-    interface Echo {
-        void one(int v);
-
-        void two(String t);
-
-        void three(long a, double b);
-    }
 
     @Test
     public void roundTrip() {
@@ -38,20 +31,37 @@ public class MethodWriterReaderSimpleIntegrationTest extends WireTestCommon {
         List<String> seen = new ArrayList<>();
         MethodReader reader = w.methodReader(new Echo() {
             @Override
-            public void one(int v) { seen.add("one:" + v); }
+            public void one(int v) {
+                seen.add("one:" + v);
+            }
+
             @Override
-            public void two(String t) { seen.add("two:" + t); }
+            public void two(String t) {
+                seen.add("two:" + t);
+            }
+
             @Override
-            public void three(long a, double b) { seen.add("three:" + a + "," + b); }
+            public void three(long a, double b) {
+                seen.add("three:" + a + "," + b);
+            }
         });
 
         while (reader.readOne()) {
             // loop until exhausted
+            continue;
         }
 
         assertEquals(3, seen.size());
         assertTrue(seen.get(0).startsWith("one:"));
         assertTrue(seen.get(1).startsWith("two:"));
         assertTrue(seen.get(2).startsWith("three:"));
+    }
+
+    interface Echo {
+        void one(int v);
+
+        void two(String t);
+
+        void three(long a, double b);
     }
 }

@@ -95,8 +95,7 @@ public class NestedClassTest extends WireTestCommon {
             wire.bytes().writeUnsignedByte('\n');
         wire.writeEventName(() -> "test2").marshallable(outerClass2);
 
-       // System.out.println(bytes.readByte(0) < 0 ? bytes.toHexString() : bytes.toString());
-       // StringBuilder to capture event names during reading.
+        // StringBuilder to capture event names during reading.
         @NotNull StringBuilder sb = new StringBuilder();
         @NotNull OuterClass outerClass0 = new OuterClass();
 

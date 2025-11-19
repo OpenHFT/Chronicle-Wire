@@ -450,17 +450,6 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     }
 
     /**
-     * Converts the first character of a given string to uppercase and the rest to lowercase.
-     *
-     * @param name The input string to be converted.
-     * @return The converted string with its first character in uppercase and the rest in lowercase.
-     */
-    @NotNull
-    private String toFirstCapCase(@NotNull String name) {
-        return Character.toUpperCase(name.charAt(0)) + name.substring(1).toLowerCase();
-    }
-
-    /**
      * The {@code CallSupplierInvocationHandler} class is an implementation of {@link InvocationHandler}
      * designed to act as a proxy for method calls. If the associated {@link UpdateInterceptor} returns
      * {@code false}, an {@code AbortCallingProxyException} is thrown, indicating that the proxy

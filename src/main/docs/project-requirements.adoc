@@ -2,6 +2,7 @@
 :toc:
 :sectnums:
 :source-highlighter: rouge
+:lang: en-GB
 
 To outline the detailed requirements for creating comprehensive and technically rich documentation for the Chronicle Wire library, aimed at improving user understanding, adoption, and effective utilization.
 
@@ -269,3 +270,15 @@ Benchmark Data :: Performance comparisons will rely on publicly available benchm
 
 Source Document :: The initial technical review document that prompted this requirements specification serves as a foundational research base.
 
+== Related documentation
+
+The following companion documents provide deeper detail for specific areas:
+
+* link:index.adoc[Chronicle Wire Documentation Index]
+* link:wire-architecture.adoc[Chronicle Wire: Architectural Overview]
+* link:functional-requirements.adoc[Chronicle Wire Functional Requirements]
+* link:data-requirements.adoc[Chronicle Wire Data Requirements]
+* link:operational-requirements.adoc[Chronicle Wire Operational Requirements]
+* link:security-review.adoc[Chronicle Wire Security Review]
+* link:ops-scenarios.adoc[Chronicle Wire Operational Scenarios]
+* link:runbooks/wire-runtime-health.adoc[Chronicle Wire Runtime Health Runbook]

@@ -12,6 +12,15 @@ import java.math.BigInteger;
 import java.time.*;
 import java.util.UUID;
 
+/**
+ * A simple dynamic enumeration used in ScalarValues.
+ */
+enum TestEnum {
+    ONE,   // Represents the first value
+    TWO,   // Represents the second value
+    THREE  // Represents the third value
+}
+
 @SuppressWarnings("rawtypes")
 public class ScalarValues extends SelfDescribingMarshallable {
     private boolean flag;
@@ -45,8 +54,6 @@ public class ScalarValues extends SelfDescribingMarshallable {
     private File file;
     private TestEnum dynamicEnum;
 
-   // Path path;
-
     public ScalarValues() {
     }
 
@@ -57,7 +64,7 @@ public class ScalarValues extends SelfDescribingMarshallable {
         ch = (char) i;
         this.i = i;
         f = i;
-        l = i * i;
+        l = (long) i * i;
         d = i * i;
 
         flag2 = i != 0;
@@ -82,12 +89,4 @@ public class ScalarValues extends SelfDescribingMarshallable {
         file = new File("/tmp/" + i);
         dynamicEnum = TestEnum.THREE;
     }
-}
-/**
- * A simple dynamic enumeration used in ScalarValues.
- */
-enum TestEnum {
-    ONE,   // Represents the first value
-    TWO,   // Represents the second value
-    THREE  // Represents the third value
 }

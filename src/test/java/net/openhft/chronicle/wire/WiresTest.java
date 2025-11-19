@@ -18,9 +18,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.util.Arrays.asList;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.Assert.*;
@@ -194,18 +194,18 @@ public class WiresTest extends WireTestCommon {
         says.say("Two");
         says.say("Three");
 
-        assertEquals("" +
-                "---\n" +
-                "say: One\n" +
-                "...\n" +
-                "---\n" +
-                "say: Two\n" +
-                "...\n" +
-                "---\n" +
-                "say: Three\n" +
-                "...\n",
-                new String(baos.toByteArray(), StandardCharsets.ISO_8859_1));
+        assertEquals("---\n" +
+                        "say: One\n" +
+                        "...\n" +
+                        "---\n" +
+                        "say: Two\n" +
+                        "...\n" +
+                        "---\n" +
+                        "say: Three\n" +
+                        "...\n",
+                new String(baos.toByteArray(), ISO_8859_1));
     }
+
     @Test
     public void replay() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -221,10 +221,9 @@ public class WiresTest extends WireTestCommon {
                 "...\n" +
                 "---\n" +
                 "say: Three\n" +
-                "...\n",says);
+                "...\n", says);
 
-        assertEquals("" +
-                "---\n" +
+        assertEquals("---\n" +
                 "say: zero\n" +
                 "...\n" +
                 "---\n" +
@@ -235,7 +234,7 @@ public class WiresTest extends WireTestCommon {
                 "...\n" +
                 "---\n" +
                 "say: Three\n" +
-                "...\n", new String(baos.toByteArray(), StandardCharsets.ISO_8859_1));
+                "...\n", new String(baos.toByteArray(), ISO_8859_1));
     }
 
     @Test
@@ -246,32 +245,6 @@ public class WiresTest extends WireTestCommon {
         assumeFalse(Jvm.getValue(bcm.bytesField, "usedByThread") == null);
         BytesContainerMarshallable bcm2 = bcm.deepCopy();
         assertNull(Jvm.getValue(bcm2.bytesField, "usedByThread"));
-    }
-
-    interface ThreeValues {
-        ThreeValues string(String s);
-
-        String string();
-
-        ThreeValues num(int n);
-
-        int num();
-
-        ThreeValues big(double d);
-
-        double big();
-    }
-
-    private static final class BytesContainer {
-        Bytes<?> bytesField = Bytes.allocateElasticOnHeap(64);
-    }
-
-    private static final class BytesContainerMarshallable extends SelfDescribingMarshallable {
-        Bytes<?> bytesField = Bytes.allocateElasticOnHeap(64);
-    }
-
-    private static final class StringBuilderContainer {
-        StringBuilder stringBuilder = new StringBuilder();
     }
 
     @Test
@@ -292,16 +265,14 @@ public class WiresTest extends WireTestCommon {
     public void copyToIncompleteValidation() {
         OneTwoFour o124 = new OneTwoFour(11, 222, 44444);
         TwoFourThreeValidatable o243 = new TwoFourThreeValidatable(2, 4, 3);
-        assertEquals("" +
-                "!net.openhft.chronicle.wire.WiresTest$TwoFourThreeValidatable {\n" +
+        assertEquals("!net.openhft.chronicle.wire.WiresTest$TwoFourThreeValidatable {\n" +
                 "  two: 2,\n" +
                 "  four: 4,\n" +
                 "  three: 3\n" +
                 "}\n", o243.toString());
         // Using copyTo to partially hydrate an object is perfectly valid
         Wires.copyTo(o124, o243);
-        assertEquals("" +
-                "!net.openhft.chronicle.wire.WiresTest$TwoFourThreeValidatable {\n" +
+        assertEquals("!net.openhft.chronicle.wire.WiresTest$TwoFourThreeValidatable {\n" +
                 "  two: 222,\n" +
                 "  four: 44444,\n" +
                 "  three: 0\n" +
@@ -322,7 +293,7 @@ public class WiresTest extends WireTestCommon {
     public void deepCopyWillWorkWhenDynamicEnumIsAnnotatedAsMarshallable() {
         Assume.assumeFalse(Jvm.maxDirectMemory() == 0);
 
-         ClassAliasPool.CLASS_ALIASES.addAlias(Thing.class, EnumThing.class);
+        ClassAliasPool.CLASS_ALIASES.addAlias(Thing.class, EnumThing.class);
 
         Thing thing2 = Marshallable.fromString(
                 "!Thing {" +
@@ -337,16 +308,46 @@ public class WiresTest extends WireTestCommon {
     }
 
     @SuppressWarnings("deprecation")
+    enum EnumThing implements DynamicEnum {
+        ONE,
+        TWO
+    }
+
+    interface ThreeValues {
+        ThreeValues string(String s);
+
+        String string();
+
+        ThreeValues num(int n);
+
+        int num();
+
+        ThreeValues big(double d);
+
+        double big();
+    }
+
+    interface Says {
+        void say(String word);
+    }
+
+    private static final class BytesContainer {
+        Bytes<?> bytesField = Bytes.allocateElasticOnHeap(64);
+    }
+
+    private static final class BytesContainerMarshallable extends SelfDescribingMarshallable {
+        Bytes<?> bytesField = Bytes.allocateElasticOnHeap(64);
+    }
+
+    private static final class StringBuilderContainer {
+        StringBuilder stringBuilder = new StringBuilder();
+    }
+
+    @SuppressWarnings("deprecation")
     static class Thing extends AbstractEventCfg<Thing> {
         @AsMarshallable
         DynamicEnum dee1;
         String someString;
-    }
-
-    @SuppressWarnings("deprecation")
-    enum EnumThing implements DynamicEnum {
-        ONE,
-        TWO;
     }
 
     static class OneTwoFour extends BytesInBinaryMarshallable {
@@ -396,9 +397,5 @@ public class WiresTest extends WireTestCommon {
         ContainsBM(BasicBytesMarshallable inner) {
             this.inner = inner;
         }
-    }
-
-    interface Says {
-        void say(String word);
     }
 }

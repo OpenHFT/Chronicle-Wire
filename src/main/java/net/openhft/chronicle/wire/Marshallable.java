@@ -19,6 +19,7 @@ import java.util.Scanner;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
@@ -39,7 +40,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * Compares a given {@code WriteMarshallable} object with another object for equality.
      *
      * @param $this The reference {@code WriteMarshallable} object.
-     * @param o The object to compare with.
+     * @param o     The object to compare with.
      * @return {@code true} if both objects are equal, {@code false} otherwise.
      */
     static boolean $equals(@NotNull WriteMarshallable $this, Object o) {
@@ -83,7 +84,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * expecting a specific type as the result.
      *
      * @param tClass The expected class of the resulting object.
-     * @param cs The character sequence to convert.
+     * @param cs     The character sequence to convert.
      * @return The corresponding marshallable object of type {@code T}, or {@code null} if the conversion is not possible.
      */
     @Nullable
@@ -111,7 +112,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * @return The corresponding marshallable object, or {@code null} if the conversion is not possible.
      */
     static <T> T fromString(@NotNull InputStream is) throws InvalidMarshallableException {
-        Scanner s = new Scanner(is).useDelimiter("\\A");
+        Scanner s = new Scanner(is, UTF_8.name()).useDelimiter("\\A");
         return TEXT.fromString(s.hasNext() ? s.next() : "");
     }
 
@@ -120,7 +121,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * content as a marshallable object of a specific type.
      *
      * @param expectedType The expected type of the resulting object.
-     * @param filename The name or path of the file to read.
+     * @param filename     The name or path of the file to read.
      * @return The marshallable object interpreted from the file content.
      */
     @Nullable
@@ -143,7 +144,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * Streams the content of a file as marshallable objects of a specific type.
      *
      * @param expectedType The expected type of the resulting objects in the stream.
-     * @param filename The name or path of the file to read.
+     * @param filename     The name or path of the file to read.
      * @return A stream of marshallable objects of type {@code T}.
      */
     @Nullable
@@ -155,7 +156,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * Retrieves the value of a specific field from the current marshallable object, expecting
      * a certain type for the field's value.
      *
-     * @param name The name of the field.
+     * @param name   The name of the field.
      * @param tClass The expected class/type of the field's value.
      * @return The value of the specified field.
      */
@@ -167,7 +168,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     /**
      * Sets the value of a specific field in the current marshallable object.
      *
-     * @param name The name of the field.
+     * @param name  The name of the field.
      * @param value The new value for the specified field.
      */
     default void setField(String name, Object value) throws NoSuchFieldException {
@@ -187,7 +188,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     /**
      * Sets the long value of a specific field in the current marshallable object.
      *
-     * @param name The name of the field.
+     * @param name  The name of the field.
      * @param value The new long value for the specified field.
      */
     default void setLongField(String name, long value) throws NoSuchFieldException {
@@ -250,9 +251,9 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * Copy fields from this to dest by marshalling out and then in. Allows copying of fields by name
      * even if there is no type relationship between this and dest
      *
+     * @param <T> destination type
      * @param dest destination
      * @return t
-     * @param <T> destination type
      */
     default <T extends Marshallable> T copyTo(@NotNull T dest) throws InvalidMarshallableException {
         return Wires.copyTo(this, dest);
@@ -261,7 +262,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     /**
      * Merges the current marshallable object into a map, using a specified function to determine the key.
      *
-     * @param map The map to merge into.
+     * @param map    The map to merge into.
      * @param getKey The function to determine the key for the current object in the map.
      * @return The merged marshallable object in the map.
      */

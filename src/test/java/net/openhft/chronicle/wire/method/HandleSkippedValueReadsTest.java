@@ -37,9 +37,12 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
         return Arrays.asList(
                 new Object[]{WireType.BINARY_LIGHT},
                 new Object[]{WireType.TEXT}
-                // TODO FIX
-//                new Object[]{WireType.YAML_ONLY}
         );
+    }
+
+    @NotNull
+    private static String asString(StringWriter sw) {
+        return sw.toString().replace("\r", "");
     }
 
     @Test
@@ -158,11 +161,6 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
         assertFalse(reader.readOne());
     }
 
-    @NotNull
-    private static String asString(StringWriter sw) {
-        return sw.toString().replace("\r", "");
-    }
-
     @Test
     public void index2index() {
         doIndex2index(false);
@@ -198,18 +196,16 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
 
         if (!scanning) {
             // one
-            assertEquals("M meta[one]\n"
-                    , asString(sw));
+            assertEquals("M meta[one]\n", asString(sw));
             assertTrue(reader.readOne());
             // i2i
-            assertEquals("M meta[one]\n"
-                    , asString(sw));
+            assertEquals("M meta[one]\n", asString(sw));
             assertTrue(reader.readOne());
         }
         // data six
         assertEquals("M meta[one]\n" +
-                        "D data[six]\n"
-                , asString(sw));
+                        "D data[six]\n",
+                asString(sw));
         assertFalse(reader.readOne());
     }
 

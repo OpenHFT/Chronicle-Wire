@@ -51,7 +51,7 @@ import static org.junit.Assume.assumeFalse;
 @SuppressWarnings({"rawtypes", "unchecked", "try", "serial"})
 @RunWith(value = Parameterized.class)
 public class YamlWireTest extends WireTestCommon {
-    private static Wire wire = Wire.newYamlWireOnHeap(); // Initialize a static YAML wire
+    private static final Wire wire = Wire.newYamlWireOnHeap(); // Initialize a static YAML wire
     private final boolean usePadding; // Flag to indicate if padding should be used
 
     // Constructor for initializing the usePadding flag
@@ -630,7 +630,10 @@ public class YamlWireTest extends WireTestCommon {
         // Custom object to hold floating-point value for verification
         class Floater {
             double f;
-            void set(double d) { f = d; }
+
+            void set(double d) {
+                f = d;
+            }
         }
         @NotNull Floater n = new Floater();
         IntStream.rangeClosed(1, 3).forEach(e -> {
@@ -798,7 +801,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testDate() {
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
         LocalDate now = LocalDate.now();
         wire.write().date(now)
                 .write().date(LocalDate.MAX)
@@ -810,7 +813,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testUuid() {
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
         UUID uuid = UUID.randomUUID();
         wire.write().uuid(uuid)
                 .write().uuid(new UUID(0, 0))
@@ -822,7 +825,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testTypeWithoutSpace() {
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
         wire.bytes().append("A: !").append(MyTypes.class.getName()).append("{}");
 
         @NotNull MyTypes mt = (MyTypes) wire.read("A")
@@ -928,9 +931,9 @@ public class YamlWireTest extends WireTestCommon {
     public void testABCStringBuilder() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        String A = "A: \"hi\", # This is an A\n";
-        String B = "B: 'hi', # This is a B\n";
-        String C = "C: hi, # And that's a C\n";
+        String stringA = "A: \"hi\", # This is an A\n";
+        String stringB = "B: 'hi', # This is a B\n";
+        String stringC = "C: hi, # And that's a C\n";
 
         // Create a wire and append values for A, B, and C
         @NotNull Wire wire = createWire();
@@ -939,7 +942,13 @@ public class YamlWireTest extends WireTestCommon {
         ABC abc = new ABC();
 
         // Read from wire and assert its value for all permutations
-        for (String input : new String[] { A + B + C, B + A + C, C + A + B, A + C + B, B + C + A, C + B + A }) {
+        for (String input : new String[]{
+                stringA + stringB + stringC,
+                stringB + stringA + stringC,
+                stringC + stringA + stringB,
+                stringA + stringC + stringB,
+                stringB + stringC + stringA,
+                stringC + stringB + stringA}) {
             wire.reset();
             wire.bytes().append(input);
             assertEquals(input, "!net.openhft.chronicle.wire.TextWireTest$ABC {\n" +
@@ -976,7 +985,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testWriteMarshallable() {
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
         @NotNull MyTypesCustom mtA = new MyTypesCustom();
         mtA.flag = true;
         mtA.d = 123.456;
@@ -1023,7 +1032,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testWriteMarshallableAndFieldLength() {
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
         @NotNull MyTypesCustom mtA = new MyTypesCustom();
         mtA.flag = true;
         mtA.d = 123.456;
@@ -1032,9 +1041,9 @@ public class YamlWireTest extends WireTestCommon {
 
         @NotNull ValueOut write = wire.write(() -> "A");
 
-        long start = wire.bytes().writePosition() + 1; // including one space for "sep".
+        final long start = wire.bytes().writePosition() + 1; // including one space for "sep".
         write.marshallable(mtA);
-        long fieldLen = wire.bytes().lengthWritten(start);
+        final long fieldLen = wire.bytes().lengthWritten(start);
 
         expectWithSnakeYaml("{A={B_FLAG=true, S_NUM=12345, D_NUM=123.456, L_NUM=0, I_NUM=-12345789, TEXT=}}", wire);
 
@@ -1682,8 +1691,8 @@ public class YamlWireTest extends WireTestCommon {
                         "? { MyField: parent }: {\n" +
                         "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key1 }: value1,\n" +
                         "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key2 }: value2\n" +
-                        "}\n"
-                , Wires.fromSizePrefixedBlobs(wire.bytes()));
+                        "}\n",
+                Wires.fromSizePrefixedBlobs(wire.bytes()));
 
         wire.readDocument(null, w -> {
             Map<MyMarshallable, Map> map1 = w.getValueIn().marshallableAsMap(MyMarshallable.class, Map.class);
@@ -1732,7 +1741,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testSortedSet() {
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
         @NotNull SortedSet<String> set = new TreeSet<>();
         set.add("one");
         set.add("two");
@@ -1750,7 +1759,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testSortedMap() {
-        @NotNull Wire wire = createWire();
+        final Wire wire = createWire();
         @NotNull SortedMap<String, Long> set = new TreeMap<>();
         set.put("one", 1L);
         set.put("two", 2L);
@@ -1848,7 +1857,7 @@ public class YamlWireTest extends WireTestCommon {
     public void nestedWithEnumSet() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        Wire wire = createWire();
+        final Wire wire = createWire();
         YNestedWithEnumSet n = new YNestedWithEnumSet();
         n.list.add(new WithEnumSet("none"));
         n.list.add(new WithEnumSet("one", EnumSet.of(TimeUnit.DAYS)));
@@ -1958,21 +1967,21 @@ public class YamlWireTest extends WireTestCommon {
                         "}\n" +
                         "     # fin\n");
 
-        assertArrayEquals(new String[] { "bar", "quux" }, obj.strings);
+        assertArrayEquals(new String[]{"bar", "quux"}, obj.strings);
     }
 
     @Test
     public void testListInterleavedComments() {
         List<String> obj = WireType.YAML.fromString(
-            "     # first\n" +
-                "[\n" +
-                "     # foo\n" +
-                "     'bar',\n" +
-                "     # baz\n" +
-                "     'quux'\n" +
-                "     # thud\n" +
-                "]\n" +
-                "     # fin\n");
+                "     # first\n" +
+                        "[\n" +
+                        "     # foo\n" +
+                        "     'bar',\n" +
+                        "     # baz\n" +
+                        "     'quux'\n" +
+                        "     # thud\n" +
+                        "]\n" +
+                        "     # fin\n");
 
         assertEquals(Arrays.asList("bar", "quux"), obj);
     }

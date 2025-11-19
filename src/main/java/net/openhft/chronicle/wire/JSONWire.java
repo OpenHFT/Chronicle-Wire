@@ -259,9 +259,9 @@ public class JSONWire extends TextWire {
      * The segment copied depends on the first character encountered (e.g., '{' indicates a map).
      * This method understands JSON structural elements and translates them appropriately.
      *
-     * @param destWire  destination wire to copy the data to.
+     * @param destWire        destination wire to copy the data to.
      * @param expectKeyValues Flag indicating if the current position is inside a map structure.
-     * @param topLevel Flag indicating if this is the topmost level of the copy operation.
+     * @param topLevel        Flag indicating if this is the topmost level of the copy operation.
      * @throws InvalidMarshallableException if there's a problem with copying the data.
      */
     public void copyOne(@NotNull WireOut destWire, boolean expectKeyValues, boolean topLevel) throws InvalidMarshallableException {
@@ -429,8 +429,8 @@ public class JSONWire extends TextWire {
      *
      * @param destWire  destination wire
      * @param quoteChar opening quote character
-     * @param inMap Flag indicating if the current position is inside a map structure.
-     * @param topLevel Flag indicating if this is the topmost level of the copy operation.
+     * @param inMap     Flag indicating if the current position is inside a map structure.
+     * @param topLevel  Flag indicating if this is the topmost level of the copy operation.
      * @throws InvalidMarshallableException if there's a problem with copying the data.
      */
     private void copyQuote(WireOut destWire, int quoteChar, boolean inMap, boolean topLevel) throws InvalidMarshallableException {
@@ -649,7 +649,7 @@ public class JSONWire extends TextWire {
      * This ensures that the resulting string can be safely embedded within a JSON string while preserving its meaning.
      * See <a href="https://www.rfc-editor.org/rfc/rfc7159#section-7">RFC 7159, Section 7</a> for more details.
      *
-     * @param s The CharSequence to escape.
+     * @param s      The CharSequence to escape.
      * @param quotes Specifies the type of quotes used in the CharSequence and guides escaping.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7159#section-7">RFC 7159, Section 7</a>
      */
@@ -768,7 +768,7 @@ public class JSONWire extends TextWire {
      * It provides a specialized context for writing JSON data, adjusting writing positions
      * and handling JSON-specific syntax such as curly braces.
      *
-         */
+     */
     class JSONWriteDocumentContext extends TextWriteDocumentContext {
         // Position marker to track the start of a JSON object
         private long start;
@@ -868,7 +868,7 @@ public class JSONWire extends TextWire {
                 bytes.append("\":");
                 if (nested) {
                     if (valueOutFromStart == null)
-                         valueOutFromStart = new JSONValueOutFromStart();
+                        valueOutFromStart = new JSONValueOutFromStart();
                     return valueOutFromStart;
                 }
             }
@@ -1101,8 +1101,8 @@ public class JSONWire extends TextWire {
          * Determines if the current value represents a JSON null value.
          *
          * @return True if the value is "null" in the JSON context; otherwise, False.
-         *         When true, it consumes the "null" and moves to the next token.
-         *         When false, no data is read, only peaked.
+         * When true, it consumes the "null" and moves to the next token.
+         * When false, no data is read, only peaked.
          */
         @Override
         public boolean isNull() {
@@ -1214,12 +1214,12 @@ public class JSONWire extends TextWire {
          * override with that. If the provided class or object instance is incompatible with the
          * type definition, it will throw a ClassCastException.
          *
-         * @param using The object instance to use, or null if not provided.
-         * @param clazz The class to parse the object as, or null if not provided.
+         * @param using      The object instance to use, or null if not provided.
+         * @param clazz      The class to parse the object as, or null if not provided.
          * @param bestEffort Indicates whether to give a best effort attempt to parse the object even if it's partially incorrect.
          * @return The parsed object.
          * @throws InvalidMarshallableException If there's an issue with unmarshalling the data.
-         * @throws ClassCastException If there's a type mismatch between the provided class or instance and the type definition.
+         * @throws ClassCastException           If there's a type mismatch between the provided class or instance and the type definition.
          */
         private <E> E parseType(@Nullable E using, @Nullable Class<? extends E> clazz, boolean bestEffort) throws InvalidMarshallableException {
 

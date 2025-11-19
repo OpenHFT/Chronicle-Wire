@@ -40,8 +40,7 @@ public class MethodIdTest extends WireTestCommon {
         // methods.methodLongMin(Long.MIN_VALUE); // Not supported yet
 
         // Asserts the binary representation of the method calls
-        assertEquals("" +
-                        "04 00 00 00                                     # msg-length\n" +
+        assertEquals("04 00 00 00                                     # msg-length\n" +
                         "ba 40                                           # methodAt ('@')\n" +
                         "e1 40                                           # @\n" +
                         "04 00 00 00                                     # msg-length\n" +
@@ -76,8 +75,7 @@ public class MethodIdTest extends WireTestCommon {
         // Read each method call and verify the output
         for (int i = 0; i < 8; i++)
             reader.readOne();
-        assertEquals("" +
-                        "methodAt: \"@\"\n" +
+        assertEquals("methodAt: \"@\"\n" +
                         "...\n" +
                         "method_z: z\n" +
                         "...\n" +
@@ -99,12 +97,9 @@ public class MethodIdTest extends WireTestCommon {
 
     // Interface defining various methods with specific method IDs using annotations
     interface Methods {
-// not supported yet
-//        @MethodId(Long.MIN_VALUE)
-//        void methodLongMin(long a);
-
         @MethodId('@')
         void methodAt(char at);
+
         @MethodId('z')
         void method_z(char z);
 
@@ -116,10 +111,6 @@ public class MethodIdTest extends WireTestCommon {
 
         @MethodId(Byte.MIN_VALUE)
         void methodByteMin(long a);
-
-// not supported yet
-//        @MethodId(Long.MAX_VALUE)
-//        void methodLongMax(long a);
 
         @MethodId(Integer.MAX_VALUE)
         void methodIntMax(long a);

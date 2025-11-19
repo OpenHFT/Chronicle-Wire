@@ -102,8 +102,12 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public WireIn bytesMatch(@NotNull BytesStore<?, ?> compareBytes, @NotNull BooleanConsumer consumer) {
-        @Nullable Object o = defaultValue;
-        @NotNull BytesStore<?, ?> bytes = (BytesStore) o;
+        Object o = defaultValue;
+        if (!(o instanceof BytesStore)) {
+            consumer.accept(false);
+            return wireIn();
+        }
+        BytesStore<?, ?> bytes = (BytesStore<?, ?>) o;
         consumer.accept(compareBytes.contentEquals(bytes));
         return wireIn();
     }
@@ -323,8 +327,9 @@ public class DefaultValueIn implements ValueIn {
     public <T> WireIn int64(@Nullable LongValue value, T t, @NotNull BiConsumer<T, LongValue> setter) {
         @NotNull Number o = (Number) defaultValue;
         if (o == null) o = 0;
-        value.setValue(o.longValue());
-        setter.accept(t, value);
+        LongValue target = value == null ? wireIn.newLongReference() : value;
+        target.setValue(o.longValue());
+        setter.accept(t, target);
         return wireIn();
     }
 
@@ -333,8 +338,9 @@ public class DefaultValueIn implements ValueIn {
     public <T> WireIn int32(@Nullable IntValue value, T t, @NotNull BiConsumer<T, IntValue> setter) {
         @NotNull Number o = (Number) defaultValue;
         if (o == null) o = 0;
-        value.setValue(o.intValue());
-        setter.accept(t, value);
+        IntValue target = value == null ? wireIn.newIntReference() : value;
+        target.setValue(o.intValue());
+        setter.accept(t, target);
         return wireIn();
     }
 
@@ -412,7 +418,7 @@ public class DefaultValueIn implements ValueIn {
 
     @Override
     public boolean bool() throws IORuntimeException {
-        return defaultValue == Boolean.TRUE;
+        return Boolean.TRUE.equals(defaultValue);
     }
 
     @Override

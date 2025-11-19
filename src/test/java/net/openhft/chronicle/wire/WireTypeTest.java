@@ -48,8 +48,7 @@ public class WireTypeTest extends WireTestCommon {
                 "  count: 1\n" +
                 "}\n", WireType.TEXT.asString(tm));
         // Test Binary-based WireType
-        assertEquals("" +
-                        "00000000 b6 10 54 65 73 74 4d 61  72 73 68 61 6c 6c 61 62 ··TestMa rshallab\n" +
+        assertEquals("00000000 b6 10 54 65 73 74 4d 61  72 73 68 61 6c 6c 61 62 ··TestMa rshallab\n" +
                         "00000010 6c 65 82 12 00 00 00 c4  6e 61 6d 65 e4 6e 61 6d le······ name·nam\n" +
                         "00000020 65 c5 63 6f 75 6e 74 a1  01                      e·count· ·       \n",
                 WireType.BINARY.asString(tm));
@@ -81,12 +80,6 @@ public class WireTypeTest extends WireTestCommon {
                 "00000020 65 C5 63 6F 75 6E 74 01                          e·count·         \n";
         // Validate Binary-based WireType
         assertEquals(tm, WireType.BINARY.fromString(asBinary));
-
-/* NOT Supported
-        String asRaw = "00000000 10 54 65 73 74 4D 61 72  73 68 61 6C 6C 61 62 6C ·TestMar shallabl\n" +
-                "00000010 65 09 00 00 00 04 6E 61  6D 65 01 00 00 00       e·····na me····  \n";
-        assertEquals(tm, WireType.RAW.fromString(asRaw));
-*/
     }
 
     // Test WireType's ability to write and read from a file

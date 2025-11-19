@@ -18,6 +18,7 @@ import java.nio.BufferUnderflowException;
  * but doesn't ensure the same object is returned on subsequent calls or across threads.
  * <p>
  * Note: While it's not strictly thread-safe, it's expected to still produce correct results.
+ *
  * @author peter.lawrey
  */
 @SuppressWarnings("unchecked")
@@ -37,7 +38,7 @@ public abstract class FromStringInterner<T> {
      * Constructor initializes the entries array and calculates mask and shift values.
      *
      * @param capacity The desired capacity of the interner.
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if the requested capacity is too small.
      */
     @SuppressWarnings("rawtypes")
     protected FromStringInterner(int capacity) throws IllegalArgumentException {
@@ -52,7 +53,9 @@ public abstract class FromStringInterner<T> {
      *
      * @param s The string to be interned.
      * @return The interned representation.
-     * @throws IllegalArgumentException, IORuntimeException, BufferUnderflowException
+     * @throws IllegalArgumentException         if the string cannot be interned.
+     * @throws IORuntimeException               if the backing storage encounters an IO issue.
+     * @throws BufferUnderflowException         if insufficient data is available while reading.
      */
     public T intern(@NotNull String s)
             throws IllegalArgumentException, IORuntimeException, BufferUnderflowException {
@@ -86,7 +89,7 @@ public abstract class FromStringInterner<T> {
      *
      * @param s The input string.
      * @return The value representation.
-     * @throws IORuntimeException
+     * @throws IORuntimeException if the value cannot be created.
      */
     @NotNull
     protected abstract T getValue(String s) throws IORuntimeException;

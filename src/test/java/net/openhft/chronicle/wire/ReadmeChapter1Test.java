@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
+// CHECKSTYLE:OFF - README-style examples intentionally non-conforming for documentation purposes
 @SuppressWarnings({"java:S2699", "java:S125", "java:S1854", "java:S1481"})
 public class ReadmeChapter1Test extends WireTestCommon {
 
@@ -58,7 +59,7 @@ So now you can write to the wire with a simple document.
                 .write(() -> "number").int64(1234567890L)
                 .write(() -> "code").asEnum(TimeUnit.SECONDS)
                 .write(() -> "price").float64(10.50);
-       // System.out.println(bytes);
+        // System.out.println(bytes);
 /*
 ```
 prints
@@ -78,7 +79,7 @@ price: 10.5
                 .write(() -> "number").int64(1234567890L)
                 .write(() -> "code").asEnum(TimeUnit.SECONDS)
                 .write(() -> "price").float64(10.50);
-       // System.out.println(bytes2.toHexString());
+        // System.out.println(bytes2.toHexString());
 
 // to obtain the underlying ByteBuffer to write to a Channel
         @Nullable ByteBuffer byteBuffer = bytes2.underlyingObject();
@@ -103,7 +104,7 @@ The down side is that we cannot easily see what the message contains.
                 .write(() -> "number").int64(1234567890L)
                 .write(() -> "code").asEnum(TimeUnit.SECONDS)
                 .write(() -> "price").float64(10.50);
-       // System.out.println(bytes3.toHexString());
+        // System.out.println(bytes3.toHexString());
 /*
 ```
 prints in RawWire
@@ -132,11 +133,11 @@ prints in RawWire
 
         @NotNull Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
         data.writeMarshallable(wire);
-       // System.out.println(bytes);
+        // System.out.println(bytes);
 
         @NotNull Data data2 = new Data();
         data2.readMarshallable(wire);
-       // System.out.println(data2);
+        // System.out.println(data2);
 
 /*
 ```
@@ -156,11 +157,11 @@ To write in binary instead
         @NotNull Wire wire2 = new BinaryWire(bytes2);
 
         data.writeMarshallable(wire2);
-       // System.out.println(bytes2.toHexString());
+        // System.out.println(bytes2.toHexString());
 
         @NotNull Data data3 = new Data();
         data3.readMarshallable(wire2);
-       // System.out.println(data3);
+        // System.out.println(data3);
 /*
 ```
 prints
@@ -189,11 +190,11 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 
         @NotNull Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
         wire.write(() -> "mydata").marshallable(data);
-       // System.out.println(bytes);
+        // System.out.println(bytes);
 
         @NotNull Data data2 = new Data();
         wire.read(() -> "mydata").marshallable(data2);
-       // System.out.println(data2);
+        // System.out.println(data2);
 
 /*
 ```
@@ -214,11 +215,11 @@ To write in binary instead
         @NotNull Wire wire2 = new BinaryWire(bytes2);
 
         wire2.write(() -> "mydata").marshallable(data);
-       // System.out.println(bytes2.toHexString());
+        // System.out.println(bytes2.toHexString());
 
         @NotNull Data data3 = new Data();
         wire2.read(() -> "mydata").marshallable(data3);
-       // System.out.println(data3);
+        // System.out.println(data3);
 /*
 ```
 prints
@@ -251,10 +252,10 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 
         @NotNull Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
         wire.write(() -> "mydata").object(data);
-       // System.out.println(bytes);
+        // System.out.println(bytes);
 
         @Nullable Data data2 = wire.read(() -> "mydata").object(Data.class);
-       // System.out.println(data2);
+        // System.out.println(data2);
 
 /*
 ```
@@ -275,10 +276,10 @@ To write in binary instead
         @NotNull Wire wire2 = new BinaryWire(bytes2);
 
         wire2.write(() -> "mydata").object(data);
-       // System.out.println(bytes2.toHexString());
+        // System.out.println(bytes2.toHexString());
 
         @Nullable Data data3 = wire2.read(() -> "mydata").object(Data.class);
-       // System.out.println(data3);
+        // System.out.println(data3);
 /*
 ```
 prints
@@ -318,11 +319,11 @@ The benefits of using this approach ares that
 
         @NotNull Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
         wire.writeDocument(false, data);
-       // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
+        // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
 
         @NotNull Data data2 = new Data();
         assertTrue(wire.readDocument(null, data2));
-       // System.out.println(data2);
+        // System.out.println(data2);
 
 /*
 ```
@@ -344,11 +345,11 @@ To write in binary instead
         wire2.usePadding(true);
 
         wire2.writeDocument(false, data);
-       // System.out.println(Wires.fromSizePrefixedBlobs(bytes2));
+        // System.out.println(Wires.fromSizePrefixedBlobs(bytes2));
 
         @NotNull Data data3 = new Data();
         assertTrue(wire2.readDocument(null, data3));
-       // System.out.println(data3);
+        // System.out.println(data3);
 /*
 ```
 prints
@@ -387,7 +388,7 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
         };
         wire.writeDocument(false, w -> w.write(() -> "mydata")
                 .sequence(v -> Stream.of(data).forEach(v::object)));
-       // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
+        // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
 
         @NotNull List<Data> dataList = new ArrayList<>();
         assertTrue(wire.readDocument(null, w -> w.read(() -> "mydata")
@@ -438,7 +439,7 @@ To write in binary instead
 
         wire2.writeDocument(false, w -> w.write(() -> "mydata")
                 .sequence(v -> Stream.of(data).forEach(v::object)));
-       // System.out.println(Wires.fromSizePrefixedBlobs(bytes2));
+        // System.out.println(Wires.fromSizePrefixedBlobs(bytes2));
 
         @NotNull List<Data> dataList2 = new ArrayList<>();
         assertTrue(wire2.readDocument(null, w -> w.read(() -> "mydata")
@@ -499,12 +500,12 @@ Data{message='Howyall', number=1234567890, timeUnit=SECONDS, price=1000.0}
 
         @NotNull Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
         wire.getValueOut().object(data);
-       // System.out.println(bytes);
+        // System.out.println(bytes);
 
         @Nullable Object o = wire.getValueIn().object(Object.class);
         if (o instanceof Data) {
             @Nullable Data data2 = (Data) o;
-           // System.out.println(data2);
+            // System.out.println(data2);
         }
 
 /*
@@ -526,12 +527,12 @@ To write in binary instead
         @NotNull Wire wire2 = new BinaryWire(bytes2);
 
         wire2.getValueOut().object(data);
-       // System.out.println(bytes2.toHexString());
+        // System.out.println(bytes2.toHexString());
 
         @Nullable Object o2 = wire2.getValueIn().object(Object.class);
         if (o2 instanceof Data) {
             @NotNull Data data2 = (Data) o2;
-           // System.out.println(data2);
+            // System.out.println(data2);
         }
 /*
 ```
@@ -550,6 +551,7 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
         bytes2.releaseLast();
     }
 }
+
 /*
 The code for the class Data
 ```java
@@ -575,3 +577,5 @@ class Data extends SelfDescribingMarshallable {
  */
 
 }
+
+// CHECKSTYLE:ON

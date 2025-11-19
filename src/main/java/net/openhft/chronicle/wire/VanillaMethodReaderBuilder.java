@@ -157,6 +157,17 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     }
 
     /**
+     * Configures whether default values should be ignored when reading messages.
+     *
+     * @param ignore flag indicating whether to ignore defaults
+     * @return this builder for chaining
+     */
+    public VanillaMethodReaderBuilder ignoreDefaults(boolean ignore) {
+        this.ignoreDefaults = ignore;
+        return this;
+    }
+
+    /**
      * Sets the method reader interceptor that handles return values from method calls.
      *
      * @param methodReaderInterceptorReturns The interceptor to set.

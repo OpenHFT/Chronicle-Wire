@@ -29,6 +29,11 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     private A instance;
 
+    @NotNull
+    private static String asString(StringWriter out) {
+        return out.toString().replace("\r", "");
+    }
+
     @Test
     public void testMethodReaderWriterMetadata() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
@@ -422,11 +427,6 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
         assertFalse(reader.readOne());
         wire.bytes().releaseLast();
-    }
-
-    @NotNull
-    private static String asString(StringWriter out) {
-        return out.toString().replace("\r", "");
     }
 
     private void checkReaderType(MethodReader reader) {

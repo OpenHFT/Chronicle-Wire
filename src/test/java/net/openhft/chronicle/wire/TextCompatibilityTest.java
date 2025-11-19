@@ -84,18 +84,14 @@ public class TextCompatibilityTest extends WireTestCommon {
                 if (s.trim().equals(expected.trim()))
                     return;
                 if (print) {
-                   // System.out.println("Comparison failure in " + filename);
-                   // System.out.println("Expected:\n" + expected);
-                   // System.out.println("Actual:\n" + s);
-                } else {
-                    assertEquals(expected, s);
+                    return;
                 }
+                assertEquals(expected, s);
             } finally {
                 bytes.releaseLast();
             }
             Object o = TEXT.fromFile(Object.class, filename);
         } catch (Exception e) {
-           // System.out.println("Expected:\n" + expected);
             throw new AssertionError(filename, e);
         }
     }

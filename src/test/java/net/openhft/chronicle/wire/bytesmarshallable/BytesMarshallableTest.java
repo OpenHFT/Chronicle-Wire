@@ -51,7 +51,6 @@ public class BytesMarshallableTest extends WireTestCommon {
 
     // Test method to verify the (de)serialization of primitive data transfer objects (DTOs)
     // with the wire, also validating against expected string representations
-    @SuppressWarnings("incomplete-switch")
     @Test
     public void primitiveDto() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
@@ -70,14 +69,14 @@ public class BytesMarshallableTest extends WireTestCommon {
         // based on the current `wireType` being tested
         String expected = "Unknown wire type";
         switch (wireType) {
-            // Cases define the expected debug string output of the wire bytes
-            // based on the different wire types
             case TEXT:
                 expected = "[pos: 0, rlim: 159, wlim: 2147483632, cap: 2147483632 ] ǁprim: {⒑  flag: true,⒑  s8: 1,⒑  ch: \"\\x01\",⒑  s16: 1,⒑  s32: 1,⒑  s64: 1,⒑  f32: 1.0,⒑  f64: 1.0⒑}⒑scalar: {⒑  text: Hello1,⒑  buffer: bye 1,⒑  bytes: hi 1⒑}⒑‡٠٠٠٠٠٠٠٠";
                 break;
             case BINARY_LIGHT:
                 expected = "[pos: 0, rlim: 69, wlim: 2147483632, cap: 2147483632 ] ǁÄprim\\u0082\\u001D٠٠٠Y⒈⒈⒈٠⒈٠٠٠⒈٠٠٠٠٠٠٠٠٠\\u0080?٠٠٠٠٠٠ð?Æscalar\\u0082⒙٠٠٠⒍Hello1⒌bye 1⒋hi 1‡٠٠٠٠٠٠٠٠٠٠٠";
                 break;
+            default:
+                throw new IllegalStateException("Unsupported wire type " + wireType);
         }
         // Asserting that the expected string equals the debug string output of the wire bytes
         assertEquals(expected, wire.bytes().toDebugString());
@@ -100,7 +99,6 @@ public class BytesMarshallableTest extends WireTestCommon {
     }
 
     // Another test method similar to the above, but using different DTO types (PrimDto2 and ScalarDto2)
-    @SuppressWarnings("incomplete-switch")
     @Test
     public void primitiveDto2() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
@@ -125,6 +123,9 @@ public class BytesMarshallableTest extends WireTestCommon {
             case BINARY_LIGHT:
                 expected = "[pos: 0, rlim: 50, wlim: 2147483632, cap: 2147483632 ] ǁÄprim\\u0082⒑٠٠٠Y⒈⒈⒈⒈⒈\\u009F|\\u009F|Æscalar\\u0082⒙٠٠٠⒍Hello1⒌bye 1⒋hi 1‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠";
                 break;
+
+            default:
+                throw new IllegalStateException("Unsupported wire type " + wireType);
         }
         // Asserting that the expected string equals the debug string output of the wire bytes
         assertEquals(expected, wire.bytes().toDebugString());
@@ -187,7 +188,7 @@ public class BytesMarshallableTest extends WireTestCommon {
             d.ch = (char) i;
             d.s16 = (short) i;
             d.s32 = i;
-            d.s64 = i * i * i;
+            d.s64 = (long) i * i * i;
             d.f32 = d.s32;
             d.f64 = d.s64;
             return d;

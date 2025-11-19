@@ -17,13 +17,13 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
-import java.sql.Date;
 import java.sql.*;
+import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.*;
 import java.util.List;
 import java.util.Queue;
-import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -81,6 +81,10 @@ final class SerializableObjectTest extends WireTestCommon {
             net.openhft.chronicle.wire.serializable.ScalarValues.class,
             net.openhft.chronicle.wire.serializable.Nested.class
     ));
+    // Predicate to check if a constructor is the default one.
+    private static final Predicate<MethodInfo> CONSTRUCTOR_IS_DEFAULT = methodInfo -> methodInfo.isPublic() && methodInfo.getTypeDescriptor().getTypeParameters().isEmpty();
+    // Filter to exclude the ignored packages.
+    private static final ClassInfoList.ClassInfoFilter NOT_IGNORED = ci -> IGNORED_PACKAGES.stream().noneMatch(ip -> ci.getPackageName().startsWith(ip));
 
     // Static block to handle specific classes that fail in certain Java versions.
     static {
@@ -93,11 +97,6 @@ final class SerializableObjectTest extends WireTestCommon {
             // This exception means the class isn't present, so we can safely ignore it.
         }
     }
-
-    // Predicate to check if a constructor is the default one.
-    private static final Predicate<MethodInfo> CONSTRUCTOR_IS_DEFAULT = methodInfo -> methodInfo.isPublic() && methodInfo.getTypeDescriptor().getTypeParameters().isEmpty();
-    // Filter to exclude the ignored packages.
-    private static final ClassInfoList.ClassInfoFilter NOT_IGNORED = ci -> IGNORED_PACKAGES.stream().noneMatch(ip -> ci.getPackageName().startsWith(ip));
 
     // Return test cases for different wire types and objects.
     private static Stream<WireTypeObject> cases() {
@@ -178,10 +177,7 @@ final class SerializableObjectTest extends WireTestCommon {
                 //
                 Instant.ofEpochMilli(TIME_MS),
                 Color.BLUE,
-//                new MessageFormat("%s%n"),
-//                InetAddress.getLoopbackAddress(),
                 new File("file")
-//                create(() -> new URL("http://chronicle.software/dir/files"))
         ).filter(SerializableObjectTest::isSerializableEqualsByObject);  // Retain only those objects that are serializable and equivalent when reconstituted.
     }
 
@@ -237,7 +233,7 @@ final class SerializableObjectTest extends WireTestCommon {
      * back to an object that is equal to the original.
      *
      * @param aClass The class to check.
-     * @param o An optional instance of the class to check. If null, a new instance will be created.
+     * @param o      An optional instance of the class to check. If null, a new instance will be created.
      * @return true if the class is serializable and deserializable, and the original and deserialized objects are equal; false otherwise.
      */
     private static boolean isSerializableEquals(Class<?> aClass, Object o) {
@@ -356,7 +352,7 @@ final class SerializableObjectTest extends WireTestCommon {
             try {
                 // Serialize and deserialize the object using the wire type
                 final Wire wire = wireTypeObject.wireType.apply(bytes);
-                wire.getValueOut().object((Class) source.getClass(), source);
+                wire.getValueOut().object(source.getClass(), source);
                 final Object target = wire.getValueIn().object(source.getClass());
 
                 // Assert the source and target objects are equivalent

@@ -50,8 +50,7 @@ public class ValueOutTest extends TestCase {
 
         );
 
-       // System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
-       // Verify that the read byte array matches the written byte array
+        // Verify that the read byte array matches the written byte array
         wire.readDocument(null, w -> {
             @NotNull final byte[] actual = (byte[]) w.read().object();
             Assert.assertArrayEquals(expected, actual);
@@ -74,8 +73,7 @@ public class ValueOutTest extends TestCase {
         @NotNull final byte[] expected = "this is my byte array".getBytes(ISO_8859_1);
         wire.writeDocument(false, w -> w.write().object(expected));
 
-       // System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
-       // Read the byte array back and ensure it matches the original
+        // Read the byte array back and ensure it matches the original
         wire.readDocument(null, w -> {
             @Nullable final byte[] actual = w.read().object(byte[].class);
             Assert.assertArrayEquals(expected, actual);

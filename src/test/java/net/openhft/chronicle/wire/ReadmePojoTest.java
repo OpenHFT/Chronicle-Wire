@@ -27,8 +27,7 @@ public class ReadmePojoTest extends WireTestCommon {
         mps.myPojos.add(new MyPojo("text1", 1, 1.1));
         mps.myPojos.add(new MyPojo("text2", 2, 2.2));
 
-       // System.out.println(mps);
-       // Convert MyPojos instance to string and back, then validate equality
+        // Convert MyPojos instance to string and back, then validate equality
         @Nullable MyPojos mps2 = Marshallable.fromString(mps.toString());
         assertEquals(mps, mps2);
 

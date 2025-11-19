@@ -2,14 +2,8 @@
 :toc: manual
 :css-signature: demo
 :toc-placement: preamble
-
-== Overview
-
-Chronicle Wire implements YAML parsing primarily through `YamlWire` and `TextWire`.
-This document outlines the level of compliance with the YAML 1.2.2 specification and highlights any deviations.
-It is intended for developers who require interoperability information.
-
-link:https://yaml.org/spec/1.2.2/[YAML 1.2.2 specification]
+:lang: en-GB
+:source-highlighter: rouge
 
 == Overview
 

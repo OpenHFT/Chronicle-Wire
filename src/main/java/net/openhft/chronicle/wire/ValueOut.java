@@ -581,7 +581,7 @@ public interface ValueOut {
     @NotNull
     default WireOut typeLiteral(@Nullable Type type) {
         return type == null ? nu11()
-                : type instanceof Class<?>? typeLiteral((Class) type)
+                : type instanceof Class<?> ? typeLiteral((Class<?>) type)
                 : typeLiteral(type.getTypeName());
     }
 
@@ -1308,6 +1308,8 @@ public interface ValueOut {
                 endTypePrefix();
                 return result;
             }
+            default:
+                break;
         }
         // Check if the value is an instance of WriteMarshallable interface
         if (value instanceof WriteMarshallable) {
@@ -1323,15 +1325,11 @@ public interface ValueOut {
 
         // Check if the value is an instance of WriteBytesMarshallable interface
         if (value instanceof WriteBytesMarshallable) {
-            // Warn about possible unmarshalling issue
-            if (!Wires.warnedUntypedBytesOnce) {
+            if (Wires.markUntypedBytesWarning()) {
                 Jvm.warn().on(ValueOut.class, "BytesMarshallable found in field which is not matching exactly, " +
                         "the object may not unmarshall correctly if that type is not specified: " + valueClass.getName() +
                         ". The warning will not repeat so there may be more types affected.");
-
-                Wires.warnedUntypedBytesOnce = true;
             }
-
             return bytesMarshallable((BytesMarshallable) value);
         }
 
@@ -1519,6 +1517,8 @@ public interface ValueOut {
             case "java.math.BigDecimal":
             case "java.io.File":
                 return text(value.toString());
+            default:
+                break;
         }
         // Check if value is an Enum and get its name
         if (isAnEnum(value)) {

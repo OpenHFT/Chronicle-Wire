@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 public class CSVBytesMarshallableTest extends WireTestCommon {
 
     // Bytes representing raw data for the tests
-    private Bytes<?> bytes = Bytes.from(
+    private final Bytes<?> bytes = Bytes.from(
             "1.09029,1.090305,EURUSD,2,1,EBS\n" +
                     "1.50935,1.50936,GBPUSD,5,1,RTRS\n" +
                     "1.0906,1.09065,EURCHF,3,1,EBS\n");
@@ -90,13 +90,10 @@ public class CSVBytesMarshallableTest extends WireTestCommon {
             fxPrice.writeMarshallable(out);
         }
 
-       // System.out.println();
-       // System.out.println(wt);
-       // System.out.println(binary ? bytes2.toHexString() : bytes2.toString());
-
         bytes2.releaseLast();
     }
 }
+
 /**
  * Class representing a foreign exchange price.
  * Implements the BytesMarshallable interface to support reading and writing of its values from/to bytes.
@@ -146,7 +143,7 @@ class FXPrice implements BytesMarshallable {
     /**
      * Helper method to parse an enum from bytes using an interner.
      *
-     * @param bytes Source bytes
+     * @param bytes    Source bytes
      * @param interner The enum interner to use for parsing
      * @return Parsed enum value
      */
@@ -158,11 +155,13 @@ class FXPrice implements BytesMarshallable {
         }
     }
 }
+
 /**
  * Class representing a foreign exchange price.
  * Implements the Marshallable interface to support reading and writing of its values using the Wire format.
  */
 class FXPrice2 implements Marshallable {
+    public transient double midPrice;
     // Fields to store price data and related attributes
     private double bidprice;
     private double offerprice;
@@ -171,7 +170,6 @@ class FXPrice2 implements Marshallable {
     private int size;
     private byte level;
     private String exchangeName;
-    public transient double midPrice;
 
     /**
      * Reads the object's data using the Wire format.

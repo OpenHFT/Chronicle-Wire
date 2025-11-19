@@ -24,16 +24,10 @@ public class ThrowableTest extends WireTestCommon {
             Wire wire = wireType.apply(Bytes.allocateElasticDirect());
             try (DocumentContext dc = wire.writingDocument()) {
                 // Initialize the Throwable object with a message and cause
-                Throwable message = new Throwable("message");
-                message.initCause(new Throwable("cause"));
+                Throwable message = new Throwable("message", new Throwable("cause"));
                 dc.wire().getValueOut()
                         .object(message);
             }
-/*            if (wireType == WireType.TEXT)
-                System.out.println(wire);
-            else
-                System.out.println(wire.bytes().toHexString()+"\n"+Wires.fromSizePrefixedBlobs(wire.bytes()));*/
-
             assumeFalse(Jvm.maxDirectMemory() == 0);
             // Read the written Throwable and validate its content
             try (DocumentContext dc = wire.readingDocument()) {

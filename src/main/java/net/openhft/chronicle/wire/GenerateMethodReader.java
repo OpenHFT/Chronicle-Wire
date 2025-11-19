@@ -236,7 +236,7 @@ public class GenerateMethodReader {
 
         // Start constructing the source code.
         if (!packageName().isEmpty())
-            sourceCode.append(format("package %s;\n", packageName()));
+            sourceCode.append(format("package %s;%n", packageName()));
 
         // Import statements required for the generated code.
         boolean hasMultipleNonMarshallableParamTypes = !Boolean.FALSE.equals(multipleNonMarshallableParamTypes);
@@ -256,16 +256,16 @@ public class GenerateMethodReader {
                 "\n");
 
         // Declare the generated class extending AbstractGeneratedMethodReader.
-        sourceCode.append(format("public class %s extends AbstractGeneratedMethodReader {\n", generatedClassName()));
+        sourceCode.append(format("public class %s extends AbstractGeneratedMethodReader {%n", generatedClassName()));
 
         // Inline comment for instances section.
         sourceCode.append("// instances on which parsed calls are invoked\n");
 
         for (int i = 0; metaDataHandler != null && i < metaDataHandler.length; i++) {
-            sourceCode.append(format("private final Object metaInstance%d;\n", i));
+            sourceCode.append(format("private final Object metaInstance%d;%n", i));
         }
         for (int i = 0; i < instances.length; i++) {
-            sourceCode.append(format("private final Object instance%d;\n", i));
+            sourceCode.append(format("private final Object instance%d;%n", i));
         }
         sourceCode.append("private final WireParselet defaultParselet;\n");
         sourceCode.append("\n");
@@ -316,13 +316,13 @@ public class GenerateMethodReader {
 
         // Initialize metaInstance objects.
         for (int i = 0; metaDataHandler != null && i < metaDataHandler.length; i++)
-            sourceCode.append(format("metaInstance%d = metaInstances[%d];\n", i, i));
+            sourceCode.append(format("metaInstance%d = metaInstances[%d];%n", i, i));
 
         // Initialize instance objects.
         for (int i = 0; i < instances.length - 1; i++)
-            sourceCode.append(format("instance%d = instances[%d];\n", i, i));
+            sourceCode.append(format("instance%d = instances[%d];%n", i, i));
 
-        sourceCode.append(format("instance%d = instances[%d];\n}\n\n", instances.length - 1, instances.length - 1));
+        sourceCode.append(format("instance%d = instances[%d];%n}%n%n", instances.length - 1, instances.length - 1));
 
         // Override the restIgnored method if chained calls are present.
         if (hasChainedCalls) {
@@ -549,7 +549,7 @@ public class GenerateMethodReader {
 
         // Field setup based on method parameters and interceptor
         if (parameterTypes.length > 0 || hasRealInterceptorReturns())
-            fields.append(format("// %s\n", m.getName()));
+            fields.append(format("// %s%n", m.getName()));
 
         // Iterating through method parameters to setup fields
         for (int i = 0; i < parameterTypes.length; i++) {
@@ -559,13 +559,13 @@ public class GenerateMethodReader {
             String fieldName = m.getName() + "arg" + i;
             if (fieldNames.add(fieldName)) {
                 if (parameterType == Bytes.class) {
-                    fields.append(format("private Bytes %s = Bytes.allocateElasticOnHeap();\n", fieldName));
+                    fields.append(format("private Bytes %s = Bytes.allocateElasticOnHeap();%n", fieldName));
                 } else {
                     if (!parameterType.isPrimitive() && !Modifier.isFinal(parameterType.getModifiers()) && multipleNonMarshallableParamTypes(parameterType)) {
-                        fields.append(format("private final Map<Class<? extends %s>, %s> %sInstances = new HashMap<>();\n", typeName, typeName, fieldName));
-                        fields.append(format("private final Function<Class<? extends %s>, %s> %sFunc = %sInstances::get;\n", typeName, typeName, fieldName, fieldName));
+                        fields.append(format("private final Map<Class<? extends %s>, %s> %sInstances = new HashMap<>();%n", typeName, typeName, fieldName));
+                        fields.append(format("private final Function<Class<? extends %s>, %s> %sFunc = %sInstances::get;%n", typeName, typeName, fieldName, fieldName));
                     }
-                    fields.append(format("private %s %s;\n", typeName, fieldName));
+                    fields.append(format("private %s %s;%n", typeName, fieldName));
                 }
             }
         }
@@ -575,7 +575,7 @@ public class GenerateMethodReader {
             hasChainedCalls = true;
 
         if (hasRealInterceptorReturns()) {
-            fields.append(format("private final Object[] interceptor%sArgs = new Object[%d];\n",
+            fields.append(format("private final Object[] interceptor%sArgs = new Object[%d];%n",
                     m.getName(), parameterTypes.length));
 
             String parameterTypesArg = parameterTypes.length == 0 ? "" :
@@ -584,7 +584,7 @@ public class GenerateMethodReader {
                             .map(s -> s + ".class")
                             .collect(Collectors.joining(", "));
 
-            fields.append(format("private static final Method %smethod = lookupMethod(%s.class, \"%s\"%s);\n",
+            fields.append(format("private static final Method %smethod = lookupMethod(%s.class, \"%s\"%s);%n",
                     m.getName(), anInterface.getCanonicalName(), m.getName(), parameterTypesArg));
         }
 
@@ -602,7 +602,7 @@ public class GenerateMethodReader {
         String chainedCallPrefix = chainReturnType != null ? "chainedCallReturnResult = " : "";
 
         // Handling code generation for event name switch block
-        eventNameSwitchBlock.append(format("case \"%s\":\n", m.getName()));
+        eventNameSwitchBlock.append(format("case \"%s\":%n", m.getName()));
         if (parameterTypes.length == 0) {
             eventNameSwitchBlock.append("valueIn.skipValue();\n");
             eventNameSwitchBlock.append(methodCall(m, instanceFieldName, chainedCallPrefix, chainReturnType));
@@ -676,9 +676,9 @@ public class GenerateMethodReader {
      */
     private void addMethodIdSwitch(String methodName, int methodId, SourceCodeFormatter eventIdSwitchBlock) {
         // Append the switch case based on method ID
-        eventIdSwitchBlock.append(format("case %d:\n", methodId));
+        eventIdSwitchBlock.append(format("case %d:%n", methodId));
         // Set the last executed method's name
-        eventIdSwitchBlock.append(format("lastEventName = \"%s\";\n", methodName));
+        eventIdSwitchBlock.append(format("lastEventName = \"%s\";%n", methodName));
         // End of the switch case
         eventIdSwitchBlock.append("break;\n\n");
     }
@@ -812,16 +812,17 @@ public class GenerateMethodReader {
             // If numeric conversion is available and has a shared instance.
             if (numericConversionClass != null && hasInstance(numericConversionClass)) {
                 return format("%s = (byte) %s.INSTANCE.parse(%s.text());\n", argumentName, numericConversionClass.getName(), valueInName);
-            }
+            } else if (numericConversionClass != null && LongConverter.class.isAssignableFrom(numericConversionClass)) {
             // If numeric conversion is available and is an instance of LongConverter.
-            else if (numericConversionClass != null && LongConverter.class.isAssignableFrom(numericConversionClass)) {
                 // Register a converter for this type.
                 numericConverters.append(format("private final %s %sConverter = ObjectUtils.newInstance(%s.class);\n",
                         numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
 
                 return format("%s = (byte) %sConverter.parse(%s.text());\n", argumentName, argumentName, valueInName);
-            } else // Default byte reading logic.
+            } else {
+                // Default byte reading logic.
                 return format("%s = %s.readByte();\n", argumentName, valueInName);
+            }
         } else if (char.class.equals(argumentType)) {
             // Handling character type arguments.
             return format("%s = %s.character();\n", argumentName, valueInName);
@@ -835,8 +836,9 @@ public class GenerateMethodReader {
                         numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
 
                 return format("%s = (short) %sConverter.parse(%s.text());\n", argumentName, argumentName, valueInName);
-            } else
+            } else {
                 return format("%s = %s.int16();\n", argumentName, valueInName);
+            }
         } else if (int.class.equals(argumentType)) {
             // Generate code based on the type of the argument and presence of numeric conversion.
             if (numericConversionClass != null && hasInstance(numericConversionClass)) {
@@ -847,8 +849,9 @@ public class GenerateMethodReader {
                         numericConversionClass.getCanonicalName(), trueArgumentName, numericConversionClass.getCanonicalName()));
 
                 return format("%s = (int) %sConverter.parse(%s.text());\n", argumentName, argumentName, valueInName);
-            } else
+            } else {
                 return format("%s = %s.int32();\n", argumentName, valueInName);
+            }
         } else if (long.class.equals(argumentType)) {
             // Generate code based on the type of the argument and presence of numeric conversion.
             if (numericConversionClass != null && hasInstance(numericConversionClass)) {
@@ -901,10 +904,10 @@ public class GenerateMethodReader {
      * based on {@link #multipleNonMarshallableParamTypes} and the type itself.
      */
     private boolean multipleNonMarshallableParamTypes(Class<?> argumentType) {
-        Boolean _multipleNonMarshallableParamTypes = this.multipleNonMarshallableParamTypes;
-        return _multipleNonMarshallableParamTypes == null
+        Boolean cachedMultipleNonMarshallableParamTypes = this.multipleNonMarshallableParamTypes;
+        return cachedMultipleNonMarshallableParamTypes == null
                 ? argumentType.isInterface() && !isRecyclable(argumentType) || argumentType == Object.class
-                : _multipleNonMarshallableParamTypes;
+                : cachedMultipleNonMarshallableParamTypes;
     }
 
     /**

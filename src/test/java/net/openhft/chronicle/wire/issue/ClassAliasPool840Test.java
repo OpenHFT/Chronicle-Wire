@@ -24,38 +24,43 @@ public class ClassAliasPool840Test {
             @Override
             public Class<?> forName(CharSequence name) throws ClassNotFoundRuntimeException {
                 switch (name.toString()) {
-                    case "Dto": return Dto.class;
-                    case "Type"   : return Type.class;
-                    case "type"   : return Class.class;
-                    default: throw new IllegalStateException();
+                    case "Dto":
+                        return Dto.class;
+                    case "Type":
+                        return Type.class;
+                    case "type":
+                        return Class.class;
+                    default:
+                        throw new IllegalStateException();
                 }
             }
 
             @Override
             public String nameFor(Class<?> clazz) throws IllegalArgumentException {
                 if (clazz.equals(Dto.class)) return "Dto";
-                if (clazz.equals(Type.class))    return "Type";
-                if (clazz.equals(Class.class))    return "type";
+                if (clazz.equals(Type.class)) return "Type";
+                if (clazz.equals(Class.class)) return "type";
 
                 throw new IllegalStateException();
             }
 
             @Override
-            public void addAlias(Class<?>... classes) {}
+            public void addAlias(Class<?>... classes) {
+            }
 
             @Override
-            public void addAlias(Class<?> clazz, String names) {}
+            public void addAlias(Class<?> clazz, String names) {
+            }
         };
 
         Wire wire = WireType.YAML_ONLY.apply(Bytes.allocateElasticOnHeap());
         wire.classLookup(customClassLookup);
 
         wire.reset();
-        wire.bytes().clear().append(
-            "{ " +
-            "obj: !Dto { value: 1 }, " +
-            "clazz: !type Type " +
-            "}");
+        wire.bytes().clear().append("{ " +
+                "obj: !Dto { value: 1 }, " +
+                "clazz: !type Type " +
+                "}");
 
         StringBuilder name = new StringBuilder();
         while (wire.hasMore()) {

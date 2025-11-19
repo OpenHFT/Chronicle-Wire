@@ -12,14 +12,12 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
  */
 public class ClusterCommand extends SelfDescribingMarshallable {
 
-    // Represents the cycle associated with the command
-    private long cycle;
-
-    // The Service instance associated with the command
-    private Service service;
-
     // The service ID in bytes format, initialized as an elastic byte buffer
     private final Bytes<?> serviceId = Bytes.allocateElasticOnHeap();
+    // Represents the cycle associated with the command
+    private long cycle;
+    // The Service instance associated with the command
+    private Service service;
 
     /**
      * Constructs a ClusterCommand with the given cycle and Service.
@@ -37,13 +35,12 @@ public class ClusterCommand extends SelfDescribingMarshallable {
     /**
      * Constructs a ClusterCommand with the given cycle and service ID.
      *
-     * @param cycle      The cycle for the command.
-     * @param serviceId  The service ID in CharSequence format.
+     * @param cycle     The cycle for the command.
+     * @param serviceId The service ID in CharSequence format.
      */
     public ClusterCommand(long cycle, CharSequence serviceId) {
         this.cycle = cycle;
         this.serviceId.clear().append(serviceId);
-           // setUniqueTimeStampNow();
     }
 
     /**

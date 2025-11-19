@@ -64,6 +64,7 @@ public class WireMarshaller<T> {
             try {
                 isRecord = Jvm.getMethod(Class.class, "isRecord");
             } catch (Exception ignored) {
+                isRecord = null;
             }
         }
     }
@@ -86,8 +87,8 @@ public class WireMarshaller<T> {
      * types receive a specialised marshaller that handles their field discovery
      * slightly differently, while all other classes use the generic variant.
      */
-    public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial
-            (tClass ->
+    public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial(
+            tClass ->
                     Throwable.class.isAssignableFrom(tClass)
                             ? WireMarshaller.ofThrowable(tClass)
                             : WireMarshaller.of(tClass)
@@ -930,7 +931,7 @@ public class WireMarshaller<T> {
             try {
                 commentAnnotation = Jvm.findAnnotation(field, Comment.class);
             } catch (NullPointerException ignore) {
-
+                commentAnnotation = null;
             }
         }
 
@@ -2013,7 +2014,6 @@ public class WireMarshaller<T> {
             @Nullable final Supplier<Collection> collectionSupplier;
             @NotNull final Class<?> componentType;
             final Class<?> type;
-            @Nullable Boolean isLeaf = null;
             type = field.getType();
             if (type == List.class || type == Collection.class)
                 collectionSupplier = ArrayList::new;
@@ -2025,6 +2025,7 @@ public class WireMarshaller<T> {
                 collectionSupplier = null;
 
             componentType = extractClass(computeActualTypeArguments(Collection.class, field)[0]);
+            @Nullable Boolean isLeaf = null;
             if (componentType != Object.class) {
                 isLeaf = !Throwable.class.isAssignableFrom(componentType)
                         // Don't recurse into the same class

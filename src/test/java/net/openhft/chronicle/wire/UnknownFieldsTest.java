@@ -24,12 +24,11 @@ public class UnknownFieldsTest extends WireTestCommon {
     @Test
     public void testExceptionIsNotSwallowed() {
         try {
-            WireType.TEXT.fromString
-                    ("!Variation1 {\n" +
-                            "    object: !Inner {\n" +
-                            "        unknown: true" +
-                            "    }\n" +
-                            "}\n");
+            WireType.TEXT.fromString("!Variation1 {\n" +
+                    "    object: !Inner {\n" +
+                    "        unknown: true" +
+                    "    }\n" +
+                    "}\n");
             Assert.fail();  // If no exception is thrown, the test should fail
         } catch (UnexpectedFieldHandlingException e) {
             // Verify that the cause of the exception is as expected
@@ -41,12 +40,11 @@ public class UnknownFieldsTest extends WireTestCommon {
     @Test
     public void testExceptionIsNotTransformed() {
         try {
-            WireType.TEXT.fromString
-                    ("!Variation2 {\n" +
-                            "    object: !Inner {\n" +
-                            "        unknown: true\n" +
-                            "    }\n" +
-                            "}\n");
+            WireType.TEXT.fromString("!Variation2 {\n" +
+                    "    object: !Inner {\n" +
+                    "        unknown: true\n" +
+                    "    }\n" +
+                    "}\n");
             Assert.fail();  // If no exception is thrown, the test should fail
         } catch (UnexpectedFieldHandlingException e) {
             // Verify that the cause of the exception is as expected
@@ -75,9 +73,8 @@ public class UnknownFieldsTest extends WireTestCommon {
         @Override
         public void unexpectedField(Object event, ValueIn valueIn) {
             // Throw an AssertionError with a descriptive message
-            throw new AssertionError
-                    ("This should not be called with the field name '" + event +
-                            "' and value '" + valueIn + "'");
+            throw new AssertionError("This should not be called with the field name '" + event +
+                    "' and value '" + valueIn + "'");
         }
     }
 }

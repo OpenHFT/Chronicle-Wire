@@ -143,9 +143,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      *
      * @param targetBuffer The appendable containing characters to be unescaped.
      * @param blockQuoteChar The block quote character that determines the escaping scheme (' or ").
-     * @param <ACS> An appendable that also implements CharSequence interface.
+     * @param <S> An appendable that also implements CharSequence interface.
      */
-    private static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS targetBuffer, char blockQuoteChar) {
+    private static <S extends Appendable & CharSequence> void unescape(@NotNull S targetBuffer, char blockQuoteChar) {
         int end = 0;
         int length = targetBuffer.length();
         boolean skip = false;
@@ -513,8 +513,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             } finally {
                 bytes.readLimit(l);
             }
-        } else
+        } else {
             return bytes.toString();
+    }
     }
 
     @Override
@@ -772,18 +773,18 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     @Override
-    @SuppressWarnings("fallthrough")
     public void consumePadding() {
         while (true) {
             switch (yt.current()) {
                 case COMMENT:
                     String text = yt.text();
                     commentListener.accept(text);
-                    // fall through
+                    yt.next();
+                    continue;
                 case DIRECTIVE:
                 case DIRECTIVES_END:
                     yt.next();
-                    break;
+                    continue;
                 default:
                     return;
             }
@@ -837,7 +838,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         int minIndent = yc.indent;
         // go through remaining keys
         while (yt.current() == YamlToken.MAPPING_KEY) {
-            long lastKeyPosition = yt.lineStart;
+            long lastKeyPosition = yt.lastKeyPosition();
             if (checkForMatch(keyName))
                 return valueIn;
 
@@ -1001,37 +1002,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         return new TextIntArrayReference();
     }
 
-    /**
-     * Reads a YAML map and deserializes it into a Java Map, converting values to the specified type.
-     *
-     * @param valueType The class type to which map values should be converted.
-     * @return A Java Map representing the YAML map.
-     */
-    @NotNull
-    private Map readMap(Class<?> valueType) {
-        Map map = new LinkedHashMap();
-        if (yt.current() == YamlToken.MAPPING_START) {
-            while (yt.next() == YamlToken.MAPPING_KEY) {
-                if (yt.next() == YamlToken.TEXT) {
-                    String key = yt.text();
-                    Object o;
-                    if (yt.next() == YamlToken.TEXT) {
-                        // Convert the text to the specified type
-                        o = ObjectUtils.convertTo(valueType, yt.text());
-                    } else {
-                        throw new UnsupportedOperationException(yt.toString());
-                    }
-                    map.put(key, o);
-                } else {
-                    throw new UnsupportedOperationException(yt.toString());
-                }
-            }
-        } else {
-            throw new UnsupportedOperationException(yt.toString());
-        }
-        return map;
-    }
-
     @Override
     public void startEvent() {
         consumePadding();
@@ -1041,6 +1011,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 return;
             case NONE:
                 return;
+            default:
+                break;
         }
         throw new UnsupportedOperationException(yt.toString());
     }
@@ -1252,6 +1224,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         /**
          * Extracts the text from the current token and appends it to a StringBuilder.
          * Handles various YAML tokens like TEXT, LITERAL, and TAG.
+         *
          * @return StringBuilder containing the text.
          */
         @Nullable
@@ -1314,6 +1287,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     }
 
                     throw new UnsupportedOperationException(yt.toString());
+                default:
+                    break;
             }
             return destinationBuilder;
         }
@@ -1411,6 +1386,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
         /**
          * Reads the length of a marshallable.
+         *
          * @return The length of the marshallable.
          */
         protected long readLengthMarshallable() {
@@ -1425,6 +1401,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
         /**
          * Consumes any token type based on its indentation level.
+         *
          * @param minIndent Minimum indentation level to consume.
          */
         protected void consumeAny(int minIndent) {
@@ -1824,6 +1801,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     // Allows scalar value to be converted into singleton array
                 case TEXT:
                     return true;
+                default:
+                    break;
             }
             return false;
         }

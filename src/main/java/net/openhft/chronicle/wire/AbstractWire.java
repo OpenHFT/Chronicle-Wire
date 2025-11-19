@@ -134,8 +134,8 @@ public abstract class AbstractWire implements Wire, InternalWire {
     /**
      * Internal method to set the header number at a specific position.
      *
-     * @param position      The position in the bytes representation.
-     * @param headerNumber  The header number to set.
+     * @param position     The position in the bytes representation.
+     * @param headerNumber The header number to set.
      * @return The current Wire instance.
      */
     @NotNull
@@ -147,8 +147,8 @@ public abstract class AbstractWire implements Wire, InternalWire {
     /**
      * Checks if the header at the given position and header number is valid.
      *
-     * @param position      The position in the bytes representation.
-     * @param headerNumber  The header number to check.
+     * @param position     The position in the bytes representation.
+     * @param headerNumber The header number to check.
      * @return True if the header is valid, false otherwise.
      */
     private boolean checkHeader(long position, long headerNumber) {

@@ -28,11 +28,10 @@ import static org.junit.Assert.*;
 public class RawWireTest extends WireTestCommon {
 
     // Suppressing raw type warnings for the Bytes<?> object.
+    // Bytes object used to simulate wire data storage.
     @SuppressWarnings("rawtypes")
     @NotNull
-    private
-    // Bytes object used to simulate wire data storage.
-    Bytes<?> bytes = nativeBytes();
+    private final Bytes<?> bytes = nativeBytes();
 
     // Override the method from WireTestCommon to ensure byte references are released.
     @Override
@@ -545,7 +544,7 @@ public class RawWireTest extends WireTestCommon {
                 .write().bytes(Bytes.wrapForRead("Hello".getBytes(ISO_8859_1)))
                 .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
                 .write().bytes(allBytes);
-       // System.out.println(bytes.toDebugString());
+
         @NotNull NativeBytes allBytes2 = nativeBytes();
         // Reading and validating byte arrays from the wire
         wire.read().bytes(b -> assertEquals(0, b.readRemaining()))

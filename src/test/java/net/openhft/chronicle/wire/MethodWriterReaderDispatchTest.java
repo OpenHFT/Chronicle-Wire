@@ -10,14 +10,10 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class MethodWriterReaderDispatchTest extends WireTestCommon {
-
-    interface Api {
-        void a(int i);
-        void b(String s);
-    }
 
     @Test
     public void dispatchKnownMethodsAndIgnoreUnknown() {
@@ -31,15 +27,28 @@ public class MethodWriterReaderDispatchTest extends WireTestCommon {
 
         List<String> seen = new ArrayList<>();
         MethodReader r = w.methodReader(new Api() {
-            @Override public void a(int i) { seen.add("a:" + i); }
-            @Override public void b(String s) { seen.add("b:" + s); }
+            @Override
+            public void a(int i) {
+                seen.add("a:" + i);
+            }
+
+            @Override
+            public void b(String s) {
+                seen.add("b:" + s);
+            }
         });
         while (r.readOne()) {
             // drain
+            continue;
         }
         assertEquals(2, seen.size());
         assertTrue(seen.get(0).startsWith("a:"));
         assertTrue(seen.get(1).startsWith("b:"));
     }
-}
 
+    interface Api {
+        void a(int i);
+
+        void b(String s);
+    }
+}

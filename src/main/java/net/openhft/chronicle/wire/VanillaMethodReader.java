@@ -40,7 +40,7 @@ import static net.openhft.chronicle.wire.VanillaWireParser.SKIP_READABLE_BYTES;
  * Supports interception via {@link MethodReaderInterceptorReturns} and custom
  * parsing through {@link WireParselet} and {@link FieldNumberParselet}.
  */
-@SuppressWarnings({"rawtypes","this-escape"})
+@SuppressWarnings({"rawtypes", "this-escape"})
 public class VanillaMethodReader implements MethodReader {
 
     // beware enabling DEBUG_ENABLED as logMessage will not work unless Wire marshalling used - https://github.com/ChronicleEnterprise/Chronicle-Services/issues/240
@@ -83,12 +83,12 @@ public class VanillaMethodReader implements MethodReader {
     /**
      * Convenience constructor used by generated code.
      *
-     * @param in       source of wire messages
-     * @param ignoreDefault if true default interface methods are skipped
-     * @param defaultParselet parselet for unknown events
+     * @param in                             source of wire messages
+     * @param ignoreDefault                  if true default interface methods are skipped
+     * @param defaultParselet                parselet for unknown events
      * @param methodReaderInterceptorReturns optional interceptor
-     * @param metadataHandlers handlers for metadata messages
-     * @param handlers handler instances for data messages
+     * @param metadataHandlers               handlers for metadata messages
+     * @param handlers                       handler instances for data messages
      */
     @UsedViaReflection
     public VanillaMethodReader(MarshallableIn in,
@@ -103,12 +103,12 @@ public class VanillaMethodReader implements MethodReader {
     /**
      * Convenience constructor used by generated code.
      *
-     * @param in       source of wire messages
-     * @param ignoreDefault if true default interface methods are skipped
-     * @param defaultParselet parselet for unknown events
-     * @param fieldNumberParselet parselet for numeric ids
+     * @param in                             source of wire messages
+     * @param ignoreDefault                  if true default interface methods are skipped
+     * @param defaultParselet                parselet for unknown events
+     * @param fieldNumberParselet            parselet for numeric ids
      * @param methodReaderInterceptorReturns optional interceptor
-     * @param handlers handler instances for data messages
+     * @param handlers                       handler instances for data messages
      */
     @UsedViaReflection
     public VanillaMethodReader(MarshallableIn in,
@@ -124,13 +124,13 @@ public class VanillaMethodReader implements MethodReader {
      * Constructor that defaults the predicate to always true.
      * It ultimately calls the primary constructor.
      *
-     * @param in       source of wire messages
-     * @param ignoreDefault if true default interface methods are skipped
-     * @param defaultParselet parselet for unknown events
-     * @param fieldNumberParselet parselet for numeric ids
+     * @param in                             source of wire messages
+     * @param ignoreDefault                  if true default interface methods are skipped
+     * @param defaultParselet                parselet for unknown events
+     * @param fieldNumberParselet            parselet for numeric ids
      * @param methodReaderInterceptorReturns optional interceptor
-     * @param metadataHandlers handlers for metadata messages
-     * @param handlers handler instances for data messages
+     * @param metadataHandlers               handlers for metadata messages
+     * @param handlers                       handler instances for data messages
      */
     public VanillaMethodReader(MarshallableIn in,
                                boolean ignoreDefault,
@@ -150,14 +150,14 @@ public class VanillaMethodReader implements MethodReader {
     /**
      * Primary constructor configuring parsers and interceptors.
      *
-     * @param in       source of wire messages
-     * @param ignoreDefault if true default interface methods are skipped
-     * @param defaultParselet parselet for unknown events
-     * @param fieldNumberParselet parselet for numeric ids
+     * @param in                             source of wire messages
+     * @param ignoreDefault                  if true default interface methods are skipped
+     * @param defaultParselet                parselet for unknown events
+     * @param fieldNumberParselet            parselet for numeric ids
      * @param methodReaderInterceptorReturns optional interceptor
-     * @param metadataHandlers handlers for metadata messages
-     * @param predicate predicate controlling readOne execution
-     * @param handlers handler instances for data messages
+     * @param metadataHandlers               handlers for metadata messages
+     * @param predicate                      predicate controlling readOne execution
+     * @param handlers                       handler instances for data messages
      */
     public VanillaMethodReader(MarshallableIn in,
                                boolean ignoreDefault,
@@ -211,15 +211,15 @@ public class VanillaMethodReader implements MethodReader {
      * Invokes {@code method} on {@code target} (or {@code context[0]}) with one long argument.
      * The argument is read from {@code valueIn}, applying any {@link LongConversion}.
      *
-     * @param target       handler when {@code context[0]} is null
+     * @param target        handler when {@code context[0]} is null
      * @param contextHolder invocation context array
-     * @param method       method to call
-     * @param methodName   method name for logging
-     * @param methodHandle optional bound MethodHandle
-     * @param argHolder    scratch array for the argument
-     * @param eventName    event name being read
-     * @param valueIn      value reader
-     * @param interceptor  optional interceptor
+     * @param method        method to call
+     * @param methodName    method name for logging
+     * @param methodHandle  optional bound MethodHandle
+     * @param argHolder     scratch array for the argument
+     * @param eventName     event name being read
+     * @param valueIn       value reader
+     * @param interceptor   optional interceptor
      */
     private static void invokeMethodWithOneLong(Object target, Object[] contextHolder, @NotNull Method method, String methodName, MethodHandle methodHandle, Object[] argHolder, CharSequence eventName, ValueIn valueIn, MethodReaderInterceptorReturns interceptor) {
         try {
@@ -293,7 +293,7 @@ public class VanillaMethodReader implements MethodReader {
      *
      * @param method The method to be invoked.
      * @param target The object on which the method is to be invoked.
-     * @param args The arguments for the method.
+     * @param args   The arguments for the method.
      * @return The result of the method invocation.
      * @throws InvocationTargetException if the method invocation fails.
      */
@@ -355,7 +355,7 @@ public class VanillaMethodReader implements MethodReader {
      * Combine explicit metadata handlers with the general handler list.
      *
      * @param metadataHandlers handlers dedicated to metadata messages
-     * @param handlers general handler objects
+     * @param handlers         general handler objects
      * @return merged array
      */
     private Object[] addObjectsToMetaDataHandlers(Object[] metadataHandlers, @NotNull Object @NotNull [] handlers) {
@@ -376,9 +376,9 @@ public class VanillaMethodReader implements MethodReader {
      * on the first argument is supported. Interfaces implemented by each object are examined
      * to define these parselets.
      *
-     * @param wireParser The WireParser to be configured.
+     * @param wireParser    The WireParser to be configured.
      * @param ignoreDefault If true, defaults are ignored.
-     * @param handlers The objects that provide the necessary information for configuring the parser.
+     * @param handlers      The objects that provide the necessary information for configuring the parser.
      */
     private void addParsersForComponents(WireParser wireParser, boolean ignoreDefault, @NotNull Object @NotNull [] handlers) {
         // Sets to keep track of method signatures and names that are already handled.
@@ -411,17 +411,17 @@ public class VanillaMethodReader implements MethodReader {
      * The main focus is to ensure each method signature is only added once, and to properly handle methods
      * with varying numbers of arguments.
      *
-     * @param wireParser           The WireParser to be configured.
-     * @param interfaces           A set of interfaces that have already been processed. Used to avoid cyclic processing.
-     * @param handlerClass               The class or interface to evaluate for methods.
-     * @param ignoreDefault        If true, methods from default interfaces are ignored.
-     * @param methodNamesHandled   A set of method names that have already been handled.
+     * @param wireParser               The WireParser to be configured.
+     * @param interfaces               A set of interfaces that have already been processed. Used to avoid cyclic processing.
+     * @param handlerClass             The class or interface to evaluate for methods.
+     * @param ignoreDefault            If true, methods from default interfaces are ignored.
+     * @param methodNamesHandled       A set of method names that have already been handled.
      * @param methodsSignaturesHandled A set of method signatures that have already been handled.
      * @param methodFilterOnFirstArg   Optional filter that can be applied on methods based on their first argument.
-     * @param handler                    The original object that the method might be invoked on.
-     * @param contextHolder              The context in which the method will be invoked.
-     * @param contextSupplier      Provides the current context.
-     * @param nextContextSupplier          Provides the next context in which the method will be invoked.
+     * @param handler                  The original object that the method might be invoked on.
+     * @param contextHolder            The context in which the method will be invoked.
+     * @param contextSupplier          Provides the current context.
+     * @param nextContextSupplier      Provides the next context in which the method will be invoked.
      */
     private void addParsletsFor(WireParser wireParser, Set<Class> interfaces, Class<?> handlerClass, boolean ignoreDefault, Set<String> methodNamesHandled, Set<String> methodsSignaturesHandled, MethodFilterOnFirstArg methodFilterOnFirstArg, Object handler, Object[] contextHolder, Supplier contextSupplier, Supplier nextContextSupplier) {
         if (!handlerClass.isInterface() || Jvm.dontChain(handlerClass)) {
@@ -604,8 +604,8 @@ public class VanillaMethodReader implements MethodReader {
      * If the method has a MethodId annotation, the key will be based on the annotation's value, otherwise, it will be based
      * on the method's name's hash code.
      *
-     * @param method    The method for which the key is being generated
-     * @param name The name of the method
+     * @param method The method for which the key is being generated
+     * @param name   The name of the method
      * @return A MethodWireKey uniquely representing the method
      */
     @NotNull
@@ -661,8 +661,8 @@ public class VanillaMethodReader implements MethodReader {
      * Checks if the given object can be recycled. For collections, it clears the collection and returns the same instance.
      * If the object is an instance of Marshallable, it returns the same object; otherwise, it returns null.
      *
-     * @param <T> The type of the object
-     * @param instance   The object to check
+     * @param <T>      The type of the object
+     * @param instance The object to check
      * @return The original object if it can be recycled, otherwise null
      */
     private <T> T checkRecycle(T instance) {
@@ -686,14 +686,14 @@ public class VanillaMethodReader implements MethodReader {
      * If the filter determines that the method should be ignored based on its first argument,
      * the method will not be executed and subsequent arguments will be skipped.
      *
-     * @param wireParser              The WireParser to which the method will be registered
-     * @param target                  The object on which the method should be invoked
-     * @param contextHolder           The current context for method invocation
-     * @param contextSupplier         Supplies the context for method invocation
-     * @param method                  The method to be registered
-     * @param parameterTypes          The array of parameter types for the method
-     * @param methodFilterOnFirstArg  The filter that decides if the method should be ignored based on its first argument
-     * @throws IllegalStateException  If the VanillaMethodReader is closed
+     * @param wireParser             The WireParser to which the method will be registered
+     * @param target                 The object on which the method should be invoked
+     * @param contextHolder          The current context for method invocation
+     * @param contextSupplier        Supplies the context for method invocation
+     * @param method                 The method to be registered
+     * @param parameterTypes         The array of parameter types for the method
+     * @param methodFilterOnFirstArg The filter that decides if the method should be ignored based on its first argument
+     * @throws IllegalStateException If the VanillaMethodReader is closed
      */
     @SuppressWarnings("unchecked")
     public void addParseletForMethod(WireParser wireParser, Object target, Object[] contextHolder, Supplier contextSupplier, @NotNull Method method, @NotNull Class[] parameterTypes, MethodFilterOnFirstArg methodFilterOnFirstArg) {
@@ -763,7 +763,7 @@ public class VanillaMethodReader implements MethodReader {
      * @param target The object on which to invoke the method
      * @param method The method to invoke
      * @param args   The arguments to pass to the method
-     * @return       The result of the method invocation
+     * @return The result of the method invocation
      * @throws InvocationTargetRuntimeException if the invoked method itself throws an exception
      */
     protected Object invoke(Object target, @NotNull Method method, Object[] args) throws InvocationTargetRuntimeException {

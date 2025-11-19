@@ -24,8 +24,7 @@ public class This0AsTransientTest extends WireTestCommon {
      */
     @Test
     public void test1() {
-        assertEquals("" +
-                        "!net.openhft.chronicle.wire.marshallable.This0AsTransientTest$MyClass1 {\n" +
+        assertEquals("!net.openhft.chronicle.wire.marshallable.This0AsTransientTest$MyClass1 {\n" +
                         "  value: 128\n" +
                         "}\n",
                 new MyClass1(128).toString());
@@ -39,8 +38,7 @@ public class This0AsTransientTest extends WireTestCommon {
         expectException("Found this$0, in class ");
         Wire wire = WireType.YAML_ONLY.apply(Bytes.allocateElasticOnHeap());
         wire.writeMessage("test", new MyClass1(1111));
-        assertEquals("" +
-                        "test: !net.openhft.chronicle.wire.marshallable.This0AsTransientTest$MyClass1 {\n" +
+        assertEquals("test: !net.openhft.chronicle.wire.marshallable.This0AsTransientTest$MyClass1 {\n" +
                         "  value: 1111\n" +
                         "}\n" +
                         "...\n",
@@ -52,8 +50,7 @@ public class This0AsTransientTest extends WireTestCommon {
      */
     @Test
     public void test2() {
-        assertEquals("" +
-                        "!net.openhft.chronicle.wire.marshallable.This0AsTransientTest$MyClass2 {\n" +
+        assertEquals("!net.openhft.chronicle.wire.marshallable.This0AsTransientTest$MyClass2 {\n" +
                         "  value: 128\n" +
                         "}\n",
                 new MyClass2(128).toString());
@@ -69,8 +66,7 @@ public class This0AsTransientTest extends WireTestCommon {
         expectException("Found this$0$, in class ");
         Wire wire = WireType.YAML_ONLY.apply(Bytes.allocateElasticOnHeap());
         wire.writeMessage("test", new MyClass2(2222));
-        assertEquals("" +
-                        "test: !net.openhft.chronicle.wire.marshallable.This0AsTransientTest$MyClass2 {\n" +
+        assertEquals("test: !net.openhft.chronicle.wire.marshallable.This0AsTransientTest$MyClass2 {\n" +
                         "  value: 2222\n" +
                         "}\n" +
                         "...\n",
@@ -90,9 +86,10 @@ public class This0AsTransientTest extends WireTestCommon {
 
     /**
      * Another non-static inner class, which also has a hidden reference to the outer instance.
-     * This class has an explicit 'this$0' field to mimic the behavior of hidden fields in inner classes.
+     * This class has an explicit 'this$0' field to mimic the behaviour of hidden fields in inner classes.
      */
     class MyClass2 extends SelfDescribingMarshallable {
+        @SuppressWarnings("unused")
         String this$0;
         long value;
 

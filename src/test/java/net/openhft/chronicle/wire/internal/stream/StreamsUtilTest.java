@@ -21,14 +21,14 @@ import static org.junit.Assert.*;
 public class StreamsUtilTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     @Test
-    public void VanillaSpliterator_estimateSize_alwaysReturnsLongMaxValue() {
+    public void vanillaSpliteratorEstimateSizeAlwaysReturnsLongMaxValue() {
         Collection<Integer> collection = Collections.emptyList();
         StreamsUtil.VanillaSpliterator<Integer> spliterator = new StreamsUtil.VanillaSpliterator<>(collection.iterator());
         assertEquals(Long.MAX_VALUE, spliterator.estimateSize());
     }
 
     @Test
-    public void VanillaSpliterator_trySplit_iteratorWithNoContentsShouldYieldNullSpliterator() {
+    public void vanillaSpliteratorTrySplitIteratorWithNoContentsShouldYieldNullSpliterator() {
         Collection<Integer> collection = Collections.emptyList();
         StreamsUtil.VanillaSpliterator<Integer> spliterator = new StreamsUtil.VanillaSpliterator<>(collection.iterator());
         Spliterator<Integer> split = spliterator.trySplit();
@@ -36,7 +36,7 @@ public class StreamsUtilTest extends net.openhft.chronicle.wire.WireTestCommon {
     }
 
     @Test
-    public void VanillaSpliterator_trySplit_batchSizeShouldBeCappedByTwoTimesBatchUnitIncrease() {
+    public void vanillaSpliteratorTrySplitBatchSizeShouldBeCappedByTwoTimesBatchUnitIncrease() {
         Collection<Integer> collection = Stream.generate(() -> 1).limit(16777216).collect(Collectors.toList());
         StreamsUtil.VanillaSpliterator<Integer> spliterator = new StreamsUtil.VanillaSpliterator<>(collection.iterator());
         Spliterator<Integer> split = spliterator.trySplit();
@@ -44,7 +44,7 @@ public class StreamsUtilTest extends net.openhft.chronicle.wire.WireTestCommon {
     }
 
     @Test
-    public void VanillaSpliterator_trySplit_batchSizeSmallerThanMatchMaxSizeShouldBeReleased() {
+    public void vanillaSpliteratorTrySplitBatchSizeSmallerThanMatchMaxSizeShouldBeReleased() {
         Collection<Integer> collection = Stream.generate(() -> 1).limit(10).collect(Collectors.toList());
         StreamsUtil.VanillaSpliterator<Integer> spliterator = new StreamsUtil.VanillaSpliterator<>(collection.iterator());
         Spliterator<Integer> split = spliterator.trySplit();
@@ -52,21 +52,21 @@ public class StreamsUtilTest extends net.openhft.chronicle.wire.WireTestCommon {
     }
 
     @Test
-    public void VanillaSpliteratorOfLong_split() {
+    public void vanillaSpliteratorOfLongSplit() {
         PrimitiveIterator.OfLong iterator = LongStream.of(1, 2).iterator();
         StreamsUtil.VanillaSpliteratorOfLong spliterator = new StreamsUtil.VanillaSpliteratorOfLong(iterator);
         assertEquals(1, spliterator.split(1).getExactSizeIfKnown());
     }
 
     @Test
-    public void VanillaSpliteratorOfDouble_split() {
+    public void vanillaSpliteratorOfDoubleSplit() {
         PrimitiveIterator.OfDouble iterator = DoubleStream.of(1, 2).iterator();
         StreamsUtil.VanillaSpliteratorOfDouble spliterator = new StreamsUtil.VanillaSpliteratorOfDouble(iterator);
         assertEquals(1, spliterator.split(1).getExactSizeIfKnown());
     }
 
     @Test
-    public void VanillaSpliteratorOfDouble_trySplit_iteratorWithNoContentsShouldYieldNullSpliterator() {
+    public void vanillaSpliteratorOfDoubleTrySplitIteratorWithNoContentsShouldYieldNullSpliterator() {
         PrimitiveIterator.OfDouble iterator = DoubleStream.empty().iterator();
         StreamsUtil.VanillaSpliteratorOfDouble spliterator = new StreamsUtil.VanillaSpliteratorOfDouble(iterator);
         Spliterator.OfDouble split = spliterator.trySplit();
@@ -74,7 +74,7 @@ public class StreamsUtilTest extends net.openhft.chronicle.wire.WireTestCommon {
     }
 
     @Test
-    public void VanillaSpliteratorOfDouble_trySplit_batchSizeShouldBeCappedByTwoTimesBatchUnitIncrease() {
+    public void vanillaSpliteratorOfDoubleTrySplitBatchSizeShouldBeCappedByTwoTimesBatchUnitIncrease() {
         PrimitiveIterator.OfDouble iterator = DoubleStream.generate(() -> 1).limit(16777216).iterator();
         StreamsUtil.VanillaSpliteratorOfDouble spliterator = new StreamsUtil.VanillaSpliteratorOfDouble(iterator);
         Spliterator.OfDouble split = spliterator.trySplit();
@@ -82,7 +82,7 @@ public class StreamsUtilTest extends net.openhft.chronicle.wire.WireTestCommon {
     }
 
     @Test
-    public void VanillaSpliteratorOfDouble_tryAdvance_nextValueShouldBeYielded() {
+    public void vanillaSpliteratorOfDoubleTryAdvanceNextValueShouldBeYielded() {
         PrimitiveIterator.OfDouble iterator = DoubleStream.generate(() -> 1).limit(16777216).iterator();
         StreamsUtil.VanillaSpliteratorOfDouble spliterator = new StreamsUtil.VanillaSpliteratorOfDouble(iterator);
 
@@ -93,7 +93,7 @@ public class StreamsUtilTest extends net.openhft.chronicle.wire.WireTestCommon {
     }
 
     @Test
-    public void VanillaSpliteratorOfDouble_tryAdvance_noValueYieldedForEmptyStream() {
+    public void vanillaSpliteratorOfDoubleTryAdvanceNoValueYieldedForEmptyStream() {
         PrimitiveIterator.OfDouble iterator = DoubleStream.empty().iterator();
         StreamsUtil.VanillaSpliteratorOfDouble spliterator = new StreamsUtil.VanillaSpliteratorOfDouble(iterator);
 
@@ -104,7 +104,7 @@ public class StreamsUtilTest extends net.openhft.chronicle.wire.WireTestCommon {
     }
 
     @Test
-    public void VanillaSpliteratorOfDouble_estimateSize_alwaysReturnsLongMaxValue() {
+    public void vanillaSpliteratorOfDoubleEstimateSizeAlwaysReturnsLongMaxValue() {
         PrimitiveIterator.OfDouble iterator = DoubleStream.empty().iterator();
         StreamsUtil.VanillaSpliteratorOfDouble spliterator = new StreamsUtil.VanillaSpliteratorOfDouble(iterator);
         assertEquals(Long.MAX_VALUE, spliterator.estimateSize());

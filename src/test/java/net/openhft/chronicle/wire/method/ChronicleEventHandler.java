@@ -12,6 +12,7 @@ public interface ChronicleEventHandler extends EventHandler<ChronicleEvent> {
 
     /**
      * Handles the provided ChronicleEvent.
+     *
      * @param event The ChronicleEvent instance to be handled.
      */
     @Override

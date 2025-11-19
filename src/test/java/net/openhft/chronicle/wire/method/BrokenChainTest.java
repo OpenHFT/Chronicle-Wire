@@ -16,14 +16,6 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 public class BrokenChainTest extends WireTestCommon {
-    interface First {
-        Second pre(String pre);
-    }
-
-    interface Second {
-        void msg(String msg);
-    }
-
     @Test
     public void brokenChainYaml() {
         doBrokenChain(WireType.YAML_ONLY);
@@ -82,5 +74,13 @@ public class BrokenChainTest extends WireTestCommon {
         assertTrue(reader.readOne());
         assertFalse(reader.readOne());
         assertEquals("[pre: pre-C, msg: msg-C]", list.toString());
+    }
+
+    interface First {
+        Second pre(String pre);
+    }
+
+    interface Second {
+        void msg(String msg);
     }
 }

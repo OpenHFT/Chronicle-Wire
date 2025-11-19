@@ -22,6 +22,15 @@ import static org.junit.Assume.assumeFalse;
 
 public class WireResourcesTest extends WireTestCommon {
 
+    // Helper method to write a message into the given wire.
+    private static void writeMessage(@NotNull Wire wire) {
+        try (DocumentContext dc = wire.writingDocument()) {
+            final Bytes<?> bytes = dc.wire().bytes();
+            bytes.writeSkip(128000);
+            bytes.writeLong(1L);
+        }
+    }
+
     @Before
     public void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
@@ -35,7 +44,7 @@ public class WireResourcesTest extends WireTestCommon {
         tmp.deleteOnExit();
 
         // Initialize and verify initial reference counts.
-        MappedBytes mb0;
+        final MappedBytes mb0;
         @NotNull MappedBytes mb = MappedBytes.mappedBytes(tmp, 64 * 1024);
         assertEquals(1, mb.mappedFile().refCount());
         assertEquals(1, mb.refCount());
@@ -73,7 +82,7 @@ public class WireResourcesTest extends WireTestCommon {
         tmp.deleteOnExit();
 
         // Initialize the mapped bytes and verify the initial reference counts.
-        Wire wire;
+        final Wire wire;
         @NotNull MappedBytes mb = MappedBytes.mappedBytes(tmp, 64 * 1024);
         assertEquals(1, mb.mappedFile().refCount());
         assertEquals(1, mb.refCount());
@@ -160,15 +169,6 @@ public class WireResourcesTest extends WireTestCommon {
         assertEquals(0, wire.bytes().refCount());
         assertEquals(0, t.refCount());
         assertEquals(0, mappedFile(wire).refCount());
-    }
-
-    // Helper method to write a message into the given wire.
-    private static void writeMessage(@NotNull Wire wire) {
-        try (DocumentContext dc = wire.writingDocument()) {
-            final Bytes<?> bytes = dc.wire().bytes();
-            bytes.writeSkip(128000);
-            bytes.writeLong(1L);
-        }
     }
 
     // Helper method to retrieve the MappedFile associated with the given wire.

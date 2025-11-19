@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
 import static java.util.Collections.*;
+
 /**
  * The {@code GenerateMethodWriter2} class is responsible for generating method writers based on the provided metadata.
  * <p>
@@ -90,9 +91,9 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
      * The method looks up the template from the predefined {@code TEMPLATE_METHODS}. If no matching template is
      * found, it returns {@code null}.
      *
-     * @param name The method name to look up
+     * @param name       The method name to look up
      * @param returnType The return type of the method
-     * @param pts The parameter types of the method
+     * @param pts        The parameter types of the method
      * @return The method template as a string, or {@code null} if not found
      */
     private static String templateFor(String name, Class<?> returnType, Class<?>[] pts) {
@@ -292,9 +293,10 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
             // For primitive types and CharSequences, write directly
             if (p.getType().isPrimitive() || CharSequence.class.isAssignableFrom(p.getType())) {
                 body.append(multipleParams ? "v." : ".").append(asString(p.getType())).append("(").append(p.getName()).append(");\n");
-            } else
+            } else {
                 // For non-primitive types, delegate to writeValue
                 writeValue(dm, body, startJ, p);
+            }
         }
 
         // Close array writing if there were multiple parameters
@@ -330,8 +332,8 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
      * Determines the return value based on the method's return type and available interfaces.
      * The method ensures that the correct return type or default value is appended to the result.
      *
-     * @param result         The code formatter to which the return value should be appended.
-     * @param method         The method whose return value needs to be determined.
+     * @param result          The code formatter to which the return value should be appended.
+     * @param method          The method whose return value needs to be determined.
      * @param interfaceClases Set of interfaces to determine if the return type matches any.
      */
     private void methodReturn(SourceCodeFormatter result, final Method method, final Set<Class<?>> interfaceClases) {

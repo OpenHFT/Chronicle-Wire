@@ -29,8 +29,7 @@ public class B2Class extends BClass {
     public void readMarshallable(BytesIn<?> in) {
         super.readMarshallable(in);
         int version = (int) in.readStopBit();
-        if (version == MASHALLABLE_VERSION) {
-        } else {
+        if (version != MASHALLABLE_VERSION) {
             throw new IllegalStateException("Unknown version " + version);
         }
     }

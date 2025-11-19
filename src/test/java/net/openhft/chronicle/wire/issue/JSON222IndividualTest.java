@@ -15,6 +15,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.StringReader;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -46,7 +47,7 @@ public class JSON222IndividualTest extends WireTestCommon {
     @Test
     public void nestedSeq() {
         @SuppressWarnings("rawtypes")
-        @NotNull List list = Arrays.asList(3L, Arrays.asList(4L));
+        @NotNull List list = Arrays.asList(3L, Collections.singletonList(4L));
         checkSerialized("[\n" +
                 "  3,\n" +
                 "  [\n" +
@@ -92,8 +93,6 @@ public class JSON222IndividualTest extends WireTestCommon {
         try {
             @NotNull Yaml yaml = new Yaml();
             Object o = yaml.load(new StringReader(input));
-           // Debugging output commented out
-           // System.out.println(o);
         } catch (Exception e) {
             throw e;
         }

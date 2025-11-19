@@ -20,42 +20,32 @@ import java.util.stream.Stream;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
 public class PerfRegressionHolder {
-    // A set of test strings split into an array
-    private String[] s = "1,12,12345,123456789,123456789012,12345678901234567890123".split(",");
-    // Various field initializations using different constructors or default constructors
-    // for different types of BytesFields and StringFields
-    private BytesFields bf1 = new BytesFields(s);
-    private BytesFields bf2 = new BytesFields();
-
-    private DefaultBytesFields df1 = new DefaultBytesFields(s);
-    private DefaultBytesFields df2 = new DefaultBytesFields();
-
-    private ReferenceBytesFields rf1 = new ReferenceBytesFields(s);
-    private ReferenceBytesFields rf2 = new ReferenceBytesFields();
-
-    private StringFields sf1 = new StringFields(s);
-    private StringFields sf2 = new StringFields();
-
-    private DefaultStringFields dsf1 = new DefaultStringFields(s);
-    private DefaultStringFields dsf2 = new DefaultStringFields();
-
-    private ArrayStringFields asf1 = new ArrayStringFields(s);
-    private ArrayStringFields asf2 = new ArrayStringFields();
-
-    private DefaultUtf8StringFields dusf1 = new DefaultUtf8StringFields(s);
-    private DefaultUtf8StringFields dusf2 = new DefaultUtf8StringFields();
-
-    private DefaultStringFields dsf0 = new DefaultStringFields(new String[6]);
-
+    // A volatile integer barrier utilized possibly for ensuring visibility between threads
+    private static volatile int barrier;
     // Initializing byte buffers: one direct (off-heap) and one on heap
     private final Bytes<?> direct = Bytes.allocateElasticDirect();
     private final Bytes<?> onHeap = Bytes.allocateElasticOnHeap();
-
+    // A set of test strings split into an array
+    private final String[] s = "1,12,12345,123456789,123456789012,12345678901234567890123".split(",");
+    // Various field initializations using different constructors or default constructors
+    // for different types of BytesFields and StringFields
+    private final BytesFields bf1 = new BytesFields(s);
+    private final BytesFields bf2 = new BytesFields();
+    private final DefaultBytesFields df1 = new DefaultBytesFields(s);
+    private final DefaultBytesFields df2 = new DefaultBytesFields();
+    private final ReferenceBytesFields rf1 = new ReferenceBytesFields(s);
+    private final ReferenceBytesFields rf2 = new ReferenceBytesFields();
+    private final StringFields sf1 = new StringFields(s);
+    private final StringFields sf2 = new StringFields();
+    private final DefaultStringFields dsf1 = new DefaultStringFields(s);
+    private final DefaultStringFields dsf2 = new DefaultStringFields();
+    private final ArrayStringFields asf1 = new ArrayStringFields(s);
+    private final ArrayStringFields asf2 = new ArrayStringFields();
+    private final DefaultUtf8StringFields dusf1 = new DefaultUtf8StringFields(s);
+    private final DefaultUtf8StringFields dusf2 = new DefaultUtf8StringFields();
+    private final DefaultStringFields dsf0 = new DefaultStringFields(new String[6]);
     // MappedBytes will be used to map files into memory for testing
     private MappedBytes mapped;
-
-    // A volatile integer barrier utilized possibly for ensuring visibility between threads
-    private static volatile int barrier;
 
     // Method to perform a performance test using a provided Runnable
     public void doTest(Runnable runnable) {
@@ -94,6 +84,81 @@ public class PerfRegressionHolder {
             }
         } catch (IOException ioe) {
             throw new AssertionError(ioe);
+        }
+    }
+
+    // Example test method for benchmarking a specific type of object
+    public void benchNull() {
+        final DefaultStringFields from = this.dsf0;
+        final DefaultStringFields to = this.dsf2;
+        testAll2(from, to);  // Utilizing a variant of the testing method
+    }
+
+    public void benchBytes() {
+        testAll(this.df1, this.df2);
+    }
+
+    public void benchFields() {
+        testAll(this.bf1, this.bf2);
+    }
+
+    public void benchRefBytes() {
+        testAll(this.rf1, this.rf2);
+    }
+
+    public void benchString() {
+        testAll(this.dsf1, this.dsf2);
+    }
+
+    public void benchArrayString() {
+        testAll(this.asf1, this.asf2);
+    }
+
+    public void benchUtf8String() {
+        testAll(this.dusf1, this.dusf2);
+    }
+
+    public void benchRefString() {
+        testAll(this.sf1, this.sf2);
+    }
+
+    // Method to perform a basic test, writing and then reading data for various buffer types
+    private void testAll(BytesMarshallable from, BytesMarshallable to) {
+        onHeap.clear();
+        from.writeMarshallable(onHeap);
+        to.readMarshallable(onHeap);
+
+        direct.clear();
+        from.writeMarshallable(direct);
+        to.readMarshallable(direct);
+
+        mapped.clear();
+        from.writeMarshallable(mapped);
+        to.readMarshallable(mapped);
+    }
+
+    // Method to perform a variation of the basic test, performing multiple read operations
+    // after a single write for each buffer type
+    private void testAll2(BytesMarshallable from, BytesMarshallable to) {
+        onHeap.clear();
+        from.writeMarshallable(onHeap);
+        for (int j = 0; j < 4; j++) {
+            onHeap.readPosition(0);
+            to.readMarshallable(onHeap);
+        }
+
+        direct.clear();
+        from.writeMarshallable(direct);
+        for (int j = 0; j < 4; j++) {
+            direct.readPosition(0);
+            to.readMarshallable(direct);
+        }
+
+        mapped.clear();
+        from.writeMarshallable(mapped);
+        for (int j = 0; j < 4; j++) {
+            mapped.readPosition(0);
+            to.readMarshallable(mapped);
         }
     }
 
@@ -291,10 +356,6 @@ public class PerfRegressionHolder {
         ArrayStringFields(String... s) {
             super(s);
         }
- // UU 2340
- // 8U 3110
- // U8 3060
- // 88 3510
 
         // Read marshallable data from a byte sequence into String fields
         // using memory offsets for potentially enhanced performance.
@@ -388,81 +449,6 @@ public class PerfRegressionHolder {
             bytes.writeUtf8(d);
             bytes.writeUtf8(e);
             bytes.writeUtf8(f);
-        }
-    }
-
-    // Example test method for benchmarking a specific type of object
-    public void benchNull() {
-        final DefaultStringFields from = this.dsf0;
-        final DefaultStringFields to = this.dsf2;
-        testAll2(from, to);  // Utilizing a variant of the testing method
-    }
-
-    public void benchBytes() {
-        testAll(this.df1, this.df2);
-    }
-
-    public void benchFields() {
-        testAll(this.bf1, this.bf2);
-    }
-
-    public void benchRefBytes() {
-        testAll(this.rf1, this.rf2);
-    }
-
-    public void benchString() {
-        testAll(this.dsf1, this.dsf2);
-    }
-
-    public void benchArrayString() {
-        testAll(this.asf1, this.asf2);
-    }
-
-    public void benchUtf8String() {
-        testAll(this.dusf1, this.dusf2);
-    }
-
-    public void benchRefString() {
-        testAll(this.sf1, this.sf2);
-    }
-
-    // Method to perform a basic test, writing and then reading data for various buffer types
-    private void testAll(BytesMarshallable from, BytesMarshallable to) {
-        onHeap.clear();
-        from.writeMarshallable(onHeap);
-        to.readMarshallable(onHeap);
-
-        direct.clear();
-        from.writeMarshallable(direct);
-        to.readMarshallable(direct);
-
-        mapped.clear();
-        from.writeMarshallable(mapped);
-        to.readMarshallable(mapped);
-    }
-
-    // Method to perform a variation of the basic test, performing multiple read operations
-    // after a single write for each buffer type
-    private void testAll2(BytesMarshallable from, BytesMarshallable to) {
-        onHeap.clear();
-        from.writeMarshallable(onHeap);
-        for (int j = 0; j < 4; j++) {
-            onHeap.readPosition(0);
-            to.readMarshallable(onHeap);
-        }
-
-        direct.clear();
-        from.writeMarshallable(direct);
-        for (int j = 0; j < 4; j++) {
-            direct.readPosition(0);
-            to.readMarshallable(direct);
-        }
-
-        mapped.clear();
-        from.writeMarshallable(mapped);
-        for (int j = 0; j < 4; j++) {
-            mapped.readPosition(0);
-            to.readMarshallable(mapped);
         }
     }
 }

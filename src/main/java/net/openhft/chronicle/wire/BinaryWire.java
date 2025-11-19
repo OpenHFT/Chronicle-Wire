@@ -1222,6 +1222,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                 // Get the textual representation of the event object.
                 valueIn.text(sb);
                 return sb;
+            default:
+                break;
         }
 
         // Return null for unknown special fields.
@@ -1639,6 +1641,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             case INT64_0x:
                 // 64-bit signed integer.
                 return bytes.readLong();
+            default:
+                break;
         }
 
         // If the encoding is unrecognized, throw an exception.
@@ -2642,7 +2646,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (bytes.retainedHexDumpDescription())
                 bytes.writeHexDumpDescription("int32 for binding");
             int32forBinding(value);
-            ((BinaryIntReference) intValue).bytesStore(bytes, bytes.writePosition() - 4, 4);
+            BinaryIntReference reference = requireReference(intValue, BinaryIntReference.class, "int32forBinding");
+            reference.bytesStore(bytes, bytes.writePosition() - 4, 4);
             return BinaryWire.this;
         }
 
@@ -2652,7 +2657,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (bytes.retainedHexDumpDescription())
                 bytes.writeHexDumpDescription("int64 for binding");
             int64forBinding(value);
-            ((BinaryLongReference) longValue).bytesStore(bytes, bytes.writePosition() - 8, 8);
+            BinaryLongReference reference = requireReference(longValue, BinaryLongReference.class, "int64forBinding");
+            reference.bytesStore(bytes, bytes.writePosition() - 8, 8);
             return BinaryWire.this;
         }
 
@@ -2660,8 +2666,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public WireOut boolForBinding(final boolean value, @NotNull final BooleanValue booleanValue) {
             bool(value);
-            ((BinaryBooleanReference) booleanValue).bytesStore(bytes, bytes.writePosition() - 1,
-                    1);
+            BinaryBooleanReference reference = requireReference(booleanValue, BinaryBooleanReference.class, "boolForBinding");
+            reference.bytesStore(bytes, bytes.writePosition() - 1, 1);
             return BinaryWire.this;
         }
 
@@ -2739,10 +2745,13 @@ public class BinaryWire extends AbstractWire implements Wire {
             final BinaryLengthLength binaryLengthLength = object.binaryLengthLength();
             long pos = binaryLengthLength.initialise(bytes);
 
-            if (useSelfDescribingMessage(object))
+            if (useSelfDescribingMessage(object)) {
                 object.writeMarshallable(BinaryWire.this);
-            else
+            } else {
+                if (!(object instanceof WriteBytesMarshallable))
+                    throw new InvalidMarshallableException("Object must implement WriteBytesMarshallable when usesSelfDescribingMessage is false: " + object.getClass());
                 ((WriteBytesMarshallable) object).writeMarshallable(BinaryWire.this.bytes());
+            }
 
             binaryLengthLength.writeLength(bytes, pos, bytes.writePosition());
             return BinaryWire.this;
@@ -3277,6 +3286,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     return getBracketTypeFor(bytes.readUnsignedByte(bytes.readPosition() + 4 + 1));
                 case NULL:
                     return BracketType.NONE;
+            default:
+                break;
             }
             return BracketType.NONE;
         }
@@ -3327,6 +3338,21 @@ public class BinaryWire extends AbstractWire implements Wire {
             // Check for general string code or specific length-based codes
             return code == STRING_ANY ||
                     (code >= STRING_0 && code <= STRING_31);
+        }
+
+        private void copyTextToBytesOut(BytesOut<?> target) {
+            if (target instanceof Bytes) {
+                textTo((Bytes) target);
+                return;
+            }
+            try (ScopedResource<Bytes<Void>> scoped = Wires.acquireBytesScoped()) {
+                Bytes<?> temp = scoped.get();
+                textTo(temp);
+                temp.readPosition(0);
+                long length = temp.readRemaining();
+                target.write(temp, 0L, length);
+                temp.clear();
+            }
         }
 
         @Nullable
@@ -3440,10 +3466,10 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             }
             if (code == U8_ARRAY) {
-                ((Bytes) bytes).readWithLength(length - 1, toBytes);
+                bytes.readWithLength(length - 1, toBytes);
             } else {
                 bytes.uncheckedReadSkipBackOne();
-                textTo((Bytes) toBytes);
+                copyTextToBytesOut(toBytes);
             }
             return wireIn();
         }
@@ -3830,6 +3856,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     bytes.uncheckedReadSkipBackOne();
                     consumePadding();
                     code = bytes.readUnsignedByte();
+                    break;
+                default:
                     break;
             }
 
@@ -4499,6 +4527,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                         else
                             Wires.readMarshallable(object, BinaryWire.this, false);
                     } else {
+                        if (!(object instanceof ReadBytesMarshallable))
+                            throw new InvalidMarshallableException("Object must implement ReadBytesMarshallable when usesSelfDescribingMessage is false: " + object.getClass());
                         ((ReadBytesMarshallable) object).readMarshallable(BinaryWire.this.bytes);
                     }
                 } finally {
@@ -4643,6 +4673,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     bytes.uncheckedReadSkipBackOne();
                     consumePadding();
                     return bool();
+            default:
+                break;
             }
             throw new IORuntimeException(stringForCode(code));
         }
@@ -4671,6 +4703,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     bytes.uncheckedReadSkipBackOne();  // Move back by one position.
                     consumePadding();  // Handle the padding or comment.
                     code = readCode();  // Read the next code.
+                    break;
+                default:
                     break;
             }
 
@@ -4841,6 +4875,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                         case ANCHOR:
                         case UPDATED_ALIAS:
                             return typedMarshallable();
+                        default:
+                            break;
 
                     }
                     break;
@@ -4886,6 +4922,8 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                         case TYPE_LITERAL:
                             return typeLiteral();
+                        default:
+                            break;
 
                     }
                     break;
@@ -4899,6 +4937,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     if (code == UUID)
                         return new java.util.UUID(bytes.readLong(), bytes.readLong());
                     return readInt0object(code);
+                default:
+                    break;
             }
             // assume it a String
             return text();
@@ -5005,6 +5045,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                             consumeNext();
                             return;
                         }
+                        default:
+                            break;
                     }
                     break;
 
@@ -5084,9 +5126,18 @@ public class BinaryWire extends AbstractWire implements Wire {
                     }
                     // If none of the known integer codes were matched, throw an exception
                     throw new UnsupportedOperationException(stringForCode(code));
+                default:
+                    break;
             }
             // If the code doesn't match any known pattern, assume it's a text encoding
             text();
         }
+    }
+
+    static <T> T requireReference(Object value, Class<T> expected, String action) {
+        if (expected.isInstance(value))
+            return expected.cast(value);
+        throw new IllegalArgumentException(action + " requires " + expected.getSimpleName() +
+                " but was " + (value == null ? "null" : value.getClass().getName()));
     }
 }
