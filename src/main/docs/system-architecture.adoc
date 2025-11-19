@@ -10,6 +10,8 @@ Chronicle Software
 This document summarises how Chronicle Wire's modules collaborate with the wider OpenHFT stack.
 Use it as an orientation map before diving into the detailed views in `wire-architecture.adoc`,
 `wire-schema-evolution.adoc`, and the component notes.
+For the primary, combined architecture view, refer to `architecture-overview.adoc`, which supersedes
+earlier summaries in this file.
 
 == Context
 
