@@ -2188,9 +2188,9 @@ try (ChronicleContext context = ChronicleContext.newContext(url)) {
 * link:src/main/docs/wire-cookbook.adoc[Cookbook]
 * link:src/main/docs/wire-faq.adoc[FAQ]
 * link:src/main/docs/wire-glossary.adoc[Glossary]
-* link:docs/EventsByMethod.adoc[Events by Method]
-* link:docs/YAML2SpecificationCompliance.adoc[YAML 1.2 Compliance]
-* link:docs/systemProperties.adoc[System Properties Guide]
+* link:src/main/docs/EventsByMethod.adoc[Events by Method]
+* link:src/main/docs/YAML2SpecificationCompliance.adoc[YAML 1.2 Compliance]
+* link:src/main/docs/systemProperties.adoc[System Properties Guide]
 
 == Community and Support
 

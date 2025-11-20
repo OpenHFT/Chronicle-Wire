@@ -12,6 +12,7 @@ Use it as an orientation map before diving into the detailed views in `wire-arch
 `wire-schema-evolution.adoc`, and the component notes.
 For the primary, combined architecture view, refer to `architecture-overview.adoc`, which supersedes
 earlier summaries in this file.
+Update the canonical view first and mirror only condensed highlights here to keep descriptions aligned.
 
 == Context
 

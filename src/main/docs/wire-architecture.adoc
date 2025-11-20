@@ -7,6 +7,7 @@
 Purpose: To provide a comprehensive understanding of the internal architecture of the Chronicle Wire library, its components, and design principles.
 For the primary, up-to-date architecture entry point that combines system and internal views, see
 `architecture-overview.adoc`.
+Keep any supplementary detail in this file consistent with the canonical view to avoid drift.
 
 == Introduction
 

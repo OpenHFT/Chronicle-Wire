@@ -1,5 +1,7 @@
 = Events by Method
 Peter Lawrey
+:toc:
+:sectnums:
 :lang: en-GB
 :source-highlighter: rouge
 

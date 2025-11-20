@@ -1,4 +1,8 @@
 = Wire Format abstraction library - Benchmarks
+:toc:
+:sectnums:
+:lang: en-GB
+:source-highlighter: rouge
 
 Chronicle Wire supports a separation of describing what data you want to store and retrieve and how it should be rendered/parsed.
 Wire handles a variety of formatting options for a wide range of formats.
@@ -6,6 +10,7 @@ Wire handles a variety of formatting options for a wide range of formats.
 How do these options affect performance?
 
 The tests were run with -Xmx1g -XX:MaxInlineSize=400 on an isolated CPU on an i7-3970X with 32 GB of memory.
+These figures are historical; rerun the suite on current hardware before using the numbers in reports or release notes.
 
 == Tests
 
@@ -170,7 +175,7 @@ What you want is the ease of a text wire format but the speed of a binary wire f
 +
 Being able to switch from one to the other can save you a lot of time in development and support, but still give you the speed you want.
 
-This uses 91 bytes, Note: the "— !!data" is added by the method to dump the data.
+This uses 91 bytes, Note: the "-- !!data" is added by the method to dump the data.
 This information is encoded in the first 4 bytes which contains the size.
 
 [source,yaml]
@@ -202,7 +207,7 @@ Test json8bit used 100 bytes.
 This binary wire has be automatically decoded to text by Wires.fromSizePrefixedBlobs(Bytes)
 
 This uses 70 bytes.
-Note: the "— !!data #binary" is added by the method to dump the data.
+Note: the "-- !!data #binary" is added by the method to dump the data.
 This information is encoded in the first 4 bytes which contains the size.
 
 [source,yaml]

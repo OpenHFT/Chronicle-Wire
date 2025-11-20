@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Chronicle Wire is a high-performance, zero-garbage collection (GC) serialization library for Java. It is designed for low-latency applications, such as inter-process communication (IPC) and in-memory state persistence. The library is part of the Chronicle stack, developed by OpenHFT.
+Chronicle Wire is a high-performance, zero-garbage collection (GC) serialisation library for Java. It is designed for low-latency applications, such as inter-process communication (IPC) and in-memory state persistence. The library is part of the Chronicle stack, developed by OpenHFT.
 
 The core feature of Chronicle Wire is its ability to abstract the underlying wire format, allowing developers to switch between human-readable formats (like YAML) and compact binary formats without changing the API. This flexibility makes it suitable for a wide range of use cases, from configuration files to high-speed data transfer.
 
@@ -10,7 +10,7 @@ The core feature of Chronicle Wire is its ability to abstract the underlying wir
 
 *   **Multiple Wire Formats:** Supports YAML, JSON, CSV, and several binary formats.
 *   **Schema Evolution:** Handles changes in data schemas, such as adding or removing fields.
-*   **Low Latency:** Optimized for performance with low allocation rates.
+*   **Low Latency:** Optimised for performance with low allocation rates.
 *   **Format Conversion:** Provides automatic conversion between different wire formats.
 *   **Integration:** Works seamlessly with other components of the Chronicle framework.
 
@@ -20,7 +20,7 @@ The project is built using Apache Maven. The following commands can be used to b
 
 ### Building the Project
 
-To build the project and install the artifacts into your local Maven repository, run the following command from the root directory of the project:
+To build the project and install the artefacts into your local Maven repository, run the following command from the root directory of the project:
 
 ```sh
 mvn clean install

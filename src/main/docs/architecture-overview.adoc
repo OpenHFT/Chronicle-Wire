@@ -9,6 +9,7 @@ Chronicle Software
 This document combines and supersedes the earlier `wire-architecture.adoc` and
 `system-architecture.adoc` views for Chronicle Wire.
 It positions Chronicle Wire within the wider OpenHFT stack, describes its core abstractions and layers, and explains how data flows through the system in typical deployments.
+Treat this file as the primary architecture reference and mirror any material changes back into `wire-architecture.adoc` and `system-architecture.adoc` only as summaries.
 
 == Introduction
 

@@ -70,11 +70,11 @@ link:decision-log.adoc[Decision Log] ::
 link:background/openhft-knowledge-pack.adoc[OpenHFT Knowledge Pack] ::
   Records version support, JVM targets, and tuning notes.
 
-link:../../EventsByMethod.adoc[Events by Method Guide] ::
+link:EventsByMethod.adoc[Events by Method Guide] ::
   Explains the event-driven approach via asynchronous method calls.
 
-link:../../YAML2SpecificationCompliance.adoc[YAML 1.2 Compliance Notes] ::
+link:YAML2SpecificationCompliance.adoc[YAML 1.2 Compliance Notes] ::
   Details how Chronicle Wire aligns with the YAML 1.2 specification.
 
-link:../../systemProperties.adoc[System Properties Guide] ::
+link:systemProperties.adoc[System Properties Guide] ::
   Lists Java system properties influencing Chronicle components.

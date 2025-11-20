@@ -87,3 +87,13 @@ This command builds all modules, executes unit and integration tests and runs st
 Module specific test runs can be scoped using Maven's `-pl` flag when iterating, but the full
 `verify` goal should be executed before releases or pull requests.
 
+== Known Skipped Tests (latest runs)
+
+Recent `mvn -q clean verify` runs on JDK 8 and JDK 21 (`mvn-java8.log` and `mvn-java21.log` in the repository root) passed but reported several intentional skips:
+
+* `BinaryWirePerfTest` (6 tests) - performance heavy, kept skipped to avoid long CI runs; re-run on dedicated hardware when assessing latency.
+* `WireCollectionTest` (7 tests) - currently skipped; review and re-enable to regain coverage for collection handling.
+* `JSON222Test` (224 of 448 tests skipped) - specification suite remains partially disabled; investigate feasibility of widening coverage.
+* `BinaryWire2Test` (10 of 78 tests) and `WireTests` (5 of 60 tests) - small subsets skipped; confirm whether platform or flakiness constraints remain.
+
+The combined skip totals were 292 (JDK 8) and 296 (JDK 21). Each skipped group should carry an explicit rationale in the test class and a TODO to re-enable where possible.
